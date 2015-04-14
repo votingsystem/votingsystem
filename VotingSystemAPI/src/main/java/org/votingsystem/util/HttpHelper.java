@@ -221,15 +221,16 @@ public class HttpHelper {
                 return JSON.getMapper().readValue(responseBytes, type);
             } else {
                 MessageDto messageDto = null;
+                String responseStr = null;
                 if(responseContentType != null && responseContentType.contains("json")) messageDto =
                         JSON.getMapper().readValue(responseBytes, MessageDto.class);
-                String responseStr = new String(responseBytes, StandardCharsets.UTF_8);
+                else responseStr = new String(responseBytes, StandardCharsets.UTF_8);
                 switch (response.getStatusLine().getStatusCode()) {
                     case ResponseVS.SC_NOT_FOUND: throw new NotFoundExceptionVS(responseStr, messageDto);
                     case ResponseVS.SC_ERROR_REQUEST_REPEATED: throw new RequestRepeatedExceptionVS(responseStr, messageDto);
                     case ResponseVS.SC_ERROR_REQUEST: throw new BadRequestExceptionVS(responseStr, messageDto);
                     case ResponseVS.SC_ERROR: throw new ServerExceptionVS(EntityUtils.toString(response.getEntity()), messageDto);
-                    default:throw new ExceptionVS(EntityUtils.toString(response.getEntity()), messageDto);
+                    default:throw new ExceptionVS(responseStr, messageDto);
                 }
             }
         } finally {

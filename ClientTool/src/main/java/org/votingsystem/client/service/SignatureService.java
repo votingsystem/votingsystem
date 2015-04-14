@@ -28,6 +28,7 @@ import org.votingsystem.model.*;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyRequestBatch;
 import org.votingsystem.model.currency.CurrencyServer;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.model.voting.VoteVS;

@@ -2,13 +2,11 @@ package org.votingsystem.model.currency;
 
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 

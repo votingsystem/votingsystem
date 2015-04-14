@@ -37,8 +37,6 @@ public class CSRBean {
 
     private static Logger log = Logger.getLogger(CSRBean.class.getSimpleName());
 
-    private static final ConcurrentHashMap<Long, KeyStoreVS> keyStoreMap = new ConcurrentHashMap<>();
-
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject SignatureBean signatureBean;
@@ -67,16 +65,6 @@ public class CSRBean {
         return deviceVS;
     }
 
-    private KeyStoreVS getKeyStoreVS(EventVS eventVS) {
-        if(!keyStoreMap.contains(eventVS.getId())) {
-            Query query = dao.getEM().createQuery("select k from KeyStoreVS k where k.eventVS =:eventVS")
-                    .setParameter("eventVS", eventVS);
-            keyStoreMap.put(eventVS.getId(), dao.getSingleResult(KeyStoreVS.class, query));
-        }
-        return keyStoreMap.get(eventVS.getId());
-    }
-
-
     public X509Certificate signCertUserVS(UserRequestCsrVS csrRequest) throws Exception {
         Date validFrom = new Date();
         Date validTo = DateUtils.addDays(validFrom, 365).getTime(); //one year
@@ -93,7 +81,7 @@ public class CSRBean {
 
     public synchronized CsrResponse signCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS) throws Exception {
         CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
-        KeyStoreVS keyStoreVS = getKeyStoreVS(eventVS);
+        KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
         //TODO ==== vote keystore -- this is for developement
         KeyStoreInfo keyStoreInfo = signatureBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
@@ -107,7 +95,7 @@ public class CSRBean {
     public synchronized CsrResponse signRepresentativeCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS,
                           UserVS representative) throws Exception {
         CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
-        KeyStoreVS keyStoreVS = getKeyStoreVS(eventVS);
+        KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
         //TODO ==== vote keystore -- this is for developement
         KeyStoreInfo keyStoreInfo = signatureBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
         String representativeURL = config.getRestURL() + "/representative/id/" + representative.getId();

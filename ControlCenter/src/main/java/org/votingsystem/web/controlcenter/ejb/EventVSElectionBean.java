@@ -35,10 +35,8 @@ public class EventVSElectionBean {
 
     private static final Logger log = Logger.getLogger(EventVSElectionBean.class.getSimpleName());
 
-    @Inject EventVSBean eventVSBean;
     @Inject MessagesBean messages;
     @Inject ConfigVS config;
-    @Inject TagVSBean tagVSBean;
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject TimeStampBean timeStampBean;
@@ -57,7 +55,6 @@ public class EventVSElectionBean {
         eventVS.setUserVS(user);
         setEventDatesState(eventVS);
         eventVS.updateAccessControlIds();
-        if(request.getTags() != null) eventVS.setTagVSSet(tagVSBean.save(request.getTags()));
         dao.persist(eventVS);
         X509Certificate controlCenterX509Cert = signatureBean.getServerCert();
         CertificateVS eventVSControlCenterCertificate =  CertificateVS.ACTORVS(null, controlCenterX509Cert);
@@ -77,7 +74,6 @@ public class EventVSElectionBean {
     public MessageSMIME cancelEvent(MessageSMIME messageSMIME) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
         EventVSDto request = messageSMIME.getSignedContent(EventVSDto.class);
-        request.validateCancelation();
         Query query = dao.getEM().createQuery("select e from EventVSElection e where e.accessControlEventVSId =:eventId")
                 .setParameter("eventId", request.getEventId());
         EventVSElection eventVS = dao.getSingleResult(EventVSElection.class, query);
@@ -87,6 +83,7 @@ public class EventVSElectionBean {
                 "ERROR - trying to cancel an EventVS tha isn't active");
         if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isUserAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
+        request.validateCancelation(eventVS.getAccessControlVS().getServerURL());
         String fromUser = config.getServerName();
         String toUser = eventVS.getAccessControlVS().getName();
         String subject = messages.get("mime.subject.eventCancellationValidated");

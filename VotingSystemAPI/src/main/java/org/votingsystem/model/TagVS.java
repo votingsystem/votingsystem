@@ -2,7 +2,6 @@ package org.votingsystem.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.voting.EventVS;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -33,7 +32,6 @@ public class TagVS implements Serializable {
     @Column(name="frequency") private Long frequency;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23) private Date dateCreated;
-    @ManyToMany(mappedBy = "tagVSSet", fetch = FetchType.LAZY) @JsonIgnore private Set<EventVS> eventVSSet;
     @ManyToMany(mappedBy = "tagVSSet", fetch = FetchType.LAZY) @JsonIgnore private Set<UserVS> userVSSet;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23) private Date lastUpdated;
@@ -87,14 +85,6 @@ public class TagVS implements Serializable {
 
     public Date getLastUpdated() {
         return lastUpdated;
-    }
-
-    public Set<EventVS> getEventVSSet() {
-        return eventVSSet;
-    }
-
-    public void setEventVSSet(Set<EventVS> eventVSSet) {
-        this.eventVSSet = eventVSSet;
     }
 
     public Set<UserVS> getUserVSSet() {

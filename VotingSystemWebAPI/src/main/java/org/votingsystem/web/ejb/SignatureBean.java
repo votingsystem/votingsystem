@@ -3,6 +3,7 @@ package org.votingsystem.web.ejb;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.votingsystem.dto.voting.KeyStoreDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.EventVSElection;
@@ -221,12 +222,7 @@ public class SignatureBean {
         return false;
     }
 
-    public KeyStoreVS generateElectionKeysStore(EventVS eventVS) throws Exception {
-        Query query = dao.getEM().createQuery("select k from KeyStoreVS k where k.valid =:valid " +
-                "and k.eventVS =:eventVS").setParameter("valid", Boolean.TRUE).setParameter("eventVS", eventVS);
-        KeyStoreVS keyStoreVS = dao.getSingleResult(KeyStoreVS.class, query);
-        if (keyStoreVS != null) throw new ExceptionVS("ERROR EventVS with KeyStoreVS associated - EventVS id:" +
-                eventVS.getId() + " - KeyStoreVS id: " + keyStoreVS.getId());
+    public KeyStoreDto generateElectionKeysStore(EventVS eventVS) throws Exception {
         //StringUtils.getRandomAlphaNumeric(7).toUpperCase()
         // _ TODO _ ====== crypto token
         String eventVSUrl = config.getRestURL() + "/eventVS/id/" + eventVS.getId();
@@ -235,22 +231,8 @@ public class SignatureBean {
                 password.toCharArray(), keyAlias, strSubjectDNRoot);
         java.security.cert.Certificate[] chain = keyStore.getCertificateChain(keyAlias);
         java.security.cert.Certificate cert = chain[0];
-        CertificateVS certificateVS = dao.persist(CertificateVS.ELECTION((X509Certificate) cert));
-        dao.merge(eventVS.setCertificateVS(certificateVS));
-        keyStoreVS = dao.persist(new KeyStoreVS (Boolean.TRUE, Boolean.TRUE, keyAlias, eventVS, eventVS.getDateBegin(),
-                eventVS.getDateFinish(), KeyStoreUtil.getBytes(keyStore, password.toCharArray())));
-        keyStoreVS.setCertificateVS(certificateVS);
-        return keyStoreVS;
-    }
-
-    public void cancel (EventVS eventVS) throws ValidationExceptionVS {
-        Query query = dao.getEM().createQuery("select k from KeyStoreVS k where k.eventVS =:eventVS and k.valid =:valid")
-                .setParameter("eventVS", eventVS).setParameter("valid", Boolean.TRUE);
-        KeyStoreVS keyStoreVS = dao.getSingleResult(KeyStoreVS.class, query);
-        if (keyStoreVS == null) throw new ValidationExceptionVS(
-                "ERROR - keyStoreVS not found - EventVS id: " + eventVS.getId());
-        keyStoreVS.setValid(Boolean.FALSE);
-        dao.merge(keyStoreVS);
+        return new KeyStoreDto(new KeyStoreVS (keyAlias, KeyStoreUtil.getBytes(keyStore, password.toCharArray()),
+                eventVS.getDateBegin(), eventVS.getDateFinish()), (X509Certificate) cert);
     }
 
     public KeyStore generateUserTestKeysStore(String givenName, String surname, String nif,

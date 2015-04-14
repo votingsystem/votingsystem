@@ -2,10 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.*;
-import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.GroupVS;
-import org.votingsystem.model.currency.SubscriptionVS;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -23,6 +20,7 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.Currency;
 import java.util.logging.Logger;
 
 @Stateless

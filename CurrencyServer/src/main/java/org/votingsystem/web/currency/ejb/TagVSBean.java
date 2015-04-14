@@ -1,4 +1,4 @@
-package org.votingsystem.web.accesscontrol.ejb;
+package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.model.TagVS;
 import org.votingsystem.web.ejb.DAOBean;

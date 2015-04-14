@@ -2,7 +2,6 @@ package org.votingsystem.model.voting;
 
 
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 
@@ -63,11 +62,6 @@ public class EventVSElection extends EventVS implements Serializable {
             for(FieldEventVS fieldEventVS : getFieldsEventVS()) {
                 fieldEventVS.setAccessControlFieldEventId(fieldEventVS.getId());
                 fieldEventVS.setId(null);
-            }
-        }
-        if(getTagVSSet() != null) {
-            for(TagVS tagVS : getTagVSSet()) {
-                tagVS.setId(null);
             }
         }
         return this;

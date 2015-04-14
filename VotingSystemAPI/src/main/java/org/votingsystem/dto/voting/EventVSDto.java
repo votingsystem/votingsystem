@@ -3,8 +3,10 @@ package org.votingsystem.dto.voting;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.model.*;
-import org.votingsystem.model.voting.*;
+import org.votingsystem.model.voting.ControlCenterVS;
+import org.votingsystem.model.voting.EventVS;
+import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.FieldEventVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
@@ -12,6 +14,7 @@ import org.votingsystem.util.TypeVS;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,7 +38,7 @@ public class EventVSDto {
     private String userVS;
     private EventVS.Cardinality cardinality;
     private EventVS.State state;
-    private Set<TagVS> tags;
+    private List<String> tags;
     private Set<FieldEventVS> fieldsEventVS;
     private ActorVSDto accessControl;
     private ActorVSDto controlCenter;
@@ -66,7 +69,7 @@ public class EventVSDto {
         this.setContent(eventVS.getContent());
         if(eventVS.getUserVS() != null) this.setUserVS(eventVS.getUserVS().getName());
         this.setCardinality(eventVS.getCardinality());
-        this.setTags(eventVS.getTagVSSet());
+        this.setTags(eventVS.getTagList());
         this.setBackupAvailable(eventVS.getBackupAvailable());
         this.setState(eventVS.getState());
         this.setDateBegin(eventVS.getDateBegin());
@@ -107,7 +110,7 @@ public class EventVSDto {
         result.type = eventVS.getType();
         result.id = eventVS.getId();
         result.UUID =  java.util.UUID.randomUUID().toString();
-        result.tags = eventVS.getTagVSSet();
+        result.tags = eventVS.getTagList();
         if(eventVS.getControlCenterVS() != null) {
             result.controlCenter = new ActorVSDto(eventVS.getControlCenterVS().getName(),
                     eventVS.getControlCenterVS().getServerURL());
@@ -128,7 +131,7 @@ public class EventVSDto {
         result.setDateBegin(dateBegin);
         result.setDateFinish(dateFinish);
         result.setFieldsEventVS(fieldsEventVS);
-        result.setTagVSSet(getTags());
+        result.setTagList(getTags());
         result.setUrl(getURL());
         Set<FieldEventVS> fieldEventVSSet = new HashSet<>(getFieldsEventVS());
         for(FieldEventVS fieldEventVS : fieldEventVSSet) {
@@ -150,11 +153,12 @@ public class EventVSDto {
                 serverURL + " found: " + controlCenterURL);
     }
 
-    //{"operation":"EVENT_CANCELLATION","accessControlURL":"...","eventId":"..","state":"CANCELLED","UUID":"..."}
-    public void validateCancelation() throws ValidationExceptionVS {
+    public void validateCancelation(String contextURL) throws ValidationExceptionVS {
         if(operation == null || TypeVS.EVENT_CANCELLATION != operation) throw new ValidationExceptionVS(
                 "ERROR - operation expected 'EVENT_CANCELLATION' found: " + operation);
         if(accessControlURL == null) throw new ValidationExceptionVS("ERROR - missing param 'accessControlURL'");
+        if(!accessControlURL.equals(contextURL))  throw new ValidationExceptionVS(
+                "ERROR - accessControlURL - expected: " + contextURL + " - found: " + accessControlURL);
         if(eventId == null) throw new ValidationExceptionVS("ERROR - missing param 'eventId'");
         if(state == null || EventVS.State.DELETED_FROM_SYSTEM != state || EventVS.State.CANCELED != state)
             throw new ValidationExceptionVS("ERROR - expected state 'DELETED_FROM_SYSTEM' found: " + state);
@@ -224,7 +228,7 @@ public class EventVSDto {
         return state;
     }
 
-    public Set<TagVS> getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
@@ -300,7 +304,7 @@ public class EventVSDto {
         this.state = state;
     }
 
-    public void setTags(Set<TagVS> tags) {
+    public void setTags(List<String> tags) {
         this.tags = tags;
     }
 

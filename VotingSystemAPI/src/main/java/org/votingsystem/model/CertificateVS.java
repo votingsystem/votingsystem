@@ -3,6 +3,7 @@ package org.votingsystem.model;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.EntityVS;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;

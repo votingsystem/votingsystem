@@ -2,7 +2,6 @@ package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.util.TypeVS;
 
 import java.util.Date;

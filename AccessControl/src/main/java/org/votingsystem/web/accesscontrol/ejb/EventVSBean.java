@@ -2,6 +2,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -69,17 +70,21 @@ public class EventVSBean {
     public MessageSMIME cancelEvent(MessageSMIME messageSMIME) throws Exception {
         SMIMEMessage smimeMessageReq = messageSMIME.getSMIME();
         UserVS signer = messageSMIME.getUserVS();
-        EventVSCancelRequest request = new EventVSCancelRequest(smimeMessageReq.getSignedContent());
-        if(!(request.eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isUserAdmin(signer.getNif())))
+        EventVSDto request = messageSMIME.getSignedContent(EventVSDto.class);
+        EventVS eventVS = dao.find(EventVS.class, request.getId());
+        if (eventVS == null) throw new ValidationExceptionVS("ERROR - EventVS not found - eventId: " + request.getId());
+        if(eventVS.getState() != EventVS.State.ACTIVE) throw new ValidationExceptionVS(
+                "ERROR - EventVS not ACTIVE - eventId: " + request.getId());
+        request.validateCancelation(config.getContextURL());
+        if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isUserAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
         SMIMEMessage smimeMessageResp = null;
         String fromUser = config.getServerName();
         String subject = messages.get("mime.subject.eventCancellationValidated");
-        if(request.eventVS instanceof EventVSElection) {
-            String toUser = ((EventVSElection)request.eventVS).getControlCenterVS().getName();
-                    smimeMessageResp = signatureBean.getSMIMEMultiSigned(
-                    fromUser, toUser, smimeMessageReq, subject);
-            String controlCenterUrl = ((EventVSElection)request.eventVS).getControlCenterVS().getServerURL();
+        if(eventVS instanceof EventVSElection) {
+            String toUser = ((EventVSElection)eventVS).getControlCenterVS().getName();
+                    smimeMessageResp = signatureBean.getSMIMEMultiSigned(fromUser, toUser, smimeMessageReq, subject);
+            String controlCenterUrl = ((EventVSElection)eventVS).getControlCenterVS().getServerURL();
             ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageResp.getBytes(),
                     ContentTypeVS.SIGNED, controlCenterUrl + "/eventVSElection/cancelled");
             if(ResponseVS.SC_OK != responseVSControlCenter.getStatusCode() ||
@@ -89,41 +94,15 @@ public class EventVSBean {
             }
         } else smimeMessageResp = signatureBean.getSMIMEMultiSigned(fromUser, signer.getNif(), smimeMessageReq, subject);
         messageSMIME.setSMIME(smimeMessageResp);
-        request.eventVS.setState(request.state);
-        request.eventVS.setDateCanceled(new Date());
-        dao.merge(request.eventVS);
-        log.info("EventVS with id:" + request.eventVS.getId() + " changed to state: " + request.state.toString());
-        return messageSMIME;
-    }
-
-    private class EventVSCancelRequest {
-        String accessControlURL;
-        EventVS.State state;
-        TypeVS operation;
-        EventVS eventVS;
-        public EventVSCancelRequest(String signedContent) throws ExceptionVS, IOException {
-            Map messageMap = new ObjectMapper().readValue(signedContent, new TypeReference<HashMap<String, Object>>() {});
-            if(!messageMap.containsKey("eventId")) throw new ValidationExceptionVS("missing param 'eventId'");
-            eventVS = dao.find(EventVS.class, Long.valueOf((String) messageMap.get("eventId")));
-            if(eventVS == null) throw new ValidationExceptionVS("eventVSNotFound - eventId: " + messageMap.get("eventId"));
-            if(eventVS.getState() != EventVS.State.ACTIVE) throw new ValidationExceptionVS(
-                    "eventNotActiveMsg - eventId: " + messageMap.get("eventId"));
-            if(!messageMap.containsKey("state"))
-                throw new ValidationExceptionVS("missing param 'state'");
-            if(!messageMap.containsKey("accessControlURL"))
-                throw new ValidationExceptionVS("missing param 'accessControlURL'");
-            if(!messageMap.containsKey("operation"))
-                throw new ValidationExceptionVS("missing param 'operation'");
-            if(TypeVS.EVENT_CANCELLATION != TypeVS.valueOf((String) messageMap.get("operation"))) throw new ValidationExceptionVS(
-                    "ERROR - operation expected: 'EVENT_CANCELLATION' - operation found: " + messageMap.get("operation"));
-            state = EventVS.State.valueOf((String) messageMap.get("state"));
-            if(!((EventVS.State.CANCELED == state) || (EventVS.State.DELETED_FROM_SYSTEM == state))) {
-                throw new ValidationExceptionVS("invalid 'EVENT_CANCELLATION' state:" + state);
-            }
-            String requestURL = StringUtils.checkURL((String) messageMap.get("accessControlURL"));
-            if(!requestURL.equals(config.getContextURL()))  throw new ValidationExceptionVS(
-                    "accessControlURLError - expected: " + config.getContextURL() + " - found: " + requestURL);
+        eventVS.setState(request.getState());
+        eventVS.setDateCanceled(new Date());
+        if(eventVS.getKeyStoreVS() != null) {
+            eventVS.getKeyStoreVS().setValid(Boolean.FALSE);
+            dao.merge(eventVS.getKeyStoreVS());
         }
+        dao.merge(eventVS);
+        log.info("EventVS with id:" + eventVS.getId() + " changed to state: " + request.getState().toString());
+        return messageSMIME;
     }
 
 }

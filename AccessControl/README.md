@@ -36,7 +36,8 @@ server configuration just after the extensions section:
         </system-properties>
 
 2. Make sure you have  Wildfly server started.
-3. Add a datasource with the name 'java:jboss/datasources/AccessControl'
-4. Use this command to build and deploy the archive:
+3. Build and deploy [**control center application**](https://github.com/votingsystem/votingsystem/tree/master/ControlCenter).
+4. Add a datasource with the name 'java:jboss/datasources/AccessControl'
+5. Use this command to build and deploy the archive:
 
             mvn clean package wildfly:deploy

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.EventVSMetaInf;
+import org.votingsystem.dto.voting.KeyStoreDto;
 import org.votingsystem.dto.voting.RepresentativesAccreditations;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.*;
@@ -40,7 +41,6 @@ public class EventVSElectionBean {
     @Inject ControlCenterBean controlCenterBean;
     @Inject EventVSBean eventVSBean;
     @Inject ConfigVS config;
-    @Inject TagVSBean tagVSBean;
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject RepresentativeBean representativeBean;
@@ -63,7 +63,6 @@ public class EventVSElectionBean {
         if(EventVS.State.TERMINATED ==  eventVS.getState()) throw new ValidationExceptionVS(
                 "ERROR - eventFinishedErrorMsg dateFinish: " + request.getDateFinish());
         request.setControlCenterURL(controlCenterVS.getServerURL());
-        if(request.getTags() != null) eventVS.setTagVSSet(tagVSBean.save(request.getTags()));
         dao.persist(eventVS);
         eventVS.setAccessControlEventVSId(eventVS.getId());
         request.setFieldsEventVS(eventVS.getFieldsEventVS());
@@ -72,7 +71,14 @@ public class EventVSElectionBean {
         request.setURL(config.getRestURL() + "/eventVSElection/id/" + eventVS.getId());
         request.setDateCreated(eventVS.getDateCreated());
         request.setType(EventVS.Type.ELECTION);
-        KeyStoreVS keyStoreVS = signatureBean.generateElectionKeysStore(eventVS);
+
+        KeyStoreDto keyStoreDto = signatureBean.generateElectionKeysStore(eventVS);
+        CertificateVS certificateVS = dao.persist(CertificateVS.ELECTION((X509Certificate) keyStoreDto.getX509Cert()));
+        dao.merge(eventVS.setCertificateVS(certificateVS));
+        keyStoreDto.getKeyStoreVS().setCertificateVS(certificateVS);
+        KeyStoreVS keyStoreVS = dao.persist(keyStoreDto.getKeyStoreVS());
+        eventVS.setKeyStoreVS(keyStoreVS);
+
         request.setCertCAVotacion( new String(CertUtils.getPEMEncoded (keyStoreVS.getCertificateVS().getX509Cert())));
         request.setCertChain(new String(CertUtils.getPEMEncoded (signatureBean.getCertChain())));
         X509Certificate certUsuX509 = userSigner.getCertificate();

@@ -1,9 +1,6 @@
 package org.votingsystem.model.voting;
 
 import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.voting.AccessRequestVS;
-import org.votingsystem.model.voting.EventVSElection;
-import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;

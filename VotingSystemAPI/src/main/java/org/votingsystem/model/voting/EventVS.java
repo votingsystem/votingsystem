@@ -1,16 +1,21 @@
 package org.votingsystem.model.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.votingsystem.model.*;
+import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.KeyStoreVS;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.TypeVS;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import static javax.persistence.GenerationType.IDENTITY;
@@ -33,6 +38,14 @@ public class EventVS extends EntityVS implements Serializable {
     private static Logger log = Logger.getLogger(EventVS.class.getSimpleName());
 
     private static final long serialVersionUID = 1L;
+
+    public List<String> getTagList() {
+        return tagList;
+    }
+
+    public void setTagList(List<String> tagList) {
+        this.tagList = tagList;
+    }
 
     public enum Cardinality { EXCLUSIVE, MULTIPLE }
 
@@ -72,13 +85,10 @@ public class EventVS extends EntityVS implements Serializable {
     @JoinColumn(name="userVS")
     private UserVS userVS;
     @OneToOne private MessageSMIME publishRequestSMIME;
+    @OneToOne private KeyStoreVS keyStoreVS;
     @Column(name="backupAvailable") private Boolean backupAvailable = Boolean.TRUE;
-    //Owning Entity side of the relationship
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
-    @JoinTable(name = "eventvs_tagvs", joinColumns = {
-            @JoinColumn(name = "eventvs", referencedColumnName = "id", nullable = false) },
-            inverseJoinColumns = { @JoinColumn(name = "tagvs", nullable = false, referencedColumnName = "id") })
-    private Set<TagVS> tagVSSet;
+    @ElementCollection
+    private List<String> tagList;
     @Column(name="url")
     private String url;
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventVS")
@@ -108,7 +118,6 @@ public class EventVS extends EntityVS implements Serializable {
     private Date lastUpdated;
 
     @Transient private Type type = null;
-    @Transient private String[] tags;
     @Transient private Integer numSignaturesCollected;
     @Transient private Integer numVotesCollected;
     @Transient private Boolean signed;
@@ -190,10 +199,6 @@ public class EventVS extends EntityVS implements Serializable {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public void setTags(String[] tags) {
-        this.tags = tags;
     }
 
     public String getContent () {
@@ -278,14 +283,6 @@ public class EventVS extends EntityVS implements Serializable {
 		this.backupAvailable = backupAvailable;
 	}
 
-	public Set<TagVS> getTagVSSet() {
-		return tagVSSet;
-	}
-
-	public void setTagVSSet(Set<TagVS> tagVSSet) {
-		this.tagVSSet = tagVSSet;
-	}
-
 	public Date getDateCanceled() {
 		return dateCanceled;
 	}
@@ -319,6 +316,14 @@ public class EventVS extends EntityVS implements Serializable {
         this.accessControlEventVSId = accessControlEventVSId;
     }
 
+    public KeyStoreVS getKeyStoreVS() {
+        return keyStoreVS;
+    }
+
+    public void setKeyStoreVS(KeyStoreVS keyStoreVS) {
+        this.keyStoreVS = keyStoreVS;
+    }
+
     public static String getURL(TypeVS type, String serverURL, Long id) {
         if(type == null) return serverURL + "/eventVS/" + id;
         switch (type) {
@@ -326,10 +331,6 @@ public class EventVS extends EntityVS implements Serializable {
             case VOTING_EVENT: return serverURL + "/eventVSElection/" + id;
             default: return serverURL + "/eventVS/" + id;
         }
-    }
-
-    public String[] getTags() {
-        return tags;
     }
 
     public Date getDateFinish() {

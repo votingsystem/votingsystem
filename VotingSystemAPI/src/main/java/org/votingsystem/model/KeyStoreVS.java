@@ -1,6 +1,5 @@
 package org.votingsystem.model;
 
-import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;
@@ -20,8 +19,6 @@ public class KeyStoreVS extends EntityVS implements Serializable {
     @Column(name="valid", nullable=false) private Boolean valid;
     
     @Column(name="isRoot", nullable=false) private Boolean isRoot;
-    
-    @OneToOne private EventVS eventVS;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
 
@@ -41,12 +38,10 @@ public class KeyStoreVS extends EntityVS implements Serializable {
 
     public KeyStoreVS() { }
 
-    public KeyStoreVS(boolean isRoot, boolean valid, String keyAlias, EventVS eventVS, Date validFrom, Date validTo,
-                      byte[] bytes) {
-        this.isRoot = isRoot;
-        this.valid = valid;
+    public KeyStoreVS(String keyAlias, byte[] bytes, Date validFrom, Date validTo) {
+        this.isRoot = Boolean.TRUE;
+        this.valid = Boolean.TRUE;
         this.keyAlias = keyAlias;
-        this.eventVS = eventVS;
         this.validFrom = validFrom;
         this.validTo = validTo;
         this.bytes = bytes;
@@ -122,14 +117,6 @@ public class KeyStoreVS extends EntityVS implements Serializable {
 
 	public String getKeyAlias() {
 		return keyAlias;
-	}
-
-	public EventVS getEventVS() {
-		return eventVS;
-	}
-
-	public void setEventVS(EventVS eventVS) {
-		this.eventVS = eventVS;
 	}
 
     public String getPassword() {

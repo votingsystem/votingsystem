@@ -6,6 +6,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.SMIMECheck;
 import org.votingsystem.util.TypeVS;
+
 import javax.persistence.*;
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;

@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 
