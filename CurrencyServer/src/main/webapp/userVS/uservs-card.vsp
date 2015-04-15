@@ -30,7 +30,7 @@
             <template if="{{isNifVisible}}">
                 <div class="nifColumn">{{uservs.uservs.NIF}}</div>
             </template>
-            <!--<div style="width:200px;">{{uservs.uservs.IBAN}}</div>-->
+            <!--<div style="width:200px;">{{uservs.uservs.iban}}</div>-->
             <div flex horizontal layout center-justified class="userVSname">{{uservs.uservs.name}}</div>
             <div horizontal layout>
                 <div flex class="stateInfo">{{uservs.state | userState}}</div>

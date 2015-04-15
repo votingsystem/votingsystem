@@ -14,9 +14,7 @@ public class BankVSDto {
     private TypeVS operation;
     private String info;
     private String certChainPEM;
-    @JsonProperty("IBAN")
     private String IBAN;
-    @JsonProperty("UUID")
     private String UUID;
 
     public BankVSDto() { }

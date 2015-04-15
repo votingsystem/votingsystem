@@ -44,9 +44,9 @@
                     </paper-button>
                 </div>
             </div>
-            <div hidden?="{{userVSList.length === 0}}" style="display: block;">
+            <div hidden?="{{resultList.length === 0}}" style="display: block;">
                 <div layout flex horizontal wrap around-justified >
-                    <template repeat="{{uservs in userVSList}}">
+                    <template repeat="{{uservs in resultList}}">
                         <div horizontal layout  class="card" on-click="{{showUserDetails}}">
                             <div layout flex vertical center-justified>
                                 <div class="name">{{uservs.name}}</div>
@@ -64,7 +64,7 @@
                     </template>
                 </div>
             </div>
-            <div hidden?="{{responseData.userVSList.length !== 0}}"  class="center" id="emptySearchMsg" style="margin:30px 0 30px 0; font-weight: bold;">
+            <div hidden?="{{responseData.resultList.length !== 0}}"  class="center" id="emptySearchMsg" style="margin:30px 0 30px 0; font-weight: bold;">
                 ${msg.emptyUserSearchResultMsg}
             </div>
             <core-localstorage id="localstorage" name="contacts-localstorage" value="{{contacts}}"
@@ -77,7 +77,7 @@
             modeSearch:false,
             ready: function() {
                 this.url = this.url || '';
-                this.userVSList = []
+                this.resultList = []
                 this.contactSelector = (this.contactSelector != null)?true:false
                 this.modeSearch = !this.contactSelector
                 console.log(this.tagName + " - contactSelector: " + this.contactSelector)
@@ -86,24 +86,26 @@
                 console.log(this.tagName + " modeSearchChanged - modeSearch: " + this.modeSearch)
                 if(this.modeSearch === true) {
                     this.textToSearch = ""
-                    this.userVSList = []
-                } else this.userVSList = toJSON(this.contacts)
+                    this.resultList = []
+                } else this.resultList = toJSON(this.contacts)
             },
             contactsChanged:function(e) {
                 console.log(this.tagName + " - contactsChanged")
                 this.contactsArray = toJSON(this.contacts)
-                if(this.contactSelector && !this.modeSearch) this.userVSList = this.contactsArray
+                if(this.contactSelector && !this.modeSearch) this.resultList = this.contactsArray
             },
             showUserDetails:function(e) {
-                this.fire("user-clicked", e.target.templateInstance.model.uservs)
+                document.querySelector("#voting_system_page").dispatchEvent(
+                        new CustomEvent('user-clicked', { 'detail': e.target.templateInstance.model.uservs }));
+
                 this.fire('core-signal', {name: "user-clicked", data: e.target.templateInstance.model.uservs});
             },
             reset: function() {
-                this.userVSList = []
+                this.resultList = []
             },
             responseDataReceived: function() {
-                console.log(this.tagName + " - responseDataReceived - num. users: " + this.responseData.userVSList.length)
-                this.userVSList = this.responseData.userVSList
+                console.log(this.tagName + " - responseDataReceived - num. users: " + this.responseData.resultList.length)
+                this.resultList = this.responseData.resultList
             },
             contactsArrayChanged: function(e) {
                 this.contacts = JSON.stringify(this.contactsArray)

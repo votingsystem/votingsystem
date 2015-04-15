@@ -23,6 +23,7 @@ import org.votingsystem.web.ejb.SubscriptionVSBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.List;
@@ -63,11 +64,12 @@ public class UserVSBean {
         return newUser;
     }
 
+    @Transactional
     public UserVSDto getUserVSDto(UserVS userVS, boolean withCerts) throws Exception {
         List<CertificateVS> certificates = null;
         if(withCerts) {
-            Query query = dao.getEM().createNamedQuery("findCertByUserAndState").setParameter("userVS", userVS)
-                    .setParameter("state", CertificateVS.State.OK);
+            Query query = dao.getEM().createQuery("SELECT c FROM CertificateVS c WHERE c.userVS =:userVS and c.state =:state")
+                    .setParameter("userVS", userVS).setParameter("state", CertificateVS.State.OK);
             certificates = query.getResultList();
         }
         Set<DeviceVSDto> deviceVSDtoSet = SessionVSManager.getInstance().connectedDeviceMap(userVS.getId());

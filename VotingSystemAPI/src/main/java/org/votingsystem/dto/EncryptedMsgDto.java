@@ -16,7 +16,6 @@ public class EncryptedMsgDto {
     private String message;
     private String from;
     private String receiverCert;
-    @JsonProperty("UUID")
     private String UUID;
 
 

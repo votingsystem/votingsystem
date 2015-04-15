@@ -22,9 +22,9 @@ public class BalancesDto {
     private List<TransactionVSDto> transactionFromList;
     private List<TransactionVSDto> transactionToList;
     private Map<String, Map> balances;
-    private Map<String, Map<String, BigDecimal>> balancesFrom;
-    private Map<String, Map<String, IncomesDto>> balancesTo;
-    private Map<String, Map<String, BigDecimal>> balancesCash;
+    private Map<String, Map<String, BigDecimal>> balancesFrom = new HashMap<>();
+    private Map<String, Map<String, IncomesDto>> balancesTo = new HashMap<>();
+    private Map<String, Map<String, BigDecimal>> balancesCash = new HashMap<>();
 
     public BalancesDto() {}
 
@@ -60,9 +60,9 @@ public class BalancesDto {
     }
 
     public void calculateCash() {
-        setBalancesCash(filterBalanceTo(getBalancesTo()));
-        for(String currency: getBalancesFrom().keySet()) {
-            if(getBalancesCash().containsKey(currency)) {
+        setBalancesCash(filterBalanceTo(balancesTo));
+        for(String currency: balancesFrom.keySet()) {
+            if(balancesCash.containsKey(currency)) {
                 for(String tag : getBalancesFrom().get(currency).keySet()) {
                     if(getBalancesCash().get(currency).containsKey(tag)) {
                         BigDecimal newAmount = getBalancesCash().get(currency).get(tag).subtract(getBalancesFrom().get(currency).get(tag));

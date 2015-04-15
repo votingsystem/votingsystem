@@ -11,8 +11,8 @@
             }
         </style>
         <div layout flex horizontal wrap around-justified>
-            <template repeat="{{bankVS in bankVSMap.bankVSList}}">
-                <div class="bankvs" on-click="{{bankVSSelected}}')">
+            <template repeat="{{bankVS in bankVSListDto}}">
+                <div class="bankvs" on-click="{{showDetails}}')">
                     <div class="nameColumn linkVS" style="font-size: 1.2em;">{{bankVS.name}}</div>
                     <div class="descriptionColumn">{{bankVS.description}}</div>
                 </div>
@@ -22,9 +22,9 @@
     <script>
         Polymer('bankVS-list', {
             ready: function() { console.log(this.tagName + " - ready")},
-            publish: { bankVSMap: {value: {}} },
-            bankVSSelected: function(e) {
-                loadURL_VS("${restURL}/userVS/" + e.target.templateInstance.model.bankVS.id)
+            publish: { bankVSListDto: {value: {}} },
+            showDetails: function(e) {
+                loadURL_VS("${restURL}/userVS/id/" + e.target.templateInstance.model.bankVS.id)
             }
         });
     </script>

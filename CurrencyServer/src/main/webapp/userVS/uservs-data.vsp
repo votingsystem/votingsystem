@@ -19,6 +19,7 @@
             -ms-transform:rotate(20deg); -webkit-transform:rotate(20deg); -moz-transform: rotate(20deg);
         }
     </style>
+
     <core-ajax id="ajax" on-core-response="{{ajaxResponse}}" handleAs="json"
                method="get" contentType="application/json"></core-ajax>
     <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
@@ -33,7 +34,7 @@
                         <div userId-data="{{uservs.id}}" style="text-align: center;">{{uservs.name}}</div>
                     </div>
                     <div flex style="margin: 0 0 0 0; font-size: 0.8em;vertical-align: bottom;">
-                        <b>IBAN: </b>{{uservs.IBAN}}
+                        <b>IBAN: </b>{{uservs.iban}}
                     </div>
                 </div>
                 <div hidden?="{{uservs.state === 'ACTIVE'}}" class="uservsCancelled">{{uservs.state}}</div>
@@ -103,7 +104,7 @@
             if(this.messageToUser) showMessageVS(this.messageToUser, "${msg.messageLbl}")
         },
         userVSDataChanged:function() {
-            console.log(this.tagName + " - userVSDataChanged - userVSData: " + Object.prototype.toString.call(this.userVSData))
+            console.log(this.tagName + " - userVSDataChanged - userVSData: " + JSON.stringify( this.userVSData))
             this.userVSData = toJSON(this.userVSData)
             this.uservs = this.userVSData.userVS
             if(this.uservs.name) {
@@ -115,7 +116,7 @@
             }
         },
         goToWeekBalance:function() {
-            loadURL_VS("${restURL}/balance/userVS/" + this.uservs.id)
+            loadURL_VS("${restURL}/balance/userVS/id/" + this.uservs.id)
         },
         ajaxResponse:function() {
             console.log(this.tagName + " - ajaxResponse - userVSData: " + JSON.stringify(this.userVSData))
@@ -126,7 +127,7 @@
         },
         makeTransactionVS:function() {
             console.log(this.tagName + " - makeTransactionVS")
-            this.$.transactionvsForm.init(Operation.FROM_USERVS, this.uservs.name, this.uservs.IBAN , this.uservs.id)
+            this.$.transactionvsForm.init(Operation.FROM_USERVS, this.uservs.name, this.uservs.iban , this.uservs.id)
             this.page = 1;
         },
         showByIBAN:function(IBAN) {

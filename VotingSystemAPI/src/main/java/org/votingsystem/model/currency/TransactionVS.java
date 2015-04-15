@@ -34,12 +34,6 @@ import static javax.persistence.GenerationType.IDENTITY;
                 "SELECT t FROM TransactionVS t WHERE t.transactionParent is null and t.dateCreated between :dateFrom and :dateTo and t.type not in :typeList"),
         @NamedQuery(name="countTransByTransactionParent", query=
                 "SELECT COUNT(t) FROM TransactionVS t WHERE t.transactionParent =:transactionParent"),
-        @NamedQuery(name="findGroupVSTransFromByStateAndDateCreatedAndInListAndNotInList", query=
-                "SELECT t FROM TransactionVS t WHERE (t.fromUser =:fromUserVS and t.state =:state " +
-                "and t.transactionParent is not null and t.dateCreated between :dateFrom and :dateTo " +
-                "and t.type not in (:notList)) OR (t.fromUser =:fromUserVS and t.state =:state " +
-                "and t.transactionParent is null and  t.dateCreated between :dateFrom and :dateTo " +
-                "and t.type in (:inList))"),
         @NamedQuery(name="findUserVSTransFromByFromUserAndStateAndDateCreatedAndInList", query=
                 "SELECT t FROM TransactionVS t WHERE (t.fromUserVS =:fromUserVS and t.state =:state " +
                         "and t.transactionParent is not null and t.dateCreated between :dateFrom and :dateTo) " +

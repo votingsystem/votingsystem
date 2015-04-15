@@ -24,6 +24,7 @@ import org.votingsystem.web.ejb.SubscriptionVSBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.logging.Logger;
@@ -79,9 +80,10 @@ public class GroupVSBean {
         UserVS signer = messageSMIME.getUserVS();
         log.info("signer:" + signer.getNif());
         GroupVSDto request = validateNewGroupRequest(messageSMIME.getSignedContent(GroupVSDto.class)) ;
-        Query query = dao.getEM().createNamedQuery("findGroupByName").setParameter("name", request.getName().trim());
+        Query query = dao.getEM().createQuery("SELECT u FROM UserVS u WHERE u.name =:name")
+                .setParameter("name", request.getName().trim());
         GroupVS groupVS = dao.getSingleResult(GroupVS.class, query);
-        if(groupVS == null) {
+        if(groupVS != null) {
             throw new ExceptionVS(messages.get("nameGroupRepeatedMsg", request.getName()));
         }
         currencyAccountBean.checkUserVSAccount(signer);
@@ -133,6 +135,7 @@ public class GroupVSBean {
         return subscriptionVS;
     }
 
+    @Transactional
     public GroupVSDto getGroupVSDto(GroupVS groupVS) throws Exception {
         GroupVSDto groupVSDto = GroupVSDto.DETAILS( groupVS, userVSBean.getUserVSDto(groupVS.getRepresentative(), false));
         Query query = dao.getEM().createNamedQuery("countSubscriptionByGroupVSAndState").setParameter("groupVS", groupVS)

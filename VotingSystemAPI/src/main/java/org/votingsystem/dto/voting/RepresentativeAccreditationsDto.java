@@ -21,7 +21,6 @@ public class RepresentativeAccreditationsDto {
     private Date selectedDate;
     private String representativeNif;
     private String email;
-    @JsonProperty("UUID")
     private String UUID;
 
     public RepresentativeAccreditationsDto() {}

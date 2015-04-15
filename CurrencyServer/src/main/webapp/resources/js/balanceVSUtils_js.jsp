@@ -1,4 +1,5 @@
-<script>
+<%@page contentType="text/javascript; charset=UTF-8" %>
+
     function calculateBalanceResultMap(balanceToMapParam, balanceFromMapParam) {
         var balanceResult = JSON.parse(JSON.stringify(balanceToMapParam));
         var balanceFromMap = JSON.parse(JSON.stringify(balanceFromMapParam));
@@ -200,4 +201,3 @@
         }
         return currencyInfoMap
     }
-</script>

@@ -1,13 +1,8 @@
 package org.votingsystem.web.currency.ejb;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.dto.currency.TransactionVSPartDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
@@ -39,7 +34,7 @@ import java.util.logging.Logger;
 @Stateless
 public class TransactionVSBean {
 
-    private static Logger log = Logger.getLogger(TransactionVSBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TransactionVSBean.class.getName());
 
     @Inject ConfigVS config;
     @Inject MessagesBean messages;
@@ -326,8 +321,11 @@ public class TransactionVSBean {
         List<TransactionVS> transactionList = null;
         Query query = null;
         if(fromUserVS instanceof GroupVS) {
-            query = dao.getEM().createNamedQuery("findGroupVSTransFromByStateAndDateCreatedAndInListAndNotInList")
-                    .setParameter("fromUserVS", fromUserVS).setParameter("state", TransactionVS.State.OK)
+            query = dao.getEM().createQuery("SELECT t FROM TransactionVS t WHERE (t.fromUser =:fromUserVS and t.state =:state " +
+                    "and t.transactionParent is not null and t.dateCreated between :dateFrom and :dateTo " +
+                    "and t.type not in (:notList)) OR (t.fromUser =:fromUserVS and t.state =:state " +
+                    "and t.transactionParent is null and  t.dateCreated between :dateFrom and :dateTo " +
+                    "and t.type in (:inList))").setParameter("fromUserVS", fromUserVS).setParameter("state", TransactionVS.State.OK)
                     .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())
                     .setParameter("notList", Arrays.asList(TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS, TransactionVS.Type.CURRENCY_INIT_PERIOD))
                     .setParameter("inList", Arrays.asList(TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS));

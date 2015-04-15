@@ -42,7 +42,6 @@ public class AnonymousDelegationDto implements Serializable {
     private UserVS representative;
     private Date dateFrom;
     private Date dateTo;
-    @JsonProperty("UUID")
     private String UUID;
 
     public SMIMEMessage getCancelVoteReceipt() {

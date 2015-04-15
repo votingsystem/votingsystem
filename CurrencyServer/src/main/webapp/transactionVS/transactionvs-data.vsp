@@ -76,7 +76,7 @@
                             <div style=""><b>${msg.nameLbl}: </b>{{transactionvs.toUserVS.name}}</div>
                             <div horizontal layout>
                                 <b>${msg.IBANLbl}: </b>
-                                <div on-click="{{showToUserIBAN}}" class="IBANLink"> {{transactionvs.toUserVS.IBAN}}</div>
+                                <div on-click="{{showToUserIBAN}}" class="IBANLink"> {{transactionvs.toUserVS.iban}}</div>
                             </div>
                         </template>
                     </div>
@@ -130,7 +130,7 @@
                 if(transactionvs.fromUserVS) {
                     if(transactionvs.fromUserVS.sender != null && transactionvs.fromUserVS.sender.fromUserIBAN != null)
                         result = transactionvs.fromUserVS.sender.fromUserIBAN
-                    else result = transactionvs.fromUserVS.IBAN
+                    else result = transactionvs.fromUserVS.iban
                 }
                 return result
             },
@@ -200,7 +200,7 @@
                 window.open(serviceURL, '_blank');
             },
             showToUserIBAN:function(e) {
-                var serviceURL =  "${restURL}/userVS/IBAN/" + this.transactionvs.toUserVS.IBAN
+                var serviceURL =  "${restURL}/userVS/IBAN/" + this.transactionvs.toUserVS.iban
                 window.open(serviceURL, '_blank');
             },
             checkReceipt: function() {

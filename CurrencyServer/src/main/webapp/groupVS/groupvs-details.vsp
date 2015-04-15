@@ -97,7 +97,7 @@
                     <div style="text-align: center;" groupvsId-data="{{groupvs.userVS.id}}">{{groupvs.userVS.name}}</div>
                 </div>
                 <div flex style="margin:5px 10px 0 0; font-size: 0.7em; color:#888; text-align: right; vertical-align: bottom;">
-                    <b>${msg.IBANLbl}: </b>{{groupvs.userVS.IBAN}}
+                    <b>${msg.IBANLbl}: </b>{{groupvs.userVS.iban}}
                 </div>
             </div>
         </div>
@@ -164,7 +164,7 @@
         },
         makeTransactionVS:function() {
             console.log(this.tagName + " - makeTransactionVS")
-            this.$.transactionvsForm.init(Operation.FROM_USERVS, this.groupvs.userVS.name, this.groupvs.userVS.IBAN ,
+            this.$.transactionvsForm.init(Operation.FROM_USERVS, this.groupvs.userVS.name, this.groupvs.userVS.iban ,
                     this.groupvs.userVS.id)
             this.page = 1;
         },
@@ -191,7 +191,7 @@
             }
         },
         goToWeekBalance:function() {
-            loadURL_VS("${restURL}/balance/userVS/" + this.groupvs.userVS.id)
+            loadURL_VS("${restURL}/balance/userVS/id/" + this.groupvs.userVS.id)
         },
         messagedialogClosed:function(e) {
             console.log("messagedialog signal - messagedialogClosed: " + e)
@@ -266,13 +266,13 @@
             //e.detail.isSelected
             if('fromGroupToMember' == e.detail.item.id) {
                 this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_MEMBER, this.groupvs.userVS.name,
-                        this.groupvs.userVS.IBAN , this.groupvs.userVS.id)
+                        this.groupvs.userVS.iban , this.groupvs.userVS.id)
             } else if('fromGroupToMemberGroup' == e.detail.item.id) {
                 this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.userVS.name,
-                        this.groupvs.userVS.IBAN, this.groupvs.userVS.id)
+                        this.groupvs.userVS.iban, this.groupvs.userVS.id)
             } else if('fromGroupToAllMember' == e.detail.item.id) {
                 this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.userVS.name,
-                        this.groupvs.userVS.IBAN, this.groupvs.userVS.id)
+                        this.groupvs.userVS.iban, this.groupvs.userVS.id)
             }
             this.page = 1;
             this.$.transactionvsCoreMenu.selected = null

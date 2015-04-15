@@ -15,7 +15,6 @@ public class EventVSChangeDto {
     private String accessControlURL;
     private Long eventId;
     private EventVS.State state;
-    @JsonProperty("UUID")
     private String UUID;
 
     public EventVSChangeDto() {}

@@ -13,11 +13,11 @@
             </div>
         </div>
         <script>
-            document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
+            document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
                 if(document.querySelector("#navBar") != null) {
-                    document.querySelector("#navBar").url = "${restURL}/userVS/" + e.detail.id + "?menu=" + menuType
-                } else window.location.href = "${restURL}/userVS/" + e.detail.id + "?menu=" + menuType
-            });
+                    document.querySelector("#navBar").url = "${restURL}/userVS/id/" + e.detail.id + "?menu=" + menuType
+                } else window.location.href = "${restURL}/userVS/id/" + e.detail.id + "?menu=" + menuType
+            })
         </script>
     </ui:define>
 </ui:composition>

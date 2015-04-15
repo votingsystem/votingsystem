@@ -53,7 +53,6 @@ public class EventVSDto {
     private String accessControlURL;
     private String serverURL;
     private VoteVSDto voteVS;
-    @JsonProperty("UUID")
     private String UUID;
 
     public EventVSDto() {}

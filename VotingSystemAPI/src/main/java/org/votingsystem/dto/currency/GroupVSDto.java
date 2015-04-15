@@ -35,9 +35,8 @@ public class GroupVSDto {
     private Set<CertificateVSDto> certCollection;
     private Long numPendingUsers;
     private Long numActiveUsers;
-    @JsonProperty("IBAN") private String IBAN;
-    @JsonProperty("NIF") private String NIF;
-    @JsonProperty("UUID")
+    private String IBAN;
+    private String NIF;
     private String UUID;
     private Set<TagVS> tags = new HashSet<>();
 
@@ -91,7 +90,6 @@ public class GroupVSDto {
         if(TypeVS.CURRENCY_GROUP_NEW != getOperation()) throw new ValidationExceptionVS(
                 "operation expected: 'CURRENCY_GROUP_NEW' - operation found: " + getOperation());
         if(getName() == null) throw new ValidationExceptionVS("missing param 'groupvsName'");
-        if(getId() == null) throw new ValidationExceptionVS("missing param 'id'");
         if(getInfo() == null) throw new ValidationExceptionVS("missing param 'groupvsInfo'");
     }
 

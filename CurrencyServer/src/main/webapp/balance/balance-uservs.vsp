@@ -150,7 +150,7 @@
                 }
             },
             goToUserVSPage:function() {
-                loadURL_VS("${restURL}/userVS/" + this.balance.userVS.id)
+                loadURL_VS("${restURL}/userVS/id/" + this.balance.userVS.id)
             },
             getTimeLimitedForTagMsg: function(currency, tag) {
                 var expendedFromTag = 0
@@ -194,11 +194,11 @@
                 if('object' !== typeof balance) this.balance = JSON.parse(balance)
                 else this.balance = balance
                 console.log(this.tagName + " - this.balance.userVS: " + this.balance)
-                this.description = "NIF:" + this.balance.userVS.nif + " - IBAN: " + this.balance.userVS.IBAN
+                this.description = "NIF:" + this.balance.userVS.nif + " - IBAN: " + this.balance.userVS.iban
                 this.userVSName = this.balance.userVS.name
                 if('SYSTEM' == this.balance.userVS.type) {
                     this.caption = "${msg.systemLbl}"
-                    this.description = "IBAN: " + this.balance.userVS.IBAN
+                    this.description = "IBAN: " + this.balance.userVS.iban
                 }
                 else if('BANKVS' == this.balance.userVS.type) {
                     this.caption = "${msg.bankVSLbl}"
@@ -206,7 +206,7 @@
                 }
                 else if('GROUP' == this.balance.userVS.type) {
                     this.caption = "${msg.groupLbl}"
-                    this.description = "IBAN: " + this.balance.userVS.IBAN
+                    this.description = "IBAN: " + this.balance.userVS.iban
                     this.balance.userVS.nif = ""
                 }
                 else if('USER' == this.balance.userVS.type) {

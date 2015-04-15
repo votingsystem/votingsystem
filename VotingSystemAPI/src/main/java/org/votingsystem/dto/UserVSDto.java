@@ -23,8 +23,8 @@ public class UserVSDto {
     private Set<CertificateVSDto> certCollection;
     private String firstName;
     private String lastName;
-    @JsonProperty("IBAN") private String IBAN;
-    @JsonProperty("NIF") private String NIF;
+    private String IBAN;
+    private String NIF;
     private Map sender;
 
     public UserVSDto() {}
@@ -48,10 +48,12 @@ public class UserVSDto {
         userVSDto.setDescription(userVS.getDescription());
         userVSDto.setConnectedDevices(connectedDevices);
         Set<CertificateVSDto> certCollection = new HashSet<>();
-        for(CertificateVS certificateVS : certificateVSList) {
-            certCollection.add(new CertificateVSDto(certificateVS.getX509Cert()));
+        if(certificateVSList != null) {
+            for(CertificateVS certificateVS : certificateVSList) {
+                certCollection.add(new CertificateVSDto(certificateVS.getX509Cert()));
+            }
+            userVSDto.setCertCollection(certCollection);
         }
-        userVSDto.setCertCollection(certCollection);
         return userVSDto;
     }
 

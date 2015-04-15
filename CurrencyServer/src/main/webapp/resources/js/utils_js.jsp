@@ -1,4 +1,4 @@
-<%@page contentType="text/javascript" %>
+<%@page contentType="text/javascript; charset=UTF-8" %>
 
     window['serverURL'] = "${contextURL}"
 

@@ -68,7 +68,8 @@ public class SubscriptionVSBean {
             CertificateException, IOException, NoSuchAlgorithmException, NoSuchProviderException {
         log.log(Level.FINE, " deviceData: " + deviceData);
         X509Certificate x509Cert = userVS.getCertificate();
-        Query query = dao.getEM().createNamedQuery("findCertByUserAndStateAndSerialNumberAndCertificateCA")
+        Query query = dao.getEM().createQuery("SELECT c FROM CertificateVS c WHERE c.userVS =:userVS and c.state =:state " +
+                "and c.serialNumber =:serialNumber and c.authorityCertificateVS =:authorityCertificateVS")
                 .setParameter("userVS", userVS).setParameter("state",CertificateVS.State.OK)
                 .setParameter("serialNumber", x509Cert.getSerialNumber().longValue())
                 .setParameter("authorityCertificateVS", userVS.getCertificateCA());

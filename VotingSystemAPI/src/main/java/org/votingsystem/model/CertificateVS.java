@@ -29,12 +29,7 @@ import static javax.persistence.GenerationType.IDENTITY;
         @NamedQuery(name = "findCertBySerialNumber", query =
                 "SELECT c FROM CertificateVS c WHERE c.serialNumber =:serialNumber"),
         @NamedQuery(name = "findCertByActorVSAndStateAndType", query =
-                "SELECT c FROM CertificateVS c WHERE c.actorVS =:actorVS and c.state =:state and type =:type"),
-        @NamedQuery(name = "findCertByUserAndStateAndSerialNumberAndCertificateCA", query =
-                "SELECT c FROM CertificateVS c WHERE c.userVS =:userVS and c.state =:state " +
-                        "and c.serialNumber =:serialNumber and c.authorityCertificateVS =:authorityCertificateVS"),
-        @NamedQuery(name = "findCertByUserAndState", query =
-        "SELECT c FROM CertificateVS c WHERE c.userVS =:userVS and c.state =:state")
+                "SELECT c FROM CertificateVS c WHERE c.actorVS =:actorVS and c.state =:state and c.type =:type")
 })
 public class CertificateVS extends EntityVS implements Serializable {
 
@@ -152,6 +147,7 @@ public class CertificateVS extends EntityVS implements Serializable {
         CertificateVS result = new CertificateVS(x509Cert);
         result.type = CertificateVS.Type.USER;
         result.state = CertificateVS.State.OK;
+        result.userVS = userVS;
         result.authorityCertificateVS = userVS.getCertificateCA();
         return result;
     }

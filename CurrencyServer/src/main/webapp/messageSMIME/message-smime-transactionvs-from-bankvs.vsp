@@ -136,7 +136,7 @@
             },
             showToUserVSByIBAN:function(e) {
                 console.log(this.tagName + " - showUserVSByIBAN - " + e)
-                loadURL_VS("${restURL}/userVS/IBAN/" + e.target.templateInstance.model.IBAN, '_blank')
+                loadURL_VS("${restURL}/userVS/IBAN/" + e.target.templateInstance.model.iban, '_blank')
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)

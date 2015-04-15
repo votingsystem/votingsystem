@@ -30,6 +30,7 @@ import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -56,7 +57,7 @@ public class GroupVSResource {
     @Inject MessagesBean messages;
 
     @Path("/")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
     public Response index(@DefaultValue("0") @QueryParam("offset") int offset,
                         @DefaultValue("100") @QueryParam("max") int max,
                         @QueryParam("state") String stateStr,
@@ -124,7 +125,7 @@ public class GroupVSResource {
         if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(groupVSDto)).build();
         else {
             req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(groupVSDto));
-            context.getRequestDispatcher("/groupVS/groupvs.xhtml").forward(req, resp);
+            context.getRequestDispatcher("/groupVS/groupVS.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
@@ -202,7 +203,7 @@ public class GroupVSResource {
         if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
         else {
             req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(balancesDto));
-            context.getRequestDispatcher("/groupVS/groupvs.xhtml").forward(req, resp);
+            context.getRequestDispatcher("/groupVS/groupVS.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }

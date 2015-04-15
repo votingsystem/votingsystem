@@ -270,7 +270,7 @@
                 var receptorList = this.$.receptorBox.getUserList()
                 var result = []
                 for(userIdx in receptorList) {
-                    result.push(receptorList[userIdx].IBAN);
+                    result.push(receptorList[userIdx].iban);
                 }
                 return result
             }

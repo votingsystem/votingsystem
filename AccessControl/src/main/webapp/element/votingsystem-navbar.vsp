@@ -75,12 +75,12 @@
                 </core-menu>
             </core-header-panel>
             <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center;" tool>{{appTitle}}</div>
+            <div id="contentDiv"></div>
             <content></content>
         </vs-navbar>
         <div hidden?="{{!loading}}" style="width: 30px;margin: 100px auto 0px auto;">
             <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
         </div>
-        <content id="content"></content>
     </template>
     <script>
         Polymer('votingsystem-navbar', {
@@ -182,7 +182,8 @@
                     console.log("script.src: " + script.src)
                     document.head.appendChild(script);
                 }
-                this.innerHTML = ajaxDocument.body.innerHTML
+                this.innerHTML = ""
+                this.$.contentDiv.innerHTML = ajaxDocument.body.innerHTML
                 updateLinksVS(document.querySelectorAll("#navBar a"))
             },
             ajaxError: function(e) {

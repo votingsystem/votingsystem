@@ -38,50 +38,47 @@ public class BalanceResource {
 
     private static Logger log = Logger.getLogger(BalanceResource.class.getSimpleName());
 
-    @Inject
-    DAOBean dao;
+    @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @PersistenceContext private EntityManager em;
-    @Inject
-    CurrencyAccountBean accountBean;
+    @Inject CurrencyAccountBean accountBean;
     @Inject BalancesBean balancesBean;
 
 
     @GET
-    @Path("/userVS/{userId}")
-    public Object userVS(@PathParam("userId") long userId, @Context ServletContext context,
+    @Path("/userVS/id/{userId}")
+    public Response userVS(@PathParam("userId") long userId, @Context ServletContext context,
              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        return getUserVSBalanceMap(req, resp, context, userId, Calendar.getInstance());
+        return getUserVSBalancesDto(req, resp, context, userId, Calendar.getInstance());
     }
 
-    @Path("/userVS/{userId}/{year}/{month}/{day}")
+    @Path("/userVS/id/{userId}/{year}/{month}/{day}")
     @GET  @Produces(MediaType.APPLICATION_JSON)
-    public Object userVSWithDate(@PathParam("userId") long userId, @PathParam("year") int year, @PathParam("month") int month,
+    public Response userVSWithDate(@PathParam("userId") long userId, @PathParam("year") int year, @PathParam("month") int month,
             @PathParam("day") int day, @Context ServletContext context, @Context HttpServletRequest req,
             @Context HttpServletResponse resp) throws Exception {
         Calendar calendar = DateUtils.getCalendar(year, month, day);
-        return getUserVSBalanceMap(req, resp, context, userId, calendar);
+        return getUserVSBalancesDto(req, resp, context, userId, calendar);
     }
 
-    private Response getUserVSBalanceMap(HttpServletRequest req, HttpServletResponse resp, ServletContext context,
+    private Response getUserVSBalancesDto(HttpServletRequest req, HttpServletResponse resp, ServletContext context,
                long userId, Calendar calendar) throws Exception {
         UserVS uservs = dao.find(UserVS.class, userId);
         if(uservs == null) {
-            throw new NotFoundException("userId: " + userId);
+            throw new NotFoundException("ERROR - UserVS not found - userId: " + userId);
         } else {
             TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
             BalancesDto balancesDto = balancesBean.genBalance(uservs, timePeriod);
             if(req.getContentType() != null && req.getContentType().contains("json")) {
                 return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
             } else {
-                req.setAttribute("balanceMap", JSON.getMapper().writeValueAsString(balancesDto));
+                req.setAttribute("balancesDto", JSON.getMapper().writeValueAsString(balancesDto));
                 context.getRequestDispatcher("/balance/userVS.xhtml").forward(req, resp);
                 return Response.ok().build();
             }
         }
     }
 
-    @Path("/userVS/{userId}/db")
+    @Path("/userVS/id/{userId}/db")
     @GET  @Produces(MediaType.APPLICATION_JSON)
     public Map userVSDB(@PathParam("userId") long userId, @Context ServletContext context, @Context HttpServletRequest req,
                 @Context HttpServletResponse resp) {

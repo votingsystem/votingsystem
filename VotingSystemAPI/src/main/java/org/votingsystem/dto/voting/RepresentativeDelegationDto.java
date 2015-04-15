@@ -19,7 +19,6 @@ public class RepresentativeDelegationDto {
     private String representativeNif;
     private String representativeName;
     private Integer weeksOperationActive;
-    @JsonProperty("UUID")
     private String UUID;
 
     public RepresentativeDelegationDto() {}

@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 @Stateless
 public class BankVSBean {
 
-    private static final Logger log = Logger.getLogger(BankVSBean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(BankVSBean.class.getName());
 
 
     @Inject DAOBean dao;

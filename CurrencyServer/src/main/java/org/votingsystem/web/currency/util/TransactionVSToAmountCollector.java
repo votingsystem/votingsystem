@@ -3,10 +3,7 @@ package org.votingsystem.web.currency.util;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.currency.TransactionVS;
 
-import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;

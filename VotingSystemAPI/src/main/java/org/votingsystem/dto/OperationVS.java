@@ -44,7 +44,6 @@ public class OperationVS {
     private Map document;
     private String contentType;
     private EventVSDto eventVS;
-    @JsonProperty("UUID")
     private String UUID;
 
 

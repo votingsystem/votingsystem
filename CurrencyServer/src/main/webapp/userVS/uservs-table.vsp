@@ -56,7 +56,7 @@
                                 {{uservs.uservs.NIF}}
                             </div>
                         </template>
-                        <!--<div style="width:200px;">{{uservs.uservs.IBAN}}</div>-->
+                        <!--<div style="width:200px;">{{uservs.uservs.iban}}</div>-->
                         <div flex>{{uservs.uservs.name}}</div>
                         <div style="width:100px;">{{uservs.state | userState}}</div>
                         <div style="width:170px;">{{uservs.lastUpdated}}</div>
