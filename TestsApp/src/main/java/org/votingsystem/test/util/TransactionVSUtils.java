@@ -13,11 +13,11 @@ import java.util.logging.Logger;
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-class TransactionVSUtils {
+public class TransactionVSUtils {
 
     static Logger log =  Logger.getLogger(TransactionVSUtils.class.getSimpleName());
 
-    public static Map getGroupVSTransactionVS(TransactionVS transactionVS, UserVS groupVS) {
+   /* public static Map getGroupVSTransactionVS(TransactionVS transactionVS, UserVS groupVS) {
         Map result = new HashMap();
         result.put("operation", transactionVS.getType().toString());
         result.put("fromUser", groupVS.getName());
@@ -33,9 +33,9 @@ class TransactionVSUtils {
         result.put("tags", Arrays.asList(transactionVS.getTag().getName()));
         result.put("UUID", UUID.randomUUID().toString());
         return result;
-    }
+    }*/
 
-    public static Map getBankVSTransactionVS(TransactionVS transactionVS) {
+    /*public static Map getBankVSTransactionVS(TransactionVS transactionVS) {
         Map result = new HashMap();
         result.put("operation", transactionVS.getType().toString());
         result.put("bankIBAN", transactionVS.getFromUserVS().getIBAN());
@@ -50,7 +50,7 @@ class TransactionVSUtils {
         result.put("tags", Arrays.asList(transactionVS.getTag().getName()));
         result.put("UUID", UUID.randomUUID().toString());
         return result;
-    }
+    }*/
 
     public static Map<String, Map<String, BigDecimal>> getCurrencyMap(List<TransactionVS> transactionVSList) {
         Map<String, Map<String, BigDecimal>> currencyMap = new HashMap<String, Map<String, BigDecimal>>();

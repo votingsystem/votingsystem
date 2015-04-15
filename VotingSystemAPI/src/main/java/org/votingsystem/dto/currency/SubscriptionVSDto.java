@@ -15,6 +15,7 @@ import java.util.Date;
 public class SubscriptionVSDto {
 
     private Long id;
+    private Long groupvsId;
     private String groupvsName;
     private String groupvsInfo;
     private String userVSName;
@@ -53,6 +54,7 @@ public class SubscriptionVSDto {
 
     private void validate() throws ValidationExceptionVS {
         if(operation == null) throw new ValidationExceptionVS("missing param 'operation'");
+        if(groupvsId == null) throw new ValidationExceptionVS("missing param 'groupvsId'");
         if(groupvsName == null) throw new ValidationExceptionVS("missing param 'groupvsName'");
         if(userVSName== null) throw new ValidationExceptionVS("missing param 'userVSName'");
         if(userVSNIF == null) throw new ValidationExceptionVS("missing param 'userVSNIF'");
@@ -62,6 +64,20 @@ public class SubscriptionVSDto {
         validate();
         if(TypeVS.CURRENCY_GROUP_USER_ACTIVATE != operation) throw new ValidationExceptionVS(
                 "Operation expected: 'CURRENCY_GROUP_USER_ACTIVATE' - operation found: " + operation);
+    }
+
+    public void loadActivationRequest() {
+        operation = TypeVS.CURRENCY_GROUP_USER_ACTIVATE;
+        groupvsId = groupvs.getId();
+        groupvsName = groupvs.getName();
+        userVSName = uservs.getName();
+        userVSNIF = uservs.getNIF();
+    }
+
+    public void validateDeActivationRequest() throws ValidationExceptionVS {
+        validate();
+        if(TypeVS.CURRENCY_GROUP_USER_DEACTIVATE != operation) throw new ValidationExceptionVS(
+                "Operation expected: 'CURRENCY_GROUP_USER_DEACTIVATE' - operation found: " + operation);
     }
 
     public String getGroupvsName() {
@@ -190,5 +206,13 @@ public class SubscriptionVSDto {
 
     public void setUservs(UserVSDto uservs) {
         this.uservs = uservs;
+    }
+
+    public Long getGroupvsId() {
+        return groupvsId;
+    }
+
+    public void setGroupvsId(Long groupvsId) {
+        this.groupvsId = groupvsId;
     }
 }

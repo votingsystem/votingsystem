@@ -16,7 +16,7 @@
         <div layout vertical>
             <div id="" style="width: 480px;margin:auto; padding: 15px;">
                 <div horizontal layout style="font-size: 0.8em;">
-                    <div style="font-weight: bold;color:#888;" flex>NIF: {{subscriptionData.uservs.NIF}}</div>
+                    <div style="font-weight: bold;color:#888;" flex>NIF: {{subscriptionData.uservs.nif}}</div>
                     <template if="{{subscriptionData.uservs.iban}}">
                         <div style="font-weight: bold;color:#888;">IBAN: {{subscriptionData.uservs.iban}}</div>
                     </template>
@@ -25,7 +25,7 @@
                     text-align: center; color:#6c0404;">
                     {{subscriptionData.uservs.name}}</div>
                 <div id="contentDiv" style="">${msg.subscriptionRequestDateLbl}:
-                    <span id="dateCreatedDiv"> {{subscriptionData.dateCreated}}</span></div>
+                    <span id="dateCreatedDiv"> {{getDate(subscriptionData.dateCreated)}}</span></div>
             </div>
             <div horizontal layout center center-justified style="margin:10px 0 0 0; font-size: 0.9em;">
                 <template if="{{isClientToolConnected}}">
@@ -63,9 +63,10 @@
                     var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
                     webAppMessage.serviceURL = "${restURL}/groupVS/deActivateUser"
                     webAppMessage.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + this.subscriptionData.groupvs.name + "'"
-                    webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_USER_DEACTIVATE,
-                        groupvs:{name:this.subscriptionData.groupvs.name, id:this.subscriptionData.groupvs.id},
-                        uservs:{name:this.subscriptionData.uservs.name, NIF:this.subscriptionData.uservs.NIF}, reason:e.detail}
+                    webAppMessage.signedContent = {groupvsId:this.subscriptionData.groupvs.id,
+                        groupvsName:this.subscriptionData.groupvs.name,
+                        userVSName:this.subscriptionData.uservs.name, userVSNIF:this.subscriptionData.uservs.NIF,
+                        reason:e.detail}
                     webAppMessage.contentType = 'application/pkcs7-signature'
                     webAppMessage.setCallback(function(appMessage) {
                         console.log("deActivateUserCallback - message: " + appMessage);
@@ -80,11 +81,14 @@
                     VotingSystemClient.setMessage(webAppMessage);
                 }.bind(this))
             },
+            getDate:function(timStamp) {
+                return new Date(timStamp).getDayWeekAndHourFormat()
+            },
             onCoreOverlayOpen:function(e) {
                 this.opened = this.$.xDialog.opened
             },
             goToUserVSPage:function() {
-                loadURL_VS("${restURL}/userVS/" + this.userId, "_blank")
+                loadURL_VS("${restURL}/userVS/id/" + this.userId, "_blank")
                 this.$.xDialog.opened = false
             },
             openedChanged:function() {
@@ -105,8 +109,8 @@
                 webAppMessage.signedMessageSubject = "${msg.activateGroupUserMessageSubject}" + " '" +
                         this.subscriptionData.groupvs.name + "'"
                 webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,
-                    groupvs:{name:this.subscriptionData.groupvs.name, id:this.subscriptionData.groupvs.id},
-                    uservs:{name:this.subscriptionData.uservs.name, NIF:this.subscriptionData.uservs.NIF}}
+                    groupvsId:this.subscriptionData.groupvs.id, groupvsName:this.subscriptionData.groupvs.name,
+                    userVSName:this.subscriptionData.uservs.name, userVSNIF:this.subscriptionData.uservs.NIF}
                 webAppMessage.contentType = 'application/pkcs7-signature'
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("activateUserCallback - message: " + appMessage);

@@ -1,5 +1,6 @@
 package org.votingsystem.test.util;
 
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.currency.TransactionVS;
 
 import java.math.BigDecimal;
@@ -8,11 +9,12 @@ import java.math.BigDecimal;
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class TransactionVSCounter {
+
     BigDecimal amount = BigDecimal.ZERO;
     Integer numTransactions = 0;
     TransactionVS.Type type;
 
-    public TransactionVSCounter(TransactionVS transactionVS) {
+    public TransactionVSCounter(TransactionVSDto transactionVS) {
         this.type = transactionVS.getType();
         this.amount = transactionVS.getAmount();
         this.numTransactions = 1;

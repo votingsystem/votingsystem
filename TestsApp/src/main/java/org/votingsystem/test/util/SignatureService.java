@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.GroupVSDto;
+import org.votingsystem.dto.currency.SubscriptionVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -238,46 +241,28 @@ public class SignatureService {
         return userList;
     }
 
-    public List<Map> validateUserVSSubscriptions(Long groupVSId, CurrencyServer currencyServer,
+    public List<SubscriptionVSDto> validateUserVSSubscriptions(Long groupVSId, CurrencyServer currencyServer,
             Map<String, MockDNI> userVSMap) throws Exception {
         log.info("validateUserVSSubscriptions");
-        ResponseVS responseVS = HttpHelper.getInstance().getData(currencyServer.getGroupVSUsersServiceURL(
-                        groupVSId, 1000, 0, SubscriptionVS.State.PENDING, UserVS.State.ACTIVE),
-                ContentTypeVS.JSON);
-        if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(
-                responseVS.getMessage());
-        Map<String, Object> dataMap = new ObjectMapper().readValue(responseVS.getMessage(),
-                new TypeReference<HashMap<String, Object>>() {});
-        List<Map> userVSList = (List) dataMap.get("userVSList");
-        List<Map> usersToActivate = new ArrayList<>();
-        for (Map userSubscriptionData : userVSList) {
-            if (UserVS.State.PENDING == UserVS.State.valueOf((String) userSubscriptionData.get("state"))) {
-                Map userVSData = (Map) userSubscriptionData.get("uservs");
-                if (userVSMap.get(userVSData.get("NIF")) != null) usersToActivate.add(userSubscriptionData);
+        ResultListDto<SubscriptionVSDto> subscriptionVSDtoList = HttpHelper.getInstance().getData(new TypeReference<ResultListDto<SubscriptionVSDto>>(){},
+                currencyServer.getGroupVSUsersServiceURL( groupVSId, 1000, 0, SubscriptionVS.State.PENDING, UserVS.State.ACTIVE),
+                MediaTypeVS.JSON);
+        for(SubscriptionVSDto subscriptionVSDto : subscriptionVSDtoList.getResultList()) {
+            if(subscriptionVSDto.getState() == SubscriptionVS.State.PENDING) {
+                subscriptionVSDto.loadActivationRequest();
             }
-        }
-        if (usersToActivate.size() != userVSMap.size())
-            throw new org.votingsystem.throwable.ExceptionVS("Expected '" + userVSMap.size() +
-                    "' pending users and found '" + usersToActivate.size() + "'");
-        List<Map> requests = new ArrayList<>();
-        for (Map userToActivate : usersToActivate) {
-            Map request = new HashMap<>();
-            request.put("operation", TypeVS.CURRENCY_GROUP_USER_ACTIVATE.toString());
-            request.put("groupvs", userToActivate.get("groupvs"));
-            request.put("uservs", userToActivate.get("uservs"));
-            requests.add(request);
         }
         String messageSubject = "TEST_ACTIVATE_GROUPVS_USERS";
         UserVS userVS = UserVS.getUserVS(certSigner);
-        for (Map request : requests) {
-            SMIMEMessage smimeMessage = getSMIMETimeStamped(userVS.getNif(), currencyServer.getName(), request.toString(),
-                    messageSubject);
-            responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+        for (SubscriptionVSDto subscriptionVSDto : subscriptionVSDtoList.getResultList()) {
+            SMIMEMessage smimeMessage = getSMIMETimeStamped(userVS.getNif(), currencyServer.getName(),
+                    JSON.getMapper().writeValueAsString(subscriptionVSDto), messageSubject);
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     currencyServer.getGroupVSUsersActivationServiceURL());
             if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(
                     responseVS.getMessage());
         }
-        return requests;
+        return subscriptionVSDtoList.getResultList();
     }
 
 }

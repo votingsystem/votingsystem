@@ -1,7 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<fmt:setBundle basename="org.votingsystem.web.currency.messages" var="bundle"/>
+<%@ taglib prefix="h" uri="http://java.sun.com/jsf/html" %>
+<%@ taglib prefix="f" uri="http://java.sun.com/jsf/core" %>
+
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
@@ -76,6 +77,19 @@
                     </paper-button raised>
                 </div>
             </template>
+            <template if="{{!isClientToolConnected}}">
+                <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 20px 0;">
+                    <f:view>
+                        <h:outputFormat value="#{msg.clientToolNeededMsg}" escape="false">
+                            <f:param value="#{contextURL}/tools/ClientTool.zip"/>
+                        </h:outputFormat>
+                        <br/>
+                        <h:outputFormat value="#{msg.clientToolDownloadMsg}" escape="false">
+                            <f:param value="#{contextURL}/app/tools.xhtml"/>
+                        </h:outputFormat>
+                    </f:view>
+                </div>
+            </template>
             <div id="pageHeader" layout horizontal center center-justified>
                 <div horizontal layout flex style="padding:7px 0px 0px 7px;">
                     <template if="{{subpage}}">
@@ -126,16 +140,6 @@
             </div>
 
         </div>
-        <template if="{{!isClientToolConnected}}">
-            <div id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 0 0;">
-                <fmt:message key="clientToolNeededMsg" bundle="${bundle}">
-                    <fmt:param value="${contextURL}/tools/ClientTool.zip"/>
-                </fmt:message>
-                <fmt:message key="clientToolDownloadMsg" bundle="${bundle}">
-                    <fmt:param value="${contextURL}/app/tools.xhtml"/>
-                </fmt:message>
-            </div>
-        </template>
     </div>
     </section>
 
@@ -206,7 +210,7 @@
             var groupvsRepresentative = {id:this.groupvs.representative.id, nif:this.groupvs.representative.nif}
             var groupVSData = {id:this.groupvs.id, name:this.groupvs.name , representative:groupvsRepresentative}
             var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_SUBSCRIBE)
-            webAppMessage.serviceURL = "${restURL}/groupVS/" + this.groupvs.id + "/subscribe"
+            webAppMessage.serviceURL = "${restURL}/groupVS/id/" + this.groupvs.id + "/subscribe"
             webAppMessage.signedMessageSubject = "${msg.subscribeToCurrencyGroupMsg}"
             webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_SUBSCRIBE, groupvs:groupVSData}
             webAppMessage.contentType = 'application/pkcs7-signature'
@@ -224,7 +228,7 @@
             VotingSystemClient.setMessage(webAppMessage);
         },
         groupvsChanged:function() {
-            console.log("groupvsChanged - groupvs: " + Object.prototype.toString.call(this.groupvs))
+            console.log(this.tagName + " - groupvsChanged - groupvs: " + JSON.stringify(this.groupvs))
             if(("admin" == menuType || "superuser" == menuType) && 'ACTIVE' == this.groupvs.state) this.isAdminView = true
             else {
                 this.isAdminView = false
@@ -245,7 +249,7 @@
                 this.$.messagePanel.style.display = 'block'
                 this.isAdminView = false
             }
-            this.$.userList.url = "${restURL}/groupVS/id/" + this.groupvs.id + "/users"
+            this.$.userList.url = "${restURL}/groupVS/id/" + this.groupvs.id + "/listUsers"
             this.fire('core-signal', {name: "vs-innerpage", data: {caption:"${msg.groupvsLbl}"}});
             console.log("this.isUserView: " + this.isUserView + " - groupvs.state: " + this.groupvs.state +
                 " - menuType: " + menuType)
@@ -283,7 +287,7 @@
         },
         showUserDetails:function(e, detail, sender) {
             console.log(this.tagName + " - showUserDetails")
-            this.$.userDescription.show("${restURL}/groupVS/id/" + this.groupvs.id + "/user", detail)
+            this.$.userDescription.show("${restURL}/groupVS/id/" + this.groupvs.id + "/user/id", detail)
         }
     })
 </script>

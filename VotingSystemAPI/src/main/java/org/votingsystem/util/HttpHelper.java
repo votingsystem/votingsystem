@@ -1,5 +1,6 @@
 package org.votingsystem.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.http.*;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -199,7 +200,11 @@ public class HttpHelper {
         }
     }
 
-    public <T> T getData(Class<T> type, String serverURL, String mediaType) throws Exception {
+    public <T> T getData(TypeReference type, String serverURL, String mediaType) throws Exception {
+        return getData(null, type, serverURL, mediaType);
+    }
+
+    public <T> T getData(Class<T> type, TypeReference typeReference, String serverURL, String mediaType) throws Exception {
         log.info("getData - contentType: " + mediaType + " - serverURL: " + serverURL);
         CloseableHttpResponse response = null;
         HttpGet httpget = null;
@@ -218,7 +223,8 @@ public class HttpHelper {
         try {
             byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
             if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
-                return JSON.getMapper().readValue(responseBytes, type);
+                if(type != null) return JSON.getMapper().readValue(responseBytes, type);
+                else return JSON.getMapper().readValue(responseBytes, typeReference);
             } else {
                 MessageDto messageDto = null;
                 String responseStr = null;
@@ -236,6 +242,10 @@ public class HttpHelper {
         } finally {
             if(response != null) response.close();
         }
+    }
+
+    public <T> T getData(Class<T> type, String serverURL, String mediaType) throws Exception {
+        return getData(type, null, serverURL, mediaType);
     }
 
 

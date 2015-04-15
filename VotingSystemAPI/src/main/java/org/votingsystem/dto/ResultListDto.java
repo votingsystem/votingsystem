@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ResultListDto {
+public class ResultListDto<T> {
 
-    private List resultList;
+    private List<T> resultList;
     private Integer offset;
     private Integer max;
     private Long totalCount;
@@ -15,15 +15,15 @@ public class ResultListDto {
 
     public ResultListDto() { }
 
-    public ResultListDto(List resultList, Integer offset, Integer max, Long totalCount) {
+    public ResultListDto(List<T> resultList, Integer offset, Integer max, Long totalCount) {
         this.resultList = resultList;
         this.offset = offset;
         this.max = max;
         this.totalCount = totalCount;
     }
 
-    public static ResultListDto GROUPVS(List groupList, Object state, Integer offset, Integer max, Long totalCount) {
-        ResultListDto result = new ResultListDto();
+    public static <T> ResultListDto GROUPVS(List<T> groupList, Object state, Integer offset, Integer max, Long totalCount) {
+        ResultListDto<T> result = new ResultListDto<T>();
         result.setResultList(groupList);
         result.setState(state);
         result.setOffset(offset);
@@ -33,11 +33,11 @@ public class ResultListDto {
     }
 
 
-    public List getResultList() {
+    public List<T> getResultList() {
         return resultList;
     }
 
-    public void setResultList(List resultList) {
+    public void setResultList(List<T> resultList) {
         this.resultList = resultList;
     }
 

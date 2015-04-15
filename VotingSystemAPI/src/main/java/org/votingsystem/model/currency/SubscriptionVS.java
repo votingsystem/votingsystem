@@ -54,7 +54,8 @@ public class SubscriptionVS extends EntityVS implements Serializable {
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
 
-    @Column(name="groupVS") private GroupVS groupVS;
+    @ManyToOne(fetch= FetchType.LAZY)
+    @JoinColumn(name="groupVS") private GroupVS groupVS;
 
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
 

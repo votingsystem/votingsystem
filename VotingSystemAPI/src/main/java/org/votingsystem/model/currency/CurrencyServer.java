@@ -58,7 +58,7 @@ public class CurrencyServer extends ActorVS implements Serializable {
     }
 
     public String getUserDashBoardURL() {
-        return getServerURL() + "/app/userVS?menu=user";
+        return getServerURL() + "/rest/app/userVS?menu=user";
     }
 
     public String getAdminDashBoardURL() {
@@ -83,7 +83,7 @@ public class CurrencyServer extends ActorVS implements Serializable {
 
     public String getGroupVSUsersServiceURL(Long groupId, Integer max, Integer offset,
                 SubscriptionVS.State subscriptionState, UserVS.State userVSState) {
-        return getServerURL() + "/rest/groupVS/id/" + String.valueOf(groupId) + "/users" +
+        return getServerURL() + "/rest/groupVS/id/" + String.valueOf(groupId) + "/listUsers" +
                 "?max=" + ((max != null)?max:"") +
                 "&offset=" + ((offset != null)?offset:"") +
                 "&subscriptionState=" + ((subscriptionState != null)?subscriptionState.toString():"") +

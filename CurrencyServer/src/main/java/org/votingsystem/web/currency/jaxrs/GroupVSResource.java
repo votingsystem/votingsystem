@@ -150,7 +150,6 @@ public class GroupVSResource {
                 subscriptionStateStr);} catch(Exception ex) {}
         UserVS.State userState = UserVS.State.ACTIVE;
         try {userState = UserVS.State.valueOf(userVSStateStr);} catch(Exception ex) {}
-        Map subscriptionMap = new HashMap<>();
         long totalCount = 0L;
         if(contentType.contains("json")) {
             String queryListPrefix = "select s ";
@@ -176,12 +175,37 @@ public class GroupVSResource {
             ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         } else {
-            req.setAttribute("subscriptionMap", JSON.getMapper().writeValueAsString(new HashMap<>()));
+            req.setAttribute("groupVSId", groupVS.getId());
+            req.setAttribute("groupVSName", groupVS.getName());
             context.getRequestDispatcher("/groupVS/listUsers.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
 
+    @Path("/id/{groupId}/listUsers")
+    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
+    public Response users(@PathParam("groupId") long groupId, @Context ServletContext context,
+                          @DefaultValue("0") @QueryParam("offset") int offset,
+                          @DefaultValue("100") @QueryParam("max") int max,
+                          @QueryParam("state") String stateStr,
+                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        List<SubscriptionVS.State> states = Arrays.asList(SubscriptionVS.State.values());
+        if(stateStr != null) try {
+            states = Arrays.asList(SubscriptionVS.State.valueOf(stateStr));
+        } catch(Exception ex) {}
+        Query query = dao.getEM().createQuery("select s from SubscriptionVS s where s.groupVS.id =:groupId " +
+                "and s.state in :states").setParameter("groupId", groupId).setParameter("states", states)
+                .setFirstResult(offset).setMaxResults(max);
+        List<SubscriptionVS> subscriptionVSList = query.getResultList();
+        List<SubscriptionVSDto> resultList = new ArrayList<>();
+        for(SubscriptionVS subscriptionVS : subscriptionVSList) {
+            resultList.add(SubscriptionVSDto.DETAILED(subscriptionVS, config.getRestURL()));
+        }
+        query = dao.getEM().createQuery("select count(s) from SubscriptionVS s where s.groupVS.id =:groupId " +
+                "and s.state in :states").setParameter("groupId", groupId).setParameter("states", states);
+        ResultListDto resultListDto = new ResultListDto(resultList, offset, max, (long)query.getSingleResult());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
+    }
 
     @Path("/id/{id}/balance") //old_url -> /groupVS/$id/balance"
     @GET @Produces(MediaType.APPLICATION_JSON)
@@ -266,9 +290,9 @@ public class GroupVSResource {
         return Response.ok().entity(messages.get("groupvsSubscriptionOKMsg", signer.getNif(), signer.getName())).build();
     }
 
-    @Path("/id/{groupId}/user/id/{userId}") //old_url -> /groupVS/$id/user/$userId
-    @GET @Produces(MediaType.APPLICATION_JSON)
-    public Response user(MessageSMIME messageSMIME, @PathParam("groupId") long groupId, @PathParam("userId") long userId,
+    @Path("/id/{groupId}/user/id/{userId}")
+    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
+    public Response user(@PathParam("groupId") long groupId, @PathParam("userId") long userId,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp) 
             throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
@@ -281,35 +305,10 @@ public class GroupVSResource {
         if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto))
                 .type(MediaTypeVS.JSON).build();
         else {
-            req.setAttribute("subscriptionMap", JSON.getMapper().writeValueAsString(dto));
+            req.setAttribute("subscriptionDto", JSON.getMapper().writeValueAsString(dto));
             context.getRequestDispatcher("/groupVS/user.xhtml").forward(req, resp);
             return Response.ok().build();
         }
-    }
-
-    @Path("/id/{groupId}/users")
-    @GET @Produces(MediaType.APPLICATION_JSON)
-    public Response users(MessageSMIME messageSMIME, @PathParam("groupId") long groupId, @Context ServletContext context,
-                    @DefaultValue("0") @QueryParam("offset") int offset,
-                    @DefaultValue("100") @QueryParam("max") int max,
-                    @QueryParam("state") String stateStr,
-                    @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        List<SubscriptionVS.State> states = Arrays.asList(SubscriptionVS.State.values());
-        if(stateStr != null) try {
-            states = Arrays.asList(SubscriptionVS.State.valueOf(stateStr));
-        } catch(Exception ex) {}
-        Query query = dao.getEM().createQuery("select s from SubscriptionVS s where s.groupVS.id =:groupId " +
-                "and s.state in :states").setParameter("groupId", groupId).setParameter("states", states)
-                .setFirstResult(offset).setMaxResults(max);
-        List<SubscriptionVS> subscriptionVSList = query.getResultList();
-        List<UserVSDto> resultList = new ArrayList<>();
-        for(SubscriptionVS subscriptionVS : subscriptionVSList) {
-            resultList.add(userVSBean.getUserVSDto(subscriptionVS.getUserVS(), false));
-        }
-        query = dao.getEM().createQuery("select count(s) from SubscriptionVS s where s.groupVS.id =:groupId " +
-                "and s.state in :states").setParameter("groupId", groupId).setParameter("states", states);
-        ResultListDto resultListDto = new ResultListDto(resultList, offset, max, (long)query.getSingleResult());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
     @Path("/activateUser")

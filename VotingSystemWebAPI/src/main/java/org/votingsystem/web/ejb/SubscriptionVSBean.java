@@ -128,7 +128,7 @@ public class SubscriptionVSBean {
         UserVS signer = messageSMIME.getUserVS();
         log.log(Level.FINE, "signer: " + signer.getNif());
         SubscriptionVSDto request = messageSMIME.getSignedContent(SubscriptionVSDto.class);
-        GroupVS groupVS = dao.find(GroupVS.class, request.getId());
+        GroupVS groupVS = dao.find(GroupVS.class, request.getGroupvsId());
         if(groupVS == null || !request.getGroupvsName().equals(groupVS.getName())) {
             throw new ExceptionVS("group with name: " + request.getGroupvsName() + " and id: " + request.getId() + " not found");
         }
@@ -159,7 +159,7 @@ public class SubscriptionVSBean {
         log.info("signer: " + signer.getNif());
         SubscriptionVSDto request = messageSMIME.getSignedContent(SubscriptionVSDto.class);
         request.validateActivationRequest();
-        GroupVS groupVS = dao.find(GroupVS.class, request.getId());
+        GroupVS groupVS = dao.find(GroupVS.class, request.getGroupvsId());
         if(groupVS == null || !request.getGroupvsName().equals(groupVS.getName())) {
             throw new ValidationExceptionVS("Group with id: " + request.getId() + " and name: " + request.getGroupvsName() + " not found");
         }

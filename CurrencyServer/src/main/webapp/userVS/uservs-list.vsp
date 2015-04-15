@@ -4,7 +4,7 @@
 <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 <link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
 <link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
-<link href="${elementURL}/userVS/uservs-card.vsp" rel="import"/>
+<link href="${elementURL}/userVS/uservs-subscription-card.vsp" rel="import"/>
 
 <polymer-element name="uservs-list" attributes="url menuType isNifVisible">
     <template>
@@ -12,8 +12,8 @@
         <core-ajax id="ajax" auto url="{{url}}" response="{{userList}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
         <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
             <div>
-                <template repeat="{{uservs in userList.userVSList}}">
-                    <uservs-card uservs="{{uservs}}"></uservs-card>
+                <template repeat="{{subscription in userList.resultList}}">
+                    <uservs-subscription-card subscription="{{subscription}}"></uservs-subscription-card>
                 </template>
                 <vs-pager on-pager-change="{{pagerChange}}" max="{{userList.max}}"
                           next="${msg.nextLbl}" previous="${msg.previousLbl}"
@@ -28,6 +28,12 @@
             ready: function() {console.log(this.tagName + " - ready") },
             refreshUserList: function(state) {
                 this.$.ajax.go()
+            },
+            urlChanged:function() {
+                console.log(this.tagName + " - urlChanged: " + this.url)
+            },
+            userListChanged:function() {
+                console.log(this.tagName + " - ready - userList: " + JSON.stringify(this.userList))
             },
             pagerChange: function(e) {
                 var newURL = setURLParameter(this.$.ajax.url, "offset",  e.detail.offset)

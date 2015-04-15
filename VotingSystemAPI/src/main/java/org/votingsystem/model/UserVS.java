@@ -415,7 +415,7 @@ public class UserVS extends EntityVS implements Serializable {
     }
 
     public static String getServerInfoURL(String serverURL, Long userId) {
-        return serverURL + "/userVS/" + userId;
+        return serverURL + "/rest/userVS/id/" + userId;
     }
 
     public Map getMetaInfMap() throws IOException {

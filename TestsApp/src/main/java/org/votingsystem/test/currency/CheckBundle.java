@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public class CheckBundle {
 
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(Test.class);
+        Logger log = TestUtils.init(CheckBundle.class);
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         Set<String> hashCertSet = new HashSet<>(Arrays.asList("g8SAcWHXZ4GeZGyIciedc6zBPoXyS1HFDUCvhw8W5h0="));
         List resquestArray = new ArrayList<>();
