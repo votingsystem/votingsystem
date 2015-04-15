@@ -1,7 +1,5 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:h="http://java.sun.com/jsf/html"
-                xmlns:f="http://java.sun.com/jsf/core"
                 template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="head">
@@ -19,25 +17,20 @@
             <transactionvs-list id="currencyTransactionTable" transactionsMap='${transactionsMap}'></transactionvs-list>
         </div>
         <script>
-
-            if(typeof sendSocketVSMessage != 'undefined') {
-                document.querySelector("#coreSignals").addEventListener('core-signal-transactionvs-new', function(e) {
-                    console.log("listener.gsp - core-signal-transactionvs-new")
-                    document.querySelector("#currencyTransactionTable").addTransaction(e.detail)
+            function listenToSelectedTransactions() {
+                document.querySelector("#coreSignals").addEventListener('core-signal-transactionvs-selector-selected', function(e) {
+                    var transactionvsType = e.detail
+                    targetURL = "${restURL}/transactionVS";
+                    if("" != transactionvsType) {
+                        targetURL = targetURL + "?transactionvsType=" + transactionvsType
+                    }
+                    history.pushState(null, null, targetURL);
+                    document.querySelector("#currencyTransactionTable").url = targetURL
                 });
-                sendSocketVSMessage({operation:Operation.LISTEN_TRANSACTIONS})
-            } else console.log("listener.gsp - no socket service available")
+            }
 
-            document.querySelector("#coreSignals").addEventListener('core-signal-transactionvs-selector-selected', function(e) {
-                var transactionvsType = e.detail
-                console.log("index.gsp - transactionvsType: " + transactionvsType)
-                targetURL = "${restURL}/transactionVS";
-                if("" != transactionvsType) {
-                    targetURL = targetURL + "?transactionvsType=" + transactionvsType
-                }
-                history.pushState(null, null, targetURL);
-                document.querySelector("#currencyTransactionTable").url = targetURL
-            });
+            if(document.querySelector("#coreSignals") != null) listenToSelectedTransactions()
+            else document.addEventListener('polymer-ready', function() { listenToSelectedTransactions() })
 
             function processSearch(textToSearch) {
                 document.querySelector("#pageInfoPanel").innerHTML = "${msg.searchResultLbl} '" + textToSearch + "'"

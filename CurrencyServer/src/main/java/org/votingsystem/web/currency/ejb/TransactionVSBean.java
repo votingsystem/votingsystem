@@ -321,9 +321,9 @@ public class TransactionVSBean {
         List<TransactionVS> transactionList = null;
         Query query = null;
         if(fromUserVS instanceof GroupVS) {
-            query = dao.getEM().createQuery("SELECT t FROM TransactionVS t WHERE (t.fromUser =:fromUserVS and t.state =:state " +
+            query = dao.getEM().createQuery("SELECT t FROM TransactionVS t WHERE (t.fromUserVS =:fromUserVS and t.state =:state " +
                     "and t.transactionParent is not null and t.dateCreated between :dateFrom and :dateTo " +
-                    "and t.type not in (:notList)) OR (t.fromUser =:fromUserVS and t.state =:state " +
+                    "and t.type not in (:notList)) OR (t.fromUserVS =:fromUserVS and t.state =:state " +
                     "and t.transactionParent is null and  t.dateCreated between :dateFrom and :dateTo " +
                     "and t.type in (:inList))").setParameter("fromUserVS", fromUserVS).setParameter("state", TransactionVS.State.OK)
                     .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())

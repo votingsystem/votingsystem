@@ -1,29 +1,29 @@
 package org.votingsystem.test.currency;
 
+import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.*;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.EnvironmentVS;
+import org.votingsystem.util.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class GroupVS_addUserVS {
+public class AddUserVSToGroupVS {
 
     public static void main(String[] args) throws Exception {
         UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
         userBaseSimulationData.setUserIndex(100L);
         SimulationData simulationData = new SimulationData();
-        simulationData.setGroupId(5L);
+        simulationData.setGroupId(6L);
         simulationData.setServerURL("http://localhost:8080/CurrencyServer");
         simulationData.setNumRequestsProjected(5);
         simulationData.setUserBaseSimulationData(userBaseSimulationData);
         Boolean isWithUserValidation = Boolean.TRUE;
 
-        Logger log = TestUtils.init(GroupVS_addUserVS.class, simulationData);
+        Logger log = TestUtils.init(AddUserVSToGroupVS.class, simulationData);
         SignatureService authoritySignatureService = SignatureService.getAuthoritySignatureService();
 
         log.info("initializeServer");
@@ -32,9 +32,11 @@ public class GroupVS_addUserVS {
             throw new ExceptionVS("SERVER NOT IN DEVELOPMENT MODE. Server mode:" + currencyServer.getEnvironmentVS());
         }
         ContextVS.getInstance().setDefaultServer(currencyServer);
-        Map subscriptionData = TestUtils.getGroupVSSubscriptionData(currencyServer.getGroupURL(simulationData.getGroupId()));
+        String groupVSURL = currencyServer.getGroupURL(simulationData.getGroupId());
+        GroupVSDto groupVSDto = HttpHelper.getInstance().getData(GroupVSDto.class, groupVSURL, MediaTypeVS.JSON);
+        groupVSDto.setOperation(TypeVS.CURRENCY_GROUP_SUBSCRIBE);
         log.info("subscribeUsers");
-        List<MockDNI> userList = authoritySignatureService.subscribeUsers(subscriptionData, simulationData, currencyServer);
+        List<MockDNI> userList = authoritySignatureService.subscribeUsers(groupVSDto, simulationData, currencyServer);
         if(!isWithUserValidation) TestUtils.finish(null);
         log.info("activateUsers");
         SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER);

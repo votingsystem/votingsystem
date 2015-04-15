@@ -92,27 +92,6 @@ public class TestUtils {
         } else throw new ExceptionVS(responseVS.getMessage());
     }
 
-    public static Map getGroupVSSubscriptionData(String groupVSURL) throws ExceptionVS, IOException {
-        ResponseVS responseVS = HttpHelper.getInstance().getData(groupVSURL, ContentTypeVS.JSON);
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            Map groupDataMap = new ObjectMapper().readValue(responseVS.getMessage(), 
-                    new TypeReference<HashMap<String, Object>>() {});
-            Map representativeDataMap = (Map) groupDataMap.get("representative");
-            //{"operation":,"groupvs":{"id":4,"name":"NombreGrupo","representative":{"id":2,"nif":"07553172H"}}}
-            Map subscriptionData = new HashMap<>();
-            subscriptionData.put("operation", "CURRENCY_GROUP_SUBSCRIBE");
-            Map groupDataMap1 = new HashMap<>();
-            groupDataMap1.put("id", groupDataMap.get("id"));
-            groupDataMap1.put("name", groupDataMap.get("name"));
-            HashMap representativeDataMap1 = new HashMap();
-            representativeDataMap1.put("id", representativeDataMap.get("id"));
-            representativeDataMap1.put("nif", representativeDataMap.get("nif"));
-            groupDataMap1.put("representative", representativeDataMap1);
-            subscriptionData.put("groupvs", groupDataMap1);
-            return subscriptionData;
-        } else throw new ExceptionVS(responseVS.getMessage());
-    }
-
     public static void finish(String resultMessage) throws Exception {
         if(simulationData != null) simulationData.finish(ResponseVS.SC_OK, System.currentTimeMillis());
         log.info("----- finished - " + initClass.getSimpleName() + "-----");

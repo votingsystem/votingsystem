@@ -222,7 +222,7 @@ public class HttpHelper {
             } else {
                 MessageDto messageDto = null;
                 String responseStr = null;
-                if(responseContentType != null && responseContentType.contains("json")) messageDto =
+                if(responseContentType != null && responseContentType.contains(MediaTypeVS.JSON)) messageDto =
                         JSON.getMapper().readValue(responseBytes, MessageDto.class);
                 else responseStr = new String(responseBytes, StandardCharsets.UTF_8);
                 switch (response.getStatusLine().getStatusCode()) {

@@ -34,6 +34,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -143,7 +144,7 @@ public class UserVSResource {
     }
 
     @Path("/id/{id}")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
     public Response index(@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
                         @Context HttpServletResponse resp) throws Exception {
         UserVS userVS = dao.find(UserVS.class, id);
@@ -157,29 +158,24 @@ public class UserVSResource {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         Object resultDto = null;
-        Map resultMap = new HashMap<>();
         String view = null;
         if(userVS instanceof GroupVS) {
-            resultDto = groupVSBean.getDataMap((GroupVS) userVS, timePeriod);
-            resultMap.put("groupvs", resultDto);
+            resultDto = groupVSBean.getGroupVSDto((GroupVS) userVS);
             req.setAttribute("groupvsDto", JSON.getMapper().writeValueAsString(resultDto));
             view = "/groupVS/groupVS.xhtml";
         }
         else if(userVS instanceof BankVS) {
             resultDto = bankVSBean.getBalancesDto((BankVS) userVS, timePeriod);
-            resultMap.put("uservs", resultDto);
-            resultMap.put("messageToUser", msg);
             req.setAttribute("uservsDto", JSON.getMapper().writeValueAsString(resultDto));
             req.setAttribute("messageToUser", msg);
             view = "/userVS/userVS.xhtml";
         } else {
             resultDto = userVSBean.getBalancesDto(userVS, timePeriod);
-            resultMap.put("uservs", resultDto);
             req.setAttribute("uservsDto", JSON.getMapper().writeValueAsString(resultDto));
             view = "/userVS/userVS.xhtml";
         }
         if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).build() ;
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build() ;
         } else {
             context.getRequestDispatcher(view).forward(req, resp);
             return Response.ok().build();

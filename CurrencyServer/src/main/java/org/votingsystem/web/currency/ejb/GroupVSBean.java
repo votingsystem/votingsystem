@@ -26,7 +26,9 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Currency;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 @Stateless
@@ -118,7 +120,7 @@ public class GroupVSBean {
         SubscriptionVS subscriptionVS = null;
         UserVS signer = messageSMIME.getUserVS();
         log.info("signer: " + signer.getNif());
-        GroupVSDto request = validateNewGroupRequest(messageSMIME.getSignedContent(GroupVSDto.class)) ;
+        GroupVSDto request = messageSMIME.getSignedContent(GroupVSDto.class);
         request.validateSubscriptionRequest();
         GroupVS groupVS = dao.find(GroupVS.class, request.getId());
         if(groupVS.getRepresentative().getNif().equals(signer.getNif())) {
@@ -146,14 +148,6 @@ public class GroupVSBean {
         groupVSDto.setNumPendingUsers((long) query.getSingleResult());
         return groupVSDto;
     }
-
-
-    public Map getDataMap(GroupVS groupVS, TimePeriod timePeriod) throws Exception {
-        Map resultMap = new HashMap<>();
-        resultMap.put("timePeriod",timePeriod);
-        resultMap.put("userVS", getGroupVSDto(groupVS));
-        return resultMap;
-    }
     
     public BalancesDto getBalancesDto(UserVS groupVS, TimePeriod timePeriod) throws Exception {
         BalancesDto balancesDto = transactionVSBean.getBalancesDto(
@@ -169,5 +163,5 @@ public class GroupVSBean {
         return balancesDto;
     }
 
-    
+
 }

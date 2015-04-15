@@ -114,7 +114,7 @@ public class GroupVSResource {
     }
 
     @Path("/id/{id}")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Transactional @Produces(MediaType.APPLICATION_JSON)
     public Response getById(@PathParam("id") long id, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
@@ -122,16 +122,16 @@ public class GroupVSResource {
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
         GroupVSDto groupVSDto = groupVSBean.getGroupVSDto(groupVS);
-        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(groupVSDto)).build();
+        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(groupVSDto)).type(MediaTypeVS.JSON).build();
         else {
-            req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(groupVSDto));
+            req.setAttribute("groupvsDto", JSON.getMapper().writeValueAsString(groupVSDto));
             context.getRequestDispatcher("/groupVS/groupVS.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
 
-    @Path("/id/{id}/users") //old_url -> /groupVS/$id/users
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @Path("/id/{id}/users")
+    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
     public Response listUsers(@PathParam("id") long id,
             @DefaultValue("0") @QueryParam("offset") int offset,
             @DefaultValue("100") @QueryParam("max") int max,
@@ -173,11 +173,6 @@ public class GroupVSResource {
                     .setParameter("subscriptionState", subscriptionState)
                     .setParameter("userState", userState).setParameter("searchText", "%" + searchText + "%");
             totalCount = (long) query.getSingleResult();
-            Map resultMap = new HashMap<>();
-            resultMap.put("userVSList", resultList);
-            resultMap.put("offset", offset);
-            resultMap.put("max", max);
-            resultMap.put("totalCount", totalCount);
             ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         } else {
@@ -245,7 +240,7 @@ public class GroupVSResource {
         return Response.ok().build();
     }
 
-    @Path("/id/{id}/cancel") //old_url -> /groupVS/cancel/$id
+    @Path("/id/{id}/cancel")
     @POST @Consumes(MediaTypeVS.JSON_SIGNED)
     public Response cancel(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
@@ -259,7 +254,7 @@ public class GroupVSResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build();
     }
 
-    @Path("/id/{id}/cancel") //old_url -> /groupVS/$id/subscribe
+    @Path("/id/{id}/subscribe")
     @POST @Consumes(MediaTypeVS.JSON_SIGNED)
     public Object subscribe(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {

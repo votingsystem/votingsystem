@@ -33,6 +33,8 @@ public class UserVSDto {
         UserVSDto result = new UserVSDto();
         result.setId(userVS.getId());
         result.setName(userVS.getName());
+        result.setFirstName(userVS.getFirstName());
+        result.setLastName(userVS.getLastName());
         result.setIBAN(userVS.getIBAN());
         result.setNIF(userVS.getNif());
         result.setType(userVS.getType());

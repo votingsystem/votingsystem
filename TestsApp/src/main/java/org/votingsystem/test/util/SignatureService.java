@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -204,8 +205,8 @@ public class SignatureService {
         return keyStore;
     }
 
-    public List<MockDNI> subscribeUsers(Map subscriptionData, SimulationData simulationData,
-                                        CurrencyServer currencyServer) throws Exception {
+    public List<MockDNI> subscribeUsers(GroupVSDto groupVSDto, SimulationData simulationData,
+                            CurrencyServer currencyServer) throws Exception {
         log.info("subscribeUser - Num. Users:" + simulationData.getNumRequestsProjected());
         List<MockDNI> userList = new ArrayList<MockDNI>();
         int fromFirstUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue();
@@ -217,12 +218,12 @@ public class SignatureService {
             KeyStore mockDnie = generateKeyStore(userNif);
             String toUser = currencyServer.getName();
             String subject = "subscribeToGroupMsg - subscribeToGroupMsg";
-            subscriptionData.put("UUID", UUID.randomUUID().toString());
+            groupVSDto.setUUID(UUID.randomUUID().toString());
             SMIMESignedGeneratorVS signedMailGenerator = new SMIMESignedGeneratorVS(mockDnie, ContextVS.END_ENTITY_ALIAS,
                     ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
             userList.add(new MockDNI(userNif, mockDnie, signedMailGenerator));
             SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userNif, toUser,
-                    subscriptionData.toString(), subject);
+                    JSON.getMapper().writeValueAsString(groupVSDto), subject);
             SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
                     currencyServer.getGroupVSSubscriptionServiceURL(simulationData.getGroupId()),
                     currencyServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);

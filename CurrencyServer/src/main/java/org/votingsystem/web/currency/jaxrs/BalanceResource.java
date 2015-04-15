@@ -14,8 +14,6 @@ import org.votingsystem.web.currency.util.ReportFiles;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
