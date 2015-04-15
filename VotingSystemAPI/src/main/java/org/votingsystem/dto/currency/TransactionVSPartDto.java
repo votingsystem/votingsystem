@@ -20,7 +20,6 @@ public class TransactionVSPartDto {
     }
 
 
-
     public Long getMessageSMIMEParentId() {
         return messageSMIMEParentId;
     }

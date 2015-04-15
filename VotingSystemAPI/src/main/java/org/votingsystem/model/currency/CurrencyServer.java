@@ -38,23 +38,23 @@ public class CurrencyServer extends ActorVS implements Serializable {
     }
 
     public String getTransactionVSServiceURL() {
-        return getServerURL() + "/transactionVS";
+        return getServerURL() + "/rest/transactionVS";
     }
 
     public String getCurrencyRequestServiceURL() {
-        return getServerURL() + "/currency/request";
+        return getServerURL() + "/rest/currency/request";
     }
 
     public String getCurrencyStateServiceURL(String hashCertVS) {
-        return getServerURL() + "/currency/" + StringUtils.toHex(hashCertVS) + "/state";
+        return getServerURL() + "/rest/currency/" + StringUtils.toHex(hashCertVS) + "/state";
     }
 
     public String getCurrencyBundleStateServiceURL() {
-        return getServerURL() + "/currency/bundleState";
+        return getServerURL() + "/rest/currency/bundleState";
     }
 
     public String getCurrencyTransactionServiceURL() {
-        return getServerURL() + "/transactionVS/currency";
+        return getServerURL() + "/rest/transactionVS/currency";
     }
 
     public String getUserDashBoardURL() {

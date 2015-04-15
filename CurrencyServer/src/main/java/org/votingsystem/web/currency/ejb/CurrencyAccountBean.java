@@ -20,8 +20,7 @@ import java.util.Map;
 @Stateless
 public class CurrencyAccountBean {
 
-    @Inject
-    DAOBean dao;
+    @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject IBANBean ibanBean;
 
@@ -31,24 +30,11 @@ public class CurrencyAccountBean {
         CurrencyAccount userAccount = dao.getSingleResult(CurrencyAccount.class, query);
         if(userAccount == null) {
             userVS.setIBAN(ibanBean.getIBAN(userVS.getId()));
+            dao.merge(userVS);
             userAccount = dao.persist(new CurrencyAccount(userVS, BigDecimal.ZERO, Currency.getInstance("EUR")
                     .getCurrencyCode(), config.getTag(TagVS.WILDTAG)));
         }
         return userAccount;
-    }
-
-    public Map getUserVSAccountMap(CurrencyAccount currencyAccount) {
-        Map result = new HashMap<>();
-        result.put("id", currencyAccount.getId());
-        result.put("currency", currencyAccount.getCurrencyCode());
-        result.put("IBAN", currencyAccount.getIBAN());
-        result.put("amount", currencyAccount.getBalance());
-        result.put("lastUpdated", currencyAccount.getLastUpdated());
-        Map tagData = new HashMap<>();
-        tagData.put("id", currencyAccount.getTag().getId());
-        tagData.put("name", currencyAccount.getTag().getName());
-        result.put("tag", tagData);
-        return result;
     }
 
     public Map getAccountsBalanceMap(UserVS userVS) {

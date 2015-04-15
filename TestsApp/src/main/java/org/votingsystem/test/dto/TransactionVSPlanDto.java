@@ -1,45 +1,47 @@
 package org.votingsystem.test.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.test.util.TransactionVSCounter;
-import org.votingsystem.test.util.TransactionVSUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
-
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TransactionVSPlanDto {
 
     private static Logger log = Logger.getLogger(TransactionVSPlanDto.class.getSimpleName());
 
 
     private TimePeriod timePeriod;
-    private CurrencyServer currencyServer;
+    private GroupVSDto groupVSDto;
+    @JsonIgnore private CurrencyServer currencyServer;
     private List<TransactionVSDto> bankVSList = new ArrayList<>();
     private List<TransactionVSDto> groupVSList = new ArrayList<>();
     private List<TransactionVSDto> userVSList = new ArrayList<>();
+    private Map<String, Map<String, BigDecimal>> bankVSBalance;
+    private Map<String, Map<String, BigDecimal>> groupVSBalance;
 
 
     public TransactionVSPlanDto() {  }
@@ -89,8 +91,8 @@ public class TransactionVSPlanDto {
         TransactionVSPlanDto.log = log;
     }
 
-    public Map runBankVSTransactions(String smimeMessageSubject) throws Exception {
-        Map currencyResultMap = new HashMap<>();
+    public Map<String, Map<String, BigDecimal>> runBankVSTransactions(String smimeMessageSubject) throws Exception {
+        setBankVSBalance(new HashMap<>());
         for(TransactionVSDto transactionVS : getBankVSList()) {
             if(UserVS.Type.BANKVS != transactionVS.getFromUserVS().getType()) throw new ExceptionVS("UserVS: " +
                     transactionVS.getFromUserVS().getNIF() + " type is '" +
@@ -103,39 +105,35 @@ public class TransactionVSPlanDto {
             ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     getCurrencyServer().getTransactionVSServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-            updateCurrencyMap(currencyResultMap, transactionVS);
+            updateCurrencyMap(getBankVSBalance(), transactionVS);
         }
-        return currencyResultMap;
+        return bankVSBalance;
     }
 
-    public Map runGroupVSTransactions(String smimeMessageSubject) throws Exception {
-        Map currencyResultMap = new HashMap<>();
+    public Map<String, Map<String, BigDecimal>> runGroupVSTransactions(String smimeMessageSubject) throws Exception {
+        groupVSBalance = new HashMap<>();
         for(TransactionVSDto transactionVS : getGroupVSList()) {
-
-            UserVS representative = transactionVS.getGroupVS().getRepresentative();
+            transactionVS.setUUID(UUID.randomUUID().toString());
+            UserVSDto representative = groupVSDto.getRepresentative();
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
-                    representative.getNif(), UserVS.Type.USER);
-            
-            SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(representative.getNif(),
+                    representative.getNIF(), UserVS.Type.USER);
+            SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(representative.getNIF(),
                     getCurrencyServer().getName(), JSON.getMapper().writeValueAsString(transactionVS), smimeMessageSubject);
             ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     getCurrencyServer().getTransactionVSServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-            updateCurrencyMap(currencyResultMap, transactionVS);
+            updateCurrencyMap(groupVSBalance, transactionVS);
         }
-        return currencyResultMap;
+        return groupVSBalance;
     }
 
-    public Map runTransactionsVS(String smimeMessageSubject) throws Exception {
-        Map bankVSCurrencyResult = runBankVSTransactions(smimeMessageSubject);
-        Map groupVSCurrencyResult = runGroupVSTransactions(smimeMessageSubject);
-        Map result = new HashMap<>();
-        result.put("bankVSCurrencyResult", bankVSCurrencyResult);
-        result.put("groupVSCurrencyResult", groupVSCurrencyResult);
-        return result;
+    public void runTransactionsVS(String smimeMessageSubject) throws Exception {
+        runBankVSTransactions(smimeMessageSubject);
+        runGroupVSTransactions(smimeMessageSubject);
     }
 
-    public static Map updateCurrencyMap(Map<String, Map<String, BigDecimal>> currencyMap, TransactionVSDto transactionVS) {
+    public static Map<String, Map<String, BigDecimal>> updateCurrencyMap(
+            Map<String, Map<String, BigDecimal>> currencyMap, TransactionVSDto transactionVS) {
         if(currencyMap.containsKey(transactionVS.getCurrencyCode())) {
             if(currencyMap.get(transactionVS.getCurrencyCode()).containsKey(transactionVS.getTag().getName())) {
                 BigDecimal newAmount = ((BigDecimal)currencyMap.get(transactionVS.getCurrencyCode()).get(
@@ -154,8 +152,6 @@ public class TransactionVSPlanDto {
         return timePeriod;
     }
 
-
-
     public List<TransactionVSDto> getTransacionList() {
         List<TransactionVSDto> result = new ArrayList<>();
         result.addAll(getBankVSList());
@@ -164,7 +160,7 @@ public class TransactionVSPlanDto {
         return result;
     }
 
-
+    @JsonIgnore
     public Map getReport() {
         List<TransactionVSDto> transactionsVSList = getTransacionList();
         Map<String, TransactionVSCounter> resultMap = new HashMap<>();
@@ -218,5 +214,29 @@ public class TransactionVSPlanDto {
 
     public void setUserVSList(List<TransactionVSDto> userVSList) {
         this.userVSList = userVSList;
+    }
+
+    public Map<String, Map<String, BigDecimal>> getBankVSBalance() {
+        return bankVSBalance;
+    }
+
+    public void setBankVSBalance(Map<String, Map<String, BigDecimal>> bankVSBalance) {
+        this.bankVSBalance = bankVSBalance;
+    }
+
+    public Map<String, Map<String, BigDecimal>> getGroupVSBalance() {
+        return groupVSBalance;
+    }
+
+    public void setGroupVSBalance(Map<String, Map<String, BigDecimal>> groupVSBalance) {
+        this.groupVSBalance = groupVSBalance;
+    }
+
+    public GroupVSDto getGroupVSDto() {
+        return groupVSDto;
+    }
+
+    public void setGroupVSDto(GroupVSDto groupVSDto) {
+        this.groupVSDto = groupVSDto;
     }
 }

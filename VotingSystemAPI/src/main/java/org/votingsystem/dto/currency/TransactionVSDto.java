@@ -35,12 +35,13 @@ public class TransactionVSDto {
     private String receipt;
     private String messageSMIME;
     private String messageSMIMEURL;
+    private String UUID;
     private BigDecimal amount;
     private Boolean isTimeLimited = Boolean.FALSE;
     private Integer numReceptors;
     private TransactionVS.Type type;
     private Set<String> tags;
-    private List<String> toUserIBAN;
+    private List<String> toUserIBAN = new ArrayList<>();
     private Long numChildTransactions;
 
     private TransactionVS.Type transactionType;
@@ -58,7 +59,6 @@ public class TransactionVSDto {
     public void validate() throws ValidationExceptionVS {
         if(operation == null) throw new ValidationExceptionVS("missing param 'operation'");
         transactionType = TransactionVS.Type.valueOf(operation.toString());
-        if(toUserIBAN == null) throw new ValidationExceptionVS("missing param 'toUserIBAN'");
         if(amount == null) throw new ValidationExceptionVS("missing param 'amount'");
         if(getCurrencyCode() == null) throw new ValidationExceptionVS("missing param 'currencyCode'");
         if(subject == null) throw new ValidationExceptionVS("missing param 'subject'");
@@ -318,5 +318,13 @@ public class TransactionVSDto {
 
     public void setTransactionVSSMIME(MessageSMIME transactionVSSMIME) {
         this.transactionVSSMIME = transactionVSSMIME;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
     }
 }

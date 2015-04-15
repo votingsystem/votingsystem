@@ -1,11 +1,13 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import org.votingsystem.dto.currency.CurrencyAccountDto;
+import org.votingsystem.dto.currency.CurrencyAccountsInfoDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.util.JSON;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.ejb.CurrencyAccountBean;
 import org.votingsystem.web.ejb.DAOBean;
-
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;
@@ -36,28 +38,24 @@ public class CurrencyAccountResource {
 
     @Inject ConfigVS app;
     @Inject DAOBean dao;
-    @Inject CurrencyAccountBean currencyAccountBean;
 
-    @Path("/userVS/id/{userId}/balance") // old_url -> /userVS/$id/balance
+    @Path("/userVS/id/{userId}/balance")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object balance(@PathParam("userId") long userId, @Context ServletContext context,
+    public Response balance(@PathParam("userId") long userId, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException {
         UserVS userVS = dao.find(UserVS.class, userId);
-        Map resultMap = new HashMap<>();
         if(userVS == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("userVS id: " + userId);
+            return Response.status(Response.Status.NOT_FOUND).entity("userVS id: " + userId).build();
         }
         Query query = dao.getEM().createQuery("select a from CurrencyAccount a where a.userVS =:userVS " +
                 "and a.state =:state").setParameter("userVS", userVS).setParameter("state", CurrencyAccount.State.ACTIVE);
         List<CurrencyAccount> userAccountsDB = query.getResultList();
-        List userAccounts = new ArrayList<>();
+        List<CurrencyAccountDto> userAccounts = new ArrayList<>();
         for(CurrencyAccount account : userAccountsDB) {
-            userAccounts.add(currencyAccountBean.getUserVSAccountMap(account));
+            userAccounts.add(new CurrencyAccountDto(account));
         }
-        resultMap.put("id", userVS.getId());
-        resultMap.put("name", userVS.getName());
-        resultMap.put("accounts", userAccounts);
-        return resultMap;
+        CurrencyAccountsInfoDto currencyAccountsInfoDto = new CurrencyAccountsInfoDto(userAccounts, userVS);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyAccountsInfoDto)).build();
     }
 
 }

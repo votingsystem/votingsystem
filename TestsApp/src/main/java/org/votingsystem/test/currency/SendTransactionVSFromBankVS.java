@@ -17,9 +17,9 @@ public class SendTransactionVSFromBankVS {
         ContextVS.getInstance().setDefaultServer(currencyServer);
         TransactionVSPlanDto transactionVSPlanDto = new TransactionVSPlanDto(
                 TestUtils.getFileFromResources("transactionsPlan/bankVS.json"), currencyServer);
-        Map currencyResultMap = transactionVSPlanDto.runTransactionsVS("TEST_BANKVS_SEND_TRANSACTIONVS");
+        transactionVSPlanDto.runTransactionsVS("TEST_BANKVS_SEND_TRANSACTIONVS");
         log.info("Transaction report:" + transactionVSPlanDto.getReport());
-        TestUtils.finish("currencyResultMap: " + currencyResultMap);
+        TestUtils.finish("currencyResultMap: " + transactionVSPlanDto.getBankVSBalance());
     }
 
 }
