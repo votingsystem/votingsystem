@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
+import com.google.common.eventbus.Subscribe;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -7,6 +8,7 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.*;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -19,7 +21,13 @@ import org.votingsystem.web.currency.util.BalanceUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.ejb.Stateless;
+import javax.enterprise.event.Observes;
+import javax.enterprise.event.Reception;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.math.BigDecimal;
@@ -31,7 +39,8 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Stateless
+@Singleton
+@Startup
 public class TransactionVSBean {
 
     private static Logger log = Logger.getLogger(TransactionVSBean.class.getName());
@@ -49,6 +58,21 @@ public class TransactionVSBean {
     @Inject TransactionVSBankVSBean transactionVSBankVSBean;
     @Inject TransactionVSUserVSBean transactionVSUserVSBean;
 
+
+    @PostConstruct public void initialize() {
+        log.info(" --- initialize --- ");
+        EventBusService.getInstance().register(this);
+    }
+
+    @PreDestroy public void destroy() {
+        log.info(" --- destroy --- ");
+        EventBusService.getInstance().unRegister(this);
+    }
+
+
+    @Subscribe public void newTransactionVS(final TransactionVS transactionVS) {
+        log.info("================ newTransactionVS: " + transactionVS.getId());
+    }
 
     public String processTransactionVS(MessageSMIME messageSMIME) throws Exception {
         TransactionVSDto request = messageSMIME.getSignedContent(TransactionVSDto.class);
@@ -243,7 +267,6 @@ public class TransactionVSBean {
         } else log.log(Level.SEVERE, "TransactionVS:" + transactionVS.getId() + " - state:" +
                 transactionVS.getState().toString());
     }
-
 
     //Check the amount from WILDTAG account expended for the param tag
     public BigDecimal checkWildTagExpensesForTag(UserVS userVS, TagVS tagVS, String currencyCode) {

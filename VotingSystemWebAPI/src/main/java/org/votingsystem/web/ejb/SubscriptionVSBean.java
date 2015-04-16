@@ -35,7 +35,7 @@ import static java.text.MessageFormat.format;
 @Stateless
 public class SubscriptionVSBean {
 
-    private static final Logger log = Logger.getLogger(SubscriptionVSBean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(SubscriptionVSBean.class.getName());
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
@@ -54,7 +54,7 @@ public class SubscriptionVSBean {
         Map<String, String> deviceData = CertUtils.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID);
         if (userVSDB == null) {
             userVSDB = dao.persist(userVS);
-            log.log(Level.FINE, "checkUser ### NEW UserVS:" + userVSDB.getNif());
+            log.log(Level.FINE, "checkUser ### NEW UserVS: " + userVSDB.getNif());
         } else {
             userVSDB.setCertificateCA(userVS.getCertificateCA());
             userVSDB.setCertificate(userVS.getCertificate());

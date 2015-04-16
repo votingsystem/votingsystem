@@ -1,7 +1,7 @@
 package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.dto.currency.TransactionVSPartDto;
+import org.votingsystem.dto.currency.TransactionVSChildDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
@@ -98,10 +98,10 @@ public class TransactionVSGroupVSBean {
 
     SMIMEMessage signReceptorData(TransactionVSDto dto, String toUserNif, int numReceptors,
                                   BigDecimal userPart) throws Exception {
-        TransactionVSPartDto transactionVSPartDto = new TransactionVSPartDto(dto.getTransactionVSSMIME().getId(),
+        TransactionVSChildDto transactionVSChildDto = new TransactionVSChildDto(dto.getTransactionVSSMIME().getId(),
                 toUserNif, numReceptors, userPart);
         return signatureBean.getSMIME(signatureBean.getSystemUser().getNif(),
-                toUserNif, JSON.getMapper().writeValueAsString(transactionVSPartDto), dto.getType().toString(), null);
+                toUserNif, JSON.getMapper().writeValueAsString(transactionVSChildDto), dto.getType().toString(), null);
     }
 
 }

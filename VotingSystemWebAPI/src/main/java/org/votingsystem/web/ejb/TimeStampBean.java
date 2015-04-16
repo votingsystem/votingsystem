@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -114,23 +115,30 @@ public class TimeStampBean {
     @Asynchronous
     private void fetchTimeStampServerInfo(final ActorVS timeStampServer) {
         log.info("fetchTimeStampServerInfo");
-        ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
-                timeStampServer.getServerURL()), ContentTypeVS.JSON);
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            try {
-                ActorVS serverActorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
-                if(timeStampServer.getServerURL().equals(serverActorVS.getServerURL())) {
-                    if(timeStampServer.getId() != null) {
-                        timeStampServer.setCertChainPEM(serverActorVS.getCertChainPEM());
-                        updateTimeStampServer(timeStampServer);
-                    } else updateTimeStampServer(serverActorVS);
-                } else log.log(Level.SEVERE, "Expected server URL:" + timeStampServer.getServerURL()  +
-                        " - found " + serverActorVS.getServerURL());
-            } catch (Exception ex) {
-                log.log(Level.SEVERE, ex.getMessage(), ex);
+        AtomicBoolean dataReceived = new AtomicBoolean(Boolean.FALSE);
+        while(!dataReceived.get()) {
+            ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
+                    timeStampServer.getServerURL()), ContentTypeVS.JSON);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                try {
+                    ActorVS serverActorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
+                    if(timeStampServer.getServerURL().equals(serverActorVS.getServerURL())) {
+                        if(timeStampServer.getId() != null) {
+                            timeStampServer.setCertChainPEM(serverActorVS.getCertChainPEM());
+                            updateTimeStampServer(timeStampServer);
+                        } else updateTimeStampServer(serverActorVS);
+                        return;
+                    } else log.log(Level.SEVERE, "Expected server URL:" + timeStampServer.getServerURL()  +
+                            " - found " + serverActorVS.getServerURL());
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                }
             }
-        } else log.log(Level.SEVERE, "ERROR fetching TimeStampServer data - serverURL: " +
-                timeStampServer.getServerURL());
+            try {Thread.sleep(5000);}
+            catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
+            log.log(Level.SEVERE, "ERROR fetching TimeStampServer data - serverURL: " +
+                        timeStampServer.getServerURL() + " - retry");
+        }
     }
 
     public byte[] getSigningCertPEMBytes() {

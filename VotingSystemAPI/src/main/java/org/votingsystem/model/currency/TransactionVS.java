@@ -3,6 +3,7 @@ package org.votingsystem.model.currency;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 
@@ -102,6 +103,7 @@ public class TransactionVS implements Serializable {
     @Transient private Map<CurrencyAccount, BigDecimal> accountFromMovements;
     @Transient private Long userId;
     @Transient private List<String> toUserVSList;
+
 
     public TransactionVS() {}
 
@@ -450,6 +452,12 @@ public class TransactionVS implements Serializable {
         if(this.validTo != null) isTimeLimited = Boolean.TRUE;
         else isTimeLimited = Boolean.FALSE;
     }
+
+    @PostPersist
+    public void postPersist() {
+        EventBusService.getInstance().post(this);
+    }
+
 
     @PreUpdate
     public void preUpdate() {

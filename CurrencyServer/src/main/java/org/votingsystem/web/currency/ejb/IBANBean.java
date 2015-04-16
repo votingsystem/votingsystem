@@ -1,11 +1,16 @@
 package org.votingsystem.web.currency.ejb;
 
 import org.iban4j.*;
+import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.web.cdi.ConfigVS;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
+import javax.enterprise.event.Observes;
+import javax.enterprise.event.Reception;
 import javax.inject.Inject;
+import java.util.logging.Logger;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -13,13 +18,15 @@ import javax.inject.Inject;
 @Singleton
 public class IBANBean {
 
+    private static Logger log = Logger.getLogger(IBANBean.class.getName());
+
     @Inject ConfigVS config;
 
     private String bankCode = null;
     private String  branchCode = null;
 
     @PostConstruct
-    public void initialize() throws Exception {
+    public void initialize() {
         bankCode = config.getProperties().getProperty("vs.IBAN_bankCode");
         branchCode = config.getProperties().getProperty("vs.IBAN_branchCode");
     }

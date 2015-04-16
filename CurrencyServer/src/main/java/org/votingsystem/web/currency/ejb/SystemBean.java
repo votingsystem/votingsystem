@@ -1,19 +1,30 @@
 package org.votingsystem.web.currency.ejb;
 
+import com.google.common.eventbus.Subscribe;
 import org.votingsystem.dto.currency.BalancesDto;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.ejb.DAOBean;
-
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.event.Observes;
+import javax.enterprise.event.Reception;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.persistence.Query;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,22 +32,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-@Stateless
-public class SystemBean {
 
-    private static Logger log = Logger.getLogger(SystemBean.class.getSimpleName());
+@Singleton
+@Startup
+public class SystemBean implements Serializable{
+
+    private static Logger log = Logger.getLogger(SystemBean.class.getName());
 
     @Inject DAOBean dao;
+    @Inject IBANBean ibanBean;
     @Inject UserVSBean userVSBean;
     @Inject GroupVSBean groupVSBean;
     @Inject BankVSBean bankVSBean;
     @Inject TransactionVSBean transactionVSBean;
     private UserVS systemUser;
 
-    @PostConstruct
-    public void initialize() throws Exception {
+    @PostConstruct public void initialize() {
+        log.info(" --- initialize --- ");
         Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
         systemUser = dao.getSingleResult(UserVS.class, query);
+        EventBusService.getInstance().register(this);
+    }
+
+    @PreDestroy public void destroy() {
+        log.info(" --- destroy --- ");
+        EventBusService.getInstance().unRegister(this);
+    }
+
+    @Subscribe public void newUserVS(final UserVS userVS) {
+        log.info("newUserVS: " + userVS.getId());
+        userVS.setIBAN(ibanBean.getIBAN(userVS.getId()));
+        dao.merge(userVS);
     }
 
     public BalancesDto genBalanceForSystem(TimePeriod timePeriod) throws Exception {
@@ -58,7 +84,6 @@ public class SystemBean {
         balancesDto.setTo(balancesToDto);
         return balancesDto;
     }
-
 
     public void updateTagBalance(BigDecimal amount, String currencyCode, TagVS tag) throws Exception {
         Query query = dao.getEM().createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")

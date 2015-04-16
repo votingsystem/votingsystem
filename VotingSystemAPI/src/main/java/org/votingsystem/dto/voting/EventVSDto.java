@@ -1,7 +1,6 @@
 package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.model.voting.EventVS;

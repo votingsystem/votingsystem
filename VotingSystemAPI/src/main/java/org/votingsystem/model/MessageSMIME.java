@@ -2,9 +2,9 @@ package org.votingsystem.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.SMIMEDto;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.EntityVS;
-import org.votingsystem.dto.SMIMEDto;
 import org.votingsystem.util.TypeVS;
 
 import javax.persistence.*;

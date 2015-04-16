@@ -10,7 +10,7 @@ import java.util.logging.Logger;
  */
 public class EventBusService {
 
-    private static Logger log = Logger.getLogger(EventBusService.class.getSimpleName());
+    private static Logger log = Logger.getLogger(EventBusService.class.getName());
 
     private static final String EVENT_BUS_IDENTIFIER = "EventBusService";
     private static final EventBus eventBus = new EventBus(EVENT_BUS_IDENTIFIER);

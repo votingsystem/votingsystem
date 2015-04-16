@@ -3,16 +3,16 @@ package org.votingsystem.dto.currency;
 import java.math.BigDecimal;
 
 
-public class TransactionVSPartDto {
+public class TransactionVSChildDto {
 
     private Long messageSMIMEParentId;
     private Integer numReceptors;
     private String toUser;
     private BigDecimal toUserAmount;
 
-    public TransactionVSPartDto() {}
+    public TransactionVSChildDto() {}
 
-    public TransactionVSPartDto(Long messageSMIMEReqId, String toUserNif, int numReceptors, BigDecimal userPart) {
+    public TransactionVSChildDto(Long messageSMIMEReqId, String toUserNif, int numReceptors, BigDecimal userPart) {
         this.messageSMIMEParentId = messageSMIMEReqId;
         this.toUser = toUserNif;
         this.numReceptors = numReceptors;

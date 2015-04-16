@@ -5,6 +5,7 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.EntityVS;
@@ -483,6 +484,11 @@ public class UserVS extends EntityVS implements Serializable {
         if(name == null) {
             this.name = (firstName == null? "":firstName + " " + lastName == null? "":lastName).trim();
         }
+    }
+
+    @PostPersist
+    public void postPersist() {
+        EventBusService.getInstance().post(this);
     }
 
     @PreUpdate

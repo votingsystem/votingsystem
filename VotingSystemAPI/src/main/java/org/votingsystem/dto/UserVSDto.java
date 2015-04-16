@@ -1,11 +1,13 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.UserVS;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

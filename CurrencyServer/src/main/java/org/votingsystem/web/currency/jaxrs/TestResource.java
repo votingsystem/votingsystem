@@ -1,11 +1,14 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.eventbus.Subscribe;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
 import org.votingsystem.dto.currency.BalancesDto;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MapUtils;
@@ -15,7 +18,6 @@ import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
-
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -60,6 +62,23 @@ public class TestResource {
         executorService = Executors.newFixedThreadPool(5);
     }
 
+
+    class EventBusListener {
+        @Subscribe public void newUserVS(UserVS userVS) {
+            log.info("newUserVS: " + userVS.getNif());
+        }
+    }
+
+
+    @GET @Path("/eventBus")
+    public Response eventBus(@Context ServletContext context, @Context HttpServletRequest req,
+                          @Context HttpServletResponse resp) {
+        EventBusService.getInstance().register(new EventBusListener());
+        UserVS userVS = new UserVS();
+        userVS.setNif("111111D");
+        EventBusService.getInstance().post(userVS);
+        return Response.ok().entity("").build();
+    }
 
     @GET @Path("/")
     public Response index(@Context ServletContext context, @Context HttpServletRequest req,

@@ -39,26 +39,30 @@ public class StartupBean implements StartupVS {
     @Inject BalancesBean balancesBean;
 
     @PostConstruct
-    public void initialize() throws Exception {
-        log.info("initialize");
-        ContextVS.init();
-        Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
-        UserVS systemUser = dao.getSingleResult(UserVS.class, query);
-        if(systemUser == null) { //First time run
-            systemUser = dao.persist(new UserVS(config.getSystemNIF(), UserVS.Type.SYSTEM, config.getServerName()));
-            systemUser.setIBAN(ibanBean.getIBAN(systemUser.getId()));
-            dao.merge(systemUser);
-            TagVS wildTag = dao.persist(new TagVS(TagVS.WILDTAG));
-            URL res = res = Thread.currentThread().getContextClassLoader().getResource("defaultTags.txt");
-            String[] defaultTags = FileUtils.getStringFromInputStream(res.openStream()).split(",");
-            for(String tag: defaultTags) {
-                TagVS newTagVS =  dao.persist(new TagVS(tag));
-                dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO,
-                        java.util.Currency.getInstance("EUR").getCurrencyCode(), newTagVS));
+    public void initialize() {
+        try {
+            log.info("initialize");
+            ContextVS.init();
+            Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
+            UserVS systemUser = dao.getSingleResult(UserVS.class, query);
+            if(systemUser == null) { //First time run
+                systemUser = dao.persist(new UserVS(config.getSystemNIF(), UserVS.Type.SYSTEM, config.getServerName()));
+                systemUser.setIBAN(ibanBean.getIBAN(systemUser.getId()));
+                dao.merge(systemUser);
+                TagVS wildTag = dao.persist(new TagVS(TagVS.WILDTAG));
+                URL res = res = Thread.currentThread().getContextClassLoader().getResource("defaultTags.txt");
+                String[] defaultTags = FileUtils.getStringFromInputStream(res.openStream()).split(",");
+                for(String tag: defaultTags) {
+                    TagVS newTagVS =  dao.persist(new TagVS(tag));
+                    dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO,
+                            java.util.Currency.getInstance("EUR").getCurrencyCode(), newTagVS));
+                }
             }
+            timeStampBean.init();
+            signatureBean.init();
+        } catch(Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
-        timeStampBean.init();
-        signatureBean.init();
     }
 
     //@Schedule(dayOfWeek = "Mon", hour="0")

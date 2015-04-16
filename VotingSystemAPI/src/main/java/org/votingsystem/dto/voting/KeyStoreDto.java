@@ -2,6 +2,7 @@ package org.votingsystem.dto.voting;
 
 
 import org.votingsystem.model.KeyStoreVS;
+
 import java.security.cert.X509Certificate;
 
 public class KeyStoreDto {

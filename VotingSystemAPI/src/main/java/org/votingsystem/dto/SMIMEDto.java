@@ -4,6 +4,7 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.VoteVS;
+
 import java.util.HashSet;
 import java.util.Set;
 
