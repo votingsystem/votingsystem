@@ -17,7 +17,7 @@ public class SendTransactionVSFromGroupVS {
 
     public static void main(String[] args) throws Exception {
         SimulationData simulationData = new SimulationData();
-        simulationData.setGroupId(5L);
+        simulationData.setGroupId(9L);
         simulationData.setServerURL("http://localhost:8080/CurrencyServer");
         Logger log = TestUtils.init(SendTransactionVSFromGroupVS.class, simulationData);
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));

@@ -1,16 +1,21 @@
 package org.votingsystem.util;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TimePeriod {
 
     public enum Lapse {YEAR, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND}
 
     private Date dateFrom;
     private Date dateTo;
+    private Boolean currentWeekPeriod;
+
+    public TimePeriod(){}
 
     public TimePeriod(Date dateFrom, Date dateTo) {
         this.dateFrom = dateFrom;
@@ -31,10 +36,17 @@ public class TimePeriod {
         return new TimePeriod(dateFrom, dateTo);
     }
 
-    public boolean isCurrentWeekPeriod() {
-        TimePeriod currentWeekPeriod = DateUtils.getCurrentWeekPeriod();
-        return (dateFrom.compareTo(currentWeekPeriod.getDateFrom()) >=0 &&
-                dateTo.compareTo(currentWeekPeriod.getDateTo()) <= 0);
+    public Boolean isCurrentWeekPeriod() {
+        if(currentWeekPeriod == null) {
+            TimePeriod period = DateUtils.getCurrentWeekPeriod();
+            currentWeekPeriod = (dateFrom.compareTo(period.getDateFrom()) >=0 &&
+                    dateTo.compareTo(period.getDateTo()) <= 0);
+        }
+        return currentWeekPeriod;
+    }
+
+    public void setCurrentWeekPeriod(Boolean currentWeekPeriod) {
+        this.currentWeekPeriod = currentWeekPeriod;
     }
 
     public boolean inRange(Date dateToCheck) {

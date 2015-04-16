@@ -15,7 +15,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-import org.votingsystem.client.backup.*;
+import org.votingsystem.client.backup.BackupValidator;
+import org.votingsystem.client.backup.ElectionBackupValidator;
+import org.votingsystem.client.backup.ValidationEvent;
+import org.votingsystem.client.backup.ValidatorListener;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.voting.MetaInf;
 import org.votingsystem.model.ResponseVS;
@@ -102,7 +105,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
                     ContextVS.getInstance().getMessage("errorLbl");
             errorsButton.setText(errorList.size() + " " + msg);
         }
-        Platform.runLater(() ->  {
+        Platform.runLater(() -> {
             progressBar.setProgress((filesProcessed++).doubleValue() / numFilesToProcess.doubleValue());
             progressMessageCounter.setText(filesProcessed + "/" + numFilesToProcess);
         });

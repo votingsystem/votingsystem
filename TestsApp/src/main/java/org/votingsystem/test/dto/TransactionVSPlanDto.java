@@ -10,6 +10,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
+import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.test.util.TransactionVSCounter;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -45,11 +46,18 @@ public class TransactionVSPlanDto {
     public Map<String, Map<String, BigDecimal>> runBankVSTransactions(String smimeMessageSubject) throws Exception {
         setBankVSBalance(new HashMap<>());
         for(TransactionVSDto transactionVS : getBankVSList()) {
+            UserVSDto fromUserVS = TestUtils.getUserVS(transactionVS.getFromUserVS().getId(), currencyServer);
+            transactionVS.setFromUserVS(fromUserVS);
+            UserVSDto toUserVS = TestUtils.getUserVS(transactionVS.getToUserVS().getId(), currencyServer);
+            transactionVS.setToUserVS(toUserVS);
+            transactionVS.loadBankVSTransaction(UUID.randomUUID().toString());
             if(UserVS.Type.BANKVS != transactionVS.getFromUserVS().getType()) throw new ExceptionVS("UserVS: " +
                     transactionVS.getFromUserVS().getNIF() + " type is '" +
                     transactionVS.getFromUserVS().getType().toString() + "' not a 'BANKVS'");
+
+
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
-                    transactionVS.getFromUserVS().getNIF(), UserVS.Type.BANKVS);
+                        transactionVS.getFromUserVS().getNIF(), UserVS.Type.BANKVS);
 
             SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(transactionVS.getFromUserVS().getNIF(),
                     getCurrencyServer().getName(), JSON.getMapper().writeValueAsString(transactionVS), smimeMessageSubject);

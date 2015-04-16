@@ -1,7 +1,6 @@
 package org.votingsystem.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.scene.Scene;

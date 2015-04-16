@@ -1,7 +1,6 @@
 package org.votingsystem.client.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;

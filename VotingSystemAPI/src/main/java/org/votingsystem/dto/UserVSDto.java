@@ -82,6 +82,7 @@ public class UserVSDto {
         return userVSDto;
     }
 
+    @JsonIgnore
     public UserVS getUserVS() throws Exception {
         UserVS userVS = null;
         switch (type) {

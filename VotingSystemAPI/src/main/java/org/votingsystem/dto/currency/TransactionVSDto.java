@@ -12,6 +12,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -92,6 +93,7 @@ public class TransactionVSDto {
         }
     }
 
+    @JsonIgnore
     public TransactionVS getTransactionVS() throws Exception {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setId(id);
@@ -350,6 +352,14 @@ public class TransactionVSDto {
 
     public String getUUID() {
         return UUID;
+    }
+
+    public void loadBankVSTransaction(String UUID) {
+        setUUID(UUID);
+        if(toUserIBAN.isEmpty() && toUserVS != null) {
+            toUserIBAN = Arrays.asList(toUserVS.getIBAN());
+            toUserVS = null;
+        }
     }
 
     public void setUUID(String UUID) {

@@ -1,7 +1,6 @@
 package org.votingsystem.client.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
@@ -220,7 +219,8 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
 
     private void consumeMessage(final String socketMsgStr) {
         try {
-            Map socketMsgMap = JSON.getMapper().readValue(socketMsgStr, new TypeReference<HashMap<String, Object>>() {});
+            Map socketMsgMap = JSON.getMapper().readValue(socketMsgStr, new TypeReference<HashMap<String, Object>>() {
+            });
             WebSocketMessage socketMsg = new WebSocketMessage(socketMsgMap);
             WebSocketSession socketSession = VotingSystemApp.getInstance().getWSSession(socketMsg.getUUID());
             log.info("consumeMessage - type: " + socketMsg.getOperation() + " - status: " + socketMsg.getStatusCode());

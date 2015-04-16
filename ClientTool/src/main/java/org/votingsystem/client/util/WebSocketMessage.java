@@ -1,7 +1,6 @@
 package org.votingsystem.client.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.model.DeviceVS;

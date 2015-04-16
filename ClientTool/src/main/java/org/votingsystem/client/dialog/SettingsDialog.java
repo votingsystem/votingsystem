@@ -24,7 +24,6 @@ import org.votingsystem.util.FileUtils;
 import java.io.File;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

@@ -1,7 +1,6 @@
 package org.votingsystem.client.pane;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.concurrent.Task;

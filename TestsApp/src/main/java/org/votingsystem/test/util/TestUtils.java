@@ -1,9 +1,8 @@
 package org.votingsystem.test.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -27,7 +26,7 @@ public class TestUtils {
 
     private static Logger log;
 
-    private static ConcurrentHashMap<Long, UserVS> userVSMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long, UserVSDto> userVSMap = new ConcurrentHashMap<>();
     private static SimulationData simulationData;
     private static Class initClass;
 
@@ -82,13 +81,12 @@ public class TestUtils {
         return FileUtils.getFileFromBytes(fileBytes);
     }
 
-    public static UserVS getUserVS(Long userId, ActorVS server) throws Exception {
+    public static UserVSDto getUserVS(Long userId, ActorVS server) throws Exception {
         if(userVSMap.get(userId) != null) return userVSMap.get(userId);
-        UserVSDto userVSDto = HttpHelper.getInstance().getData(UserVSDto.class, server.getUserVSURL(userId),
+        UserVSDto dto = HttpHelper.getInstance().getData(UserVSDto.class, server.getUserVSURL(userId),
                 MediaTypeVS.JSON);
-        UserVS userVS = userVSDto.getUserVS();
-        userVSMap.put(userId, userVS);
-        return userVS;
+        userVSMap.put(userId, dto);
+        return dto;
     }
 
     public static void finish(String resultMessage) throws Exception {

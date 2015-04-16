@@ -71,7 +71,7 @@ public class TransactionVSBean {
 
 
     @Subscribe public void newTransactionVS(final TransactionVS transactionVS) {
-        log.info("================ newTransactionVS: " + transactionVS.getId());
+        log.info("newTransactionVS: " + transactionVS.getId());
     }
 
     public String processTransactionVS(MessageSMIME messageSMIME) throws Exception {
@@ -106,9 +106,9 @@ public class TransactionVSBean {
     }
 
     public TransactionVSDto validateBankVSRequest(TransactionVSDto dto) throws ValidationExceptionVS {
-        if(TypeVS.FROM_USERVS != dto.getOperation())
+        if(TypeVS.FROM_BANKVS != dto.getOperation())
             throw new ValidationExceptionVS(
-                    "peration expected: 'FROM_USERVS' - operation found: " + dto.getOperation());
+                    "peration expected: 'FROM_BANKVS' - operation found: " + dto.getOperation());
         if(dto.getToUserIBAN().size() != 1) throw new ValidationExceptionVS(
                 "there can be only one receptor. request.toUserIBAN:" + dto.getToUserIBAN());
         Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", dto.getToUserIBAN().get(0));

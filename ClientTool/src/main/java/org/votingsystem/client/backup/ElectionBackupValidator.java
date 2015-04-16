@@ -1,7 +1,6 @@
 package org.votingsystem.client.backup;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.voting.MetaInf;
 import org.votingsystem.dto.voting.RepresentativeData;
 import org.votingsystem.dto.voting.RepresentativesData;

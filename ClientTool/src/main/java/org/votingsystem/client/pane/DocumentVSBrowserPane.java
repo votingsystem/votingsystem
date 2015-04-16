@@ -1,7 +1,6 @@
 package org.votingsystem.client.pane;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.geometry.Insets;
@@ -136,9 +135,11 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
                 }
                 try {
                     metaInf = MetaInf.parse(JSON.getMapper().readValue(metaInfFile,
-                            new TypeReference<HashMap<String, Object>>() {}));
+                            new TypeReference<HashMap<String, Object>>() {
+                            }));
                     Map representativeDataMap = JSON.getMapper().readValue(representativeMetaInfFile,
-                            new TypeReference<HashMap<String, Object>>() {});
+                            new TypeReference<HashMap<String, Object>>() {
+                            });
                     if (representativeMetaInfFile.exists()) metaInf.loadRepresentativeData(representativeDataMap);
                     EventVSInfoPane eventPanel = new EventVSInfoPane(metaInf, decompressedBackupBaseDir);
                     getChildren().add(1, eventPanel);

@@ -1,6 +1,5 @@
 package org.votingsystem.client.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.web.WebView;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.*;

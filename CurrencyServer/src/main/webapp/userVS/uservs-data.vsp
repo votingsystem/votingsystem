@@ -92,7 +92,7 @@
         uservsType:'',
         isClientToolConnected:false,
         publish: {
-            userVSData: {}
+            uservsDto: {}
         },
         ready: function() {
             this.menuType = menuType
@@ -103,10 +103,10 @@
             }.bind(this))
             if(this.messageToUser) showMessageVS(this.messageToUser, "${msg.messageLbl}")
         },
-        userVSDataChanged:function() {
-            console.log(this.tagName + " - userVSDataChanged - userVSData: " + JSON.stringify( this.userVSData))
-            this.userVSData = toJSON(this.userVSData)
-            this.uservs = this.userVSData.userVS
+        uservsDtoChanged:function() {
+            console.log(this.tagName + " - uservsDtoChanged - uservsDto: " + JSON.stringify( this.uservsDto))
+            this.uservsDto = toJSON(this.uservsDto)
+            this.uservs = this.uservsDto.userVS
             if(this.uservs.name) {
                 var uservsType
                 if('BANKVS' == this.uservs.type) uservsType = "${msg.bankVSLbl}"
@@ -119,8 +119,8 @@
             loadURL_VS("${restURL}/balance/userVS/id/" + this.uservs.id)
         },
         ajaxResponse:function() {
-            console.log(this.tagName + " - ajaxResponse - userVSData: " + JSON.stringify(this.userVSData))
-            this.uservs = this.userVSData.userVS
+            console.log(this.tagName + " - ajaxResponse - uservsDto: " + JSON.stringify(this.uservsDto))
+            this.uservs = this.uservsDto.userVS
         },
         blockUser:function() {
             console.log(this.tagName + " - blockUser")

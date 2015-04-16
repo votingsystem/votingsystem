@@ -1,7 +1,6 @@
 package org.votingsystem.client.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Button;
 import org.votingsystem.client.Browser;

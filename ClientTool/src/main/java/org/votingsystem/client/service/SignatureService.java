@@ -1,6 +1,5 @@
 package org.votingsystem.client.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;

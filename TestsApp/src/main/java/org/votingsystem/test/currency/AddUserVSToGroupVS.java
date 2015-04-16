@@ -14,9 +14,9 @@ public class AddUserVSToGroupVS {
 
     public static void main(String[] args) throws Exception {
         UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
-        userBaseSimulationData.setUserIndex(600L);
+        userBaseSimulationData.setUserIndex(100L);
         SimulationData simulationData = new SimulationData();
-        simulationData.setGroupId(5L);
+        simulationData.setGroupId(9L);
         simulationData.setServerURL("http://localhost:8080/CurrencyServer");
         simulationData.setNumRequestsProjected(5);
         simulationData.setUserBaseSimulationData(userBaseSimulationData);

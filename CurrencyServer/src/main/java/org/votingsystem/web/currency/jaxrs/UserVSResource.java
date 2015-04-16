@@ -165,12 +165,12 @@ public class UserVSResource {
             view = "/groupVS/groupVS.xhtml";
         }
         else if(userVS instanceof BankVS) {
-            resultDto = bankVSBean.getBalancesDto((BankVS) userVS, timePeriod);
+            resultDto = UserVSDto.COMPLETE(userVS);
             req.setAttribute("uservsDto", JSON.getMapper().writeValueAsString(resultDto));
             req.setAttribute("messageToUser", msg);
             view = "/userVS/userVS.xhtml";
         } else {
-            resultDto = userVSBean.getBalancesDto(userVS, timePeriod);
+            resultDto = UserVSDto.COMPLETE(userVS);
             req.setAttribute("uservsDto", JSON.getMapper().writeValueAsString(resultDto));
             view = "/userVS/userVS.xhtml";
         }

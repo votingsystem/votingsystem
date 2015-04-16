@@ -1,5 +1,6 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.UserVS;
@@ -52,6 +53,7 @@ public class DeviceVSDto {
         if(x509Cert != null) certPEM = new String(CertUtils.getPEMEncoded(x509Cert));
     }
 
+    @JsonIgnore
     public DeviceVS getDeviceVS() throws Exception {
         DeviceVS deviceVS = new DeviceVS();
         deviceVS.setId(getId());
