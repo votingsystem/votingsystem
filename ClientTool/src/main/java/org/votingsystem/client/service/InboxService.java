@@ -16,10 +16,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.TypeVS;
-import org.votingsystem.util.Wallet;
+import org.votingsystem.util.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -63,7 +60,8 @@ public class InboxService {
             if(messagesFile.createNewFile()) {
                 messageList = new ArrayList<>();
                 flush();
-            } else messageList =  new ObjectMapper().readValue(messagesFile, new TypeReference<List>() {});
+            } else messageList =  JSON.getMapper().readValue(messagesFile, new TypeReference<List>() {
+            });
             for(int i = 0; i < messageList.size(); i++) {
                 InboxMessage inboxMessage = new InboxMessage((Map) messageList.get(i));
                 if(inboxMessage.isEncrypted()) encryptedMessageList.add(inboxMessage);

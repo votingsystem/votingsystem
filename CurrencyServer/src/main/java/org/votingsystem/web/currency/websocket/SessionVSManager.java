@@ -1,18 +1,17 @@
 package org.votingsystem.web.currency.websocket;
 
+import org.votingsystem.dto.ConnectedUsersDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ExceptionVS;
-
 import javax.websocket.Session;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -62,35 +61,35 @@ public class SessionVSManager {
         if(!connectedUserVSDeviceMap.containsKey(userId)) return new HashSet<>();
         else {
             Set<DeviceVSDto> userVSConnectedDevices = connectedUserVSDeviceMap.get(userId).stream().map(d -> {
-                    return new DeviceVSDto(d.getId(), d.getDeviceName());
-                }).collect(Collectors.toSet());
+                try {
+                    return new DeviceVSDto(d);
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                }
+                return null;
+            }).collect(Collectors.toSet());
             return userVSConnectedDevices;
         }
     }
 
-    public Map<Long, Set> getConnectedUsersDataMap() {
-        Map result = new HashMap();
-        Map notAuthenticatedDataMap = new HashMap();
-        notAuthenticatedDataMap.put("numUsersNotAuthenticated", sessionMap.size());
-        List<String> notAuthenticatedSessionList = new ArrayList<>();
+    public ConnectedUsersDto getConnectedUsersDto() {
+        ConnectedUsersDto connectedUsersDto = new ConnectedUsersDto();
+        List<String> notAuthenticatedSessions = new ArrayList<>();
         for(Session session : sessionMap.values()) {
-            notAuthenticatedSessionList.add(session.getId());
+            notAuthenticatedSessions.add(session.getId());
         }
-        notAuthenticatedDataMap.put("sessionIdList", notAuthenticatedSessionList);
-        Map<Long, Set> authUsersMap = new HashMap();
+        connectedUsersDto.setNotAuthenticatedSessions(notAuthenticatedSessions);
+        Map<Long, Set<DeviceVSDto>>  usersAuthenticated = new HashMap();
         for(Long deviceId : deviceSessionMap.keySet()) {
-            Map deviceInfoMap = new HashMap();
-            deviceInfoMap.put("deviceId", deviceId);
-            deviceInfoMap.put("sessionId", deviceSessionMap.get(deviceId));
+            DeviceVSDto deviceVSDto = new DeviceVSDto(deviceId, deviceSessionMap.get(deviceId));
             Long userVSId = authenticatedSessionMap.get(deviceSessionMap.get(deviceId)).getUserVS().getId();
-            Set userDeviceSet = authUsersMap.get(userVSId);
+            Set<DeviceVSDto> userDeviceSet = usersAuthenticated.get(userVSId);
             if(userDeviceSet == null) userDeviceSet = new HashSet<>();
-            userDeviceSet.add(deviceInfoMap);
-            authUsersMap.put(userVSId,  userDeviceSet);
+            userDeviceSet.add(deviceVSDto);
+            usersAuthenticated.put(userVSId,  userDeviceSet);
         }
-        result.put("authenticatedUsers", authUsersMap);
-        result.put("notAuthenticatedUsers", notAuthenticatedDataMap);
-        return result;
+        connectedUsersDto.setUsersAuthenticated(usersAuthenticated);
+        return connectedUsersDto;
     }
 
     public void remove(Session session) {

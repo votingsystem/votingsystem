@@ -13,7 +13,9 @@ import javafx.stage.FileChooser;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.ContextVS;
@@ -45,7 +47,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
     private RadioButton signWithDNIeRb;
     private RadioButton signWithMobileRb;
     private RadioButton signWithKeystoreRb;
-    private Map deviceDataMap;
+    private DeviceVSDto deviceVSDto;
 
     public SettingsDialog() {
         super(new GridPane());
@@ -123,7 +125,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         if(evt.getSource() == signWithKeystoreRb) {
             gridPane.add(keyStoreVBox, 0, 6);
         }
-        if(evt.getSource() == signWithMobileRb && deviceDataMap != null) {
+        if(evt.getSource() == signWithMobileRb && deviceVSDto != null) {
             gridPane.add(mobileDeviceInfo, 0, 2);
         }
         if(evt.getSource() == signWithMobileRb) MobileSelectorDialog.show(ContextVS.getMessage(
@@ -146,7 +148,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
                 break;
             case MOBILE:
                 signWithMobileRb.setSelected(true);
-                mobileDeviceLbl.setText(SessionService.getInstance().getCryptoTokenName());
+                mobileDeviceLbl.setText(SessionService.getInstance().getCryptoToken().getDeviceName());
                 gridPane.add(mobileDeviceInfo, 0, 2);
                 break;
         }
@@ -188,7 +190,6 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
     private void validateForm() {
         log.info("validateForm");
         CryptoTokenVS cryptoTokenVS = SessionService.getCryptoTokenType();
-        CryptoTokenVS newCryptoTokenVS = null;
         if(signWithKeystoreRb.isSelected() &&  CryptoTokenVS.JKS_KEYSTORE != cryptoTokenVS) {
             if(userKeyStore == null) {
                 showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("keyStoreNotSelectedErrorLbl"));
@@ -201,28 +202,28 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
                     PasswordDialog passwordDialog = new PasswordDialog();
                     passwordDialog.show(ContextVS.getMessage("newKeyStorePasswordMsg"));
                     String password = passwordDialog.getPassword();
-                    deviceDataMap = ContextVS.saveUserKeyStore(userKeyStore, password).toMap();
-                    newCryptoTokenVS = CryptoTokenVS.JKS_KEYSTORE;
+                    UserVS userVS = ContextVS.saveUserKeyStore(userKeyStore, password);
+                    deviceVSDto = SessionService.getInstance().getDeviceVS().loadUserVS(userVS);
                 } catch(Exception ex) {
                     showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("errorStoringKeyStoreMsg"));
                     return;
                 }
             }
         }
-        if(signWithDNIeRb.isSelected()) newCryptoTokenVS = CryptoTokenVS.DNIe;
-        if(signWithMobileRb.isSelected() && deviceDataMap == null) {
+        if(signWithDNIeRb.isSelected()) deviceVSDto.setType(CryptoTokenVS.DNIe);
+        if(signWithMobileRb.isSelected() && deviceVSDto == null) {
             showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("deviceDataMissingErrorMsg"));
             return;
-        } else if(signWithMobileRb.isSelected()) newCryptoTokenVS = CryptoTokenVS.MOBILE;
-        SessionService.getInstance().setCryptoToken(newCryptoTokenVS, deviceDataMap);
+        } else if(signWithMobileRb.isSelected()) deviceVSDto.setType(CryptoTokenVS.MOBILE);
+        SessionService.getInstance().setCryptoToken(deviceVSDto);
         hide();
     }
 
-    @Override public void setSelectedDevice(Map deviceDataMap) {
-        log.info("setSelectedDevice: " + deviceDataMap.toString());
-        this.deviceDataMap = deviceDataMap;
+    @Override public void setSelectedDevice(DeviceVSDto device) {
+        log.info("setSelectedDevice: " + deviceVSDto.toString());
+        this.deviceVSDto = device;
         if(!gridPane.getChildren().contains(mobileDeviceInfo)) gridPane.add(mobileDeviceInfo, 0, 2);
-        mobileDeviceLbl.setText((String) deviceDataMap.get("deviceName"));
+        mobileDeviceLbl.setText((String) deviceVSDto.getDeviceName());
         getStage().sizeToScene();
     }
 

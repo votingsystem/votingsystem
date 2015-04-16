@@ -13,9 +13,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.CurrencyDialog;
-import org.votingsystem.client.model.MetaInf;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.dto.voting.MetaInf;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.SignedFile;
@@ -135,9 +135,9 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
                     return;
                 }
                 try {
-                    metaInf = MetaInf.parse(new ObjectMapper().readValue(metaInfFile,
+                    metaInf = MetaInf.parse(JSON.getMapper().readValue(metaInfFile,
                             new TypeReference<HashMap<String, Object>>() {}));
-                    Map representativeDataMap = new ObjectMapper().readValue(representativeMetaInfFile,
+                    Map representativeDataMap = JSON.getMapper().readValue(representativeMetaInfFile,
                             new TypeReference<HashMap<String, Object>>() {});
                     if (representativeMetaInfFile.exists()) metaInf.loadRepresentativeData(representativeDataMap);
                     EventVSInfoPane eventPanel = new EventVSInfoPane(metaInf, decompressedBackupBaseDir);

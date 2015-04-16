@@ -350,52 +350,6 @@ public class TransactionVS implements Serializable {
         this.currencyTransactionBatch = currencyTransactionBatch;
     }
 
-    public static TransactionVS parse(Map dataMap) throws Exception {
-        TransactionVS transactionVS = new TransactionVS();
-        if(dataMap.containsKey("id")) transactionVS.setId((Long) dataMap.get("id"));
-        if(dataMap.containsKey("userId")) transactionVS.setUserId((Long) dataMap.get("userId"));
-        if(dataMap.containsKey("operation")) transactionVS.setType(Type.valueOf((String) dataMap.get("operation")));
-        if(dataMap.containsKey("bankIBAN")) {
-            transactionVS.setFromUser((String) dataMap.get("fromUser"));
-            transactionVS.setFromUserIBAN((String) dataMap.get("fromUserIBAN"));
-            if(dataMap.containsKey("toUserName")) {
-                UserVS toUserVS = new UserVS();
-                toUserVS.setName((String) dataMap.get("toUserName"));
-                List toUserArray = (List) dataMap.get("toUserIBAN");
-                toUserVS.setIBAN((String) toUserArray.get(0));
-                transactionVS.setToUserVS(toUserVS);
-            }
-        } else if (dataMap.containsKey("fromUserVS")) {
-            Map fromUserJSON = (Map) dataMap.get("fromUserVS");
-            transactionVS.setFromUserVS(UserVS.parse(fromUserJSON));
-            if(fromUserJSON.containsKey("sender")) {
-                Map senderJSON = (Map) fromUserJSON.get("sender");
-                UserVS sender = new UserVS();
-                sender.setIBAN((String) senderJSON.get("fromUserIBAN"));
-                sender.setName((String) senderJSON.get("fromUser"));
-                transactionVS.setFromUserVS(sender);
-            }
-        }
-        if(dataMap.containsKey("toUserVS")) {
-            transactionVS.setToUserVS(UserVS.parse((Map) dataMap.get("toUserVS")));
-        }
-        if(dataMap.containsKey("tags")) {
-            List tagsArray = (List) dataMap.get("tags");
-            transactionVS.setTag(new TagVS((String)tagsArray.get(0)));
-        }
-        if(dataMap.containsKey("isTimeLimited")) transactionVS.setIsTimeLimited((Boolean) dataMap.get("isTimeLimited"));
-        transactionVS.setSubject((String) dataMap.get("subject"));
-        if(dataMap.containsKey("currencyCode")) transactionVS.setCurrencyCode((String) dataMap.get("currencyCode"));
-        else transactionVS.setCurrencyCode((String) dataMap.get("currency"));
-        if(dataMap.containsKey("dateCreated")) transactionVS.setDateCreated(
-                DateUtils.getDateFromString((String) dataMap.get("dateCreated")));
-        if(dataMap.containsKey("validTo")) transactionVS.setValidTo(DateUtils.getDateFromString(
-                (String) dataMap.get("validTo")));
-        if(dataMap.containsKey("type")) transactionVS.setType(Type.valueOf((String) dataMap.get("type")));
-        transactionVS.setAmount(new BigDecimal((String) dataMap.get("amount")));
-        return transactionVS;
-    }
-
     public static TransactionVS generateTriggeredTransaction(TransactionVS transactionParent, BigDecimal amount,
              UserVS toUser, String toUserIBAN) {
         TransactionVS result = new TransactionVS();
@@ -413,21 +367,6 @@ public class TransactionVS implements Serializable {
         result.transactionParent = transactionParent;
         result.toUserVS = toUser;
         result.toUserIBAN = toUserIBAN;
-        return result;
-    }
-
-    public static Map getInitPeriodTransactionVSData(BigDecimal amountResult, BigDecimal timeLimitedNotExpended,
-            String tag, UserVS userVS) {
-        Map result = new HashMap<>();
-        result.put("operation", TypeVS.CURRENCY_INIT_PERIOD.toString());
-        result.put("amount", amountResult.setScale(2, BigDecimal.ROUND_DOWN).toPlainString());
-        result.put("timeLimitedNotExpended", timeLimitedNotExpended.setScale(2, BigDecimal.ROUND_DOWN).toPlainString());
-        result.put("tag", tag);
-        result.put("toUserType", userVS.getType().toString());
-        result.put("toUserId", userVS.getId());
-        if(userVS.getNif() != null) result.put("toUserNIF", userVS.getNif());
-        result.put("toUserVS", userVS.getName());
-        result.put("UUID", UUID.randomUUID().toString());
         return result;
     }
 

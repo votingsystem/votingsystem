@@ -1,5 +1,6 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -52,6 +53,10 @@ public class CertificateVSDto {
         state = certificate.getState();
         if(certificate.getAuthorityCertificateVS() != null) issuerSerialNumber = certificate
                 .getAuthorityCertificateVS().getSerialNumber().toString();
+    }
+
+    @JsonIgnore X509Certificate getX509Cert() throws Exception {
+        return CertUtils.fromPEMToX509CertCollection(pemCert.getBytes()).iterator().next();
     }
 
     public String getSerialNumber() {

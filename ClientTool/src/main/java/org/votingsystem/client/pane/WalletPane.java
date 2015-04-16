@@ -23,6 +23,7 @@ import org.votingsystem.client.util.CurrencyCheckResponse;
 import org.votingsystem.client.util.CurrencyCheckerTask;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.WalletException;
@@ -160,7 +161,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
         });
     }
 
-    @Override public void setSelectedDevice(Map deviceDataMap) {
+    @Override public void setSelectedDevice(DeviceVSDto dto) {
 
     }
 

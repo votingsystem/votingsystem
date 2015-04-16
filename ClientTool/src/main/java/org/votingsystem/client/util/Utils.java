@@ -32,6 +32,7 @@ import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -232,7 +233,7 @@ public class Utils {
         File certVSDataFile = File.createTempFile(ContextVS.CANCEL_DATA_FILE_NAME, "");
         certVSDataFile.deleteOnExit();
         FileUtils.copyStreamToFile(new ByteArrayInputStream(
-                new ObjectMapper().writeValueAsString(delegationDataMap).getBytes("UTF-8")), certVSDataFile);
+                JSON.getMapper().writeValueAsString(delegationDataMap).getBytes("UTF-8")), certVSDataFile);
         fileList.add(certVSDataFile);
         fileList.add(smimeTempFile);
         File outputZip = File.createTempFile(ContextVS.CANCEL_BUNDLE_FILE_NAME, ".zip");
@@ -365,10 +366,8 @@ public class Utils {
                         ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                                 CryptoTokenVS.JKS_KEYSTORE.toString());
                         SessionService.getInstance().setUserVS(userVS, false);
-                        Map userDataMap = userVS.toMap();
-                        userDataMap.put("statusCode", ResponseVS.SC_OK);
                         if(operationVS != null) browserVS.invokeBrowserCallback(
-                                userDataMap, operationVS.getCallerCallback());
+                                UserVSDto.COMPLETE(userVS), operationVS.getCallerCallback());
                     } catch(Exception ex) {
                         log.log(Level.SEVERE,ex.getMessage(), ex);
                         if(operationVS != null) browserVS.invokeBrowserCallback(getMessageToBrowser(ResponseVS.SC_ERROR,

@@ -16,6 +16,7 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -144,7 +145,7 @@ public class WebSocketService extends Service<ResponseVS> {
 
     private void consumeMessage(final String messageStr){
         try {
-            Map messageMap = new ObjectMapper().readValue(messageStr, new TypeReference<HashMap<String, Object>>() {});
+            Map messageMap = JSON.getMapper().readValue(messageStr, new TypeReference<HashMap<String, Object>>() { });
             WebSocketMessage socketMsg = new WebSocketMessage(messageMap);
             log.info("consumeMessage - type: " + socketMsg.getOperation() +
                     " - status: " + socketMsg.getStatusCode());

@@ -1,19 +1,16 @@
 package org.votingsystem.test.currency;
 
 import org.votingsystem.dto.currency.GroupVSDto;
-import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.test.dto.TransactionVSPlanDto;
 import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.test.util.TestUtils;
-import org.votingsystem.test.dto.TransactionVSPlanDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 
 import java.io.File;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class SendTransactionVSFromGroupVS {

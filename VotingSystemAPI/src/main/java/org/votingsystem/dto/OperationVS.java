@@ -3,14 +3,17 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParseException;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -42,6 +45,7 @@ public class OperationVS {
     private Map documentToEncrypt;
     private Map documentToDecrypt;
     private Map document;
+    private String jsonStr;
     private String contentType;
     private EventVSDto eventVS;
     private String UUID;
@@ -287,6 +291,18 @@ public class OperationVS {
 
     public void setUUID(String UUID) {
         this.UUID = UUID;
+    }
+
+    public <T> T getData(Class<T> type) throws IOException {
+        return JSON.getMapper().readValue(jsonStr, type);
+    }
+
+    public String getJsonStr() {
+        return jsonStr;
+    }
+
+    public void setJsonStr(String jsonStr) {
+        this.jsonStr = jsonStr;
     }
 }
 

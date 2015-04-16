@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 
 import java.security.cert.X509Certificate;
@@ -55,8 +56,8 @@ public class Formatter {
                     break;
                 default:
                     log.info("Formatter not found for " + operation);
-                    result =new ObjectMapper().configure(
-                            SerializationFeature.INDENT_OUTPUT,true).writeValueAsString(dataMap);
+                    result = JSON.getMapper().configure(
+                            SerializationFeature.INDENT_OUTPUT, true).writeValueAsString(dataMap);
             }
 
         } catch(Exception ex) {
@@ -73,7 +74,7 @@ public class Formatter {
         Map optionSelectedJSON = (Map) dataMap.get("optionSelected");
         result.append("<b>" + ContextVS.getMessage("optionSelectedLbl") +": </b>" + optionSelectedJSON.get("content"));
         result.append("</html>");
-        return new ObjectMapper().writeValueAsString(result);
+        return JSON.getMapper().writeValueAsString(result);
     }
 
     private static String formatTransactionVSFromGroupToAllMembers(Map dataMap){

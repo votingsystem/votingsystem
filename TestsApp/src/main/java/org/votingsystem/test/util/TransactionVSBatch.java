@@ -2,6 +2,7 @@ package org.votingsystem.test.util;
 
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.test.dto.ReportDto;
 import org.votingsystem.throwable.ExceptionVS;
 
 import java.math.BigDecimal;
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-class TransactionVSBatch {
+public class TransactionVSBatch {
 
     private static Logger log = Logger.getLogger(TransactionVSBatch.class.getSimpleName());
 
@@ -103,8 +104,8 @@ class TransactionVSBatch {
         return currencyInfoMap;
     }
 
-    public Report getReport() {
-        return new Report.Builder(type, currencyCode).numTotal(transacionVSList.size()).totalAmount(
+    public ReportDto getReport() {
+        return new ReportDto.Builder(type, currencyCode).numTotal(transacionVSList.size()).totalAmount(
                 getTotalAmount()).source(source).currencyMap(TransactionVSUtils.getCurrencyMap(transacionVSList)).build();
     }
 

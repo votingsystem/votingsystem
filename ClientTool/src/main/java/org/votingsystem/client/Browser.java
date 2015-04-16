@@ -21,6 +21,7 @@ import org.votingsystem.dto.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -119,8 +120,8 @@ public class Browser extends VBox implements BrowserVS {
         } else showMessage(responseVS.getStatusCode(), responseVS.getMessage());
     }
 
-    @Override public void invokeBrowserCallback(Map dataMap, String callerCallback) throws JsonProcessingException {
-        String message = new ObjectMapper().writeValueAsString(dataMap);
+    @Override public void invokeBrowserCallback(Object dto, String callerCallback) throws JsonProcessingException {
+        String message = JSON.getMapper().writeValueAsString(dto);
         log.info("invokeBrowserCallback - dataMap: " + MsgUtils.truncateLog(message));
         try {
             WebView operationWebView = webViewMap.remove(callerCallback);
@@ -206,8 +207,8 @@ public class Browser extends VBox implements BrowserVS {
     public void runJSCommandCurrentView(String jsCommand) {
         PlatformImpl.runLater(() -> {
             Object currentContent = tabPaneVS.getSelectionModel().getSelectedItem().getContent();
-            if(currentContent instanceof WebView) {
-                ((WebView)currentContent).getEngine().executeScript(jsCommand);
+            if (currentContent instanceof WebView) {
+                ((WebView) currentContent).getEngine().executeScript(jsCommand);
             } else log.log(Level.SEVERE, "current content is not instance of WebView: " + currentContent.getClass());
         });
     }
@@ -216,14 +217,14 @@ public class Browser extends VBox implements BrowserVS {
         webViewMap.put(callerCallback, webView);
     }
 
-    public void fireCoreSignal(String name, Map data, boolean fireToAllTabs) {
+    public void fireCoreSignal(String name, Object data, boolean fireToAllTabs) {
         //this.fire('core-signal', {name: "vs-session-data", data: sessionDataJSON});
         try {
             Map coreSignal = new HashMap<>();
             coreSignal.put("name", name);
             coreSignal.put("data", data);
             String jsCommand = "fireCoreSignal('" + Base64.getEncoder().encodeToString(
-                    new ObjectMapper().writeValueAsString(coreSignal).getBytes("UTF-8")) + "')";
+                    JSON.getMapper().writeValueAsString(coreSignal).getBytes("UTF-8")) + "')";
             if(fireToAllTabs) runJSCommand(jsCommand);
             else runJSCommandCurrentView(jsCommand);
         } catch (UnsupportedEncodingException | JsonProcessingException ex) {

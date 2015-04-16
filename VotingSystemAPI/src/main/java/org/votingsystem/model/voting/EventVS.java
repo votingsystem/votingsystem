@@ -49,7 +49,7 @@ public class EventVS extends EntityVS implements Serializable {
 
     public enum Cardinality { EXCLUSIVE, MULTIPLE }
 
-    public enum Type { CLAIM, ELECTION }
+    public enum Type {ELECTION }
 
     public enum State { ACTIVE, TERMINATED, CANCELED, ERROR, PENDING, PENDING_SIGNATURE, DELETED_FROM_SYSTEM }
 
@@ -327,7 +327,6 @@ public class EventVS extends EntityVS implements Serializable {
     public static String getURL(TypeVS type, String serverURL, Long id) {
         if(type == null) return serverURL + "/eventVS/" + id;
         switch (type) {
-            case CLAIM_EVENT: return serverURL + "/eventVSClaim/" + id;
             case VOTING_EVENT: return serverURL + "/eventVSElection/" + id;
             default: return serverURL + "/eventVS/" + id;
         }

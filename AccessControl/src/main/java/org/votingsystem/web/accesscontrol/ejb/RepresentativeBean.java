@@ -3,6 +3,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.*;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.*;
@@ -92,36 +93,35 @@ public class RepresentativeBean {
         return new ResponseVS<RepresentativeDocument>(ResponseVS.SC_OK, msg, repDocument);
     }
 
-    public Map checkRepresentationState(String nifToCheck) throws ExceptionVS {
+    public RepresentationStateDto checkRepresentationState(String nifToCheck) throws ExceptionVS {
         nifToCheck = NifUtils.validate(nifToCheck);
         Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif").setParameter("nif", nifToCheck);
         UserVS userVS  = dao.getSingleResult(UserVS.class, query);
         if(userVS == null) throw new ValidationExceptionVS(messages.get("userVSNotFoundByNIF", nifToCheck));
-        Map result = new HashMap<>();
-        result.put("lastCheckedDate", new Date());
+        RepresentationStateDto result = new RepresentationStateDto();
+        result.setLastCheckedDate(new Date());
         if(userVS.getRepresentative() != null) {
             query = dao.getEM().createQuery("select r from RepresentationDocument r where r.userVS =:userVS and " +
                     "r.state =:state").setParameter("userVS", userVS).setParameter("state", RepresentationDocument.State.OK);
             RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
-            result.put("state", RepresentationState.WITH_PUBLIC_REPRESENTATION);
-            result.put("base64ContentDigest", representationDocument.getActivationSMIME().getBase64ContentDigest());
-            result.put("representative", representativeDelegationBean.getRepresentativeDto(userVS.getRepresentative()));
-            return result;
+            result.setState(RepresentationState.WITH_PUBLIC_REPRESENTATION);
+            result.setBase64ContentDigest(representationDocument.getActivationSMIME().getBase64ContentDigest());
+            result.setRepresentative(UserVSDto.BASIC(userVS.getRepresentative()));
         }
         if(UserVS.Type.REPRESENTATIVE == userVS.getType()) {
-            result.put("state", RepresentationState.REPRESENTATIVE);
-            result.put("representative", representativeDelegationBean.getRepresentativeDto(userVS));
+            result.setState(RepresentationState.REPRESENTATIVE);
+            result.setRepresentative(UserVSDto.BASIC(userVS));
             return result;
         }
         AnonymousDelegation anonymousDelegation = representativeDelegationBean.getAnonymousDelegation(userVS);
         if(anonymousDelegation != null) {
-            result.put("state", RepresentationState.WITH_ANONYMOUS_REPRESENTATION);
-            result.put("base64ContentDigest", anonymousDelegation.getDelegationSMIME().getBase64ContentDigest());
-            result.put("dateFrom", anonymousDelegation.getDateFrom());
-            result.put("dateTo", anonymousDelegation.getDateTo());
+            result.setState(RepresentationState.WITH_ANONYMOUS_REPRESENTATION);
+            result.setBase64ContentDigest(anonymousDelegation.getDelegationSMIME().getBase64ContentDigest());
+            result.setDateFrom(anonymousDelegation.getDateFrom());
+            result.setDateTo(anonymousDelegation.getDateTo());
             return result;
         }
-        result.put("state", RepresentationState.WITHOUT_REPRESENTATION);
+        result.setState(RepresentationState.WITHOUT_REPRESENTATION);
         return result;
     }
 

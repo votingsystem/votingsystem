@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.application.Platform;
@@ -12,11 +13,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.NifUtils;
+import org.votingsystem.util.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,7 +33,7 @@ import static org.votingsystem.client.Browser.showMessage;
 public class MobileSelectorDialog extends DialogVS {
 
     public interface Listener {
-        public void setSelectedDevice(Map deviceDataMap);
+        public void setSelectedDevice(DeviceVSDto device);
     }
 
     private static Logger log = Logger.getLogger(MobileSelectorDialog.class.getSimpleName());
@@ -70,18 +70,16 @@ public class MobileSelectorDialog extends DialogVS {
             final String nif = NifUtils.validate(nifTextField.getText());
             if(!mainPane.getChildren().contains(progressBar)) mainPane.getChildren().add(1, progressBar);
             mainPane.getScene().getWindow().sizeToScene();
-            new Thread(new Runnable() {
-                @Override public void run() {
-                    ResponseVS responseVS = HttpHelper.getInstance().getData(
-                            ContextVS.getInstance().getCurrencyServer().getDeviceListByNifServiceURL(nif), ContentTypeVS.JSON);
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        try {
-                            updateDeviceList((List) responseVS.getMessageMap().get("deviceList"));
-                        } catch (IOException ex) {
-                            log.log(Level.SEVERE, ex.getMessage(), ex);
-                        }
-                    }
+            new Thread(() -> {
+                try {
+                    ResultListDto<DeviceVSDto> resultListDto = HttpHelper.getInstance().getData(
+                            new TypeReference<ResultListDto<DeviceVSDto>>(){},
+                            ContextVS.getInstance().getCurrencyServer().getDeviceListByNifServiceURL(nif), MediaTypeVS.JSON);
+                    updateDeviceList(resultListDto.getResultList());
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
+
             }).start();
         } catch(Exception ex) {
             showMessage(ResponseVS.SC_ERROR, ex.getMessage());
@@ -89,39 +87,35 @@ public class MobileSelectorDialog extends DialogVS {
 
     }
 
-    private void updateDeviceList(List deviceList) {
-        PlatformImpl.runLater(new Runnable() {
-            @Override public void run() {
-                if(mainPane.getChildren().contains(progressBar)) mainPane.getChildren().remove(progressBar);
-                if(!deviceListBox.getChildren().isEmpty()) deviceListBox.getChildren().removeAll(
-                        deviceListBox.getChildren());
-                deviceToggleGroup = new ToggleGroup();
-                deviceToggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
-                    public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
-                        if (deviceToggleGroup.getSelectedToggle() != null) {
-                            if(!footerBox.getChildren().contains(acceptButton))
-                                footerBox.getChildren().add(2, acceptButton);
-                        } else footerBox.getChildren().remove(acceptButton);
-                    }
-                });
-                for(int i = 0; i < deviceList.size() ; i++) {
-                    Map deviceData = (Map) deviceList.get(i);
-                    if(SessionService.getInstance().getDeviceId() == null ||
-                            !SessionService.getInstance().getDeviceId().equals(deviceData.get("deviceId"))) {
-                        RadioButton radioButton = new RadioButton((String) deviceData.get("deviceName"));
-                        radioButton.setUserData(deviceData);
-                        radioButton.setToggleGroup(deviceToggleGroup);
-                        deviceListBox.getChildren().add(radioButton);
-                    }
+    private void updateDeviceList(List<DeviceVSDto> deviceList) {
+        PlatformImpl.runLater(() -> {
+            if(mainPane.getChildren().contains(progressBar)) mainPane.getChildren().remove(progressBar);
+            if(!deviceListBox.getChildren().isEmpty()) deviceListBox.getChildren().removeAll(
+                    deviceListBox.getChildren());
+            deviceToggleGroup = new ToggleGroup();
+            deviceToggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+                public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
+                    if (deviceToggleGroup.getSelectedToggle() != null) {
+                        if(!footerBox.getChildren().contains(acceptButton))
+                            footerBox.getChildren().add(2, acceptButton);
+                    } else footerBox.getChildren().remove(acceptButton);
                 }
-                mainPane.getScene().getWindow().sizeToScene();
+            });
+            for(DeviceVSDto dto : deviceList) {
+                if(!SessionService.getInstance().getDeviceVS().getDeviceId().equals(dto.getDeviceId())) {
+                    RadioButton radioButton = new RadioButton(dto.getDeviceName());
+                    radioButton.setUserData(dto);
+                    radioButton.setToggleGroup(deviceToggleGroup);
+                    deviceListBox.getChildren().add(radioButton);
+                }
             }
+            mainPane.getScene().getWindow().sizeToScene();
         });
     }
 
     public void acceptButton(ActionEvent actionEvent) {
         if(deviceToggleGroup != null && deviceToggleGroup.getSelectedToggle() != null)
-            listener.setSelectedDevice((Map) deviceToggleGroup.getSelectedToggle().getUserData());
+            listener.setSelectedDevice((DeviceVSDto) deviceToggleGroup.getSelectedToggle().getUserData());
         hide();
     }
 
@@ -130,14 +124,12 @@ public class MobileSelectorDialog extends DialogVS {
     }
 
     public static void show(String caption, String message, Listener listener) {
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                try {
-                    MobileSelectorDialog dialog = new MobileSelectorDialog(caption, message, listener);
-                    dialog.show();
-                } catch (Exception ex) {
-                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                }
+        Platform.runLater(() -> {
+            try {
+                MobileSelectorDialog dialog = new MobileSelectorDialog(caption, message, listener);
+                dialog.show();
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
             }
         });
     }

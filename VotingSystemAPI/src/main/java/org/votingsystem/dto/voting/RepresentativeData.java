@@ -1,4 +1,4 @@
-package org.votingsystem.client.model;
+package org.votingsystem.dto.voting;
 
 import org.votingsystem.signature.util.SignedFile;
 
@@ -12,8 +12,7 @@ import java.util.logging.Logger;
 */
 public class RepresentativeData {
     
-    private static Logger log = Logger.getLogger(
-            RepresentativeData.class.getSimpleName());
+    private static Logger log = Logger.getLogger(RepresentativeData.class.getName());
     
     private String nif;
     private Long id;

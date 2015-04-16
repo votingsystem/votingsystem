@@ -8,7 +8,6 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class AddUserVSToGroupVS {

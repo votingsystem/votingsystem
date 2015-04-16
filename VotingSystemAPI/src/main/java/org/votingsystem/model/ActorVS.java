@@ -302,11 +302,11 @@ public class ActorVS extends EntityVS implements Serializable {
 
 
     public String getDeviceListByNifServiceURL(String nif) {
-        return getServerURL() + "/deviceVS/" + nif + "/list";
+        return getServerURL() + "/rest/deviceVS/nif/" + nif + "/list";
     }
 
     public String getConnectedDeviceListByNifServiceURL(String nif) {
-        return getServerURL() + "/deviceVS/" + nif + "/connected";
+        return getServerURL() + "/rest/deviceVS/nif/" + nif + "/connected";
     }
 
     public Map getDataMap() {

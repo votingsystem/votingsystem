@@ -1,8 +1,12 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.BankVS;
+import org.votingsystem.model.currency.GroupVS;
 
 import java.util.HashSet;
 import java.util.List;
@@ -22,14 +26,18 @@ public class UserVSDto {
     private String reason;
     private String description;
     private Set<DeviceVSDto> connectedDevices;
-    private Set<CertificateVSDto> certCollection;
+    private DeviceVSDto deviceVS;
+    private Set<CertificateVSDto> certCollection = new HashSet<>();
     private String firstName;
     private String lastName;
+    private String metaInf;
+    private String country;
     private String IBAN;
     private String NIF;
-    private Map sender;
+    private UserVSDto representative;//this is for groups
 
     public UserVSDto() {}
+
 
     public static UserVSDto BASIC(UserVS userVS) {
         UserVSDto result = new UserVSDto();
@@ -40,25 +48,79 @@ public class UserVSDto {
         result.setIBAN(userVS.getIBAN());
         result.setNIF(userVS.getNif());
         result.setType(userVS.getType());
+        result.setState(userVS.getState());
         return result;
+    }
+
+    public static UserVSDto COMPLETE(UserVS userVS) throws Exception {
+        UserVSDto userVSDto = BASIC(userVS);
+        if(userVS.getCertificate() != null) {
+            Set<CertificateVSDto> certCollection = new HashSet<>();
+            certCollection.add(new CertificateVSDto(userVS.getCertificate()));
+            userVSDto.setCertCollection(certCollection);
+        }
+        DeviceVSDto deviceVS = new DeviceVSDto();
+        deviceVS.setPhone(userVS.getPhone());
+        deviceVS.setEmail(userVS.getEmail());
+        userVSDto.setDeviceVS(deviceVS);
+        return userVSDto;
     }
 
     public static UserVSDto DEVICES(UserVS userVS, Set<DeviceVSDto> connectedDevices,
                     List<CertificateVS> certificateVSList) throws Exception {
         UserVSDto userVSDto = BASIC(userVS);
-        userVSDto.setState(userVS.getState());
-        userVSDto.setType(userVS.getType());
         userVSDto.setReason(userVS.getReason());
         userVSDto.setDescription(userVS.getDescription());
         userVSDto.setConnectedDevices(connectedDevices);
-        Set<CertificateVSDto> certCollection = new HashSet<>();
         if(certificateVSList != null) {
+            Set<CertificateVSDto> certCollection = new HashSet<>();
             for(CertificateVS certificateVS : certificateVSList) {
                 certCollection.add(new CertificateVSDto(certificateVS.getX509Cert()));
             }
             userVSDto.setCertCollection(certCollection);
         }
         return userVSDto;
+    }
+
+    public UserVS getUserVS() throws Exception {
+        UserVS userVS = null;
+        switch (type) {
+            case BANKVS:
+                userVS = new BankVS();
+                break;
+            case GROUP:
+                userVS = new GroupVS();
+                if(representative != null) ((GroupVS)userVS).setRepresentative(representative.getUserVS());
+                break;
+            default:
+                userVS = new UserVS();
+        }
+        if(!certCollection.isEmpty()) {
+            userVS.setCertificate(certCollection.iterator().next().getX509Cert());
+        }
+        userVS.setId(id);
+        userVS.setName(name);
+        userVS.setFirstName(firstName);
+        userVS.setLastName(lastName);
+        userVS.setIBAN(IBAN);
+        userVS.setNif(NIF);
+        userVS.setType(type);
+        userVS.setState(state);
+        userVS.setReason(reason);
+        userVS.setDescription(description);
+        return userVS;
+    }
+
+    @JsonIgnore
+    public Set<DeviceVS> getDevices() throws Exception {
+        Set<DeviceVS> result = null;
+        if (connectedDevices != null) {
+            result = new HashSet<>();
+            for(DeviceVSDto deviceVSDto : connectedDevices) {
+                result.add(deviceVSDto.getDeviceVS());
+            }
+        }
+        return result;
     }
 
     public Long getId() {
@@ -157,11 +219,35 @@ public class UserVSDto {
         this.certCollection = certCollection;
     }
 
-    public Map getSender() {
-        return sender;
+    public DeviceVSDto getDeviceVS() {
+        return deviceVS;
     }
 
-    public void setSender(Map sender) {
-        this.sender = sender;
+    public void setDeviceVS(DeviceVSDto deviceVS) {
+        this.deviceVS = deviceVS;
+    }
+
+    public UserVSDto getRepresentative() {
+        return representative;
+    }
+
+    public void setRepresentative(UserVSDto representative) {
+        this.representative = representative;
+    }
+
+    public String getMetaInf() {
+        return metaInf;
+    }
+
+    public void setMetaInf(String metaInf) {
+        this.metaInf = metaInf;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 }

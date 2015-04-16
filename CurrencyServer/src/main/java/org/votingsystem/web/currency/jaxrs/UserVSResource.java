@@ -370,9 +370,10 @@ public class UserVSResource {
 
     @Path("/connected")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object connected(@Context HttpServletRequest req) throws Exception {
+    public Response connected(@Context HttpServletRequest req) throws Exception {
         //TODO
-        return SessionVSManager.getInstance().getConnectedUsersDataMap();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
+                SessionVSManager.getInstance().getConnectedUsersDto())).build();
     }
 
 }

@@ -18,7 +18,10 @@ import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.client.util.WebSocketSession;
+import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.SocketSessionDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
@@ -27,10 +30,8 @@ import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.*;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -197,34 +198,29 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
 
     public ResponseVS sendMessageVS(OperationVS operationVS) throws Exception {
         log.info("sendMessageVS");
-        ResponseVS responseVS = null;
         if(isConnected()) {
-            responseVS = HttpHelper.getInstance().getData(((CurrencyServer) operationVS.getTargetServer()).
-                    getDeviceVSConnectedServiceURL(operationVS.getNif()), ContentTypeVS.JSON);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                List deviceList = (List) responseVS.getMessageMap().get("deviceList");
-                boolean isMessageDelivered = false;
-                for (int i = 0; i < deviceList.size(); i++) {
-                    DeviceVS deviceVS = DeviceVS.parse((Map) deviceList.get(i));
-                    if(!SessionService.getInstance().getDeviceId().equals(deviceVS.getDeviceId())) {
-                        Map socketMsg = WebSocketMessage.getMessageVSToDevice(deviceVS, operationVS.getNif(),
-                                operationVS.getMessage());
-                        sendMessage(socketMsg.toString());
-                        isMessageDelivered = true;
-                    }
+            ResultListDto<DeviceVSDto> resultListDto = HttpHelper.getInstance().getData(
+                    new TypeReference<ResultListDto<DeviceVSDto>>(){}, ((CurrencyServer) operationVS.getTargetServer())
+                    .getDeviceVSConnectedServiceURL(operationVS.getNif()),  MediaTypeVS.JSON);
+            boolean isMessageDelivered = false;
+            for (DeviceVSDto deviceVSDto : resultListDto.getResultList()) {
+                DeviceVS deviceVS = deviceVSDto.getDeviceVS();
+                if(!SessionService.getInstance().getDeviceVS().getDeviceId().equals(deviceVS.getDeviceId())) {
+                    Map socketMsg = WebSocketMessage.getMessageVSToDevice(deviceVS, operationVS.getNif(),
+                            operationVS.getMessage());
+                    sendMessage(socketMsg.toString());
+                    isMessageDelivered = true;
                 }
-                if(isMessageDelivered) responseVS = new ResponseVS(ResponseVS.SC_OK);
-                else responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage(
-                        "uservsWithoutDevicesConnectedMsg", operationVS.getNif()));
             }
-        } else responseVS = new ResponseVS(ResponseVS.SC_ERROR,
-                ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"));
-        return responseVS;
+            if(isMessageDelivered) return new ResponseVS(ResponseVS.SC_OK);
+            else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage(
+                    "uservsWithoutDevicesConnectedMsg", operationVS.getNif()));
+        } throw new ExceptionVS(ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"));
     }
 
     private void consumeMessage(final String socketMsgStr) {
         try {
-            Map socketMsgMap = new ObjectMapper().readValue(socketMsgStr, new TypeReference<HashMap<String, Object>>() {});
+            Map socketMsgMap = JSON.getMapper().readValue(socketMsgStr, new TypeReference<HashMap<String, Object>>() {});
             WebSocketMessage socketMsg = new WebSocketMessage(socketMsgMap);
             WebSocketSession socketSession = VotingSystemApp.getInstance().getWSSession(socketMsg.getUUID());
             log.info("consumeMessage - type: " + socketMsg.getOperation() + " - status: " + socketMsg.getStatusCode());
@@ -297,24 +293,22 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         }
 
         @Override protected ResponseVS call() throws Exception {
-            Map documentToSignMap = new HashMap<>();
-            String randomUUID = UUID.randomUUID().toString();
-            documentToSignMap.put("operation", TypeVS.INIT_VALIDATED_SESSION.toString());
-            documentToSignMap.put("deviceFromId", SessionService.getInstance().getDeviceId());
-            documentToSignMap.put("UUID", randomUUID);
+            SocketSessionDto dto = SocketSessionDto.INIT_SESSION_REQUEST(
+                    SessionService.getInstance().getDeviceVS().getDeviceId());
             ResponseVS responseVS = null;
             try {
                 if(SessionService.getCryptoTokenType() == CryptoTokenVS.MOBILE) {
                     updateMessage(ContextVS.getMessage("checkDeviceVSCryptoTokenMsg"));
                 } else updateMessage(ContextVS.getMessage("connectionMsg"));
                 SMIMEMessage smimeMessage = SessionService.getSMIME(null, targetServer.getName(),
-                        documentToSignMap.toString(), password, ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));
+                        JSON.getMapper().writeValueAsString(dto), password,
+                        ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());
                 userVS = smimeMessage.getSigner();
                 smimeMessage = timeStamper.call();
-                responseVS = ResponseVS.OK(null).setSMIME(smimeMessage);
-                connectionMessage = WebSocketMessage.getAuthenticationRequest(smimeMessage, randomUUID).toString();
+                connectionMessage = JSON.getMapper().writeValueAsString(dto.getInitConnectionMsg(smimeMessage));
                 PlatformImpl.runLater(() -> WebSocketAuthenticatedService.this.restart());
+                responseVS = ResponseVS.OK().setSMIME(smimeMessage);
             } catch(InterruptedException ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);

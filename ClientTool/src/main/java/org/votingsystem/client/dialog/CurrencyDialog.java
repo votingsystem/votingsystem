@@ -19,6 +19,7 @@ import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.util.*;
+import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
@@ -204,20 +205,20 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
                 ContextVS.getMessage("sendingMoneyLbl"), stage);
     }
 
-    @Override public void setSelectedDevice(Map dataMap) {
-        log.info("setSelectedDevice - deviceDataJSON: " + dataMap.toString());
-        walletChangeTask = new WalletChangeTask(dataMap);
+    @Override public void setSelectedDevice(DeviceVSDto device) {
+        log.info("setSelectedDevice - device: " + device.getDeviceName());
+        walletChangeTask = new WalletChangeTask(device);
         ProgressDialog.showDialog(walletChangeTask, ContextVS.getMessage("changeWalletLbl"), stage);
     }
 
     public  class WalletChangeTask extends Task<ResponseVS> {
 
-        private Map dataMap;
+        private DeviceVSDto device;
         private AtomicBoolean isCancelled = new AtomicBoolean();
         private CountDownLatch countDownLatch;
 
-        public WalletChangeTask(Map dataMap) {
-            this.dataMap = dataMap;
+        public WalletChangeTask(DeviceVSDto device) {
+            this.device = device;
         }
 
         @Override protected ResponseVS call() throws Exception {
@@ -225,7 +226,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
             updateProgress(1, 10);
             try {
                 countDownLatch = new CountDownLatch(1);
-                DeviceVS deviceVS = DeviceVS.parse(dataMap);
+                DeviceVS deviceVS = device.getDeviceVS();
                 WebSocketAuthenticatedService.getInstance().sendMessage(WebSocketMessage.getCurrencyWalletChangeRequest(
                         deviceVS, Arrays.asList(currency)).toString());
                 countDownLatch.await();
@@ -262,14 +263,14 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
                     transactionData.getToUserIBAN(), currency.getAmount(), currency.getCurrencyCode(),
                     currency.getTag().getName(), false, currencyServer.getTimeStampServiceURL());
             updateProgress(3, 10);
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(new ObjectMapper().writeValueAsString(dataMap).getBytes(),
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsString(dataMap).getBytes(),
                     ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
             updateProgress(8, 10);
             log.info("transaction result: " + responseVS.getStatusCode());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 showMessage(responseVS);
             } else {
-                Map<String, Object> responseDataMap = new ObjectMapper().readValue(responseVS.getMessage(),
+                Map<String, Object> responseDataMap = JSON.getMapper().readValue(responseVS.getMessage(),
                         new TypeReference<HashMap<String, Object>>() {});
                 transactionBatch.validateTransactionVSResponse(responseDataMap, currencyServer.getTrustAnchors());
                 showMessage(ResponseVS.SC_OK, (String) responseDataMap.get("message"));

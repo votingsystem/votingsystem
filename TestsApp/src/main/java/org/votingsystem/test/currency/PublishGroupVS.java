@@ -1,6 +1,5 @@
 package org.votingsystem.test.currency;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -10,7 +9,9 @@ import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.*;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 

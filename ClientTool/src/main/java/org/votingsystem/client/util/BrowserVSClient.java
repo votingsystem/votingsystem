@@ -41,7 +41,7 @@ public class BrowserVSClient {
             String jsonStr =  StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
             String logMsg = jsonStr.length() > 300 ? jsonStr.substring(0, 300) + "..." : jsonStr;
             log.info("BrowserVSClient.setMessage: " + logMsg);
-            OperationVS operationVS = new ObjectMapper().readValue(jsonStr, OperationVS.class);
+            OperationVS operationVS = JSON.getMapper().readValue(jsonStr, OperationVS.class);
             Browser.getInstance().registerCallerCallbackView(operationVS.getCallerCallback(), this.webView);
             switch (operationVS.getType()) {
                 case CONNECT:
@@ -134,11 +134,11 @@ public class BrowserVSClient {
         }
     }
 
-    public String call(String messageToSignatureClient) {
+    public String call(String msgFromBrowser) {
         String result = null;
         try {
-            String jsonStr = StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
-            OperationVS operationVS = new ObjectMapper().readValue(jsonStr, OperationVS.class);
+            String jsonStr = StringUtils.decodeB64_TO_UTF8(msgFromBrowser);
+            OperationVS operationVS = JSON.getMapper().readValue(jsonStr, OperationVS.class);
             switch (operationVS.getType()) {
                 case FORMAT_DATE:
                     Date dateToFormat = DateUtils.getDateFromString((String) operationVS.getDocument().get("dateStr"),
@@ -155,7 +155,7 @@ public class BrowserVSClient {
                     Browser.getInstance().processSignalVS(operationVS.getDocument());
                     break;
                 case REPRESENTATIVE_STATE:
-                    result = SessionService.getInstance().getRepresentationState().toString();
+                    result = JSON.getMapper().writeValueAsString(SessionService.getInstance().getRepresentationState());
                     break;
                 case WALLET_STATE:
                     result = Wallet.getWalletState().toString();

@@ -194,25 +194,4 @@ public class DeviceVS extends EntityVS implements Serializable {
         return this;
     }
 
-    public static DeviceVS parse(Map dataMap) throws Exception {
-        DeviceVS deviceVS = new DeviceVS();
-        deviceVS.setId((Long) dataMap.get("id"));
-        deviceVS.setDeviceName((String) dataMap.get("deviceName"));
-        if(dataMap.containsKey("email")) deviceVS.setEmail((String) dataMap.get("email"));
-        if(dataMap.containsKey("phone")) deviceVS.setPhone((String) dataMap.get("phone"));
-        deviceVS.setDeviceId((String) dataMap.get("deviceId"));
-        Collection<X509Certificate>  certChain = CertUtils.fromPEMToX509CertCollection(
-                ((String)dataMap.get("certPEM")).getBytes());
-        deviceVS.setX509Certificate(certChain.iterator().next());
-        return deviceVS;
-    }
-
-    public Map toMap() throws Exception {
-        Map deviceMap = new HashMap<>();
-        deviceMap.put("id", id);
-        deviceMap.put("deviceId", deviceId);
-        deviceMap.put("deviceName", getDeviceName());
-        deviceMap.put("certPEM", new String(CertUtils.getPEMEncoded(getX509Certificate()), StandardCharsets.UTF_8));
-        return deviceMap;
-    }
 }

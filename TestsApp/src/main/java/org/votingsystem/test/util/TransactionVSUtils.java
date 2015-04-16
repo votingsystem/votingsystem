@@ -1,13 +1,14 @@
 package org.votingsystem.test.util;
 
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.test.dto.ReportDto;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.DateUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -130,8 +131,8 @@ public class TransactionVSUtils {
         return balancesCash;
     }
 
-    public static Map<String, Report> sumReport(Map<String, Report> reportMap, Map<String, Report> newReport) throws ExceptionVS {
-        Map<String, Report> result = new HashMap<>();
+    public static Map<String, ReportDto> sumReport(Map<String, ReportDto> reportMap, Map<String, ReportDto> newReport) throws ExceptionVS {
+        Map<String, ReportDto> result = new HashMap<>();
         result.put("transactionFromList", reportMap.get("transactionFromList").sum(newReport.get("transactionFromList")));
         result.put("transactionToList", reportMap.get("transactionToList").sum(newReport.get("transactionToList")));
         return result;

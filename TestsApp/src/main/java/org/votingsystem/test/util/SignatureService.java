@@ -1,11 +1,9 @@
 package org.votingsystem.test.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.SubscriptionVSDto;
 import org.votingsystem.model.ActorVS;

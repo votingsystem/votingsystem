@@ -20,6 +20,7 @@ import javafx.stage.WindowEvent;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -63,8 +64,9 @@ public class JSONFormDialog extends VBox {
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(actionEvent -> {
             try {
-                Map<String, Object> dataMap = new ObjectMapper().readValue(textArea.getText(),
-                        new TypeReference<HashMap<String, Object>>() {});
+                Map<String, Object> dataMap = JSON.getMapper().readValue(textArea.getText(),
+                        new TypeReference<HashMap<String, Object>>() {
+                        });
                 if(listener != null) listener.processJSONForm(dataMap);
                 else log.info("No listeners to send JSON form");
                 stage.hide();
@@ -91,7 +93,7 @@ public class JSONFormDialog extends VBox {
     public void showMessage(String title, Map dataMap, Listener listener) throws JsonProcessingException {
         this.listener = listener;
         messageLabel.setText(title);
-        textArea.setText(new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT,true).writeValueAsString(dataMap));
+        textArea.setText(JSON.getMapper().configure(SerializationFeature.INDENT_OUTPUT, true).writeValueAsString(dataMap));
         stage.centerOnScreen();
         stage.show();
         stage.toFront();

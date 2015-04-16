@@ -1,5 +1,4 @@
-package org.votingsystem.client.model;
-
+package org.votingsystem.dto.voting;
 
 import java.util.Map;
 

@@ -25,10 +25,7 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -267,7 +264,7 @@ public class SignDocumentFormStackPane extends StackPane {
                     break;
                 case SIGN_SMIME:
                     try {
-                        Map<String, Object> textToSignMap = new ObjectMapper().readValue(
+                        Map<String, Object> textToSignMap = JSON.getMapper().readValue(
                                 textToSign.replaceAll("(\\r|\\n)", "\\\\n"), new TypeReference<HashMap<String, Object>>() {});
                         textToSignMap.put("UUID", UUID.randomUUID().toString());
                         toUser = StringUtils.getNormalized(toUser);

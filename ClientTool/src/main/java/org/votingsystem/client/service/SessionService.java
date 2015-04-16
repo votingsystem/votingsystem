@@ -8,10 +8,13 @@ import javafx.scene.control.Button;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
-import org.votingsystem.client.model.Representation;
+import org.votingsystem.client.dto.BrowserSessionDto;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.client.util.WebSocketMessage;
+import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.AnonymousDelegationDto;
+import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -28,7 +31,6 @@ import org.votingsystem.util.*;
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -50,9 +52,8 @@ public class SessionService {
     private File sessionFile;
     private File representativeStateFile;
     private AnonymousDelegationDto anonymousDelegationDto;
-    private Map representativeStateMap;
-    private Map browserSessionDataMap;
-    private Map sessionDataMap;
+    private RepresentationStateDto representativeStateDto;
+    private BrowserSessionDto browserSessionDto;
     private static CountDownLatch countDownLatch;
     private static SMIMEMessage smimeMessage;
     private static ResponseVS<SMIMEMessage> messageToDeviceResponse;
@@ -62,44 +63,39 @@ public class SessionService {
         try {
             sessionFile = new File(ContextVS.APPDIR + File.separator + ContextVS.BROWSER_SESSION_FILE);
             if(sessionFile.createNewFile()) {
-                sessionDataMap = new HashMap<>();
-                browserSessionDataMap = new HashMap<>();
-                browserSessionDataMap.put("deviceId", UUID.randomUUID().toString());
-                browserSessionDataMap.put("fileType", ContextVS.BROWSER_SESSION_FILE);
-                sessionDataMap.put("browserSession", browserSessionDataMap);
+                browserSessionDto = new BrowserSessionDto();
+                DeviceVSDto deviceVSDto = new DeviceVSDto();
+                deviceVSDto.setDeviceId(UUID.randomUUID().toString());
+                browserSessionDto.setDeviceVS(deviceVSDto);
+                browserSessionDto.setFileType(ContextVS.BROWSER_SESSION_FILE);
             } else {
-                sessionDataMap = new ObjectMapper().readValue(sessionFile, new TypeReference<HashMap<String, Object>>() {});
-                browserSessionDataMap = (Map) sessionDataMap.get("browserSession");
+                browserSessionDto = JSON.getMapper().readValue(sessionFile, BrowserSessionDto.class);
             }
-            browserSessionDataMap.put("isConnected", false);
-            if(browserSessionDataMap.get("userVS") != null) userVS =
-                    UserVS.parse((Map) browserSessionDataMap.get("userVS"));
+            browserSessionDto.setIsConnected(false);
+            if(browserSessionDto.getUserVS() != null) userVS = browserSessionDto.getUserVS().getUserVS();
             flush();
         } catch (Exception ex) {
             log.log(Level.SEVERE,ex.getMessage(), ex);
         }
     }
 
-    private void loadRepresentationData() throws IOException {
-        Map userVSStateOnServerMap = null;
+    private void loadRepresentationData() throws Exception {
+        RepresentationStateDto serverDto = null;
         if(userVS != null) {
-            ResponseVS responseVS = HttpHelper.getInstance().getData(ContextVS.getInstance().getAccessControl().
-                    getRepresentationStateServiceURL(userVS.getNif()), ContentTypeVS.JSON);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                userVSStateOnServerMap = responseVS.getMessageMap();
-            }
+            serverDto = HttpHelper.getInstance().getData(RepresentationStateDto.class,
+                    ContextVS.getInstance().getAccessControl().
+                    getRepresentationStateServiceURL(userVS.getNif()), MediaTypeVS.JSON);
         }
         representativeStateFile = new File(ContextVS.APPDIR + File.separator + ContextVS.REPRESENTATIVE_STATE_FILE);
         if(representativeStateFile.createNewFile()) {
-            representativeStateMap = userVSStateOnServerMap;
+            representativeStateDto = serverDto;
             flush();
         } else {
-            representativeStateMap = new ObjectMapper().readValue(
-                    representativeStateFile, new TypeReference<HashMap<String, Object>>() {});
-            if(userVSStateOnServerMap != null) {
-                if(!userVSStateOnServerMap.get("base64ContentDigest").equals(
-                        representativeStateMap.get("base64ContentDigest"))) {
-                    representativeStateMap = userVSStateOnServerMap;
+            representativeStateDto = JSON.getMapper().readValue(representativeStateFile, RepresentationStateDto.class);
+            if(serverDto != null) {
+                if(!serverDto.getBase64ContentDigest().equals(representativeStateDto.getBase64ContentDigest())) {
+                    log.info("Base64ContentDigest mismatch - updating local representativeState");
+                    representativeStateDto = serverDto;
                     flush();
                 }
             }
@@ -109,59 +105,43 @@ public class SessionService {
     public void setAnonymousDelegationDto(AnonymousDelegationDto delegation) {
         try {
             loadRepresentationData();
-            String serializedDelegation = new String(ObjectUtils.serializeObject(delegation), "UTF-8");
-            representativeStateMap.put("state", Representation.State.WITH_ANONYMOUS_REPRESENTATION.toString());
-            representativeStateMap.put("lastCheckedDate", DateUtils.getDateStr(new Date()));
-            representativeStateMap.put("representative", delegation.getRepresentative().toMap());
-            representativeStateMap.put("anonymousDelegationObject", serializedDelegation);
-            representativeStateMap.put("dateFrom", DateUtils.getDayWeekDateStr(delegation.getDateFrom()));
-            representativeStateMap.put("dateTo", DateUtils.getDayWeekDateStr(delegation.getDateTo()));
-            representativeStateMap.put("base64ContentDigest", delegation.getCancelVoteReceipt().getContentDigestStr());
-            this.anonymousDelegationDto = delegation;
+            representativeStateDto = new RepresentationStateDto(delegation);
+            anonymousDelegationDto = delegation;
             flush();
         } catch(Exception ex) {
             log.log(Level.SEVERE,ex.getMessage(), ex);
         }
     }
 
-    public Map getRepresentationState() {
-        Map result = null;
-        try {
-            loadRepresentationData();
-            result = new HashMap<>(representativeStateMap);
-            result.remove("anonymousDelegationObject");
-            Representation.State representationState =
-                    Representation.State.valueOf((String) representativeStateMap.get("state"));
-            String stateMsg = null;
-            switch (representationState) {
-                case WITH_ANONYMOUS_REPRESENTATION:
-                    stateMsg = ContextVS.getMessage("withAnonymousRepresentationMsg");
-                    break;
-                case REPRESENTATIVE:
-                    stateMsg = ContextVS.getMessage("userRepresentativeMsg");
-                    break;
-                case WITH_PUBLIC_REPRESENTATION:
-                    stateMsg = ContextVS.getMessage("withPublicRepresentationMsg");
-                    break;
-                case WITHOUT_REPRESENTATION:
-                    stateMsg = ContextVS.getMessage("withoutRepresentationMsg");
-                    break;
-            }
-            Date lastCheckedDate = DateUtils.getDateFromString((String) representativeStateMap.get("lastCheckedDate"));
-            result.put("stateMsg", stateMsg);
-            result.put("lastCheckedDateMsg", ContextVS.getMessage("lastCheckedDateMsg",
-                    DateUtils.getDayWeekDateStr(lastCheckedDate)));
-        } catch(Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex);
-        } finally {
-            return result;
+    public RepresentationStateDto getRepresentationState() throws Exception {
+        loadRepresentationData();
+        RepresentationStateDto result = representativeStateDto.clone();
+        String stateMsg = null;
+        switch (representativeStateDto.getState()) {
+            case WITH_ANONYMOUS_REPRESENTATION:
+                stateMsg = ContextVS.getMessage("withAnonymousRepresentationMsg");
+                break;
+            case REPRESENTATIVE:
+                stateMsg = ContextVS.getMessage("userRepresentativeMsg");
+                break;
+            case WITH_PUBLIC_REPRESENTATION:
+                stateMsg = ContextVS.getMessage("withPublicRepresentationMsg");
+                break;
+            case WITHOUT_REPRESENTATION:
+                stateMsg = ContextVS.getMessage("withoutRepresentationMsg");
+                break;
         }
+        result.setStateMsg(stateMsg);
+        result.setLastCheckedDateMsg(ContextVS.getMessage("lastCheckedDateMsg",
+                DateUtils.getDayWeekDateStr(result.getLastCheckedDate())));
+        return result;
     }
 
     public AnonymousDelegationDto getAnonymousDelegationDto() {
         if(anonymousDelegationDto != null) return anonymousDelegationDto;
         try {
             loadRepresentationData();
-            String serializedDelegation = (String) representativeStateMap.get("anonymousDelegationObject");
+            String serializedDelegation = representativeStateDto.getAnonymousDelegationObject();
             if(serializedDelegation != null) {
                 anonymousDelegationDto = (AnonymousDelegationDto) ObjectUtils.deSerializeObject(
                         serializedDelegation.getBytes());
@@ -178,17 +158,18 @@ public class SessionService {
     }
 
     public void setIsConnected(boolean isConnected) {
-        browserSessionDataMap.put("isConnected", isConnected);
+        browserSessionDto.setIsConnected(isConnected);
         flush();
     }
 
     public WebSocketMessage initAuthenticatedSession(WebSocketMessage socketMsg, UserVS userVS) {
         try {
             if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
-                socketMsg.getMessageJSON().put("userVS", userVS.toMap());
                 socketMsg.setUserVS(userVS);
-                browserSessionDataMap.put("userVS", userVS.toMap());
-                browserSessionDataMap.put("isConnected", true);
+                browserSessionDto.setUserVS(UserVSDto.COMPLETE(userVS));
+                socketMsg.getMessageJSON().put("userVS", browserSessionDto.getUserVS());
+
+                browserSessionDto.setIsConnected(true);
                 flush();
                 VotingSystemApp.getInstance().setDeviceId(socketMsg.getDeviceId());
                 Browser.getInstance().runJSCommand(
@@ -204,22 +185,23 @@ public class SessionService {
     }
 
     public void setCSRRequestId(Long id) {
-        browserSessionDataMap.put("csrRequestId", id);
+        browserSessionDto.setCsrRequestId(id);
         flush();
     }
 
-    public void setCryptoToken(CryptoTokenVS cryptoTokenVS, Map deviceDataMap) {
-        log.info("setCryptoToken - type: " + cryptoTokenVS.toString() + "- deviceDataJSON: " + deviceDataMap);
-        ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, cryptoTokenVS.toString());
-        if(deviceDataMap == null) deviceDataMap = new HashMap<>();
-        deviceDataMap.put("type", cryptoTokenVS.toString());
-        browserSessionDataMap.put("cryptoTokenVS", deviceDataMap);
+    public void setCryptoToken(DeviceVSDto cryptoToken) {
+        log.info("setCryptoToken - type: " + cryptoToken.getType());
+        ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, cryptoToken.getType().toString());
+        browserSessionDto.setCryptoToken(cryptoToken);
         flush();
     }
 
-    //{"id":,"deviceName":"","certPEM":""}
-    public Map getCryptoToken() {
-        return (Map) browserSessionDataMap.get("cryptoTokenVS");
+    public DeviceVSDto getCryptoToken() {
+        return browserSessionDto.getCryptoToken();
+    }
+
+    public DeviceVSDto getDeviceVS() {
+        return browserSessionDto.getDeviceVS();
     }
 
     public static CryptoTokenVS getCryptoTokenType () {
@@ -227,20 +209,8 @@ public class SessionService {
         return CryptoTokenVS.valueOf(tokenType);
     }
 
-    public String getCryptoTokenName() {
-        if(browserSessionDataMap.containsKey("cryptoTokenVS")) {
-            if(((Map)browserSessionDataMap.get("cryptoTokenVS")).containsKey("deviceName")) {
-                return (String)((Map)browserSessionDataMap.get("cryptoTokenVS")).get("deviceName");
-            } else return null;
-        } else return null;
-    }
-
     public Long getCSRRequestId() {
-        return ((Number)browserSessionDataMap.get("csrRequestId")).longValue();
-    }
-
-    public String getDeviceId() {
-        return (String) browserSessionDataMap.get("deviceId");
+        return browserSessionDto.getCsrRequestId();
     }
 
     public UserVS getUserVS() {
@@ -249,31 +219,24 @@ public class SessionService {
 
     public void setUserVS(UserVS userVS, boolean isConnected) throws Exception {
         this.userVS = userVS;
-        List userVSList = null;
-        if(browserSessionDataMap.containsKey("userVSList")) {
-            userVSList = (List) browserSessionDataMap.get("userVSList");
-            boolean updated = false;
-            for(int i = 0; i < userVSList.size(); i++) {
-                Map user = (Map) userVSList.get(i);
-                if(user.get("nif").equals(userVS.getNif())) {
-                    userVSList.remove(i);
-                    userVSList.add(userVS.toMap());
-                    updated = true;
-                }
+        browserSessionDto.setUserVS(UserVSDto.COMPLETE(userVS));
+        List<UserVSDto> userVSList = browserSessionDto.getUserVSList();
+        boolean updated = false;
+        for(int i = 0; i < userVSList.size(); i++) {
+            UserVSDto user = userVSList.get(i);
+            if(user.getNIF().equals(userVS.getNif())) {
+                userVSList.remove(i);
+                userVSList.add(browserSessionDto.getUserVS());
+                updated = true;
             }
-            if(!updated) userVSList.add(userVS.toMap());
-        } else {
-            userVSList = new ArrayList<>();
-            userVSList.add(userVS.toMap());
-            browserSessionDataMap.put("userVSList", userVSList);
         }
-        browserSessionDataMap.put("isConnected", isConnected);
-        browserSessionDataMap.put("userVS", userVS.toMap());
+        if(!updated) userVSList.add(browserSessionDto.getUserVS());
+        browserSessionDto.setIsConnected(isConnected);
         flush();
     }
 
-    public Map getBrowserSessionData() {
-        return browserSessionDataMap;
+    public BrowserSessionDto getBrowserSessionData() {
+        return browserSessionDto;
     }
 
     public void setCSRRequest(Long requestId, Encryptor.EncryptedBundle bundle) {
@@ -304,7 +267,7 @@ public class SessionService {
         if(csrFile.exists()) {
             log.info("csr request found");
             try {
-                Map dataMap = new ObjectMapper().readValue(csrFile, new TypeReference<HashMap<String, Object>>() {});
+                Map dataMap = JSON.getMapper().readValue(csrFile, new TypeReference<HashMap<String, Object>>() {});
                 String serviceURL = ContextVS.getInstance().getAccessControl().getUserCSRServiceURL(
                         ((Number)dataMap.get("requestId")).longValue());
                 ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, null);
@@ -379,7 +342,7 @@ public class SessionService {
                 return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password.toCharArray(), subject, headers);
             case MOBILE:
                 countDownLatch = new CountDownLatch(1);
-                DeviceVS deviceVS = DeviceVS.parse(getInstance().getCryptoToken());
+                DeviceVS deviceVS = getInstance().getDeviceVS().getDeviceVS();
                 Map jsonObject = WebSocketMessage.getSignRequest(deviceVS, toUser, textToSign, subject, headers);
                 PlatformImpl.runLater(() -> {//Service must only be used from the FX Application Thread
                     try {
@@ -426,9 +389,8 @@ public class SessionService {
     private void flush() {
         log.info("flush");
         try {
-            sessionDataMap.put("browserSession", browserSessionDataMap);
-            new ObjectMapper().writeValue(sessionFile, sessionDataMap);
-            if(representativeStateMap != null) new ObjectMapper().writeValue(representativeStateFile, representativeStateMap);
+            JSON.getMapper().writeValue(sessionFile, browserSessionDto);
+            if(representativeStateDto != null) JSON.getMapper().writeValue(representativeStateFile, representativeStateDto);
         } catch(Exception ex) {
             log.log(Level.SEVERE,ex.getMessage(), ex);
         }

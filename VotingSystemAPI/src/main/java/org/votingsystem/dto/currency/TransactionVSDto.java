@@ -23,6 +23,7 @@ public class TransactionVSDto {
 
     private TypeVS operation;
     private Long id;
+    private Long userId;
     private UserVSDto fromUserVS;
     private UserVSDto toUserVS;
     private Date validTo;
@@ -33,6 +34,7 @@ public class TransactionVSDto {
     private String fromUser;
     private String fromUserIBAN;
     private String receipt;
+    private String bankIBAN;
     private String messageSMIME;
     private String messageSMIMEURL;
     private String UUID;
@@ -73,13 +75,9 @@ public class TransactionVSDto {
         this.setId(transactionVS.getId());
         if(transactionVS.getFromUserVS() != null) {
             this.setFromUserVS(UserVSDto.BASIC(transactionVS.getFromUserVS()));
-            if(transactionVS.getFromUserIBAN() != null) {
-                Map senderMap = new HashMap<>();
-                senderMap.put("fromUserIBAN", transactionVS.getFromUserIBAN());
-                senderMap.put("fromUser", transactionVS.getFromUser());
-                this.getFromUserVS().setSender(senderMap);
-            }
         }
+        fromUserIBAN = transactionVS.getFromUserIBAN();
+        fromUser = transactionVS.getFromUser();
         if(transactionVS.getToUserVS() != null) {
             this.setToUserVS(UserVSDto.BASIC(transactionVS.getToUserVS()));
         }
@@ -92,6 +90,36 @@ public class TransactionVSDto {
         if(transactionVS.getMessageSMIME() != null) {
             setMessageSMIMEURL(contextURL + "/rest/messageSMIME/id/" + transactionVS.getMessageSMIME().getId());
         }
+    }
+
+    public TransactionVS getTransactionVS() throws Exception {
+        TransactionVS transactionVS = new TransactionVS();
+        transactionVS.setId(id);
+        transactionVS.setUserId(userId);
+        transactionVS.setType(type);
+        transactionVS.setFromUser(fromUser);
+        transactionVS.setFromUserIBAN(fromUserIBAN);
+        if(toUserVS != null) {
+            transactionVS.setToUserVS(toUserVS.getUserVS());
+        }
+        transactionVS.setFromUserIBAN(fromUserIBAN);
+        if(fromUserVS != null) {
+            transactionVS.setFromUserVS(fromUserVS.getUserVS());
+        }
+        transactionVS.setTag(getTagVS());
+        transactionVS.setIsTimeLimited(isTimeLimited);
+        transactionVS.setSubject(subject);
+        transactionVS.setCurrencyCode(currencyCode);
+        transactionVS.setDateCreated(dateCreated);
+        transactionVS.setValidTo(validTo);
+        transactionVS.setAmount(amount);
+        return transactionVS;
+    }
+
+    @JsonIgnore public TagVS getTagVS() {
+        if(tag != null) return tag;
+        else if(tags != null && !tags.isEmpty()) return new TagVS(tags.iterator().next());
+        else return null;
     }
 
     public Long getId() {
@@ -326,5 +354,13 @@ public class TransactionVSDto {
 
     public void setUUID(String UUID) {
         this.UUID = UUID;
+    }
+
+    public String getBankIBAN() {
+        return bankIBAN;
+    }
+
+    public void setBankIBAN(String bankIBAN) {
+        this.bankIBAN = bankIBAN;
     }
 }

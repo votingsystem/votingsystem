@@ -1,6 +1,8 @@
 package org.votingsystem.dto.voting;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
@@ -9,14 +11,12 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
-
 import java.io.*;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -29,16 +29,19 @@ public class AnonymousDelegationDto implements Serializable {
     public static final String TAG = AnonymousDelegationDto.class.getSimpleName();
 
     private Long localId = -1L;
+    private TypeVS operation;
     private transient SMIMEMessage delegationReceipt;
     private transient byte[] delegationReceiptBytes;
+    @JsonIgnore private String originHashCertVSHidden;
     private String originHashCertVS;
     private String hashCertVSBase64;
     private String representativeNif;
     private String representativeName;
     private Integer weeksOperationActive;
+    private String accessControlURL;
     private String serverURL;
-    private CertificationRequestVS certificationRequest;
-    private UserVS representative;
+    @JsonIgnore private CertificationRequestVS certificationRequest;
+    private UserVSDto representative;
     private Date dateFrom;
     private Date dateTo;
     private String UUID;
@@ -62,8 +65,8 @@ public class AnonymousDelegationDto implements Serializable {
         this.dateTo = DateUtils.addDays(dateFrom, weeksOperationActive * 7).getTime();
         this.representativeName = representativeName;
         this.representativeNif = representativeNif;
-        originHashCertVS = java.util.UUID.randomUUID().toString();
-        hashCertVSBase64 = CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
+        originHashCertVSHidden = java.util.UUID.randomUUID().toString();
+        hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVSHidden, ContextVS.VOTING_DATA_DIGEST);
         certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(
                 ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
                 ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive.toString(),
@@ -171,51 +174,36 @@ public class AnonymousDelegationDto implements Serializable {
         this.weeksOperationActive = weeksOperationActive;
     }
 
-    public UserVS getRepresentative() {
+    public UserVSDto getRepresentative() {
         return representative;
     }
 
-    public void setRepresentative(UserVS representative) {
+    public void setRepresentative(UserVSDto representative) {
         this.representative = representative;
     }
 
-    public Map getRequest() {
-        Map result = new HashMap();
-        result.put("weeksOperationActive", getWeeksOperationActive());
-        result.put("dateFrom", DateUtils.getDateStr(dateFrom));
-        result.put("dateTo", DateUtils.getDateStr(dateTo));
-        result.put("accessControlURL", serverURL);
-        result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST.toString());
-        result.put("UUID", java.util.UUID.randomUUID().toString());
-        return result;
+    public AnonymousDelegationDto getRequest() {
+        operation = TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST;
+        accessControlURL = serverURL;
+        UUID = java.util.UUID.randomUUID().toString();
+        return this;
     }
 
-    public Map getCancellationRequest() {
-        Map result = new HashMap();
-        result.put("weeksOperationActive", getWeeksOperationActive());
-        result.put("dateFrom", DateUtils.getDateStr(dateFrom));
-        result.put("dateTo", DateUtils.getDateStr(dateTo));
-        result.put("accessControlURL", serverURL);
-        result.put("representativeNif", representative.getNif());
-        result.put("representativeName", representative.getName());
-        result.put("hashCertVSBase64", hashCertVSBase64);
-        result.put("originHashCertVSBase64", originHashCertVS);
-        result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED.toString());
-        result.put("UUID", java.util.UUID.randomUUID().toString());
-        return result;
+    public AnonymousDelegationDto getCancellationRequest() {
+        operation = TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED;
+        accessControlURL = serverURL;
+        representativeNif = representative.getNIF();
+        representativeName = representative.getName();
+        originHashCertVS = originHashCertVSHidden;
+        UUID = java.util.UUID.randomUUID().toString();
+        return this;
     }
 
-    public Map getDelegation() {
-        Map result = new HashMap();
-        result.put("representativeNif", representativeNif);
-        result.put("representativeName", representativeName);
-        result.put("weeksOperationActive", getWeeksOperationActive());
-        result.put("dateFrom", DateUtils.getDateStr(dateFrom));
-        result.put("dateTo", DateUtils.getDateStr(dateTo));
-        result.put("accessControlURL", serverURL);
-        result.put("operation", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION.toString());
-        result.put("UUID", java.util.UUID.randomUUID().toString());
-        return result;
+    public AnonymousDelegationDto getDelegation() {
+        operation = TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION;
+        accessControlURL = serverURL;
+        UUID = java.util.UUID.randomUUID().toString();
+        return this;
     }
 
     public static AnonymousDelegationDto parse(Map dataMap) throws Exception {
@@ -236,5 +224,21 @@ public class AnonymousDelegationDto implements Serializable {
 
     public void setUUID(String UUID) {
         this.UUID = UUID;
+    }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
+    }
+
+    public String getAccessControlURL() {
+        return accessControlURL;
+    }
+
+    public void setAccessControlURL(String accessControlURL) {
+        this.accessControlURL = accessControlURL;
     }
 }

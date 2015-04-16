@@ -2,9 +2,9 @@ package org.votingsystem.client.backup;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.votingsystem.client.model.MetaInf;
-import org.votingsystem.client.model.RepresentativeData;
-import org.votingsystem.client.model.RepresentativesData;
+import org.votingsystem.dto.voting.MetaInf;
+import org.votingsystem.dto.voting.RepresentativeData;
+import org.votingsystem.dto.voting.RepresentativesData;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.FieldEventVS;
@@ -12,10 +12,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.DocumentVSValidator;
 import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.*;
 
 import java.io.File;
 import java.security.cert.TrustAnchor;
@@ -104,11 +101,13 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
         if(!metaInfFile.exists()) {
             log.log(Level.SEVERE, " - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
         } else {
-            Map<String, Object> metaInfMap = new ObjectMapper().readValue(
-                    metaInfFile, new TypeReference<HashMap<String, Object>>() {});
+            Map<String, Object> metaInfMap = JSON.getMapper().readValue(
+                    metaInfFile, new TypeReference<HashMap<String, Object>>() {
+            });
             metaInf = MetaInf.parse(metaInfMap);
-            Map<String, Object> representativeDataMap = new ObjectMapper().readValue(
-                    representativeMetaInfFile, new TypeReference<HashMap<String, Object>>() {});
+            Map<String, Object> representativeDataMap = JSON.getMapper().readValue(
+                    representativeMetaInfFile, new TypeReference<HashMap<String, Object>>() {
+            });
             metaInf.loadRepresentativeData(representativeDataMap);
             eventURL= EventVS.getURL(TypeVS.VOTING_EVENT, metaInf.getServerURL(), metaInf.getId());
         }

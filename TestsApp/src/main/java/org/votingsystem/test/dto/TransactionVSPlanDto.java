@@ -2,25 +2,21 @@ package org.votingsystem.test.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
-import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.test.util.TransactionVSCounter;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
-import java.io.File;
+
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.logging.Logger;
@@ -45,51 +41,6 @@ public class TransactionVSPlanDto {
 
 
     public TransactionVSPlanDto() {  }
-
-    public TransactionVSPlanDto(File transactionVSPlanFile, CurrencyServer currencyServer) throws Exception {
-        this.setCurrencyServer(currencyServer);
-        Map<String, Object> transactionVSPlanJSON = new ObjectMapper().readValue(
-                transactionVSPlanFile, new TypeReference<HashMap<String, Object>>() {});
-        List bankVSTransacionList = (List) transactionVSPlanJSON.get("bankVSList");
-        for(int i = 0; i < bankVSTransacionList.size(); i++) {
-            Map transactionMap = (Map) bankVSTransacionList.get(i);
-            UserVS fromUserVS = TestUtils.getUserVS(((Number) transactionMap.get("fromUserVSId")).longValue(), currencyServer);
-            UserVS toUserVS = TestUtils.getUserVS(((Number)transactionMap.get("toUserVSId")).longValue(), currencyServer);
-            TransactionVS transactionVS = TransactionVS.parse(transactionMap);
-            transactionVS.setFromUserVS(fromUserVS);
-            transactionVS.setToUserVS(toUserVS);
-            bankVSTransacionList.add(transactionVS);
-        }
-        List groupVSTransacionList = (List) transactionVSPlanJSON.get("groupVSList");
-        for(int i = 0; i < groupVSTransacionList.size(); i++) {
-            Map transactionMap = (Map) groupVSTransacionList.get(i);
-            UserVS fromUserVS = TestUtils.getUserVS(((Number)transactionMap.get("fromUserVSId")).longValue(), currencyServer);
-            TransactionVS transactionVS = TransactionVS.parse(transactionMap);
-            if(transactionMap.get("toUserVSList") instanceof List){
-                List paramList = (List) transactionMap.get("toUserVSList");
-                List<String> toUserVSList = new ArrayList<>();
-                for(int j = 0; j < paramList.size(); j++){
-                    UserVS toUserVS = TestUtils.getUserVS(((Number)paramList.get(j)).longValue(), currencyServer);
-                    toUserVSList.add(toUserVS.getIBAN());
-                }
-                transactionVS.setToUserVSList(toUserVSList);
-            }
-            transactionVS.setFromUserVS(fromUserVS);
-            groupVSTransacionList.add(transactionVS);
-        }
-        List userVSTransacionList = (List) transactionVSPlanJSON.get("userVSList");
-        for(int i = 0; i < userVSTransacionList.size(); i++) {
-            userVSTransacionList.add(TransactionVS.parse((Map) userVSTransacionList.get(i)));
-        }
-    }
-
-    public static Logger getLog() {
-        return log;
-    }
-
-    public static void setLog(Logger log) {
-        TransactionVSPlanDto.log = log;
-    }
 
     public Map<String, Map<String, BigDecimal>> runBankVSTransactions(String smimeMessageSubject) throws Exception {
         setBankVSBalance(new HashMap<>());

@@ -152,12 +152,6 @@ public class RepresentativeResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto)).type(MediaTypeVS.JSON).build();
     }
 
-    @Path("/nif/{nif}/state") @GET
-    public Response state(@PathParam("nif") String nifReq) throws JsonProcessingException, ExceptionVS {
-        Map result = representativeBean.checkRepresentationState(nifReq);
-        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(result)).type(MediaTypeVS.JSON).build();
-    }
-
     @Path("/image/id/{id}") @GET
     public Response imageById(@PathParam("id") Long id, @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException {

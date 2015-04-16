@@ -1,5 +1,7 @@
-package org.votingsystem.client.model;
+package org.votingsystem.dto.voting;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.FieldEventVS;
 import org.votingsystem.util.ContextVS;
@@ -12,9 +14,9 @@ import java.util.*;
 import java.util.logging.Logger;
 
 /**
-* @author jgzornoza
-* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
-*/
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MetaInf {
     
     private static Logger log = Logger.getLogger(MetaInf.class.getSimpleName());
@@ -35,7 +37,8 @@ public class MetaInf {
     private List<String> errorsList;
     private List<FieldEventVS> optionList;
     
-    
+
+    @JsonIgnore
     public String getFormattedInfo() {
         StringBuilder result = new StringBuilder(
                 "<html style='font-family: arial, helvetica, sans-serif; color: #555; padding:5px 15px 0 15px;'>");
@@ -44,10 +47,6 @@ public class MetaInf {
         result.append("<b>" + ContextVS.getMessage("eventURLLbl") +": </b>");
         result.append("<a href='" + eventURL + "'>" + eventURL +"</a><br/>");
         switch (type) {
-            case CLAIM_EVENT:
-                result.append("<b>" + ContextVS.getMessage("numClaimsLbl") +": </b>" +
-                        String.valueOf(numSignatures) + "<br/>");
-                break;
             case VOTING_EVENT:
                 result.append("<b>" + ContextVS.getMessage("accessRequestLbl") +": </b>");
                 result.append( numAccessRequest + "<br/>");

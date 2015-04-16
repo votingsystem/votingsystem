@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.currency.BalancesDto;
+import org.votingsystem.dto.currency.InitPeriodTransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
@@ -12,6 +13,7 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -135,10 +137,10 @@ public class BalancesBean {
                         timeLimitedNotExpended.compareTo(BigDecimal.ZERO) < 0) timeLimitedNotExpended = BigDecimal.ZERO;
                 BigDecimal amountResult = tagVSEntry.getValue().subtract(timeLimitedNotExpended);
                 String signedMessageSubject =  messages.get("tagInitPeriodMsg", tagVSEntry.getKey());
+                String signedContent = JSON.getMapper().writeValueAsString(new InitPeriodTransactionVSDto(amountResult,
+                        timeLimitedNotExpended, tagVSEntry.getKey(), userVS));
                 SMIMEMessage smimeMessage = signatureBean.getSMIMETimeStamped (signatureBean.getSystemUser().getName(),
-                        userVS.getNif(), TransactionVS.getInitPeriodTransactionVSData(amountResult,
-                        timeLimitedNotExpended, tagVSEntry.getKey(), userVS).toString(),
-                        transactionMsgSubject + " - " + signedMessageSubject);
+                        userVS.getNif(), signedContent, transactionMsgSubject + " - " + signedMessageSubject);
                 MessageSMIME messageSMIME = dao.persist(new MessageSMIME(smimeMessage, signatureBean.getSystemUser(),
                         TypeVS.CURRENCY_INIT_PERIOD));
                 dao.persist(new TransactionVS(userVS, userVS, amountResult, currency, signedMessageSubject, messageSMIME,

@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.application.Platform;
@@ -12,14 +13,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.MediaTypeVS;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
 public class UserDeviceSelectorDialog extends DialogVS {
 
     public interface Listener {
-        public void setSelectedDevice(Map deviceDataMap);
+        public void setSelectedDevice(DeviceVSDto device);
     }
 
     private static Logger log = Logger.getLogger(UserDeviceSelectorDialog.class.getSimpleName());
@@ -49,15 +50,14 @@ public class UserDeviceSelectorDialog extends DialogVS {
         this.listener = listener;
         messageLbl.setText(message);
         new Thread(() -> {
-            ResponseVS responseVS = HttpHelper.getInstance().getData(
-                    ContextVS.getInstance().getCurrencyServer().getConnectedDeviceListByNifServiceURL(
-                            SessionService.getInstance().getUserVS().getNif()), ContentTypeVS.JSON);
-            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                try {
-                    updateDeviceList((List<Map>) responseVS.getMessageMap().get("deviceList"));
-                } catch (IOException ex) {
-                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                }
+            try {
+                ResultListDto<DeviceVSDto> deviceList = HttpHelper.getInstance().getData(
+                        new TypeReference<ResultListDto<DeviceVSDto>>(){},
+                        ContextVS.getInstance().getCurrencyServer().getConnectedDeviceListByNifServiceURL(
+                                SessionService.getInstance().getUserVS().getNif()), MediaTypeVS.JSON);
+                updateDeviceList(deviceList.getResultList());
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
             }
         }).start();
     }
@@ -68,7 +68,7 @@ public class UserDeviceSelectorDialog extends DialogVS {
         footerBox.getChildren().remove(acceptButton);
     }
 
-    private void updateDeviceList(List<Map> deviceList) {
+    private void updateDeviceList(List<DeviceVSDto> deviceList) {
         PlatformImpl.runLater(() -> {
             if(mainPane.getChildren().contains(progressBar)) mainPane.getChildren().remove(progressBar);
             if(!deviceListBox.getChildren().isEmpty()) deviceListBox.getChildren().removeAll(
@@ -85,11 +85,11 @@ public class UserDeviceSelectorDialog extends DialogVS {
                 }
             });
             boolean deviceFound = false;
-            for(Map deviceData: deviceList) {
-                if(!SessionService.getInstance().getDeviceId().equals(deviceData.get("deviceId"))) {
+            for(DeviceVSDto deviceVSDto: deviceList) {
+                if(!SessionService.getInstance().getDeviceVS().getDeviceId().equals(deviceVSDto.getDeviceId())) {
                     deviceFound = true;
-                    RadioButton radioButton = new RadioButton((String) deviceData.get("deviceName"));
-                    radioButton.setUserData(deviceData);
+                    RadioButton radioButton = new RadioButton(deviceVSDto.getDeviceName());
+                    radioButton.setUserData(deviceVSDto);
                     radioButton.setToggleGroup(deviceToggleGroup);
                     deviceListBox.getChildren().add(radioButton);
                 }
@@ -104,19 +104,17 @@ public class UserDeviceSelectorDialog extends DialogVS {
 
     public void acceptButton(ActionEvent actionEvent) {
         if(deviceToggleGroup != null && deviceToggleGroup.getSelectedToggle() != null)
-            listener.setSelectedDevice((Map) deviceToggleGroup.getSelectedToggle().getUserData());
+            listener.setSelectedDevice((DeviceVSDto) deviceToggleGroup.getSelectedToggle().getUserData());
         hide();
     }
 
     public static void show(String caption, String message, Listener listener) {
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                try {
-                    UserDeviceSelectorDialog dialog = new UserDeviceSelectorDialog(caption, message, listener);
-                    dialog.show();
-                } catch (Exception ex) {
-                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                }
+        Platform.runLater(() -> {
+            try {
+                UserDeviceSelectorDialog dialog = new UserDeviceSelectorDialog(caption, message, listener);
+                dialog.show();
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
             }
         });
     }

@@ -21,10 +21,14 @@ import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.AnonymousDelegationDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.VoteVSDto;
-import org.votingsystem.model.*;
+import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.DeviceVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyRequestBatch;
 import org.votingsystem.model.currency.CurrencyServer;
@@ -128,7 +132,6 @@ public class SignatureService extends Service<ResponseVS> {
                         case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED:
                             responseVS = processCancelAnonymousDelegation(operationVS);
                             break;
-                        case CLAIM_PUBLISHING:
                         case VOTING_PUBLISHING:
                             responseVS = publishSMIME(operationVS);
                             break;
@@ -165,7 +168,7 @@ public class SignatureService extends Service<ResponseVS> {
         private String getOperationMessage(OperationVS operationVS) {
             if(CryptoTokenVS.MOBILE == SessionService.getCryptoTokenType()) {
                 return ContextVS.getMessage("messageToDeviceProgressMsg",
-                        SessionService.getInstance().getCryptoTokenName());
+                        SessionService.getInstance().getDeviceVS().getType());
             } else return operationVS.getSignedMessageSubject();
         }
 
@@ -208,7 +211,7 @@ public class SignatureService extends Service<ResponseVS> {
             CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
                     ContextVS.KEY_SIZE, SIG_NAME, SIGN_MECHANISM, PROVIDER,
                     (String)operationVS.getDocument().get("nif"), (String)operationVS.getDocument().get("email"),
-                    (String)operationVS.getDocument().get("phone"), SessionService.getInstance().getDeviceId(),
+                    (String)operationVS.getDocument().get("phone"), SessionService.getInstance().getDeviceVS().getDeviceId(),
                     (String)operationVS.getDocument().get("givenname"),
                     (String)operationVS.getDocument().get("surname"),
                     InetAddress.getLocalHost().getHostName(), DeviceVS.Type.PC);
@@ -234,14 +237,14 @@ public class SignatureService extends Service<ResponseVS> {
             String toUser = eventVS.getAccessControl().getName();
             String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + eventVS.getId();
             SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser, 
-                    new ObjectMapper().writeValueAsString(voteVS.getAccessRequestDataMap()),
+                    JSON.getMapper().writeValueAsString(voteVS.getAccessRequestDataMap()),
                     password, msgSubject, null);
             AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, voteVS);
             ResponseVS responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             updateProgress(60, 100);
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
-            String textToSign = new ObjectMapper().writeValueAsString(new VoteVSDto(voteVS, null)); ;
+            String textToSign = JSON.getMapper().writeValueAsString(new VoteVSDto(voteVS, null)); ;
             fromUser = eventVS.getVoteVS().getHashCertVSBase64();
             msgSubject = ContextVS.getInstance().getMessage("voteVSSubject");
             smimeMessage = certificationRequest.getSMIME(fromUser, toUser, textToSign, msgSubject, null);
@@ -310,7 +313,7 @@ public class SignatureService extends Service<ResponseVS> {
                 //String base64RepresentativeEncodedImage = Base64.getEncoder().encodeToString(imageFileBytes);
                 //operation.getContentFirma().put("base64RepresentativeEncodedImage", base64RepresentativeEncodedImage);
                 SMIMEMessage representativeRequestSMIME = SessionService.getSMIME(null, operationVS.getReceiverName(),
-                        new ObjectMapper().writeValueAsString(operationVS.getDocumentToSignMap()),
+                        JSON.getMapper().writeValueAsString(operationVS.getDocumentToSignMap()),
                         password, operationVS.getSignedMessageSubject(), null);
                 RepresentativeDataSender dataSender = new RepresentativeDataSender(representativeRequestSMIME,
                         operationVS.getFile(), operationVS.getServiceURL());
@@ -328,9 +331,9 @@ public class SignatureService extends Service<ResponseVS> {
             CurrencyRequestBatch currencyBatch = new CurrencyRequestBatch(totalAmount, totalAmount, currencyCode, tag,
                     isTimeLimited, (CurrencyServer) operationVS.getTargetServer());
             Map<String, Object> mapToSend = new HashMap<String, Object>();
-            byte[] fileContent = new ObjectMapper().writeValueAsString(currencyBatch.getCurrencyCSRList()).getBytes();
+            byte[] fileContent = JSON.getMapper().writeValueAsString(currencyBatch.getCurrencyCSRList()).getBytes();
             mapToSend.put(ContextVS.CSR_FILE_NAME, fileContent);
-            String textToSign = new ObjectMapper().writeValueAsString(currencyBatch.getRequestDataToSignMap());
+            String textToSign = JSON.getMapper().writeValueAsString(currencyBatch.getRequestDataToSignMap());
             SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(), textToSign,
                     password, operationVS.getSignedMessageSubject(), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
@@ -403,7 +406,7 @@ public class SignatureService extends Service<ResponseVS> {
         //we know this is done in a background thread
         private ResponseVS processAnonymousDelegation(OperationVS operationVS) throws Exception {
             String caption = operationVS.getCaption();
-            UserVS representative = UserVS.parse(operationVS.getDocument());
+            UserVSDto representative = operationVS.getData(UserVSDto.class);
             if(caption.length() > 50) caption = caption.substring(0, 50) + "...";
             AnonymousDelegationDto anonymousDelegation = new AnonymousDelegationDto(
                     Integer.valueOf((String) operationVS.getDocumentToSignMap().get("weeksOperationActive")),
@@ -472,7 +475,7 @@ public class SignatureService extends Service<ResponseVS> {
             if(operationVS.getAsciiDoc() != null) {
                 documentToSignStr = operationVS.getAsciiDoc();
             } else {
-                documentToSignStr = new ObjectMapper().writeValueAsString(operationVS.getDocumentToSignMap());
+                documentToSignStr = JSON.getMapper().writeValueAsString(operationVS.getDocumentToSignMap());
             }
             SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(),
                     documentToSignStr, password, operationVS.getSignedMessageSubject(), null);

@@ -1,7 +1,8 @@
-package org.votingsystem.test.util;
+package org.votingsystem.test.dto;
 
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.test.util.TransactionVSUtils;
 import org.votingsystem.throwable.ExceptionVS;
 
 import java.math.BigDecimal;
@@ -10,7 +11,7 @@ import java.util.Map;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class Report {
+public class ReportDto {
 
     private Integer numTotal = 0;
     private BigDecimal totalAmount = BigDecimal.ZERO;
@@ -54,12 +55,12 @@ public class Report {
             return this;
         }
 
-        public Report build() {
-            return new Report(this);
+        public ReportDto build() {
+            return new ReportDto(this);
         }
     }
 
-    public Report(Builder builder) {
+    public ReportDto(Builder builder) {
         numTotal = builder.numTotal;
         totalAmount = builder.totalAmount;
         type = builder.type;
@@ -76,12 +77,12 @@ public class Report {
         this.currencyMap = currencyMap;
     }
 
-    public Report sum(Report report) throws ExceptionVS {
+    public ReportDto sum(ReportDto report) throws ExceptionVS {
         if(report.getType() != type) throw new ExceptionVS("Expected:" + type.toString() +
                 " found: " + report.getType().toString());
         if(report.source != source) throw new ExceptionVS("Expected: " + source.toString() + " - found: " +
                 report.getSource().toString());
-        Map newCurrencyMap = TransactionVSUtils.sumCurrencyMap(currencyMap , report.currencyMap);
+        Map newCurrencyMap = TransactionVSUtils.sumCurrencyMap(currencyMap, report.currencyMap);
         return new Builder(report.getType(), report.getCurrencyCode()).numTotal(numTotal + report.numTotal).totalAmount(
                 totalAmount.add(report.totalAmount)).currencyMap(newCurrencyMap).build();
     }

@@ -5,6 +5,7 @@
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 
+
 <polymer-element name="representative-select-dialog">
     <template>
         <paper-dialog id="xDialog" class="dialog" autoCloseDisabled layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
@@ -172,7 +173,7 @@
                         representativeNif:this.representative.nif,
                         representativeName:this.representativeFullName,
                         weeksOperationActive:this.$.numWeeksAnonymousDelegation.value}
-                    webAppMessage.document = this.representative
+                    webAppMessage.jsonStr = JSON.stringify(this.representative)
                     webAppMessage.serviceURL = "${restURL}/representative/delegation"
                     webAppMessage.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'
                     webAppMessage.setCallback(function(appMessage) {

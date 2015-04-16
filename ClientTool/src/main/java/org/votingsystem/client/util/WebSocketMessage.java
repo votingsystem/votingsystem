@@ -11,10 +11,7 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.TypeVS;
-import org.votingsystem.util.Wallet;
+import org.votingsystem.util.*;
 
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
@@ -263,7 +260,7 @@ public class WebSocketMessage {
             dataToEncrypt.put("statusCode", statusCode);
             dataToEncrypt.put("message", message);
             dataToEncrypt.put("operation", operation.toString());
-            String dataToEncryptStr = new ObjectMapper().writeValueAsString(dataToEncrypt);
+            String dataToEncryptStr = JSON.getMapper().writeValueAsString(dataToEncrypt);
             result.put("encryptedMessage", Encryptor.encryptAES(dataToEncryptStr, aesParams));
         } else {
             result.put("operation", operation.toString());
@@ -273,17 +270,6 @@ public class WebSocketMessage {
         return result;
     }
 
-    public static Map getAuthenticationRequest(SMIMEMessage smimeMessage, String UUID) throws Exception {
-        Map messageToServiceMap = new HashMap<>();
-        messageToServiceMap.put("operation", TypeVS.INIT_VALIDATED_SESSION);
-        messageToServiceMap.put("deviceFromId", SessionService.getInstance().getDeviceId());
-        messageToServiceMap.put("locale", ContextVS.getInstance().getLocale().getLanguage());
-        messageToServiceMap.put("smimeMessage", Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
-        messageToServiceMap.put("UUID", UUID);
-        VotingSystemApp.getInstance().putWSSession(UUID, new WebSocketSession<>(
-                null, null, null, TypeVS.INIT_VALIDATED_SESSION));
-        return messageToServiceMap;
-    }
 
     public static Map getSignRequest(DeviceVS deviceVS, String toUser, String textToSign, String subject ,
             Header... headers) throws Exception {
@@ -316,7 +302,7 @@ public class WebSocketMessage {
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
                 socketSession.getAESParams().toMap().toString().getBytes(), deviceVS.getX509Certificate());
         messageToDevice.put("aesParams", new String(base64EncryptedAESDataRequestBytes));
-        String encryptedDataStr = new ObjectMapper().writeValueAsString(encryptedDataMap);
+        String encryptedDataStr = JSON.getMapper().writeValueAsString(encryptedDataMap);
         messageToDevice.put("encryptedMessage", Encryptor.encryptAES(encryptedDataStr, socketSession.getAESParams()));
         return messageToDevice;
     }
@@ -355,7 +341,7 @@ public class WebSocketMessage {
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
                 socketSession.getAESParams().toMap().toString().getBytes(), deviceVS.getX509Certificate());
         messageToDevice.put("aesParams", new String(base64EncryptedAESDataRequestBytes));
-        String encryptedDataStr = new ObjectMapper().writeValueAsString(encryptedDataMap);
+        String encryptedDataStr = JSON.getMapper().writeValueAsString(encryptedDataMap);
         messageToDevice.put("encryptedMessage", Encryptor.encryptAES(encryptedDataStr, socketSession.getAESParams()));
         return messageToDevice;
     }
@@ -380,7 +366,7 @@ public class WebSocketMessage {
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
                 socketSession.getAESParams().toMap().toString().getBytes(), deviceVS.getX509Certificate());
         messageToDevice.put("aesParams", new String(base64EncryptedAESDataRequestBytes));
-        String encryptedDataStr = new ObjectMapper().writeValueAsString(encryptedDataMap);
+        String encryptedDataStr = JSON.getMapper().writeValueAsString(encryptedDataMap);
         
         messageToDevice.put("encryptedMessage", Encryptor.encryptAES(encryptedDataStr, socketSession.getAESParams()));
         return messageToDevice;
@@ -388,14 +374,16 @@ public class WebSocketMessage {
 
     public void decryptMessage(PrivateKey privateKey) throws Exception {
         byte[] decryptedBytes = Encryptor.decryptCMS(((String)messageMap.get("aesParams")).getBytes(), privateKey);
-        this.aesParams = AESParams.load(new ObjectMapper().readValue(new String(decryptedBytes) , 
-                new TypeReference<HashMap<String, Object>>() {}));
+        this.aesParams = AESParams.load(JSON.getMapper().readValue(new String(decryptedBytes),
+                new TypeReference<HashMap<String, Object>>() {
+                }));
         decryptMessage(this.aesParams);
     }
 
     public void decryptMessage(AESParams aesParams) throws Exception {
-        Map<String, Object> decryptedMap = new ObjectMapper().readValue(Encryptor.decryptAES(
-                (String) messageMap.get("encryptedMessage"), aesParams), new TypeReference<HashMap<String, Object>>() {});
+        Map<String, Object> decryptedMap = JSON.getMapper().readValue(Encryptor.decryptAES(
+                (String) messageMap.get("encryptedMessage"), aesParams), new TypeReference<HashMap<String, Object>>() {
+        });
         if(decryptedMap.containsKey("operation")) operation = TypeVS.valueOf((String) decryptedMap.get("operation"));
         if(decryptedMap.containsKey("statusCode")) statusCode = ((Number) decryptedMap.get("statusCode")).intValue();
         if(decryptedMap.containsKey("message")) message = (String) decryptedMap.get("message");

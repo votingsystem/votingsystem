@@ -348,6 +348,10 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         this.url = url;
     }
 
+    public static ResponseVS OK() {
+        return new ResponseVS(ResponseVS.SC_OK);
+    }
+
     public static ResponseVS OK(byte[] messageBytes) {
         return new ResponseVS(ResponseVS.SC_OK, messageBytes);
     }

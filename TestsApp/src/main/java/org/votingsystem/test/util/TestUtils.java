@@ -3,6 +3,7 @@ package org.votingsystem.test.util;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ActorVSDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -83,13 +84,11 @@ public class TestUtils {
 
     public static UserVS getUserVS(Long userId, ActorVS server) throws Exception {
         if(userVSMap.get(userId) != null) return userVSMap.get(userId);
-        ResponseVS responseVS = HttpHelper.getInstance().getData(server.getUserVSURL(userId), ContentTypeVS.JSON);
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            Map dataMap = new ObjectMapper().readValue(responseVS.getMessage(), new TypeReference<HashMap<String, Object>>() {});
-            UserVS userVS = UserVS.parse((Map) dataMap.get("userVS"));
-            userVSMap.put(userId, userVS);
-            return userVS;
-        } else throw new ExceptionVS(responseVS.getMessage());
+        UserVSDto userVSDto = HttpHelper.getInstance().getData(UserVSDto.class, server.getUserVSURL(userId),
+                MediaTypeVS.JSON);
+        UserVS userVS = userVSDto.getUserVS();
+        userVSMap.put(userId, userVS);
+        return userVS;
     }
 
     public static void finish(String resultMessage) throws Exception {

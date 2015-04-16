@@ -66,7 +66,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         }
         String contentStr = null;
         try {
-            Map dataMap = new ObjectMapper().readValue(signedFile.getSMIME().getSignedContent(), 
+            Map dataMap = JSON.getMapper().readValue(signedFile.getSMIME().getSignedContent(),
                     new TypeReference<HashMap<String, Object>>() {});
             contentStr = Formatter.format(dataMap);
         }  catch(Exception ex) {
@@ -92,7 +92,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         Map signedContentMap = null;
         if(signedFile.getSMIME().getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
             signedContentMap =  signedFile.getOperationDocument();
-        } else signedContentMap = new ObjectMapper().readValue(signedFile.getSMIME().getSignedContent(), 
+        } else signedContentMap = JSON.getMapper().readValue(signedFile.getSMIME().getSignedContent(),
                 new TypeReference<HashMap<String, Object>>() {});
         String timeStampDateStr = "";
         if(signedFile.getSMIME().getTimeStampToken() != null) {
@@ -100,7 +100,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
                     getTimeStampToken().getTimeStampInfo().getGenTime(),"dd/MMM/yyyy HH:mm");
         }
         try {
-            String signedContentStr = new ObjectMapper().configure(
+            String signedContentStr = JSON.getMapper().configure(
                     SerializationFeature.INDENT_OUTPUT,true).writeValueAsString(signedContentMap);
             signatureContentWebView.getEngine().loadContent(signedContentStr, "application/json");
         } catch(Exception ex) {
