@@ -24,7 +24,7 @@ public class TransactionVSToAmountCollector implements Collector<TransactionVS, 
         };*/
         return new Supplier<IncomesDto[]>() {
             @Override public IncomesDto[] get() {
-                return new IncomesDto[]{IncomesDto.ZERO};
+                return new IncomesDto[]{IncomesDto.ZERO()};
             }
         };
     }

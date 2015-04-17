@@ -1,6 +1,5 @@
 package org.votingsystem.model.currency;
 
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -18,7 +17,6 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
-
 import javax.persistence.*;
 import java.io.*;
 import java.math.BigDecimal;
@@ -30,20 +28,13 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.logging.Logger;
-
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
-
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity
 @Table(name="Currency")
-@NamedQueries({
-        @NamedQuery(name = "findCryptocurrBySerialNumberAndHashCert", query =
-                "SELECT c FROM Currency c WHERE c.serialNumber =:serialNumber and c.hashCertVS =:hashCertVS"),
-        @NamedQuery(name = "findCryptocurrByHashCert", query = "SELECT c FROM Currency c WHERE c.hashCertVS =:hashCertVS"),
-})
 public class Currency extends EntityVS implements Serializable  {
 
     private static Logger log = Logger.getLogger(Currency.class.getSimpleName());

@@ -69,13 +69,13 @@ public class StartupBean implements StartupVS {
 
     //@Schedule(dayOfWeek = "Mon", hour="0")
     public void initWeekPeriod() throws IOException {
-        checkCancelledCooins();
+        checkCurrencyCanceled();
         balancesBean.initWeekPeriod(Calendar.getInstance());
     }
 
-    private void checkCancelledCooins() {
+    private void checkCurrencyCanceled() {
         Date date = new Date();
-        log.info("checkCancelledCooins - date: " + date);
+        log.info("checkCurrencyCanceled - date: " + date);
         Query query = dao.getEM().createQuery("select c from Currency c where c.validTo <=:validTo and c.state =:state")
                 .setParameter("validTo", date).setParameter("state", Currency.State.OK);
         List<Currency> currencyList = query.getResultList();

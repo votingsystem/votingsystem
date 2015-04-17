@@ -77,7 +77,7 @@ public class TransactionVSBean {
     public ResultListDto<TransactionVSDto> processTransactionVS(MessageSMIME messageSMIME) throws Exception {
         TransactionVSDto request = messageSMIME.getSignedContent(TransactionVSDto.class);
         request.validate();
-        request.setSigner(messageSMIME.getUserVS());
+        request.setTransactionVSSMIME(messageSMIME);
         for(String IBAN : request.getToUserIBAN()) {
             ((ConfigVSImpl)config).validateIBAN(IBAN);
         }
@@ -115,13 +115,13 @@ public class TransactionVSBean {
 
     public TransactionVSDto validateGroupVSRequest(TransactionVSDto dto) throws ValidationExceptionVS {
         Query query = dao.getEM().createNamedQuery("findUserByRepresentativeAndIBAN").setParameter(
-                "representative", dto.getSigner()).setParameter("IBAN", dto.getToUserIBAN().get(0));
+                "representative", dto.getSigner()).setParameter("IBAN", dto.getFromUserIBAN());
         GroupVS groupVS = dao.getSingleResult(GroupVS.class, query);
         if(groupVS == null) {
             throw new ValidationExceptionVS(messages.get(
                     "groupNotFoundByIBANErrorMsg", dto.getFromUserIBAN(), dto.getSigner().getNif()));
         }
-        if(dto.getType() != TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
+        if(dto.getType() != TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
             List<UserVS> toUserVSList = new ArrayList<>();
             for(String groupUserIBAN : dto.getToUserIBAN()) {
                 query = dao.getEM().createNamedQuery("findSubscriptionByGroupAndStateAndUserIBAN").setParameter("groupVS", groupVS)

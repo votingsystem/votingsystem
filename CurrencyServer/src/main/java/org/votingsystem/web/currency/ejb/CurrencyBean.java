@@ -92,7 +92,7 @@ public class CurrencyBean {
 
     public Currency validateCurrency(Currency currency) throws ExceptionVS, TSPException {
         SMIMEMessage smimeMessage = currency.getSMIME();
-        Query query = em.createNamedQuery("findCryptocurrBySerialNumberAndHashCert")
+        Query query = em.createQuery("SELECT c FROM Currency c WHERE c.serialNumber =:serialNumber and c.hashCertVS =:hashCertVS")
                 .setParameter("serialNumber", currency.getX509AnonymousCert().getSerialNumber().longValue())
                 .setParameter("hashCertVS", currency.getHashCertVS());
         Currency currencyDB = dao.getSingleResult(Currency.class, query);
@@ -136,7 +136,7 @@ public class CurrencyBean {
 
     public List<Map> checkBundleState(List<String> hashCertVSList) {
         List<Map> resultList = new ArrayList<>();
-        Query query = em.createNamedQuery("findCryptocurrByHashCert");
+        Query query = em.createQuery("SELECT c FROM Currency c WHERE c.hashCertVS =:hashCertVS");
         for(String hashCertVS : hashCertVSList) {
             Map dataMap = new HashMap<>();
             Currency currency = (Currency) query.setParameter("hashCertVS", hashCertVS).getSingleResult();

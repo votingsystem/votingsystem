@@ -106,7 +106,7 @@
         uservsDtoChanged:function() {
             console.log(this.tagName + " - uservsDtoChanged - uservsDto: " + JSON.stringify( this.uservsDto))
             this.uservsDto = toJSON(this.uservsDto)
-            this.uservs = this.uservsDto.userVS
+            this.uservs = this.uservsDto
             if(this.uservs.name) {
                 var uservsType
                 if('BANKVS' == this.uservs.type) uservsType = "${msg.bankVSLbl}"

@@ -20,7 +20,6 @@ public class CurrencyAccountDto {
     private Date lastUpdated;
     private TagVS tag;
 
-
     public CurrencyAccountDto() {}
 
     public CurrencyAccountDto(CurrencyAccount currencyAccount) {

@@ -32,10 +32,10 @@
                     <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">{{caption}}</div>
                 </div>
 
-                <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
+                <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
                     <b>${msg.dateLbl}: </b>{{timeStampDate}}
                 </div>
-                <div style="display:{{messageToUser? 'block':'none'}}">
+                <div hidden?="{{!messageToUser}}">
                     <div  layout horizontal center center-justified  class="messageToUser">
                         <div>
                             <div id="messageToUser">{{messageToUser}}</div>
@@ -50,7 +50,7 @@
                 <div style=""><b>${msg.amountLbl}: </b>{{transactionvs.amount}} {{transactionvs.currency}}</div>
 
                 <div horizontal layout>
-                    <div style=""><b>${msg.dateLbl}: </b>{{transactionvs.dateCreated}}</div>
+                    <div style=""><b>${msg.dateLbl}: </b>{{getDate(transactionvs.dateCreated)}}</div>
                     <template if="{{transactionvs.validTo}}">
                         <div style="margin: 0 0 0 15px;"><b>${msg.validToLbl}: </b>{{transactionvs.validTo}}</div>
                     </template>
@@ -115,6 +115,9 @@
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected', function() {
                     this.isClientToolConnected = true
                 }.bind(this))
+            },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
             },
             getFromUserName: function (transactionvs) {
                 var result
@@ -187,7 +190,7 @@
        // {"fromUserVS":{"nif":null,"name":"Grupo sab 29 - 16:44","type":"GROUP","id":7,"sender":{"fromUserIBAN":"ES0878788989450000000007","fromUser":null}},
        // "dateCreated":"27 sep 2014 21:16","validTo":"29 sep 2014 00:00","id":5,"subject":"Asunto sábado españa - 21:16","type":"FROM_GROUP_TO_MEMBER","amount":"200.00",
        // "currency":"EUR","messageSMIMEURL":"http://currency:8086/CurrencyServer/messageSMIME/35","numChildTransactions":1,"tags":[{"id":3,"name":"HIDROGENO"}]}
-        showToUserInfo:function(e) {
+            showToUserInfo:function(e) {
                 var groupURL = "${restURL}/groupVS/" + e.target.templateInstance.model.transactionvs.toUserVS.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },

@@ -10,9 +10,11 @@ public class IncomesDto {
     private BigDecimal total = BigDecimal.ZERO;
     private BigDecimal timeLimited = BigDecimal.ZERO;
 
-    public static final IncomesDto ZERO = new IncomesDto(BigDecimal.ZERO, BigDecimal.ZERO);
-
     public IncomesDto() {}
+
+    public static IncomesDto ZERO() {
+        return new IncomesDto(BigDecimal.ZERO, BigDecimal.ZERO);
+    }
 
     public IncomesDto(BigDecimal total, BigDecimal timeLimited) {
         this.total = total;
@@ -51,14 +53,9 @@ public class IncomesDto {
     }
 
     public IncomesDto add(TransactionVS transactionVS) {
-        if(transactionVS.getIsTimeLimited()) {
-            if(timeLimited == null) timeLimited = transactionVS.getAmount();
-            else timeLimited = timeLimited.add(transactionVS.getAmount());
-        }
-        if(total == null) total = transactionVS.getAmount();
-        else total = total.add(transactionVS.getAmount());
+        if(transactionVS.getIsTimeLimited()) timeLimited = timeLimited.add(transactionVS.getAmount());
+        total = total.add(transactionVS.getAmount());
         return this;
     }
-
 
 }

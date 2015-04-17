@@ -8,6 +8,7 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
+import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.TestUtils;
@@ -46,6 +47,7 @@ public class TransactionVSPlanDto {
     public Map<String, Map<String, BigDecimal>> runBankVSTransactions(String smimeMessageSubject) throws Exception {
         setBankVSBalance(new HashMap<>());
         for(TransactionVSDto transactionVS : getBankVSList()) {
+            transactionVS.setType(TransactionVS.Type.FROM_BANKVS);
             UserVSDto fromUserVS = TestUtils.getUserVS(transactionVS.getFromUserVS().getId(), currencyServer);
             transactionVS.setFromUserVS(fromUserVS);
             UserVSDto toUserVS = TestUtils.getUserVS(transactionVS.getToUserVS().getId(), currencyServer);
@@ -70,6 +72,7 @@ public class TransactionVSPlanDto {
     public Map<String, Map<String, BigDecimal>> runGroupVSTransactions(String smimeMessageSubject) throws Exception {
         groupVSBalance = new HashMap<>();
         for(TransactionVSDto transactionVS : getGroupVSList()) {
+            transactionVS.setFromUserIBAN(groupVSDto.getIBAN());
             transactionVS.setUUID(UUID.randomUUID().toString());
             UserVSDto representative = groupVSDto.getRepresentative();
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
@@ -99,7 +102,7 @@ public class TransactionVSPlanDto {
             } else currencyMap.get(transactionVS.getCurrencyCode()).put(transactionVS.getTag().getName(), transactionVS.getAmount());
         } else {
             Map tagMap = new HashMap<>();
-            tagMap.put(transactionVS.getTag().getName(), transactionVS.getAmount());
+            tagMap.put(transactionVS.getTagName(), transactionVS.getAmount());
             currencyMap.put(transactionVS.getCurrencyCode(), tagMap);
         }
         return currencyMap;
@@ -122,9 +125,9 @@ public class TransactionVSPlanDto {
         List<TransactionVSDto> transactionsVSList = getTransacionList();
         Map<String, TransactionVSCounter> resultMap = new HashMap<>();
         for(TransactionVSDto transactionVS : transactionsVSList) {
-            if(resultMap.containsKey(transactionVS.getType().toString()))
+            if(resultMap.containsKey(transactionVS.getOperation().toString()))
                 resultMap.get(transactionVS.getType().toString()).addTransaction(transactionVS.getAmount());
-            else resultMap.put(transactionVS.getType().toString(), new TransactionVSCounter(transactionVS));
+            else resultMap.put(transactionVS.getOperation().toString(), new TransactionVSCounter(transactionVS));
         }
         return resultMap;
     }

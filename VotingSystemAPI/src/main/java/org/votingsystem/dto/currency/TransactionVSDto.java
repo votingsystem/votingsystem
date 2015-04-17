@@ -201,6 +201,7 @@ public class TransactionVSDto {
     }
 
     public TransactionVS.Type getType() {
+        if(type == null && operation != null) type = TransactionVS.Type.valueOf(operation.toString());
         return type;
     }
 
@@ -317,6 +318,12 @@ public class TransactionVSDto {
         return tag;
     }
 
+    public String getTagName() {
+        if(tag != null) return tag.getName();
+        else if (tags != null && !tags.isEmpty()) return tags.iterator().next();
+        return null;
+    }
+
     public void setTag(TagVS tag) {
         this.tag = tag;
     }
@@ -351,6 +358,7 @@ public class TransactionVSDto {
 
     public void setTransactionVSSMIME(MessageSMIME transactionVSSMIME) {
         this.transactionVSSMIME = transactionVSSMIME;
+        this.signer = transactionVSSMIME.getUserVS();
     }
 
     public String getUUID() {
