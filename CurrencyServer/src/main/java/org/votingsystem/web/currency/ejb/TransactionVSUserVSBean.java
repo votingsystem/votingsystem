@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
@@ -10,9 +11,10 @@ import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -24,17 +26,13 @@ public class TransactionVSUserVSBean {
 
     private static Logger log = Logger.getLogger(TransactionVSUserVSBean.class.getSimpleName());
 
-    @PersistenceContext private EntityManager em;
     @Inject ConfigVS config;
-    @Inject
-    DAOBean dao;
-    @Inject
-    SignatureBean signatureBean;
+    @Inject DAOBean dao;
+    @Inject SignatureBean signatureBean;
     @Inject WalletBean walletBean;
 
 
-    public SMIMEMessage processTransactionVS(TransactionVSDto request) throws Exception {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws Exception {
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 request.getSigner().getIBAN(), request.getTag(), request.getAmount(), request.getCurrencyCode());
         //Transactions from users doesn't need parent transaction
@@ -46,9 +44,12 @@ public class TransactionVSUserVSBean {
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(fromUser, toUser,
                 request.getTransactionVSSMIME().getSMIME(), request.getTransactionVSSMIME().getSMIME().getSubject());
         request.getTransactionVSSMIME().setSMIME(receipt);
-        em.merge(request.getTransactionVSSMIME().refresh());
-        log.info("operation: " + request.getOperation() + " - transactionVS: " + transactionVS.getId());
-        return receipt;
+        dao.merge(request.getTransactionVSSMIME().refresh());
+        TransactionVSDto dto = new TransactionVSDto(transactionVS);
+        dto.setMessageSMIME(Base64.getUrlEncoder().encodeToString(request.getTransactionVSSMIME().getContent()));
+        List<TransactionVSDto> listDto = Arrays.asList(dto);
+        ResultListDto<TransactionVSDto> resultListDto = new ResultListDto<>(listDto, request.getOperation());
+        return resultListDto;
     }
 
 }

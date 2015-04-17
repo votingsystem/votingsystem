@@ -332,7 +332,7 @@ public class UserVSResource {
     }
 
     @Path("/userInfoTest")
-    @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaTypeVS.JSON_SIGNED)
+    @POST @Produces(MediaType.APPLICATION_JSON)
     public Object userInfoTest(MessageSMIME messageSMIME, @Context HttpServletRequest req, @Context
         HttpServletResponse resp) throws Exception {
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();

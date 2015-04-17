@@ -2,7 +2,6 @@ package org.votingsystem.web.currency.ejb;
 
 import com.google.common.eventbus.Subscribe;
 import org.votingsystem.dto.currency.BalancesDto;
-import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
@@ -12,17 +11,12 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.ejb.DAOBean;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.ejb.Stateless;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.event.Reception;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.persistence.Query;
 import java.io.Serializable;
 import java.math.BigDecimal;

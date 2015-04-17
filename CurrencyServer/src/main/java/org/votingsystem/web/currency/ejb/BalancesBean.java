@@ -59,7 +59,6 @@ public class BalancesBean {
     @Inject MessagesBean messages;
 
     public void initWeekPeriod(Calendar requestDate) throws IOException {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long beginCalc = System.currentTimeMillis();
         //we know this is launch every Monday after 00:00 so we just make sure to select a day from last week
         TimePeriod timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(requestDate));

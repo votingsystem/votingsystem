@@ -1,7 +1,7 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.dto.currency.TransactionVSChildDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -40,12 +41,14 @@ public class TransactionVSGroupVSBean {
     @Inject MessagesBean messages;
 
 
-    public String processTransactionVS(TransactionVSDto request) throws Exception {
+    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws Exception {
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 request.getGroupVS().getIBAN(), request.getTag(), request.getAmount(), request.getCurrencyCode());
         if(request.getType() == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
             return processTransactionVSForAllMembers(request, accountFromMovements);
         } else {
+            ResultListDto<TransactionVSDto> resultListDto = null;
+            List<TransactionVSDto> resultList = new ArrayList<>();
             BigDecimal numReceptors = new BigDecimal(request.getNumReceptors());
             BigDecimal userPart = request.getAmount().divide(numReceptors, 4, RoundingMode.FLOOR);
             if(request.getType() != TransactionVS.Type.FROM_GROUP_TO_MEMBER ||
@@ -56,23 +59,26 @@ public class TransactionVSGroupVSBean {
                     accountFromMovements, request.getAmount(), request.getCurrencyCode(), request.getSubject(),
                     request.getValidTo(), request.getTransactionVSSMIME(), request.getTag()));
             for(UserVS toUser: request.getToUserVSList()) {
-                dao.persist(TransactionVS.generateTriggeredTransaction(
+                TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(
                         transactionParent, userPart, toUser, toUser.getIBAN()));
+                resultList.add(new TransactionVSDto(triggeredTransaction));
             }
             log.info("transactionType: " + request.getType().toString() + " - num. receptors: " +
                     request.getToUserVSList().size()  + " - TransactionVS parent id: " + transactionParent.getId() +
                     " - amount: " + request.getAmount().toString());
+            resultListDto = new ResultListDto(resultList, request.getOperation());
             if(request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER) {
-                return messages.get("transactionVSFromGroupToMemberOKMsg", request.getAmount() + " " +
-                        request.getCurrencyCode(), request.getToUserVSList().iterator().next().getNif());
+                resultListDto.setMessage(messages.get("transactionVSFromGroupToMemberOKMsg", request.getAmount() + " " +
+                        request.getCurrencyCode(), request.getToUserVSList().iterator().next().getNif()));
             } else if (request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
-                return messages.get("transactionVSFromGroupToMemberGroupOKMsg", request.getAmount() + " " +
-                        request.getCurrencyCode());
-            } else return null;
+                resultListDto.setMessage(messages.get("transactionVSFromGroupToMemberGroupOKMsg", request.getAmount() + " " +
+                        request.getCurrencyCode()));
+            }
+            return resultListDto;
         }
     }
 
-    private String processTransactionVSForAllMembers(TransactionVSDto request,
+    private ResultListDto<TransactionVSDto> processTransactionVSForAllMembers(TransactionVSDto request,
                                  Map<CurrencyAccount, BigDecimal> accountFromMovements) throws Exception {
         BigDecimal numReceptors = new BigDecimal(request.getNumReceptors());
         BigDecimal userPart = request.getAmount().divide(numReceptors, 2, RoundingMode.FLOOR);
@@ -83,25 +89,24 @@ public class TransactionVSGroupVSBean {
         Query query = dao.getEM().createNamedQuery("findSubscriptionByGroupAndState").setParameter(
                 "groupVS", request.getGroupVS()).setParameter("state", SubscriptionVS.State.ACTIVE);
         List<SubscriptionVS> subscriptionList = query.getResultList();
+        List<TransactionVSDto> resultList = new ArrayList<>();
         for(SubscriptionVS subscription : subscriptionList) {
-            SMIMEMessage receipt = signReceptorData(request, subscription.getUserVS().getNif(),
-                    subscriptionList.size(), userPart);
+            String toUserNIF = subscription.getUserVS().getNif();
+            TransactionVSDto triggeredDto = request.getGroupVSChild(
+                    toUserNIF, userPart, subscriptionList.size(), config.getRestURL());
+            SMIMEMessage receipt = signatureBean.getSMIME(signatureBean.getSystemUser().getNif(),
+                    toUserNIF, JSON.getMapper().writeValueAsString(triggeredDto), request.getOperation().toString(), null);
             MessageSMIME messageSMIMEReceipt = dao.persist(new MessageSMIME(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS,
                     request.getTransactionVSSMIME()));
-            dao.persist(TransactionVS.generateTriggeredTransaction(transactionParent, userPart, subscription.getUserVS(),
-                    subscription.getUserVS().getIBAN()));
+            TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(transactionParent,
+                    userPart, subscription.getUserVS(), subscription.getUserVS().getIBAN()));
+            resultList.add(new TransactionVSDto(triggeredTransaction));
         }
         log.info("transactionVS: " + transactionParent.getId() + " - operation: " + request.getOperation().toString());
-        return messages.get("transactionVSFromGroupToAllMembersGroupOKMsg", request.getAmount().toString() + " " +
-                request.getCurrencyCode());
-    }
-
-    SMIMEMessage signReceptorData(TransactionVSDto dto, String toUserNif, int numReceptors,
-                                  BigDecimal userPart) throws Exception {
-        TransactionVSChildDto transactionVSChildDto = new TransactionVSChildDto(dto.getTransactionVSSMIME().getId(),
-                toUserNif, numReceptors, userPart);
-        return signatureBean.getSMIME(signatureBean.getSystemUser().getNif(),
-                toUserNif, JSON.getMapper().writeValueAsString(transactionVSChildDto), dto.getType().toString(), null);
+        ResultListDto<TransactionVSDto> resultDto = new ResultListDto(resultList);
+        resultDto.setMessage(messages.get("transactionVSFromGroupToAllMembersGroupOKMsg", request.getAmount().toString() + " " +
+                request.getCurrencyCode()));
+        return resultDto;
     }
 
 }

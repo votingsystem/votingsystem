@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.ejb;
 
 import com.google.common.eventbus.Subscribe;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -25,9 +26,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Observes;
-import javax.enterprise.event.Reception;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.math.BigDecimal;
@@ -74,7 +72,7 @@ public class TransactionVSBean {
         log.info("newTransactionVS: " + transactionVS.getId());
     }
 
-    public String processTransactionVS(MessageSMIME messageSMIME) throws Exception {
+    public ResultListDto<TransactionVSDto> processTransactionVS(MessageSMIME messageSMIME) throws Exception {
         TransactionVSDto request = messageSMIME.getSignedContent(TransactionVSDto.class);
         validate(request, messageSMIME.getUserVS());
         switch(request.getOperation()) {
@@ -85,8 +83,7 @@ public class TransactionVSBean {
             case FROM_GROUP_TO_ALL_MEMBERS:
                 return transactionVSGroupVSBean.processTransactionVS(validateGroupVSRequest(request));
             case FROM_USERVS:
-                SMIMEMessage smime = transactionVSUserVSBean.processTransactionVS(validateUserVSRequest(request));
-                return new String(smime.getBytes(), StandardCharsets.UTF_8);
+                return transactionVSUserVSBean.processTransactionVS(validateUserVSRequest(request));
             default:
                 throw new ExceptionVS(messages.get("unknownTransactionErrorMsg",request.getOperation().toString()));
         }

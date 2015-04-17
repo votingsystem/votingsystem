@@ -55,16 +55,14 @@ public class TransactionVSPlanDto {
                     transactionVS.getFromUserVS().getNIF() + " type is '" +
                     transactionVS.getFromUserVS().getType().toString() + "' not a 'BANKVS'");
 
-
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
                         transactionVS.getFromUserVS().getNIF(), UserVS.Type.BANKVS);
-
             SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(transactionVS.getFromUserVS().getNIF(),
                     getCurrencyServer().getName(), JSON.getMapper().writeValueAsString(transactionVS), smimeMessageSubject);
             ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     getCurrencyServer().getTransactionVSServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-            updateCurrencyMap(getBankVSBalance(), transactionVS);
+            updateCurrencyMap(bankVSBalance, transactionVS);
         }
         return bankVSBalance;
     }

@@ -12,7 +12,6 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -33,11 +32,13 @@ public class TransactionVSDto {
     private String description;
     private String currencyCode;
     private String fromUser;
+    private String toUser;
     private String fromUserIBAN;
     private String receipt;
     private String bankIBAN;
     private String messageSMIME;
     private String messageSMIMEURL;
+    private String messageSMIMEParentURL;
     private String UUID;
     private BigDecimal amount;
     private Boolean isTimeLimited = Boolean.FALSE;
@@ -58,21 +59,7 @@ public class TransactionVSDto {
 
     public TransactionVSDto() {}
 
-
-    public void validate() throws ValidationExceptionVS {
-        if(operation == null) throw new ValidationExceptionVS("missing param 'operation'");
-        transactionType = TransactionVS.Type.valueOf(operation.toString());
-        if(amount == null) throw new ValidationExceptionVS("missing param 'amount'");
-        if(getCurrencyCode() == null) throw new ValidationExceptionVS("missing param 'currencyCode'");
-        if(subject == null) throw new ValidationExceptionVS("missing param 'subject'");
-        if(isTimeLimited) validTo = DateUtils.getCurrentWeekPeriod().getDateTo();
-        if(tags.size() != 1) { //for now transactions can only have one tag associated
-            throw new ValidationExceptionVS("invalid number of tags:" + tags.size());
-        }
-    }
-
-
-    public TransactionVSDto(TransactionVS transactionVS, String contextURL) {
+    public TransactionVSDto(TransactionVS transactionVS) {
         this.setId(transactionVS.getId());
         if(transactionVS.getFromUserVS() != null) {
             this.setFromUserVS(UserVSDto.BASIC(transactionVS.getFromUserVS()));
@@ -88,8 +75,24 @@ public class TransactionVSDto {
         this.setAmount(transactionVS.getAmount());
         this.setType(transactionVS.getType());
         this.setCurrencyCode(transactionVS.getCurrencyCode());
+    }
+
+    public TransactionVSDto(TransactionVS transactionVS, String contextURL) {
+        this(transactionVS);
         if(transactionVS.getMessageSMIME() != null) {
             setMessageSMIMEURL(contextURL + "/rest/messageSMIME/id/" + transactionVS.getMessageSMIME().getId());
+        }
+    }
+
+    public void validate() throws ValidationExceptionVS {
+        if(operation == null) throw new ValidationExceptionVS("missing param 'operation'");
+        transactionType = TransactionVS.Type.valueOf(operation.toString());
+        if(amount == null) throw new ValidationExceptionVS("missing param 'amount'");
+        if(getCurrencyCode() == null) throw new ValidationExceptionVS("missing param 'currencyCode'");
+        if(subject == null) throw new ValidationExceptionVS("missing param 'subject'");
+        if(isTimeLimited) validTo = DateUtils.getCurrentWeekPeriod().getDateTo();
+        if (tags.size() != 1) { //for now transactions can only have one tag associated
+            throw new ValidationExceptionVS("invalid number of tags:" + tags.size());
         }
     }
 
@@ -97,7 +100,7 @@ public class TransactionVSDto {
     public TransactionVS getTransactionVS() throws Exception {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setId(id);
-        transactionVS.setUserId(userId);
+        transactionVS.setUserId(getUserId());
         transactionVS.setType(type);
         transactionVS.setFromUser(fromUser);
         transactionVS.setFromUserIBAN(fromUserIBAN);
@@ -362,6 +365,17 @@ public class TransactionVSDto {
         }
     }
 
+    public TransactionVSDto getGroupVSChild(String receptorNIF, BigDecimal receptorPart, Integer numReceptors,
+                String restURL) {
+        TransactionVSDto dto =  new TransactionVSDto();
+        dto.setOperation(operation);
+        dto.setToUser(receptorNIF);
+        dto.setAmount(receptorPart);
+        dto.setMessageSMIMEParentURL(restURL + "/messageSMIME/id/" + transactionVSSMIME.getId());
+        dto.setNumReceptors(numReceptors);
+        return dto;
+    }
+
     public void setUUID(String UUID) {
         this.UUID = UUID;
     }
@@ -372,5 +386,29 @@ public class TransactionVSDto {
 
     public void setBankIBAN(String bankIBAN) {
         this.bankIBAN = bankIBAN;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getToUser() {
+        return toUser;
+    }
+
+    public void setToUser(String toUser) {
+        this.toUser = toUser;
+    }
+
+    public String getMessageSMIMEParentURL() {
+        return messageSMIMEParentURL;
+    }
+
+    public void setMessageSMIMEParentURL(String messageSMIMEParentURL) {
+        this.messageSMIMEParentURL = messageSMIMEParentURL;
     }
 }

@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.TransactionVS;
@@ -11,6 +12,7 @@ import org.votingsystem.web.ejb.DAOBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 /**
@@ -25,7 +27,7 @@ public class TransactionVSBankVSBean {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
 
-    public String processTransactionVS(TransactionVSDto request) throws ExceptionVS {
+    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws ExceptionVS {
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getSigner().getNif());
         BankVS bankVS = dao.getSingleResult(BankVS.class, query);
         if(bankVS == null) throw new ExceptionVS(messages.get("bankVSPrivilegesErrorMsg", request.getOperation().toString()));
@@ -35,6 +37,7 @@ public class TransactionVSBankVSBean {
         TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(
                 transactionParent, transactionParent.getAmount(), request.getReceptor(), request.getReceptor().getIBAN()));
         log.info("BankVS: " + bankVS.getId() + " - to user: " + request.getReceptor().getId());
-        return "Transaction OK";
+        return new ResultListDto(Arrays.asList(new TransactionVSDto(triggeredTransaction)), 0, 1, 1L);
     }
+
 }

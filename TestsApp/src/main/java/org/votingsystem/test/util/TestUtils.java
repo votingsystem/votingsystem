@@ -2,10 +2,8 @@ package org.votingsystem.test.util;
 
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;

@@ -86,7 +86,7 @@ public class TransactionVSResource {
         }
     }
 
-    @Path("/") @POST @Consumes(MediaTypeVS.JSON_SIGNED)
+    @Path("/") @POST
     public Response post(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
         return Response.ok().entity(transactionVSBean.processTransactionVS(messageSMIME)).build();
     }

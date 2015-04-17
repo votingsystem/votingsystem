@@ -96,7 +96,7 @@ public class ShopExampleResource {
     //Called from the mobile after the payment. The mobile sends the signed receipt with the completed transaction data.
     //here you must check with the tools of your choice the validity of the receipt. The receipt is an standard
     //S/MIME document (http://en.wikipedia.org/wiki/S/MIME)
-    @Path("/{uuid}/payment") @POST @Consumes(MediaTypeVS.JSON_SIGNED) // old_url -> /shop/$uuid/payment
+    @Path("/{uuid}/payment") @POST// old_url -> /shop/$uuid/payment
     public Object payment(@PathParam("uuid") String uuid, MessageSMIME messageSMIME,
               @Context HttpServletRequest req) throws Exception {
         shopExampleBean.sendResponse(uuid, messageSMIME.getSMIME());

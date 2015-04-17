@@ -7,11 +7,8 @@ import org.votingsystem.util.EntityVS;
 import javax.persistence.*;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import static javax.persistence.GenerationType.IDENTITY;

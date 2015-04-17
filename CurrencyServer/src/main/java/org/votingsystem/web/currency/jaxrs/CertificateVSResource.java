@@ -78,7 +78,7 @@ public class CertificateVSResource {
     }
 
     @Path("/addCertificateAuthority")
-    @POST @Consumes(MediaTypeVS.JSON_SIGNED) @Produces(MediaType.APPLICATION_JSON)
+    @POST @Produces(MediaType.APPLICATION_JSON)
     public Response addCertificateAuthority(MessageSMIME messageSMIME, @Context HttpServletRequest req,
             @Context HttpServletResponse resp) throws Exception {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(certificateVSBean.addCertificateAuthority(messageSMIME)))
@@ -86,7 +86,7 @@ public class CertificateVSResource {
     }
 
     @Path("/editCert")
-    @POST @Consumes(MediaTypeVS.JSON_SIGNED) @Produces(MediaType.APPLICATION_JSON)
+    @POST @Produces(MediaType.APPLICATION_JSON)
     public Response editCert(MessageSMIME messageSMIME, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws Exception {
         CertificateVS certificateVS = certificateVSBean.editCert(messageSMIME);

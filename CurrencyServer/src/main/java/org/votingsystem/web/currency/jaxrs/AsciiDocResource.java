@@ -53,7 +53,7 @@ public class AsciiDocResource {
     }
 
     @Path("/test")
-    @POST @Consumes(MediaTypeVS.JSON_SIGNED)
+    @POST
     public Response testSMIME(MessageSMIME messageSMIME, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String asciiDocStr = messageSMIME.getSMIME().getSignedContent();

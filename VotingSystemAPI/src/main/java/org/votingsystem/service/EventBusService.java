@@ -38,7 +38,7 @@ public class EventBusService {
     public void post(Object eventData) {
         try {
             queue.put(eventData);
-            log.info("-------- queue.put - queue.size: " + queue.size());
+            log.info("--- queue.put - queue.size: " + queue.size());
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -48,10 +48,11 @@ public class EventBusService {
 
     private EventBusService() {
         new Thread(() -> {
+            log.info("--- EventBusService started ---");
             while(isRunning.get()) {
                 try {
-                    log.info("-------- queue.take");
                     eventBus.post(queue.take());
+                    log.info("--- queue.take: " + queue.size());
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }

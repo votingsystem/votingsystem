@@ -1,6 +1,7 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.util.TypeVS;
 
 import java.util.List;
 
@@ -12,14 +13,29 @@ public class ResultListDto<T> {
     private Integer max;
     private Long totalCount;
     private Object State;
+    private String message;
+    private TypeVS type;
 
     public ResultListDto() { }
+
+    public ResultListDto(List<T> resultList) {
+        this(resultList, 0, resultList.size(), Long.valueOf(resultList.size()));
+    }
+
+    public ResultListDto(List<T> resultList, TypeVS type) {
+        this(resultList, 0, resultList.size(), Long.valueOf(resultList.size()));
+        this.type = type;
+    }
 
     public ResultListDto(List<T> resultList, Integer offset, Integer max, Long totalCount) {
         this.resultList = resultList;
         this.offset = offset;
         this.max = max;
         this.totalCount = totalCount;
+    }
+
+    public ResultListDto(List<T> resultList, Integer offset, Integer max, Integer totalCount) {
+        this(resultList, offset, max, Long.valueOf(totalCount));
     }
 
     public static <T> ResultListDto GROUPVS(List<T> groupList, Object state, Integer offset, Integer max, Long totalCount) {
@@ -31,7 +47,6 @@ public class ResultListDto<T> {
         result.setTotalCount(totalCount);
         return result;
     }
-
 
     public List<T> getResultList() {
         return resultList;
@@ -73,4 +88,19 @@ public class ResultListDto<T> {
         State = state;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public TypeVS getType() {
+        return type;
+    }
+
+    public void setType(TypeVS type) {
+        this.type = type;
+    }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.voting.RepresentationState;
 import org.votingsystem.util.ObjectUtils;
+
 import java.util.Date;
 
 /**

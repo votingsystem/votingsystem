@@ -1,14 +1,10 @@
 package org.votingsystem.web.currency.ejb;
 
 import org.iban4j.*;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.web.cdi.ConfigVS;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
-import javax.enterprise.event.Observes;
-import javax.enterprise.event.Reception;
 import javax.inject.Inject;
 import java.util.logging.Logger;
 

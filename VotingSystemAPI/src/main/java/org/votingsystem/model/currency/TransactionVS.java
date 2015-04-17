@@ -4,13 +4,14 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.service.EventBusService;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.TypeVS;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static javax.persistence.GenerationType.IDENTITY;

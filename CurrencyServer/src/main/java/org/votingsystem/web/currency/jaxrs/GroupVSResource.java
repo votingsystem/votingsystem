@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.SubscriptionVSDto;
@@ -228,7 +227,7 @@ public class GroupVSResource {
     }
 
     @Path("/newGroup")
-    @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaTypeVS.JSON_SIGNED)
+    @POST @Produces(MediaType.APPLICATION_JSON)
     public Object search(MessageSMIME messageSMIME,  @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         GroupVS groupVS = groupVSBean.saveGroup(messageSMIME);
@@ -239,7 +238,7 @@ public class GroupVSResource {
     }
 
     @Path("/id/{id}/edit")//old_url -> /groupVS/edit/$id
-    @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaTypeVS.JSON_SIGNED)
+    @POST @Produces(MediaType.APPLICATION_JSON)
     public Response edit(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
                        @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         GroupVS groupVS = dao.find(GroupVS.class, id);
@@ -265,7 +264,7 @@ public class GroupVSResource {
     }
 
     @Path("/id/{id}/cancel")
-    @POST @Consumes(MediaTypeVS.JSON_SIGNED)
+    @POST
     public Response cancel(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         GroupVS groupVS = dao.find(GroupVS.class, id);
@@ -279,7 +278,7 @@ public class GroupVSResource {
     }
 
     @Path("/id/{id}/subscribe")
-    @POST @Consumes(MediaTypeVS.JSON_SIGNED)
+    @POST
     public Object subscribe(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         GroupVS groupVS = dao.find(GroupVS.class, id);
@@ -312,7 +311,7 @@ public class GroupVSResource {
     }
 
     @Path("/activateUser")
-    @POST @Consumes(MediaTypeVS.JSON_SIGNED) @Produces(MediaType.APPLICATION_JSON)
+    @POST @Produces(MediaType.APPLICATION_JSON)
     public Object activateUser(MessageSMIME messageSMIME, @Context ServletContext context,
                             @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         SubscriptionVS subscriptionVS = subscriptionVSBean.activateUser(messageSMIME);
@@ -325,7 +324,7 @@ public class GroupVSResource {
     }
 
     @Path("/deActivateUser")
-    @POST @Consumes(MediaTypeVS.JSON_SIGNED) @Produces(MediaType.APPLICATION_JSON)
+    @POST @Produces(MediaType.APPLICATION_JSON)
     public Object deActivateUser(MessageSMIME messageSMIME, @Context ServletContext context,
                                @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         SubscriptionVS subscriptionVS = subscriptionVSBean.deActivateUser(messageSMIME);
