@@ -11,6 +11,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.math.BigDecimal;
+import static java.text.MessageFormat.*;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
@@ -37,25 +38,25 @@ public class CurrencyAccountBean {
         return userAccount;
     }
 
-    public Map getAccountsBalanceMap(UserVS userVS) {
+    public Map<String, Map<String, Map<String, BigDecimal>>> getAccountsBalanceMap(UserVS userVS) {
         Query query = dao.getEM().createNamedQuery("findAccountByTypeAndUser").setParameter(
                 "type", CurrencyAccount.Type.SYSTEM).setParameter("userVS", userVS);
         List<CurrencyAccount> currencyAccounts = query.getResultList();
-        Map<String,Map<String, Map>> result = new HashMap<>();
+        Map<String, Map<String, Map<String, BigDecimal>>> result = new HashMap<>();
         for(CurrencyAccount account: currencyAccounts) {
             if(result.containsKey(account.getIBAN())) {
                 if(result.get(account.getIBAN()).containsKey(account.getCurrencyCode())) {
                     result.get(account.getIBAN()).get(account.getCurrencyCode()).put(account.getTag().getName(),
-                            account.getBalance().toString());
+                            account.getBalance());
                 } else {
                     Map tagDataMap = new HashMap<>();
                     tagDataMap.put(account.getTag().getName(), account.getBalance().toString());
                     result.get(account.getIBAN()).put(account.getCurrencyCode(), tagDataMap);
                 }
             } else {
-                Map currencyDataMap = new HashMap<>();
-                Map tagDataMap = new HashMap<>();
-                tagDataMap.put(account.getTag().getName(), account.getBalance().toString());
+                Map<String, Map<String, BigDecimal>> currencyDataMap = new HashMap<>();
+                Map<String, BigDecimal> tagDataMap = new HashMap<>();
+                tagDataMap.put(account.getTag().getName(), account.getBalance());
                 currencyDataMap.put(account.getCurrencyCode(), tagDataMap);
                 result.put(account.getIBAN(), currencyDataMap);
             }
@@ -63,42 +64,45 @@ public class CurrencyAccountBean {
         return result;
     }
 
+    //Method that checks that the calculated balance from transactions corresponds with the accounts state
     public void checkBalancesMap(UserVS userVS, Map<String, Map<String, BigDecimal>> balancesMap) throws ExceptionVS {
-        Map<String, Map> accountsMap = getAccountsBalanceMap(userVS);
+        Map<String, Map<String, Map<String, BigDecimal>>> accountsMap = getAccountsBalanceMap(userVS);
         if(accountsMap.keySet().size() > 1) throw new ExceptionVS("UserVS: " + userVS.getId() + "has " +
                 accountsMap.keySet().size() + " accounts");
         if(accountsMap.keySet().isEmpty()) return;
-        accountsMap = accountsMap.values().iterator().next();
-        for(String currency : accountsMap.keySet()) {
+        //TODO - bucle when UserVS could have multiple accounts
+        Map<String, Map<String, BigDecimal>> mainAccountMap = accountsMap.values().iterator().next();
+        for(String currency : mainAccountMap.keySet()) {
             BigDecimal wildTagExpendedInTags = BigDecimal.ZERO;
             BigDecimal wildTagBalance = BigDecimal.ZERO;
             if(balancesMap.containsKey(currency)) {
-                for(Object tag: accountsMap.get(currency).keySet()) {
-                    BigDecimal tagAccount = new BigDecimal((String) accountsMap.get(currency).get(tag));
-                    if(balancesMap.get(currency).containsKey(tag)) {
-                        BigDecimal tagBalance = (BigDecimal) balancesMap.get(currency).get(tag);
-                        if(TagVS.WILDTAG.equals(tag)) wildTagBalance = tagBalance;
-                        else if(tagAccount.compareTo(tagBalance) != 0)
-                            wildTagExpendedInTags = wildTagExpendedInTags.add(tagBalance.subtract(tagAccount));
+                for(String tag: mainAccountMap.get(currency).keySet()) {
+                    BigDecimal tagAccountAmount = mainAccountMap.get(currency).get(tag);
+                    BigDecimal tagBalanceAmount = null;
+                    if((tagBalanceAmount = balancesMap.get(currency).get(tag)) != null) {
+                        if(TagVS.WILDTAG.equals(tag)) wildTagBalance = tagBalanceAmount;
+                        else if(tagAccountAmount.compareTo(tagBalanceAmount) != 0)
+                            wildTagExpendedInTags = wildTagExpendedInTags.add(tagBalanceAmount.subtract(tagAccountAmount));
                     } else {
-                        if(tagAccount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Balance Error with userVS "
-                                + userVS.getId() + " - " + tag + " - " + currency + " - accounts: " + accountsMap +
-                                "balances: " + balancesMap);
+                        if(tagAccountAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS(
+                                "tagAccountAmount Error with userVS " + userVS.getId() + " - " + tag + " - " +
+                                currency + " - tagAccountAmount: " + tagAccountAmount);
                     }
                 }
-            } else {
-                for(Object tag: accountsMap.get(currency).keySet()) {
-                    BigDecimal tagAccount = new BigDecimal((String) accountsMap.get(currency).get(tag));
-                    if(tagAccount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS("Error with userVS: " +
-                            userVS.getId() + " - tag " + tag + " " + currency + " - accounts: " + accountsMap +
-                            " - balance:" + balancesMap);
+            } else {//check if there's a tag with negative balance
+                for(String tag: mainAccountMap.get(currency).keySet()) {
+                    BigDecimal tagAccountAmount = mainAccountMap.get(currency).get(tag);
+                    if(tagAccountAmount.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS("Error with userVS: " +
+                            userVS.getId() + " - tag " + tag + " - tagAccountAmount: " + tagAccountAmount + " - currency: " + currency +
+                            " - accounts: " + accountsMap + " - balance:" + balancesMap);
                 }
             }
-            //check WILDTAG result
-            BigDecimal wildTagAccount = new BigDecimal((String) accountsMap.get(currency).get(TagVS.WILDTAG));
-            if(wildTagAccount.compareTo(wildTagBalance.subtract(wildTagExpendedInTags)) != 0) throw new ExceptionVS(
-                    "Balance Error with user " + "'$userVS.id' - '$currency' - accounts: '$accountsMap' - " +
-                            "wildTagExpendedInTags  not resolved '$wildTagExpendedInTags'");
+            //check WILDTAG balance result match with stored in account
+            BigDecimal wildTagAccountAmount = mainAccountMap.get(currency).get(TagVS.WILDTAG);
+            if(wildTagAccountAmount.compareTo(wildTagBalance.subtract(wildTagExpendedInTags)) != 0) throw new ExceptionVS(
+                    format("ERROR - wildTag mismatch -  userVS: ''{0}'' - currency: ''{1}'' - wildTagAccountAmount: ''{2}'' " +
+                            "- wildTagExpendedInTags: ''{3}'' - wildTagBalance: ''{4}'' - accounts: ''{5}''",
+                            userVS.getId(), currency, wildTagAccountAmount, wildTagExpendedInTags, wildTagBalance, accountsMap));
 
         }
     }

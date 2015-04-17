@@ -1,4 +1,4 @@
-package org.votingsystem.test.util;
+package org.votingsystem.test.misc;
 
 import org.votingsystem.util.FileUtils;
 
@@ -13,11 +13,15 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-class Utils {
+class PropertiesToLowerCase {
 
-    private static final Logger log = Logger.getLogger(Utils.class.getName());
+    private static final Logger log = Logger.getLogger(PropertiesToLowerCase.class.getName());
 
-    public static void propertyValuesToLowerCase(String sourceFilePath, String destFilePath) throws IOException {
+    private static String sourceFilePath;
+    private static String destFilePath;
+
+
+    public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         byte[] propertBytes = FileUtils.getBytesFromStream(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream(sourceFilePath));
@@ -33,5 +37,6 @@ class Utils {
         result.createNewFile();
         props.store(new FileOutputStream(result), null);
     }
+
 
 }

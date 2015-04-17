@@ -23,7 +23,8 @@ public class ExceptionMapperVS implements ExceptionMapper<Exception> {
     public Response toResponse(Exception exception) {
         try {
             if(exception instanceof ExceptionVS) {
-                log.log(Level.SEVERE, "--- ExceptionVS --- " + exception.getMessage());
+                //log.log(Level.SEVERE, "--- ExceptionVS --- " + exception.getMessage());
+                log.log(Level.SEVERE, exception.getMessage(), exception);
                 if(((ExceptionVS) exception).getMessageDto() != null) {
                     MessageDto messageDto = ((ExceptionVS) exception).getMessageDto();
                     return Response.status(messageDto.getStatusCode()).entity(
