@@ -24,7 +24,6 @@ import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ejb.Asynchronous;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
@@ -66,7 +65,6 @@ public class TransactionVSBean {
         EventBusService.getInstance().unRegister(this);
     }
 
-    @Asynchronous
     @Subscribe public void newTransactionVS(final TransactionVS transactionVS) {
         log.info("newTransactionVS: " + transactionVS.getId());
         try {

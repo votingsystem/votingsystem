@@ -13,6 +13,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
