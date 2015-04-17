@@ -41,4 +41,7 @@ public interface ConfigVS {
     public Properties getProperties();
 
     public File getServerDir();
+
+    public String getIBAN(Long userId);
+
 }

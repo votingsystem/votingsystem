@@ -38,7 +38,6 @@ public class GroupVSBean {
 
     @Inject DAOBean dao;
     @Inject MessagesBean messages;
-    @Inject IBANBean ibanBean;
     @Inject ConfigVS config;
     @Inject UserVSBean userVSBean;
     @Inject CurrencyAccountBean currencyAccountBean;
@@ -91,7 +90,8 @@ public class GroupVSBean {
         currencyAccountBean.checkUserVSAccount(signer);
         groupVS = dao.persist(new GroupVS(request.getName().trim(), UserVS.State.ACTIVE, signer,
                 request.getInfo(), request.getTags()));
-        groupVS.setIBAN(ibanBean.getIBAN(groupVS.getId()));
+        groupVS.setIBAN(config.getIBAN(groupVS.getId()));
+        dao.merge(groupVS);
         dao.persist(new CurrencyAccount(groupVS, BigDecimal.ZERO, Currency.getInstance("EUR").getCurrencyCode(),
                 config.getTag(TagVS.WILDTAG)));
         String fromUser = config.getServerName();

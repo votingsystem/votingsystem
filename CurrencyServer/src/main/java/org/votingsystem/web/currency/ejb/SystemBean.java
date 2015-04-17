@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.ejb;
 
-import com.google.common.eventbus.Subscribe;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
@@ -8,7 +7,6 @@ import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.ejb.DAOBean;
 
@@ -34,7 +32,6 @@ public class SystemBean implements Serializable{
     private static Logger log = Logger.getLogger(SystemBean.class.getName());
 
     @Inject DAOBean dao;
-    @Inject IBANBean ibanBean;
     @Inject UserVSBean userVSBean;
     @Inject GroupVSBean groupVSBean;
     @Inject BankVSBean bankVSBean;
@@ -45,18 +42,10 @@ public class SystemBean implements Serializable{
         log.info(" --- initialize --- ");
         Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
         systemUser = dao.getSingleResult(UserVS.class, query);
-        EventBusService.getInstance().register(this);
     }
 
     @PreDestroy public void destroy() {
         log.info(" --- destroy --- ");
-        EventBusService.getInstance().unRegister(this);
-    }
-
-    @Subscribe public void newUserVS(final UserVS userVS) {
-        log.info("newUserVS: " + userVS.getId());
-        userVS.setIBAN(ibanBean.getIBAN(userVS.getId()));
-        dao.merge(userVS);
     }
 
     public BalancesDto genBalanceForSystem(TimePeriod timePeriod) throws Exception {

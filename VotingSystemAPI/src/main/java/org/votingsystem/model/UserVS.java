@@ -486,11 +486,6 @@ public class UserVS extends EntityVS implements Serializable {
         }
     }
 
-    @PostPersist
-    public void postPersist() {
-        EventBusService.getInstance().post(this);
-    }
-
     @PreUpdate
     public void preUpdate() {
         setLastUpdated(new Date());

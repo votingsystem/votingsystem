@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.cdi;
 
+import org.iban4j.*;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -116,6 +117,26 @@ public class ConfigVSImpl implements ConfigVS {
 
     public void setX509TimeStampServerCert(X509Certificate x509TimeStampServerCert) {
         this.x509TimeStampServerCert = x509TimeStampServerCert;
+    }
+
+    @Override
+    public String getIBAN(Long userId) {
+        String accountNumberStr = String.format("%010d", userId);
+        Iban iban = new Iban.Builder().countryCode(CountryCode.ES).bankCode(bankCode).branchCode(branchCode)
+                .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
+        return iban.toString();
+    }
+
+    public String getIBAN(Long userId, String bankCodeStr, String branchCodeStr) {
+        String accountNumberStr = String.format("%010d", userId);
+        Iban iban = new Iban.Builder().countryCode(CountryCode.ES).bankCode(bankCodeStr).branchCode(branchCodeStr)
+                .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
+        return iban.toString();
+    }
+
+    public String validateIBAN(String IBAN) throws IbanFormatException, InvalidCheckDigitException, UnsupportedCountryException {
+        IbanUtil.validate(IBAN);
+        return IBAN;
     }
 
     public EnvironmentVS getMode() {

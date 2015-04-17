@@ -114,6 +114,9 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
+    public String getIBAN(Long userId) { return null;}
+
+    @Override
     public String getRestURL() {
         return null;
     }

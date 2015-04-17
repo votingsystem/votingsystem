@@ -11,11 +11,12 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.math.BigDecimal;
-import static java.text.MessageFormat.*;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.text.MessageFormat.format;
 
 
 @Stateless
@@ -23,15 +24,11 @@ public class CurrencyAccountBean {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject IBANBean ibanBean;
-
 
     public CurrencyAccount checkUserVSAccount(UserVS userVS) throws Exception {
         Query query = dao.getEM().createNamedQuery("findAccountByUser").setParameter("userVS", userVS);
         CurrencyAccount userAccount = dao.getSingleResult(CurrencyAccount.class, query);
         if(userAccount == null) {
-            userVS.setIBAN(ibanBean.getIBAN(userVS.getId()));
-            dao.merge(userVS);
             userAccount = dao.persist(new CurrencyAccount(userVS, BigDecimal.ZERO, Currency.getInstance("EUR")
                     .getCurrencyCode(), config.getTag(TagVS.WILDTAG)));
         }

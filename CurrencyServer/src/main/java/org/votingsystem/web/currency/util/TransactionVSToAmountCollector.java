@@ -45,8 +45,8 @@ public class TransactionVSToAmountCollector implements Collector<TransactionVS, 
     @Override public BinaryOperator<IncomesDto[]> combiner() {
         /*problems with spring-loaded
         return (a, b) -> {
-            a[0].put("total", a[0].get("total").add(b[0].get("total")));
-            a[0].put("timeLimited", a[0].get("timeLimited").add(b[0].get("timeLimited")));
+            a[0].setTotal(a[0].getTotal().add(b[0].getTotal()));
+            a[0].setTimeLimited(a[0].getTimeLimited().add(b[0].getTimeLimited()));
             return a; };*/
         return new  BinaryOperator<IncomesDto[]>() {
             @Override public IncomesDto[] apply(IncomesDto[] incom1, IncomesDto[] incom2) {

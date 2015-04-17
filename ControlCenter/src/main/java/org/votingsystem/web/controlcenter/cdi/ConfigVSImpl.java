@@ -48,8 +48,6 @@ public class ConfigVSImpl implements ConfigVS {
     private String timeStampServerURL;
     private EnvironmentVS mode;
     private Properties props;
-    private String bankCode = null;
-    private String  branchCode = null;
     private String emailAdmin = null;
     private String staticResURL = null;
     private File serverDir = null;
@@ -165,21 +163,8 @@ public class ConfigVSImpl implements ConfigVS {
         return webURL;
     }
 
-    public String getBankCode() {
-        return bankCode;
-    }
-
-    public void setBankCode(String bankCode) {
-        this.bankCode = bankCode;
-    }
-
-    public String getBranchCode() {
-        return branchCode;
-    }
-
-    public void setBranchCode(String branchCode) {
-        this.branchCode = branchCode;
-    }
+    @Override
+    public String getIBAN(Long userId) { return null;}
 
     public String getSystemNIF() {
         return systemNIF;

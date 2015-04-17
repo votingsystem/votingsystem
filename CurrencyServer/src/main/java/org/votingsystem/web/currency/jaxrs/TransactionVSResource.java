@@ -9,7 +9,6 @@ import org.votingsystem.model.currency.CurrencyTransactionBatch;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
@@ -86,12 +85,13 @@ public class TransactionVSResource {
         }
     }
 
-    @Path("/") @POST
+    @Path("/") @POST @Produces(MediaType.APPLICATION_JSON)
     public Response post(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
-        return Response.ok().entity(transactionVSBean.processTransactionVS(messageSMIME)).build();
+        ResultListDto dto = transactionVSBean.processTransactionVS(messageSMIME);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
-    @Path("/from/{dateFrom}/to/{dateTo}") //old_url -> /transactionVS/from/$dateFrom/to/$dateTo
+    @Path("/from/{dateFrom}/to/{dateTo}")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response search(@DefaultValue("0") @QueryParam("offset") int offset,
                        @DefaultValue("100") @QueryParam("max") int max,

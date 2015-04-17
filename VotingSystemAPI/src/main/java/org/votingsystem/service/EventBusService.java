@@ -52,7 +52,7 @@ public class EventBusService {
             while(isRunning.get()) {
                 try {
                     eventBus.post(queue.take());
-                    log.info("--- queue.take: " + queue.size());
+                    log.info("--- queue.take - queue.size: " + queue.size());
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }

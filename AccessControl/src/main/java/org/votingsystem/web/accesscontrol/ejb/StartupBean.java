@@ -4,6 +4,7 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.web.accesscontrol.cdi.ConfigVSImpl;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -29,7 +30,6 @@ public class StartupBean implements StartupVS {
     @Inject DAOBean dao;
     @Inject TimeStampBean timeStampBean;
     @Inject SignatureBean signatureBean;
-    @Inject ControlCenterBean controlCenterBean;
     @Inject EventVSElectionBean eventVSElectionBean;
 
 
@@ -67,7 +67,7 @@ public class StartupBean implements StartupVS {
 
     @Override
     public void mainServletInitialized() throws Exception{
-        controlCenterBean.init();
+        ((ConfigVSImpl)config).initControlCenter();
     }
 
 }

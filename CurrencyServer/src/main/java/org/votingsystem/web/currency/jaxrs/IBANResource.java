@@ -3,7 +3,8 @@ package org.votingsystem.web.currency.jaxrs;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.web.currency.ejb.IBANBean;
+import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.currency.cdi.ConfigVSImpl;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
 import org.votingsystem.web.ejb.DAOBean;
 
@@ -32,8 +33,8 @@ public class IBANResource {
 
     private static final Logger log = Logger.getLogger(IBANResource.class.getSimpleName());
 
-    @Inject IBANBean ibanBean;
     @Inject DAOBean dao;
+    @Inject ConfigVS config;
     @Inject TransactionVSBean transactionVSBean;
 
     @Path("/from/{IBANCode}") //old_url -> /IBAN/from/$IBANCode
@@ -43,7 +44,8 @@ public class IBANResource {
         Iban iban = Iban.valueOf(IBANCode);
         List result = new ArrayList<>();
 
-        if(iban.getBankCode().equals(ibanBean.getBankCode()) && iban.getBranchCode().equals(ibanBean.getBranchCode())) {
+        if(iban.getBankCode().equals(((ConfigVSImpl)config).getBankCode()) && iban.getBranchCode()
+                .equals(((ConfigVSImpl) config).getBranchCode())) {
             log.log(Level.FINE, "VotingSystem IBAN");
             Query query = dao.getEM().createQuery("select t from TransactionVS t where t.fromUserVS.IBAN =:IBAN")
                     .setParameter("IBAN", iban.toString());

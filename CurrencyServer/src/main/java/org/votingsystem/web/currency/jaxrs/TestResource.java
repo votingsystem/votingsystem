@@ -69,6 +69,14 @@ public class TestResource {
         }
     }
 
+    @GET @Path("/test")
+    public Response test(@Context ServletContext context, @Context HttpServletRequest req,
+                             @Context HttpServletResponse resp) {
+        UserVS userVS = new UserVS("98765432Q", UserVS.Type.SYSTEM, "test con id");
+        userVS.setId(10000L);
+        dao.merge(userVS);
+        return Response.ok().entity("userVS.getId(): " + userVS.getId()).build();
+    }
 
     @GET @Path("/eventBus")
     public Response eventBus(@Context ServletContext context, @Context HttpServletRequest req,

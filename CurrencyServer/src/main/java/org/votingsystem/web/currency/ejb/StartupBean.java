@@ -31,7 +31,6 @@ public class StartupBean implements StartupVS {
     private static Logger log = Logger.getLogger(StartupBean.class.getSimpleName());
 
     @Inject DAOBean dao;
-    @Inject IBANBean ibanBean;
     @Inject ConfigVS config;
     @Inject TimeStampBean timeStampBean;
     @Inject SignatureBean signatureBean;
@@ -46,10 +45,13 @@ public class StartupBean implements StartupVS {
             Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
             UserVS systemUser = dao.getSingleResult(UserVS.class, query);
             if(systemUser == null) { //First time run
-                systemUser = dao.persist(new UserVS(config.getSystemNIF(), UserVS.Type.SYSTEM, config.getServerName()));
-                systemUser.setIBAN(ibanBean.getIBAN(systemUser.getId()));
+                UserVS userVS = new UserVS(config.getSystemNIF(), UserVS.Type.SYSTEM, config.getServerName());
+                systemUser = dao.persist(userVS);
+                systemUser.setIBAN(config.getIBAN(systemUser.getId()));
                 dao.merge(systemUser);
                 TagVS wildTag = dao.persist(new TagVS(TagVS.WILDTAG));
+                dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO,
+                        java.util.Currency.getInstance("EUR").getCurrencyCode(), wildTag));
                 URL res = res = Thread.currentThread().getContextClassLoader().getResource("defaultTags.txt");
                 String[] defaultTags = FileUtils.getStringFromInputStream(res.openStream()).split(",");
                 for(String tag: defaultTags) {

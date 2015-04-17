@@ -10,7 +10,6 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.*;
 import org.votingsystem.service.EventBusService;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
@@ -18,18 +17,19 @@ import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
+import org.votingsystem.web.currency.cdi.ConfigVSImpl;
 import org.votingsystem.web.currency.util.BalanceUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.ejb.Asynchronous;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +47,6 @@ public class TransactionVSBean {
     @Inject MessagesBean messages;
     @Inject DAOBean dao;
     @Inject SystemBean systemBean;
-    @Inject IBANBean ibanBean;
     @Inject SignatureBean signatureBean;
     @Inject BankVSBean bankVSBean;
     @Inject GroupVSBean groupVSBean;
@@ -67,14 +66,28 @@ public class TransactionVSBean {
         EventBusService.getInstance().unRegister(this);
     }
 
-
+    @Asynchronous
     @Subscribe public void newTransactionVS(final TransactionVS transactionVS) {
         log.info("newTransactionVS: " + transactionVS.getId());
+        try {
+            updateCurrencyAccounts(transactionVS);
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
     public ResultListDto<TransactionVSDto> processTransactionVS(MessageSMIME messageSMIME) throws Exception {
         TransactionVSDto request = messageSMIME.getSignedContent(TransactionVSDto.class);
-        validate(request, messageSMIME.getUserVS());
+        request.validate();
+        request.setSigner(messageSMIME.getUserVS());
+        for(String IBAN : request.getToUserIBAN()) {
+            ((ConfigVSImpl)config).validateIBAN(IBAN);
+        }
+        String transactionTag =  request.getTags().iterator().next();
+        if(request.isTimeLimited() && TagVS.WILDTAG.equals(transactionTag.toUpperCase()))
+            throw new ValidationExceptionVS("WILDTAG transactions cannot be time limited");
+        request.setTag(config.getTag(transactionTag));
+        if(request.getTag() == null) throw new ValidationExceptionVS("unknown tag:" + transactionTag);
         switch(request.getOperation()) {
             case FROM_BANKVS:
                 return transactionVSBankVSBean.processTransactionVS(validateBankVSRequest(request));
@@ -87,19 +100,6 @@ public class TransactionVSBean {
             default:
                 throw new ExceptionVS(messages.get("unknownTransactionErrorMsg",request.getOperation().toString()));
         }
-    }
-
-    public void validate(TransactionVSDto dto, UserVS signer) throws ValidationExceptionVS {
-        dto.validate();
-        dto.setSigner(signer);
-        for(String IBAN : dto.getToUserIBAN()) {
-            ibanBean.validateIBAN(IBAN);
-        }
-        String transactionTag =  dto.getTags().iterator().next();
-        if(dto.isTimeLimited() && TagVS.WILDTAG.equals(transactionTag.toUpperCase()))
-            throw new ValidationExceptionVS("WILDTAG transactions cannot be time limited");
-        dto.setTag(config.getTag(transactionTag));
-        if(dto.getTag() == null) throw new ValidationExceptionVS("unknown tag:" + transactionTag);
     }
 
     public TransactionVSDto validateBankVSRequest(TransactionVSDto dto) throws ValidationExceptionVS {
@@ -144,7 +144,6 @@ public class TransactionVSBean {
         return dto;
     }
 
-
     public TransactionVSDto validateUserVSRequest(TransactionVSDto dto) throws ValidationExceptionVS{
         if(TypeVS.FROM_BANKVS != dto.getOperation()) throw new ValidationExceptionVS(
                 "operation expected: 'FROM_BANKVS' - operation found: " + dto.getOperation());
@@ -158,7 +157,6 @@ public class TransactionVSBean {
         if(dto.getFromUser() == null)  throw new ValidationExceptionVS("missing param 'fromUser'");
         return dto;
     }
-
 
     public BalancesDto getBalancesDto(UserVS userVS, TimePeriod timePeriod) throws Exception {
         if(userVS instanceof BankVS) return bankVSBean.getBalancesDto((BankVS) userVS, timePeriod);
@@ -214,7 +212,7 @@ public class TransactionVSBean {
         }
     }
 
-    public void updateBalances(TransactionVS transactionVS) throws Exception {
+    public void updateCurrencyAccounts(TransactionVS transactionVS) throws Exception {
         if(transactionVS.getState() == TransactionVS.State.OK) {
             boolean isParentTransaction = (transactionVS.getTransactionParent() == null);
             switch(transactionVS.getType()) {
@@ -271,11 +269,11 @@ public class TransactionVSBean {
         Map<String, Map<String, BigDecimal>> balancesFrom =
                 BalanceUtils.getBalancesFrom(getTransactionFromList(userVS, timePeriod));
         Map<String, Map<String, IncomesDto>> balancesTo = BalanceUtils.getBalancesTo(getTransactionToList(userVS, timePeriod));
-        if(balancesFrom.get("currencyCode") == null) return BigDecimal.ZERO;
-        BigDecimal expendedForTagVS = (BigDecimal) balancesFrom.get(currencyCode).get(tagVS.getName());
+        if(balancesFrom.get(currencyCode) == null) return BigDecimal.ZERO;
+        BigDecimal expendedForTagVS = balancesFrom.get(currencyCode).get(tagVS.getName());
         if(expendedForTagVS == null || BigDecimal.ZERO.compareTo(expendedForTagVS) == 0) return BigDecimal.ZERO;
-        BigDecimal incomesForTagVS = (BigDecimal) ((Map)balancesTo.get(currencyCode).get(tagVS.getName())).get("total");
-        if(incomesForTagVS.compareTo(expendedForTagVS) < 0) return expendedForTagVS.subtract(incomesForTagVS);
+        BigDecimal totalIncomesForTagVS = balancesTo.get(currencyCode).get(tagVS.getName()).getTotal();
+        if(totalIncomesForTagVS.compareTo(expendedForTagVS) < 0) return expendedForTagVS.subtract(totalIncomesForTagVS);
         else return BigDecimal.ZERO;
     }
 

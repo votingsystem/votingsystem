@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.ast.DocumentHeader;
 import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.inject.Inject;

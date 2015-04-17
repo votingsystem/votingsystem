@@ -3,7 +3,6 @@ package org.votingsystem.web.currency.jaxrs;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.Payment;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;

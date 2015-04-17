@@ -2,7 +2,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
-import org.votingsystem.web.accesscontrol.ejb.ControlCenterBean;
+import org.votingsystem.web.accesscontrol.cdi.ConfigVSImpl;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
@@ -33,7 +33,6 @@ public class ServerInfoResource {
     @Inject Logger log;
     @EJB SignatureBean signatureBean;
     @EJB TimeStampBean timeStampBean;
-    @EJB ControlCenterBean controlCenterBean;
 
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Map doGet(@Context HttpServletRequest req, @Context HttpServletResponse resp) {
@@ -43,7 +42,7 @@ public class ServerInfoResource {
         serverInfo.put("serverURL", config.getContextURL());
         serverInfo.put("state",  ActorVS.State.OK);
         serverInfo.put("date", new Date());
-        serverInfo.put("controlCenter", new ActorVSDto(controlCenterBean.getControlCenter()));
+        serverInfo.put("controlCenter", new ActorVSDto(((ConfigVSImpl)config).getControlCenter()));
         serverInfo.put("environmentMode", config.getMode());
         serverInfo.put("timeStampCertPEM", new String(timeStampBean.getSigningCertPEMBytes()));
         serverInfo.put("timeStampServerURL", config.getTimeStampServerURL());

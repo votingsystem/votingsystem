@@ -13,7 +13,6 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -54,7 +53,9 @@ public class SubscriptionVSBean {
         Map<String, String> deviceData = CertUtils.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID);
         if (userVSDB == null) {
             userVSDB = dao.persist(userVS);
-            log.log(Level.FINE, "checkUser ### NEW UserVS: " + userVSDB.getNif());
+            userVS.setIBAN(config.getIBAN(userVS.getId()));
+            dao.merge(userVS);
+            log.log(Level.INFO, "checkUser ### NEW UserVS: " + userVSDB.getNif());
         } else {
             userVSDB.setCertificateCA(userVS.getCertificateCA());
             userVSDB.setCertificate(userVS.getCertificate());
