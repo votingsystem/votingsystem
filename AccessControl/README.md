@@ -43,3 +43,6 @@ the property **vs.timeStampServerURL** must be set according to that.
 6. Use this command to build and deploy the archive:
 
             mvn clean package wildfly:deploy
+            
+#### Certificates
+[Certificates](src/main/webapp/WEB-INF/votingsystem/certs/readme.md)

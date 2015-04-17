@@ -19,3 +19,6 @@ server configuration just after the extensions section:
 4. Use this command to build and deploy the archive:
 
             mvn clean package wildfly:deploy
+            
+#### Certificates
+[Certificates](src/main/resources/readme.md)
