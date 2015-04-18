@@ -8,10 +8,14 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.Payment;
 import org.votingsystem.util.TypeVS;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -48,6 +52,14 @@ public class TransactionVSDto {
     private List<String> toUserIBAN = new ArrayList<>();
     private Long numChildTransactions;
 
+    private String infoURL;
+    private UserVS.Type userToType;
+    private Payment paymentMethod;
+    private List<Payment> paymentOptions;
+    private Date date;
+    private List<String> coinCsrList;
+    private TransactionVSDetailsDto details;
+
     private TransactionVS.Type transactionType;
     @JsonIgnore private List<UserVS> toUserVSList;
     @JsonIgnore private UserVS signer;
@@ -81,6 +93,21 @@ public class TransactionVSDto {
         if(transactionVS.getMessageSMIME() != null) {
             setMessageSMIMEURL(contextURL + "/rest/messageSMIME/id/" + transactionVS.getMessageSMIME().getId());
         }
+    }
+
+    public static TransactionVSDto PAYMENT_REQUEST(String toUser, UserVS.Type userToType, BigDecimal amount,
+               String currencyCode, String toUserIBAN, String subject, String tag) {
+        TransactionVSDto dto = new TransactionVSDto();
+        dto.setOperation(TypeVS.PAYMENT_REQUEST);
+        dto.setUserToType(userToType);
+        dto.setToUser(toUser);
+        dto.setAmount(amount);
+        dto.setCurrencyCode(currencyCode);
+        dto.setSubject(subject);
+        dto.setToUserIBAN(Arrays.asList(toUserIBAN));
+        dto.setTags(new HashSet<>(Arrays.asList(tag)));
+        dto.setUUID(java.util.UUID.randomUUID().toString());
+        return dto;
     }
 
     public void validate() throws ValidationExceptionVS {
@@ -428,5 +455,50 @@ public class TransactionVSDto {
 
     public void setMessageSMIMEParentURL(String messageSMIMEParentURL) {
         this.messageSMIMEParentURL = messageSMIMEParentURL;
+    }
+
+    public UserVS.Type getUserToType() {
+        return userToType;
+    }
+
+    public void setUserToType(UserVS.Type userToType) {
+        this.userToType = userToType;
+    }
+
+    public List<Payment> getPaymentOptions() {
+        return paymentOptions;
+    }
+
+    public void setPaymentOptions(List<Payment> paymentOptions) {
+        this.paymentOptions = paymentOptions;
+    }
+
+    public void validateReceipt(SMIMEMessage smimeMessage) throws IOException, ValidationExceptionVS {
+        TransactionVSDto receiptDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), TransactionVSDto.class);
+        if(type != receiptDto.getType()) throw new ValidationExceptionVS("expected type " + type + " found " +
+                receiptDto.getType());
+        if(userToType != receiptDto.getUserToType()) throw new ValidationExceptionVS("expected userToType " + userToType +
+                " found " + receiptDto.getUserToType());
+        if(!toUserIBAN.equals(receiptDto.getToUserIBAN())) throw new ValidationExceptionVS("expected toUserIBAN " + toUserIBAN +
+                " found " + receiptDto.getToUserIBAN());
+        if(!subject.equals(receiptDto.getSubject())) throw new ValidationExceptionVS("expected subject " + subject +
+                " found " + receiptDto.getSubject());
+        if(!toUser.equals(receiptDto.getToUser())) throw new ValidationExceptionVS(
+                "expected toUser " + toUser + " found " + receiptDto.getToUser());
+        if(amount.compareTo(receiptDto.getAmount()) != 0) throw new ValidationExceptionVS(
+                "expected amount " + amount + " amount " + receiptDto.getAmount());
+        if(!currencyCode.equals(receiptDto.getCurrencyCode())) throw new ValidationExceptionVS(
+                "expected currencyCode " + currencyCode + " found " + receiptDto.getCurrencyCode());
+        if(UUID.equals(receiptDto.getUUID())) throw new ValidationExceptionVS(
+                "expected UUID " + UUID + " found " + receiptDto.getUUID());
+        if(!details.equals(receiptDto.getDetails())) throw new ValidationExceptionVS(
+                "expected details " + details + " found " + receiptDto.getDetails());}
+
+    public TransactionVSDetailsDto getDetails() {
+        return details;
+    }
+
+    public void setDetails(TransactionVSDetailsDto details) {
+        this.details = details;
     }
 }

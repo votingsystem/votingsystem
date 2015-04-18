@@ -3,7 +3,6 @@ package org.votingsystem.dto.voting;
 import java.util.Map;
 
 /**
-* @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 public class RepresentativesData {

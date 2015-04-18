@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
-* @author jgzornoza
 * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 @Entity

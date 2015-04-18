@@ -5,6 +5,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.currency.ejb.DashBoardBean;
+
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;

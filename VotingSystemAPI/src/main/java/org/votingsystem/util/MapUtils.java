@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class MapUtils {

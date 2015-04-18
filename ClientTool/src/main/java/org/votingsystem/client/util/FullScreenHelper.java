@@ -9,7 +9,6 @@ import javafx.stage.Stage;
  * stage.setFullScreenExitHint("");
  * stage.setFullScreen(!stage.isFullScreen());
  *
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class FullScreenHelper {

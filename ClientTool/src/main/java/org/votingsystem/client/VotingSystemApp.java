@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 import static java.util.stream.Collectors.toList;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class VotingSystemApp extends Application {

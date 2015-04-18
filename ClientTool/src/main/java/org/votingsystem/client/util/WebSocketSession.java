@@ -5,7 +5,6 @@ import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.util.TypeVS;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class WebSocketSession<T> {

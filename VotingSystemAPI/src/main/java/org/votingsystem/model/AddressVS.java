@@ -1,16 +1,13 @@
 package org.votingsystem.model;
 
-import org.votingsystem.throwable.ValidationExceptionVS;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.util.Country;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.text.ParseException;
+import java.text.MessageFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -19,6 +16,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 */
 @Entity
 @Table(name="AddressVS")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AddressVS extends EntityVS implements Serializable {
 
     public enum Type {CERTIFICATION_OFFICE}
@@ -121,45 +119,18 @@ public class AddressVS extends EntityVS implements Serializable {
         this.country = country;
     }
 
-    public void checkAddress(AddressVS address) throws ValidationExceptionVS {
-        if(address.getName() != null) if(!address.getName().equals(name)) throw new ValidationExceptionVS(
-                "expected name " + address.getName() + " found " + name);
-        if(address.getPostalCode() != null) if(!address.getPostalCode().equals(postalCode))
-                throw new ValidationExceptionVS("expected postalCode " + address.getName() +
-                " found " + postalCode);
-        if(address.getProvince() != null) if(!address.getProvince().equals(province))
-                throw new ValidationExceptionVS("expected province " + address.getProvince() +
-                " found " + province);
-        if(address.getCity() != null) if(!address.getCity().equals(city))
-            throw new ValidationExceptionVS("expected city " + address.getCity() + " found " + city);
-        if(address.getCountry() != null) if(!address.getCountry().equals(country))
-            throw new ValidationExceptionVS("expected country " + address.getCountry() + " found " + country);
+    public boolean equals(AddressVS address) {
+        if(address.getName() != null) if(!address.getName().equals(name)) return false;
+        if(address.getPostalCode() != null) if(!address.getPostalCode().equals(postalCode)) return false;
+        if(address.getProvince() != null) if(!address.getProvince().equals(province)) return false;
+        if(address.getCity() != null) if(!address.getCity().equals(city)) return false;
+        if(address.getCountry() != null) if(!address.getCountry().equals(country)) return false;
+        return true;
     }
 
-    public static AddressVS parse(Map dataMap) throws ParseException {
-        AddressVS result = new AddressVS();
-        if(dataMap.containsKey("id")) result.setId(((Integer) dataMap.get("id")).longValue());
-        if(dataMap.containsKey("name")) result.setName((String) dataMap.get("name"));
-        if(dataMap.containsKey("metaInf")) result.setMetaInf((String) dataMap.get("metaInf"));
-        if(dataMap.containsKey("postalCode")) result.setPostalCode((String) dataMap.get("postalCode"));
-        if(dataMap.containsKey("province")) result.setProvince((String) dataMap.get("province"));
-        if(dataMap.containsKey("city")) result.setCity((String) dataMap.get("city"));
-        if(dataMap.containsKey("dateCreated")) result.setDateCreated(
-                DateUtils.getDateFromString((String) dataMap.get("dateCreated")));
-        return result;
-    }
-
-    public Map toMap() {
-        Map result = new HashMap<>();
-        if(id != null) result.put("id", id);
-        if(name != null) result.put("name", name);
-        if(metaInf != null) result.put("metaInf", metaInf);
-        if(postalCode != null) result.put("postalCode", postalCode);
-        if(province != null) result.put("province", province);
-        if(city != null) result.put("city", city);
-        if(dateCreated != null) result.put("dateCreated", dateCreated);
-        if(country != null) result.put("country", country.toString());
-        return result;
+    @Override public String toString() {
+        return MessageFormat.format("[name: {0} - postalCode: {1} - province: {2} - city: {3} - country: {4}]",
+                name, postalCode, province, city, country);
     }
 
 }

@@ -4,7 +4,6 @@ package org.votingsystem.web.currency.websocket;
 import java.util.logging.Logger;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 //@ServerEndpoint(value = "/websocket/service", configurator = SocketConfigurator.class)

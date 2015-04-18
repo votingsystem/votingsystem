@@ -35,7 +35,6 @@ import java.util.logging.Logger;
 import static org.votingsystem.client.Browser.showMessage;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class TimeStampPane extends GridPane {

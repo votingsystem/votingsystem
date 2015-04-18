@@ -1,17 +1,17 @@
 package org.votingsystem.web.currency.ejb;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
-import org.votingsystem.web.currency.util.TransactionRequest;
-
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.servlet.AsyncContext;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -25,58 +25,51 @@ import java.util.logging.Logger;
 @Stateless
 public class ShopExampleBean {
 
-    private static Logger log = Logger.getLogger(ShopExampleBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(ShopExampleBean.class.getName());
 
-    private static Map<String, TransactionRequest> transactionRequestMap = new HashMap<String, TransactionRequest>();
+    private static final Map<String, AsyncRequestBundle> transactionRequestMap = new HashMap<>();
 
     @Inject ConfigVS config;
     @Inject MessagesBean messages;
 
 
-    public void putTransactionRequest(String sessionId, TransactionRequest transactionRequest) {
+    public void putTransactionRequest(String sessionId, TransactionVSDto transactionRequest) {
         log.info("putTransactionRequest - sessionId $sessionId");
-        transactionRequestMap.put(sessionId, transactionRequest);
+        transactionRequestMap.put(sessionId, new AsyncRequestBundle(transactionRequest, null));
     }
 
-    public TransactionRequest getTransactionRequest(String sessionId) {
-        return transactionRequestMap.get(sessionId);
+    public TransactionVSDto getTransactionRequest(String sessionId) {
+        return transactionRequestMap.get(sessionId).dto;
     }
 
     public Set<String> getSessionKeys() {
         return transactionRequestMap.keySet();
     }
 
-    public void bindContext(String sessionId, AsyncContext ctx) {
-        transactionRequestMap.get(sessionId).setAsyncContext(ctx);
+    public void bindContext(String sessionId, AsyncResponse asyncResponse) {
+        transactionRequestMap.get(sessionId).asyncResponse = asyncResponse;
     }
 
     public void sendResponse(String sessionId, SMIMEMessage smimeMessage) throws ExceptionVS, IOException, ParseException {
         log.info("sendResponse");
-        TransactionRequest transactionRequest = transactionRequestMap.remove(sessionId);
-        if(transactionRequest != null) {
-            SignedReceiptContent receiptContent = new SignedReceiptContent(smimeMessage.getSignedContent());
-            receiptContent.transactionRequest.checkRequest(transactionRequest);
-            Map dataMap = new HashMap<>();
-            dataMap.put("status", ResponseVS.SC_OK);
-            dataMap.put("message", receiptContent.getMessage());
-            transactionRequest.getAsyncContext().getResponse().getWriter().write(
-                    new ObjectMapper().writeValueAsString(dataMap));
-            transactionRequest.getAsyncContext().complete();
+        AsyncRequestBundle asyncRequestBundle = transactionRequestMap.remove(sessionId);
+        if(asyncRequestBundle != null) {
+            try {
+                asyncRequestBundle.dto.validateReceipt(smimeMessage);
+                asyncRequestBundle.asyncResponse.resume(Response.ok().entity(JSON.getMapper()
+                        .writeValueAsBytes(asyncRequestBundle.dto)).type(MediaTypeVS.JSON).build());
+            } catch (Exception ex) {
+                asyncRequestBundle.asyncResponse.resume(Response.status(ResponseVS.SC_ERROR).entity(ex.getMessage()).build());
+            }
         } else throw new ExceptionVS("transactionRequest with sessionId:" + sessionId + " has expired");
     }
 
-    private class SignedReceiptContent {
-
-        TransactionRequest transactionRequest;
-
-        public SignedReceiptContent(String signedContent) throws ExceptionVS, IOException, ParseException {
-            transactionRequest = TransactionRequest.parse(new ObjectMapper().readValue(
-                    signedContent, new TypeReference<HashMap<String, Object>>() {}));
-        }
-
-        public String getMessage() {
-            return messages.get("transactionRequestOKMsg", transactionRequest.getAmount().toString(),
-                    transactionRequest.getCurrencyCode());
+    private static class AsyncRequestBundle {
+        TransactionVSDto dto;
+        AsyncResponse asyncResponse;
+        public AsyncRequestBundle(TransactionVSDto dto, AsyncResponse asyncResponse) {
+            this.dto = dto;
+            this.asyncResponse = asyncResponse;
         }
     }
 

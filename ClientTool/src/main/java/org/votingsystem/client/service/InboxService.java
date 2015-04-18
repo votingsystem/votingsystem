@@ -30,7 +30,6 @@ import static java.util.stream.Collectors.toList;
 import static org.votingsystem.client.Browser.showMessage;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class InboxService {

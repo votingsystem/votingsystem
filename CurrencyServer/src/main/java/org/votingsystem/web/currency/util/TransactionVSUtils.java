@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class TransactionVSUtils {

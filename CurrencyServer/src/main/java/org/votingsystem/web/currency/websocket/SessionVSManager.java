@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toSet;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class SessionVSManager {

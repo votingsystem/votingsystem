@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 import static java.util.stream.Collectors.toSet;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class CurrencyCheckerTask extends Task<CurrencyCheckResponse> {

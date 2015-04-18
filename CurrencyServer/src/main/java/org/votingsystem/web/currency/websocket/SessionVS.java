@@ -3,8 +3,8 @@ package org.votingsystem.web.currency.websocket;
 import org.votingsystem.model.UserVS;
 
 import javax.websocket.Session;
+
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class SessionVS {

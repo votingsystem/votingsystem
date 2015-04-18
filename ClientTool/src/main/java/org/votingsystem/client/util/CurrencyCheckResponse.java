@@ -5,7 +5,6 @@ import org.votingsystem.model.ResponseVS;
 import java.util.Set;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class CurrencyCheckResponse {

@@ -3,7 +3,6 @@ package org.votingsystem.client.util;
 import org.votingsystem.util.ContentTypeVS;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public interface DocumentVS {

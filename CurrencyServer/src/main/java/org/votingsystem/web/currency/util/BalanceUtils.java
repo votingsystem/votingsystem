@@ -14,7 +14,6 @@ import java.util.stream.Collector;
 import static java.util.stream.Collectors.groupingBy;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class BalanceUtils {

@@ -54,7 +54,6 @@ import static java.util.stream.Collectors.toSet;
 import static org.votingsystem.util.ContextVS.*;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class SignatureService extends Service<ResponseVS> {

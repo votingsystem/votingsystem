@@ -17,7 +17,6 @@ import org.votingsystem.client.util.Utils;
 import java.io.IOException;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class DialogVS {

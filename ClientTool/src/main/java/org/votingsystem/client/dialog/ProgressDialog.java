@@ -20,7 +20,6 @@ import org.votingsystem.util.ContextVS;
 import java.util.logging.Logger;
 
 /**
- * @author jgzornoza
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class ProgressDialog extends VBox {

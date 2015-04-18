@@ -14,10 +14,10 @@
                 <div horizontal="" layout="">
                     <h3>
                         ${msg.transactionValueLbl}:
-                        ${transactionRequest.getAmount()} ${transactionRequest.getCurrencyCode()} - ${transactionRequest.getTagVS()}
+                        ${transactionRequest.getAmount()} ${transactionRequest.getCurrencyCode()} - ${transactionRequest.getTagName()}
                     </h3>
                 </div>
-                ${msg.paymentOptionsLbl}: ${transactionRequest.paymentOptions}
+                ${msg.paymentOptionsLbl}: ${transactionRequest.getPaymentOptions}
                 <img src="http://localhost:8080/CurrencyServer/QR?cht=qr&amp;chs=250x250&amp;chl=${paymentInfoServiceURL}" alt="read it with your mobile" height="250" width="250"/>
                 <core-ajax auto="" response="{{data}}" on-core-response="{{ajaxHandler}}" handleAs="json"
                            url="${restURL}/shopExample/listenTransactionChanges/${shopSessionID}"></core-ajax>
