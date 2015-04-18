@@ -9,20 +9,17 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.GroupVS;
-import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TimePeriod;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.cdi.ConfigVSImpl;
 import org.votingsystem.web.currency.util.BalanceUtils;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -31,7 +28,10 @@ import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,13 +45,9 @@ public class TransactionVSBean {
     private static Logger log = Logger.getLogger(TransactionVSBean.class.getName());
 
     @Inject ConfigVS config;
+    @Inject DAOBean dao;
     @Inject MessagesBean messages;
     @Inject BalancesBean balancesBean;
-    @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
-    @Inject BankVSBean bankVSBean;
-    @Inject GroupVSBean groupVSBean;
-    @Inject UserVSBean userVSBean;
     @Inject TransactionVSGroupVSBean transactionVSGroupVSBean;
     @Inject TransactionVSBankVSBean transactionVSBankVSBean;
     @Inject TransactionVSUserVSBean transactionVSUserVSBean;
@@ -90,73 +86,16 @@ public class TransactionVSBean {
         if(request.getTag() == null) throw new ValidationExceptionVS("unknown tag:" + transactionTag);
         switch(request.getOperation()) {
             case FROM_BANKVS:
-                return transactionVSBankVSBean.processTransactionVS(validateBankVSRequest(request));
+                return transactionVSBankVSBean.processTransactionVS(request);
             case FROM_GROUP_TO_MEMBER:
             case FROM_GROUP_TO_MEMBER_GROUP:
             case FROM_GROUP_TO_ALL_MEMBERS:
-                return transactionVSGroupVSBean.processTransactionVS(request, validateGroupVSRequest(request));
+                return transactionVSGroupVSBean.processTransactionVS(request);
             case FROM_USERVS:
-                return transactionVSUserVSBean.processTransactionVS(validateUserVSRequest(request));
+                return transactionVSUserVSBean.processTransactionVS(request);
             default:
                 throw new ExceptionVS(messages.get("unknownTransactionErrorMsg",request.getOperation().toString()));
         }
-    }
-
-    public TransactionVSDto validateBankVSRequest(TransactionVSDto dto) throws ValidationExceptionVS {
-        if(TypeVS.FROM_BANKVS != dto.getOperation())
-            throw new ValidationExceptionVS(
-                    "peration expected: 'FROM_BANKVS' - operation found: " + dto.getOperation());
-        if(dto.getToUserIBAN().size() != 1) throw new ValidationExceptionVS(
-                "there can be only one receptor. request.toUserIBAN:" + dto.getToUserIBAN());
-        Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", dto.getToUserIBAN().get(0));
-        UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
-        if(toUserVS == null) throw new ValidationExceptionVS("invalid 'toUserIBAN':" + dto.getToUserIBAN().get(0));
-        dto.setReceptor(toUserVS);
-        return dto;
-    }
-
-    public GroupVS validateGroupVSRequest(TransactionVSDto dto) throws ValidationExceptionVS {
-        Query query = dao.getEM().createNamedQuery("findUserByRepresentativeAndIBAN").setParameter(
-                "representative", dto.getSigner()).setParameter("IBAN", dto.getFromUserIBAN());
-        GroupVS groupVS = dao.getSingleResult(GroupVS.class, query);
-        if(groupVS == null) {
-            throw new ValidationExceptionVS(messages.get(
-                    "groupNotFoundByIBANErrorMsg", dto.getFromUserIBAN(), dto.getSigner().getNif()));
-        }
-        if(dto.getType() != TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
-            List<UserVS> toUserVSList = new ArrayList<>();
-            for(String groupUserIBAN : dto.getToUserIBAN()) {
-                query = dao.getEM().createQuery("SELECT s FROM SubscriptionVS s WHERE s.groupVS =:groupVS AND " +
-                        "s.state =:state AND s.userVS.IBAN =:IBAN").setParameter("groupVS", groupVS)
-                        .setParameter("state", SubscriptionVS.State.ACTIVE)
-                        .setParameter("IBAN", groupUserIBAN);
-                SubscriptionVS subscription = dao.getSingleResult(SubscriptionVS.class, query);
-                if(subscription == null) throw new ValidationExceptionVS(messages.get("groupUserNotFoundByIBANErrorMsg",
-                        groupUserIBAN, groupVS.getName()));
-                toUserVSList.add(subscription.getUserVS());
-            }
-            if(toUserVSList.isEmpty()) throw new ValidationExceptionVS("transaction without valid receptors");
-            dto.setToUserVSList(toUserVSList);
-        } else if (dto.getType() == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
-            query = dao.getEM().createNamedQuery("countSubscriptionByGroupVSAndState").setParameter("groupVS", groupVS)
-                    .setParameter("state", SubscriptionVS.State.ACTIVE);
-            dto.setNumReceptors(((Long)query.getSingleResult()).intValue());
-        }
-        return groupVS;
-    }
-
-    public TransactionVSDto validateUserVSRequest(TransactionVSDto dto) throws ValidationExceptionVS{
-        if(TypeVS.FROM_BANKVS != dto.getOperation()) throw new ValidationExceptionVS(
-                "operation expected: 'FROM_BANKVS' - operation found: " + dto.getOperation());
-        if(dto.getToUserIBAN().size() != 1) throw new ValidationExceptionVS(
-                "there can be only one receptor. request.toUserIBAN: " + dto.getToUserIBAN().get(0));
-        Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", dto.getToUserIBAN().get(0));
-        UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
-        if(toUserVS == null) throw new ValidationExceptionVS("invalid 'toUserIBAN':" + dto.getToUserIBAN().get(0));
-        //this is to get data from banks clients
-        if(dto.getFromUserIBAN() == null)  throw new ValidationExceptionVS("missing param 'fromUserIBAN'");
-        if(dto.getFromUser() == null)  throw new ValidationExceptionVS("missing param 'fromUser'");
-        return dto;
     }
 
     private CurrencyAccount updateUserVSAccountTo(TransactionVS transactionVS) throws ExceptionVS {

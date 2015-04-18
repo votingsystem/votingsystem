@@ -2,9 +2,12 @@ package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -28,6 +31,7 @@ public class TransactionVSBankVSBean {
     @Inject DAOBean dao;
 
     public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws ExceptionVS {
+        validateRequest(request);
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getSigner().getNif());
         BankVS bankVS = dao.getSingleResult(BankVS.class, query);
         if(bankVS == null) throw new ExceptionVS(messages.get("bankVSPrivilegesErrorMsg", request.getOperation().toString()));
@@ -38,6 +42,20 @@ public class TransactionVSBankVSBean {
                 transactionParent, transactionParent.getAmount(), request.getReceptor(), request.getReceptor().getIBAN()));
         log.info("BankVS: " + bankVS.getId() + " - to user: " + request.getReceptor().getId());
         return new ResultListDto(Arrays.asList(new TransactionVSDto(triggeredTransaction)), 0, 1, 1L);
+    }
+
+
+    public TransactionVSDto validateRequest(TransactionVSDto dto) throws ValidationExceptionVS {
+        if(TypeVS.FROM_BANKVS != dto.getOperation())
+            throw new ValidationExceptionVS(
+                    "peration expected: 'FROM_BANKVS' - operation found: " + dto.getOperation());
+        if(dto.getToUserIBAN().size() != 1) throw new ValidationExceptionVS(
+                "there can be only one receptor. request.toUserIBAN:" + dto.getToUserIBAN());
+        Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", dto.getToUserIBAN().get(0));
+        UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
+        if(toUserVS == null) throw new ValidationExceptionVS("invalid 'toUserIBAN':" + dto.getToUserIBAN().get(0));
+        dto.setReceptor(toUserVS);
+        return dto;
     }
 
 }

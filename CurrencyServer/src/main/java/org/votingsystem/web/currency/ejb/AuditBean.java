@@ -270,7 +270,7 @@ public class AuditBean {
             String elapsedTime = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc);
             log.info("processed " + offset + " of " + numTotalUsers + " - elapsedTime: " + elapsedTime);
         }
-        BalancesDto systemBalance = balancesBean.genBalanceForSystem(timePeriod);
+        BalancesDto systemBalance = balancesBean.getSystemBalancesDto(timePeriod);
         Map userBalances = new HashMap<>();
         userBalances.put("systemBalance", systemBalance);
         userBalances.put("groupVSBalanceList", groupVSBalanceList);

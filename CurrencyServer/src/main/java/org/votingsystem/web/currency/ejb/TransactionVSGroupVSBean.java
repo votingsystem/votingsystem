@@ -10,6 +10,7 @@ import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -42,7 +43,8 @@ public class TransactionVSGroupVSBean {
     @Inject MessagesBean messages;
 
 
-    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request, GroupVS groupVS) throws Exception {
+    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws Exception {
+        GroupVS groupVS = validateRequest(request);
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 groupVS.getIBAN(), request.getTag(), request.getAmount(), request.getCurrencyCode());
         if(request.getType() == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
@@ -75,6 +77,37 @@ public class TransactionVSGroupVSBean {
             }
             return resultListDto;
         }
+    }
+
+
+    public GroupVS validateRequest(TransactionVSDto dto) throws ValidationExceptionVS {
+        Query query = dao.getEM().createNamedQuery("findUserByRepresentativeAndIBAN").setParameter(
+                "representative", dto.getSigner()).setParameter("IBAN", dto.getFromUserIBAN());
+        GroupVS groupVS = dao.getSingleResult(GroupVS.class, query);
+        if(groupVS == null) {
+            throw new ValidationExceptionVS(messages.get(
+                    "groupNotFoundByIBANErrorMsg", dto.getFromUserIBAN(), dto.getSigner().getNif()));
+        }
+        if(dto.getType() != TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
+            List<UserVS> toUserVSList = new ArrayList<>();
+            for(String groupUserIBAN : dto.getToUserIBAN()) {
+                query = dao.getEM().createQuery("SELECT s FROM SubscriptionVS s WHERE s.groupVS =:groupVS AND " +
+                        "s.state =:state AND s.userVS.IBAN =:IBAN").setParameter("groupVS", groupVS)
+                        .setParameter("state", SubscriptionVS.State.ACTIVE)
+                        .setParameter("IBAN", groupUserIBAN);
+                SubscriptionVS subscription = dao.getSingleResult(SubscriptionVS.class, query);
+                if(subscription == null) throw new ValidationExceptionVS(messages.get("groupUserNotFoundByIBANErrorMsg",
+                        groupUserIBAN, groupVS.getName()));
+                toUserVSList.add(subscription.getUserVS());
+            }
+            if(toUserVSList.isEmpty()) throw new ValidationExceptionVS("transaction without valid receptors");
+            dto.setToUserVSList(toUserVSList);
+        } else if (dto.getType() == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
+            query = dao.getEM().createNamedQuery("countSubscriptionByGroupVSAndState").setParameter("groupVS", groupVS)
+                    .setParameter("state", SubscriptionVS.State.ACTIVE);
+            dto.setNumReceptors(((Long)query.getSingleResult()).intValue());
+        }
+        return groupVS;
     }
 
     private ResultListDto<TransactionVSDto> processTransactionVSForAllMembers(TransactionVSDto request,

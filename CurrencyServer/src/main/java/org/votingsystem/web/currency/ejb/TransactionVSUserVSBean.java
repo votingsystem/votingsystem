@@ -2,15 +2,19 @@ package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.Query;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Base64;
@@ -33,6 +37,7 @@ public class TransactionVSUserVSBean {
 
 
     public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws Exception {
+        validateRequest(request);
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 request.getSigner().getIBAN(), request.getTag(), request.getAmount(), request.getCurrencyCode());
         //Transactions from users doesn't need parent transaction
@@ -50,6 +55,21 @@ public class TransactionVSUserVSBean {
         List<TransactionVSDto> listDto = Arrays.asList(dto);
         ResultListDto<TransactionVSDto> resultListDto = new ResultListDto<>(listDto, request.getOperation());
         return resultListDto;
+    }
+
+
+    public TransactionVSDto validateRequest(TransactionVSDto dto) throws ValidationExceptionVS {
+        if(TypeVS.FROM_BANKVS != dto.getOperation()) throw new ValidationExceptionVS(
+                "operation expected: 'FROM_BANKVS' - operation found: " + dto.getOperation());
+        if(dto.getToUserIBAN().size() != 1) throw new ValidationExceptionVS(
+                "there can be only one receptor. request.toUserIBAN: " + dto.getToUserIBAN().get(0));
+        Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", dto.getToUserIBAN().get(0));
+        UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
+        if(toUserVS == null) throw new ValidationExceptionVS("invalid 'toUserIBAN':" + dto.getToUserIBAN().get(0));
+        //this is to get data from banks clients
+        if(dto.getFromUserIBAN() == null)  throw new ValidationExceptionVS("missing param 'fromUserIBAN'");
+        if(dto.getFromUser() == null)  throw new ValidationExceptionVS("missing param 'fromUser'");
+        return dto;
     }
 
 }

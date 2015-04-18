@@ -42,7 +42,7 @@ public class BalancesBean {
     @Inject TransactionVSBean transactionVSBean;
     @Inject CurrencyAccountBean currencyAccountBean;
 
-    public BalancesDto genBalanceForSystem(TimePeriod timePeriod) throws Exception {
+    public BalancesDto getSystemBalancesDto(TimePeriod timePeriod) throws Exception {
         log.info("timePeriod: " + timePeriod.toString());
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("timePeriod", timePeriod);
@@ -62,7 +62,6 @@ public class BalancesBean {
         return balancesDto;
     }
 
-
     public BalancesDto getBankVSBalancesDto(BankVS bankVS, TimePeriod timePeriod) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
                 transactionVSBean.getTransactionFromList(bankVS, timePeriod), TransactionVS.Source.FROM);
@@ -70,7 +69,6 @@ public class BalancesBean {
         balancesDto.setUserVS(userVSBean.getUserVSDto(bankVS, false));
         return balancesDto;
     }
-
 
     public BalancesDto getGroupVSBalancesDto(GroupVS groupVS, TimePeriod timePeriod) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
