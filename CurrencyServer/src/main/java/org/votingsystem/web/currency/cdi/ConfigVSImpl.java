@@ -15,9 +15,10 @@ import org.votingsystem.web.ejb.TimeStampBean;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
+import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.persistence.Query;
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +33,9 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@ApplicationScoped
+@Singleton
 @Named(value="config")
+@Startup
 public class ConfigVSImpl implements ConfigVS {
 
     private static final Logger log = Logger.getLogger(ConfigVS.class.getSimpleName());

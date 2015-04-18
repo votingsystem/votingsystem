@@ -5,8 +5,8 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.web.cdi.ConfigVS;
 
-import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.inject.Named;
 import java.io.File;
 import java.net.URL;
 import java.security.cert.X509Certificate;
@@ -17,7 +17,8 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Singleton
+@javax.inject.Singleton
+@Named(value="config")
 @Startup
 public class ConfigVSImpl implements ConfigVS {
 

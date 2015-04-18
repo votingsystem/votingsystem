@@ -23,8 +23,8 @@ import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.currency.CurrencyBatch;
+import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.*;
 

@@ -7,7 +7,6 @@ import org.votingsystem.services.TimeStampService;
 import org.votingsystem.services.impl.TimeStampServiceImpl;
 import org.votingsystem.signature.util.TimeStampResponseGenerator;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.web.cdi.ConfigVS;
 
