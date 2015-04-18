@@ -2,6 +2,7 @@ package org.votingsystem.web.accesscontrol.cdi;
 
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.*;
+import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
@@ -9,12 +10,17 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
+import org.votingsystem.web.ejb.TimeStampBean;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import javax.ejb.Schedule;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -41,6 +47,8 @@ public class ConfigVSImpl implements ConfigVS {
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionBean;
+    @Inject EventVSElectionBean eventVSElectionBean;
+    @Inject TimeStampBean timeStampBean;
     /* Executor service for asynchronous processing */
     @Resource(name="comp/DefaultManagedExecutorService")
     private ManagedExecutorService executorService;
@@ -108,6 +116,38 @@ public class ConfigVSImpl implements ConfigVS {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
+
+    @PostConstruct
+    public void initialize() throws Exception {
+        log.info("initialize");
+        Query query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
+                .setParameter("type", UserVS.Type.SYSTEM);
+        UserVS systemUser = dao.getSingleResult(UserVS.class, query);
+        if(systemUser == null) {
+            dao.persist(new UserVS(systemNIF, serverName, UserVS.Type.SYSTEM));
+        }
+        query = dao.getEM().createQuery("select a from ActorVS a where a.serverURL =:serverURL")
+                .setParameter("serverURL", contextURL);
+        AccessControlVS actorVS = dao.getSingleResult(AccessControlVS.class, query);
+        if(actorVS == null) {
+            actorVS = new AccessControlVS();
+            actorVS.setServerURL(contextURL);
+            actorVS.setState(ActorVS.State.OK).setName(serverName);
+            dao.persist(actorVS);
+        }
+        timeStampBean.init();
+        signatureBean.init();
+
+    }
+
+    @Schedule(dayOfWeek = "*")
+    public void generateElectionBackups() throws Exception {
+        log.info("scheduled - generateElectionBackups");
+        eventVSElectionBean.generateBackups();
+    }
+
+    @PreDestroy
+    private void shutdown() { log.info(" --------- shutdown ---------");}
 
     public String getProperty(String key) {
         return props.getProperty(key);
@@ -189,8 +229,7 @@ public class ConfigVSImpl implements ConfigVS {
         return systemNIF;
     }
 
-    @Override
-    public String getEmailAdmin() {
+    @Override public String getEmailAdmin() {
         return emailAdmin;
     }
 
@@ -245,8 +284,9 @@ public class ConfigVSImpl implements ConfigVS {
         }
     }
 
-    public void initControlCenter() {
-        log.info("initControlCenter");
+    @Override
+    public void mainServletInitialized() throws Exception{
+        log.info("mainServletInitialized - initControlCenter");
         try {
             Query query = dao.getEM().createQuery("select c from ControlCenterVS c where c.state =:state")
                     .setParameter("state", ActorVS.State.OK);

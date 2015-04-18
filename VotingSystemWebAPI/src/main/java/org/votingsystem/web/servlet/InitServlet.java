@@ -3,9 +3,8 @@ package org.votingsystem.web.servlet;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.SignatureBean;
-import org.votingsystem.web.ejb.StartupVS;
-
 import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -25,7 +24,7 @@ public class InitServlet extends HttpServlet{
     private static Logger log = Logger.getLogger(InitServlet.class.getSimpleName());
 
     @Inject SignatureBean signatureBean;
-    @Inject StartupVS startupBean;
+    @Inject ConfigVS config;
 
     @Override public void init() throws ServletException {
         try {
@@ -52,7 +51,7 @@ public class InitServlet extends HttpServlet{
             if(res == null) {
                 log.log(Level.SEVERE, "Have you executed 'bower install' from web-app dir ???");
             }
-            startupBean.mainServletInitialized();
+            config.mainServletInitialized();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

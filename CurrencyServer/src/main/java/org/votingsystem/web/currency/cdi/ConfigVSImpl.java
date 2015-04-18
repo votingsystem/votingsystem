@@ -3,20 +3,28 @@ package org.votingsystem.web.currency.cdi;
 import org.iban4j.*;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.util.EnvironmentVS;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.currency.ejb.AuditBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
+import org.votingsystem.web.ejb.TimeStampBean;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.Query;
 import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.Calendar;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +41,9 @@ public class ConfigVSImpl implements ConfigVS {
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionBean;
+    @Inject TimeStampBean timeStampBean;
+    @Inject AuditBean auditBean;
+
 
     public static final String RESOURCE_PATH= "/resources/bower_components";
     public static final String WEB_PATH= "/jsf";
@@ -102,8 +113,39 @@ public class ConfigVSImpl implements ConfigVS {
 
     @PostConstruct
     public void initialize() throws Exception {
-        Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
-        systemUser = dao.getSingleResult(UserVS.class, query);
+        log.info("initialize");
+        try {
+            Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
+            systemUser = dao.getSingleResult(UserVS.class, query);
+            if(systemUser == null) { //First time run
+                UserVS userVS = new UserVS(systemNIF, UserVS.Type.SYSTEM, serverName);
+                systemUser = dao.persist(userVS);
+                systemUser.setIBAN(getIBAN(systemUser.getId()));
+                dao.merge(systemUser);
+                TagVS wildTag = dao.persist(new TagVS(TagVS.WILDTAG));
+                dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO,
+                        java.util.Currency.getInstance("EUR").getCurrencyCode(), wildTag));
+                URL res = res = Thread.currentThread().getContextClassLoader().getResource("defaultTags.txt");
+                String[] defaultTags = FileUtils.getStringFromInputStream(res.openStream()).split(",");
+                for(String tag: defaultTags) {
+                    TagVS newTagVS =  dao.persist(new TagVS(tag));
+                    dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO,
+                            java.util.Currency.getInstance("EUR").getCurrencyCode(), newTagVS));
+                }
+            }
+            timeStampBean.init();
+            signatureBean.init();
+        } catch(Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+    }
+
+    @PreDestroy private void shutdown() { log.info(" --------- shutdown ---------");}
+
+    //@Schedule(dayOfWeek = "Mon", hour="0")
+    public void initWeekPeriod() throws IOException {
+        auditBean.checkCurrencyCanceled();
+        auditBean.initWeekPeriod(Calendar.getInstance());
     }
 
     public String getProperty(String key) {
@@ -217,8 +259,9 @@ public class ConfigVSImpl implements ConfigVS {
         return systemNIF;
     }
 
-    @Override
-    public String getEmailAdmin() {
+    @Override public void mainServletInitialized() throws Exception { }
+
+    @Override public String getEmailAdmin() {
         return emailAdmin;
     }
 

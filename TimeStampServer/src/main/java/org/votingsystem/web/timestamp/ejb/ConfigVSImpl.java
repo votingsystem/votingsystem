@@ -132,4 +132,6 @@ public class ConfigVSImpl implements ConfigVS {
         return null;
     }
 
+    @Override public void mainServletInitialized() throws Exception { }
+
 }

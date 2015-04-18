@@ -39,7 +39,6 @@ public class TimeStampServerBean implements TimeStampService {
     @PostConstruct
     public void initialize() throws Exception {
         log.info("initialize");
-        ContextVS.init();
         URL res = Thread.currentThread().getContextClassLoader().getResource("TimeStampServer.jks");
         try {
             byte[] keyStoreBytes = FileUtils.getBytesFromStream(res.openStream());

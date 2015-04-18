@@ -8,10 +8,7 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.BankVS;
-import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.GroupVS;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
@@ -38,6 +35,7 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Currency;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -293,4 +291,15 @@ public class AuditBean {
         return resultMap;
     }
 
+    public void checkCurrencyCanceled() {
+        Date date = new Date();
+        log.info("checkCurrencyCanceled - date: " + date);
+        Query query = dao.getEM().createQuery("select c from Currency c where c.validTo <=:validTo and c.state =:state")
+                .setParameter("validTo", date).setParameter("state", org.votingsystem.model.currency.Currency.State.OK);
+        List<org.votingsystem.model.currency.Currency> currencyList = query.getResultList();
+        for(org.votingsystem.model.currency.Currency currency :currencyList) {
+            dao.merge(currency.setState(org.votingsystem.model.currency.Currency.State.LAPSED));
+            log.log(Level.FINE, "LAPSED currency id: " + currency.getId() + " - value: " + currency.getAmount());
+        }
+    }
 }

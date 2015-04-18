@@ -64,7 +64,6 @@ public class ContextVS implements BundleActivator {
     public static String APPDIR;
     public static String WEBVIEWDIR;
     public static String APPTEMPDIR;
-    public static String ERROR_DIR;
 
     public static String SETTINGS_FILE_NAME = "settings.properties";
     public static String USER_KEYSTORE_FILE_NAME = "userks.jks";
@@ -130,7 +129,6 @@ public class ContextVS implements BundleActivator {
     public static final String HASH_CERTVS_KEY        = "hashCertVSBase64";
     public static final String ORIGIN_HASH_CERTVS_KEY = "originHashCertVS";
     public static final String CRYPTO_TOKEN = "CRYPTO_TOKEN";
-    public static final String USER_NIF = "USER_NIF";
     public static final String BASE64_ENCODED_CONTENT_TYPE = "Base64Encoded";
     public static final String KEYSTORE_USER_CERT_ALIAS = "UserTestKeysStore";
 
@@ -210,10 +208,8 @@ public class ContextVS implements BundleActivator {
         APPDIR =  baseDir + File.separator +  ".VotingSystem";
         WEBVIEWDIR =  APPDIR + File.separator + "webview";
         APPTEMPDIR =  APPDIR + File.separator + "temp";
-        ERROR_DIR =  APPDIR + File.separator + "error";
         new File(APPDIR).mkdir();
         new File(APPTEMPDIR).mkdir();
-        new File(ERROR_DIR).mkdirs();
     }
 
     public static void initSignatureClient (String localizatedMessagesFileName, String locale){
@@ -230,11 +226,6 @@ public class ContextVS implements BundleActivator {
 
     public Locale getLocale() {
         return locale;
-    }
-
-
-    public static void init() {
-        getInstance();
     }
 
     public static ContextVS getInstance() {
@@ -429,7 +420,7 @@ public class ContextVS implements BundleActivator {
         File newFileDir = new File(APPDIR + subPath);
         newFileDir.mkdirs();
         File newFile = new File(newFileDir.getAbsolutePath() + "/" + fileName);
-        log.info("newFile.path: " + newFile.getAbsolutePath());
+        log.info("copyFile - path: " + newFile.getAbsolutePath());
         FileUtils.copyStreamToFile(new ByteArrayInputStream(fileToCopy), newFile);
     }
 

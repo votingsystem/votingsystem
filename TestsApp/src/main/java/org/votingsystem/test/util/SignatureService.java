@@ -21,6 +21,7 @@ import org.votingsystem.util.*;
 import javax.mail.Header;
 import javax.security.auth.x500.X500PrivateCredential;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;

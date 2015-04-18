@@ -1,4 +1,4 @@
-package org.votingsystem.web.jaxrs.exception;
+package org.votingsystem.web.jaxrs.provider;
 
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.throwable.ExceptionVS;

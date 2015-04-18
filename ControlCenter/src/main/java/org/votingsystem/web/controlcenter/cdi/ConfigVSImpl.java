@@ -7,7 +7,9 @@ import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
+import org.votingsystem.web.ejb.TimeStampBean;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -32,6 +34,7 @@ public class ConfigVSImpl implements ConfigVS {
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionBean;
+    @Inject TimeStampBean timeStampBean;
 
     public static final String RESOURCE_PATH= "/resources/bower_components";
     public static final String WEB_PATH= "/jsf";
@@ -94,6 +97,19 @@ public class ConfigVSImpl implements ConfigVS {
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
+    }
+
+    @PostConstruct
+    public void initialize() throws Exception {
+        log.info("initialize");
+        Query query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
+                .setParameter("type", UserVS.Type.SYSTEM);
+        UserVS systemUser = dao.getSingleResult(UserVS.class, query);
+        if(systemUser == null) {
+            dao.persist(new UserVS(systemNIF, serverName, UserVS.Type.SYSTEM));
+        }
+        timeStampBean.init();
+        signatureBean.init();
     }
 
     public String getProperty(String key) {
@@ -176,8 +192,9 @@ public class ConfigVSImpl implements ConfigVS {
         return systemNIF;
     }
 
-    @Override
-    public String getEmailAdmin() {
+    @Override public void mainServletInitialized() throws Exception { }
+
+    @Override public String getEmailAdmin() {
         return emailAdmin;
     }
 
