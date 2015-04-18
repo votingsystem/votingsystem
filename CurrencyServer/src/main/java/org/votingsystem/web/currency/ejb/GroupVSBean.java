@@ -1,7 +1,5 @@
 package org.votingsystem.web.currency.ejb;
 
-import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
@@ -9,11 +7,9 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.SubscriptionVS;
-import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
@@ -43,7 +39,6 @@ public class GroupVSBean {
     @Inject CurrencyAccountBean currencyAccountBean;
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
-    @Inject SystemBean systemBean;
     @Inject TransactionVSBean transactionVSBean;
 
 
@@ -139,7 +134,7 @@ public class GroupVSBean {
 
     @Transactional
     public GroupVSDto getGroupVSDto(GroupVS groupVS) throws Exception {
-        GroupVSDto groupVSDto = GroupVSDto.DETAILS( groupVS, userVSBean.getUserVSDto(groupVS.getRepresentative(), false));
+        GroupVSDto groupVSDto = GroupVSDto.DETAILS(groupVS, userVSBean.getUserVSDto(groupVS.getRepresentative(), false));
         Query query = dao.getEM().createNamedQuery("countSubscriptionByGroupVSAndState").setParameter("groupVS", groupVS)
                 .setParameter("state", SubscriptionVS.State.ACTIVE);
         groupVSDto.setNumActiveUsers((long) query.getSingleResult());
@@ -148,20 +143,5 @@ public class GroupVSBean {
         groupVSDto.setNumPendingUsers((long) query.getSingleResult());
         return groupVSDto;
     }
-    
-    public BalancesDto getBalancesDto(UserVS groupVS, TimePeriod timePeriod) throws Exception {
-        BalancesDto balancesDto = transactionVSBean.getBalancesDto(
-                transactionVSBean.getTransactionFromList(groupVS, timePeriod), TransactionVS.Source.FROM);
-        balancesDto.setTimePeriod(timePeriod);
-        balancesDto.setUserVS(UserVSDto.BASIC(groupVS));
-
-        BalancesDto balancesToDto = transactionVSBean.getBalancesDto(
-                transactionVSBean.getTransactionToList(groupVS, timePeriod), TransactionVS.Source.TO);
-        balancesDto.setTo(balancesToDto);
-        balancesDto.calculateCash();
-        currencyAccountBean.checkBalancesMap(groupVS, balancesDto.getBalancesCash());
-        return balancesDto;
-    }
-
 
 }

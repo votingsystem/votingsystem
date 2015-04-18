@@ -12,7 +12,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MapUtils;
 import org.votingsystem.util.TimePeriod;
-import org.votingsystem.web.currency.ejb.AuditingBean;
+import org.votingsystem.web.currency.ejb.AuditBean;
 import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
@@ -51,7 +51,7 @@ public class TestResource {
 
     private static final Logger log = Logger.getLogger(TestResource.class.getSimpleName());
 
-    @Inject AuditingBean auditingBean;
+    @Inject AuditBean auditBean;
     @Inject BalancesBean balanceBean;
     @Inject DAOBean dao;
 
@@ -140,7 +140,7 @@ public class TestResource {
     public Response checkCooin(@Context ServletContext context, @Context HttpServletRequest req,
                         @Context HttpServletResponse resp) throws ServletException, IOException {
         TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
-        auditingBean.checkCurrencyRequest(timePeriod);
+        auditBean.checkCurrencyRequest(timePeriod);
         return Response.ok().entity("OK").build();
     }
 
@@ -172,7 +172,7 @@ public class TestResource {
     public Response newWeek() throws IOException {
         Calendar nextWeek = Calendar.getInstance();
         nextWeek.set(Calendar.WEEK_OF_YEAR, (nextWeek.get(Calendar.WEEK_OF_YEAR) + 1));
-        balanceBean.initWeekPeriod(nextWeek);
+        auditBean.initWeekPeriod(nextWeek);
         /*List transactionList
         TransactionVS.withTransaction {
             //transactionList = TransactionVS.findAllWhere(type:[TransactionVS.Type.CURRENCY_INIT_PERIOD,
@@ -216,14 +216,14 @@ public class TestResource {
     public Object initWeek() throws Exception {
         UserVS userVS = dao.find(UserVS.class, 2L);
         TimePeriod timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(Calendar.getInstance()));
-        balanceBean.initUserVSWeekPeriod(userVS, timePeriod, "TestingController");
+        auditBean.initUserVSWeekPeriod(userVS, timePeriod, "TestingController");
         return Response.ok().entity("OK").build();
     }
 
     @Path("/initWeekPeriod")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Object initWeekPeriod() throws Exception {
-        balanceBean.initWeekPeriod(Calendar.getInstance());
+        auditBean.initWeekPeriod(Calendar.getInstance());
         return Response.ok().entity("OK").build();
     }
 

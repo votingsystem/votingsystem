@@ -1,7 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
 import org.iban4j.Iban;
-import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.BankVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
@@ -9,11 +8,9 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.BankVSInfo;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -44,7 +41,6 @@ public class BankVSBean {
     @Inject UserVSBean userVSBean;
     @Inject TransactionVSBean transactionVSBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
-    @Inject SystemBean systemBean;
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;
 
@@ -83,14 +79,6 @@ public class BankVSBean {
                 config.getTag(TagVS.WILDTAG)));
         log.info("added new bank - id: " + bankVS.getId() + " - " + x509Certificate.getSubjectDN().toString());
         return bankVS;
-    }
-
-    public BalancesDto getBalancesDto(BankVS bankVS, TimePeriod timePeriod) throws Exception {
-        BalancesDto balancesDto = transactionVSBean.getBalancesDto(
-                transactionVSBean.getTransactionFromList(bankVS, timePeriod), TransactionVS.Source.FROM);
-        balancesDto.setTimePeriod(timePeriod);
-        balancesDto.setUserVS(userVSBean.getUserVSDto(bankVS, false));
-        return balancesDto;
     }
 
     public void refreshBankInfoData() {

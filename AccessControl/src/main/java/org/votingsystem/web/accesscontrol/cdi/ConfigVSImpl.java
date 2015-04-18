@@ -1,10 +1,7 @@
 package org.votingsystem.web.accesscontrol.cdi;
 
 import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TagVS;
+import org.votingsystem.model.*;
 import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
@@ -182,6 +179,11 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Override
     public String getIBAN(Long userId) { return null;}
+
+    @Override
+    public UserVS getSystemUser() {
+        return null;
+    }
 
     public String getSystemNIF() {
         return systemNIF;

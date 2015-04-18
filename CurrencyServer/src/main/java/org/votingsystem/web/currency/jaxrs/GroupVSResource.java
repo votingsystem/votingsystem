@@ -17,6 +17,7 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
+import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.CurrencyAccountBean;
 import org.votingsystem.web.currency.ejb.GroupVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
@@ -51,6 +52,7 @@ public class GroupVSResource {
     @Inject CurrencyAccountBean currencyAccountBean;
     @Inject GroupVSBean groupVSBean;
     @Inject UserVSBean userVSBean;
+    @Inject BalancesBean balancesBean;
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
     @Inject MessagesBean messages;
@@ -217,10 +219,10 @@ public class GroupVSResource {
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null)  return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
-        BalancesDto balancesDto = groupVSBean.getBalancesDto(groupVS, DateUtils.getCurrentWeekPeriod());
-        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
+        BalancesDto dto = balancesBean.getBalancesDto(groupVS, DateUtils.getCurrentWeekPeriod());
+        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
         else {
-            req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(balancesDto));
+            req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(dto));
             context.getRequestDispatcher("/groupVS/groupVS.xhtml").forward(req, resp);
             return Response.ok().build();
         }

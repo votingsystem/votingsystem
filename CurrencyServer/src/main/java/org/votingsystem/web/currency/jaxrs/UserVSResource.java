@@ -5,6 +5,7 @@ import org.iban4j.Iban;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
@@ -20,10 +21,7 @@ import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
-import org.votingsystem.web.currency.ejb.BankVSBean;
-import org.votingsystem.web.currency.ejb.GroupVSBean;
-import org.votingsystem.web.currency.ejb.TransactionVSBean;
-import org.votingsystem.web.currency.ejb.UserVSBean;
+import org.votingsystem.web.currency.ejb.*;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -53,6 +51,7 @@ public class UserVSResource {
 
     @Inject TransactionVSBean transactionVSBean;
     @Inject GroupVSBean groupVSBean;
+    @Inject BalancesBean balancesBean;
     @Inject UserVSBean userVSBean;
     @Inject BankVSBean bankVSBean;
     @Inject SignatureBean signatureBean;
@@ -269,11 +268,10 @@ public class UserVSResource {
 
     @Path("/nif/{nif}/{year}/{month}/{day}")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object userInfo(@PathParam("nif") String nif,
+    public Response userInfo(@PathParam("nif") String nif,
                            @PathParam("year") int year,
                            @PathParam("month") int month,
                            @PathParam("day") int day,
-                           @DefaultValue("true") @QueryParam("withCheck") boolean withCheck,
                            @Context ServletContext context, @Context HttpServletRequest req,
                             @Context HttpServletResponse resp) throws Exception {
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", nif);
@@ -281,20 +279,21 @@ public class UserVSResource {
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - nif: " + nif).build();
         Calendar calendar = DateUtils.getCalendar(year, month, day);
         TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
-        return userVSBean.getBalancesDto(userVS, timePeriod, withCheck);
+        BalancesDto dto = balancesBean.getBalancesDto(userVS, timePeriod);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
     @Path("/nif/{nif}")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object userInfoByNif(@PathParam("nif") String nif,
-                           @DefaultValue("true") @QueryParam("withCheck") boolean withCheck,
+    public Response userInfoByNif(@PathParam("nif") String nif,
                            @Context ServletContext context, @Context HttpServletRequest req,
                            @Context HttpServletResponse resp) throws Exception {
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", nif);
         UserVS userVS = dao.getSingleResult(UserVS.class, query);
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - nif: " + nif).build();
         TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
-        return userVSBean.getBalancesDto(userVS, timePeriod, withCheck);
+        BalancesDto dto = balancesBean.getBalancesDto(userVS, timePeriod);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
     @Path("/searchByDevice")
@@ -333,13 +332,14 @@ public class UserVSResource {
 
     @Path("/userInfoTest")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Object userInfoTest(MessageSMIME messageSMIME, @Context HttpServletRequest req, @Context
+    public Response userInfoTest(MessageSMIME messageSMIME, @Context HttpServletRequest req, @Context
         HttpServletResponse resp) throws Exception {
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
         Map<String, Object> dataMap = new ObjectMapper().readValue(smimeMessage.getSignedContent(), Map.class);
         //TODO check operation
         TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
-        return userVSBean.getBalancesDto(messageSMIME.getUserVS(), timePeriod);
+        BalancesDto dto = balancesBean.getBalancesDto(messageSMIME.getUserVS(), timePeriod);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
     @Path("/save") @GET

@@ -1,6 +1,7 @@
 package org.votingsystem.web.cdi;
 
 import org.votingsystem.model.TagVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EnvironmentVS;
 
 import java.io.File;
@@ -43,5 +44,7 @@ public interface ConfigVS {
     public File getServerDir();
 
     public String getIBAN(Long userId);
+
+    public UserVS getSystemUser();
 
 }

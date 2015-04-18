@@ -11,6 +11,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
@@ -49,6 +50,7 @@ public class TransactionVSResource {
     @Inject TransactionVSBean transactionVSBean;
     @Inject SignatureBean signatureBean;
     @Inject CurrencyBean currencyBean;
+    @Inject BalancesBean balancesBean;
     @Inject DAOBean dao;
     @Inject ConfigVS config;
 
@@ -150,7 +152,7 @@ public class TransactionVSResource {
         }
         TimePeriod.Lapse lapse =  TimePeriod.Lapse.valueOf(lapseStr.toUpperCase());
         TimePeriod timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(req.getLocale()).getTime(), lapse);
-        return transactionVSBean.getBalancesDto(userVS, timePeriod);
+        return balancesBean.getBalancesDto(userVS, timePeriod);
     }
 
     @Path("/currency")

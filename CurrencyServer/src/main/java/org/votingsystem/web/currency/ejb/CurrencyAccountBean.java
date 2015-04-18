@@ -62,7 +62,7 @@ public class CurrencyAccountBean {
     }
 
     //Method that checks that the calculated balance from transactions corresponds with the accounts state
-    public void checkBalancesMap(UserVS userVS, Map<String, Map<String, BigDecimal>> balancesMap) throws ExceptionVS {
+    public void checkBalancesWithCurrencyAccounts(UserVS userVS, Map<String, Map<String, BigDecimal>> balancesMap) throws ExceptionVS {
         Map<String, Map<String, Map<String, BigDecimal>>> accountsMap = getAccountsBalanceMap(userVS);
         if(accountsMap.keySet().size() > 1) throw new ExceptionVS("UserVS: " + userVS.getId() + "has " +
                 accountsMap.keySet().size() + " accounts");

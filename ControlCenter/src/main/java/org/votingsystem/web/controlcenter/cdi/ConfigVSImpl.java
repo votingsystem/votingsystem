@@ -1,6 +1,7 @@
 package org.votingsystem.web.controlcenter.cdi;
 
 import org.votingsystem.model.TagVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -165,6 +166,11 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Override
     public String getIBAN(Long userId) { return null;}
+
+    @Override
+    public UserVS getSystemUser() {
+        return null;
+    }
 
     public String getSystemNIF() {
         return systemNIF;

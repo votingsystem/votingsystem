@@ -36,6 +36,7 @@ public class StartupBean implements StartupVS {
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
     @Inject BalancesBean balancesBean;
+    @Inject AuditBean auditBean;
 
     @PostConstruct
     public void initialize() {
@@ -70,7 +71,7 @@ public class StartupBean implements StartupVS {
     //@Schedule(dayOfWeek = "Mon", hour="0")
     public void initWeekPeriod() throws IOException {
         checkCurrencyCanceled();
-        balancesBean.initWeekPeriod(Calendar.getInstance());
+        auditBean.initWeekPeriod(Calendar.getInstance());
     }
 
     private void checkCurrencyCanceled() {

@@ -2,13 +2,15 @@ package org.votingsystem.web.currency.ejb;
 
 import com.google.common.eventbus.Subscribe;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.*;
+import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.model.currency.SubscriptionVS;
+import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -44,8 +46,8 @@ public class TransactionVSBean {
 
     @Inject ConfigVS config;
     @Inject MessagesBean messages;
+    @Inject BalancesBean balancesBean;
     @Inject DAOBean dao;
-    @Inject SystemBean systemBean;
     @Inject SignatureBean signatureBean;
     @Inject BankVSBean bankVSBean;
     @Inject GroupVSBean groupVSBean;
@@ -157,12 +159,6 @@ public class TransactionVSBean {
         return dto;
     }
 
-    public BalancesDto getBalancesDto(UserVS userVS, TimePeriod timePeriod) throws Exception {
-        if(userVS instanceof BankVS) return bankVSBean.getBalancesDto((BankVS) userVS, timePeriod);
-        else if(userVS instanceof GroupVS) return groupVSBean.getBalancesDto(userVS, timePeriod);
-        else return userVSBean.getBalancesDto(userVS, timePeriod);
-    }
-
     private CurrencyAccount updateUserVSAccountTo(TransactionVS transactionVS) throws ExceptionVS {
         if(transactionVS.getToUserIBAN() == null) throw new ExceptionVS("transactionVS without toUserIBAN");
         Query query = dao.getEM().createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")
@@ -219,26 +215,26 @@ public class TransactionVSBean {
                     break;
                 case CURRENCY_INIT_PERIOD_TIME_LIMITED:
                     updateUserVSAccountFrom(transactionVS);
-                    systemBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(), transactionVS.getTag());
+                    balancesBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(), transactionVS.getTag());
                     break;
                 case FROM_USERVS:
                     updateUserVSAccountFrom(transactionVS);
                     updateUserVSAccountTo(transactionVS);
-                    systemBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(), transactionVS.getTag());
+                    balancesBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(), transactionVS.getTag());
                     break;
                 case CURRENCY_REQUEST:
                     updateUserVSAccountFrom(transactionVS);
-                    systemBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(), transactionVS.getTag());
+                    balancesBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(), transactionVS.getTag());
                     break;
                 case CURRENCY_SEND:
                     switch(transactionVS.getCurrencyTransactionBatch().getPaymentMethod()) {
                         case ANONYMOUS_SIGNED_TRANSACTION:
                             updateUserVSAccountTo(transactionVS);
-                            systemBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
+                            balancesBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
                                     transactionVS.getTag());
                             break;
                         case CASH_SEND:
-                            systemBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
+                            balancesBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
                                     transactionVS.getTag());
                             break;
                     }
@@ -246,11 +242,11 @@ public class TransactionVSBean {
                 default:
                     if(isParentTransaction) {//Parent transaction, to system before trigger to receptors
                         if(transactionVS.getType() != TransactionVS.Type.FROM_BANKVS) updateUserVSAccountFrom(transactionVS);
-                        systemBean.updateTagBalance(transactionVS.getAmount(),transactionVS.getCurrencyCode(),
+                        balancesBean.updateTagBalance(transactionVS.getAmount(),transactionVS.getCurrencyCode(),
                                 transactionVS.getTag());
                     } else {
                         updateUserVSAccountTo(transactionVS);
-                        systemBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
+                        balancesBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
                                 transactionVS.getTag());
                         log.info("" + transactionVS.getType() + " - " + transactionVS.getAmount() +  " " +
                                 transactionVS.getCurrencyCode() + " - " + transactionVS.getTag().getName() + " - " +
@@ -276,19 +272,6 @@ public class TransactionVSBean {
         else return BigDecimal.ZERO;
     }
 
-    public BalancesDto getBalancesDto(List<TransactionVS> transactionList, TransactionVS.Source source) throws ExceptionVS {
-        List<TransactionVSDto> transactionFromList = new ArrayList<>();
-        for(TransactionVS transaction : transactionList) {
-            transactionFromList.add(getTransactionDto(transaction));
-        }
-        switch (source) {
-            case FROM:
-                return BalancesDto.FROM(transactionFromList, BalanceUtils.getBalancesFrom(transactionList));
-            case TO:
-                return BalancesDto.TO(transactionFromList, BalanceUtils.getBalancesTo(transactionList));
-        }
-        throw new ExceptionVS("unknown source: " + source);
-    }
 
     public TransactionVSDto getTransactionDto(TransactionVS transactionVS) {
         TransactionVSDto dto = new TransactionVSDto(transactionVS, config.getContextURL());

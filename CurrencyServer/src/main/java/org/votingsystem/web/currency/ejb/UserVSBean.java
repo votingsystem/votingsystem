@@ -4,14 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
@@ -40,7 +37,6 @@ public class UserVSBean {
     @Inject ConfigVS config;
     @Inject CurrencyAccountBean currencyAccountBean;
     @Inject UserVSBean userVSBean;
-    @Inject SystemBean systemBean;
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
     @Inject TransactionVSBean transactionVSBean;
@@ -74,26 +70,6 @@ public class UserVSBean {
         }
         Set<DeviceVSDto> deviceVSDtoSet = SessionVSManager.getInstance().connectedDeviceMap(userVS.getId());
         return UserVSDto.DEVICES(userVS, deviceVSDtoSet, certificates);
-    }
-
-    public BalancesDto getBalancesDto(UserVS userVS, TimePeriod timePeriod, boolean validateResult) throws Exception {
-        BalancesDto balancesDto = transactionVSBean.getBalancesDto(
-                transactionVSBean.getTransactionFromList(userVS, timePeriod), TransactionVS.Source.FROM);
-        balancesDto.setTimePeriod(timePeriod);
-        balancesDto.setUserVS(getUserVSDto(userVS, false));
-
-        BalancesDto balancesToDto = transactionVSBean.getBalancesDto(
-                transactionVSBean.getTransactionToList(userVS, timePeriod), TransactionVS.Source.TO);
-        balancesDto.setTo(balancesToDto);
-
-        balancesToDto.calculateCash();
-        if(validateResult && UserVS.Type.SYSTEM != userVS.getType() && timePeriod.isCurrentWeekPeriod())
-            currencyAccountBean.checkBalancesMap(userVS, balancesDto.getBalancesCash());
-        return balancesDto;
-    }
-
-    public BalancesDto getBalancesDto(UserVS userVS, TimePeriod timePeriod) throws Exception {
-        return getBalancesDto(userVS, timePeriod, true);
     }
     
 }

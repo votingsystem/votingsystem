@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.cdi;
 
 import org.iban4j.*;
 import org.votingsystem.model.TagVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -55,9 +56,12 @@ public class ConfigVSImpl implements ConfigVS {
     private File serverDir = null;
     private TagVS wildTag;
     private X509Certificate x509TimeStampServerCert;
+    private UserVS systemUser;
 
     public ConfigVSImpl() {
         try {
+            Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
+            systemUser = dao.getSingleResult(UserVS.class, query);
             String resourceFile = null;
             log.info("environment: " + System.getProperty("vs.environment"));
             if(System.getProperty("vs.environment") != null) {
@@ -137,6 +141,10 @@ public class ConfigVSImpl implements ConfigVS {
     public String validateIBAN(String IBAN) throws IbanFormatException, InvalidCheckDigitException, UnsupportedCountryException {
         IbanUtil.validate(IBAN);
         return IBAN;
+    }
+
+    public UserVS getSystemUser() {
+        return systemUser;
     }
 
     public EnvironmentVS getMode() {

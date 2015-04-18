@@ -41,7 +41,6 @@ public class BalanceResource {
     @Inject CurrencyAccountBean accountBean;
     @Inject BalancesBean balancesBean;
 
-
     @GET
     @Path("/userVS/id/{userId}")
     public Response userVS(@PathParam("userId") long userId, @Context ServletContext context,
@@ -65,7 +64,7 @@ public class BalanceResource {
             throw new NotFoundException("ERROR - UserVS not found - userId: " + userId);
         } else {
             TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
-            BalancesDto balancesDto = balancesBean.genBalance(uservs, timePeriod);
+            BalancesDto balancesDto = balancesBean.getBalancesDto(uservs, timePeriod);
             if(req.getContentType() != null && req.getContentType().contains("json")) {
                 return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
             } else {
