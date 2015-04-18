@@ -2,13 +2,13 @@ package org.votingsystem.dto.currency;
 
 
 import org.votingsystem.model.currency.TransactionVS;
-
 import java.math.BigDecimal;
 
 public class IncomesDto {
 
     private BigDecimal total = BigDecimal.ZERO;
     private BigDecimal timeLimited = BigDecimal.ZERO;
+    private String tag;
 
     public IncomesDto() {}
 
@@ -58,4 +58,11 @@ public class IncomesDto {
         return this;
     }
 
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
 }

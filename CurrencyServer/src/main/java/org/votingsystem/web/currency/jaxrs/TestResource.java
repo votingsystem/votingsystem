@@ -5,6 +5,7 @@ import com.google.common.eventbus.Subscribe;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
 import org.votingsystem.dto.currency.BalancesDto;
+import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.service.EventBusService;
@@ -19,6 +20,7 @@ import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;
+import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -173,18 +175,12 @@ public class TestResource {
         Calendar nextWeek = Calendar.getInstance();
         nextWeek.set(Calendar.WEEK_OF_YEAR, (nextWeek.get(Calendar.WEEK_OF_YEAR) + 1));
         auditBean.initWeekPeriod(nextWeek);
-        /*List transactionList
-        TransactionVS.withTransaction {
-            //transactionList = TransactionVS.findAllWhere(type:[TransactionVS.Type.CURRENCY_INIT_PERIOD,
-            //       TransactionVS.Type.CURRENCY_INIT_PERIOD_TIME_LIMITED])
-            transactionList = TransactionVS.createCriteria().list(offset: 0) {
-                inList("type", [TransactionVS.Type.CURRENCY_INIT_PERIOD,
-                                TransactionVS.Type.CURRENCY_INIT_PERIOD_TIME_LIMITED] )
-            }
-
-            for(TransactionVS transaction : transactionList) {
-                transaction.delete()
-            }
+        /*Query query = dao.getEM().createQuery("select t from TransactionVS t where t.type  in :inList")
+                .setParameter("inList", Arrays.asList(TransactionVS.Type.CURRENCY_INIT_PERIOD,
+                TransactionVS.Type.CURRENCY_INIT_PERIOD_TIME_LIMITED));
+        List<TransactionVS> resultList =  query.getResultList();
+        for(TransactionVS transactionVS : resultList) {
+            dao.getEM().remove(transactionVS);
         }*/
         return Response.ok().entity("OK").build();
     }
@@ -192,20 +188,21 @@ public class TestResource {
     @Path("/balance")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response balance() throws IOException {
-        Map balanceTo = new HashMap<>();
-        balanceTo.put("EUR", MapUtils.getTagMapForIncomes(new MapUtils.TagData("HIDROGENO", new BigDecimal(880.5), new BigDecimal(700.5)),
-                new MapUtils.TagData("NITROGENO", new BigDecimal(100), new BigDecimal(50.5))));
-        balanceTo.put("DOLLAR", MapUtils.getTagMapForIncomes(new MapUtils.TagData("WILDTAG", new BigDecimal(1454), new BigDecimal(400.5)),
-                new MapUtils.TagData("NITROGENO", new BigDecimal(100), new BigDecimal(50.5))));
-        Map balanceFrom = new HashMap<>();
-        balanceFrom.put("EUR", MapUtils.getTagMapForExpenses(new MapUtils.TagData("HIDROGENO", new BigDecimal(1080.5)),
-                new MapUtils.TagData("OXIGENO", new BigDecimal(350))));
-        balanceFrom.put("DOLLAR", MapUtils.getTagMapForExpenses(new MapUtils.TagData("WILDTAG", new BigDecimal(6000))));
-        balanceFrom.put("YEN", MapUtils.getTagMapForExpenses(new MapUtils.TagData("WILDTAG", new BigDecimal(8000))));
+        Map<String, Map<String, IncomesDto>> balancesTo = new HashMap<>();
+        balancesTo.put("EUR", MapUtils.getTagMapForIncomes("HIDROGENO", new BigDecimal(880.5), new BigDecimal(700.5)));
+        balancesTo.put("EUR", MapUtils.getTagMapForIncomes("NITROGENO", new BigDecimal(100), new BigDecimal(50.5)));
+        balancesTo.put("DOLLAR", MapUtils.getTagMapForIncomes("WILDTAG", new BigDecimal(1454), new BigDecimal(400.5)));
+        balancesTo.put("DOLLAR", MapUtils.getTagMapForIncomes("NITROGENO", new BigDecimal(100), new BigDecimal(50.5)));
+
+        Map<String, Map<String, BigDecimal>> balancesFrom = new HashMap<>();
+        balancesFrom.put("EUR", MapUtils.getTagMapForExpenses("HIDROGENO", new BigDecimal(1080.5)));
+        balancesFrom.put("EUR", MapUtils.getTagMapForExpenses("OXIGENO", new BigDecimal(350)));
+        balancesFrom.put("DOLLAR", MapUtils.getTagMapForExpenses("WILDTAG", new BigDecimal(6000)));
+        balancesFrom.put("YEN", MapUtils.getTagMapForExpenses("WILDTAG", new BigDecimal(8000)));
 
         BalancesDto balancesDto = new BalancesDto();
-        balancesDto.setBalancesTo(balanceTo);
-        balancesDto.setBalancesFrom(balanceFrom);
+        balancesDto.setBalancesTo(balancesTo);
+        balancesDto.setBalancesFrom(balancesFrom);
         balancesDto.calculateCash();
 
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
