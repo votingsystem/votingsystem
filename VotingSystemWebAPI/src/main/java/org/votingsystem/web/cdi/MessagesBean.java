@@ -28,7 +28,7 @@ public class MessagesBean {
     public MessagesBean() { }
 
     @PostConstruct
-    public void initialize() {
+    public void initialize() throws Exception {
         bundleBaseName = config.getProperty("vs.bundleBaseName");
     }
 

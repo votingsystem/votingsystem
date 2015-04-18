@@ -54,7 +54,7 @@ public class TimeStampBean {
     public TimeStampBean() { }
 
     public void init() {
-        log.info("TimeStampBean");
+        log.info("TimeStampBean - init");
         try {
             String serverURL = StringUtils.checkURL(config.getTimeStampServerURL());
             timeStampServiceURL = serverURL + "/timestamp";

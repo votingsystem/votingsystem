@@ -9,6 +9,7 @@ import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -60,8 +61,6 @@ public class ConfigVSImpl implements ConfigVS {
 
     public ConfigVSImpl() {
         try {
-            Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
-            systemUser = dao.getSingleResult(UserVS.class, query);
             String resourceFile = null;
             log.info("environment: " + System.getProperty("vs.environment"));
             if(System.getProperty("vs.environment") != null) {
@@ -99,6 +98,12 @@ public class ConfigVSImpl implements ConfigVS {
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
+    }
+
+    @PostConstruct
+    public void initialize() throws Exception {
+        Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
+        systemUser = dao.getSingleResult(UserVS.class, query);
     }
 
     public String getProperty(String key) {

@@ -5,7 +5,6 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.currency.ejb.DashBoardBean;
-
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -32,8 +31,7 @@ public class AppResource {
 
     private static final Logger log = Logger.getLogger(AppResource.class.getSimpleName());
 
-    @Inject
-    DashBoardBean dashBoardBean;
+    @Inject DashBoardBean dashBoardBean;
 
     @GET @Path("/androidClient")
     public Response androidClient(@Context ServletContext context, @Context HttpServletRequest req,
@@ -102,13 +100,13 @@ public class AppResource {
 
     @GET @Path("/userVS")
     @Produces(MediaType.APPLICATION_JSON)
-    public Object userVS(@Context ServletContext context, @Context HttpServletRequest req,
+    public Response userVS(@Context ServletContext context, @Context HttpServletRequest req,
                            @Context HttpServletResponse resp) throws ServletException, IOException {
         TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), -1);//default to 1 hour
         Map dataMap = new HashMap<>();
         dataMap.put("transactionVSData", dashBoardBean.getUserVSInfo(timePeriod));
         if(req.getContentType() != null && req.getContentType().contains("json")) {
-            return dataMap;
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dataMap)).build();
         } else {
             req.setAttribute("dataMap", JSON.getMapper().writeValueAsString(dataMap));
             context.getRequestDispatcher("/app/user.xhtml").forward(req, resp);
@@ -118,17 +116,17 @@ public class AppResource {
 
     @GET @Path("/userVS/{numHours}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Object userVS(@PathParam("numHours") Integer numHours,
+    public Response userVS(@PathParam("numHours") Integer numHours,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws ServletException, IOException {
         TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), numHours);
         Map dataMap = new HashMap<>();
         dataMap.put("transactionVSData", dashBoardBean.getUserVSInfo(timePeriod));
         if(req.getContentType() != null && req.getContentType().contains("json")) {
-            return dataMap;
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dataMap)).build();
         } else {
             req.setAttribute("dataMap", JSON.getMapper().writeValueAsString(dataMap));
-            context.getRequestDispatcher("/jsf/app/user.jsp").forward(req, resp);
+            context.getRequestDispatcher("/app/user.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }

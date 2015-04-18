@@ -1,4 +1,4 @@
-package org.votingsystem.web.currency.jaxrs;
+package org.votingsystem.web.currency.jaxrs.provider;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.ext.Provider;
