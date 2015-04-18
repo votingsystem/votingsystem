@@ -18,13 +18,8 @@ import static javax.persistence.GenerationType.IDENTITY;
 @NamedQueries({
         @NamedQuery(name = "findSubscriptionByGroupAndUser", query =
                 "SELECT s FROM SubscriptionVS s WHERE s.userVS =:userVS AND s.groupVS =:groupVS"),
-        @NamedQuery(name = "findSubscriptionByGroupAndStateAndUserIBAN", query =
-                "SELECT s FROM SubscriptionVS s WHERE s.groupVS =:groupVS AND s.state =:state AND s.userVS.IBAN =:IBAN"),
         @NamedQuery(name="countSubscriptionByGroupVSAndState", query=
-                "SELECT COUNT(s) FROM SubscriptionVS s WHERE s.groupVS =:groupVS AND s.state =:state"),
-        @NamedQuery(name="findSubscriptionByGroupAndState", query=
-                "SELECT s FROM SubscriptionVS s WHERE s.groupVS =:groupVS AND s.state =:state"),
-
+                "SELECT COUNT(s) FROM SubscriptionVS s WHERE s.groupVS =:groupVS AND s.state =:state")
 })
 public class SubscriptionVS extends EntityVS implements Serializable {
 

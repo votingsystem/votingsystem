@@ -5,7 +5,7 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.CurrencyTransactionBatch;
+import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
@@ -31,7 +31,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -152,7 +155,7 @@ public class TransactionVSResource {
 
     @Path("/currency")
     @POST @Produces(MediaType.APPLICATION_JSON) @Consumes({"application/json"})
-    public Object currency(Map transactionBatchMap) throws Exception {
-        return currencyBean.processCurrencyTransaction(new CurrencyTransactionBatch(transactionBatchMap));
+    public Object currency(CurrencyBatch currencyBatch) throws Exception {
+        return currencyBean.processCurrencyTransaction(currencyBatch);
     }
 }

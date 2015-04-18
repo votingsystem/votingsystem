@@ -93,7 +93,7 @@ public class TransactionVS implements Serializable {
     @Column(name="toUserIBAN") private String toUserIBAN;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
-    @OneToOne private CurrencyTransactionBatch currencyTransactionBatch;
+    @OneToOne private CurrencyBatch currencyTransactionBatch;
     @Column(name="isTimeLimited") private Boolean isTimeLimited;
     @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
@@ -123,8 +123,8 @@ public class TransactionVS implements Serializable {
         this.tag = tag;
     }
 
-    public static TransactionVS CURRENCY_BATCH(CurrencyTransactionBatch batch, UserVS toUserVS, Date validTo,
-                MessageSMIME messageSMIME) {
+    public static TransactionVS CURRENCY_BATCH(CurrencyBatch batch, UserVS toUserVS, Date validTo,
+               MessageSMIME messageSMIME) {
         TransactionVS transactionVS = USERVS(null, toUserVS, TransactionVS.Type.CURRENCY_SEND, null, batch.getBatchAmount(),
                 batch.getCurrencyCode(), batch.getSubject(), validTo, messageSMIME, batch.getTagVS());
         transactionVS.setToUserIBAN(batch.getToUserIBAN());
@@ -134,7 +134,7 @@ public class TransactionVS implements Serializable {
     }
 
     public static TransactionVS USERVS(UserVS userVS, UserVS toUserVS, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
-       BigDecimal amount, String currencyCode, String subject, Date validTo, MessageSMIME messageSMIME, TagVS tag) {
+               BigDecimal amount, String currencyCode, String subject, Date validTo, MessageSMIME messageSMIME, TagVS tag) {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setFromUserVS(userVS);
         transactionVS.setFromUserIBAN(userVS.getIBAN());
@@ -153,7 +153,7 @@ public class TransactionVS implements Serializable {
     }
 
     public static TransactionVS BANKVS_PARENT(BankVS bankVS, String bankClientIBAN, String bankClientName,
-            BigDecimal amount, String currencyCode, String subject, Date validTo, MessageSMIME messageSMIME, TagVS tag) {
+          BigDecimal amount, String currencyCode, String subject, Date validTo, MessageSMIME messageSMIME, TagVS tag) {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setFromUserVS(bankVS);
         transactionVS.setFromUserIBAN(bankClientIBAN);
@@ -343,11 +343,11 @@ public class TransactionVS implements Serializable {
         else return tag.getName();
     }
 
-    public CurrencyTransactionBatch getCurrencyTransactionBatch() {
+    public CurrencyBatch getCurrencyTransactionBatch() {
         return currencyTransactionBatch;
     }
 
-    public void setCurrencyTransactionBatch(CurrencyTransactionBatch currencyTransactionBatch) {
+    public void setCurrencyTransactionBatch(CurrencyBatch currencyTransactionBatch) {
         this.currencyTransactionBatch = currencyTransactionBatch;
     }
 

@@ -6,7 +6,7 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
@@ -50,7 +50,6 @@ public class TransactionVSDto {
 
     private TransactionVS.Type transactionType;
     @JsonIgnore private List<UserVS> toUserVSList;
-    @JsonIgnore private GroupVS groupVS;
     @JsonIgnore private UserVS signer;
     @JsonIgnore private UserVS receptor;
     @JsonIgnore private TagVS tag;
@@ -100,10 +99,9 @@ public class TransactionVSDto {
     public TransactionVS getTransactionVS() throws Exception {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setId(id);
+        transactionVS.setFromUser(fromUser);
         transactionVS.setUserId(getUserId());
         transactionVS.setType(type);
-        transactionVS.setFromUser(fromUser);
-        transactionVS.setFromUserIBAN(fromUserIBAN);
         if(toUserVS != null) {
             transactionVS.setToUserVS(toUserVS.getUserVS());
         }
@@ -118,6 +116,26 @@ public class TransactionVSDto {
         transactionVS.setDateCreated(dateCreated);
         transactionVS.setValidTo(validTo);
         transactionVS.setAmount(amount);
+        return transactionVS;
+    }
+
+    @JsonIgnore
+    public TransactionVS getTransactionVS(UserVS fromUserVS, UserVS toUserVS,
+              Map<CurrencyAccount, BigDecimal> accountFromMovements) throws Exception {
+        TransactionVS transactionVS = new TransactionVS();
+        transactionVS.setFromUserVS(fromUserVS);
+        transactionVS.setFromUserIBAN(fromUserVS.getIBAN());
+        transactionVS.setToUserVS(toUserVS);
+        transactionVS.setToUserIBAN(toUserVS.getIBAN());
+        transactionVS.setType(getType());
+        transactionVS.setAccountFromMovements(accountFromMovements);
+        transactionVS.setAmount(amount);
+        transactionVS.setCurrencyCode(currencyCode);
+        transactionVS.setSubject(subject);
+        transactionVS.setValidTo(validTo);
+        transactionVS.setMessageSMIME(transactionVSSMIME);
+        transactionVS.setTag(tag);
+        transactionVS.setState(TransactionVS.State.OK);
         return transactionVS;
     }
 
@@ -304,14 +322,6 @@ public class TransactionVSDto {
     public void setToUserVSList(List<UserVS> toUserVSList) {
         this.toUserVSList = toUserVSList;
         this.numReceptors = toUserVSList.size();
-    }
-
-    public GroupVS getGroupVS() {
-        return groupVS;
-    }
-
-    public void setGroupVS(GroupVS groupVS) {
-        this.groupVS = groupVS;
     }
 
     public TagVS getTag() {

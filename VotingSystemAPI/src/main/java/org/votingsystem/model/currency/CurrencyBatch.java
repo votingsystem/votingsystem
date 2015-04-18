@@ -1,10 +1,8 @@
 package org.votingsystem.model.currency;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.model.BatchRequest;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
@@ -12,7 +10,6 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 
 import javax.persistence.*;
@@ -29,9 +26,9 @@ import java.util.*;
  */
 @Entity
 @DiscriminatorValue("CurrencyTransactionBatch")
-public class CurrencyTransactionBatch extends BatchRequest implements Serializable {
+public class CurrencyBatch extends BatchRequest implements Serializable {
 
-    private static java.util.logging.Logger log = java.util.logging.Logger.getLogger(CurrencyTransactionBatch.class.getSimpleName());
+    private static java.util.logging.Logger log = java.util.logging.Logger.getLogger(CurrencyBatch.class.getSimpleName());
 
 
     @ManyToOne(fetch=FetchType.LAZY)
@@ -54,74 +51,10 @@ public class CurrencyTransactionBatch extends BatchRequest implements Serializab
     @Transient private String toUserIBAN;
     @Transient private String tag;
 
-    public CurrencyTransactionBatch(Map dataMap) throws Exception {
-        super(new ObjectMapper().writeValueAsString(dataMap).getBytes("UTF-8"));
-        currencyAmount = BigDecimal.ZERO;
-        currencyList = new ArrayList<Currency>();
-        if(dataMap.get("csrCurrency") != null) {
-            PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(
-                    ((String)dataMap.get("csrCurrency")).getBytes());
-            leftOverCurrency = new Currency(csr);
-        }
-        Iterator<JsonNode> ite = ((ArrayNode)dataMap.get("currency")).elements();
-        boolean initialized = false;
-        while (ite.hasNext()) {
-            JsonNode node = ite.next();
-            SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(
-                    Base64.getDecoder().decode(node.asText().getBytes())));
-            smimeMessage.isValidSignature();
-            try {
-                Currency currency = new Currency(smimeMessage);
-                currencyAmount = currencyAmount.add(currency.getAmount());
-                currencyList.add(currency);
-                if(!initialized) {
-                    initialized = true;
-                    this.operation = currency.getOperation();
-                    this.paymentMethod = currency.getPaymentMethod();
-                    this.setSubject(currency.getSubject());
-                    this.toUserIBAN = currency.getToUserIBAN();
-                    this.batchAmount = currency.getBatchAmount();
-                    this.setCurrencyCode(currency.getCurrencyCode());
-                    this.tag = currency.getTag().getName();
-                    this.isTimeLimited = currency.getIsTimeLimited();
-                    this.batchUUID = currency.getBatchUUID();
-                } else checkCurrencyData(currency);
-            } catch(Exception ex) {
-                throw new ExceptionVS("Error with currency : " + ex.getMessage(), ex);
-            }
-        }
-        leftOver = currencyAmount.subtract(batchAmount);
-        if(leftOver.compareTo(BigDecimal.ZERO) < 0) new ValidationExceptionVS(
-                "CurrencyTransactionBatch insufficientCash - required '" + batchAmount.toString() + "' " + "found '" +
-                currencyAmount.toString() + "'");
-        if(leftOverCurrency != null && leftOver.compareTo(leftOverCurrency.getAmount()) != 0) new ValidationExceptionVS(
-                "CurrencyTransactionBatch leftOverMissMatch, expected '" + leftOver.toString() +
-                "found '" + leftOverCurrency.getAmount().toString() + "'");
-    }
 
-    public Map getDataMap() {
-        Map result = new HashMap<>();
-        result.put("operation", this.operation.toString());
-        result.put("paymentMethod", this.paymentMethod.toString());
-        if(getSubject() != null) result.put("subject", getSubject());
-        if(toUserIBAN != null) result.put("toUserIBAN", toUserIBAN);
-        if(batchAmount != null) result.put("batchAmount", batchAmount.toString());
-        if(currencyAmount != null) result.put("currencyAmount", currencyAmount.toString());
-        if(getCurrencyCode() != null) result.put("currencyCode", getCurrencyCode());
-        if(tag != null) result.put("tag", tag);
-        List<String> hashCertVSCurrency = new ArrayList<>();
-        for(Currency currency : currencyList) {
-            hashCertVSCurrency.add(currency.getHashCertVS());
-        }
-        result.put("hashCertVSCurrency", hashCertVSCurrency);
-        result.put("isTimeLimited", isTimeLimited);
-        if(batchUUID != null) result.put("batchUUID", batchUUID);
-        return result;
-    }
+    public CurrencyBatch() {}
 
-    public CurrencyTransactionBatch() {}
-
-    public CurrencyTransactionBatch(List<Currency> currencyList) {
+    public CurrencyBatch(List<Currency> currencyList) {
         this.currencyList = currencyList;
     }
 
@@ -137,26 +70,6 @@ public class CurrencyTransactionBatch extends BatchRequest implements Serializab
         addCurrency(currency);
     }
 
-    public void checkCurrencyData(Currency currency) throws ExceptionVS {
-        String currencyData = "Currency with hash '" + currency.getHashCertVS() + "' ";
-        if(operation != currency.getOperation()) throw new ValidationExceptionVS(
-                currencyData + "expected operation " + operation + " found " + currency.getOperation());
-        if(paymentMethod != currency.getPaymentMethod()) throw new ValidationExceptionVS(
-                currencyData + "expected paymentOption " + paymentMethod + " found " + currency.getPaymentMethod());
-        if(!getSubject().equals(currency.getSubject())) throw new ValidationExceptionVS(
-                currencyData + "expected subject " + getSubject() + " found " + currency.getSubject());
-        if(!toUserIBAN.equals(currency.getToUserIBAN())) throw new ValidationExceptionVS(
-                currencyData + "expected subject " + toUserIBAN + " found " + currency.getToUserIBAN());
-        if(batchAmount.compareTo(currency.getBatchAmount()) != 0) throw new ValidationExceptionVS(
-                currencyData + "expected batchAmount " + batchAmount.toString() + " found " + currency.getBatchAmount().toString());
-        if(!getCurrencyCode().equals(currency.getCurrencyCode())) throw new ValidationExceptionVS(
-                currencyData + "expected currencyCode " + getCurrencyCode() + " found " + currency.getCurrencyCode());
-        if(!tag.equals(currency.getTag().getName())) throw new ValidationExceptionVS(
-                currencyData + "expected tag " + tag + " found " + currency.getTag().getName());
-        if(!batchUUID.equals(currency.getBatchUUID())) throw new ValidationExceptionVS(
-                currencyData + "expected batchUUID " + batchUUID + " found " + currency.getBatchUUID());
-    }
-
     public void initTransactionVSRequest(String toUserName, String toUserIBAN, String subject,
                  Boolean isTimeLimited, String timeStampServiceURL) throws Exception {
         for(Currency currency : currencyList) {
@@ -168,30 +81,29 @@ public class CurrencyTransactionBatch extends BatchRequest implements Serializab
             currency.setSMIME(timeStamper.call());
         }
     }
-    public Map getTransactionVSRequest(TypeVS operation, Payment paymentMethod, String subject, String toUserIBAN,
+    public CurrencyBatchDto getTransactionVSRequest(TypeVS operation, Payment paymentMethod, String subject, String toUserIBAN,
             BigDecimal batchAmount, String currencyCode, String tag, Boolean isTimeLimited, String timeStampServiceURL)
             throws Exception {
-        this.operation = operation;
+        this.setOperation(operation);
         this.paymentMethod = paymentMethod;
         this.subject = subject;
         this.toUserIBAN = toUserIBAN;
-        this.batchAmount = batchAmount;
+        this.setBatchAmount(batchAmount);
         this.currencyCode = currencyCode;
         this.tag = tag;
         this.batchUUID = UUID.randomUUID().toString();
-        Map transactionRequest = getDataMap();
-        Map result = new HashMap<>();
+        CurrencyBatchDto dto = new CurrencyBatchDto(this);
         List<String> currencyTransactionBatch = new ArrayList<String>();
         for (Currency currency : currencyList) {
             SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(currency.getHashCertVS(),
-                    StringUtils.getNormalized(currency.getToUserName()),
-                    new ObjectMapper().writeValueAsString(transactionRequest), subject, null);
+                    StringUtils.getNormalized(currency.getToUserName()), JSON.getMapper().writeValueAsString(dto),
+                    subject, null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServiceURL);
             currency.setSMIME(timeStamper.call());
             currencyTransactionBatch.add(Base64.getEncoder().encodeToString(currency.getSMIME().getBytes()));
         }
-        result.put("currency", currencyTransactionBatch);
-        return result;
+        dto.setCurrency(currencyTransactionBatch);
+        return dto;
     }
 
     public void validateTransactionVSResponse(Map dataMap, Set<TrustAnchor> trustAnchor) throws Exception {
@@ -291,7 +203,7 @@ public class CurrencyTransactionBatch extends BatchRequest implements Serializab
         return toUserVS;
     }
 
-    public CurrencyTransactionBatch setToUserVS(UserVS toUserVS) {
+    public CurrencyBatch setToUserVS(UserVS toUserVS) {
         this.toUserVS = toUserVS;
         return this;
     }
@@ -332,8 +244,24 @@ public class CurrencyTransactionBatch extends BatchRequest implements Serializab
         return messageSMIME;
     }
 
-    public CurrencyTransactionBatch setMessageSMIME(MessageSMIME messageSMIME) {
+    public CurrencyBatch setMessageSMIME(MessageSMIME messageSMIME) {
         this.messageSMIME = messageSMIME;
         return this;
+    }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
+    }
+
+    public void setBatchAmount(BigDecimal batchAmount) {
+        this.batchAmount = batchAmount;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 }

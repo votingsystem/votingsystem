@@ -3,9 +3,10 @@ package org.votingsystem.test.currency;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.model.currency.CurrencyTransactionBatch;
+import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
@@ -30,12 +31,12 @@ public class CurrencySendFromWallet {
         });
         if(currencyFiles != null || currencyFiles.length == 0) throw new ExceptionVS(" --- Empty wallet ---");
         //we have al the Currency initialized, now we can make de transactions
-        CurrencyTransactionBatch transactionBatch = new CurrencyTransactionBatch();
+        CurrencyBatch transactionBatch = new CurrencyBatch();
         transactionBatch.addCurrency(currencyFiles[0]);
-        Map requestJSON =  transactionBatch.getTransactionVSRequest(TypeVS.CURRENCY_SEND,
+        CurrencyBatchDto dto =  transactionBatch.getTransactionVSRequest(TypeVS.CURRENCY_SEND,
                 Payment.ANONYMOUS_SIGNED_TRANSACTION, "First Currency Transaction",
                 "ES0878788989450000000007", new BigDecimal(9), "EUR", "WILDTAG", false, currencyServer.getTimeStampServiceURL());
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(requestJSON.toString().getBytes(),
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsBytes(dto),
                 ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
         log.info("Currency Transaction result: " + responseVS.getStatusCode());
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
@@ -44,7 +45,6 @@ public class CurrencySendFromWallet {
         log.info("Transaction result:" + responseMap);
         transactionBatch.validateTransactionVSResponse(responseMap, currencyServer.getTrustAnchors());
         System.exit(0);
-
     }
 
 }

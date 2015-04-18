@@ -5,6 +5,7 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -41,11 +42,11 @@ public class TransactionVSGroupVSBean {
     @Inject MessagesBean messages;
 
 
-    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws Exception {
+    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request, GroupVS groupVS) throws Exception {
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
-                request.getGroupVS().getIBAN(), request.getTag(), request.getAmount(), request.getCurrencyCode());
+                groupVS.getIBAN(), request.getTag(), request.getAmount(), request.getCurrencyCode());
         if(request.getType() == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
-            return processTransactionVSForAllMembers(request, accountFromMovements);
+            return processTransactionVSForAllMembers(request, accountFromMovements, groupVS);
         } else {
             ResultListDto<TransactionVSDto> resultListDto = null;
             List<TransactionVSDto> resultList = new ArrayList<>();
@@ -55,9 +56,7 @@ public class TransactionVSGroupVSBean {
                     request.getType() != TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
                 throw new ExceptionVS("unknown transaction: " + request.getType().toString());
             }
-            TransactionVS transactionParent = dao.persist(TransactionVS.USERVS(request.getGroupVS(), null, request.getType(),
-                    accountFromMovements, request.getAmount(), request.getCurrencyCode(), request.getSubject(),
-                    request.getValidTo(), request.getTransactionVSSMIME(), request.getTag()));
+            TransactionVS transactionParent = dao.persist(request.getTransactionVS(groupVS, null, accountFromMovements));
             for(UserVS toUser: request.getToUserVSList()) {
                 TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(
                         transactionParent, userPart, toUser, toUser.getIBAN()));
@@ -79,15 +78,12 @@ public class TransactionVSGroupVSBean {
     }
 
     private ResultListDto<TransactionVSDto> processTransactionVSForAllMembers(TransactionVSDto request,
-                                 Map<CurrencyAccount, BigDecimal> accountFromMovements) throws Exception {
+                                 Map<CurrencyAccount, BigDecimal> accountFromMovements, GroupVS groupVS) throws Exception {
         BigDecimal numReceptors = new BigDecimal(request.getNumReceptors());
         BigDecimal userPart = request.getAmount().divide(numReceptors, 2, RoundingMode.FLOOR);
-        TransactionVS.Type transactionVSType = TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS;
-        TransactionVS transactionParent = dao.persist(TransactionVS.USERVS(request.getGroupVS(), null, transactionVSType,
-                accountFromMovements, request.getAmount(), request.getCurrencyCode(), request.getSubject(),
-                request.getValidTo(), request.getTransactionVSSMIME(), request.getTag()));
-        Query query = dao.getEM().createNamedQuery("findSubscriptionByGroupAndState").setParameter(
-                "groupVS", request.getGroupVS()).setParameter("state", SubscriptionVS.State.ACTIVE);
+        TransactionVS transactionParent = dao.persist(request.getTransactionVS(groupVS, null, accountFromMovements));
+        Query query = dao.getEM().createQuery("SELECT s FROM SubscriptionVS s WHERE s.groupVS =:groupVS AND s.state =:state")
+                .setParameter("groupVS", groupVS).setParameter("state", SubscriptionVS.State.ACTIVE);
         List<SubscriptionVS> subscriptionList = query.getResultList();
         List<TransactionVSDto> resultList = new ArrayList<>();
         for(SubscriptionVS subscription : subscriptionList) {

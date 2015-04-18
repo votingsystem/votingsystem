@@ -19,7 +19,7 @@
         <class>org.votingsystem.model.currency.Currency</class>
         <class>org.votingsystem.model.currency.CurrencyAccount</class>
         <class>org.votingsystem.model.currency.CurrencyRequestBatch</class>
-        <class>org.votingsystem.model.currency.CurrencyTransactionBatch</class>
+        <class>org.votingsystem.model.currency.CurrencyBatch</class>
         <class>org.votingsystem.model.currency.GroupVS</class>
         <class>org.votingsystem.model.currency.MessageVS</class>
         <class>org.votingsystem.model.currency.SubscriptionVS</class>

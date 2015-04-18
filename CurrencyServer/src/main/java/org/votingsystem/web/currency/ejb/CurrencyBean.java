@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.ejb;
 
 import org.bouncycastle.tsp.TSPException;
+import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.*;
@@ -10,6 +11,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.CurrencyExpendedException;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -48,7 +50,7 @@ public class CurrencyBean {
     @Inject MessagesBean messages;
 
 
-    public Map processCurrencyTransaction(CurrencyTransactionBatch currencyBatch) throws Exception {
+    public Map processCurrencyTransaction(CurrencyBatch currencyBatch) throws Exception {
         Map dataMap = new HashMap<>();
         List<Currency> validatedCurrencyList = new ArrayList<>();
         Query query = em.createNamedQuery("findUserByIBAN").setParameter("IBAN", currencyBatch.getToUserIBAN());
@@ -63,9 +65,9 @@ public class CurrencyBean {
         for(Currency currency : currencyBatch.getCurrencyList()) {
             validatedCurrencyList.add(validateCurrency(currency));
         }
-        Map batchDataMap = currencyBatch.getDataMap();
+        CurrencyBatchDto dto = new CurrencyBatchDto(currencyBatch);
         SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
-                currencyBatch.getBatchUUID(), batchDataMap.toString(), currencyBatch.getSubject());
+                currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(dto), currencyBatch.getSubject());
         MessageSMIME messageSMIME = new MessageSMIME(receipt, TypeVS.RECEIPT);
         em.persist(messageSMIME);
         em.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));

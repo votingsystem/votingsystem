@@ -92,7 +92,7 @@ public class TransactionVSBean {
             case FROM_GROUP_TO_MEMBER:
             case FROM_GROUP_TO_MEMBER_GROUP:
             case FROM_GROUP_TO_ALL_MEMBERS:
-                return transactionVSGroupVSBean.processTransactionVS(validateGroupVSRequest(request));
+                return transactionVSGroupVSBean.processTransactionVS(request, validateGroupVSRequest(request));
             case FROM_USERVS:
                 return transactionVSUserVSBean.processTransactionVS(validateUserVSRequest(request));
             default:
@@ -113,7 +113,7 @@ public class TransactionVSBean {
         return dto;
     }
 
-    public TransactionVSDto validateGroupVSRequest(TransactionVSDto dto) throws ValidationExceptionVS {
+    public GroupVS validateGroupVSRequest(TransactionVSDto dto) throws ValidationExceptionVS {
         Query query = dao.getEM().createNamedQuery("findUserByRepresentativeAndIBAN").setParameter(
                 "representative", dto.getSigner()).setParameter("IBAN", dto.getFromUserIBAN());
         GroupVS groupVS = dao.getSingleResult(GroupVS.class, query);
@@ -121,10 +121,11 @@ public class TransactionVSBean {
             throw new ValidationExceptionVS(messages.get(
                     "groupNotFoundByIBANErrorMsg", dto.getFromUserIBAN(), dto.getSigner().getNif()));
         }
-        if(dto.getType() != TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
+        if(dto.getType() != TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
             List<UserVS> toUserVSList = new ArrayList<>();
             for(String groupUserIBAN : dto.getToUserIBAN()) {
-                query = dao.getEM().createNamedQuery("findSubscriptionByGroupAndStateAndUserIBAN").setParameter("groupVS", groupVS)
+                query = dao.getEM().createQuery("SELECT s FROM SubscriptionVS s WHERE s.groupVS =:groupVS AND " +
+                        "s.state =:state AND s.userVS.IBAN =:IBAN").setParameter("groupVS", groupVS)
                         .setParameter("state", SubscriptionVS.State.ACTIVE)
                         .setParameter("IBAN", groupUserIBAN);
                 SubscriptionVS subscription = dao.getSingleResult(SubscriptionVS.class, query);
@@ -139,7 +140,7 @@ public class TransactionVSBean {
                     .setParameter("state", SubscriptionVS.State.ACTIVE);
             dto.setNumReceptors(((Long)query.getSingleResult()).intValue());
         }
-        return dto;
+        return groupVS;
     }
 
     public TransactionVSDto validateUserVSRequest(TransactionVSDto dto) throws ValidationExceptionVS{

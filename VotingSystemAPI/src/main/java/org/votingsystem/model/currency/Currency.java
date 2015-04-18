@@ -17,6 +17,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
+
 import javax.persistence.*;
 import java.io.*;
 import java.math.BigDecimal;
@@ -28,6 +29,7 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.logging.Logger;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
@@ -59,7 +61,7 @@ public class Currency extends EntityVS implements Serializable  {
     @Column(name="batchUUID") private String batchUUID;
 
     @Column(name="serialNumber", unique=true, nullable=false) private Long serialNumber;
-    @Column(name="content", nullable=false) @Lob private byte[] content;
+    @Column(name="content", nullable=false) private byte[] content;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
 
     @ManyToOne(fetch=FetchType.LAZY)

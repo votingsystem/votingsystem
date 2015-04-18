@@ -19,11 +19,12 @@ import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.util.*;
 import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.model.currency.CurrencyTransactionBatch;
+import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.*;
 
@@ -243,7 +244,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
     public static class ProcessFormTask extends Task<ResponseVS> {
 
         private Currency.TransactionVSData transactionData;
-        private CurrencyTransactionBatch transactionBatch;
+        private CurrencyBatch transactionBatch;
         private Currency currency;
         private CurrencyServer currencyServer;
 
@@ -251,18 +252,18 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
             this.currency = currency;
             this.currencyServer = currencyServer;
             this.transactionData = transactionData;
-            this.transactionBatch = new CurrencyTransactionBatch(Arrays.asList(currency));
+            this.transactionBatch = new CurrencyBatch(Arrays.asList(currency));
         }
 
         @Override protected ResponseVS call() throws Exception {
             updateProgress(1, 10);
             updateMessage(ContextVS.getMessage("transactionInProgressMsg"));
-            Map dataMap =  transactionBatch.getTransactionVSRequest(TypeVS.CURRENCY_SEND,
+            CurrencyBatchDto dto =  transactionBatch.getTransactionVSRequest(TypeVS.CURRENCY_SEND,
                     Payment.ANONYMOUS_SIGNED_TRANSACTION, transactionData.getSubject(),
                     transactionData.getToUserIBAN(), currency.getAmount(), currency.getCurrencyCode(),
                     currency.getTag().getName(), false, currencyServer.getTimeStampServiceURL());
             updateProgress(3, 10);
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsString(dataMap).getBytes(),
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsString(dto).getBytes(),
                     ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
             updateProgress(8, 10);
             log.info("transaction result: " + responseVS.getStatusCode());
