@@ -331,7 +331,7 @@ public class SignatureService extends Service<ResponseVS> {
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             byte[] fileContent = JSON.getMapper().writeValueAsString(currencyBatch.getCurrencyCSRList()).getBytes();
             mapToSend.put(ContextVS.CSR_FILE_NAME, fileContent);
-            String textToSign = JSON.getMapper().writeValueAsString(currencyBatch.getRequestDataToSignMap());
+            String textToSign = JSON.getMapper().writeValueAsString(currencyBatch.getRequest());
             SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(), textToSign,
                     password, operationVS.getSignedMessageSubject(), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,

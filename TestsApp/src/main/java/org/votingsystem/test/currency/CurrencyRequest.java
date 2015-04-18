@@ -12,6 +12,7 @@ import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.Wallet;
 
 import java.math.BigDecimal;
@@ -35,12 +36,12 @@ public class CurrencyRequest {
         CurrencyRequestBatch currencyBatch = new CurrencyRequestBatch(totalAmount, totalAmount, curencyCode, tag,
                 isTimeLimited, ContextVS.getInstance().getCurrencyServer());
         String messageSubject = "TEST_CURRENCY_REQUEST_DATA_MSG_SUBJECT";
-        Map<String, Object> mapToSend = new HashMap<String, Object>();
-        byte[] requestBytes = new ObjectMapper().writeValueAsString(currencyBatch.getCurrencyCSRList()).getBytes();
+        Map<String, Object> mapToSend = new HashMap<>();
+        byte[] requestBytes = JSON.getMapper().writeValueAsString(currencyBatch.getCurrencyCSRList()).getBytes();
         mapToSend.put(ContextVS.CSR_FILE_NAME, requestBytes);
-        String signatureContent =  new ObjectMapper().writeValueAsString(currencyBatch.getRequestDataToSignMap());
+        String signatureContent =  JSON.getMapper().writeValueAsString(currencyBatch.getRequest());
         SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(fromUserVS.getNif(),
-                currencyServer.getName(),signatureContent, messageSubject);
+                currencyServer.getName(), signatureContent, messageSubject);
         mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, smimeMessage.getBytes());
         ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend, currencyServer.getCurrencyRequestServiceURL());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

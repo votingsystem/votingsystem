@@ -2,7 +2,11 @@ package org.votingsystem.web.currency.ejb;
 
 import org.bouncycastle.tsp.TSPException;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
-import org.votingsystem.model.*;
+import org.votingsystem.dto.currency.CurrencyIssuedDto;
+import org.votingsystem.model.BatchRequest;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.TagVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -10,9 +14,7 @@ import org.votingsystem.signature.util.CertExtensionCheckerVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.CurrencyExpendedException;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
@@ -115,9 +117,8 @@ public class CurrencyBean {
         return currency;
     }
 
-    public Map processCurrencyRequest(CurrencyRequestBatch currencyBatch) throws Exception {
+    public CurrencyIssuedDto processCurrencyRequest(CurrencyRequestBatch currencyBatch) throws Exception {
         UserVS fromUserVS = currencyBatch.getMessageSMIME().getUserVS();
-        TimePeriod timePeriod = DateUtils.getWeekPeriod(Calendar.getInstance());
         //Check cash available for user
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 fromUserVS.getIBAN(), currencyBatch.getTagVS(), currencyBatch.getRequestAmount(), currencyBatch.getCurrencyCode());
@@ -126,29 +127,23 @@ public class CurrencyBean {
         em.persist(userTransaction);
         String message = messages.get("withdrawalMsg", currencyBatch.getRequestAmount().toString(),
                 currencyBatch.getCurrencyCode()) + " " + messages.getTagMessage(currencyBatch.getTag());
-        Map dataMap = new HashMap<>();
-        dataMap.put("statusCode", ResponseVS.SC_OK);
-        dataMap.put("message", message);
-        dataMap.put("issuedCurrency", currencyBatch.getIssuedCurrencyListPEM());
+        CurrencyIssuedDto dto = new CurrencyIssuedDto(currencyBatch.getIssuedCurrencyListPEM(), message);
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(signatureBean.getSystemUser().getName(),
                 fromUserVS.getNif(), currencyBatch.getMessageSMIME().getSMIME(), null);
         em.merge(currencyBatch.getMessageSMIME().setSMIME(receipt).refresh());
-        return dataMap;
+        return dto;
     }
 
-    public List<Map> checkBundleState(List<String> hashCertVSList) {
-        List<Map> resultList = new ArrayList<>();
+    public Map<String, String> checkBundleState(List<String> hashCertVSList) {
+        Map<String, String> result = new HashMap<>();
         Query query = em.createQuery("SELECT c FROM Currency c WHERE c.hashCertVS =:hashCertVS");
         for(String hashCertVS : hashCertVSList) {
-            Map dataMap = new HashMap<>();
             Currency currency = (Currency) query.setParameter("hashCertVS", hashCertVS).getSingleResult();
             if(currency != null) {
-                dataMap.put("hashCertVS", hashCertVS);
-                dataMap.put("state", currency.getState().toString());
-                resultList.add(dataMap);
+                result.put(hashCertVS, currency.getState().toString());
             }
         }
-        return resultList;
+        return result;
     }
 
 }

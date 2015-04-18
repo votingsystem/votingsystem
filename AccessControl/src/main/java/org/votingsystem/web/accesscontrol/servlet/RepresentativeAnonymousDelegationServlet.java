@@ -55,7 +55,8 @@ public class RepresentativeAnonymousDelegationServlet extends HttpServlet {
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
-            resp.getOutputStream().write(ex.getMessage().getBytes());
+            String message = ex.getMessage() != null ? ex.getMessage(): "EXCEPTION: " + ex.getClass();
+            resp.getOutputStream().write(message.getBytes());
         }
     }
 

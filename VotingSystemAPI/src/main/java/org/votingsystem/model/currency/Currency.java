@@ -7,6 +7,8 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.votingsystem.dto.currency.CurrencyCSRDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
@@ -525,7 +527,7 @@ public class Currency extends EntityVS implements Serializable  {
         }
     }
 
-    public Map getTransaction(String toUserName, String toUserIBAN, String subject,
+    public TransactionVSDto getSendRequest(String toUserName, String toUserIBAN, String subject,
                                      Boolean isTimeLimited) throws ExceptionVS {
         this.toUserName = toUserName;
         this.toUserIBAN = toUserIBAN;
@@ -534,26 +536,12 @@ public class Currency extends EntityVS implements Serializable  {
                 x509AnonymousCert.getNotAfter())) {
             throw new ExceptionVS("Time limited Currency with 'isTimeLimited' signature param set to false");
         }
-        Map dataMap = new HashMap();
-        dataMap.put("operation", TypeVS.CURRENCY_SEND.toString());
-        dataMap.put("subject", subject);
-        dataMap.put("toUserName", toUserName);
-        dataMap.put("toUserIBAN", toUserIBAN);
-        dataMap.put("tag", tag.getName());
-        dataMap.put("amount", amount.toString());
-        dataMap.put("currencyCode", currencyCode);
-        dataMap.put("isTimeLimited", isTimeLimited);
-        dataMap.put("UUID", UUID.randomUUID().toString());
-        return dataMap;
+        return TransactionVSDto.CURRENCY_SEND(toUserName, subject, amount, currencyCode, toUserIBAN,
+                isTimeLimited, tag.getName());
     }
 
-    public Map getCSRDataMap() throws Exception {
-        Map<String, String> result = new HashMap<String, String>();
-        result.put("currencyCode", currencyCode);
-        result.put("tag", tag.getName());
-        result.put("currencyValue", amount.toString());
-        result.put("csr", new String(certificationRequest.getCsrPEM(), "UTF-8"));
-        return result;
+    public CurrencyCSRDto getCSRDto() throws Exception {
+        return new CurrencyCSRDto(new String(certificationRequest.getCsrPEM()), amount, currencyCode, tag.getName());
     }
 
     public static Map<String, BigDecimal> getCurrencyMap(Collection<Currency> currencyList) {

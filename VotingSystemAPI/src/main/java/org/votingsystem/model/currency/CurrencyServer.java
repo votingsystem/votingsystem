@@ -42,7 +42,7 @@ public class CurrencyServer extends ActorVS implements Serializable {
     }
 
     public String getCurrencyRequestServiceURL() {
-        return getServerURL() + "/rest/currency/request";
+        return getServerURL() + "/currency/request";
     }
 
     public String getCurrencyStateServiceURL(String hashCertVS) {

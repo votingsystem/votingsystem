@@ -110,6 +110,21 @@ public class TransactionVSDto {
         return dto;
     }
 
+    public static TransactionVSDto CURRENCY_SEND(String toUser, String subject, BigDecimal amount,
+                   String currencyCode, String toUserIBAN, boolean isTimeLimited, String tag) {
+        TransactionVSDto dto = new TransactionVSDto();
+        dto.setOperation(TypeVS.CURRENCY_SEND);
+        dto.setSubject(subject);
+        dto.setToUser(toUser);
+        dto.setAmount(amount);
+        dto.setToUserIBAN(Arrays.asList(toUserIBAN));
+        dto.setTags(new HashSet<>(Arrays.asList(tag)));
+        dto.setCurrencyCode(currencyCode);
+        dto.setIsTimeLimited(isTimeLimited);
+        dto.setUUID(java.util.UUID.randomUUID().toString());
+        return dto;
+    }
+
     public void validate() throws ValidationExceptionVS {
         if(operation == null) throw new ValidationExceptionVS("missing param 'operation'");
         transactionType = TransactionVS.Type.valueOf(operation.toString());
@@ -153,7 +168,7 @@ public class TransactionVSDto {
         transactionVS.setFromUserVS(fromUserVS);
         transactionVS.setFromUserIBAN(fromUserVS.getIBAN());
         transactionVS.setToUserVS(toUserVS);
-        transactionVS.setToUserIBAN(toUserVS.getIBAN());
+        if(toUserVS != null) transactionVS.setToUserIBAN(toUserVS.getIBAN());
         transactionVS.setType(getType());
         transactionVS.setAccountFromMovements(accountFromMovements);
         transactionVS.setAmount(amount);

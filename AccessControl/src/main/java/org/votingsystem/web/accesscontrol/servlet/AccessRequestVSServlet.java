@@ -72,7 +72,8 @@ public class AccessRequestVSServlet extends HttpServlet {
                 dao.merge(accessRequestVS.setState(AccessRequestVS.State.CANCELED));
             }
             resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
-            resp.getOutputStream().write(ex.getMessage().getBytes());
+            String message = ex.getMessage() != null ? ex.getMessage(): "EXCEPTION: " + ex.getClass();
+            resp.getOutputStream().write(message.getBytes());
         }
     }
 

@@ -1,10 +1,11 @@
 package org.votingsystem.web.currency.servlet;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.CurrencyRequestBatch;
 import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
@@ -19,11 +20,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@WebServlet("/currency/request") //old_url -> /cooin/request
+@WebServlet("/currency/request")
 @MultipartConfig(location="/tmp", fileSizeThreshold=1024*1024, maxFileSize=1024*1024*50, maxRequestSize=1024*1024*5*50)
 public class CurrencyRequestServlet extends HttpServlet {
 
@@ -48,13 +48,14 @@ public class CurrencyRequestServlet extends HttpServlet {
             CurrencyRequestBatch currencyBatch = new CurrencyRequestBatch(requestVS.getCSRBytes(),
                     messageSMIME, config.getContextURL());
             currencyBatch.setTagVS(config.getTag(currencyBatch.getTag()));
-            Map result = currencyBean.processCurrencyRequest(currencyBatch);
+            CurrencyIssuedDto dto = currencyBean.processCurrencyRequest(currencyBatch);
             resp.setContentType(MediaTypeVS.JSON);
-            resp.getOutputStream().write(new ObjectMapper().writeValueAsBytes(result));
+            resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(dto));
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
-            resp.getOutputStream().write(ex.getMessage().getBytes());
+            String message = ex.getMessage() != null ? ex.getMessage(): "EXCEPTION: " + ex.getClass();
+            resp.getOutputStream().write(message.getBytes());
         }
     }
 

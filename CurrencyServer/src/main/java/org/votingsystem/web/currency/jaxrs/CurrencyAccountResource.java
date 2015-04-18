@@ -1,7 +1,7 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import org.votingsystem.dto.currency.CurrencyAccountDto;
-import org.votingsystem.dto.currency.CurrencyAccountsInfoDto;
+import org.votingsystem.dto.currency.UserVSCurrencyAccountsDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.util.JSON;
@@ -52,7 +52,7 @@ public class CurrencyAccountResource {
         for(CurrencyAccount account : userAccountsDB) {
             userAccounts.add(new CurrencyAccountDto(account));
         }
-        CurrencyAccountsInfoDto currencyAccountsInfoDto = new CurrencyAccountsInfoDto(userAccounts, userVS);
+        UserVSCurrencyAccountsDto currencyAccountsInfoDto = new UserVSCurrencyAccountsDto(userAccounts, userVS);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyAccountsInfoDto)).build();
     }
 

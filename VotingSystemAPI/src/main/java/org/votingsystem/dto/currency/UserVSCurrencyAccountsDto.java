@@ -10,14 +10,14 @@ import java.util.List;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CurrencyAccountsInfoDto {
+public class UserVSCurrencyAccountsDto {
 
     private UserVSDto userVS;
     private List<CurrencyAccountDto> accounts;
 
-    public CurrencyAccountsInfoDto() {}
+    public UserVSCurrencyAccountsDto() {}
 
-    public CurrencyAccountsInfoDto(List<CurrencyAccountDto> accounts, UserVS userVS) {
+    public UserVSCurrencyAccountsDto(List<CurrencyAccountDto> accounts, UserVS userVS) {
         this.setAccounts(accounts);
         this.setUserVS(UserVSDto.BASIC(userVS));
     }

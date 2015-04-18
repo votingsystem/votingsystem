@@ -3,6 +3,7 @@ package org.votingsystem.model.currency;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.BatchRequest;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
@@ -25,7 +26,7 @@ import java.util.*;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity
-@DiscriminatorValue("CurrencyTransactionBatch")
+@DiscriminatorValue("CurrencyBatch")
 public class CurrencyBatch extends BatchRequest implements Serializable {
 
     private static java.util.logging.Logger log = java.util.logging.Logger.getLogger(CurrencyBatch.class.getSimpleName());
@@ -73,10 +74,10 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
     public void initTransactionVSRequest(String toUserName, String toUserIBAN, String subject,
                  Boolean isTimeLimited, String timeStampServiceURL) throws Exception {
         for(Currency currency : currencyList) {
-            Map transactionRequest = currency.getTransaction(toUserName, toUserIBAN, subject, isTimeLimited);
+            TransactionVSDto requestDto = currency.getSendRequest(toUserName, toUserIBAN, subject, isTimeLimited);
             SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(currency.getHashCertVS(),
                     StringUtils.getNormalized(currency.getToUserName()),
-                    new ObjectMapper().writeValueAsString(transactionRequest), currency.getSubject(), null);
+                    new ObjectMapper().writeValueAsString(requestDto), currency.getSubject(), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServiceURL);
             currency.setSMIME(timeStamper.call());
         }

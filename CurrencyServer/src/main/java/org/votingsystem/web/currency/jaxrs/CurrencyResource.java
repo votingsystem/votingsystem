@@ -1,7 +1,9 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
+import org.votingsystem.util.JSON;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
@@ -9,7 +11,6 @@ import org.votingsystem.web.currency.ejb.TransactionVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
-
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;
@@ -24,6 +25,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -102,8 +104,9 @@ public class CurrencyResource {
 
     @Path("/bundleState")
     @POST @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
-    public Object bundleState(List<String> hashCertVSList) {
-        return currencyBean.checkBundleState(hashCertVSList);
+    public Response bundleState(List<String> hashCertVSList) throws JsonProcessingException {
+        Map<String, String> result =  currencyBean.checkBundleState(hashCertVSList);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(result)).build();
     }
 
 }

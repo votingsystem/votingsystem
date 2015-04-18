@@ -116,13 +116,13 @@ public class CertUtils {
         certGen.setSubjectDN(new X500Principal(endEntitySubjectDN));
         certGen.setPublicKey(entityKey);
         certGen.setSignatureAlgorithm(ContextVS.CERT_GENERATION_SIG_ALGORITHM);
-        certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, 
+        certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false,
                 new AuthorityKeyIdentifierStructure(caCert));
-        certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, 
+        certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false,
                 new SubjectKeyIdentifierStructure(entityKey));
-        certGen.addExtension(X509Extensions.BasicConstraints, true, 
+        certGen.addExtension(X509Extensions.BasicConstraints, true,
                 new BasicConstraints(false));
-        certGen.addExtension(X509Extensions.KeyUsage, true, 
+        certGen.addExtension(X509Extensions.KeyUsage, true,
                 new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
         certGen.addExtension(X509Extensions.ExtendedKeyUsage, true,
                 new ExtendedKeyUsage(new DERSequence(KeyPurposeId.id_kp_timeStamping)));
@@ -357,8 +357,17 @@ public class CertUtils {
         byte[] extensionValue =  x509Certificate.getExtensionValue(extensionOID);
         if(extensionValue == null) return null;
         DERTaggedObject derTaggedObject = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(extensionValue);
-        return new ObjectMapper().readValue(((DERUTF8String)derTaggedObject.getObject()).getString(),
-                new TypeReference<HashMap<String, String>>() {});
+        return new ObjectMapper().readValue(((DERUTF8String) derTaggedObject.getObject()).getString(),
+                new TypeReference<HashMap<String, String>>() { });
+    }
+
+    public static <T> T getCertExtensionData(Class<T> type, X509Certificate x509Certificate,
+                 String extensionOID) throws Exception {
+        byte[] extensionValue =  x509Certificate.getExtensionValue(extensionOID);
+        if(extensionValue == null) return null;
+        DERTaggedObject derTaggedObject = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(extensionValue);
+        String extensionData = ((DERUTF8String) derTaggedObject.getObject()).getString();
+        return new ObjectMapper().readValue(extensionData, type);
     }
 
     public static String getHashCertVS(X509Certificate x509Cert, String oid) throws IOException {
