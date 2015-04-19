@@ -15,7 +15,9 @@ import org.votingsystem.web.ejb.TimeStampBean;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import javax.ejb.Startup;
+import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -45,7 +47,8 @@ public class ConfigVSImpl implements ConfigVS {
     @Inject SubscriptionVSBean subscriptionBean;
     @Inject TimeStampBean timeStampBean;
     @Inject AuditBean auditBean;
-
+    @Resource(name="comp/DefaultManagedExecutorService")
+    private ManagedExecutorService executorService;
 
     public static final String RESOURCE_PATH= "/resources/bower_components";
     public static final String WEB_PATH= "/jsf";
@@ -135,8 +138,14 @@ public class ConfigVSImpl implements ConfigVS {
                             java.util.Currency.getInstance("EUR").getCurrencyCode(), newTagVS));
                 }
             }
-            timeStampBean.init();
-            signatureBean.init();
+            executorService.submit(() -> {
+                try {
+                    timeStampBean.init();
+                    signatureBean.init();
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                }
+            });
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
