@@ -1,6 +1,7 @@
 package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.util.TypeVS;
 import java.math.BigDecimal;
 
@@ -14,7 +15,7 @@ public class CurrencyRequestDto {
     private String subject;
     private String serverURL;
     private String currencyCode;
-    private String tag;
+    private TagVS tagVS;
     private String UUID;
     private BigDecimal totalAmount;
     private Boolean isTimeLimited;
@@ -22,13 +23,13 @@ public class CurrencyRequestDto {
     public CurrencyRequestDto() {}
 
     public CurrencyRequestDto(String subject, BigDecimal totalAmount, String currencyCode, boolean isTimeLimited,
-              String serverURL, String tag) {
+              String serverURL, TagVS tagVS) {
         this.subject = subject;
         this.serverURL = serverURL;
         this.totalAmount = totalAmount;
         this.currencyCode = currencyCode;
         this.isTimeLimited = isTimeLimited;
-        this.tag = tag;
+        this.tagVS = tagVS;
         this.UUID = java.util.UUID.randomUUID().toString();
     }
 
@@ -64,14 +65,6 @@ public class CurrencyRequestDto {
         this.currencyCode = currencyCode;
     }
 
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
     public String getUUID() {
         return UUID;
     }
@@ -94,5 +87,13 @@ public class CurrencyRequestDto {
 
     public void setIsTimeLimited(Boolean isTimeLimited) {
         this.isTimeLimited = isTimeLimited;
+    }
+
+    public TagVS getTagVS() {
+        return tagVS;
+    }
+
+    public void setTagVS(TagVS tagVS) {
+        this.tagVS = tagVS;
     }
 }

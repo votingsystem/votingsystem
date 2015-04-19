@@ -4,6 +4,7 @@ import org.iban4j.*;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -71,7 +72,6 @@ public class ConfigVSImpl implements ConfigVS {
     private String emailAdmin = null;
     private String staticResURL = null;
     private File serverDir = null;
-    private TagVS wildTag;
     private X509Certificate x509TimeStampServerCert;
     private UserVS systemUser;
 
@@ -123,13 +123,10 @@ public class ConfigVSImpl implements ConfigVS {
             Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
             systemUser = dao.getSingleResult(UserVS.class, query);
             if(systemUser == null) { //First time run
+                dao.persist(new TagVS(TagVS.WILDTAG));
                 UserVS userVS = new UserVS(systemNIF, UserVS.Type.SYSTEM, serverName);
                 systemUser = dao.persist(userVS);
-                systemUser.setIBAN(getIBAN(systemUser.getId()));
-                dao.merge(systemUser);
-                TagVS wildTag = dao.persist(new TagVS(TagVS.WILDTAG));
-                dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO,
-                        java.util.Currency.getInstance("EUR").getCurrencyCode(), wildTag));
+                createIBAN(systemUser);
                 URL res = res = Thread.currentThread().getContextClassLoader().getResource("defaultTags.txt");
                 String[] defaultTags = FileUtils.getStringFromInputStream(res.openStream()).split(",");
                 for(String tag: defaultTags) {
@@ -172,9 +169,12 @@ public class ConfigVSImpl implements ConfigVS {
         return serverDir;
     }
 
-    public TagVS getTag(String tagName) {
-        Query query = dao.getEM().createNamedQuery("findTagByName").setParameter("name", tagName);
-        return dao.getSingleResult(TagVS.class, query);
+    @Override
+    public TagVS getTag(String tagName) throws ValidationExceptionVS {
+        Query query = dao.getEM().createNamedQuery("findTagByName").setParameter("name", tagName.toUpperCase());
+        TagVS tagVS = dao.getSingleResult(TagVS.class, query);
+        if(tagVS == null) throw new ValidationExceptionVS("tag: " + tagName + " is not active");
+        return tagVS;
     }
 
     public void setX509TimeStampServerCert(X509Certificate x509TimeStampServerCert) {
@@ -182,11 +182,15 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public String getIBAN(Long userId) {
-        String accountNumberStr = String.format("%010d", userId);
+    public UserVS createIBAN(UserVS userVS) throws ValidationExceptionVS {
+        String accountNumberStr = String.format("%010d", userVS.getId());
         Iban iban = new Iban.Builder().countryCode(CountryCode.ES).bankCode(bankCode).branchCode(branchCode)
                 .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
-        return iban.toString();
+        userVS.setIBAN(iban.toString());
+        userVS = dao.merge(userVS);
+        dao.persist(new CurrencyAccount(userVS, BigDecimal.ZERO,
+                java.util.Currency.getInstance("EUR").getCurrencyCode(), getTag(TagVS.WILDTAG)));
+        return userVS;
     }
 
     public String getIBAN(Long userId, String bankCodeStr, String branchCodeStr) {
@@ -227,10 +231,6 @@ public class ConfigVSImpl implements ConfigVS {
 
     public String getWebSocketURL() {
         return webSocketURL;
-    }
-
-    public TagVS getWildTag() {
-        return wildTag;
     }
 
     public String getResourceURL() {

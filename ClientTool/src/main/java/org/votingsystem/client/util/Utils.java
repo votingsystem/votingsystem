@@ -195,7 +195,7 @@ public class Utils {
             String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
             ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                actorVS = ((ActorVSDto) responseVS.getDto(ActorVSDto.class)).getActorVS();
+                actorVS = ((ActorVSDto) responseVS.getMessage(ActorVSDto.class)).getActorVS();
                 responseVS.setData(actorVS);
                 log.log(Level.SEVERE,"checkServer - adding " + serverURL.trim() + " to sever map");
                 switch (actorVS.getType()) {

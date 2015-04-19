@@ -74,7 +74,6 @@ public class GroupVSBean {
 
     public GroupVS saveGroup(MessageSMIME messageSMIME) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
-        log.info("signer:" + signer.getNif());
         GroupVSDto request = validateNewGroupRequest(messageSMIME.getSignedContent(GroupVSDto.class)) ;
         Query query = dao.getEM().createQuery("SELECT u FROM UserVS u WHERE u.name =:name")
                 .setParameter("name", request.getName().trim());
@@ -85,15 +84,13 @@ public class GroupVSBean {
         currencyAccountBean.checkUserVSAccount(signer);
         groupVS = dao.persist(new GroupVS(request.getName().trim(), UserVS.State.ACTIVE, signer,
                 request.getInfo(), request.getTags()));
-        groupVS.setIBAN(config.getIBAN(groupVS.getId()));
-        dao.merge(groupVS);
-        dao.persist(new CurrencyAccount(groupVS, BigDecimal.ZERO, Currency.getInstance("EUR").getCurrencyCode(),
-                config.getTag(TagVS.WILDTAG)));
+        config.createIBAN(groupVS);
         String fromUser = config.getServerName();
         String toUser = signer.getNif();
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(fromUser, toUser,
                 messageSMIME.getSMIME(), messages.get("newGroupVSReceiptSubject"));
         messageSMIME.setSMIME(receipt);
+        log.info("saveGroup - GroupVS id:" + groupVS.getId());
         return groupVS;
     }
 

@@ -2,6 +2,7 @@ package org.votingsystem.web.timestamp.ejb;
 
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.web.cdi.ConfigVS;
 
@@ -116,7 +117,7 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public String getIBAN(Long userId) { return null;}
+    public UserVS createIBAN(UserVS userVS) throws ValidationExceptionVS { return null;}
 
     @Override
     public UserVS getSystemUser() {

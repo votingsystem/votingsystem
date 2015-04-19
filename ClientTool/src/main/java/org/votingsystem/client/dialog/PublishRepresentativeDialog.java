@@ -177,7 +177,7 @@ public class PublishRepresentativeDialog extends DialogVS {
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 showMessage(responseVS);
             } else {
-                RepresentativeDto representativeDto = (RepresentativeDto) responseVS.getDto(RepresentativeDto.class);
+                RepresentativeDto representativeDto = (RepresentativeDto) responseVS.getMessage(RepresentativeDto.class);
                 String description = new String(Base64.getDecoder().decode(representativeDto.getDescription()),
                         StandardCharsets.UTF_8);
                 Platform.runLater(() -> editor.setHtmlText(description));

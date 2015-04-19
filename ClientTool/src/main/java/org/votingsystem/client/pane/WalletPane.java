@@ -78,8 +78,8 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
             currencyLbl.setText(currencyCode);
             Map<String, Set<Currency>> tagMap = new HashMap<>();
             for(Currency currency : currencySet) {
-                if(tagMap.containsKey(currency.getCertTagVS())) tagMap.get(currency.getCertTagVS()).add(currency);
-                else tagMap.put(currency.getCertTagVS(), new HashSet<>(Arrays.asList(currency)));
+                if(tagMap.containsKey(currency.getTag().getName())) tagMap.get(currency.getTag().getName()).add(currency);
+                else tagMap.put(currency.getTag().getName(), new HashSet<>(Arrays.asList(currency)));
             }
             currencyPane.getChildren().add(currencyLbl);
             for(String tag: tagMap.keySet()) {

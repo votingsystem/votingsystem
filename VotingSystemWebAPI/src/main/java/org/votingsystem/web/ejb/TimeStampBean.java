@@ -127,7 +127,7 @@ public class TimeStampBean {
                             timeStampServer.getServerURL()), ContentTypeVS.JSON);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         try {
-                            ActorVS serverActorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
+                            ActorVS serverActorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
                             if(timeStampServer.getServerURL().equals(serverActorVS.getServerURL())) {
                                 if(timeStampServer.getId() != null) {
                                     timeStampServer.setCertChainPEM(serverActorVS.getCertChainPEM());

@@ -6,6 +6,7 @@ import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.HttpHelper;
@@ -220,7 +221,7 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public String getIBAN(Long userId) { return null;}
+    public UserVS createIBAN(UserVS userVS) throws ValidationExceptionVS { return null;}
 
     @Override
     public UserVS getSystemUser() {
@@ -258,7 +259,7 @@ public class ConfigVSImpl implements ConfigVS {
             while(!dataReceived.get()) {
                 ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON);
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    ActorVS actorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
+                    ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
                     if (ActorVS.Type.CONTROL_CENTER != actorVS.getType()) throw new ExceptionVS(
                             "ERROR - actorNotControlCenterMsg serverURL: " + serverURL);
                     if(!actorVS.getServerURL().equals(serverURL)) throw new ExceptionVS(

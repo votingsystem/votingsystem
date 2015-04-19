@@ -3,6 +3,7 @@ package org.votingsystem.web.currency.jaxrs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.StringUtils;
@@ -55,7 +56,7 @@ public class TagVSResource {
     @POST @Path("/")
     @Consumes({"application/json"})
     public Object indexPost(Map requestMap, @Context ServletContext context, @Context HttpServletRequest req,
-                          @Context HttpServletResponse resp) throws JsonProcessingException {
+                          @Context HttpServletResponse resp) throws JsonProcessingException, ValidationExceptionVS {
         if(!requestMap.containsKey("tag"))  return Response.status(Response.Status.BAD_REQUEST).entity(
                 "missing json node - tag").build();
         String tagName = (String) requestMap.get("tag");

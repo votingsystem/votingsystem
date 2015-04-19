@@ -1,22 +1,25 @@
 package org.votingsystem.signature.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
 
 import javax.mail.Header;
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.math.BigDecimal;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
@@ -63,7 +66,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         delegationDataMap.put("accessControlURL", accessControlURL);
         delegationDataMap.put("hashCertVS", getHashCertVSBase64);
         delegationDataMap.put("eventId", eventId);
-        String delegationDataStr = new ObjectMapper().writeValueAsString(delegationDataMap);
+        String delegationDataStr = JSON.getMapper().writeValueAsString(delegationDataMap);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.VOTE_TAG, new DERUTF8String(delegationDataStr)));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
@@ -84,7 +87,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         delegationDataMap.put("weeksOperationActive", weeksOperationActive);
         delegationDataMap.put("validFrom", dateFrom);
         delegationDataMap.put("validTo", dateTo);
-        String delegationDataStr = new ObjectMapper().writeValueAsString(delegationDataMap);
+        String delegationDataStr = JSON.getMapper().writeValueAsString(delegationDataMap);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG,
                 new DERUTF8String(delegationDataStr)));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
@@ -106,7 +109,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         if(deviceName != null) extensionDataMap.put("deviceName", deviceName);
         if (email != null) extensionDataMap.put("email", email);
         if (phone != null) extensionDataMap.put("mobilePhone", phone);
-        String extensionDataStr = new ObjectMapper().writeValueAsString(extensionDataMap);
+        String extensionDataStr = JSON.getMapper().writeValueAsString(extensionDataMap);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG, new DERUTF8String(extensionDataStr)));
         X500Principal subject = new X500Principal(principal);
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
@@ -116,22 +119,17 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     public static CertificationRequestVS getCurrencyRequest(int keySize, String keyName,
               String signatureMechanism, String provider, String currencyServerURL, String hashCertVS,
-              String amount, String currency, String tagVS) throws NoSuchAlgorithmException,
+              BigDecimal amount, String currencyCode, String tagVS) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         tagVS = (tagVS == null)? TagVS.WILDTAG:tagVS;
         X500Principal subject = new X500Principal("CN=currencyServerURL:" + currencyServerURL +
-                ", OU=CURRENCY_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currency +
+                ", OU=CURRENCY_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currencyCode +
                 ", OU=TAG:" + tagVS + ", OU=DigitalCurrency");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
-        Map delegationDataMap = new HashMap<String, String>();
-        delegationDataMap.put("currencyServerURL", currencyServerURL);
-        delegationDataMap.put("hashCertVS", hashCertVS);
-        delegationDataMap.put("currencyValue", amount);
-        delegationDataMap.put("currencyCode", currency);
-        delegationDataMap.put("tag", tagVS);
-        String delegationDataStr = new ObjectMapper().writeValueAsString(delegationDataMap);
-        asn1EncodableVector.add(new DERTaggedObject(ContextVS.CURRENCY_TAG, new DERUTF8String(delegationDataStr)));
+        CurrencyCertExtensionDto dto = new CurrencyCertExtensionDto(amount, currencyCode, hashCertVS, currencyServerURL, tagVS);
+        asn1EncodableVector.add(new DERTaggedObject(ContextVS.CURRENCY_TAG,
+                new DERUTF8String(JSON.getMapper().writeValueAsString(dto))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);

@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.dto.currency.CurrencyCSRDto;
+import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
@@ -18,6 +19,7 @@ import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.util.currency.Payment;
 
@@ -95,18 +97,19 @@ public class Currency extends EntityVS implements Serializable  {
     @Transient private X509Certificate x509AnonymousCert;
     @Transient private transient SMIMEMessage smimeMessage;
     @Transient private File file;
-    @Transient private String certTagVS;
     @Transient private String toUserIBAN;
     @Transient private String toUserName;
     @Transient private Currency.CertSubject certSubject;
+    @Transient private CurrencyCertExtensionDto certExtensionDto;
 
     public Currency() {}
 
     public Currency(SMIMEMessage smimeMessage) throws Exception {
         this.smimeMessage = smimeMessage;
         x509AnonymousCert = smimeMessage.getCurrencyCert();
-        Map<String, String> certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.CURRENCY_OID);
-        initCertData(certExtensionData, smimeMessage.getCurrencyCert().getSubjectDN().toString());
+        CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+                x509AnonymousCert, ContextVS.CURRENCY_OID);
+        initCertData(certExtensionDto, smimeMessage.getCurrencyCert().getSubjectDN().toString());
         validateSignedData();
     }
 
@@ -114,35 +117,35 @@ public class Currency extends EntityVS implements Serializable  {
         this.csr = csr;
         CertificationRequestInfo info = csr.getCertificationRequestInfo();
         Enumeration csrAttributes = info.getAttributes().getObjects();
-        Map<String, String> certExtensionData = null;
+        CurrencyCertExtensionDto certExtensionDto = null;
         while(csrAttributes.hasMoreElements()) {
             DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
             switch(attribute.getTagNo()) {
                 case ContextVS.CURRENCY_TAG:
                     String certAttributeJSONStr = ((DERUTF8String)attribute.getObject()).getString();
-                    certExtensionData = new ObjectMapper().readValue(certAttributeJSONStr, 
-                            new TypeReference<HashMap<String, String>>() {});
+                    certExtensionDto = JSON.getMapper().readValue(certAttributeJSONStr, CurrencyCertExtensionDto.class);
                     break;
             }
         }
-        initCertData(certExtensionData, info.getSubject().toString());
+        initCertData(certExtensionDto, info.getSubject().toString());
     }
 
-    public Currency initCertData(Map<String, String> certExtensionData, String subjectDN) throws ExceptionVS {
-        if(certExtensionData == null) throw new ExceptionVS("Currency without cert extension data");
-        if(!certExtensionData.containsKey("hashCertVS"))  throw new ExceptionVS("Currency without cert hash");
-        currencyServerURL = certExtensionData.get("currencyServerURL");
-        hashCertVS = certExtensionData.get("hashCertVS");
-        if(hashCertVS == null) throw new ExceptionVS("Currency without hash");
+    public Currency initCertData(CurrencyCertExtensionDto certExtensionDto, String subjectDN) throws ExceptionVS {
+        if(certExtensionDto == null) throw new ValidationExceptionVS("error missing cert extension data");
+        this.certExtensionDto = certExtensionDto;
         certSubject = new CertSubject(subjectDN, hashCertVS);
-        amount = new BigDecimal(certExtensionData.get("currencyValue"));
-        currencyCode = certExtensionData.get("currencyCode");
-        certTagVS = certExtensionData.get("tag");
-        if(!certSubject.getCurrencyServerURL().equals(currencyServerURL) ||
-                certSubject.getCurrencyValue().compareTo(amount) != 0 ||
-                !certSubject.getCurrencyCode().equals(currencyCode) ||
-                !certSubject.getTag().equals(certTagVS)) throw new ExceptionVS("Currency with errors. SubjectDN: '" +
-                subjectDN + "' - cert extension data: '" + certExtensionData.toString() + "'");
+        hashCertVS = certExtensionDto.getHashCertVS();
+        currencyServerURL = certExtensionDto.getCurrencyServerURL();
+        if(!certSubject.getCurrencyServerURL().equals(certExtensionDto.getCurrencyServerURL()))
+            throw new ValidationExceptionVS("currencyServerURL: " + currencyServerURL + " - certSubject: " + certSubject);
+        amount = certExtensionDto.getAmount();
+        if(certSubject.getCurrencyValue().compareTo(amount) != 0)
+            throw new ValidationExceptionVS("amount: " + amount + " - certSubject: " + certSubject);
+        currencyCode = certExtensionDto.getCurrencyCode();
+        if(!certSubject.getCurrencyCode().equals(currencyCode))
+            throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + certSubject);
+        if(!certSubject.getTag().equals(certExtensionDto.getTag()))
+            throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + certSubject);
         return this;
     }
 
@@ -152,7 +155,7 @@ public class Currency extends EntityVS implements Serializable  {
         if(!currencyRequest.getCurrencyServerURL().equals(currencyServerURL))  throw new ExceptionVS("checkRequestWithDB_currencyServerURL");
         if(!currencyRequest.getHashCertVS().equals(hashCertVS))  throw new ExceptionVS("checkRequestWithDB_hashCertVS");
         if(!currencyRequest.getCurrencyCode().equals(currencyCode))  throw new ExceptionVS("checkRequestWithDB_currencyCode");
-        if(!currencyRequest.getCertTagVS().equals(tag.getName()))  throw new ExceptionVS("checkRequestWithDB_TagVS");
+        if(!currencyRequest.getCertExtensionDto().getTag().equals(tag.getName()))  throw new ExceptionVS("checkRequestWithDB_TagVS");
         if(currencyRequest.getAmount().compareTo(amount) != 0)  throw new ExceptionVS("checkRequestWithDB_amount");
         this.smimeMessage = currencyRequest.getSMIME();
         this.x509AnonymousCert = currencyRequest.getX509AnonymousCert();
@@ -184,8 +187,8 @@ public class Currency extends EntityVS implements Serializable  {
         if(!currencyCode.equals(dataJSON.get("currencyCode").asText())) throw new ExceptionVS(getErrorPrefix() +
                 "currencyCode '" + currencyCode + "' has signed currencyCode  '" + dataJSON.get("currencyCode").asText());
         tag = new TagVS(dataJSON.get("tag").asText());
-        if(!TagVS.WILDTAG.equals(certTagVS) && !certTagVS.equals(tag.getName()))
-                throw new ExceptionVS(getErrorPrefix() + "tag '" + certTagVS + "' has signed tag  '" +
+        if(!TagVS.WILDTAG.equals(certExtensionDto.getTag()) && !certExtensionDto.getTag().equals(tag.getName()))
+                throw new ExceptionVS(getErrorPrefix() + "tag '" + certExtensionDto.getTag() + "' has signed tag  '" +
                 dataJSON.get("tag"));
         Date signatureTime = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
@@ -201,7 +204,8 @@ public class Currency extends EntityVS implements Serializable  {
         x509AnonymousCert = certificationRequest.getCertificate();
         validFrom = x509AnonymousCert.getNotBefore();
         validTo = x509AnonymousCert.getNotAfter();
-        Map<String, String> certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.CURRENCY_OID);
+        CurrencyCertExtensionDto certExtensionData = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+                x509AnonymousCert, ContextVS.CURRENCY_OID);
         initCertData(certExtensionData, x509AnonymousCert.getSubjectDN().toString());
         certSubject.addDateInfo(x509AnonymousCert);
     }
@@ -211,6 +215,14 @@ public class Currency extends EntityVS implements Serializable  {
         currency.setCertificationRequest(certificationRequest);
         currency.initSigner(certificationRequest.getSignedCsr());
         return currency;
+    }
+
+    public CurrencyCertExtensionDto getCertExtensionDto() {
+        return certExtensionDto;
+    }
+
+    public void setCertExtensionDto(CurrencyCertExtensionDto certExtensionDto) {
+        this.certExtensionDto = certExtensionDto;
     }
 
     public BigDecimal getBatchAmount() {
@@ -257,10 +269,6 @@ public class Currency extends EntityVS implements Serializable  {
         this.subject = subject;
     }
 
-    public String getCertTagVS() {
-        return certTagVS;
-    }
-
     public Map<String, String> getCertExtensionData() throws IOException {
         return CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.CURRENCY_OID);
     }
@@ -295,7 +303,7 @@ public class Currency extends EntityVS implements Serializable  {
             setHashCertVS(CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST));
             certificationRequest = CertificationRequestVS.getCurrencyRequest(
                     ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
-                    ContextVS.PROVIDER, currencyServerURL, hashCertVS, amount.toString(), this.currencyCode, tag.getName());
+                    ContextVS.PROVIDER, currencyServerURL, hashCertVS, amount, this.currencyCode, tag.getName());
         } catch(Exception ex) {
             ex.printStackTrace();
         }
@@ -505,7 +513,8 @@ public class Currency extends EntityVS implements Serializable  {
     }
 
     public TagVS getTag() {
-        return tag;
+        if(tag != null) return tag;
+        else return new TagVS(certExtensionDto.getTag());
     }
 
     public void setTag(TagVS tag) {

@@ -40,7 +40,6 @@ public class CurrencyBean {
 
     private static Logger log = Logger.getLogger(CurrencyBean.class.getSimpleName());
 
-    @PersistenceContext EntityManager em;
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject TransactionVSBean transactionVSBean;
@@ -55,7 +54,7 @@ public class CurrencyBean {
     public Map processCurrencyTransaction(CurrencyBatch currencyBatch) throws Exception {
         Map dataMap = new HashMap<>();
         List<Currency> validatedCurrencyList = new ArrayList<>();
-        Query query = em.createNamedQuery("findUserByIBAN").setParameter("IBAN", currencyBatch.getToUserIBAN());
+        Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", currencyBatch.getToUserIBAN());
         UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
         currencyBatch.setToUserVS(toUserVS);
         TagVS tagVS = config.getTag(currencyBatch.getTag());
@@ -71,21 +70,22 @@ public class CurrencyBean {
         SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
                 currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(dto), currencyBatch.getSubject());
         MessageSMIME messageSMIME = new MessageSMIME(receipt, TypeVS.RECEIPT);
-        em.persist(messageSMIME);
-        em.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));
+        dao.persist(messageSMIME);
+        dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));
         log.info("currencyBatch:" + currencyBatch.getId() + " - messageSMIME:" + messageSMIME.getId());
         Date validTo = null;
         //TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         //if(currencyBatch.isTimeLimited == true) validTo = timePeriod.getDateTo()
 
         TransactionVS transactionVS = TransactionVS.CURRENCY_BATCH(currencyBatch, toUserVS, validTo, messageSMIME);
-        em.persist(transactionVS);
+        dao.persist(transactionVS);
 
         for(Currency currency : validatedCurrencyList) {
-            em.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
+            dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
         }
         if(currencyBatch.getLeftOverCurrency() != null) {
-            currencyBatch.getLeftOverCurrency().setTag(config.getTag(currencyBatch.getLeftOverCurrency().getCertTagVS()));
+            currencyBatch.getLeftOverCurrency().setTag(config.getTag(
+                    currencyBatch.getLeftOverCurrency().getCertExtensionDto().getTag()));
             Currency leftOverCoin = csrBean.signCurrencyRequest(currencyBatch.getLeftOverCurrency());
             dataMap.put("leftOverCoin", new String(leftOverCoin.getIssuedCertPEM(), "UTF-8"));
         }
@@ -96,7 +96,7 @@ public class CurrencyBean {
 
     public Currency validateCurrency(Currency currency) throws ExceptionVS, TSPException {
         SMIMEMessage smimeMessage = currency.getSMIME();
-        Query query = em.createQuery("SELECT c FROM Currency c WHERE c.serialNumber =:serialNumber and c.hashCertVS =:hashCertVS")
+        Query query = dao.getEM().createQuery("SELECT c FROM Currency c WHERE c.serialNumber =:serialNumber and c.hashCertVS =:hashCertVS")
                 .setParameter("serialNumber", currency.getX509AnonymousCert().getSerialNumber().longValue())
                 .setParameter("hashCertVS", currency.getHashCertVS());
         Currency currencyDB = dao.getSingleResult(Currency.class, query);
@@ -124,19 +124,19 @@ public class CurrencyBean {
                 fromUserVS.getIBAN(), currencyBatch.getTagVS(), currencyBatch.getRequestAmount(), currencyBatch.getCurrencyCode());
         currencyBatch = csrBean.signCurrencyBatchRequest(currencyBatch);
         TransactionVS userTransaction = currencyBatch.getTransactionVS(messages.get("currencyRequestLbl"), accountFromMovements);
-        em.persist(userTransaction);
+        dao.persist(userTransaction);
         String message = messages.get("withdrawalMsg", currencyBatch.getRequestAmount().toString(),
-                currencyBatch.getCurrencyCode()) + " " + messages.getTagMessage(currencyBatch.getTag());
+                currencyBatch.getCurrencyCode()) + " " + messages.getTagMessage(currencyBatch.getTagVS().getName());
         CurrencyIssuedDto dto = new CurrencyIssuedDto(currencyBatch.getIssuedCurrencyListPEM(), message);
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(signatureBean.getSystemUser().getName(),
                 fromUserVS.getNif(), currencyBatch.getMessageSMIME().getSMIME(), null);
-        em.merge(currencyBatch.getMessageSMIME().setSMIME(receipt).refresh());
+        dao.merge(currencyBatch.getMessageSMIME().setSMIME(receipt).refresh());
         return dto;
     }
 
     public Map<String, String> checkBundleState(List<String> hashCertVSList) {
         Map<String, String> result = new HashMap<>();
-        Query query = em.createQuery("SELECT c FROM Currency c WHERE c.hashCertVS =:hashCertVS");
+        Query query = dao.getEM().createQuery("SELECT c FROM Currency c WHERE c.hashCertVS =:hashCertVS");
         for(String hashCertVS : hashCertVSList) {
             Currency currency = (Currency) query.setParameter("hashCertVS", hashCertVS).getSingleResult();
             if(currency != null) {

@@ -396,8 +396,8 @@ public class ContextVS implements BundleActivator {
 
     public X509Certificate getTimeStampServerCert() throws ExceptionVS {
         if(timeStampCACert != null) return timeStampCACert;
-        if(defaultServer != null) {
-            return defaultServer.getTimeStampCert();
+        if(getDefaultServer() != null) {
+            return getDefaultServer().getTimeStampCert();
         } else throw new ExceptionVS("TimeStampServerCert not initialized");
     }
 

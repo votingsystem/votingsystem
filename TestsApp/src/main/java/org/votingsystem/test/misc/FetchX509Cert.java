@@ -32,7 +32,7 @@ public class FetchX509Cert {
         ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
             throw new ExceptionVS("$serverInfoURL - error: " + responseVS.getMessage());
-        ActorVS actorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
+        ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
         if(serverURL.equals(actorVS.getServerURL())) {
             Collection<X509Certificate> certCollection = CertUtils.fromPEMToX509CertCollection(
                     actorVS.getCertChainPEM().getBytes());

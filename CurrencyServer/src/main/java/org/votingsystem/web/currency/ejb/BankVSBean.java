@@ -74,10 +74,8 @@ public class BankVSBean {
         }
         bankVS = (BankVS) bankVSDB;
         subscriptionVSBean.setUserData(bankVS, null);
-        bankVS.setIBAN(config.getIBAN(bankVS.getId()));
-        dao.persist(new CurrencyAccount(bankVS, BigDecimal.ZERO,Currency.getInstance("EUR").getCurrencyCode(),
-                config.getTag(TagVS.WILDTAG)));
-        log.info("added new bank - id: " + bankVS.getId() + " - " + x509Certificate.getSubjectDN().toString());
+        config.createIBAN(bankVS);
+        log.info("saveBankVS - BankVS id: " + bankVS.getId() + " - " + x509Certificate.getSubjectDN().toString());
         return bankVS;
     }
 

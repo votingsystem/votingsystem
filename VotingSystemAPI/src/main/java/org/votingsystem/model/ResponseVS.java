@@ -200,8 +200,8 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         this.messageMap = messageMap;
     }
 
-    public <S> S getDto(Class<S> type) throws Exception {
-        return JSON.getMapper().readValue(getMessage(), type);
+    public <T> T getMessage(Class<T> type) throws Exception {
+        return new ObjectMapper().readValue(getMessage(), type);
     }
     
     public String toString () {

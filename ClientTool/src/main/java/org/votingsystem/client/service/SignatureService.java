@@ -21,6 +21,7 @@ import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.voting.AnonymousDelegationDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.VoteVSDto;
@@ -327,12 +328,12 @@ public class SignatureService extends Service<ResponseVS> {
             String currencyCode = (String) operationVS.getDocumentToSignMap().get("currencyCode");
             TagVS tag = new TagVS((String) operationVS.getDocumentToSignMap().get("tag"));
             Boolean isTimeLimited = (Boolean) operationVS.getDocumentToSignMap().get("isTimeLimited");
-            CurrencyRequestBatch currencyBatch = new CurrencyRequestBatch(totalAmount, totalAmount, currencyCode, tag,
-                    isTimeLimited, (CurrencyServer) operationVS.getTargetServer());
+            CurrencyRequestBatch currencyBatch = CurrencyRequestBatch.createRequest(totalAmount, totalAmount,
+                    currencyCode, tag, isTimeLimited, operationVS.getTargetServer().getServerURL());
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             byte[] fileContent = JSON.getMapper().writeValueAsString(currencyBatch.getCurrencyCSRList()).getBytes();
             mapToSend.put(ContextVS.CSR_FILE_NAME, fileContent);
-            String textToSign = JSON.getMapper().writeValueAsString(currencyBatch.getRequest());
+            String textToSign = JSON.getMapper().writeValueAsString(currencyBatch.getRequestDto());
             SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(), textToSign,
                     password, operationVS.getSignedMessageSubject(), null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
@@ -342,12 +343,12 @@ public class SignatureService extends Service<ResponseVS> {
             ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                     ((CurrencyServer)operationVS.getTargetServer()).getCurrencyRequestServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                Map dataMap = responseVS.getMessageMap();
-                currencyBatch.initCurrency((List) dataMap.get("issuedCurrency"));
+                CurrencyIssuedDto dto = (CurrencyIssuedDto) responseVS.getMessage(CurrencyIssuedDto.class);
+                currencyBatch.loadIssuedCurrency(dto.getIssuedCurrency());
                 Wallet.saveToPlainWallet(Wallet.getCertificationRequestSerialized(currencyBatch.getCurrencyMap().values()));
                 Map responseMap = new HashMap<>();
                 responseMap.put("statusCode", responseVS.getStatusCode());
-                responseMap.put("message", dataMap.get("message"));
+                responseMap.put("message", dto.getMessage());
                 responseVS.setContentType(ContentTypeVS.JSON);
                 responseVS.setMessageMap(responseMap);
                 InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"), new Date());

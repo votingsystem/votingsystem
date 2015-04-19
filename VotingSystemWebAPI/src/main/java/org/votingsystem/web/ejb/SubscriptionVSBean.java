@@ -54,8 +54,7 @@ public class SubscriptionVSBean {
         Map<String, String> deviceData = CertUtils.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID);
         if (userVSDB == null) {
             userVSDB = dao.persist(userVS);
-            userVS.setIBAN(config.getIBAN(userVS.getId()));
-            dao.merge(userVS);
+            config.createIBAN(userVS);
             log.log(Level.INFO, "checkUser ### NEW UserVS: " + userVSDB.getNif());
         } else {
             userVSDB.setCertificateCA(userVS.getCertificateCA());

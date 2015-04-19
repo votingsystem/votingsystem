@@ -106,7 +106,7 @@ public class EventVSElectionBean {
                     ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    accessControl = (AccessControlVS) ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
+                    accessControl = (AccessControlVS) ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
                     return dao.persist(accessControl);
                 } catch(Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);

@@ -34,20 +34,18 @@ public class CurrencyRequestServlet extends HttpServlet {
     @Inject CurrencyBean currencyBean;
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         processRequest(request, response);
     }
 
-    protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException, IOException {
+    protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.CURRENCY_REQUEST);
             MessageSMIME messageSMIME = signatureBean.validateSMIME(
                     requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
-            CurrencyRequestBatch currencyBatch = new CurrencyRequestBatch(requestVS.getCSRBytes(),
+            CurrencyRequestBatch currencyBatch = CurrencyRequestBatch.validateRequest(requestVS.getCSRBytes(),
                     messageSMIME, config.getContextURL());
-            currencyBatch.setTagVS(config.getTag(currencyBatch.getTag()));
+            currencyBatch.setTagVS(config.getTag(currencyBatch.getTagVS().getName()));
             CurrencyIssuedDto dto = currencyBean.processCurrencyRequest(currencyBatch);
             resp.setContentType(MediaTypeVS.JSON);
             resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(dto));

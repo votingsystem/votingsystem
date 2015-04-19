@@ -2,6 +2,7 @@ package org.votingsystem.web.cdi;
 
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EnvironmentVS;
 
 import java.io.File;
@@ -21,7 +22,7 @@ public interface ConfigVS {
 
     public String getProperty(String key);
 
-    public TagVS getTag(String tagName);
+    public TagVS getTag(String tagName) throws ValidationExceptionVS;
 
     public void setX509TimeStampServerCert(X509Certificate x509Cert);
 
@@ -45,7 +46,7 @@ public interface ConfigVS {
 
     public File getServerDir();
 
-    public String getIBAN(Long userId);
+    public UserVS createIBAN(UserVS userVS) throws ValidationExceptionVS;
 
     public UserVS getSystemUser();
 

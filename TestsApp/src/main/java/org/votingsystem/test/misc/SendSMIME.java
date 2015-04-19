@@ -30,7 +30,7 @@ public class SendSMIME {
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                "http://localhost:8080/AccessControl"),ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        ActorVS actorVS = ((ActorVSDto)responseVS.getDto(ActorVSDto.class)).getActorVS();
+        ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
         ContextVS.getInstance().setDefaultServer(actorVS);
 
         String uuid = UUID.randomUUID().toString();

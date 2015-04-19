@@ -133,7 +133,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
         currencyHashText.setText(currency.getHashCertVS());
         currencyValueLbl.setText(currency.getAmount().toPlainString());
         currencyLbl.setText(currency.getCurrencyCode());
-        currencyTagLbl.setText(MsgUtils.getTagDescription(currency.getCertTagVS()));
+        currencyTagLbl.setText(MsgUtils.getTagDescription(currency.getTag().getName()));
         menuButton.setGraphic(Utils.getIcon(FontAwesomeIconName.BARS));
         validFromLbl.setText(ContextVS.getMessage("issuedLbl") + ": " +
                 DateUtils.getDateStr(currency.getValidFrom(), "dd MMM yyyy' 'HH:mm"));
@@ -157,7 +157,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
                     errorMsg =  ContextVS.getMessage("currencyLapsedErrorLbl");
                 } else errorMsg =  ContextVS.getMessage("currencyErrorLbl");
                 String amountStr = currency.getAmount() + " " + currency.getCurrencyCode() + " " +
-                        Utils.getTagForDescription(currency.getCertTagVS());
+                        Utils.getTagForDescription(currency.getTag().getName());
                 msg = ContextVS.getMessage("currencyInfoErroMsg", errorMsg, amountStr, x509Cert.getIssuerDN().toString(),
                         DateUtils.getDateStr(currency.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
                         DateUtils.getDateStr(currency.getValidTo()), "dd MMM yyyy' 'HH:mm");
