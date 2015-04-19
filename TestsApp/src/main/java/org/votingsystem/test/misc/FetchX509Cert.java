@@ -4,9 +4,9 @@ import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 
 import java.security.cert.X509Certificate;
@@ -22,8 +22,11 @@ import static java.text.MessageFormat.format;
  */
 public class FetchX509Cert {
 
+    private static Logger log =  Logger.getLogger(FetchX509Cert.class.getName());
+
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(FetchX509Cert.class);
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         String serverURL = "http://currency/TimeStampServer";
         String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
         ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);

@@ -3,7 +3,7 @@ package org.votingsystem.test.voting;
 import com.sun.mail.pop3.POP3Store;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.util.POP3SimulationData;
-import org.votingsystem.test.util.TestUtils;
+import org.votingsystem.util.ContextVS;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -19,13 +19,16 @@ import java.util.logging.Logger;
 
 public class SendAndReadMail {
 
-    private static Logger log;
+    private static Logger log =  Logger.getLogger(SendAndReadMail.class.getName());
+
     private static Session session;
     private static POP3Store pop3Store;
     private static POP3SimulationData simulationData;
     private static ExecutorCompletionService completionService;
     
     public static void main(String[] args) throws Exception {
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         simulationData = new POP3SimulationData();
         simulationData.setSmtpHostName("localhost");
         simulationData.setPop3HostName("localhost");
@@ -38,8 +41,6 @@ public class SendAndReadMail {
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
         simulationData.setTimerMap(timerMap);
-
-        log = TestUtils.init(SendAndReadMail.class, simulationData);
 
         Properties properties = new Properties();
         properties.put("mail.smtp.host", simulationData.getSmtpHostName());
@@ -116,7 +117,7 @@ public class SendAndReadMail {
             }
             remoteInbox.close(true);
         }
-        TestUtils.finish("OK - Num. requests completed: " + simulationData.getNumRequestsCollected());
+        simulationData.finishAndExit(ResponseVS.SC_OK, null);
     }
 
 }

@@ -6,7 +6,11 @@ import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
 
-import java.util.*;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
@@ -50,7 +54,9 @@ public class SimulationData {
         this.message = message;
     }
 
-    public SimulationData() {}
+    public SimulationData() {
+        this.begin = System.currentTimeMillis();
+    }
 
     public Long getDurationInMillis() {
         return durationInMillis;
@@ -70,23 +76,6 @@ public class SimulationData {
 
     public boolean isRunning() {
         return (ResponseVS.SC_PROCESSING == getStatusCode());
-    }
-
-    public Map getDataMap() {
-        Map resultMap = new HashMap();
-        String timeDurationStr = null;
-        if(durationStr == null && begin != null) {
-            long timeDuration = System.currentTimeMillis() - begin;
-            timeDurationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(timeDuration);
-        } else timeDurationStr = durationStr;
-        resultMap.put("statusCode", getStatusCode());
-        resultMap.put("errorList", errorList);
-        resultMap.put("timeDuration", timeDurationStr);
-        if(numRequestsProjected != null) resultMap.put("numRequestsProjected", numRequestsProjected.longValue());
-        if(numRequests != null) resultMap.put("numRequests", numRequests.longValue());
-        if(numRequestsOK != null) resultMap.put("numRequestsOK", numRequestsOK.longValue());
-        if(numRequestsERROR != null) resultMap.put("numRequestsERROR", numRequestsERROR.longValue());
-        return resultMap;
     }
 
     public Long getNumRequestsCollected() {
@@ -159,8 +148,8 @@ public class SimulationData {
         else return new Date(begin);
     }
 
-    public void init(Long begin) {
-        this.begin = begin;
+    public void init() {
+        this.begin = System.currentTimeMillis();
     }
 
     public Long getFinish() {
@@ -174,6 +163,13 @@ public class SimulationData {
             durationStr = DateUtils.getElapsedTimeHoursMinutesFromMilliseconds(duration);
             this.finish = finish;
         }
+    }
+
+    public void finishAndExit(int statusCode, String resultMessage) throws Exception {
+        finish(ResponseVS.SC_OK, System.currentTimeMillis());
+        log.info("----- finish - " + toString());
+        if(resultMessage != null) log.info(resultMessage);
+        System.exit(0);
     }
 
     public String getDurationStr() {
@@ -276,5 +272,13 @@ public class SimulationData {
                 }
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return MessageFormat.format("statusCode: {0} - message: {1} - serverURL: {2} - numRequestsProjected: {3} - " +
+                "numRequests: {4} - numRequestsOK: {5} - numRequestsERROR: {6} - begin: {7} - duration: {8} - errors: {9}",
+                statusCode, message, serverURL, numRequestsProjected, numRequests, numRequestsOK, numRequestsERROR,
+                DateUtils.getDateStr(getBeginDate()), durationStr, errorList);
     }
 }

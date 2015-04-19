@@ -1,6 +1,6 @@
 package org.votingsystem.test.misc;
 
-import org.votingsystem.test.util.TestUtils;
+import org.votingsystem.util.ContextVS;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -17,8 +17,11 @@ import java.util.logging.Logger;
  */
 public class TestEncryptAES {
 
+    private static Logger log =  Logger.getLogger(TestEncryptAES.class.getName());
+
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(TestEncryptAES.class, "./TestEncryptAES");
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         String messageToEncrypt = "Hello from messageToEncrypt";
         SecureRandom random = new SecureRandom();
         IvParameterSpec iv = new IvParameterSpec(random.generateSeed(16));
@@ -42,7 +45,7 @@ public class TestEncryptAES {
         stringBytes = cipher.doFinal(encryptedMessage);
         String clearText = new String(stringBytes, "UTF8");
         log.info("clearText: " + clearText);
-        TestUtils.finish("OK");
+        System.exit(0);
     }
 
 }

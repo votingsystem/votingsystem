@@ -2,11 +2,11 @@ package org.votingsystem.test.voting;
 
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.test.util.SimulationData;
-import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 
@@ -23,10 +23,13 @@ import java.util.logging.Logger;
  */
 public class VoteValidation {
 
-    private static Logger log;
+    private static Logger log =  Logger.getLogger(VoteValidation.class.getName());
+
     private static ExecutorCompletionService completionService;
 
     public void main(String[] args) throws Exception {
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SimulationData simulationData = new SimulationData();
         simulationData.setServerURL("http://localhost:8080/TimeStampServer");//http://www.sistemavotacion.org/TimeStampServer
         simulationData.setMaxPendingResponses(10);
@@ -35,10 +38,10 @@ public class VoteValidation {
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
         simulationData.setTimerMap(timerMap);
-        log = TestUtils.init(VoteValidation.class, simulationData);
-        File voteFile = TestUtils.getFileFromResources("voting/vote.p7m");
+        File voteFile = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("voting/vote.p7m"));
         byte[] voteBytes = FileUtils.getBytesFromFile(voteFile);
-        File trustedCertsFile = TestUtils.getFileFromResources("voting/systemTrustedCerts.pem");
+        File trustedCertsFile = FileUtils.getFileFromBytes(
+                ContextVS.getInstance().getResourceBytes("voting/systemTrustedCerts.pem"));
         Collection<X509Certificate> trustedCerts = CertUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(trustedCertsFile));
         Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>(trustedCerts.size());
@@ -46,8 +49,9 @@ public class VoteValidation {
             TrustAnchor anchor = new TrustAnchor(certificate, null);
             trustAnchors.add(anchor);
         }
+        File eventTrustedCertsFile = FileUtils.getFileFromBytes(
+                ContextVS.getInstance().getResourceBytes("voting/eventTrustedCerts.pem"));
 
-        File eventTrustedCertsFile = TestUtils.getFileFromResources("voting/eventTrustedCerts.pem");
         Collection<X509Certificate> eventTrustedCerts = CertUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(eventTrustedCertsFile));
         Set<TrustAnchor> eventTrustedAnchors = new HashSet<TrustAnchor>(eventTrustedCerts.size());
@@ -56,7 +60,8 @@ public class VoteValidation {
             eventTrustedAnchors.add(anchor);
         }
 
-        File timeStampCertFile = TestUtils.getFileFromResources("voting/timeStampCert.pem");
+        File timeStampCertFile = FileUtils.getFileFromBytes(
+                ContextVS.getInstance().getResourceBytes("voting/timeStampCert.pem"));
         Collection<X509Certificate> timeStampCerts = CertUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(timeStampCertFile));
         X509Certificate timeStampServerCert = timeStampCerts.iterator().next();
@@ -80,6 +85,7 @@ public class VoteValidation {
                 JcaSimpleSignerInfoVerifierBuilder().build(timeStampServerCert);
         vote.getSMIME().getSigner().getTimeStampToken().validate(timeStampSignerInfoVerifier);
         log.info("vote valid - delivered: " + tokenDate.toString());
+        simulationData.finishAndExit(ResponseVS.SC_OK, null);
     }
 
 }

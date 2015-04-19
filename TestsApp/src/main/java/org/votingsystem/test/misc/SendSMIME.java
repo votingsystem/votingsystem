@@ -7,7 +7,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
-import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
@@ -20,12 +19,14 @@ import java.util.logging.Logger;
 
 public class SendSMIME {
 
+    private static Logger log =  Logger.getLogger(SendSMIME.class.getName());
+
     private static final String receptor = "SendSMIMEReceptor";
     private static final String receptorURL = "http://localhost:8080/AccessControl/rest/eventVS/save";
 
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(SendSMIME.class);
-
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                "http://localhost:8080/AccessControl"),ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());

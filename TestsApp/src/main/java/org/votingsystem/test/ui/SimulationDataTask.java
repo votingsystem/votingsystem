@@ -5,12 +5,6 @@ import org.votingsystem.test.util.SimulationData;
 
 import java.util.logging.Logger;
 
-;
-;
-
-/**
- * Created by jgzornoza on 19/10/14.
- */
 public class SimulationDataTask extends Task {
 
     Logger log =  Logger.getLogger(SimulationDataTask.class.getSimpleName());

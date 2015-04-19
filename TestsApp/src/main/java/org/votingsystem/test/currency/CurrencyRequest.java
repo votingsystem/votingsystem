@@ -23,8 +23,11 @@ import java.util.logging.Logger;
 
 public class CurrencyRequest {
 
+    private static Logger log =  Logger.getLogger(CurrencyRequest.class.getName());
+
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(CurrencyRequest.class);
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SignatureService signatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER);
         UserVS fromUserVS = signatureService.getUserVS();
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));

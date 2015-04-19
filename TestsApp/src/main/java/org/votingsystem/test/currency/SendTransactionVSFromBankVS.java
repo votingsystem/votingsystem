@@ -4,23 +4,27 @@ import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.dto.TransactionVSPlanDto;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
-
+import java.io.File;
 import java.util.logging.Logger;
 
 
 public class SendTransactionVSFromBankVS {
 
+    private static Logger log =  Logger.getLogger(SendTransactionVSFromBankVS.class.getName());
+
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(SendTransactionVSFromBankVS.class);
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
-        ContextVS.getInstance().setDefaultServer(currencyServer);
-        TransactionVSPlanDto transactionVSPlanDto = JSON.getMapper().readValue(
-                TestUtils.getFileFromResources("transactionsPlan/bankVS.json"), TransactionVSPlanDto.class);
+        File transactionsPlan = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("transactionsPlan/bankVS.json"));
+        TransactionVSPlanDto transactionVSPlanDto = JSON.getMapper().readValue(transactionsPlan, TransactionVSPlanDto.class);
         transactionVSPlanDto.setCurrencyServer(currencyServer);
         transactionVSPlanDto.runTransactionsVS("TEST_BANKVS_SEND_TRANSACTIONVS");
         log.info("Transaction report:" + transactionVSPlanDto.getReport());
-        TestUtils.finish("currencyResultMap: " + transactionVSPlanDto.getBankVSBalance());
+        log.info("currencyResultMap: " + transactionVSPlanDto.getBankVSBalance());
+        System.exit(0);
     }
 
 }

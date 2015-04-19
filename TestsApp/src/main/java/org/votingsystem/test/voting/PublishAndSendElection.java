@@ -16,7 +16,10 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.callable.SignTask;
 import org.votingsystem.test.callable.VoteSender;
 import org.votingsystem.test.dto.VoteResultDto;
-import org.votingsystem.test.util.*;
+import org.votingsystem.test.util.SignatureService;
+import org.votingsystem.test.util.SimulationData;
+import org.votingsystem.test.util.UserBaseSimulationData;
+import org.votingsystem.test.util.VotingSimulationData;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
@@ -29,7 +32,7 @@ import java.util.logging.Logger;
 
 public class PublishAndSendElection {
 
-    private static Logger log;
+    private static Logger log =  Logger.getLogger(PublishAndSendElection.class.getName());
 
     private static EventVS eventVS;
     private static VotingSimulationData simulationData;
@@ -41,6 +44,8 @@ public class PublishAndSendElection {
     private static ExecutorCompletionService signClaimCompletionService;
 
     public static void main(String[] args) throws Exception {
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         eventVS = new EventVS();
         eventVS.setSubject("voting subject");
         eventVS.setContent("<p>election content</p>");
@@ -67,7 +72,6 @@ public class PublishAndSendElection {
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
         simulationData.setTimerMap(timerMap);
-        log = TestUtils.init(PublishAndSendElection.class, simulationData);
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                 simulationData.getServerURL()), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
@@ -98,7 +102,7 @@ public class PublishAndSendElection {
                     e.printStackTrace();
                 }
             }*/
-            TestUtils.finish("Empty elector list");
+            simulationData.finishAndExit(ResponseVS.SC_OK, null);
         } else {
             simulatorExecutor = Executors.newFixedThreadPool(100);
             responseService = new ExecutorCompletionService<ResponseVS>(simulatorExecutor);
@@ -147,16 +151,15 @@ public class PublishAndSendElection {
                     VoteVS voteReceipt = responseVS.getData().getVoteVS();
                     if(isWithVoteCancellation) cancelVote(voteReceipt, nifFrom);
                     simulationData.getAndIncrementNumVotingRequestsOK();
-                } else TestUtils.finishWithError("ERROR", responseVS.getMessage(),
-                        simulationData.getNumRequestsOK());
+                } else simulationData.finishAndExit(ResponseVS.SC_ERROR, "ERROR" + responseVS.getMessage());
             } catch(Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
-                TestUtils.finishWithError("EXCEPTION", ex.getMessage(), simulationData.getNumRequestsOK());
+                simulationData.finishAndExit(ResponseVS.SC_ERROR, "EXCEPTION: " + ex.getMessage());
             }
         }
         if(simulationData.getEventStateWhenFinished() != null) changeEventState(publisherNIF);
         //if(simulationData.getBackupRequestEmail() != null) requestBackup(eventVS, publisherNIF);
-        TestUtils.finish("Num. votes: " + simulationData.getNumOfElectors());
+        simulationData.finishAndExit(ResponseVS.SC_OK, null);
     }
 
     private static EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeMessageSubject) throws Exception {

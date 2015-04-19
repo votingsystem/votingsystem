@@ -16,8 +16,12 @@ import java.util.logging.Logger;
 
 
 public class PublishGroupVS {
+
+    private static Logger log =  Logger.getLogger(PublishGroupVS.class.getName());
+
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(PublishGroupVS.class);
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         GroupVSDto groupVSDto = new GroupVSDto();
         groupVSDto.setInfo("GroupVS From TESTS Description - " + DateUtils.getDayWeekDateStr(new Date()));
         groupVSDto.setTags(new HashSet<>());

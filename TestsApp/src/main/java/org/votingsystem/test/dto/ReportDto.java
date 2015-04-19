@@ -4,7 +4,6 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.test.util.TransactionVSUtils;
 import org.votingsystem.throwable.ExceptionVS;
-
 import java.math.BigDecimal;
 import java.util.Map;
 

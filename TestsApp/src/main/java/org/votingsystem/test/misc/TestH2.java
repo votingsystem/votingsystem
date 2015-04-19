@@ -1,7 +1,7 @@
 package org.votingsystem.test.misc;
 
 import org.votingsystem.test.util.H2Utils;
-import org.votingsystem.test.util.TestUtils;
+import org.votingsystem.util.ContextVS;
 
 import java.util.logging.Logger;
 
@@ -10,11 +10,14 @@ import java.util.logging.Logger;
  */
 public class TestH2 {
 
+    private static Logger log =  Logger.getLogger(TestH2.class.getName());
+
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(TestH2.class, "./H2Databases");
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         H2Utils.testBlob();
         //H2Utils.testPlainText()
-        TestUtils.finish("OK");
+        System.exit(0);
     }
 }
 

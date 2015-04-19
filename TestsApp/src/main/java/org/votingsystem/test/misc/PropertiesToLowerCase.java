@@ -1,10 +1,10 @@
 package org.votingsystem.test.misc;
 
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -22,6 +22,8 @@ class PropertiesToLowerCase {
 
 
     public static void main(String[] args) throws Exception {
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         Properties props = new Properties();
         byte[] propertBytes = FileUtils.getBytesFromStream(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream(sourceFilePath));

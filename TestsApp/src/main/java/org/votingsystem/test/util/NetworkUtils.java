@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 class NetworkUtils {
 
-    private static Logger log = Logger.getLogger(NetworkUtils.class.getSimpleName());
+    private static Logger log = Logger.getLogger(NetworkUtils.class.getName());
 
     private NetworkUtils() { }
 
@@ -82,7 +82,6 @@ class NetworkUtils {
     }*/
 
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(NetworkUtils.class, new SimulationData());
         getIpAddress();
     }
 

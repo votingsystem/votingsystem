@@ -4,10 +4,6 @@ import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 
 import java.security.KeyStore;
 
-;
-;
-;
-
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */

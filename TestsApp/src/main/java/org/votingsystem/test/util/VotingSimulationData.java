@@ -3,7 +3,6 @@ package org.votingsystem.test.util;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.ResponseVS;
 
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
@@ -13,7 +12,7 @@ import java.util.logging.Logger;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VotingSimulationData extends SimulationData {
 
-    private static Logger log = Logger.getLogger(SimulationData.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SimulationData.class.getName());
 
     public enum Error {ACCESS_REQUES, VOTING};
 
@@ -33,7 +32,7 @@ public class VotingSimulationData extends SimulationData {
     public VotingSimulationData(SimulationData simulData) throws Exception {
         setAccessControlURL(simulData.getAccessControlURL());
         setEventVS(simulData.getEventVS());
-        init(simulData.getBegin());
+        init();
         setEventStateWhenFinished(simulData.getEventStateWhenFinished());
         setUserBaseData(simulData.getUserBaseSimulationData());
         setMaxPendingResponses(simulData.getMaxPendingResponses());
@@ -43,22 +42,15 @@ public class VotingSimulationData extends SimulationData {
         setNumRequestsProjected(simulData.getNumRequestsProjected());
     }
 
-    @Override public void init(Long begin) {
+    public void init() {
         numOfElectors = new AtomicLong(0);
         accessRequestERROR = new AtomicLong(0);
         accessRequestOK = new AtomicLong(0);
         votingRequestERROR = new AtomicLong(0);
         votingRequestOK = new AtomicLong(0);
-        super.init(begin);
+        super.init();
     }
 
-    @Override public Map getDataMap() {
-        Map resultMap = super.getDataMap();
-        resultMap.put("numAccessRequestsERROR", getNumAccessRequestsERROR());
-        resultMap.put("numVotingRequestsERROR", getNumVotingRequestsERROR());
-        resultMap.put("numAccessRequestsOK", getNumAccessRequestsOK());
-        return resultMap;
-    }
 
     public Long getNumVotingRequests() {
         return votingRequestERROR.get() + votingRequestOK.get();

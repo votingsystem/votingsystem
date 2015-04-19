@@ -2,25 +2,29 @@ package org.votingsystem.test.currency;
 
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.dto.TransactionVSPlanDto;
-import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
 
+import java.io.File;
 import java.util.logging.Logger;
 
 public class SendTransactionVSPlan {
 
+    private static Logger log =  Logger.getLogger(SendTransactionVSPlan.class.getName());
+
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(SendTransactionVSFromBankVS.class, new SimulationData());
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         ContextVS.getInstance().setDefaultServer(currencyServer);
-        TransactionVSPlanDto transactionVSPlanDto = JSON.getMapper().readValue(
-                TestUtils.getFileFromResources("transactionPlan.json"), TransactionVSPlanDto.class);
+        File transactionPlan = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("transactionPlan.json"));
+        TransactionVSPlanDto transactionVSPlanDto = JSON.getMapper().readValue(transactionPlan, TransactionVSPlanDto.class);
         transactionVSPlanDto.setCurrencyServer(currencyServer);
         transactionVSPlanDto.runBankVSTransactions("TEST_BANKVS_SEND_TRANSACTIONVS");
         transactionVSPlanDto.runGroupVSTransactions("TEST_GROUPVS_SEND_TRANSACTIONVS");
-        TestUtils.finish("bankVSCurrencyResultMap: " + transactionVSPlanDto.getBankVSBalance() + "\n groupVSCurrencyResultMap: " +
+        log.info("bankVSCurrencyResultMap: " + transactionVSPlanDto.getBankVSBalance() + "\n groupVSCurrencyResultMap: " +
                 transactionVSPlanDto.getGroupVSBalance());
     }
 

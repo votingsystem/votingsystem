@@ -21,7 +21,6 @@ import org.votingsystem.util.*;
 import javax.mail.Header;
 import javax.security.auth.x500.X500PrivateCredential;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -49,6 +48,7 @@ public class SignatureService {
     private static SignatureService authoritySignatureService;
     private KeyStore keyStore;
     private UserVS userVS;
+
 
     public SignatureService(KeyStore keyStore, String keyAlias, String password) throws Exception {
         init(keyStore, keyAlias, password);
@@ -241,8 +241,12 @@ public class SignatureService {
     }
 
     public List<SubscriptionVSDto> validateUserVSSubscriptions(Long groupVSId, CurrencyServer currencyServer,
-            Map<String, MockDNI> userVSMap) throws Exception {
+                           List<MockDNI> userList) throws Exception {
         log.info("validateUserVSSubscriptions");
+        Map<String, MockDNI> userVSMap = new HashMap<>();
+        for(MockDNI mockDNI:userList) {
+            userVSMap.put(mockDNI.getNif(), mockDNI);
+        }
         ResultListDto<SubscriptionVSDto> subscriptionVSDtoList = HttpHelper.getInstance().getData(new TypeReference<ResultListDto<SubscriptionVSDto>>(){},
                 currencyServer.getGroupVSUsersServiceURL( groupVSId, 1000, 0, SubscriptionVS.State.PENDING, UserVS.State.ACTIVE),
                 MediaTypeVS.JSON);

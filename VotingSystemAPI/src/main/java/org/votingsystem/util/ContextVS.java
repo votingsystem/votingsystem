@@ -272,9 +272,13 @@ public class ContextVS implements BundleActivator {
             if(settings == null) {
                 settings = new Properties();
                 File settingsFile = new File(APPDIR + File.separator + SETTINGS_FILE_NAME);
-                if(!settingsFile.exists()) settingsFile.createNewFile();
+                if(!settingsFile.exists()) {
+                    settingsFile.getParentFile().mkdirs();
+                    settingsFile.createNewFile();
+                }
                 input = new FileInputStream(settingsFile);
                 settings.load(input);
+                log.info("loading seetings: " + settingsFile.getAbsolutePath());
             }
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

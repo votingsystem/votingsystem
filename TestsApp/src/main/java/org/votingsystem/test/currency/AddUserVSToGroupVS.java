@@ -1,6 +1,7 @@
 package org.votingsystem.test.currency;
 
 import org.votingsystem.dto.currency.GroupVSDto;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.*;
@@ -12,7 +13,11 @@ import java.util.logging.Logger;
 
 public class AddUserVSToGroupVS {
 
+    private static Logger log =  Logger.getLogger(AddUserVSToGroupVS.class.getName());
+
     public static void main(String[] args) throws Exception {
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
         userBaseSimulationData.setUserIndex(100L);
         SimulationData simulationData = new SimulationData();
@@ -22,7 +27,6 @@ public class AddUserVSToGroupVS {
         simulationData.setUserBaseSimulationData(userBaseSimulationData);
         Boolean isWithUserValidation = Boolean.TRUE;
 
-        Logger log = TestUtils.init(AddUserVSToGroupVS.class, simulationData);
         SignatureService authoritySignatureService = SignatureService.getAuthoritySignatureService();
 
         log.info("initializeServer");
@@ -36,12 +40,11 @@ public class AddUserVSToGroupVS {
         groupVSDto.setOperation(TypeVS.CURRENCY_GROUP_SUBSCRIBE);
         log.info("subscribeUsers");
         List<MockDNI> userList = authoritySignatureService.subscribeUsers(groupVSDto, simulationData, currencyServer);
-        if(!isWithUserValidation) TestUtils.finish(null);
+        if(!isWithUserValidation) simulationData.finishAndExit(ResponseVS.SC_OK, null);
         log.info("activateUsers");
         SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER);
-        representativeSignatureService.validateUserVSSubscriptions(simulationData.getGroupId(), currencyServer,
-                TestUtils.getUserVSMap(userList));
-        TestUtils.finish(null);
+        representativeSignatureService.validateUserVSSubscriptions(simulationData.getGroupId(), currencyServer, userList);
+        simulationData.finishAndExit(ResponseVS.SC_OK, null);
     }
 
 }

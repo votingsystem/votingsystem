@@ -3,6 +3,7 @@ package org.votingsystem.test.misc;
 import com.google.common.eventbus.Subscribe;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.service.EventBusService;
+import org.votingsystem.util.ContextVS;
 
 import java.util.logging.Logger;
 
@@ -21,7 +22,9 @@ public class EventBusTest {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         EventBusService.getInstance().register(new EventBusConsumer());
         for(int i= 0; i < 10 ; i++) {
             log.info("sended message: " + i);

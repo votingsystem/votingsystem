@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserBaseSimulationData extends SimulationData {
 
-    private static Logger log = Logger.getLogger(UserBaseSimulationData.class.getSimpleName());
+    private static Logger log = Logger.getLogger(UserBaseSimulationData.class.getName());
 
     private int statusCode = ResponseVS.SC_ERROR;
     private String message = null;

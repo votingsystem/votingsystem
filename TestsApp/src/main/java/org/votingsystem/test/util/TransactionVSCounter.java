@@ -10,9 +10,9 @@ import java.math.BigDecimal;
  */
 public class TransactionVSCounter {
 
-    BigDecimal amount = BigDecimal.ZERO;
-    Integer numTransactions = 0;
-    TransactionVS.Type type;
+    private BigDecimal amount = BigDecimal.ZERO;
+    private Integer numTransactions = 0;
+    private TransactionVS.Type type;
 
     public TransactionVSCounter(TransactionVSDto transactionVS) {
         this.type = transactionVS.getType();

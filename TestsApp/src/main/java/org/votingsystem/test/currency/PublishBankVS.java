@@ -14,8 +14,11 @@ import java.util.logging.Logger;
 
 public class PublishBankVS {
 
+    private static Logger log =  Logger.getLogger(PublishBankVS.class.getName());
+
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(PublishBankVS.class);
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         String info = "Voting System Test Bank - " + DateUtils.getDayWeekDateStr(new Date());
         String certChainPEM = new String(ContextVS.getInstance().getResourceBytes(
                 "./certs/Cert_BANKVS_03455543T.pem"),"UTF-8");

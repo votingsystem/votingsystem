@@ -5,8 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.currency.CurrencyBatch;
+import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
@@ -20,9 +20,11 @@ import java.util.logging.Logger;
 
 public class CurrencySendFromWallet {
 
+    private static Logger log =  Logger.getLogger(CurrencySendFromWallet.class.getName());
 
     public static void main(String[] args) throws Exception {
-        Logger log = TestUtils.init(CurrencySendFromWallet.class);
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         ContextVS.getInstance().setDefaultServer(currencyServer);
         File walletFir = new File(ContextVS.getInstance().getProperty("walletDir"));

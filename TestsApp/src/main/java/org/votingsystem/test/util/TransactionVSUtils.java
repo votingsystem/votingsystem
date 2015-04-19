@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  */
 public class TransactionVSUtils {
 
-    static Logger log =  Logger.getLogger(TransactionVSUtils.class.getSimpleName());
+    static Logger log =  Logger.getLogger(TransactionVSUtils.class.getName());
 
    /* public static Map getGroupVSTransactionVS(TransactionVS transactionVS, UserVS groupVS) {
         Map result = new HashMap();
@@ -91,7 +91,7 @@ public class TransactionVSUtils {
         return destMap;
     }
 
-    public static Map<String, Map<String, BigDecimal>> filterBalanceTo(Map<String, Map<String, Map>> balanceTo) {
+    /*public static Map<String, Map<String, BigDecimal>> filterBalanceTo(Map<String, Map<String, Map>> balanceTo) {
         Map result = new HashMap<>();
         Map currencyMap = null;
         for(String currency : balanceTo.keySet()) {
@@ -102,9 +102,9 @@ public class TransactionVSUtils {
             result.put(currency, currencyMap);
         }
         return result;
-    }
+    }*/
 
-    public static Map<String, Map<String, BigDecimal>> balancesCash(Map<String, Map<String, Map>> balancesTo,
+    /*public static Map<String, Map<String, BigDecimal>> balancesCash(Map<String, Map<String, Map>> balancesTo,
             Map<String, Map<String, BigDecimal>> balancesFrom) {
         Map<String, Map<String, BigDecimal>> balancesCash = filterBalanceTo(balancesTo);
         Map<String, BigDecimal> tagMap = null;
@@ -129,7 +129,7 @@ public class TransactionVSUtils {
             }
         }
         return balancesCash;
-    }
+    }*/
 
     public static Map<String, ReportDto> sumReport(Map<String, ReportDto> reportMap, Map<String, ReportDto> newReport) throws ExceptionVS {
         Map<String, ReportDto> result = new HashMap<>();

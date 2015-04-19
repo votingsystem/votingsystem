@@ -1,10 +1,11 @@
 package org.votingsystem.test.voting;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.SimulationData;
-import org.votingsystem.test.util.TestUtils;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 
 import java.security.cert.X509Certificate;
@@ -14,10 +15,13 @@ import java.util.logging.Logger;
 
 public class Multisign {
 
-    private static Logger log;
+    private static Logger log =  Logger.getLogger(Multisign.class.getName());
+
     private static ExecutorCompletionService completionService;
 
     public static void main(String[] args) throws Exception {
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SimulationData simulationData = new SimulationData();
         simulationData.setServerURL("http://sistemavotacion.org/AccessControl");
         simulationData.setMaxPendingResponses(10);
@@ -26,7 +30,6 @@ public class Multisign {
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
         simulationData.setTimerMap(timerMap);
-        log = TestUtils.init(Multisign.class, simulationData);
         Map dataToSignMap = new HashMap<>();
         dataToSignMap.put("UUID", UUID.randomUUID().toString());
 
@@ -43,6 +46,7 @@ public class Multisign {
         smimeSigned.isValidSignature();
         Collection result = smimeSigned.checkSignerCert(x509Cert);
         log.info("cert matches: " + result.size());
+        simulationData.finishAndExit(ResponseVS.SC_OK, null);
     }
 }
 

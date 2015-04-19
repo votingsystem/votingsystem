@@ -17,9 +17,9 @@ import java.util.logging.Logger;
  */
 public class TransactionVSBatch {
 
-    private static Logger log = Logger.getLogger(TransactionVSBatch.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TransactionVSBatch.class.getName());
 
-    List<TransactionVS> transacionVSList;
+    private List<TransactionVS> transacionVSList;
     private UserVS.Type type;
     private TransactionVS.Source source;
     private String currencyCode;

@@ -5,7 +5,6 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.callable.MultiSignTestSender;
 import org.votingsystem.test.util.SimulationData;
-import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
@@ -21,11 +20,14 @@ import java.util.logging.Logger;
 
 public class SendMultisign {
 
-    private static Logger log;
+    private static Logger log =  Logger.getLogger(SendMultisign.class.getName());
+
     private static SimulationData simulationData;
     private static ExecutorCompletionService completionService;
 
     public static void main(String[] args) throws Exception {
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         simulationData = new SimulationData();
         simulationData.setServerURL("http://localhost:8080/AccessControl");
         simulationData.setMaxPendingResponses(10);
@@ -34,7 +36,6 @@ public class SendMultisign {
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
         simulationData.setTimerMap(timerMap);
-        log = TestUtils.init(Multisign.class, simulationData);
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                 simulationData.getServerURL()), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
@@ -96,13 +97,13 @@ public class SendMultisign {
                 ResponseVS responseVS = f.get();
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     simulationData.getAndIncrementNumRequestsOK();
-                } else TestUtils.finishWithError("ERROR", responseVS.getMessage(), simulationData.getNumRequestsOK());
+                } else simulationData.finishAndExit(ResponseVS.SC_ERROR, "ERROR: " + responseVS.getMessage());
             } catch(Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
-                TestUtils.finishWithError("EXCEPTION", ex.getMessage(), simulationData.getNumRequestsOK());
+                simulationData.finishAndExit(ResponseVS.SC_EXCEPTION, "EXCEPTION: " + ex.getMessage());
             }
         }
-        TestUtils.finish("OK - Num. requests completed: " + simulationData.getNumRequestsOK());
+        simulationData.finishAndExit(ResponseVS.SC_OK, null);
     }
     
 }
