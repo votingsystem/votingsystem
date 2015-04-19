@@ -27,7 +27,7 @@
                 </div>
             </div>
             <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
-                <b>${msg.dateLbl}: </b> {{getDate(timeStampDate)}}
+                <b>${msg.dateLbl}: </b> {{timeStampDate}}
             </div>
             <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
                 <div>

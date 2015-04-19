@@ -6,6 +6,7 @@
 <link href="${resourceURL}/paper-shadow/paper-shadow.html" rel="import"/>
 <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 
+
 <polymer-element name="message-smime-votevs-canceler" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
@@ -33,7 +34,7 @@
                     </template>
                 </div>
             </div>
-            <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
+            <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
                 <b>${msg.timeStampDateLbl}: </b>{{timeStampDate}}
             </div>
             <template if="{{messageToUser}}">

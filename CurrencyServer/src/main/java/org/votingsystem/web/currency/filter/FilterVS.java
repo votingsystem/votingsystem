@@ -50,7 +50,8 @@ public class FilterVS implements Filter {
         if(!"HEAD".equals(requestMethod)) {
             RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
             log.info(requestMethod + " - " + ((HttpServletRequest)req).getRequestURI() +
-                    " - contentType: " + req.getContentType() + " - locale: " + req.getLocale());
+                    " - contentType: " + req.getContentType() + " - locale: " + req.getLocale() + " - User-Agent: " +
+                    ((HttpServletRequest) req).getHeader("User-Agent"));
             chain.doFilter(requestWrapper, resp);
         } else chain.doFilter(req, resp);
     }

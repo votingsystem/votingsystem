@@ -11,7 +11,7 @@
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <core-ajax id="ajax" auto url="{{transactionvsURL}}" response="{{transactionvs}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
-            <div style="display:{{isProcessing? 'block':'none'}}">
+            <div hidden?="{{!isProcessing}}">
                 <div layout vertical center center-justified  style="text-align:center;min-height: 150px;">
                     <progress style="margin:20px auto;"></progress>
                 </div>
@@ -19,7 +19,7 @@
             <div>
                 <message-smime id="transactionViewer"></message-smime>
             </div>
-        </vs-dialog>
+        </paper-dialog>
     </template>
     <script>
         Polymer('message-smime-dialog', {

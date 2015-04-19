@@ -1,13 +1,10 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:h="http://java.sun.com/jsf/html"
-                xmlns:f="http://java.sun.com/jsf/core"
                 template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="head">
-        <!--https://github.com/josdejong/jsoneditor-->
-        <link rel="stylesheet" type="text/css" href="${resourceURL}/jsoneditor/jsoneditor.min.css"/>
-        <script type="text/javascript" src="${resourceURL}/jsoneditor/jsoneditor.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="${resourceURL}/jsoneditor/dist/jsoneditor.min.css"/>
+        <script type="text/javascript" src="${resourceURL}/jsoneditor/dist/jsoneditor.min.js"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
     </ui:define>
     <ui:define name="content">

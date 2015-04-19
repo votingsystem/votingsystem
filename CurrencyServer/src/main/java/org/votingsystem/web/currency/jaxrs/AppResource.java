@@ -1,11 +1,11 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import org.votingsystem.dto.DashBoardDto;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.currency.ejb.DashBoardBean;
-
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -38,7 +38,7 @@ public class AppResource {
     public Response androidClient(@Context ServletContext context, @Context HttpServletRequest req,
                                   @Context HttpServletResponse resp) throws ServletException, IOException {
         if(req.getParameter("androidClientLoaded") != null && Boolean.getBoolean(req.getParameter("androidClientLoaded"))) {
-            context.getRequestDispatcher("/jsf/app/index.jsp").forward(req, resp);
+            context.getRequestDispatcher("/app/index.xhtml").forward(req, resp);
             return Response.ok().build();
         } else {
             String uri = req.getParameter("refererURL");
@@ -53,7 +53,7 @@ public class AppResource {
     @GET @Path("/tools")
     public Response tools(@Context ServletContext context, @Context HttpServletRequest req,
                       @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/jsf/app/tools.jsp").forward(req, resp);
+        context.getRequestDispatcher("/app/tools.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 
@@ -99,35 +99,33 @@ public class AppResource {
         return Response.ok().build();
     }
 
-    @GET @Path("/userVS")
+    @GET @Path("/userVSDashboard")
     @Produces(MediaType.APPLICATION_JSON)
     public Response userVS(@Context ServletContext context, @Context HttpServletRequest req,
                            @Context HttpServletResponse resp) throws ServletException, IOException {
         TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), -1);//default to 1 hour
-        Map dataMap = new HashMap<>();
-        dataMap.put("transactionVSData", dashBoardBean.getUserVSInfo(timePeriod));
+        DashBoardDto dto = dashBoardBean.getUserVSInfo(timePeriod);
         if(req.getContentType() != null && req.getContentType().contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dataMap)).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
         } else {
-            req.setAttribute("dataMap", JSON.getMapper().writeValueAsString(dataMap));
-            context.getRequestDispatcher("/app/user.xhtml").forward(req, resp);
+            req.setAttribute("dashBoardDto", JSON.getMapper().writeValueAsString(dto));
+            context.getRequestDispatcher("/app/userVSDashboard.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
 
-    @GET @Path("/userVS/{numHours}")
+    @GET @Path("/userVSDashboard/hoursAgo/{numHours}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response userVS(@PathParam("numHours") Integer numHours,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws ServletException, IOException {
-        TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), numHours);
-        Map dataMap = new HashMap<>();
-        dataMap.put("transactionVSData", dashBoardBean.getUserVSInfo(timePeriod));
+        TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), - numHours);
+        DashBoardDto dto = dashBoardBean.getUserVSInfo(timePeriod);
         if(req.getContentType() != null && req.getContentType().contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dataMap)).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
         } else {
-            req.setAttribute("dataMap", JSON.getMapper().writeValueAsString(dataMap));
-            context.getRequestDispatcher("/app/user.xhtml").forward(req, resp);
+            req.setAttribute("dashBoardDto", JSON.getMapper().writeValueAsString(dto));
+            context.getRequestDispatcher("/app/userVSDashboard.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }

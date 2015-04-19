@@ -60,6 +60,12 @@ public class Browser extends VBox implements BrowserVS {
         browserStage.toFront();
     }
 
+    public void minimize() {
+        log.info("minimize");
+        browserStage.setIconified(true);
+        browserStage.toBack();
+    }
+
     private Browser(Stage browserStage) {
         getStylesheets().add(Utils.getResource("/css/browservs.css"));
         getStyleClass().add("main-dialog");

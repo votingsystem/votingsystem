@@ -5,6 +5,8 @@ import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
@@ -87,13 +89,22 @@ public class BrowserVSToolbar extends HBox {
         navButtonBox.getChildren().addAll(prevButton, forwardButton);
         getChildren().addAll(newTabButton, navButtonBox, locationField, reloadButton, Utils.createSpacer(), connectionButton,
                 msgButton, menuButton, closeButton);
+
+        final ContextMenu contextMenu = new ContextMenu();
+        MenuItem minimizeItem = new MenuItem(ContextVS.getMessage("minimizeLbl"));
+        contextMenu.getItems().add(minimizeItem);
+        minimizeItem.setOnAction(actionEvent -> Browser.getInstance().minimize());
+
         setOnMouseClicked(mouseEvent -> {
-                if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
-                    if(mouseEvent.getClickCount() == 2){
-                        Browser.getInstance().toggleFullScreen();
-                    }
+            if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+                if (mouseEvent.getClickCount() == 2) {
+                    Browser.getInstance().toggleFullScreen();
                 }
-            });
+            } else if (mouseEvent.getButton().equals(MouseButton.SECONDARY)) {
+                contextMenu.show(BrowserVSToolbar.this, mouseEvent.getScreenX(), mouseEvent.getScreenY());
+            }
+        });
+
         final Delta dragDelta = new Delta();
         setOnMousePressed(mouseEvent -> {  // record a delta distance for the drag and drop operation.
             dragDelta.x = stage.getX() - mouseEvent.getScreenX();
@@ -103,6 +114,7 @@ public class BrowserVSToolbar extends HBox {
             stage.setX(mouseEvent.getScreenX() + dragDelta.x);
             stage.setY(mouseEvent.getScreenY() + dragDelta.y);
         });
+
     }
 
     public Button getPrevButton() {

@@ -89,7 +89,7 @@ public class MessageSMIMEResource {
                 viewer = "message-smime-transactionvs-from-bankvs";
                 break;
             case CURRENCY_REQUEST:
-                viewer = "message-smime-transactionvs-cooin-request";
+                viewer = "message-smime-transactionvs-currency-request";
                 break;
         }
         /*if(params.operation) {

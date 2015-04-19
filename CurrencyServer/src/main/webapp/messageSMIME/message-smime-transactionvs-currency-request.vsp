@@ -7,6 +7,7 @@
 <link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 <link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 
+
 <polymer-element name="message-smime-transactionvs-currency-request" attributes="signedDocument smimeMessage
         isClientToolConnected timeStampDate">
     <template>
@@ -43,7 +44,7 @@
                 </div>
 
                 <div hidden?="{{!timeStampDate}}" class="timeStampMsg" style="text-align: center;">
-                    <b>${msg.dateLbl}: </b> {{getDate(timeStampDate)}}
+                    <b>${msg.dateLbl}: </b> {{timeStampDate}}
                 </div>
                 <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
                     <div>

@@ -85,7 +85,7 @@
                 return amount
             },
             showTransactionDetails: function(e) {
-                console.log(" ======= messageSMIMEURL: " + e.target.templateInstance.model.transaction.messageSMIMEURL)
+                console.log("messageSMIMEURL: " + e.target.templateInstance.model.transaction.messageSMIMEURL)
                 loadURL_VS(e.target.templateInstance.model.transaction.messageSMIMEURL, "_blank")
             }
 
