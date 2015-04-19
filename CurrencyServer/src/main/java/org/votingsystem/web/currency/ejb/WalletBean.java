@@ -6,6 +6,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.util.WalletVS;
 import org.votingsystem.web.ejb.DAOBean;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;

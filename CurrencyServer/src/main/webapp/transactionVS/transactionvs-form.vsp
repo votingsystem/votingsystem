@@ -248,7 +248,7 @@
             webAppMessage.serviceURL = "${restURL}/transactionVS"
             webAppMessage.signedMessageSubject = "${msg.transactionvsFromGroupMsgSubject}"
             webAppMessage.signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
-                isTimeLimited:this.$.timeLimitedButton.checked, tags:tagList, amount: this.$.amount.value,
+                timeLimited:this.$.timeLimitedButton.checked, tags:tagList, amount: this.$.amount.value,
                 currencyCode:this.$.currencySelector.getSelected(), fromUser:this.fromUserName,
                 fromUserIBAN:this.fromUserIBAN}
             if(this.toUserName)  webAppMessage.signedContent.toUser = this.toUserName

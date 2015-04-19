@@ -11,6 +11,7 @@ import org.votingsystem.web.currency.ejb.TransactionVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
+
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;

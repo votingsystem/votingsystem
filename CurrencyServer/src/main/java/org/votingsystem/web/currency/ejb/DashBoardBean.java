@@ -4,6 +4,7 @@ package org.votingsystem.web.currency.ejb;
 import org.votingsystem.dto.DashBoardDto;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.TimePeriod;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

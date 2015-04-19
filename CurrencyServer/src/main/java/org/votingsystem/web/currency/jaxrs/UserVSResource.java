@@ -119,11 +119,10 @@ public class UserVSResource {
     }
 
 
-    @Path("/IBAN/{IBAN}")//"/userVS/$userType/IBAN/$IBAN"
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @Path("/IBAN/{IBAN}")
+    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
     public Object findByIBAN(@PathParam("IBAN") String IBAN, @Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws Exception {
-
         Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", IBAN);
         UserVS userVS = dao.getSingleResult(UserVS.class, query);
         String msg = null;
@@ -273,7 +272,7 @@ public class UserVSResource {
                            @PathParam("month") int month,
                            @PathParam("day") int day,
                            @Context ServletContext context, @Context HttpServletRequest req,
-                            @Context HttpServletResponse resp) throws Exception {
+                           @Context HttpServletResponse resp) throws Exception {
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", nif);
         UserVS userVS = dao.getSingleResult(UserVS.class, query);
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - nif: " + nif).build();

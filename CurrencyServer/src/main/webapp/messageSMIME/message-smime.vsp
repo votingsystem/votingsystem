@@ -1,15 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="org.votingsystem.util.TypeVS" %>
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 
-<polymer-element name="message-smime" attributes="signedDocument smimeMessage isClientToolConnected timeStampDate">
+<polymer-element name="message-smime" attributes="smimeMessageContent smimeMessage timeStampDate">
     <template>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
         .messageToUser {
             font-weight: bold;
@@ -32,7 +29,7 @@
                 </div>
             </div>
             <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
-                <b>${msg.dateLbl}: </b> {{getDate(timeStampDate)}}
+                <b>${msg.dateLbl}: </b> {{timeStampDate}}
             </div>
             <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
                 <div>
@@ -41,10 +38,10 @@
                 <paper-shadow z="1"></paper-shadow>
             </div>
             <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-            <div style=""><b>${msg.subjectLbl}: </b>{{signedDocument.subject}}</div>
+            <div style=""><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
             <div horizontal layout>
-                <div style=""><b>${msg.amountLbl}: </b>{{signedDocument.amount}} {{signedDocument.currencyCode}}</div>
-                <template if="{{signedDocument.isTimeLimited}}">
+                <div style=""><b>${msg.amountLbl}: </b>{{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
+                <template if="{{smimeMessageContent.timeLimited}}">
                     <div class="pageHeader" style="margin: 0 0 0 20px;"><b>
                         ${msg.timeLimitedLbl}</b>
                     </div>
@@ -55,24 +52,24 @@
                 <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
                     ${msg.senderLbl}</div>
                 <div id="fromUserDiv">
-                    <div style=""><b>${msg.nameLbl}: </b>{{signedDocument.fromUser}}</div>
-                    <div style=""><b>${msg.IBANLbl}: </b>{{signedDocument.fromUserIBAN}}</div>
+                    <div style=""><b>${msg.nameLbl}: </b>{{smimeMessageContent.fromUser}}</div>
+                    <div style=""><b>${msg.IBANLbl}: </b>{{smimeMessageContent.fromUserIBAN}}</div>
                 </div>
             </div>
-            <div style="margin:20px 0px 0px 20px;display:{{isReceptorVisible?'block':'none'}}">
+            <div hidden?="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
                 <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621;">
                     {{receptorLbl}}</div>
                 <div layout horizontal>
                     <div><b>${msg.IBANLbl}: </b></div>
                     <div layout vertical>
-                        <template repeat="{{IBAN in signedDocument.toUserIBAN}}">
+                        <template repeat="{{IBAN in smimeMessageContent.toUserIBAN}}">
                             <div on-click="{{showToUserIBAN}}" style="text-decoration: underline; color: #0000ee; cursor: pointer;">{{IBAN}}</div>
                         </template>
                     </div>
                 </div>
             </div >
 
-            <template if="{{signedDocument.operation == 'CURRENCY'}}">
+            <template if="{{smimeMessageContent.operation == 'CURRENCY'}}">
                 <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;color: #621">
                     {{receptorLbl}}</div>
                 <div><b>{{toUserName}}</b></div>
@@ -81,9 +78,9 @@
                 </div>
             </template>
 
-            <template if="{{signedDocument.tags.length > 0}}">
+            <template if="{{smimeMessageContent.tags.length > 0}}">
                 <div layout horizontal center center-justified style="margin: 15px 0 0 0;">
-                    <template repeat="{{tag in signedDocument.tags}}">
+                    <template repeat="{{tag in smimeMessageContent.tags}}">
                         <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag.name}}</a>
                     </template>
                 </div>
@@ -93,7 +90,7 @@
     <script>
         Polymer('message-smime', {
             publish: {
-                signedDocument: {value: {}}
+                smimeMessageContent: {value: {}}
             },
             isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,
@@ -110,17 +107,13 @@
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
             },
-            attached: function () {
-                console.log(this.tagName + " - attached")
-                this.fire('attached', null);
-            },
-            signedDocumentChanged:function() {
+            smimeMessageContentChanged:function() {
                 this.messageToUser = null
                 this.isReceptorVisible = true
-                if(this.signedDocument.toUserIBAN != null && this.signedDocument.toUserIBAN.length > 1) {
+                if(this.smimeMessageContent.toUserIBAN != null && this.smimeMessageContent.toUserIBAN.length > 1) {
                     this.receptorLbl = '${msg.receptorsLbl}'
                 } else this.receptorLbl = '${msg.receptorLbl}'
-                switch (this.signedDocument.operation) {
+                switch (this.smimeMessageContent.operation) {
                     case 'FROM_BANKVS':
                         this.caption = "${msg.transactionVSFromBankVS}"
                         break;
@@ -144,25 +137,25 @@
                         this.caption = "${msg.anonymousTransactionVSLbl}"
                         this.$.fromUserDivContainer.style.display = 'none'
                         this.isReceptorVisible = false
-                        this.iban = this.signedDocument.toUseriban
-                        this.toUserName = this.signedDocument.toUserName
+                        this.iban = this.smimeMessageContent.toUseriban
+                        this.toUserName = this.smimeMessageContent.toUserName
                         this.receptorLbl = '${msg.receptorLbl}'
                         break;
                     default:
-                        this.caption = this.signedDocument.operation
+                        this.caption = this.smimeMessageContent.operation
 
                 }
             },
             showToUserInfo:function(e) {
-                var groupURL = "${restURL}/groupVS/" + e.target.templateInstance.model.signedDocument.toUserVS.id
+                var groupURL = "${restURL}/groupVS/" + e.target.templateInstance.model.smimeMessageContent.toUserVS.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },
             showFromUserInfo:function(group) {
-                var groupURL = ""${restURL}/groupVS/" +  e.target.templateInstance.model.signedDocument.fromUserVS.id
+                var groupURL = "${restURL}/groupVS/" +  e.target.templateInstance.model.smimeMessageContent.fromUserVS.id
                 console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showInfoIBAN:function(e) {
-                var fromUserIBANInfoURL = "${restURL}/IBAN/from/" + e.target.templateInstance.model.signedDocument.fromUserVS.sender.fromUserIBAN
+                var fromUserIBANInfoURL = "${restURL}/IBAN/from/" + e.target.templateInstance.model.smimeMessageContent.fromUserVS.sender.fromUserIBAN
                 console.log(this.tagName + " - showInfoIBAN - fromUserIBANInfoURL: " + fromUserIBANInfoURL)
             },
             showToUserIBAN:function(e) {

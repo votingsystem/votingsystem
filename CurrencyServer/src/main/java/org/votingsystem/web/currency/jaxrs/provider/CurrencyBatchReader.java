@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.jaxrs.provider;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.util.JSON;

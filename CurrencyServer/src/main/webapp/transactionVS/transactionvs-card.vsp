@@ -61,9 +61,9 @@
                 } else return ""
             },
             timeLimitedDescription: function(transactionvs) {
-                if(transactionvs.isTimeLimited === true || transactionvs.validTo != null) return "${msg.timeLimitedLbl}"
-                else if  (transactionvs.isTimeLimited === false) return ""
-                else return transactionvs.isTimeLimited
+                if(transactionvs.timeLimited === true || transactionvs.validTo != null) return "${msg.timeLimitedLbl}"
+                else if  (transactionvs.timeLimited === false) return ""
+                else return transactionvs.timeLimited
             },
             transactionDescription: function(transactionvs) {
                 var result = null

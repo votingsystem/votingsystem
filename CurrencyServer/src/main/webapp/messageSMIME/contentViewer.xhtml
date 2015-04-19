@@ -10,7 +10,6 @@
     <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
     <script src="${contextURL}/resources/js/utilsVS.js" type="text/javascript"/>
     <script src="${contextURL}/jsf/resources/js/utils_js.jsp" type="text/javascript"/>
-    <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
     <link href="${elementURL}/messageSMIME/${viewer}.vsp" rel="import"/>
     <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
     <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -21,32 +20,15 @@
     <div id="smimeMessage" style="display:none;">${smimeMessage}</div>
 
     <script>
-        var timeStampDate = new Date(${timeStampDate}).getDayWeekAndHourFormat()
-        var viewer = null
-        var smimeMessageContent = toJSON('${signedContentMap}')
-
         document.addEventListener('polymer-ready', function() {
             console.log("receiptViewer - polymer-ready")
-            viewer = document.createElement('${viewer}');
+            var viewer = document.createElement('${viewer}');
             sendSignalVS({title:"${msg.signedDocumentLbl}"})
             document.querySelector("#voting_system_page").appendChild(viewer)
-            loadContent()
-        });
-
-        function showContent(contentStr, timeStampDateStr) {
-            var b64_to_utf8 = decodeURIComponent(escape(window.atob(contentStr)))
-            smimeMessageContent = JSON.parse(b64_to_utf8)
-            timeStampDate = timeStampDateStr
-            if(viewer != null) loadContent()
-        }
-
-        function loadContent() {
             viewer.smimeMessage = document.querySelector("#smimeMessage").innerHTML;
-            viewer.smimeMessageContent = smimeMessageContent
-            viewer.timeStampDate = timeStampDate
-            smimeMessageContent = null
-            timeStampDate = null
-        }
+            viewer.smimeMessageContent = toJSON('${signedContentMap}')
+            viewer.timeStampDate = new Date(${timeStampDate}).getDayWeekAndHourFormat()
+        });
     </script>
 </h:body>
 </html>

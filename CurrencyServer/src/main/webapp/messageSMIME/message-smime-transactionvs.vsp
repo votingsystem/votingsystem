@@ -2,12 +2,9 @@
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
-<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 <link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 
-
-<polymer-element name="message-smime-transactionvs-from-bankvs" attributes="smimeMessage isClientToolConnected timeStampDate">
+<polymer-element name="message-smime-transactionvs" attributes="smimeMessageContent smimeMessage timeStampDate">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -24,62 +21,59 @@
         </style>
         <div layout horizontal>
             <div layout vertical style="margin: 0px auto; color: #667;">
-                <div horizontal layout style="margin: 0 0 20px 0;">
-                    <div>
-                        <template if="{{smimeMessageContent.tags.length > 0}}">
-                            <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
-                                <template repeat="{{tag in smimeMessageContent.tags}}">
-                                    <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em;">
-                                        <i class="fa fa-tag" style="color: #888;"></i> {{tag}}</a>
-                                </template>
-                            </div>
+                <div horizontal layout style="margin: 0 0 10px 0; min-width: 400px;">
+                    <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
+                        <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em;">
+                            <i class="fa fa-tag" style="color: #888;"></i> {{smimeMessageContent.tags[0]}}</a>
+                    </div>
+                    <div layout horizontal center center-justified class="pageHeader" style="margin:0 0 0 20px; font-size: 1.2em;">
+                        {{messageType}}
+                    </div>
+                    <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px; font-size: 0.9em;">
+                        <template if="{{isClientToolConnected}}">
+                            <paper-button raised on-click="{{checkReceipt}}">
+                                <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
+                            </paper-button>
                         </template>
                     </div>
-                    <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">
-                        ${msg.transactionVSFromBankVS}
-                    </div>
                 </div>
 
-                <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
+                <div hidden?="{{!timeStampDate}}" class="timeStampMsg" style="text-align: center;">
                     <b>${msg.dateLbl}: </b> {{timeStampDate}}
                 </div>
-
-                <div hidden?="{{!messageToUser}}">
-                    <div  layout horizontal center center-justified  class="messageToUser">
-                        <div>
-                            <div id="messageToUser">{{messageToUser}}</div>
-                        </div>
-                        <paper-shadow z="1"></paper-shadow>
+                <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
+                    <div>
+                        <div id="messageToUser">{{messageToUser}}</div>
                     </div>
+                    <paper-shadow z="1"></paper-shadow>
                 </div>
-
-                <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-                <div style=""><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
-                <div horizontal layout>
-                    <div flex style=""><b>${msg.amountLbl}: </b>{{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
-                    <template if="{{smimeMessageContent.timeLimited}}">
+                <div horizontal layout center center-justified style="margin:0 0 10px 0;">
+                    <div style="font-size: 1.1em; font-weight: bold;">${msg.subjectLbl}:</div>
+                    <div style="font-size: 1.2em; ">{{smimeMessageContent.subject}}</div>
+                </div>
+                <div horizontal layout center-justified>
+                    <div style="font-size: 1.1em;"><b>${msg.amountLbl}: </b>
+                        {{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
+                    <div hidden?="{{!smimeMessageContent.timeLimited}}">
                         <core-tooltip large label="${msg.timeLimitedDateMsg} '{{smimeMessageContent.validTo}}'" position="left">
                             <div class="pageHeader" style="margin: 0 20px 0 0;"><b>
                                 ${msg.timeLimitedLbl}</b>
                             </div>
                         </core-tooltip>
-                    </template>
+                    </div>
                 </div>
                 <div style="margin-left: 20px;">
                     <div class="actorLbl" style=" margin:10px 0px 0px 0px;">${msg.senderLbl}</div>
                     <div>
-                        <div style=""><b>${msg.nameLbl}:  </b>{{smimeMessageContent.fromUser}}</div>
-                        <div style=""><b>${msg.IBANLbl}: </b>{{smimeMessageContent.fromUserIBAN}}</div>
-                        <div on-click="{{showFromUserVSByIBAN}}">
-                            <b>${msg.bankVSIBANLbl}: </b>
-                            <span class="iban-link">{{smimeMessageContent.fromUserIBAN}}</span>
+                        <div><b>${msg.nameLbl}:  </b>{{smimeMessageContent.fromUser}}</div>
+                        <div horizontal layout on-click="{{showFromUserVSByIBAN}}">
+                            <div><b>${msg.IBANLbl}: </b></div>
+                            <div  class="iban-link">{{smimeMessageContent.fromUserIBAN}}</div>
                         </div>
                     </div>
                 </div>
                 <div hidden?="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
-                    <div class="actorLbl">
-                        ${msg.receptorLbl}
-                    </div>
+                    <div class="actorLbl">${msg.receptorLbl}</div>
                     <div layout horizontal>
                         <div><b>${msg.IBANLbl}: </b></div>
                         <div layout vertical>
@@ -89,46 +83,45 @@
                         </div>
                     </div>
                 </div >
-                <div  layout horizontal center center-justified>
-                    <div flex></div>
-                    <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px;">
-                        <template if="{{isClientToolConnected}}">
-                            <paper-button raised on-click="{{checkReceipt}}">
-                                <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
-                            </paper-button>
-                        </template>
-                    </div>
-                </div>
             </div>
         </div>
 
     </template>
     <script>
-        Polymer('message-smime-transactionvs-from-bankvs', {
+        Polymer('message-smime-transactionvs', {
             publish: {
                 smimeMessageContent: {value: {}}
             },
             isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,
             timeStampDate:null,
-            isReceptorVisible:true,
+            isReceptorVisible:false,
+            messageType:null,
+            fromUserIBAN:null,
+            toUserIBAN:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected', function() {
                     this.isClientToolConnected = true
                 }.bind(this))
-                sendSignalVS({caption:"${msg.transactionVSFromBankVS}"})
             },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
                 console.log(this.tagName + " - smimeMessageContentChanged: " + JSON.stringify(this.smimeMessageContent))
+                switch (this.smimeMessageContent.type) {
+                    case 'FROM_GROUP_TO_ALL_MEMBERS':
+                        this.messageType = "${msg.transactionVSFromGroupToAllMembers}"
+                        this.fromUserIBAN = this.smimeMessageContent.fromUserIBAN
+                        break;
+                    default: return tagName
+                }
+                sendSignalVS({caption:this.messageType})
             },
             showFromUserVSByIBAN:function(e) {
-                loadURL_VS("${restURL}/userVS/IBAN/" + this.smimeMessageContent.bankIBAN, '_blank')
+                loadURL_VS("${restURL}/userVS/IBAN/" + this.fromUserIBAN, '_blank')
             },
             showToUserVSByIBAN:function(e) {
-                console.log(this.tagName + " - showUserVSByIBAN - " + e)
-                loadURL_VS("${restURL}/userVS/IBAN/" + e.target.templateInstance.model.iban, '_blank')
+                loadURL_VS("${restURL}/userVS/IBAN/" + this.toUserIBAN, '_blank')
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)

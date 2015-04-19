@@ -94,16 +94,16 @@
                 for(currencyIdx in this.currencyArray) {
                     var currency = this.currencyArray[currencyIdx]
                     try {
-                        //{{currency.currencyValue}} {{currency.currencyCode}} {{currency.isTimeLimited}}
+                        //{{currency.currencyValue}} {{currency.currencyCode}} {{currency.timeLimited}}
                         if(tagGroupMap[currency.currencyCode]) {
-                            if(currency.isTimeLimited === true) {
-                                tagGroupMap[currency.currencyCode].isTimeLimited = addNumbers(
-                                                tagGroupMap[currency.currencyCode].isTimeLimited, currency.currencyValue)
+                            if(currency.timeLimited === true) {
+                                tagGroupMap[currency.currencyCode].timeLimited = addNumbers(
+                                                tagGroupMap[currency.currencyCode].timeLimited, currency.currencyValue)
                             }
                             tagGroupMap[currency.currencyCode].total = addNumbers(tagGroupMap[currency.currencyCode].total, currency.currencyValue)
                         } else {
-                            var timeLimited = (currency.isTimeLimited === true)?currency.currencyValue:0
-                            tagGroupMap[currency.currencyCode] = {isTimeLimited: timeLimited, total:currency.currencyValue}
+                            var timeLimited = (currency.timeLimited === true)?currency.currencyValue:0
+                            tagGroupMap[currency.currencyCode] = {timeLimited: timeLimited, total:currency.currencyValue}
                         }
                     } catch(ex) {console.log(Ex)}
 
@@ -113,8 +113,8 @@
                 for(currencyIdx in currencies) {
                     var currency = currencies[currencyIdx]
                     var msg = currency + ". ${msg.totalLbl}: " + tagGroupMap[currency].total
-                    if(tagGroupMap[currency].isTimeLimited > 0) msg = msg +
-                            " (${msg.timeLimitedForTagShortMsg})".format(tagGroupMap[currency].isTimeLimited)
+                    if(tagGroupMap[currency].timeLimited > 0) msg = msg +
+                            " (${msg.timeLimitedForTagShortMsg})".format(tagGroupMap[currency].timeLimited)
                     this.currencyMsgs.push(msg)
                 }
             },

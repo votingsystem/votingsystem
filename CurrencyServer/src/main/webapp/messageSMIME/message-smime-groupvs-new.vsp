@@ -1,10 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="org.votingsystem.util.TypeVS" %>
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 
-<polymer-element name="message-smime-groupvs-new" attributes="signedDocument smimeMessage isClientToolConnected timeStampDate">
+<polymer-element name="message-smime-groupvs-new" attributes="signedDocument smimeMessage timeStampDate">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -71,9 +70,6 @@
             caption:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
-            },
-            getDate:function(dateStamp) {
-                return new Date(dateStamp).getDayWeekFormat()
             },
             checkReceipt: function() {
                 var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)

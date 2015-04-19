@@ -1,18 +1,13 @@
 package org.votingsystem.web.currency.jaxrs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.JSON;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.*;
 import org.votingsystem.web.currency.ejb.UserVSBean;
 import org.votingsystem.web.currency.util.AsciiDocUtil;
 import org.votingsystem.web.ejb.DAOBean;
-
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -52,7 +47,16 @@ public class MessageSMIMEResource {
         } else return processRequest(messageSMIME, context, req, resp);
     }
 
-    private Object processRequest(MessageSMIME messageSMIME, @Context ServletContext context,
+    @Path("/transactionVS/id/{id}") @GET @Transactional
+    public Response transactionVS(@PathParam("id") long id, @Context ServletContext context,
+                                  @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        TransactionVS transactionVS = dao.find(TransactionVS.class, id);
+        if(transactionVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "TransactionVS not found - transactionVSId: " + id).build();
+        return processRequest(transactionVS.getMessageSMIME(), context, req, resp);
+    }
+
+    private Response processRequest(MessageSMIME messageSMIME, @Context ServletContext context,
                                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         String smimeMessageStr = Base64.getEncoder().encodeToString(messageSMIME.getContent());
@@ -79,7 +83,6 @@ public class MessageSMIMEResource {
             if(signedContentMap.containsKey("fromUserVS")) {
                 signedContentMap.put("fromUserVS", UserVSDto.BASIC(messageSMIME.getUserVS()));
             }
-
         }
         switch(operation) {
             case CURRENCY_GROUP_NEW:
@@ -91,29 +94,18 @@ public class MessageSMIMEResource {
             case CURRENCY_REQUEST:
                 viewer = "message-smime-transactionvs-currency-request";
                 break;
+            case FROM_GROUP_TO_ALL_MEMBERS:
+                viewer = "message-smime-transactionvs";
+                break;
         }
-        /*if(params.operation) {
-            try {
-                TypeVS operationType = TypeVS.valueOf(params.operation.toUpperCase())
-                operationType = TypeVS.valueOf(params.operation.toUpperCase())
-                switch(operationType) {
-                    case TypeVS.FROM_BANKVS:
-                        viewer = "message-smime"
-                        break;
-                    case TypeVS.FROM_GROUP_TO_ALL_MEMBERS:
-                        viewer = "message-smime"
-                        break;
-                }
-            } catch(Exception ex) { log.error(ex.getMessage(), ex)}
-        }*/
         if(contentType.contains("json")) {
             Map resultMap = new HashMap<>();
             resultMap.put("operation", signedContentMap.get("operation"));
             resultMap.put("smimeMessage", smimeMessageStr);
-            req.setAttribute("signedContentMap", new ObjectMapper().writeValueAsString(signedContentMap));
+            resultMap.put("signedContentMap", JSON.getMapper().writeValueAsString(signedContentMap));
             resultMap.put("timeStampDate", timeStampDate.getTime());
             resultMap.put("viewer", viewer);
-            return resultMap;
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("operation", signedContentMap.get("operation"));
             req.setAttribute("smimeMessage", smimeMessageStr);
@@ -124,15 +116,5 @@ public class MessageSMIMEResource {
             return Response.ok().build();
         }
     }
-
-    @Path("/transactionVS/id/{id}") @GET @Transactional
-    public Object transactionVS(@PathParam("id") long id, @Context ServletContext context,
-                        @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        TransactionVS transactionVS = dao.find(TransactionVS.class, id);
-        if(transactionVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "TransactionVS not found - transactionVSId: " + id);
-        return processRequest(transactionVS.getMessageSMIME(), context, req, resp);
-    }
-
 
 }
