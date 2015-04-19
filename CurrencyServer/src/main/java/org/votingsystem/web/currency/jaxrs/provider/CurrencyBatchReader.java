@@ -3,6 +3,7 @@ package org.votingsystem.web.currency.jaxrs.provider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.model.currency.CurrencyBatch;
+import org.votingsystem.util.JSON;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
@@ -33,7 +34,7 @@ public class CurrencyBatchReader implements MessageBodyReader<CurrencyBatch> {
     @Override
     public CurrencyBatch readFrom(Class<CurrencyBatch> aClass, Type type, Annotation[] annotations,
                  MediaType mediaType, MultivaluedMap<String, String> multivaluedMap, InputStream in) throws IOException, WebApplicationException {
-        CurrencyBatchDto dto = new ObjectMapper().readValue(in, CurrencyBatchDto.class);
+        CurrencyBatchDto dto = JSON.getMapper().readValue(in, CurrencyBatchDto.class);
         try {
             return dto.loadCurrencyBatch();
         } catch(Exception ex) {

@@ -27,16 +27,14 @@
         </style>
         <div vertical on-click="{{showTransactionDetails}}" class="card {{getClass(transaction)}}">
             <div horizontal layout>
-                <div flex horizontal layout center-justified class="transactionDescription">{{transaction| transactionDescription}}</div>
-                <div class="date">
-                    {{getDate(transaction.dateCreated)}}
-                </div>
+                <div flex horizontal layout center-justified class="transactionDescription">{{transactionDescription(transaction)}}</div>
+                <div class="date">{{getDate(transaction.dateCreated)}}</div>
             </div>
-            <div id="subjectDiv" horizontal layout center-justified class="subject">{{transaction | getSubject}}</div>
+            <div id="subjectDiv" horizontal layout center-justified class="subject">{{getSubject(transaction)}}</div>
             <div horizontal layout>
                 <div class="amount">{{amount(transaction)}}</div>
                 <div class="tag">{{transaction.tags[0]}}</div>
-                <div flex class="timeInfo">{{transaction | timeLimitedDescription}}</div>
+                <div flex class="timeInfo">{{timeLimitedDescription(transaction)}}</div>
             </div>
         </div>
     </template>
@@ -83,10 +81,11 @@
             amount: function(transaction) {
                 var amount
                 if(isNaN(transaction.amount)) amount = transaction.amount.toFixed(2) + " " + transaction.currency
-                else  amount = transaction.amount + " " + transaction.currency
+                else  amount = transaction.amount + " " + transaction.currencyCode
                 return amount
             },
             showTransactionDetails: function(e) {
+                console.log(" ======= messageSMIMEURL: " + e.target.templateInstance.model.transaction.messageSMIMEURL)
                 loadURL_VS(e.target.templateInstance.model.transaction.messageSMIMEURL, "_blank")
             }
 

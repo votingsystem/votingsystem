@@ -7,6 +7,7 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.currency.ejb.UserVSBean;
 import org.votingsystem.web.currency.util.AsciiDocUtil;
@@ -16,6 +17,7 @@ import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -38,7 +40,7 @@ public class MessageSMIMEResource {
     @Inject DAOBean dao;
     @Inject UserVSBean userVSBean;
 
-    @Path("/id/{id}") @GET
+    @Path("/id/{id}") @GET @Transactional
     public Object index(@PathParam("id") long id, @Context ServletContext context,
                                 @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
@@ -68,7 +70,7 @@ public class MessageSMIMEResource {
         } else {
             signedContentMap = messageSMIME.getSignedContentMap();
         }
-        if((boolean)signedContentMap.get("isTimeLimited")) {
+        if((boolean)signedContentMap.get("timeLimited")) {
             signedContentMap.put("validTo", DateUtils.getDayWeekDateStr(
                     DateUtils.getNexMonday(DateUtils.getCalendar(timeStampDate)).getTime()));
         }
@@ -115,15 +117,15 @@ public class MessageSMIMEResource {
         } else {
             req.setAttribute("operation", signedContentMap.get("operation"));
             req.setAttribute("smimeMessage", smimeMessageStr);
-            req.setAttribute("signedContentMap", signedContentMap);
+            req.setAttribute("signedContentMap", JSON.getMapper().writeValueAsString(signedContentMap));
             req.setAttribute("timeStampDate", timeStampDate.getTime());
             req.setAttribute("viewer",  viewer);
-            context.getRequestDispatcher("/jsf/messageSMIME/contentViewer.xhtml").forward(req, resp);
+            context.getRequestDispatcher("/messageSMIME/contentViewer.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
 
-    @Path("/transactionVS/id/{id}") @GET // old_url -> /messageSMIME/transactionVS/$id
+    @Path("/transactionVS/id/{id}") @GET @Transactional
     public Object transactionVS(@PathParam("id") long id, @Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         TransactionVS transactionVS = dao.find(TransactionVS.class, id);

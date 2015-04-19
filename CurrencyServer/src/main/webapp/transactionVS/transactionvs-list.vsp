@@ -5,15 +5,15 @@
 <link href="${elementURL}/transactionVS/transactionvs-card.vsp" rel="import"/>
 
 
-<polymer-element name="transactionvs-list" attributes="url transactionsMap">
+<polymer-element name="transactionvs-list" attributes="url transactionsDto">
 <template>
     <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
                contentType="application/json"  on-core-complete="{{ajaxComplete}}"></core-ajax>
     <div layout flex horizontal wrap around-justified>
-        <template repeat="{{transaction in resultList}}">
+        <template repeat="{{transaction in transactionsDto.resultList}}">
             <transactionvs-card transaction="{{transaction}}"></transactionvs-card>
         </template>
-        <div hidden?="{{resultList.length !== 0}}" style="font-size: 1.3em; margin:30px 0 0 0;">
+        <div hidden?="{{transactionsDto.resultList.length !== 0}}" style="font-size: 1.3em; margin:30px 0 0 0;">
             ${msg.withoutMovementsLbl}
         </div>
     </div>
@@ -21,24 +21,21 @@
 <script>
     Polymer('transactionvs-list', {
         publish: {
-            transactionsMap: {value: {}}
+            transactionsDto: {value: {}}
         },
         ready :  function(e) { console.log(this.tagName + " - ready") },
         urlChanged:function() {
             console.log(this.tagName + " - urlChanged: " + this.url)
         },
-        transactionsMapChanged:function() {
-            console.log(this.tagName + " - transactionsMapChanged - transactionsMap: " +
-                    Object.prototype.toString.call(this.transactionsMap))
-            this.transactionsMap = toJSON(this.transactionsMap)
-            this.resultList = this.transactionsMap.resultList
+        transactionsDtoChanged:function() {
+            console.log(this.tagName + " - transactionsDtoChanged - transactionsDto: " + this.transactionsDto)
         },
         ajaxComplete: function() {
-            this.transactionsMap = this.responseData
             console.log(this.tagName + " - ajaxComplete")
+            this.transactionsDto = this.responseData
         },
         addTransaction:function(transactionvs) {
-            this.transactionsMap.resultList.push(transactionvs)
+            this.transactionsDto.resultList.push(transactionvs)
         }
     });</script>
 </polymer-element>

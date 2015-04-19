@@ -20,6 +20,7 @@ import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.*;
@@ -367,7 +368,7 @@ public class CertUtils {
         if(extensionValue == null) return null;
         DERTaggedObject derTaggedObject = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(extensionValue);
         String extensionData = ((DERUTF8String) derTaggedObject.getObject()).getString();
-        return new ObjectMapper().readValue(extensionData, type);
+        return JSON.getMapper().readValue(extensionData, type);
     }
 
     public static String getHashCertVS(X509Certificate x509Cert, String oid) throws IOException {

@@ -24,6 +24,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -32,10 +33,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -66,13 +64,18 @@ public class TransactionVSResource {
     }
 
     @Path("/")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
     public Response index(@DefaultValue("0") @QueryParam("offset") int offset,
-              @DefaultValue("100") @QueryParam("max") int max, @Context ServletContext context,
+              @DefaultValue("100") @QueryParam("max") int max,
+              @QueryParam("transactionvsType") String transactionvsType, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        Query query = dao.getEM().createQuery("select t from TransactionVS t where t.transactionParent is null")
-                .setMaxResults(max).setFirstResult(offset);
+        List<TransactionVS.Type> transactionTypeList = Arrays.asList(TransactionVS.Type.values());
+        try {
+            if(transactionvsType != null) transactionTypeList = Arrays.asList(TransactionVS.Type.valueOf(transactionvsType));
+        } catch(Exception ex) {}
+        Query query = dao.getEM().createQuery("select t from TransactionVS t where t.transactionParent is null and t.type in :inList")
+                .setParameter("inList", transactionTypeList).setMaxResults(max).setFirstResult(offset);
         List<TransactionVS> transactionList = query.getResultList();
         query = dao.getEM().createQuery("select COUNT(t) from TransactionVS t where t.transactionParent is null");
         long totalCount = (long) query.getSingleResult();
@@ -84,7 +87,7 @@ public class TransactionVSResource {
         if(contentType.contains("json")) return Response.ok().entity(
                 JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         else {
-            req.setAttribute("transactionsMap", JSON.getMapper().writeValueAsString(resultListDto));
+            req.setAttribute("transactionsDto", JSON.getMapper().writeValueAsString(resultListDto));
             context.getRequestDispatcher("/transactionVS/index.xhtml").forward(req, resp);
             return Response.ok().build();
         }
@@ -135,7 +138,7 @@ public class TransactionVSResource {
         if(contentType.contains("json")) return Response.ok().entity(
                 JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         else {
-            req.setAttribute("transactionsMap", JSON.getMapper().writeValueAsString(resultListDto));
+            req.setAttribute("transactionsDto", JSON.getMapper().writeValueAsString(resultListDto));
             context.getRequestDispatcher("/transactionVS/index.xhtml").forward(req, resp);
             return Response.ok().build();
         }
