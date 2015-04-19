@@ -16,6 +16,7 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.*;
+import org.votingsystem.util.currency.Wallet;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

@@ -1,4 +1,4 @@
-package org.votingsystem.util;
+package org.votingsystem.util.currency;
 
 
 import org.votingsystem.dto.currency.IncomesDto;

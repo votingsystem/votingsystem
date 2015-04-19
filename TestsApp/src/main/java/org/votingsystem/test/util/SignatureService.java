@@ -207,10 +207,10 @@ public class SignatureService {
         return keyStore;
     }
 
-    public List<MockDNI> subscribeUsers(GroupVSDto groupVSDto, SimulationData simulationData,
+    public List<DNIBundle> subscribeUsers(GroupVSDto groupVSDto, SimulationData simulationData,
                             CurrencyServer currencyServer) throws Exception {
         log.info("subscribeUser - Num. Users:" + simulationData.getNumRequestsProjected());
-        List<MockDNI> userList = new ArrayList<MockDNI>();
+        List<DNIBundle> userList = new ArrayList<DNIBundle>();
         int fromFirstUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue();
         int toLastUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue() +
                 simulationData.getNumRequestsProjected();
@@ -223,7 +223,7 @@ public class SignatureService {
             groupVSDto.setUUID(UUID.randomUUID().toString());
             SMIMESignedGeneratorVS signedMailGenerator = new SMIMESignedGeneratorVS(mockDnie, ContextVS.END_ENTITY_ALIAS,
                     ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
-            userList.add(new MockDNI(userNif, mockDnie, signedMailGenerator));
+            userList.add(new DNIBundle(userNif, mockDnie, signedMailGenerator));
             SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userNif, toUser,
                     JSON.getMapper().writeValueAsString(groupVSDto), subject);
             SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
@@ -241,10 +241,10 @@ public class SignatureService {
     }
 
     public List<SubscriptionVSDto> validateUserVSSubscriptions(Long groupVSId, CurrencyServer currencyServer,
-                           List<MockDNI> userList) throws Exception {
+                           List<DNIBundle> userList) throws Exception {
         log.info("validateUserVSSubscriptions");
-        Map<String, MockDNI> userVSMap = new HashMap<>();
-        for(MockDNI mockDNI:userList) {
+        Map<String, DNIBundle> userVSMap = new HashMap<>();
+        for(DNIBundle mockDNI:userList) {
             userVSMap.put(mockDNI.getNif(), mockDNI);
         }
         ResultListDto<SubscriptionVSDto> subscriptionVSDtoList = HttpHelper.getInstance().getData(new TypeReference<ResultListDto<SubscriptionVSDto>>(){},

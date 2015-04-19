@@ -4,7 +4,7 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.currency.util.WalletVS;
+import org.votingsystem.util.currency.WalletVS;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.ejb.Stateless;

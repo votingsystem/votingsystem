@@ -10,6 +10,7 @@ import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
+import org.votingsystem.util.currency.Payment;
 
 import java.io.File;
 import java.io.FilenameFilter;

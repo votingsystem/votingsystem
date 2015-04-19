@@ -19,6 +19,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
+import org.votingsystem.util.currency.Payment;
 
 import javax.persistence.*;
 import java.io.*;

@@ -1,9 +1,6 @@
 package org.votingsystem.test.util;
 
-import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.test.dto.ReportDto;
-import org.votingsystem.throwable.ExceptionVS;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -18,42 +15,7 @@ public class TransactionVSUtils {
 
     static Logger log =  Logger.getLogger(TransactionVSUtils.class.getName());
 
-   /* public static Map getGroupVSTransactionVS(TransactionVS transactionVS, UserVS groupVS) {
-        Map result = new HashMap();
-        result.put("operation", transactionVS.getType().toString());
-        result.put("fromUser", groupVS.getName());
-        result.put("fromUserIBAN", groupVS.getIBAN());
-        result.put("amount", transactionVS.getAmount().toString());
-        result.put("currencyCode", transactionVS.getCurrencyCode());
-        result.put("subject", transactionVS.getSubject() + " - " + DateUtils.getDayWeekDateStr(new Date()));
-        if(TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS != transactionVS.getType()) {
-            result.put("toUserName", transactionVS.getToUserVS().getName());
-            result.put("toUserIBAN", Arrays.asList(transactionVS.getToUserVS().getIBAN()));
-        } else result.put("toUserIBAN", transactionVS.getToUserVSList());
-        result.put("isTimeLimited", transactionVS.getIsTimeLimited());
-        result.put("tags", Arrays.asList(transactionVS.getTag().getName()));
-        result.put("UUID", UUID.randomUUID().toString());
-        return result;
-    }*/
-
-    /*public static Map getBankVSTransactionVS(TransactionVS transactionVS) {
-        Map result = new HashMap();
-        result.put("operation", transactionVS.getType().toString());
-        result.put("bankIBAN", transactionVS.getFromUserVS().getIBAN());
-        result.put("fromUser", transactionVS.getFromUser());
-        result.put("fromUserIBAN", transactionVS.getFromUserIBAN());
-        result.put("amount", transactionVS.getAmount().toString());
-        result.put("currencyCode", transactionVS.getCurrencyCode());
-        result.put("subject", transactionVS.getSubject() + " - " + DateUtils.getDayWeekDateStr(new Date()));
-        result.put("toUserName", transactionVS.getToUserVS().getName());
-        result.put("toUserIBAN", Arrays.asList(transactionVS.getToUserVS().getIBAN()));
-        result.put("isTimeLimited", transactionVS.getIsTimeLimited());
-        result.put("tags", Arrays.asList(transactionVS.getTag().getName()));
-        result.put("UUID", UUID.randomUUID().toString());
-        return result;
-    }*/
-
-    public static Map<String, Map<String, BigDecimal>> getCurrencyMap(List<TransactionVS> transactionVSList) {
+    public static Map<String, Map<String, BigDecimal>> getCurrencyMap1(List<TransactionVS> transactionVSList) {
         Map<String, Map<String, BigDecimal>> currencyMap = new HashMap<String, Map<String, BigDecimal>>();
         Map<String, BigDecimal> tagMap = null;
         for(TransactionVS transactionVS:transactionVSList) {
@@ -91,51 +53,5 @@ public class TransactionVSUtils {
         return destMap;
     }
 
-    /*public static Map<String, Map<String, BigDecimal>> filterBalanceTo(Map<String, Map<String, Map>> balanceTo) {
-        Map result = new HashMap<>();
-        Map currencyMap = null;
-        for(String currency : balanceTo.keySet()) {
-            currencyMap = new HashMap<>();
-            for(String tag : balanceTo.get(currency).keySet()) {
-                currencyMap.put(tag, balanceTo.get(currency).get(tag).get("total"));
-            }
-            result.put(currency, currencyMap);
-        }
-        return result;
-    }*/
-
-    /*public static Map<String, Map<String, BigDecimal>> balancesCash(Map<String, Map<String, Map>> balancesTo,
-            Map<String, Map<String, BigDecimal>> balancesFrom) {
-        Map<String, Map<String, BigDecimal>> balancesCash = filterBalanceTo(balancesTo);
-        Map<String, BigDecimal> tagMap = null;
-        for(String currency: balancesFrom.keySet()) {
-            if(balancesCash.containsKey(currency)) {
-                for(String tag : balancesFrom.get(currency).keySet()) {
-                    if(balancesCash.get(currency).get(tag) != null) {
-                        balancesCash.get(currency).put(tag, balancesCash.get(currency).get(tag).subtract(balancesFrom.get(currency).get(tag)));
-                        if(balancesCash.get(currency).get(tag).compareTo(BigDecimal.ZERO) < 0) {
-                            balancesCash.get(currency).put(TagVS.WILDTAG, balancesCash.get(currency).get(
-                                    TagVS.WILDTAG).add(balancesCash.get(currency).get(tag)));
-                            balancesCash.get(currency).put(tag, BigDecimal.ZERO);
-                        }
-                    } else balancesCash.get(currency).put(TagVS.WILDTAG, balancesCash.get(currency).get(
-                            TagVS.WILDTAG).subtract(balancesFrom.get(currency).get(tag)));
-                }
-            } else {
-                balancesCash.put(currency, new HashMap<>(balancesFrom.get(currency)));
-                for(String tag : balancesCash.get(currency).keySet()) {
-                    balancesCash.get(currency).put(tag, balancesCash.get(currency).get(tag).negate());
-                }
-            }
-        }
-        return balancesCash;
-    }*/
-
-    public static Map<String, ReportDto> sumReport(Map<String, ReportDto> reportMap, Map<String, ReportDto> newReport) throws ExceptionVS {
-        Map<String, ReportDto> result = new HashMap<>();
-        result.put("transactionFromList", reportMap.get("transactionFromList").sum(newReport.get("transactionFromList")));
-        result.put("transactionToList", reportMap.get("transactionToList").sum(newReport.get("transactionToList")));
-        return result;
-    }
 
 }

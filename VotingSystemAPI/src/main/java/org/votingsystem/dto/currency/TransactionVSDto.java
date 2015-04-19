@@ -12,7 +12,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.Payment;
+import org.votingsystem.util.currency.Payment;
 import org.votingsystem.util.TypeVS;
 
 import java.io.IOException;

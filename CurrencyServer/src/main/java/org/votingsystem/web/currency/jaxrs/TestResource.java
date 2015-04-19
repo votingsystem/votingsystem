@@ -11,7 +11,7 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MapUtils;
+import org.votingsystem.util.currency.MapUtils;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.currency.ejb.AuditBean;
 import org.votingsystem.web.currency.ejb.BalancesBean;

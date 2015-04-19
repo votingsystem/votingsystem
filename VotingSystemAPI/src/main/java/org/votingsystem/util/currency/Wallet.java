@@ -1,4 +1,4 @@
-package org.votingsystem.util;
+package org.votingsystem.util.currency;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,6 +8,10 @@ import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.WalletException;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

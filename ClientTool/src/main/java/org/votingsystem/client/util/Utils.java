@@ -41,6 +41,7 @@ import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.*;
+import org.votingsystem.util.currency.Wallet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

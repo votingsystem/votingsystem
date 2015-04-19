@@ -1,4 +1,4 @@
-package org.votingsystem.web.currency.util;
+package org.votingsystem.util.currency;
 
 import org.votingsystem.model.currency.TransactionVS;
 

@@ -27,6 +27,7 @@ import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.*;
+import org.votingsystem.util.currency.Payment;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;

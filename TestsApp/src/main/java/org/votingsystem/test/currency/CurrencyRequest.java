@@ -13,7 +13,7 @@ import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.Wallet;
+import org.votingsystem.util.currency.Wallet;
 
 import java.math.BigDecimal;
 import java.util.HashMap;

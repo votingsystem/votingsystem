@@ -12,6 +12,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
+import org.votingsystem.util.currency.Payment;
 
 import javax.persistence.*;
 import java.io.ByteArrayInputStream;

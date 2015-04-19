@@ -39,7 +39,7 @@ public class AddUserVSToGroupVS {
         GroupVSDto groupVSDto = HttpHelper.getInstance().getData(GroupVSDto.class, groupVSURL, MediaTypeVS.JSON);
         groupVSDto.setOperation(TypeVS.CURRENCY_GROUP_SUBSCRIBE);
         log.info("subscribeUsers");
-        List<MockDNI> userList = authoritySignatureService.subscribeUsers(groupVSDto, simulationData, currencyServer);
+        List<DNIBundle> userList = authoritySignatureService.subscribeUsers(groupVSDto, simulationData, currencyServer);
         if(!isWithUserValidation) simulationData.finishAndExit(ResponseVS.SC_OK, null);
         log.info("activateUsers");
         SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER);

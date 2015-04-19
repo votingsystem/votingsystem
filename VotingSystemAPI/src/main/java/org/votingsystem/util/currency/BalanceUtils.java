@@ -1,7 +1,9 @@
-package org.votingsystem.web.currency.util;
+package org.votingsystem.util.currency;
 
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.util.currency.TransactionVSFromAmountCollector;
+import org.votingsystem.util.currency.TransactionVSToAmountCollector;
 
 import java.math.BigDecimal;
 import java.util.Collection;

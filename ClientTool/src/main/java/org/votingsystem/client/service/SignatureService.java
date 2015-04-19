@@ -40,6 +40,7 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
+import org.votingsystem.util.currency.Wallet;
 
 import java.io.File;
 import java.math.BigDecimal;

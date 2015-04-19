@@ -1,4 +1,4 @@
-package org.votingsystem.web.currency.util;
+package org.votingsystem.util;
 
 /**
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia

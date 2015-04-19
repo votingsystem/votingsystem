@@ -11,6 +11,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.*;
+import org.votingsystem.util.currency.Wallet;
 
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
