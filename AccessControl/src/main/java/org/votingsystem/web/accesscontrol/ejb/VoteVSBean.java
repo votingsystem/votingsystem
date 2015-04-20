@@ -14,8 +14,8 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.ejb.Stateless;

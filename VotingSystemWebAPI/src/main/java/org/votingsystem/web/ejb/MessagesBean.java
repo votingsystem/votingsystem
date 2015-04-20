@@ -1,11 +1,11 @@
-package org.votingsystem.web.cdi;
+package org.votingsystem.web.ejb;
 
 import org.votingsystem.model.TagVS;
+import org.votingsystem.web.cdi.ConfigVS;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
+import javax.ejb.Stateful;
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -15,21 +15,25 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@RequestScoped
-@Named(value="messages")
+@Stateful
 public class MessagesBean {
 
     private static final Logger log = Logger.getLogger(MessagesBean.class.getSimpleName());
 
     private ResourceBundle bundle;
     private String bundleBaseName;
-    @Inject ConfigVS config;
+    @Inject
+    ConfigVS config;
 
     public MessagesBean() { }
 
     @PostConstruct
-    public void initialize() throws Exception {
-        bundleBaseName = config.getProperty("vs.bundleBaseName");
+    public void initialize() {
+        try {
+            bundleBaseName = config.getProperty("vs.bundleBaseName");
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
     public String getTagMessage(String tag) {

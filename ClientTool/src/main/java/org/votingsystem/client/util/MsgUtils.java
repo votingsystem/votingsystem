@@ -1,5 +1,6 @@
 package org.votingsystem.client.util;
 
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.ContextVS;
@@ -16,13 +17,13 @@ public class MsgUtils {
 
     private static Logger log = Logger.getLogger(MsgUtils.class.getSimpleName());
 
-    public static String getCurrencyChangeWalletMsg(WebSocketMessage webSocketMessage) {
-        Map<String, BigDecimal> currencyMap = Currency.getCurrencyMap(webSocketMessage.getCurrencySet());
+    public static String getCurrencyChangeWalletMsg(SocketMessageDto messageDto) throws Exception {
+        Map<String, BigDecimal> currencyMap = Currency.getCurrencyMap(messageDto.getCurrencySet());
         StringBuilder amountInfo = new StringBuilder();
         for(String currencyCode: currencyMap.keySet()) {
             amountInfo.append(" - " + currencyMap.get(currencyCode) + " " + currencyCode);
         }
-        return ContextVS.getMessage("currency_wallet_change_msg", webSocketMessage.getDeviceFromName(), amountInfo.toString());
+        return ContextVS.getMessage("currency_wallet_change_msg", messageDto.getDeviceFromName(), amountInfo.toString());
     }
 
     public static String getPlainWalletNotEmptyMsg(Map<String, BigDecimal> currencyMap) {

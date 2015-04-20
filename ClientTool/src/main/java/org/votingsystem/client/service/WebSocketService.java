@@ -1,28 +1,30 @@
 package org.votingsystem.client.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.client.Browser;
-import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.util.InboxMessage;
-import org.votingsystem.client.util.WebSocketMessage;
-import org.votingsystem.client.util.WebSocketSession;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.CoreSignal;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.WebSocketSession;
 
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -103,7 +105,7 @@ public class WebSocketService extends Service<ResponseVS> {
         }
 
         @OnClose public void onClose(Session session, CloseReason closeReason) {
-            broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
+            broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
             SessionService.getInstance().setIsConnected(false);
         }
 
@@ -130,7 +132,7 @@ public class WebSocketService extends Service<ResponseVS> {
         if(session != null && session.isOpen()) {
             try {session.close();}
             catch(Exception ex) {log.log(Level.SEVERE, ex.getMessage(), ex);}
-        } else broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
+        } else broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
     }
 
     public void sendMessage(String message) throws IOException {
@@ -143,52 +145,51 @@ public class WebSocketService extends Service<ResponseVS> {
 
     private void consumeMessage(final String messageStr){
         try {
-            Map messageMap = JSON.getMapper().readValue(messageStr, new TypeReference<HashMap<String, Object>>() { });
-            WebSocketMessage socketMsg = new WebSocketMessage(messageMap);
-            log.info("consumeMessage - type: " + socketMsg.getOperation() +
-                    " - status: " + socketMsg.getStatusCode());
-            WebSocketSession socketSession = VotingSystemApp.getInstance().getWSSession(socketMsg.getUUID());
-            if(socketMsg.getStatusCode() != null && ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
-                showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
+            SocketMessageDto messageDto = JSON.getMapper().readValue(messageStr, SocketMessageDto.class);
+            log.info("consumeMessage - type: " + messageDto.getOperation() +
+                    " - status: " + messageDto.getStatusCode());
+            WebSocketSession socketSession = ContextVS.getInstance().getWSSession(messageDto.getUUID());
+            if(messageDto.getStatusCode() != null && ResponseVS.SC_ERROR == messageDto.getStatusCode()) {
+                showMessage(messageDto.getStatusCode(), messageDto.getMessage());
                 return;
             }
-            if(socketMsg.isEncrypted() && socketSession != null)
-                socketMsg.decryptMessage(socketSession.getAESParams());
-            switch(socketMsg.getOperation()) {
+            if(messageDto.isEncrypted() && socketSession != null)
+                messageDto.decryptMessage(socketSession.getAESParams());
+            switch(messageDto.getOperation()) {
                 case INIT_VALIDATED_SESSION:
                     Browser.getInstance().runJSCommand(
-                            socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
+                            CoreSignal.getWebSocketCoreSignalJSCommand(null, SocketMessageDto.ConnectionStatus.OPEN));
                     break;
                 case MESSAGEVS_TO_DEVICE:
-                    InboxService.getInstance().newMessage(new InboxMessage(socketMsg));
+                    InboxService.getInstance().newMessage(new InboxMessage(messageDto));
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:
-                    SessionService.setSignResponse(socketMsg);
+                    SessionService.setSignResponse(messageDto);
                     break;
                 case MESSAGEVS_FROM_VS:
                     if(socketSession != null && socketSession.getTypeVS() != null) {
                         switch(socketSession.getTypeVS()) {
                             case MESSAGEVS_SIGN:
-                                SessionService.setSignResponse(socketMsg);
+                                SessionService.setSignResponse(messageDto);
                                 return;
                         }
                     }
-                default: log.info("unprocessed socketMsg");
+                default: log.info("unprocessed messageDto");
             }
         } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
     }
 
-    private void broadcastConnectionStatus(WebSocketMessage.ConnectionStatus status) {
+    private void broadcastConnectionStatus(SocketMessageDto.ConnectionStatus status) {
         if(session == null) log.info("broadcastConnectionStatus - status: " + status.toString());
         else log.info("broadcastConnectionStatus - status: " + status.toString() + " - session: " + session.getId());
         switch (status) {
             case CLOSED:
-                Browser.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
-                        null, WebSocketMessage.ConnectionStatus.CLOSED));
+                Browser.getInstance().runJSCommand(CoreSignal.getWebSocketCoreSignalJSCommand(
+                        null, SocketMessageDto.ConnectionStatus.CLOSED));
                 break;
             case OPEN:
-                Browser.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
-                        null, WebSocketMessage.ConnectionStatus.OPEN));
+                Browser.getInstance().runJSCommand(CoreSignal.getWebSocketCoreSignalJSCommand(
+                        null, SocketMessageDto.ConnectionStatus.OPEN));
                 break;
         }
     }

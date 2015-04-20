@@ -2,7 +2,7 @@ package org.votingsystem.web.currency.filter;
 
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.cdi.MessagesBean;
+import org.votingsystem.web.ejb.MessagesBean;
 
 import javax.inject.Inject;
 import javax.servlet.*;

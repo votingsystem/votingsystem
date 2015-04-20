@@ -1,6 +1,7 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
 import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.RepresentativeDto;
 import org.votingsystem.dto.voting.RepresentativeRevokeDto;
@@ -20,8 +21,8 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.ejb.Stateless;
@@ -31,7 +32,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import static java.text.MessageFormat.format;
@@ -107,13 +107,13 @@ public class RepresentativeDelegationBean {
 
     public RepresentationDocument saveAnonymousDelegation(MessageSMIME messageSMIME) throws Exception {
         X509Certificate anonCert =  messageSMIME.getAnonymousSigner().getCertificate();
-        Map<String, String> certExtensionData = CertUtils.getCertExtensionData(anonCert,
-                ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID);
+        AnonymousDelegationCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
+                AnonymousDelegationCertExtensionDto.class, anonCert, ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID);
         Query query = dao.getEM().createQuery("select c from  CertificateVS c where c.serialNumber=:serialNumber " +
                 "and c.type =:type and c.state =:state and c.hashCertVSBase64 =:hashCertVS")
                 .setParameter("serialNumber", anonCert.getSerialNumber().longValue())
                 .setParameter("type", CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION).setParameter("state", CertificateVS.State.OK)
-                .setParameter("hashCertVS", certExtensionData.get("hashCertVS"));
+                .setParameter("hashCertVS", certExtensionDto.getHashCertVS());
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if(certificateVS == null) throw new ValidationExceptionVS(messages.get("certificateVSUnknownErrorMsg"));
         AnonymousDelegationRequest request = messageSMIME.getSignedContent(AnonymousDelegationRequest.class);

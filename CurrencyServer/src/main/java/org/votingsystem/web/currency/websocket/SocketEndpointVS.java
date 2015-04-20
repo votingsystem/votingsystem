@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.websocket;
 
-
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.MessageSMIME;
@@ -11,11 +10,10 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.SessionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.cdi.MessagesBean;
+import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
-
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.websocket.*;
@@ -59,7 +57,6 @@ public class SocketEndpointVS {
         }
     }
 
-
     //TODO QUEUE
     public void processRequest(SocketMessageDto messageDto) throws Exception {
         switch(messageDto.getOperation()) {
@@ -83,7 +80,7 @@ public class SocketEndpointVS {
                 }
                 break;
             case INIT_VALIDATED_SESSION:
-                MessageSMIME messageSMIME = signatureBean.validateSMIME(messageDto.getSmime(), null).getMessageSMIME();
+                MessageSMIME messageSMIME = signatureBean.validateSMIME(messageDto.getSMIME(), null).getMessageSMIME();
                 UserVS signer = messageSMIME.getUserVS();
                 if(signer.getDeviceVS() != null) {
                     //check if accessing from one device and signing from another
@@ -109,20 +106,6 @@ public class SocketEndpointVS {
             default: throw new ExceptionVS("unknownSocketOperationErrorMsg: " + messageDto.getOperation());
         }
     }
-    
-    /*@OnMessage public void onBinaryMessage(Session session, ByteBuffer bb, boolean last) {
-        try {
-            if (session.isOpen()) {
-                webSocketBean.onBinaryMessage(session, bb, last);
-            }
-        } catch (Exception ex) {
-            log.log(Level.SEVERE,ex.getMessage(), ex);
-            try {
-                session.close();
-            } catch (IOException ex1) { // Ignore
-            }
-        }
-    }*/
 
     @OnError public void onError(Throwable t) {
         log.log(Level.SEVERE, t.getMessage(), t);
@@ -134,7 +117,7 @@ public class SocketEndpointVS {
 
 
     @OnClose public void onClose(Session session, CloseReason closeReason) {
-        //log.info(String.format("Session %s closed because of %s", session.getId(), closeReason));
+        log.info(String.format("Session %s closed because of %s", session.getId(), closeReason));
         try {
             SessionVSManager.getInstance().remove(session);
         } catch (Exception ex) {
@@ -142,8 +125,4 @@ public class SocketEndpointVS {
         }
     }
 
-
-    /*@OnMessage public void echoPongMessage(PongMessage pm) {
-        // Ignored
-    }*/
 }

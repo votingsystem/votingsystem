@@ -12,6 +12,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.voting.ControlCenterVS;
+import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -33,6 +34,7 @@ import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.toList;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -138,6 +140,10 @@ public class ContextVS implements BundleActivator {
 
     private X509Certificate timeStampCACert;
     private Locale locale = new Locale("es");
+
+
+    private static final Map<String, WebSocketSession> sessionMap = new HashMap<String, WebSocketSession>();
+    private Long deviceId;
 
     private Map<String, ResponseVS> hashCertVSDataMap;
     private Collection<X509Certificate> votingSystemSSLCerts;
@@ -324,6 +330,26 @@ public class ContextVS implements BundleActivator {
             if (result == null) return defaultValue;
             else return result;
         }
+    }
+
+
+    public void putWSSession(String UUID, WebSocketSession session) {
+        sessionMap.put(UUID, session.setUUID(UUID));
+    }
+
+    public AESParams getWSSessionKeys(String UUID) {
+        WebSocketSession webSocketSession = null;
+        if((webSocketSession = sessionMap.get(UUID)) != null) return webSocketSession.getAESParams();
+        return null;
+    }
+
+    public WebSocketSession getWSSession(String UUID) {
+        return sessionMap.get(UUID);
+    }
+    public WebSocketSession getWSSession(Long deviceId) {
+        List<WebSocketSession> result = sessionMap.entrySet().stream().filter(k ->  k.getValue().getDeviceVS() != null &&
+                k.getValue().getDeviceVS().getId() == deviceId).map(k -> k.getValue()).collect(toList());
+        return result.isEmpty()? null : result.get(0);
     }
 
     public void setProperty(String propertyName, String propertyValue) {
@@ -548,5 +574,13 @@ public class ContextVS implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         log.info(" --- stop --- ");
+    }
+
+    public Long getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(Long deviceId) {
+        this.deviceId = deviceId;
     }
 }

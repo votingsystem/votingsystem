@@ -11,8 +11,8 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.ejb.Stateless;

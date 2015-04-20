@@ -39,7 +39,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
         this.destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
         this.certificationRequest = CertificationRequestVS.getVoteRequest(KEY_SIZE, SIG_NAME, VOTE_SIGN_MECHANISM,
                 ContextVS.PROVIDER, ContextVS.getInstance().getAccessControl().getServerURL(),
-                voteVS.getEventVS().getId().toString(), voteVS.getHashCertVSBase64());
+                voteVS.getEventVS().getId(), voteVS.getHashCertVSBase64());
     }
 
     @Override public ResponseVS call() throws Exception {

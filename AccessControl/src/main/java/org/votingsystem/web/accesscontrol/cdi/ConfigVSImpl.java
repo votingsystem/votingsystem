@@ -7,10 +7,7 @@ import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.EnvironmentVS;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.*;
 import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -138,9 +135,15 @@ public class ConfigVSImpl implements ConfigVS {
             actorVS.setState(ActorVS.State.OK).setName(serverName);
             dao.persist(actorVS);
         }
-        timeStampBean.init();
-        signatureBean.init();
-
+        executorService.submit(() -> {
+            try {
+                timeStampBean.init();
+                signatureBean.init();
+                ContextVS.getInstance();
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        });
     }
 
     @Schedule(dayOfWeek = "*")
@@ -278,7 +281,7 @@ public class ConfigVSImpl implements ConfigVS {
                     controlCenter = controlCenterDB;
                     return;
                 }
-                try {Thread.sleep(5000);}
+                try {Thread.sleep(10000);}
                 catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
                 log.log(Level.SEVERE, "ERROR fetching TimeStampServer data - serverURL: " + serverURL + " - retry");
             }

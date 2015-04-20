@@ -1,16 +1,15 @@
 package org.votingsystem.client.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
 import javafx.scene.control.Button;
 import org.votingsystem.client.Browser;
-import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dto.BrowserSessionDto;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.EncryptedBundleDto;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.AnonymousDelegationDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
@@ -20,15 +19,11 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.signature.util.CryptoTokenVS;
-import org.votingsystem.signature.util.Encryptor;
+import org.votingsystem.signature.util.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
 import javax.mail.Header;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -160,18 +155,15 @@ public class SessionService {
         flush();
     }
 
-    public WebSocketMessage initAuthenticatedSession(WebSocketMessage socketMsg, UserVS userVS) {
+    public SocketMessageDto initAuthenticatedSession(SocketMessageDto socketMsg, UserVS userVS) {
         try {
             if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
                 socketMsg.setUserVS(userVS);
                 browserSessionDto.setUserVS(UserVSDto.COMPLETE(userVS));
-                socketMsg.getMessageJSON().put("userVS", browserSessionDto.getUserVS());
-
                 browserSessionDto.setIsConnected(true);
                 flush();
-                VotingSystemApp.getInstance().setDeviceId(socketMsg.getDeviceId());
-                Browser.getInstance().runJSCommand(
-                        socketMsg.getWebSocketCoreSignalJSCommand(WebSocketMessage.ConnectionStatus.OPEN));
+                ContextVS.getInstance().setDeviceId(socketMsg.getDeviceId());
+                Browser.getInstance().runJSCommand(CoreSignal.getWebSocketCoreSignalJSCommand(null, SocketMessageDto.ConnectionStatus.OPEN));
             } else {
                 showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
                 log.log(Level.SEVERE,"ERROR - initAuthenticatedSession - statusCode: " + socketMsg.getStatusCode());
@@ -237,13 +229,13 @@ public class SessionService {
         return browserSessionDto;
     }
 
-    public void setCSRRequest(Long requestId, Encryptor.EncryptedBundle bundle) {
+    public void setCSRRequest(Long requestId, EncryptedBundle bundle) {
         try {
             File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
             csrFile.createNewFile();
-            Map dataMap = bundle.toMap();
-            dataMap.put("requestId", requestId);
-            FileUtils.copyStreamToFile(new ByteArrayInputStream(dataMap.toString().getBytes()), csrFile);
+            EncryptedBundleDto bundleDto = new EncryptedBundleDto(bundle);
+            bundleDto.setId(requestId);
+            JSON.getMapper().writeValue(csrFile, bundleDto);
         } catch(Exception ex) {
             log.log(Level.SEVERE,ex.getMessage(), ex);
         }
@@ -265,9 +257,8 @@ public class SessionService {
         if(csrFile.exists()) {
             log.info("csr request found");
             try {
-                Map dataMap = JSON.getMapper().readValue(csrFile, new TypeReference<HashMap<String, Object>>() {});
-                String serviceURL = ContextVS.getInstance().getAccessControl().getUserCSRServiceURL(
-                        ((Number)dataMap.get("requestId")).longValue());
+                EncryptedBundleDto bundleDto = JSON.getMapper().readValue(csrFile, EncryptedBundleDto.class);
+                String serviceURL = ContextVS.getInstance().getAccessControl().getUserCSRServiceURL(bundleDto.getId());
                 ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, null);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
@@ -291,7 +282,7 @@ public class SessionService {
                             showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"), optionButton);
                             return;
                         }
-                        Encryptor.EncryptedBundle bundle = Encryptor.EncryptedBundle.parse(dataMap);
+                        EncryptedBundle bundle = bundleDto.getEncryptedBundle();
                         try {
                             serializedCertificationRequest = Encryptor.pbeAES_Decrypt(passwd, bundle);
                         } catch (Exception ex) {
@@ -341,10 +332,10 @@ public class SessionService {
             case MOBILE:
                 countDownLatch = new CountDownLatch(1);
                 DeviceVS deviceVS = getInstance().getDeviceVS().getDeviceVS();
-                Map jsonObject = WebSocketMessage.getSignRequest(deviceVS, toUser, textToSign, subject, headers);
+                SocketMessageDto messageDto = SocketMessageDto.getSignRequest(deviceVS, toUser, textToSign, subject, headers);
                 PlatformImpl.runLater(() -> {//Service must only be used from the FX Application Thread
                     try {
-                        WebSocketService.getInstance().sendMessage(jsonObject.toString());
+                        WebSocketService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(messageDto));
                     } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
                 });
                 countDownLatch.await();
@@ -355,7 +346,7 @@ public class SessionService {
         }
     }
 
-    public static void setSignResponse(WebSocketMessage socketMsg) {
+    public static void setSignResponse(SocketMessageDto socketMsg) {
         switch(socketMsg.getStatusCode()) {
             case ResponseVS.SC_WS_MESSAGE_SEND_OK:
                 break;

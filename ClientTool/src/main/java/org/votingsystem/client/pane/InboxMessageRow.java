@@ -43,7 +43,7 @@ public class InboxMessageRow implements CurrencyCheckerTask.Listener {
         fxmlLoader.load();
     }
 
-    @FXML void initialize() { // This method is called by the FXMLLoader when initialization is complete
+    @FXML void initialize() throws Exception { // This method is called by the FXMLLoader when initialization is complete
         messageButton.setWrapText(true);
         removeButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
         removeButton.setOnAction((event) ->

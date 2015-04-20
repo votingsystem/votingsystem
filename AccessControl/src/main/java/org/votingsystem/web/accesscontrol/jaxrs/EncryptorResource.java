@@ -8,8 +8,8 @@ import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.inject.Inject;

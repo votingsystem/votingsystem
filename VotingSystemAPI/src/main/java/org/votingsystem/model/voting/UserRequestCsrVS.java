@@ -38,10 +38,10 @@ public class UserRequestCsrVS extends EntityVS implements Serializable {
 
     public UserRequestCsrVS () {}
 
-    public UserRequestCsrVS (State state, byte[] content, UserVS userVS, DeviceVS deviceVS) {
+    public UserRequestCsrVS (State state, byte[] content, DeviceVS deviceVS) {
         this.state = state;
         this.content = content;
-        this.userVS = userVS;
+        this.userVS = deviceVS.getUserVS();
         this.deviceVS = deviceVS;
     }
 

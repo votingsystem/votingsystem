@@ -54,7 +54,7 @@ public class ActorVSDto {
                 break;
             case ACCESS_CONTROL:
                 actorVS =  new AccessControlVS();
-                actorVS.setControlCenter((ControlCenterVS) controlCenter.getActorVS());
+                if(controlCenter != null) actorVS.setControlCenter((ControlCenterVS) controlCenter.getActorVS());
                 break;
             case CURRENCY:
                 actorVS = new CurrencyServer();

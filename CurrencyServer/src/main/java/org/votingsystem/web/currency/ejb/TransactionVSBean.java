@@ -17,7 +17,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.currency.BalanceUtils;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.cdi.MessagesBean;
+import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.currency.cdi.ConfigVSImpl;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.ejb.DAOBean;

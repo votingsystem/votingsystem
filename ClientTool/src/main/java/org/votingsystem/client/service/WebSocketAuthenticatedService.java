@@ -10,14 +10,14 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.Browser;
-import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.CertNotFoundDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.InboxMessage;
-import org.votingsystem.client.util.WebSocketMessage;
-import org.votingsystem.client.util.WebSocketSession;
-import org.votingsystem.dto.*;
+import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
@@ -34,7 +34,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -110,7 +113,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         }
 
         @OnClose public void onClose(Session session, CloseReason closeReason) {
-            broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
+            broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
             SessionService.getInstance().setIsConnected(false);
             EventBusService.getInstance().post(new ResponseVS(TypeVS.DISCONNECT));
         }
@@ -155,7 +158,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                             ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
                     password = passwordDialog.getPassword();
                     if(password == null) {
-                        broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
+                        broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
                     } else connect(connectionDataMap, password);
                 } else if(CryptoTokenVS.MOBILE == SessionService.getCryptoTokenType()) {
                     connect(connectionDataMap, null);
@@ -166,7 +169,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
             if(session != null && session.isOpen()) {
                 try {session.close();}
                 catch(Exception ex) {log.log(Level.SEVERE, ex.getMessage(), ex);}
-            } else broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
+            } else broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
         }
     }
 
@@ -201,9 +204,9 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
             for (DeviceVSDto deviceVSDto : resultListDto.getResultList()) {
                 DeviceVS deviceVS = deviceVSDto.getDeviceVS();
                 if(!SessionService.getInstance().getDeviceVS().getDeviceId().equals(deviceVS.getDeviceId())) {
-                    Map socketMsg = WebSocketMessage.getMessageVSToDevice(deviceVS, operationVS.getNif(),
-                            operationVS.getMessage());
-                    sendMessage(socketMsg.toString());
+                    SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(SessionService.getInstance().getUserVS(),
+                            deviceVS, operationVS.getNif(), operationVS.getMessage());
+                    sendMessage(JSON.getMapper().writeValueAsString(messageDto));
                     isMessageDelivered = true;
                 }
             }
@@ -215,46 +218,44 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
 
     private void consumeMessage(final String socketMsgStr) {
         try {
-            Map socketMsgMap = JSON.getMapper().readValue(socketMsgStr, new TypeReference<HashMap<String, Object>>() {
-            });
-            WebSocketMessage socketMsg = new WebSocketMessage(socketMsgMap);
-            WebSocketSession socketSession = VotingSystemApp.getInstance().getWSSession(socketMsg.getUUID());
-            log.info("consumeMessage - type: " + socketMsg.getOperation() + " - status: " + socketMsg.getStatusCode());
-            if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
-                showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
+            SocketMessageDto messageDto = JSON.getMapper().readValue(socketMsgStr, SocketMessageDto.class);
+            WebSocketSession socketSession = ContextVS.getInstance().getWSSession(messageDto.getUUID());
+            log.info("consumeMessage - type: " + messageDto.getOperation() + " - status: " + messageDto.getStatusCode());
+            if(ResponseVS.SC_ERROR == messageDto.getStatusCode()) {
+                showMessage(messageDto.getStatusCode(), messageDto.getMessage());
                 return;
             }
-            if(socketSession != null && socketMsg.isEncrypted()) {
-                socketMsg.decryptMessage(socketSession.getAESParams());
+            if(socketSession != null && messageDto.isEncrypted()) {
+                messageDto.decryptMessage(socketSession.getAESParams());
             }
-            socketMsg.setWebSocketSession(socketSession);
+            messageDto.setWebSocketSession(socketSession);
             ResponseVS responseVS = null;
-            switch(socketMsg.getOperation()) {
+            switch(messageDto.getOperation()) {
                 case MESSAGEVS:
                 case MESSAGEVS_TO_DEVICE:
-                    InboxService.getInstance().newMessage(new InboxMessage(socketMsg));
+                    InboxService.getInstance().newMessage(new InboxMessage(messageDto));
                     break;
                 case MESSAGEVS_FROM_VS:
                     if(socketSession != null) {
-                        socketMsg.setOperation(socketSession.getTypeVS());
+                        messageDto.setOperation(socketSession.getTypeVS());
                         switch(socketSession.getTypeVS()) {
                             case INIT_VALIDATED_SESSION:
-                                SessionService.getInstance().initAuthenticatedSession(socketMsg, userVS);
+                                SessionService.getInstance().initAuthenticatedSession(messageDto, userVS);
                                 break;
                             default:
                                 log.log(Level.SEVERE, "MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
                         }
-                        responseVS = new ResponseVS(null, socketSession.getTypeVS(), socketMsg);
+                        responseVS = new ResponseVS(null, socketSession.getTypeVS(), messageDto);
                     }
                     break;
                 case MESSAGEVS_FROM_DEVICE:
-                    responseVS = new ResponseVS(null, socketSession.getTypeVS(), socketMsg);
+                    responseVS = new ResponseVS(null, socketSession.getTypeVS(), messageDto);
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:
-                    SessionService.setSignResponse(socketMsg);
+                    SessionService.setSignResponse(messageDto);
                     break;
                 default:
-                    log.info("unprocessed socketMsg: " + socketMsg.getOperation());
+                    log.info("unprocessed socketMsg: " + messageDto.getOperation());
             }
             if(responseVS != null) EventBusService.getInstance().post(responseVS);
         } catch(Exception ex) {
@@ -262,17 +263,17 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         }
     }
 
-    private void broadcastConnectionStatus(WebSocketMessage.ConnectionStatus status) {
+    private void broadcastConnectionStatus(SocketMessageDto.ConnectionStatus status) {
         if(session == null) log.info("broadcastConnectionStatus - status: " + status.toString());
         else log.info("broadcastConnectionStatus - status: " + status.toString() + " - session: " + session.getId());
         switch (status) {
             case CLOSED:
-                Browser.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
-                        null, WebSocketMessage.ConnectionStatus.CLOSED));
+                Browser.getInstance().runJSCommand(CoreSignal.getWebSocketCoreSignalJSCommand(
+                        null, SocketMessageDto.ConnectionStatus.CLOSED));
                 break;
             case OPEN:
-                Browser.getInstance().runJSCommand(WebSocketMessage.getWebSocketCoreSignalJSCommand(
-                        null, WebSocketMessage.ConnectionStatus.OPEN));
+                Browser.getInstance().runJSCommand(CoreSignal.getWebSocketCoreSignalJSCommand(
+                        null, SocketMessageDto.ConnectionStatus.OPEN));
                 break;
         }
     }
@@ -289,7 +290,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         }
 
         @Override protected ResponseVS call() throws Exception {
-            SocketMessageDto dto = SocketMessageDto.INIT_SESSION_REQUEST(
+            org.votingsystem.dto.SocketMessageDto dto = org.votingsystem.dto.SocketMessageDto.INIT_SESSION_REQUEST(
                     SessionService.getInstance().getDeviceVS().getDeviceId());
             ResponseVS responseVS = null;
             try {
@@ -307,10 +308,10 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                 responseVS = ResponseVS.OK().setSMIME(smimeMessage);
             } catch(InterruptedException ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
-                broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
+                broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
             } catch(Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
-                broadcastConnectionStatus(WebSocketMessage.ConnectionStatus.CLOSED);
+                broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
                 showMessage(ResponseVS.SC_ERROR_REQUEST, ex.getMessage());
             }
             return responseVS;

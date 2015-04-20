@@ -7,8 +7,8 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.util.RequestUtils;
 
 import javax.inject.Inject;

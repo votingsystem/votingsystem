@@ -1,5 +1,6 @@
 package org.votingsystem.client.util;
 
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 
@@ -20,7 +21,7 @@ public class InboxMessage<T> {
 
     public enum State {LAPSED, PENDING, PROCESSED, REMOVED}
 
-    private WebSocketMessage webSocketMessage;
+    private SocketMessageDto webSocketMessage;
     private TypeVS typeVS;
     private String message;
     private String from;
@@ -40,7 +41,7 @@ public class InboxMessage<T> {
         this.UUID = java.util.UUID.randomUUID().toString();
     }
 
-    public InboxMessage(WebSocketMessage webSocketMessage) {
+    public InboxMessage(SocketMessageDto webSocketMessage) {
         load(webSocketMessage);
     }
 
@@ -48,7 +49,7 @@ public class InboxMessage<T> {
         return messageID;
     }
 
-    private void load(WebSocketMessage webSocketMessage) {
+    private void load(SocketMessageDto webSocketMessage) {
         this.webSocketMessage = webSocketMessage;
         this.typeVS = webSocketMessage.getOperation();
         this.message = webSocketMessage.getMessage();
@@ -66,7 +67,8 @@ public class InboxMessage<T> {
         if(dataMap.containsKey("date")) date = DateUtils.getDateFromString((String) dataMap.get("date"));
         if(dataMap.containsKey("messageID")) messageID = (String) dataMap.get("messageID");
         try {
-            load(new WebSocketMessage((Map) dataMap.get("webSocketMessage")));
+            SocketMessageDto messageDto = (SocketMessageDto) dataMap.get("webSocketMessage");
+            load(messageDto);
         } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
         if(dataMap.containsKey("message")) message = (String) dataMap.get("message");
         UUID = (String) dataMap.get("UUID");
@@ -133,11 +135,11 @@ public class InboxMessage<T> {
         return isTimeLimited;
     }
 
-    public WebSocketMessage getWebSocketMessage() {
+    public SocketMessageDto getWebSocketMessage() {
         return webSocketMessage;
     }
 
-    public void setWebSocketMessage(WebSocketMessage webSocketMessage) {
+    public void setWebSocketMessage(SocketMessageDto webSocketMessage) {
         this.webSocketMessage = webSocketMessage;
     }
 
@@ -160,7 +162,7 @@ public class InboxMessage<T> {
         result.put("date", DateUtils.getISODateStr(date));
         result.put("message", message);
         result.put("typeVS", typeVS.toString());
-        if(webSocketMessage != null) result.put("webSocketMessage", webSocketMessage.getMessageJSON());
+        if(webSocketMessage != null) result.put("webSocketMessage", webSocketMessage);
         result.put("messageID", messageID);
         result.put("UUID", getUUID());
         return result;

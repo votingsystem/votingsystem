@@ -68,8 +68,7 @@ public class AnonymousDelegationDto implements Serializable {
         hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVSHidden, ContextVS.VOTING_DATA_DIGEST);
         certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(
                 ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
-                ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive.toString(),
-                DateUtils.getDateStr(dateFrom), DateUtils.getDateStr(dateTo));
+                ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive, dateFrom, dateTo);
     }
 
     public String getSubject() {

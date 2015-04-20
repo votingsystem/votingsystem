@@ -22,7 +22,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.cdi.MessagesBean;
 
 import javax.ejb.Singleton;
 import javax.inject.Inject;

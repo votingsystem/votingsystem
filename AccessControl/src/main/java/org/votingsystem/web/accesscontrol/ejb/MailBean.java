@@ -3,7 +3,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 import org.votingsystem.model.BackupRequestVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.cdi.MessagesBean;
+import org.votingsystem.web.ejb.MessagesBean;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;

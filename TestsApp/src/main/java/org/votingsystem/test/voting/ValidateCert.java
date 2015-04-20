@@ -1,63 +1,53 @@
-package org.votingsystem.test.misc;
+package org.votingsystem.test.voting;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ActorVSDto;
+import org.votingsystem.dto.voting.CertValidationDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.JSON;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-public class SendSMIME {
+public class ValidateCert {
 
-    private static Logger log =  Logger.getLogger(SendSMIME.class.getName());
+    private static Logger log =  Logger.getLogger(ValidateCert.class.getName());
 
-    private static final String receptor = "SendSMIMEReceptor";
-    private static final String receptorURL = "http://localhost:8080/AccessControl/rest/eventVS/save";
 
     public static void main(String[] args) throws Exception {
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
-               "http://localhost:8080/AccessControl"),ContentTypeVS.JSON);
+                "http://localhost:8080/AccessControl"), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
-        ContextVS.getInstance().setDefaultServer(actorVS);
-
-        String uuid = UUID.randomUUID().toString();
-        Map requestDataMap = new HashMap<>();
-        requestDataMap.put("operation", "SendSMIME");
-        requestDataMap.put("statusCode", ResponseVS.SC_OK);
-        requestDataMap.put("message", "message from SendSMIME");
-        requestDataMap.put("UUID", uuid);
-
-        SignatureService superUserSignatureService = SignatureService
-                .getUserVSSignatureService("07553172H", UserVS.Type.USER);
+        if(!(actorVS instanceof AccessControlVS)) throw new ExceptionVS("Expected access control but found " +
+                actorVS.getType().toString());
+        AccessControlVS accessControlVS = (AccessControlVS)actorVS;
+        ContextVS.getInstance().setAccessControl((AccessControlVS)actorVS);
+        CertValidationDto certValidationDto = CertValidationDto.validationRequest(
+                "7553172H", "aee09e79-e44e-4a86-9a5d-0fd1ee445038");
+        SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService(
+                "07553172H", UserVS.Type.USER);
         UserVS fromUserVS = superUserSignatureService.getUserVS();
-
-        String messageSubject = "SendSMIME test " + uuid;
-        String contentStr = new ObjectMapper().writeValueAsString(requestDataMap);
+        String messageSubject = "ValidateCert test " + certValidationDto.getUUID();
         SMIMEMessage smimeMessage = superUserSignatureService.getSMIMETimeStamped(fromUserVS.getNif(),
-                receptor, contentStr, messageSubject);
+                accessControlVS.getName(), JSON.getMapper().writeValueAsString(certValidationDto), messageSubject);
         responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                receptorURL);
+                accessControlVS.getUserCSRValidationServiceURL());
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage());
         System.exit(0);
     }
-
 }
-
-
-
-
-
-

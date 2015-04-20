@@ -1,6 +1,7 @@
 package org.votingsystem.web.accesscontrol.servlet;
 
 
+import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -53,14 +54,14 @@ public class AccessRequestVSServlet extends HttpServlet {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ACCESS_REQUEST);
             MessageSMIME messageSMIME = signatureBean.validateSMIME(
                     requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
-            AccessRequestBean.AccessRequest accessRequest = accessRequestBean.saveRequest(messageSMIME);
-            accessRequestVS = accessRequest.getAccessRequestVS();
+            AccessRequestDto requestDto = accessRequestBean.saveRequest(messageSMIME);
+            accessRequestVS = requestDto.getAccessRequestVS();
             UserVS signer = accessRequestVS.getUserVS();
             CsrResponse csrResponse = null;
             if(signer.getType() == UserVS.Type.REPRESENTATIVE) {
-                csrResponse = csrBean.signCertVoteVS(requestVS.getCSRBytes(), accessRequest.getEventVS());
+                csrResponse = csrBean.signCertVoteVS(requestVS.getCSRBytes(), requestDto.getEventVS());
             } else csrResponse = csrBean.signRepresentativeCertVoteVS(
-                    requestVS.getCSRBytes(), accessRequest.getEventVS(), signer);
+                    requestVS.getCSRBytes(), requestDto.getEventVS(), signer);
             resp.setContentType(ContentTypeVS.TEXT_STREAM.getName());
             resp.setContentLength(csrResponse.getIssuedCert().length);
             resp.getOutputStream().write(csrResponse.getIssuedCert());

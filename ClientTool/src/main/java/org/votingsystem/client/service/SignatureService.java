@@ -38,6 +38,7 @@ import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
+import org.votingsystem.signature.util.EncryptedBundle;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
@@ -221,7 +222,7 @@ public class SignatureService extends Service<ResponseVS> {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 Long requestId = Long.valueOf(responseVS.getMessage());
                 byte[] serializedCertificationRequest = ObjectUtils.serializeObject(certificationRequest);
-                Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, serializedCertificationRequest);
+                EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, serializedCertificationRequest);
                 SessionService.getInstance().setCSRRequest(requestId, bundle);
             }
             return responseVS;
@@ -237,7 +238,7 @@ public class SignatureService extends Service<ResponseVS> {
             String toUser = eventVS.getAccessControl().getName();
             String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + eventVS.getId();
             SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser, 
-                    JSON.getMapper().writeValueAsString(voteVS.getAccessRequestDataMap()),
+                    JSON.getMapper().writeValueAsString(voteVS.getAccessRequestDto()),
                     password, msgSubject, null);
             AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, voteVS);
             ResponseVS responseVS = accessRequestDataSender.call();

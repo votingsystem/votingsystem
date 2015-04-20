@@ -2,16 +2,15 @@ package org.votingsystem.util.currency;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.EncryptedBundleDto;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.signature.util.CertificationRequestVS;
+import org.votingsystem.signature.util.EncryptedBundle;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.WalletException;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -160,8 +159,8 @@ public class Wallet {
         WalletFile walletFile = encryptedWalletList.getWallet(pinHashHex);
         if(walletFile == null || encryptedWalletList.size() == 0)
             throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
-        Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletMap.toString().getBytes());
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toMap().toString().getBytes("UTF-8")), walletFile.file);
+        EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletMap.toString().getBytes());
+        JSON.getMapper().writeValue(walletFile.file, new EncryptedBundleDto(bundle));
         wallet = getCurrencySet(walletMap);
         return wallet;
     }
@@ -172,8 +171,8 @@ public class Wallet {
         File walletFile = new File(ContextVS.APPDIR + File.separator + walletFileName);
         walletFile.getParentFile().mkdirs();
         walletFile.createNewFile();
-        Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletMap.toString().getBytes());
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toMap().toString().getBytes("UTF-8")), walletFile);
+        EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, walletMap.toString().getBytes());
+        JSON.getMapper().writeValue(walletFile, new EncryptedBundleDto(bundle));
         wallet = getCurrencySet(walletMap);
     }
 
@@ -190,8 +189,8 @@ public class Wallet {
             if(encryptedWalletList.size() > 0) throw new ExceptionVS(ContextVS.getMessage("walletNotFoundErrorMsg"));
             else throw new WalletException(ContextVS.getMessage("walletNotFoundErrorMsg"));
         }
-        Map bundleMap = new ObjectMapper().readValue(walletFile, new TypeReference<HashMap<String, Object>>() {});
-        Encryptor.EncryptedBundle bundle = Encryptor.EncryptedBundle.parse(bundleMap);
+        EncryptedBundleDto bundleDto = JSON.getMapper().readValue(walletFile, EncryptedBundleDto.class);
+        EncryptedBundle bundle = bundleDto.getEncryptedBundle();
         byte[] decryptedWalletBytes = Encryptor.pbeAES_Decrypt(pin, bundle);
         wallet = getCurrencySet(new ObjectMapper().readValue(
                 new String(decryptedWalletBytes, "UTF-8"), new TypeReference<List>() {}));
@@ -212,9 +211,9 @@ public class Wallet {
         String newWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + newPinHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File newWalletFile = new File(ContextVS.APPDIR + File.separator + newWalletFileName);
         if(!newWalletFile.createNewFile()) throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
-        Encryptor.EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(
+        EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(
                 newPin, new ObjectMapper().writeValueAsString(walletMap).getBytes());
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(bundle.toMap().toString().getBytes("UTF-8")), newWalletFile);
+        JSON.getMapper().writeValue(newWalletFile, new EncryptedBundleDto(bundle));
         String oldWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + oldPinHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File oldWalletFile = new File(ContextVS.APPDIR + File.separator + oldWalletFileName);
         oldWalletFile.delete();

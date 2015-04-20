@@ -17,6 +17,7 @@ import org.votingsystem.web.cdi.ConfigVS;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -102,8 +103,9 @@ public class SubscriptionVSBean {
         userVS.setDeviceVS(deviceVS);
     }
 
+    @Transactional
     public DeviceVS checkDevice(String givenname, String surname, String nif, String phone, String email, String deviceId,
-                           String deviceType) throws ExceptionVS {
+                           DeviceVS.Type deviceType) throws ExceptionVS {
         log.info(format("checkDevice - givenname: {0} - surname: {1} - nif:{2} - phone: {3}" +
                 " - email: {4} - deviceId: {5} - deviceType: {6}", givenname, surname, nif, phone,
                 email, deviceId, deviceType));
@@ -117,7 +119,7 @@ public class SubscriptionVSBean {
         query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId")
                 .setParameter("deviceId", deviceId);
         DeviceVS device = dao.getSingleResult(DeviceVS.class, query);
-        DeviceVS.Type type = device != null ? device.getType():null;
+        DeviceVS.Type type = device != null ? device.getType(): deviceType;
         if (device == null || (device.getUserVS().getId() != userVS.getId())) device = dao.persist(
                 new DeviceVS(userVS, deviceId, email, phone, type));
         else dao.merge(device.setEmail(email).setPhone(phone));

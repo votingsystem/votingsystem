@@ -3,6 +3,7 @@ package org.votingsystem.web.controlcenter.cdi;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -11,7 +12,9 @@ import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.ejb.Startup;
+import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -38,6 +41,9 @@ public class ConfigVSImpl implements ConfigVS {
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionBean;
     @Inject TimeStampBean timeStampBean;
+    /* Executor service for asynchronous processing */
+    @Resource(name="comp/DefaultManagedExecutorService")
+    private ManagedExecutorService executorService;
 
     public static final String RESOURCE_PATH= "/resources/bower_components";
     public static final String WEB_PATH= "/jsf";
@@ -111,8 +117,15 @@ public class ConfigVSImpl implements ConfigVS {
         if(systemUser == null) {
             dao.persist(new UserVS(systemNIF, serverName, UserVS.Type.SYSTEM));
         }
-        timeStampBean.init();
-        signatureBean.init();
+        executorService.submit(() -> {
+            try {
+                timeStampBean.init();
+                signatureBean.init();
+                ContextVS.getInstance();
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        });
     }
 
     public String getProperty(String key) {

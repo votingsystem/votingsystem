@@ -447,33 +447,6 @@ public class Encryptor {
         return cipher.doFinal(bundle.cipherText);
     }
 
-    public static class EncryptedBundle {
-        byte[] iv, cipherText, salt;
-        public EncryptedBundle(byte[] cipherText, byte[] iv, byte[] salt) {
-            this.iv = iv;
-            this.cipherText = cipherText;
-            this.salt = salt;
-        }
-        public byte[] getIV() { return iv; }
-        public byte[] getCipherText() { return cipherText; }
-        public byte[] getSalt() { return salt; }
-
-        public Map<String, String> toMap() {
-            Map result = new HashMap<>();
-            result.put("iv", Base64.getEncoder().encodeToString(iv));
-            result.put("salt", Base64.getEncoder().encodeToString(salt));
-            result.put("cipherText", Base64.getEncoder().encodeToString(cipherText));
-            return result;
-        }
-
-        public static EncryptedBundle parse(Map<String, String> jsonObject) {
-            byte[] iv = Base64.getDecoder().decode(jsonObject.get("iv").getBytes());
-            byte[] cipherText = Base64.getDecoder().decode(jsonObject.get("cipherText").getBytes());
-            byte[] salt = Base64.getDecoder().decode(jsonObject.get("salt").getBytes());
-            return new EncryptedBundle(cipherText, iv, salt);
-        }
-    }
-
     /*public static String encryptAES(String messageToEncrypt, AESParams params) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException,

@@ -4,11 +4,9 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.client.util.WebSocketSession;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControlVS;
-import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
 
@@ -26,8 +24,6 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.util.stream.Collectors.toList;
-
 /**
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
@@ -37,8 +33,6 @@ public class VotingSystemApp extends Application {
 
     private static VotingSystemApp INSTANCE;
     private Map<String, String> smimeMessageMap;
-    private static final Map<String, WebSocketSession> sessionMap = new HashMap<String, WebSocketSession>();
-    private Long deviceId;
 
     // Create a trust manager that does not validate certificate chains
     private static TrustManager[] trustAllCerts = new TrustManager[] {
@@ -75,25 +69,6 @@ public class VotingSystemApp extends Application {
             smimeMessageMap = new HashMap<String, String>();
         }
         smimeMessageMap.put(smimeMessageURL, smimeMessageStr);
-    }
-
-    public void putWSSession(String UUID, WebSocketSession session) {
-        sessionMap.put(UUID, session.setUUID(UUID));
-    }
-
-    public AESParams getWSSessionKeys(String UUID) {
-        WebSocketSession webSocketSession = null;
-        if((webSocketSession = sessionMap.get(UUID)) != null) return webSocketSession.getAESParams();
-        return null;
-    }
-
-    public WebSocketSession getWSSession(String UUID) {
-        return sessionMap.get(UUID);
-    }
-    public WebSocketSession getWSSession(Long deviceId) {
-        List<WebSocketSession> result = sessionMap.entrySet().stream().filter(k ->  k.getValue().getDeviceVS() != null &&
-                k.getValue().getDeviceVS().getId() == deviceId).map(k -> k.getValue()).collect(toList());
-        return result.isEmpty()? null : result.get(0);
     }
 
     @Override public void stop() {
@@ -157,14 +132,6 @@ public class VotingSystemApp extends Application {
                 }
         }).start();
         browser.show();
-    }
-
-    public Long getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(Long deviceId) {
-        this.deviceId = deviceId;
     }
 
     public static void main(String[] args) {

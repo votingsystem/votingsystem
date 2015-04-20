@@ -1,6 +1,5 @@
 package org.votingsystem.test.callable;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.AccessRequestDataSender;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.model.ResponseVS;
@@ -11,6 +10,7 @@ import org.votingsystem.test.dto.VoteResultDto;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.StringUtils;
 
 import java.util.concurrent.Callable;
@@ -35,14 +35,14 @@ public class VoteSender implements Callable<ResponseVS> {
         String smimeMessageSubject = "VoteSender Test - accessRequestMsgSubject";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(electorNIF);
         String toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
-        String contentStr = new ObjectMapper().writeValueAsString(voteVS.getAccessRequestDataMap());
+        String contentStr = JSON.getMapper().writeValueAsString(voteVS.getAccessRequestDto());
         SMIMEMessage smimeMessage = signatureService.getSMIME(electorNIF, toUser, contentStr, smimeMessageSubject);
 
         AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, voteVS);
         ResponseVS responseVS = accessRequestDataSender.call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
-            String voteDataStr = new ObjectMapper().writeValueAsString(voteVS.getVoteDataMap());
+            String voteDataStr = JSON.getMapper().writeValueAsString(voteVS);
             smimeMessage = certificationRequest.getSMIME(voteVS.getHashCertVSBase64(), toUser, voteDataStr, "voteVSMsgSubject", null);
             SMIMESignedSender sender = new SMIMESignedSender(smimeMessage,
                     ContextVS.getInstance().getControlCenter().getVoteServiceURL(),

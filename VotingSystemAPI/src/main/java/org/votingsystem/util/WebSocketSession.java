@@ -1,8 +1,7 @@
-package org.votingsystem.client.util;
+package org.votingsystem.util;
 
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.signature.util.AESParams;
-import org.votingsystem.util.TypeVS;
 
 /**
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia

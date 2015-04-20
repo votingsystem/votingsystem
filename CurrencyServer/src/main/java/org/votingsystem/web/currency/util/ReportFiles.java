@@ -1,7 +1,6 @@
 package org.votingsystem.web.currency.util;
 
 import org.votingsystem.util.TimePeriod;
-
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

@@ -18,7 +18,9 @@ public class VoteVSCancelerDto {
     private String hashCertVSBase64;
     private String originHashAccessRequest;
     private String hashAccessRequestBase64;
-    private TypeVS operation;
+    private TypeVS operation = TypeVS.CANCEL_VOTE;
+    private String UUID;
+
 
     public VoteVSCancelerDto() {}
 
@@ -75,4 +77,13 @@ public class VoteVSCancelerDto {
     public void setOperation(TypeVS operation) {
         this.operation = operation;
     }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
+    }
+
 }

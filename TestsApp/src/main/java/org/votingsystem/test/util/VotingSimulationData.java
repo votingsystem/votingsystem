@@ -18,21 +18,21 @@ public class VotingSimulationData extends SimulationData {
 
     private Error error;
     private String controlCenterURL;
-    private AtomicLong numOfElectors;
+    private AtomicLong numOfElectors = new AtomicLong(0L);
     private UserBaseSimulationData userBaseData;
 
-    private AtomicLong accessRequestERROR ;
-    private AtomicLong accessRequestOK;
+    private AtomicLong accessRequestERROR  = new AtomicLong(0L);
+    private AtomicLong accessRequestOK = new AtomicLong(0L);
 
-    private AtomicLong votingRequestERROR;
-    private AtomicLong votingRequestOK;
+    private AtomicLong votingRequestERROR = new AtomicLong(0L);
+    private AtomicLong votingRequestOK = new AtomicLong(0L);
 
     public VotingSimulationData() {}
 
     public VotingSimulationData(SimulationData simulData) throws Exception {
+        super.init();
         setAccessControlURL(simulData.getAccessControlURL());
         setEventVS(simulData.getEventVS());
-        init();
         setEventStateWhenFinished(simulData.getEventStateWhenFinished());
         setUserBaseData(simulData.getUserBaseSimulationData());
         setMaxPendingResponses(simulData.getMaxPendingResponses());
@@ -41,16 +41,6 @@ public class VotingSimulationData extends SimulationData {
         setDurationInMillis(simulData.getDurationInMillis());
         setNumRequestsProjected(simulData.getNumRequestsProjected());
     }
-
-    public void init() {
-        numOfElectors = new AtomicLong(0);
-        accessRequestERROR = new AtomicLong(0);
-        accessRequestOK = new AtomicLong(0);
-        votingRequestERROR = new AtomicLong(0);
-        votingRequestOK = new AtomicLong(0);
-        super.init();
-    }
-
 
     public Long getNumVotingRequests() {
         return votingRequestERROR.get() + votingRequestOK.get();

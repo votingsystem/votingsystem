@@ -14,11 +14,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
-import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
-import org.votingsystem.client.util.*;
+import org.votingsystem.client.util.DocumentVS;
+import org.votingsystem.client.util.MsgUtils;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
@@ -227,10 +229,10 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
             try {
                 countDownLatch = new CountDownLatch(1);
                 DeviceVS deviceVS = device.getDeviceVS();
-                WebSocketAuthenticatedService.getInstance().sendMessage(WebSocketMessage.getCurrencyWalletChangeRequest(
+                WebSocketAuthenticatedService.getInstance().sendMessage(SocketMessageDto.getCurrencyWalletChangeRequest(
                         deviceVS, Arrays.asList(currency)).toString());
                 countDownLatch.await();
-                WebSocketSession webSocketSession = VotingSystemApp.getInstance().getWSSession(deviceVS.getId());
+                WebSocketSession webSocketSession = ContextVS.getInstance().getWSSession(deviceVS.getId());
             } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
             return null;
         }

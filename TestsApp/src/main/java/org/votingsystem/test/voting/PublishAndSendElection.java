@@ -53,13 +53,13 @@ public class PublishAndSendElection {
         eventVS.setFieldsEventVS(new HashSet<>(Arrays.asList(new FieldEventVS("field1", null), new FieldEventVS("field2", null))));
 
         UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
-        userBaseSimulationData.setUserIndex(200);
+        userBaseSimulationData.setUserIndex(700);
         userBaseSimulationData.setNumUsersWithoutRepresentative(10);
         userBaseSimulationData.setNumUsersWithoutRepresentativeWithVote(8);
-        userBaseSimulationData.setNumRepresentatives(3);
-        userBaseSimulationData.setNumRepresentativesWithVote(2);
+        userBaseSimulationData.setNumRepresentatives(5);
+        userBaseSimulationData.setNumRepresentativesWithVote(4);
         userBaseSimulationData.setNumUsersWithRepresentative(10);
-        userBaseSimulationData.setNumUsersWithRepresentativeWithVote(2);
+        userBaseSimulationData.setNumUsersWithRepresentativeWithVote(5);
 
         simulationData = new VotingSimulationData();
         simulationData.setServerURL("http://localhost:8080/AccessControl");

@@ -15,6 +15,7 @@ import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.dto.voting.VoteCertExtensionDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -155,10 +156,10 @@ public class SMIMEPane extends GridPane implements DocumentVS {
 
         @Override protected ResponseVS call() throws Exception {
             updateMessage(ContextVS.getMessage("checkVoteLbl"));
-            Map certExtensionData = CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.VOTE_OID);
-            String hashCertVS = (String) certExtensionData.get("hashCertVS");
+            VoteCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
+                    VoteCertExtensionDto.class, x509AnonymousCert, ContextVS.VOTE_OID);
             String voteStateServiceURL = ContextVS.getInstance().getAccessControl().getVoteStateServiceURL(
-                    StringUtils.toHex(hashCertVS));
+                    StringUtils.toHex(certExtensionDto.getHashCertVS()));
             ResponseVS responseVS = HttpHelper.getInstance().getData(voteStateServiceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 //[state:voteVS.state.toString(), value:voteVS.optionSelected.content]

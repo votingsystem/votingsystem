@@ -2,6 +2,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.web.accesscontrol.cdi.ConfigVSImpl;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -42,7 +43,8 @@ public class ServerInfoResource {
         serverInfo.put("serverURL", config.getContextURL());
         serverInfo.put("state",  ActorVS.State.OK);
         serverInfo.put("date", new Date());
-        serverInfo.put("controlCenter", new ActorVSDto(((ConfigVSImpl)config).getControlCenter()));
+        ControlCenterVS controlCenterVS = ((ConfigVSImpl)config).getControlCenter();
+        if(controlCenterVS != null) serverInfo.put("controlCenter", new ActorVSDto(controlCenterVS));
         serverInfo.put("environmentMode", config.getMode());
         serverInfo.put("timeStampCertPEM", new String(timeStampBean.getSigningCertPEMBytes()));
         serverInfo.put("timeStampServerURL", config.getTimeStampServerURL());

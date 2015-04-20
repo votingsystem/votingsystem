@@ -6,7 +6,10 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.votingsystem.dto.UserVSCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
+import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
+import org.votingsystem.dto.voting.VoteCertExtensionDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -27,8 +30,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,18 +58,15 @@ public class CertificationRequestVS implements java.io.Serializable {
     }
 
     public static CertificationRequestVS getVoteRequest(int keySize, String keyName, String signatureMechanism,
-            String provider, String accessControlURL, String eventId, String getHashCertVSBase64)
+            String provider, String accessControlURL, Long eventId, String hashCertVS)
             throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException,
             IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +", OU=eventId:" + eventId);
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
-        Map delegationDataMap = new HashMap<String, String>();
-        delegationDataMap.put("accessControlURL", accessControlURL);
-        delegationDataMap.put("hashCertVS", getHashCertVSBase64);
-        delegationDataMap.put("eventId", eventId);
-        String delegationDataStr = JSON.getMapper().writeValueAsString(delegationDataMap);
-        asn1EncodableVector.add(new DERTaggedObject(ContextVS.VOTE_TAG, new DERUTF8String(delegationDataStr)));
+        VoteCertExtensionDto dto = new VoteCertExtensionDto(accessControlURL, hashCertVS, eventId);
+        asn1EncodableVector.add(new DERTaggedObject(ContextVS.VOTE_TAG,
+                new DERUTF8String(JSON.getMapper().writeValueAsString(dto))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
@@ -75,21 +74,16 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     public static CertificationRequestVS getAnonymousDelegationRequest(int keySize, String keyName,
             String signatureMechanism, String provider, String accessControlURL, String hashCertVS,
-            String weeksOperationActive, String dateFrom, String dateTo) throws NoSuchAlgorithmException,
+            Integer weeksOperationActive, Date validFrom, Date validTo) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         X500Principal subject = new X500Principal("CN=accessControlURL:" + accessControlURL +
                 ", OU=AnonymousRepresentativeDelegation");
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
-        Map delegationDataMap = new HashMap<String, String>();
-        delegationDataMap.put("accessControlURL", accessControlURL);
-        delegationDataMap.put("hashCertVS", hashCertVS);
-        delegationDataMap.put("weeksOperationActive", weeksOperationActive);
-        delegationDataMap.put("validFrom", dateFrom);
-        delegationDataMap.put("validTo", dateTo);
-        String delegationDataStr = JSON.getMapper().writeValueAsString(delegationDataMap);
+        AnonymousDelegationCertExtensionDto dto = new AnonymousDelegationCertExtensionDto(accessControlURL, hashCertVS,
+                weeksOperationActive, validFrom, validTo);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG,
-                new DERUTF8String(delegationDataStr)));
+                new DERUTF8String(JSON.getMapper().writeValueAsString(dto))));
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
@@ -103,14 +97,9 @@ public class CertificationRequestVS implements java.io.Serializable {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         String principal = "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenName + ", SURNAME=" + surName;
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
-        Map extensionDataMap = new HashMap<String, String>();
-        extensionDataMap.put("deviceId", deviceId);
-        extensionDataMap.put("deviceType", deviceType.toString());
-        if(deviceName != null) extensionDataMap.put("deviceName", deviceName);
-        if (email != null) extensionDataMap.put("email", email);
-        if (phone != null) extensionDataMap.put("mobilePhone", phone);
-        String extensionDataStr = JSON.getMapper().writeValueAsString(extensionDataMap);
-        asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG, new DERUTF8String(extensionDataStr)));
+        UserVSCertExtensionDto dto = new UserVSCertExtensionDto(deviceId, deviceName, email, phone, deviceType);
+        asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG,
+                new DERUTF8String(JSON.getMapper().writeValueAsString(dto))));
         X500Principal subject = new X500Principal(principal);
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);

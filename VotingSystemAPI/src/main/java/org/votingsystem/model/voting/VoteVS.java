@@ -3,12 +3,13 @@ package org.votingsystem.model.voting;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import org.votingsystem.dto.voting.AccessRequestDto;
+import org.votingsystem.dto.voting.VoteCertExtensionDto;
+import org.votingsystem.dto.voting.VoteVSCancelerDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
@@ -16,7 +17,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.JSON;
 
 import javax.persistence.*;
 import java.io.IOException;
@@ -57,15 +58,14 @@ public class VoteVS extends EntityVS implements Serializable {
 
     @JsonProperty("UUID")
     @Transient private String voteUUID;
-    @Transient private String originHashCertVote;
-    @Transient private String hashCertVoteHex;
     @Transient private String hashCertVSBase64;
-    @Transient private String originHashAccessRequest;
     @Transient private String hashAccessRequestBase64;
     @Transient private String accessControlURL;
     @Transient private String eventURL;
     @Transient private Long accessControlEventVSId;
     @Transient private String representativeURL;
+    @Transient @JsonIgnore private String originHashCertVote;
+    @Transient @JsonIgnore private String originHashAccessRequest;
     @Transient @JsonIgnore private X509Certificate x509Certificate;
     @Transient @JsonIgnore private TimeStampToken timeStampToken;
     @Transient @JsonIgnore private Set<X509Certificate> serverCerts = new HashSet<X509Certificate>();
@@ -82,7 +82,6 @@ public class VoteVS extends EntityVS implements Serializable {
         eventURL = voteVSDto.getEventVSURL();
         hashAccessRequestBase64 = voteVSDto.getHashAccessRequestBase64();
         hashCertVSBase64 = voteVSDto.getHashCertVSBase64();
-        hashCertVoteHex = voteVSDto.getHashCertVoteHex();
         optionSelected = voteVSDto.getOptionSelected();
         state = voteVSDto.getState();
     }
@@ -202,10 +201,6 @@ public class VoteVS extends EntityVS implements Serializable {
 		this.certificateVS = certificateVS;
 	}
 
-    public void setHashCertVoteHex(String hashCertVoteHex) {
-        this.hashCertVoteHex = hashCertVoteHex;
-    }
-
     public String getHashCertVSBase64() {
         return hashCertVSBase64;
     }
@@ -309,11 +304,11 @@ public class VoteVS extends EntityVS implements Serializable {
         byte[] voteExtensionValue = x509Certificate.getExtensionValue(ContextVS.VOTE_OID);
         if(voteExtensionValue != null) {
             DERTaggedObject voteCertDataDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(voteExtensionValue);
-            Map<String,String> voteCertData = new ObjectMapper().readValue(((DERUTF8String) voteCertDataDER.getObject()).toString(),
-                    new TypeReference<HashMap<String, String>>() {});
-            this.accessControlEventVSId = Long.valueOf(voteCertData.get("eventId"));
-            this.accessControlURL = voteCertData.get("accessControlURL");
-            this.hashCertVSBase64 = voteCertData.get("hashCertVS");
+            VoteCertExtensionDto certExtensionDto = JSON.getMapper().readValue(((DERUTF8String) voteCertDataDER.getObject()).toString(),
+                    VoteCertExtensionDto.class);
+            this.accessControlEventVSId = certExtensionDto.getEventId();
+            this.accessControlURL = certExtensionDto.getAccessControlURL();
+            this.hashCertVSBase64 = certExtensionDto.getHashCertVS();
         }
         byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_VOTE_OID);
         if(representativeURLExtensionValue != null) {
@@ -324,43 +319,24 @@ public class VoteVS extends EntityVS implements Serializable {
     }
 
     @JsonIgnore
-    public HashMap getVoteDataMap() {
-        log.info("getVoteDataMap");
-        Map map = new HashMap();
-        map.put("operation", TypeVS.SEND_SMIME_VOTE.toString());
-        map.put("eventURL", eventVS.getUrl());
-        HashMap optionSelectedMap = new HashMap();
-        optionSelectedMap.put("id", optionSelected.getId());
-        optionSelectedMap.put("content", optionSelected.getContent());
-        map.put("optionSelected", optionSelectedMap);
-        map.put("UUID", UUID.randomUUID().toString());
-        return new HashMap(map);
+    public AccessRequestDto getAccessRequestDto() {
+        AccessRequestDto accessRequestDto = new AccessRequestDto();
+        accessRequestDto.setEventId(eventVS.getId());
+        accessRequestDto.setEventURL(eventVS.getUrl());
+        accessRequestDto.setHashAccessRequestBase64(hashAccessRequestBase64);
+        accessRequestDto.setUUID(UUID.randomUUID().toString());
+        return accessRequestDto;
     }
 
     @JsonIgnore
-    public HashMap getAccessRequestDataMap() {
-        log.info("getAccessRequestDataMap");
-        Map map = new HashMap();
-        map.put("operation", TypeVS.ACCESS_REQUEST.toString());
-        map.put("eventId", eventVS.getId());
-        map.put("eventURL", eventVS.getUrl());
-        map.put("UUID", UUID.randomUUID().toString());
-        map.put("hashAccessRequestBase64", hashAccessRequestBase64);
-        return new HashMap(map);
-    }
-
-    @JsonIgnore
-    public HashMap getCancelVoteDataMap() {
-        log.info("getCancelVoteDataMap");
-        Map map = new HashMap();
-        map.put("operation", TypeVS.CANCEL_VOTE.toString());
-        map.put("originHashCertVote", originHashCertVote);
-        map.put("hashCertVSBase64", hashCertVSBase64);
-        map.put("originHashAccessRequest", originHashAccessRequest);
-        map.put("hashAccessRequestBase64", hashAccessRequestBase64);
-        map.put("UUID", UUID.randomUUID().toString());
-        HashMap dataMap = new HashMap(map);
-        return dataMap;
+    public VoteVSCancelerDto getCancelVoteDto() {
+        VoteVSCancelerDto cancelerDto = new VoteVSCancelerDto();
+        cancelerDto.setOriginHashAccessRequest(originHashAccessRequest);
+        cancelerDto.setHashAccessRequestBase64(hashAccessRequestBase64);
+        cancelerDto.setOriginHashCertVote(originHashCertVote);
+        cancelerDto.setHashCertVSBase64(hashCertVSBase64);
+        cancelerDto.setUUID(UUID.randomUUID().toString());
+        return cancelerDto;
     }
 
 }

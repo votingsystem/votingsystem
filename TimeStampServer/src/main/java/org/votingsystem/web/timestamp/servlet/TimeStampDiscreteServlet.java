@@ -5,7 +5,7 @@ import org.votingsystem.model.TimeStampVS;
 import org.votingsystem.services.TimeStampService;
 import org.votingsystem.signature.util.TimeStampResponseGenerator;
 import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.web.cdi.MessagesBean;
+import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.timestamp.filter.FilterVS;
 
