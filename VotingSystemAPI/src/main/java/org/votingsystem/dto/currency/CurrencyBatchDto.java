@@ -9,8 +9,8 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.currency.Payment;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.currency.Payment;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;

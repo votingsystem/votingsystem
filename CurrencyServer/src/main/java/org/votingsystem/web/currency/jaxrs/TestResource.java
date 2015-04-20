@@ -6,13 +6,14 @@ import org.iban4j.CountryCode;
 import org.iban4j.Iban;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.IncomesDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.currency.MapUtils;
 import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.currency.MapUtils;
 import org.votingsystem.web.currency.ejb.AuditBean;
 import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.util.LoggerVS;
@@ -156,9 +157,16 @@ public class TestResource {
             int randomInt = randomGenerator.nextInt(100);
             int transactionvsItemId = new Random().nextInt(transactionTypes.length);
             TransactionVS.Type transactionType = transactionTypes[transactionvsItemId];
-            LoggerVS.logTransactionVS(Long.valueOf(idx), "TRANSACTION_STATE", transactionType.toString(),
-                    "fromUser" + randomInt, "toUser" + randomInt, Currency.getInstance("EUR").getCurrencyCode(),
-                    new BigDecimal(randomInt), null, Calendar.getInstance().getTime(), null, "Subject - " + randomInt, true);
+            TransactionVSDto dto = new TransactionVSDto();
+            dto.setId(Long.valueOf(idx));
+            dto.setType(transactionType);
+            dto.setFromUser("fromUser" + randomInt);
+            dto.setToUser("toUser" + randomInt);
+            dto.setCurrencyCode("EUR");
+            dto.setAmount(new BigDecimal(randomInt));
+            dto.setSubject("Subject - " + randomInt);
+            dto.setDateCreated(new Date());
+            LoggerVS.logTransactionVS(dto);
         }
         Long finish = System.currentTimeMillis();
         Long duration = finish - init;

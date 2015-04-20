@@ -14,6 +14,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
+
 import javax.persistence.*;
 import java.io.IOException;
 import java.io.Serializable;

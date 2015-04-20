@@ -8,6 +8,7 @@ import org.votingsystem.util.*;
 import org.votingsystem.web.currency.ejb.UserVSBean;
 import org.votingsystem.web.currency.util.AsciiDocUtil;
 import org.votingsystem.web.ejb.DAOBean;
+
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;

@@ -1,4 +1,4 @@
-package org.votingsystem.web.currency.websocket;
+package org.votingsystem.util;
 
 import org.votingsystem.model.UserVS;
 

@@ -3,6 +3,7 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.util.TypeVS;
+
 import java.math.BigDecimal;
 
 /**

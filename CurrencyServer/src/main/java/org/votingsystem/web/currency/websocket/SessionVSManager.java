@@ -1,11 +1,15 @@
 package org.votingsystem.web.currency.websocket;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.ConnectedUsersDto;
 import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.SessionVS;
 
 import javax.websocket.Session;
 import java.util.*;
@@ -167,7 +171,7 @@ public class SessionVSManager {
 
     public ResponseVS broadcastList(String messageStr, Set<String> listeners) {
         log.info("broadcastList");
-        List<String> errorList = new ArrayList<String>();
+        List<String> errorList = new ArrayList<>();
         for(String listener : listeners) {
             Session session = sessionMap.get(listener);
             if(session.isOpen()) {
@@ -208,28 +212,29 @@ public class SessionVSManager {
         return responseVS;
     }
 
-    public void sendMessage(List<DeviceVS> userVSDeviceList, String message) throws ExceptionVS {
+    public void sendMessage(List<DeviceVS> userVSDeviceList, SocketMessageDto messageDto) throws ExceptionVS {
         for(DeviceVS device : userVSDeviceList) {
-            String sessionId = deviceSessionMap.get(device.getId());
-            if(sessionId != null) {
-                if(!sendMessage(sessionId, message)) deviceSessionMap.remove(device.getId());
+            messageDto.setSessionId(deviceSessionMap.get(device.getId()));
+            if(messageDto.getSessionId() != null) {
+                if(!sendMessage(messageDto)) deviceSessionMap.remove(device.getId());
             } else log.log(Level.SEVERE, "device id '" + device.getId() + "' has no active sessions");
         }
     }
 
-    public boolean sendMessageToDevice(Long deviceId, String message) throws ExceptionVS{
-        if(!deviceSessionMap.containsKey(deviceId)) return false;
-        else return sendMessage(authenticatedSessionMap.get(deviceSessionMap.get(deviceId)).getSession().getId(), message);
+    public boolean sendMessageToDevice(SocketMessageDto messageDto) throws ExceptionVS, JsonProcessingException {
+        if(!deviceSessionMap.containsKey(messageDto.getDeviceToId())) return false;
+        messageDto.setSessionId(authenticatedSessionMap.get(deviceSessionMap.get(messageDto.getDeviceToId())).getSession().getId());
+        return sendMessage(messageDto);
     }
 
-    public boolean sendMessage(String sessionId, String message) throws ExceptionVS {
-        if(sessionId == null) throw new ExceptionVS("null sessionId");
-        if(authenticatedSessionMap.containsKey(sessionId)) return sendMessageToAuthenticatedUser(sessionId, message);
-        if(sessionMap.containsKey(sessionId)) {
-            Session session = sessionMap.get(sessionId);
+    public boolean sendMessage(SocketMessageDto messageDto) throws ExceptionVS {
+        if(messageDto.getSessionId() == null) throw new ExceptionVS("null sessionId");
+        if(authenticatedSessionMap.containsKey(messageDto.getSessionId())) return sendMessageToAuthenticatedUser(messageDto);
+        if(sessionMap.containsKey(messageDto.getSessionId())) {
+            Session session = sessionMap.get(messageDto.getSessionId());
             if(session.isOpen()) {
                 try {
-                    session.getBasicRemote().sendText(message);
+                    session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(messageDto));
                     return true;
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -237,20 +242,20 @@ public class SessionVSManager {
             }
             remove(session);
         }
-        log.info ("sendMessage - lost message for session '" + sessionId + "' - message: " + message);
+        log.info("sendMessage - lost message for session '" + messageDto.getSessionId() + "' - message: " + messageDto);
         return false;
     }
 
-    private boolean sendMessageToAuthenticatedUser(String sessionId, String message) {
-        if(!authenticatedSessionMap.containsKey(sessionId)) return false;
-        Session session = authenticatedSessionMap.get(sessionId).getSession();
+    private boolean sendMessageToAuthenticatedUser(SocketMessageDto messageDto) {
+        if(!authenticatedSessionMap.containsKey(messageDto.getSessionId())) return false;
+        Session session = authenticatedSessionMap.get(messageDto.getSessionId()).getSession();
         if(session.isOpen()) {
             try {
-                session.getBasicRemote().sendText(message);
+                session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(messageDto));
                 return true;
             } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex); }
         }
-        log.info ("sendMessageToAuthenticatedUser - lost message for session '" + sessionId + "' - message: " + message);
+        log.info ("sendMessageToAuthenticatedUser - lost message for session '" + messageDto.getSessionId() + "' - message: " + messageDto);
         remove(session);
         return false;
     }

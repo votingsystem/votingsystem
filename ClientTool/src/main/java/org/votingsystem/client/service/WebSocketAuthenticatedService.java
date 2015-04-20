@@ -17,10 +17,7 @@ import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.WebSocketMessage;
 import org.votingsystem.client.util.WebSocketSession;
-import org.votingsystem.dto.DeviceVSDto;
-import org.votingsystem.dto.OperationVS;
-import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.SocketSessionDto;
+import org.votingsystem.dto.*;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
@@ -292,7 +289,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         }
 
         @Override protected ResponseVS call() throws Exception {
-            SocketSessionDto dto = SocketSessionDto.INIT_SESSION_REQUEST(
+            SocketMessageDto dto = SocketMessageDto.INIT_SESSION_REQUEST(
                     SessionService.getInstance().getDeviceVS().getDeviceId());
             ResponseVS responseVS = null;
             try {

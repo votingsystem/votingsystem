@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.SessionVS;
 import org.votingsystem.util.TypeVS;
-import org.votingsystem.web.currency.websocket.SessionVS;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 
 import javax.websocket.Session;
@@ -35,7 +35,7 @@ public class SocketServiceRequest {
     private SMIMEMessage smimeMessage;
     private String remoteAddress;
 
-    public SocketServiceRequest(Session session, String msg, boolean last) throws IOException, ExceptionVS {
+    public SocketServiceRequest(Session session, String msg) throws IOException, ExceptionVS {
         /*this.remoteAddress = ((String)((AbstractServletOutputStream)((WsRemoteEndpointImplServer)((WsRemoteEndpointAsync)
                 ((WsSession)session).remoteEndpointAsync).base).sos).socketWrapper.getRemoteAddr());*/
         this.setSession(session);
@@ -55,15 +55,6 @@ public class SocketServiceRequest {
                 "remoteIp:");
     }
 
-    public Map getResponse(Integer statusCode, String message){
-        Map result = new HashMap<>();
-        result.put("statusCode", statusCode);
-        result.put("message", message);
-        result.put("sessionId", getSession().getId());
-        result.put("operation", TypeVS.MESSAGEVS_FROM_VS.toString());
-        result.put("UUID", dataJSON.get("UUID").asText());
-        return result;
-    }
 
     public static Map getResponse(Integer statusCode, String message, Session session, String requestMsg){
         String requestUUID = null;
@@ -79,16 +70,6 @@ public class SocketServiceRequest {
         return result;
     }
 
-    public Map getResponse(Integer statusCode, String message, Long deviceId){
-        Map result = new HashMap<>();
-        result.put("statusCode", statusCode);
-        result.put("message", message);
-        result.put("deviceId", deviceId);
-        result.put("operation", TypeVS.MESSAGEVS_FROM_VS.toString());
-        result.put("sessionId", dataJSON.get("sessionId").asLong());
-        result.put("UUID", dataJSON.get("UUID").asText());
-        return result;
-    }
 
     public SMIMEMessage getSMIME() throws Exception {
         if(getSmimeMessage() == null) setSmimeMessage(new SMIMEMessage(new ByteArrayInputStream(

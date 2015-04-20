@@ -1,7 +1,5 @@
 package org.votingsystem.dto.currency;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.math.BigDecimal;
 
 /**

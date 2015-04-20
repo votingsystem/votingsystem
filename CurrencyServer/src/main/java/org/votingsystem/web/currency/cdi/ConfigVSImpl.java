@@ -9,6 +9,7 @@ import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.ejb.AuditBean;
+import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
@@ -137,6 +138,7 @@ public class ConfigVSImpl implements ConfigVS {
             }
             executorService.submit(() -> {
                 try {
+                    LoggerVS.init(staticResURL + "/logs");
                     timeStampBean.init();
                     signatureBean.init();
                 } catch (Exception ex) {

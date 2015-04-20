@@ -2,6 +2,7 @@ package org.votingsystem.dto.currency;
 
 
 import org.votingsystem.model.currency.TransactionVS;
+
 import java.math.BigDecimal;
 
 public class IncomesDto {

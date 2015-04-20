@@ -13,7 +13,6 @@ import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.MultipartRequestVS;
 
 import javax.inject.Inject;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;

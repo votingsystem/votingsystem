@@ -12,8 +12,8 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.currency.Payment;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.currency.Payment;
 
 import java.io.IOException;
 import java.math.BigDecimal;

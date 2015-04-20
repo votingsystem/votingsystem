@@ -18,11 +18,11 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.currency.TransactionVSUtils;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.currency.util.ReportFiles;
-import org.votingsystem.util.currency.TransactionVSUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
@@ -136,7 +136,6 @@ public class AuditBean {
         String dateToPathPart = fileDateFormatter.format(timePeriod.getDateTo());
         String reportsBasePath = config.getServerDir().getAbsolutePath() + "/backup/weekReports";
         String weekReportsLogPath = reportsBasePath + "/" + dateFromPathPart + "_" + dateToPathPart + "/initWeekPeriod.log";
-        Logger weekPeriodLogger = LoggerVS.getLogger(weekReportsLogPath, "org.votingsysem.currency.initWeekPeriod");
         int offset = 0;
         int pageSize = 100;
         List<UserVS> userVSList;
@@ -148,7 +147,7 @@ public class AuditBean {
                 try {
                     if(!initUserVSWeekPeriod(userVS, timePeriod, transactionMsgSubject)) continue;
                 } catch(Exception ex) {
-                    weekPeriodLogger.log(Level.SEVERE, "userVS: " + userVS.getId() +  ex.getMessage(), ex);
+                    LoggerVS.weekLog(Level.SEVERE, "userVS: " + userVS.getId() +  ex.getMessage(), ex);
                 }
             }
             if((offset % 2000) == 0) {

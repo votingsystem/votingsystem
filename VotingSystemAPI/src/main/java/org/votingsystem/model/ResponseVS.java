@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.EntityVS;
+import org.votingsystem.util.StatusVS;
+import org.votingsystem.util.TypeVS;
 
 import javax.persistence.*;
 import java.io.File;

@@ -15,10 +15,11 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.currency.BalanceUtils;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.cdi.MessagesBean;
 import org.votingsystem.web.currency.cdi.ConfigVSImpl;
-import org.votingsystem.util.currency.BalanceUtils;
+import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.annotation.PostConstruct;
@@ -84,6 +85,10 @@ public class TransactionVSBean {
             throw new ValidationExceptionVS("WILDTAG transactions cannot be time limited");
         request.setTag(config.getTag(transactionTag));
         if(request.getTag() == null) throw new ValidationExceptionVS("unknown tag:" + transactionTag);
+
+
+        LoggerVS.logTransactionVS(request);
+
         switch(request.getOperation()) {
             case FROM_BANKVS:
                 return transactionVSBankVSBean.processTransactionVS(request);
