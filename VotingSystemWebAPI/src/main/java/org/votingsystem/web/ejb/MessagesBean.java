@@ -22,8 +22,8 @@ public class MessagesBean {
 
     private ResourceBundle bundle;
     private String bundleBaseName;
-    @Inject
-    ConfigVS config;
+    private Locale locale;
+    @Inject ConfigVS config;
 
     public MessagesBean() { }
 
@@ -44,6 +44,7 @@ public class MessagesBean {
     public void setLocale(Locale locale) {
         try {
             this.bundle = ResourceBundle.getBundle(bundleBaseName, locale);
+            this.locale = locale;
         } catch (Exception ex) {
             log.log(Level.SEVERE, "resource not found for locale: " + locale);
             this.bundle = ResourceBundle.getBundle(bundleBaseName, new Locale("es"));
@@ -61,4 +62,7 @@ public class MessagesBean {
         }
     }
 
+    public Locale getLocale() {
+        return locale;
+    }
 }

@@ -283,7 +283,7 @@ public class ConfigVSImpl implements ConfigVS {
                 }
                 try {Thread.sleep(10000);}
                 catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
-                log.log(Level.SEVERE, "ERROR fetching TimeStampServer data - serverURL: " + serverURL + " - retry");
+                log.log(Level.SEVERE, "ERROR fetching ControlCenterVS - serverURL: " + serverURL + " - retry");
             }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

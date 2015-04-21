@@ -1,7 +1,6 @@
 package org.votingsystem.test.voting;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.voting.CertValidationDto;
 import org.votingsystem.model.ActorVS;
@@ -16,9 +15,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 public class ValidateCert {

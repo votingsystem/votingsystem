@@ -13,8 +13,8 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.currency.BalanceUtils;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.ejb.Stateless;

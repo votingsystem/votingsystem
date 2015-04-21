@@ -10,7 +10,10 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import static javax.persistence.GenerationType.IDENTITY;

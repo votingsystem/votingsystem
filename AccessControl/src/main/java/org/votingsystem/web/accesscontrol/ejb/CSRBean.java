@@ -7,7 +7,6 @@ import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.UserVSCertExtensionDto;
-import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.CertValidationDto;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
