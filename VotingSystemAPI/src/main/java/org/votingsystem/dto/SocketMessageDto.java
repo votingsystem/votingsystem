@@ -3,6 +3,7 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -23,6 +24,14 @@ import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SocketMessageDto {
+
+    public List<CurrencyDto> getCurrencyDtoList() {
+        return currencyDtoList;
+    }
+
+    public void setCurrencyDtoList(List<CurrencyDto> currencyDtoList) {
+        this.currencyDtoList = currencyDtoList;
+    }
 
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
     public enum ConnectionStatus {OPEN, CLOSED}
@@ -50,7 +59,7 @@ public class SocketMessageDto {
     private String deviceFromName;
     private String deviceToName;
     private String URL;
-    private List<Map> currencyList;
+    private List<CurrencyDto> currencyDtoList;
     private Date date;
     @JsonIgnore private UserVS userVS;
     @JsonIgnore private Set<Currency> currencySet;
@@ -285,16 +294,9 @@ public class SocketMessageDto {
         this.userVS = userVS;
     }
 
-    public List<Map> getCurrencyList() {
-        return currencyList;
-    }
-
-    public void setCurrencyList(List<Map> currencyList) {
-        this.currencyList = currencyList;
-    }
 
     public Set<Currency> getCurrencySet() throws Exception {
-        if(currencySet == null && currencyList != null) currencySet = Wallet.getCurrencySet(currencyList);
+        if(currencySet == null && currencyDtoList != null) currencySet = Wallet.getCurrencySet(currencyDtoList);
         return currencySet;
     }
 

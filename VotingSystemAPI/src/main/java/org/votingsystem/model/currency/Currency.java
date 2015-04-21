@@ -209,7 +209,7 @@ public class Currency extends EntityVS implements Serializable  {
         certSubject.addDateInfo(x509AnonymousCert);
     }
 
-    public static Currency load(CertificationRequestVS certificationRequest) throws Exception {
+    public static Currency fromCertificationRequestVS(CertificationRequestVS certificationRequest) throws Exception {
         Currency currency = new Currency();
         currency.setCertificationRequest(certificationRequest);
         currency.initSigner(certificationRequest.getSignedCsr());
