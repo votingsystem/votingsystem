@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.EntityVS;
-import org.votingsystem.util.StatusVS;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.*;
 
 import javax.persistence.*;
 import java.io.File;
@@ -204,7 +201,7 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     }
 
     public <T> T getMessage(Class<T> type) throws Exception {
-        return new ObjectMapper().readValue(getMessage(), type);
+        return JSON.getMapper().readValue(getMessage(), type);
     }
     
     public String toString () {

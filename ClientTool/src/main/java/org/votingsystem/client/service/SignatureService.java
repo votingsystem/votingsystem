@@ -23,6 +23,7 @@ import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.AnonymousDelegationDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.VoteVSDto;
@@ -327,12 +328,11 @@ public class SignatureService extends Service<ResponseVS> {
 
         private ResponseVS sendCurrencyRequest(OperationVS operationVS) throws Exception {
             log.info("sendCurrencyRequest");
-            BigDecimal totalAmount = new BigDecimal((String)operationVS.getDocumentToSignMap().get("totalAmount"));
-            String currencyCode = (String) operationVS.getDocumentToSignMap().get("currencyCode");
-            TagVS tag = new TagVS((String) operationVS.getDocumentToSignMap().get("tag"));
-            Boolean isTimeLimited = (Boolean) operationVS.getDocumentToSignMap().get("isTimeLimited");
-            CurrencyRequestBatch currencyBatch = CurrencyRequestBatch.createRequest(totalAmount, totalAmount,
-                    currencyCode, tag, isTimeLimited, operationVS.getTargetServer().getServerURL());
+            TransactionVSDto transactionVSDto = operationVS.getDocumentToSign(TransactionVSDto.class);
+            TagVS tag = new TagVS(transactionVSDto.getTags().iterator().next());
+            CurrencyRequestBatch currencyBatch = CurrencyRequestBatch.createRequest(transactionVSDto.getAmount(),
+                    transactionVSDto.getAmount(), transactionVSDto.getCurrencyCode(), tag,
+                    transactionVSDto.isTimeLimited(), operationVS.getTargetServer().getServerURL());
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             byte[] fileContent = JSON.getMapper().writeValueAsString(currencyBatch.getCurrencyCSRList()).getBytes();
             mapToSend.put(ContextVS.CSR_FILE_NAME, fileContent);

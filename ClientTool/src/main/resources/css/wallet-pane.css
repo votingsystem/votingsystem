@@ -1,5 +1,6 @@
 .main-pane {
     -fx-pref-width: 600px;
+    -fx-min-height: 300px;
     -fx-background-color: #fff;
     -fx-padding: 10;
 }

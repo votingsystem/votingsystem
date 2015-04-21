@@ -38,7 +38,7 @@ public class BrowserVSMenuButton extends MenuButton {
     private MenuItem currencyAdminMenuItem;
 
     class EventBusConnectionListener {
-        @Subscribe public void responseVSChange(ResponseVS responseVS) {
+        @Subscribe public void onMessage(ResponseVS responseVS) {
             log.info("EventBusConnectionListener - response type: " + responseVS.getType());
             AtomicBoolean isConnected = new AtomicBoolean(false);
             if(TypeVS.INIT_VALIDATED_SESSION == responseVS.getType()) {

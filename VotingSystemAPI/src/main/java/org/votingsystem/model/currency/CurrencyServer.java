@@ -58,7 +58,7 @@ public class CurrencyServer extends ActorVS implements Serializable {
     }
 
     public String getUserDashBoardURL() {
-        return getServerURL() + "/rest/app/userVS?menu=user";
+        return getServerURL() + "/rest/app/userVSDashboard?menu=user";
     }
 
     public String getAdminDashBoardURL() {

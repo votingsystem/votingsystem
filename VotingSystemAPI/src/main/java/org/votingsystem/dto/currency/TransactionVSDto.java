@@ -45,7 +45,7 @@ public class TransactionVSDto {
     private String messageSMIMEParentURL;
     private String UUID;
     private BigDecimal amount;
-    private Boolean isTimeLimited = Boolean.FALSE;
+    private Boolean timeLimited = Boolean.FALSE;
     private Integer numReceptors;
     private TransactionVS.Type type;
     private Set<String> tags;
@@ -120,7 +120,7 @@ public class TransactionVSDto {
         dto.setToUserIBAN(Arrays.asList(toUserIBAN));
         dto.setTags(new HashSet<>(Arrays.asList(tag)));
         dto.setCurrencyCode(currencyCode);
-        dto.setIsTimeLimited(isTimeLimited);
+        dto.setTimeLimited(isTimeLimited);
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
     }
@@ -131,7 +131,7 @@ public class TransactionVSDto {
         if(amount == null) throw new ValidationExceptionVS("missing param 'amount'");
         if(getCurrencyCode() == null) throw new ValidationExceptionVS("missing param 'currencyCode'");
         if(subject == null) throw new ValidationExceptionVS("missing param 'subject'");
-        if(isTimeLimited) validTo = DateUtils.getCurrentWeekPeriod().getDateTo();
+        if(timeLimited) validTo = DateUtils.getCurrentWeekPeriod().getDateTo();
         if (tags.size() != 1) { //for now transactions can only have one tag associated
             throw new ValidationExceptionVS("invalid number of tags:" + tags.size());
         }
@@ -152,7 +152,7 @@ public class TransactionVSDto {
             transactionVS.setFromUserVS(fromUserVS.getUserVS());
         }
         transactionVS.setTag(getTagVS());
-        transactionVS.setIsTimeLimited(isTimeLimited);
+        transactionVS.setIsTimeLimited(timeLimited);
         transactionVS.setSubject(subject);
         transactionVS.setCurrencyCode(currencyCode);
         transactionVS.setDateCreated(dateCreated);
@@ -333,14 +333,6 @@ public class TransactionVSDto {
         this.fromUserIBAN = fromUserIBAN;
     }
 
-    public Boolean isTimeLimited() {
-        return isTimeLimited;
-    }
-
-    public void setIsTimeLimited(Boolean isTimeLimited) {
-        this.isTimeLimited = isTimeLimited;
-    }
-
     public Integer getNumReceptors() {
         return numReceptors;
     }
@@ -515,5 +507,13 @@ public class TransactionVSDto {
 
     public void setDetails(TransactionVSDetailsDto details) {
         this.details = details;
+    }
+
+    public Boolean isTimeLimited() {
+        return timeLimited;
+    }
+
+    public void setTimeLimited(Boolean timeLimited) {
+        this.timeLimited = timeLimited;
     }
 }

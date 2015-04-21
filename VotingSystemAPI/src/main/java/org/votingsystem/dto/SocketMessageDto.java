@@ -86,18 +86,14 @@ public class SocketMessageDto {
         return this;
     }
 
-    public static SocketMessageDto INIT_SESSION_REQUEST(String deviceFromId) {
+    public static SocketMessageDto INIT_SESSION_REQUEST(String deviceFromId) throws NoSuchAlgorithmException {
+        WebSocketSession socketSession = checkWebSocketSession(null, null, TypeVS.INIT_VALIDATED_SESSION);
         SocketMessageDto messageDto = new SocketMessageDto();
-        messageDto.setUUID(java.util.UUID.randomUUID().toString());
-        messageDto.setOperation(TypeVS.INIT_VALIDATED_SESSION);
+        messageDto.setUUID(socketSession.getUUID());
+        messageDto.setLocale(ContextVS.getInstance().getLocale().getLanguage());
+        messageDto.setOperation(socketSession.getTypeVS());
         messageDto.setDeviceFromId(deviceFromId);
         return messageDto;
-    }
-
-    public SocketMessageDto getInitConnectionMsg(SMIMEMessage smimeMessage) throws Exception {
-        setLocale(ContextVS.getInstance().getLocale().getLanguage());
-        setSmimeMessage(Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
-        return this;
     }
 
     public SocketMessageDto clone() {
@@ -225,8 +221,10 @@ public class SocketMessageDto {
         return smime;
     }
 
-    public void setSMIME(SMIMEMessage smime) {
-        this.smime = smime;
+    public SocketMessageDto setSMIME(SMIMEMessage smimeMessage) throws Exception {
+        this.smime = smimeMessage;
+        setSmimeMessage(Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
+        return this;
     }
 
     public State getState() {
@@ -451,7 +449,8 @@ public class SocketMessageDto {
 
     private static <T> WebSocketSession checkWebSocketSession (DeviceVS deviceVS, T data, TypeVS typeVS)
             throws NoSuchAlgorithmException {
-        WebSocketSession webSocketSession = ContextVS.getInstance().getWSSession(deviceVS.getId());
+        WebSocketSession webSocketSession = null;
+        if(deviceVS != null) webSocketSession = ContextVS.getInstance().getWSSession(deviceVS.getId());
         if(webSocketSession == null) {
             String randomUUID = java.util.UUID.randomUUID().toString();
             AESParams aesParams = new AESParams();

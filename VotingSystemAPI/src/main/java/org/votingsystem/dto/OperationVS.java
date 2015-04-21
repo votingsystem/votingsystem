@@ -3,6 +3,7 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
@@ -154,6 +155,11 @@ public class OperationVS {
             documentToSignMap.put("UUID", java.util.UUID.randomUUID().toString());
         }
         return documentToSignMap;
+    }
+
+    public <T> T getDocumentToSign(Class<T> type) throws Exception {
+        String documentToSign = JSON.getMapper().writeValueAsString(documentToSignMap);
+        return JSON.getMapper().readValue(documentToSign, type);
     }
 
     public void setDocumentToSignMap(Map documentToSignMap) {

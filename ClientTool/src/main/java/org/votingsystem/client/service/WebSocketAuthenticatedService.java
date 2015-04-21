@@ -164,8 +164,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                     connect(null);
                 }
             });
-        }
-        if(!isConnectionEnabled) {
+        } else  {
             if(session != null && session.isOpen()) {
                 try {session.close();}
                 catch(Exception ex) {log.log(Level.SEVERE, ex.getMessage(), ex);}
@@ -302,9 +301,10 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());
                 userVS = smimeMessage.getSigner();
                 smimeMessage = timeStamper.call();
-                connectionMessage = JSON.getMapper().writeValueAsString(dto.getInitConnectionMsg(smimeMessage));
+                connectionMessage = JSON.getMapper().writeValueAsString(dto.setSMIME(smimeMessage));
                 PlatformImpl.runLater(() -> WebSocketAuthenticatedService.this.restart());
                 responseVS = ResponseVS.OK().setSMIME(smimeMessage);
+
             } catch(InterruptedException ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);

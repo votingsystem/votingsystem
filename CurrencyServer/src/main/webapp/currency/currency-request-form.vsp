@@ -148,9 +148,9 @@
                 var webAppMessage = new WebAppMessage(Operation.CURRENCY_REQUEST)
                 webAppMessage.serviceURL = "${restURL}/currency/processRequest"
                 webAppMessage.signedMessageSubject = "${msg.currencyRequestLbl}"
-                webAppMessage.signedContent = {operation:Operation.CURRENCY_REQUEST, totalAmount:new Number(this.amountValue),
+                webAppMessage.signedContent = {operation:Operation.CURRENCY_REQUEST, amount:new Number(this.amountValue),
                     timeLimited:this.$.timeLimitedRButton.checked, currencyCode:this.$.currencySelector.getSelected(),
-                    tag:tagList[0]}
+                    tags:tagList}
                 webAppMessage.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     var caption

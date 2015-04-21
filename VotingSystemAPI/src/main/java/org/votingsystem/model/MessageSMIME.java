@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.SMIMEDto;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.EntityVS;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 
 import javax.persistence.*;
@@ -236,11 +237,11 @@ public class MessageSMIME extends EntityVS implements Serializable {
     }
 
     public Map<String, Object> getSignedContentMap() throws Exception {
-        return new ObjectMapper().readValue(signedContent, new TypeReference<HashMap<String, Object>>() {});
+        return JSON.getMapper().readValue(signedContent, new TypeReference<HashMap<String, Object>>() {});
     }
 
     public <T> T getSignedContent(Class<T> type) throws Exception {
-        return new ObjectMapper().readValue(signedContent, type);
+        return JSON.getMapper().readValue(signedContent, type);
     }
 
     public MessageSMIME setSignedContent(String signedContent) {

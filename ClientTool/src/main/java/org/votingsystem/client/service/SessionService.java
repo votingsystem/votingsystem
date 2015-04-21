@@ -164,6 +164,7 @@ public class SessionService {
                 flush();
                 ContextVS.getInstance().setDeviceId(socketMsg.getDeviceId());
                 Browser.getInstance().runJSCommand(CoreSignal.getWebSocketCoreSignalJSCommand(null, SocketMessageDto.ConnectionStatus.OPEN));
+                EventBusService.getInstance().post(socketMsg);
             } else {
                 showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
                 log.log(Level.SEVERE,"ERROR - initAuthenticatedSession - statusCode: " + socketMsg.getStatusCode());
