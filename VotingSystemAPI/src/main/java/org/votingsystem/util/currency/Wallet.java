@@ -1,28 +1,23 @@
 package org.votingsystem.util.currency;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.EncryptedBundleDto;
 import org.votingsystem.dto.currency.CurrencyDto;
+import org.votingsystem.dto.currency.WalletDto;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CMSUtils;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.EncryptedBundle;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static java.util.stream.Collectors.toSet;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -44,106 +39,48 @@ public class Wallet {
         }
     }
 
-    public static List<CurrencyDto> getCurrencySerialized(Collection<Currency> currencyCollection)
-            throws UnsupportedEncodingException {
-        List<CurrencyDto> result = new ArrayList<>();
-        for(Currency currency : currencyCollection) {
-            result.add(new CurrencyDto(currency));
-        }
-        return result;
-    }
-
-    public static List<Map> getCertificationRequestSerialized(Collection<Currency> currencyCollection)
-            throws UnsupportedEncodingException {
-        List<Map> result = new ArrayList<Map>();
-        for(Currency currency : currencyCollection) {
-            Map currencyDataMap = currency.getCertSubject().getDataMap();
-            byte[] serializedCertificationRequest =  ObjectUtils.serializeObject(currency.getCertificationRequest());
-            currencyDataMap.put("certificationRequest", new String(serializedCertificationRequest, "UTF-8"));
-            result.add(currencyDataMap);
-        }
-        return result;
-    }
-
-    public static Set<Currency> getCurrencySetFromCertificationRequest(List list) throws Exception {
-        Set<Currency> currencySet = new HashSet<>();
-        for(int i = 0; i < list.size(); i++) {
-            byte[] serializedCertificationRequest = ((String)((Map)list.get(i)).get("certificationRequest")).getBytes();
-            CertificationRequestVS certificationRequest = (CertificationRequestVS) ObjectUtils.deSerializeObject(
-                    serializedCertificationRequest);
-            currencySet.add(Currency.fromCertificationRequestVS(certificationRequest));
-        }
-        return currencySet;
-    }
-
-    public static List<Map> getPlainWallet() throws Exception {
+    public static List<CurrencyDto> getPlainWalletDto() throws Exception {
         File walletFile = new File(ContextVS.APPDIR + File.separator + ContextVS.PLAIN_WALLET_FILE_NAME);
         if(!walletFile.exists()) return new ArrayList<>();
-        return new ObjectMapper().readValue(new String(FileUtils.getBytesFromFile(walletFile), "UTF-8"),
-                new TypeReference<List<Map>>() {
-                });
+        return JSON.getMapper().readValue(walletFile, new TypeReference<List<CurrencyDto>>() {
+        });
     }
 
-    public static Set<Currency> getCurrencySetFromPlainWallet() throws Exception {
-        return getCurrencySetFromCertificationRequest(getPlainWallet());
+    public static Set<Currency> getPlainWallet() throws Exception {
+        return CurrencyDto.getCurrencySet(getPlainWalletDto());
     }
 
-    public static Set<Currency> getCurrencySet(Collection<CurrencyDto> currencyDtoCollection) throws Exception {
-        Set<Currency> currencySet = new HashSet<>();
-        for(CurrencyDto currencyDto : currencyDtoCollection) {
-            if(currencyDto.getObject() != null) {
-                currencySet.add((Currency) ObjectUtils.deSerializeObject(currencyDto.getObject().getBytes()));
-            } else if(currencyDto.getCertificationRequest() != null) {
-                CertificationRequestVS certificationRequest = (CertificationRequestVS) ObjectUtils.deSerializeObject(
-                        currencyDto.getCertificationRequest().getBytes());
-                currencySet.add(Currency.fromCertificationRequestVS(certificationRequest));
-            } else throw new ValidationExceptionVS("currency not serialized inside wallet");
-        }
-        return currencySet;
-    }
-
-    public static void savePlainWallet(List walletList) throws Exception {
+    public static void savePlainWalletDto(Collection<CurrencyDto> walletList) throws Exception {
         File walletFile = new File(ContextVS.APPDIR + File.separator + ContextVS.PLAIN_WALLET_FILE_NAME);
         walletFile.createNewFile();
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(new ObjectMapper().writeValueAsString(walletList)
-                .getBytes()), walletFile);
+        JSON.getMapper().writeValue(walletFile, walletList);
     }
 
-    public static void saveToPlainWallet(List<Map> serializedCurrencyList) throws Exception {
-        List storedWalletList = getPlainWallet();
-        storedWalletList.addAll(serializedCurrencyList);
-        savePlainWallet(storedWalletList);
+    public static void saveToPlainWallet(Collection<Currency> currencyCollection) throws Exception {
+        List<CurrencyDto> plainWallet = getPlainWalletDto();
+        plainWallet.addAll(CurrencyDto.serializeCollection(currencyCollection));
+        savePlainWalletDto(plainWallet);
     }
 
     public static void saveToWallet(Collection<Currency> currencyCollection, String pin) throws Exception {
-        List<CurrencyDto> serializedCurrencyList = getCurrencySerialized(currencyCollection);
-        saveToWallet(serializedCurrencyList, pin);
+        Set<CurrencyDto> serializedCurrencyList = CurrencyDto.serializeCollection(currencyCollection);
+        saveToWalletDto(serializedCurrencyList, pin);
     }
 
-    public static void saveToWallet(List<CurrencyDto> serializedCurrencyList, String pin) throws Exception {
+    public static void saveToWalletDto(Collection<CurrencyDto> currencyDtoCollection, String pin) throws Exception {
         Set<Currency> storedWallet = getWallet(pin);
-        List<CurrencyDto> storedWalletList = getCurrencySerialized(storedWallet);
-        storedWalletList.addAll(serializedCurrencyList);
+        Set<CurrencyDto> storedWalletDto = CurrencyDto.serializeCollection(storedWallet);
+        storedWalletDto.addAll(currencyDtoCollection);
         Set<String> hashSet = new HashSet<>();
-        List<CurrencyDto> currencyToSaveArray = new ArrayList<>();
-        for(CurrencyDto currencyDto:  storedWalletList) {
+        //check if duplicated
+        List<CurrencyDto> walletDtoToSave = new ArrayList<>();
+        for(CurrencyDto currencyDto:  storedWalletDto) {
             if(hashSet.add(currencyDto.getHashCertVS())) {
-                currencyToSaveArray.add(currencyDto);
+                walletDtoToSave.add(currencyDto);
             } else log.log(Level.SEVERE, "repeated currency!!!: " + currencyDto.getHashCertVS());
         }
-        log.info("saving '" + currencyToSaveArray.size() + "' currency items");
-        saveWallet(currencyToSaveArray, pin);
-    }
-
-    public static Set<Currency> saveWallet(Set<Currency> wallet, String pin) throws Exception {
-        Set<String> hashSet = new HashSet<>();
-        wallet = wallet.stream().filter(currency -> {
-            if (!hashSet.add(currency.getHashCertVS())) {
-                log.log(Level.SEVERE, "removing repeated currency!!!: " + currency.getHashCertVS());
-                return false;
-            } else return true;
-        }).collect(toSet());
-        return saveWallet(getCurrencySerialized(wallet), pin);
+        log.info("saving '" + walletDtoToSave.size() + "' currency items");
+        saveWallet(walletDtoToSave, pin);
     }
 
     public static Set<Currency> saveWallet(Collection<CurrencyDto> currencyDtoCollection, String pin) throws Exception {
@@ -154,7 +91,7 @@ public class Wallet {
             throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
         EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, JSON.getMapper().writeValueAsBytes(currencyDtoCollection));
         JSON.getMapper().writeValue(walletFile.file, new EncryptedBundleDto(bundle));
-        wallet = getCurrencySet(currencyDtoCollection);
+        wallet = CurrencyDto.getCurrencySet(currencyDtoCollection);
         return wallet;
     }
 
@@ -165,7 +102,7 @@ public class Wallet {
         walletFile.getParentFile().mkdirs();
         EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, JSON.getMapper().writeValueAsBytes(walletDto));
         JSON.getMapper().writeValue(walletFile, new EncryptedBundleDto(bundle));
-        wallet = getCurrencySet(walletDto);
+        wallet = CurrencyDto.getCurrencySet(walletDto);
     }
 
     public static Set<Currency> getWallet() {
@@ -184,20 +121,20 @@ public class Wallet {
         EncryptedBundleDto bundleDto = JSON.getMapper().readValue(walletFile, EncryptedBundleDto.class);
         EncryptedBundle bundle = bundleDto.getEncryptedBundle();
         byte[] decryptedWalletBytes = Encryptor.pbeAES_Decrypt(pin, bundle);
-        wallet = getCurrencySet(new ObjectMapper().readValue(
-                new String(decryptedWalletBytes, "UTF-8"), new TypeReference<List>() {}));
-        Set<Currency> plainWallet = getCurrencySetFromPlainWallet();
+        List<CurrencyDto> walletDto = JSON.getMapper().readValue(decryptedWalletBytes, new TypeReference<List<CurrencyDto>>() {});
+        wallet = CurrencyDto.deSerializeCollection(walletDto);
+        Set<Currency> plainWallet = getPlainWallet();
         if(plainWallet.size() > 0) {
             wallet.addAll(plainWallet);
-            saveWallet(wallet, pin);
-            savePlainWallet(new ArrayList<>());
+            saveWallet(CurrencyDto.serializeCollection(wallet), pin);
+            savePlainWalletDto(new ArrayList<>());
         }
         return wallet;
     }
 
     public static void changePin(String newPin, String oldPin) throws Exception {
         Set<Currency> wallet = getWallet(oldPin);
-        List<CurrencyDto> walletDto = getCurrencySerialized(wallet);
+        Set<CurrencyDto> walletDto = CurrencyDto.serializeCollection(wallet);
         String oldPinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST));
         String newPinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(newPin, ContextVS.VOTING_DATA_DIGEST));
         String newWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + newPinHashHex + ContextVS.WALLET_FILE_EXTENSION;
@@ -226,12 +163,11 @@ public class Wallet {
         } else return new EncryptedWalletList();
     }
 
-    public static Map getWalletState() throws Exception {
-        Map result = new HashMap<>();
-        result.put("plainWallet", getPlainWallet());
+    public static WalletDto getWalletDto() throws Exception {
+        WalletDto walletDto = new WalletDto(getPlainWalletDto(), null, null);
         EncryptedWalletList encryptedWalletList = getEncryptedWalletList();
-        if(encryptedWalletList != null) result.put("encryptedWalletList", getEncryptedWalletList().toMap());
-        return result;
+        if(encryptedWalletList != null) walletDto.setWalletFilesHashSet(encryptedWalletList.walletList.keySet());
+        return walletDto;
     }
 
     private static WalletFile getWalletWrapper(String filePath) {
@@ -262,17 +198,6 @@ public class Wallet {
         }
         WalletFile getWallet(String hash) {
             return walletList.get(hash);
-        }
-        List<Map> toMap() {
-            List<Map> result = new ArrayList<>();
-            for(String hash : walletList.keySet()) {
-                WalletFile walletFile = walletList.get(hash);
-                Map walletMap = new HashMap<>();
-                //walletMap.put("dateCreated", DateUtils.getDateStr(walletWrapper.dateCreated));
-                walletMap.put("hash", walletFile.hash);
-                result.add(walletMap);
-            }
-            return result;
         }
 
         int size() {

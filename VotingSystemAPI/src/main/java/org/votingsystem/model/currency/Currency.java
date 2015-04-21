@@ -6,7 +6,6 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.votingsystem.dto.currency.CurrencyCSRDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.CertificateVS;
@@ -547,10 +546,6 @@ public class Currency extends EntityVS implements Serializable  {
         }
         return TransactionVSDto.CURRENCY_SEND(toUserName, subject, amount, currencyCode, toUserIBAN,
                 isTimeLimited, tag.getName());
-    }
-
-    public CurrencyCSRDto getCSRDto() throws Exception {
-        return new CurrencyCSRDto(new String(certificationRequest.getCsrPEM()), amount, currencyCode, tag.getName());
     }
 
     public static Map<String, BigDecimal> getCurrencyMap(Collection<Currency> currencyList) {

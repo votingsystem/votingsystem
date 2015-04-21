@@ -2,6 +2,7 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.Currency;
@@ -13,10 +14,7 @@ import org.votingsystem.util.currency.Wallet;
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;
 import java.net.InetAddress;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SocketMessageContentDto {
@@ -33,7 +31,7 @@ public class SocketMessageContentDto {
     private String toUser;
     private String smimeMessage;
     private Map<String, String> headers;
-    private List<Map> currencyList;
+    private Set<CurrencyDto> currencyList;
     private String URL;
 
     public SocketMessageContentDto() {}
@@ -72,7 +70,7 @@ public class SocketMessageContentDto {
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
         messageContentDto.setDeviceFromId(ContextVS.getInstance().getDeviceId());
         messageContentDto.setLocale(ContextVS.getInstance().getLocale().getLanguage());
-        messageContentDto.setCurrencyList(Wallet.getCertificationRequestSerialized(currencyList));
+        messageContentDto.setCurrencyList(CurrencyDto.serializeCollection(currencyList));
         return messageContentDto;
     }
 
@@ -177,11 +175,11 @@ public class SocketMessageContentDto {
         this.deviceFromId = deviceFromId;
     }
 
-    public List<Map> getCurrencyList() {
+    public Set<CurrencyDto> getCurrencyList() {
         return currencyList;
     }
 
-    public void setCurrencyList(List<Map> currencyList) {
+    public void setCurrencyList(Set<CurrencyDto> currencyList) {
         this.currencyList = currencyList;
     }
 

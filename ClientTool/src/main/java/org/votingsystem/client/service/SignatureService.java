@@ -21,6 +21,7 @@ import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.voting.AnonymousDelegationDto;
 import org.votingsystem.dto.voting.EventVSDto;
@@ -346,7 +347,7 @@ public class SignatureService extends Service<ResponseVS> {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 CurrencyIssuedDto dto = (CurrencyIssuedDto) responseVS.getMessage(CurrencyIssuedDto.class);
                 currencyBatch.loadIssuedCurrency(dto.getIssuedCurrency());
-                Wallet.saveToPlainWallet(Wallet.getCertificationRequestSerialized(currencyBatch.getCurrencyMap().values()));
+                Wallet.saveToPlainWallet(currencyBatch.getCurrencyMap().values());
                 Map responseMap = new HashMap<>();
                 responseMap.put("statusCode", responseVS.getStatusCode());
                 responseMap.put("message", dto.getMessage());
@@ -370,7 +371,7 @@ public class SignatureService extends Service<ResponseVS> {
                         return false;
                     } else return true;
                 }).collect(toSet());
-                Wallet.saveWallet(wallet, password);
+                Wallet.saveWallet(CurrencyDto.serializeCollection(wallet), password);
                 return new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.CURRENCY_DELETE).setStatus(new StatusVS() {});
             } catch(Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);

@@ -2,8 +2,8 @@ package org.votingsystem.model.currency;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.votingsystem.dto.currency.CurrencyCSRDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
+import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.model.BatchRequest;
 import org.votingsystem.model.MessageSMIME;
@@ -42,7 +42,7 @@ public class CurrencyRequestBatch extends BatchRequest implements Serializable  
 
     @Transient private CurrencyRequestDto requestDto;
     @Transient private Map<String, Currency> currencyMap;
-    @Transient private List<CurrencyCSRDto> currencyCSRList;
+    @Transient private List<CurrencyDto> currencyDtoList;
 
     public CurrencyRequestBatch() {}
 
@@ -58,23 +58,24 @@ public class CurrencyRequestBatch extends BatchRequest implements Serializable  
                 "Expected operation 'CURRENCY_REQUEST' found: " + requestDto.getOperation());
         if(!contextURL.equals(requestDto.getServerURL())) throw new ExceptionVS("Expected serverURL '" + contextURL +
                 "' found: " + requestDto.getServerURL());
-        List<CurrencyCSRDto> currencyCSRList = JSON.getMapper().readValue(currencyBatchRequest,
-                new TypeReference<List<CurrencyCSRDto>>() {});
+        List<CurrencyDto> currencyDtoList = JSON.getMapper().readValue(currencyBatchRequest,
+                new TypeReference<List<CurrencyDto>>() {});
         BigDecimal csrRequestAmount = BigDecimal.ZERO;
         Map<String, Currency> currencyMap = new HashMap<>();
-        for(CurrencyCSRDto currencyCSRDto : currencyCSRList) {
-            if(!currencyCSRDto.getTag().equals(requestDto.getTagVS().getName())) throw new ValidationExceptionVS(
-                    "requestDto tag: " + requestDto.getTagVS().getName() + " - CurrencyCSRDto tag: " + currencyCSRDto.getTag());
-            PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(currencyCSRDto.getCsr().getBytes());
+        for(CurrencyDto currencyDto : currencyDtoList) {
+            if(!currencyDto.getTag().equals(requestDto.getTagVS().getName())) throw new ValidationExceptionVS(
+                    "requestDto tag: " + requestDto.getTagVS().getName() + " - CurrencyCSRDto tag: " + currencyDto.getTag());
+            PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(
+                    currencyDto.getCertificationRequest().getBytes());
             Currency currency = new Currency(csr);
-            if(currencyCSRDto.getCurrencyValue().compareTo(currency.getAmount()) != 0) throw new ValidationExceptionVS(
-                    "amount error - CurrencyCSRDto amount: " + currencyCSRDto.getCurrencyValue() + " - csr amount: " +
+            if(currencyDto.getAmount().compareTo(currency.getAmount()) != 0) throw new ValidationExceptionVS(
+                    "amount error - CurrencyCSRDto amount: " + currencyDto.getAmount() + " - csr amount: " +
                     currency.getAmount());
-            if(!currencyCSRDto.getCurrencyCode().equals(currency.getCurrencyCode())) throw new ValidationExceptionVS(
-                    "currency error - CurrencyCSRDto currencyCode: " + currencyCSRDto.getCurrencyCode() +
+            if(!currencyDto.getCurrencyCode().equals(currency.getCurrencyCode())) throw new ValidationExceptionVS(
+                    "currency error - CurrencyCSRDto currencyCode: " + currencyDto.getCurrencyCode() +
                     " - csr currencyCode: " + currency.getCurrencyCode());
-            if(!currencyCSRDto.getTag().equals(currency.getTag().getName())) throw new ValidationExceptionVS(
-                    "tag error - CurrencyCSRDto tag: " + currencyCSRDto.getTag() + " - csr tag: " + currency.getTag().getName());
+            if(!currencyDto.getTag().equals(currency.getTag().getName())) throw new ValidationExceptionVS(
+                    "tag error - CurrencyCSRDto tag: " + currencyDto.getTag() + " - csr tag: " + currency.getTag().getName());
             if (!contextURL.equals(currency.getCurrencyServerURL()))  throw new ExceptionVS("serverURL error - " +
                     " serverURL: " + contextURL + " - csr serverURL: " + currency.getCurrencyServerURL());
             csrRequestAmount = csrRequestAmount.add(currency.getAmount());
@@ -83,7 +84,7 @@ public class CurrencyRequestBatch extends BatchRequest implements Serializable  
         if(requestDto.getTotalAmount().compareTo(csrRequestAmount) != 0) throw new ExceptionVS("total amount error - " +
             "CurrencyRequestDto amount: " + requestDto.getTotalAmount() + "' - total csr amount: " + csrRequestAmount);
         CurrencyRequestBatch currencyRequestBatch = new CurrencyRequestBatch(requestDto, messageSMIME);
-        currencyRequestBatch.setCurrencyCSRList(currencyCSRList);
+        currencyRequestBatch.setCurrencyDtoList(currencyDtoList);
         currencyRequestBatch.setCurrencyMap(currencyMap);
         return currencyRequestBatch;
     }
@@ -103,11 +104,11 @@ public class CurrencyRequestBatch extends BatchRequest implements Serializable  
             currencyMap.put(currency.getHashCertVS(), currency);
         }
         currencyRequestBatch.setCurrencyMap(currencyMap);
-        List<CurrencyCSRDto> currencyCSRList = new ArrayList<>();
+        List<CurrencyDto> currencyDtoList = new ArrayList<>();
         for(Currency currency : currencyMap.values()) {
-            currencyCSRList.add(currency.getCSRDto());
+            currencyDtoList.add(CurrencyDto.serialize(currency));
         }
-        currencyRequestBatch.setCurrencyCSRList(currencyCSRList);
+        currencyRequestBatch.setCurrencyDtoList(currencyDtoList);
         return currencyRequestBatch;
     }
 
@@ -158,8 +159,8 @@ public class CurrencyRequestBatch extends BatchRequest implements Serializable  
         this.messageSMIME = messageSMIME;
     }
 
-    public List<CurrencyCSRDto> getCurrencyCSRList () {
-        return currencyCSRList;
+    public List<CurrencyDto> getCurrencyCSRList () {
+        return currencyDtoList;
     }
 
     public TagVS getTagVS() {
@@ -200,8 +201,8 @@ public class CurrencyRequestBatch extends BatchRequest implements Serializable  
         this.requestDto = requestDto;
     }
 
-    public void setCurrencyCSRList(List<CurrencyCSRDto> currencyCSRList) {
-        this.currencyCSRList = currencyCSRList;
+    public void setCurrencyDtoList(List<CurrencyDto> currencyDtoList) {
+        this.currencyDtoList = currencyDtoList;
     }
 
     public TransactionVS getTransactionVS(String subject, Map<CurrencyAccount, BigDecimal> accountFromMovements) {

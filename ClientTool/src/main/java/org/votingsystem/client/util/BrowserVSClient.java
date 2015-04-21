@@ -158,7 +158,7 @@ public class BrowserVSClient {
                     result = JSON.getMapper().writeValueAsString(SessionService.getInstance().getRepresentationState());
                     break;
                 case WALLET_STATE:
-                    result = Wallet.getWalletState().toString();
+                    result = JSON.getMapper().writeValueAsString(Wallet.getWalletDto());
                     break;
                 default:
                     result = "Unknown operation: '" + operationVS.getType() + "'";

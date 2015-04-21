@@ -69,7 +69,7 @@ public class InboxService {
                 if(inboxMessage.isEncrypted()) encryptedMessageList.add(inboxMessage);
                 else messageList.add(inboxMessage);
             }
-            Set<Currency> currencySet = Wallet.getCurrencySetFromPlainWallet();
+            Set<Currency> currencySet = Wallet.getPlainWallet();
             if(currencySet.size() > 0) {
                 log.info("found currency in not secured wallet");
                 InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"),

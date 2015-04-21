@@ -296,7 +296,7 @@ public class SocketMessageDto {
 
 
     public Set<Currency> getCurrencySet() throws Exception {
-        if(currencySet == null && currencyDtoList != null) currencySet = Wallet.getCurrencySet(currencyDtoList);
+        if(currencySet == null && currencyDtoList != null) currencySet = CurrencyDto.deSerializeCollection(currencyDtoList);
         return currencySet;
     }
 
@@ -443,7 +443,7 @@ public class SocketMessageDto {
         SocketMessageContentDto messageContentDto = JSON.getMapper().readValue(
                 Encryptor.decryptAES(encryptedMessage, aesParams), SocketMessageContentDto.class);
         if(messageContentDto.getSmimeMessage() != null) smime = messageContentDto.getSMIME();
-        if(messageContentDto.getCurrencyList() != null) currencySet = Wallet.getCurrencySetFromCertificationRequest(
+        if(messageContentDto.getCurrencyList() != null) currencySet = CurrencyDto.deSerializeCollection(
                 messageContentDto.getCurrencyList());
         this.isEncrypted = false;
         ContextVS.getInstance().putWSSession(UUID, new WebSocketSession<>(
