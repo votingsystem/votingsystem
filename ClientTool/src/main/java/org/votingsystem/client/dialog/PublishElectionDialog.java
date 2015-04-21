@@ -98,6 +98,9 @@ public class PublishElectionDialog implements AddVoteOptionDialog.Listener {
             }
             mapToSign.put("fieldsEventVS", optionList);
             operationVS.setDocumentToSignMap(mapToSign);
+            operationVS.setSignedMessageSubject(ContextVS.getMessage("publishElectionLbl"));
+            operationVS.setServiceURL(ContextVS.getInstance().getAccessControl().getPublishElectionURL());
+            operationVS.setCallerCallback(null);
             Browser.getInstance().processOperationVS(operationVS, null);
             stage.hide();
         } catch(Exception ex) {

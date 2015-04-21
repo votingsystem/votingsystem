@@ -19,7 +19,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 public class UserRequestCsrVS extends EntityVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     public enum State {OK, PENDING, REJECTED, CANCELED}
     
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -32,7 +32,8 @@ public class UserRequestCsrVS extends EntityVS implements Serializable {
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
-    @OneToOne private MessageSMIME cancelMessage;
+    @OneToOne private MessageSMIME cancelationSMIME;
+    @OneToOne private MessageSMIME activationSMIME;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23, insertable=true) private Date lastUpdated;
 
@@ -89,8 +90,9 @@ public class UserRequestCsrVS extends EntityVS implements Serializable {
 		return certificateVS;
 	}
 
-	public void setCertificateVS(CertificateVS certificateVS) {
+	public UserRequestCsrVS setCertificateVS(CertificateVS certificateVS) {
 		this.certificateVS = certificateVS;
+        return this;
 	}
 
 	public State getState() {
@@ -101,21 +103,30 @@ public class UserRequestCsrVS extends EntityVS implements Serializable {
 		this.state = state;
         return this;
 	}
-	
+
+    public MessageSMIME getCancelationSMIME() {
+        return cancelationSMIME;
+    }
+
+    public void setCancelationSMIME(MessageSMIME cancelationSMIME) {
+        this.cancelationSMIME = cancelationSMIME;
+    }
+
+    public MessageSMIME getActivationSMIME() {
+        return activationSMIME;
+    }
+
+    public UserRequestCsrVS setActivationSMIME(MessageSMIME activationSMIME) {
+        this.activationSMIME = activationSMIME;
+        return this;
+    }
+
 	public DeviceVS getDeviceVS() {
 		return deviceVS;
 	}
 
 	public void setDeviceVS(DeviceVS deviceVS) {
 		this.deviceVS = deviceVS;
-	}
-
-	public MessageSMIME getCancelMessage() {
-		return cancelMessage;
-	}
-
-	public void setCancelMessage(MessageSMIME cancelMessage) {
-		this.cancelMessage = cancelMessage;
 	}
 
 	public UserVS getUserVS() {

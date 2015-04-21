@@ -29,6 +29,8 @@ public class UserVSDto {
     private Set<CertificateVSDto> certCollection = new HashSet<>();
     private String firstName;
     private String lastName;
+    private String phone;
+    private String email;
     private String metaInf;
     private String country;
     private String IBAN;
@@ -37,6 +39,14 @@ public class UserVSDto {
 
     public UserVSDto() {}
 
+    public UserVSDto(UserVS userVS) {
+        this.name = userVS.getName();
+        this.NIF = userVS.getNif();
+        this.firstName = userVS.getFirstName();
+        this.lastName = userVS.getLastName();
+        this.phone = userVS.getPhone();
+        this.email = userVS.getEmail();
+    }
 
     public static UserVSDto BASIC(UserVS userVS) {
         UserVSDto result = new UserVSDto();
@@ -249,5 +259,21 @@ public class UserVSDto {
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

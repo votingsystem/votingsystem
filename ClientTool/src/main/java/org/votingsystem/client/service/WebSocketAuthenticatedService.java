@@ -139,14 +139,14 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         }
     }
 
-    private void connect(Map connectionDataMap, String password) {
-        ProgressDialog.showDialog(new InitValidatedSessionTask((String) connectionDataMap.get("nif"),
-                password, targetServer), ContextVS.getMessage("connectLbl"), Browser.getInstance().getScene().getWindow());
+    private void connect(String password) {
+        ProgressDialog.showDialog(new InitValidatedSessionTask(password, targetServer),
+                ContextVS.getMessage("connectLbl"), Browser.getWindow());
     }
 
-    public void setConnectionEnabled(boolean isConnectionEnabled, Map connectionDataMap){
+    public void setConnectionEnabled(boolean isConnectionEnabled){
         if(SessionService.getInstance().getUserVS() == null) {
-            CertNotFoundDialog.show(Browser.getInstance().getScene().getWindow());
+            CertNotFoundDialog.show(Browser.getWindow());
             return;
         }
         if(isConnectionEnabled) {
@@ -159,9 +159,9 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                     password = passwordDialog.getPassword();
                     if(password == null) {
                         broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
-                    } else connect(connectionDataMap, password);
+                    } else connect(password);
                 } else if(CryptoTokenVS.MOBILE == SessionService.getCryptoTokenType()) {
-                    connect(connectionDataMap, null);
+                    connect(null);
                 }
             });
         }
@@ -280,11 +280,10 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
 
     public class InitValidatedSessionTask extends Task<ResponseVS> {
 
-        private String password, nif;
+        private String password;
         private ActorVS targetServer;
 
-        public InitValidatedSessionTask (String nif, String password, ActorVS targetServer) {
-            this.nif = nif;
+        public InitValidatedSessionTask (String password, ActorVS targetServer) {
             this.password = password;
             this.targetServer = targetServer;
         }

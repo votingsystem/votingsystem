@@ -309,14 +309,4 @@ public class ActorVS extends EntityVS implements Serializable {
         return getServerURL() + "/rest/deviceVS/nif/" + nif + "/connected";
     }
 
-    public Map getDataMap() {
-        log.info("getDataMap");
-        Map map = new HashMap();
-        map.put("id", id);
-        map.put("serverURL", serverURL);
-        map.put("name", name);
-        map.put("voteVSInfoURL", voteVSInfoURL);
-        return map;
-    }
-
 }

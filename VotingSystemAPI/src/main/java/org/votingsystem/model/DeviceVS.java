@@ -31,6 +31,8 @@ public class DeviceVS extends EntityVS implements Serializable {
 
     public enum Type {MOBILE, PC}
 
+    public enum State {CANCELED, OK, PENDING, RENEWED}
+
 	@Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
     @ManyToOne(fetch=FetchType.LAZY)
@@ -39,6 +41,8 @@ public class DeviceVS extends EntityVS implements Serializable {
     @Column(name="device" ) private String deviceId;
     @Column(name="email" ) private String email;
     @Column(name="phone" ) private String phone;
+    @Column(name="state" ) @Enumerated(EnumType.STRING)  private State state;
+    @Column(name="metaInf" ) private String metaInf;
     @OneToOne private CertificateVS certificateVS;
     @Column(name="reason", columnDefinition="TEXT") private String reason;
     @Column(name="deviceName") private String deviceName;
@@ -81,6 +85,14 @@ public class DeviceVS extends EntityVS implements Serializable {
 		return userVS;
 	}
 
+    public String getMetaInf() {
+        return metaInf;
+    }
+
+    public void setMetaInf(String metaInf) {
+        this.metaInf = metaInf;
+    }
+
 	public void setUserVS(UserVS userVS) {
 		this.userVS = userVS;
 	}
@@ -109,6 +121,15 @@ public class DeviceVS extends EntityVS implements Serializable {
 		this.email = email;
         return this;
 	}
+
+    public State getState() {
+        return state;
+    }
+
+    public DeviceVS setState(State state) {
+        this.state = state;
+        return this;
+    }
 
 	public String getPhone() {
 		return phone;
@@ -156,8 +177,9 @@ public class DeviceVS extends EntityVS implements Serializable {
         return certificateVS;
     }
 
-    public void setCertificateVS(CertificateVS certificateVS) {
+    public DeviceVS setCertificateVS(CertificateVS certificateVS) {
         this.certificateVS = certificateVS;
+        return this;
     }
 
     public Type getType() {

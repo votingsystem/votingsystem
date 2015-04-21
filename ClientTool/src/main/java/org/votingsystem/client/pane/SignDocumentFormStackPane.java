@@ -262,8 +262,14 @@ public class SignDocumentFormStackPane extends StackPane {
                     break;
                 case SIGN_SMIME:
                     try {
-                        Map<String, Object> textToSignMap = JSON.getMapper().readValue(
-                                textToSign.replaceAll("(\\r|\\n)", "\\\\n"), new TypeReference<HashMap<String, Object>>() {});
+                        Map<String, Object> textToSignMap = null;
+                        try {
+                            textToSignMap = JSON.getMapper().readValue(
+                                    textToSign.replaceAll("(\\r|\\n)", "\\\\n"), new TypeReference<HashMap<String, Object>>() {});
+                        } catch (Exception ex) {
+                            textToSignMap = new HashMap<>();
+                            textToSignMap.put("message", textToSign);
+                        }
                         textToSignMap.put("UUID", UUID.randomUUID().toString());
                         toUser = StringUtils.getNormalized(toUser);
                         String timeStampService = ActorVS.getTimeStampServiceURL(ContextVS.getMessage("defaultTimeStampServer"));

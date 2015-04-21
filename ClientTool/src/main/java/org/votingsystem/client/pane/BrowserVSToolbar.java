@@ -70,7 +70,7 @@ public class BrowserVSToolbar extends HBox {
         connectionButton.setVisible(false);
         connectionButton.setOnAction(event -> {
             Button optionButton = new Button(ContextVS.getMessage("disconnectLbl"));
-            optionButton.setOnAction(event1 -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false, null));
+            optionButton.setOnAction(event1 -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false));
             showMessage(ContextVS.getMessage("disconnectMsg"), optionButton);
         });
 

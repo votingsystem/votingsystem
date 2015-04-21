@@ -91,8 +91,7 @@ public class BrowserVSMenuButton extends MenuButton {
         connectMenuItem  = new MenuItem(ContextVS.getMessage("connectLbl"));
         connectMenuItem.setVisible(false);
         connectMenuItem.setGraphic(Utils.getIcon(FontAwesomeIconName.FLASH));
-        connectMenuItem.setOnAction(event -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(
-                true, SessionService.getInstance().getConnectDataMap()));
+        connectMenuItem.setOnAction(event -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true));
 
         MenuItem settingsMenuItem = new MenuItem(ContextVS.getMessage("settingsLbl"));
         settingsMenuItem.setGraphic(Utils.getIcon(FontAwesomeIconName.COG));

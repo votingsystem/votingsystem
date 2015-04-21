@@ -10,6 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.Window;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.BrowserVSTabPane;
@@ -236,4 +237,8 @@ public class Browser extends VBox implements BrowserVS {
         }
     }
 
+    public static Window getWindow() {
+
+        return getInstance().getScene().getWindow();
+    }
 }

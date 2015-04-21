@@ -1,5 +1,6 @@
 package org.votingsystem.web.ejb;
 
+import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.currency.SubscriptionVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.DeviceVS;
@@ -45,7 +46,6 @@ public class SubscriptionVSBean {
     public UserVS checkUser(UserVS userVS) throws ExceptionVS, IOException, CertificateException,
             NoSuchAlgorithmException, NoSuchProviderException {
         log.log(Level.FINE, "nif: " + userVS.getNif());
-        CertificateVS certificate = null;
         if(userVS.getNif() == null) throw new ExceptionVS("ERROR - missing Nif");
         X509Certificate x509Cert = userVS.getCertificate();
         if (x509Cert == null) throw new ExceptionVS("Missing certificate!!!");
@@ -104,29 +104,23 @@ public class SubscriptionVSBean {
     }
 
     @Transactional
-    public DeviceVS checkDevice(String givenname, String surname, String nif, String phone, String email, String deviceId,
-                           DeviceVS.Type deviceType) throws ExceptionVS {
+    public DeviceVS checkDeviceFromCSR(DeviceVSDto dto) throws ExceptionVS {
         log.info(format("checkDevice - givenname: {0} - surname: {1} - nif:{2} - phone: {3}" +
-                " - email: {4} - deviceId: {5} - deviceType: {6}", givenname, surname, nif, phone,
-                email, deviceId, deviceType));
-        if(nif == null) throw new ValidationExceptionVS("missing 'nif'");
-        if(deviceId == null) throw new ValidationExceptionVS("missing 'deviceId'");
-        String validatedNIF = org.votingsystem.util.NifUtils.validate(nif);
+                " - email: {4} - deviceId: {5} - deviceType: {6}", dto.getFirstName(), dto.getLastName(), dto.getNIF(),
+                dto.getPhone(), dto.getEmail(), dto.getDeviceId(), dto.getDeviceType()));
+        if(dto.getNIF() == null) throw new ValidationExceptionVS("missing 'nif'");
+        if(dto.getDeviceId() == null) throw new ValidationExceptionVS("missing 'deviceId'");
+        String validatedNIF = org.votingsystem.util.NifUtils.validate(dto.getNIF());
         Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif").setParameter("nif", validatedNIF);
         UserVS userVS = dao.getSingleResult(UserVS.class, query);
-        if (userVS == null) userVS = dao.persist(new UserVS(validatedNIF, UserVS.Type.USER, givenname,
-                givenname, surname, email, phone));
-        query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId")
-                .setParameter("deviceId", deviceId);
-        DeviceVS device = dao.getSingleResult(DeviceVS.class, query);
-        DeviceVS.Type type = device != null ? device.getType(): deviceType;
-        if (device == null || (device.getUserVS().getId() != userVS.getId())) device = dao.persist(
-                new DeviceVS(userVS, deviceId, email, phone, type));
-        else dao.merge(device.setEmail(email).setPhone(phone));
-        return device;
+        if (userVS == null) userVS = dao.persist(new UserVS(validatedNIF, UserVS.Type.USER, null,
+                dto.getFirstName(), dto.getLastName(), dto.getEmail(), dto.getPhone()));
+        DeviceVS deviceVS = new DeviceVS(userVS, dto.getDeviceId(), dto.getEmail(), dto.getPhone(),
+                dto.getDeviceType());
+        deviceVS.setState(DeviceVS.State.PENDING);
+        return dao.persist(deviceVS);
     }
 
-    //DeviceVS(UserVS userVS, String deviceId, String email, String phone, Type type)
     public SubscriptionVS deActivateUser(MessageSMIME messageSMIME) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
         log.log(Level.FINE, "signer: " + signer.getNif());

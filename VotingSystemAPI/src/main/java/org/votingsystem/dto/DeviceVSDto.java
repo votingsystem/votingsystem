@@ -23,15 +23,29 @@ public class DeviceVSDto {
     private String email;
     private String phone;
     private String certPEM;
+    private String firstName;
+    private String lastName;
+    private String NIF;
+    private DeviceVS.Type deviceType;
     private CryptoTokenVS type;
+
+    public DeviceVSDto() {}
+
+    public DeviceVSDto(UserVS userVS, UserVSCertExtensionDto certExtensionDto) {
+        this.NIF = userVS.getNif();
+        this.firstName = userVS.getFirstName();
+        this.lastName = userVS.getLastName();
+        this.phone = certExtensionDto.getMobilePhone();
+        this.email = certExtensionDto.getEmail();
+        this.deviceId = certExtensionDto.getDeviceId();
+        this.deviceType = certExtensionDto.getDeviceType();
+    }
 
     public DeviceVSDto loadUserVS(UserVS userVS) {
         setType(CryptoTokenVS.JKS_KEYSTORE);
         setDeviceName(userVS.getNif() + " - " + userVS.getName());
         return this;
     }
-
-    public DeviceVSDto() {}
 
     public DeviceVSDto(Long id, String name) {
         this.setId(id);
@@ -135,4 +149,35 @@ public class DeviceVSDto {
     }
 
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getNIF() {
+        return NIF;
+    }
+
+    public void setNIF(String NIF) {
+        this.NIF = NIF;
+    }
+
+    public DeviceVS.Type getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(DeviceVS.Type deviceType) {
+        this.deviceType = deviceType;
+    }
 }

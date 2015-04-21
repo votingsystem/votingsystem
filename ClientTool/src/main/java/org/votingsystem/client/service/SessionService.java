@@ -310,13 +310,6 @@ public class SessionService {
 
     }
 
-    public Map getConnectDataMap() {
-        if(getUserVS() == null) return null;
-        Map<String, String> result = new HashMap<>();
-        result.put("nif", getUserVS().getNif());
-        return result;
-    }
-
     public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
             String password, String subject, Header... headers) throws Exception {
         String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());

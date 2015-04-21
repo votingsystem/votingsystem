@@ -5,7 +5,9 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.UserVSCertExtensionDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.CertValidationDto;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
@@ -49,7 +51,8 @@ public class CSRBean {
         if(!signatureBean.isUserAdmin(userVS.getNif()) && !userVS.getNif().equals(certValidationDto.getNif()))
             throw new ExceptionVS("operation: signCertUserVS - userWithoutPrivilegesERROR - userVS nif: " + userVS.getNif());
         String validatedNif = NifUtils.validate(certValidationDto.getNif());
-        Query query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId and d.userVS.nif =:nif")
+        Query query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId and d.userVS.nif =:nif " +
+                "and d.state =:state").setParameter("state", DeviceVS.State.PENDING)
                 .setParameter("deviceId", certValidationDto.getDeviceId()).setParameter("nif", validatedNif);
         DeviceVS deviceVS = dao.getSingleResult(DeviceVS.class, query);
         if(deviceVS == null) throw new ExceptionVS("deviceNotFoundErrorMsg - deviceId: " + certValidationDto.getDeviceId() +
@@ -59,9 +62,16 @@ public class CSRBean {
         UserRequestCsrVS csrRequest = dao.getSingleResult(UserRequestCsrVS.class, query);
         if (csrRequest == null) throw new ExceptionVS("userRequestCsrMissingErrorMsg - validatedNif: " + validatedNif +
             " - deviceId: " + certValidationDto.getDeviceId());
+        query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId and d.userVS.nif =:nif " +
+                "and d.state =:state").setParameter("state", DeviceVS.State.OK)
+                .setParameter("deviceId", certValidationDto.getDeviceId()).setParameter("nif", validatedNif);
+        DeviceVS oldDevice = dao.getSingleResult(DeviceVS.class, query);
+        if(oldDevice != null) dao.merge(oldDevice.setState(DeviceVS.State.CANCELED));
         X509Certificate issuedCert = signCertUserVS(csrRequest);
+        CertificateVS certificate = dao.persist(CertificateVS.USER(deviceVS.getUserVS(), issuedCert));
         dao.merge(deviceVS.getUserVS().updateCertInfo(issuedCert));
-        dao.merge(deviceVS.updateCertInfo(issuedCert));
+        dao.merge(deviceVS.setCertificateVS(certificate).setState(DeviceVS.State.OK).updateCertInfo(issuedCert));
+        dao.merge(csrRequest.setCertificateVS(certificate).setActivationSMIME(messageSMIME));
         return deviceVS;
     }
 
@@ -192,9 +202,8 @@ public class CSRBean {
                     break;
             }
         }
-        DeviceVS deviceVS = subscriptionVSBean.checkDevice(userVS.getFirstName(), userVS.getLastName(),
-                userVS.getNif(), certExtensionDto.getMobilePhone(), certExtensionDto.getEmail(),
-                certExtensionDto.getDeviceId(), certExtensionDto.getDeviceType());
+        DeviceVSDto deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
+        DeviceVS deviceVS = subscriptionVSBean.checkDeviceFromCSR(deviceVSDto);
         Query query = dao.getEM().createQuery("select r from UserRequestCsrVS r where r.deviceVS =:device and " +
                 "r.userVS.nif =:user and r.state =:state").setParameter("device", deviceVS)
                 .setParameter("user", userVS.getNif()).setParameter("state", UserRequestCsrVS.State.PENDING);

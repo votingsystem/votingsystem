@@ -65,16 +65,8 @@ public class AccessControlVS extends ActorVS implements Serializable {
         return getServerURL() + "/rest/backupVS/download/" + param;
     }
 
-    public String getPublishClaimURL() {
-        return getServerURL() + "/rest/eventVSClaim";
-    }
-
     public String getPublishElectionURL() {
         return getServerURL() + "/rest/eventVSElection";
-    }
-
-    public String getClaimServiceURL() {
-        return getServerURL() + "/rest/eventVSClaim/collect";
     }
 
     public String getEventURL(String eventId) {

@@ -45,11 +45,10 @@ public class BrowserVSClient {
             Browser.getInstance().registerCallerCallbackView(operationVS.getCallerCallback(), this.webView);
             switch (operationVS.getType()) {
                 case CONNECT:
-                    WebSocketAuthenticatedService.getInstance().setConnectionEnabled(
-                            true, operationVS.getDocument());
+                    WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true);
                     break;
                 case DISCONNECT:
-                    WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false, null);
+                    WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false);
                     break;
                 case FILE_FROM_URL:
                     Browser.getInstance().processOperationVS(null, operationVS);
