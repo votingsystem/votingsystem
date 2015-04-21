@@ -11,7 +11,6 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.currency.Payment;
-
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -32,6 +31,7 @@ public class CurrencyBatchDto {
     private String csrCurrency;
     private List<String> hashCertVSCurrency;
     private String toUserIBAN;
+    private String toUserName;
     private Payment paymentMethod;
     private String subject;
     private String currencyCode;
@@ -78,19 +78,19 @@ public class CurrencyBatchDto {
             smimeMessage.isValidSignature();
             try {
                 Currency currency = new Currency(smimeMessage);
-                setCurrencyAmount(getCurrencyAmount().add(currency.getAmount()));
+                this.currencyAmount = this.currencyAmount.add(currency.getAmount());
                 currencyList.add(currency);
-                if(!getInitialized().get()) {
-                    getInitialized().set(Boolean.TRUE);
-                    this.setOperation(currency.getOperation());
-                    this.setPaymentMethod(currency.getPaymentMethod());
-                    this.setSubject(currency.getSubject());
-                    this.setToUserIBAN(currency.getToUserIBAN());
-                    this.setBatchAmount(currency.getBatchAmount());
-                    this.setCurrencyCode(currency.getCurrencyCode());
-                    this.setTag(currency.getTag().getName());
-                    this.setIsTimeLimited(currency.getIsTimeLimited());
-                    this.setBatchUUID(currency.getBatchUUID());
+                if(!initialized.get()) {
+                    initialized.set(Boolean.TRUE);
+                    this.operation = currency.getOperation();
+                    this.paymentMethod = currency.getPaymentMethod();
+                    this.subject = currency.getSubject();
+                    this.toUserIBAN = currency.getToUserIBAN();
+                    this.batchAmount = currency.getBatchAmount();
+                    this.currencyCode = currency.getCurrencyCode();
+                    this.tag = currency.getTag().getName();
+                    this.isTimeLimited = currency.getIsTimeLimited();
+                    this.batchUUID = currency.getBatchUUID();
                 } else checkCurrencyData(currency);
             } catch(Exception ex) {
                 throw new ExceptionVS("Error with currency : " + ex.getMessage(), ex);
@@ -271,4 +271,11 @@ public class CurrencyBatchDto {
         this.currencyList = currencyList;
     }
 
+    public String getToUserName() {
+        return toUserName;
+    }
+
+    public void setToUserName(String toUserName) {
+        this.toUserName = toUserName;
+    }
 }

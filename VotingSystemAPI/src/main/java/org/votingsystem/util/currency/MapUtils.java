@@ -3,6 +3,7 @@ package org.votingsystem.util.currency;
 
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.model.currency.Currency;
+
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;

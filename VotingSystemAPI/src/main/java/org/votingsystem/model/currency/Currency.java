@@ -1,11 +1,11 @@
 package org.votingsystem.model.currency;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -109,7 +109,30 @@ public class Currency extends EntityVS implements Serializable  {
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 x509AnonymousCert, ContextVS.CURRENCY_OID);
         initCertData(certExtensionDto, smimeMessage.getCurrencyCert().getSubjectDN().toString());
-        validateSignedData();
+        CurrencyBatchDto currencyBatchDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), CurrencyBatchDto.class);
+        if(amount.compareTo(currencyBatchDto.getCurrencyAmount()) != 0) throw new ExceptionVS("Currency amount '" + amount +
+                "' CurrencyBatchDto amount  '" + currencyBatchDto.getCurrencyAmount() + "'");
+        this.batchAmount = currencyBatchDto.getBatchAmount();
+        this.batchUUID = currencyBatchDto.getBatchUUID();
+        this.paymentMethod = currencyBatchDto.getPaymentMethod();
+        this.operation = currencyBatchDto.getOperation();
+        if(TypeVS.CURRENCY_SEND != operation)
+            throw new ExceptionVS("Expected operation 'CURRENCY_SEND' - found: " + currencyBatchDto.getOperation() + "'");
+        if(!this.currencyCode.equals(currencyBatchDto.getCurrencyCode())) {
+            throw new ExceptionVS(getErrorPrefix() +
+                    "expected currencyCode '" + currencyCode + "' - found: '" + currencyBatchDto.getCurrencyCode());
+        }
+        tag = new TagVS(currencyBatchDto.getTag());
+        if(!TagVS.WILDTAG.equals(certExtensionDto.getTag()) && !certExtensionDto.getTag().equals(tag.getName()))
+            throw new ExceptionVS("expected tag '" + certExtensionDto.getTag() + "' - found: '" +
+                    currencyBatchDto.getTag());
+        Date signatureTime = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
+        if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
+                x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
+        this.subject = currencyBatchDto.getSubject();
+        this.toUserIBAN = currencyBatchDto.getToUserIBAN();
+        this.toUserName = currencyBatchDto.getToUserName();
+        this.isTimeLimited = currencyBatchDto.isTimeLimited();
     }
 
     public Currency(PKCS10CertificationRequest csr) throws ExceptionVS, IOException {
@@ -164,36 +187,6 @@ public class Currency extends EntityVS implements Serializable  {
 
     private String getErrorPrefix() {
         return "ERROR - Currency with hash: " + hashCertVS + " - ";
-    }
-
-    public void validateSignedData() throws Exception {
-        ObjectNode dataJSON = (ObjectNode) new ObjectMapper().readTree(smimeMessage.getSignedContent());
-        if(dataJSON.has("amount")) {
-            BigDecimal toUserVSAmount = new BigDecimal(dataJSON.get("amount").asText());
-            if(amount.compareTo(toUserVSAmount) != 0) throw new ExceptionVS(getErrorPrefix() + "and value '" + amount +
-                    "' has signed amount  '" + toUserVSAmount + "'");
-        } else if(dataJSON.has("batchAmount")) {
-            this.batchAmount = new BigDecimal(dataJSON.get("batchAmount").asText());
-        }
-        if(dataJSON.has("batchUUID")) this.batchUUID = dataJSON.get("batchUUID").asText();
-        if(dataJSON.has("paymentMethod")) this.paymentMethod = Payment.valueOf(dataJSON.get("paymentMethod").asText());
-        operation = TypeVS.valueOf(dataJSON.get("operation").asText());
-        if(TypeVS.CURRENCY_SEND != operation)
-            throw new ExceptionVS("Error - Currency with invalid operation '" + operation.toString() + "'");
-
-        if(!currencyCode.equals(dataJSON.get("currencyCode").asText())) throw new ExceptionVS(getErrorPrefix() +
-                "currencyCode '" + currencyCode + "' has signed currencyCode  '" + dataJSON.get("currencyCode").asText());
-        tag = new TagVS(dataJSON.get("tag").asText());
-        if(!TagVS.WILDTAG.equals(certExtensionDto.getTag()) && !certExtensionDto.getTag().equals(tag.getName()))
-                throw new ExceptionVS(getErrorPrefix() + "tag '" + certExtensionDto.getTag() + "' has signed tag  '" +
-                dataJSON.get("tag"));
-        Date signatureTime = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
-        if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
-                x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
-        subject = dataJSON.get("subject").asText();
-        toUserIBAN = dataJSON.get("toUserIBAN").asText();
-        toUserName = dataJSON.get("toUserName").asText();
-        if(dataJSON.has("isTimeLimited")) isTimeLimited = dataJSON.get("isTimeLimited").asBoolean();
     }
 
     public void initSigner(byte[] csrBytes) throws Exception {

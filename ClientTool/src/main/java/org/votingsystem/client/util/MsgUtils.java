@@ -2,7 +2,6 @@ package org.votingsystem.client.util;
 
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.currency.MapUtils;
