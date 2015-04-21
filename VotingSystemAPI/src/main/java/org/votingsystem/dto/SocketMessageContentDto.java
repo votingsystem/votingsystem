@@ -9,7 +9,6 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
-import org.votingsystem.util.currency.Wallet;
 
 import javax.mail.Header;
 import java.io.ByteArrayInputStream;

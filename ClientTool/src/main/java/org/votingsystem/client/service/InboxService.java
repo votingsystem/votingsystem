@@ -19,6 +19,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.currency.MapUtils;
 import org.votingsystem.util.currency.Wallet;
 
 import java.io.ByteArrayInputStream;
@@ -74,7 +75,7 @@ public class InboxService {
                 log.info("found currency in not secured wallet");
                 InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"),
                         new Date());
-                inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(Currency.getCurrencyMap(
+                inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(MapUtils.getCurrencyMap(
                         currencySet))).setTypeVS(TypeVS.CURRENCY_IMPORT);
                 newMessage(inboxMessage);
             }

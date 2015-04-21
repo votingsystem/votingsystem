@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
+import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
@@ -97,7 +98,7 @@ public class Currency extends EntityVS implements Serializable  {
     @Transient private File file;
     @Transient private String toUserIBAN;
     @Transient private String toUserName;
-    @Transient private Currency.CertSubject certSubject;
+    @Transient private CurrencyDto certSubjectDto;
     @Transient private CurrencyCertExtensionDto certExtensionDto;
 
     public Currency() {}
@@ -131,23 +132,21 @@ public class Currency extends EntityVS implements Serializable  {
     public Currency initCertData(CurrencyCertExtensionDto certExtensionDto, String subjectDN) throws ExceptionVS {
         if(certExtensionDto == null) throw new ValidationExceptionVS("error missing cert extension data");
         this.certExtensionDto = certExtensionDto;
-        certSubject = new CertSubject(subjectDN, hashCertVS);
+        certSubjectDto = getCertSubjectDto(subjectDN, hashCertVS);
         hashCertVS = certExtensionDto.getHashCertVS();
         currencyServerURL = certExtensionDto.getCurrencyServerURL();
-        if(!certSubject.getCurrencyServerURL().equals(certExtensionDto.getCurrencyServerURL()))
-            throw new ValidationExceptionVS("currencyServerURL: " + currencyServerURL + " - certSubject: " + certSubject);
+        if(!certSubjectDto.getCurrencyServerURL().equals(certExtensionDto.getCurrencyServerURL()))
+            throw new ValidationExceptionVS("currencyServerURL: " + currencyServerURL + " - certSubject: " + subjectDN);
         amount = certExtensionDto.getAmount();
-        if(certSubject.getCurrencyValue().compareTo(amount) != 0)
-            throw new ValidationExceptionVS("amount: " + amount + " - certSubject: " + certSubject);
+        if(certSubjectDto.getAmount().compareTo(amount) != 0)
+            throw new ValidationExceptionVS("amount: " + amount + " - certSubject: " + subjectDN);
         currencyCode = certExtensionDto.getCurrencyCode();
-        if(!certSubject.getCurrencyCode().equals(currencyCode))
-            throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + certSubject);
-        if(!certSubject.getTag().equals(certExtensionDto.getTag()))
-            throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + certSubject);
+        if(!certSubjectDto.getCurrencyCode().equals(currencyCode))
+            throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
+        if(!certSubjectDto.getTag().equals(certExtensionDto.getTag()))
+            throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
         return this;
     }
-
-    public CertSubject getCertSubject() {return certSubject;}
 
     public Currency checkRequestWithDB(Currency currencyRequest) throws ExceptionVS {
         if(!currencyRequest.getCurrencyServerURL().equals(currencyServerURL))  throw new ExceptionVS("checkRequestWithDB_currencyServerURL");
@@ -205,7 +204,8 @@ public class Currency extends EntityVS implements Serializable  {
         CurrencyCertExtensionDto certExtensionData = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 x509AnonymousCert, ContextVS.CURRENCY_OID);
         initCertData(certExtensionData, x509AnonymousCert.getSubjectDN().toString());
-        certSubject.addDateInfo(x509AnonymousCert);
+        certSubjectDto.setNotBefore(x509AnonymousCert.getNotBefore());
+        certSubjectDto.setNotAfter(x509AnonymousCert.getNotAfter());
     }
 
     public static Currency fromCertificationRequestVS(CertificationRequestVS certificationRequest) throws Exception {
@@ -265,10 +265,6 @@ public class Currency extends EntityVS implements Serializable  {
 
     public void setSubject(String subject) {
         this.subject = subject;
-    }
-
-    public Map<String, String> getCertExtensionData() throws IOException {
-        return CertUtils.getCertExtensionData(x509AnonymousCert, ContextVS.CURRENCY_OID);
     }
 
     public SMIMEMessage getSMIME() {
@@ -548,94 +544,17 @@ public class Currency extends EntityVS implements Serializable  {
                 isTimeLimited, tag.getName());
     }
 
-    public static Map<String, BigDecimal> getCurrencyMap(Collection<Currency> currencyList) {
-        Map<String, BigDecimal> currencyMap = new HashMap<String, BigDecimal>();
-        for(Currency currency : currencyList){
-            if(currencyMap.containsKey(currency.getCurrencyCode())) currencyMap.put(currency.getCurrencyCode(),
-                    currencyMap.get(currency.getCurrencyCode()).add(currency.getAmount()));
-            else currencyMap.put(currency.getCurrencyCode(), currency.getAmount());
-        }
-        return currencyMap;
-    }
-
-    public static class TransactionVSData {
-
-        private String subject, toUserName, toUserIBAN;
-        private Boolean isTimeLimited;
-
-        public String getSubject(){return subject;}
-        public String getToUserName(){return toUserName;}
-        public String getToUserIBAN(){return toUserIBAN;}
-        public Boolean getIsTimeLimited(){return isTimeLimited;}
-
-        public TransactionVSData() {}
-
-        public TransactionVSData(String subject, String toUserName, String toUserIBAN, Boolean isTimeLimited) {
-            this.subject = subject;
-            this.toUserName = toUserName;
-            this.toUserIBAN = toUserIBAN;
-            this.isTimeLimited = isTimeLimited;
-        }
-
-        public TransactionVSData(Map formData) {
-            this.subject = (String) formData.get("subject");
-            this.toUserName = (String) formData.get("toUserName");
-            this.toUserIBAN = (String) formData.get("toUserIBAN");
-            this.isTimeLimited = (Boolean) formData.get("isTimeLimited");
-        }
-
-        public Map getJSON() {
-            Map result = new HashMap<>();
-            result.put("subject", subject);
-            result.put("toUserName", toUserName);
-            result.put("toUserIBAN", toUserIBAN);
-            result.put("isTimeLimited", isTimeLimited);
-            return result;
-        }
-    }
-
-    public static class CertSubject implements Serializable {
-
-        public static final long serialVersionUID = 1L;
-
-        private String currencyCode;
-        private BigDecimal currencyValue;
-        private String currencyServerURL;
-        private String tag;
-        private String hashCertVS;
-        private Map<String, String> dataMap;
-        private Date notBefore;
-        private Date notAfter;
-
-        public CertSubject(String subjectDN, String hashCertVS) {
-            this.hashCertVS = hashCertVS;
-            if (subjectDN.contains("CURRENCY_CODE:")) currencyCode = subjectDN.split("CURRENCY_CODE:")[1].split(",")[0];
-            if (subjectDN.contains("CURRENCY_VALUE:")) currencyValue = new BigDecimal(subjectDN.split("CURRENCY_VALUE:")[1].split(",")[0]);
-            if (subjectDN.contains("TAG:")) tag = subjectDN.split("TAG:")[1].split(",")[0];
-            if (subjectDN.contains("currencyServerURL:")) currencyServerURL = subjectDN.split("currencyServerURL:")[1].split(",")[0];
-            dataMap = new HashMap<>();
-            dataMap.put("currencyServerURL", currencyServerURL);
-            dataMap.put("currencyCode", currencyCode);
-            dataMap.put("currencyValue", currencyValue.toString());
-            dataMap.put("tag", tag);
-            dataMap.put("hashCertVS", hashCertVS);
-        }
-
-        public void addDateInfo(X509Certificate x509AnonymousCert) {
-            this.notBefore = x509AnonymousCert.getNotBefore();
-            this.notAfter = x509AnonymousCert.getNotAfter();
-            dataMap.put("notBefore", DateUtils.getDateStr(x509AnonymousCert.getNotBefore()));
-            dataMap.put("notAfter", DateUtils.getDateStr(x509AnonymousCert.getNotAfter()));
-        }
-
-        public String getCurrencyCode() {return this.currencyCode;}
-        public BigDecimal getCurrencyValue() {return this.currencyValue;}
-        public String getCurrencyServerURL() {return this.currencyServerURL;}
-        public String getTag() {return this.tag;}
-        public Map<String, String> getDataMap() {return dataMap;}
-        public Date getNotBefore() { return notBefore; }
-        public Date getNotAfter() { return notAfter; }
-
+    private CurrencyDto getCertSubjectDto(String subjectDN, String hashCertVS) {
+        CurrencyDto currencyDto = new CurrencyDto();
+        if (subjectDN.contains("CURRENCY_CODE:"))
+            currencyDto.setCurrencyCode(subjectDN.split("CURRENCY_CODE:")[1].split(",")[0]);
+        if (subjectDN.contains("CURRENCY_VALUE:"))
+            currencyDto.setAmount(new BigDecimal(subjectDN.split("CURRENCY_VALUE:")[1].split(",")[0]));
+        if (subjectDN.contains("TAG:")) currencyDto.setTag(subjectDN.split("TAG:")[1].split(",")[0]);
+        if (subjectDN.contains("currencyServerURL:"))
+            currencyDto.setCurrencyServerURL(subjectDN.split("currencyServerURL:")[1].split(",")[0]);
+        currencyDto.setHashCertVS(hashCertVS);
+        return currencyDto;
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {

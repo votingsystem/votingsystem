@@ -43,6 +43,7 @@ import org.votingsystem.signature.util.EncryptedBundle;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
+import org.votingsystem.util.currency.MapUtils;
 import org.votingsystem.util.currency.Wallet;
 
 import java.io.File;
@@ -354,7 +355,7 @@ public class SignatureService extends Service<ResponseVS> {
                 responseVS.setContentType(ContentTypeVS.JSON);
                 responseVS.setMessageMap(responseMap);
                 InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"), new Date());
-                inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(Currency.getCurrencyMap(
+                inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(MapUtils.getCurrencyMap(
                         currencyBatch.getCurrencyMap().values()))).setTypeVS(TypeVS.CURRENCY_IMPORT);
                 InboxService.getInstance().newMessage(inboxMessage, false);
             }

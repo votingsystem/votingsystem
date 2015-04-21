@@ -5,6 +5,7 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.currency.MapUtils;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class MsgUtils {
     private static Logger log = Logger.getLogger(MsgUtils.class.getSimpleName());
 
     public static String getCurrencyChangeWalletMsg(SocketMessageDto messageDto) throws Exception {
-        Map<String, BigDecimal> currencyMap = Currency.getCurrencyMap(messageDto.getCurrencySet());
+        Map<String, BigDecimal> currencyMap = MapUtils.getCurrencyMap(messageDto.getCurrencySet());
         StringBuilder amountInfo = new StringBuilder();
         for(String currencyCode: currencyMap.keySet()) {
             amountInfo.append(" - " + currencyMap.get(currencyCode) + " " + currencyCode);

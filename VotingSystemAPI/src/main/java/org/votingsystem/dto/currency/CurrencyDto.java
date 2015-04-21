@@ -8,6 +8,7 @@ import org.votingsystem.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,12 +20,14 @@ public class CurrencyDto {
 
     private BigDecimal amount;
     private String currencyCode;
+    private String currencyServerURL;
     private String hashCertVS;
     private String tag;
     private Boolean timeLimited;
     private String object;
     private String certificationRequest;
-
+    private Date notBefore;
+    private Date notAfter;
 
     public CurrencyDto() {}
 
@@ -137,5 +140,29 @@ public class CurrencyDto {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public String getCurrencyServerURL() {
+        return currencyServerURL;
+    }
+
+    public void setCurrencyServerURL(String currencyServerURL) {
+        this.currencyServerURL = currencyServerURL;
+    }
+
+    public Date getNotBefore() {
+        return notBefore;
+    }
+
+    public void setNotBefore(Date notBefore) {
+        this.notBefore = notBefore;
+    }
+
+    public Date getNotAfter() {
+        return notAfter;
+    }
+
+    public void setNotAfter(Date notAfter) {
+        this.notAfter = notAfter;
     }
 }
