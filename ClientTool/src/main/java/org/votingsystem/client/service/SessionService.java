@@ -1,7 +1,7 @@
 package org.votingsystem.client.service;
 
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.scene.control.Button;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.PasswordDialog;
@@ -164,7 +164,6 @@ public class SessionService {
                 flush();
                 ContextVS.getInstance().setDeviceId(socketMsg.getDeviceId());
                 Browser.getInstance().runJSCommand(CoreSignal.getWebSocketCoreSignalJSCommand(null, SocketMessageDto.ConnectionStatus.OPEN));
-                EventBusService.getInstance().post(socketMsg);
             } else {
                 showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
                 log.log(Level.SEVERE,"ERROR - initAuthenticatedSession - statusCode: " + socketMsg.getStatusCode());
@@ -278,7 +277,7 @@ public class SessionService {
                         passwd = passwordDialog.getPassword();
                         if(passwd == null) {
                             Button optionButton = new Button(ContextVS.getMessage("deletePendingCsrMsg"));
-                            optionButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
+                            optionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
                             optionButton.setOnAction(event -> deleteCSR());
                             showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"), optionButton);
                             return;

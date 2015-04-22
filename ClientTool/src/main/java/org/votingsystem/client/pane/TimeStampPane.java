@@ -1,6 +1,6 @@
 package org.votingsystem.client.pane;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -131,10 +131,10 @@ public class TimeStampPane extends GridPane {
         //AttributeTable  table = timeStampToken.getSignedAttributes();
         HBox buttonsHBox = new HBox();
         Button certValidationButton = new Button(ContextVS.getMessage("validateLbl"));
-        certValidationButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
+        certValidationButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
         certValidationButton.setOnAction(actionEvent -> TimeStampCertValidationPane.showDialog(timeStampToken));
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
         cancelButton.setOnAction(actionEvent -> TimeStampPane.this.getScene().getWindow().hide());
         buttonsHBox.getChildren().addAll(certValidationButton, Utils.getSpacer(), cancelButton);
         setMargin(buttonsHBox, new Insets(20, 20, 0, 20));

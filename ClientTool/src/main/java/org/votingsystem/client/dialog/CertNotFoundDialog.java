@@ -1,7 +1,7 @@
 package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -33,7 +33,7 @@ public class CertNotFoundDialog extends VBox {
             Utils.selectKeystoreFile(null, Browser.getInstance());
             getScene().getWindow().hide();
         });
-        importCertButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
+        importCertButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
         Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"));
         requestCertButton.setOnAction(actionEvent -> {
                 Browser.getInstance().openVotingSystemURL(
@@ -41,7 +41,7 @@ public class CertNotFoundDialog extends VBox {
                         ContextVS.getMessage("requestCertLbl"));
                 getScene().getWindow().hide();
             } );
-        requestCertButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES));
+        requestCertButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES));
         HBox footerButtonsBox = new HBox(10);
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), importCertButton, requestCertButton);
         setStyle("-fx-padding: 30;-fx-spacing: 20;-fx-alignment: center;-fx-background-color: #fff;");

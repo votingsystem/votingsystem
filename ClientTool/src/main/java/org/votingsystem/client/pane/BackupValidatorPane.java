@@ -1,6 +1,6 @@
 package org.votingsystem.client.pane;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -72,7 +72,7 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
                 runningTask.cancelValidation();
                 getScene().getWindow().hide();
             });
-        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
         buttonHBox.getChildren().addAll(errorsButton, Utils.getSpacer(), cancelButton);
         setMargin(buttonHBox, new Insets(0, 20, 20, 20));
         progressBox.getChildren().addAll(progressMessageText, progressMessageCounter, progressBar);

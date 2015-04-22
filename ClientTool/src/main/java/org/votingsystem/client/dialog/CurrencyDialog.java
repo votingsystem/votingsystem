@@ -3,7 +3,7 @@ package org.votingsystem.client.dialog;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -117,7 +117,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         log.info("initialize");
         EventBusService.getInstance().register(new EventBusCurrencyListener());
-        closeButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
+        closeButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> stage.close());
         sendMenuItem = new MenuItem("");
         Map dataMap = new HashMap<>();
@@ -141,7 +141,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
         currencyValueLbl.setText(currency.getAmount().toPlainString());
         currencyLbl.setText(currency.getCurrencyCode());
         currencyTagLbl.setText(MsgUtils.getTagDescription(currency.getTag().getName()));
-        menuButton.setGraphic(Utils.getIcon(FontAwesomeIconName.BARS));
+        menuButton.setGraphic(Utils.getIcon(FontAwesomeIcons.BARS));
         validFromLbl.setText(ContextVS.getMessage("issuedLbl") + ": " +
                 DateUtils.getDateStr(currency.getValidFrom(), "dd MMM yyyy' 'HH:mm"));
         validToLbl.setText(ContextVS.getMessage("expiresLbl") + ": " +

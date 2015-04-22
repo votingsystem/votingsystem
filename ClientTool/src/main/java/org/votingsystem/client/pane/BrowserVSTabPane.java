@@ -1,7 +1,7 @@
 package org.votingsystem.client.pane;
 
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -151,11 +151,11 @@ public class BrowserVSTabPane extends TabPane {
                     log.info("newState: " + newState + " - " + webView.getEngine().getLocation());
                     switch (newState) {
                         case SCHEDULED:
-                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIconName.COG));
+                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIcons.COG));
                             break;
                         case SUCCEEDED:
                             if(tabCaption == null && URL != null) newTab.setText(TAB_CAPTION_EMPTY);
-                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIconName.REFRESH));
+                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIcons.REFRESH));
                             Document doc = webView.getEngine().getDocument();
                             Element element = doc.getElementById("voting_system_page");
                             if(element != null) {
@@ -167,7 +167,7 @@ public class BrowserVSTabPane extends TabPane {
                             }
                             break;
                         case FAILED:
-                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIconName.REFRESH));
+                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIcons.REFRESH));
                             showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg")));
                             break;
                     }

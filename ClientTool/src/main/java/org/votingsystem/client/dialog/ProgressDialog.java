@@ -1,6 +1,6 @@
 package org.votingsystem.client.dialog;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -41,7 +41,7 @@ public class ProgressDialog extends VBox {
             progressTask.cancel(true);
             getScene().getWindow().hide();
         });
-        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
         HBox footerButtonBox = new HBox();
         footerButtonBox.getChildren().addAll(Utils.getSpacer(), cancelButton);
         setMargin(footerButtonBox, new Insets(20, 20, 0, 10));

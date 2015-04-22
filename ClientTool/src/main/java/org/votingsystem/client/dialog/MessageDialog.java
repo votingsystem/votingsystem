@@ -1,6 +1,6 @@
 package org.votingsystem.client.dialog;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -102,10 +102,10 @@ public class MessageDialog extends VBox {
         if(statusCode != null) {
             if(ResponseVS.SC_OK == statusCode) {
                 decoratedPane.setCaption(null);
-                messageLabel.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK, Utils.COLOR_RESULT_OK ,32));
+                messageLabel.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK, Utils.COLOR_RESULT_OK ,32));
             } else {
                 decoratedPane.setCaption(ContextVS.getMessage("errorLbl"));
-                messageLabel.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK, 32));
+                messageLabel.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK, 32));
             }
             messageLabel.setGraphicTextGap(15);
         }

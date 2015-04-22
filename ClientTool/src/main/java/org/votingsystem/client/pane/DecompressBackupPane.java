@@ -1,6 +1,6 @@
 package org.votingsystem.client.pane;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -58,7 +58,7 @@ public class DecompressBackupPane extends VBox {
             runningTask.cancel();
             getScene().getWindow().hide();
         });
-        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
         HBox footerButtonBox = new HBox();
         footerButtonBox.getChildren().addAll(Utils.getSpacer(), cancelButton);
         progressBox.setMargin(footerButtonBox, new Insets(30, 20, 0, 10));

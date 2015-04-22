@@ -2,7 +2,7 @@ package org.votingsystem.client.pane;
 
 import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -58,13 +58,13 @@ public class BrowserVSToolbar extends HBox {
         setSpacing(10);
         setAlignment(Pos.CENTER);
         getStyleClass().add("browser-toolbar");
-        forwardButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.CHEVRON_RIGHT));;
-        prevButton =  Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.CHEVRON_LEFT));
-        reloadButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.REFRESH));
-        connectionButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.FLASH));
+        forwardButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.CHEVRON_RIGHT));;
+        prevButton =  Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.CHEVRON_LEFT));
+        reloadButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.REFRESH));
+        connectionButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.FLASH));
         prevButton.setDisable(true);
         forwardButton.setDisable(true);
-        Button newTabButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.PLUS));
+        Button newTabButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.PLUS));
         newTabButton.getStyleClass().add("toolbar-button");
         newTabButton.setOnAction(event -> Browser.getInstance().newTab(null, null, null));
         connectionButton.setVisible(false);
@@ -76,13 +76,13 @@ public class BrowserVSToolbar extends HBox {
 
         HBox.setHgrow(locationField, Priority.ALWAYS);
         locationField.getStyleClass().add("location-text");
-        Button msgButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.ENVELOPE, Utils.COLOR_RED_DARK));
+        Button msgButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.ENVELOPE, Utils.COLOR_RED_DARK));
         InboxService.getInstance().setInboxButton(msgButton);
 
         menuButton = new BrowserVSMenuButton();
         menuButton.getStyleClass().add("toolbar-button");
 
-        Button closeButton =  Utils.getToolBarButton(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
+        Button closeButton =  Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> VotingSystemApp.getInstance().stop());
 
         HBox navButtonBox = new HBox();

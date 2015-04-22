@@ -1,6 +1,6 @@
 package org.votingsystem.client.pane;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -64,12 +64,12 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         GridPane.setVgrow(textArea, Priority.ALWAYS);
 
         signButton = new Button(ContextVS.getMessage("signLbl"));
-        signButton.setGraphic((Utils.getIcon(FontAwesomeIconName.PENCIL)));
+        signButton.setGraphic((Utils.getIcon(FontAwesomeIcons.PENCIL)));
         signButton.setOnAction(actionEvent -> documentSignerHelper.processOperation(
                 SignDocumentFormStackPane.Operation.SIGN_SMIME, toUserTextField.getText(),
                 textArea.getText(), messageSubjectTextField.getText(), smimeMessage, null));
         Button saveButton = new Button(ContextVS.getMessage("saveLbl"));
-        saveButton.setGraphic((Utils.getIcon(FontAwesomeIconName.SAVE)));
+        saveButton.setGraphic((Utils.getIcon(FontAwesomeIcons.SAVE)));
         saveButton.setOnAction(actionEvent -> saveMessage(smimeMessage));
         HBox.setMargin(saveButton, new Insets(0, 40, 0, 10));
 
@@ -88,7 +88,7 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         HBox.setMargin(serviceURLTextField, new Insets(0, 0, 0, 30));
         HBox.setHgrow(serviceURLTextField, Priority.ALWAYS);
         Button sendButton = new Button(ContextVS.getMessage("sendLbl"));
-        sendButton.setGraphic((Utils.getIcon(FontAwesomeIconName.UPLOAD)));
+        sendButton.setGraphic((Utils.getIcon(FontAwesomeIcons.UPLOAD)));
         sendButton.setOnAction(actionEvent -> sendDocumentToService());
         HBox.setMargin(sendButton, new Insets(0, 0, 0, 30));
 
@@ -115,7 +115,7 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
 
         HBox buttonsBox = new HBox();
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic((Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK)));
+        cancelButton.setGraphic((Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK)));
         cancelButton.setOnAction(actionEvent -> SignDocumentFormPane.this.getScene().getWindow().hide());
         buttonsBox.getChildren().addAll(signButton, Utils.getSpacer(), cancelButton);
         setMargin(buttonsBox, new Insets(20, 20, 0, 20));

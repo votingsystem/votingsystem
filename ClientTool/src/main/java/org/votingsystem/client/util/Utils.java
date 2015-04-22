@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.GlyphIcon;
 import de.jensd.fx.glyphs.GlyphsDude;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -81,25 +81,25 @@ public class Utils {
 
     private static Logger log = Logger.getLogger(Utils.class.getSimpleName());
 
-    public static Text getIcon(FontAwesomeIconName icon) {
-        Text text = GlyphsDude.createIcon(icon, GlyphIcon.DEFAULT_ICON_SIZE);
+    public static Text getIcon(FontAwesomeIcons icon) {
+        Text text = GlyphsDude.createIcon(icon, GlyphIcon.DEFAULT_FONT_SIZE);
         text.setFill(Color.web(COLOR_BUTTON_OK));
         return text;
     }
 
-    public static Text getIcon(FontAwesomeIconName icon, String color, double size) {
+    public static Text getIcon(FontAwesomeIcons icon, String color, double size) {
         Text text = GlyphsDude.createIcon(icon, String.valueOf(size));
         text.setFill(Color.web(color));
         return text;
     }
 
-    public static Text getIcon(FontAwesomeIconName icon, double size) {
+    public static Text getIcon(FontAwesomeIcons icon, double size) {
         Text text = GlyphsDude.createIcon(icon, String.valueOf(size));
         return text;
     }
 
-    public static Text getIcon(FontAwesomeIconName icon, String color) {
-        Text text = GlyphsDude.createIcon(icon, GlyphIcon.DEFAULT_ICON_SIZE);
+    public static Text getIcon(FontAwesomeIcons icon, String color) {
+        Text text = GlyphsDude.createIcon(icon, GlyphIcon.DEFAULT_FONT_SIZE);
         text.setFill(Color.web(color));
         return text;
     }

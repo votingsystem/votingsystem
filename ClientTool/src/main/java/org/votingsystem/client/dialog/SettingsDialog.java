@@ -1,6 +1,6 @@
 package org.votingsystem.client.dialog;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -64,7 +64,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         mobileDeviceLbl = new Label();
         mobileDeviceLbl.setStyle("-fx-text-fill: #888;");
         Button mobileDeviceButton = new Button(ContextVS.getMessage("changeMobileDeviceLbl"));
-        mobileDeviceButton.setGraphic(Utils.getIcon(FontAwesomeIconName.EXCHANGE));
+        mobileDeviceButton.setGraphic(Utils.getIcon(FontAwesomeIcons.EXCHANGE));
         mobileDeviceButton.setOnAction(actionEvent -> MobileSelectorDialog.show(ContextVS.getMessage(
                 "setMobileSignatureMechanismMsg"), ContextVS.getMessage("setMobileSignatureMechanismAdv"),
                 SettingsDialog.this));
@@ -74,7 +74,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         signWithKeystoreRb.setOnAction(actionEvent -> changeSignatureMode(actionEvent));
         keyStoreVBox = new VBox(10);
         Button selectKeyStoreButton = new Button(ContextVS.getMessage("setKeyStoreLbl"));
-        selectKeyStoreButton.setGraphic(Utils.getIcon(FontAwesomeIconName.KEY));
+        selectKeyStoreButton.setGraphic(Utils.getIcon(FontAwesomeIcons.KEY));
         selectKeyStoreButton.setOnAction(actionEvent -> selectKeystoreFile());
         keyStoreLbl = new Label(ContextVS.getMessage("selectKeyStoreLbl"));
         keyStoreLbl.setContentDisplay(ContentDisplay.LEFT);
@@ -82,7 +82,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         VBox.setMargin(keyStoreVBox, new Insets(10, 10, 10, 10));
         keyStoreVBox.getStyleClass().add("settings-vbox");
         Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"));
-        requestCertButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CERTIFICATE));
+        requestCertButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CERTIFICATE));
         requestCertButton.setOnAction(actionEvent -> {
             if (ContextVS.getInstance().getAccessControl() != null) {
                 Platform.runLater(() -> {
@@ -98,9 +98,9 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
 
         HBox footerButtonsBox = new HBox(10);
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
-        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
         cancelButton.setOnAction(actionEvent -> getStage().close());
-        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
         acceptButton.setOnAction(actionEvent -> validateForm());
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);
         gridPane.setMargin(footerButtonsBox, new Insets(20, 20, 0, 20));

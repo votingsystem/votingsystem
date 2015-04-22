@@ -1,7 +1,7 @@
 package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -66,12 +66,12 @@ public class PasswordDialog {
         password2Field = new PasswordField();
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
         cancelButton.setOnAction(event -> stage.close());
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(event -> checkPasswords());
-        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
             new EventHandler<KeyEvent>() {

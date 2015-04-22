@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconName;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -73,10 +73,10 @@ public class JSONFormDialog extends VBox {
             }
 
         });
-        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIconName.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
         cancelButton.setOnAction(actionEvent -> stage.hide());
-        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIconName.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
 
         HBox footerButtonsBox = new HBox(10);
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);
