@@ -1,7 +1,7 @@
 package org.votingsystem.signature.util;
 
 import org.bouncycastle.util.encoders.Base64;
-
+import org.votingsystem.dto.AESParamsDto;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
-
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class AESParams {
@@ -38,18 +37,16 @@ public class AESParams {
         return iv;
     }
 
-    public Map<String, String> toMap() throws UnsupportedEncodingException {
-        Map jsonObject = new HashMap<>();
-        jsonObject.put("key", new String(Base64.encode(key.getEncoded()), "UTF-8"));
-        jsonObject.put("iv", new String(Base64.encode(iv.getIV()), "UTF-8"));
-        return jsonObject;
+    public AESParamsDto getDto() throws UnsupportedEncodingException {
+        return new AESParamsDto(new String(Base64.encode(key.getEncoded()), "UTF-8"),
+                new String(Base64.encode(iv.getIV()), "UTF-8"));
     }
 
-    public static AESParams load(Map<String, String> jsonObject) throws NoSuchAlgorithmException {
+    public static AESParams load(AESParamsDto dto) throws NoSuchAlgorithmException {
         AESParams aesParams = new AESParams();
-        byte[] decodeKeyBytes = Base64.decode(jsonObject.get("key").getBytes());
+        byte[] decodeKeyBytes = Base64.decode(dto.getKey().getBytes());
         aesParams.key = new SecretKeySpec(decodeKeyBytes, 0, decodeKeyBytes.length, "AES");
-        byte[] iv = Base64.decode(jsonObject.get("iv").getBytes());
+        byte[] iv = Base64.decode(dto.getIv().getBytes());
         aesParams.iv = new IvParameterSpec(iv);
         return aesParams;
     }

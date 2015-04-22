@@ -4,10 +4,7 @@ import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -22,10 +19,8 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
-
 import static org.votingsystem.client.Browser.showMessage;
 
 /**
@@ -41,16 +36,28 @@ public class BrowserVSToolbar extends HBox {
     private Button forwardButton;
     private Button connectionButton;
     private BrowserVSMenuButton menuButton;
+    private AtomicBoolean isConnected = new AtomicBoolean(false);
 
     class EventBusConnectionListener {
         @Subscribe
         public void responseVSChange(ResponseVS responseVS) {
             log.info("EventBusConnectionListener - response type: " + responseVS.getType());
-            AtomicBoolean isConnected = new AtomicBoolean(false);
             if(TypeVS.INIT_VALIDATED_SESSION == responseVS.getType()) {
                 isConnected.set(true);
-            } else if(TypeVS.DISCONNECT == responseVS.getType()) { }
-            PlatformImpl.runLater(() -> connectionButton.setVisible(isConnected.get()));
+            } else if(TypeVS.DISCONNECT == responseVS.getType()) {
+                isConnected.set(false);
+            }
+            PlatformImpl.runLater(() -> {
+                if (isConnected.get()) {
+                    connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.FLASH));
+                    connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("disconnectLbl")));
+                } else {
+                    connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
+                    connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.SHARE));
+                }
+
+
+            });
         }
     }
     public BrowserVSToolbar(Stage stage) {
@@ -61,17 +68,21 @@ public class BrowserVSToolbar extends HBox {
         forwardButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.CHEVRON_RIGHT));;
         prevButton =  Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.CHEVRON_LEFT));
         reloadButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.REFRESH));
-        connectionButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.FLASH));
+        connectionButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.SHARE));
+        connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
         prevButton.setDisable(true);
         forwardButton.setDisable(true);
         Button newTabButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.PLUS));
         newTabButton.getStyleClass().add("toolbar-button");
         newTabButton.setOnAction(event -> Browser.getInstance().newTab(null, null, null));
-        connectionButton.setVisible(false);
         connectionButton.setOnAction(event -> {
-            Button optionButton = new Button(ContextVS.getMessage("disconnectLbl"));
-            optionButton.setOnAction(event1 -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false));
-            showMessage(ContextVS.getMessage("disconnectMsg"), optionButton);
+            if(isConnected.get()) {
+                Button optionButton = new Button(ContextVS.getMessage("disconnectLbl"));
+                optionButton.setOnAction(event1 -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false));
+                showMessage(ContextVS.getMessage("disconnectMsg"), optionButton);
+            } else {
+                WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true);
+            }
         });
 
         HBox.setHgrow(locationField, Priority.ALWAYS);

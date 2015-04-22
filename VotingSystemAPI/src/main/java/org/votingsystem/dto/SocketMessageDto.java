@@ -382,8 +382,8 @@ public class SocketMessageDto {
         socketMessageDto.setUUID(socketSession.getUUID());
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getSignRequest(deviceVS, toUser, textToSign,
                 subject, headers);
-        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                socketSession.getAESParams().toMap().toString().getBytes(), deviceVS.getX509Certificate());
+        String aesParams = JSON.getMapper().writeValueAsString(socketSession.getAESParams().getDto());
+        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(), deviceVS.getX509Certificate());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.getMapper().writeValueAsString(messageContentDto),
                 socketSession.getAESParams()));
@@ -401,8 +401,8 @@ public class SocketMessageDto {
         socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getCurrencyWalletChangeRequest(currencyList);
 
-        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                socketSession.getAESParams().toMap().toString().getBytes(), deviceVS.getX509Certificate());
+        String aesParams = JSON.getMapper().writeValueAsString(socketSession.getAESParams().getDto());
+        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(), deviceVS.getX509Certificate());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(JSON.getMapper().writeValueAsString(messageContentDto),
                 socketSession.getAESParams()));
@@ -421,8 +421,8 @@ public class SocketMessageDto {
         socketMessageDto.setLocale(ContextVS.getInstance().getLocale().getLanguage());
 
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getMessageVSToDevice(userVS, toUser, textToEncrypt);
-        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(
-                socketSession.getAESParams().toMap().toString().getBytes(), deviceVS.getX509Certificate());
+        String aesParams = JSON.getMapper().writeValueAsString(socketSession.getAESParams().getDto());
+        byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(), deviceVS.getX509Certificate());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(
                 JSON.getMapper().writeValueAsString(messageContentDto), socketSession.getAESParams()));
@@ -437,11 +437,11 @@ public class SocketMessageDto {
     }
 
     public void decryptMessage(AESParams aesParams) throws Exception {
-        SocketMessageContentDto messageContentDto = JSON.getMapper().readValue(
+        content = JSON.getMapper().readValue(
                 Encryptor.decryptAES(encryptedMessage, aesParams), SocketMessageContentDto.class);
-        if(messageContentDto.getSmimeMessage() != null) smime = messageContentDto.getSMIME();
-        if(messageContentDto.getCurrencyList() != null) currencySet = CurrencyDto.deSerializeCollection(
-                messageContentDto.getCurrencyList());
+        if(content.getSmimeMessage() != null) smime = content.getSMIME();
+        if(content.getCurrencyList() != null) currencySet = CurrencyDto.deSerializeCollection(
+                content.getCurrencyList());
         this.isEncrypted = false;
         ContextVS.getInstance().putWSSession(UUID, new WebSocketSession<>(
                 aesParams, new DeviceVS(Long.valueOf(deviceFromId), deviceFromName), null, operation));

@@ -33,23 +33,11 @@ public class BrowserVSMenuButton extends MenuButton {
     private MenuItem selectRepresentativeMenuItem;
     private MenuItem currencyUsersProceduresMenuItem;
     private MenuItem walletMenuItem;
-    private MenuItem connectMenuItem;
     private MenuItem votingSystemAdminMenuItem;
     private MenuItem currencyAdminMenuItem;
 
-    class EventBusConnectionListener {
-        @Subscribe public void onMessage(ResponseVS responseVS) {
-            log.info("EventBusConnectionListener - response type: " + responseVS.getType());
-            AtomicBoolean isConnected = new AtomicBoolean(false);
-            if(TypeVS.INIT_VALIDATED_SESSION == responseVS.getType()) {
-                isConnected.set(true);
-            } else if(TypeVS.DISCONNECT == responseVS.getType()) { }
-            PlatformImpl.runLater(() -> connectMenuItem.setVisible(!isConnected.get()));
-        }
-    }
 
     public BrowserVSMenuButton () {
-        EventBusService.getInstance().register(new EventBusConnectionListener());
         setGraphic(Utils.getIcon(FontAwesomeIcons.BARS));
         MenuItem openFileMenuItem = new MenuItem(ContextVS.getMessage("openFileButtonLbl"));
         openFileMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.FOLDER_OPEN));
@@ -88,11 +76,6 @@ public class BrowserVSMenuButton extends MenuButton {
         walletMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.MONEY));
         walletMenuItem.setOnAction(event -> WalletPane.showDialog(Browser.getInstance().getScene().getWindow()));
 
-        connectMenuItem  = new MenuItem(ContextVS.getMessage("connectLbl"));
-        connectMenuItem.setVisible(false);
-        connectMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.FLASH));
-        connectMenuItem.setOnAction(event -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true));
-
         MenuItem settingsMenuItem = new MenuItem(ContextVS.getMessage("settingsLbl"));
         settingsMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.COG));
         settingsMenuItem.setOnAction(actionEvent -> SettingsDialog.showDialog());
@@ -112,7 +95,7 @@ public class BrowserVSMenuButton extends MenuButton {
         adminsMenu.getItems().addAll(currencyAdminMenuItem, votingSystemAdminMenuItem);
 
         getItems().addAll(voteMenuItem, selectRepresentativeMenuItem, new SeparatorMenuItem(),
-                connectMenuItem, walletMenuItem, currencyUsersProceduresMenuItem, new SeparatorMenuItem(),
+                walletMenuItem, currencyUsersProceduresMenuItem, new SeparatorMenuItem(),
                 signDocumentMenuItem, openFileMenuItem, new SeparatorMenuItem(),
                 settingsMenuItem, new SeparatorMenuItem(), adminsMenu);
     }
@@ -129,7 +112,6 @@ public class BrowserVSMenuButton extends MenuButton {
         PlatformImpl.runLater(() -> {
             currencyUsersProceduresMenuItem.setVisible(available);
             walletMenuItem.setVisible(available);
-            connectMenuItem.setVisible(available);
             currencyAdminMenuItem.setVisible(available);
         });
     }
