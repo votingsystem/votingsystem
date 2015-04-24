@@ -24,14 +24,6 @@ import java.util.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SocketMessageDto {
 
-    public List<CurrencyDto> getCurrencyDtoList() {
-        return currencyDtoList;
-    }
-
-    public void setCurrencyDtoList(List<CurrencyDto> currencyDtoList) {
-        this.currencyDtoList = currencyDtoList;
-    }
-
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
     public enum ConnectionStatus {OPEN, CLOSED}
 
@@ -105,6 +97,15 @@ public class SocketMessageDto {
         dto.setUUID(UUID);
         return dto;
     }
+
+    public List<CurrencyDto> getCurrencyDtoList() {
+        return currencyDtoList;
+    }
+
+    public void setCurrencyDtoList(List<CurrencyDto> currencyDtoList) {
+        this.currencyDtoList = currencyDtoList;
+    }
+
 
     public boolean isEncrypted() {
         return encryptedMessage != null;

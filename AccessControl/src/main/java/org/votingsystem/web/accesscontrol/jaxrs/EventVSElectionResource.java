@@ -1,6 +1,7 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.voting.EventVS;
@@ -45,7 +46,7 @@ public class EventVSElectionResource {
 
     @Path("/id/{id}") @GET
     @Transactional
-    public Object getById (@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
+    public Response getById (@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
                            @Context HttpServletResponse resp) throws ValidationExceptionVS, IOException, ServletException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE, EventVS.State.PENDING, EventVS.State.CANCELED,
@@ -69,7 +70,7 @@ public class EventVSElectionResource {
 
     @Path("/") @GET
     @Transactional
-    public Object index (@QueryParam("eventVSState") String eventVSStateReq,
+    public Response index (@QueryParam("eventVSState") String eventVSStateReq,
                          @DefaultValue("0") @QueryParam("offset") int offset,
                          @DefaultValue("50") @QueryParam("max") int max, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ValidationExceptionVS,
@@ -90,21 +91,17 @@ public class EventVSElectionResource {
         query = dao.getEM().createQuery("select e from EventVSElection e where e.state in :inList order by e.dateBegin desc")
                 .setParameter("inList", inList).setFirstResult(offset).setMaxResults(max);
         List<EventVSElection> resultList = query.getResultList();
-        List<EventVSDto> resultListJSON = new ArrayList<>();
+        List<EventVSDto> eventVSListDto = new ArrayList<>();
         for(EventVSElection eventVSElection : resultList) {
             eventVSBean.checkEventVSDates(eventVSElection);
-            resultListJSON.add(new EventVSDto(eventVSElection, config.getServerName(), config.getContextURL()));
+            eventVSListDto.add(new EventVSDto(eventVSElection, config.getServerName(), config.getContextURL()));
         }
-        Map eventsVSMap = new HashMap();
-        eventsVSMap.put("eventVS", resultListJSON);
-        eventsVSMap.put("offset", offset);
-        eventsVSMap.put("max", max);
-        eventsVSMap.put("totalCount", totalCount);
+        ResultListDto<EventVSDto> resultListDto = new ResultListDto<>(eventVSListDto, offset, max, totalCount);
         if(contentType.contains("json")){
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventsVSMap))
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
                     .type(MediaTypeVS.JSON).build();
         } else {
-            req.setAttribute("eventsVSMap", JSON.getMapper().writeValueAsString(eventsVSMap));
+            req.setAttribute("resultListDto", JSON.getMapper().writeValueAsString(resultListDto));
             context.getRequestDispatcher("/eventVSElection/index.xhtml").forward(req, resp);
             return Response.ok().build();
         }

@@ -16,7 +16,7 @@
             }
         </style>
         <vs-innerpage-signal id="innerpageSignal" caption="${msg.electionSystemLbl}"></vs-innerpage-signal>
-        <core-ajax id="ajax" url="{{url}}" response="{{eventsVSMap}}" handleAs="json"
+        <core-ajax id="ajax" url="{{url}}" response="{{resultListDto}}" handleAs="json"
                    contentType="application/json" on-core-complete="{{ajaxComplete}}"></core-ajax>
         <core-signals on-core-signal-eventvs-election-closed="{{closeEventVSDetails}}"></core-signals>
         <core-animated-pages hidden?="{{loading}}" id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
@@ -34,7 +34,7 @@
                         </template>
                     </div>
                     <div layout flex horizontal wrap around-justified>
-                        <template repeat="{{eventvs in eventsVSMap.eventVS}}">
+                        <template repeat="{{eventvs in resultListDto.resultList}}">
                             <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{getEventVSClass(eventvs.state)}}'>
                                 <div layout horizontal center center-justified eventvsId-data="{{eventvs.id}}" class='eventSubjectDiv'>
                                     {{getSubject(eventvs.subject)}}
@@ -58,10 +58,10 @@
                             </div>
                         </template>
                     </div>
-                    <vs-pager id="vspager" on-pager-change="{{pagerChange}}" max="{{eventsVSMap.max}}" style="margin: 0 0 100px 0;"
+                    <vs-pager id="vspager" on-pager-change="{{pagerChange}}" max="{{resultListDto.max}}" style="margin: 0 0 100px 0;"
                               next="${msg.nextLbl}" previous="${msg.previousLbl}"
                               first="${msg.firstLbl}" last="${msg.lastLbl}"
-                              offset="{{eventsVSMap.offset}}" total="{{eventsVSMap.totalCount}}"></vs-pager>
+                              offset="{{resultListDto.offset}}" total="{{resultListDto.totalCount}}"></vs-pager>
                 </div>
             </section>
 
@@ -76,7 +76,7 @@
     <script>
         Polymer('eventvs-election-list', {
             publish: {
-                eventsVSMap: {value: {}}
+                resultListDto: {value: {}}
             },
             ready:function(e) {
                 console.log(this.tagName + " - ready - eventVSState: " + this.eventVSState)
@@ -88,9 +88,9 @@
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
             },
-            eventsVSMapChanged:function() {
-                if(this.eventsVSMap == null) return
-                console.log(this.tagName + " - eventsVSMapChanged - offset: " + this.eventsVSMap.offset + " - totalCount: " + this.eventsVSMap.totalCount)
+            resultListDtoChanged:function() {
+                if(this.resultListDto == null) return
+                console.log(this.tagName + " - resultListDtoChanged - offset: " + this.resultListDto.offset + " - totalCount: " + this.resultListDto.totalCount)
                 this.loading = false
             },
             closeEventVSDetails:function(e, detail, sender) {

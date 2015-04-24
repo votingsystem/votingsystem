@@ -15,8 +15,8 @@ public class CertValidationDto {
 
     public static CertValidationDto validationRequest(String nif, String deviceId) {
         CertValidationDto certValidationDto = new CertValidationDto();
-        certValidationDto.setNif("7553172H");
-        certValidationDto.setDeviceId("aee09e79-e44e-4a86-9a5d-0fd1ee445038");
+        certValidationDto.setNif(nif);
+        certValidationDto.setDeviceId(deviceId);
         certValidationDto.setUUID(java.util.UUID.randomUUID().toString());
         return certValidationDto;
     }

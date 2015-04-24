@@ -203,8 +203,8 @@ public class CSRBean {
         }
         DeviceVSDto deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
         DeviceVS deviceVS = subscriptionVSBean.checkDeviceFromCSR(deviceVSDto);
-        Query query = dao.getEM().createQuery("select r from UserRequestCsrVS r where r.deviceVS =:device and " +
-                "r.userVS.nif =:user and r.state =:state").setParameter("device", deviceVS)
+        Query query = dao.getEM().createQuery("select r from UserRequestCsrVS r where r.deviceVS.deviceId =:device and " +
+                "r.userVS.nif =:user and r.state =:state").setParameter("device", deviceVS.getDeviceId())
                 .setParameter("user", userVS.getNif()).setParameter("state", UserRequestCsrVS.State.PENDING);
         List<UserRequestCsrVS> previousRequestList = query.getResultList();
         for(UserRequestCsrVS prevRequest: previousRequestList) {
