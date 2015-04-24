@@ -2,6 +2,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.RepresentativeDto;
 import org.votingsystem.model.UserVS;
@@ -101,16 +102,12 @@ public class SearchResource {
                 "(e.subject like :searchText or e.content like :searchText)").setParameter("inList", inList)
                 .setParameter("searchText", "%" + searchText + "%");
         List<EventVS> eventvsList = query.getResultList();
-        List resultList = null;
+        List<EventVSDto> dtoList = null;
         for(EventVS eventVS : eventvsList) {
-            resultList.add(new EventVSDto(eventVS, config.getServerName(), config.getContextURL()));
+            dtoList.add(new EventVSDto(eventVS, config.getServerName(), config.getContextURL()));
         }
-        Map resultMap = new HashMap<>();
-        resultMap.put("eventVS", resultList);
-        resultMap.put("totalCount", resultList.size());
-        resultMap.put("offset", offset);
-        resultMap.put("max", max);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
+        ResultListDto<EventVSDto> resultListDto = new ResultListDto<>(dtoList, offset, max, dtoList.size());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaTypeVS.JSON).build();
     }
 
 

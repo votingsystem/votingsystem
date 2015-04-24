@@ -201,7 +201,7 @@ public class SocketMessageContentDto {
     @JsonIgnore
     SMIMEMessage getSMIME () throws Exception {
         byte[] smimeMessageBytes = Base64.getDecoder().decode(smimeMessage.getBytes());
-        return new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
+        return new SMIMEMessage(smimeMessageBytes);
     }
 
 }

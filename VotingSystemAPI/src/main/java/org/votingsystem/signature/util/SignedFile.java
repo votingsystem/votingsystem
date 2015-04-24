@@ -30,7 +30,7 @@ public class SignedFile {
 
 
     public SignedFile(byte[] signedFileBytes, String name, Map operationDocument) throws Exception {
-        smimeMessage = new SMIMEMessage(new ByteArrayInputStream(signedFileBytes));
+        smimeMessage = new SMIMEMessage(signedFileBytes);
         signatureVerified = smimeMessage.isValidSignature();
         this.operationDocument = operationDocument;
         this.name = name;

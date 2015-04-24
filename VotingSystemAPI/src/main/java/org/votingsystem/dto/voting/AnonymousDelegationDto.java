@@ -48,7 +48,7 @@ public class AnonymousDelegationDto implements Serializable {
     public SMIMEMessage getCancelVoteReceipt() {
         if(delegationReceipt == null && delegationReceiptBytes != null) {
             try {
-                delegationReceipt = new SMIMEMessage(new ByteArrayInputStream(delegationReceiptBytes));
+                delegationReceipt = new SMIMEMessage(delegationReceiptBytes);
             } catch(Exception ex) {
                 ex.printStackTrace();
             }

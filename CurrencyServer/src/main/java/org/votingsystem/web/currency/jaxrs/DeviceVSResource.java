@@ -7,7 +7,6 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
-
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.ws.rs.GET;

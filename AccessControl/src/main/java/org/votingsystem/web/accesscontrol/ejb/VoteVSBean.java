@@ -105,8 +105,7 @@ public class VoteVSBean {
         ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageReq.getBytes(),
                 ContentTypeVS.JSON_SIGNED, voteCancelerURL);
         if (ResponseVS.SC_OK == responseVSControlCenter.getStatusCode()) {
-            SMIMEMessage smimeMessageResp = new SMIMEMessage(new ByteArrayInputStream(
-                    responseVSControlCenter.getMessageBytes()));
+            SMIMEMessage smimeMessageResp = new SMIMEMessage(responseVSControlCenter.getMessageBytes());
             smimeMessageResp.isValidSignature();
             if(!smimeMessage.getContent().equals(smimeMessageResp.getContentDigestStr())) throw new ValidationExceptionVS(
                     "smimeContentMismatchError");

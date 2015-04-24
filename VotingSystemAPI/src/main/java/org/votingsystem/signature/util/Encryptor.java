@@ -159,7 +159,7 @@ public class Encryptor {
      */
     public ResponseVS encryptSMIME(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
         //If the message isn't recreated there can be problems with multipart boundaries. TODO
-        SMIMEMessage msgToEncrypt = new SMIMEMessage(new ByteArrayInputStream(bytesToEncrypt));
+        SMIMEMessage msgToEncrypt = new SMIMEMessage(bytesToEncrypt);
         SMIMEEnvelopedGenerator encryptor = new SMIMEEnvelopedGenerator();
         encryptor.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receiverCert).setProvider("BC"));
 			/* Encrypt the message */
@@ -220,7 +220,7 @@ public class Encryptor {
         }
         byte[] messageContentBytes =  recipientInfo.getContent(recipient);
         //log.info(" ------- Message Contents: ${new String(messageContentBytes)}");
-        smimeMessageReq = new SMIMEMessage(new ByteArrayInputStream(messageContentBytes));
+        smimeMessageReq = new SMIMEMessage(messageContentBytes);
         ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
         responseVS.setSMIME(smimeMessageReq);
         return responseVS;

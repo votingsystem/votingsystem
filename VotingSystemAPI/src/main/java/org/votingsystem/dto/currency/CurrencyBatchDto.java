@@ -74,8 +74,7 @@ public class CurrencyBatchDto {
             setLeftOverCurrency(new Currency(csr));
         }
         for(String currencyItem : getCurrency()) {
-            SMIMEMessage smimeMessage = new SMIMEMessage(new ByteArrayInputStream(
-                    Base64.getDecoder().decode(currencyItem.getBytes())));
+            SMIMEMessage smimeMessage = new SMIMEMessage(Base64.getDecoder().decode(currencyItem.getBytes()));
             smimeMessage.isValidSignature();
             try {
                 Currency currency = new Currency(smimeMessage);

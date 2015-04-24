@@ -178,7 +178,7 @@ public class MessageSMIME extends EntityVS implements Serializable {
 
     public SMIMEMessage getSMIME() throws Exception {
 		if(smimeMessage == null && content != null) {
-			smimeMessage = new SMIMEMessage(new ByteArrayInputStream(content));
+			smimeMessage = new SMIMEMessage(content);
             smimeMessage.isValidSignature();
 		}
 		return smimeMessage;

@@ -217,7 +217,7 @@ public class SocketMessageDto {
 
     @JsonIgnore
     public SMIMEMessage getSMIME() throws Exception {
-        if(smime == null) smime = new SMIMEMessage(new ByteArrayInputStream(Base64.getDecoder().decode(smimeMessage)));
+        if(smime == null) smime = new SMIMEMessage(Base64.getDecoder().decode(smimeMessage));
         return smime;
     }
 

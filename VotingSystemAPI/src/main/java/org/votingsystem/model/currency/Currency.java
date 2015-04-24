@@ -562,7 +562,7 @@ public class Currency extends EntityVS implements Serializable  {
         s.defaultReadObject();
         byte[] smimeMessageBytes = (byte[]) s.readObject();
         if(smimeMessageBytes != null) {
-            smimeMessage = new SMIMEMessage(new ByteArrayInputStream(smimeMessageBytes));
+            smimeMessage = new SMIMEMessage(smimeMessageBytes);
         }
         if(x509AnonymousCert != null) {
             validFrom = x509AnonymousCert.getNotBefore();

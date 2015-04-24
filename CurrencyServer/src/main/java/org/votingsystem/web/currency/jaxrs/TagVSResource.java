@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -38,19 +39,13 @@ public class TagVSResource {
 
     @Path("/")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object index(@DefaultValue("") @QueryParam("tag") String tag, @Context ServletContext context,
-                  @Context HttpServletRequest req, @Context HttpServletResponse resp) {
+    public Response index(@DefaultValue("") @QueryParam("tag") String tag, @Context ServletContext context,
+                  @Context HttpServletRequest req, @Context HttpServletResponse resp) throws JsonProcessingException {
         Query query = dao.getEM().createQuery("select t from TagVS t where t.name like :tag").setParameter("tag",
-                "%" + tag.toUpperCase() +  "%");
+                "%" + tag.toUpperCase() + "%");
         List<TagVS> tagVSList = query.getResultList();
-        List resultList = new ArrayList<>();
-        for(TagVS tagVS : tagVSList) {
-            resultList.add(tagVS);
-        }
-        Map result = new HashMap<>();
-        result.put("tagRecords", resultList);
-        result.put("numTotalTags", tagVSList.size());
-        return result;
+        ResultListDto<TagVS> resultListDto = new ResultListDto<>(tagVSList, 0, tagVSList.size(), tagVSList.size());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
     @POST @Path("/")

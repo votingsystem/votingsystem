@@ -58,7 +58,7 @@ public class SMIMESignedSender implements Callable<ResponseVS> {
                 responseVS.setMessageBytes(decryptedBytes);
             } else if(responseContentType != null && ResponseVS.SC_OK == responseVS.getStatusCode() &&
                     (responseContentType == ContentTypeVS.VOTE || responseContentType == ContentTypeVS.JSON_SIGNED)) {
-                responseVS.setSMIME(new SMIMEMessage(new ByteArrayInputStream(responseVS.getMessageBytes())));
+                responseVS.setSMIME(new SMIMEMessage(responseVS.getMessageBytes()));
             }
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

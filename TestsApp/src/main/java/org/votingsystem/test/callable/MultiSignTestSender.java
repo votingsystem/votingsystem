@@ -38,8 +38,7 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
         ResponseVS responseVS = HttpHelper.getInstance().sendData(
                 smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED, serverURL);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            byte[] multiSigendResponseBytes = responseVS.getMessageBytes();
-            SMIMEMessage smimeResponse = new SMIMEMessage(new ByteArrayInputStream(multiSigendResponseBytes));
+            SMIMEMessage smimeResponse = new SMIMEMessage(responseVS.getMessageBytes());
             log.info("- smimeResponse.isValidSignature(): " + smimeResponse.isValidSignature());
         } else throw new ExceptionVS(responseVS.getMessage());
         return responseVS;

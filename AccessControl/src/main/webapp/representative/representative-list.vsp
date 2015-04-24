@@ -28,7 +28,7 @@
             <section id="page1">
                 <div cross-fade>
                     <div layout flex horizontal wrap around-justified>
-                        <template repeat="{{representative in representativeData.representatives}}">
+                        <template repeat="{{representative in representativeData.resultList}}">
                             <div on-tap="{{showRepresentativeDetails}}" class='card representativeDiv'>
                                 <div class='representativeImgCol'>
                                     <img src='{{representative.imageURL}}'/>

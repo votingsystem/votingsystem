@@ -96,8 +96,7 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
     }
 
     public void validateTransactionVSResponse(Map<String, String> dataMap, Set<TrustAnchor> trustAnchor) throws Exception {
-        SMIMEMessage receipt = new SMIMEMessage(new ByteArrayInputStream(
-                Base64.getDecoder().decode(((String)dataMap.get("receipt")).getBytes())));
+        SMIMEMessage receipt = new SMIMEMessage(Base64.getDecoder().decode(((String)dataMap.get("receipt")).getBytes()));
         if(dataMap.containsKey("leftOverCoin")) {
 
         }
@@ -107,8 +106,7 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
         if(currencyMap.size() != dataMap.size()) throw new ExceptionVS("Num. currency: '" +
                 currencyMap.size() + "' - num. receipts: " + dataMap.size());
         for(String hashCertVS : dataMap.keySet()) {
-            SMIMEMessage smimeReceipt = new SMIMEMessage(new ByteArrayInputStream(
-                    Base64.getDecoder().decode(dataMap.get(hashCertVS).getBytes())));
+            SMIMEMessage smimeReceipt = new SMIMEMessage(Base64.getDecoder().decode(dataMap.get(hashCertVS).getBytes()));
             String signatureHashCertVS = CertUtils.getHashCertVS(smimeReceipt.getCurrencyCert(), ContextVS.CURRENCY_OID);
             Currency currency = currencyMap.remove(signatureHashCertVS);
             currency.validateReceipt(smimeReceipt, trustAnchor);

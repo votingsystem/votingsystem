@@ -1,7 +1,7 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.RepresentativeAccreditationsDto;
 import org.votingsystem.dto.voting.RepresentativeDto;
 import org.votingsystem.dto.voting.RepresentativeVotingHistoryDto;
@@ -22,7 +22,6 @@ import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.util.EmailTemplateWrapper;
-
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;
@@ -91,23 +90,19 @@ public class RepresentativeResource {
             throws ServletException, IOException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         List<RepresentativeDto> responseList = new ArrayList<>();
-        Map representativeMap  = new HashMap();
         Query query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
                 .setParameter("type", UserVS.Type.REPRESENTATIVE);
         List<UserVS> representativeList = query.getResultList();
         for(UserVS representative : representativeList) {
             responseList.add(representativeBean.geRepresentativeDto(representative));
         }
-        representativeMap.put("offset", offset);
-        representativeMap.put("max", max);
-        representativeMap.put("representatives", responseList);
-        representativeMap.put("numRepresentatives", responseList.size());
-        representativeMap.put("numTotalRepresentatives", responseList.size());//TODO totalCount
+        //TODO totalCount
+        ResultListDto<RepresentativeDto> resultListDto = new ResultListDto<>(responseList, offset, max, responseList.size());
         if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeMap))
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
                     .type(MediaTypeVS.JSON).build();
         } else {
-            req.setAttribute("representativeData", JSON.getMapper().writeValueAsString(representativeMap));
+            req.setAttribute("resultListDto", JSON.getMapper().writeValueAsString(resultListDto));
             context.getRequestDispatcher("/representative/index.xhtml").forward(req, resp);
             return Response.ok().build();
         }

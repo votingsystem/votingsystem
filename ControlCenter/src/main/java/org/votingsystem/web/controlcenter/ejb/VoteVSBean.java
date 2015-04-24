@@ -72,7 +72,7 @@ public class VoteVSBean {
                 eventVS.getAccessControlVS().getVoteServiceURL());
         if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(messages.get(
                 "accessRequestVoteErrorMsg", responseVS.getMessage()));
-        SMIMEMessage smimeMessageResp = new SMIMEMessage(new ByteArrayInputStream(responseVS.getMessageBytes()));
+        SMIMEMessage smimeMessageResp = new SMIMEMessage(responseVS.getMessageBytes());
         if(!smimeMessageResp.isValidSignature() || !smimeMessageResp.getContentDigestStr().equals(signedVoteDigest)) {
             throw new ValidationExceptionVS("ERROR - expected signedVoteDigest: " + signedVoteDigest + " - found: " +
                     smimeMessageResp.getContentDigestStr());

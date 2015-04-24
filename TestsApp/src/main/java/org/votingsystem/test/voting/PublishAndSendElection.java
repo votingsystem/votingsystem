@@ -179,7 +179,7 @@ public class PublishAndSendElection {
         String eventURL = ((List<String>)responseVS.getData()).iterator().next();
         byte[] responseBytes = responseVS.getMessageBytes();
         ContextVS.getInstance().copyFile(responseBytes, "/electionSimulation", "ElectionPublishedReceipt");
-        SMIMEMessage dnieMimeMessage = new SMIMEMessage(new ByteArrayInputStream(responseBytes));
+        SMIMEMessage dnieMimeMessage = new SMIMEMessage(responseBytes);
         responseVS = HttpHelper.getInstance().getData(eventURL, ContentTypeVS.JSON);
         EventVSDto eventVSJSON = JSON.getMapper().readValue(responseVS.getMessage(), EventVSDto.class);
         return eventVSJSON.getEventVSElection();

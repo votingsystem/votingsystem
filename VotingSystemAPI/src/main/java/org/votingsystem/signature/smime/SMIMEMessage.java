@@ -80,6 +80,10 @@ public class SMIMEMessage extends MimeMessage {
         super(ContextVS.MAIL_SESSION, inputStream);
     }
 
+    public SMIMEMessage(byte[] messageBytes) throws Exception {
+        super(ContextVS.MAIL_SESSION, (new ByteArrayInputStream(messageBytes)));
+    }
+
     public SMIMEMessage load() throws Exception {
         if(contentInfo == null) contentInfo = new SMIMEContentInfo(getContent(), getHeader(CONTENT_TYPE_VS));
         return this;
