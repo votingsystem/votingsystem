@@ -49,7 +49,7 @@ public class JSON {
     }
 
     public static ObjectMapper getMapper() {
-        ObjectMapper mapper = JSON.getMapper();
+        ObjectMapper mapper = new ObjectMapper();
         //mapper.setDateFormat(dateFormat);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.enable(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN);
