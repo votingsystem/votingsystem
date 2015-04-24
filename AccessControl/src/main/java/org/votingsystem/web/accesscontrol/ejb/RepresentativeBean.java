@@ -139,7 +139,7 @@ public class RepresentativeBean {
         String backupFileName = format("{0}_EventVS_{1}.zip", TypeVS.REPRESENTATIVE_DATA, eventVS.getId());
         if(zipResult.exists()) {
             log.info("existing backup file:" + backupFileName);
-            RepresentativesAccreditations repAccreditations = new ObjectMapper().readValue(metaInfFile,
+            RepresentativesAccreditations repAccreditations = JSON.getMapper().readValue(metaInfFile,
                     new TypeReference<RepresentativesAccreditations>() {});
             return repAccreditations;
         }
@@ -275,7 +275,7 @@ public class RepresentativeBean {
         RepresentativesAccreditations representativesAccreditations = new RepresentativesAccreditations(numRepresentatives,
                 numRepresentativesWithAccessRequest, numRepresentativesWithVote, numTotalRepresentedWithAccessRequest,
                 numTotalRepresented, numVotesRepresentedByRepresentatives, optionsMap, representativesMap);
-        new ObjectMapper().writeValue(metaInfFile, representativesAccreditations);
+        JSON.getMapper().writeValue(metaInfFile, representativesAccreditations);
         return representativesAccreditations;
     }
 
@@ -303,7 +303,7 @@ public class RepresentativeBean {
         if(zipResult.exists()) {
             metaInfFile = new File(basedir + "/meta.inf");
             if(metaInfFile.exists()) {
-                RepresentativeAccreditationsMetaInf metaInf = new ObjectMapper().readValue(
+                RepresentativeAccreditationsMetaInf metaInf = JSON.getMapper().readValue(
                         metaInfFile, new TypeReference<RepresentativeAccreditationsMetaInf>() {});
                 return metaInf;
             }
@@ -327,7 +327,7 @@ public class RepresentativeBean {
         RepresentativeAccreditationsMetaInf metaInf = new RepresentativeAccreditationsMetaInf(numAccreditations,
                 selectedDate, representativeURL, accreditationsPath + ".zip", downloadURL);
         metaInfFile = new File(basedir + "/meta.inf");
-        new ObjectMapper().writeValue(new FileOutputStream(metaInfFile), metaInf);
+        JSON.getMapper().writeValue(new FileOutputStream(metaInfFile), metaInf);
         new ZipUtils(basedir).zipIt(zipResult);
         log.info("getAccreditationsBackup - zipResult: " + zipResult.getAbsolutePath());
         return metaInf;
@@ -404,7 +404,7 @@ public class RepresentativeBean {
         if(zipResult.exists()) {
             metaInfFile = new File(basedir + "/meta.inf");
             if(metaInfFile.exists()) {
-                RepresentativeVotingHistoryMetaInf metaInf = new ObjectMapper().readValue(metaInfFile,
+                RepresentativeVotingHistoryMetaInf metaInf = JSON.getMapper().readValue(metaInfFile,
                         new TypeReference<RepresentativeVotingHistoryMetaInf>() {});
                 return metaInf;
             }
@@ -424,7 +424,7 @@ public class RepresentativeBean {
         RepresentativeVotingHistoryMetaInf metaInf = new RepresentativeVotingHistoryMetaInf(numVotes, dateFrom,
                 dateTo, representativeURL, votingHistoryPath + ".zip" , downloadURL);
         metaInfFile = new File(basedir + "/meta.inf");
-        new ObjectMapper().writeValue(new FileOutputStream(metaInfFile), metaInf);
+        JSON.getMapper().writeValue(new FileOutputStream(metaInfFile), metaInf);
         new ZipUtils(basedir).zipIt(zipResult);
         return metaInf;
     }

@@ -1,7 +1,5 @@
 package org.votingsystem.web.currency.jaxrs;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.ast.DocumentHeader;
 import org.votingsystem.model.MessageSMIME;
@@ -39,7 +37,7 @@ public class AsciiDocResource {
     @Inject SignatureBean signatureBean;
 
 
-    @GET@Path("/")
+    @GET @Path("/")
     public Response index(@Context ServletContext context, @Context HttpServletRequest req,
               @Context HttpServletResponse resp) throws ServletException, IOException {
         File asciiFile = new File(testFile);
@@ -51,8 +49,7 @@ public class AsciiDocResource {
         return Response.ok().entity(htmlBuffer.toString()).build();
     }
 
-    @Path("/test")
-    @POST
+    @POST @Path("/test")
     public Response testSMIME(MessageSMIME messageSMIME, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String asciiDocStr = messageSMIME.getSMIME().getSignedContent();
@@ -72,8 +69,8 @@ public class AsciiDocResource {
         //StructuredDocument document = asciidoctor.readDocumentStructure(asciiDocStr, new HashMap<String, Object>());
         DocumentHeader header = asciidoctor.readDocumentHeader(asciiDocStr);
         String metaInf = (String) header.getAttributes().get("metaInfVS");
-        JsonNode actualObj = new ObjectMapper().readTree("{\"k1\":\"v1\"}");
         log.info("loadAsciiDoc - metaInfJSON: " + metaInf);
         return html;
     }
+
 }

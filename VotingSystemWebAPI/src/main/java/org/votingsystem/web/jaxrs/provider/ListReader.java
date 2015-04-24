@@ -1,7 +1,7 @@
 package org.votingsystem.web.jaxrs.provider;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.util.JSON;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
@@ -31,7 +31,7 @@ public class ListReader implements MessageBodyReader<List<String>> {
     public List<String> readFrom(Class<List<String>> aClass, Type type, Annotation[] annotations, MediaType mediaType,
                          MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws
             IOException, WebApplicationException {
-        return new ObjectMapper().readValue(inputStream, new TypeReference<List<String>>() {});
+        return JSON.getMapper().readValue(inputStream, new TypeReference<List<String>>() {});
     }
 
 

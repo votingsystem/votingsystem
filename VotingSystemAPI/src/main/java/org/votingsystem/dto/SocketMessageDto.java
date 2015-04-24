@@ -223,7 +223,7 @@ public class SocketMessageDto {
 
     public SocketMessageDto setSMIME(SMIMEMessage smimeMessage) throws Exception {
         this.smime = smimeMessage;
-        setSmimeMessage(Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
+        this.smimeMessage = Base64.getEncoder().encodeToString(smimeMessage.getBytes());
         return this;
     }
 

@@ -1,7 +1,6 @@
 package org.votingsystem.signature.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -358,8 +357,9 @@ public class CertUtils {
         byte[] extensionValue =  x509Certificate.getExtensionValue(extensionOID);
         if(extensionValue == null) return null;
         DERTaggedObject derTaggedObject = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(extensionValue);
-        return new ObjectMapper().readValue(((DERUTF8String) derTaggedObject.getObject()).getString(),
-                new TypeReference<HashMap<String, String>>() { });
+        return JSON.getMapper().readValue(((DERUTF8String) derTaggedObject.getObject()).getString(),
+                new TypeReference<HashMap<String, String>>() {
+                });
     }
 
     public static <T> T getCertExtensionData(Class<T> type, X509Certificate x509Certificate,

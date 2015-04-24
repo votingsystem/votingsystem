@@ -47,7 +47,7 @@ public class ShopExampleResource {
         TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST("currency shop example", UserVS.Type.GROUP,
                 new BigDecimal(1), "EUR", "ES0878788989450000000007", "shop example payment - " + new Date(), TagVS.WILDTAG);
         dto.setPaymentOptions(Arrays.asList(Payment.SIGNED_TRANSACTION,
-                Payment.ANONYMOUS_SIGNED_TRANSACTION, Payment.CASH_SEND));
+                Payment.CURRENCY_BATCH, Payment.CASH_SEND));
         String shopSessionID = dto.getUUID().substring(0, 8);
         String paymentInfoServiceURL = config.getRestURL() + "/shop/" + shopSessionID;
         shopExampleBean.putTransactionRequest(shopSessionID, dto);

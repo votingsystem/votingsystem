@@ -6,6 +6,7 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -49,7 +50,7 @@ public class EncryptorResource {
         PublicKey receiverPublic =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decodedPK));
         //log.debug("receiverPublic.toString(): " + receiverPublic.toString());
         request.setMessage(format("Hello ''{0}'' from ''{1}''", request.getFrom(), config.getServerName()));
-        byte[] responseBytes = new ObjectMapper().writeValueAsBytes(request);
+        byte[] responseBytes = JSON.getMapper().writeValueAsBytes(request);
         //if(requestMap.receiverCert) signatureBean.encryptToCMS(responseBytes, requestMap.receiverCert)
         byte[] encryptedResponse = signatureBean.encryptMessage(responseBytes, receiverPublic);
         return Response.ok().entity(encryptedResponse).type(MediaTypeVS.MULTIPART_ENCRYPTED).build();

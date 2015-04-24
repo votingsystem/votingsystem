@@ -87,7 +87,7 @@ public class EventVSElectionBean {
         String fromUser = config.getServerName();
         String toUser = controlCenterVS.getName();
         String subject = messages.get("mime.subject.votingEventValidated");
-        SMIMEMessage smime = signatureBean.getSMIMETimeStamped(fromUser, toUser, new ObjectMapper().writeValueAsString(
+        SMIMEMessage smime = signatureBean.getSMIMETimeStamped(fromUser, toUser, JSON.getMapper().writeValueAsString(
                 request), subject, header);
         ResponseVS responseVS = HttpHelper.getInstance().sendData(smime.getBytes(),
                 ContentTypeVS.JSON_SIGNED, controlCenterVS.getServerURL() + "/rest/eventVSElection");
@@ -132,7 +132,7 @@ public class EventVSElectionBean {
                 TypeVS.VOTING_EVENT, eventVS.getId());
         if(backupFiles.getZipResult().exists()) {
             log.info("generateBackup - backup file already exists");
-            //return new ObjectMapper().readValue(backupFiles.getMetaInfFile(), new TypeReference<EventVSMetaInf>() {});
+            //return JSON.getMapper().readValue(backupFiles.getMetaInfFile(), new TypeReference<EventVSMetaInf>() {});
             return;
         }
         RepresentativesAccreditations representativesAccreditations =
@@ -156,7 +156,7 @@ public class EventVSElectionBean {
         Long numTotalAccessRequests = (long) query.getSingleResult();
         EventVSMetaInf eventMetaInf = new EventVSMetaInf(eventVS, config.getContextURL(), downloadURL);
         eventMetaInf.setBackupData(numTotalVotes, numTotalAccessRequests);
-        new ObjectMapper().writeValue(new FileOutputStream(backupFiles.getMetaInfFile()), eventMetaInf);
+        JSON.getMapper().writeValue(new FileOutputStream(backupFiles.getMetaInfFile()), eventMetaInf);
         DecimalFormat formatted = new DecimalFormat("00000000");
         Long votesBatch = 0L;
         String votesBaseDir= format("{0}/votes/batch_{1}", filesDir.getAbsolutePath(), formatted.format(++votesBatch));
@@ -205,7 +205,7 @@ public class EventVSElectionBean {
         }
         new ZipUtils(backupFiles.getBaseDir()).zipIt(backupFiles.getZipResult());
         //TODO copy zip result to serve as static resource -> downloadURL
-        eventVS.setMetaInf(new ObjectMapper().writeValueAsString(eventMetaInf));
+        eventVS.setMetaInf(JSON.getMapper().writeValueAsString(eventMetaInf));
         dao.merge(eventVS);
         log.info("ZipResult absolutePath: " + backupFiles.getZipResult().getAbsolutePath());
     }

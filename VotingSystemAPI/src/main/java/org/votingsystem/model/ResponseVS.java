@@ -1,7 +1,6 @@
 package org.votingsystem.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
@@ -191,8 +190,9 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     public Map<String, Object> getMessageMap() throws IOException {
         if(messageMap != null) return messageMap;
         String message = getMessage();
-        if(message != null) return  new ObjectMapper().readValue(message.trim(),
-                new TypeReference<HashMap<String, Object>>() {});
+        if(message != null) return  JSON.getMapper().readValue(message.trim(),
+                new TypeReference<HashMap<String, Object>>() {
+                });
         return null;
     }
 

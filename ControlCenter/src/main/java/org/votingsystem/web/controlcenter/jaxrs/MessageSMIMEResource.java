@@ -79,7 +79,7 @@ public class MessageSMIMEResource {
         } else {
             req.setAttribute("operation", operation);
             req.setAttribute("smimeMessage", smimeMessageStr);
-            req.setAttribute("signedContentMap", new ObjectMapper().writeValueAsString(signedContentMap));
+            req.setAttribute("signedContentMap", JSON.getMapper().writeValueAsString(signedContentMap));
             req.setAttribute("timeStampDate", timeStampDate.getTime());
             req.setAttribute("viewer",  viewer);
             context.getRequestDispatcher("/messageSMIME/contentViewer.xhtml").forward(req, resp);

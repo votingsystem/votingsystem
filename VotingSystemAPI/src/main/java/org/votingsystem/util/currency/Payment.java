@@ -6,6 +6,6 @@ package org.votingsystem.util.currency;
  */
 public enum Payment {
 
-    SIGNED_TRANSACTION, ANONYMOUS_SIGNED_TRANSACTION, CASH_SEND;
+    SIGNED_TRANSACTION, CURRENCY_BATCH, CASH_SEND;
 
 }

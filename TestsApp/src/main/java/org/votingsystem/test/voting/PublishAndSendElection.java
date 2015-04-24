@@ -168,7 +168,7 @@ public class PublishAndSendElection {
         eventVS.setSubject(eventVS.getSubject()+ " -> " + DateUtils.getDayWeekDateStr(new Date()));
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF,
-                ContextVS.getInstance().getAccessControl().getName(), new ObjectMapper().writeValueAsString(
+                ContextVS.getInstance().getAccessControl().getName(), JSON.getMapper().writeValueAsString(
                         new EventVSDto(eventVS)), smimeMessageSubject);
         SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage,
                 ContextVS.getInstance().getAccessControl().getPublishElectionURL(),
@@ -199,7 +199,7 @@ public class PublishAndSendElection {
         String smimeMessageSubject = "cancelEventMsgSubject";
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF, ContextVS.getInstance().getAccessControl().
-                getName(), new ObjectMapper().writeValueAsString(cancelData), smimeMessageSubject);
+                getName(), JSON.getMapper().writeValueAsString(cancelData), smimeMessageSubject);
         SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
                 ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(),
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
@@ -219,7 +219,7 @@ public class PublishAndSendElection {
         cancelDataMap.put("UUID", UUID.randomUUID().toString());
         SignatureService signatureService = SignatureService.getUserVSSignatureService(nif, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(nif, ContextVS.getInstance().getAccessControl().getName(),
-                new ObjectMapper().writeValueAsString(cancelDataMap), "cancelVote");
+                JSON.getMapper().writeValueAsString(cancelDataMap), "cancelVote");
         SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
                 ContextVS.getInstance().getAccessControl().getVoteCancelerServiceURL(),
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),

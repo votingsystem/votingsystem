@@ -55,7 +55,7 @@ public class EventVSElectionResource {
         eventVSBean.checkEventVSDates(eventVS);
         EventVSDto eventVSDto = new EventVSDto(eventVS, config.getServerName(), config.getRestURL());
         if(contentType.contains("json")) {
-            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventVSDto))
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventVSDto))
                     .type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("eventMap", JSON.getMapper().writeValueAsString(eventVSDto));
@@ -96,7 +96,7 @@ public class EventVSElectionResource {
         eventsVSMap.put("max", max);
         eventsVSMap.put("totalCount", resultListJSON.size()); //TODO
         if(contentType.contains("json")){
-            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(eventsVSMap))
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventsVSMap))
                     .type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("eventsVSMap", JSON.getMapper().writeValueAsString(eventsVSMap));
@@ -122,7 +122,7 @@ public class EventVSElectionResource {
                 "eventId: " + id).build();
         Map statsMap = eventVSBean.getStatsMap(eventVS);
         if(contentType.contains("json")) {
-            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(statsMap))
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(statsMap))
                     .type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("statsJSON", JSON.getMapper().writeValueAsString(statsMap));

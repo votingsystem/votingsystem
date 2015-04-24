@@ -38,7 +38,6 @@ public class CurrencyResource {
     private static final Logger log = Logger.getLogger(CurrencyResource.class.getSimpleName());
 
     @Inject DAOBean dao;
-    @Inject CurrencyResource currencyResource;
     @Inject UserVSBean userVSBean;
     @Inject TransactionVSBean transactionVSBean;
     @Inject ConfigVS config;
@@ -68,7 +67,7 @@ public class CurrencyResource {
         return Response.ok().build();
     }
 
-    @Path("/request")
+    @Path("/requestLog")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Object processReques(@Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {

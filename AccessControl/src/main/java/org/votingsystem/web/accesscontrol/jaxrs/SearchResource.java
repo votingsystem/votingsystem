@@ -6,6 +6,7 @@ import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.RepresentativeDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
@@ -52,7 +53,7 @@ public class SearchResource {
         }
         Map resultMap = new HashMap<>();
         resultMap.put("eventsVS", resultList);
-        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/representative") @GET
@@ -74,7 +75,7 @@ public class SearchResource {
         representativeMap.put("max", max);
         representativeMap.put("numRepresentatives", resultList.size());
         representativeMap.put("numTotalRepresentatives", resultList.size()); //TODO totalCount
-        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(representativeMap)).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeMap)).build();
     }
 
     @Path("/eventVS") @GET
@@ -109,7 +110,7 @@ public class SearchResource {
         resultMap.put("totalCount", resultList.size());
         resultMap.put("offset", offset);
         resultMap.put("max", max);
-        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
     }
 
 

@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 import org.bouncycastle.tsp.TSPException;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
+import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.model.BatchRequest;
 import org.votingsystem.model.MessageSMIME;
@@ -49,16 +50,16 @@ public class CurrencyBean {
     @Inject MessagesBean messages;
 
 
-    public Map processCurrencyTransaction(CurrencyBatch currencyBatch) throws Exception {
-        Map dataMap = new HashMap<>();
+    public CurrencyBatchResponseDto processCurrencyTransaction(CurrencyBatch currencyBatch) throws Exception {
+        CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto();
         List<Currency> validatedCurrencyList = new ArrayList<>();
         Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", currencyBatch.getToUserIBAN());
-        UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
-        currencyBatch.setToUserVS(toUserVS);
         TagVS tagVS = config.getTag(currencyBatch.getTag());
         if(tagVS == null) throw new ExceptionVS(
                 "CurrencyTransactionBatch:" + currencyBatch.getBatchUUID() + " missing TagVS");
         currencyBatch.setTagVS(tagVS);
+        UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
+        currencyBatch.setToUserVS(toUserVS);
         if(toUserVS == null) throw new ExceptionVS("CurrencyTransactionBatch:" + currencyBatch.getBatchUUID() +
                 " has wrong receptor IBAN '" + currencyBatch.getToUserIBAN());
         for(Currency currency : currencyBatch.getCurrencyList()) {
@@ -85,11 +86,10 @@ public class CurrencyBean {
             currencyBatch.getLeftOverCurrency().setTag(config.getTag(
                     currencyBatch.getLeftOverCurrency().getCertExtensionDto().getTag()));
             Currency leftOverCoin = csrBean.signCurrencyRequest(currencyBatch.getLeftOverCurrency());
-            dataMap.put("leftOverCoin", new String(leftOverCoin.getIssuedCertPEM(), "UTF-8"));
+            responseDto.setLeftOverCoin(new String(leftOverCoin.getIssuedCertPEM(), "UTF-8"));
         }
-        dataMap.put("receipt", Base64.getEncoder().encodeToString(receipt.getBytes()));
-        //return new ResponseVS(statusCode:ResponseVS.SC_OK, contentType: ContentTypeVS.JSON, data: dataMap)
-        return dataMap;
+        responseDto.setReceipt(Base64.getEncoder().encodeToString(receipt.getBytes()));
+        return responseDto;
     }
 
     public Currency validateCurrency(Currency currency) throws ExceptionVS, TSPException {

@@ -7,6 +7,7 @@ import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.JSON;
 
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -37,7 +38,7 @@ public class Multisign {
         SignatureService signatureService1 = SignatureService.genUserVSSignatureService("00111222V");
         SignatureService signatureService2 = SignatureService.genUserVSSignatureService("03455543T");
         SMIMEMessage smimeMessage = signatureService.getSMIME("08888888D", "00111222V",
-                new ObjectMapper().writeValueAsString(dataToSignMap), DateUtils.getDateStr(new Date()));
+                JSON.getMapper().writeValueAsString(dataToSignMap), DateUtils.getDateStr(new Date()));
 
         SMIMEMessage smimeSigned = signatureService1.getSMIMEMultiSigned("03455543T", "08888888D", smimeMessage,
                 DateUtils.getDateStr(new Date()));

@@ -279,4 +279,5 @@ public class CurrencyBatchDto {
     public void setToUserName(String toUserName) {
         this.toUserName = toUserName;
     }
+
 }

@@ -1,10 +1,10 @@
 package org.votingsystem.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.util.EntityVS;
+import org.votingsystem.util.JSON;
 
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
@@ -301,7 +301,7 @@ public class UserVS extends EntityVS implements Serializable {
 
     public void updateAdmins(Set<String> admins) throws IOException {
         getMetaInfMap().put("adminsDNI", admins);
-        this.metaInf = new ObjectMapper().writeValueAsString(metaInfMap);
+        this.metaInf = JSON.getMapper().writeValueAsString(metaInfMap);
     }
 
     public void setSignerInformation(SignerInformation signer) {
@@ -409,7 +409,7 @@ public class UserVS extends EntityVS implements Serializable {
         this.signerInformation = signer;
     }
 
-    public String getContentDigestBase64() {
+    public String getSignedContentDigestBase64() {
         if (signerInformation.getContentDigest() == null) return null;
         return DatatypeConverter.printBase64Binary(signerInformation.getContentDigest());
     }
@@ -422,8 +422,8 @@ public class UserVS extends EntityVS implements Serializable {
         if(metaInfMap == null) {
             if(metaInf == null) {
                 metaInfMap = new HashMap<>();
-                metaInf = new ObjectMapper().writeValueAsString(metaInfMap);
-            } else metaInfMap = new ObjectMapper().readValue(metaInf, HashMap.class);
+                metaInf = JSON.getMapper().writeValueAsString(metaInfMap);
+            } else metaInfMap = JSON.getMapper().readValue(metaInf, HashMap.class);
         }
         return metaInfMap;
     }

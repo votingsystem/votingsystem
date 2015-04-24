@@ -286,14 +286,12 @@ public class Currency extends EntityVS implements Serializable  {
         this.currencyCode = currencyCode;
         this.tag = tag;
         try {
-            setOriginHashCertVS(UUID.randomUUID().toString());
-            setHashCertVS(CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST));
+            this.originHashCertVS = UUID.randomUUID().toString();
+            this.hashCertVS = CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
             certificationRequest = CertificationRequestVS.getCurrencyRequest(
                     ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
                     ContextVS.PROVIDER, currencyServerURL, hashCertVS, amount, this.currencyCode, tag.getName());
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+        } catch(Exception ex) {  ex.printStackTrace(); }
     }
 
     public Currency loadCertData(X509Certificate x509AnonymousCert, TimePeriod timePeriod,
@@ -510,7 +508,7 @@ public class Currency extends EntityVS implements Serializable  {
 
     public void validateReceipt(SMIMEMessage smimeReceipt, Set<TrustAnchor> trustAnchor)
             throws Exception {
-        if(!smimeMessage.getSigner().getContentDigestBase64().equals(smimeReceipt.getSigner().getContentDigestBase64())){
+        if(!smimeMessage.getSigner().getSignedContentDigestBase64().equals(smimeReceipt.getSigner().getSignedContentDigestBase64())){
             throw new ExceptionVS("Signer content digest mismatch");
         }
         for(X509Certificate cert : smimeReceipt.getSignersCerts()) {
@@ -570,7 +568,6 @@ public class Currency extends EntityVS implements Serializable  {
             validFrom = x509AnonymousCert.getNotBefore();
             validTo = x509AnonymousCert.getNotAfter();
         }
-
     }
 
 }

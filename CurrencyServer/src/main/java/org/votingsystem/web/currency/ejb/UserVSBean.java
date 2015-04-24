@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.ejb;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.UserVSDto;
@@ -9,6 +8,7 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
@@ -46,7 +46,7 @@ public class UserVSBean {
         UserVS signer = messageSMIMEReq.getUserVS();
         if(!signatureBean.isUserAdmin(signer.getNif())) throw new ExceptionVS(messages.get("userWithoutPrivilegesErrorMsg",
                 signer.getNif(), TypeVS.CERT_CA_NEW.toString()));
-        ObjectNode dataJSON =(ObjectNode)  new ObjectMapper().readTree(messageSMIMEReq.getSMIME().getSignedContent());
+        ObjectNode dataJSON =(ObjectNode)  JSON.getMapper().readTree(messageSMIMEReq.getSMIME().getSignedContent());
         if (dataJSON.get("info") == null || dataJSON.get("certChainPEM") == null || dataJSON.get("operation") == null ||
                 (TypeVS.CERT_USER_NEW != TypeVS.valueOf(dataJSON.get("operation").asText()))) {
             throw new ExceptionVS(messages.get("paramsErrorMsg"));

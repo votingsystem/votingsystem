@@ -172,7 +172,7 @@ public class TransactionVSBean {
                     break;
                 case CURRENCY_SEND:
                     switch(transactionVS.getCurrencyTransactionBatch().getPaymentMethod()) {
-                        case ANONYMOUS_SIGNED_TRANSACTION:
+                        case CURRENCY_BATCH:
                             updateUserVSAccountTo(transactionVS);
                             balancesBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
                                     transactionVS.getTag());

@@ -124,7 +124,7 @@ public class RepresentativeResource {
         }
         RepresentativeDto representativeDto = representativeBean.geRepresentativeDto(representative);
         if(contentType.contains("json")) {
-            return Response.ok().entity(new ObjectMapper().writeValueAsBytes(representativeDto))
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
                     .type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("representativeMap", JSON.getMapper().writeValueAsString(representativeDto));

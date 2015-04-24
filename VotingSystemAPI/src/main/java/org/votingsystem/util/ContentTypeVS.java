@@ -1,7 +1,6 @@
 package org.votingsystem.util;
 
 /**
-
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  *
  * S/MIME signatures are usually "detached signatures": the signature information is separate

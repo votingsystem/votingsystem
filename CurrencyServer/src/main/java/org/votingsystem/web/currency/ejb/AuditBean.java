@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.ejb;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.InitPeriodTransactionVSDto;
@@ -280,7 +279,7 @@ public class AuditBean {
         resultMap.put("timePeriod",timePeriod);
         resultMap.put("userBalances", userBalances);
 
-        String resultBalanceStr = new ObjectMapper().writeValueAsString(resultMap);
+        String resultBalanceStr = JSON.getMapper().writeValueAsString(resultMap);
         Files.write(Paths.get(reportFiles.getJsonFile().getAbsolutePath()), resultBalanceStr.getBytes());
         String subjectSufix = "[" + DateUtils.getDateStr(timePeriod.getDateFrom()) + " - " + DateUtils.getDateStr(timePeriod.getDateTo()) + "]";
         String subject =  messages.get("periodBalancesReportMsgSubject", subjectSufix);

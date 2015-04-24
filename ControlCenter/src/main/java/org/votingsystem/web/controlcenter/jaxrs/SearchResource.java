@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.voting.EventVS;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.controlcenter.ejb.EventVSElectionBean;
@@ -51,7 +52,7 @@ public class SearchResource {
         }
         Map resultMap = new HashMap<>();
         resultMap.put("eventsVS", resultList);
-        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/eventVS") @GET
@@ -86,7 +87,7 @@ public class SearchResource {
         resultMap.put("totalCount", resultList.size());
         resultMap.put("offset", offset);
         resultMap.put("max", max);
-        return Response.ok().entity(new ObjectMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
     }
 
 

@@ -1,7 +1,6 @@
 package org.votingsystem.web.currency.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.util.DateUtils;
@@ -70,7 +69,7 @@ public class LoggerVS {
 
     public static void logReportVS(Map dataMap) throws JsonProcessingException {
         dataMap.put("date", Calendar.getInstance().getTime());
-        reportslog.info(new ObjectMapper().writeValueAsString(dataMap) + ",");
+        reportslog.info(JSON.getMapper().writeValueAsString(dataMap) + ",");
     }
 
     public static void logReportVS(int status, String type, String message, String url) throws JsonProcessingException {
@@ -80,7 +79,7 @@ public class LoggerVS {
         dataMap.put("type", type);
         dataMap.put("message", message);
         dataMap.put("url", url);
-        reportslog.info(new ObjectMapper().writeValueAsString(dataMap) + ",");
+        reportslog.info(JSON.getMapper().writeValueAsString(dataMap) + ",");
     }
 
     public static void logTransactionVS(TransactionVSDto dto) throws JsonProcessingException {
@@ -98,7 +97,7 @@ public class LoggerVS {
         dataMap.put("isTimeLimited", isTimeLimited);
         dataMap.put("dateCreated", DateUtils.getDayWeekDateStr(dateCreated));
         dataMap.put("validTo", DateUtils.getDayWeekDateStr(validTo));
-        currencyIssuedlog.info(new ObjectMapper().writeValueAsString(dataMap) + ",");
+        currencyIssuedlog.info(JSON.getMapper().writeValueAsString(dataMap) + ",");
     }
 
     public static void weekLog(Level level, String msg, Throwable thrown) {

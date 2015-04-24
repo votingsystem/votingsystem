@@ -7,6 +7,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.JSON;
 
 import java.security.MessageDigest;
 import java.util.Base64;
@@ -42,7 +43,7 @@ public class RepresentativeTestDataSender implements Callable<ResponseVS> {
         byte[] resultDigest =  messageDigest.digest(imageBytes);
         SignatureService signatureService = SignatureService.genUserVSSignatureService(representativeNIF);
         SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(representativeNIF,
-                ContextVS.getInstance().getAccessControl().getName(), new ObjectMapper().writeValueAsString(
+                ContextVS.getInstance().getAccessControl().getName(), JSON.getMapper().writeValueAsString(
                 getRequestJSON(representativeNIF, Base64.getEncoder().encodeToString(resultDigest))), subject);
         RepresentativeDataSender representativeDataSender = new RepresentativeDataSender(smimeMessage,
                 FileUtils.getFileFromBytes(imageBytes), ContextVS.getInstance().getAccessControl().getRepresentativeServiceURL());

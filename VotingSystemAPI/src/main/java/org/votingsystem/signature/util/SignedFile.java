@@ -1,12 +1,12 @@
 package org.votingsystem.signature.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 
 import java.io.ByteArrayInputStream;
@@ -84,7 +84,7 @@ public class SignedFile {
     }
 
     public Map getContent() throws Exception {
-        return  new ObjectMapper().readValue(smimeMessage.getSignedContent(),
+        return  JSON.getMapper().readValue(smimeMessage.getSignedContent(),
                 new TypeReference<HashMap<String, Object>>() {});
     }
 

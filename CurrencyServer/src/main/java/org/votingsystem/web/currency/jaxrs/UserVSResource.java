@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.jaxrs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.iban4j.Iban;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
@@ -334,7 +333,7 @@ public class UserVSResource {
     public Response userInfoTest(MessageSMIME messageSMIME, @Context HttpServletRequest req, @Context
         HttpServletResponse resp) throws Exception {
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
-        Map<String, Object> dataMap = new ObjectMapper().readValue(smimeMessage.getSignedContent(), Map.class);
+        Map<String, Object> dataMap = JSON.getMapper().readValue(smimeMessage.getSignedContent(), Map.class);
         //TODO check operation
         TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         BalancesDto dto = balancesBean.getBalancesDto(messageSMIME.getUserVS(), timePeriod);

@@ -21,7 +21,7 @@ public class TestEncryptWallet {
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SignatureService signatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER);
         File fileToEncrypt = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("plainWallet"));
-        //Map<String, Object> dataMap = new ObjectMapper().readValue(fileToEncrypt, new TypeReference<HashMap<String, Object>>() {});
+        //Map<String, Object> dataMap = JSON.getMapper().readValue(fileToEncrypt, new TypeReference<HashMap<String, Object>>() {});
         byte[] encryptedBytes = signatureService.encryptToCMS(FileUtils.getBytesFromFile(fileToEncrypt),
                 signatureService.getCertSigner());
         File encryptedFile = new File (ContextVS.APPDIR + File.separator + ContextVS.WALLET_FILE_NAME);

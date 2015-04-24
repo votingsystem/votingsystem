@@ -8,6 +8,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
 
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -33,7 +34,7 @@ public class RepresentativeDelegatorDataSender implements Callable<ResponseVS> {
         String subject = "representativeDelegationMsgSubject";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(userNIF);
         String toUser = ContextVS.getInstance().getAccessControl().getName();
-        SMIMEMessage smimeMessage = signatureService.getSMIME(userNIF, toUser, new ObjectMapper().writeValueAsString(
+        SMIMEMessage smimeMessage = signatureService.getSMIME(userNIF, toUser, JSON.getMapper().writeValueAsString(
                 new RepresentativeDelegationDto(representativeNIF)), subject);
         SMIMESignedSender senderSender = new SMIMESignedSender(smimeMessage, serviceURL,
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),

@@ -130,7 +130,7 @@ public class CSRBean {
             DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
             switch(attribute.getTagNo()) {
                 case ContextVS.VOTE_TAG:
-                    certExtensionDto = new ObjectMapper().readValue(
+                    certExtensionDto = JSON.getMapper().readValue(
                             ((DERUTF8String)attribute.getObject()).getString(), VoteCertExtensionDto.class);
                     break;
             }
@@ -157,7 +157,7 @@ public class CSRBean {
             switch(attribute.getTagNo()) {
                 case ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG:
                     String certAttributeMapStr = ((DERUTF8String)attribute.getObject()).getString();
-                    certExtensionDto = new ObjectMapper().readValue(certAttributeMapStr,
+                    certExtensionDto = JSON.getMapper().readValue(certAttributeMapStr,
                             AnonymousDelegationCertExtensionDto.class);
                     break;
             }

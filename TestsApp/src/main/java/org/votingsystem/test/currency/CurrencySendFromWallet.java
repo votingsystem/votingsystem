@@ -37,13 +37,13 @@ public class CurrencySendFromWallet {
         CurrencyBatch transactionBatch = new CurrencyBatch();
         transactionBatch.addCurrency(currencyFiles[0]);
         CurrencyBatchDto dto =  transactionBatch.getTransactionVSRequest(TypeVS.CURRENCY_SEND,
-                Payment.ANONYMOUS_SIGNED_TRANSACTION, "First Currency Transaction",
+                Payment.CURRENCY_BATCH, "First Currency Transaction",
                 "ES0878788989450000000007", new BigDecimal(9), "EUR", "WILDTAG", false, currencyServer.getTimeStampServiceURL());
         ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsBytes(dto),
                 ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
         log.info("Currency Transaction result: " + responseVS.getStatusCode());
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        Map<String, Object> responseMap = new ObjectMapper().readValue(
+        Map<String, String> responseMap = JSON.getMapper().readValue(
                 responseVS.getMessage(), new TypeReference<HashMap<String, Object>>() {});
         log.info("Transaction result:" + responseMap);
         transactionBatch.validateTransactionVSResponse(responseMap, currencyServer.getTrustAnchors());

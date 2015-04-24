@@ -1,7 +1,6 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.BalancesDto;
@@ -73,7 +72,7 @@ public class GroupVSResource {
         if(contentType.contains("json")) {
             Map<String, String> requestMap = null;
             try {
-                requestMap = new ObjectMapper().readValue(req.getInputStream(),
+                requestMap = JSON.getMapper().readValue(req.getInputStream(),
                         new TypeReference<HashMap<String, String>>() {});
                 try {dateFrom = DateUtils.getDateFromString(requestMap.get("searchFrom"));} catch(Exception ex) {}
                 try {dateTo = DateUtils.getDateFromString(requestMap.get("searchTo"));} catch(Exception ex) {}

@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.jaxrs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.Subscribe;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
@@ -134,7 +133,7 @@ public class TestResource {
         dataMap.put("status", 200);
         dataMap.put("message", "Hello");
         dataMap.put("coreSignal", "transactionvs-new");
-        SessionVSManager.getInstance().broadcast(new ObjectMapper().writeValueAsString(dataMap));
+        SessionVSManager.getInstance().broadcast(JSON.getMapper().writeValueAsString(dataMap));
         return Response.ok().entity("OK").build();
     }
 

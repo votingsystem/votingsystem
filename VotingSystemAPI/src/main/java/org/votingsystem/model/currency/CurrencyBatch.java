@@ -1,9 +1,7 @@
 package org.votingsystem.model.currency;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.BatchRequest;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
@@ -72,17 +70,6 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
         addCurrency(currency);
     }
 
-    public void initTransactionVSRequest(String toUserName, String toUserIBAN, String subject,
-                 Boolean isTimeLimited, String timeStampServiceURL) throws Exception {
-        for(Currency currency : currencyList) {
-            TransactionVSDto requestDto = currency.getSendRequest(toUserName, toUserIBAN, subject, isTimeLimited);
-            SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(currency.getHashCertVS(),
-                    StringUtils.getNormalized(currency.getToUserName()),
-                    new ObjectMapper().writeValueAsString(requestDto), currency.getSubject(), null);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServiceURL);
-            currency.setSMIME(timeStamper.call());
-        }
-    }
     public CurrencyBatchDto getTransactionVSRequest(TypeVS operation, Payment paymentMethod, String subject, String toUserIBAN,
             BigDecimal batchAmount, String currencyCode, String tag, Boolean isTimeLimited, String timeStampServiceURL)
             throws Exception {
@@ -108,7 +95,7 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
         return dto;
     }
 
-    public void validateTransactionVSResponse(Map dataMap, Set<TrustAnchor> trustAnchor) throws Exception {
+    public void validateTransactionVSResponse(Map<String, String> dataMap, Set<TrustAnchor> trustAnchor) throws Exception {
         SMIMEMessage receipt = new SMIMEMessage(new ByteArrayInputStream(
                 Base64.getDecoder().decode(((String)dataMap.get("receipt")).getBytes())));
         if(dataMap.containsKey("leftOverCoin")) {
@@ -119,11 +106,9 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
         Map<String, Currency> currencyMap = getCurrencyMap();
         if(currencyMap.size() != dataMap.size()) throw new ExceptionVS("Num. currency: '" +
                 currencyMap.size() + "' - num. receipts: " + dataMap.size());
-        for(int i = 0; i < dataMap.size(); i++) {
-            Map receiptData = (Map) dataMap.get(i);
-            String hashCertVS = (String) receiptData.keySet().iterator().next();
+        for(String hashCertVS : dataMap.keySet()) {
             SMIMEMessage smimeReceipt = new SMIMEMessage(new ByteArrayInputStream(
-                    Base64.getDecoder().decode(((String)receiptData.get(hashCertVS)).getBytes())));
+                    Base64.getDecoder().decode(dataMap.get(hashCertVS).getBytes())));
             String signatureHashCertVS = CertUtils.getHashCertVS(smimeReceipt.getCurrencyCert(), ContextVS.CURRENCY_OID);
             Currency currency = currencyMap.remove(signatureHashCertVS);
             currency.validateReceipt(smimeReceipt, trustAnchor);
@@ -266,4 +251,5 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
     public void setTag(String tag) {
         this.tag = tag;
     }
+
 }

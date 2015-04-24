@@ -160,7 +160,9 @@ public class TransactionVSResource {
 
     @Path("/currency")
     @POST @Produces(MediaType.APPLICATION_JSON) @Consumes({"application/json"})
-    public Object currency(CurrencyBatch currencyBatch) throws Exception {
-        return currencyBean.processCurrencyTransaction(currencyBatch);
+    public Response currency(CurrencyBatch currencyBatch) throws Exception {
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
+                currencyBean.processCurrencyTransaction(currencyBatch))).build() ;
     }
+
 }

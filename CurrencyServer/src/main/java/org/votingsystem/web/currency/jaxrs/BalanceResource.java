@@ -1,7 +1,6 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
@@ -96,7 +95,7 @@ public class BalanceResource {
         if(reportFiles.getJsonFile() == null) {
             throw new NotFoundException("reportsForWeekNotFoundMsg - timePeriod: " + timePeriod.toString());
         } else {
-            Map<String, Object> dataMap = new ObjectMapper().readValue(reportFiles.getJsonFile(),
+            Map<String, Object> dataMap = JSON.getMapper().readValue(reportFiles.getJsonFile(),
                     new TypeReference<HashMap<String, Object>>() {});
             if(req.getContentType() != null && req.getContentType().contains("json")) {
                 return dataMap;

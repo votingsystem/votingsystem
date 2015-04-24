@@ -5,6 +5,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.SignatureBean;
+
 import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

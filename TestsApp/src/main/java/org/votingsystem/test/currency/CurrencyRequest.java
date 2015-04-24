@@ -34,21 +34,21 @@ public class CurrencyRequest {
         String curencyCode = "EUR";
         TagVS tag = new TagVS("HIDROGENO");
         Boolean isTimeLimited = true;
-        CurrencyRequestBatch currencyBatch = CurrencyRequestBatch.createRequest(totalAmount, totalAmount, curencyCode, tag,
+        CurrencyRequestBatch requestBatch = CurrencyRequestBatch.createRequest(totalAmount, totalAmount, curencyCode, tag,
                 isTimeLimited, ContextVS.getInstance().getCurrencyServer().getServerURL());
         String messageSubject = "TEST_CURRENCY_REQUEST_DATA_MSG_SUBJECT";
         Map<String, Object> mapToSend = new HashMap<>();
-        byte[] requestBytes = JSON.getMapper().writeValueAsString(currencyBatch.getCurrencyCSRList()).getBytes();
+        byte[] requestBytes = JSON.getMapper().writeValueAsString(requestBatch.getCurrencyCSRList()).getBytes();
         mapToSend.put(ContextVS.CSR_FILE_NAME, requestBytes);
-        String signatureContent =  JSON.getMapper().writeValueAsString(currencyBatch.getRequestDto());
+        String signatureContent =  JSON.getMapper().writeValueAsString(requestBatch.getRequestDto());
         SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(fromUserVS.getNif(),
                 currencyServer.getName(), signatureContent, messageSubject);
         mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, smimeMessage.getBytes());
         ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend, currencyServer.getCurrencyRequestServiceURL());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             CurrencyIssuedDto dto = (CurrencyIssuedDto) responseVS.getMessage(CurrencyIssuedDto.class);
-            currencyBatch.loadIssuedCurrency(dto.getIssuedCurrency());
-            Wallet.saveCurrencyToDir(currencyBatch.getCurrencyMap().values(), ContextVS.getInstance().getProperty("walletDir"));
+            requestBatch.loadIssuedCurrency(dto.getIssuedCurrency());
+            Wallet.saveCurrencyToDir(requestBatch.getCurrencyMap().values(), ContextVS.getInstance().getProperty("walletDir"));
         } else {
             log.log(Level.SEVERE," --- ERROR --- " + responseVS.getMessage());
         }

@@ -272,7 +272,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
             updateProgress(1, 10);
             updateMessage(ContextVS.getMessage("transactionInProgressMsg"));
             CurrencyBatchDto dto =  transactionBatch.getTransactionVSRequest(TypeVS.CURRENCY_SEND,
-                    Payment.ANONYMOUS_SIGNED_TRANSACTION, transactionVSDto.getSubject(),
+                    Payment.CURRENCY_BATCH, transactionVSDto.getSubject(),
                     transactionVSDto.getToUserIBAN().get(0), currency.getAmount(), currency.getCurrencyCode(),
                     currency.getTag().getName(), false, currencyServer.getTimeStampServiceURL());
             updateProgress(3, 10);
@@ -283,7 +283,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 showMessage(responseVS);
             } else {
-                Map<String, Object> responseDataMap = JSON.getMapper().readValue(responseVS.getMessage(),
+                Map<String, String> responseDataMap = JSON.getMapper().readValue(responseVS.getMessage(),
                         new TypeReference<HashMap<String, Object>>() {});
                 transactionBatch.validateTransactionVSResponse(responseDataMap, currencyServer.getTrustAnchors());
                 showMessage(ResponseVS.SC_OK, (String) responseDataMap.get("message"));
