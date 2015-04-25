@@ -66,7 +66,7 @@ public class SocketMessageContentDto {
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
         messageContentDto.setOperation(TypeVS.CURRENCY_WALLET_CHANGE);
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
-        messageContentDto.setDeviceFromId(ContextVS.getInstance().getDeviceId());
+        messageContentDto.setDeviceFromId(ContextVS.getInstance().getConnectedDevice().getId());
         messageContentDto.setLocale(ContextVS.getInstance().getLocale().getLanguage());
         messageContentDto.setCurrencyList(CurrencyDto.serializeCollection(currencyList));
         return messageContentDto;
@@ -78,7 +78,7 @@ public class SocketMessageContentDto {
         messageContentDto.setOperation(TypeVS.MESSAGEVS);
         messageContentDto.setFrom(userVS.getFullName());
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
-        messageContentDto.setDeviceFromId(ContextVS.getInstance().getDeviceId());
+        messageContentDto.setDeviceFromId(ContextVS.getInstance().getConnectedDevice().getId());
         messageContentDto.setToUser(toUser);
         messageContentDto.setMessage(message);
         return messageContentDto;

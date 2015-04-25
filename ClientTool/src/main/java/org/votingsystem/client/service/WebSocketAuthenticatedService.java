@@ -288,7 +288,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         }
 
         @Override protected ResponseVS call() throws Exception {
-            org.votingsystem.dto.SocketMessageDto dto = org.votingsystem.dto.SocketMessageDto.INIT_SESSION_REQUEST(
+            SocketMessageDto dto = SocketMessageDto.INIT_SESSION_REQUEST(
                     SessionService.getInstance().getDeviceVS().getDeviceId());
             ResponseVS responseVS = null;
             try {

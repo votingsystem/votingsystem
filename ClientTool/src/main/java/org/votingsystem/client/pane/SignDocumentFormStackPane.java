@@ -109,7 +109,7 @@ public class SignDocumentFormStackPane extends StackPane {
         cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        acceptButton.setOnAction(actionEvent -> checkPasswords());
+        acceptButton.setOnAction(actionEvent -> initBackgroundTask());
         acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED, event -> {

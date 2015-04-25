@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.MessageSMIME;
@@ -63,17 +64,19 @@ public class WebSocketBean {
                 UserVS signer = messageSMIME.getUserVS();
                 if(signer.getDeviceVS() != null) {
                     //check if accessing from one device and signing from another
-                    if(!signer.getDeviceVS().getDeviceId().equals(messageDto.getDeviceFromId())) signer.setDeviceVS(null);
+                    if(!signer.getDeviceVS().getDeviceId().equals(messageDto.getDeviceId())) signer.setDeviceVS(null);
                 }
-                if(signer.getDeviceVS() == null && messageDto.getDeviceFromId() != null){
+                if(signer.getDeviceVS() == null && messageDto.getDeviceId() != null){
                     Query query = dao.getEM().createNamedQuery("findDeviceByUserAndDeviceId")
-                            .setParameter("deviceId", messageDto.getDeviceFromId()).setParameter("userVS", signer);
+                            .setParameter("deviceId", messageDto.getDeviceId()).setParameter("userVS", signer);
                     DeviceVS deviceVS = dao.getSingleResult(DeviceVS.class, query);
                     signer.setDeviceVS(deviceVS);
                 }
                 if(signer.getDeviceVS() != null) {
                     SessionVSManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer);
-                    SessionVSManager.getInstance().sendMessage(messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK, null));
+                    SocketMessageDto responseDto = messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK, null);
+                    responseDto.setConnectedDevice(new DeviceVSDto(signer.getDeviceVS()));
+                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
                     dao.getEM().merge(messageSMIME.setType(TypeVS.WEB_SOCKET_INIT));
                 } else SessionVSManager.getInstance().sendMessage(messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
                         messages.get("certWithoutDeviceVSInfoErrorMsg")));

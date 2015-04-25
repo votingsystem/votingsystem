@@ -6,6 +6,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -142,8 +143,7 @@ public class ContextVS implements BundleActivator {
     private Locale locale = new Locale("es");
 
 
-    private static final Map<String, WebSocketSession> sessionMap = new HashMap<String, WebSocketSession>();
-    private Long deviceId;
+    private static final Map<String, WebSocketSession> sessionMap = new HashMap<>();
 
     private Map<String, ResponseVS> hashCertVSDataMap;
     private Collection<X509Certificate> votingSystemSSLCerts;
@@ -156,7 +156,8 @@ public class ContextVS implements BundleActivator {
     private AccessControlVS accessControl;
     private ControlCenterVS controlCenter;
     private ActorVS defaultServer;
-    static ContextVS INSTANCE;
+    private DeviceVSDto connectedDevice;
+    private static ContextVS INSTANCE;
 
     public ContextVS() {
         try {
@@ -576,11 +577,12 @@ public class ContextVS implements BundleActivator {
         log.info(" --- stop --- ");
     }
 
-    public Long getDeviceId() {
-        return deviceId;
+
+    public DeviceVSDto getConnectedDevice() {
+        return connectedDevice;
     }
 
-    public void setDeviceId(Long deviceId) {
-        this.deviceId = deviceId;
+    public void setConnectedDevice(DeviceVSDto connectedDevice) {
+        this.connectedDevice = connectedDevice;
     }
 }

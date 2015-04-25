@@ -146,7 +146,8 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
                 break;
             case MOBILE:
                 signWithMobileRb.setSelected(true);
-                mobileDeviceLbl.setText(SessionService.getInstance().getCryptoToken().getDeviceName());
+                deviceVSDto = SessionService.getInstance().getCryptoToken();
+                mobileDeviceLbl.setText(deviceVSDto.getDeviceName());
                 gridPane.add(mobileDeviceInfo, 0, 2);
                 break;
         }
@@ -217,9 +218,9 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         hide();
     }
 
-    @Override public void setSelectedDevice(DeviceVSDto device) {
-        log.info("setSelectedDevice: " + deviceVSDto.toString());
-        this.deviceVSDto = device;
+    @Override public void setSelectedDevice(DeviceVSDto selectedDevice) {
+        log.info("setSelectedDevice: " + selectedDevice.getDeviceName());
+        this.deviceVSDto = selectedDevice;
         if(!gridPane.getChildren().contains(mobileDeviceInfo)) gridPane.add(mobileDeviceInfo, 0, 2);
         mobileDeviceLbl.setText((String) deviceVSDto.getDeviceName());
         getStage().sizeToScene();

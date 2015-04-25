@@ -9,7 +9,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
-
 import javax.websocket.Session;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,14 +23,19 @@ public class SessionVSManager {
 
     private static Logger log = Logger.getLogger(SessionVSManager.class.getSimpleName());
 
-    private static final ConcurrentHashMap<String, Session> sessionMap = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<String, Session> authenticatedSessionMap = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Long, Session> deviceSessionMap = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Long, Set<DeviceVS>> userVSDeviceMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Session> sessionMap = null;
+    private ConcurrentHashMap<String, Session> authenticatedSessionMap = null;
+    private ConcurrentHashMap<Long, Session> deviceSessionMap = null;
+    private ConcurrentHashMap<Long, Set<DeviceVS>> userVSDeviceMap = null;
 
     private static final SessionVSManager instance = new SessionVSManager();
 
-    private SessionVSManager() { }
+    private SessionVSManager() {
+        sessionMap = new ConcurrentHashMap<>();
+        authenticatedSessionMap = new ConcurrentHashMap<>();
+        deviceSessionMap = new ConcurrentHashMap<>();
+        userVSDeviceMap = new ConcurrentHashMap<>();
+    }
 
     public void put(Session session) {
         if(!sessionMap.containsKey(session.getId())) {
@@ -40,7 +44,7 @@ public class SessionVSManager {
     }
 
     public void putAuthenticatedDevice(Session session, UserVS userVS) throws ExceptionVS {
-        log.info("put - authenticatedSessionMap - session id: " + session.getId() + " - user id:" + userVS.getId());
+        log.info("putAuthenticatedDevice - session id: " + session.getId() + " - UserVS id:" + userVS.getId());
         if(sessionMap.containsKey(session.getId())) sessionMap.remove(session.getId());
         authenticatedSessionMap.put(session.getId(), session);
         deviceSessionMap.put(userVS.getDeviceVS().getId(), session);
@@ -107,7 +111,9 @@ public class SessionVSManager {
                 if(userVSDevice.getId().longValue() == deviceVS.getId().longValue()) deviceVSSet.remove(userVSDevice);
             }
         }
-        try {session.close();} catch (Exception ex) {
+        try {
+            session.close();
+        } catch (Exception ex) {
             log.severe(ex.getMessage());
         }
     }
@@ -124,13 +130,11 @@ public class SessionVSManager {
         return sessionMap.get(sessionId);
     }
 
-    public synchronized void broadcast(String messageStr) {
-        log.info("broadcast - message: " + messageStr + " to '" + sessionMap.size() + "' users NOT authenticated");
-        Enumeration<Session> sessions = sessionMap.elements();
-        while(sessions.hasMoreElements()) {
-            Session session = sessions.nextElement();
+    public synchronized void broadcast(String message) {
+        log.info("broadcast - message: " + message + " to '" + sessionMap.size() + "' NOT authenticated users");
+        for(Session session : sessionMap.values()) {
             try {
-                session.getBasicRemote().sendText(messageStr);
+                session.getBasicRemote().sendText(message);
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 remove(session);
@@ -138,13 +142,12 @@ public class SessionVSManager {
         }
     }
 
-    public synchronized void broadcastToAuthenticatedUsers(String messageStr) {
-        log.info("broadcastToAuthenticatedUsers - message: " + messageStr + " to '" + authenticatedSessionMap.size() +
+    public synchronized void broadcastToAuthenticatedUsers(String message) {
+        log.info("broadcastToAuthenticatedUsers - message: " + message + " to '" + authenticatedSessionMap.size() +
                 "' users authenticated");
-        Collection<Session> sessions = authenticatedSessionMap.values();
-        for(Session session:sessions) {
+        for(Session session : authenticatedSessionMap.values()) {
             try {
-                session.getBasicRemote().sendText(messageStr);
+                session.getBasicRemote().sendText(message);
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 remove(session);
@@ -152,25 +155,23 @@ public class SessionVSManager {
         }
     }
 
-    public ResponseVS broadcastList(String messageStr, Set<String> listeners) {
+    public Set<String> broadcastList(String message, Collection<String> listenersSessionIdSet) {
         log.info("broadcastList");
-        List<String> errorList = new ArrayList<>();
-        for(String listener : listeners) {
-            Session session = sessionMap.get(listener);
+        Set<String> brokenSessionSet = new HashSet<>();
+        for(String sessionId : listenersSessionIdSet) {
+            Session session = sessionMap.get(sessionId);
             if(session.isOpen()) {
                 try {
-                    session.getBasicRemote().sendText(messageStr);
+                    session.getBasicRemote().sendText(message);
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                     remove(session);
                 }
             } else {
-                errorList.add(listener);
+                brokenSessionSet.add(sessionId);
             }
         }
-        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
-        responseVS.setData(errorList);
-        return responseVS;
+        return brokenSessionSet;
     }
 
     public Set<DeviceVS> getUserVSDeviceVSSet(Long userId) {
@@ -179,25 +180,23 @@ public class SessionVSManager {
         return result;
     }
 
-    public ResponseVS broadcastAuthenticatedList(String messageStr, Set<String> listeners) {
+    public Set<String> broadcastAuthenticatedList(String message, Set<String> listenersSessionIdSet) {
         log.info("broadcastAuthenticatedList");
-        List<String> errorList = new ArrayList<>();
-        for(String listener : listeners) {
+        Set<String> brokenSessionSet = new HashSet<>();
+        for(String listener : listenersSessionIdSet) {
             Session session = authenticatedSessionMap.get(listener);
             if(session.isOpen()) {
                 try {
-                    session.getBasicRemote().sendText(messageStr);
+                    session.getBasicRemote().sendText(message);
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                     remove(session);
                 }
             } else {
-                errorList.add(listener);
+                brokenSessionSet.add(listener);
             }
         }
-        ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
-        responseVS.setData(errorList);
-        return responseVS;
+        return brokenSessionSet;
     }
 
     public void sendMessage(List<DeviceVS> userVSDeviceList, SocketMessageDto messageDto) throws ExceptionVS {
@@ -205,14 +204,17 @@ public class SessionVSManager {
             messageDto.setSessionId(deviceSessionMap.get(device.getId()).getId());
             if(messageDto.getSessionId() != null) {
                 if(!sendMessage(messageDto)) deviceSessionMap.remove(device.getId());
-            } else log.log(Level.SEVERE, "device id '" + device.getId() + "' has no active sessions");
+            } else log.log(Level.SEVERE, "sendMessage - device id '" + device.getId() + "' has no active sessions");
         }
     }
 
     public boolean sendMessageToDevice(SocketMessageDto messageDto) throws ExceptionVS, JsonProcessingException {
-        if(!deviceSessionMap.containsKey(messageDto.getDeviceToId())) return false;
-        messageDto.setSessionId(deviceSessionMap.get(messageDto.getDeviceToId()).getId());
-        return sendMessage(messageDto);
+        Session deviceSession = deviceSessionMap.get(messageDto.getDeviceToId());
+        if(deviceSession == null) return false;
+        else {
+            messageDto.setSessionId(deviceSession.getId());
+            return sendMessage(messageDto);
+        }
     }
 
     public boolean sendMessage(SocketMessageDto messageDto) throws ExceptionVS {
@@ -225,7 +227,7 @@ public class SessionVSManager {
                     return true;
                 } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex); }
             }
-            log.info ("sendMessageToAuthenticatedUser - lost message for session '" + messageDto.getSessionId() + "' - message: " + messageDto);
+            log.info ("sendMessage - lost message for session '" + messageDto.getSessionId() + "' - message: " + messageDto);
             remove(session);
             return false;
         } else if((session = sessionMap.get(messageDto.getSessionId())) != null) {

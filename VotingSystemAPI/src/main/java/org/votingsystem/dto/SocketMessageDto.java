@@ -26,19 +26,26 @@ import java.util.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SocketMessageDto {
 
+    public DeviceVSDto getConnectedDevice() {
+        return connectedDevice;
+    }
+
+    public void setConnectedDevice(DeviceVSDto connectedDevice) {
+        this.connectedDevice = connectedDevice;
+    }
+
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
     public enum ConnectionStatus {OPEN, CLOSED}
 
     private TypeVS operation;
     private State state = State.PENDING;
     private Integer statusCode;
-    private String deviceFromId;
-    private String deviceToId;
+    private Long deviceFromId;
+    private Long deviceToId;
     private String sessionId;
     private String message;
     private String encryptedMessage;
     private String UUID;
-    private String locale;
     private String remoteAddress;
     private String smimeMessage;
     private String aesParams;
@@ -46,20 +53,21 @@ public class SocketMessageDto {
     private SocketMessageContentDto content;
 
     private String from;
-    private Long deviceId;
-    private boolean timeLimited = false;
-    private Boolean isEncrypted;
     private String deviceFromName;
     private String deviceToName;
+    private String deviceId;//hardware id
+    private boolean timeLimited = false;
     private String URL;
     private List<CurrencyDto> currencyDtoList;
     private Date date;
+    private DeviceVSDto connectedDevice;
     @JsonIgnore private UserVS userVS;
     @JsonIgnore private Set<Currency> currencySet;
     @JsonIgnore private AESParams aesEncryptParams;
     @JsonIgnore private WebSocketSession webSocketSession;
     @JsonIgnore private Session session;
     @JsonIgnore private SMIMEMessage smime;
+    private String locale = ContextVS.getInstance().getLocale().getLanguage();
 
     public SocketMessageDto () {}
 
@@ -79,13 +87,12 @@ public class SocketMessageDto {
         return this;
     }
 
-    public static SocketMessageDto INIT_SESSION_REQUEST(String deviceFromId) throws NoSuchAlgorithmException {
+    public static SocketMessageDto INIT_SESSION_REQUEST(String deviceId) throws NoSuchAlgorithmException {
         WebSocketSession socketSession = checkWebSocketSession(null, null, TypeVS.INIT_VALIDATED_SESSION);
         SocketMessageDto messageDto = new SocketMessageDto();
-        messageDto.setUUID(socketSession.getUUID());
-        messageDto.setLocale(ContextVS.getInstance().getLocale().getLanguage());
         messageDto.setOperation(socketSession.getTypeVS());
-        messageDto.setDeviceFromId(deviceFromId);
+        messageDto.setDeviceId(deviceId);
+        messageDto.setUUID(socketSession.getUUID());
         return messageDto;
     }
 
@@ -107,24 +114,23 @@ public class SocketMessageDto {
         this.currencyDtoList = currencyDtoList;
     }
 
-
     public boolean isEncrypted() {
         return encryptedMessage != null;
     }
 
-    public String getDeviceFromId() {
+    public Long getDeviceFromId() {
         return deviceFromId;
     }
 
-    public void setDeviceFromId(String deviceFromId) {
+    public void setDeviceFromId(Long deviceFromId) {
         this.deviceFromId = deviceFromId;
     }
 
-    public String getDeviceToId() {
+    public Long getDeviceToId() {
         return deviceToId;
     }
 
-    public void setDeviceToId(String deviceToId) {
+    public void setDeviceToId(Long deviceToId) {
         this.deviceToId = deviceToId;
     }
 
@@ -244,11 +250,11 @@ public class SocketMessageDto {
         this.from = from;
     }
 
-    public Long getDeviceId() {
+    public String getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceId(Long deviceId) {
+    public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
 
@@ -346,7 +352,6 @@ public class SocketMessageDto {
         SocketMessageDto messageDto = new SocketMessageDto();
         messageDto.setSessionId(sessionId);
         messageDto.setOperation(TypeVS.MESSAGEVS_FROM_DEVICE);
-        messageDto.setLocale(ContextVS.getInstance().getLocale().getLanguage());
         messageDto.setUUID(UUID);
         if(aesParams != null) {
             SocketMessageContentDto socketMessageContentDto = new SocketMessageContentDto(operation, statusCode, message, null);
@@ -366,7 +371,7 @@ public class SocketMessageDto {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
-        socketMessageDto.setDeviceToId(deviceVS.getId().toString());
+        socketMessageDto.setDeviceToId(deviceVS.getId());
         socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getSignRequest(deviceVS, toUser, textToSign,
@@ -386,7 +391,7 @@ public class SocketMessageDto {
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setTimeLimited(true);
         socketMessageDto.setUUID(socketSession.getUUID());
-        socketMessageDto.setDeviceToId(deviceVS.getId().toString());
+        socketMessageDto.setDeviceToId(deviceVS.getId());
         socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getCurrencyWalletChangeRequest(currencyList);
 
@@ -404,10 +409,9 @@ public class SocketMessageDto {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
-        socketMessageDto.setDeviceToId(deviceVS.getId().toString());
+        socketMessageDto.setDeviceToId(deviceVS.getId());
         socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
-        socketMessageDto.setLocale(ContextVS.getInstance().getLocale().getLanguage());
 
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getMessageVSToDevice(userVS, toUser, textToEncrypt);
         String aesParams = JSON.getMapper().writeValueAsString(socketSession.getAESParams().getDto());
@@ -431,9 +435,9 @@ public class SocketMessageDto {
         if(content.getSmimeMessage() != null) smime = content.getSMIME();
         if(content.getCurrencyList() != null) currencySet = CurrencyDto.deSerializeCollection(
                 content.getCurrencyList());
-        this.isEncrypted = false;
         ContextVS.getInstance().putWSSession(UUID, new WebSocketSession<>(
                 aesParams, new DeviceVS(Long.valueOf(deviceFromId), deviceFromName), null, operation));
+        this.encryptedMessage = null;
     }
 
     private static <T> WebSocketSession checkWebSocketSession (DeviceVS deviceVS, T data, TypeVS typeVS)

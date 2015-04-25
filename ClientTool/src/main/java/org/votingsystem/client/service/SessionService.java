@@ -162,7 +162,7 @@ public class SessionService {
                 browserSessionDto.setUserVS(UserVSDto.COMPLETE(userVS));
                 browserSessionDto.setIsConnected(true);
                 flush();
-                ContextVS.getInstance().setDeviceId(socketMsg.getDeviceId());
+                ContextVS.getInstance().setConnectedDevice(socketMsg.getConnectedDevice());
                 Browser.getInstance().runJSCommand(CoreSignal.getWebSocketCoreSignalJSCommand(null, SocketMessageDto.ConnectionStatus.OPEN));
             } else {
                 showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
@@ -324,7 +324,7 @@ public class SessionService {
                 return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password.toCharArray(), subject, headers);
             case MOBILE:
                 countDownLatch = new CountDownLatch(1);
-                DeviceVS deviceVS = getInstance().getDeviceVS().getDeviceVS();
+                DeviceVS deviceVS = getInstance().getCryptoToken().getDeviceVS();
                 SocketMessageDto messageDto = SocketMessageDto.getSignRequest(deviceVS, toUser, textToSign, subject, headers);
                 PlatformImpl.runLater(() -> {//Service must only be used from the FX Application Thread
                     try {

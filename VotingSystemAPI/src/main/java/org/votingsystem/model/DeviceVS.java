@@ -38,7 +38,7 @@ public class DeviceVS extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
     @Column(name="type") @Enumerated(EnumType.STRING) private Type type = Type.MOBILE;
-    @Column(name="device" ) private String deviceId;
+    @Column(name="device" ) private String deviceId;//hardware id
     @Column(name="email" ) private String email;
     @Column(name="phone" ) private String phone;
     @Column(name="state" ) @Enumerated(EnumType.STRING)  private State state;

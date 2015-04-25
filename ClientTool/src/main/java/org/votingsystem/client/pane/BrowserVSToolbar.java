@@ -53,7 +53,7 @@ public class BrowserVSToolbar extends HBox {
                     connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("disconnectLbl")));
                 } else {
                     connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
-                    connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.SHARE));
+                    connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CLOUD_UPLOAD));
                 }
 
 
@@ -68,7 +68,7 @@ public class BrowserVSToolbar extends HBox {
         forwardButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.CHEVRON_RIGHT));;
         prevButton =  Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.CHEVRON_LEFT));
         reloadButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.REFRESH));
-        connectionButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.SHARE));
+        connectionButton = Utils.getToolBarButton(Utils.getIcon(FontAwesomeIcons.CLOUD_UPLOAD));
         connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
         prevButton.setDisable(true);
         forwardButton.setDisable(true);

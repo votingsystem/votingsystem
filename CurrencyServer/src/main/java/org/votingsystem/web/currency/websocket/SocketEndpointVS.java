@@ -41,9 +41,11 @@ public class SocketEndpointVS {
             String message = ex.getMessage();
             if(message == null) message = messages.get("socketRequestErrorMsg");
             try {
-                if(messageDto != null) SessionVSManager.getInstance().sendMessage(messageDto.getErrorResponse(message));
+                if(messageDto != null) session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                        messageDto.getErrorResponse(message)));
                 session.close();
-            } catch (Exception ex1) { // Ignore }
+            } catch (Exception ex1) {
+                log.severe(ex1.getMessage());
             }
         }
     }

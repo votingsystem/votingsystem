@@ -98,7 +98,7 @@ public class MobileSelectorDialog extends DialogVS {
                 public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
                     if (deviceToggleGroup.getSelectedToggle() != null) {
                         if(!footerBox.getChildren().contains(acceptButton))
-                            footerBox.getChildren().add(2, acceptButton);
+                            footerBox.getChildren().add(acceptButton);
                     } else footerBox.getChildren().remove(acceptButton);
                 }
             });
