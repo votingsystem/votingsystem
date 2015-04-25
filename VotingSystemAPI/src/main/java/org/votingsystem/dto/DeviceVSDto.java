@@ -52,7 +52,8 @@ public class DeviceVSDto {
         this.setDeviceName(name);
     }
 
-    public DeviceVSDto(String deviceId, String sessionId) {
+    public DeviceVSDto(Long id, String deviceId, String sessionId) {
+        this.setId(id);
         this.setDeviceId(deviceId);
         this.setSessionId(sessionId);
     }

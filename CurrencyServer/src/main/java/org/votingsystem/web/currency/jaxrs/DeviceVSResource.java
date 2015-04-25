@@ -3,10 +3,12 @@ package org.votingsystem.web.currency.jaxrs;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.model.DeviceVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
+
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.ws.rs.GET;
@@ -17,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -48,13 +51,14 @@ public class DeviceVSResource {
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response connected(@PathParam("nif") String nifStr) throws Exception {
         String nif = NifUtils.validate(nifStr);
-        Query query = dao.getEM().createQuery("select d from DeviceVS d where d.userVS.nif =:nif").setParameter("nif", nif);
-        List<DeviceVS> deviceVSList = query.getResultList();
+        Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif").setParameter("nif", nif);
+        UserVS userVS = dao.getSingleResult(UserVS.class, query);
+        if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - UserVS not found - nif:" + nif).build();
+        Set<DeviceVS> deviceVSSet = SessionVSManager.getInstance().getUserVSDeviceVSSet(userVS.getId());
         List<DeviceVSDto> resultList = new ArrayList<>();
-        for(DeviceVS deviceVS : deviceVSList) {
-            if(SessionVSManager.getInstance().get(deviceVS.getId()) != null) {
-                resultList.add(new DeviceVSDto(deviceVS));
-            }
+        for(DeviceVS deviceVS : deviceVSSet) {
+            resultList.add(new DeviceVSDto(deviceVS));
         }
         ResultListDto<DeviceVSDto> resultListDto = new ResultListDto<DeviceVSDto>(resultList, 0, resultList.size(),
                 Long.valueOf(resultList.size()));

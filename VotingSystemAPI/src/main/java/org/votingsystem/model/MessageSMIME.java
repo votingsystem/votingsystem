@@ -8,7 +8,6 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 
 import javax.persistence.*;
-import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;

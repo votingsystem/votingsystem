@@ -2,7 +2,6 @@ package org.votingsystem.web.currency.websocket;
 
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.SessionVS;
 import org.votingsystem.web.currency.ejb.WebSocketBean;
 import org.votingsystem.web.ejb.MessagesBean;
 
@@ -35,8 +34,7 @@ public class SocketEndpointVS {
                 if(messages.getLocale() == null && messageDto.getLocale() != null) {
                     messages.setLocale(Locale.forLanguageTag(messageDto.getLocale()));
                 }
-                SessionVS sessionVS = SessionVSManager.getInstance().getAuthenticatedSession(session);
-                messageDto.setSession(session, sessionVS);
+                messageDto.setSession(session);
                 webSocketBean.processRequest(messageDto);
             }
         } catch (Exception ex) {

@@ -6,7 +6,6 @@ import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
 
-import java.io.ByteArrayInputStream;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;

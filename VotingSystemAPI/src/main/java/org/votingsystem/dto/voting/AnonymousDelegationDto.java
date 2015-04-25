@@ -11,7 +11,10 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;

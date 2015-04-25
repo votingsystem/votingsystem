@@ -13,7 +13,6 @@ import org.votingsystem.util.*;
 import org.votingsystem.util.currency.Payment;
 
 import javax.persistence.*;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;

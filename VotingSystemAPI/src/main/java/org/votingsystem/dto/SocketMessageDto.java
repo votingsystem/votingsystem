@@ -12,11 +12,13 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.WebSocketSession;
 
 import javax.mail.Header;
 import javax.websocket.Session;
-import java.io.ByteArrayInputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.*;
@@ -57,7 +59,6 @@ public class SocketMessageDto {
     @JsonIgnore private AESParams aesEncryptParams;
     @JsonIgnore private WebSocketSession webSocketSession;
     @JsonIgnore private Session session;
-    @JsonIgnore private SessionVS sessionVS;
     @JsonIgnore private SMIMEMessage smime;
 
     public SocketMessageDto () {}
@@ -151,19 +152,11 @@ public class SocketMessageDto {
         this.remoteAddress = remoteAddress;
     }
 
-    public SessionVS getSessionVS() {
-        return sessionVS;
-    }
-
-    public void setSessionVS(SessionVS sessionVS) {
-        this.sessionVS = sessionVS;
-    }
-
     public Session getSession() {
         return session;
     }
 
-    public void setSession(Session session, SessionVS sessionVS) throws ValidationExceptionVS {
+    public void setSession(Session session) throws ValidationExceptionVS {
         if(operation == null) throw new ValidationExceptionVS("missing param 'operation'");
         /*if(TypeVS.MESSAGEVS_SIGN == operation && deviceId == null) {
             throw new ValidationExceptionVS("missing message 'deviceId'");
@@ -171,7 +164,6 @@ public class SocketMessageDto {
         /*this.remoteAddress = ((String)((AbstractServletOutputStream)((WsRemoteEndpointImplServer)((WsRemoteEndpointAsync)
                 ((WsSession)session).remoteEndpointAsync).base).sos).socketWrapper.getRemoteAddr());*/
         this.session = session;
-        this.sessionVS = sessionVS;
         if(sessionId == null) sessionId = session.getId();
         //Locale.forLanguageTag(locale)
     }
@@ -324,10 +316,6 @@ public class SocketMessageDto {
 
     public void setWebSocketSession(WebSocketSession webSocketSession) {
         this.webSocketSession = webSocketSession;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
     }
 
     public String getEncryptedMessage() {

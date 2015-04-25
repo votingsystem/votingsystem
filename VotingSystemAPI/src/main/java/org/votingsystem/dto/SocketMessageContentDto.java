@@ -11,7 +11,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 
 import javax.mail.Header;
-import java.io.ByteArrayInputStream;
 import java.net.InetAddress;
 import java.util.*;
 

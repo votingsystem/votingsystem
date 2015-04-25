@@ -44,11 +44,12 @@ public class WebSocketBean {
                 } else SessionVSManager.getInstance().sendMessage(messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND, null));
                 break;
             case MESSAGEVS_FROM_DEVICE:
-                if(messageDto.getSessionVS() == null) SessionVSManager.getInstance().sendMessage(
-                        messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
+                if(messageDto.getSession().getUserProperties().get("userVS") == null) SessionVSManager.getInstance()
+                        .sendMessage(messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
                                 messages.get("userNotAuthenticatedErrorMsg")));
                 Session callerSession = SessionVSManager.getInstance().getAuthenticatedSession(messageDto.getSessionId());
-                if(callerSession == null) callerSession = SessionVSManager.getInstance().getSession(messageDto.getSessionId());
+                if(callerSession == null) callerSession = SessionVSManager.getInstance()
+                        .getNotAuthenticatedSession(messageDto.getSessionId());
                 if(callerSession == null) {
                     SessionVSManager.getInstance().sendMessage(messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
                             messages.get("messagevsSignRequestorNotFound")));
