@@ -13,7 +13,6 @@ import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
-
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -55,7 +54,8 @@ public class WebSocketBean {
                             messages.get("messagevsSignRequestorNotFound")));
                 } else {
                     callerSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(messageDto));
-                    SessionVSManager.getInstance().sendMessage(messageDto.getResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null));
+                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                            messageDto.getResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null)));
                 }
                 break;
             case INIT_VALIDATED_SESSION:

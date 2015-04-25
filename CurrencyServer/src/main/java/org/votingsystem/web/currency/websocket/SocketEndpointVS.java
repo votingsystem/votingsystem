@@ -4,7 +4,6 @@ import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.util.JSON;
 import org.votingsystem.web.currency.ejb.WebSocketBean;
 import org.votingsystem.web.ejb.MessagesBean;
-
 import javax.inject.Inject;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -48,8 +47,6 @@ public class SocketEndpointVS {
             }
         }
     }
-
-
 
     @OnError public void onError(Throwable t) {
         log.log(Level.SEVERE, t.getMessage(), t);
