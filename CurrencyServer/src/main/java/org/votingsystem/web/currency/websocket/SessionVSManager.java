@@ -47,6 +47,8 @@ public class SessionVSManager {
         if(userVSDeviceMap.containsKey(userVS.getId())) {
             userVSDeviceMap.get(userVS.getId()).add(userVS.getDeviceVS());
         } else userVSDeviceMap.put(userVS.getId(), new HashSet<>(Arrays.asList(userVS.getDeviceVS())));
+        session.getUserProperties().put("userVS", userVS);
+        session.getUserProperties().put("deviceVS", userVS.getDeviceVS());
     }
 
     public Collection<Long> getAuthenticatedDevices() {

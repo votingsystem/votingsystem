@@ -74,7 +74,6 @@ public class WebSocketBean {
                 if(signer.getDeviceVS() != null) {
                     SessionVSManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer);
                     SessionVSManager.getInstance().sendMessage(messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK, null));
-                    //signer.getDeviceVS().getId()
                     dao.getEM().merge(messageSMIME.setType(TypeVS.WEB_SOCKET_INIT));
                 } else SessionVSManager.getInstance().sendMessage(messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
                         messages.get("certWithoutDeviceVSInfoErrorMsg")));
