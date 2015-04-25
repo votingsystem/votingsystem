@@ -26,14 +26,6 @@ import java.util.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SocketMessageDto {
 
-    public DeviceVSDto getConnectedDevice() {
-        return connectedDevice;
-    }
-
-    public void setConnectedDevice(DeviceVSDto connectedDevice) {
-        this.connectedDevice = connectedDevice;
-    }
-
     public enum State {PENDING, PROCESSED, LAPSED, REMOVED}
     public enum ConnectionStatus {OPEN, CLOSED}
 
@@ -348,6 +340,14 @@ public class SocketMessageDto {
         this.aesEncryptParams = aesEncryptParams;
     }
 
+    public DeviceVSDto getConnectedDevice() {
+        return connectedDevice;
+    }
+
+    public void setConnectedDevice(DeviceVSDto connectedDevice) {
+        this.connectedDevice = connectedDevice;
+    }
+
     public SocketMessageDto createResponseFromDevice(Integer statusCode, String message) throws Exception {
         SocketMessageDto messageDto = new SocketMessageDto();
         messageDto.setSessionId(sessionId);
@@ -435,6 +435,7 @@ public class SocketMessageDto {
         if(content.getSmimeMessage() != null) smime = content.getSMIME();
         if(content.getCurrencyList() != null) currencySet = CurrencyDto.deSerializeCollection(
                 content.getCurrencyList());
+        if(content.getOperation() != null) operation = content.getOperation();
         ContextVS.getInstance().putWSSession(UUID, new WebSocketSession<>(
                 aesParams, new DeviceVS(Long.valueOf(deviceFromId), deviceFromName), null, operation));
         this.encryptedMessage = null;
