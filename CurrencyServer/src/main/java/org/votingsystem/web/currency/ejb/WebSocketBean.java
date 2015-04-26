@@ -65,7 +65,7 @@ public class WebSocketBean {
                     }
                 }
                 break;
-            case INIT_VALIDATED_SESSION:
+            case INIT_SIGNED_SESSION:
                 MessageSMIME messageSMIME = signatureBean.validateSMIME(messageDto.getSMIME(), null).getMessageSMIME();
                 UserVS signer = messageSMIME.getUserVS();
                 if(signer.getDeviceVS() != null) {

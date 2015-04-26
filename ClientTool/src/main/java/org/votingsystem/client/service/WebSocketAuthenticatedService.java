@@ -238,7 +238,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                     if(socketSession != null) {
                         messageDto.setOperation(socketSession.getTypeVS());
                         switch(socketSession.getTypeVS()) {
-                            case INIT_VALIDATED_SESSION:
+                            case INIT_SIGNED_SESSION:
                                 SessionService.getInstance().initAuthenticatedSession(messageDto, userVS);
                                 break;
                             default:

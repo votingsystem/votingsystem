@@ -107,14 +107,14 @@
                 console.log("sessionDataSignal")
             },
             websocketSignal:function(e, detail, sender) {
-                if("OPEN" === detail.socketStatus && "INIT_VALIDATED_SESSION" === detail.operation) {
+                if("OPEN" === detail.socketStatus && "INIT_SIGNED_SESSION" === detail.operation) {
                     this.$._navbar.updateSession(detail.userVS, null)
                 } else if("CLOSED" === detail.socketStatus) {
                     this.$._navbar.updateSession(null, null)
                 } else console.log("userVS NOT updated")
 
                 if(detail.messageVSList && detail.messageVSList.length > 0) alert("You have pending messages")
-                //{"locale":"es","operation":"INIT_VALIDATED_SESSION","sessionId":"2","userId":2,"messageVSList":[],"state":"PENDING","status":200,"socketStatus":"OPEN"}
+                //{"locale":"es","operation":"INIT_SIGNED_SESSION","sessionId":"2","userId":2,"messageVSList":[],"state":"PENDING","status":200,"socketStatus":"OPEN"}
             },
             innerPageSignal:function(e, detail, sender) {
                 console.log("innerPageSignal - caption:" + detail.caption + " - url: " + detail.url)

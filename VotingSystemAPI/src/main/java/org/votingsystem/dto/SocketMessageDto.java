@@ -95,7 +95,7 @@ public class SocketMessageDto {
     }
 
     public static SocketMessageDto INIT_SESSION_REQUEST(String deviceId) throws NoSuchAlgorithmException {
-        WebSocketSession socketSession = checkWebSocketSession(null, null, TypeVS.INIT_VALIDATED_SESSION);
+        WebSocketSession socketSession = checkWebSocketSession(null, null, TypeVS.INIT_SIGNED_SESSION);
         SocketMessageDto messageDto = new SocketMessageDto();
         messageDto.setOperation(socketSession.getTypeVS());
         messageDto.setDeviceId(deviceId);

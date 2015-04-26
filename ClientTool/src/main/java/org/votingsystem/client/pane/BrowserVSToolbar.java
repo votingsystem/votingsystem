@@ -42,7 +42,7 @@ public class BrowserVSToolbar extends HBox {
         @Subscribe
         public void responseVSChange(ResponseVS responseVS) {
             log.info("EventBusConnectionListener - response type: " + responseVS.getType());
-            if(TypeVS.INIT_VALIDATED_SESSION == responseVS.getType()) {
+            if(TypeVS.INIT_SIGNED_SESSION == responseVS.getType()) {
                 isConnected.set(true);
             } else if(TypeVS.DISCONNECT == responseVS.getType()) {
                 isConnected.set(false);

@@ -156,7 +156,7 @@ public class WebSocketService extends Service<ResponseVS> {
             if(messageDto.isEncrypted() && socketSession != null)
                 messageDto.decryptMessage(socketSession.getAESParams());
             switch(messageDto.getOperation()) {
-                case INIT_VALIDATED_SESSION:
+                case INIT_SIGNED_SESSION:
                     Browser.getInstance().runJSCommand(
                             CoreSignal.getWebSocketCoreSignalJSCommand(null, SocketMessageDto.ConnectionStatus.OPEN));
                     break;
