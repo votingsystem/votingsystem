@@ -6,9 +6,7 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.*;
 import org.votingsystem.web.currency.ejb.UserVSBean;
-import org.votingsystem.web.currency.util.AsciiDocUtil;
 import org.votingsystem.web.ejb.DAOBean;
-
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +35,7 @@ public class MessageSMIMEResource {
     @Inject UserVSBean userVSBean;
 
     @Path("/id/{id}") @GET @Transactional
-    public Object index(@PathParam("id") long id, @Context ServletContext context,
+    public Response index(@PathParam("id") long id, @Context ServletContext context,
                                 @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         MessageSMIME messageSMIME = dao.find(MessageSMIME.class, id);
@@ -68,13 +66,7 @@ public class MessageSMIMEResource {
         if(smimeMessage.getTimeStampToken() != null) {
             timeStampDate = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
         }
-        if(smimeMessage.getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
-            signedContentMap = messageSMIME.getSignedContentMap();
-            signedContentMap.put("asciiDoc", messageSMIME.getSMIME().getSignedContent());
-            signedContentMap.put("asciiDocHTML", AsciiDocUtil.getHTML(messageSMIME.getSMIME().getSignedContent()));
-        } else {
-            signedContentMap = messageSMIME.getSignedContentMap();
-        }
+        signedContentMap = messageSMIME.getSignedContentMap();
         if((boolean)signedContentMap.get("timeLimited")) {
             signedContentMap.put("validTo", DateUtils.getDayWeekDateStr(
                     DateUtils.getNexMonday(DateUtils.getCalendar(timeStampDate)).getTime()));
