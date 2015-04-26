@@ -40,23 +40,29 @@ public class WebSocketBean {
         switch(messageDto.getOperation()) {
             case MESSAGEVS_TO_DEVICE:
                 if(SessionVSManager.getInstance().sendMessageToDevice(messageDto)) {//message send OK
-                    SessionVSManager.getInstance().sendMessage(messageDto.getResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null));
-                } else SessionVSManager.getInstance().sendMessage(messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND, null));
+                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                            messageDto.getServerResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null)));
+                } else messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                        messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND, null)));
                 break;
             case MESSAGEVS_FROM_DEVICE:
-                if(messageDto.getSession().getUserProperties().get("userVS") == null) SessionVSManager.getInstance()
-                        .sendMessage(messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
-                                messages.get("userNotAuthenticatedErrorMsg")));
-                Session callerSession = SessionVSManager.getInstance().getAuthenticatedSession(messageDto.getSessionId());
-                if(callerSession == null) callerSession = SessionVSManager.getInstance()
-                        .getNotAuthenticatedSession(messageDto.getSessionId());
-                if(callerSession == null) {
-                    SessionVSManager.getInstance().sendMessage(messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
-                            messages.get("messagevsSignRequestorNotFound")));
-                } else {
-                    callerSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(messageDto));
+                if(messageDto.getSession().getUserProperties().get("userVS") == null) {
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
-                            messageDto.getResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null)));
+                            messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
+                            messages.get("userNotAuthenticatedErrorMsg"))));
+                } else {
+                    Session callerSession = SessionVSManager.getInstance().getAuthenticatedSession(messageDto.getSessionId());
+                    if(callerSession == null) callerSession = SessionVSManager.getInstance()
+                            .getNotAuthenticatedSession(messageDto.getSessionId());
+                    if(callerSession == null) {
+                        messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                                messageDto.getServerResponse( ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
+                                messages.get("messagevsSignRequestorNotFound"))));
+                    } else {
+                        callerSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(messageDto));
+                        messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                                messageDto.getServerResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null)));
+                    }
                 }
                 break;
             case INIT_VALIDATED_SESSION:
@@ -74,12 +80,16 @@ public class WebSocketBean {
                 }
                 if(signer.getDeviceVS() != null) {
                     SessionVSManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer);
-                    SocketMessageDto responseDto = messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK, null);
+                    SocketMessageDto responseDto = messageDto.getServerResponse(
+                            ResponseVS.SC_WS_CONNECTION_INIT_OK, null);
                     responseDto.setConnectedDevice(new DeviceVSDto(signer.getDeviceVS()));
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
                     dao.getEM().merge(messageSMIME.setType(TypeVS.WEB_SOCKET_INIT));
-                } else SessionVSManager.getInstance().sendMessage(messageDto.getResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
-                        messages.get("certWithoutDeviceVSInfoErrorMsg")));
+                } else {
+                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                            messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
+                            messages.get("certWithoutDeviceVSInfoErrorMsg"))));
+                }
                 break;
             case WEB_SOCKET_BAN_SESSION:
                 //talks
@@ -87,4 +97,5 @@ public class WebSocketBean {
             default: throw new ExceptionVS("unknownSocketOperationErrorMsg: " + messageDto.getOperation());
         }
     }
+
 }

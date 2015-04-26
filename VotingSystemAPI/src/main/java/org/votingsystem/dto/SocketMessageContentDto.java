@@ -9,8 +9,6 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
-
-import javax.mail.Header;
 import java.net.InetAddress;
 import java.util.*;
 
@@ -20,17 +18,18 @@ public class SocketMessageContentDto {
     private TypeVS operation;
     private Integer statusCode;
     private String subject;
-    private String locale;
+    private String locale = ContextVS.getInstance().getLocale().getLanguage();;
     private String message;
     private String from;
     private String deviceFromName;
+    private String deviceToName;
     private Long deviceFromId;
     private String textToSign;
     private String toUser;
     private String smimeMessage;
-    private Map<String, String> headers;
     private Set<CurrencyDto> currencyList;
     private String URL;
+
 
     public SocketMessageContentDto() {}
 
@@ -42,7 +41,7 @@ public class SocketMessageContentDto {
     }
 
     public static SocketMessageContentDto getSignRequest(DeviceVS deviceVS, String toUser, String textToSign,
-            String subject, Header... headers) throws Exception {
+            String subject) throws Exception {
         SocketMessageContentDto messageContentDto =  new SocketMessageContentDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
@@ -50,15 +49,6 @@ public class SocketMessageContentDto {
         messageContentDto.setTextToSign(textToSign);
         messageContentDto.setSubject(subject);
         messageContentDto.setLocale(ContextVS.getInstance().getLocale().getLanguage());
-        if(headers != null) {
-            Map<String, String> messageHeaders = new HashMap<>();
-            for(Header header : headers) {
-                if (header != null) {
-                    messageHeaders.put(header.getName(), header.getValue());
-                }
-            }
-            messageContentDto.setHeaders(messageHeaders);
-        }
         return messageContentDto;
     }
 
@@ -157,14 +147,6 @@ public class SocketMessageContentDto {
         this.toUser = toUser;
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-
     public Long getDeviceFromId() {
         return deviceFromId;
     }
@@ -203,4 +185,11 @@ public class SocketMessageContentDto {
         return new SMIMEMessage(smimeMessageBytes);
     }
 
+    public String getDeviceToName() {
+        return deviceToName;
+    }
+
+    public void setDeviceToName(String deviceToName) {
+        this.deviceToName = deviceToName;
+    }
 }

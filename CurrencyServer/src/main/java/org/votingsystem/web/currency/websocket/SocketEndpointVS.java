@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.websocket;
 
 import org.votingsystem.dto.SocketMessageDto;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.web.currency.ejb.WebSocketBean;
 import org.votingsystem.web.ejb.MessagesBean;
@@ -42,7 +43,7 @@ public class SocketEndpointVS {
             if(message == null) message = messages.get("socketRequestErrorMsg");
             try {
                 if(messageDto != null) session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
-                        messageDto.getErrorResponse(message)));
+                        messageDto.getServerResponse(ResponseVS.SC_ERROR, message)));
                 session.close();
             } catch (Exception ex1) {
                 log.severe(ex1.getMessage());

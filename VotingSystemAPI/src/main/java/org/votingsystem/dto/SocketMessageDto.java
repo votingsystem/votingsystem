@@ -16,8 +16,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.WebSocketSession;
-
-import javax.mail.Header;
 import javax.websocket.Session;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -41,9 +39,9 @@ public class SocketMessageDto {
     private String remoteAddress;
     private String smimeMessage;
     private String aesParams;
-
-    private SocketMessageContentDto content;
-
+    private String subject;
+    private String toUser;
+    private String textToSign;
     private String from;
     private String deviceFromName;
     private String deviceToName;
@@ -53,6 +51,8 @@ public class SocketMessageDto {
     private List<CurrencyDto> currencyDtoList;
     private Date date;
     private DeviceVSDto connectedDevice;
+
+    private SocketMessageContentDto content;
     @JsonIgnore private UserVS userVS;
     @JsonIgnore private Set<Currency> currencySet;
     @JsonIgnore private AESParams aesEncryptParams;
@@ -63,7 +63,7 @@ public class SocketMessageDto {
 
     public SocketMessageDto () {}
 
-    public SocketMessageDto getResponse(Integer statusCode, String message){
+    public SocketMessageDto getServerResponse(Integer statusCode, String message){
         SocketMessageDto responseDto = new SocketMessageDto();
         responseDto.setStatusCode(statusCode);
         responseDto.setMessage(message);
@@ -73,10 +73,25 @@ public class SocketMessageDto {
         return responseDto;
     }
 
-    public SocketMessageDto getErrorResponse(String message){
-        this.statusCode = ResponseVS.SC_ERROR;
-        this.message = message;
-        return this;
+    public SocketMessageDto getResponse(Integer statusCode, String message, TypeVS operation) throws Exception {
+        SocketMessageDto messageDto = new SocketMessageDto();
+        messageDto.setOperation(TypeVS.MESSAGEVS_FROM_DEVICE);
+        messageDto.setStatusCode(ResponseVS.SC_PROCESSING);
+        messageDto.setSessionId(sessionId);
+        SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
+        messageContentDto.setStatusCode(statusCode);
+        messageContentDto.setMessage(message);
+        messageContentDto.setOperation(operation);
+        if(aesEncryptParams != null) {
+            messageDto.setEncryptedMessage(Encryptor.encryptAES(
+                    JSON.getMapper().writeValueAsString(messageContentDto), aesEncryptParams));
+        } else {
+            messageDto.setOperation(operation);
+            messageDto.setStatusCode(statusCode);
+            messageDto.setMessage(message);
+        }
+        messageDto.setUUID(UUID);
+        return messageDto;
     }
 
     public static SocketMessageDto INIT_SESSION_REQUEST(String deviceId) throws NoSuchAlgorithmException {
@@ -86,16 +101,6 @@ public class SocketMessageDto {
         messageDto.setDeviceId(deviceId);
         messageDto.setUUID(socketSession.getUUID());
         return messageDto;
-    }
-
-    public SocketMessageDto clone() {
-        SocketMessageDto dto = new SocketMessageDto();
-        dto.setOperation(operation);
-        dto.setDeviceFromId(deviceFromId);
-        dto.setSmimeMessage(smimeMessage);
-        dto.setLocale(locale);
-        dto.setUUID(UUID);
-        return dto;
     }
 
     public List<CurrencyDto> getCurrencyDtoList() {
@@ -154,16 +159,37 @@ public class SocketMessageDto {
         return session;
     }
 
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getToUser() {
+        return toUser;
+    }
+
+    public void setToUser(String toUser) {
+        this.toUser = toUser;
+    }
+
+    public String getTextToSign() {
+        return textToSign;
+    }
+
+    public void setTextToSign(String textToSign) {
+        this.textToSign = textToSign;
+    }
+
+
     public void setSession(Session session) throws ValidationExceptionVS {
-        if(operation == null) throw new ValidationExceptionVS("missing param 'operation'");
-        /*if(TypeVS.MESSAGEVS_SIGN == operation && deviceId == null) {
-            throw new ValidationExceptionVS("missing message 'deviceId'");
-        }*/
         /*this.remoteAddress = ((String)((AbstractServletOutputStream)((WsRemoteEndpointImplServer)((WsRemoteEndpointAsync)
                 ((WsSession)session).remoteEndpointAsync).base).sos).socketWrapper.getRemoteAddr());*/
         this.session = session;
-        if(sessionId == null) sessionId = session.getId();
-        //Locale.forLanguageTag(locale)
+        //if sessionId isn't null is because it's a MESSAGEVS_FROM_DEVICE
+        if(sessionId == null) this.sessionId = session.getId();
     }
 
     public Integer getStatusCode() {
@@ -282,7 +308,6 @@ public class SocketMessageDto {
         this.userVS = userVS;
     }
 
-
     public Set<Currency> getCurrencySet() throws Exception {
         if(currencySet == null && currencyDtoList != null) currencySet = CurrencyDto.deSerializeCollection(currencyDtoList);
         return currencySet;
@@ -348,25 +373,8 @@ public class SocketMessageDto {
         this.connectedDevice = connectedDevice;
     }
 
-    public SocketMessageDto createResponseFromDevice(Integer statusCode, String message) throws Exception {
-        SocketMessageDto messageDto = new SocketMessageDto();
-        messageDto.setSessionId(sessionId);
-        messageDto.setOperation(TypeVS.MESSAGEVS_FROM_DEVICE);
-        messageDto.setUUID(UUID);
-        if(aesParams != null) {
-            SocketMessageContentDto socketMessageContentDto = new SocketMessageContentDto(operation, statusCode, message, null);
-            messageDto.setEncryptedMessage(Encryptor.encryptAES(
-                    JSON.getMapper().writeValueAsString(socketMessageContentDto), aesEncryptParams));
-        } else {
-            messageDto.setOperation(operation);
-            messageDto.setStatusCode(statusCode);
-            messageDto.setMessage(message);
-        }
-        return messageDto;
-    }
-
-    public static SocketMessageDto getSignRequest(DeviceVS deviceVS, String toUser, String textToSign, String subject ,
-                     Header... headers) throws Exception {
+    public static SocketMessageDto getSignRequest(DeviceVS deviceVS, String toUser, String textToSign, String subject)
+            throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceVS, null, TypeVS.MESSAGEVS_SIGN);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
@@ -375,7 +383,7 @@ public class SocketMessageDto {
         socketMessageDto.setDeviceToName(deviceVS.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getSignRequest(deviceVS, toUser, textToSign,
-                subject, headers);
+                subject);
         String aesParams = JSON.getMapper().writeValueAsString(socketSession.getAESParams().getDto());
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(), deviceVS.getX509Certificate());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
@@ -432,12 +440,21 @@ public class SocketMessageDto {
     public void decryptMessage(AESParams aesParams) throws Exception {
         content = JSON.getMapper().readValue(
                 Encryptor.decryptAES(encryptedMessage, aesParams), SocketMessageContentDto.class);
+        if(content.getOperation() != null) operation = content.getOperation();
+        if(content.getStatusCode() != null) statusCode = content.getStatusCode();
+        if(content.getDeviceFromName() != null) deviceFromName = content.getDeviceFromName();
+        if(content.getFrom() != null) from = content.getFrom();
+        if(content.getDeviceFromId() != null) deviceFromId = content.getDeviceFromId();
         if(content.getSmimeMessage() != null) smime = content.getSMIME();
         if(content.getCurrencyList() != null) currencySet = CurrencyDto.deSerializeCollection(
                 content.getCurrencyList());
-        if(content.getOperation() != null) operation = content.getOperation();
-        ContextVS.getInstance().putWSSession(UUID, new WebSocketSession<>(
-                aesParams, new DeviceVS(Long.valueOf(deviceFromId), deviceFromName), null, operation));
+        if(content.getSubject() != null) subject = content.getSubject();
+        if(content.getMessage() != null) message = content.getMessage();
+        if(content.getToUser() != null) toUser = content.getToUser();
+        if(content.getDeviceToName() != null) deviceToName = content.getDeviceToName();
+        if(content.getURL()!= null) URL = content.getURL();
+        if(content.getTextToSign() != null) textToSign = content.getTextToSign();
+        if(content.getLocale() != null) locale = content.getLocale();
         this.encryptedMessage = null;
     }
 

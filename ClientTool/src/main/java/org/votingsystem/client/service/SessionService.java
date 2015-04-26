@@ -311,7 +311,7 @@ public class SessionService {
     }
 
     public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
-            String password, String subject, Header... headers) throws Exception {
+            String password, String subject) throws Exception {
         String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
         log.info("getSMIME - tokenType: " + tokenType);
         switch(CryptoTokenVS.valueOf(tokenType)) {
@@ -319,13 +319,13 @@ public class SessionService {
                 KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password.toCharArray());
                 SMIMESignedGeneratorVS signedGenerator = new SMIMESignedGeneratorVS(keyStore,
                         ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
-                return signedGenerator.getSMIME(fromUser, toUser, textToSign, subject, headers);
+                return signedGenerator.getSMIME(fromUser, toUser, textToSign, subject);
             case DNIe:
-                return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password.toCharArray(), subject, headers);
+                return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password.toCharArray(), subject);
             case MOBILE:
                 countDownLatch = new CountDownLatch(1);
                 DeviceVS deviceVS = getInstance().getCryptoToken().getDeviceVS();
-                SocketMessageDto messageDto = SocketMessageDto.getSignRequest(deviceVS, toUser, textToSign, subject, headers);
+                SocketMessageDto messageDto = SocketMessageDto.getSignRequest(deviceVS, toUser, textToSign, subject);
                 PlatformImpl.runLater(() -> {//Service must only be used from the FX Application Thread
                     try {
                         WebSocketService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(messageDto));

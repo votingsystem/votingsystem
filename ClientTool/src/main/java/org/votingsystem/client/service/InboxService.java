@@ -11,6 +11,7 @@ import org.votingsystem.client.util.InboxDecryptTask;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CryptoTokenVS;
@@ -204,8 +205,9 @@ public class InboxService {
                         Wallet.saveToWallet(inboxMessage.getWebSocketMessage().getCurrencySet(), password);
                         EventBusService.getInstance().post(inboxMessage.setState(InboxMessage.State.PROCESSED));
                         removeMessage(inboxMessage);
+                        SocketMessageDto messageDto = inboxMessage.getWebSocketMessage();
                         WebSocketAuthenticatedService.getInstance().sendMessage(inboxMessage.getWebSocketMessage().
-                                getResponse(ResponseVS.SC_OK, null).toString());
+                                getResponse(ResponseVS.SC_OK, null, messageDto.getOperation()).toString());
                     } catch (WalletException wex) {
                         Utils.showWalletNotFoundMessage();
                     } catch (Exception ex) {

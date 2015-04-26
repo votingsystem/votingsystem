@@ -201,9 +201,9 @@ public class SessionVSManager {
 
     public void sendMessage(List<DeviceVS> userVSDeviceList, SocketMessageDto messageDto) throws ExceptionVS {
         for(DeviceVS device : userVSDeviceList) {
-            messageDto.setSessionId(deviceSessionMap.get(device.getId()).getId());
+            Session deviceSession = deviceSessionMap.get(device.getId());
             if(messageDto.getSessionId() != null) {
-                if(!sendMessage(messageDto)) deviceSessionMap.remove(device.getId());
+                if(!sendMessage(messageDto, deviceSession.getId())) deviceSessionMap.remove(device.getId());
             } else log.log(Level.SEVERE, "sendMessage - device id '" + device.getId() + "' has no active sessions");
         }
     }
@@ -211,16 +211,12 @@ public class SessionVSManager {
     public boolean sendMessageToDevice(SocketMessageDto messageDto) throws ExceptionVS, JsonProcessingException {
         Session deviceSession = deviceSessionMap.get(messageDto.getDeviceToId());
         if(deviceSession == null) return false;
-        else {
-            messageDto.setSessionId(deviceSession.getId());
-            return sendMessage(messageDto);
-        }
+        else return sendMessage(messageDto, deviceSession.getId());
     }
 
-    public boolean sendMessage(SocketMessageDto messageDto) throws ExceptionVS {
-        if(messageDto.getSessionId() == null) throw new ExceptionVS("null sessionId");
+    private boolean sendMessage(SocketMessageDto messageDto, String deviceToSessionId) throws ExceptionVS {
         Session session = null;
-        if((session = authenticatedSessionMap.get(messageDto.getSessionId())) != null) {
+        if((session = authenticatedSessionMap.get(deviceToSessionId)) != null) {
             if(session.isOpen()) {
                 try {
                     session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(messageDto));
@@ -230,7 +226,7 @@ public class SessionVSManager {
             log.info ("sendMessage - lost message for session '" + messageDto.getSessionId() + "' - message: " + messageDto);
             remove(session);
             return false;
-        } else if((session = sessionMap.get(messageDto.getSessionId())) != null) {
+        } else if((session = sessionMap.get(deviceToSessionId)) != null) {
             if(session.isOpen()) {
                 try {
                     session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(messageDto));

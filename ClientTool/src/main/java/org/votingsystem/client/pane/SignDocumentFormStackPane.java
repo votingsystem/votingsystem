@@ -275,7 +275,7 @@ public class SignDocumentFormStackPane extends StackPane {
                         String timeStampService = ActorVS.getTimeStampServiceURL(ContextVS.getMessage("defaultTimeStampServer"));
                         log.info("toUser: " + toUser + " - timeStampService: " + timeStampService);
                         smimeMessage = SessionService.getSMIME(null, toUser,
-                                textToSignMap.toString(), password, messageSubject, null);
+                                textToSignMap.toString(), password, messageSubject);
                         updateMessage(ContextVS.getMessage("gettingTimeStampMsg"));
                         updateProgress(40, 100);
                         MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampService);
