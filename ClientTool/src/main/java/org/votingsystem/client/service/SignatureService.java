@@ -318,10 +318,12 @@ public class SignatureService extends Service<ResponseVS> {
                 SMIMEMessage representativeRequestSMIME = SessionService.getSMIME(null, operationVS.getReceiverName(),
                         JSON.getMapper().writeValueAsString(operationVS.getDocumentToSignMap()),
                         password, operationVS.getSignedMessageSubject());
-                RepresentativeDataSender dataSender = new RepresentativeDataSender(representativeRequestSMIME,
-                        operationVS.getFile(), operationVS.getServiceURL());
-                ResponseVS responseVS = dataSender.call();
-                return responseVS;
+                Map<String, Object> fileMap = new HashMap<String, Object>();
+                String representativeDataFileName =
+                        ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" + MediaTypeVS.JSON_SIGNED;
+                fileMap.put(representativeDataFileName, representativeRequestSMIME.getBytes());
+                fileMap.put(ContextVS.IMAGE_FILE_NAME, operationVS.getFile());
+                return HttpHelper.getInstance().sendObjectMap(fileMap, operationVS.getServiceURL());
             }
         }
 
@@ -338,9 +340,6 @@ public class SignatureService extends Service<ResponseVS> {
             String textToSign = JSON.getMapper().writeValueAsString(currencyBatch.getRequestDto());
             SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(), textToSign,
                     password, operationVS.getSignedMessageSubject());
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage,
-                    operationVS.getTargetServer().getTimeStampServiceURL());
-            smimeMessage = timeStamper.call();
             mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, smimeMessage.getBytes());
             ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                     ((CurrencyServer)operationVS.getTargetServer()).getCurrencyRequestServiceURL());
@@ -388,9 +387,8 @@ public class SignatureService extends Service<ResponseVS> {
             SMIMEMessage smimeMessage = SessionService.getSMIME(null,
                     operationVS.getReceiverName(), delegation.getCancellationRequest().toString(),
                     password, operationVS.getSignedMessageSubject());
-            SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operationVS.getServiceURL(),
-                    operationVS.getTargetServer().getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
-            ResponseVS responseVS = senderWorker.call();
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                    operationVS.getServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessage delegationReceipt = responseVS.getSMIME();
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -419,32 +417,20 @@ public class SignatureService extends Service<ResponseVS> {
                 SMIMEMessage smimeMessage = SessionService.getSMIME(null, ContextVS.getInstance().getAccessControl().
                         getName(), anonymousDelegation.getRequest().toString(), password,
                         operationVS.getSignedMessageSubject());
-                TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
-                ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
-                        ContentTypeVS.TIMESTAMP_QUERY, ContextVS.getInstance().getAccessControl().getTimeStampServiceURL());
+                //byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert);
+                //byte[] delegationEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
+                String representationDataFile = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
+                        MediaTypeVS.JSON_SIGNED;
+                Map<String, Object> mapToSend = new HashMap<String, Object>();
+                mapToSend.put(ContextVS.CSR_FILE_NAME, anonymousDelegation.getCertificationRequest().getCsrPEM());
+                mapToSend.put(representationDataFile, smimeMessage.getBytes());
+                ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
+                        ContextVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    byte[] bytesToken = responseVS.getMessageBytes();
-                    TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));
-                    X509Certificate timeStampCert = ContextVS.getInstance().getAccessControl().getTimeStampCert();
-                    SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
-                            setProvider(ContextVS.PROVIDER).build(timeStampCert);
-                    timeStampToken.validate(timeStampSignerInfoVerifier);
-                    smimeMessage.setTimeStampToken(timeStampToken);
-                    //byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert);
-                    //byte[] delegationEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
-                    String representationDataFile = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +
-                            MediaTypeVS.JSON_SIGNED;
-                    Map<String, Object> mapToSend = new HashMap<String, Object>();
-                    mapToSend.put(ContextVS.CSR_FILE_NAME, anonymousDelegation.getCertificationRequest().getCsrPEM());
-                    mapToSend.put(representationDataFile, smimeMessage.getBytes());
-                    responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
-                            ContextVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
-                    if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        //byte[] decryptedData = Encryptor.decryptFile(responseVS.getMessageBytes(),
-                        // certificationRequest.getPublicKey(), certificationRequest.getPrivateKey());
-                        anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
-                    } else return responseVS;
-                }
+                    //byte[] decryptedData = Encryptor.decryptFile(responseVS.getMessageBytes(),
+                    // certificationRequest.getPublicKey(), certificationRequest.getPrivateKey());
+                    anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
+                } else return responseVS;
                 updateProgress(60, 100);
                 if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
                 smimeMessage = anonymousDelegation.getCertificationRequest().getSMIME(anonymousDelegation.getHashCertVS(),
@@ -473,18 +459,10 @@ public class SignatureService extends Service<ResponseVS> {
         //we know this is done in a background thread
         private ResponseVS sendSMIME(OperationVS operationVS, String... header) throws Exception {
             log.info("sendSMIME");
-            String documentToSignStr = null;
-            if(operationVS.getAsciiDoc() != null) {
-                documentToSignStr = operationVS.getAsciiDoc();
-            } else {
-                documentToSignStr = JSON.getMapper().writeValueAsString(operationVS.getDocumentToSignMap());
-            }
+            String documentToSignStr = JSON.getMapper().writeValueAsString(operationVS.getDocumentToSignMap());
             SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(),
                     documentToSignStr, password, operationVS.getSignedMessageSubject());
             updateMessage(operationVS.getSignedMessageSubject());
-            if(operationVS.getAsciiDoc() != null) {
-                smimeMessage.setHeader(SMIMEMessage.CONTENT_TYPE_VS, ContentTypeVS.ASCIIDOC.getName());
-            }
             SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operationVS.getServiceURL(),
                     operationVS.getTargetServer().getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null,
                     operationVS.getTargetServer().getX509Certificate(), header);

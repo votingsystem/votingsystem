@@ -36,7 +36,6 @@ public class OperationVS {
     private String serviceURL;
     private String receiverName;
     private String email;
-    private String asciiDoc;
     @JsonIgnore private ActorVS targetServer;
     private File file;
     private String signedMessageSubject;
@@ -263,14 +262,6 @@ public class OperationVS {
 
     public void setDocument(Map document) {
         this.document = document;
-    }
-
-    public String getAsciiDoc() {
-        return asciiDoc;
-    }
-
-    public void setAsciiDoc(String asciiDoc) {
-        this.asciiDoc = asciiDoc;
     }
 
     public String getNif() {

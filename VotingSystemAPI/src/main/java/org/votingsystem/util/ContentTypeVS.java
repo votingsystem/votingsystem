@@ -12,8 +12,6 @@ public enum ContentTypeVS {
 
     BACKUP(MediaTypeVS.BACKUP, "zip"),
     JAVASCRIPT("application/javascript", "js"),
-    ASCIIDOC("asciidoc", "asciidoc"),
-    ASCIIDOC_SIGNED("asciidoc;application/pkcs7-signature", "asciidoc"),
 
     JSON(MediaTypeVS.JSON, "json"),
     JSON_SIGNED(MediaTypeVS.JSON_SIGNED,"p7s"),
@@ -122,9 +120,6 @@ public enum ContentTypeVS {
         if(contentTypeStr.contains(MULTIPART_SIGNED.getName())) return MULTIPART_SIGNED;
         if(contentTypeStr.contains(TEXT.getName())) return TEXT;
         if(contentTypeStr.contains(HTML.getName())) return HTML;
-
-        if(contentTypeStr.contains(ASCIIDOC.getName())) return ASCIIDOC;
-        if(contentTypeStr.contains(ASCIIDOC_SIGNED.getName())) return ASCIIDOC_SIGNED;
 
         if(contentTypeStr.contains(MESSAGEVS.getName())) return MESSAGEVS;
 

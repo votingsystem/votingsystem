@@ -88,10 +88,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         getRowConstraints().addAll(new RowConstraints(), row1);
         setColumnSpan(signatureContentWebView, 3);
         //add(contentWithoutFormatCheckBox, 0, 2);
-        Map signedContentMap = null;
-        if(signedFile.getSMIME().getContentTypeVS() == ContentTypeVS.ASCIIDOC) {
-            signedContentMap =  signedFile.getOperationDocument();
-        } else signedContentMap = JSON.getMapper().readValue(signedFile.getSMIME().getSignedContent(),
+        Map signedContentMap = JSON.getMapper().readValue(signedFile.getSMIME().getSignedContent(),
                 new TypeReference<HashMap<String, Object>>() {});
         String timeStampDateStr = "";
         if(signedFile.getSMIME().getTimeStampToken() != null) {

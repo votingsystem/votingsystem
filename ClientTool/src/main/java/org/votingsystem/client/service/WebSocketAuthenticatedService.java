@@ -298,9 +298,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                 SMIMEMessage smimeMessage = SessionService.getSMIME(null, targetServer.getName(),
                         JSON.getMapper().writeValueAsString(dto), password,
                         ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));
-                MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, targetServer.getTimeStampServiceURL());
                 userVS = smimeMessage.getSigner();
-                smimeMessage = timeStamper.call();
                 connectionMessage = JSON.getMapper().writeValueAsString(dto.setSMIME(smimeMessage));
                 PlatformImpl.runLater(() -> WebSocketAuthenticatedService.this.restart());
                 responseVS = ResponseVS.OK().setSMIME(smimeMessage);

@@ -3,6 +3,7 @@ package org.votingsystem.client.service;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.scene.control.Button;
+import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dto.BrowserSessionDto;
@@ -319,7 +320,10 @@ public class SessionService {
                 KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password.toCharArray());
                 SMIMESignedGeneratorVS signedGenerator = new SMIMESignedGeneratorVS(keyStore,
                         ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
-                return signedGenerator.getSMIME(fromUser, toUser, textToSign, subject);
+                SMIMEMessage smime = signedGenerator.getSMIME(fromUser, toUser, textToSign, subject);
+                MessageTimeStamper timeStamper = new MessageTimeStamper(smime,
+                        ContextVS.getInstance().getDefaultServer().getTimeStampServerURL());
+                return timeStamper.getSMIME();
             case DNIe:
                 return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password.toCharArray(), subject);
             case MOBILE:
