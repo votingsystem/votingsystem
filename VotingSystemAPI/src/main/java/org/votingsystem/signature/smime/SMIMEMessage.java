@@ -1,5 +1,7 @@
 package org.votingsystem.signature.smime;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -18,6 +20,7 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Store;
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.util.CMSUtils;
@@ -104,6 +107,14 @@ public class SMIMEMessage extends MimeMessage {
 
     public String getSignedContent() {
         return signedContent;
+    }
+
+    public <T> T getSignedContent(Class<T> type) throws Exception {
+        return JSON.getMapper().readValue(signedContent, type);
+    }
+
+    public <T> T getSignedContent(TypeReference type) throws IOException {
+        return JSON.getMapper().readValue(signedContent, type);
     }
 
     public SMIMESigned getSmimeSigned() throws Exception {
@@ -247,7 +258,8 @@ public class SMIMEMessage extends MimeMessage {
         this.signers = signers;
     }
 
-    public UserVS getSigner() {
+    public UserVS getSigner() throws Exception {
+        isValidSignature();
         if(signerVS == null && !signers.isEmpty()) {
             signerVS = signers.iterator().next();
         }
@@ -389,7 +401,8 @@ public class SMIMEMessage extends MimeMessage {
                 }
                 signers.add(userVS);
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
-                    voteVS = JSON.getMapper().readValue(signedContent, VoteVS.class);
+                    VoteVSDto dto = JSON.getMapper().readValue(signedContent, VoteVSDto.class);
+                    voteVS = new VoteVS(dto);
                     voteVS.loadSignatureData(cert, timeStampToken);
                 } else if (cert.getExtensionValue(ContextVS.CURRENCY_OID) != null) {
                     currencyCert = cert;

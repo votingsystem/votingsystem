@@ -92,7 +92,7 @@ public class CurrencyBean {
         return responseDto;
     }
 
-    public Currency validateCurrency(Currency currency) throws ExceptionVS, TSPException {
+    public Currency validateCurrency(Currency currency) throws Exception {
         SMIMEMessage smimeMessage = currency.getSMIME();
         Query query = dao.getEM().createQuery("SELECT c FROM Currency c WHERE c.serialNumber =:serialNumber and c.hashCertVS =:hashCertVS")
                 .setParameter("serialNumber", currency.getX509AnonymousCert().getSerialNumber().longValue())

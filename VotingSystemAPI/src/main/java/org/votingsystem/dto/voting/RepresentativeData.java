@@ -1,6 +1,8 @@
 package org.votingsystem.dto.voting;
 
-import org.votingsystem.signature.util.SignedFile;
+
+import org.votingsystem.model.voting.VoteVS;
+import org.votingsystem.signature.smime.SMIMEMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,28 +17,27 @@ public class RepresentativeData {
     
     private String nif;
     private Long id;
-    private SignedFile accessRequest;
-    private SignedFile vote;
-    private List<SignedFile> representationDocumentList = new ArrayList<SignedFile>();
+    private SMIMEMessage accessRequest;
+    private SMIMEMessage vote;
+    private List<SMIMEMessage> representationDocumentList = new ArrayList<SMIMEMessage>();
     private byte[] representedReport;
 
     private Long optionSelectedId = null;
     private Long numRepresentedWithVote = null;
     private Long numRepresentations = null;
     private Long numVotesRepresented = null;
-   
+    private String representationDocumentFileName = null;
+
+
     public RepresentativeData() { }
     
     public RepresentativeData(String nif) {
         this.nif = nif;
     }
     
-    public void addRepresentationDoc(SignedFile repDoc) {
-        if(repDoc == null) {
-            log.info("repDoc null");
-            return;
-        } 
+    public void addRepresentationDoc(SMIMEMessage repDoc, String representationDocumentFileName) {
         representationDocumentList.add(repDoc);
+        this.representationDocumentFileName = representationDocumentFileName;
     }
     
     public int getNumVotesRepresentedForEvent() {
@@ -47,8 +48,8 @@ public class RepresentativeData {
     
     public int getNumVotesOfRepresented () {
         int numVotesOfRepresented = 0;
-        for(SignedFile repDoc:representationDocumentList) {
-            if(repDoc.getName().contains("WithRequest_")) numVotesOfRepresented++;
+        for(SMIMEMessage repDoc:representationDocumentList) {
+            if(representationDocumentFileName.contains("WithRequest_")) numVotesOfRepresented++;
         }      
         return numVotesOfRepresented;
     }    
@@ -56,28 +57,28 @@ public class RepresentativeData {
     /**
      * @return the accessRequest
      */
-    public SignedFile getAccessRequest() {
+    public SMIMEMessage getAccessRequest() {
         return accessRequest;
     }
 
     /**
      * @param accessRequest the accessRequest to set
      */
-    public void setAccessRequest(SignedFile accessRequest) {
+    public void setAccessRequest(SMIMEMessage accessRequest) {
         this.accessRequest = accessRequest;
     }
 
     /**
      * @return the vote
      */
-    public SignedFile getVote() {
+    public SMIMEMessage getVote() {
         return vote;
     }
 
     /**
      * @param vote the vote to set
      */
-    public void setVote(SignedFile vote) {
+    public void setVote(SMIMEMessage vote) {
         this.vote = vote;
     }
 
@@ -98,7 +99,7 @@ public class RepresentativeData {
     /**
      * @return the representationDocumentList
      */
-    public List<SignedFile> getRepresentationDocumentList() {
+    public List<SMIMEMessage> getRepresentationDocumentList() {
         return representationDocumentList;
     }
     
@@ -118,7 +119,7 @@ public class RepresentativeData {
      * @param representationDocumentList the representationDocumentList to set
      */
     public void setRepresentationDocument(
-            List<SignedFile> representationDocumentList) {
+            List<SMIMEMessage> representationDocumentList) {
         this.representationDocumentList = representationDocumentList;
     }
 
@@ -144,10 +145,9 @@ public class RepresentativeData {
     }
    
     public Long getOptionSelectedIdFromVote() throws Exception {
-        if(vote == null) {
-            return null;
-        }
-        return vote.getSelectedOptionId();
+        if(vote == null) return null;
+        VoteVSDto voteVS = vote.getSignedContent(VoteVSDto.class);
+        return voteVS.getOptionSelected().getId();
     }
     /**
      * @param optionSelectedId the optionSelectedId to set

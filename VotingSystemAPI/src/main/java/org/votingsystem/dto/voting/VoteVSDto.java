@@ -1,12 +1,22 @@
 package org.votingsystem.dto.voting;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.FieldEventVS;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.model.voting.VoteVSCanceler;
+import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.CMSUtils;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.TypeVS;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import java.security.NoSuchAlgorithmException;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -14,6 +24,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VoteVSDto {
 
+    private TypeVS operation;
     private Long id;
     private Long cancelerId;
     private Long eventVSId;
@@ -25,8 +36,11 @@ public class VoteVSDto {
     private String messageSMIMEURL;
     private String cancelationMessageSMIMEURL;
     private String eventVSURL;
+    private String voteUUID;
     private VoteVS.State state;
     private FieldEventVS optionSelected;
+    @JsonIgnore
+    private SMIMEMessage voteReceipt;
 
     public VoteVSDto() {}
 
@@ -160,5 +174,51 @@ public class VoteVSDto {
 
     public void setOptionSelected(FieldEventVS optionSelected) {
         this.optionSelected = optionSelected;
+    }
+
+
+    public String getVoteUUID() {
+        return voteUUID;
+    }
+
+    public void setVoteUUID(String voteUUID) {
+        this.voteUUID = voteUUID;
+    }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
+    }
+
+    public AccessRequestDto getAccessRequestDto() {
+        AccessRequestDto accessRequestDto = new AccessRequestDto();
+        accessRequestDto.setEventId(eventVSId);
+        accessRequestDto.setEventURL(eventVSURL);
+        accessRequestDto.setHashAccessRequestBase64(hashAccessRequestBase64);
+        accessRequestDto.setHashCertVSBase64(hashCertVSBase64);
+        accessRequestDto.setUUID(UUID.randomUUID().toString());
+        return accessRequestDto;
+    }
+
+    public VoteVSCancelerDto getCancelVoteDto(String originHashAccessRequest, String originHashCertVote) {
+        VoteVSCancelerDto cancelerDto = new VoteVSCancelerDto();
+        cancelerDto.setOriginHashAccessRequest(originHashAccessRequest);
+        cancelerDto.setHashAccessRequestBase64(hashAccessRequestBase64);
+        cancelerDto.setOriginHashCertVote(originHashCertVote);
+        cancelerDto.setHashCertVSBase64(hashCertVSBase64);
+        cancelerDto.setUUID(UUID.randomUUID().toString());
+        return cancelerDto;
+    }
+
+
+    public SMIMEMessage getVoteReceipt() {
+        return voteReceipt;
+    }
+
+    public void setVoteReceipt(SMIMEMessage voteReceipt) {
+        this.voteReceipt = voteReceipt;
     }
 }

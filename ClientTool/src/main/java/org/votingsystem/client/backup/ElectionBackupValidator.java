@@ -7,6 +7,7 @@ import org.votingsystem.dto.voting.RepresentativesData;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.FieldEventVS;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.DocumentVSValidator;
 import org.votingsystem.signature.util.SignedFile;
@@ -208,7 +209,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                                 errorList.add(errorMsg);
                             }
                         }
-                        ResponseVS responseVS = DocumentVSValidator.validateRepresentationDocument(signedFile,
+                        ResponseVS responseVS = DocumentVSValidator.validateRepresentationDocument(repDoc,
                                 trustAnchors, metaInf.getDateBegin(),  metaInf.getDateFinish(), representativeNif,
                                 timeStampServerCert);
                         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
@@ -223,9 +224,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                     List<File> result = FileUtils.findRecursively(votesDir, "_" + representativeNif);
                     if(!result.isEmpty()) {
                         File voteFile = result.iterator().next();
-                        byte[] fileBytes = FileUtils.getBytesFromFile(voteFile);
-                        SignedFile vote = new SignedFile(fileBytes, voteFile.getName(), null);
-                        ResponseVS representativeVoteResponse = DocumentVSValidator.validateVote(vote,
+                        ResponseVS representativeVoteResponse = DocumentVSValidator.validateVote(voteFile,
                                 trustAnchors, eventTrustedAnchors,  representativeDataMetaInf.
                                 getOptionSelectedId(), eventURL, metaInf.getDateBegin(), metaInf.getDateFinish(),
                                 timeStampServerCert);
@@ -290,21 +289,23 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                     if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELED);
                     String errorMessage = null;
                     byte[] accessRequestBytes = FileUtils.getBytesFromFile(accessRequest);
-                    SignedFile signedFile = new SignedFile(accessRequestBytes, accessRequest.getName(), null);
-                    ResponseVS validationResponse = DocumentVSValidator.validateAccessRequest(signedFile,
+                    ResponseVS validationResponse = DocumentVSValidator.validateAccessRequest(accessRequest,
                             trustAnchors, eventURL, metaInf.getDateBegin(),
                             metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();
                     if(ResponseVS.SC_OK == validationResponse.getStatusCode()) {
-                        boolean repeatedAccessrequest = signersNifMap.containsKey(signedFile.getSignerNif());
+                        boolean repeatedAccessrequest = signersNifMap.containsKey(
+                                validationResponse.getSMIME().getSigner().getNif());
                         if(repeatedAccessrequest) {
                             numAccessRequestERROR++;
                             errorMessage = ContextVS.getInstance().getMessage("accessRequetsRepeatedErrorMsg",
-                                    signedFile.getSignerNif()) + " - " + accessRequest.getAbsolutePath() + " - " +
-                                    signersNifMap.get(signedFile.getSignerNif());
+                                    validationResponse.getSMIME().getSigner().getNif()) + " - " +
+                                    accessRequest.getAbsolutePath() + " - " +
+                                    signersNifMap.get(validationResponse.getSMIME().getSigner().getNif());
                         } else {
                             numAccessRequestOK++;
-                            signersNifMap.put(signedFile.getSignerNif(), accessRequest.getAbsolutePath());
+                            signersNifMap.put(validationResponse.getSMIME().getSigner().getNif(),
+                                    accessRequest.getAbsolutePath());
                         } 
                     } else {
                         numAccessRequestERROR++;
@@ -346,26 +347,27 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                 File[] votes = batchDir.listFiles();
                 for(File vote : votes) {
                     if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELED);
-                    byte[] voteBytes = FileUtils.getBytesFromFile(vote);
-                    SignedFile signedFile = new SignedFile(voteBytes, vote.getName(), null);
-                    ResponseVS<Long> validationResponse = DocumentVSValidator.validateVote(signedFile,
+                    ResponseVS<Long> validationResponse = DocumentVSValidator.validateVote(vote,
                             trustAnchors, eventTrustedAnchors, null, eventURL,
                             metaInf.getDateBegin(), metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();
                     if(ResponseVS.SC_OK == validationResponse.getStatusCode()) {
-                        boolean repeatedVote = signerCertMap.containsKey(signedFile.getSignerCertSerialNumber());
+                        SMIMEMessage smimeMessage = new SMIMEMessage(FileUtils.getBytesFromFile(vote));
+                        boolean repeatedVote = signerCertMap.containsKey(validationResponse.getSMIME().getVoteVS()
+                                .getX509Certificate().getSerialNumber().longValue());
+                        Long certSerialNumber = smimeMessage.getVoteVS().getX509Certificate().getSerialNumber().longValue();
                         if(repeatedVote){
                             numVotesERROR++;
                             statusCode = ResponseVS.SC_ERROR;
                             String msg = ContextVS.getInstance().getMessage(
-                                    "voteRepeatedErrorMsg", signedFile.getSignerCertSerialNumber()) + " - " +
-                                    vote.getAbsolutePath() + " - " +
-                                    signerCertMap.get(signedFile.getSignerCertSerialNumber());
+                                    "voteRepeatedErrorMsg", smimeMessage.getVoteVS().getX509Certificate()
+                                    .getSerialNumber().longValue()) + " - " + vote.getAbsolutePath() + " - " +
+                                    signerCertMap.get(certSerialNumber);
                             errorList.add(msg);
                         } else {
                             numVotesOK++;
                             Long optionSelectedId = validationResponse.getData();
-                            signerCertMap.put(signedFile.getSignerCertSerialNumber(), vote.getAbsolutePath());
+                            signerCertMap.put(certSerialNumber, vote.getAbsolutePath());
                             if(vote.getAbsolutePath().contains(representativeVoteFileName)) {
                                 String representativeNIF = vote.getName().split("_")[1].split("\\.")[0];
                                 numRepresentativeVotes++;

@@ -5,6 +5,7 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -28,18 +29,16 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
 
     private static Logger log = Logger.getLogger(AccessRequestDataSender.class.getSimpleName());
 
-    private VoteVS voteVS;
     private SMIMEMessage smimeMessage;
     private CertificationRequestVS certificationRequest;
     private X509Certificate destinationCert;
 
-    public AccessRequestDataSender(SMIMEMessage smimeMessage, VoteVS voteVS) throws Exception {
+    public AccessRequestDataSender(SMIMEMessage smimeMessage, AccessRequestDto accessRequest) throws Exception {
         this.smimeMessage = smimeMessage;
-        this.voteVS = voteVS;
         this.destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
         this.certificationRequest = CertificationRequestVS.getVoteRequest(KEY_SIZE, SIG_NAME, VOTE_SIGN_MECHANISM,
                 ContextVS.PROVIDER, ContextVS.getInstance().getAccessControl().getServerURL(),
-                voteVS.getEventVS().getId(), voteVS.getHashCertVSBase64());
+                accessRequest.getEventVS().getId(), accessRequest.getHashCertVSBase64());
     }
 
     @Override public ResponseVS call() throws Exception {

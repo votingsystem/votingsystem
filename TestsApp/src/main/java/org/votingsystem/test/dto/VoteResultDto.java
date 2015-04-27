@@ -1,25 +1,26 @@
 package org.votingsystem.test.dto;
 
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.voting.VoteVS;
 
 public class VoteResultDto {
 
-    private VoteVS voteVS;
+    private VoteVSDto voteVS;
     private String electorNIF;
 
     public VoteResultDto() {}
 
-    public VoteResultDto(VoteVS voteVS, String electorNIF) {
+    public VoteResultDto(VoteVSDto voteVS, String electorNIF) {
         this.voteVS = voteVS;
         this.electorNIF = electorNIF;
     }
 
 
-    public VoteVS getVoteVS() {
+    public VoteVSDto getVoteVS() {
         return voteVS;
     }
 
-    public void setVoteVS(VoteVS voteVS) {
+    public void setVoteVS(VoteVSDto voteVS) {
         this.voteVS = voteVS;
     }
 

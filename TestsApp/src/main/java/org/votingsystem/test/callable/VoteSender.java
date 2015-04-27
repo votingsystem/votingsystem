@@ -2,6 +2,7 @@ package org.votingsystem.test.callable;
 
 import org.votingsystem.callable.AccessRequestDataSender;
 import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -23,10 +24,10 @@ public class VoteSender implements Callable<ResponseVS> {
     
     private static Logger log = Logger.getLogger(VoteSender.class.getSimpleName());
    
-    private VoteVS voteVS;
+    private VoteVSDto voteVS;
     private String electorNIF;
         
-    public VoteSender(VoteVS voteVS, String electorNIF) throws Exception {
+    public VoteSender(VoteVSDto voteVS, String electorNIF) throws Exception {
         this.voteVS = voteVS;
         this.electorNIF = electorNIF;
     }
@@ -38,7 +39,7 @@ public class VoteSender implements Callable<ResponseVS> {
         String contentStr = JSON.getMapper().writeValueAsString(voteVS.getAccessRequestDto());
         SMIMEMessage smimeMessage = signatureService.getSMIME(electorNIF, toUser, contentStr, smimeMessageSubject);
 
-        AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, voteVS);
+        AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, voteVS.getAccessRequestDto());
         ResponseVS responseVS = accessRequestDataSender.call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
@@ -52,7 +53,7 @@ public class VoteSender implements Callable<ResponseVS> {
             responseVS = sender.call();
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessage voteReceipt = responseVS.getSMIME();
-                voteVS.setReceipt(voteReceipt);
+                voteVS.setVoteReceipt(voteReceipt);
                 //_ TODO _ validate receipt
             }
         }

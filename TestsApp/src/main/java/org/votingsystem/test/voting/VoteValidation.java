@@ -4,12 +4,11 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
-
 import java.io.File;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
@@ -66,14 +65,14 @@ public class VoteValidation {
                 FileUtils.getBytesFromFile(timeStampCertFile));
         X509Certificate timeStampServerCert = timeStampCerts.iterator().next();
 
-        SignedFile vote = new SignedFile(voteBytes, voteFile.getName(), null);
-        Date tokenDate = vote.getSMIME().getSigner().getTimeStampToken().getTimeStampInfo().getGenTime();
+        SMIMEMessage vote = new SMIMEMessage(voteBytes);
+        Date tokenDate = vote.getSigner().getTimeStampToken().getTimeStampInfo().getGenTime();
 
         if(!vote.isValidSignature()) {
-            log.log(Level.SEVERE, ContextVS.getInstance().getProperty("signatureErrorMsg", vote.getName()));
+            log.log(Level.SEVERE, ContextVS.getInstance().getProperty("signatureErrorMsg", voteFile.getAbsolutePath()));
         }
 
-        Set<UserVS> signersVS = vote.getSMIME().getSigners();
+        Set<UserVS> signersVS = vote.getSigners();
         for(UserVS signerVS:signersVS) {
             if(signerVS.getTimeStampToken() != null) {//user signature
                 CertUtils.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(signerVS.getCertificate()), tokenDate);
@@ -83,7 +82,7 @@ public class VoteValidation {
         }
         SignerInformationVerifier timeStampSignerInfoVerifier = new
                 JcaSimpleSignerInfoVerifierBuilder().build(timeStampServerCert);
-        vote.getSMIME().getSigner().getTimeStampToken().validate(timeStampSignerInfoVerifier);
+        vote.getSigner().getTimeStampToken().validate(timeStampSignerInfoVerifier);
         log.info("vote valid - delivered: " + tokenDate.toString());
         simulationData.finishAndExit(ResponseVS.SC_OK, null);
     }

@@ -1,8 +1,6 @@
 package org.votingsystem.model.voting;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -34,7 +32,6 @@ import static javax.persistence.GenerationType.IDENTITY;
 */
 @Entity
 @Table(name="VoteVS")
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class VoteVS extends EntityVS implements Serializable {
 
     private static Logger log = Logger.getLogger(VoteVS.class.getSimpleName());
@@ -45,18 +42,17 @@ public class VoteVS extends EntityVS implements Serializable {
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
-    @OneToOne @JsonIgnore private MessageSMIME messageSMIME;
-    @OneToOne @JsonIgnore private CertificateVS certificateVS;
+    private MessageSMIME messageSMIME;
+    private CertificateVS certificateVS;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="optionSelected") private FieldEventVS optionSelected;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="eventVSElection") private @JsonIgnore
-    EventVS eventVS;
+    @JoinColumn(name="eventVSElection") private EventVS eventVS;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @Column(name="dateCreated", length=23) @Temporal(TemporalType.TIMESTAMP) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
-    @JsonProperty("UUID")
+
     @Transient private String voteUUID;
     @Transient private String hashCertVSBase64;
     @Transient private String hashAccessRequestBase64;
@@ -64,25 +60,26 @@ public class VoteVS extends EntityVS implements Serializable {
     @Transient private String eventURL;
     @Transient private Long accessControlEventVSId;
     @Transient private String representativeURL;
-    @Transient @JsonIgnore private String originHashCertVote;
-    @Transient @JsonIgnore private String originHashAccessRequest;
-    @Transient @JsonIgnore private X509Certificate x509Certificate;
-    @Transient @JsonIgnore private TimeStampToken timeStampToken;
-    @Transient @JsonIgnore private Set<X509Certificate> serverCerts = new HashSet<X509Certificate>();
-    @Transient @JsonIgnore private SMIMEMessage receipt;
+    @Transient private String originHashCertVote;
+    @Transient private String originHashAccessRequest;
+    @Transient private X509Certificate x509Certificate;
+    @Transient private TimeStampToken timeStampToken;
+    @Transient private Set<X509Certificate> serverCerts = new HashSet<X509Certificate>();
+    @Transient private SMIMEMessage receipt;
     @Transient private boolean isValid = false;
 
     public VoteVS () {}
 
     public VoteVS (VoteVSDto voteVSDto) {
         id = voteVSDto.getId();
-        EventVSElection eventVSElection = new EventVSElection();
-        eventVSElection.setId(voteVSDto.getEventVSId());
-        eventVSElection.setUrl(voteVSDto.getEventVSURL());
+        eventVS = new EventVSElection();
+        eventVS.setId(voteVSDto.getEventVSId());
+        eventVS.setUrl(voteVSDto.getEventVSURL());
         eventURL = voteVSDto.getEventVSURL();
         hashAccessRequestBase64 = voteVSDto.getHashAccessRequestBase64();
         hashCertVSBase64 = voteVSDto.getHashCertVSBase64();
         optionSelected = voteVSDto.getOptionSelected();
+        voteUUID = voteVSDto.getVoteUUID();
         state = voteVSDto.getState();
     }
 
@@ -277,23 +274,27 @@ public class VoteVS extends EntityVS implements Serializable {
         this.accessControlEventVSId = accessControlEventVSId;
     }
 
-    public void genVote() throws NoSuchAlgorithmException {
-        log.info(" --- genVote ---");
+    public VoteVSDto genVote() throws NoSuchAlgorithmException {
         originHashAccessRequest = UUID.randomUUID().toString();
         hashAccessRequestBase64 = CMSUtils.getHashBase64(originHashAccessRequest, ContextVS.VOTING_DATA_DIGEST);
         originHashCertVote = UUID.randomUUID().toString();
         hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVote, ContextVS.VOTING_DATA_DIGEST);
+        VoteVSDto dto = new VoteVSDto();
+        dto.setHashAccessRequestBase64(hashAccessRequestBase64);
+        dto.setHashCertVSBase64(hashCertVSBase64);
+        dto.setEventVSId(eventVS.getId());
+        dto.setEventVSURL(eventURL);
+        dto.setOptionSelected(optionSelected);
+        return dto;
     }
 
-    public static VoteVS genRandomVote (String digestAlg, EventVS eventVS)throws NoSuchAlgorithmException {
-        VoteVS voteVS = new VoteVS(eventVS);
-        voteVS.setEventVS(eventVS);
-        voteVS.genVote();
-        voteVS.setOptionSelected(getRandomOption(eventVS.getFieldsEventVS()));
-        return voteVS;
+    public VoteVSDto genRandomVote() throws NoSuchAlgorithmException {
+        VoteVSDto dto = genVote();
+        dto.setOptionSelected(getRandomOption(eventVS.getFieldsEventVS()));
+        return dto;
     }
 
-    private static FieldEventVS getRandomOption (Set<FieldEventVS> options) {
+    public static FieldEventVS getRandomOption (Set<FieldEventVS> options) {
         int item = new Random().nextInt(options.size()); // In real life, the Random object should be rather more shared than this
         return (FieldEventVS) options.toArray()[item];
     }
@@ -316,27 +317,6 @@ public class VoteVS extends EntityVS implements Serializable {
                     representativeURLExtensionValue);
             setRepresentativeURL(((DERUTF8String) representativeURL_DER.getObject()).toString());
         }
-    }
-
-    @JsonIgnore
-    public AccessRequestDto getAccessRequestDto() {
-        AccessRequestDto accessRequestDto = new AccessRequestDto();
-        accessRequestDto.setEventId(eventVS.getId());
-        accessRequestDto.setEventURL(eventVS.getUrl());
-        accessRequestDto.setHashAccessRequestBase64(hashAccessRequestBase64);
-        accessRequestDto.setUUID(UUID.randomUUID().toString());
-        return accessRequestDto;
-    }
-
-    @JsonIgnore
-    public VoteVSCancelerDto getCancelVoteDto() {
-        VoteVSCancelerDto cancelerDto = new VoteVSCancelerDto();
-        cancelerDto.setOriginHashAccessRequest(originHashAccessRequest);
-        cancelerDto.setHashAccessRequestBase64(hashAccessRequestBase64);
-        cancelerDto.setOriginHashCertVote(originHashCertVote);
-        cancelerDto.setHashCertVSBase64(hashCertVSBase64);
-        cancelerDto.setUUID(UUID.randomUUID().toString());
-        return cancelerDto;
     }
 
 }

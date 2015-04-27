@@ -110,8 +110,11 @@ public class WebSocketService extends Service<ResponseVS> {
         }
 
         @OnMessage public void onMessage(String message) {
-            consumeMessage(message);
+            try {
+                consumeMessage( JSON.getMapper().readValue(message, SocketMessageDto.class));
+            } catch (IOException e) { e.printStackTrace(); }
         }
+
     }
 
     class WebSocketTask extends Task<ResponseVS> {
@@ -143,18 +146,18 @@ public class WebSocketService extends Service<ResponseVS> {
         }
     }
 
-    private void consumeMessage(final String messageStr){
+    private void consumeMessage(final SocketMessageDto messageDto){
         try {
-            SocketMessageDto messageDto = JSON.getMapper().readValue(messageStr, SocketMessageDto.class);
-            log.info("consumeMessage - type: " + messageDto.getOperation() +
-                    " - status: " + messageDto.getStatusCode());
+            log.info("consumeMessage - type: " + messageDto.getOperation() + " - status: " + messageDto.getStatusCode());
             WebSocketSession socketSession = ContextVS.getInstance().getWSSession(messageDto.getUUID());
-            if(messageDto.getStatusCode() != null && ResponseVS.SC_ERROR == messageDto.getStatusCode()) {
+            if(ResponseVS.SC_ERROR == messageDto.getStatusCode()) {
                 showMessage(messageDto.getStatusCode(), messageDto.getMessage());
                 return;
             }
-            if(messageDto.isEncrypted() && socketSession != null)
+            if(messageDto.isEncrypted() && socketSession != null) {
                 messageDto.decryptMessage(socketSession.getAESParams());
+                log.info("consumeMessage - type: " + messageDto.getOperation() + " - status: " + messageDto.getStatusCode());
+            }
             switch(messageDto.getOperation()) {
                 case INIT_SIGNED_SESSION:
                     Browser.getInstance().runJSCommand(
@@ -162,6 +165,12 @@ public class WebSocketService extends Service<ResponseVS> {
                     break;
                 case MESSAGEVS_TO_DEVICE:
                     InboxService.getInstance().newMessage(new InboxMessage(messageDto));
+                    break;
+                case MESSAGEVS_SIGN:
+                    if(ResponseVS.SC_CANCELED == messageDto.getStatusCode()){
+                        messageDto.setStatusCode(ResponseVS.SC_ERROR);
+                        SessionService.setSignResponse(messageDto);
+                    }
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:
                     SessionService.setSignResponse(messageDto);
@@ -174,7 +183,13 @@ public class WebSocketService extends Service<ResponseVS> {
                                 return;
                         }
                     }
-                default: log.info("unprocessed messageDto");
+                    break;
+                case OPERATION_CANCELED:
+                    messageDto.setOperation(socketSession.getTypeVS());
+                    messageDto.setStatusCode(ResponseVS.SC_CANCELED);
+                    consumeMessage(messageDto);
+                    break;
+                default: log.info("unprocessed messageDto - operation: " +  messageDto.getOperation());
             }
         } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
     }

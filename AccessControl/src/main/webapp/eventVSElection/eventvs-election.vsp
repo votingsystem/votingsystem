@@ -178,10 +178,10 @@
             },
             submitVote:function() {
                 console.log("submitVote")
-                var voteVS = {optionSelected:this.optionVSSelected, eventId:this.eventvs.id, eventURL:this.eventvs.URL}
+                var voteVS = {optionSelected:this.optionVSSelected, eventVSId:this.eventvs.id, eventVSURL:this.eventvs.URL}
                 var webAppMessage = new WebAppMessage(Operation.SEND_SMIME_VOTE)
                 this.eventvs.voteVS = voteVS
-                webAppMessage.eventVS = this.eventvs
+                webAppMessage.voteVS = voteVS
                 webAppMessage.signedMessageSubject = '${msg.sendVoteMsgSubject}'
                 webAppMessage.setCallback(function(appMessage) {
                     console.log(this.tagName + " - vote callback - message: " + appMessage);

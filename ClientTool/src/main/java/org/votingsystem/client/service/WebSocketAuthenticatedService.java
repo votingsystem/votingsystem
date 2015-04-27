@@ -119,7 +119,11 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         }
 
         @OnMessage public void onMessage(String message) {
-            consumeMessage(message);
+            try {
+                consumeMessage(JSON.getMapper().readValue(message, SocketMessageDto.class));
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+            }
         }
     }
 
@@ -215,9 +219,8 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         } throw new ExceptionVS(ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"));
     }
 
-    private void consumeMessage(final String socketMsgStr) {
+    private void consumeMessage(final SocketMessageDto messageDto) {
         try {
-            SocketMessageDto messageDto = JSON.getMapper().readValue(socketMsgStr, SocketMessageDto.class);
             WebSocketSession socketSession = ContextVS.getInstance().getWSSession(messageDto.getUUID());
             log.info("consumeMessage - type: " + messageDto.getOperation() + " - status: " + messageDto.getStatusCode());
             if(ResponseVS.SC_ERROR == messageDto.getStatusCode()) {
@@ -244,14 +247,25 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                             default:
                                 log.log(Level.SEVERE, "MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
                         }
-                        responseVS = new ResponseVS(null, socketSession.getTypeVS(), messageDto);
+                        responseVS = new ResponseVS(null, messageDto.getOperation(), messageDto);
                     }
                     break;
                 case MESSAGEVS_FROM_DEVICE:
                     responseVS = new ResponseVS(null, socketSession.getTypeVS(), messageDto);
                     break;
+                case MESSAGEVS_SIGN:
+                    if(ResponseVS.SC_CANCELED == messageDto.getStatusCode()){
+                        messageDto.setStatusCode(ResponseVS.SC_ERROR);
+                        SessionService.setSignResponse(messageDto);
+                    }
+                    break;
                 case MESSAGEVS_SIGN_RESPONSE:
                     SessionService.setSignResponse(messageDto);
+                    break;
+                case OPERATION_CANCELED:
+                    messageDto.setOperation(socketSession.getTypeVS());
+                    messageDto.setStatusCode(ResponseVS.SC_CANCELED);
+                    consumeMessage(messageDto);
                     break;
                 default:
                     log.info("unprocessed socketMsg: " + messageDto.getOperation());

@@ -16,6 +16,7 @@ public class AccessRequestDto {
     private String eventURL;
     private Long eventId;
     private String hashAccessRequestBase64;
+    private String hashCertVSBase64;
     private String UUID;
 
     @JsonIgnore private EventVSElection eventVS;
@@ -78,5 +79,13 @@ public class AccessRequestDto {
 
     public void setAccessRequestVS(AccessRequestVS accessRequestVS) {
         this.accessRequestVS = accessRequestVS;
+    }
+
+    public String getHashCertVSBase64() {
+        return hashCertVSBase64;
+    }
+
+    public void setHashCertVSBase64(String hashCertVSBase64) {
+        this.hashCertVSBase64 = hashCertVSBase64;
     }
 }

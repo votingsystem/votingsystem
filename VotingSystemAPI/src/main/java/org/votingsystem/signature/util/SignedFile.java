@@ -16,12 +16,12 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
-* License: https://github.com/votingsystem/votingsystem/wiki/Licencia
-*/
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 public class SignedFile {
-        
+
     private static Logger log = Logger.getLogger(SignedFile.class.getSimpleName());
-    
+
     private byte[] signedFileBytes = null;
     private String name = null;
     private Map operationDocument = null;
@@ -35,28 +35,19 @@ public class SignedFile {
         this.operationDocument = operationDocument;
         this.name = name;
     }
-    
+
     public boolean isValidSignature() {
         return signatureVerified;
     }
-    
-    /**
-     * @return the signedFileBytes
-     */
+
     public byte[] getSignedFileBytes() {
         return signedFileBytes;
     }
 
-    /**
-     * @param signedFileBytes the signedFileBytes to set
-     */
     public void setSignedFileBytes(byte[] signedFileBytes) {
         this.signedFileBytes = signedFileBytes;
     }
 
-    /**
-     * @return the name
-     */
     public String getName() {
         return name;
     }
@@ -64,7 +55,7 @@ public class SignedFile {
     public SMIMEMessage getSMIME() {
         return smimeMessage;
     }
-    
+
     public String getCaption( ) throws Exception {
         TypeVS operation = getTypeVS();
         if(operation == null) return null;
@@ -95,27 +86,27 @@ public class SignedFile {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public boolean isSMIME() {
         if(smimeMessage != null) return true;
         if(signedFileBytes == null) return false;
         if(name.toLowerCase().endsWith(".p7m") && signatureVerified) return true;
         else return false;
     }
-    
-    public String getSignerNif() {
+
+    public String getSignerNif() throws Exception {
         return smimeMessage.getSigner().getNif();
     }
-    
+
     public byte[] getFileBytes() {
         return signedFileBytes;
     }
-    
+
     public String getNifFromRepresented() {
         if(name != null && name.contains("_delegation_")) return name.split("_delegation_")[0];
         else return null;
     }
-    
+
     public File getFile() throws Exception {
         File file = File.createTempFile("signedFile", ".votingSystem");
         file.deleteOnExit();
@@ -132,8 +123,8 @@ public class SignedFile {
         }
         return null;
     }
-    
-    public Long getSignerCertSerialNumber() {
+
+    public Long getSignerCertSerialNumber() throws Exception {
         if(smimeMessage == null) return null;
         UserVS userVS = smimeMessage.getSigner();
         return userVS.getCertificate().getSerialNumber().longValue();

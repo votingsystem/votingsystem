@@ -5,6 +5,7 @@ import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.voting.EventVSChangeDto;
 import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -41,7 +42,7 @@ public class PublishAndSendElection {
     private static List<String> synchronizedElectorList;
     private static ExecutorService simulatorExecutor;
     private static ExecutorCompletionService responseService;
-    private static ExecutorCompletionService signClaimCompletionService;
+    private static final Map<String, VoteVS> voteVSMap = new ConcurrentHashMap<>();
 
     public static void main(String[] args) throws Exception {
         ContextVS.getInstance().initTestEnvironment(
@@ -132,8 +133,10 @@ public class PublishAndSendElection {
                 if(!((VotingSimulationData)simulationData).waitingForVoteRequests()) {
                     int randomElector = new Random().nextInt(synchronizedElectorList.size());
                     String electorNif = synchronizedElectorList.remove(randomElector);
-                    responseService.submit(new VoteSender(VoteVS.genRandomVote(ContextVS.VOTING_DATA_DIGEST, eventVS),
-                            electorNif));
+                    VoteVS voteVS = new VoteVS(eventVS);
+                    VoteVSDto voteVSDto = voteVS.genRandomVote();
+                    voteVSMap.put(voteVSDto.getHashCertVSBase64(), voteVS);
+                    responseService.submit(new VoteSender(voteVSDto, electorNif));
                 } else Thread.sleep(500);
             }
         }
@@ -148,8 +151,8 @@ public class PublishAndSendElection {
                 String nifFrom = null;
                 if(responseVS.getData() != null) nifFrom = responseVS.getData().getElectorNIF();
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    VoteVS voteReceipt = responseVS.getData().getVoteVS();
-                    if(isWithVoteCancellation) cancelVote(voteReceipt, nifFrom);
+                    VoteVSDto voteReceipt = responseVS.getData().getVoteVS();
+                    if(isWithVoteCancellation) cancelVote(voteVSMap.get(voteReceipt.getHashCertVSBase64()), nifFrom);
                     simulationData.getAndIncrementNumVotingRequestsOK();
                 } else simulationData.finishAndExit(ResponseVS.SC_ERROR, "ERROR" + responseVS.getMessage());
             } catch(Exception ex) {

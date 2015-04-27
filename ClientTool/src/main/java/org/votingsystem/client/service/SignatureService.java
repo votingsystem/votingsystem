@@ -24,6 +24,7 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.AnonymousDelegationDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.VoteVSDto;
@@ -235,20 +236,20 @@ public class SignatureService extends Service<ResponseVS> {
         private ResponseVS sendVote(OperationVS operationVS) throws Exception {
             log.info("sendVote");
             String fromUser = ContextVS.getInstance().getMessage("electorLbl");
-            EventVSDto eventVS = operationVS.getEventVS();
-            VoteVS voteVS = new VoteVS(eventVS.getVoteVS());
-            voteVS.genVote();
-            String toUser = eventVS.getAccessControl().getName();
-            String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + eventVS.getId();
+            VoteVS voteVS = new VoteVS(operationVS.getVoteVS());
+            VoteVSDto voteVSDto = voteVS.genVote();
+            String toUser = voteVS.getEventURL();
+            String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + voteVS.getEventVS().getId();
+            AccessRequestDto accessRequestDto = voteVSDto.getAccessRequestDto();
             SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser, 
-                    JSON.getMapper().writeValueAsString(voteVS.getAccessRequestDto()), password, msgSubject);
-            AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, voteVS);
+                    JSON.getMapper().writeValueAsString(accessRequestDto), password, msgSubject);
+            AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, accessRequestDto);
             ResponseVS responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             updateProgress(60, 100);
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
-            String textToSign = JSON.getMapper().writeValueAsString(new VoteVSDto(voteVS, null)); ;
-            fromUser = eventVS.getVoteVS().getHashCertVSBase64();
+            String textToSign = JSON.getMapper().writeValueAsString(voteVSDto); ;
+            fromUser = voteVS.getHashCertVSBase64();
             msgSubject = ContextVS.getInstance().getMessage("voteVSSubject");
             smimeMessage = certificationRequest.getSMIME(fromUser, toUser, textToSign, msgSubject, null);
             String urlVoteService = ((ControlCenterVS)ContextVS.getInstance().getControlCenter()).getVoteServiceURL();
@@ -262,8 +263,7 @@ public class SignatureService extends Service<ResponseVS> {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessage validatedVote = responseVS.getSMIME();
                 voteVS.setReceipt(validatedVote);
-                ResponseVS voteResponse = new ResponseVS(ResponseVS.SC_OK, ContentTypeVS.VOTE);
-                voteResponse.setType(TypeVS.VOTEVS);
+                ResponseVS voteResponse = new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.VOTEVS);
                 voteResponse.setData(voteVS);
                 ContextVS.getInstance().addHashCertVSData(voteVS.getHashCertVSBase64(), voteResponse);
                 Map dataMap = new HashMap<>();

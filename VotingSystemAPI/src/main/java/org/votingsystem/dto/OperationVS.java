@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.AccessControlVS;
@@ -36,7 +37,6 @@ public class OperationVS {
     private String serviceURL;
     private String receiverName;
     private String email;
-    @JsonIgnore private ActorVS targetServer;
     private File file;
     private String signedMessageSubject;
     @JsonProperty("signedContent") private Map documentToSignMap;
@@ -46,8 +46,11 @@ public class OperationVS {
     private String jsonStr;
     private String contentType;
     private EventVSDto eventVS;
+    private VoteVSDto voteVS;
     private String UUID;
 
+
+    @JsonIgnore private ActorVS targetServer;
 
     public OperationVS() {}
 
@@ -299,5 +302,14 @@ public class OperationVS {
     public void setJsonStr(String jsonStr) {
         this.jsonStr = jsonStr;
     }
+
+    public VoteVSDto getVoteVS() {
+        return voteVS;
+    }
+
+    public void setVoteVS(VoteVSDto voteVS) {
+        this.voteVS = voteVS;
+    }
+
 }
 
