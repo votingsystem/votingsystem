@@ -396,7 +396,8 @@ public class SignatureBean {
         String signerNIF = org.votingsystem.util.NifUtils.validate(smimeMessage.getSigner().getNif());
         SMIMEDto smimeDto = new SMIMEDto();
         for(UserVS userVS: signersVS) {
-            timeStampBean.validateToken(userVS.getTimeStampToken());
+            if(userVS.getTimeStampToken() != null) timeStampBean.validateToken(userVS.getTimeStampToken());
+            else log.info("signature without timestamp - signer: " + userVS.getCertificate().getSubjectDN());
             validatorResult = verifyUserCertificate(userVS);
             if(validatorResult.getChecker().isAnonymousSigner()) {
                 log.log(Level.FINE, "validateSignersCerts - is anonymous signer");

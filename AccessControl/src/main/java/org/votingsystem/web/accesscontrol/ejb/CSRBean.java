@@ -87,7 +87,7 @@ public class CSRBean {
     }
 
 
-    public synchronized CsrResponse signCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS) throws Exception {
+    public CsrResponse signCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS) throws Exception {
         CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
         KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
         //TODO ==== vote keystore -- this is for developement
@@ -100,7 +100,7 @@ public class CSRBean {
         return csrResponse;
     }
 
-    public synchronized CsrResponse signRepresentativeCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS,
+    public CsrResponse signRepresentativeCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS,
                           UserVS representative) throws Exception {
         CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
         KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
@@ -146,7 +146,7 @@ public class CSRBean {
     }
 
 
-    public synchronized X509Certificate signAnonymousDelegationCert (byte[] csrPEMBytes) throws Exception {
+    public X509Certificate signAnonymousDelegationCert (byte[] csrPEMBytes) throws Exception {
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         CertificationRequestInfo info = csr.getCertificationRequestInfo();
         Enumeration csrAttributes = info.getAttributes().getObjects();

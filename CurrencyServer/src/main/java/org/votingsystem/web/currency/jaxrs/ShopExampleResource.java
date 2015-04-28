@@ -44,7 +44,7 @@ public class ShopExampleResource {
     @Path("/") @GET
     public Object index(@QueryParam("uuid") String uuid, @Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST("currency shop example", UserVS.Type.GROUP,
+        TransactionVSDto dto = TransactionVSDto.CURRENCY_SEND_REQUEST("currency shop example", UserVS.Type.GROUP,
                 new BigDecimal(1), "EUR", "ES0878788989450000000007", "shop example payment - " + new Date(), TagVS.WILDTAG);
         dto.setPaymentOptions(Arrays.asList(Payment.SIGNED_TRANSACTION,
                 Payment.CURRENCY_BATCH, Payment.CASH_SEND));

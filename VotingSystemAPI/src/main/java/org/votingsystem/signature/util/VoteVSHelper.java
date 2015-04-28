@@ -27,6 +27,7 @@ public class VoteVSHelper {
     private String hashCertVSBase64;
     private SMIMEMessage validatedVote;
     private VoteVSDto voteVSDto;
+    private VoteVSCancelerDto cancelerDto;
     private AccessRequestDto accessRequestDto;
 
 
@@ -66,7 +67,7 @@ public class VoteVSHelper {
         voteVSDto.setEventVSId(eventVSId);
         voteVSDto.setEventVSURL(eventVSURL);
         voteVSDto.setOptionSelected(optionSelected);
-        voteVSDto.setVoteUUID(UUID.randomUUID().toString());
+        voteVSDto.setUUID(UUID.randomUUID().toString());
     }
 
 
@@ -83,13 +84,15 @@ public class VoteVSHelper {
     }
 
     public VoteVSCancelerDto getVoteCanceler() {
-        VoteVSCancelerDto cancelerDto = new VoteVSCancelerDto();
-        cancelerDto.setOperation(TypeVS.CANCEL_VOTE);
-        cancelerDto.setOriginHashAccessRequest(originHashAccessRequest);
-        cancelerDto.setHashAccessRequestBase64(hashAccessRequestBase64);
-        cancelerDto.setOriginHashCertVote(originHashCertVote);
-        cancelerDto.setHashCertVSBase64(hashCertVSBase64);
-        cancelerDto.setUUID(UUID.randomUUID().toString());
+        if(cancelerDto == null) {
+            cancelerDto = new VoteVSCancelerDto();
+            cancelerDto.setOperation(TypeVS.CANCEL_VOTE);
+            cancelerDto.setOriginHashAccessRequest(originHashAccessRequest);
+            cancelerDto.setHashAccessRequestBase64(hashAccessRequestBase64);
+            cancelerDto.setOriginHashCertVote(originHashCertVote);
+            cancelerDto.setHashCertVSBase64(hashCertVSBase64);
+            cancelerDto.setUUID(UUID.randomUUID().toString());
+        }
         return cancelerDto;
     }
 
@@ -121,7 +124,6 @@ public class VoteVSHelper {
         return hashCertVSBase64;
     }
 
-
     public String getNIF() {
         return NIF;
     }
@@ -129,4 +131,5 @@ public class VoteVSHelper {
     public void setNIF(String NIF) {
         this.NIF = NIF;
     }
+
 }

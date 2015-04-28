@@ -27,7 +27,7 @@
             <div>
                 <div layout horizontal center center-justified>
                     <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
-                        <div style="text-align: center;display:{{caption? 'block':'none'}}">{{caption}}</div>
+                        <div hidden?="{{!caption}}" style="text-align: center;">{{caption}}</div>
                     </div>
                     <div style="position: absolute; top: 0px; right: 0px;">
                         <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
@@ -37,10 +37,11 @@
                     <vs-html-echo html="{{message}}"></vs-html-echo>
                 </div>
                 <template if="{{messageType == 'VOTE_RESULT'}}">
-                    <p style="text-align: center; display:{{optionSelected == null? 'none':'block'}}">
-                        ${msg.confirmOptionDialogMsg}:<br>
+                    <div hidden?="{{!optionSelected}}">
+                        <p style="text-align: center;">
+                            ${msg.confirmOptionDialogMsg}:</p>
                         <div style="font-size: 1.2em; text-align: center;"><b>{{optionSelected}}</b></div>
-                    </p>
+                    </div>
                     <template if="{{statusCode == 200}}">
                         <div layout horizontal style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
@@ -74,7 +75,6 @@
     </template>
     <script>
         Polymer('votevs-result-dialog', {
-            votevsURL:null,
             votevsReceipt:null,
             hashCertVSHex:null,
             hashCertVSBase64:null,
@@ -98,9 +98,6 @@
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     this.caption = "${msg.voteOKCaption}"
                     this.message = "${msg.voteResultOKMsg}"
-                    //                responseJSON.put("voteURL", ((List<String>)responseVS.getData()).iterator().next());
-                    //responseJSON.put("hashCertVSHex", new String(Hex.encode(eventVS.getVoteVS().getHashCertVSBase64().getBytes())));
-                    this.votevsURL = appMessageJSON.message
                     this.optionSelected = appMessageJSON.optionSelected
                     this.hashCertVSHex = appMessageJSON.hashCertVSHex
                     this.votevsReceipt = appMessageJSON.voteVSReceipt
@@ -132,7 +129,6 @@
                 this.message = null
                 this.caption = null
                 this.optionSelected = null
-                this.votevsURL = null
                 this.votevsReceipt = null
                 this.statusCode = null
             },
@@ -146,12 +142,10 @@
                 VotingSystemClient.setMessage(webAppMessage);
             },
             cancellationConfirmed: function() {
-                console.log("cancellationConfirmed")
                 var webAppMessage = new WebAppMessage(Operation.CANCEL_VOTE)
                 webAppMessage.message = this.hashCertVSBase64
-                webAppMessage.serviceURL = "${restURL}/voteVSCanceler"
+                webAppMessage.serviceURL = "${restURL}/voteVS/cancel"
                 webAppMessage.signedMessageSubject = "${msg.cancelVoteLbl}"
-                this.statusCode = appMessageJSON.statusCode
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("vote cancellation callback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
@@ -161,9 +155,8 @@
                         this.message = "${msg.voteVSCancellationOKMsg}"
                         this.caption =  "${msg.voteVSCancellationCaption}"
                         this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
-
                         this.opened = true
-                    } else  showMessageVS(appMessageJSON.message, '${msg.voteVSCancellationErrorCaption}')
+                    } else showMessageVS(appMessageJSON.message, '${msg.voteVSCancellationErrorCaption}')
                 }.bind(this))
                 VotingSystemClient.setMessage(webAppMessage);
             }

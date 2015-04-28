@@ -107,7 +107,7 @@ public class EventVSElectionBean {
         return eventVS;
     }
 
-    public synchronized void generateBackups () throws Exception {
+    public void generateBackups () throws Exception {
         Date checkDate = DateUtils.addDays(new Date(), -1).getTime();
         Query query = dao.getEM().createQuery("select e from EventVSElection e where e.dateFinish <:checkDate " +
                 "and e.backupAvailable =:backupAvailable").setParameter("checkDate", checkDate)
@@ -119,7 +119,7 @@ public class EventVSElectionBean {
     }
 
     @Asynchronous
-    public synchronized void generateBackup (EventVSElection eventVS) throws Exception {
+    public void generateBackup (EventVSElection eventVS) throws Exception {
         log.info("generateBackup - eventVS:" + eventVS.getId());
         /*if (eventVS.isActive(Calendar.getInstance().getTime())) {
             throw new ExceptionVS(messageSource.getMessage('eventActiveErrorMsg', [eventVS.id].toArray(), locale))

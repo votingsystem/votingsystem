@@ -1,6 +1,7 @@
 package org.votingsystem.web.controlcenter.ejb;
 
 import org.votingsystem.dto.SMIMEDto;
+import org.votingsystem.dto.voting.VoteVSCancelerDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
@@ -15,6 +16,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.DAOUtils;
@@ -44,6 +46,7 @@ public class VoteVSBean {
 
     @Inject private ConfigVS config;
     @PersistenceContext private EntityManager em;
+    @Inject DAOBean dao;
     @Inject private SignatureBean signatureBean;
     @Inject MessagesBean messages;
 
@@ -89,18 +92,18 @@ public class VoteVSBean {
         return voteVS;
     }
 
-    public synchronized VoteVSCanceler processCancel (MessageSMIME messageSMIME) throws Exception {
+    public VoteVSCanceler processCancel (MessageSMIME messageSMIME) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
-        VoteVSRequest request = messageSMIME.getSignedContent(VoteVSRequest.class);
-        request.validateCancelationRequest();
-        Query query = em.createQuery("select c from CertificateVS c where c.hashCertVSBase64 =:hashCertVSBase64 and " +
-                "c.state =:state").setParameter("hashCertVSBase64", request.hashCertVSBase64)
+        VoteVSCancelerDto request = messageSMIME.getSignedContent(VoteVSCancelerDto.class);
+        request.validate();
+        Query query = dao.getEM().createQuery("select c from CertificateVS c where c.hashCertVSBase64 =:hashCertVSBase64 and " +
+                "c.state =:state").setParameter("hashCertVSBase64", request.getHashCertVSBase64())
                 .setParameter("state", CertificateVS.State.OK);
-        CertificateVS certificateVS = DAOUtils.getSingleResult(CertificateVS.class, query);
+        CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if (certificateVS == null) throw new ValidationExceptionVS(messages.get("certNotFoundErrorMsg"));
-        query = em.createQuery("select v from VoteVS v where v.certificateVS =:certificateVS " +
+        query = dao.getEM().createQuery("select v from VoteVS v where v.certificateVS =:certificateVS " +
                 "and v.state =:state").setParameter("certificateVS", certificateVS).setParameter("state", VoteVS.State.OK);
-        VoteVS voteVS = DAOUtils.getSingleResult(VoteVS.class, query);
+        VoteVS voteVS = dao.getSingleResult(VoteVS.class, query);
         if(voteVS == null) throw new ValidationExceptionVS("VoteVS not found");
         Date timeStampDate = signer.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(!voteVS.getEventVS().isActive(timeStampDate)) throw new ValidationExceptionVS(messages.get(
@@ -108,40 +111,17 @@ public class VoteVSBean {
                 DateUtils.getDateStr(voteVS.getEventVS().getDateBegin()),
                 DateUtils.getDateStr(voteVS.getEventVS().getDateFinish())));
         String fromUser = config.getServerName();
-        String toUser = messageSMIME.getUserVS().getNif();
+        String toUser = signer.getNif();
         String subject = messages.get("voteCancelationSubject");
         SMIMEMessage smimeMessage = signatureBean.getSMIMEMultiSigned(fromUser, toUser, messageSMIME.getSMIME(), subject);
-        messageSMIME.setSMIME(smimeMessage);
-        em.merge(messageSMIME);
-        VoteVSCanceler voteCanceler = new VoteVSCanceler(messageSMIME, null,
-                VoteVSCanceler.State.CANCELLATION_OK, request.originHashAccessRequest, request.hashCertVSBase64,
-                request.originHashCertVote, request.hashCertVSBase64, voteVS);
-        em.persist(voteCanceler);
-        em.merge(voteVS.setState(VoteVS.State.CANCELED));
-        em.merge(certificateVS.setState(CertificateVS.State.CANCELED));
+        dao.merge(messageSMIME.setSMIME(smimeMessage));
+        VoteVSCanceler voteCanceler = new VoteVSCanceler(messageSMIME, null, VoteVSCanceler.State.CANCELLATION_OK,
+                request.getOriginHashAccessRequest(), request.getHashAccessRequestBase64(),
+                request.getOriginHashCertVote(), request.getHashCertVSBase64(), voteVS);
+        dao.persist(voteCanceler);
+        dao.merge(voteVS.setState(VoteVS.State.CANCELED));
+        dao.merge(certificateVS.setState(CertificateVS.State.CANCELED));
         return voteCanceler;
     }
 
-    private class VoteVSRequest {
-        String originHashCertVote, hashCertVSBase64, originHashAccessRequest, hashAccessRequestBase64;
-        TypeVS operation;
-
-        public VoteVSRequest(String signedContent) {}
-
-        public void validateCancelationRequest() throws ValidationExceptionVS, NoSuchAlgorithmException {
-            if(operation == null || TypeVS.CANCEL_VOTE != operation) throw new ValidationExceptionVS(
-                    "ERROR - expected operation 'CANCEL_VOTE' - found: " + operation);
-            if(originHashCertVote == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashCertVote'");
-            if(hashCertVSBase64 == null) throw new ValidationExceptionVS("ERROR - missing param 'hashCertVSBase64'");
-            if(hashAccessRequestBase64 == null) throw new ValidationExceptionVS("ERROR - missing param 'hashAccessRequestBase64'");
-            if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
-            if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
-            if(!hashAccessRequestBase64.equals(CMSUtils.getHashBase64(originHashAccessRequest,
-                    ContextVS.VOTING_DATA_DIGEST))) throw new ValidationExceptionVS(messages.get(
-                    "voteCancellationAccessRequestHashError"));
-            if(!hashCertVSBase64.equals(CMSUtils.getHashBase64(originHashCertVote,
-                    ContextVS.VOTING_DATA_DIGEST))) throw new ValidationExceptionVS(
-                    messages.get("voteCancellationHashCertificateError"));
-        }
-    }
 }

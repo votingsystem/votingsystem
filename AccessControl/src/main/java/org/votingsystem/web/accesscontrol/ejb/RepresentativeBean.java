@@ -124,7 +124,7 @@ public class RepresentativeBean {
         return result;
     }
 
-    public synchronized RepresentativesAccreditations getAccreditationsBackupForEvent (EventVSElection eventVS)
+    public RepresentativesAccreditations getAccreditationsBackupForEvent (EventVSElection eventVS)
             throws ExceptionVS, IOException {
 		/*if(event.isActive(Calendar.getInstance().getTime())) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:messageSource.getMessage('eventActiveErrorMsg',

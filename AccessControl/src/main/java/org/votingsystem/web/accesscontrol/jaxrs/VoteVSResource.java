@@ -2,6 +2,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.dto.SMIMEDto;
 import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.model.voting.VoteVSCanceler;
@@ -17,6 +18,7 @@ import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -37,6 +39,7 @@ public class VoteVSResource {
     /**
      * Service that receives and checks the votes signed by the Control Center
      */
+    @Transactional
     @Path("/")
     @POST
     public Response save(SMIMEDto smimeDto,  @Context ServletContext context,
@@ -45,6 +48,7 @@ public class VoteVSResource {
         return Response.ok().entity(voteVS.getMessageSMIME().getContent()).type(ContentTypeVS.VOTE.getName()).build();
     }
 
+    @Transactional
     @Path("/id/{id}")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response get(@PathParam("id") long id, @Context ServletContext context,
@@ -56,19 +60,24 @@ public class VoteVSResource {
                 new VoteVSDto(voteVS, config.getRestURL()))).type(MediaTypeVS.JSON).build();
     }
 
-    @Path("/hash/{hashHex}") @GET
+    @Transactional
+    @Path("/hash/{hashHex}")
+    @GET @Produces(MediaType.APPLICATION_JSON)
     public Response getByHash(@PathParam("hashHex") String hashHex, @Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String hashCertVSBase64 = new String(new HexBinaryAdapter().unmarshal(hashHex));
         Query query = dao.getEM().createQuery("select v from VoteVS v where v.certificateVS.hashCertVSBase64 =:hashCertVSBase64")
                 .setParameter("hashCertVSBase64", hashCertVSBase64);
         VoteVS voteVS = dao.getSingleResult(VoteVS.class, query);
-        if(voteVS == null) return Response.status(Response.Status.BAD_REQUEST).entity(
-                "ERROR - VoteVS not found - hashHex: " + hashHex).build();
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
-                new VoteVSDto(voteVS, config.getRestURL()))).type(MediaTypeVS.JSON).build();
+        if(voteVS == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(
+                    "ERROR - VoteVS not found - hashHex: " + hashHex).build();
+        }
+        VoteVSDto dto = new VoteVSDto(voteVS, config.getRestURL());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
     }
 
+    @Transactional
     @Path("/id/{id}/cancelation")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response cancelation(@PathParam("id") Long id, @Context ServletContext context,
@@ -86,7 +95,9 @@ public class VoteVSResource {
     }
 
 
-    @Path("/canceler/hash/{hashHex}") @GET
+    @Transactional
+    @Path("/canceler/hash/{hashHex}")
+    @GET @Produces(MediaType.APPLICATION_JSON)
     public Response cancelerByHash(@PathParam("hashHex") String hashHex, @Context ServletContext context,
                               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String hashCertVSBase64 = new String(new HexBinaryAdapter().unmarshal(hashHex));

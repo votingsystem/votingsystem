@@ -34,9 +34,9 @@ public class VoteVSDto {
     private String messageSMIMEURL;
     private String cancelationMessageSMIMEURL;
     private String eventVSURL;
-    private String voteUUID;
     private VoteVS.State state;
     private FieldEventVS optionSelected;
+    private String UUID;
 
 
     public VoteVSDto() {}
@@ -156,20 +156,20 @@ public class VoteVSDto {
     }
 
 
-    public String getVoteUUID() {
-        return voteUUID;
-    }
-
-    public void setVoteUUID(String voteUUID) {
-        this.voteUUID = voteUUID;
-    }
-
     public TypeVS getOperation() {
         return operation;
     }
 
     public void setOperation(TypeVS operation) {
         this.operation = operation;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
     }
 
 }

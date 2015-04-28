@@ -42,12 +42,12 @@ public class VoteVS extends EntityVS implements Serializable {
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
-    private MessageSMIME messageSMIME;
-    private CertificateVS certificateVS;
-    @ManyToOne(fetch=FetchType.LAZY)
+    @OneToOne private MessageSMIME messageSMIME;
+    @OneToOne private CertificateVS certificateVS;
+    @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="optionSelected") private FieldEventVS optionSelected;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="eventVSElection") private EventVS eventVS;
+    @JoinColumn(name="eventVSElection") private EventVSElection eventVS;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @Column(name="dateCreated", length=23) @Temporal(TemporalType.TIMESTAMP) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
@@ -78,11 +78,11 @@ public class VoteVS extends EntityVS implements Serializable {
         eventURL = voteVSDto.getEventVSURL();
         hashCertVSBase64 = voteVSDto.getHashCertVSBase64();
         optionSelected = voteVSDto.getOptionSelected();
-        voteUUID = voteVSDto.getVoteUUID();
+        voteUUID = voteVSDto.getUUID();
         state = voteVSDto.getState();
     }
 
-    public VoteVS (EventVS eventVS) {
+    public VoteVS (EventVSElection eventVS) {
         this.eventVS = eventVS;
         this.eventURL = eventVS.getUrl();
     }
@@ -92,7 +92,7 @@ public class VoteVS extends EntityVS implements Serializable {
         this.x509Certificate = x509Certificate;
     }
 
-    public VoteVS (FieldEventVS optionSelected, EventVS eventVS, State state, CertificateVS certificateVS,
+    public VoteVS (FieldEventVS optionSelected, EventVSElection eventVS, State state, CertificateVS certificateVS,
                     MessageSMIME messageSMIME) {
         this.optionSelected = optionSelected;
         this.eventVS = eventVS;
@@ -149,11 +149,11 @@ public class VoteVS extends EntityVS implements Serializable {
 		return id;
 	}
 
-	public void setEventVS(EventVS eventVS) {
+	public void setEventVS(EventVSElection eventVS) {
 		this.eventVS = eventVS;
 	}
 
-	public EventVS getEventVS() {
+	public EventVSElection getEventVS() {
 		return eventVS;
 	}
 
@@ -274,7 +274,7 @@ public class VoteVS extends EntityVS implements Serializable {
         this.accessControlEventVSId = accessControlEventVSId;
     }
 
-    public void loadSignatureData(X509Certificate x509Certificate, TimeStampToken timeStampToken) throws IOException {
+    public VoteVS loadSignatureData(X509Certificate x509Certificate, TimeStampToken timeStampToken) throws IOException {
         this.timeStampToken = timeStampToken;
         this.x509Certificate = x509Certificate;
         byte[] voteExtensionValue = x509Certificate.getExtensionValue(ContextVS.VOTE_OID);
@@ -292,6 +292,7 @@ public class VoteVS extends EntityVS implements Serializable {
                     representativeURLExtensionValue);
             setRepresentativeURL(((DERUTF8String) representativeURL_DER.getObject()).toString());
         }
+        return this;
     }
 
 }

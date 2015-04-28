@@ -50,8 +50,7 @@ public class RepresentativeDelegationBean {
     @Inject CSRBean csrBean;
     @Inject MessagesBean messages;
 
-    //{"operation":"REPRESENTATIVE_SELECTION","representativeNif":"...","representativeName":"...","UUID":"..."}
-    public synchronized RepresentationDocument saveDelegation(MessageSMIME messageSMIME) throws Exception {
+    public RepresentationDocument saveDelegation(MessageSMIME messageSMIME) throws Exception {
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
         UserVS userVS = messageSMIME.getUserVS();
         checkUserDelegationStatus(userVS);

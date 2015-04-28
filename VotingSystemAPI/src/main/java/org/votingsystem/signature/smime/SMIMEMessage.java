@@ -402,8 +402,7 @@ public class SMIMEMessage extends MimeMessage {
                 signers.add(userVS);
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
                     VoteVSDto dto = JSON.getMapper().readValue(signedContent, VoteVSDto.class);
-                    voteVS = new VoteVS(dto);
-                    voteVS.loadSignatureData(cert, timeStampToken);
+                    voteVS = new VoteVS(dto).loadSignatureData(cert, timeStampToken);
                 } else if (cert.getExtensionValue(ContextVS.CURRENCY_OID) != null) {
                     currencyCert = cert;
                 } else {signerCerts.add(cert);}

@@ -45,6 +45,9 @@
                 <template if="{{subpage}}">
                     <paper-fab mini icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                 </template>
+
+                <paper-fab hidden?="{{!votevsResul}}" mini icon="mail" on-click="{{showVoteResul}}" style="color: #ba0011;margin: 0 0 0 20px;background: #ffeb3b;"></paper-fab>
+
                 <div flex id="pageTitle" eventvsId-data="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
             </div>
             <div layout vertical?="{{smallScreen}}" horizontal?="{{!smallScreen}}" style="width: 100%;">
@@ -132,6 +135,7 @@
                 eventvs: {value: {}}
             },
             subpage:false,
+            votevsResul:null,
             optionVSSelected:null,
             fireSignal:function() {
                 this.fire('core-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
@@ -142,6 +146,7 @@
             eventvsChanged:function() {
                 this.optionVSSelected = null
                 this.dateFinish = new Date(this.eventvs.dateFinish)
+                this.votevsResul = null;
             },
             ready: function() {
                 console.log(this.tagName + "- subpage:  " + this.subpage)
@@ -176,6 +181,9 @@
                     VotingSystemClient.setMessage(webAppMessage)
                 } else window.location.href = fileURL
             },
+            showVoteResul:function() {
+                this.$.votevsResultDialog.show(this.votevsResul)
+            },
             submitVote:function() {
                 console.log("submitVote")
                 var voteVS = {optionSelected:this.optionVSSelected, eventVSId:this.eventvs.id, eventVSURL:this.eventvs.url}
@@ -188,6 +196,7 @@
                     var appMessageJSON = toJSON(appMessage)
                     appMessageJSON.eventVS = this.eventvs
                     appMessageJSON.optionSelected = this.optionVSSelected.content
+                    this.votevsResul = appMessageJSON
                     this.$.votevsResultDialog.show(appMessageJSON)
                 }.bind(this))
                 console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))

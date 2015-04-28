@@ -16,6 +16,7 @@ import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Formatter;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -159,11 +160,9 @@ public class SMIMEPane extends GridPane implements DocumentVS {
                     StringUtils.toHex(certExtensionDto.getHashCertVS()));
             ResponseVS responseVS = HttpHelper.getInstance().getData(voteStateServiceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                //[state:voteVS.state.toString(), value:voteVS.optionSelected.content]
-                Map responseMap = responseVS.getMessageMap();
-                VoteVS.State voteState = VoteVS.State.valueOf((String) responseMap.get("state"));
+                VoteVSDto voteVSDto = (VoteVSDto) responseVS.getMessage(VoteVSDto.class);
                 StringBuilder sb = new StringBuilder();
-                switch (voteState) {
+                switch (voteVSDto.getState()) {
                     case OK:
                         sb.append(ContextVS.getMessage("voteStateOKMsg"));
                         break;
@@ -174,7 +173,8 @@ public class SMIMEPane extends GridPane implements DocumentVS {
                         sb.append(ContextVS.getMessage("voteStateERRORMsg"));
                         break;
                 }
-                sb.append("<br/><br/><b>" + ContextVS.getMessage("optionSelectedLbl") + "</b>: " + responseMap.get("value"));
+                sb.append("<br/><br/><b>" + ContextVS.getMessage("optionSelectedLbl") + "</b>: " +
+                        voteVSDto.getOptionSelected().getContent());
                 showMessage(sb.toString(), ContextVS.getMessage("checkVoteLbl"));
             } else showMessage(responseVS);
             return responseVS;

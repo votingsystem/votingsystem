@@ -65,7 +65,7 @@ public class EventVS extends EntityVS implements Serializable {
     private String content;
     @Column(name="metaInf", columnDefinition="TEXT")
     private String metaInf = "{}"; 
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="controlCenter")
     private ControlCenterVS controlCenterVS;
     @ManyToOne(fetch=FetchType.LAZY)
@@ -91,7 +91,7 @@ public class EventVS extends EntityVS implements Serializable {
     private List<String> tagList;
     @Column(name="url")
     private String url;
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy="eventVS")
+    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy="eventVS")
     private Set<FieldEventVS> fieldsEventVS;
 
     @Temporal(TemporalType.TIMESTAMP)

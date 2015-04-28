@@ -234,6 +234,7 @@ public class SignatureService extends Service<ResponseVS> {
             AccessRequestDto accessRequestDto = voteVSHelper.getAccessRequest();
             SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser, 
                     JSON.getMapper().writeValueAsString(accessRequestDto), password, msgSubject);
+            updateMessage(operationVS.getSignedMessageSubject());
             AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage,
                     accessRequestDto, voteVS.getHashCertVSBase64());
             ResponseVS responseVS = accessRequestDataSender.call();
@@ -273,8 +274,6 @@ public class SignatureService extends Service<ResponseVS> {
         //we know this is done in a background thread
         private ResponseVS cancelVote(OperationVS operationVS) throws Exception {
             log.info("cancelVote");
-            Map documentToSignMap = new HashMap<String, String>();
-            documentToSignMap.put("operation", TypeVS.CANCEL_VOTE.toString());
             ResponseVS voteResponse = ContextVS.getInstance().getHashCertVSData(operationVS.getMessage());
             VoteVSHelper voteVSHelper = (VoteVSHelper) voteResponse.getData();
             VoteVSCancelerDto cancelerDto = voteVSHelper.getVoteCanceler();
@@ -303,6 +302,7 @@ public class SignatureService extends Service<ResponseVS> {
                 SMIMEMessage representativeRequestSMIME = SessionService.getSMIME(null, operationVS.getReceiverName(),
                         JSON.getMapper().writeValueAsString(operationVS.getDocumentToSignMap()),
                         password, operationVS.getSignedMessageSubject());
+                updateMessage(operationVS.getSignedMessageSubject());
                 Map<String, Object> fileMap = new HashMap<String, Object>();
                 String representativeDataFileName =
                         ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" + MediaTypeVS.JSON_SIGNED;
@@ -325,6 +325,7 @@ public class SignatureService extends Service<ResponseVS> {
             String textToSign = JSON.getMapper().writeValueAsString(currencyBatch.getRequestDto());
             SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(), textToSign,
                     password, operationVS.getSignedMessageSubject());
+            updateMessage(operationVS.getSignedMessageSubject());
             mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, smimeMessage.getBytes());
             ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                     ((CurrencyServer)operationVS.getTargetServer()).getCurrencyRequestServiceURL());
@@ -372,6 +373,7 @@ public class SignatureService extends Service<ResponseVS> {
             SMIMEMessage smimeMessage = SessionService.getSMIME(null,
                     operationVS.getReceiverName(), delegation.getCancellationRequest().toString(),
                     password, operationVS.getSignedMessageSubject());
+            updateMessage(operationVS.getSignedMessageSubject());
             ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     operationVS.getServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -402,6 +404,7 @@ public class SignatureService extends Service<ResponseVS> {
                 SMIMEMessage smimeMessage = SessionService.getSMIME(null, ContextVS.getInstance().getAccessControl().
                         getName(), anonymousDelegation.getRequest().toString(), password,
                         operationVS.getSignedMessageSubject());
+                updateMessage(operationVS.getSignedMessageSubject());
                 //byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert);
                 //byte[] delegationEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
                 String representationDataFile = ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" +

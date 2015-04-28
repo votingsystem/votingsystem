@@ -4,7 +4,6 @@ import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.voting.EventVSChangeDto;
 import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
@@ -34,7 +33,7 @@ public class PublishAndSendElection {
 
     private static EventVS eventVS;
     private static VotingSimulationData simulationData;
-    private static boolean isWithVoteCancellation = false;
+    private static boolean isWithVoteCancellation = true;
     private static String publisherNIF = "00111222V";
     private static List<String> synchronizedElectorList;
     private static ExecutorService simulatorExecutor;
@@ -54,10 +53,10 @@ public class PublishAndSendElection {
         userBaseSimulationData.setUserIndex(100);
         userBaseSimulationData.setNumUsersWithoutRepresentative(1);
         userBaseSimulationData.setNumUsersWithoutRepresentativeWithVote(1);
-        userBaseSimulationData.setNumRepresentatives(1);
-        userBaseSimulationData.setNumRepresentativesWithVote(1);
-        userBaseSimulationData.setNumUsersWithRepresentative(2);
-        userBaseSimulationData.setNumUsersWithRepresentativeWithVote(1);
+        userBaseSimulationData.setNumRepresentatives(0);
+        userBaseSimulationData.setNumRepresentativesWithVote(0);
+        userBaseSimulationData.setNumUsersWithRepresentative(0);
+        userBaseSimulationData.setNumUsersWithRepresentativeWithVote(0);
 
         simulationData = new VotingSimulationData();
         simulationData.setServerURL("http://localhost:8080/AccessControl");

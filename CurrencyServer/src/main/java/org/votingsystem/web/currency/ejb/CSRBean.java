@@ -36,7 +36,7 @@ public class CSRBean {
     @Inject ConfigVS config;
 
 
-    public synchronized CurrencyRequestBatch signCurrencyBatchRequest (CurrencyRequestBatch currencyBatchRequest) throws ExceptionVS {
+    public CurrencyRequestBatch signCurrencyBatchRequest (CurrencyRequestBatch currencyBatchRequest) throws ExceptionVS {
         TimePeriod timePeriod = null;
         if(currencyBatchRequest.getIsTimeLimited()) timePeriod = DateUtils.getCurrentWeekPeriod();
         else {
@@ -65,7 +65,7 @@ public class CSRBean {
         }
     }
 
-    public synchronized Currency signCurrencyRequest(Currency currency) throws ExceptionVS {
+    public Currency signCurrencyRequest(Currency currency) throws ExceptionVS {
         if(currencyMinValue.compareTo(currency.getAmount()) > 0) throw new ExceptionVS(messages.get("currencyMinValueError",
                 currencyMinValue.toString(), currency.getAmount().toString()));
         TimePeriod timePeriod = null;
