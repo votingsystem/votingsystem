@@ -1,6 +1,5 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.EventVSMetaInf;

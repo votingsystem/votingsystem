@@ -1,6 +1,5 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.MessageSMIME;
@@ -9,7 +8,6 @@ import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -26,7 +24,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static java.text.MessageFormat.format;
@@ -137,15 +138,10 @@ public class EventVSElectionResource {
     @Path("/id/{id}/publishRequest") @GET
     public Response publishRequest(@PathParam("id") long id, @Context ServletContext context,
                                    @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        //contextURL + "/eventVSElection/id/" + eventVS.getId() + "/publishRequest"
         EventVSElection eventVS = dao.find(EventVSElection.class, id);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection not found - " +
                 "eventId: " + id).build();
-        Query query = dao.getEM().createQuery("select m from MessageSMIME m where m.eventVS =:eventVS " +
-                "and m.type =:type").setParameter("eventVS", eventVS).setParameter("type", TypeVS.VOTING_EVENT);
-        MessageSMIME messageSMIME = dao.getSingleResult(MessageSMIME.class, query);
-        if(messageSMIME == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection without " +
-                "publishRequest - eventId: " + id).build();
-        return Response.ok().entity(messageSMIME.getContent()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(eventVS.getPublishRequestSMIME().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
+
 }

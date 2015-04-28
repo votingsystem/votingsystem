@@ -1,7 +1,6 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.*;

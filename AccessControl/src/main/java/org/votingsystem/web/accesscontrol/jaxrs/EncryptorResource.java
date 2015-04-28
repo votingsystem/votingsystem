@@ -1,6 +1,5 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.EncryptedMsgDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;

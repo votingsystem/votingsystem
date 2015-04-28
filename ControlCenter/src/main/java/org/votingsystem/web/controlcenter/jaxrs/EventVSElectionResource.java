@@ -42,7 +42,7 @@ public class EventVSElectionResource {
 
 
     @Path("/id/{id}") @GET
-    public Object getById (@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
+    public Response getById (@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
             @Context HttpServletResponse resp) throws ValidationExceptionVS, IOException, ServletException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE, EventVS.State.PENDING, EventVS.State.CANCELED,
@@ -67,7 +67,7 @@ public class EventVSElectionResource {
 
     @Transactional
     @Path("/") @GET
-    public Object index (@QueryParam("eventVSState") String eventVSStateReq,
+    public Response index (@QueryParam("eventVSState") String eventVSStateReq,
                          @DefaultValue("0") @QueryParam("offset") int offset,
                          @DefaultValue("100") @QueryParam("max") int max, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ValidationExceptionVS,
@@ -134,15 +134,10 @@ public class EventVSElectionResource {
     @Path("/id/{id}/publishRequest") @GET
     public Response publishRequest(@PathParam("id") long id, @Context ServletContext context,
                                    @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        //contextURL + "/eventVSElection/id/" + eventVS.getId() + "/publishRequest"
         EventVSElection eventVS = dao.find(EventVSElection.class, id);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection not found - " +
                 "eventId: " + id).build();
-        Query query = dao.getEM().createQuery("select m from MessageSMIME m where m.eventVS =:eventVS " +
-                "and m.type =:type").setParameter("eventVS", eventVS).setParameter("type", TypeVS.VOTING_EVENT);
-        MessageSMIME messageSMIME = dao.getSingleResult(MessageSMIME.class, query);
-        if(messageSMIME == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection without " +
-                "publishRequest - eventId: " + id).build();
-        return Response.ok().entity(messageSMIME.getContent()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(eventVS.getPublishRequestSMIME().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
+
 }

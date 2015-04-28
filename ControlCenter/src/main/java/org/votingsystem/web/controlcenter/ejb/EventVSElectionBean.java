@@ -52,6 +52,7 @@ public class EventVSElectionBean {
         EventVSElection eventVS = request.getEventVSElection();
         eventVS.setAccessControlVS(accessControl);
         eventVS.setUserVS(user);
+        eventVS.setPublishRequestSMIME(messageSMIME);
         setEventDatesState(eventVS);
         eventVS.updateAccessControlIds();
         dao.persist(eventVS);

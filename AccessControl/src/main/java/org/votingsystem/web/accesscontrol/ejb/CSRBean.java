@@ -1,6 +1,5 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
