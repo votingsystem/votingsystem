@@ -179,7 +179,7 @@
             submitVote:function() {
                 console.log("submitVote")
                 var voteVS = {optionSelected:this.optionVSSelected, eventVSId:this.eventvs.id, eventVSURL:this.eventvs.url}
-                var webAppMessage = new WebAppMessage(Operation.SEND_SMIME_VOTE)
+                var webAppMessage = new WebAppMessage(Operation.SEND_VOTE)
                 this.eventvs.voteVS = voteVS
                 webAppMessage.voteVS = voteVS
                 webAppMessage.signedMessageSubject = '${msg.sendVoteMsgSubject}'

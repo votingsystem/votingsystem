@@ -8,7 +8,6 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 
-import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

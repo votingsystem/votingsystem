@@ -233,8 +233,9 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         return data;
     }
 
-    public void setData(T data) {
+    public ResponseVS setData(T data) {
         this.data = data;
+        return this;
     }
 
     public void appendMessage(String msg) {

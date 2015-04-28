@@ -33,7 +33,7 @@ public class RequestUtils {
         signedContentMap = messageSMIME.getSignedContentMap();
         TypeVS operation = TypeVS.valueOf((String) signedContentMap.get("operation"));
         switch(operation) {
-            case SEND_SMIME_VOTE:
+            case SEND_VOTE:
                 viewer = "message-smime-votevs";
                 break;
             case CANCEL_VOTE:

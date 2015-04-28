@@ -67,7 +67,7 @@
             },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
-                if('${TypeVS.SEND_SMIME_VOTE.toString()}' != this.smimeMessageContent.operation )
+                if('${TypeVS.SEND_VOTE.toString()}' != this.smimeMessageContent.operation )
                     this.messageToUser = '${msg.smimeTypeErrorMsg}' + " - " + this.smimeMessageContent.operation
             },
             checkReceipt: function() {

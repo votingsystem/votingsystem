@@ -365,7 +365,7 @@ public class SignatureBean {
         CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
                 eventTrustedAnchors, false, Arrays.asList(checkedCert));
         X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
-        smimeDto.setMessageSMIME(dao.persist(new MessageSMIME(smimeMessage, smimeDto, TypeVS.VOTEVS)));
+        smimeDto.setMessageSMIME(dao.persist(new MessageSMIME(smimeMessage, smimeDto, TypeVS.SEND_VOTE)));
         return smimeDto;
     }
 
@@ -375,7 +375,7 @@ public class SignatureBean {
                 .setParameter("hashCertVS", smimeDto.getVoteVS().getHashCertVSBase64()).setParameter("state", CertificateVS.State.OK);
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if (certificateVS == null) {
-            smimeDto.getMessageSMIME().setType(TypeVS.VOTE_ERROR).setReason("missing VoteVS CertificateVS");
+            smimeDto.getMessageSMIME().setType(TypeVS.ERROR).setReason("missing VoteVS CertificateVS");
             dao.merge(smimeDto.getMessageSMIME());
             throw new ValidationExceptionVS("missing VoteVS CertificateVS");
         }

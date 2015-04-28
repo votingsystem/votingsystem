@@ -86,7 +86,7 @@ public class BrowserVSClient {
                 case SAVE_SMIME:
                     Utils.saveReceipt(operationVS, Browser.getInstance());
                     break;
-                case SAVE_SMIME_ANONYMOUS_DELEGATION:
+                case SEND_ANONYMOUS_DELEGATION:
                     Utils.saveReceiptAnonymousDelegation(operationVS, Browser.getInstance());
                     break;
                 case CERT_USER_NEW:

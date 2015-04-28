@@ -1,12 +1,7 @@
 package org.votingsystem.test.misc;
 
-import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.util.JSON;
-
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 /**

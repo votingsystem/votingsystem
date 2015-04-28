@@ -68,7 +68,7 @@ public class CurrencyBean {
         CurrencyBatchDto dto = new CurrencyBatchDto(currencyBatch);
         SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
                 currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(dto), currencyBatch.getSubject());
-        MessageSMIME messageSMIME = new MessageSMIME(receipt, TypeVS.RECEIPT);
+        MessageSMIME messageSMIME = new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT);
         dao.persist(messageSMIME);
         dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));
         log.info("currencyBatch:" + currencyBatch.getId() + " - messageSMIME:" + messageSMIME.getId());

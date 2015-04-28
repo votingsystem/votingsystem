@@ -1,6 +1,5 @@
 package org.votingsystem.test.voting;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;

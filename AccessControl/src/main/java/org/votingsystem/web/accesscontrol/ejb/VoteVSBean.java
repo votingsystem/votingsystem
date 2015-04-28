@@ -111,7 +111,7 @@ public class VoteVSBean {
             signatureBean.validateSignersCerts(smimeMessageResp);
             dao.merge(messageSMIME.setType(TypeVS.CANCEL_VOTE).setSMIME(smimeMessageResp));
         } else {
-            messageSMIME.setType(TypeVS.CANCEL_VOTE_ERROR).setReason(responseVSControlCenter.getMessage());
+            messageSMIME.setType(TypeVS.ERROR).setReason(responseVSControlCenter.getMessage());
             dao.merge(messageSMIME);
             throw new ValidationExceptionVS(responseVSControlCenter.getMessage());
         }

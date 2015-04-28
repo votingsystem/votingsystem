@@ -46,7 +46,7 @@ public class Formatter {
         try {
             TypeVS operation = TypeVS.valueOf((String) dataMap.get("operation"));
             switch(operation) {
-                case SEND_SMIME_VOTE:
+                case SEND_VOTE:
                     result = formatVote(dataMap);
                     break;
                 case FROM_GROUP_TO_ALL_MEMBERS:

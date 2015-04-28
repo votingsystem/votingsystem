@@ -76,7 +76,6 @@ public class VoteVS extends EntityVS implements Serializable {
         eventVS.setId(voteVSDto.getEventVSId());
         eventVS.setUrl(voteVSDto.getEventVSURL());
         eventURL = voteVSDto.getEventVSURL();
-        hashAccessRequestBase64 = voteVSDto.getHashAccessRequestBase64();
         hashCertVSBase64 = voteVSDto.getHashCertVSBase64();
         optionSelected = voteVSDto.getOptionSelected();
         voteUUID = voteVSDto.getVoteUUID();
@@ -273,31 +272,6 @@ public class VoteVS extends EntityVS implements Serializable {
 
     public void setAccessControlEventVSId(Long accessControlEventVSId) {
         this.accessControlEventVSId = accessControlEventVSId;
-    }
-
-    public VoteVSDto genVote() throws NoSuchAlgorithmException {
-        originHashAccessRequest = UUID.randomUUID().toString();
-        hashAccessRequestBase64 = CMSUtils.getHashBase64(originHashAccessRequest, ContextVS.VOTING_DATA_DIGEST);
-        originHashCertVote = UUID.randomUUID().toString();
-        hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVote, ContextVS.VOTING_DATA_DIGEST);
-        VoteVSDto dto = new VoteVSDto();
-        dto.setHashAccessRequestBase64(hashAccessRequestBase64);
-        dto.setHashCertVSBase64(hashCertVSBase64);
-        dto.setEventVSId(eventVS.getId());
-        dto.setEventVSURL(eventURL);
-        dto.setOptionSelected(optionSelected);
-        return dto;
-    }
-
-    public VoteVSDto genRandomVote() throws NoSuchAlgorithmException {
-        VoteVSDto dto = genVote();
-        dto.setOptionSelected(getRandomOption(eventVS.getFieldsEventVS()));
-        return dto;
-    }
-
-    public static FieldEventVS getRandomOption (Set<FieldEventVS> options) {
-        int item = new Random().nextInt(options.size()); // In real life, the Random object should be rather more shared than this
-        return (FieldEventVS) options.toArray()[item];
     }
 
     public void loadSignatureData(X509Certificate x509Certificate, TimeStampToken timeStampToken) throws IOException {

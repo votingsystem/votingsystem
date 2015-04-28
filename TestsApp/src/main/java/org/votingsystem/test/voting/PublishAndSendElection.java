@@ -1,6 +1,5 @@
 package org.votingsystem.test.voting;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.voting.EventVSChangeDto;
@@ -12,11 +11,10 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.FieldEventVS;
-import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.test.callable.SignTask;
 import org.votingsystem.test.callable.VoteSender;
-import org.votingsystem.test.dto.VoteResultDto;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.test.util.UserBaseSimulationData;
@@ -24,7 +22,6 @@ import org.votingsystem.test.util.VotingSimulationData;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
-import java.io.ByteArrayInputStream;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
@@ -42,7 +39,7 @@ public class PublishAndSendElection {
     private static List<String> synchronizedElectorList;
     private static ExecutorService simulatorExecutor;
     private static ExecutorCompletionService responseService;
-    private static final Map<String, VoteVS> voteVSMap = new ConcurrentHashMap<>();
+    private static final Map<String, VoteVSHelper> voteVSMap = new ConcurrentHashMap<>();
 
     public static void main(String[] args) throws Exception {
         ContextVS.getInstance().initTestEnvironment(
@@ -133,10 +130,10 @@ public class PublishAndSendElection {
                 if(!((VotingSimulationData)simulationData).waitingForVoteRequests()) {
                     int randomElector = new Random().nextInt(synchronizedElectorList.size());
                     String electorNif = synchronizedElectorList.remove(randomElector);
-                    VoteVS voteVS = new VoteVS(eventVS);
-                    VoteVSDto voteVSDto = voteVS.genRandomVote();
-                    voteVSMap.put(voteVSDto.getHashCertVSBase64(), voteVS);
-                    responseService.submit(new VoteSender(voteVSDto, electorNif));
+                    VoteVSHelper voteVSHelper = VoteVSHelper.genRandomVote(eventVS.getId(), eventVS.getUrl(), eventVS.getFieldsEventVS());
+                    voteVSHelper.setNIF(electorNif);
+                    voteVSMap.put(voteVSHelper.getHashCertVSBase64(), voteVSHelper);
+                    responseService.submit(new VoteSender(voteVSHelper));
                 } else Thread.sleep(500);
             }
         }
@@ -146,13 +143,12 @@ public class PublishAndSendElection {
         log.info("waitForVoteResponses - Num. votes: " + simulationData.getNumOfElectors());
         while (simulationData.hasPendingVotes()) {
             try {
-                Future<ResponseVS<VoteResultDto>> f = responseService.take();
-                ResponseVS<VoteResultDto> responseVS = f.get();
-                String nifFrom = null;
-                if(responseVS.getData() != null) nifFrom = responseVS.getData().getElectorNIF();
+                Future<ResponseVS<VoteVSHelper>> f = responseService.take();
+                ResponseVS<VoteVSHelper> responseVS = f.get();
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    VoteVSDto voteReceipt = responseVS.getData().getVoteVS();
-                    if(isWithVoteCancellation) cancelVote(voteVSMap.get(voteReceipt.getHashCertVSBase64()), nifFrom);
+                    VoteVSHelper voteVSHelper = f.get().getData();
+                    if(isWithVoteCancellation) cancelVote(voteVSMap.get(voteVSHelper.getHashCertVSBase64()),
+                            voteVSHelper.getNIF());
                     simulationData.getAndIncrementNumVotingRequestsOK();
                 } else simulationData.finishAndExit(ResponseVS.SC_ERROR, "ERROR" + responseVS.getMessage());
             } catch(Exception ex) {
@@ -212,17 +208,10 @@ public class PublishAndSendElection {
     }
 
 
-    private static void cancelVote(VoteVS voteVS, String nif) throws Exception {
-        Map cancelDataMap = new HashMap<String, String>();
-        cancelDataMap.put("operation", TypeVS.CANCEL_VOTE.toString());
-        cancelDataMap.put("originHashAccessRequest", voteVS.getOriginHashAccessRequest());
-        cancelDataMap.put("hashAccessRequestBase64", voteVS.getHashAccessRequestBase64());
-        cancelDataMap.put("originHashCertVote", voteVS.getOriginHashCertVote());
-        cancelDataMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
-        cancelDataMap.put("UUID", UUID.randomUUID().toString());
+    private static void cancelVote(VoteVSHelper voteVSHelper, String nif) throws Exception {
         SignatureService signatureService = SignatureService.getUserVSSignatureService(nif, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(nif, ContextVS.getInstance().getAccessControl().getName(),
-                JSON.getMapper().writeValueAsString(cancelDataMap), "cancelVote");
+                JSON.getMapper().writeValueAsString(voteVSHelper.getVoteCanceler()), "cancelVote");
         SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
                 ContextVS.getInstance().getAccessControl().getVoteCancelerServiceURL(),
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
@@ -230,6 +219,7 @@ public class PublishAndSendElection {
         ResponseVS responseVS = worker.call();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
     }
+
 }
 
 

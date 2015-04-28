@@ -1,6 +1,5 @@
 package org.votingsystem.test.callable;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.callable.RepresentativeDataSender;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;

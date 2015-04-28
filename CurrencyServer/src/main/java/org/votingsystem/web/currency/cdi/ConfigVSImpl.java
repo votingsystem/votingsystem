@@ -118,7 +118,7 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @PostConstruct
-    public void initialize() throws Exception {
+    public void initialize() {
         log.info("initialize");
         try {
             Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);

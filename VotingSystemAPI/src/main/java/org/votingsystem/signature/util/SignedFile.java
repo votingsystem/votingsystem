@@ -60,7 +60,7 @@ public class SignedFile {
         TypeVS operation = getTypeVS();
         if(operation == null) return null;
         switch (operation) {
-            case SEND_SMIME_VOTE:
+            case SEND_VOTE:
                 return ContextVS.getMessage("voteLbl");
             default: return ContextVS.getMessage("signedDocumentCaption");
         }

@@ -29,8 +29,6 @@ public class VoteVSDto {
     private Long cancelerId;
     private Long eventVSId;
     private String certificateURL;
-    private String hashAccessRequestBase64;
-    private String hashAccessRequestHex;
     private String hashCertVSBase64;
     private String hashCertVoteHex;
     private String messageSMIMEURL;
@@ -39,8 +37,7 @@ public class VoteVSDto {
     private String voteUUID;
     private VoteVS.State state;
     private FieldEventVS optionSelected;
-    @JsonIgnore
-    private SMIMEMessage voteReceipt;
+
 
     public VoteVSDto() {}
 
@@ -59,8 +56,6 @@ public class VoteVSDto {
         if(VoteVS.State.CANCELED == getState()) {
             setCancelationMessageSMIMEURL(contextURL + "/voteVS/id/" + voteVS.getId() + "/cancelation");
         }
-        setHashAccessRequestBase64(voteVS.getHashAccessRequestBase64());
-        if(getHashAccessRequestBase64() != null) setHashAccessRequestHex(StringUtils.toHex(getHashAccessRequestBase64()));
         setEventVSId(voteVS.getEventVS().getId());
         setEventVSURL(contextURL + "/eventVSElection/id/" + getEventVSId());
         setOptionSelected(voteVS.getOptionSelected());
@@ -102,22 +97,6 @@ public class VoteVSDto {
 
     public void setCertificateURL(String certificateURL) {
         this.certificateURL = certificateURL;
-    }
-
-    public String getHashAccessRequestBase64() {
-        return hashAccessRequestBase64;
-    }
-
-    public void setHashAccessRequestBase64(String hashAccessRequestBase64) {
-        this.hashAccessRequestBase64 = hashAccessRequestBase64;
-    }
-
-    public String getHashAccessRequestHex() {
-        return hashAccessRequestHex;
-    }
-
-    public void setHashAccessRequestHex(String hashAccessRequestHex) {
-        this.hashAccessRequestHex = hashAccessRequestHex;
     }
 
     public String getHashCertVSBase64() {
@@ -193,31 +172,4 @@ public class VoteVSDto {
         this.operation = operation;
     }
 
-    public AccessRequestDto getAccessRequestDto() {
-        AccessRequestDto accessRequestDto = new AccessRequestDto();
-        accessRequestDto.setEventId(eventVSId);
-        accessRequestDto.setEventURL(eventVSURL);
-        accessRequestDto.setHashAccessRequestBase64(hashAccessRequestBase64);
-        accessRequestDto.setUUID(UUID.randomUUID().toString());
-        return accessRequestDto;
-    }
-
-    public VoteVSCancelerDto getCancelVoteDto(String originHashAccessRequest, String originHashCertVote) {
-        VoteVSCancelerDto cancelerDto = new VoteVSCancelerDto();
-        cancelerDto.setOriginHashAccessRequest(originHashAccessRequest);
-        cancelerDto.setHashAccessRequestBase64(hashAccessRequestBase64);
-        cancelerDto.setOriginHashCertVote(originHashCertVote);
-        cancelerDto.setHashCertVSBase64(hashCertVSBase64);
-        cancelerDto.setUUID(UUID.randomUUID().toString());
-        return cancelerDto;
-    }
-
-
-    public SMIMEMessage getVoteReceipt() {
-        return voteReceipt;
-    }
-
-    public void setVoteReceipt(SMIMEMessage voteReceipt) {
-        this.voteReceipt = voteReceipt;
-    }
 }

@@ -114,6 +114,9 @@ public enum ContentTypeVS {
     public static ContentTypeVS getByName(String contentTypeStr) {
         if(contentTypeStr == null) return null;
 
+        if(contentTypeStr.contains(VOTE.getName())) return VOTE;
+        if(contentTypeStr.contains(CURRENCY.getName())) return CURRENCY;
+
         if(contentTypeStr.contains(JSON_SIGNED.getName())) return JSON_SIGNED;
         if(contentTypeStr.contains("json")) return JSON;
 
@@ -142,10 +145,6 @@ public enum ContentTypeVS {
 
         if(contentTypeStr.contains(TIMESTAMP_QUERY.getName())) return TIMESTAMP_QUERY;
         if(contentTypeStr.contains(TIMESTAMP_RESPONSE.getName())) return TIMESTAMP_RESPONSE;
-
-        if(contentTypeStr.contains(VOTE.getName())) return VOTE;
-
-        if(contentTypeStr.contains(CURRENCY.getName())) return CURRENCY;
 
         return null;
     }

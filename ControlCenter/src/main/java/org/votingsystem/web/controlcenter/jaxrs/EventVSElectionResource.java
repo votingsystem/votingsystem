@@ -40,7 +40,7 @@ public class EventVSElectionResource {
     @Inject EventVSElectionBean eventVSBean;
     @Inject ConfigVS config;
 
-
+    @Transactional
     @Path("/id/{id}") @GET
     public Response getById (@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
             @Context HttpServletResponse resp) throws ValidationExceptionVS, IOException, ServletException {

@@ -29,7 +29,7 @@ public class DocumentVSValidator {
 
     private static Logger log = Logger.getLogger(DocumentVSValidator.class.getSimpleName());
 
-    //{"operation":"SEND_SMIME_VOTE","optionSelectedId":2,"UUID":"cfbeec4a-f87c-4e4f-b442-4b127259fbd5",
+    //{"operation":"SEND_VOTE","optionSelectedId":2,"UUID":"cfbeec4a-f87c-4e4f-b442-4b127259fbd5",
     //"optionSelectedContent":"option A","eventURL":"http://sistemavotacion.org/AccessControl/eventVSElection/1"}
     public static ResponseVS<Long> validateVote(File voteFile, Set<TrustAnchor> trustAnchors,
                Set<TrustAnchor> eventTrustedAnchors, Long optionSelectedId, String eventURL, Date dateBegin,
@@ -76,9 +76,9 @@ public class DocumentVSValidator {
         Map dataMap = signedFile.getSignedContent(new TypeReference<Map<String, Object>>() {});
         if(dataMap.containsKey("operation")) {
             TypeVS operationType = TypeVS.valueOf((String) dataMap.get("operation"));
-            if(TypeVS.SEND_SMIME_VOTE != operationType) {
+            if(TypeVS.SEND_VOTE != operationType) {
                 return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("operationErrorMsg",
-                        TypeVS.SEND_SMIME_VOTE.toString(), operationType.toString(), voteFile.getAbsolutePath()));
+                        TypeVS.SEND_VOTE.toString(), operationType.toString(), voteFile.getAbsolutePath()));
             }
         } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("jsonErrorMsg") +
                 " - " + ContextVS.getInstance().getMessage("missingOperationErrorMsg", voteFile.getAbsolutePath()));
