@@ -191,8 +191,7 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         if(messageMap != null) return messageMap;
         String message = getMessage();
         if(message != null) return  JSON.getMapper().readValue(message.trim(),
-                new TypeReference<HashMap<String, Object>>() {
-                });
+                new TypeReference<HashMap<String, Object>>() {});
         return null;
     }
 

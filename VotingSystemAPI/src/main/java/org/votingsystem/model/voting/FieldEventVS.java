@@ -27,9 +27,9 @@ public class FieldEventVS extends EntityVS implements Serializable {
     @JoinColumn(name="eventVS", nullable=false) @JsonIgnore private EventVS eventVS;
     @Column(name="content", length=10000, nullable=false) private String content;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCreated", length=23) private Date dateCreated;
+    @Column(name="dateCreated", length=23) @JsonIgnore private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Column(name="lastUpdated", length=23) @JsonIgnore private Date lastUpdated;
 
     @Transient private String value;
     @Transient private Long numVoteRequests;

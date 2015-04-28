@@ -48,6 +48,7 @@ import org.votingsystem.util.*;
 import org.votingsystem.util.currency.MapUtils;
 import org.votingsystem.util.currency.Wallet;
 
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.File;
 import java.math.BigDecimal;
 import java.net.InetAddress;
@@ -93,12 +94,8 @@ public class SignatureService extends Service<ResponseVS> {
             try {
                 switch (operationVS.getType()) {
                     case SEND_SMIME_VOTE:
-                        String accessControlURL = operationVS.getEventVS().getServerURL();
-                        responseVS = Utils.checkServer(accessControlURL);
-                        if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-                        else ContextVS.getInstance().setServer((AccessControlVS) responseVS.getData());
-                        operationVS.setTargetServer((AccessControlVS) responseVS.getData());
-                        String controlCenterURL = operationVS.getEventVS().getControlCenter().getServerURL();
+                        operationVS.setTargetServer(ContextVS.getInstance().getAccessControl());
+                        String controlCenterURL = ContextVS.getInstance().getAccessControl().getControlCenter().getServerURL();
                         responseVS = Utils.checkServer(controlCenterURL);
                         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                             ContextVS.getInstance().setControlCenter((ControlCenterVS) responseVS.getData());
@@ -204,10 +201,10 @@ public class SignatureService extends Service<ResponseVS> {
                 responseVS.setStatusCode(ResponseVS.SC_INITIALIZED);
                 operationVS.setMessage(responseVS.getMessage());
                 PlatformImpl.runLater(() -> {
-                        DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(operationVS.getMessage(),
-                                null, operationVS.getDocument());
-                        Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
-                    });
+                    DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(operationVS.getMessage(),
+                            null, operationVS.getDocument());
+                    Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
+                });
             }
             return responseVS;
         }
@@ -243,7 +240,8 @@ public class SignatureService extends Service<ResponseVS> {
             AccessRequestDto accessRequestDto = voteVSDto.getAccessRequestDto();
             SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser, 
                     JSON.getMapper().writeValueAsString(accessRequestDto), password, msgSubject);
-            AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, accessRequestDto);
+            AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage,
+                    accessRequestDto, voteVSDto.getHashCertVSBase64());
             ResponseVS responseVS = accessRequestDataSender.call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
             updateProgress(60, 100);
@@ -252,7 +250,7 @@ public class SignatureService extends Service<ResponseVS> {
             fromUser = voteVS.getHashCertVSBase64();
             msgSubject = ContextVS.getInstance().getMessage("voteVSSubject");
             smimeMessage = certificationRequest.getSMIME(fromUser, toUser, textToSign, msgSubject, null);
-            String urlVoteService = ((ControlCenterVS)ContextVS.getInstance().getControlCenter()).getVoteServiceURL();
+            String urlVoteService = ContextVS.getInstance().getControlCenter().getVoteServiceURL();
             updateProgress(70, 100);
             SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage, urlVoteService,
                     ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
@@ -266,16 +264,15 @@ public class SignatureService extends Service<ResponseVS> {
                 ResponseVS voteResponse = new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.VOTEVS);
                 voteResponse.setData(voteVS);
                 ContextVS.getInstance().addHashCertVSData(voteVS.getHashCertVSBase64(), voteResponse);
-                Map dataMap = new HashMap<>();
-                dataMap.put("statusCode", ResponseVS.SC_OK);
-                dataMap.put("voteURL", ((List<String>)responseVS.getData()).iterator().next());
-                dataMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
-                dataMap.put("hashCertVSHex", new String(Hex.encode(voteVS.getHashCertVSBase64().getBytes())));
-                dataMap.put("voteVSReceipt", Base64.getEncoder().encodeToString(validatedVote.getBytes()));
-                //HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-                //String hashCertVSBase64 = new String(hexConverter.unmarshal(hashCertVSHex));
+                String hashCertVSHex = new String(Hex.encode(voteVS.getHashCertVSBase64().getBytes()));
+                Map responseMap = new HashMap<>();
+                responseMap.put("statusCode", ResponseVS.SC_OK);
+                responseMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
+                responseMap.put("hashCertVSHex", hashCertVSHex);
+                responseMap.put("voteURL", ContextVS.getInstance().getAccessControl().getVoteStateServiceURL(hashCertVSHex));
+                responseMap.put("voteVSReceipt", Base64.getEncoder().encodeToString(validatedVote.getBytes()));
                 responseVS.setContentType(ContentTypeVS.JSON);
-                responseVS.setMessageMap(dataMap);
+                responseVS.setMessageMap(responseMap);
             }
             return responseVS;
         }

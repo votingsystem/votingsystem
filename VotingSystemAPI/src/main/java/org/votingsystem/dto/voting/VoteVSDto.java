@@ -198,7 +198,6 @@ public class VoteVSDto {
         accessRequestDto.setEventId(eventVSId);
         accessRequestDto.setEventURL(eventVSURL);
         accessRequestDto.setHashAccessRequestBase64(hashAccessRequestBase64);
-        accessRequestDto.setHashCertVSBase64(hashCertVSBase64);
         accessRequestDto.setUUID(UUID.randomUUID().toString());
         return accessRequestDto;
     }

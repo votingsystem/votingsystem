@@ -62,7 +62,6 @@
                 <div style="margin:0px 30px 0px 30px; color: #888;"><b>${msg.dateLbl}: </b>
                     {{getDate(eventvs.dateBegin)}}</div>
             </div>
-
             <div>
                 <div class="eventContentDiv">
                     <vs-html-echo html="{{eventvs.content}}"></vs-html-echo>
@@ -121,6 +120,7 @@
             </div>
             </div>
         </div>
+
         <eventvs-vote-confirm-dialog id="confirmOptionDialog"></eventvs-vote-confirm-dialog>
         <eventvs-admin-dialog id="eventVSAdminDialog" eventvs="{{eventvs}}"></eventvs-admin-dialog>
         <votevs-result-dialog id="votevsResultDialog"></votevs-result-dialog>
@@ -178,7 +178,7 @@
             },
             submitVote:function() {
                 console.log("submitVote")
-                var voteVS = {optionSelected:this.optionVSSelected, eventVSId:this.eventvs.id, eventVSURL:this.eventvs.URL}
+                var voteVS = {optionSelected:this.optionVSSelected, eventVSId:this.eventvs.id, eventVSURL:this.eventvs.url}
                 var webAppMessage = new WebAppMessage(Operation.SEND_SMIME_VOTE)
                 this.eventvs.voteVS = voteVS
                 webAppMessage.voteVS = voteVS

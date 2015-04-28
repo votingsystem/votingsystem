@@ -2,6 +2,7 @@ package org.votingsystem.test.callable;
 
 import org.votingsystem.callable.AccessRequestDataSender;
 import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.VoteVS;
@@ -36,10 +37,12 @@ public class VoteSender implements Callable<ResponseVS> {
         String smimeMessageSubject = "VoteSender Test - accessRequestMsgSubject";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(electorNIF);
         String toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
-        String contentStr = JSON.getMapper().writeValueAsString(voteVS.getAccessRequestDto());
+        AccessRequestDto accessRequestDto = voteVS.getAccessRequestDto();
+        String contentStr = JSON.getMapper().writeValueAsString(accessRequestDto);
         SMIMEMessage smimeMessage = signatureService.getSMIME(electorNIF, toUser, contentStr, smimeMessageSubject);
 
-        AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage, voteVS.getAccessRequestDto());
+        AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage,
+                accessRequestDto, voteVS.getHashCertVSBase64());
         ResponseVS responseVS = accessRequestDataSender.call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();

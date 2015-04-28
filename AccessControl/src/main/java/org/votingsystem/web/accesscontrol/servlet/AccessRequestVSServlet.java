@@ -1,13 +1,17 @@
 package org.votingsystem.web.accesscontrol.servlet;
 
 
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.AccessRequestVS;
 import org.votingsystem.signature.util.CsrResponse;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.AccessRequestBean;
 import org.votingsystem.web.accesscontrol.ejb.CSRBean;
 import org.votingsystem.web.cdi.ConfigVS;
@@ -66,15 +70,23 @@ public class AccessRequestVSServlet extends HttpServlet {
             resp.setContentLength(csrResponse.getIssuedCert().length);
             resp.getOutputStream().write(csrResponse.getIssuedCert());
         } catch (Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-            if(accessRequestVS != null && accessRequestVS.getId() != null && accessRequestVS.getState()
-                    == AccessRequestVS.State.OK) {
-                accessRequestVS.setMetaInf(ex.getMessage());
-                dao.merge(accessRequestVS.setState(AccessRequestVS.State.CANCELED));
+            if(ex instanceof ExceptionVS && ((ExceptionVS) ex).getMessageDto() != null) {
+                MessageDto messageDto = ((ExceptionVS) ex).getMessageDto();
+                log.severe(messageDto.toString());
+                resp.setStatus(messageDto.getStatusCode());
+                resp.setHeader("Content-Type", MediaTypeVS.JSON);
+                resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(messageDto));
+            } else {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+                if(accessRequestVS != null && accessRequestVS.getId() != null && accessRequestVS.getState()
+                        == AccessRequestVS.State.OK) {
+                    accessRequestVS.setMetaInf(ex.getMessage());
+                    dao.merge(accessRequestVS.setState(AccessRequestVS.State.CANCELED));
+                }
+                resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
+                String message = ex.getMessage() != null ? ex.getMessage(): "EXCEPTION: " + ex.getClass();
+                resp.getOutputStream().write(message.getBytes());
             }
-            resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
-            String message = ex.getMessage() != null ? ex.getMessage(): "EXCEPTION: " + ex.getClass();
-            resp.getOutputStream().write(message.getBytes());
         }
     }
 

@@ -109,7 +109,7 @@
                 } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == appMessageJSON.statusCode) {
                     this.caption = '${msg.voteERRORCaption}'
                     var msgTemplate =  "${msg.accessRequestRepeatedMsg}"
-                    this.message = msgTemplate.format(appMessageJSON.eventVS.subject, appMessageJSON.message);
+                    this.message = msgTemplate.format(appMessageJSON.eventVS.subject, appMessageJSON.url);
                 } else {
                     this.caption = '${msg.voteERRORCaption}'
                     this.message = appMessageJSON.message

@@ -40,4 +40,8 @@ public class MessageDto {
     public String getURL() {
         return URL;
     }
+
+    @Override public String toString() {
+        return "[statusCode: " + statusCode + " - message: " + message + " - URL: " + URL +"]";
+    }
 }

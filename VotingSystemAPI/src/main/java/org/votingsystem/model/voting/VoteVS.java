@@ -85,6 +85,7 @@ public class VoteVS extends EntityVS implements Serializable {
 
     public VoteVS (EventVS eventVS) {
         this.eventVS = eventVS;
+        this.eventURL = eventVS.getUrl();
     }
 
     public VoteVS (X509Certificate x509Certificate, TimeStampToken timeStampToken) {

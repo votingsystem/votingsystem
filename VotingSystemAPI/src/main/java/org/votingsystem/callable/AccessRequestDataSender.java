@@ -31,14 +31,15 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
 
     private SMIMEMessage smimeMessage;
     private CertificationRequestVS certificationRequest;
-    private X509Certificate destinationCert;
+    private X509Certificate receiverCert;
 
-    public AccessRequestDataSender(SMIMEMessage smimeMessage, AccessRequestDto accessRequest) throws Exception {
+    public AccessRequestDataSender(SMIMEMessage smimeMessage, AccessRequestDto accessRequest,
+                       String hashCertVSBase64) throws Exception {
         this.smimeMessage = smimeMessage;
-        this.destinationCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
+        this.receiverCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
         this.certificationRequest = CertificationRequestVS.getVoteRequest(KEY_SIZE, SIG_NAME, VOTE_SIGN_MECHANISM,
                 ContextVS.PROVIDER, ContextVS.getInstance().getAccessControl().getServerURL(),
-                accessRequest.getEventVS().getId(), accessRequest.getHashCertVSBase64());
+                accessRequest.getEventId(), hashCertVSBase64);
     }
 
     @Override public ResponseVS call() throws Exception {
@@ -54,8 +55,8 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
                     setProvider(ContextVS.PROVIDER).build(timeStampCert);
             timeStampToken.validate(timeStampSignerInfoVerifier);
             smimeMessage.setTimeStampToken(timeStampToken);
-            //byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert);
-            //byte[] accessRequestEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
+            //byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),receiverCert);
+            //byte[] accessRequestEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, receiverCert);
             Map<String, Object> mapToSend = new HashMap<String, Object>();
             mapToSend.put(ContextVS.CSR_FILE_NAME, certificationRequest.getCsrPEM());
             mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME, smimeMessage.getBytes());

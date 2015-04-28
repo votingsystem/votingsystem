@@ -1,5 +1,6 @@
 package org.votingsystem.dto.voting;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.voting.ControlCenterVS;
@@ -82,10 +83,8 @@ public class EventVSDto {
     public EventVSDto(EventVS eventVS, String serverName, String contextURL) {
         this(eventVS);
         if(eventVS instanceof EventVSElection) {
-            this.setURL(contextURL + "/eventVSElection/id/" + eventVS.getId());
-            this.setPublishRequestURL(contextURL + "/eventVSElection/id/" + eventVS.getId() + "/publishRequest");
-            this.setEventCACertificateURL(contextURL + "/certificateVS/eventVS/id/" + eventVS.getId() + "/CACertificate");
-            this.setVoteVSInfoURL(contextURL + "/eventVSElection/id/" + eventVS.getId() + "/voteVSInfo");
+            this.setURL(contextURL + "/rest/eventVSElection/id/" + eventVS.getId());
+            this.setPublishRequestURL(contextURL + "/rest/eventVSElection/id/" + eventVS.getId() + "/publishRequest");
             ControlCenterVS controlCenterVS = eventVS.getControlCenterVS();
             if(controlCenterVS != null) this.setControlCenter(new ActorVSDto(
                     controlCenterVS.getServerURL(), controlCenterVS.getName()));
@@ -119,6 +118,7 @@ public class EventVSDto {
         return result;
     }
 
+    @JsonIgnore
     public EventVSElection getEventVSElection() {
         EventVSElection result = new EventVSElection();
         result.setId(id);
