@@ -54,8 +54,8 @@
                 </paper-tabs>
                 <div hidden?="{{selectedTab != 'profile'}}" class="tabContent">
                     <div layout horizontal>
-                        <div hidden?="{{false}}">
-                            <img id="representativeImg" on-click="{{showImage}}" src="{{representative.imageURL}}"
+                        <div hidden?="{{!representative.imageURL}}">
+                            <img id="representativeImg" on-click="{{showImage}}"
                                  style="text-align:center; width: 100px;margin-right: 20px;"/>
                         </div>
                         <div style="margin:auto auto">
@@ -114,6 +114,7 @@
                 console.log(this.tagName + ".representativeChanged - subpage:  " + this.subpage + " - selectedTab: " + this.selectedTab)
                 console.log(this.tagName + ".representativeChanged:  " + JSON.stringify(this.representative))
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
+                this.$.representativeImg.src = this.representative.imageURL
             },
             ready: function() {
                 this.selectedTab = 'profile'
