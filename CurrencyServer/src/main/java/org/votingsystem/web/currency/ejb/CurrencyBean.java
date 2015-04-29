@@ -132,13 +132,13 @@ public class CurrencyBean {
         return dto;
     }
 
-    public Map<String, String> checkBundleState(List<String> hashCertVSList) {
-        Map<String, String> result = new HashMap<>();
+    public Map<String, Currency.State> checkBundleState(List<String> hashCertVSList) {
+        Map<String, Currency.State> result = new HashMap<>();
         Query query = dao.getEM().createQuery("SELECT c FROM Currency c WHERE c.hashCertVS =:hashCertVS");
         for(String hashCertVS : hashCertVSList) {
             Currency currency = (Currency) query.setParameter("hashCertVS", hashCertVS).getSingleResult();
             if(currency != null) {
-                result.put(hashCertVS, currency.getState().toString());
+                result.put(hashCertVS, currency.getState());
             }
         }
         return result;

@@ -59,7 +59,7 @@
                                  style="text-align:center; width: 100px;margin-right: 20px;"/>
                         </div>
                         <div style="margin:auto auto">
-                            <vs-html-echo html="{{getDescription(representative.description)}}"></vs-html-echo>
+                            <vs-html-echo html="{{decodeBase64(representative.description)}}"></vs-html-echo>
                         </div>
                     </div>
                 </div>
@@ -102,9 +102,9 @@
             requestVotingHistory:function() {
                 this.$.votingHistoryDialog.show(this.representative)
             },
-            getDescription:function(base64EncodedDescription) {
-                if(base64EncodedDescription == null) return null
-                return decodeURIComponent(escape(window.atob(base64EncodedDescription)))
+            decodeBase64:function(base64EncodedString) {
+                if(base64EncodedString == null) return null
+                return decodeURIComponent(escape(window.atob(base64EncodedString)))
             },
             selectRepresentative:function() {
                 console.log("selectRepresentative")

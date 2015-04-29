@@ -6,8 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="725.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox fx:id="mainVBox" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="725.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <HBox prefHeight="29.0" prefWidth="580.0">
          <children>
@@ -19,13 +18,13 @@
             </DatePicker>
          </children>
       </HBox>
-      <HTMLEditor fx:id="editor" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="334.0" prefWidth="705.0" />
+      <HTMLEditor fx:id="editor" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="334.0" VBox.vgrow="ALWAYS" />
       <Button fx:id="addOptionButton" mnemonicParsing="false" text="Button">
          <VBox.margin>
             <Insets top="10.0" />
          </VBox.margin>
       </Button>
-      <VBox fx:id="optionsVBox" prefHeight="0.0" />
+      <VBox fx:id="optionsVBox" prefHeight="0.0" VBox.vgrow="ALWAYS" />
       <HBox prefWidth="200.0">
          <children>
             <Region HBox.hgrow="ALWAYS" />

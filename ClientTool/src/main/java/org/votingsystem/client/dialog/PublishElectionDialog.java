@@ -48,7 +48,6 @@ public class PublishElectionDialog  extends DialogVS implements AddVoteOptionDia
 
     private static Logger log = Logger.getLogger(PublishElectionDialog.class.getSimpleName());
 
-    private static Stage stage;
     private OperationVS operationVS;
 
     private Set<String> optionSet;
@@ -66,7 +65,7 @@ public class PublishElectionDialog  extends DialogVS implements AddVoteOptionDia
                 case CANCELED:
                     if(responseVS.getData() instanceof OperationVS) {
                         OperationVS operationVS = (OperationVS) responseVS.getData();
-                        if(operationVS.getType() == TypeVS.VOTING_PUBLISHING && stage != null) {
+                        if(operationVS.getType() == TypeVS.VOTING_PUBLISHING && operationVS != null) {
                             show(operationVS, null);
                         }
                     }
@@ -154,8 +153,8 @@ public class PublishElectionDialog  extends DialogVS implements AddVoteOptionDia
             operationVS.setSignedMessageSubject(ContextVS.getMessage("publishElectionLbl"));
             operationVS.setServiceURL(ContextVS.getInstance().getAccessControl().getPublishElectionURL());
             operationVS.setCallerCallback(null);
+            hide();
             Browser.getInstance().processOperationVS(operationVS, null);
-            stage.hide();
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -189,6 +188,7 @@ public class PublishElectionDialog  extends DialogVS implements AddVoteOptionDia
         optionsVBox.getChildren().add(optionHBox);
         if(optionSet.size() >= 2) publishButton.setVisible(true);
         else publishButton.setVisible(false);
+        getStage().sizeToScene();
     }
 
     private void removeOption(HBox optionRemovedHBox, String optionRemoved) {
@@ -196,6 +196,7 @@ public class PublishElectionDialog  extends DialogVS implements AddVoteOptionDia
         optionsVBox.getChildren().removeAll(optionRemovedHBox);
         if(optionSet.size() >= 2) publishButton.setVisible(true);
         else publishButton.setVisible(false);
+        getStage().sizeToScene();
     }
 
 }

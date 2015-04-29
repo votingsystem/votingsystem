@@ -257,7 +257,7 @@ public class SignatureService extends Service<ResponseVS> {
                 responseMap.put("voteURL", ContextVS.getInstance().getAccessControl().getVoteStateServiceURL(hashCertVSHex));
                 responseMap.put("voteVSReceipt", Base64.getEncoder().encodeToString(voteVSHelper.getValidatedVote().getBytes()));
                 responseVS.setContentType(ContentTypeVS.JSON);
-                responseVS.setMessageMap(responseMap);
+                responseVS.setMessage(JSON.getMapper().writeValueAsString(responseMap));
             }
             return responseVS;
         }
@@ -305,11 +305,7 @@ public class SignatureService extends Service<ResponseVS> {
                 CurrencyIssuedDto dto = (CurrencyIssuedDto) responseVS.getMessage(CurrencyIssuedDto.class);
                 currencyBatch.loadIssuedCurrency(dto.getIssuedCurrency());
                 Wallet.saveToPlainWallet(currencyBatch.getCurrencyMap().values());
-                Map responseMap = new HashMap<>();
-                responseMap.put("statusCode", responseVS.getStatusCode());
-                responseMap.put("message", dto.getMessage());
-                responseVS.setContentType(ContentTypeVS.JSON);
-                responseVS.setMessageMap(responseMap);
+                responseVS = new ResponseVS(responseVS.getStatusCode(), dto.getMessage());
                 InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"), new Date());
                 inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(MapUtils.getCurrencyMap(
                         currencyBatch.getCurrencyMap().values()))).setTypeVS(TypeVS.CURRENCY_IMPORT);
@@ -329,7 +325,9 @@ public class SignatureService extends Service<ResponseVS> {
                     } else return true;
                 }).collect(toSet());
                 Wallet.saveWallet(CurrencyDto.serializeCollection(wallet), password);
-                return new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.CURRENCY_DELETE).setStatus(new StatusVS() {});
+                ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.CURRENCY_DELETE);
+                EventBusService.getInstance().post(responseVS);
+                return new ResponseVS(ResponseVS.SC_OK).setType(TypeVS.CURRENCY_DELETE);
             } catch(Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
@@ -438,9 +436,10 @@ public class SignatureService extends Service<ResponseVS> {
             ResponseVS responseVS = sendSMIME(operationVS.getJsonStr(), operationVS, "eventURL");
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 String eventURL = ((List<String>)responseVS.getData()).iterator().next() +"?menu=admin";
-                operationVS.setDocumentURL(eventURL);
+                log.info("publishSMIME - new event URL: " + eventURL);
+                Browser.getInstance().openVotingSystemURL(eventURL, ContextVS.getMessage("eventVSElectionLbl"));
                 //String receipt = responseVS.getMessage();
-                responseVS.setMessage(eventURL);
+                responseVS.setMessage(ContextVS.getMessage("eventVSPublishedOKMsg"));
             }
             return responseVS;
         }

@@ -17,6 +17,7 @@ import org.votingsystem.client.pane.BrowserVSTabPane;
 import org.votingsystem.client.pane.BrowserVSToolbar;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.util.*;
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -80,9 +81,7 @@ public class Browser extends VBox implements BrowserVS {
             log.info("signatureService - OnSucceeded");
             try {
                 ResponseVS responseVS = browserHelper.getSignatureService().getValue();
-                if(responseVS.getStatus() != null) {
-                    EventBusService.getInstance().post(responseVS);
-                } else if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
+                if(ResponseVS.SC_INITIALIZED == responseVS.getStatusCode()) {
                     log.info("signatureService - OnSucceeded - ResponseVS.SC_INITIALIZED");
                 } else {
                     if(browserHelper.getSignatureService().getOperationVS().getCallerCallback() == null) {
@@ -90,9 +89,9 @@ public class Browser extends VBox implements BrowserVS {
                         return;
                     }
                     if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                        invokeBrowserCallback(responseVS.getMessageMap(),
+                        invokeBrowserCallback(responseVS.getMessage(),
                                 browserHelper.getSignatureService().getOperationVS().getCallerCallback());
-                    } else invokeBrowserCallback(Utils.getMessageToBrowser(responseVS.getStatusCode(), responseVS.getMessage()),
+                    } else invokeBrowserCallback(new MessageDto(responseVS.getStatusCode(), responseVS.getMessage()),
                             browserHelper.getSignatureService().getOperationVS().getCallerCallback());
                 }
             } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
@@ -119,19 +118,26 @@ public class Browser extends VBox implements BrowserVS {
     }
 
     private void showOperationResult(ResponseVS responseVS) throws IOException {
-        if(ContentTypeVS.JSON == responseVS.getContentType()) {
-            showMessage(((Number)responseVS.getMessageMap().get("statusCode")).intValue(),
-                    (String)responseVS.getMessageMap().get("message"));
-        } else showMessage(responseVS.getStatusCode(), responseVS.getMessage());
+        showMessage(responseVS.getStatusCode(), responseVS.getMessage());
     }
 
     @Override public void invokeBrowserCallback(Object dto, String callerCallback) throws JsonProcessingException {
         String message = JSON.getMapper().writeValueAsString(dto);
-        log.info("invokeBrowserCallback - dataMap: " + MsgUtils.truncateLog(message));
+        log.info("invokeBrowserCallback - dto: " + MsgUtils.truncateLog(message));
         try {
             WebView operationWebView = webViewMap.remove(callerCallback);
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
                     Base64.getEncoder().encodeToString(message.getBytes("UTF8")) + "')";
+            PlatformImpl.runLater(() -> {  operationWebView.getEngine().executeScript(jsCommand); });
+        } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex); }
+    }
+
+    public void invokeBrowserCallback(String jsonStr, String callerCallback) throws JsonProcessingException {
+        log.info("invokeBrowserCallback - jsonStr: " + MsgUtils.truncateLog(jsonStr));
+        try {
+            WebView operationWebView = webViewMap.remove(callerCallback);
+            final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
+                    Base64.getEncoder().encodeToString(jsonStr.getBytes("UTF8")) + "')";
             PlatformImpl.runLater(() -> {  operationWebView.getEngine().executeScript(jsCommand); });
         } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex); }
     }

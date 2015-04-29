@@ -79,8 +79,7 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23, insertable=true) private Date lastUpdated;
 
-    @Transient private StatusVS<?> status;
-    @Transient private Map messageMap;
+
     @Transient private SMIMEMessage smimeMessage;
     @Transient private EventVS eventVS;
     @Transient private T data;
@@ -150,17 +149,6 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
-    public ResponseVS (int statusCode, StatusVS<?> status, String msg) {
-        this.statusCode = statusCode;
-        this.status = status;
-        this.message = msg;
-    }
-
-    public ResponseVS (int statusCode, StatusVS<?> status) {
-        this.statusCode = statusCode;
-        this.status = status;
-    }
-
     public ResponseVS (int statusCode, byte[] messageBytes) {
         this.statusCode = statusCode;
         this.messageBytes = messageBytes;
@@ -187,20 +175,12 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         return message;
     }
 
-    public Map<String, Object> getMessageMap() throws IOException {
-        if(messageMap != null) return messageMap;
-        String message = getMessage();
-        if(message != null) return  JSON.getMapper().readValue(message.trim(),
-                new TypeReference<HashMap<String, Object>>() {});
-        return null;
-    }
-
-    public void setMessageMap(Map messageMap) {
-        this.messageMap = messageMap;
-    }
-
     public <T> T getMessage(Class<T> type) throws Exception {
         return JSON.getMapper().readValue(getMessage(), type);
+    }
+
+    public <T> T getMessage(TypeReference typeReference) throws Exception {
+        return JSON.getMapper().readValue(getMessage(), typeReference);
     }
     
     public String toString () {
@@ -287,15 +267,6 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
 		this.userVS = userVS;
         return this;
 	}
-
-    public <E> StatusVS<E> getStatus() {
-        return (StatusVS<E>)status;
-    }
-
-    public <E> ResponseVS setStatus(StatusVS<E> status) {
-        this.status = status;
-        return this;
-    }
 
     public File getFile() {
         return file;

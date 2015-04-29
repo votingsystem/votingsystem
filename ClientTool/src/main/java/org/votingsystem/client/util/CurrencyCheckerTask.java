@@ -1,5 +1,6 @@
 package org.votingsystem.client.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.concurrent.Task;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
@@ -49,14 +50,13 @@ public class CurrencyCheckerTask extends Task<CurrencyCheckResponse> {
             responseVS = HttpHelper.getInstance().sendData(requestList.toString().getBytes(),
                     ContentTypeVS.JSON, currencyServer.getCurrencyBundleStateServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                Map result = responseVS.getMessageMap();
+                Map<String, Currency.State> result = (Map<String, Currency.State>) responseVS.getMessage(
+                        new TypeReference<Map<String, Currency.State>>() {});
                 Set<String> errorSet = new HashSet<>();
                 Set<String> OKSet = new HashSet<>();
-                for(int i = 0; i < result.size(); i++) {
-                    Map currencyData = (Map) result.get(i);
-                    if(Currency.State.OK == Currency.State.valueOf((String) currencyData.get("state"))) {
-                        OKSet.add((String) currencyData.get("hashCertVS"));
-                    } else errorSet.add((String) currencyData.get("hashCertVS"));
+                for(String hashCertVS : result.keySet()) {
+                    if(Currency.State.OK == result.get(hashCertVS)) OKSet.add(hashCertVS);
+                    else errorSet.add(hashCertVS);
                 }
                 Integer statusCode = errorSet.size() > 0? ResponseVS.SC_ERROR : ResponseVS.SC_OK;
                 response = new CurrencyCheckResponse(statusCode, null, OKSet, errorSet);

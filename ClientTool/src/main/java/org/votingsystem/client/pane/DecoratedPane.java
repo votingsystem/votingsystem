@@ -6,10 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.votingsystem.client.util.FullScreenHelper;
 import org.votingsystem.client.util.ResizeHelper;
@@ -33,15 +30,17 @@ public class DecoratedPane extends VBox {
 
     public DecoratedPane(String caption, MenuButton menuButton, Pane contentPane, Stage stage) {
         this.stage = stage;
+        setAlignment(Pos.TOP_CENTER);
         fullScreenHelper = new FullScreenHelper(stage);
-        setStyle("-fx-background-insets: 3;" +
-                "-fx-effect: dropshadow(three-pass-box, #888, 5, 0, 0, 0);" +
-                "-fx-background-radius: 4;" +
-                "-fx-padding: 5, 5;");
+        setStyle("-fx-background-insets: 3;-fx-effect: dropshadow(three-pass-box, #888, 5, 0, 0, 0);" +
+                "-fx-background-radius: 4; -fx-padding: 5, 5;");
         mainDialog = new VBox();
         mainDialog.setStyle("-fx-background-radius: 4;");
         mainDialog.setAlignment(Pos.TOP_CENTER);
+        HBox.setHgrow(mainDialog, Priority.ALWAYS);
         VBox.setVgrow(mainDialog, Priority.ALWAYS);
+        HBox.setHgrow(contentPane, Priority.ALWAYS);
+        VBox.setVgrow(contentPane, Priority.ALWAYS);
         toolBar = new HBox();
         toolBar.setSpacing(10);
         toolBar.setStyle("-fx-padding: 3, 20;");
@@ -52,6 +51,7 @@ public class DecoratedPane extends VBox {
         captionLbl = new Label();
         captionLbl.setStyle("-fx-font-size: 1.3em; -fx-font-weight: bold; -fx-text-fill: #888;");
         captionBox.getChildren().add(captionLbl);
+        AnchorPane.setTopAnchor(toolBar, 10.0);
         toolBar.getChildren().add(captionBox);
         if(caption != null) captionLbl.setText(caption);
         closeButton = new Button();
@@ -65,6 +65,7 @@ public class DecoratedPane extends VBox {
         getChildren().add(mainDialog);
         mainDialog.getChildren().addAll(toolBar, contentPane);
         final Delta dragDelta = new Delta();
+        AnchorPane.setTopAnchor(toolBar, 0.0);
         toolBar.setOnMousePressed(mouseEvent -> {  // record a delta distance for the drag and drop operation.
             dragDelta.x = stage.getX() - mouseEvent.getScreenX();
             dragDelta.y = stage.getY() - mouseEvent.getScreenY();

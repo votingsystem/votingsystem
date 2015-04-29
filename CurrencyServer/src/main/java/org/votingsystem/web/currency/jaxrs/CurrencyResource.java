@@ -105,7 +105,7 @@ public class CurrencyResource {
     @Path("/bundleState")
     @POST @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
     public Response bundleState(List<String> hashCertVSList) throws JsonProcessingException {
-        Map<String, String> result =  currencyBean.checkBundleState(hashCertVSList);
+        Map<String, Currency.State> result =  currencyBean.checkBundleState(hashCertVSList);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(result)).build();
     }
 

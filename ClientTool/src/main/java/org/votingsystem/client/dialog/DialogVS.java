@@ -5,6 +5,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -38,7 +40,6 @@ public class DialogVS {
         stage.centerOnScreen();
 
         decoratedPane = new DecoratedPane(null, null, fxmlLoader.load(), stage);
-        decoratedPane.setAlignment(Pos.CENTER_RIGHT);
 
         stage.setScene(new Scene(decoratedPane));
         Utils.addMouseDragSupport(stage);

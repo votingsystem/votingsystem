@@ -21,6 +21,19 @@ public class MessageDto {
         this.URL = URL;
     }
 
+    public MessageDto(Integer statusCode, String message) {
+        this.statusCode = statusCode;
+        this.message = message;
+    }
+
+    public static MessageDto OK(String message) {
+        return new MessageDto(ResponseVS.SC_OK, message, null);
+    }
+
+    public static MessageDto ERROR(String message) {
+        return new MessageDto(ResponseVS.SC_ERROR, message, null);
+    }
+
     public static MessageDto OK(String message, String URL) {
         return new MessageDto(ResponseVS.SC_OK, message, URL);
     }

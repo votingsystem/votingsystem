@@ -45,7 +45,7 @@ public class PublishAndSendElection {
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         eventVS = new EventVS();
         eventVS.setSubject("voting subject");
-        eventVS.setContent("<p>election content</p>");
+        eventVS.setContent(Base64.getEncoder().encodeToString("<p>election content</p>".getBytes()));
         eventVS.setDateBegin(new Date());
         eventVS.setFieldsEventVS(new HashSet<>(Arrays.asList(new FieldEventVS("field1", null), new FieldEventVS("field2", null))));
 
