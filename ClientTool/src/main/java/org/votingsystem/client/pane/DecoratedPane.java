@@ -51,7 +51,6 @@ public class DecoratedPane extends VBox {
         captionLbl = new Label();
         captionLbl.setStyle("-fx-font-size: 1.3em; -fx-font-weight: bold; -fx-text-fill: #888;");
         captionBox.getChildren().add(captionLbl);
-        AnchorPane.setTopAnchor(toolBar, 10.0);
         toolBar.getChildren().add(captionBox);
         if(caption != null) captionLbl.setText(caption);
         closeButton = new Button();

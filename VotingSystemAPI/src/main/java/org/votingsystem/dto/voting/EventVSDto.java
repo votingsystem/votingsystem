@@ -158,7 +158,7 @@ public class EventVSDto {
         if(!accessControlURL.equals(contextURL))  throw new ValidationExceptionVS(
                 "ERROR - accessControlURL - expected: " + contextURL + " - found: " + accessControlURL);
         if(eventId == null) throw new ValidationExceptionVS("ERROR - missing param 'eventId'");
-        if(state == null || EventVS.State.DELETED_FROM_SYSTEM != state || EventVS.State.CANCELED != state)
+        if(state == null || (EventVS.State.DELETED_FROM_SYSTEM != state && EventVS.State.CANCELED != state))
             throw new ValidationExceptionVS("ERROR - expected state 'DELETED_FROM_SYSTEM' found: " + state);
     }
 

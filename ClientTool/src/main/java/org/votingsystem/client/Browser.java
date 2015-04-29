@@ -15,7 +15,6 @@ import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.BrowserVSTabPane;
 import org.votingsystem.client.pane.BrowserVSToolbar;
-import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.util.*;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.OperationVS;

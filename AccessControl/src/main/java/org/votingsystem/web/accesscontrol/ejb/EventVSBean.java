@@ -63,10 +63,10 @@ public class EventVSBean {
         SMIMEMessage smimeMessageReq = messageSMIME.getSMIME();
         UserVS signer = messageSMIME.getUserVS();
         EventVSDto request = messageSMIME.getSignedContent(EventVSDto.class);
-        EventVS eventVS = dao.find(EventVS.class, request.getId());
+        EventVS eventVS = dao.find(EventVS.class, request.getEventId());
         if (eventVS == null) throw new ValidationExceptionVS("ERROR - EventVS not found - eventId: " + request.getId());
-        if(eventVS.getState() != EventVS.State.ACTIVE) throw new ValidationExceptionVS(
-                "ERROR - EventVS not ACTIVE - eventId: " + request.getId());
+        if(eventVS.getState() != EventVS.State.ACTIVE && eventVS.getState() != EventVS.State.PENDING)
+                throw new ValidationExceptionVS("ERROR - EventVS not ACTIVE - eventId: " + request.getEventId());
         request.validateCancelation(config.getContextURL());
         if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
