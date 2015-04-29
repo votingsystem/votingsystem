@@ -4,7 +4,6 @@ import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MediaTypeVS;
@@ -25,7 +24,7 @@ public class TestUtils {
     public static CurrencyServer fetchCurrencyServer(String currencyServerURL) throws Exception {
         if(ContextVS.getInstance().getCurrencyServer() == null) {
             ActorVSDto actorVSDto = HttpHelper.getInstance().getData(ActorVSDto.class,
-                    ActorVS.getServerInfoURL(currencyServerURL), ContentTypeVS.JSON.getName());
+                    ActorVS.getServerInfoURL(currencyServerURL), MediaTypeVS.JSON);
             ContextVS.getInstance().setCurrencyServer((CurrencyServer) actorVSDto.getActorVS());
         }
         return ContextVS.getInstance().getCurrencyServer();

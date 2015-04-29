@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
@@ -45,7 +46,7 @@ public class SubscriptionVSResource {
         Query query = dao.getEM().createQuery("select e from EventVSElection e where e.state =:state order by e.dateCreated DESC")
                 .setParameter("state", EventVS.State.ACTIVE);
         List<EventVSElection> eventVSList = query.getResultList();
-        List<SyndEntryImpl> feeds = query.getResultList();
+        List<SyndEntryImpl> feeds = new ArrayList<>();
         for(EventVSElection eventVSElection : eventVSList) {
             String electionURL = config.getRestURL() + "/eventVSElection/id" + eventVSElection.getId();
             SyndEntryImpl entry = new SyndEntryImpl();

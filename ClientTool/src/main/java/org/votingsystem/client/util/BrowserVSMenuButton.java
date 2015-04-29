@@ -1,6 +1,5 @@
 package org.votingsystem.client.util;
 
-import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.scene.control.Menu;
@@ -12,14 +11,8 @@ import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.pane.WalletPane;
-import org.votingsystem.client.service.EventBusService;
-import org.votingsystem.client.service.SessionService;
-import org.votingsystem.client.service.WebSocketAuthenticatedService;
-import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.TypeVS;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 /**

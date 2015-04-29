@@ -49,22 +49,14 @@ public class RepresentativeBean {
     @Inject RepresentativeDelegationBean representativeDelegationBean;
     @Inject MessagesBean messages;
 
-    public ResponseVS<RepresentativeDocument> saveRepresentativeData(MessageSMIME messageSMIME, byte[] imageBytes) throws Exception {
+    public RepresentativeDocument saveRepresentative(MessageSMIME messageSMIME) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
         AnonymousDelegation anonymousDelegation = representativeDelegationBean.getAnonymousDelegation(signer);
         if(anonymousDelegation != null) throw new ValidationExceptionVS(messages.get(
                 "representativeRequestWithActiveAnonymousDelegation"));
-        Map requestMap = messageSMIME.getSignedContentMap();
-        String base64ImageHash = (String) requestMap.get("base64ImageHash");
-        MessageDigest messageDigest = MessageDigest.getInstance(ContextVS.VOTING_DATA_DIGEST);
-        byte[] resultDigest =  messageDigest.digest(imageBytes);
-        String base64ResultDigest = Base64.getEncoder().encodeToString(resultDigest);
-        if(!base64ResultDigest.equals(base64ImageHash)) throw new ValidationExceptionVS(messages.get("imageHashErrorMsg"));
-        //String base64EncodedImage = requestMap.base64RepresentativeEncodedImage
-        //BASE64Decoder decoder = new BASE64Decoder();
-        //byte[] imageFileBytes = decoder.decodeBuffer(base64EncodedImage);
+        RepresentativeDto request = messageSMIME.getSignedContent(RepresentativeDto.class);
         String msg = null;
-        signer.setDescription((String) requestMap.get("representativeInfo"));
+        signer.setDescription(request.getDescription());
         if(UserVS.Type.REPRESENTATIVE != signer.getType()) {
             representativeDelegationBean.cancelRepresentationDocument(messageSMIME);
             msg = messages.get("representativeDataCreatedOKMsg", signer.getFirstName(), signer.getLastName());
@@ -78,6 +70,7 @@ public class RepresentativeBean {
         for(ImageVS imageVS : images) {
             dao.merge(imageVS.setType(ImageVS.Type.REPRESENTATIVE_CANCELED));
         }
+        byte[] imageBytes = Base64.getDecoder().decode(request.getBase64Image().getBytes());
         ImageVS newImage = dao.persist(new ImageVS(signer,messageSMIME, ImageVS.Type.REPRESENTATIVE, imageBytes));
         query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS " +
                 "and r.state =:state").setParameter("userVS", signer).setParameter("state", RepresentativeDocument.State.OK);
@@ -87,11 +80,13 @@ public class RepresentativeBean {
             dao.merge(representativeDocument);
 
         }
+        messageSMIME.setSMIME(signatureBean.getSMIMEMultiSigned(signer.getNif(), messageSMIME.getSMIME(),
+                messageSMIME.getSMIME().getSubject()));
+        dao.merge(messageSMIME);
         RepresentativeDocument repDocument = dao.persist(new RepresentativeDocument(signer, messageSMIME,
-                (String) requestMap.get("representativeInfo")));
-        log.info ("saveRepresentativeData - user id: " + signer.getId());
-        //return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg,  type:TypeVS.REPRESENTATIVE_DATA)
-        return new ResponseVS<RepresentativeDocument>(ResponseVS.SC_OK, msg, repDocument);
+                request.getDescription()));
+        log.info ("saveRepresentative - user id: " + signer.getId());
+        return repDocument;
     }
 
 

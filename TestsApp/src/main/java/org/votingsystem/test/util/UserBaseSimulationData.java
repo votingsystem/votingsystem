@@ -3,8 +3,8 @@ package org.votingsystem.test.util;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.test.callable.RepresentativeDelegatorDataSender;
-import org.votingsystem.test.callable.RepresentativeTestDataSender;
+import org.votingsystem.test.callable.RepresentativeDataSender;
+import org.votingsystem.test.callable.RepresentativeDelegationDataSender;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
@@ -309,7 +309,7 @@ public class UserBaseSimulationData extends SimulationData {
             byte[] imageBytes = ContextVS.getInstance().getResourceBytes("./images/icon_64/fa-user.png");
             while (hasRepresesentativeRequestsPending()){
                 if(!waitingForRepresesentativeRequests()) {
-                    requestCompletionService.submit(new RepresentativeTestDataSender(NifUtils.getNif(
+                    requestCompletionService.submit(new RepresentativeDataSender(NifUtils.getNif(
                             new Long(getAndIncrementUserIndex()).intValue()), imageBytes));
                     getAndIncrementNumRepresentativeRequests();
                 } else Thread.sleep(500);
@@ -351,15 +351,13 @@ public class UserBaseSimulationData extends SimulationData {
     public void createDelegations () throws Exception {
         log.info("createDelegations - Num. users with representative: " + getNumUsersWithRepresentative());
         if(getNumUsersWithRepresentative() > 0) {
-            String serviceURL = ContextVS.getInstance().getAccessControl().getDelegationServiceURL();
             while (getNumDelegationRequests() < getNumUsersWithRepresentative()) {
                 log.info("getNumDelegationRequests: " + getNumDelegationRequests() +
                         "- getNumUsersWithRepresentative: " + getNumUsersWithRepresentative());
                 if((getNumDelegationRequests() - getNumDelegationRequestsCollected()) < getMaxPendingResponses()) {
                     String userNIF = NifUtils.getNif(new Long(getAndIncrementUserIndex()).intValue());
                     String representativeNIF = getRandomRepresentative();
-                    requestCompletionService.submit(new RepresentativeDelegatorDataSender(
-                            userNIF,representativeNIF, serviceURL));
+                    requestCompletionService.submit(new RepresentativeDelegationDataSender(userNIF,representativeNIF));
                     getAndIncrementNumDelegationRequests();
                 } else Thread.sleep(200);
             }

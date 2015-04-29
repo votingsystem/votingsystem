@@ -1,7 +1,6 @@
 package org.votingsystem.client.pane;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;

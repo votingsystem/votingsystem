@@ -30,10 +30,8 @@ public class RepresentativeDocument  extends EntityVS implements Serializable {
     private Long id;
     @Enumerated(EnumType.STRING)
     @Column(name="state", nullable=false) private State state = State.OK;
-    @OneToOne
-    private MessageSMIME activationSMIME;
-    @OneToOne
-    private MessageSMIME cancellationSMIME;
+    @OneToOne private MessageSMIME activationSMIME;
+    @OneToOne private MessageSMIME cancellationSMIME;
 	@Column(name="description", columnDefinition="TEXT" ) private String description;
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;

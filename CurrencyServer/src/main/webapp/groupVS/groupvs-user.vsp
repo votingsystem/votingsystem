@@ -24,7 +24,7 @@
                 <div id="nameDiv" style="font-size: 1.15em;font-weight: bold; margin:5px 0px 5px 0px;
                     text-align: center; color:#6c0404;">
                     {{subscriptionData.uservs.name}}</div>
-                <div id="contentDiv" style="">${msg.subscriptionRequestDateLbl}:
+                <div id="contentDiv">${msg.subscriptionRequestDateLbl}:
                     <span id="dateCreatedDiv"> {{getDate(subscriptionData.dateCreated)}}</span></div>
             </div>
             <div horizontal layout center center-justified style="margin:10px 0 0 0; font-size: 0.9em;">

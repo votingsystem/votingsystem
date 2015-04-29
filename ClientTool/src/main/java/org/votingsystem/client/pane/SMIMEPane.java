@@ -18,7 +18,6 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.util.*;

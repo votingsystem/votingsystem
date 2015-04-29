@@ -50,6 +50,12 @@ public class RepresentativeResource {
     @Inject RepresentativeDelegationBean representativeDelegationBean;
     @Inject MessagesBean messages;
 
+    @Path("/save") @POST
+    public Response save(MessageSMIME messageSMIME) throws Exception {
+        RepresentativeDocument representativeDocument = representativeBean.saveRepresentative(messageSMIME);
+        return Response.ok().entity(representativeDocument.getActivationSMIME().getContent())
+                .type(MediaTypeVS.JSON_SIGNED).build();
+    }
 
     @Path("/delegation") @POST
     public Response delegation(MessageSMIME messageSMIME) throws Exception {
@@ -79,7 +85,6 @@ public class RepresentativeResource {
         representativeBean.processAccreditationsRequest(messageSMIME, mailTemplate);
         return Response.ok().entity(messages.get("backupRequestOKMsg", request.getEmail())).build();
     }
-
 
     @Path("/revoke") @POST
     public Response revoke(MessageSMIME messageSMIME) throws Exception {

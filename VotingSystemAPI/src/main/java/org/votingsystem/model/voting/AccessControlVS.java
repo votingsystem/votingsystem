@@ -82,7 +82,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getRepresentativeServiceURL() {
-        return getServerURL() + "/representative";
+        return getServerURL() + "/rest/representative/save";
     }
 
     public String getControlCenterCheckServiceURL(String controlCenterServerURL) {

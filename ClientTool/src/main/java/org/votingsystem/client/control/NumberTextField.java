@@ -1,8 +1,5 @@
 package org.votingsystem.client.control;
 
-import java.math.BigDecimal;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -10,6 +7,10 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.TextField;
+
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 /**
  * Textfield implementation that accepts formatted number and stores them in a

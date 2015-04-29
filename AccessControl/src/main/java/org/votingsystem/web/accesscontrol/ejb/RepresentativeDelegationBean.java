@@ -65,14 +65,13 @@ public class RepresentativeDelegationBean {
         userVS.setRepresentative(representative);
         RepresentationDocument representationDocument = dao.persist(new RepresentationDocument(messageSMIME,
                 userVS, representative, RepresentationDocument.State.OK));
+        dao.merge(userVS);
         String toUser = userVS.getNif();
         String subject = messages.get("representativeSelectValidationSubject");
         messageSMIME.setSMIME(signatureBean.getSMIMEMultiSigned(toUser, smimeMessage, subject));
+        dao.merge(messageSMIME);
         log.info(format("user id: {0} - representationDocument id: {1}", userVS.getNif(), representationDocument.getId()));
         return representationDocument;
-        /*String msg = messageSource.getMessage('representativeAssociatedMsg',[messageJSON.representativeName, userVS.nif].toArray(), locale)
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, data:messageSMIME,
-                type:TypeVS.REPRESENTATIVE_SELECTION)*/
     }
 
     private void cancelPublicDelegation(MessageSMIME messageSMIME) {

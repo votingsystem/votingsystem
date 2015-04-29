@@ -27,8 +27,6 @@ public class OperationVS {
 
     private TypeVS operation;
     private Integer statusCode;
-    @JsonProperty("objectId")
-    private String callerCallback;
     private String message;
     private String nif;
     private String documentURL;
@@ -39,9 +37,6 @@ public class OperationVS {
     private String email;
     private File file;
     private String signedMessageSubject;
-    @JsonProperty("signedContent") private Map documentToSignMap;
-    private Map documentToEncrypt;
-    private Map documentToDecrypt;
     private Map document;
     private String jsonStr;
     private String contentType;
@@ -49,7 +44,8 @@ public class OperationVS {
     private VoteVSDto voteVS;
     private String UUID;
 
-
+    @JsonProperty("signedContent") private Map documentToSignMap;
+    @JsonProperty("objectId") private String callerCallback;
     @JsonIgnore private ActorVS targetServer;
 
     public OperationVS() {}
@@ -239,22 +235,6 @@ public class OperationVS {
 
     public void setTargetServer(ActorVS targetServer) {
         this.targetServer = targetServer;
-    }
-
-    public Map getDocumentToEncrypt() {
-        return documentToEncrypt;
-    }
-
-    public void setDocumentToEncrypt(Map documentToEncrypt) {
-        this.documentToEncrypt = documentToEncrypt;
-    }
-
-    public Map getDocumentToDecrypt() {
-        return documentToDecrypt;
-    }
-
-    public void setDocumentToDecrypt(Map documentToDecrypt) {
-        this.documentToDecrypt = documentToDecrypt;
     }
 
     public Map getDocument() {

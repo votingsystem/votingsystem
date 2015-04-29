@@ -19,8 +19,10 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
+
 import static org.votingsystem.client.Browser.showMessage;
 
 /**

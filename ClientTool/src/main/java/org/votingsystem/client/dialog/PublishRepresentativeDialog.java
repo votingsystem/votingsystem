@@ -21,10 +21,7 @@ import org.votingsystem.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,11 +68,11 @@ public class PublishRepresentativeDialog extends DialogVS {
         editor.setHtmlText("<html><body></body></html>");
         switch (operationVS.getType()) {
             case NEW_REPRESENTATIVE:
-                publishButton.setText(ContextVS.getMessage("publishRepresentativeLbl"));
+                publishButton.setText(ContextVS.getMessage("saveLbl"));
                 setCaption(ContextVS.getMessage("publishRepresentativeLbl"));
                 break;
             case EDIT_REPRESENTATIVE:
-                publishButton.setText(ContextVS.getMessage("editRepresentativeLbl"));
+                publishButton.setText(ContextVS.getMessage("saveLbl"));
                 setCaption(ContextVS.getMessage("editRepresentativeLbl"));
                 ProgressDialog.showDialog(new FetchRepresentativeDataTask(operationVS.getNif()),
                         ContextVS.getMessage("editRepresentativeLbl"), getStage());
@@ -94,12 +91,12 @@ public class PublishRepresentativeDialog extends DialogVS {
                 showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterImageLbl"));
                 return;
             }
-            Map mapToSign = new HashMap<>();
-            mapToSign.put("operation", TypeVS.NEW_REPRESENTATIVE);
-            //this is to allow parsing json html fields with javascript
-            mapToSign.put("representativeInfo", Base64.getEncoder().encodeToString(editor.getHtmlText().getBytes()));
-            operationVS.setDocumentToSignMap(mapToSign);
-            operationVS.setFile(selectedImage);
+            RepresentativeDto dto = new RepresentativeDto();
+            dto.setOperation(TypeVS.NEW_REPRESENTATIVE);
+            dto.setDescription(Base64.getEncoder().encodeToString(editor.getHtmlText().getBytes()));
+            dto.setBase64Image(Base64.getEncoder().encodeToString(FileUtils.getBytesFromFile(selectedImage)));
+            dto.setUUID(UUID.randomUUID().toString());
+            operationVS.setJsonStr(JSON.getMapper().writeValueAsString(dto));
             operationVS.setSignedMessageSubject(ContextVS.getMessage("publishRepresentativeLbl"));
             operationVS.setServiceURL(ContextVS.getInstance().getAccessControl().getRepresentativeServiceURL());
             operationVS.setCallerCallback(null);
@@ -130,8 +127,8 @@ public class PublishRepresentativeDialog extends DialogVS {
                                 ContextVS.IMAGE_MAX_FILE_SIZE_KB));
                         selectedImage = null;
                     }
+                    imageView.setImage(new Image(selectedImage.toURI().toURL().toString()));
                 }
-                imageView.setImage(new Image(selectedImage.toURI().toURL().toString()));
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 showMessage(ResponseVS.SC_ERROR, ex.getMessage());

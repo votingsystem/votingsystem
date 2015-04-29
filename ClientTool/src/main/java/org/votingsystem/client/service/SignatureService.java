@@ -3,15 +3,8 @@ package org.votingsystem.client.service;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.SignerInformationVerifier;
-import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle.tsp.TimeStampRequest;
-import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.callable.AccessRequestDataSender;
-import org.votingsystem.callable.MessageTimeStamper;
-import org.votingsystem.callable.RepresentativeDataSender;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
@@ -34,7 +27,6 @@ import org.votingsystem.model.currency.CurrencyRequestBatch;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.voting.ControlCenterVS;
-import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.*;
 import org.votingsystem.throwable.ExceptionVS;
@@ -42,12 +34,9 @@ import org.votingsystem.util.*;
 import org.votingsystem.util.currency.MapUtils;
 import org.votingsystem.util.currency.Wallet;
 
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.File;
-import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.security.MessageDigest;
-import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -286,30 +275,11 @@ public class SignatureService extends Service<ResponseVS> {
 
         //we know this is done in a background thread
         private ResponseVS processNewRepresentative(OperationVS operationVS) throws Exception {
-            byte[] imageFileBytes = FileUtils.getBytesFromFile(operationVS.getFile());
-            log.info(" - imageFileBytes.length: " + imageFileBytes.length);
-            if(imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
-                log.info(" - MAX_FILE_SIZE exceeded ");
-                return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("fileSizeExceeded",
-                        ContextVS.IMAGE_MAX_FILE_SIZE_KB));
-            } else {
-                MessageDigest messageDigest = MessageDigest.getInstance(ContextVS.VOTING_DATA_DIGEST);
-                byte[] resultDigest =  messageDigest.digest(imageFileBytes);
-                String base64ResultDigest = Base64.getEncoder().encodeToString(resultDigest);
-                operationVS.getDocumentToSignMap().put("base64ImageHash", base64ResultDigest);
-                //String base64RepresentativeEncodedImage = Base64.getEncoder().encodeToString(imageFileBytes);
-                //operation.getContentFirma().put("base64RepresentativeEncodedImage", base64RepresentativeEncodedImage);
-                SMIMEMessage representativeRequestSMIME = SessionService.getSMIME(null, operationVS.getReceiverName(),
-                        JSON.getMapper().writeValueAsString(operationVS.getDocumentToSignMap()),
-                        password, operationVS.getSignedMessageSubject());
-                updateMessage(operationVS.getSignedMessageSubject());
-                Map<String, Object> fileMap = new HashMap<String, Object>();
-                String representativeDataFileName =
-                        ContextVS.REPRESENTATIVE_DATA_FILE_NAME + ":" + MediaTypeVS.JSON_SIGNED;
-                fileMap.put(representativeDataFileName, representativeRequestSMIME.getBytes());
-                fileMap.put(ContextVS.IMAGE_FILE_NAME, operationVS.getFile());
-                return HttpHelper.getInstance().sendObjectMap(fileMap, operationVS.getServiceURL());
-            }
+            SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(),
+                    operationVS.getJsonStr(),  password, operationVS.getSignedMessageSubject());
+            updateMessage(operationVS.getSignedMessageSubject());
+            return HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                    operationVS.getServiceURL());
         }
 
         private ResponseVS sendCurrencyRequest(OperationVS operationVS) throws Exception {

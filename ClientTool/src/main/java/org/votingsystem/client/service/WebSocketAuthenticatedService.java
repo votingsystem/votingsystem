@@ -8,7 +8,6 @@ import javafx.concurrent.Task;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.CertNotFoundDialog;
 import org.votingsystem.client.dialog.PasswordDialog;

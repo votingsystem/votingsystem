@@ -47,7 +47,7 @@
                 </core-menu>
             </core-header-panel>
             <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center;" tool>{{appTitle}}</div>
-            <div id="contentDiv" style="display: block;" vertical start-justified layout></div>
+            <div id="contentDiv" layout vertical start-justified></div>
             <content></content>
         </vs-navbar>
         <div hidden?="{{!loading}}" style="width: 30px;margin: 100px auto 0px auto;">
