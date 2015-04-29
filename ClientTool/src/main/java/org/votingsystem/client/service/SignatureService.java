@@ -17,7 +17,10 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.dto.voting.*;
+import org.votingsystem.dto.voting.AccessRequestDto;
+import org.votingsystem.dto.voting.AnonymousDelegationDto;
+import org.votingsystem.dto.voting.VoteVSCancelerDto;
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
@@ -36,7 +39,6 @@ import org.votingsystem.util.currency.Wallet;
 
 import java.io.File;
 import java.net.InetAddress;
-import java.security.MessageDigest;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -432,8 +434,8 @@ public class SignatureService extends Service<ResponseVS> {
 
         //we know this is done in a background thread
         private ResponseVS<ActorVS> publishSMIME(OperationVS operationVS) throws Exception {
-            log.info("publishPoll");
-            ResponseVS responseVS = sendSMIME(operationVS, "eventURL");
+            log.info("publishSMIME");
+            ResponseVS responseVS = sendSMIME(operationVS.getJsonStr(), operationVS, "eventURL");
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 String eventURL = ((List<String>)responseVS.getData()).iterator().next() +"?menu=admin";
                 operationVS.setDocumentURL(eventURL);

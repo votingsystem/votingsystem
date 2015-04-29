@@ -21,7 +21,9 @@ import org.votingsystem.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -83,10 +85,6 @@ public class PublishRepresentativeDialog extends DialogVS {
 
     private void submitForm(){
         try {
-            if(StringUtils.isHTMLEmpty(editor.getHtmlText().trim())) {
-                showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterDataLbl"));
-                return;
-            }
             if(selectedImage == null) {
                 showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterImageLbl"));
                 return;

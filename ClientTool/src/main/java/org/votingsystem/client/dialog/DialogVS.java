@@ -37,7 +37,6 @@ public class DialogVS {
         fxmlLoader.setController(this);
         stage.centerOnScreen();
 
-
         decoratedPane = new DecoratedPane(null, null, fxmlLoader.load(), stage);
         decoratedPane.setAlignment(Pos.CENTER_RIGHT);
 

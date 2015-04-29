@@ -112,12 +112,12 @@ public class DevelopmentResource {
     @Path("/test") @GET
     public Response test(@Context ServletContext context, @Context HttpServletRequest req,
                             @Context HttpServletResponse resp) throws Exception {
-        Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.state =:state")
+        /*Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.state =:state")
                 .setParameter("state", RepresentativeDocument.State.OK);
         List<RepresentativeDocument> resultList = query.getResultList();
         for(RepresentativeDocument item : resultList) {
             item.setState(RepresentativeDocument.State.CANCELED).setDateCanceled(new Date());
-        }
+        }*/
         return Response.ok().entity("OK").build();
     }
 }

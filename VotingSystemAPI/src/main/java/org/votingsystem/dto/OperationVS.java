@@ -155,8 +155,10 @@ public class OperationVS {
     }
 
     public <T> T getDocumentToSign(Class<T> type) throws Exception {
-        String documentToSign = JSON.getMapper().writeValueAsString(documentToSignMap);
-        return JSON.getMapper().readValue(documentToSign, type);
+        if(documentToSignMap != null) {
+            String documentToSign = JSON.getMapper().writeValueAsString(documentToSignMap);
+            return JSON.getMapper().readValue(documentToSign, type);
+        } else return JSON.getMapper().readValue(jsonStr, type);
     }
 
     public void setDocumentToSignMap(Map documentToSignMap) {

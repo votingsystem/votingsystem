@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import com.google.common.eventbus.Subscribe;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -18,14 +19,23 @@ import javafx.stage.Window;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.voting.FieldEventVS;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.TypeVS;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +44,7 @@ import static org.votingsystem.client.Browser.showMessage;
 /**
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class PublishElectionDialog implements AddVoteOptionDialog.Listener {
+public class PublishElectionDialog  extends DialogVS implements AddVoteOptionDialog.Listener {
 
     private static Logger log = Logger.getLogger(PublishElectionDialog.class.getSimpleName());
 
@@ -50,8 +60,28 @@ public class PublishElectionDialog implements AddVoteOptionDialog.Listener {
     @FXML private HTMLEditor editor;
     @FXML private VBox optionsVBox;
 
-    public PublishElectionDialog(OperationVS operationVS) {
-        this.operationVS = operationVS;
+    static class OperationVSListener {
+        @Subscribe public void responseVSChange(ResponseVS responseVS) {
+            switch(responseVS.getType()) {
+                case CANCELED:
+                    if(responseVS.getData() instanceof OperationVS) {
+                        OperationVS operationVS = (OperationVS) responseVS.getData();
+                        if(operationVS.getType() == TypeVS.VOTING_PUBLISHING && stage != null) {
+                            show(operationVS, null);
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
+    static {
+        EventBusService.getInstance().register(new OperationVSListener());
+    }
+
+    public PublishElectionDialog(OperationVS operationVS) throws IOException {
+        super("/fxml/PublishVoteEditor.fxml", ContextVS.getMessage("publishElectionLbl"));
+        setOperationVS(operationVS);
     }
 
     @FXML void initialize() {
@@ -67,6 +97,24 @@ public class PublishElectionDialog implements AddVoteOptionDialog.Listener {
         });
         publishButton.setVisible(true);
         editor.setHtmlText("<html><body></body></html>");
+        //publishButton.setVisible(false);
+    }
+
+    private void setOperationVS(OperationVS operationVS) {
+        this.operationVS = operationVS;
+        if(operationVS.getJsonStr() != null) {
+            try {
+                EventVSDto eventVSDto = operationVS.getDocumentToSign(EventVSDto.class);
+                caption.setText(eventVSDto.getSubject());
+                datePicker.setValue(eventVSDto.getDateBegin().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                editor.setHtmlText(new String(Base64.getDecoder().decode(eventVSDto.getContent()), StandardCharsets.UTF_8));
+                for(FieldEventVS fieldEventVS : eventVSDto.getFieldsEventVS()) {
+                    addOption(fieldEventVS.getContent());
+                }
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
     }
 
     private void submitForm(){
@@ -79,25 +127,30 @@ public class PublishElectionDialog implements AddVoteOptionDialog.Listener {
                 showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterDateLbl"));
                 return;
             }
-            if(StringUtils.isHTMLEmpty(editor.getHtmlText().trim())) {
-                showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterDataLbl"));
+            if(optionSet.size() < 2) {
+                showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("missingOptionsErrorMsg"));
+                return;
             }
             LocalDate isoDate = datePicker.getValue();
             Instant instant = isoDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
             Date dateBegin = Date.from(instant);
-            Map mapToSign = new HashMap<>();
-            mapToSign.put("subject", caption.getText().trim());
-            //this is to allow parsing json html fields with javascript
-            mapToSign.put("content",  Base64.getEncoder().encodeToString(editor.getHtmlText().getBytes()));
-            mapToSign.put("dateBegin", dateBegin);
-            List<Map> optionList = new ArrayList<>();
-            for(String option : optionSet) {
-                Map optionMap = new HashMap<>();
-                optionMap.put("content", option);
-                optionList.add(optionMap);
+            if(dateBegin.before(new Date())) {
+                showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("dateBeforeCurrentErrorMsg"));
+                return;
             }
-            mapToSign.put("fieldsEventVS", optionList);
-            operationVS.setDocumentToSignMap(mapToSign);
+            EventVSDto eventVSDto = new EventVSDto();
+            eventVSDto.setSubject(caption.getText().trim());
+            //this is to allow parsing json html fields with javascript
+            eventVSDto.setContent(Base64.getEncoder().encodeToString(editor.getHtmlText().getBytes()));
+            eventVSDto.setDateBegin(dateBegin);
+            Set<FieldEventVS> fieldEventVSet = new HashSet<>();
+            for(String option : optionSet) {
+                FieldEventVS fieldEventVS = new FieldEventVS();
+                fieldEventVS.setContent(option);
+                fieldEventVSet.add(fieldEventVS);
+            }
+            eventVSDto.setFieldsEventVS(fieldEventVSet);
+            operationVS.setJsonStr(JSON.getMapper().writeValueAsString(eventVSDto));
             operationVS.setSignedMessageSubject(ContextVS.getMessage("publishElectionLbl"));
             operationVS.setServiceURL(ContextVS.getInstance().getAccessControl().getPublishElectionURL());
             operationVS.setCallerCallback(null);
@@ -113,19 +166,7 @@ public class PublishElectionDialog implements AddVoteOptionDialog.Listener {
             @Override public void run() {
                 try {
                     PublishElectionDialog dialog = new PublishElectionDialog(operationVS);
-                    if (stage == null) {
-                        stage = new Stage(StageStyle.DECORATED);
-                        stage.initOwner(owner);
-                        stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
-                    }
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/PublishVoteEditor.fxml"));
-                    fxmlLoader.setController(dialog);
-                    stage.setScene(new Scene(fxmlLoader.load()));
-                    stage.getScene().setFill(null);
-                    Utils.addMouseDragSupport(stage);
-                    stage.centerOnScreen();
-                    stage.toFront();
-                    stage.show();
+                    dialog.show();
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }

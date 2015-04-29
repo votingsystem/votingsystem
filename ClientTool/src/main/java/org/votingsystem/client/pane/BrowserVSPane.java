@@ -19,8 +19,11 @@ import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.service.SignatureService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.TypeVS;
 
 import java.util.logging.Logger;
 
@@ -90,7 +93,10 @@ public class BrowserVSPane extends StackPane {
         password1Field = new PasswordField();
         password2Field = new PasswordField();
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setOnAction(event -> setPasswordDialogVisible(false, null));
+        cancelButton.setOnAction(event -> {
+            cancel();
+            setPasswordDialogVisible(false, null);
+        });
         cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(event -> checkPasswords());
@@ -128,6 +134,13 @@ public class BrowserVSPane extends StackPane {
         if(CryptoTokenVS.MOBILE != SessionService.getCryptoTokenType()) {
             PlatformImpl.runAndWait(() -> setPasswordDialogVisible(true, passwordDialogMessage));
         } else signatureService.processOperationVS("", operationVS);
+    }
+
+    private void cancel() {
+        ResponseVS responseVS = new ResponseVS();
+        responseVS.setType(TypeVS.CANCELED);
+        responseVS.setData(operationVS);
+        EventBusService.getInstance().post(responseVS);
     }
 
     public void setPasswordDialogVisible(boolean isVisible, String message) {

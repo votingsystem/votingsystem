@@ -1,10 +1,5 @@
 package org.votingsystem.util;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.script.ScriptEngine;
@@ -72,17 +67,6 @@ public class StringUtils {
             tmp.append((char) currInt);
         }
         return tmp.toString();
-    }
-    
-    public static boolean isHTMLEmpty(String textToCheck) {
-        String emptyContent = "<p><br></p>";
-        Document doc = Jsoup.parse(textToCheck);
-        Elements elements = doc.select("body").first().children();
-        if(elements.size() == 0) return true;
-        for (Element el : elements) {
-            if("".equals(el.toString()) || emptyContent.equals(el.toString())) return true;
-        }
-        return false;
     }
 
     public static Clob getClobFromString (String string) {
