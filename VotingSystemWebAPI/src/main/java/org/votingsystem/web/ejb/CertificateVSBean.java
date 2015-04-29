@@ -39,7 +39,7 @@ public class CertificateVSBean {
     public MessageDto addCertificateAuthority(MessageSMIME messageSMIME) throws Exception {
         CertificateVSRequest request = messageSMIME.getSignedContent(CertificateVSRequest.class);
         request.validateNewCARequest();
-        if(!signatureBean.isUserAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
+        if(!signatureBean.isAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
                 "userWithoutPrivilegesErrorMsg - operation: " + TypeVS.CERT_CA_NEW.toString() + " - user: " +
                 request.signer.getId());
         Collection<X509Certificate> certX509CertCollection = CertUtils.fromPEMToX509CertCollection(
@@ -107,7 +107,7 @@ public class CertificateVSBean {
     public CertificateVS editCert(MessageSMIME messageSMIME) throws Exception {
         CertificateVSRequest request = messageSMIME.getSignedContent(CertificateVSRequest.class);
         request.validatEditCertRequest();
-        if(!signatureBean.isUserAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
+        if(!signatureBean.isAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
                 "userWithoutPrivilegesErrorMsg - operation: " + TypeVS.CERT_EDIT.toString() + " - user: " +
                         request.signer.getId());
         Query query = dao.getEM().createNamedQuery("findCertBySerialNumber").setParameter("serialNumber", request.serialNumber);

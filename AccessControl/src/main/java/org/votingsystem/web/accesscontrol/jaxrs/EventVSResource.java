@@ -5,11 +5,11 @@ import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.ejb.DAOBean;
-
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -26,6 +26,7 @@ public class EventVSResource {
     @Inject EventVSBean eventVSBean;
     @Inject DAOBean dao;
 
+    @Transactional
     @Path("/id/{id}") @GET
     public Response index(@PathParam("id") long id, @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
@@ -42,6 +43,7 @@ public class EventVSResource {
         return Response.ok().entity(response.getContent()).type(MediaTypeVS.JSON).build();
     }
 
+    @Transactional
     @Path("/id/{id}/checkDates") @GET
     public Response checkDates(@PathParam("id") long id) throws Exception {
         EventVS eventVS = dao.find(EventVS.class, id);
@@ -50,4 +52,5 @@ public class EventVSResource {
         eventVSBean.checkEventVSDates(eventVS);
         return Response.ok().build();
     }
+
 }

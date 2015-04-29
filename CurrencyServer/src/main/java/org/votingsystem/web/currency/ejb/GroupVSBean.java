@@ -42,7 +42,7 @@ public class GroupVSBean {
     public GroupVS cancelGroup(GroupVS groupVS, MessageSMIME messageSMIME) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
         log.info("signer:" + signer.getNif());
-        if(!groupVS.getRepresentative().getNif().equals(signer.getNif()) && !signatureBean.isUserAdmin(signer.getNif())) {
+        if(!groupVS.getRepresentative().getNif().equals(signer.getNif()) && !signatureBean.isAdmin(signer.getNif())) {
             throw new ExceptionVS("operation: " +  TypeVS.CURRENCY_GROUP_CANCEL.toString() +
                     " - userWithoutGroupPrivilegesErrorMsg - user: " + signer.getNif() + " - group: " + groupVS.getName());
         }
@@ -56,7 +56,7 @@ public class GroupVSBean {
         UserVS signer = messageSMIME.getUserVS();
         log.info("signer:" + signer.getNif());
         if(!groupVS.getRepresentative().getNif().equals(messageSMIME.getUserVS().getNif()) &&
-                !signatureBean.isUserAdmin(messageSMIME.getUserVS().getNif())) {
+                !signatureBean.isAdmin(messageSMIME.getUserVS().getNif())) {
             throw new ExceptionVS("operation: " +  TypeVS.CURRENCY_GROUP_EDIT.toString() +
                     " - userWithoutGroupPrivilegesErrorMsg - user: " + signer.getNif() + " - group: " + groupVS.getName());
         }

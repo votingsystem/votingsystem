@@ -104,7 +104,7 @@ public class SignatureBean {
         serverName = config.getServerName();
     }
 
-    public boolean isUserAdmin(String nif) {
+    public boolean isAdmin(String nif) {
         return admins.contains(nif);
     }
 

@@ -2,6 +2,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.dto.voting.EventVSStatsDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.EventVSElection;
@@ -45,8 +46,8 @@ public class EventVSElectionResource {
     @Inject EventVSElectionBean eventVSElectionBean;
     @Inject ConfigVS config;
 
-    @Path("/id/{id}") @GET
     @Transactional
+    @Path("/id/{id}") @GET
     public Response getById (@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
                            @Context HttpServletResponse resp) throws ValidationExceptionVS, IOException, ServletException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
@@ -60,8 +61,7 @@ public class EventVSElectionResource {
         eventVSBean.checkEventVSDates(eventVS);
         EventVSDto eventVSDto = new EventVSDto(eventVS, config.getServerName(), config.getContextURL());
         if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventVSDto))
-                    .type(MediaTypeVS.JSON).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventVSDto)).type(MediaTypeVS.JSON).build();
         } else {
             req.setAttribute("eventMap", JSON.getMapper().writeValueAsString(eventVSDto));
             context.getRequestDispatcher("/eventVSElection/eventVSElection.xhtml").forward(req, resp);
@@ -69,8 +69,8 @@ public class EventVSElectionResource {
         }
     }
 
-    @Path("/") @GET
     @Transactional
+    @Path("/") @GET
     public Response index (@QueryParam("eventVSState") String eventVSStateReq,
                          @DefaultValue("0") @QueryParam("offset") int offset,
                          @DefaultValue("50") @QueryParam("max") int max, @Context ServletContext context,
@@ -124,17 +124,17 @@ public class EventVSElectionResource {
         EventVSElection eventVS = dao.find(EventVSElection.class, id);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - EventVSElection not found - eventId: " + id).build();
-        Map statsMap = eventVSElectionBean.getStatsMap(eventVS);
+        EventVSStatsDto statsDto = eventVSElectionBean.getStats(eventVS);
         if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(statsMap))
-                    .type(MediaTypeVS.JSON).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(statsDto)).type(MediaTypeVS.JSON).build();
         } else {
-            req.setAttribute("statsDataMap", JSON.getMapper().writeValueAsString(statsMap));
+            req.setAttribute("statsDto", JSON.getMapper().writeValueAsString(statsDto));
             context.getRequestDispatcher("/eventVSElection/stats.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
 
+    @Transactional
     @Path("/id/{id}/publishRequest") @GET
     public Response publishRequest(@PathParam("id") long id, @Context ServletContext context,
                                    @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {

@@ -7,7 +7,7 @@
 <polymer-element name="eventvs-election-stats" attributes="title eventVSId">
     <template>
         <style></style>
-        <core-ajax id="ajax" auto url="{{url}}" handleAs="json" response="{{statsDataMap}}" method="get"
+        <core-ajax id="ajax" auto url="{{url}}" handleAs="json" response="{{statsDto}}" method="get"
                    contentType="application/json" on-core-response="{{ajaxResponse}}"></core-ajax>
         <div hidden?="{{chartVisible}}" id="messageToUser" vertical layout center center-justified
              style="padding: 10px;font-weight: bold;">
@@ -21,7 +21,7 @@
             title:null,
             chartVisible:false,
             publish: {
-                statsDataMap: {value: {}}
+                statsDto: {value: {}}
             },
             options: {
                 chart: {
@@ -59,12 +59,12 @@
             ready: function() {
                 this.options.chart.renderTo = this.$.graphContainer
             },
-            statsDataMapChanged: function() {
-                if(this.statsDataMap == null) return
-                console.log(this.tagName + " - subject: " + this.statsDataMap.subject);
+            statsDtoChanged: function() {
+                if(this.statsDto == null) return
+                console.log(this.tagName + " - subject: " + this.statsDto.subject);
                 var seriesData = []
                 var numTotalVotes = 0
-                Array.prototype.forEach.call(this.statsDataMap.fieldsEventVS, function(fieldEvent) {
+                Array.prototype.forEach.call(this.statsDto.fieldsEventVS, function(fieldEvent) {
                     seriesData.push([fieldEvent.content, fieldEvent.numVotesVS])
                     numTotalVotes += fieldEvent.numVotesVS
                 });

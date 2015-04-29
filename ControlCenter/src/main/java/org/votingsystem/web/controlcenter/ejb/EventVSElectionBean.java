@@ -81,7 +81,7 @@ public class EventVSElectionBean {
                 "ERROR - EventVSElection not found - accessControlEventVSId: " +request.getEventId());
         if(EventVS.State.ACTIVE != eventVS.getState()) throw new ValidationExceptionVS(
                 "ERROR - trying to cancel an EventVS tha isn't active");
-        if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isUserAdmin(signer.getNif())))
+        if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
         request.validateCancelation(eventVS.getAccessControlVS().getServerURL());
         String fromUser = config.getServerName();

@@ -13,6 +13,7 @@ import org.votingsystem.util.*;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.MessagesBean;
+import org.votingsystem.web.ejb.SignatureBean;
 
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
@@ -44,6 +45,7 @@ public class RepresentativeBean {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject MailBean mailBean;
+    @Inject SignatureBean signatureBean;
     @Inject RepresentativeDelegationBean representativeDelegationBean;
     @Inject MessagesBean messages;
 
@@ -90,6 +92,51 @@ public class RepresentativeBean {
         log.info ("saveRepresentativeData - user id: " + signer.getId());
         //return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg,  type:TypeVS.REPRESENTATIVE_DATA)
         return new ResponseVS<RepresentativeDocument>(ResponseVS.SC_OK, msg, repDocument);
+    }
+
+
+    public MessageSMIME processRevoke(MessageSMIME messageSMIME) throws Exception {
+        SMIMEMessage smimeMessage = messageSMIME.getSMIME();
+        UserVS signer = messageSMIME.getUserVS();
+        UserVS representative = null;
+        Query query = null;
+        RepresentativeRevokeDto request = messageSMIME.getSignedContent(RepresentativeRevokeDto.class);
+        request.validate();
+        if(!signatureBean.isAdmin(signer.getNif()) && !signer.getNif().equals(request.getRepresentativeNIF())) {
+            throw new ValidationExceptionVS("user without privileges");
+        }
+        if(signer.getNif().equals(request.getRepresentativeNIF())) representative = signer;
+        else {
+            query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getRepresentativeNIF());
+            representative = dao.getSingleResult(UserVS.class, query);
+        }
+        query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS and " +
+                "r.state =:state").setParameter("userVS", representative).setParameter("state", RepresentativeDocument.State.OK);
+        RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
+        if(representativeDocument == null) throw new ValidationExceptionVS(
+                messages.get("unsubscribeRepresentativeUserErrorMsg", representative.getNif()));
+        log.info("processRevoke - user: " + representative.getId());
+        query = dao.getEM().createQuery("select u from UserVS u where u.representative =:userVS")
+                .setParameter("userVS", representative);
+        List<UserVS> representedList = query.getResultList();
+        for(UserVS represented : representedList) {
+            query = dao.getEM().createQuery("select r from RepresentationDocument r where r.userVS =:represented " +
+                    "and r.representative =:representative and r.state =:state").setParameter("represented", represented)
+                    .setParameter("representative", representative).setParameter("state", RepresentationDocument.State.OK);
+            RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
+            representationDocument.setState(RepresentationDocument.State.CANCELED_BY_REPRESENTATIVE).setCancellationSMIME(
+                    messageSMIME).setDateCanceled(represented.getTimeStampToken().getTimeStampInfo().getGenTime());
+            dao.merge(representationDocument);
+            dao.merge(represented.setRepresentative(null));
+        }
+        dao.merge(representative.setType(UserVS.Type.USER));
+        String toUser = signer.getNif();
+        String subject = messages.get("unsubscribeRepresentativeValidationSubject");
+        SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(toUser, smimeMessage, subject);
+        dao.merge(messageSMIME.setSMIME(smimeMessageResp));
+        dao.merge(representativeDocument.setState(RepresentativeDocument.State.CANCELED)
+                .setCancellationSMIME(messageSMIME).setDateCanceled(new Date()));
+        return messageSMIME;
     }
 
     public RepresentationStateDto checkRepresentationState(String nifToCheck) throws ExceptionVS {

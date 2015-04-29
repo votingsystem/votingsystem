@@ -46,7 +46,7 @@ public class BankVSBean {
         BankVSDto request = messageSMIMEReq.getSignedContent(BankVSDto.class);
         request.validatePublishRequest();
         Iban IBAN = Iban.valueOf(request.getIBAN());
-        if(!signatureBean.isUserAdmin(signer.getNif())) {
+        if(!signatureBean.isAdmin(signer.getNif())) {
             throw new ValidationExceptionVS("operation: " + request.getOperation() +
                     " - userWithoutPrivilegesErrorMsg - nif: " + signer.getNif());
         }

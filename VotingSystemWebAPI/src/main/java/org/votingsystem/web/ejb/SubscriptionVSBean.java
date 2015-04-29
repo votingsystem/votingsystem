@@ -129,7 +129,7 @@ public class SubscriptionVSBean {
         if(groupVS == null || !request.getGroupvsName().equals(groupVS.getName())) {
             throw new ExceptionVS("group with name: " + request.getGroupvsName() + " and id: " + request.getId() + " not found");
         }
-        if(!groupVS.getRepresentative().getNif().equals(request.getUserVSNIF()) && !signatureBean.isUserAdmin(signer.getNif())) {
+        if(!groupVS.getRepresentative().getNif().equals(request.getUserVSNIF()) && !signatureBean.isAdmin(signer.getNif())) {
             throw new ExceptionVS("'userWithoutGroupPrivilegesErrorMsg - groupVS:" + request.getGroupvsName() + " - nif:" +
                     signer.getNif());
         }
@@ -160,7 +160,7 @@ public class SubscriptionVSBean {
         if(groupVS == null || !request.getGroupvsName().equals(groupVS.getName())) {
             throw new ValidationExceptionVS("Group with id: " + request.getId() + " and name: " + request.getGroupvsName() + " not found");
         }
-        if(!groupVS.getRepresentative().getNif().equals(signer.getNif()) && !signatureBean.isUserAdmin(signer.getNif())) {
+        if(!groupVS.getRepresentative().getNif().equals(signer.getNif()) && !signatureBean.isAdmin(signer.getNif())) {
             throw new ValidationExceptionVS("userWithoutGroupPrivilegesErrorMsg - operation: " +
                     TypeVS.CURRENCY_GROUP_USER_ACTIVATE.toString() + " - nif: " + signer.getNif() + " - group: " +
                     request.getGroupvsName());

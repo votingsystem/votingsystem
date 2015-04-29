@@ -14,17 +14,32 @@ import static java.text.MessageFormat.format;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RepresentativeRevokeDto {
 
-    private TypeVS operation;
+    private TypeVS operation = TypeVS.REPRESENTATIVE_REVOKE;
+    private String representativeNIF;
 
     public RepresentativeRevokeDto() {}
 
-    public void validate(UserVS userVS) throws ExceptionVS {
+    public void validate() throws ExceptionVS {
         if(TypeVS.REPRESENTATIVE_REVOKE != operation) throw new ValidationExceptionVS(
-                format("ERROR - operation missmatch - expected: {0} - found: {1}",
-                        TypeVS.REPRESENTATIVE_REVOKE, operation));
-        if(UserVS.Type.REPRESENTATIVE != userVS.getType()) {
-            throw new ExceptionVS("ERROR - unsubscribeRepresentativeUserErrorMsg - user nif: " + userVS.getNif());
-        }
+                "ERROR - operation missmatch - expected: 'TypeVS.REPRESENTATIVE_REVOKE' - found:" + operation);
+        if(representativeNIF == null) throw new ValidationExceptionVS("missing representative NIF");
+    }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
+    }
+
+
+    public String getRepresentativeNIF() {
+        return representativeNIF;
+    }
+
+    public void setRepresentativeNIF(String representativeNIF) {
+        this.representativeNIF = representativeNIF;
     }
 
 }

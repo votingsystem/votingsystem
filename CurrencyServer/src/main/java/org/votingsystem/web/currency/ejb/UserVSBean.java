@@ -44,7 +44,7 @@ public class UserVSBean {
     
     public UserVS saveUser(MessageSMIME messageSMIMEReq) throws Exception {
         UserVS signer = messageSMIMEReq.getUserVS();
-        if(!signatureBean.isUserAdmin(signer.getNif())) throw new ExceptionVS(messages.get("userWithoutPrivilegesErrorMsg",
+        if(!signatureBean.isAdmin(signer.getNif())) throw new ExceptionVS(messages.get("userWithoutPrivilegesErrorMsg",
                 signer.getNif(), TypeVS.CERT_CA_NEW.toString()));
         ObjectNode dataJSON =(ObjectNode)  JSON.getMapper().readTree(messageSMIMEReq.getSMIME().getSignedContent());
         if (dataJSON.get("info") == null || dataJSON.get("certChainPEM") == null || dataJSON.get("operation") == null ||

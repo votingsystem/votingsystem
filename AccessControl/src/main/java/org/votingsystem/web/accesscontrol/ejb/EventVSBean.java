@@ -68,7 +68,7 @@ public class EventVSBean {
         if(eventVS.getState() != EventVS.State.ACTIVE) throw new ValidationExceptionVS(
                 "ERROR - EventVS not ACTIVE - eventId: " + request.getId());
         request.validateCancelation(config.getContextURL());
-        if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isUserAdmin(signer.getNif())))
+        if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
         SMIMEMessage smimeMessageResp = null;
         String fromUser = config.getServerName();

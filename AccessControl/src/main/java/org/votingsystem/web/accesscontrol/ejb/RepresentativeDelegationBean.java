@@ -175,41 +175,6 @@ public class RepresentativeDelegationBean {
         }
     }
 
-    public MessageSMIME processRevoke(MessageSMIME messageSMIME) throws Exception {
-        SMIMEMessage smimeMessage = messageSMIME.getSMIME();
-        UserVS userVS = messageSMIME.getUserVS();
-        Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS and " +
-                "r.state =:state").setParameter("userVS", userVS).setParameter("state", RepresentativeDocument.State.OK);
-        RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
-        if(representativeDocument == null) throw new ValidationExceptionVS( 
-                messages.get("unsubscribeRepresentativeUserErrorMsg", userVS.getNif()));
-        log.info("processRevoke - user: " + userVS.getId());
-        RepresentativeRevokeDto request = messageSMIME.getSignedContent(RepresentativeRevokeDto.class);
-        request.validate(userVS);
-        query = dao.getEM().createQuery("select u from UserVS u where u.representative =:userVS")
-                .setParameter("userVS", userVS);
-        List<UserVS> representedUsers = query.getResultList();
-        for(UserVS representedUser : representedUsers) {
-            query = dao.getEM().createQuery("select r from RepresentationDocument r where r.userVS =:representedUser " +
-                    "and r.representative =:representative and r.state =:state").setParameter("representedUser", representedUser)
-                    .setParameter("representative", userVS).setParameter("state", RepresentationDocument.State.OK);
-            RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
-            representationDocument.setState(RepresentationDocument.State.CANCELED_BY_REPRESENTATIVE).setCancellationSMIME(
-                    messageSMIME).setDateCanceled(userVS.getTimeStampToken().getTimeStampInfo().getGenTime());
-            dao.merge(representationDocument);
-            dao.merge(representedUser.setRepresentative(null));
-        }
-        dao.merge(userVS.setType(UserVS.Type.USER));
-        String toUser = userVS.getNif();
-        String subject = messages.get("unsubscribeRepresentativeValidationSubject");
-        SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(toUser, smimeMessage, subject);
-        messageSMIME.setSMIME(smimeMessageResp);
-        dao.merge(messageSMIME);
-        dao.merge(representativeDocument.setCancellationSMIME(messageSMIME).setDateCanceled(new Date()));
-        return messageSMIME;
-    }
-
-
     public AnonymousDelegation getAnonymousDelegation(UserVS userVS) {
         Query query = dao.getEM().createQuery("select a from AnonymousDelegation a where a.userVS =:userVS and " +
                 "a.status =:status").setParameter("userVS", userVS).setParameter("status", AnonymousDelegation.Status.OK);

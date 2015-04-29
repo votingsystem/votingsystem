@@ -46,7 +46,7 @@ public class CSRBean {
     public DeviceVS signCertUserVS(MessageSMIME messageSMIME) throws Exception {
         UserVS userVS = messageSMIME.getUserVS();
         CertValidationDto certValidationDto = messageSMIME.getSignedContent(CertValidationDto.class);
-        if(!signatureBean.isUserAdmin(userVS.getNif()) && !userVS.getNif().equals(certValidationDto.getNif()))
+        if(!signatureBean.isAdmin(userVS.getNif()) && !userVS.getNif().equals(certValidationDto.getNif()))
             throw new ExceptionVS("operation: signCertUserVS - userWithoutPrivilegesERROR - userVS nif: " + userVS.getNif());
         String validatedNif = NifUtils.validate(certValidationDto.getNif());
         Query query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId and d.userVS.nif =:nif " +
