@@ -1,10 +1,9 @@
 package org.votingsystem.web.accesscontrol.filter;
 
 import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
-
-import javax.inject.Inject;
+import javax.ejb.EJB;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.Cookie;
@@ -19,8 +18,8 @@ public class FilterVS implements Filter {
 
     private static final Logger log = Logger.getLogger(FilterVS.class.getSimpleName());
 
+    @EJB ConfigVS config;
     private ServletContext servletContext;
-    @Inject ConfigVS config;
     private String serverName;
     private String contextURL;
     private String bundleBaseName;

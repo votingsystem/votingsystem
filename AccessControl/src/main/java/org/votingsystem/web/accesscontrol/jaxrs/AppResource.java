@@ -1,6 +1,6 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;

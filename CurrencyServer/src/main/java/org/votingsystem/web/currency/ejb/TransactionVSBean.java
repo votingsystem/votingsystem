@@ -16,8 +16,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.currency.BalanceUtils;
-import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.currency.cdi.ConfigVSImpl;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.MessagesVS;
@@ -78,7 +77,7 @@ public class TransactionVSBean {
         request.validate();
         request.setTransactionVSSMIME(messageSMIME);
         for(String IBAN : request.getToUserIBAN()) {
-            ((ConfigVSImpl)config).validateIBAN(IBAN);
+            config.validateIBAN(IBAN);
         }
         String transactionTag =  request.getTags().iterator().next();
         if(request.isTimeLimited() && TagVS.WILDTAG.equals(transactionTag.toUpperCase()))

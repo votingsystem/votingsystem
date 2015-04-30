@@ -7,7 +7,7 @@ import org.votingsystem.model.currency.CurrencyRequestBatch;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.MultipartRequestVS;

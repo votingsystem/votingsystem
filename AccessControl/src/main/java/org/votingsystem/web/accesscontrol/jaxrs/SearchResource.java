@@ -10,7 +10,7 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;

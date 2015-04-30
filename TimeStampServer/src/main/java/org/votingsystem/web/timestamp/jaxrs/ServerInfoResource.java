@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.services.TimeStampService;
 import org.votingsystem.util.JSON;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;

@@ -3,7 +3,7 @@ package org.votingsystem.web.controlcenter.jaxrs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;

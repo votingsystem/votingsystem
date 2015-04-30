@@ -4,10 +4,11 @@ import org.iban4j.*;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.currency.ejb.AuditBean;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -262,6 +263,11 @@ public class ConfigVSImpl implements ConfigVS {
 
     public String getBranchCode() {
         return branchCode;
+    }
+
+    @Override
+    public ControlCenterVS getControlCenter() {
+        return null;
     }
 
     public void setBranchCode(String branchCode) {

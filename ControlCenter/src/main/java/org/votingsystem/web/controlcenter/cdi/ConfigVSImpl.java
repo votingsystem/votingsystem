@@ -2,10 +2,11 @@ package org.votingsystem.web.controlcenter.cdi;
 
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EnvironmentVS;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
@@ -201,6 +202,26 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Override
     public UserVS getSystemUser() {
+        return null;
+    }
+
+    @Override
+    public String validateIBAN(String IBAN) throws Exception {
+        return null;
+    }
+
+    @Override
+    public String getBankCode() {
+        return null;
+    }
+
+    @Override
+    public String getBranchCode() {
+        return null;
+    }
+
+    @Override
+    public ControlCenterVS getControlCenter() {
         return null;
     }
 

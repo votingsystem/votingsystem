@@ -5,7 +5,7 @@ import org.votingsystem.dto.currency.UserVSCurrencyAccountsDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.util.JSON;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;

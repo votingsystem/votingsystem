@@ -7,7 +7,7 @@ import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.controlcenter.ejb.EventVSElectionBean;
 import org.votingsystem.web.ejb.DAOBean;
 

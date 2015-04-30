@@ -6,7 +6,7 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.voting.UserRequestCsrVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.web.accesscontrol.ejb.CSRBean;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.MessagesVS;

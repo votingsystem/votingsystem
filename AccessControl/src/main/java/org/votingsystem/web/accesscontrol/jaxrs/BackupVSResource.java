@@ -6,7 +6,7 @@ import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.MessagesVS;
 import org.votingsystem.web.util.RequestUtils;

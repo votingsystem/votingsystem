@@ -3,8 +3,8 @@ package org.votingsystem.web.servlet;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;

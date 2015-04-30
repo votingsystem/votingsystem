@@ -8,7 +8,7 @@ import org.votingsystem.services.impl.TimeStampServiceImpl;
 import org.votingsystem.signature.util.TimeStampResponseGenerator;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;

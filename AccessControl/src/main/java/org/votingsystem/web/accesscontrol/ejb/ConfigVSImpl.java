@@ -1,4 +1,4 @@
-package org.votingsystem.web.accesscontrol.cdi;
+package org.votingsystem.web.accesscontrol.ejb;
 
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.*;
@@ -8,8 +8,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
-import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
@@ -19,11 +18,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.Schedule;
+import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
 import javax.persistence.Query;
 import java.io.File;
 import java.net.URL;
@@ -38,7 +36,6 @@ import java.util.logging.Logger;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Singleton
-@Named(value="config")
 @Startup
 public class ConfigVSImpl implements ConfigVS {
 
@@ -228,6 +225,21 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Override
     public UserVS getSystemUser() {
+        return null;
+    }
+
+    @Override
+    public String validateIBAN(String IBAN) throws Exception {
+        return null;
+    }
+
+    @Override
+    public String getBankCode() {
+        return null;
+    }
+
+    @Override
+    public String getBranchCode() {
         return null;
     }
 

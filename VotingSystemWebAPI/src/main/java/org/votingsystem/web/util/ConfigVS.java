@@ -1,7 +1,8 @@
-package org.votingsystem.web.cdi;
+package org.votingsystem.web.util;
 
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EnvironmentVS;
 
@@ -12,7 +13,7 @@ import java.util.Properties;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public interface ConfigVS {
+public interface ConfigVS  {
 
     public String getTimeStampServerURL();
 
@@ -49,5 +50,13 @@ public interface ConfigVS {
     public UserVS createIBAN(UserVS userVS) throws ValidationExceptionVS;
 
     public UserVS getSystemUser();
+
+    public String validateIBAN(String IBAN) throws Exception;
+
+    public String getBankCode();
+
+    public String getBranchCode();
+
+    public ControlCenterVS getControlCenter();
 
 }

@@ -6,7 +6,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.MultipartRequestVS;
 

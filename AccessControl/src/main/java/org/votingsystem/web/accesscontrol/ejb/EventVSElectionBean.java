@@ -9,8 +9,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
-import org.votingsystem.web.accesscontrol.cdi.ConfigVSImpl;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
@@ -49,7 +48,7 @@ public class EventVSElectionBean {
         UserVS userSigner = messageSMIME.getUserVS();
         EventVSDto request  = messageSMIME.getSignedContent(EventVSDto.class);
         request.setDateFinish(DateUtils.resetDay(DateUtils.addDays(request.getDateBegin(), 1).getTime()).getTime());
-        ControlCenterVS controlCenterVS = ((ConfigVSImpl)config).getControlCenter();
+        ControlCenterVS controlCenterVS = config.getControlCenter();
         Query query = dao.getEM().createQuery("select a from ActorVS a where a.serverURL =:serverURL")
                 .setParameter("serverURL", config.getContextURL());
         AccessControlVS accessControlVS = dao.getSingleResult(AccessControlVS.class, query);

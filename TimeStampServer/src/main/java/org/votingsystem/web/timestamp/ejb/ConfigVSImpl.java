@@ -2,10 +2,12 @@ package org.votingsystem.web.timestamp.ejb;
 
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EnvironmentVS;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 
+import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Named;
 import java.io.File;
@@ -18,7 +20,7 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@javax.inject.Singleton
+@Singleton
 @Named(value="config")
 @Startup
 public class ConfigVSImpl implements ConfigVS {
@@ -121,6 +123,26 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Override
     public UserVS getSystemUser() {
+        return null;
+    }
+
+    @Override
+    public String validateIBAN(String IBAN) throws Exception {
+        return null;
+    }
+
+    @Override
+    public String getBankCode() {
+        return null;
+    }
+
+    @Override
+    public String getBranchCode() {
+        return null;
+    }
+
+    @Override
+    public ControlCenterVS getControlCenter() {
         return null;
     }
 

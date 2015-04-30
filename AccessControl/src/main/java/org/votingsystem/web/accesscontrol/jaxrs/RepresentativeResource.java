@@ -17,7 +17,7 @@ import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.EmailTemplateWrapper;
 import org.votingsystem.web.util.MessagesVS;

@@ -3,7 +3,7 @@ package org.votingsystem.web.currency.websocket;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.currency.ejb.WebSocketBean;
 import org.votingsystem.web.util.MessagesVS;
 
