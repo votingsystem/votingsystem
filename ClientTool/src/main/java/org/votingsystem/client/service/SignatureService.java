@@ -13,6 +13,7 @@ import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.UserVSCertExtensionDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
@@ -160,7 +161,7 @@ public class SignatureService extends Service<ResponseVS> {
             ResponseVS responseVS = HttpHelper.getInstance().getData(operationVS.getDocumentURL(), null);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(null,
-                        FileUtils.getFileFromBytes(responseVS.getMessageBytes()), null);
+                        FileUtils.getFileFromBytes(responseVS.getMessageBytes()));
                 Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
                 return new ResponseVS(ResponseVS.SC_OK);
             }
@@ -183,8 +184,7 @@ public class SignatureService extends Service<ResponseVS> {
                 responseVS.setStatusCode(ResponseVS.SC_INITIALIZED);
                 operationVS.setMessage(responseVS.getMessage());
                 PlatformImpl.runLater(() -> {
-                    DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(operationVS.getMessage(),
-                            null, operationVS.getDocument());
+                    DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(operationVS.getMessage(), null);
                     Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
                 });
             }
@@ -192,13 +192,12 @@ public class SignatureService extends Service<ResponseVS> {
         }
 
         private ResponseVS sendCSRRequest(OperationVS operationVS) throws Exception {
+            UserVSCertExtensionDto certExtensionDto = operationVS.getData(UserVSCertExtensionDto.class);
+            certExtensionDto.setDeviceId(SessionService.getInstance().getDeviceVS().getDeviceId());
+            certExtensionDto.setDeviceType(DeviceVS.Type.PC);
+            certExtensionDto.setDeviceName(InetAddress.getLocalHost().getHostName());
             CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
-                    ContextVS.KEY_SIZE, SIG_NAME, SIGN_MECHANISM, PROVIDER,
-                    (String)operationVS.getDocument().get("nif"), (String)operationVS.getDocument().get("email"),
-                    (String)operationVS.getDocument().get("phone"), SessionService.getInstance().getDeviceVS().getDeviceId(),
-                    (String)operationVS.getDocument().get("givenname"),
-                    (String)operationVS.getDocument().get("surname"),
-                    InetAddress.getLocalHost().getHostName(), DeviceVS.Type.PC);
+                    ContextVS.KEY_SIZE, SIG_NAME, SIGN_MECHANISM, PROVIDER, certExtensionDto);
             byte[] csrBytes = certificationRequest.getCsrPEM();
             ResponseVS responseVS = HttpHelper.getInstance().sendData(csrBytes, null,
                     ((AccessControlVS) operationVS.getTargetServer()).getUserCSRServiceURL());

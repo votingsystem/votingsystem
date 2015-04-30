@@ -6,7 +6,6 @@ var Operation = {
     CERT_EDIT:"CERT_EDIT",
     CONNECT:"CONNECT",
     DISCONNECT:"DISCONNECT",
-    FORMAT_DATE:"FORMAT_DATE",
     FILE_FROM_URL:"FILE_FROM_URL",
     KEYSTORE_SELECT:"KEYSTORE_SELECT",
     SIGNAL_VS:"SIGNAL_VS",
@@ -401,7 +400,7 @@ VotingSystemClient.call = function (messageJSON) {
 function sendSignalVS(signalData, callback) {
     var result
     var webAppMessage = new WebAppMessage(Operation.SIGNAL_VS)
-    webAppMessage.document = signalData
+    webAppMessage.document = JSON.stringify(signalData)
     webAppMessage.setCallback(callback)
     try {
         result = VotingSystemClient.call(webAppMessage);

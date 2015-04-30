@@ -35,7 +35,7 @@ public class BrowserVSMenuButton extends MenuButton {
         MenuItem openFileMenuItem = new MenuItem(ContextVS.getMessage("openFileButtonLbl"));
         openFileMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.FOLDER_OPEN));
         openFileMenuItem.setOnAction(actionEvent -> {
-            DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(null, null, null);
+            DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(null, null);
             Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
         });
         MenuItem signDocumentMenuItem = new MenuItem(ContextVS.getMessage("signDocumentButtonLbl"));

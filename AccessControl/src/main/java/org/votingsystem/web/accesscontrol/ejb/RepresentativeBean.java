@@ -152,6 +152,7 @@ public class RepresentativeBean {
             result.setState(RepresentationState.WITH_PUBLIC_REPRESENTATION);
             result.setBase64ContentDigest(representationDocument.getActivationSMIME().getBase64ContentDigest());
             result.setRepresentative(UserVSDto.BASIC(userVS.getRepresentative()));
+            return result;
         }
         if(UserVS.Type.REPRESENTATIVE == userVS.getType()) {
             result.setState(RepresentationState.REPRESENTATIVE);

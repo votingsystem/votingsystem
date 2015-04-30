@@ -75,22 +75,22 @@ public class SessionService {
     }
 
     private void loadRepresentationData() throws Exception {
-        RepresentationStateDto serverDto = null;
+        RepresentationStateDto stateDto = null;
         if(userVS != null) {
-            serverDto = HttpHelper.getInstance().getData(RepresentationStateDto.class,
-                    ContextVS.getInstance().getAccessControl().
-                    getRepresentationStateServiceURL(userVS.getNif()), MediaTypeVS.JSON);
+            stateDto = HttpHelper.getInstance().getData(RepresentationStateDto.class,
+                    ContextVS.getInstance().getAccessControl().getRepresentationStateServiceURL(userVS.getNif()),
+                    MediaTypeVS.JSON);
         }
         representativeStateFile = new File(ContextVS.APPDIR + File.separator + ContextVS.REPRESENTATIVE_STATE_FILE);
         if(representativeStateFile.createNewFile()) {
-            representativeStateDto = serverDto;
+            representativeStateDto = stateDto;
             flush();
         } else {
             representativeStateDto = JSON.getMapper().readValue(representativeStateFile, RepresentationStateDto.class);
-            if(serverDto != null) {
-                if(!serverDto.getBase64ContentDigest().equals(representativeStateDto.getBase64ContentDigest())) {
+            if(stateDto != null) {
+                if(!stateDto.getBase64ContentDigest().equals(representativeStateDto.getBase64ContentDigest())) {
                     log.info("Base64ContentDigest mismatch - updating local representativeState");
-                    representativeStateDto = serverDto;
+                    representativeStateDto = stateDto;
                     flush();
                 }
             }

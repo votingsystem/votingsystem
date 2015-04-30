@@ -68,8 +68,8 @@
                 else return tag
             },
             dateInfo:function(currency) {
-                var notBefore = getDateFormatted(currency.notBefore,"yyyy/MM/dd' 'HH:mm:ss", "dd MMM yyyy' 'HH:mm", null)
-                var notAfter = getDateFormatted(currency.notAfter,"yyyy/MM/dd' 'HH:mm:ss", "dd MMM yyyy' 'HH:mm", null)
+                var notBefore = new Date(currency.notBefore)
+                var notAfter = new Date(currency.notAfter)
                 return "${msg.dateRangeMsg}".format(notBefore, notAfter)
             },
             isTimeLimited:function(currency) {
@@ -120,7 +120,7 @@
             },
             showCurrency: function(e) {
                 var webAppMessage = new WebAppMessage(Operation.OPEN_CURRENCY)
-                webAppMessage.document = e.target.templateInstance.model.currency
+                webAppMessage.message = e.target.templateInstance.model.currency.object
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("showCurrency - message: " + appMessage);
                 }.bind(this))

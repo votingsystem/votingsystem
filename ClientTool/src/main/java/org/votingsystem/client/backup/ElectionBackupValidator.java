@@ -195,7 +195,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                         numRepresented++;
                         numRepresentations++;
                         byte[] fileBytes = FileUtils.getBytesFromFile(repDoc);
-                        SignedFile signedFile = new SignedFile(fileBytes, repDoc.getName(), null);
+                        SignedFile signedFile = new SignedFile(fileBytes, repDoc.getName());
                         if(repDoc.getAbsolutePath().contains("_delegation_with_vote")) {
                             List<File> result = FileUtils.findRecursively(
                                     accessRequestsDir, signedFile.getNifFromRepresented());

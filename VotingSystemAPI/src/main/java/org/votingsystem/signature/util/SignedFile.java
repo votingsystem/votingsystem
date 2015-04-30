@@ -24,15 +24,13 @@ public class SignedFile {
 
     private byte[] signedFileBytes = null;
     private String name = null;
-    private Map operationDocument = null;
     private SMIMEMessage smimeMessage = null;
     private boolean signatureVerified = false;
 
 
-    public SignedFile(byte[] signedFileBytes, String name, Map operationDocument) throws Exception {
+    public SignedFile(byte[] signedFileBytes, String name) throws Exception {
         smimeMessage = new SMIMEMessage(signedFileBytes);
         signatureVerified = smimeMessage.isValidSignature();
-        this.operationDocument = operationDocument;
         this.name = name;
     }
 
@@ -128,14 +126,6 @@ public class SignedFile {
         if(smimeMessage == null) return null;
         UserVS userVS = smimeMessage.getSigner();
         return userVS.getCertificate().getSerialNumber().longValue();
-    }
-
-    public Map getOperationDocument() {
-        return operationDocument;
-    }
-
-    public void setOperationDocument(Map operationDocument) {
-        this.operationDocument = operationDocument;
     }
 
 }

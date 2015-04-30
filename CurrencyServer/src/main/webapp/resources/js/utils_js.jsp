@@ -127,18 +127,6 @@
         document.querySelector("#_votingsystemMessageDialog").sendAndroidURIMessage(encodedData)
     }
 
-    function getDateFormatted(dateToFormat, dateFormat, stringFormat, callback) {
-        var result
-        var webAppMessage = new WebAppMessage(Operation.FORMAT_DATE)
-        webAppMessage.document = {dateStr: dateToFormat, dateFormat:dateFormat, stringFormat:stringFormat}
-        webAppMessage.setCallback(callback)
-        try {
-            result = VotingSystemClient.call(webAppMessage);
-        } catch(ex) { } finally {
-            return result || dateToFormat
-        }
-    }
-
     var weekdays = [${msg.weekdaysShort}];
     var months = [${msg.monthsShort}];
 

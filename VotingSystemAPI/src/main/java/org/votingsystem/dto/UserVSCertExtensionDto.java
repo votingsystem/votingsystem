@@ -1,5 +1,6 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.DeviceVS;
 
@@ -13,6 +14,9 @@ public class UserVSCertExtensionDto {
     private String deviceName;
     private String email;
     private String mobilePhone;
+    private String nif;
+    private String givenname;
+    private String surname;
     private DeviceVS.Type deviceType;
 
 
@@ -64,5 +68,34 @@ public class UserVSCertExtensionDto {
 
     public void setDeviceType(DeviceVS.Type deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public String getNif() {
+        return nif;
+    }
+
+    public void setNif(String nif) {
+        this.nif = nif;
+    }
+
+    public String getGivenname() {
+        return givenname;
+    }
+
+    public void setGivenname(String givenname) {
+        this.givenname = givenname;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    @JsonIgnore
+    public String getPrincipal() {
+        return "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenname + ", SURNAME=" + surname;
     }
 }

@@ -27,11 +27,10 @@ public class RepresentationStateDto {
     public RepresentationStateDto() {}
 
     public RepresentationStateDto(AnonymousDelegationDto delegation) throws Exception {
-        String serializedDelegation = new String(ObjectUtils.serializeObject(delegation), "UTF-8");
         setState(RepresentationState.WITH_ANONYMOUS_REPRESENTATION);
         setLastCheckedDate(new Date());
         setRepresentative(delegation.getRepresentative());
-        setAnonymousDelegationObject(serializedDelegation);
+        setAnonymousDelegationObject(new String(ObjectUtils.serializeObject(delegation), "UTF-8"));
         setDateFrom(delegation.getDateFrom());
         setDateTo(delegation.getDateTo());
         setBase64ContentDigest(delegation.getCancelVoteReceipt().getContentDigestStr());

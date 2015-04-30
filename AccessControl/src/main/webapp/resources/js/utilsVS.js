@@ -366,7 +366,7 @@ VotingSystemClient.setMessage = function (messageJSON) {
 function sendSignalVS(signalData, callback) {
     var result
     var webAppMessage = new WebAppMessage(Operation.SIGNAL_VS)
-    webAppMessage.document = signalData
+    webAppMessage.jsonStr = JSON.stringify(signalData)
     webAppMessage.setCallback(callback)
     try {
         result = VotingSystemClient.call(webAppMessage);

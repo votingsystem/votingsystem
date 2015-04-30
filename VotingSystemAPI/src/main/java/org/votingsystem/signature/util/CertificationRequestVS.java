@@ -89,18 +89,14 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getUserRequest (int keySize, String keyName,
-            String signatureMechanism, String provider, String nif, String email, String phone, String deviceId,
-            String givenName, String surName, String deviceName, DeviceVS.Type deviceType)
-            throws NoSuchAlgorithmException,
+    public static CertificationRequestVS getUserRequest (int keySize, String keyName, String signatureMechanism,
+            String provider, UserVSCertExtensionDto certExtensionDto) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
-        String principal = "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenName + ", SURNAME=" + surName;
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
-        UserVSCertExtensionDto dto = new UserVSCertExtensionDto(deviceId, deviceName, email, phone, deviceType);
         asn1EncodableVector.add(new DERTaggedObject(ContextVS.DEVICEVS_TAG,
-                new DERUTF8String(JSON.getMapper().writeValueAsString(dto))));
-        X500Principal subject = new X500Principal(principal);
+                new DERUTF8String(JSON.getMapper().writeValueAsString(certExtensionDto))));
+        X500Principal subject = new X500Principal(certExtensionDto.getPrincipal());
         PKCS10CertificationRequest csr = new PKCS10CertificationRequest(signatureMechanism, subject,
                 keyPair.getPublic(), new DERSet(asn1EncodableVector), keyPair.getPrivate(), provider);
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);

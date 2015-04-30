@@ -92,8 +92,8 @@
             var webAppMessage = new WebAppMessage(Operation.CERT_USER_NEW)
             webAppMessage.serviceURL = "${restURL}/csr/request"
             webAppMessage.signedMessageSubject = "${msg.certRequestLbl}"
-            webAppMessage.document = {nif:validateNIF(this.$.nif.value), givenname:this.$.givenname.value.toUpperCase(),
-                surname:this.$.surname.value.toUpperCase(), phone:this.$.phone.value, email:this.$.email.value}
+            webAppMessage.jsonStr = JSON.stringify({nif:validateNIF(this.$.nif.value), givenname:this.$.givenname.value.toUpperCase(),
+                surname:this.$.surname.value.toUpperCase(), mobilePhone:this.$.phone.value, email:this.$.email.value})
             webAppMessage.setCallback(function(appMessage) {
                 var appMessageJSON = JSON.parse(appMessage)
                 var message = appMessageJSON.message

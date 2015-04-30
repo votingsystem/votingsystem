@@ -37,7 +37,6 @@ public class OperationVS {
     private String email;
     private File file;
     private String signedMessageSubject;
-    private Map document;
     private String jsonStr;
     private String contentType;
     private EventVSDto eventVS;
@@ -237,16 +236,6 @@ public class OperationVS {
 
     public void setTargetServer(ActorVS targetServer) {
         this.targetServer = targetServer;
-    }
-
-    public Map getDocument() {
-        if(document != null && !document.containsKey("locale")) document.put("locale",
-                ContextVS.getInstance().getLocale().getLanguage());
-        return document;
-    }
-
-    public void setDocument(Map document) {
-        this.document = document;
     }
 
     public String getNif() {

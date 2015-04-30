@@ -11,7 +11,6 @@ public enum TypeVS {
 
     OK,
     EXCEPTION,
-    FORMAT_DATE,
     TEST,
     ERROR,
     CANCELED,

@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import org.votingsystem.client.dialog.MessageDialog;
+import org.votingsystem.client.dto.SignalVSDto;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.BrowserVSTabPane;
 import org.votingsystem.client.pane.BrowserVSToolbar;
@@ -149,10 +150,9 @@ public class Browser extends VBox implements BrowserVS {
         browserHelper.processOperationVS(password, operationVS);
     }
 
-    @Override public void processSignalVS(Map signalData) {//{title:, url:}
-        log.info("processSignalVS - caption: " + signalData.get("caption"));
-        if(signalData.containsKey("caption")) tabPaneVS.getSelectionModel().getSelectedItem().setText(
-                (String)signalData.get("caption"));
+    @Override public void processSignalVS(SignalVSDto signal) {//{title:, url:}
+        log.info("processSignalVS - caption: " + signal.getCaption());
+        tabPaneVS.getSelectionModel().getSelectedItem().setText(signal.getCaption());
     }
 
     public void toggleFullScreen() {

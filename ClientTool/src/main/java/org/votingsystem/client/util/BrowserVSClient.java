@@ -3,6 +3,7 @@ package org.votingsystem.client.util;
 import javafx.scene.web.WebView;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.*;
+import org.votingsystem.client.dto.SignalVSDto;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.client.service.InboxService;
@@ -65,13 +66,11 @@ public class BrowserVSClient {
                 case OPEN_SMIME:
                     String smimeMessageStr = new String(Base64.getDecoder().decode(
                             operationVS.getMessage().getBytes()), "UTF-8");
-                    DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(
-                            smimeMessageStr, null, operationVS.getDocument());
+                    DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(smimeMessageStr, null);
                     Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
                     break;
                 case OPEN_CURRENCY:
-                    CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject((
-                                    (String) operationVS.getDocument().get("object")).getBytes()),
+                    CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject((operationVS.getMessage()).getBytes()),
                             Browser.getInstance().getScene().getWindow());
                     break;
                 case OPEN_SMIME_FROM_URL:
@@ -139,19 +138,8 @@ public class BrowserVSClient {
             String jsonStr = StringUtils.decodeB64_TO_UTF8(msgFromBrowser);
             OperationVS operationVS = JSON.getMapper().readValue(jsonStr, OperationVS.class);
             switch (operationVS.getType()) {
-                case FORMAT_DATE:
-                    Date dateToFormat = DateUtils.getDateFromString((String) operationVS.getDocument().get("dateStr"),
-                            (String) operationVS.getDocument().get("dateFormat"));
-                    String stringFormat = null;
-                    if (operationVS.getDocument().get("stringFormat") != null) {
-                        stringFormat = (String) operationVS.getDocument().get("stringFormat");
-                    }
-                    if (stringFormat != null) result = DateUtils.getDateStr(dateToFormat,
-                            (String) operationVS.getDocument().get("stringFormat"));
-                    else result = DateUtils.getDayWeekDateStr(dateToFormat);
-                    break;
                 case SIGNAL_VS:
-                    Browser.getInstance().processSignalVS(operationVS.getDocument());
+                    Browser.getInstance().processSignalVS(operationVS.getData(SignalVSDto.class));
                     break;
                 case REPRESENTATIVE_STATE:
                     result = JSON.getMapper().writeValueAsString(SessionService.getInstance().getRepresentationState());

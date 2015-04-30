@@ -44,7 +44,7 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
     private List<String> fileList = new ArrayList<String>();
     private String caption;
 
-    public DocumentVSBrowserPane(final String signedDocumentStr, File fileParam, Map operationDocument) {
+    public DocumentVSBrowserPane(final String signedDocumentStr, File fileParam) {
         this.backup = fileParam;
         buttonsHBox = new HBox();
         saveButton = new Button(ContextVS.getMessage("saveLbl"));
@@ -75,7 +75,7 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
                     CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(backup)),
                             Browser.getInstance().getScene().getWindow());
                 } else {
-                    openFile(backup, operationDocument);
+                    openFile(backup);
                 }
             } catch (IOException ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -99,13 +99,13 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
         log.info("TODO - showSignedFile: " + signedFile);
     }
 
-    private void openFile (File file, Map operationDocument) {
+    private void openFile (File file) {
         try {
             int fileIndex = fileList.indexOf(file.getPath());
             log.info("openFile - file: " + file.getAbsolutePath() + " - fileIndex: " + fileIndex);
             fileList.add(file.getPath());
             String fileName = file.getName().endsWith("temp") ? "":file.getName();
-            SignedFile signedFile = new SignedFile(FileUtils.getBytesFromFile(file), fileName, operationDocument);
+            SignedFile signedFile = new SignedFile(FileUtils.getBytesFromFile(file), fileName);
             SMIMEPane SMIMEPane = new SMIMEPane(signedFile);
             getChildren().add(1, SMIMEPane);
             VBox.setVgrow(SMIMEPane, Priority.ALWAYS);
