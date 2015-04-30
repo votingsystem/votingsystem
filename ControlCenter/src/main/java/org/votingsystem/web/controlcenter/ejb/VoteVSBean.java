@@ -11,15 +11,17 @@ import org.votingsystem.model.voting.FieldEventVS;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.model.voting.VoteVSCanceler;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.DAOUtils;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -27,8 +29,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
-import java.io.ByteArrayInputStream;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,7 +48,7 @@ public class VoteVSBean {
     @PersistenceContext private EntityManager em;
     @Inject DAOBean dao;
     @Inject private SignatureBean signatureBean;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Transactional
     public VoteVS validateVote(SMIMEDto smimeDto) throws Exception {

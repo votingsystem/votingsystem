@@ -5,10 +5,10 @@ import org.votingsystem.dto.ConnectedUsersDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
+
 import javax.websocket.Session;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

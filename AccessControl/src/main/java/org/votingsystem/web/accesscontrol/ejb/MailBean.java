@@ -3,7 +3,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 import org.votingsystem.model.BackupRequestVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.ejb.MessagesBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -29,7 +29,7 @@ public class MailBean {
     @Resource(name = "java:jboss/mail/gmail")
     private Session session;
     @Inject private ConfigVS config;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Asynchronous
     public void send(String toUser, String subject, String msg) {

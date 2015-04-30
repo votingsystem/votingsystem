@@ -20,7 +20,7 @@ import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.cdi.ConfigVSImpl;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -47,7 +47,7 @@ public class TransactionVSBean {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject BalancesBean balancesBean;
     @Inject TransactionVSGroupVSBean transactionVSGroupVSBean;
     @Inject TransactionVSBankVSBean transactionVSBankVSBean;

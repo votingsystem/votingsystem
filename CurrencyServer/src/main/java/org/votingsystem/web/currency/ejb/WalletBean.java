@@ -6,7 +6,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -23,7 +23,7 @@ public class WalletBean {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
 
     public Map<CurrencyAccount, BigDecimal> getAccountMovementsForTransaction(String fromUserIBAN,

@@ -13,9 +13,9 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -33,7 +33,7 @@ public class UserVSBean {
     private static Logger log = Logger.getLogger(UserVSBean.class.getSimpleName());
 
     @Inject DAOBean dao;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject ConfigVS config;
     @Inject CurrencyAccountBean currencyAccountBean;
     @Inject UserVSBean userVSBean;

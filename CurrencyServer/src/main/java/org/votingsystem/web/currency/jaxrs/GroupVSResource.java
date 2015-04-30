@@ -20,9 +20,9 @@ import org.votingsystem.web.currency.ejb.CurrencyAccountBean;
 import org.votingsystem.web.currency.ejb.GroupVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -54,7 +54,7 @@ public class GroupVSResource {
     @Inject BalancesBean balancesBean;
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/")
     @GET @Produces(MediaType.APPLICATION_JSON) @Transactional

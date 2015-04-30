@@ -5,9 +5,9 @@ import org.votingsystem.model.TimeStampVS;
 import org.votingsystem.services.TimeStampService;
 import org.votingsystem.signature.util.TimeStampResponseGenerator;
 import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.timestamp.filter.FilterVS;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -28,7 +28,7 @@ public class TimeStampDiscreteServlet extends HttpServlet {
 
     private java.util.logging.Logger log = java.util.logging.Logger.getLogger(TimeStampDiscreteServlet.class.getSimpleName());
 
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject TimeStampService timeStampService;
     @Inject DAOBean dao;
 

@@ -22,6 +22,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Singleton;
 import javax.inject.Inject;
@@ -54,7 +55,7 @@ public class SignatureBean {
     @Inject ConfigVS config;
     @Inject TimeStampBean timeStampBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
     private SMIMESignedGeneratorVS signedMailGenerator;
     private Encryptor encryptor;
     private Set<TrustAnchor> trustAnchors;

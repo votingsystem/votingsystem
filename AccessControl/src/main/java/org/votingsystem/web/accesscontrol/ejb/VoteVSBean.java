@@ -15,8 +15,9 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.MessagesVS;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -40,7 +41,7 @@ public class VoteVSBean {
     @Inject private ConfigVS config;
     @Inject private DAOBean dao;
     @Inject private SignatureBean signatureBean;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
 
     public VoteVS validateVote(SMIMEDto smimeDto) throws Exception {

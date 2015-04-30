@@ -3,8 +3,10 @@ package org.votingsystem.web.currency.websocket;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.ejb.WebSocketBean;
-import org.votingsystem.web.ejb.MessagesBean;
+import org.votingsystem.web.util.MessagesVS;
+
 import javax.inject.Inject;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -21,9 +23,9 @@ public class SocketEndpointVS {
 
     private static Logger log = Logger.getLogger(SocketEndpointVS.class.getSimpleName());
 
-    @Inject MessagesBean messages;
+    private MessagesVS messages = null;
     @Inject WebSocketBean webSocketBean;
-
+    @Inject ConfigVS config;
 
     @OnMessage
     public void onTextMessage(String msg, Session session) {
@@ -31,9 +33,9 @@ public class SocketEndpointVS {
         try {
             if (session.isOpen()) {
                 messageDto = JSON.getMapper().readValue(msg, SocketMessageDto.class);
-                if(messages.getLocale() == null && messageDto.getLocale() != null) {
-                    messages.setLocale(Locale.forLanguageTag(messageDto.getLocale()));
-                }
+                MessagesVS.setCurrentInstance(
+                        Locale.forLanguageTag(messageDto.getLocale()), config.getProperty("vs.bundleBaseName"));
+                messages = MessagesVS.getCurrentInstance();
                 messageDto.setSession(session);
                 webSocketBean.processRequest(messageDto);
             }

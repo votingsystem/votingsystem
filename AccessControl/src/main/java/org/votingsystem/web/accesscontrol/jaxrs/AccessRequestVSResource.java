@@ -6,7 +6,7 @@ import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -31,7 +31,7 @@ public class AccessRequestVSResource {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
 
     @Path("/id/{id}") @GET

@@ -22,8 +22,8 @@ import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.currency.util.ReportFiles;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -53,7 +53,7 @@ public class AuditBean {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject TransactionVSBean transactionVSBean;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject SignatureBean signatureBean;
     @Inject BalancesBean balancesBean;
 

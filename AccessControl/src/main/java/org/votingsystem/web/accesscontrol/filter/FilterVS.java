@@ -2,7 +2,7 @@ package org.votingsystem.web.accesscontrol.filter;
 
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.ejb.MessagesBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.servlet.*;
@@ -21,11 +21,10 @@ public class FilterVS implements Filter {
 
     private ServletContext servletContext;
     @Inject ConfigVS config;
-    @Inject MessagesBean messages;
     private String serverName;
     private String contextURL;
+    private String bundleBaseName;
     private String timeStampServerURL;
-
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -33,6 +32,7 @@ public class FilterVS implements Filter {
         contextURL = config.getContextURL();
         serverName = config.getServerName();
         timeStampServerURL = config.getTimeStampServerURL();
+        bundleBaseName = config.getProperty("vs.bundleBaseName");
         servletContext.log("------- AccessControl FilterVS initialized -------");
     }
 
@@ -47,7 +47,7 @@ public class FilterVS implements Filter {
         req.setAttribute("contextURL", contextURL);
         req.setAttribute("serverName", serverName);
         req.setAttribute("timeStampServerURL", timeStampServerURL);
-        messages.setLocale(req.getLocale());
+        MessagesVS.setCurrentInstance(req.getLocale(), bundleBaseName);
         if(!"HEAD".equals(requestMethod)) {
             RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
             log.info(requestMethod + " - " + ((HttpServletRequest)req).getRequestURI() +

@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.ejb;
 
-import org.bouncycastle.tsp.TSPException;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
@@ -19,9 +18,9 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -47,7 +46,7 @@ public class CurrencyBean {
     @Inject CSRBean csrBean;
     @Inject WalletBean walletBean;
     @Inject TimeStampBean timeStampBean;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
 
     public CurrencyBatchResponseDto processCurrencyTransaction(CurrencyBatch currencyBatch) throws Exception {
@@ -124,12 +123,17 @@ public class CurrencyBean {
         TransactionVS userTransaction = currencyBatch.getTransactionVS(messages.get("currencyRequestLbl"), accountFromMovements);
         dao.persist(userTransaction);
         String message = messages.get("withdrawalMsg", currencyBatch.getRequestAmount().toString(),
-                currencyBatch.getCurrencyCode()) + " " + messages.getTagMessage(currencyBatch.getTagVS().getName());
+                currencyBatch.getCurrencyCode()) + " " + getTagMessage(currencyBatch.getTagVS().getName());
         CurrencyIssuedDto dto = new CurrencyIssuedDto(currencyBatch.getIssuedCurrencyListPEM(), message);
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(signatureBean.getSystemUser().getName(),
                 fromUserVS.getNif(), currencyBatch.getMessageSMIME().getSMIME(), null);
         dao.merge(currencyBatch.getMessageSMIME().setSMIME(receipt).refresh());
         return dto;
+    }
+
+    public String getTagMessage(String tag) {
+        if(TagVS.WILDTAG.equals(tag)) return messages.get("wildTagMsg");
+        else return messages.get("tagMsg", tag);
     }
 
     public Map<String, Currency.State> checkBundleState(List<String> hashCertVSList) {

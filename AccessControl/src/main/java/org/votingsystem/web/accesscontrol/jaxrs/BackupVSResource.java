@@ -8,7 +8,7 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
+import org.votingsystem.web.util.MessagesVS;
 import org.votingsystem.web.util.RequestUtils;
 
 import javax.inject.Inject;
@@ -36,7 +36,7 @@ public class BackupVSResource {
     @Inject DAOBean dao;
     @Inject EventVSElectionBean eventVSElectionBean;
     @Inject ConfigVS config;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/request/id/{requestId}/download") @GET
     public Object download(@PathParam("requestId") long requestId, @Context ServletContext context,

@@ -7,7 +7,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.ejb.MessagesBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -31,7 +31,7 @@ public class ShopExampleBean {
     private static final Map<String, AsyncRequestBundle> transactionRequestMap = new HashMap<>();
 
     @Inject ConfigVS config;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
 
     public void putTransactionRequest(String sessionId, TransactionVSDto transactionRequest) {

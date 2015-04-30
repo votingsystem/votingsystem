@@ -48,7 +48,7 @@
                             <paper-item data-href="new_representative">
                                 <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.newRepresentativeLbl}
                             </paper-item>
-                            <paper-item data-href="${config.webURL}/representative/edit.xhtml">
+                            <paper-item data-href="${contextURL}/representative/edit.xhtml">
                                 <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.editRepresentativeLbl}
                             </paper-item>
                             <!--</template>-->

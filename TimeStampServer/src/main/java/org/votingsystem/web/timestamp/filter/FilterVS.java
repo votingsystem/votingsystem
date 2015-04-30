@@ -1,7 +1,8 @@
 package org.votingsystem.web.timestamp.filter;
 
 import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.web.ejb.MessagesBean;
+import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.servlet.*;
@@ -17,14 +18,15 @@ public class FilterVS implements Filter {
 
     private java.util.logging.Logger log = java.util.logging.Logger.getLogger(FilterVS.class.getSimpleName());
 
+    @Inject ConfigVS config;
+    private String bundleBaseName;
     private ServletContext servletContext;
-    @Inject MessagesBean messages;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         // It is common to save a reference to the ServletContext here in case it is needed in the destroy() call.
         servletContext = filterConfig.getServletContext();
-        // To see this log message at run time, check out the terminal window where you started WildFly.
+        bundleBaseName = config.getProperty("vs.bundleBaseName");
         servletContext.log("------- FilterVS initialized -------");
     }
 
@@ -32,9 +34,9 @@ public class FilterVS implements Filter {
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain filterChain) throws IOException, ServletException {
         RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
-        log.info(((HttpServletRequest)req).getMethod() + " - " + ((HttpServletRequest)req).getRequestURI() +
+        MessagesVS.setCurrentInstance(req.getLocale(), bundleBaseName);
+        log.info(((HttpServletRequest) req).getMethod() + " - " + ((HttpServletRequest) req).getRequestURI() +
                 " - contentType: " + req.getContentType() + " - locale: " + req.getLocale());
-        messages.setLocale(req.getLocale());
         filterChain.doFilter(requestWrapper, resp);
     }
 

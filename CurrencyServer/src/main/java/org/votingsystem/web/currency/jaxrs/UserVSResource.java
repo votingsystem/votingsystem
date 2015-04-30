@@ -22,8 +22,8 @@ import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.currency.ejb.*;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -56,7 +56,7 @@ public class UserVSResource {
     @Inject SignatureBean signatureBean;
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/") @GET
     @Produces(MediaType.APPLICATION_JSON)

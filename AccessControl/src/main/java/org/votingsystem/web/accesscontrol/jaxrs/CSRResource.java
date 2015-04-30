@@ -8,8 +8,8 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.web.accesscontrol.ejb.CSRBean;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -37,7 +37,7 @@ public class CSRResource {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject SignatureBean signatureBean;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/request") @POST @Transactional
     public Response request(@Context ServletContext context,

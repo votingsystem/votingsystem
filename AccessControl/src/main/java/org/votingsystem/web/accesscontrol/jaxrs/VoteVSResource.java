@@ -2,7 +2,6 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.dto.SMIMEDto;
 import org.votingsystem.dto.voting.VoteVSDto;
-import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.model.voting.VoteVSCanceler;

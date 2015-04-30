@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.io.IOUtils;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.*;
-import org.votingsystem.model.*;
+import org.votingsystem.model.BackupRequestVS;
+import org.votingsystem.model.ImageVS;
+import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
@@ -12,8 +15,8 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
@@ -23,7 +26,6 @@ import javax.ws.rs.NotFoundException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.*;
@@ -47,7 +49,7 @@ public class RepresentativeBean {
     @Inject MailBean mailBean;
     @Inject SignatureBean signatureBean;
     @Inject RepresentativeDelegationBean representativeDelegationBean;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     public RepresentativeDocument saveRepresentative(MessageSMIME messageSMIME) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
@@ -95,14 +97,16 @@ public class RepresentativeBean {
         UserVS signer = messageSMIME.getUserVS();
         UserVS representative = null;
         Query query = null;
-        RepresentativeRevokeDto request = messageSMIME.getSignedContent(RepresentativeRevokeDto.class);
-        request.validate();
-        if(!signatureBean.isAdmin(signer.getNif()) && !signer.getNif().equals(request.getRepresentativeNIF())) {
+        RepresentativeDto request = messageSMIME.getSignedContent(RepresentativeDto.class);
+        if(TypeVS.REPRESENTATIVE_REVOKE != request.getOperation()) throw new ValidationExceptionVS(
+                "ERROR - operation missmatch - expected: 'TypeVS.REPRESENTATIVE_REVOKE' - found:" + request.getOperation());
+        String representativeNIF = NifUtils.validate(request.getNif());
+        if(!signatureBean.isAdmin(signer.getNif()) && !signer.getNif().equals(representativeNIF)) {
             throw new ValidationExceptionVS("user without privileges");
         }
-        if(signer.getNif().equals(request.getRepresentativeNIF())) representative = signer;
+        if(signer.getNif().equals(signer.getNif())) representative = signer;
         else {
-            query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getRepresentativeNIF());
+            query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", representativeNIF);
             representative = dao.getSingleResult(UserVS.class, query);
         }
         query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS and " +

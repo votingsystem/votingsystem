@@ -19,8 +19,8 @@ import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.util.EmailTemplateWrapper;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -47,7 +47,7 @@ public class RepresentativeResource {
     @Inject DAOBean dao;
     @Inject RepresentativeBean representativeBean;
     @Inject RepresentativeDelegationBean representativeDelegationBean;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/save") @POST
     public Response save(MessageSMIME messageSMIME) throws Exception {

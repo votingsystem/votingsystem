@@ -11,11 +11,11 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -34,7 +34,7 @@ public class EventVSElectionBean {
 
     private static final Logger log = Logger.getLogger(EventVSElectionBean.class.getSimpleName());
 
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;

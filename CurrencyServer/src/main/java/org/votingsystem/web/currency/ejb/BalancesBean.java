@@ -14,8 +14,8 @@ import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.currency.BalanceUtils;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -38,7 +38,7 @@ public class BalancesBean {
     @Inject BankVSBean bankVSBean;
     @Inject UserVSBean userVSBean;
     @Inject DAOBean dao;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject TransactionVSBean transactionVSBean;
     @Inject CurrencyAccountBean currencyAccountBean;
 

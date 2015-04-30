@@ -12,8 +12,10 @@ import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
+import org.votingsystem.web.util.MessagesVS;
 
-import javax.inject.Inject;
+import javax.ejb.EJB;
+import javax.enterprise.context.SessionScoped;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +26,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,14 +35,16 @@ import java.util.List;
 import java.util.logging.Logger;
 
 @Path("/development")
-public class DevelopmentResource {
+@SessionScoped
+public class DevelopmentResource implements Serializable {
 
     private static final Logger log = Logger.getLogger(DevelopmentResource.class.getSimpleName());
 
-    @Inject ConfigVS config;
-    @Inject SubscriptionVSBean subscriptionVSBean;
-    @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
+    @EJB ConfigVS config;
+    @EJB SubscriptionVSBean subscriptionVSBean;
+    @EJB DAOBean dao;
+    @EJB SignatureBean signatureBean;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Transactional
     @Path("/adduser") @POST
@@ -118,6 +123,15 @@ public class DevelopmentResource {
         for(RepresentativeDocument item : resultList) {
             item.setState(RepresentativeDocument.State.CANCELED).setDateCanceled(new Date());
         }*/
-        return Response.ok().entity("OK").build();
+
+        log.info(MessagesVS.getCurrentInstance().get("representativeDataLbl"));
+        return Response.ok().entity(MessagesVS.getCurrentInstance().get("representativeDataLbl")).build();
+    }
+
+    @Transactional
+    @Path("/test1") @GET
+    public Response test1(@Context ServletContext context, @Context HttpServletRequest req,
+                         @Context HttpServletResponse resp) throws Exception {
+        return Response.ok().entity("test1").build();
     }
 }

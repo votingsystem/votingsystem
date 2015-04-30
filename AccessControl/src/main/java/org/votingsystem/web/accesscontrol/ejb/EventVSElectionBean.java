@@ -12,9 +12,9 @@ import org.votingsystem.util.*;
 import org.votingsystem.web.accesscontrol.cdi.ConfigVSImpl;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
@@ -25,7 +25,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.security.cert.X509Certificate;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import static java.text.MessageFormat.format;
@@ -41,7 +43,7 @@ public class EventVSElectionBean {
     @Inject SignatureBean signatureBean;
     @Inject RepresentativeBean representativeBean;
     @Inject TimeStampBean timeStampBean;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     public EventVSElection saveEvent(MessageSMIME messageSMIME) throws Exception {
         UserVS userSigner = messageSMIME.getUserVS();

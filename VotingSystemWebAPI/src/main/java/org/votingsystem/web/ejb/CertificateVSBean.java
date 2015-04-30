@@ -9,6 +9,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -29,7 +30,7 @@ public class CertificateVSBean {
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     /*
      * Método para poder añadir certificados de confianza.

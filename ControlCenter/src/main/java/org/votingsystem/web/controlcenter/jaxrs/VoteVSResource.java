@@ -1,6 +1,5 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.SMIMEDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.MessageSMIME;

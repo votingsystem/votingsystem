@@ -7,7 +7,7 @@ import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -30,7 +30,7 @@ public class SubscriptionVSResource {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     List<String> supportedFormats = Arrays.asList("rss_0.90", "rss_0.91", "rss_0.92", "rss_0.93",
             "rss_0.94", "rss_1.0", "rss_2.0", "atom_0.3");

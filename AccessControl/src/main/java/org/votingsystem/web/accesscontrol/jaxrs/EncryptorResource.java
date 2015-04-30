@@ -9,8 +9,8 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
@@ -38,7 +38,7 @@ public class EncryptorResource {
     @Inject ConfigVS config;
     @Inject SignatureBean signatureBean;
     @Inject DAOBean dao;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/") @POST
     public Response request(EncryptedMsgDto request, @Context ServletContext context,

@@ -4,7 +4,6 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.RepresentativeDto;
-import org.votingsystem.dto.voting.RepresentativeRevokeDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
@@ -22,8 +21,8 @@ import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -31,7 +30,6 @@ import javax.persistence.Query;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Logger;
 
 import static java.text.MessageFormat.format;
@@ -48,7 +46,7 @@ public class RepresentativeDelegationBean {
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject CSRBean csrBean;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     public RepresentationDocument saveDelegation(MessageSMIME messageSMIME) throws Exception {
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();

@@ -1,6 +1,5 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.EncryptedMsgDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
@@ -9,9 +8,9 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.cdi.ConfigVS;
-import org.votingsystem.web.ejb.MessagesBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
@@ -37,7 +36,7 @@ public class EncryptorResource {
     private static final Logger log = Logger.getLogger(EncryptorResource.class.getSimpleName());
 
     @Inject ConfigVS config;
-    @Inject MessagesBean messages;
+    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject SignatureBean signatureBean;
     @Inject DAOBean dao;
 
