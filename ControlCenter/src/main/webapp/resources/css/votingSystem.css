@@ -130,6 +130,7 @@ hr {
     text-overflow: ellipsis;
     font-size: 1.3em;
     text-align: center;
+    padding: 5px 10px 5px 10px;
 }
 
 .headerTitle {

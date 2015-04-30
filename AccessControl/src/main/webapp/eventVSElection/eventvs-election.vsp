@@ -84,7 +84,7 @@
 
 
                 <div horizontal layout class="fieldsBox">
-                    <div style="width: 100%;display:{{smallScreen?(selectedTab == 'optionsTab'?'block':'none'):'block'}}">
+                    <div hidden?="{{smallScreen?(selectedTab != 'optionsTab'):false}}" style="width: 100%;">
                         <fieldset>
                             <legend>${msg.pollFieldLegend}</legend>
                             <div>
@@ -116,7 +116,7 @@
                             </template>
                         </div>
                     </div>
-                    <div vertical layout center center-justified style="display:{{smallScreen?(selectedTab == 'statsTab'?'block':'none'):'block'}}">
+                    <div id="statsDiv" hidden?="{{smallScreen?(selectedTab == 'optionsTab'):false}}"  vertical layout center center-justified>
                         <eventvs-election-stats eventVSId="{{eventvs.id}}"></eventvs-election-stats>
                     </div>
                 </div>
@@ -151,6 +151,7 @@
                 this.optionVSSelected = null
                 this.dateFinish = new Date(this.eventvs.dateFinish)
                 this.votevsResul = null;
+                if('PENDING' == this.eventvs.state) this.$.statsDiv.style.display = 'none'
             },
             ready: function() {
                 console.log(this.tagName + "- subpage:  " + this.subpage)

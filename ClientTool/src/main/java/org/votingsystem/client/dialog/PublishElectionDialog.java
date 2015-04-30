@@ -173,6 +173,7 @@ public class PublishElectionDialog  extends DialogVS implements AddVoteOptionDia
         optionSet.add(optionContent);
         HBox optionHBox = new HBox();
         Button removeOptionButton = new Button(ContextVS.getMessage("deleteLbl"));
+        removeOptionButton.setStyle("-fx-min-width:100px;");
         removeOptionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
         removeOptionButton.setOnAction(actionEvent -> {
             removeOption(optionHBox, optionContent);

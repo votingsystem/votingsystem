@@ -1,6 +1,5 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.RepresentativeAccreditationsDto;
 import org.votingsystem.dto.voting.RepresentativeDto;
@@ -53,8 +52,8 @@ public class RepresentativeResource {
     @Path("/save") @POST
     public Response save(MessageSMIME messageSMIME) throws Exception {
         RepresentativeDocument representativeDocument = representativeBean.saveRepresentative(messageSMIME);
-        return Response.ok().entity(representativeDocument.getActivationSMIME().getContent())
-                .type(MediaTypeVS.JSON_SIGNED).build();
+        RepresentativeDto representativeDto = representativeBean.geRepresentativeDto(representativeDocument.getUserVS());
+        return Response.ok().entity(representativeDto).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/delegation") @POST
@@ -138,21 +137,24 @@ public class RepresentativeResource {
 
     @Transactional
     @Path("/nif/{nif}") @GET
-    public Response getByNif(@PathParam("nif") String nifReq) throws JsonProcessingException, ExceptionVS {
+    public Response getByNif(@PathParam("nif") String nifReq, @Context HttpServletRequest req, @Context ServletContext context,
+             @Context HttpServletResponse resp) throws IOException, ExceptionVS, ServletException {
+        String contentType = req.getContentType() != null ? req.getContentType():"";
         String nif = NifUtils.validate(nifReq);
         Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
                 .setParameter("nif", nif).setParameter("type", UserVS.Type.REPRESENTATIVE);
         UserVS representative = dao.getSingleResult(UserVS.class, query);
         if(representative == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - UserVS is not a representative - nif: " + nif).build();
-        query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS " +
-                "and r.state =:state").setParameter("userVS", representative).setParameter("state", RepresentativeDocument.State.OK);
-        RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
-        if(representativeDocument == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - RepresentativeDocument not found - nif: " + nif).build();
-        RepresentativeDto representativeDto = new RepresentativeDto(
-                representativeDocument.getUserVS(), representativeDocument.getDescription());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto)).type(MediaTypeVS.JSON).build();
+        RepresentativeDto representativeDto = representativeBean.geRepresentativeDto(representative);
+        if(contentType.contains("json")) {
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
+                    .type(MediaTypeVS.JSON).build();
+        } else {
+            req.setAttribute("representativeMap", JSON.getMapper().writeValueAsString(representativeDto));
+            context.getRequestDispatcher("/representative/representative.xhtml").forward(req, resp);
+            return Response.ok().build();
+        }
     }
 
     @Path("/image/id/{id}") @GET

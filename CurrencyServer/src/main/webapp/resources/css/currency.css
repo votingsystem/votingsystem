@@ -76,6 +76,7 @@ paper-button {
     color: #6c0404;
     font-weight: bold;
     text-overflow: ellipsis;
+    padding: 5px 10px 5px 10px;
 }
 
 .messagePanel {

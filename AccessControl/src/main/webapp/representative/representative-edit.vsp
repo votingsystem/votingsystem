@@ -9,7 +9,7 @@
         <style></style>
         <div hidden?="{{step !== 'operationSelection'}}">
             <div layout horizontal center center-justified>
-                <paper-button raised type="button" on-click="{{representativeCancel}}"
+                <paper-button raised type="button" on-click="{{representativeRevoke}}"
                         style="margin:15px 20px 15px 0px;">
                     <i class="fa fa-times"></i> ${msg.removeRepresentativeLbl}
                 </paper-button>
@@ -24,7 +24,7 @@
                 <h3>${msg.editRepresentativeLbl}</h3>
             </div>
             <div layout vertical center center-justified style="margin:0px auto 0px auto; width: 500px;">
-                <label style="margin:0px 0px 20px 0px">${msg.nifForEditRepresentativeLbl}</label>
+                <label style="margin:0px 0px 20px 0px">${msg.representativeNIFLbl}</label>
                 <input type="text" id="representativeNif" style="width:350px; margin:0px auto 0px auto;" class="form-control"/>
                 <div>
                     <div layout horizontal style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
@@ -37,7 +37,7 @@
             </div>
         </div>
     </div>
-    <representative-cancel-dialog id="representativeCancelDialog"></representative-cancel-dialog>
+    <representative-cancel-dialog id="representativeRevokeDialog"></representative-cancel-dialog>
     </template>
     <script>
         Polymer('representative-edit', {
@@ -52,8 +52,8 @@
             representativeEdit: function() {
                 this.step = 'requestNIF'
             },
-            representativeCancel: function() {
-                this.$.representativeCancelDialog.show()
+            representativeRevoke: function() {
+                this.$.representativeRevokeDialog.show()
             },
             checkRepresentativeNIF: function() {
                 console.log(this.tagName + " - ready")

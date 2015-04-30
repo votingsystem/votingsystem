@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -16,10 +17,11 @@ import org.votingsystem.client.Browser;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.voting.RepresentativeDto;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.*;
-
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
@@ -43,8 +45,26 @@ public class PublishRepresentativeDialog extends DialogVS {
     @FXML private HTMLEditor editor;
     @FXML private VBox optionsVBox;
     @FXML private ImageView imageView;
-    private File selectedImage;
+    private File representativeImage;
     private static PublishRepresentativeDialog INSTANCE;
+
+    static class OperationVSListener {
+        @Subscribe
+        public void responseVSChange(ResponseVS responseVS) {
+            switch(responseVS.getType()) {
+                case CANCELED:
+                    if(responseVS.getData() instanceof OperationVS) {
+                        OperationVS operationVS = (OperationVS) responseVS.getData();
+                        if((operationVS.getType() == TypeVS.EDIT_REPRESENTATIVE ||
+                                operationVS.getType() == TypeVS.NEW_REPRESENTATIVE) && operationVS != null) {
+                            show(operationVS, null);
+                            INSTANCE.refreshImage();
+                        }
+                    }
+                    break;
+            }
+        }
+    }
 
     public PublishRepresentativeDialog(String caption) throws IOException {
         super("/fxml/RepresentativeEditor.fxml", caption);
@@ -80,20 +100,33 @@ public class PublishRepresentativeDialog extends DialogVS {
                         ContextVS.getMessage("editRepresentativeLbl"), getStage());
                 break;
         }
+        if(operationVS.getJsonStr() != null) {
+            try {
+                RepresentativeDto dto = operationVS.getData(RepresentativeDto.class);
+                editor.setHtmlText(new String(Base64.getDecoder().decode(dto.getDescription()), StandardCharsets.UTF_8));
+                byte[] imageBytes = Base64.getDecoder().decode(dto.getBase64Image().getBytes());
+                FileUtils.copyBytesToFile(imageBytes, representativeImage);
+                refreshImage();
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
+        imageView.setImage(null);
         show();
     }
 
     private void submitForm(){
         try {
-            if(selectedImage == null) {
+            if(representativeImage == null) {
                 showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterImageLbl"));
                 return;
             }
             RepresentativeDto dto = new RepresentativeDto();
             dto.setOperation(TypeVS.NEW_REPRESENTATIVE);
             dto.setDescription(Base64.getEncoder().encodeToString(editor.getHtmlText().getBytes()));
-            dto.setBase64Image(Base64.getEncoder().encodeToString(FileUtils.getBytesFromFile(selectedImage)));
+            dto.setBase64Image(Base64.getEncoder().encodeToString(FileUtils.getBytesFromFile(representativeImage)));
             dto.setUUID(UUID.randomUUID().toString());
+            operationVS.setType(TypeVS.NEW_REPRESENTATIVE);
             operationVS.setJsonStr(JSON.getMapper().writeValueAsString(dto));
             operationVS.setSignedMessageSubject(ContextVS.getMessage("publishRepresentativeLbl"));
             operationVS.setServiceURL(ContextVS.getInstance().getAccessControl().getRepresentativeServiceURL());
@@ -115,21 +148,31 @@ public class PublishRepresentativeDialog extends DialogVS {
                         "PNG (*.png)", Arrays.asList("*.png", "*.PNG"));
                 fileChooser.getExtensionFilters().addAll(extFilterJPG, extFilterPNG);
                 fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-                selectedImage = fileChooser.showOpenDialog(null);
-                if (selectedImage != null) {
-                    byte[] imageFileBytes = FileUtils.getBytesFromFile(selectedImage);
+                representativeImage = fileChooser.showOpenDialog(null);
+                if (representativeImage != null) {
+                    byte[] imageFileBytes = FileUtils.getBytesFromFile(representativeImage);
                     log.info(" - imageFileBytes.length: " + imageFileBytes.length);
                     if (imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
                         log.info(" - MAX_FILE_SIZE exceeded ");
                         showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("fileSizeExceeded",
                                 ContextVS.IMAGE_MAX_FILE_SIZE_KB));
-                        selectedImage = null;
+                        representativeImage = null;
                     }
-                    imageView.setImage(new Image(selectedImage.toURI().toURL().toString()));
+                    refreshImage();
                 }
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+            }
+        });
+    }
+
+    private void refreshImage() {
+        if(representativeImage != null) PlatformImpl.runLater(() -> {
+            try {
+                imageView.setImage(new Image(representativeImage.toURI().toURL().toString()));
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
             }
         });
     }
@@ -146,7 +189,10 @@ public class PublishRepresentativeDialog extends DialogVS {
                         caption = ContextVS.getMessage("editRepresentativeLbl");
                         break;
                 }
-                if(INSTANCE == null) INSTANCE =  new PublishRepresentativeDialog(caption);
+                if(INSTANCE == null) {
+                    INSTANCE =  new PublishRepresentativeDialog(caption);
+                    EventBusService.getInstance().register(new OperationVSListener());
+                }
                 INSTANCE.loadOperationData(operationVS);
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);

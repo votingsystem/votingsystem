@@ -17,10 +17,7 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.dto.voting.AccessRequestDto;
-import org.votingsystem.dto.voting.AnonymousDelegationDto;
-import org.votingsystem.dto.voting.VoteVSCancelerDto;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.*;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
@@ -110,15 +107,6 @@ public class SignatureService extends Service<ResponseVS> {
                         case CERT_USER_NEW:
                             responseVS = sendCSRRequest(operationVS);
                             break;
-                        case NEW_REPRESENTATIVE:
-                            responseVS = processNewRepresentative(operationVS);
-                            break;
-                        case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                            responseVS = processAnonymousDelegation(operationVS);
-                            break;
-                        case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED:
-                            responseVS = processCancelAnonymousDelegation(operationVS);
-                            break;
                         case VOTING_PUBLISHING:
                             responseVS = publishSMIME(operationVS);
                             break;
@@ -139,6 +127,15 @@ public class SignatureService extends Service<ResponseVS> {
                             break;
                         case REPRESENTATIVE_SELECTION:
                             responseVS = sendSMIME(operationVS);
+                            break;
+                        case NEW_REPRESENTATIVE:
+                            responseVS = sendRepresentativeData(operationVS);
+                            break;
+                        case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                            responseVS = processAnonymousDelegation(operationVS);
+                            break;
+                        case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED:
+                            responseVS = processCancelAnonymousDelegation(operationVS);
                             break;
                         default:
                             responseVS = sendSMIME(operationVS);
@@ -278,7 +275,7 @@ public class SignatureService extends Service<ResponseVS> {
         //we know this is done in a background thread
         private ResponseVS processNewRepresentative(OperationVS operationVS) throws Exception {
             SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(),
-                    operationVS.getJsonStr(),  password, operationVS.getSignedMessageSubject());
+                    operationVS.getJsonStr(), password, operationVS.getSignedMessageSubject());
             updateMessage(operationVS.getSignedMessageSubject());
             return HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     operationVS.getServiceURL());
@@ -425,6 +422,20 @@ public class SignatureService extends Service<ResponseVS> {
                     operationVS.getTargetServer().getX509Certificate(), header);
             return senderWorker.call();
         }
+
+        //we know this is done in a background thread
+        private ResponseVS sendRepresentativeData(OperationVS operationVS, String... header) throws Exception {
+            ResponseVS responseVS = sendSMIME(operationVS.getJsonStr(), operationVS);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                RepresentativeDto representativeDto = (RepresentativeDto) responseVS.getMessage(RepresentativeDto.class);
+                String representativeURL =  ContextVS.getInstance().getAccessControl()
+                        .getRepresentativeByNifServiceURL(representativeDto.getNif());
+                Browser.getInstance().openVotingSystemURL(representativeURL, null);
+                responseVS.setMessage(ContextVS.getMessage("representativeDataSendOKMsg"));
+            }
+            return responseVS;
+        }
+
         //we know this is done in a background thread
         private ResponseVS sendSMIME(OperationVS operationVS, String... header) throws Exception {
             return sendSMIME(JSON.getMapper().writeValueAsString(operationVS.getDocumentToSignMap()), operationVS, header);

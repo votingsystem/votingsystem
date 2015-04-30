@@ -7,24 +7,27 @@
 
 <polymer-element name="representative-cancel-dialog">
     <template>
-        <paper-dialog id="xDialog" class="dialog" autoCloseDisabled layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" class="xDialog" autoCloseDisabled layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
             <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <style no-shim>
-            .dialog {
-                box-sizing: border-box;
-                -moz-box-sizing: border-box;
-                font-family: Arial, Helvetica, sans-serif;
-                font-size: 13px;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                overflow: auto;
-                background: white;
-                padding:10px 30px 30px 30px;
-                outline: 1px solid rgba(0,0,0,0.2);
-                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-                width: 500px;
-            }
+                .xDialog {
+                    box-sizing: border-box;
+                    -moz-box-sizing: border-box;
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 13px;
+                    -webkit-user-select: none;
+                    -moz-user-select: none;
+                    overflow: auto;
+                    background: white;
+                    padding:10px 30px 30px 30px;
+                    outline: 1px solid rgba(0,0,0,0.2);
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+                    width: 500px;
+                }
+                .textDialog {
+                    font-size: 1.2em; color:#888; font-weight: bold; text-align: center;
+                }
             </style>
             <div>
                 <div layout horizontal center center-justified>
@@ -37,8 +40,12 @@
                         <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
                     </div>
                 </div>
-                <div style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
+                <div class="textDialog" style="padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
                     <p style="text-align: center;">${msg.removeRepresentativeMsg}</p>
+                </div>
+                <div  class="textDialog" layout vertical center center-justified style="margin:0px auto 0px auto;">
+                    <label style="margin:0px 0px 20px 0px">${msg.representativeNIFLbl}</label>
+                    <input type="text" id="representativeNif" style="width:150px; margin:0px auto 0px auto;" class="form-control"/>
                 </div>
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
                     <div flex></div>
@@ -58,11 +65,17 @@
             },
             show: function() {
                 this.$.xDialog.opened = true
+                this.$.representativeNif.value = ""
             },
             accept: function() {
                 console.log(this.tagName + " - removeRepresentative")
+                var validatedNif = validateNIF(this.$.representativeNif.value)
+                if(validatedNif == null) {
+                    showMessageVS('${msg.nifERRORMsg}','${msg.errorLbl}')
+                    return;
+                }
                 var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_REVOKE)
-                webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_REVOKE}
+                webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_REVOKE, nif:validatedNif}
                 webAppMessage.serviceURL = "${restURL}/representative/revoke"
                 webAppMessage.signedMessageSubject = '${msg.removeRepresentativeMsgSubject}'
                 webAppMessage.setCallback(function(appMessage) {
