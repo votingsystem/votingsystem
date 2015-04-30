@@ -123,17 +123,12 @@ public class CurrencyBean {
         TransactionVS userTransaction = currencyBatch.getTransactionVS(messages.get("currencyRequestLbl"), accountFromMovements);
         dao.persist(userTransaction);
         String message = messages.get("withdrawalMsg", currencyBatch.getRequestAmount().toString(),
-                currencyBatch.getCurrencyCode()) + " " + getTagMessage(currencyBatch.getTagVS().getName());
+                currencyBatch.getCurrencyCode()) + " " + messages.getTagMessage(currencyBatch.getTagVS().getName());
         CurrencyIssuedDto dto = new CurrencyIssuedDto(currencyBatch.getIssuedCurrencyListPEM(), message);
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(signatureBean.getSystemUser().getName(),
                 fromUserVS.getNif(), currencyBatch.getMessageSMIME().getSMIME(), null);
         dao.merge(currencyBatch.getMessageSMIME().setSMIME(receipt).refresh());
         return dto;
-    }
-
-    public String getTagMessage(String tag) {
-        if(TagVS.WILDTAG.equals(tag)) return messages.get("wildTagMsg");
-        else return messages.get("tagMsg", tag);
     }
 
     public Map<String, Currency.State> checkBundleState(List<String> hashCertVSList) {

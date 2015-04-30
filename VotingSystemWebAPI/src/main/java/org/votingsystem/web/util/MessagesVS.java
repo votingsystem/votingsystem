@@ -1,5 +1,6 @@
 package org.votingsystem.web.util;
 
+import org.votingsystem.model.TagVS;
 import org.votingsystem.util.ContextVS;
 
 import java.text.MessageFormat;
@@ -61,4 +62,8 @@ public class MessagesVS {
         setCurrentInstance(new MessagesVS(locale, bundleBaseName));
     }
 
+    public String getTagMessage(String tag) {
+        if(TagVS.WILDTAG.equals(tag)) return get("wildTagMsg");
+        else return get("tagMsg", tag);
+    }
 }
