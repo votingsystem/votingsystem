@@ -34,7 +34,7 @@ public class ValidateCert {
         AccessControlVS accessControlVS = (AccessControlVS)actorVS;
         ContextVS.getInstance().setAccessControl((AccessControlVS)actorVS);
         CertValidationDto certValidationDto = CertValidationDto.validationRequest(
-                "7553172H", "355136056990149");
+                "7553172H", "aee09e79-e44e-4a86-9a5d-0fd1ee445038");
         SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService(
                 "07553172H", UserVS.Type.USER);
         UserVS fromUserVS = superUserSignatureService.getUserVS();

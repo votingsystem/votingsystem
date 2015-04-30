@@ -51,8 +51,8 @@
             },
             submit: function() {
                 var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
-                webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST,
-                    representativeNif:this.representative.nif, representativeName:this.representativeFullName}
+                webAppMessage.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST,
+                    representativeNif:this.representative.nif, representativeName:this.representativeFullName})
                 webAppMessage.serviceURL = "${restURL}/representative/accreditations"
                 webAppMessage.signedMessageSubject = '${msg.requestRepresentativeAcreditationsLbl}'
                 VotingSystemClient.setMessage(webAppMessage);

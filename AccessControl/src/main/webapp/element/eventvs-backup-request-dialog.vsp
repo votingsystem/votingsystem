@@ -76,7 +76,7 @@
                 webAppMessage.serviceURL = "${restURL}/backupVS"
                 webAppMessage.signedMessageSubject = '${msg.requestEventvsBackupMsgSubject}'
                 webAppMessage.eventVS = this.eventvs
-                webAppMessage.signedContent = this.eventvs
+                webAppMessage.jsonStr = JSON.stringify(this.eventvs)
                 webAppMessage.email = this.$.eventBackupUserEmailText.value
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("activateUserCallback - message: " + appMessage);

@@ -60,9 +60,8 @@
                 var webAppMessage = new WebAppMessage(Operation.CERT_CA_NEW)
                 webAppMessage.serviceURL = "${restURL}/userVS/save"
                 webAppMessage.signedMessageSubject = "${msg.newUserCertLbl}"
-                webAppMessage.signedContent = {info:document.querySelector("#userInfo").value,
-                    certChainPEM:document.querySelector("#pemCert").value,
-                    operation:Operation.CERT_USER_NEW}
+                webAppMessage.jsonStr = JSON.stringify({info:document.querySelector("#userInfo").value,
+                    certChainPEM:document.querySelector("#pemCert").value, operation:Operation.CERT_USER_NEW})
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("newUserCertCallback - message: " + appMessage);
                     appMessageJSON = toJSON(appMessage)

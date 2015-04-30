@@ -101,7 +101,7 @@
                     webAppMessage.serviceURL= "${restURL}/eventVS/cancel"
                     var signedContent = {operation:Operation.EVENT_CANCELLATION,
                         accessControlURL:"${contextURL}", eventId:Number(this.eventvs.id), state:state}
-                    webAppMessage.signedContent = signedContent
+                    webAppMessage.jsonStr = JSON.stringify(signedContent)
                     webAppMessage.signedMessageSubject = messageSubject
                     webAppMessage.setCallback(function(appMessage) {
                         console.log("eventvs-admin-dialog callback - message: " + appMessage);

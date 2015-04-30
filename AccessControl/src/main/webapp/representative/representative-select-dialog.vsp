@@ -172,10 +172,10 @@
                         representativeOperation = Operation.REPRESENTATIVE_SELECTION
                     }
                     var webAppMessage = new WebAppMessage( representativeOperation)
-                    webAppMessage.signedContent = {operation:representativeOperation,
+                    webAppMessage.jsonStr = JSON.stringify({operation:representativeOperation,
                         representativeNif:this.representative.nif,
                         representativeName:this.representativeFullName,
-                        weeksOperationActive:this.$.numWeeksAnonymousDelegation.value}
+                        weeksOperationActive:this.$.numWeeksAnonymousDelegation.value})
                     webAppMessage.jsonStr = JSON.stringify(this.representative)
                     webAppMessage.serviceURL = "${restURL}/representative/delegation"
                     webAppMessage.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'

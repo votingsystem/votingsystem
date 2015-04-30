@@ -70,8 +70,8 @@
                     var webAppMessage = new WebAppMessage(Operation.BANKVS_NEW)
                     webAppMessage.serviceURL = "${restURL}/userVS/newBankVS"
                     webAppMessage.signedMessageSubject = "${msg.newBankVSMsgSubject}"
-                    webAppMessage.signedContent = {info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
-                        iban:document.querySelector("#bankVSIBAN").value, operation:Operation.BANKVS_NEW}
+                    webAppMessage.jsonStr = JSON.stringify({info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
+                        iban:document.querySelector("#bankVSIBAN").value, operation:Operation.BANKVS_NEW})
                     webAppMessage.setCallback(function(appMessage) {
                         console.log("newBankVSCallback - message: " + appMessage);
                         appMessageJSON = toJSON(appMessage)

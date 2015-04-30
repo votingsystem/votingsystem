@@ -56,8 +56,8 @@
                 var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_EDIT)
                 webAppMessage.serviceURL = "${restURL}/groupVS/edit/" + this.groupvs.id
                 webAppMessage.signedMessageSubject = "${msg.newGroupVSMsgSubject}"
-                webAppMessage.signedContent = {info:this.$.textEditor.getData(), name:this.groupvs.name,
-                    id:this.groupvs.id, operation:Operation.CURRENCY_GROUP_NEW}
+                webAppMessage.jsonStr = JSON.stringify({info:this.$.textEditor.getData(), name:this.groupvs.name,
+                    id:this.groupvs.id, operation:Operation.CURRENCY_GROUP_NEW})
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("editGroupVSCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)

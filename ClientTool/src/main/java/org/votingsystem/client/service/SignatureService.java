@@ -362,9 +362,9 @@ public class SignatureService extends Service<ResponseVS> {
             UserVSDto representative = operationVS.getData(UserVSDto.class);
             if(caption.length() > 50) caption = caption.substring(0, 50) + "...";
             AnonymousDelegationDto anonymousDelegation = new AnonymousDelegationDto(
-                    Integer.valueOf((String) operationVS.getDocumentToSignMap().get("weeksOperationActive")),
-                    (String) operationVS.getDocumentToSignMap().get("representativeNif"),
-                    (String) operationVS.getDocumentToSignMap().get("representativeName"),
+                    Integer.valueOf((String) operationVS.getDocumentToSign().get("weeksOperationActive")),
+                    (String) operationVS.getDocumentToSign().get("representativeNif"),
+                    (String) operationVS.getDocumentToSign().get("representativeName"),
                     ContextVS.getInstance().getAccessControl().getServerURL());
             try {
                 SMIMEMessage smimeMessage = SessionService.getSMIME(null, ContextVS.getInstance().getAccessControl().
@@ -437,7 +437,7 @@ public class SignatureService extends Service<ResponseVS> {
 
         //we know this is done in a background thread
         private ResponseVS sendSMIME(OperationVS operationVS, String... header) throws Exception {
-            return sendSMIME(JSON.getMapper().writeValueAsString(operationVS.getDocumentToSignMap()), operationVS, header);
+            return sendSMIME(operationVS.getJsonStr(), operationVS, header);
         }
 
         //we know this is done in a background thread

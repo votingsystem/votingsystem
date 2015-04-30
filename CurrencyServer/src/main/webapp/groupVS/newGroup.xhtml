@@ -125,8 +125,8 @@
             var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_NEW)
             webAppMessage.serviceURL = "${restURL}/groupVS/newGroup"
             webAppMessage.signedMessageSubject = "${msg.newGroupVSMsgSubject}"
-            webAppMessage.signedContent = {info:textEditor.getData(), tags:document.querySelector('#selectedTags').selectedTags,
-                name:document.querySelector("#groupSubject").value, operation:Operation.CURRENCY_GROUP_NEW}
+            webAppMessage.jsonStr = JSON.stringify( {info:textEditor.getData(), tags:document.querySelector('#selectedTags').selectedTags,
+                name:document.querySelector("#groupSubject").value, operation:Operation.CURRENCY_GROUP_NEW})
             webAppMessage.setCallback(function(appMessage) {
                 console.log("newGroupVSCallback - message: " + appMessage);
                 appMessageJSON = toJSON(appMessage)

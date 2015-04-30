@@ -19,7 +19,7 @@
         var webAppMessage = new WebAppMessage( this.operation)
         webAppMessage.serviceURL = ${restURL}/transactionVS"
         webAppMessage.signedMessageSubject = "${msg.transactionvsFromGroupMsgSubject}"
-        webAppMessage.signedContent = {operation:"TEST"}
+        webAppMessage.jsonStr = JSON.stringify({operation:"TEST"})
 
         webAppMessage.setCallback(function () {
             console.log("====#### callback")

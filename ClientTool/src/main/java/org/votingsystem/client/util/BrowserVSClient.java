@@ -119,7 +119,7 @@ public class BrowserVSClient {
                     }
                     break;
                 case MESSAGEVS:
-                    if(operationVS.getDocumentToSignMap() != null) Browser.getInstance().processOperationVS(
+                    if(operationVS.getDocumentToSign() != null) Browser.getInstance().processOperationVS(
                             operationVS, null);
                     else  Browser.getInstance().processOperationVS(null, operationVS);
                     break;

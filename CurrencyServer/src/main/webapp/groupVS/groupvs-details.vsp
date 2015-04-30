@@ -178,8 +178,8 @@
                 var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_CANCEL)
                 webAppMessage.serviceURL = "${restURL}/groupVS/cancel/" + this.groupvs.id
                 webAppMessage.signedMessageSubject = "${msg.cancelGroupVSSignedMessageSubject}"
-                webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_CANCEL, name:this.groupvs.name,
-                    id:this.groupvs.id}
+                webAppMessage.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_CANCEL, name:this.groupvs.name,
+                    id:this.groupvs.id})
                 webAppMessage.contentType = 'application/pkcs7-signature'
                 webAppMessage.setCallback(function(appMessage) {
                     this.appMessageJSON = JSON.parse(appMessage)
@@ -212,7 +212,7 @@
             var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_SUBSCRIBE)
             webAppMessage.serviceURL = "${restURL}/groupVS/id/" + this.groupvs.id + "/subscribe"
             webAppMessage.signedMessageSubject = "${msg.subscribeToCurrencyGroupMsg}"
-            webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_SUBSCRIBE, groupvs:groupVSData}
+            webAppMessage.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_SUBSCRIBE, groupvs:groupVSData})
             webAppMessage.contentType = 'application/pkcs7-signature'
             webAppMessage.setCallback(function(appMessage) {
                 console.log("subscribeToGroupCallback - message: " + appMessage);

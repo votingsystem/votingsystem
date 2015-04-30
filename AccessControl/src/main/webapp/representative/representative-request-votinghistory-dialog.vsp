@@ -51,9 +51,8 @@
             },
             submit: function() {
                 var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
-                webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
-                    representativeNif:this.representative.nif,
-                    representativeName:this.representativeFullName}
+                webAppMessage.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
+                    representativeNif:this.representative.nif, representativeName:this.representativeFullName})
                 webAppMessage.serviceURL = "${restURL}/representative/history"
                 webAppMessage.signedMessageSubject = '${msg.requestVotingHistoryLbl}'
                 VotingSystemClient.setMessage(webAppMessage);

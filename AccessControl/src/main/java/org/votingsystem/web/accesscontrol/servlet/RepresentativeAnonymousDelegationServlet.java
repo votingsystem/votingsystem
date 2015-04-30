@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@WebServlet("/representative/anonymousDelegation")
+@WebServlet("/representative/anonymousDelegationRequest")
 @MultipartConfig(location="/tmp", fileSizeThreshold=1024*1024, maxFileSize=1024*1024*50, maxRequestSize=1024*1024*5*50)
 public class RepresentativeAnonymousDelegationServlet extends HttpServlet {
 
@@ -47,7 +47,8 @@ public class RepresentativeAnonymousDelegationServlet extends HttpServlet {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ANONYMOUS_DELEGATION);
             MessageSMIME messageSMIME = signatureBean.validateSMIME(
                     requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
-            X509Certificate anonymousIssuedCert = representativeDelegationBean.validateAnonymousRequest(messageSMIME, requestVS.getCSRBytes());
+            X509Certificate anonymousIssuedCert = representativeDelegationBean.validateAnonymousRequest(
+                    messageSMIME, requestVS.getCSRBytes());
             byte[] issuedCertPEMBytes = CertUtils.getPEMEncoded(anonymousIssuedCert);
             resp.setContentType(ContentTypeVS.PEM.getName());
             resp.setContentLength(issuedCertPEMBytes.length);

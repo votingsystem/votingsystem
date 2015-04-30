@@ -75,7 +75,7 @@
                     return;
                 }
                 var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_REVOKE)
-                webAppMessage.signedContent = {operation:Operation.REPRESENTATIVE_REVOKE, nif:validatedNif}
+                webAppMessage.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_REVOKE, nif:validatedNif})
                 webAppMessage.serviceURL = "${restURL}/representative/revoke"
                 webAppMessage.signedMessageSubject = '${msg.removeRepresentativeMsgSubject}'
                 webAppMessage.setCallback(function(appMessage) {

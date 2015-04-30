@@ -3,6 +3,7 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ActorVS;
@@ -15,6 +16,7 @@ import org.votingsystem.util.TypeVS;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -43,7 +45,6 @@ public class OperationVS {
     private VoteVSDto voteVS;
     private String UUID;
 
-    @JsonProperty("signedContent") private Map documentToSignMap;
     @JsonProperty("objectId") private String callerCallback;
     @JsonIgnore private ActorVS targetServer;
 
@@ -62,15 +63,6 @@ public class OperationVS {
         this.message = message;
     }
 
-    public static OperationVS VOTING_PUBLISHING(Map documentToSignMap, AccessControlVS accessControlVS) {
-        OperationVS result = new OperationVS(TypeVS.VOTING_PUBLISHING);
-        result.setReceiverName(accessControlVS.getName());
-        result.setSignedMessageSubject(ContextVS.getMessage("signedMessageSubject"));
-        result.setServiceURL(accessControlVS.getPublishElectionURL());
-        result.setTimeStampServerURL(accessControlVS.getTimeStampServerURL());
-        return result;
-    }
-
     public String getTimeStampServerURL() {
         if(timeStampServerURL == null && targetServer == null) return null;
         else if(timeStampServerURL == null && targetServer != null) return targetServer.getTimeStampServerURL();
@@ -85,17 +77,13 @@ public class OperationVS {
         return serverURL;
     }
 
-    public void setUrlServer(String serverURL) {
-        this.serverURL = serverURL;
-    }
-
     public TypeVS getType() {
         return getOperation();
     }
 
     public String getFileName() {
-        if(getOperation() == null) return "DEFAULT_OPERATION_NAME";
-        else return getOperation().toString();
+        if(operation == null) return "DEFAULT_OPERATION_NAME";
+        else return operation.toString();
     }
 
     public String getCaption() {
@@ -146,22 +134,19 @@ public class OperationVS {
         this.eventVS = eventVS;
     }
 
-    public Map getDocumentToSignMap() {
-        if(documentToSignMap != null && !documentToSignMap.containsKey("UUID")) {
+    public Map getDocumentToSign() {
+        Map documentToSignMap = null;
+        try {
+            documentToSignMap = JSON.getMapper().readValue(jsonStr, new TypeReference<Map<String, String>>() {});
             documentToSignMap.put("UUID", java.util.UUID.randomUUID().toString());
+        } catch (IOException ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
         return documentToSignMap;
     }
 
     public <T> T getDocumentToSign(Class<T> type) throws Exception {
-        if(documentToSignMap != null) {
-            String documentToSign = JSON.getMapper().writeValueAsString(documentToSignMap);
-            return JSON.getMapper().readValue(documentToSign, type);
-        } else return JSON.getMapper().readValue(jsonStr, type);
-    }
-
-    public void setDocumentToSignMap(Map documentToSignMap) {
-        this.documentToSignMap = documentToSignMap;
+        return JSON.getMapper().readValue(jsonStr, type);
     }
 
     public void setContentType(String contentType) {
@@ -206,22 +191,6 @@ public class OperationVS {
         this.callerCallback = callerCallback;
     }
 
-    public ResponseVS validateReceiptDataMap(Map receiptDataMap) {
-        switch(getOperation()) {
-            case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                TypeVS receiptTypeVS = TypeVS.valueOf((String) receiptDataMap.get("operation"));
-                if(!documentToSignMap.get("weeksOperationActive").equals(receiptDataMap.get("weeksOperationActive")) ||
-                   !documentToSignMap.get("UUID").equals(receiptDataMap.get("UUID")) ||
-                   !documentToSignMap.get("representativeNif").equals(receiptDataMap.get("representativeNif")) ||
-                   TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != receiptTypeVS) {
-                    return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("receiptDataMismatchErrorMsg"));
-                } else return new ResponseVS(ResponseVS.SC_OK);
-            default:
-                return new ResponseVS(ResponseVS.SC_ERROR,
-                        ContextVS.getMessage("serviceNotAvailableForOperationMsg", getOperation()));
-        }
-    }
-
     public File getFile() {
         return file;
     }
@@ -254,14 +223,6 @@ public class OperationVS {
         this.operation = operation;
     }
 
-    public String getUUID() {
-        return UUID;
-    }
-
-    public void setUUID(String UUID) {
-        this.UUID = UUID;
-    }
-
     public <T> T getData(Class<T> type) throws IOException {
         return JSON.getMapper().readValue(jsonStr, type);
     }
@@ -280,6 +241,14 @@ public class OperationVS {
 
     public void setVoteVS(VoteVSDto voteVS) {
         this.voteVS = voteVS;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
     }
 
 }

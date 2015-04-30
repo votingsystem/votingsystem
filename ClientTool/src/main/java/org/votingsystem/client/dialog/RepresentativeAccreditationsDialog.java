@@ -68,7 +68,7 @@ public class RepresentativeAccreditationsDialog extends DialogVS {
         datePicker.getStyleClass().add("text-field-ok");
 
 
-        Map mapToSign = operationVS.getDocumentToSignMap();
+        Map mapToSign = operationVS.getDocumentToSign();
         mapToSign.put("selectedDate", selectedDate.getTime());
         mapToSign.put("email", emailText.getText());
         mapToSign.put("UUID", UUID.randomUUID().toString());

@@ -63,10 +63,9 @@
                     var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
                     webAppMessage.serviceURL = "${restURL}/groupVS/deActivateUser"
                     webAppMessage.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + this.subscriptionData.groupvs.name + "'"
-                    webAppMessage.signedContent = {groupvsId:this.subscriptionData.groupvs.id,
-                        groupvsName:this.subscriptionData.groupvs.name,
-                        userVSName:this.subscriptionData.uservs.name, userVSNIF:this.subscriptionData.uservs.NIF,
-                        reason:e.detail}
+                    webAppMessage.jsonStr = JSON.stringify({groupvsId:this.subscriptionData.groupvs.id,
+                        groupvsName:this.subscriptionData.groupvs.name, userVSName:this.subscriptionData.uservs.name,
+                        userVSNIF:this.subscriptionData.uservs.NIF, reason:e.detail})
                     webAppMessage.contentType = 'application/pkcs7-signature'
                     webAppMessage.setCallback(function(appMessage) {
                         console.log("deActivateUserCallback - message: " + appMessage);
@@ -108,9 +107,9 @@
                 webAppMessage.serviceURL = "${restURL}/groupVS/activateUser"
                 webAppMessage.signedMessageSubject = "${msg.activateGroupUserMessageSubject}" + " '" +
                         this.subscriptionData.groupvs.name + "'"
-                webAppMessage.signedContent = {operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,
+                webAppMessage.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,
                     groupvsId:this.subscriptionData.groupvs.id, groupvsName:this.subscriptionData.groupvs.name,
-                    userVSName:this.subscriptionData.uservs.name, userVSNIF:this.subscriptionData.uservs.NIF}
+                    userVSName:this.subscriptionData.uservs.name, userVSNIF:this.subscriptionData.uservs.NIF})
                 webAppMessage.contentType = 'application/pkcs7-signature'
                 webAppMessage.setCallback(function(appMessage) {
                     console.log("activateUserCallback - message: " + appMessage);
