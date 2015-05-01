@@ -126,7 +126,7 @@ public class PublishRepresentativeDialog extends DialogVS {
             dto.setDescription(Base64.getEncoder().encodeToString(editor.getHtmlText().getBytes()));
             dto.setBase64Image(Base64.getEncoder().encodeToString(FileUtils.getBytesFromFile(representativeImage)));
             dto.setUUID(UUID.randomUUID().toString());
-            operationVS.setType(TypeVS.NEW_REPRESENTATIVE);
+            operationVS.setOperation(TypeVS.NEW_REPRESENTATIVE);
             operationVS.setJsonStr(JSON.getMapper().writeValueAsString(dto));
             operationVS.setSignedMessageSubject(ContextVS.getMessage("publishRepresentativeLbl"));
             operationVS.setServiceURL(ContextVS.getInstance().getAccessControl().getRepresentativeServiceURL());

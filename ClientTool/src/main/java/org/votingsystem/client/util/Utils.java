@@ -317,7 +317,7 @@ public class Utils {
     public static void receiptCancellation(final OperationVS operationVS, BrowserVS browserVS) throws Exception {
         log.info("receiptCancellation");
         switch(operationVS.getType()) {
-            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED:
+            case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
                 PlatformImpl.runLater(() -> {
                     FileChooser fileChooser = new FileChooser();
                     FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Zip (*.zip)",

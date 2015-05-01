@@ -39,7 +39,7 @@ public class RequestUtils {
             case CANCEL_VOTE:
                 viewer = "message-smime-votevs-canceler";
                 break;
-            case ANONYMOUS_REPRESENTATIVE_REQUEST:
+            case ANONYMOUS_SELECTION_CERT_REQUEST:
                 viewer = "message-smime-representative-anonymousdelegation-request";
                 break;
             case ACCESS_REQUEST:

@@ -21,7 +21,7 @@ var Operation = {
     REPRESENTATIVE_ACCREDITATIONS_REQUEST: "REPRESENTATIVE_ACCREDITATIONS_REQUEST",
     REPRESENTATIVE_REVOKE: "REPRESENTATIVE_REVOKE",
     REPRESENTATIVE_DATA:"REPRESENTATIVE_DATA",
-    ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED:"ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED",
+    ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:"ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION",
     REPRESENTATIVE_STATE:"REPRESENTATIVE_STATE"
 }
 
@@ -270,9 +270,8 @@ function getRadioValue(radioName) {
     }
 }
 
-var menuType = 'user'
-
-if(getParameterByName('menu') != null) menuType = getParameterByName('menu')
+var menuType = getParameterByName('menu')
+if(menuType == null) menuType = 'user'
 
 function updateMenuLinks() {
     var elem = 'a'

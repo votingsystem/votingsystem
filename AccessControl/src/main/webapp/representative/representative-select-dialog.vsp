@@ -171,10 +171,9 @@
                     } else {
                         representativeOperation = Operation.REPRESENTATIVE_SELECTION
                     }
-                    var operationVS = new OperationVS( representativeOperation)
-                    operationVS.jsonStr = JSON.stringify({operation:representativeOperation,
-                        representativeNif:this.representative.nif,
-                        representativeName:this.representativeFullName,
+                    var operationVS = new OperationVS(representativeOperation)
+                    var representative = {nif:this.representative.nif, name:this.representativeFullName}
+                    operationVS.jsonStr = JSON.stringify({operation:representativeOperation, representative:representative,
                         weeksOperationActive:this.$.numWeeksAnonymousDelegation.value})
                     operationVS.jsonStr = JSON.stringify(this.representative)
                     operationVS.serviceURL = "${restURL}/representative/delegation"

@@ -86,7 +86,7 @@
                 }
             },
             cancelAnonymousDelegation: function() {
-                var operationVS = new OperationVS(Operation.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED)
+                var operationVS = new OperationVS(Operation.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION)
                 operationVS.serviceURL = "${restURL}/representative/cancelAnonymousDelegation"
                 operationVS.signedMessageSubject = '${msg.cancelAnonymousDelegationMsgSubject}'
                 operationVS.setCallback(function(appMessage) {

@@ -176,7 +176,7 @@ public class CSRBean {
         return issuedCert;
         /*byte[] issuedCertPEMBytes = CertUtils.getPEMEncoded(issuedCert);
         Map data = [requestPublicKey:csr.getPublicKey()]
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST,
+        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST,
                 contentType: ContentTypeVS.TEXT_STREAM, data:data, message:"certificateVS_${certificate.id}",
                 messageBytes:issuedCertPEMBytes)*/
     }

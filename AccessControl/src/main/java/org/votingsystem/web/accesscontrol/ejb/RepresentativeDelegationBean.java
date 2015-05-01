@@ -220,8 +220,8 @@ public class RepresentativeDelegationBean {
         }
 
         public AnonymousDelegationRequest validateRequest() throws ExceptionVS {
-            if(TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST != operation) throw new ValidationExceptionVS(
-                    "expected operation 'ANONYMOUS_REPRESENTATIVE_REQUEST' but found '" + operation.toString() + "'");
+            if(TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST != operation) throw new ValidationExceptionVS(
+                    "expected operation 'ANONYMOUS_SELECTION_CERT_REQUEST' but found '" + operation.toString() + "'");
             return this;
         }
         public AnonymousDelegationRequest validateDelegation() throws ExceptionVS {
@@ -232,8 +232,8 @@ public class RepresentativeDelegationBean {
         }
 
         public AnonymousDelegationRequest validateAnonymousDelegationCancellation(UserVS userVS) throws ExceptionVS, NoSuchAlgorithmException {
-            if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED != operation) throw new ValidationExceptionVS(
-                    "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED' but found '" + operation.toString() + "'");
+            if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION != operation) throw new ValidationExceptionVS(
+                    "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION' but found '" + operation.toString() + "'");
             validateDelegationData();
             anonymousDelegation = getAnonymousDelegation(userVS);
             if(anonymousDelegation == null)  throw new ValidationExceptionVS(

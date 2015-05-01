@@ -70,7 +70,7 @@
             },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
-                if('${TypeVS.ANONYMOUS_REPRESENTATIVE_REQUEST.toString()}' != this.smimeMessageContent.operation )
+                if('${TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST.toString()}' != this.smimeMessageContent.operation )
                     this.messageToUser = '${msg.smimeTypeErrorMsg}' + " - " + this.smimeMessageContent.operation
             },
             checkReceipt: function() {

@@ -32,7 +32,6 @@ public class OperationVS {
     private String message;
     private String nif;
     private String documentURL;
-    private String timeStampServerURL;
     private String serverURL;
     private String serviceURL;
     private String receiverName;
@@ -63,16 +62,6 @@ public class OperationVS {
         this.message = message;
     }
 
-    public String getTimeStampServerURL() {
-        if(timeStampServerURL == null && targetServer == null) return null;
-        else if(timeStampServerURL == null && targetServer != null) return targetServer.getTimeStampServerURL();
-        else return timeStampServerURL;
-    }
-
-    public void setTimeStampServerURL(String timeStampServerURL) {
-        this.timeStampServerURL = timeStampServerURL;
-    }
-
     public String getServerURL() {
         return serverURL;
     }
@@ -87,11 +76,7 @@ public class OperationVS {
     }
 
     public String getCaption() {
-        return ContextVS.getInstance().getMessage(getOperation().toString());
-    }
-
-    public void setType(TypeVS operation) {
-        this.setOperation(operation);
+        return ContextVS.getInstance().getMessage(operation.toString());
     }
 
     public Integer getStatusCode() {

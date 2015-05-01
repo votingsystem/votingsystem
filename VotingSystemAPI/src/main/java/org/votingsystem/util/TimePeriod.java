@@ -18,8 +18,8 @@ public class TimePeriod {
     public TimePeriod(){}
 
     public TimePeriod(Date dateFrom, Date dateTo) {
-        this.dateFrom = dateFrom;
-        this.dateTo = dateTo;
+        this.dateFrom = new Date(dateFrom.getTime());
+        this.dateTo = new Date(dateTo.getTime());
     }
 
     public Date getDateFrom() {

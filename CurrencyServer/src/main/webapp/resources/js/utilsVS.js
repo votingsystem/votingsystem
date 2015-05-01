@@ -293,8 +293,8 @@ function getFnName(fn) {
 	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
 }
 
-var menuType = 'user'
-if(getParameterByName('menu') != null) menuType = getParameterByName('menu')
+var menuType = getParameterByName('menu')
+if(menuType == null) menuType = 'user'
 
 function updateMenuLinks() {
     var elem = 'a'
