@@ -114,7 +114,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div hidden="{{step !== 'anonymousDelegationResponse'}}">
                     <p style="text-align: center; font-size: 1.2em;">
                         {{anonymousDelegationResponseMsg}}
@@ -134,7 +133,6 @@
             anonymousDelegationMsg:null,
             representative:null,
             anonymousLbl:"${msg.anonymousLbl}",
-            hashCertVSBase64:null,
             anonymousDelegationResponseMsg:null,
             representativeFullName:null,
             publicLbl:"${msg.publicLbl}",
@@ -175,7 +173,6 @@
                     var operationVS = new OperationVS(representativeOperation)
                     operationVS.jsonStr = JSON.stringify({operation:representativeOperation, representative:this.representative,
                         weeksOperationActive:this.$.numWeeksAnonymousDelegation.value})
-                    operationVS.serviceURL = "${restURL}/representative/delegation"
                     operationVS.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'
                     operationVS.setCallback(function(appMessage) {
                         console.log("selectRepresentativeCallback - message: " + appMessage);
@@ -185,7 +182,6 @@
                         if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                             if(this.isAnonymousDelegation) {
                                 this.step = 'anonymousDelegationResponse'
-                                this.hashCertVSBase64 = appMessageJSON.message
                                 this.anonymousDelegationResponseMsg = "${msg.selectedRepresentativeMsg}".format(this.representativeFullName)
                                 return
                             } else {

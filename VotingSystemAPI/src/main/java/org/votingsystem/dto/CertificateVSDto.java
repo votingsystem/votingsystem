@@ -6,6 +6,7 @@ import org.votingsystem.model.CertificateVS;
 import org.votingsystem.signature.util.CertUtils;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
@@ -16,7 +17,9 @@ import java.util.Date;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CertificateVSDto {
+public class CertificateVSDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     //SerialNumber as String to avoid Javascript problem handling such big numbers
     private String serialNumber;

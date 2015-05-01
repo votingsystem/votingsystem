@@ -22,7 +22,6 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
 
-
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
@@ -34,6 +33,8 @@ public class RepresentativeDelegationDto implements Serializable {
     private TypeVS operation;
     private String originHashCertVS;
     private String hashCertVSBase64;
+    private String originHashAnonymousDelegation;
+    private String hashAnonymousDelegation;
     private Integer weeksOperationActive;
     private String serverURL;
     private UserVSDto representative;
@@ -143,7 +144,16 @@ public class RepresentativeDelegationDto implements Serializable {
     }
 
     @JsonIgnore
-    public RepresentativeDelegationDto getCancelationRequest() {
+    public RepresentativeDelegationDto getAnonymousCancelationRequest() {
+        RepresentativeDelegationDto cancelationDto = getRequest(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
+        cancelationDto.setOriginHashAnonymousDelegation(originHashAnonymousDelegation);
+        cancelationDto.setHashAnonymousDelegation(hashAnonymousDelegation);
+        cancelationDto.setHashCertVSBase64(null);
+        return cancelationDto;
+    }
+
+    @JsonIgnore
+    public RepresentativeDelegationDto getAnonymousRepresentationDocumentCancelationRequest() {
         RepresentativeDelegationDto cancelationDto = getRequest(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
         cancelationDto.setOriginHashCertVS(originHashCertVS);
         return cancelationDto;
@@ -154,6 +164,8 @@ public class RepresentativeDelegationDto implements Serializable {
             NoSuchProviderException, InvalidKeyException, SignatureException {
         originHashCertVS = java.util.UUID.randomUUID().toString();
         hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVS, ContextVS.VOTING_DATA_DIGEST);
+        originHashAnonymousDelegation = java.util.UUID.randomUUID().toString();
+        hashAnonymousDelegation = CMSUtils.getHashBase64(originHashAnonymousDelegation, ContextVS.VOTING_DATA_DIGEST);
         dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
         dateTo = DateUtils.addDays(dateFrom, weeksOperationActive * 7).getTime();
         certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(
@@ -213,5 +225,21 @@ public class RepresentativeDelegationDto implements Serializable {
 
     public void setReceipt(SMIMEMessage receipt) {
         this.receipt = receipt;
+    }
+
+    public String getOriginHashAnonymousDelegation() {
+        return originHashAnonymousDelegation;
+    }
+
+    public void setOriginHashAnonymousDelegation(String originHashAnonymousDelegation) {
+        this.originHashAnonymousDelegation = originHashAnonymousDelegation;
+    }
+
+    public String getHashAnonymousDelegation() {
+        return hashAnonymousDelegation;
+    }
+
+    public void setHashAnonymousDelegation(String hashAnonymousDelegation) {
+        this.hashAnonymousDelegation = hashAnonymousDelegation;
     }
 }

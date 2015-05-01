@@ -180,7 +180,6 @@ public class RepresentativeResource {
         return Response.ok().entity(image.getFileBytes()).type(ContentTypeVS.IMAGE.getName()).build();
     }
 
-
     @Path("eventVS/id/{id}/accreditationsBackup") @GET
     public Response accreditationsBackupForEvent(@PathParam("id") Long id) throws IOException, ExceptionVS {
         EventVSElection eventVS = dao.find(EventVSElection.class, id);
@@ -192,17 +191,11 @@ public class RepresentativeResource {
         return Response.ok().entity("request procesed check your email").build();
     }
 
-    @Path("/anonymousDelegation")
+    @Path("/anonymousDelegation") @POST
     public Response anonymousDelegation(MessageSMIME messageSMIME) throws Exception {
         RepresentationDocument response = representativeDelegationBean.saveAnonymousDelegation(messageSMIME);
         return Response.ok().entity(response.getActivationSMIME().getContent()).type(
                 MediaTypeVS.JSON_SIGNED).build();
-    }
-
-    @Path("/cancelAnonymousDelegation")
-    public Response cancelAnonymousDelegation(MessageSMIME messageSMIME) throws Exception {
-        MessageSMIME response = representativeDelegationBean.cancelAnonymousDelegation(messageSMIME);
-        return Response.ok().entity(response.getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
 

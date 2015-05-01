@@ -1,17 +1,18 @@
 package org.votingsystem.web.accesscontrol.servlet;
 
 
-import org.votingsystem.dto.MessageDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.voting.AnonymousDelegation;
+import org.votingsystem.model.voting.RepresentationDocument;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MultipartRequestVS;
 
 import javax.inject.Inject;
@@ -30,11 +31,11 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@WebServlet("/representative/anonymousDelegationRequest")
+@WebServlet("/representative/cancelAnonymousDelegation")
 @MultipartConfig(location="/tmp", fileSizeThreshold=1024*1024, maxFileSize=1024*1024*50, maxRequestSize=1024*1024*5*50)
-public class AnonymousRepresentativeDelegationServlet extends HttpServlet {
+public class AnonymousRepresentativeDelegationCancelerServlet extends HttpServlet {
 
-    private final static Logger log = Logger.getLogger(AnonymousRepresentativeDelegationServlet.class.getSimpleName());
+    private final static Logger log = Logger.getLogger(AnonymousRepresentativeDelegationCancelerServlet.class.getSimpleName());
 
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;
@@ -50,15 +51,20 @@ public class AnonymousRepresentativeDelegationServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException, IOException {
         try {
-            MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ANONYMOUS_DELEGATION);
+            MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(),
+                    MultipartRequestVS.Type.ANONYMOUS_DELEGATION_CANCELATION);
             MessageSMIME messageSMIME = signatureBean.validateSMIME(
                     requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
-            X509Certificate anonymousIssuedCert = representativeDelegationBean.validateAnonymousRequest(
-                    messageSMIME, requestVS.getCSRBytes());
-            byte[] issuedCertPEMBytes = CertUtils.getPEMEncoded(anonymousIssuedCert);
-            resp.setContentType(MediaTypeVS.PEM);
-            resp.setContentLength(issuedCertPEMBytes.length);
-            resp.getOutputStream().write(issuedCertPEMBytes);
+            MessageSMIME anonymousMessageSMIME = signatureBean.validateSMIME(
+                    requestVS.getAnonymousSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
+            RepresentationDocument representationDocument =
+                    representativeDelegationBean.cancelAnonymousRepresentationDocument(anonymousMessageSMIME);
+            AnonymousDelegation anonymousDelegation = representativeDelegationBean.cancelAnonymousDelegation(messageSMIME);
+
+            byte[] receiptBytes = anonymousDelegation.getCancellationSMIME().getContent();
+            resp.setContentType(MediaTypeVS.JSON_SIGNED);
+            resp.setContentLength(receiptBytes.length);
+            resp.getOutputStream().write(receiptBytes);
         } catch (ExceptionVS ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             if(ex.getMessageDto() != null) {

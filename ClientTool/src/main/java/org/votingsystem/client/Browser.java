@@ -44,7 +44,7 @@ public class Browser extends VBox implements BrowserVS {
     private BrowserVSToolbar toolBar;
     private BrowserVSTabPane tabPaneVS;
     private BrowserVSPane browserHelper;
-    private Map<String, WebView> webViewMap = new HashMap<String, WebView>();
+    private Map<String, WebView> webViewMap = new HashMap<>();
     private static Browser INSTANCE;
 
     public static Browser init(Stage browserStage) {

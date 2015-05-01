@@ -12,11 +12,12 @@ import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.EncryptedBundleDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
+import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.voting.RepresentationState;
 import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
@@ -87,9 +88,14 @@ public class SessionService {
             flush();
         } else {
             representativeStateDto = JSON.getMapper().readValue(representativeStateFile, RepresentationStateDto.class);
-            if(stateDto != null) {
+            if(stateDto != null && stateDto.getBase64ContentDigest() != null) {
                 if(!stateDto.getBase64ContentDigest().equals(representativeStateDto.getBase64ContentDigest())) {
                     log.info("Base64ContentDigest mismatch - updating local representativeState");
+                    representativeStateDto = stateDto;
+                    flush();
+                }
+            } else if(stateDto != null && stateDto.getState() == RepresentationState.WITHOUT_REPRESENTATION) {
+                if(representativeStateDto.getState() != RepresentationState.WITHOUT_REPRESENTATION) {
                     representativeStateDto = stateDto;
                     flush();
                 }

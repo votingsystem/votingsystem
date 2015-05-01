@@ -27,6 +27,10 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name="status", nullable=false)
     private Status status;
+
+
+    @Column(name="originHashAnonymousDelegation", unique=true) private String originHashAnonymousDelegation;
+    @Column(name="hashAnonymousDelegation", unique=true) private String hashAnonymousDelegation;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
     @OneToOne private MessageSMIME delegationSMIME;
@@ -62,7 +66,6 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
     }
-
 
     public void setId(Long id) {
 		this.id = id;
@@ -144,6 +147,23 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
 
     public void setDateTo(Date dateTo) {
         this.dateTo = dateTo;
+    }
+
+    public String getOriginHashAnonymousDelegation() {
+        return originHashAnonymousDelegation;
+    }
+
+    public AnonymousDelegation setOriginHashAnonymousDelegation(String originHashAnonymousDelegation) {
+        this.originHashAnonymousDelegation = originHashAnonymousDelegation;
+        return this;
+    }
+
+    public String getHashAnonymousDelegation() {
+        return hashAnonymousDelegation;
+    }
+
+    public void setHashAnonymousDelegation(String hashAnonymousDelegation) {
+        this.hashAnonymousDelegation = hashAnonymousDelegation;
     }
 
 }

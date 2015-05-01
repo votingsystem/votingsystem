@@ -7,6 +7,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.CryptoTokenVS;
 
+import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
@@ -14,7 +15,9 @@ import java.util.Collection;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DeviceVSDto {
+public class DeviceVSDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private String deviceId;

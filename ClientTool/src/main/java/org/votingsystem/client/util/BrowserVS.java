@@ -5,8 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.client.dto.SignalVSDto;
 import org.votingsystem.dto.OperationVS;
 
-import java.util.Map;
-
 /**
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */

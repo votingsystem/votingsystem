@@ -5,6 +5,7 @@
 <link href="${elementURL}/representative/representative-info.vsp" rel="import"/>
 <link href="${elementURL}/representative/representation-state.vsp" rel="import"/>
 
+
 <polymer-element name="representative-list" attributes="url">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />

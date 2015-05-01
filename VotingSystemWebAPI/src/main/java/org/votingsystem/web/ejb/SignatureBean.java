@@ -394,7 +394,9 @@ public class SignatureBean {
         Set<UserVS> signersVS = smimeMessage.getSigners();
         if(signersVS.isEmpty()) throw new ExceptionVS("documentWithoutSignersErrorMsg");
         CertUtils.CertValidatorResultVS validatorResult = null;
-        String signerNIF = org.votingsystem.util.NifUtils.validate(smimeMessage.getSigner().getNif());
+        String signerNIF = null;
+        if(smimeMessage.getSigner().getNif() != null) signerNIF =
+                org.votingsystem.util.NifUtils.validate(smimeMessage.getSigner().getNif());
         SMIMEDto smimeDto = new SMIMEDto();
         for(UserVS userVS: signersVS) {
             if(userVS.getTimeStampToken() != null) timeStampBean.validateToken(userVS.getTimeStampToken());

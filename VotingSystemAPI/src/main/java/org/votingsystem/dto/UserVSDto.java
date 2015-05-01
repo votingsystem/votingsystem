@@ -8,6 +8,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.GroupVS;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +17,9 @@ import java.util.Set;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserVSDto {
+public class UserVSDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private UserVS.State state;

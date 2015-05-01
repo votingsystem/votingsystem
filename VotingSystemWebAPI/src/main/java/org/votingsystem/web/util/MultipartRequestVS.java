@@ -17,10 +17,10 @@ public class MultipartRequestVS {
 
     private final static Logger log = Logger.getLogger(MultipartRequestVS.class.getSimpleName());
 
-    public enum Type {CURRENCY_REQUEST, ACCESS_REQUEST, ANONYMOUS_DELEGATION}
+    public enum Type {CURRENCY_REQUEST, ACCESS_REQUEST, ANONYMOUS_DELEGATION, ANONYMOUS_DELEGATION_CANCELATION}
     private SMIMEMessage smime;
+    private SMIMEMessage anonymousSMIME;
     private byte[] csrBytes;
-    private byte[] imageBytes;
 
     public MultipartRequestVS(Collection<Part> parts, Type type) throws Exception {
         switch (type) {
@@ -63,6 +63,19 @@ public class MultipartRequestVS {
                 if(csrBytes == null) throw new ValidationExceptionVS("ERROR - missing file: " + ContextVS.CSR_FILE_NAME);
                 if(smime == null) throw new ValidationExceptionVS("ERROR - missing file: " + ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
                 break;
+            case ANONYMOUS_DELEGATION_CANCELATION:
+                for(Part part : parts) {
+                    if(part.getName().contains(ContextVS.SMIME_FILE_NAME)) {
+                        smime = new SMIMEMessage(part.getInputStream());
+                    } else if(part.getName().contains(ContextVS.SMIME_ANONYMOUS_FILE_NAME)) {
+                        anonymousSMIME = new SMIMEMessage(part.getInputStream());
+                    } else {
+                        throw new ValidationExceptionVS("ANONYMOUS_DELEGATION_CANCELATION - bad request - file name: " + part.getName());
+                    }
+                }
+                if(anonymousSMIME == null) throw new ValidationExceptionVS("ERROR - missing file: " + ContextVS.SMIME_ANONYMOUS_FILE_NAME);
+                if(smime == null) throw new ValidationExceptionVS("ERROR - missing file: " + ContextVS.SMIME_FILE_NAME);
+                break;
             default: throw new ExceptionVS("unprocessed type " + type);
         }
     }
@@ -71,12 +84,13 @@ public class MultipartRequestVS {
         return smime;
     }
 
+    public SMIMEMessage getAnonymousSMIME() {
+        return anonymousSMIME;
+    }
+
     public byte[] getCSRBytes() {
         return csrBytes;
     }
 
-    public byte[] getImageBytes() {
-        return imageBytes;
-    }
 
 }

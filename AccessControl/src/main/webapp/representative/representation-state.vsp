@@ -31,7 +31,7 @@
                 </div>
                 <div id="representativeInfo" style="margin:10px 0 10px 0;">
                     <div style="color:#6c0404;text-align: center;">{{representativeFullName}}</div>
-                    <div hidden="{{!representationState.representative.description}}"
+                    <div hidden?="{{!representationState.representative.description}}"
                             style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center;
                             padding:10px 20px 10px 20px; word-wrap:break-word;">
                         <vs-html-echo html="{{representationState.representative.description}}"></vs-html-echo>
@@ -42,9 +42,9 @@
                     {{representationState.stateMsg}}
                     <div id="delegationTimeInfoDiv" horizontal layout style="margin:10px 0 0 0;display: none;font-size: 0.9em">
                         <b>${msg.validFromLbl}:</b>
-                        {{representationState.dateFrom}}
+                        {{getDate(representationState.dateFrom)}}
                         <span style="margin: 0 0 0 20px;"><b>${msg.toLbl}:</b></span>
-                        {{representationState.dateTo}}
+                        {{getDate(representationState.dateTo)}}
                     </div>
                 </div>
                 <div style="color:#02227a;text-align: center; margin:10px 0 10px 0;">{{representationState.lastCheckedDateMsg}}</div>
@@ -74,7 +74,6 @@
                     var operationVS = new OperationVS(Operation.REPRESENTATIVE_STATE)
                     var result = VotingSystemClient.call(operationVS)
                     this.representationState = toJSON(decodeURIComponent(escape(window.atob(result))));
-                    this.message = JSON.stringify(representationState.representative)
                     if(this.representationState.representative) {
                         this.representativeFullName = this.representationState.representative.firstName + " " +
                                 this.representationState.representative.lastName
@@ -82,8 +81,13 @@
                     if(this.representationState.state === "WITH_ANONYMOUS_REPRESENTATION") {
                         this.$.delegationTimeInfoDiv.style.display = 'block'
                         this.$.cancellationButton.style.display = 'block'
+                    } else if(this.representationState.state === "WITHOUT_REPRESENTATION") {
+                        this.close();
                     }
                 }
+            },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
             },
             cancelAnonymousDelegation: function() {
                 var operationVS = new OperationVS(Operation.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION)

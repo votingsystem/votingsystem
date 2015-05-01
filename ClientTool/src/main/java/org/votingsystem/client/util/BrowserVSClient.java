@@ -16,12 +16,9 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.*;
 import org.votingsystem.util.currency.Wallet;
-
 import java.util.Base64;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import static org.votingsystem.client.Browser.showMessage;
 
 /**

@@ -19,9 +19,9 @@ import org.votingsystem.dto.voting.RepresentativeDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.*;
+
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;

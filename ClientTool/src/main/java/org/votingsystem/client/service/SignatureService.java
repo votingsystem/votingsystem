@@ -12,8 +12,8 @@ import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
-import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.CertExtensionDto;
+import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -135,7 +135,7 @@ public class SignatureService extends Service<ResponseVS> {
                             responseVS = processAnonymousDelegation(operationVS);
                             break;
                         case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
-                            responseVS = processCancelAnonymousDelegation(operationVS);
+                            responseVS = processAnonymousDelegationCancelation(operationVS);
                             break;
                         default:
                             responseVS = sendSMIME(operationVS);
@@ -330,27 +330,34 @@ public class SignatureService extends Service<ResponseVS> {
         }
 
         //we know this is done in a background thread
-        private ResponseVS processCancelAnonymousDelegation(OperationVS operationVS) throws Exception {
-            String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
+        private  ResponseVS processAnonymousDelegationCancelation(OperationVS operationVS) throws Exception {
             RepresentativeDelegationDto delegation = SessionService.getInstance().getAnonymousDelegationDto();
             if(delegation == null) return new ResponseVS(ResponseVS.SC_ERROR,
                     ContextVS.getMessage("anonymousDelegationDataMissingMsg"));
+            RepresentativeDelegationDto anonymousCancelationRequest = delegation.getAnonymousCancelationRequest();
+            RepresentativeDelegationDto anonymousRepresentationDocumentCancelationRequest =
+                    delegation.getAnonymousRepresentationDocumentCancelationRequest();
             SMIMEMessage smimeMessage = SessionService.getSMIME(null,
-                    operationVS.getReceiverName(), delegation.getCancelationRequest().toString(),
+                    operationVS.getReceiverName(), JSON.getMapper().writeValueAsString(anonymousCancelationRequest),
                     password, operationVS.getSignedMessageSubject());
+            SMIMEMessage anonymousSmimeMessage = delegation.getCertificationRequest().getSMIME(delegation.getHashCertVSBase64(),
+                    ContextVS.getInstance().getAccessControl().getName(),
+                    JSON.getMapper().writeValueAsString(anonymousRepresentationDocumentCancelationRequest),
+                    operationVS.getSignedMessageSubject(), null);
+            Map<String, Object> mapToSend = new HashMap<>();
+            mapToSend.put(ContextVS.SMIME_FILE_NAME, smimeMessage.getBytes());
+            mapToSend.put(ContextVS.SMIME_ANONYMOUS_FILE_NAME, anonymousSmimeMessage.getBytes());
             updateMessage(operationVS.getSignedMessageSubject());
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                    operationVS.getServiceURL());
+            ResponseVS responseVS =  HttpHelper.getInstance().sendObjectMap(mapToSend,
+                    ContextVS.getInstance().getAccessControl().getAnonymousDelegationCancelerServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessage delegationReceipt = responseVS.getSMIME();
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    Collection matches = delegationReceipt.checkSignerCert(
-                            ContextVS.getInstance().getAccessControl().getX509Certificate());
-                    if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
-                    responseVS.setSMIME(delegationReceipt);
-                    responseVS.setMessage(ContextVS.getMessage("cancelAnonymousRepresentationOkMsg"));
-                    return responseVS;
-                }
+                Collection matches = delegationReceipt.checkSignerCert(
+                        ContextVS.getInstance().getAccessControl().getX509Certificate());
+                if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
+                responseVS.setSMIME(delegationReceipt);
+                responseVS.setMessage(ContextVS.getMessage("cancelAnonymousRepresentationOkMsg"));
+                return responseVS;
             }
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("errorLbl"));
         }
@@ -399,8 +406,8 @@ public class SignatureService extends Service<ResponseVS> {
                     anonymousDelegation.setDelegationReceipt(responseVS.getSMIME(),
                             ContextVS.getInstance().getAccessControl().getX509Certificate());
                     SessionService.getInstance().setAnonymousDelegationDto(anonymousDelegation);
-                }
-                return responseVS;
+                    return ResponseVS.OK();
+                } else return responseVS;
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 return new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
