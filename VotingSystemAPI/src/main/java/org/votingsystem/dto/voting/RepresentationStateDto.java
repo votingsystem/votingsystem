@@ -33,7 +33,7 @@ public class RepresentationStateDto {
         setAnonymousDelegationObject(new String(ObjectUtils.serializeObject(delegation), "UTF-8"));
         setDateFrom(delegation.getDateFrom());
         setDateTo(delegation.getDateTo());
-        setBase64ContentDigest(delegation.getCancelVoteReceipt().getContentDigestStr());
+        setBase64ContentDigest(delegation.getDelegationReceipt().getContentDigestStr());
     }
 
     public RepresentationStateDto clone() {
