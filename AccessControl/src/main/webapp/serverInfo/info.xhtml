@@ -1,7 +1,5 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:h="http://java.sun.com/jsf/html"
-                xmlns:f="http://java.sun.com/jsf/core"
                 template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="head">
@@ -56,7 +54,7 @@
                         <paper-tab name="info" style="width: 400px">${msg.infoLbl}</paper-tab>
                         <paper-tab name="appData">${msg.appDataLabel}</paper-tab>
                     </paper-tabs>
-                    <div id="infoDiv" class="tabContent" style="display:{{selectedTab == 'info'?'block':'none'}}">
+                    <div id="infoDiv" hidden?="{{selectedTab !== 'info'}}"  class="tabContent" style="display:{{selectedTab == 'info'?'block':'none'}}">
                         <div class="mainLink"><a href="http://www.sistemavotacion.org">${msg.webSiteLbl}</a></div>
                         <div class="mainLink"><a href="https://github.com/votingsystem/votingsystem/tree/master/AccessControl">
                             ${msg.sourceCodeLbl}</a>

@@ -5,7 +5,7 @@
 <link href="${resourceURL}/paper-input/paper-input.html" rel="import"/>
 
 
-<polymer-element name="reason-dialog" attributes="caption opened isForAdmins messageToUser">
+<polymer-element name="reason-dialog" attributes="caption opened isMenuAdmin messageToUser">
     <template>
         <style></style>
         <core-overlay flex vertical id="coreOverlay" vertical opened="{{opened}}" layered="true" sizingTarget="{{$.container}}">
@@ -23,11 +23,11 @@
             <div id="container" layout vertical class="card" style="overflow-y: auto; width:450px; padding:10px;">
                 <h3 style="color: #6c0404;">{{caption}}</h3>
 
-                <div class="center" style="color: #6c0404;display:{{isForAdmins?'block':'none'}}">
+                <div hidden?="{{!isMenuAdmin}}" class="center" style="color: #6c0404;">
                     <core-icon icon="warning" style="fill:#6c0404;"></core-icon>
                     ${msg.systemAdminReservedOperationMsg}
                 </div>
-                <div class="center" style="color: #6c0404;display:{{messageToUser?'block':'none'}}">
+                <div hidden?="{{!messageToUser}}" class="center" style="color: #6c0404;">
                     {{messageToUser}}
                 </div>
                 <div style="margin:20px 0px 10px 0px;">
@@ -47,7 +47,7 @@
 <script>
     Polymer('reason-dialog', {
         opened: false,
-        isForAdmins: false,
+        isMenuAdmin: false,
         ready: function() { },
         openedChanged: function() {},
         submitForm: function() {

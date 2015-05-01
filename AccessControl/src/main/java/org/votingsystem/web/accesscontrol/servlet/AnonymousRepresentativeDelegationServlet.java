@@ -1,10 +1,14 @@
 package org.votingsystem.web.accesscontrol.servlet;
 
 
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -27,9 +31,9 @@ import java.util.logging.Logger;
  */
 @WebServlet("/representative/anonymousDelegationRequest")
 @MultipartConfig(location="/tmp", fileSizeThreshold=1024*1024, maxFileSize=1024*1024*50, maxRequestSize=1024*1024*5*50)
-public class RepresentativeAnonymousDelegationServlet extends HttpServlet {
+public class AnonymousRepresentativeDelegationServlet extends HttpServlet {
 
-    private final static Logger log = Logger.getLogger(RepresentativeAnonymousDelegationServlet.class.getSimpleName());
+    private final static Logger log = Logger.getLogger(AnonymousRepresentativeDelegationServlet.class.getSimpleName());
 
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;
@@ -50,15 +54,26 @@ public class RepresentativeAnonymousDelegationServlet extends HttpServlet {
             X509Certificate anonymousIssuedCert = representativeDelegationBean.validateAnonymousRequest(
                     messageSMIME, requestVS.getCSRBytes());
             byte[] issuedCertPEMBytes = CertUtils.getPEMEncoded(anonymousIssuedCert);
-            resp.setContentType(ContentTypeVS.PEM.getName());
+            resp.setContentType(MediaTypeVS.PEM);
             resp.setContentLength(issuedCertPEMBytes.length);
             resp.getOutputStream().write(issuedCertPEMBytes);
-        } catch (Exception ex) {
+        } catch (ExceptionVS ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
-            resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
-            String message = ex.getMessage() != null ? ex.getMessage(): "EXCEPTION: " + ex.getClass();
-            resp.getOutputStream().write(message.getBytes());
+            if(ex.getMessageDto() != null) {
+                resp.setStatus(ex.getMessageDto().getStatusCode());
+                resp.setContentType(MediaTypeVS.JSON);
+                resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(ex.getMessageDto()));
+            } else writeException(resp, ex);
+        } catch (Exception ex) {
+            writeException(resp, ex);
         }
+    }
+
+    private void writeException(HttpServletResponse resp, Exception ex) throws IOException {
+        log.log(Level.SEVERE, ex.getMessage(), ex);
+        resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
+        String message = ex.getMessage() != null ? ex.getMessage(): "EXCEPTION: " + ex.getClass();
+        resp.getOutputStream().write(message.getBytes());
     }
 
     @Override

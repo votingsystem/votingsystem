@@ -19,8 +19,8 @@
         <core-ajax id="ajax" url="{{url}}" response="{{eventsVSMap}}" handleAs="json"
                    contentType="application/json" on-core-complete="{{ajaxComplete}}"></core-ajax>
         <core-signals on-core-signal-eventvs-election-closed="{{closeEventVSDetails}}"></core-signals>
-        <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
-                             transitions="cross-fade-all" style="display:{{loading?'none':'block'}}">
+        <core-animated-pages hidden?="{{loading}}" id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
+                             transitions="cross-fade-all">
             <section id="page1">
                 <div cross-fade>
                     <div layout horizontal center center-justified>

@@ -26,7 +26,7 @@
             }
         </style>
         <div class="card" layout vertical>
-            <div class="errorMessage" style="display:{{errorMessage?'block':'none'}}">{{errorMessage}}</div>
+            <div hidden?="{{!errorMessage}}" class="errorMessage">{{errorMessage}}</div>
             <div class="userVS">{{infoName}} - {{name}}</div>
             <div layout horizontal center center-justified>
                 ${msg.numExpensesLbl}: {{balance.transactionFromList.length}} ---

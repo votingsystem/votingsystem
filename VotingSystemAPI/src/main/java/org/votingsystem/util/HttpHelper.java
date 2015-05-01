@@ -403,8 +403,7 @@ public class HttpHelper {
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
             log.info("----------------------------------------");
-            log.info(response.getStatusLine().toString() + " - Content-Type: " + header.getValue() +
-                    " - contentTypeVS: " + responseContentType +
+            log.info(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType +
                     " - connManager stats: " + connManager.getTotalStats().toString());
             log.info("----------------------------------------");
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());

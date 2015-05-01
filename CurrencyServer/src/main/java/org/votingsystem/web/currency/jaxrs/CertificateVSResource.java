@@ -158,7 +158,7 @@ public class CertificateVSResource {
             if(contentType.contains("pem") || "pem".equals(format)) {
                 resp.setHeader("Content-Disposition", "inline; filename='trustedCert_" + serialNumber + "'");
                 return Response.ok().entity(CertUtils.getPEMEncoded(certificate.getX509Cert()))
-                        .type(ContentTypeVS.PEM.getName()).build();
+                        .type(MediaTypeVS.PEM).build();
             } else {
                 if(req.getContentType().contains("json")) {
                    return Response.ok().entity(JSON.getMapper().writeValueAsBytes(new CertificateVSDto(certificate)));

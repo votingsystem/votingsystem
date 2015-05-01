@@ -1,5 +1,4 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="org.votingsystem.util.TypeVS" %>
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-shadow/paper-shadow.html" rel="import"/>
@@ -21,7 +20,7 @@
                 color:#aaaaaa; font-size:1.1em; margin:0 0 15px 0;font-style:italic;
             }
         </style>
-        <div layout vertical style="margin: 10px auto;">
+        <div layout vertical style="margin: 10px auto; max-width: 800px;">
             <div  layout horizontal center center-justified>
                 <div flex></div>
                 <div class="pageHeader"><h3>${msg.anonymousdelegationRequest}</h3></div>
@@ -33,10 +32,9 @@
                     </template>
                 </div>
             </div>
-            <div class="timeStampMsg" style="display:{{timeStampDate ? 'block':'none'}}">
+            <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
                 <b>${msg.timeStampDateLbl}: </b>{{timeStampDate}}
             </div>
-
             <template if="{{messageToUser}}">
                 <div  layout horizontal center center-justified  class="messageToUser">
                     <div>
@@ -46,8 +44,8 @@
                 </div>
             </template>
             <div><b>${msg.weeksAnonymousDelegation}: </b>{{smimeMessageContent.weeksOperationActive}}</div>
-            <div horizontal layout style="margin:10px 0 0 0;"><b>${msg.validFromLbl}:</b> {{smimeMessageContent.dateFrom}}
-                <span style="margin: 0 0 0 20px;"><b>${msg.toLbl}:</b></span> {{smimeMessageContent.dateFrom}}</div>
+            <div horizontal layout style="margin:10px 0 0 0;"><b>${msg.validFromLbl}:</b> {{getDate(smimeMessageContent.dateFrom)}}
+                <span style="margin: 0 0 0 20px;"><b>${msg.toLbl}:</b></span> {{getDate(smimeMessageContent.dateFrom)}}</div>
         </div>
     </template>
     <script>
@@ -64,13 +62,16 @@
                     this.isClientToolConnected = true
                 }.bind(this))
             },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
+            },
             attached: function () {
                 console.log(this.tagName + " - attached")
                 this.fire('attached', null);
             },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
-                if('${TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST.toString()}' != this.smimeMessageContent.operation )
+                if('ANONYMOUS_SELECTION_CERT_REQUEST' != this.smimeMessageContent.operation )
                     this.messageToUser = '${msg.smimeTypeErrorMsg}' + " - " + this.smimeMessageContent.operation
             },
             checkReceipt: function() {

@@ -42,8 +42,8 @@
             </div>
         </div>
 
-        <div class="center card" style="font-weight: bold;color: {{status == 200?'#388746':'#ba0011'}};
-            margin:10px auto 10px auto; border: 1px solid #ccc; background: #f9f9f9;padding:10px 20px 10px 20px; display:{{messageToUser == null?'none':'block'}};">
+        <div hidden?="{{!messageToUser}}" class="center card" style="font-weight: bold;color: {{status == 200?'#388746':'#ba0011'}};
+            margin:10px auto 10px auto; border: 1px solid #ccc; background: #f9f9f9;padding:10px 20px 10px 20px;">
             <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                 <div id="messageToUser">{{messageToUser}}</div>
                 <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon></div>

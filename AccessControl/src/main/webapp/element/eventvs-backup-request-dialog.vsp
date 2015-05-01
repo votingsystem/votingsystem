@@ -20,7 +20,7 @@
                     </div>
                 </div>
 
-                <div style="display:{{messageToUser? 'block':'none'}}">
+                <div hidden?="{{!messageToUser}}">
                     <div class="messageToUser">
                         <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                             <div id="messageToUser">{{messageToUser}}</div>

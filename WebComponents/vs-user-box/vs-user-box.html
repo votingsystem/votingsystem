@@ -18,7 +18,7 @@
             }
         </style>
         <vs-i18n id="i18nVS"></vs-i18n>
-        <div layout vertical style="border: 1px solid #ccc;padding:0px 0px 0px 10px;display:{{ uservsList.length == 0?'none':'block'}}">
+        <div hidden?="{{uservsList.length == 0}}" layout vertical style="border: 1px solid #ccc;padding:0px 0px 0px 10px;">
             <fieldset class="receptorsBox">
                 <legend style="margin:5px 0px 0px 0px;">{{boxCaption}}</legend>
                 <template repeat="{{uservs in uservsList}}">

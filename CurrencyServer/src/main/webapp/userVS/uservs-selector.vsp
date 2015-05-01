@@ -53,7 +53,7 @@
                                 <div class="name" style="margin: 5px 0 0 0;">{{uservs.lastName}}</div>
                             </div>
                             <div>
-                                <div style="display:{{uservs|isContactButtonVisible}}">
+                                <div hidden?="{{isContactButtonVisible(uservs)}}">
                                     <paper-button raised on-click="{{toggleContact}}" style="font-size: 0.7em; margin:0 0 0 0;">
                                         {{modeSearch? '${msg.addContactLbl}':'${msg.removeContactLbl}'}}
                                     </paper-button>

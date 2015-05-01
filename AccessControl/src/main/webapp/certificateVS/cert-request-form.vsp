@@ -3,7 +3,7 @@
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
 
-<polymer-element name="cert-request-form" attributes="caption opened isForAdmins messageToUser">
+<polymer-element name="cert-request-form" attributes="caption opened isMenuAdmin messageToUser">
 <template>
     <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
     <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />

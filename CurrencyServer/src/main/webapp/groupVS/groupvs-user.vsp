@@ -29,12 +29,10 @@
             </div>
             <div horizontal layout center center-justified style="margin:10px 0 0 0; font-size: 0.9em;">
                 <template if="{{isClientToolConnected}}">
-                    <paper-button raised type="button" on-click="{{activateUser}}"
-                                         style="margin:0 10px;display:{{isActive?'none':'block'}}">
+                    <paper-button hidden?="{{isActive}}" raised type="button" on-click="{{activateUser}}" style="margin:0 10px;">
                         <i class="fa fa-thumbs-o-up"></i> ${msg.activateUserLbl}
                     </paper-button>
-                    <paper-button raised on-click="{{initCancellation}}"
-                                         style="margin:0 10px;display:{{(isActive && 'admin' == menuType) && !isCancelled?'block':'none'}} ">
+                    <paper-button hidden?="{{'admin' !== menuType || isCancelled}}" raised on-click="{{initCancellation}}" style="margin:0 10px;">
                         <i class="fa fa-thumbs-o-down"></i> ${msg.deActivateUserLbl}
                     </paper-button>
                 </template>

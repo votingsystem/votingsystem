@@ -74,13 +74,12 @@
                         </div>
                         <template if="{{selectedTags.length === 0}}">
                             <div layout horizontal center center-justified style="font-size: 0.8em;">
-                                <div style="width: 180px; margin:0 10px 0 0;">
-                                    <paper-button raised on-click="{{showTagDialog}}" style="font-size: 1em;
-                                    margin:10px 0px 10px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                                <div hidden?="{{isPending || isCancelled}}" style="width: 180px; margin:0 10px 0 0;">
+                                    <paper-button raised on-click="{{showTagDialog}}" style="font-size: 1em; margin:10px 0px 10px 10px;">
                                         <i class="fa fa-tag"></i> ${msg.addTagLbl}
                                     </paper-button>
                                 </div>
-                                <div style="display: {{selectedTags.length == 0? 'block':'none'}};">
+                                <div hidden?="{{selectedTags.length == 0}}">
                                     ${msg.transactionvsWithTagAdvertMsg}
                                 </div>
                                 <div style="max-width: 400px;">{{selectedTagMsg}}</div>

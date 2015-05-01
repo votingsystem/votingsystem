@@ -57,7 +57,7 @@
                 <paper-tab name="serviceList">${msg.serviceListLbl}</paper-tab>
                 <paper-tab name="appData">${msg.appDataLabel}</paper-tab>
             </paper-tabs>
-            <div id="infoDiv" class="tabContent" style="display:{{selectedTab == 'info'?'block':'none'}}">
+            <div hidden?="{{selectedTab !== 'info'}}" id="infoDiv" class="tabContent">
                 <div class="mainLink"><a href="http://www.sistemavotacion.org">${msg.webSiteLbl}</a></div>
                 <div class="mainLink"><a href="https://github.com/votingsystem/votingsystem/tree/master/ControlCenter">
                     ${msg.sourceCodeLbl}</a>
@@ -65,11 +65,11 @@
                 <div class="mainLink"><a href="https://github.com/votingsystem/votingsystem/wiki/Centro-de-Control">${msg.wikiLabel}</a></div>
             </div>
 
-            <div id="serviceList" class="tabContent" style="display:{{selectedTab == 'serviceList'?'block':'none'}}">
+            <div hidden?="{{selectedTab !== 'serviceList'}}" id="serviceList" class="tabContent">
                 <g:include controller="serverInfo" action="serviceList" />
             </div>
 
-            <div id="appData" class="tabContent" style="display:{{selectedTab == 'appData'?'block':'none'}}">
+            <div hidden?="{{selectedTab !== 'appData'}}" id="appData" class="tabContent">
                 <g:include controller="serverInfo" action="appData" />
             </div>
         </div>

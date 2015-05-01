@@ -69,7 +69,7 @@
                     </div>
                 </template>
 
-                <div style="margin:20px 0px 0px 20px;display:{{isReceptorVisible ?'block':'none'}}">
+                <div hidden?="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
                     <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621">{{receptorLbl}}</div>
                     <div>
                         <template if="{{!receptorMsg}}">

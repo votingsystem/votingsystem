@@ -132,6 +132,8 @@ public class RepresentativeDelegationDto implements Serializable {
         requestDto.setOperation(operation);
         requestDto.setWeeksOperationActive(weeksOperationActive);
         requestDto.setRepresentative(representative);
+        requestDto.getRepresentative().setDescription(null);
+        requestDto.getRepresentative().setCertCollection(null);
         requestDto.setServerURL(serverURL);
         requestDto.setHashCertVSBase64(hashCertVSBase64);
         if(dateTo != null) requestDto.setDateTo(new Date(dateTo.getTime()));
