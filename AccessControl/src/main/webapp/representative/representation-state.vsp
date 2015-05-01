@@ -71,8 +71,8 @@
             openedChanged: function() {
                 this.$.xDialog.opened = this.opened
                 if(this.opened) {
-                    var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_STATE)
-                    var result = VotingSystemClient.call(webAppMessage)
+                    var operationVS = new OperationVS(Operation.REPRESENTATIVE_STATE)
+                    var result = VotingSystemClient.call(operationVS)
                     this.representationState = toJSON(decodeURIComponent(escape(window.atob(result))));
                     this.message = JSON.stringify(representationState.representative)
                     if(this.representationState.representative) {
@@ -86,10 +86,10 @@
                 }
             },
             cancelAnonymousDelegation: function() {
-                var webAppMessage = new WebAppMessage(Operation.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED)
-                webAppMessage.serviceURL = "${restURL}/representative/cancelAnonymousDelegation"
-                webAppMessage.signedMessageSubject = '${msg.cancelAnonymousDelegationMsgSubject}'
-                webAppMessage.setCallback(function(appMessage) {
+                var operationVS = new OperationVS(Operation.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELED)
+                operationVS.serviceURL = "${restURL}/representative/cancelAnonymousDelegation"
+                operationVS.signedMessageSubject = '${msg.cancelAnonymousDelegationMsgSubject}'
+                operationVS.setCallback(function(appMessage) {
                     console.log("selectRepresentativeCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     var caption = '${msg.operationERRORCaption}'
@@ -98,7 +98,7 @@
                     }
                     showMessageVS(appMessageJSON.message, caption)
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             },
             accept: function() {
                 this.close()

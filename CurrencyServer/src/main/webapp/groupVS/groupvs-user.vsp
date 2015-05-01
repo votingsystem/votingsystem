@@ -60,14 +60,13 @@
                 this.isClientToolConnected = window['isClientToolConnected']
                 this.$.reasonDialog.addEventListener('on-submit', function (e) {
                     console.log("deActivateUser")
-                    var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
-                    webAppMessage.serviceURL = "${restURL}/groupVS/deActivateUser"
-                    webAppMessage.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + this.subscriptionData.groupvs.name + "'"
-                    webAppMessage.jsonStr = JSON.stringify({groupvsId:this.subscriptionData.groupvs.id,
+                    var operationVS = new OperationVS(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
+                    operationVS.serviceURL = "${restURL}/groupVS/deActivateUser"
+                    operationVS.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + this.subscriptionData.groupvs.name + "'"
+                    operationVS.jsonStr = JSON.stringify({groupvsId:this.subscriptionData.groupvs.id,
                         groupvsName:this.subscriptionData.groupvs.name, userVSName:this.subscriptionData.uservs.name,
                         userVSNIF:this.subscriptionData.uservs.NIF, reason:e.detail})
-                    webAppMessage.contentType = 'application/pkcs7-signature'
-                    webAppMessage.setCallback(function(appMessage) {
+                    operationVS.setCallback(function(appMessage) {
                         console.log("deActivateUserCallback - message: " + appMessage);
                         var appMessageJSON = toJSON(appMessage)
                         var caption = '${msg.deActivateUserERRORLbl}'
@@ -77,7 +76,7 @@
                         var msg = appMessageJSON.message
                         showMessageVS(msg, caption)
                     }.bind(this))
-                    VotingSystemClient.setMessage(webAppMessage);
+                    VotingSystemClient.setMessage(operationVS);
                 }.bind(this))
             },
             getDate:function(timStamp) {
@@ -103,15 +102,14 @@
             },
             activateUser : function(e) {
                 console.log("activateUser")
-                var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_USER_ACTIVATE)
-                webAppMessage.serviceURL = "${restURL}/groupVS/activateUser"
-                webAppMessage.signedMessageSubject = "${msg.activateGroupUserMessageSubject}" + " '" +
+                var operationVS = new OperationVS(Operation.CURRENCY_GROUP_USER_ACTIVATE)
+                operationVS.serviceURL = "${restURL}/groupVS/activateUser"
+                operationVS.signedMessageSubject = "${msg.activateGroupUserMessageSubject}" + " '" +
                         this.subscriptionData.groupvs.name + "'"
-                webAppMessage.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,
+                operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,
                     groupvsId:this.subscriptionData.groupvs.id, groupvsName:this.subscriptionData.groupvs.name,
                     userVSName:this.subscriptionData.uservs.name, userVSNIF:this.subscriptionData.uservs.NIF})
-                webAppMessage.contentType = 'application/pkcs7-signature'
-                webAppMessage.setCallback(function(appMessage) {
+                operationVS.setCallback(function(appMessage) {
                     console.log("activateUserCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     if(appMessageJSON != null) {
@@ -124,7 +122,7 @@
                         showMessageVS(appMessageJSON.message, caption)
                     }
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             },
             initCancellation : function(e) {
                 this.$.reasonDialog.toggle();

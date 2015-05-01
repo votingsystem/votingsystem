@@ -2,7 +2,7 @@
 
     window['serverURL'] = "${contextURL}"
 
-    function WebAppMessage(operation, statusCode) {
+    function OperationVS(operation, statusCode) {
         this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING
         this.operation = operation
         this.caption;
@@ -17,7 +17,7 @@
         this.objectId = Math.random().toString(36).substring(7);
     }
 
-    WebAppMessage.prototype.setCallback = function(callbackFunction) {
+    OperationVS.prototype.setCallback = function(callbackFunction) {
         window[this.objectId] = callbackFunction;
     }
 

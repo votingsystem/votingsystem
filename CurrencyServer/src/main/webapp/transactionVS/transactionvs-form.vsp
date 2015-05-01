@@ -244,17 +244,17 @@
                 }
             } else tagList.push('WILDTAG'); //No tags, receptor can expend money with any tag
 
-            var webAppMessage = new WebAppMessage(this.operation)
-            webAppMessage.serviceURL = "${restURL}/transactionVS"
-            webAppMessage.signedMessageSubject = "${msg.transactionvsFromGroupMsgSubject}"
+            var operationVS = new OperationVS(this.operation)
+            operationVS.serviceURL = "${restURL}/transactionVS"
+            operationVS.signedMessageSubject = "${msg.transactionvsFromGroupMsgSubject}"
             var signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
                 timeLimited:this.$.timeLimitedButton.checked, tags:tagList, amount: this.$.amount.value,
                 currencyCode:this.$.currencySelector.getSelected(), fromUser:this.fromUserName,
                 fromUserIBAN:this.fromUserIBAN}
             if(this.toUserName)  signedContent.toUser = this.toUserName
             if(this.getToUserIBAN()) signedContent.toUserIBAN = this.getToUserIBAN()
-            webAppMessage.jsonStr = JSON.stringify(signedContent)
-            webAppMessage.setCallback(function(appMessage) {
+            operationVS.jsonStr = JSON.stringify(signedContent)
+            operationVS.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     var caption
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
@@ -263,7 +263,7 @@
                     } else caption = '${msg.transactionvsERRORLbl}'
                     showMessageVS(appMessageJSON.message, caption)
                 }.bind(this))
-            VotingSystemClient.setMessage(webAppMessage);
+            VotingSystemClient.setMessage(operationVS);
         },
         getToUserIBAN: function () {
             if(this.operation === Operation.FROM_GROUP_TO_ALL_MEMBERS) return null

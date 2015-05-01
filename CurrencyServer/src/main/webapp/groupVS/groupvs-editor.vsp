@@ -53,12 +53,12 @@
                             '${msg.dataFormERRORLbl}')
                     return
                 }
-                var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_EDIT)
-                webAppMessage.serviceURL = "${restURL}/groupVS/edit/" + this.groupvs.id
-                webAppMessage.signedMessageSubject = "${msg.newGroupVSMsgSubject}"
-                webAppMessage.jsonStr = JSON.stringify({info:this.$.textEditor.getData(), name:this.groupvs.name,
+                var operationVS = new OperationVS(Operation.CURRENCY_GROUP_EDIT)
+                operationVS.serviceURL = "${restURL}/groupVS/edit/" + this.groupvs.id
+                operationVS.signedMessageSubject = "${msg.newGroupVSMsgSubject}"
+                operationVS.jsonStr = JSON.stringify({info:this.$.textEditor.getData(), name:this.groupvs.name,
                     id:this.groupvs.id, operation:Operation.CURRENCY_GROUP_NEW})
-                webAppMessage.setCallback(function(appMessage) {
+                operationVS.setCallback(function(appMessage) {
                     console.log("editGroupVSCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     var caption = '${msg.editGroupERRORCaption}'
@@ -70,7 +70,7 @@
                     showMessageVS(msg, caption)
                     window.scrollTo(0,0);
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             }
         })
     </script>

@@ -207,15 +207,15 @@
                 window.open(serviceURL, '_blank');
             },
             checkReceipt: function() {
-                var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)
+                var operationVS = new OperationVS(Operation.OPEN_SMIME)
                 if(this.smimeMessage == null) {
-                    webAppMessage.serviceURL = this.transactionvs.messageSMIMEURL
-                    webAppMessage.operation = Operation.OPEN_SMIME_FROM_URL
-                } else webAppMessage.message = this.smimeMessage
-                webAppMessage.setCallback(function(appMessage) {
+                    operationVS.serviceURL = this.transactionvs.messageSMIMEURL
+                    operationVS.operation = Operation.OPEN_SMIME_FROM_URL
+                } else operationVS.message = this.smimeMessage
+                operationVS.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage);
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             }
         });
     </script>

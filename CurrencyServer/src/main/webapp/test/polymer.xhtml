@@ -16,14 +16,14 @@
                              serviceURL="${restURL}/tagVS"></tagvs-select-dialog>
     </ui:define>
     <script>
-        var webAppMessage = new WebAppMessage( this.operation)
-        webAppMessage.serviceURL = ${restURL}/transactionVS"
-        webAppMessage.signedMessageSubject = "${msg.transactionvsFromGroupMsgSubject}"
-        webAppMessage.jsonStr = JSON.stringify({operation:"TEST"})
+        var operationVS = new OperationVS( this.operation)
+        operationVS.serviceURL = ${restURL}/transactionVS"
+        operationVS.signedMessageSubject = "${msg.transactionvsFromGroupMsgSubject}"
+        operationVS.jsonStr = JSON.stringify({operation:"TEST"})
 
-        webAppMessage.setCallback(function () {
+        operationVS.setCallback(function () {
             console.log("====#### callback")
         })
-        window[webAppMessage.objectId]()
+        window[operationVS.objectId]()
     </script>
 </ui:composition>

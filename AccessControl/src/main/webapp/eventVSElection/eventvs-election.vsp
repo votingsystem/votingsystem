@@ -176,14 +176,14 @@
                 var fileURL = "${contextURL}/static/backup/" + this.dateFinish.urlFormat() +
                         "/VOTING_EVENT_" + this.eventvs.id + ".zip"
                 if(window['isClientToolConnected']) {
-                    var webAppMessage = new WebAppMessage(Operation.FILE_FROM_URL)
-                    webAppMessage.subject = '${msg.downloadingFileMsg}'
-                    webAppMessage.documentURL = fileURL
-                    webAppMessage.setCallback(function(appMessage) {
+                    var operationVS = new OperationVS(Operation.FILE_FROM_URL)
+                    operationVS.subject = '${msg.downloadingFileMsg}'
+                    operationVS.documentURL = fileURL
+                    operationVS.setCallback(function(appMessage) {
                         var appMessageJSON = toJSON(appMessage)
                         if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message)
                     }.bind(this))
-                    VotingSystemClient.setMessage(webAppMessage)
+                    VotingSystemClient.setMessage(operationVS)
                 } else window.location.href = fileURL
             },
             showVoteResul:function() {
@@ -192,11 +192,11 @@
             submitVote:function() {
                 console.log("submitVote")
                 var voteVS = {optionSelected:this.optionVSSelected, eventVSId:this.eventvs.id, eventVSURL:this.eventvs.url}
-                var webAppMessage = new WebAppMessage(Operation.SEND_VOTE)
+                var operationVS = new OperationVS(Operation.SEND_VOTE)
                 this.eventvs.voteVS = voteVS
-                webAppMessage.voteVS = voteVS
-                webAppMessage.signedMessageSubject = '${msg.sendVoteMsgSubject}'
-                webAppMessage.setCallback(function(appMessage) {
+                operationVS.voteVS = voteVS
+                operationVS.signedMessageSubject = '${msg.sendVoteMsgSubject}'
+                operationVS.setCallback(function(appMessage) {
                     console.log(this.tagName + " - vote callback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     appMessageJSON.eventVS = this.eventvs
@@ -204,8 +204,8 @@
                     this.votevsResul = appMessageJSON
                     this.$.votevsResultDialog.show(appMessageJSON)
                 }.bind(this))
-                console.log(" - webAppMessage: " +  JSON.stringify(webAppMessage))
-                VotingSystemClient.setMessage(webAppMessage);
+                console.log(" - operationVS: " +  JSON.stringify(operationVS))
+                VotingSystemClient.setMessage(operationVS);
             }
         });
     </script>

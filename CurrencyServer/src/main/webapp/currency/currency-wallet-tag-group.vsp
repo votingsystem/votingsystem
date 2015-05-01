@@ -119,12 +119,12 @@
                 }
             },
             showCurrency: function(e) {
-                var webAppMessage = new WebAppMessage(Operation.OPEN_CURRENCY)
-                webAppMessage.message = e.target.templateInstance.model.currency.object
-                webAppMessage.setCallback(function(appMessage) {
+                var operationVS = new OperationVS(Operation.OPEN_CURRENCY)
+                operationVS.message = e.target.templateInstance.model.currency.object
+                operationVS.setCallback(function(appMessage) {
                     console.log("showCurrency - message: " + appMessage);
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             }
         });
     </script>

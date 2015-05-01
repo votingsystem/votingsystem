@@ -99,14 +99,14 @@
                 var fileURL = this.eventvs.accessControl.serverURL + "/backup/" + this.dateFinish.urlFormat() +
                         "/VOTING_EVENT_" + this.eventvs.accessControlEventVSId + ".zip"
                 if(window['isClientToolConnected']) {
-                    var webAppMessage = new WebAppMessage(Operation.FILE_FROM_URL)
-                    webAppMessage.subject = '${msg.downloadingFileMsg}'
-                    webAppMessage.documentURL = fileURL
-                    webAppMessage.setCallback(function(appMessage) {
+                    var operationVS = new OperationVS(Operation.FILE_FROM_URL)
+                    operationVS.subject = '${msg.downloadingFileMsg}'
+                    operationVS.documentURL = fileURL
+                    operationVS.setCallback(function(appMessage) {
                         var appMessageJSON = toJSON(appMessage)
                         if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message)
                     }.bind(this))
-                    VotingSystemClient.setMessage(webAppMessage)
+                    VotingSystemClient.setMessage(operationVS)
                 } else window.location.href = fileURL
             },
             back:function() {

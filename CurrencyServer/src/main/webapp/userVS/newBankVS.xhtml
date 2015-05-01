@@ -67,12 +67,12 @@
                         showMessageVS('${msg.emptyDocumentERRORMsg}', '${msg.dataFormERRORLbl}')
                         return false
                     }
-                    var webAppMessage = new WebAppMessage(Operation.BANKVS_NEW)
-                    webAppMessage.serviceURL = "${restURL}/userVS/newBankVS"
-                    webAppMessage.signedMessageSubject = "${msg.newBankVSMsgSubject}"
-                    webAppMessage.jsonStr = JSON.stringify({info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
+                    var operationVS = new OperationVS(Operation.BANKVS_NEW)
+                    operationVS.serviceURL = "${restURL}/userVS/newBankVS"
+                    operationVS.signedMessageSubject = "${msg.newBankVSMsgSubject}"
+                    operationVS.jsonStr = JSON.stringify({info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
                         iban:document.querySelector("#bankVSIBAN").value, operation:Operation.BANKVS_NEW})
-                    webAppMessage.setCallback(function(appMessage) {
+                    operationVS.setCallback(function(appMessage) {
                         console.log("newBankVSCallback - message: " + appMessage);
                         appMessageJSON = toJSON(appMessage)
                         var caption = '${msg.newBankVSERRORCaption}'
@@ -85,7 +85,7 @@
                         showMessageVS(msg, caption)
                         window.scrollTo(0,0);
                     })
-                    VotingSystemClient.setMessage(webAppMessage);
+                    VotingSystemClient.setMessage(operationVS);
                     appMessageJSON = null
                     return false
                 } catch(ex) {

@@ -38,14 +38,13 @@
         document.addEventListener('polymer-ready', function() {
             document.querySelector("#reasonDialog").addEventListener('on-submit', function (e) {
                 console.log("deActivateUser")
-                var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
-                webAppMessage.serviceURL = "${restURL}/groupVS/deActivateUser"
-                webAppMessage.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + subscriptionDataJSON.groupvs.name + "'"
-                webAppMessage.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_DEACTIVATE,
+                var operationVS = new OperationVS(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
+                operationVS.serviceURL = "${restURL}/groupVS/deActivateUser"
+                operationVS.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + subscriptionDataJSON.groupvs.name + "'"
+                operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_DEACTIVATE,
                     groupvs:{name:subscriptionDataJSON.groupvs.name, id:subscriptionDataJSON.groupvs.id},
                     uservs:{name:subscriptionDataJSON.uservs.name, NIF:subscriptionDataJSON.uservs.NIF}, reason:e.detail})
-                webAppMessage.contentType = 'application/pkcs7-signature'
-                webAppMessage.setCallback(function(appMessage) {
+                operationVS.setCallback(function(appMessage) {
                     console.log("deActivateUserCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     var caption = '${msg.deActivateUserERRORLbl}'
@@ -55,7 +54,7 @@
                     var msg = appMessageJSON.message
                     showMessageVS(msg, caption)
                 })
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             })
         });
 
@@ -78,14 +77,13 @@
 
         function activateUser () {
             console.log("activateUser")
-            var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_USER_ACTIVATE)
-            webAppMessage.serviceURL = "${restURL}/groupVS/activateUser"
-            webAppMessage.signedMessageSubject = "${msg.activateGroupUserMessageSubject}" + " '" + subscriptionDataJSON.groupvs.name + "'"
-            webAppMessage.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,
+            var operationVS = new OperationVS(Operation.CURRENCY_GROUP_USER_ACTIVATE)
+            operationVS.serviceURL = "${restURL}/groupVS/activateUser"
+            operationVS.signedMessageSubject = "${msg.activateGroupUserMessageSubject}" + " '" + subscriptionDataJSON.groupvs.name + "'"
+            operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,
                 groupvs:{name:subscriptionDataJSON.groupvs.name, id:subscriptionDataJSON.groupvs.id},
                 uservs:{name:subscriptionDataJSON.uservs.name, NIF:subscriptionDataJSON.uservs.NIF}})
-            webAppMessage.contentType = 'application/pkcs7-signature'
-            webAppMessage.setCallback(function(appMessage) {
+            operationVS.setCallback(function(appMessage) {
                 console.log("activateUserCallback - message: " + appMessage);
                 var appMessageJSON = toJSON(appMessage)
                 if(appMessageJSON != null) {
@@ -98,13 +96,14 @@
                         document.querySelector("#deActivateUserButton").style.display = 'block'
                     }
                     showMessageVS(appMessageJSON.message, caption)
-                })
-                VotingSystemClient.setMessage(webAppMessage);
-            }
+                }
+                VotingSystemClient.setMessage(operationVS);
+            })
+        }
 
-            function makeTransactionVS () {
-                console.log("makeTransactionVS - TODO -")
-            }
+        function makeTransactionVS () {
+            console.log("makeTransactionVS - TODO -")
+        }
 
     </script>
 </ui:composition>

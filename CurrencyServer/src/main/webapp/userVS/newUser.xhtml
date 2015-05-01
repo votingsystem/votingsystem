@@ -57,12 +57,12 @@
                     return false
                 }
 
-                var webAppMessage = new WebAppMessage(Operation.CERT_CA_NEW)
-                webAppMessage.serviceURL = "${restURL}/userVS/save"
-                webAppMessage.signedMessageSubject = "${msg.newUserCertLbl}"
-                webAppMessage.jsonStr = JSON.stringify({info:document.querySelector("#userInfo").value,
+                var operationVS = new OperationVS(Operation.CERT_CA_NEW)
+                operationVS.serviceURL = "${restURL}/userVS/save"
+                operationVS.signedMessageSubject = "${msg.newUserCertLbl}"
+                operationVS.jsonStr = JSON.stringify({info:document.querySelector("#userInfo").value,
                     certChainPEM:document.querySelector("#pemCert").value, operation:Operation.CERT_USER_NEW})
-                webAppMessage.setCallback(function(appMessage) {
+                operationVS.setCallback(function(appMessage) {
                     console.log("newUserCertCallback - message: " + appMessage);
                     appMessageJSON = toJSON(appMessage)
                     var caption = '${msg.newUserCertERRORCaption}'
@@ -75,7 +75,7 @@
                     showMessageVS(msg, caption)
                     window.scrollTo(0,0);
                 })
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
                 return false
             }
 

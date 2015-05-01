@@ -50,12 +50,12 @@
                 this.$.xDialog.opened = true
             },
             submit: function() {
-                var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
-                webAppMessage.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST,
+                var operationVS = new OperationVS(Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST)
+                operationVS.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST,
                     representativeNif:this.representative.nif, representativeName:this.representativeFullName})
-                webAppMessage.serviceURL = "${restURL}/representative/accreditations"
-                webAppMessage.signedMessageSubject = '${msg.requestRepresentativeAcreditationsLbl}'
-                VotingSystemClient.setMessage(webAppMessage);
+                operationVS.serviceURL = "${restURL}/representative/accreditations"
+                operationVS.signedMessageSubject = '${msg.requestRepresentativeAcreditationsLbl}'
+                VotingSystemClient.setMessage(operationVS);
                 this.close()
             },
             close: function() {

@@ -358,18 +358,17 @@ VotingSystemClient.setMessage = function (messageJSON) {
         return
     }
     var messageToSignatureClient = JSON.stringify(messageJSON);
-//    console.log("setMessage - message: " + messageToSignatureClient);
     //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
     clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
 }
 
 function sendSignalVS(signalData, callback) {
     var result
-    var webAppMessage = new WebAppMessage(Operation.SIGNAL_VS)
-    webAppMessage.jsonStr = JSON.stringify(signalData)
-    webAppMessage.setCallback(callback)
+    var operationVS = new OperationVS(Operation.SIGNAL_VS)
+    operationVS.jsonStr = JSON.stringify(signalData)
+    operationVS.setCallback(callback)
     try {
-        result = VotingSystemClient.call(webAppMessage);
+        result = VotingSystemClient.call(operationVS);
     } catch(ex) { } finally { return result;}
 }
 

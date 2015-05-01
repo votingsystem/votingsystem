@@ -56,14 +56,14 @@
                 console.log(this.tagName + " - ready")
             },
             domReady: function(){
-                var walletState = toJSON(VotingSystemClient.call(new WebAppMessage(Operation.WALLET_STATE)));
+                var walletState = toJSON(VotingSystemClient.call(new OperationVS(Operation.WALLET_STATE)));
                 this.loadPlainWallet(walletState.plainWallet)
 
                 //this.showPasswdDialog()
             },
             showPasswdDialog: function(){
-                var webAppMessage = new WebAppMessage(Operation.WALLET_OPEN)
-                webAppMessage.setCallback(function(appMessage) {
+                var operationVS = new OperationVS(Operation.WALLET_OPEN)
+                operationVS.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         this.loadSecureWallet(appMessageJSON.message)
@@ -72,7 +72,7 @@
                         showMessageVS(appMessageJSON.message, caption)
                     }
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             },
             loadPlainWallet:function(currencysWalletArray) {
                 console.log(this.tagName + " - loadPlainWallet")

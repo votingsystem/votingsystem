@@ -71,16 +71,15 @@
             sendMessage: function () {
                 console.log("sendMessageVS")
                 if(this.messageVS.trim() == "") return
-                var webAppMessage = new WebAppMessage(Operation.MESSAGEVS)
-                webAppMessage.message = this.messageVS
-                webAppMessage.nif = this.uservs.nif
-                webAppMessage.contentType = 'application/messagevs'
-                webAppMessage.setCallback(function(appMessage) {
+                var operationVS = new OperationVS(Operation.MESSAGEVS)
+                operationVS.message = this.messageVS
+                operationVS.nif = this.uservs.nif
+                operationVS.setCallback(function(appMessage) {
                     console.log(this.tagName + " - " + this.id + " - sendMessageVS callback: " + appMessage);
                     this.fire('message-response', appMessage)
                 }.bind(this))
-                //alert(JSON.stringify(webAppMessage))
-                VotingSystemClient.setMessage(webAppMessage);
+                //alert(JSON.stringify(operationVS))
+                VotingSystemClient.setMessage(operationVS);
                 this.opened = false
                 this.$.toast.show()
             }

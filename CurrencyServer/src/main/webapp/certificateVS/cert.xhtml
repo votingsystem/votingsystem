@@ -33,17 +33,16 @@
         <script>
             document.addEventListener('polymer-ready', function() {
                 document.querySelector("#reasonDialog").addEventListener('on-submit', function (e) {
-                    var webAppMessage = new WebAppMessage(Operation.CERT_EDIT)
-                    webAppMessage.serviceURL = "${restURL}/certificateVS/editCert"
-                    webAppMessage.signedMessageSubject = "${msg.cancelCertMessageSubject}"
+                    var operationVS = new OperationVS(Operation.CERT_EDIT)
+                    operationVS.serviceURL = "${restURL}/certificateVS/editCert"
+                    operationVS.signedMessageSubject = "${msg.cancelCertMessageSubject}"
                     var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                         changeCertToState:"${CertificateVS.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
-                    webAppMessage.jsonStr = JSON.stringify(signedContent)
-                    webAppMessage.contentType = 'application/pkcs7-signature'
-                    webAppMessage.setCallback(function(appMessage) {
+                    operationVS.jsonStr = JSON.stringify(signedContent)
+                    operationVS.setCallback(function(appMessage) {
                         document.querySelector("#certData").url = "${restURL}/certificateVS/cert/" + certMap.serialNumber + "?menu=" + menuType
                     })
-                    VotingSystemClient.setMessage(webAppMessage);
+                    VotingSystemClient.setMessage(operationVS);
                 })
             });
 

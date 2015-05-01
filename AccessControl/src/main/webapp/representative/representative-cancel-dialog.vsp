@@ -74,11 +74,11 @@
                     showMessageVS('${msg.nifERRORMsg}','${msg.errorLbl}')
                     return;
                 }
-                var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_REVOKE)
-                webAppMessage.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_REVOKE, nif:validatedNif})
-                webAppMessage.serviceURL = "${restURL}/representative/revoke"
-                webAppMessage.signedMessageSubject = '${msg.removeRepresentativeMsgSubject}'
-                webAppMessage.setCallback(function(appMessage) {
+                var operationVS = new OperationVS(Operation.REPRESENTATIVE_REVOKE)
+                operationVS.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_REVOKE, nif:validatedNif})
+                operationVS.serviceURL = "${restURL}/representative/revoke"
+                operationVS.signedMessageSubject = '${msg.removeRepresentativeMsgSubject}'
+                operationVS.setCallback(function(appMessage) {
                     console.log(this.tagName + "removeRepresentativeCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     var caption = '${msg.operationERRORCaption}'
@@ -91,7 +91,7 @@
                     }
                     showMessageVS(msg, caption)
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
                 this.close()
             },
 

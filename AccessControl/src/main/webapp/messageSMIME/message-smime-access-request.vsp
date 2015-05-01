@@ -68,12 +68,12 @@
                 this.messageToUser = null
             },
             checkReceipt: function() {
-                var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)
-                webAppMessage.message = this.smimeMessage
-                webAppMessage.setCallback(function(appMessage) {
+                var operationVS = new OperationVS(Operation.OPEN_SMIME)
+                operationVS.message = this.smimeMessage
+                operationVS.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage)
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             }
         });
     </script>

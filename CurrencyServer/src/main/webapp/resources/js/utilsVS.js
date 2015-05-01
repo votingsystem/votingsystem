@@ -399,11 +399,11 @@ VotingSystemClient.call = function (messageJSON) {
 
 function sendSignalVS(signalData, callback) {
     var result
-    var webAppMessage = new WebAppMessage(Operation.SIGNAL_VS)
-    webAppMessage.document = JSON.stringify(signalData)
-    webAppMessage.setCallback(callback)
+    var operationVS = new OperationVS(Operation.SIGNAL_VS)
+    operationVS.document = JSON.stringify(signalData)
+    operationVS.setCallback(callback)
     try {
-        result = VotingSystemClient.call(webAppMessage);
+        result = VotingSystemClient.call(operationVS);
     } catch(ex) { } finally { return result;}
 }
 

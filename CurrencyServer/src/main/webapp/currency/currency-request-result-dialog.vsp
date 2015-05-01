@@ -53,8 +53,8 @@
                 this.isStoredInWallet = true;
             },
             saveToSecureWallet: function() {
-                var webAppMessage = new WebAppMessage(Operation.WALLET_SAVE)
-                webAppMessage.setCallback(function(appMessage) {
+                var operationVS = new OperationVS(Operation.WALLET_SAVE)
+                operationVS.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         this.loadWallet(appMessageJSON.message)
@@ -63,7 +63,7 @@
                         showMessageVS(appMessageJSON.message, caption)
                     }
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             },
             showMessage:function(caption, message) {
                 this.caption = caption;

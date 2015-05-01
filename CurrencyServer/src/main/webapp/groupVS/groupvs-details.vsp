@@ -175,13 +175,12 @@
         messagedialogAccepted:function(e, detail, sender) {
             console.log(this.tagName + ".messagedialogAccepted")
             if('cancel_group' == detail.callerId) {
-                var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_CANCEL)
-                webAppMessage.serviceURL = "${restURL}/groupVS/cancel/" + this.groupvs.id
-                webAppMessage.signedMessageSubject = "${msg.cancelGroupVSSignedMessageSubject}"
-                webAppMessage.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_CANCEL, name:this.groupvs.name,
+                var operationVS = new OperationVS(Operation.CURRENCY_GROUP_CANCEL)
+                operationVS.serviceURL = "${restURL}/groupVS/cancel/" + this.groupvs.id
+                operationVS.signedMessageSubject = "${msg.cancelGroupVSSignedMessageSubject}"
+                operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_CANCEL, name:this.groupvs.name,
                     id:this.groupvs.id})
-                webAppMessage.contentType = 'application/pkcs7-signature'
-                webAppMessage.setCallback(function(appMessage) {
+                operationVS.setCallback(function(appMessage) {
                     this.appMessageJSON = JSON.parse(appMessage)
                     var caption = '${msg.groupCancelERRORLbl}'
                     if(ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
@@ -190,7 +189,7 @@
                     }
                     showMessageVS(this.appMessageJSON.message, caption, this.tagName)
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
                 this.appMessageJSON = null
             }
         },
@@ -209,12 +208,11 @@
             console.log("subscribeToGroup")
             var groupvsRepresentative = {id:this.groupvs.representative.id, nif:this.groupvs.representative.nif}
             var groupVSData = {id:this.groupvs.id, name:this.groupvs.name , representative:groupvsRepresentative}
-            var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_SUBSCRIBE)
-            webAppMessage.serviceURL = "${restURL}/groupVS/id/" + this.groupvs.id + "/subscribe"
-            webAppMessage.signedMessageSubject = "${msg.subscribeToCurrencyGroupMsg}"
-            webAppMessage.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_SUBSCRIBE, groupvs:groupVSData})
-            webAppMessage.contentType = 'application/pkcs7-signature'
-            webAppMessage.setCallback(function(appMessage) {
+            var operationVS = new OperationVS(Operation.CURRENCY_GROUP_SUBSCRIBE)
+            operationVS.serviceURL = "${restURL}/groupVS/id/" + this.groupvs.id + "/subscribe"
+            operationVS.signedMessageSubject = "${msg.subscribeToCurrencyGroupMsg}"
+            operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_SUBSCRIBE, groupvs:groupVSData})
+            operationVS.setCallback(function(appMessage) {
                 console.log("subscribeToGroupCallback - message: " + appMessage);
                 var appMessageJSON = JSON.parse(appMessage)
                 var caption
@@ -225,7 +223,7 @@
                 var msg = appMessageJSON.message
                 showMessageVS(msg, caption)
             }.bind(this))
-            VotingSystemClient.setMessage(webAppMessage);
+            VotingSystemClient.setMessage(operationVS);
         },
         groupvsChanged:function() {
             console.log(this.tagName + " - groupvsChanged - groupvs: " + JSON.stringify(this.groupvs))

@@ -171,15 +171,15 @@
                     } else {
                         representativeOperation = Operation.REPRESENTATIVE_SELECTION
                     }
-                    var webAppMessage = new WebAppMessage( representativeOperation)
-                    webAppMessage.jsonStr = JSON.stringify({operation:representativeOperation,
+                    var operationVS = new OperationVS( representativeOperation)
+                    operationVS.jsonStr = JSON.stringify({operation:representativeOperation,
                         representativeNif:this.representative.nif,
                         representativeName:this.representativeFullName,
                         weeksOperationActive:this.$.numWeeksAnonymousDelegation.value})
-                    webAppMessage.jsonStr = JSON.stringify(this.representative)
-                    webAppMessage.serviceURL = "${restURL}/representative/delegation"
-                    webAppMessage.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'
-                    webAppMessage.setCallback(function(appMessage) {
+                    operationVS.jsonStr = JSON.stringify(this.representative)
+                    operationVS.serviceURL = "${restURL}/representative/delegation"
+                    operationVS.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'
+                    operationVS.setCallback(function(appMessage) {
                         console.log("selectRepresentativeCallback - message: " + appMessage);
                         var appMessageJSON = toJSON(appMessage)
                         var caption = '${msg.operationERRORCaption}'
@@ -202,7 +202,7 @@
                         }
                         showMessageVS(msg, caption)
                     }.bind(this))
-                    VotingSystemClient.setMessage(webAppMessage);
+                    VotingSystemClient.setMessage(operationVS);
                 }
             },
 

@@ -133,20 +133,20 @@
                 this.statusCode = null
             },
             checkReceipt: function() {
-                var webAppMessage = new WebAppMessage(Operation.OPEN_SMIME)
-                if(this.messageType == 'VOTE_RESULT') webAppMessage.message = this.votevsReceipt
-                else if(this.messageType == 'VOTE_CANCELLATION_RESULT') webAppMessage.message = this.voteVSCancellationReceipt
-                webAppMessage.setCallback(function(appMessage) {
+                var operationVS = new OperationVS(Operation.OPEN_SMIME)
+                if(this.messageType == 'VOTE_RESULT') operationVS.message = this.votevsReceipt
+                else if(this.messageType == 'VOTE_CANCELLATION_RESULT') operationVS.message = this.voteVSCancellationReceipt
+                operationVS.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage)
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             },
             cancellationConfirmed: function() {
-                var webAppMessage = new WebAppMessage(Operation.CANCEL_VOTE)
-                webAppMessage.message = this.hashCertVSBase64
-                webAppMessage.serviceURL = "${restURL}/voteVS/cancel"
-                webAppMessage.signedMessageSubject = "${msg.cancelVoteLbl}"
-                webAppMessage.setCallback(function(appMessage) {
+                var operationVS = new OperationVS(Operation.CANCEL_VOTE)
+                operationVS.message = this.hashCertVSBase64
+                operationVS.serviceURL = "${restURL}/voteVS/cancel"
+                operationVS.signedMessageSubject = "${msg.cancelVoteLbl}"
+                operationVS.setCallback(function(appMessage) {
                     console.log("vote cancellation callback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
@@ -158,7 +158,7 @@
                         this.opened = true
                     } else showMessageVS(appMessageJSON.message, '${msg.voteVSCancellationErrorCaption}')
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             }
         });
     </script>

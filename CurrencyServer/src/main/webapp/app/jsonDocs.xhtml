@@ -58,15 +58,15 @@
 
             function sendTransactionVSFromBankVS() {
                 console.log("transactionvsFromBankVS")
-                var webAppMessage = transactionvsFromBankVS.get();
-                webAppMessage.statusCode = ResponseVS.SC_PROCESSING
-                webAppMessage.objectId = Math.random().toString(36).substring(7)
-                window[webAppMessage.objectId] = function(appMessage) {
+                var operationVS = transactionvsFromBankVS.get();
+                operationVS.statusCode = ResponseVS.SC_PROCESSING
+                operationVS.objectId = Math.random().toString(36).substring(7)
+                window[operationVS.objectId] = function(appMessage) {
                     console.log("sendTransactionVSFromBankVS - message: " + appMessage);
                     appMessageJSON = JSON.parse(appMessage)
                     showMessageVS(JSON.stringify(appMessageJSON.message), "sendTransactionVSFromBankVS " + appMessageJSON.statusCode)
                 }
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             }
 
             var transactionvsEditor = new JSONEditor(document.querySelector("#transactionvsEditor"));
@@ -110,15 +110,15 @@
             signWithMobileEditor.set(jsonSignWithMobileEditor);
             function signWithMobile() {
                 console.log("signWithMobile")
-                var webAppMessage = signWithMobileEditor.get();
-                webAppMessage.statusCode = ResponseVS.SC_PROCESSING
-                webAppMessage.objectId = Math.random().toString(36).substring(7)
-                window[webAppMessage.objectId] = function(appMessage) {
+                var operationVS = signWithMobileEditor.get();
+                operationVS.statusCode = ResponseVS.SC_PROCESSING
+                operationVS.objectId = Math.random().toString(36).substring(7)
+                window[operationVS.objectId] = function(appMessage) {
                     console.log("signWithMobile - message: " + appMessage);
                     appMessageJSON = JSON.parse(appMessage)
                     showMessageVS(JSON.stringify(appMessageJSON.message), "signWithMobile " + appMessageJSON.statusCode)
                 }
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             }
         </script>
     </ui:define>

@@ -72,13 +72,13 @@
                     this.messageToUser = "${msg.formErrorMsg}"
                     return
                 }
-                var webAppMessage = new WebAppMessage(Operation.BACKUP_REQUEST)
-                webAppMessage.serviceURL = "${restURL}/backupVS"
-                webAppMessage.signedMessageSubject = '${msg.requestEventvsBackupMsgSubject}'
-                webAppMessage.eventVS = this.eventvs
-                webAppMessage.jsonStr = JSON.stringify(this.eventvs)
-                webAppMessage.email = this.$.eventBackupUserEmailText.value
-                webAppMessage.setCallback(function(appMessage) {
+                var operationVS = new OperationVS(Operation.BACKUP_REQUEST)
+                operationVS.serviceURL = "${restURL}/backupVS"
+                operationVS.signedMessageSubject = '${msg.requestEventvsBackupMsgSubject}'
+                operationVS.eventVS = this.eventvs
+                operationVS.jsonStr = JSON.stringify(this.eventvs)
+                operationVS.email = this.$.eventBackupUserEmailText.value
+                operationVS.setCallback(function(appMessage) {
                     console.log("activateUserCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     var caption = '${msg.operationERRORCaption}'
@@ -89,7 +89,7 @@
                     }
                     showMessageVS(appMessageJSON.message, caption)
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage)
+                VotingSystemClient.setMessage(operationVS)
             },
             close: function() {
                 this.opened = false

@@ -116,7 +116,7 @@
                 this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
             },
             showWallet: function() {
-                VotingSystemClient.setMessage(new WebAppMessage(Operation.WALLET_OPEN));
+                VotingSystemClient.setMessage(new OperationVS(Operation.WALLET_OPEN));
             },
             removeTag: function(e) {
                 var tagToDelete = e.target.templateInstance.model.tag
@@ -145,14 +145,14 @@
                     }
                 } else tagList.push('WILDTAG'); //No tags, receptor can expend money with any tag
 
-                var webAppMessage = new WebAppMessage(Operation.CURRENCY_REQUEST)
-                webAppMessage.serviceURL = "${restURL}/currency/processRequest"
-                webAppMessage.signedMessageSubject = "${msg.currencyRequestLbl}"
+                var operationVS = new OperationVS(Operation.CURRENCY_REQUEST)
+                operationVS.serviceURL = "${restURL}/currency/processRequest"
+                operationVS.signedMessageSubject = "${msg.currencyRequestLbl}"
                 var signedContent = {operation:Operation.CURRENCY_REQUEST, amount:new Number(this.amountValue),
                     timeLimited:this.$.timeLimitedRButton.checked, currencyCode:this.$.currencySelector.getSelected(),
                     tags:tagList}
-                webAppMessage.jsonStr = JSON.stringify(signedContent)
-                webAppMessage.setCallback(function(appMessage) {
+                operationVS.jsonStr = JSON.stringify(signedContent)
+                operationVS.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
                     var caption
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
@@ -163,7 +163,7 @@
                         showMessageVS(appMessageJSON.message, caption)
                     }
                 }.bind(this))
-                VotingSystemClient.setMessage(webAppMessage);
+                VotingSystemClient.setMessage(operationVS);
             }
         });
     </script>

@@ -19,13 +19,13 @@
     <script>
         function webViewLoaded() {
             console.log("webViewLoaded")
-            var webAppMessage = new WebAppMessage( 'init')
-            VotingSystemClient.setMessage(webAppMessage);
+            var operationVS = new OperationVS( 'init')
+            VotingSystemClient.setMessage(operationVS);
         }
 
         function serverMessage(message) {
-            var webAppMessage = new WebAppMessage('message: ' + message, ResponseVS.OK)
-            VotingSystemClient.setMessage(webAppMessage);
+            var operationVS = new OperationVS('message: ' + message, ResponseVS.OK)
+            VotingSystemClient.setMessage(operationVS);
         }
 
         document.addEventListener('polymer-ready', function() {

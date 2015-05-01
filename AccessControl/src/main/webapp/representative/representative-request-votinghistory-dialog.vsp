@@ -50,12 +50,12 @@
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
             },
             submit: function() {
-                var webAppMessage = new WebAppMessage(Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
-                webAppMessage.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
+                var operationVS = new OperationVS(Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST)
+                operationVS.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
                     representativeNif:this.representative.nif, representativeName:this.representativeFullName})
-                webAppMessage.serviceURL = "${restURL}/representative/history"
-                webAppMessage.signedMessageSubject = '${msg.requestVotingHistoryLbl}'
-                VotingSystemClient.setMessage(webAppMessage);
+                operationVS.serviceURL = "${restURL}/representative/history"
+                operationVS.signedMessageSubject = '${msg.requestVotingHistoryLbl}'
+                VotingSystemClient.setMessage(operationVS);
                 this.close()
             },
             close: function() {

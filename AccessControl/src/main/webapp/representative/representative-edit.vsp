@@ -60,9 +60,9 @@
                 var validatedNif = validateNIF(this.$.representativeNif.value)
                 if(validatedNif == null) showMessageVS('${msg.nifERRORMsg}','${msg.errorLbl}')
                 else {
-                    var webAppMessage = new WebAppMessage(Operation.EDIT_REPRESENTATIVE)
-                    webAppMessage.nif = validatedNif
-                    VotingSystemClient.setMessage(webAppMessage);
+                    var operationVS = new OperationVS(Operation.EDIT_REPRESENTATIVE)
+                    operationVS.nif = validatedNif
+                    VotingSystemClient.setMessage(operationVS);
                 }
             }
         });

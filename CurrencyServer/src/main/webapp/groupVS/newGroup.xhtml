@@ -122,12 +122,12 @@
                 showMessageVS('${msg.emptyDocumentERRORMsg}', '${msg.dataFormERRORLbl}')
                 return false
             }
-            var webAppMessage = new WebAppMessage(Operation.CURRENCY_GROUP_NEW)
-            webAppMessage.serviceURL = "${restURL}/groupVS/newGroup"
-            webAppMessage.signedMessageSubject = "${msg.newGroupVSMsgSubject}"
-            webAppMessage.jsonStr = JSON.stringify( {info:textEditor.getData(), tags:document.querySelector('#selectedTags').selectedTags,
+            var operationVS = new OperationVS(Operation.CURRENCY_GROUP_NEW)
+            operationVS.serviceURL = "${restURL}/groupVS/newGroup"
+            operationVS.signedMessageSubject = "${msg.newGroupVSMsgSubject}"
+            operationVS.jsonStr = JSON.stringify( {info:textEditor.getData(), tags:document.querySelector('#selectedTags').selectedTags,
                 name:document.querySelector("#groupSubject").value, operation:Operation.CURRENCY_GROUP_NEW})
-            webAppMessage.setCallback(function(appMessage) {
+            operationVS.setCallback(function(appMessage) {
                 console.log("newGroupVSCallback - message: " + appMessage);
                 appMessageJSON = toJSON(appMessage)
                 var callBackResult = null
@@ -139,7 +139,7 @@
                 showMessageVS(msg, caption)
                 window.scrollTo(0,0);
             })
-            VotingSystemClient.setMessage(webAppMessage);
+            VotingSystemClient.setMessage(operationVS);
             appMessageJSON = null
             return false
         }
