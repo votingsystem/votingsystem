@@ -1,6 +1,7 @@
 package org.votingsystem.test.callable;
 
 import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -8,6 +9,7 @@ import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.TypeVS;
 
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -33,7 +35,7 @@ public class RepresentativeDelegationDataSender implements Callable<ResponseVS> 
         String toUser = ContextVS.getInstance().getAccessControl().getName();
         String serviceURL = ContextVS.getInstance().getAccessControl().getDelegationServiceURL();
         SMIMEMessage smimeMessage = signatureService.getSMIME(userNIF, toUser, JSON.getMapper().writeValueAsString(
-                new RepresentativeDelegationDto(representativeNIF)), subject);
+                getDelegationDto(representativeNIF)), subject);
         SMIMESignedSender senderSender = new SMIMESignedSender(smimeMessage, serviceURL,
                 ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
                 ContentTypeVS.JSON_SIGNED, null, null);
@@ -42,5 +44,13 @@ public class RepresentativeDelegationDataSender implements Callable<ResponseVS> 
         return reponseVS;
     }
 
+    private RepresentativeDelegationDto getDelegationDto(String representativeNIF) {
+        UserVSDto representative = new UserVSDto();
+        representative.setNIF(representativeNIF);
+        RepresentativeDelegationDto delegationDto = new RepresentativeDelegationDto();
+        delegationDto.setRepresentative(representative);
+        delegationDto.setOperation(TypeVS.REPRESENTATIVE_SELECTION);
+        return delegationDto;
+    }
 
 }

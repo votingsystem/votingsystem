@@ -2,7 +2,7 @@ package org.votingsystem.test.voting;
 
 
 import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.dto.voting.CertValidationDto;
+import org.votingsystem.dto.CertValidationDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;

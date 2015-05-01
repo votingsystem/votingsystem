@@ -8,7 +8,7 @@ import org.votingsystem.model.DeviceVS;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserVSCertExtensionDto {
+public class CertExtensionDto {
 
     private String deviceId;
     private String deviceName;
@@ -20,9 +20,9 @@ public class UserVSCertExtensionDto {
     private DeviceVS.Type deviceType;
 
 
-    public UserVSCertExtensionDto() {}
+    public CertExtensionDto() {}
 
-    public UserVSCertExtensionDto(String deviceId, String deviceName, String email, String phone, DeviceVS.Type deviceType) {
+    public CertExtensionDto(String deviceId, String deviceName, String email, String phone, DeviceVS.Type deviceType) {
         this.deviceId = deviceId;
         this.deviceName = deviceName;
         this.email = email;

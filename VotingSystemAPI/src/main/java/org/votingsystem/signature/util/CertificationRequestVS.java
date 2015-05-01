@@ -6,11 +6,10 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.votingsystem.dto.UserVSCertExtensionDto;
+import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
-import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
@@ -90,7 +89,7 @@ public class CertificationRequestVS implements java.io.Serializable {
     }
 
     public static CertificationRequestVS getUserRequest (int keySize, String keyName, String signatureMechanism,
-            String provider, UserVSCertExtensionDto certExtensionDto) throws NoSuchAlgorithmException,
+            String provider, CertExtensionDto certExtensionDto) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();

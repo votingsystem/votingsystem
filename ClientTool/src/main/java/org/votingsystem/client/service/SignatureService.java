@@ -13,8 +13,7 @@ import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.OperationVS;
-import org.votingsystem.dto.UserVSCertExtensionDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -192,7 +191,7 @@ public class SignatureService extends Service<ResponseVS> {
         }
 
         private ResponseVS sendCSRRequest(OperationVS operationVS) throws Exception {
-            UserVSCertExtensionDto certExtensionDto = operationVS.getData(UserVSCertExtensionDto.class);
+            CertExtensionDto certExtensionDto = operationVS.getData(CertExtensionDto.class);
             certExtensionDto.setDeviceId(SessionService.getInstance().getDeviceVS().getDeviceId());
             certExtensionDto.setDeviceType(DeviceVS.Type.PC);
             certExtensionDto.setDeviceName(InetAddress.getLocalHost().getHostName());
@@ -333,7 +332,7 @@ public class SignatureService extends Service<ResponseVS> {
         //we know this is done in a background thread
         private ResponseVS processCancelAnonymousDelegation(OperationVS operationVS) throws Exception {
             String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
-            AnonymousDelegationDto delegation = SessionService.getInstance().getAnonymousDelegationDto();
+            RepresentativeDelegationDto delegation = SessionService.getInstance().getAnonymousDelegationDto();
             if(delegation == null) return new ResponseVS(ResponseVS.SC_ERROR,
                     ContextVS.getMessage("anonymousDelegationDataMissingMsg"));
             SMIMEMessage smimeMessage = SessionService.getSMIME(null,
@@ -360,9 +359,9 @@ public class SignatureService extends Service<ResponseVS> {
         private ResponseVS processAnonymousDelegation(OperationVS operationVS) throws Exception {
             String caption = operationVS.getCaption();
             if(caption.length() > 50) caption = caption.substring(0, 50) + "...";
-            AnonymousDelegationDto anonymousDelegation = operationVS.getData(AnonymousDelegationDto.class);
-            AnonymousDelegationDto anonymousCertRequest = anonymousDelegation.getAnonymousCertRequest();
-            AnonymousDelegationDto anonymousDelegationRequest = anonymousDelegation.getDelegation();
+            RepresentativeDelegationDto anonymousDelegation = operationVS.getData(RepresentativeDelegationDto.class);
+            RepresentativeDelegationDto anonymousCertRequest = anonymousDelegation.getAnonymousCertRequest();
+            RepresentativeDelegationDto anonymousDelegationRequest = anonymousDelegation.getDelegation();
             try {
                 SMIMEMessage smimeMessage = SessionService.getSMIME(null, ContextVS.getInstance().getAccessControl().
                         getName(), JSON.getMapper().writeValueAsString(anonymousCertRequest), password,

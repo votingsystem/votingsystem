@@ -1,4 +1,4 @@
-package org.votingsystem.dto.voting;
+package org.votingsystem.dto;
 
 
 import org.votingsystem.util.TypeVS;

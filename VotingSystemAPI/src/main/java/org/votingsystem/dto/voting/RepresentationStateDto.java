@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.voting.RepresentationState;
 import org.votingsystem.util.ObjectUtils;
-
 import java.util.Date;
 
 /**
@@ -26,7 +25,7 @@ public class RepresentationStateDto {
 
     public RepresentationStateDto() {}
 
-    public RepresentationStateDto(AnonymousDelegationDto delegation) throws Exception {
+    public RepresentationStateDto(RepresentativeDelegationDto delegation) throws Exception {
         setState(RepresentationState.WITH_ANONYMOUS_REPRESENTATION);
         setLastCheckedDate(new Date());
         setRepresentative(delegation.getRepresentative());

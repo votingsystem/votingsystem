@@ -31,7 +31,7 @@ public class DeviceVSDto {
 
     public DeviceVSDto() {}
 
-    public DeviceVSDto(UserVS userVS, UserVSCertExtensionDto certExtensionDto) {
+    public DeviceVSDto(UserVS userVS, CertExtensionDto certExtensionDto) {
         this.NIF = userVS.getNif();
         this.firstName = userVS.getFirstName();
         this.lastName = userVS.getLastName();

@@ -1,64 +1,115 @@
 package org.votingsystem.dto.voting;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.CMSUtils;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.NifUtils;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.Date;
 
-import static java.text.MessageFormat.format;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RepresentativeDelegationDto {
+public class RepresentativeDelegationDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private TypeVS operation;
-    private String representativeNif;
-    private String representativeName;
+    private String originHashCertVS;
+    private String hashCertVSBase64;
     private Integer weeksOperationActive;
+    private String serverURL;
+    private UserVSDto representative;
+    private Date dateFrom;
+    private Date dateTo;
+    private transient SMIMEMessage delegationReceipt;
     private String UUID;
+
+    @JsonIgnore private CertificationRequestVS certificationRequest;
 
     public RepresentativeDelegationDto() {}
 
-    public RepresentativeDelegationDto(String representativeNif) {
-        this.operation = TypeVS.REPRESENTATIVE_SELECTION;
-        this.representativeNif = representativeNif;
-        this.UUID = java.util.UUID.randomUUID().toString();
+    public String getSubject() {
+        return null;
     }
 
-
-    public void validate() throws ExceptionVS {
-        if(TypeVS.REPRESENTATIVE_SELECTION != operation) throw new ValidationExceptionVS(
-                format("ERROR - operation missmatch - expected: {0} - found: {1}",
-                        TypeVS.REPRESENTATIVE_SELECTION, operation));
-        representativeNif =  NifUtils.validate(representativeNif);
+    public Date getDateFrom() {
+        return dateFrom;
     }
 
-    public TypeVS getOperation() {
-        return operation;
+    public void setDateFrom(Date dateFrom) {
+        this.dateFrom = dateFrom;
     }
 
-
-    public String getRepresentativeNif() {
-        return representativeNif;
+    public Date getDateTo() {
+        return dateTo;
     }
 
-    public String getUUID() {
-        return UUID;
+    public void setDateTo(Date dateTo) {
+        this.dateTo = dateTo;
     }
 
-    public void setUUID(String UUID) {
-        this.UUID = UUID;
+    public SMIMEMessage getReceipt() {
+        return delegationReceipt;
     }
 
-    public void setOperation(TypeVS operation) {
-        this.operation = operation;
+    public String getMessageId() {
+        String result = null;
+        try {
+            SMIMEMessage receipt = getReceipt();
+            String[] headers = receipt.getHeader("Message-ID");
+            if(headers != null && headers.length > 0) return headers[0];
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return result;
     }
 
-    public void setRepresentativeNif(String representativeNif) {
-        this.representativeNif = representativeNif;
+    public String getOriginHashCertVS() {
+        return originHashCertVS;
+    }
+
+    public CertificationRequestVS getCertificationRequest() {
+        return certificationRequest;
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        try {
+            if(delegationReceipt != null) s.writeObject(delegationReceipt.getBytes());
+            else s.writeObject(null);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void readObject(ObjectInputStream s) throws Exception {
+        s.defaultReadObject();
+        byte[] delegationReceiptBytes = (byte[]) s.readObject();
+        if(delegationReceiptBytes != null) delegationReceipt = new SMIMEMessage(delegationReceiptBytes);
+    }
+
+    public void setDelegationReceipt(SMIMEMessage delegationReceipt, X509Certificate serverCert) throws Exception {
+        Collection matches = delegationReceipt.checkSignerCert(serverCert);
+        if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
+        this.delegationReceipt = delegationReceipt;
     }
 
     public Integer getWeeksOperationActive() {
@@ -69,11 +120,94 @@ public class RepresentativeDelegationDto {
         this.weeksOperationActive = weeksOperationActive;
     }
 
-    public String getRepresentativeName() {
-        return representativeName;
+    public UserVSDto getRepresentative() {
+        return representative;
     }
 
-    public void setRepresentativeName(String representativeName) {
-        this.representativeName = representativeName;
+    public void setRepresentative(UserVSDto representative) {
+        this.representative = representative;
     }
+
+    public RepresentativeDelegationDto getRequest(TypeVS operation) {
+        RepresentativeDelegationDto requestDto = new RepresentativeDelegationDto();
+        requestDto.setOperation(operation);
+        requestDto.setWeeksOperationActive(weeksOperationActive);
+        requestDto.setRepresentative(representative);
+        requestDto.setServerURL(serverURL);
+        requestDto.setHashCertVSBase64(hashCertVSBase64);
+        if(dateTo != null) requestDto.setDateTo(new Date(dateTo.getTime()));
+        if(dateFrom != null) requestDto.setDateFrom(new Date(dateFrom.getTime()));
+        requestDto.setUUID(java.util.UUID.randomUUID().toString());
+        return requestDto;
+    }
+
+    public RepresentativeDelegationDto getCancelationRequest() {
+        RepresentativeDelegationDto cancelationDto = getRequest(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
+        cancelationDto.setOriginHashCertVS(originHashCertVS);
+        return cancelationDto;
+    }
+
+
+    public RepresentativeDelegationDto getAnonymousCertRequest() throws NoSuchAlgorithmException, IOException,
+            NoSuchProviderException, InvalidKeyException, SignatureException {
+        originHashCertVS = java.util.UUID.randomUUID().toString();
+        hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVS, ContextVS.VOTING_DATA_DIGEST);
+        dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
+        dateTo = DateUtils.addDays(dateFrom, weeksOperationActive * 7).getTime();
+        certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(
+                ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
+                ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive, dateFrom, dateTo);
+        RepresentativeDelegationDto requestDto = getRequest(TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST);
+        return requestDto;
+    }
+
+    public RepresentativeDelegationDto getDelegation(){
+        RepresentativeDelegationDto delegationDto = getRequest(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
+        return delegationDto;
+    }
+
+    public SMIMEMessage getDelegationReceipt() {
+        return delegationReceipt;
+    }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
+    }
+
+    public String getServerURL() {
+        return serverURL;
+    }
+
+    public void setServerURL(String serverURL) {
+        this.serverURL = serverURL;
+    }
+
+    public void setOriginHashCertVS(String originHashCertVS) {
+        this.originHashCertVS = originHashCertVS;
+    }
+
+    public String getHashCertVSBase64() {
+        return hashCertVSBase64;
+    }
+
+    public void setHashCertVSBase64(String hashCertVSBase64) {
+        this.hashCertVSBase64 = hashCertVSBase64;
+    }
+
+    public void setDelegationReceipt(SMIMEMessage delegationReceipt) {
+        this.delegationReceipt = delegationReceipt;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
+    }
+
 }

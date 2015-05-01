@@ -5,9 +5,9 @@ import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.dto.DeviceVSDto;
-import org.votingsystem.dto.UserVSCertExtensionDto;
+import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
-import org.votingsystem.dto.voting.CertValidationDto;
+import org.votingsystem.dto.CertValidationDto;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.EventVSElection;
@@ -190,13 +190,13 @@ public class CSRBean {
         String subjectDN = info.getSubject().toString();
         UserVS userVS = UserVS.getUserVS(subjectDN);
         Enumeration csrAttributes = info.getAttributes().getObjects();
-        UserVSCertExtensionDto certExtensionDto = null;
+        CertExtensionDto certExtensionDto = null;
         while(csrAttributes.hasMoreElements()) {
             DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
             switch(attribute.getTagNo()) {
                 case ContextVS.DEVICEVS_TAG:
                     String deviceData = ((DERUTF8String)attribute.getObject()).getString();
-                    certExtensionDto = JSON.getMapper().readValue(deviceData, UserVSCertExtensionDto.class);
+                    certExtensionDto = JSON.getMapper().readValue(deviceData, CertExtensionDto.class);
                     break;
             }
         }

@@ -53,12 +53,15 @@ public class RepresentativeDelegationBean {
         UserVS userVS = messageSMIME.getUserVS();
         checkUserDelegationStatus(userVS);
         RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
-        request.validate();
+        if(TypeVS.REPRESENTATIVE_SELECTION != request.getOperation()) throw new ValidationExceptionVS(
+                format("ERROR - operation missmatch - expected: {0} - found: {1}",
+                        TypeVS.REPRESENTATIVE_SELECTION, request.getOperation()));
+        request.getRepresentative().setNIF(NifUtils.validate(request.getRepresentative().getNIF()));
         Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
-                .setParameter("nif", request.getRepresentativeNif()).setParameter("type", UserVS.Type.REPRESENTATIVE);
+                .setParameter("nif", request.getRepresentative().getNIF()).setParameter("type", UserVS.Type.REPRESENTATIVE);
         UserVS representative = dao.getSingleResult(UserVS.class, query);
         if(representative == null)  throw new ValidationExceptionVS(
-                "ERROR - representativeNifErrorMsg - representativeNif: " + request.getRepresentativeNif());
+                "ERROR - representativeNifErrorMsg - representativeNif: " + request.getRepresentative().getNIF());
         cancelPublicDelegation(messageSMIME);
         userVS.setRepresentative(representative);
         RepresentationDocument representationDocument = dao.persist(new RepresentationDocument(messageSMIME,
@@ -71,6 +74,7 @@ public class RepresentativeDelegationBean {
         log.info(format("user id: {0} - representationDocument id: {1}", userVS.getNif(), representationDocument.getId()));
         return representationDocument;
     }
+
 
     private void cancelPublicDelegation(MessageSMIME messageSMIME) {
         Query query = dao.getEM().createQuery("select r from RepresentationDocument r where r.userVS =:userVS and " +
@@ -87,17 +91,18 @@ public class RepresentativeDelegationBean {
     }
 
     public X509Certificate validateAnonymousRequest(MessageSMIME messageSMIME, byte[] csrRequest) throws Exception {
+        RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
+        if(TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST != request.getOperation()) throw new ValidationExceptionVS(
+                "expected operation 'ANONYMOUS_SELECTION_CERT_REQUEST' but found '" + request.getOperation() + "'");
         UserVS userVS = messageSMIME.getUserVS();
         checkUserDelegationStatus(userVS);
-        AnonymousDelegationRequest request = messageSMIME.getSignedContent(AnonymousDelegationRequest.class);
-        request.validateRequest();
         cancelPublicDelegation(messageSMIME);
         SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(userVS.getNif(), messageSMIME.getSMIME(), null);
-        messageSMIME.setType(request.operation).setSMIME(smimeMessageResp);
+        messageSMIME.setType(request.getOperation()).setSMIME(smimeMessageResp);
         X509Certificate anonymousCert = csrBean.signAnonymousDelegationCert(csrRequest);
         userVS.setRepresentative(null);
         dao.persist(new AnonymousDelegation(AnonymousDelegation.Status.OK, messageSMIME,
-                userVS, request.dateFrom, request.dateTo));
+                userVS, request.getDateFrom(), request.getDateTo()));
         return anonymousCert;
     }
 
@@ -112,7 +117,29 @@ public class RepresentativeDelegationBean {
                 .setParameter("hashCertVS", certExtensionDto.getHashCertVS());
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if(certificateVS == null) throw new ValidationExceptionVS(messages.get("certificateVSUnknownErrorMsg"));
-        AnonymousDelegationRequest request = messageSMIME.getSignedContent(AnonymousDelegationRequest.class);
+        RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
+        if(request.getRepresentative() == null) throw new ValidationExceptionVS("missing param 'representative'");
+        request.getRepresentative().setNIF(NifUtils.validate(request.getRepresentative().getNIF()));
+        query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
+                .setParameter("nif", request.getRepresentative().getNIF()).setParameter("type", UserVS.Type.REPRESENTATIVE);
+        UserVS representative = dao.getSingleResult(UserVS.class, query);
+        if(representative == null) throw new ValidationExceptionVS(
+                "ERROR - representativeNifErrorMsg - nif: " + request.getRepresentative().getNIF());
+        if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != request.getOperation()) throw new ValidationExceptionVS(
+                "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION' but found '" + request.getOperation() + "'");
+
+        if(request.getWeeksOperationActive() == null) throw new ValidationExceptionVS("missing param 'weeksOperationActive'");
+        if(request.getDateFrom() == null) throw new ValidationExceptionVS("missing param 'dateFrom'");
+        if(request.getDateTo() == null) throw new ValidationExceptionVS("missing param 'dateTo'");
+        if(request.getDateFrom().after(request.getDateTo())) throw new ValidationExceptionVS(
+                format("dateFrom '{0}' after '{1}'", request.getDateFrom(), request.getDateTo()));
+        Date dateFromCheck = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
+        if(request.getDateFrom().compareTo(dateFromCheck) != 0) throw new ValidationExceptionVS(
+                format("dateFrom expected '{0}' received '{1}'", dateFromCheck, request.getDateFrom()));
+        Date dateToCheck = DateUtils.addDays(dateFromCheck, request.getWeeksOperationActive() * 7).getTime();
+        if(request.getDateTo().compareTo(dateToCheck) != 0) throw new ValidationExceptionVS(
+                format("dateTo expected '{0}' received '{1}'", dateToCheck, request.getDateTo()));
+
         String toUser = certificateVS.getHashCertVSBase64();
         String subject = messages.get("representativeSelectValidationSubject");
         SMIMEMessage smimeMessage = signatureBean.getSMIMEMultiSigned(toUser, messageSMIME.getSMIME(), subject);
@@ -120,29 +147,43 @@ public class RepresentativeDelegationBean {
         dao.merge(messageSMIME);
         dao.merge(certificateVS.setState(CertificateVS.State.USED).setMessageSMIME(messageSMIME));
         RepresentationDocument representationDocument = new RepresentationDocument(messageSMIME, null,
-                request.representative, RepresentationDocument.State.OK);
+                representative, RepresentationDocument.State.OK);
         dao.persist(representationDocument);
         return representationDocument;
-        /*String msg = messageSource.getMessage('anonymousRepresentativeAssociatedMsg',
-        [request.representativeName].toArray(), locale)
-        log.debug "$methodName - representationDocument: ${representationDocument.id}"
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, message:msg, messageSMIME: messageSMIME,
-                type:TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION, contentType: ContentTypeVS.JSON_SIGNED)*/
     }
 
 
     public MessageSMIME cancelAnonymousDelegation(MessageSMIME messageSMIME) throws Exception {
         UserVS userVS = messageSMIME.getUserVS();
-        AnonymousDelegationRequest request = messageSMIME.getSignedContent(AnonymousDelegationRequest.class);
-        request.validateAnonymousDelegationCancellation(userVS);
-        request.anonymousDelegation.setStatus(AnonymousDelegation.Status.CANCELED).setCancellationSMIME(
-                messageSMIME).setDateCancelled(new Date());
-        dao.merge(request.anonymousDelegation);
-        request.representationDocument.setCancellationSMIME(messageSMIME);
-        dao.merge(request.representationDocument);
+        RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
+        if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION != request.getOperation()) throw new ValidationExceptionVS(
+                "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION' but found '" + request.getOperation() + "'");
+        AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS);
+        if(anonymousDelegation == null)  throw new ValidationExceptionVS(
+                "ERROR - userWithoutAnonymousDelegationErrorMsg - userVS nif: " +userVS.getNif());
+        if(request.getHashCertVSBase64() == null) throw new ValidationExceptionVS("missing param 'hashCertVSBase64'");
+        if(request.getOriginHashCertVS() == null) throw new ValidationExceptionVS("missing param 'originHashCertVSBase64'");
+        String hashCertVSBase64 = CMSUtils.getHashBase64(request.getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
+        if(request.getHashCertVSBase64().equals(hashCertVSBase64)) {
+            throw new ValidationExceptionVS("calculated 'hashCertVSBase64' doesn't match request one");
+        }
+        Query query = dao.getEM().createQuery("select c from CertificateVS c where c.state =:state " +
+                "and c.hashCertVSBase64 =:hashCertVS").setParameter("state", CertificateVS.State.USED)
+                .setParameter("hashCertVS", hashCertVSBase64);
+        CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
+        if(certificateVS == null) throw new ValidationExceptionVS("data doesn't match param CertificateVS");
+        query = dao.getEM().createQuery("select r from RepresentationDocument r where r.activationSMIME =:messageSMIME")
+                .setParameter("messageSMIME", certificateVS.getMessageSMIME());
+        RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
+        if(representationDocument == null) throw new ValidationExceptionVS(
+                "ERROR - RepresentationDocument for request not found");
         SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(userVS.getNif(), messageSMIME.getSMIME(), null);
         messageSMIME.setSMIME(smimeMessageResp);
         dao.merge(messageSMIME);
+        anonymousDelegation.setStatus(AnonymousDelegation.Status.CANCELED).setCancellationSMIME(messageSMIME)
+                .setDateCancelled(new Date());
+        dao.merge(anonymousDelegation);
+        dao.merge(representationDocument.setCancellationSMIME(messageSMIME));
         return messageSMIME;
     }
 
@@ -181,81 +222,6 @@ public class RepresentativeDelegationBean {
             return null;
         } else return anonymousDelegation;
     }
-
-    private class AnonymousDelegationRequest {
-        String representativeNif, representativeName, accessControlURL, hashCertVSBase64, originHashCertVSBase64;
-        Integer weeksOperationActive;
-        Date dateFrom, dateTo;
-        TypeVS operation;
-        UserVS representative;
-        AnonymousDelegation anonymousDelegation;
-        CertificateVS certificateVS;
-        RepresentationDocument representationDocument;
-
-        public AnonymousDelegationRequest(String signedContent) throws ExceptionVS { }
-
-        public void validate() throws ValidationExceptionVS {
-            if(weeksOperationActive == null) throw new ValidationExceptionVS("missing param 'weeksOperationActive'");
-            if(dateFrom == null) throw new ValidationExceptionVS("missing param 'dateFrom'");
-            if(dateTo == null) throw new ValidationExceptionVS("missing param 'dateTo'");
-            if(dateFrom.after(dateTo)) throw new ValidationExceptionVS(
-                    format("dateFrom '{0}' after '{1}'", dateFrom, dateTo));
-            Date dateFromCheck = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
-            if(dateFrom.compareTo(dateFromCheck) != 0) throw new ValidationExceptionVS(
-                    format("dateFrom expected '{0}' received '{1}'", dateFromCheck, dateFrom));
-            Date dateToCheck = DateUtils.addDays(dateFromCheck, weeksOperationActive * 7).getTime();
-            if(dateTo.compareTo(dateToCheck) != 0) throw new ValidationExceptionVS(
-                    format("dateTo expected '{0}' received '{1}'", dateToCheck, dateTo));
-        }
-
-        public AnonymousDelegationRequest validateDelegationData() throws ExceptionVS {
-            representativeNif = NifUtils.validate(representativeNif);
-            if(representativeName == null) throw new ValidationExceptionVS("missing param 'representativeName'");
-            Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
-                    .setParameter("nif", representativeNif).setParameter("type", UserVS.Type.REPRESENTATIVE);
-            representative = dao.getSingleResult(UserVS.class, query);
-            if(representative == null) throw new ValidationExceptionVS(
-                    "ERROR - representativeNifErrorMsg - nif: " + representativeNif);
-            return this;
-        }
-
-        public AnonymousDelegationRequest validateRequest() throws ExceptionVS {
-            if(TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST != operation) throw new ValidationExceptionVS(
-                    "expected operation 'ANONYMOUS_SELECTION_CERT_REQUEST' but found '" + operation.toString() + "'");
-            return this;
-        }
-        public AnonymousDelegationRequest validateDelegation() throws ExceptionVS {
-            if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != operation) throw new ValidationExceptionVS(
-                    "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION' but found '" + operation.toString() + "'");
-            validateDelegationData();
-            return this;
-        }
-
-        public AnonymousDelegationRequest validateAnonymousDelegationCancellation(UserVS userVS) throws ExceptionVS, NoSuchAlgorithmException {
-            if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION != operation) throw new ValidationExceptionVS(
-                    "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION' but found '" + operation.toString() + "'");
-            validateDelegationData();
-            anonymousDelegation = getAnonymousDelegation(userVS);
-            if(anonymousDelegation == null)  throw new ValidationExceptionVS(
-                    "ERROR - userWithoutAnonymousDelegationErrorMsg - userVS nif: " +userVS.getNif());
-            if(hashCertVSBase64 == null) throw new ValidationExceptionVS("missing param 'hashCertVSBase64'");
-            if(originHashCertVSBase64 == null) throw new ValidationExceptionVS("missing param 'originHashCertVSBase64'");
-            if(!hashCertVSBase64.equals(CMSUtils.getHashBase64(originHashCertVSBase64, ContextVS.VOTING_DATA_DIGEST)))
-                throw new ValidationExceptionVS("provided origin doesn't match hash origin");
-            Query query = dao.getEM().createQuery("select c from CertificateVS c where c.state =:state " +
-                    "and c.hashCertVSBase64 =:hashCertVS").setParameter("state", CertificateVS.State.USED)
-                    .setParameter("hashCertVS", hashCertVSBase64);
-            certificateVS = dao.getSingleResult(CertificateVS.class, query);
-            if(certificateVS == null) throw new ValidationExceptionVS("data doesn't match param CertificateVS");
-            query = dao.getEM().createQuery("select r from RepresentationDocument r where r.activationSMIME =:messageSMIME")
-                    .setParameter("messageSMIME", certificateVS.getMessageSMIME());
-            representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
-            if(representationDocument == null) throw new ValidationExceptionVS(
-                    "data doesn't macth param RepresentationDocument");
-            return this;
-        }
-    }
-
 
     public RepresentativeDto getRepresentativeDto(UserVS representative) {
         Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS and " +

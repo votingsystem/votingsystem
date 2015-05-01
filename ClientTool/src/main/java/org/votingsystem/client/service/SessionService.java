@@ -12,7 +12,7 @@ import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.EncryptedBundleDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.dto.voting.AnonymousDelegationDto;
+import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
@@ -46,7 +46,7 @@ public class SessionService {
     private UserVS userVS;
     private File sessionFile;
     private File representativeStateFile;
-    private AnonymousDelegationDto anonymousDelegationDto;
+    private RepresentativeDelegationDto anonymousDelegationDto;
     private RepresentationStateDto representativeStateDto;
     private BrowserSessionDto browserSessionDto;
     private static CountDownLatch countDownLatch;
@@ -97,7 +97,7 @@ public class SessionService {
         }
     }
 
-    public void setAnonymousDelegationDto(AnonymousDelegationDto delegation) {
+    public void setAnonymousDelegationDto(RepresentativeDelegationDto delegation) {
         try {
             loadRepresentationData();
             representativeStateDto = new RepresentationStateDto(delegation);
@@ -132,13 +132,13 @@ public class SessionService {
         return result;
     }
 
-    public AnonymousDelegationDto getAnonymousDelegationDto() {
+    public RepresentativeDelegationDto getAnonymousDelegationDto() {
         if(anonymousDelegationDto != null) return anonymousDelegationDto;
         try {
             loadRepresentationData();
             String serializedDelegation = representativeStateDto.getAnonymousDelegationObject();
             if(serializedDelegation != null) {
-                anonymousDelegationDto = (AnonymousDelegationDto) ObjectUtils.deSerializeObject(
+                anonymousDelegationDto = (RepresentativeDelegationDto) ObjectUtils.deSerializeObject(
                         serializedDelegation.getBytes());
             }
         } catch(Exception ex) {
