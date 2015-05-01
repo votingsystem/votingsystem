@@ -12,18 +12,19 @@
             <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <style no-shim>
-            .dialog {
+            :dialog {
                 box-sizing: border-box;
                 -moz-box-sizing: border-box;
                 font-family: Arial, Helvetica, sans-serif;
-                font-size: 13px;
+                font-size: 1.2em;
                 -webkit-user-select: none;
                 -moz-user-select: none;
                 overflow: auto;
                 background: white;
                 outline: 1px solid rgba(0,0,0,0.2);
                 box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-                width: 500px;
+                width: 800px;
+                color: #888;
             }
             </style>
             <div id="container" style="overflow: auto;">
@@ -99,7 +100,7 @@
                 </div>
 
                 <div hidden?="{{step !== 'confirm'}}">
-                    <div layout horizontal style="margin:0px 20px 0px 0px;">
+                    <div layout horizontal style="margin:0px 20px 0px 0px;  font-size:1.2em;">
                         <div flex></div>
                         <div style="margin:10px 20px 10px 0px;">
                             <paper-button raised on-click="{{cancel}}" style="margin: 0px 0px 0px 5px;">
@@ -172,10 +173,8 @@
                         representativeOperation = Operation.REPRESENTATIVE_SELECTION
                     }
                     var operationVS = new OperationVS(representativeOperation)
-                    var representative = {nif:this.representative.nif, name:this.representativeFullName}
-                    operationVS.jsonStr = JSON.stringify({operation:representativeOperation, representative:representative,
+                    operationVS.jsonStr = JSON.stringify({operation:representativeOperation, representative:this.representative,
                         weeksOperationActive:this.$.numWeeksAnonymousDelegation.value})
-                    operationVS.jsonStr = JSON.stringify(this.representative)
                     operationVS.serviceURL = "${restURL}/representative/delegation"
                     operationVS.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'
                     operationVS.setCallback(function(appMessage) {

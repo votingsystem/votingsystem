@@ -360,6 +360,7 @@ public class SignatureService extends Service<ResponseVS> {
             String caption = operationVS.getCaption();
             if(caption.length() > 50) caption = caption.substring(0, 50) + "...";
             RepresentativeDelegationDto anonymousDelegation = operationVS.getData(RepresentativeDelegationDto.class);
+            anonymousDelegation.setServerURL(ContextVS.getInstance().getAccessControl().getServerURL());
             RepresentativeDelegationDto anonymousCertRequest = anonymousDelegation.getAnonymousCertRequest();
             RepresentativeDelegationDto anonymousDelegationRequest = anonymousDelegation.getDelegation();
             try {

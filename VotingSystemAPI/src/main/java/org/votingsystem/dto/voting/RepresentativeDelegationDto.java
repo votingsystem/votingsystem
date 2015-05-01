@@ -39,9 +39,9 @@ public class RepresentativeDelegationDto implements Serializable {
     private UserVSDto representative;
     private Date dateFrom;
     private Date dateTo;
-    private transient SMIMEMessage delegationReceipt;
     private String UUID;
 
+    @JsonIgnore private transient SMIMEMessage receipt;
     @JsonIgnore private CertificationRequestVS certificationRequest;
 
     public RepresentativeDelegationDto() {}
@@ -66,14 +66,11 @@ public class RepresentativeDelegationDto implements Serializable {
         this.dateTo = dateTo;
     }
 
-    public SMIMEMessage getReceipt() {
-        return delegationReceipt;
-    }
-
+    @JsonIgnore
     public String getMessageId() {
+        if(receipt == null) return null;
         String result = null;
         try {
-            SMIMEMessage receipt = getReceipt();
             String[] headers = receipt.getHeader("Message-ID");
             if(headers != null && headers.length > 0) return headers[0];
         } catch(Exception ex) {
@@ -86,6 +83,7 @@ public class RepresentativeDelegationDto implements Serializable {
         return originHashCertVS;
     }
 
+    @JsonIgnore
     public CertificationRequestVS getCertificationRequest() {
         return certificationRequest;
     }
@@ -93,7 +91,7 @@ public class RepresentativeDelegationDto implements Serializable {
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         try {
-            if(delegationReceipt != null) s.writeObject(delegationReceipt.getBytes());
+            if(receipt != null) s.writeObject(receipt.getBytes());
             else s.writeObject(null);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -102,14 +100,14 @@ public class RepresentativeDelegationDto implements Serializable {
 
     private void readObject(ObjectInputStream s) throws Exception {
         s.defaultReadObject();
-        byte[] delegationReceiptBytes = (byte[]) s.readObject();
-        if(delegationReceiptBytes != null) delegationReceipt = new SMIMEMessage(delegationReceiptBytes);
+        byte[] receiptBytes = (byte[]) s.readObject();
+        if(receiptBytes != null) receipt = new SMIMEMessage(receiptBytes);
     }
 
-    public void setDelegationReceipt(SMIMEMessage delegationReceipt, X509Certificate serverCert) throws Exception {
-        Collection matches = delegationReceipt.checkSignerCert(serverCert);
+    public void setDelegationReceipt(SMIMEMessage receipt, X509Certificate serverCert) throws Exception {
+        Collection matches = receipt.checkSignerCert(serverCert);
         if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
-        this.delegationReceipt = delegationReceipt;
+        this.receipt = receipt;
     }
 
     public Integer getWeeksOperationActive() {
@@ -128,6 +126,7 @@ public class RepresentativeDelegationDto implements Serializable {
         this.representative = representative;
     }
 
+    @JsonIgnore
     public RepresentativeDelegationDto getRequest(TypeVS operation) {
         RepresentativeDelegationDto requestDto = new RepresentativeDelegationDto();
         requestDto.setOperation(operation);
@@ -141,13 +140,14 @@ public class RepresentativeDelegationDto implements Serializable {
         return requestDto;
     }
 
+    @JsonIgnore
     public RepresentativeDelegationDto getCancelationRequest() {
         RepresentativeDelegationDto cancelationDto = getRequest(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
         cancelationDto.setOriginHashCertVS(originHashCertVS);
         return cancelationDto;
     }
 
-
+    @JsonIgnore
     public RepresentativeDelegationDto getAnonymousCertRequest() throws NoSuchAlgorithmException, IOException,
             NoSuchProviderException, InvalidKeyException, SignatureException {
         originHashCertVS = java.util.UUID.randomUUID().toString();
@@ -161,14 +161,12 @@ public class RepresentativeDelegationDto implements Serializable {
         return requestDto;
     }
 
+    @JsonIgnore
     public RepresentativeDelegationDto getDelegation(){
         RepresentativeDelegationDto delegationDto = getRequest(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
         return delegationDto;
     }
 
-    public SMIMEMessage getDelegationReceipt() {
-        return delegationReceipt;
-    }
 
     public TypeVS getOperation() {
         return operation;
@@ -198,10 +196,6 @@ public class RepresentativeDelegationDto implements Serializable {
         this.hashCertVSBase64 = hashCertVSBase64;
     }
 
-    public void setDelegationReceipt(SMIMEMessage delegationReceipt) {
-        this.delegationReceipt = delegationReceipt;
-    }
-
     public String getUUID() {
         return UUID;
     }
@@ -210,4 +204,12 @@ public class RepresentativeDelegationDto implements Serializable {
         this.UUID = UUID;
     }
 
+    @JsonIgnore
+    public SMIMEMessage getReceipt() {
+        return receipt;
+    }
+
+    public void setReceipt(SMIMEMessage receipt) {
+        this.receipt = receipt;
+    }
 }

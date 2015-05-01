@@ -1,5 +1,8 @@
 package org.votingsystem.test.misc;
 
+import org.votingsystem.dto.voting.RepresentativeDelegationDto;
+import org.votingsystem.util.JSON;
+
 import java.util.logging.Logger;
 
 /**

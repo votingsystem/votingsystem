@@ -323,7 +323,8 @@ public class SessionService {
                         ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
                 SMIMEMessage smime = signedGenerator.getSMIME(fromUser, toUser, textToSign, subject);
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smime,
-                        ContextVS.getInstance().getDefaultServer().getTimeStampServerURL());
+                        ContextVS.getInstance().getDefaultServer().getTimeStampServiceURL());
+                timeStamper.call();
                 return timeStamper.getSMIME();
             case DNIe:
                 return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password.toCharArray(), subject);
