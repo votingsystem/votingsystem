@@ -86,7 +86,7 @@ public class AnonymousRepresentativeDelegationCancelerServlet extends HttpServle
 
     @Override
     public String getServletInfo() {
-        return "servlet that process currency request";
+        return "servlet that process cancelations of anonymouys representative delegations";
     }
 
 }

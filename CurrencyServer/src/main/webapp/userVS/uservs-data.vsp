@@ -65,7 +65,7 @@
                         <vs-html-echo html="{{uservs.description}}"></vs-html-echo>
                     </div>
                 </div>
-                <div hidden="{{!uservs.subscriptionVSList ||  uservs.subscriptionVSList.length === 0}}"
+                <div hidden?="{{!uservs.subscriptionVSList ||  uservs.subscriptionVSList.length === 0}}"
                      layout flex horizontal wrap style="border:1px solid #eee; padding: 5px;">
                     <div style="font-size: 0.9em;font-weight: bold; color: #888; margin:0 15px 0 0;">
                         - ${msg.groupsLbl} -

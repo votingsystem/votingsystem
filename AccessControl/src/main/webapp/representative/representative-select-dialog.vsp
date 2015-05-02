@@ -114,7 +114,7 @@
                         </div>
                     </div>
                 </div>
-                <div hidden="{{step !== 'anonymousDelegationResponse'}}">
+                <div hidden?="{{step !== 'anonymousDelegationResponse'}}">
                     <p style="text-align: center; font-size: 1.2em;">
                         {{anonymousDelegationResponseMsg}}
                     </p>

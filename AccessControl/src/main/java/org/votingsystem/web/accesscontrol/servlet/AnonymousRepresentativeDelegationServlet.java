@@ -80,7 +80,7 @@ public class AnonymousRepresentativeDelegationServlet extends HttpServlet {
 
     @Override
     public String getServletInfo() {
-        return "servlet that process currency request";
+        return "servlet that process anonymous representative delegation";
     }
 
 }
