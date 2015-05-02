@@ -47,7 +47,6 @@ public class AnonymousRepresentativeDelegationCancelerServlet extends HttpServle
         processRequest(request, response);
     }
 
-    @Transactional
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException, IOException {
         try {
