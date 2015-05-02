@@ -5,6 +5,7 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.callable.AccessRequestDataSender;
+import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
@@ -344,6 +345,11 @@ public class SignatureService extends Service<ResponseVS> {
                     ContextVS.getInstance().getAccessControl().getName(),
                     JSON.getMapper().writeValueAsString(anonymousRepresentationDocumentCancelationRequest),
                     operationVS.getSignedMessageSubject(), null);
+            MessageTimeStamper timeStamper = new MessageTimeStamper(anonymousSmimeMessage,
+                    ContextVS.getInstance().getDefaultServer().getTimeStampServiceURL());
+            anonymousSmimeMessage = timeStamper.call();
+
+
             Map<String, Object> mapToSend = new HashMap<>();
             mapToSend.put(ContextVS.SMIME_FILE_NAME, smimeMessage.getBytes());
             mapToSend.put(ContextVS.SMIME_ANONYMOUS_FILE_NAME, anonymousSmimeMessage.getBytes());
@@ -374,6 +380,7 @@ public class SignatureService extends Service<ResponseVS> {
                 SMIMEMessage smimeMessage = SessionService.getSMIME(null, ContextVS.getInstance().getAccessControl().
                         getName(), JSON.getMapper().writeValueAsString(anonymousCertRequest), password,
                         operationVS.getSignedMessageSubject());
+                anonymousDelegation.setAnonymousDelegationRequestBase64ContentDigest(smimeMessage.getContentDigestStr());
                 updateMessage(operationVS.getSignedMessageSubject());
                 //byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert);
                 //byte[] delegationEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
@@ -420,7 +427,8 @@ public class SignatureService extends Service<ResponseVS> {
             SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(),
                     documentToSign, password, operationVS.getSignedMessageSubject());
             updateMessage(operationVS.getSignedMessageSubject());
-            SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage, operationVS.getServiceURL(),
+            SMIMESignedSender senderWorker = new SMIMESignedSender(smimeMessage,
+                    ContextVS.getInstance().getAccessControl().getDelegationServiceURL(),
                     operationVS.getTargetServer().getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null,
                     operationVS.getTargetServer().getX509Certificate(), header);
             return senderWorker.call();

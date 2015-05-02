@@ -242,7 +242,8 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         this.messageBytes = messageBytes;
     }
 
-    public SMIMEMessage getSMIME() {
+    public SMIMEMessage getSMIME() throws Exception {
+        if(smimeMessage == null) smimeMessage = new SMIMEMessage(getMessageBytes());
         return smimeMessage;
     }
 

@@ -13,12 +13,13 @@
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <style no-shim>
             .dialog {
-                font-size: 1.2em;
                 width: 800px;
                 color: #888;
             }
             </style>
             <div id="container" style="overflow: auto;">
+
+                <div style="font-size: 1.2em;">
                 <div layout horizontal center center-justified>
                     <div flex style="font-size: 1.5em; margin:0px auto;font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">${msg.saveAsRepresentativeLbl}</div>
@@ -62,15 +63,13 @@
                         </div>
                     </div>
                 </div>
-                <div hidden?="{{step !== 'confirm'}}">
-                    <div style="margin: 10px 0 10px 10px;">
+                <div hidden?="{{step !== 'confirm'}}" vertical layout center center-justified>
+                    <div style="margin: 20px 0 10px 10px;">
                         <vs-html-echo id="delegationMsg"></vs-html-echo>
                     </div>
-                    <template if="{{isAnonymousDelegation == true}}">
-                        <div style="margin:25px 0 25px 0;">
-                            <vs-html-echo html="{{anonymousDelegationMsg}}"></vs-html-echo>
-                        </div>
-                    </template>
+                    <div hidden?="{{!isAnonymousDelegation}}" style="margin:25px 0 25px 0;">
+                        <vs-html-echo html="{{anonymousDelegationMsg}}"></vs-html-echo>
+                    </div>
                 </div>
                 <div hidden?="{{isAnonymousDelegation == false || step !== 'main'}}" vertical layout center center-justified
                      style="margin:10px 0;">
@@ -79,6 +78,16 @@
                            style="width:120px;margin:10px 20px 0px 7px;" class="form-control"
                            title="${msg.numWeeksAnonymousDelegationMsg}">
                 </div>
+                <div hidden?="{{step !== 'anonymousDelegationResponse'}}">
+                    <p style="text-align: center; font-size: 1.2em;">
+                        {{anonymousDelegationResponseMsg}}
+                    </p>
+                    <p style="text-align: center; font-size: 1.2em;">
+                        ${msg.anonymousDelegationReceiptMsg}
+                    </p>
+                </div>
+                </div>
+
                 <div hidden?="{{step !== 'main'}}">
                     <div layout horizontal style="margin:0px 20px 0px 0px;">
                         <div flex></div>
@@ -105,14 +114,7 @@
                         </div>
                     </div>
                 </div>
-                <div hidden?="{{step !== 'anonymousDelegationResponse'}}">
-                    <p style="text-align: center; font-size: 1.2em;">
-                        {{anonymousDelegationResponseMsg}}
-                    </p>
-                    <p style="text-align: center; font-size: 1.2em;">
-                        ${msg.anonymousDelegationReceiptMsg}
-                    </p>
-                </div>
+
             </div>
         </paper-dialog>
     </template>

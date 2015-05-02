@@ -190,7 +190,11 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
                             }
                         });
                     }
-                    smimeMessage = responseVS.getSMIME();
+                    try {
+                        smimeMessage = responseVS.getSMIME();
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                    }
                 } else showMessage(responseVS.getStatusCode(), responseVS.getMessage());
                 break;
             case SEND_SMIME:

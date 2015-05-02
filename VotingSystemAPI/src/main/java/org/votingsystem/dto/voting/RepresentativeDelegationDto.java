@@ -35,6 +35,7 @@ public class RepresentativeDelegationDto implements Serializable {
     private String hashCertVSBase64;
     private String originHashAnonymousDelegation;
     private String hashAnonymousDelegation;
+    private String anonymousDelegationRequestBase64ContentDigest;
     private Integer weeksOperationActive;
     private String serverURL;
     private UserVSDto representative;
@@ -132,11 +133,7 @@ public class RepresentativeDelegationDto implements Serializable {
         RepresentativeDelegationDto requestDto = new RepresentativeDelegationDto();
         requestDto.setOperation(operation);
         requestDto.setWeeksOperationActive(weeksOperationActive);
-        requestDto.setRepresentative(representative);
-        requestDto.getRepresentative().setDescription(null);
-        requestDto.getRepresentative().setCertCollection(null);
         requestDto.setServerURL(serverURL);
-        requestDto.setHashCertVSBase64(hashCertVSBase64);
         if(dateTo != null) requestDto.setDateTo(new Date(dateTo.getTime()));
         if(dateFrom != null) requestDto.setDateFrom(new Date(dateFrom.getTime()));
         requestDto.setUUID(java.util.UUID.randomUUID().toString());
@@ -148,7 +145,6 @@ public class RepresentativeDelegationDto implements Serializable {
         RepresentativeDelegationDto cancelationDto = getRequest(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
         cancelationDto.setOriginHashAnonymousDelegation(originHashAnonymousDelegation);
         cancelationDto.setHashAnonymousDelegation(hashAnonymousDelegation);
-        cancelationDto.setHashCertVSBase64(null);
         return cancelationDto;
     }
 
@@ -156,6 +152,7 @@ public class RepresentativeDelegationDto implements Serializable {
     public RepresentativeDelegationDto getAnonymousRepresentationDocumentCancelationRequest() {
         RepresentativeDelegationDto cancelationDto = getRequest(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION);
         cancelationDto.setOriginHashCertVS(originHashCertVS);
+        cancelationDto.setHashCertVSBase64(hashCertVSBase64);
         return cancelationDto;
     }
 
@@ -172,12 +169,17 @@ public class RepresentativeDelegationDto implements Serializable {
                 ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
                 ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive, dateFrom, dateTo);
         RepresentativeDelegationDto requestDto = getRequest(TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST);
+        requestDto.setHashAnonymousDelegation(hashAnonymousDelegation);
         return requestDto;
     }
 
     @JsonIgnore
     public RepresentativeDelegationDto getDelegation(){
         RepresentativeDelegationDto delegationDto = getRequest(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
+        delegationDto.setRepresentative(representative);
+        delegationDto.getRepresentative().setDescription(null);
+        delegationDto.getRepresentative().setCertCollection(null);
+        delegationDto.setHashCertVSBase64(hashCertVSBase64);
         return delegationDto;
     }
 
@@ -241,5 +243,13 @@ public class RepresentativeDelegationDto implements Serializable {
 
     public void setHashAnonymousDelegation(String hashAnonymousDelegation) {
         this.hashAnonymousDelegation = hashAnonymousDelegation;
+    }
+
+    public String getAnonymousDelegationRequestBase64ContentDigest() {
+        return anonymousDelegationRequestBase64ContentDigest;
+    }
+
+    public void setAnonymousDelegationRequestBase64ContentDigest(String anonymousDelegationRequestBase64ContentDigest) {
+        this.anonymousDelegationRequestBase64ContentDigest = anonymousDelegationRequestBase64ContentDigest;
     }
 }

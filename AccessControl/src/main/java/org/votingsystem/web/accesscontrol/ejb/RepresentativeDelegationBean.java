@@ -101,7 +101,7 @@ public class RepresentativeDelegationBean {
         SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(userVS.getNif(), messageSMIME.getSMIME(), null);
         messageSMIME.setType(request.getOperation()).setSMIME(smimeMessageResp);
         X509Certificate anonymousCert = csrBean.signAnonymousDelegationCert(csrRequest);
-        userVS.setRepresentative(null);
+        dao.merge(userVS.setRepresentative(null));
         AnonymousDelegation anonymousDelegation = new AnonymousDelegation(AnonymousDelegation.Status.OK, messageSMIME,
                 userVS, request.getDateFrom(), request.getDateTo());
         anonymousDelegation.setHashAnonymousDelegation(request.getHashAnonymousDelegation());
@@ -182,6 +182,7 @@ public class RepresentativeDelegationBean {
         dao.merge(messageSMIME.setSMIME(smimeMessageResp));
         anonymousDelegation.setOriginHashAnonymousDelegation(request.getOriginHashAnonymousDelegation()).setDateCancelled(new Date());
         dao.merge(anonymousDelegation.setStatus(AnonymousDelegation.Status.CANCELED).setCancellationSMIME(messageSMIME));
+        log.info("cancelAnonymousDelegation -  AnonymousDelegation id: " + anonymousDelegation.getId());
         return anonymousDelegation;
     }
 
@@ -192,7 +193,7 @@ public class RepresentativeDelegationBean {
         if(request.getHashCertVSBase64() == null) throw new ValidationExceptionVS("missing param 'hashCertVSBase64'");
         if(request.getOriginHashCertVS() == null) throw new ValidationExceptionVS("missing param 'originHashCertVSBase64'");
         String hashCertVSBase64 = CMSUtils.getHashBase64(request.getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
-        if(request.getHashCertVSBase64().equals(hashCertVSBase64)) {
+        if(!request.getHashCertVSBase64().equals(hashCertVSBase64)) {
             throw new ValidationExceptionVS("calculated 'hashCertVSBase64' doesn't match request one");
         }
         X509Certificate anonymousX509Cert =  messageSMIME.getAnonymousSigner().getCertificate();
@@ -211,7 +212,7 @@ public class RepresentativeDelegationBean {
         RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
         if(representationDocument == null) throw new ValidationExceptionVS(
                 "ERROR - RepresentationDocument for request not found");
-        SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(anonymousX509Cert.getSubjectDN().toString(),
+        SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(certificateVS.getHashCertVSBase64(),
                 messageSMIME.getSMIME(), null);
         dao.merge(messageSMIME.setSMIME(smimeMessageResp));
         dao.merge(representationDocument.setState(RepresentationDocument.State.CANCELED).setCancellationSMIME(messageSMIME));
