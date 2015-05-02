@@ -12,17 +12,8 @@
             <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <style no-shim>
-            :dialog {
-                box-sizing: border-box;
-                -moz-box-sizing: border-box;
-                font-family: Arial, Helvetica, sans-serif;
+            .dialog {
                 font-size: 1.2em;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                overflow: auto;
-                background: white;
-                outline: 1px solid rgba(0,0,0,0.2);
-                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
                 width: 800px;
                 color: #888;
             }

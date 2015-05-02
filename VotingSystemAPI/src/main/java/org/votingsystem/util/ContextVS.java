@@ -482,8 +482,9 @@ public class ContextVS implements BundleActivator {
         } finally {
             try {
                 if(pattern == null) pattern = getInstance().parentBundle.getString(key);
-                if(arguments.length > 0) return new String(MessageFormat.format(pattern, arguments).getBytes(ISO_8859_1), UTF_8);
-                else return new String(pattern.getBytes(ISO_8859_1), UTF_8);
+                pattern = new String(pattern.getBytes(ISO_8859_1), UTF_8);
+                if(arguments.length > 0) return MessageFormat.format(pattern, arguments);
+                else return pattern;
             } catch (Exception ex) {
                 log.log(Level.SEVERE, "### Value not found for key: " + key);
                 return "---" + key + "---";
