@@ -18,6 +18,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyGeneratorVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.throwable.KeyStoreExceptionVS;
 
 import javax.mail.Session;
 import javax.swing.*;
@@ -388,7 +389,7 @@ public class ContextVS implements BundleActivator {
         return userVS;
     }
 
-    public KeyStore getUserKeyStore(char[] password) throws KeyStoreExceptionVS{
+    public KeyStore getUserKeyStore(char[] password) throws KeyStoreExceptionVS {
         File keyStoreFile = null;
         KeyStore keyStore = null;
         try {

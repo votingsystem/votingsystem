@@ -1,7 +1,6 @@
 package org.votingsystem.util.currency;
 
 /**
-
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public enum Payment {

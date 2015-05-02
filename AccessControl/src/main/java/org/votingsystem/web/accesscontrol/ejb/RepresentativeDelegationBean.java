@@ -27,6 +27,7 @@ import org.votingsystem.web.util.MessagesVS;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -156,6 +157,7 @@ public class RepresentativeDelegationBean {
         return representationDocument;
     }
 
+    @Transactional
     public AnonymousDelegation cancelAnonymousDelegation(
             MessageSMIME messageSMIME, MessageSMIME anonymousMessageSMIME) throws Exception {
         cancelAnonymousRepresentationDocument(anonymousMessageSMIME);
