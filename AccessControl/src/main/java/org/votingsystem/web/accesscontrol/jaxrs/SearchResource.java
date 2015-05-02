@@ -3,7 +3,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.dto.voting.RepresentativeDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.JSON;
@@ -65,7 +65,7 @@ public class SearchResource {
                 "or u.lastName like :searchText or u.description like :searchText)").setParameter(
                 "type", UserVS.Type.REPRESENTATIVE).setParameter("searchText", "%" + searchText + "%");
         List<UserVS> representativeList = query.getResultList();
-        List<RepresentativeDto> resultList = new ArrayList<>();
+        List<UserVSDto> resultList = new ArrayList<>();
         for(UserVS representative : representativeList) {
             resultList.add(representativeBean.geRepresentativeDto(representative));
         }

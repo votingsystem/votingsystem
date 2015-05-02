@@ -3,7 +3,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
-import org.votingsystem.dto.voting.RepresentativeDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
@@ -28,7 +28,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.logging.Logger;
@@ -255,19 +254,15 @@ public class RepresentativeDelegationBean {
         } else return anonymousDelegation;
     }
 
-    public RepresentativeDto getRepresentativeDto(UserVS representative) {
+    public UserVSDto getRepresentativeDto(UserVS representative) {
         Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS and " +
                 "r.state =:state").setParameter("userVS", representative).setParameter("state", RepresentativeDocument.State.OK);
         RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
-        String representativeMessageURL = format("{0}/messageSMIME/id/{1}", config.getRestURL(),
-                representativeDocument.getActivationSMIME().getId());
-        String imageURL = format("{0}/representative/id/{1}/image", config.getRestURL(), representative.getId());
-        String URL = format("{0}/representative/id/{1}", config.getRestURL(), representative.getId());
         query = dao.getEM().createQuery("select count(r) from RepresentationDocument r where " +
                 "r.representative =:representative and r.state =:state").setParameter("representative", representative)
                 .setParameter("state", RepresentationDocument.State.OK);
         long numRepresentations = (long) query.getSingleResult() + 1;//plus the representative itself
-        return new RepresentativeDto(representative,  representativeDocument.getActivationSMIME().getId(),
+        return UserVSDto.REPRESENTATIVE(representative,  representativeDocument.getActivationSMIME().getId(),
                 numRepresentations, config.getRestURL());
     }
 

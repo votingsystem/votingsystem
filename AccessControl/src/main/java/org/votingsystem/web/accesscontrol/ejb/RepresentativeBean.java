@@ -56,7 +56,7 @@ public class RepresentativeBean {
         AnonymousDelegation anonymousDelegation = representativeDelegationBean.getAnonymousDelegation(signer);
         if(anonymousDelegation != null) throw new ValidationExceptionVS(messages.get(
                 "representativeRequestWithActiveAnonymousDelegation"));
-        RepresentativeDto request = messageSMIME.getSignedContent(RepresentativeDto.class);
+        UserVSDto request = messageSMIME.getSignedContent(UserVSDto.class);
         String msg = null;
         signer.setDescription(request.getDescription());
         if(UserVS.Type.REPRESENTATIVE != signer.getType()) {
@@ -97,10 +97,10 @@ public class RepresentativeBean {
         UserVS signer = messageSMIME.getUserVS();
         UserVS representative = null;
         Query query = null;
-        RepresentativeDto request = messageSMIME.getSignedContent(RepresentativeDto.class);
+        UserVSDto request = messageSMIME.getSignedContent(UserVSDto.class);
         if(TypeVS.REPRESENTATIVE_REVOKE != request.getOperation()) throw new ValidationExceptionVS(
                 "ERROR - operation missmatch - expected: 'TypeVS.REPRESENTATIVE_REVOKE' - found:" + request.getOperation());
-        String representativeNIF = NifUtils.validate(request.getNif());
+        String representativeNIF = NifUtils.validate(request.getNIF());
         if(!signatureBean.isAdmin(signer.getNif()) && !signer.getNif().equals(representativeNIF)) {
             throw new ValidationExceptionVS("user without privileges");
         }
@@ -151,12 +151,12 @@ public class RepresentativeBean {
             RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
             result.setState(RepresentationState.WITH_PUBLIC_REPRESENTATION);
             result.setBase64ContentDigest(representationDocument.getActivationSMIME().getBase64ContentDigest());
-            result.setRepresentative(UserVSDto.BASIC(userVS.getRepresentative()));
+            result.setRepresentative(org.votingsystem.dto.UserVSDto.BASIC(userVS.getRepresentative()));
             return result;
         }
         if(UserVS.Type.REPRESENTATIVE == userVS.getType()) {
             result.setState(RepresentationState.REPRESENTATIVE);
-            result.setRepresentative(UserVSDto.BASIC(userVS));
+            result.setRepresentative(org.votingsystem.dto.UserVSDto.BASIC(userVS));
             return result;
         }
         AnonymousDelegation anonymousDelegation = representativeDelegationBean.getAnonymousDelegation(userVS);
@@ -475,7 +475,7 @@ public class RepresentativeBean {
         return metaInf;
     }
 
-    public RepresentativeDto geRepresentativeDto(UserVS representative) {
+    public UserVSDto geRepresentativeDto(UserVS representative) {
         Query query = dao.getEM().createQuery("select count(d) from RepresentationDocument d where " +
                 "d.representative =:representative and d.state =:state").setParameter("representative", representative)
                 .setParameter("state", RepresentationDocument.State.OK);
@@ -486,7 +486,7 @@ public class RepresentativeBean {
         RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
         if (representativeDocument == null) throw new NotFoundException(
                 "ERROR - RepresentativeDocument not found - representativeId: " + representative.getId());
-        return new RepresentativeDto(representative,
+        return UserVSDto.REPRESENTATIVE(representative,
                 representativeDocument.getActivationSMIME().getId(), numRepresentations, config.getRestURL());
     }
 }

@@ -2,7 +2,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.RepresentativeAccreditationsDto;
-import org.votingsystem.dto.voting.RepresentativeDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentativeVotingHistoryDto;
 import org.votingsystem.model.ImageVS;
 import org.votingsystem.model.MessageSMIME;
@@ -52,7 +52,7 @@ public class RepresentativeResource {
     @Path("/save") @POST
     public Response save(MessageSMIME messageSMIME) throws Exception {
         RepresentativeDocument representativeDocument = representativeBean.saveRepresentative(messageSMIME);
-        RepresentativeDto representativeDto = representativeBean.geRepresentativeDto(representativeDocument.getUserVS());
+        UserVSDto representativeDto = representativeBean.geRepresentativeDto(representativeDocument.getUserVS());
         return Response.ok().entity(representativeDto).type(MediaTypeVS.JSON).build();
     }
 
@@ -96,7 +96,7 @@ public class RepresentativeResource {
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws ServletException, IOException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        List<RepresentativeDto> responseList = new ArrayList<>();
+        List<UserVSDto> responseList = new ArrayList<>();
         Query query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
                 .setParameter("type", UserVS.Type.REPRESENTATIVE);
         List<UserVS> representativeList = query.getResultList();
@@ -104,7 +104,7 @@ public class RepresentativeResource {
             responseList.add(representativeBean.geRepresentativeDto(representative));
         }
         //TODO totalCount
-        ResultListDto<RepresentativeDto> resultListDto = new ResultListDto<>(responseList, offset, max, responseList.size());
+        ResultListDto<UserVSDto> resultListDto = new ResultListDto<>(responseList, offset, max, responseList.size());
         if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
                     .type(MediaTypeVS.JSON).build();
@@ -124,7 +124,7 @@ public class RepresentativeResource {
             return Response.status(Response.Status.NOT_FOUND).entity(
                     "ERROR - UserVS is not a representative - id: " + id).build();
         }
-        RepresentativeDto representativeDto = representativeBean.geRepresentativeDto(representative);
+        UserVSDto representativeDto = representativeBean.geRepresentativeDto(representative);
         if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
                     .type(MediaTypeVS.JSON).build();
@@ -146,7 +146,7 @@ public class RepresentativeResource {
         UserVS representative = dao.getSingleResult(UserVS.class, query);
         if(representative == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - UserVS is not a representative - nif: " + nif).build();
-        RepresentativeDto representativeDto = representativeBean.geRepresentativeDto(representative);
+        UserVSDto representativeDto = representativeBean.geRepresentativeDto(representative);
         if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
                     .type(MediaTypeVS.JSON).build();

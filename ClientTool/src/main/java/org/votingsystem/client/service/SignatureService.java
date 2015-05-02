@@ -15,6 +15,7 @@ import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -35,7 +36,6 @@ import org.votingsystem.util.*;
 import org.votingsystem.util.currency.MapUtils;
 import org.votingsystem.util.currency.Wallet;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.util.*;
 import java.util.logging.Level;
@@ -349,7 +349,6 @@ public class SignatureService extends Service<ResponseVS> {
                     ContextVS.getInstance().getDefaultServer().getTimeStampServiceURL());
             anonymousSmimeMessage = timeStamper.call();
 
-
             Map<String, Object> mapToSend = new HashMap<>();
             mapToSend.put(ContextVS.SMIME_FILE_NAME, smimeMessage.getBytes());
             mapToSend.put(ContextVS.SMIME_ANONYMOUS_FILE_NAME, anonymousSmimeMessage.getBytes());
@@ -438,9 +437,9 @@ public class SignatureService extends Service<ResponseVS> {
         private ResponseVS sendRepresentativeData(OperationVS operationVS, String... header) throws Exception {
             ResponseVS responseVS = sendSMIME(operationVS.getJsonStr(), operationVS);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                RepresentativeDto representativeDto = (RepresentativeDto) responseVS.getMessage(RepresentativeDto.class);
+                UserVSDto representativeDto = (UserVSDto) responseVS.getMessage(UserVSDto.class);
                 String representativeURL =  ContextVS.getInstance().getAccessControl()
-                        .getRepresentativeByNifServiceURL(representativeDto.getNif());
+                        .getRepresentativeByNifServiceURL(representativeDto.getNIF());
                 Browser.getInstance().openVotingSystemURL(representativeURL, null);
                 responseVS.setMessage(ContextVS.getMessage("representativeDataSendOKMsg"));
             }

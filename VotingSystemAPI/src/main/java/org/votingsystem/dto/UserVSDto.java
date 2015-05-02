@@ -7,11 +7,14 @@ import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.util.TypeVS;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static java.text.MessageFormat.format;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -22,6 +25,7 @@ public class UserVSDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;
+    private TypeVS operation;
     private UserVS.State state;
     private UserVS.Type type;
     private String name;
@@ -40,11 +44,21 @@ public class UserVSDto implements Serializable {
     private String NIF;
     private UserVSDto representative;//this is for groups
 
+    private Long numRepresentations ;
+    private String URL;
+    private String representativeMessageURL;
+    private String imageURL;
+    private String UUID;
+    private String base64Image;
+
+
+
     public UserVSDto() {}
 
     public UserVSDto(UserVS userVS) {
         this.name = userVS.getName();
         this.NIF = userVS.getNif();
+        this.type = UserVS.Type.USER;
         this.firstName = userVS.getFirstName();
         this.lastName = userVS.getLastName();
         this.phone = userVS.getPhone();
@@ -91,6 +105,17 @@ public class UserVSDto implements Serializable {
             }
             userVSDto.setCertCollection(certCollection);
         }
+        return userVSDto;
+    }
+
+    public static UserVSDto REPRESENTATIVE(UserVS userVS, Long smimeActivationId, Long numRepresentations,
+                                           String contextURL) {
+        UserVSDto userVSDto = BASIC(userVS);
+        userVSDto.type = UserVS.Type.REPRESENTATIVE;
+        userVSDto.numRepresentations = numRepresentations;
+        userVSDto.URL = format("{0}/representative/id/{1}", contextURL, userVS.getId());
+        userVSDto.representativeMessageURL = format("{0}/messageSMIME/id/{1}", contextURL, smimeActivationId);
+        userVSDto.imageURL = format("{0}/representative/id/{1}/image", contextURL, userVS.getId());
         return userVSDto;
     }
 
@@ -278,5 +303,61 @@ public class UserVSDto implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getRepresentativeMessageURL() {
+        return representativeMessageURL;
+    }
+
+    public void setRepresentativeMessageURL(String representativeMessageURL) {
+        this.representativeMessageURL = representativeMessageURL;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
+    }
+
+    public String getBase64Image() {
+        return base64Image;
+    }
+
+    public void setBase64Image(String base64Image) {
+        this.base64Image = base64Image;
+    }
+
+    public String getURL() {
+        return URL;
+    }
+
+    public void setURL(String URL) {
+        this.URL = URL;
+    }
+
+    public Long getNumRepresentations() {
+        return numRepresentations;
+    }
+
+    public void setNumRepresentations(Long numRepresentations) {
+        this.numRepresentations = numRepresentations;
+    }
+
+    public TypeVS getOperation() {
+        return operation;
+    }
+
+    public void setOperation(TypeVS operation) {
+        this.operation = operation;
     }
 }

@@ -15,7 +15,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.votingsystem.client.Browser;
 import org.votingsystem.dto.OperationVS;
-import org.votingsystem.dto.voting.RepresentativeDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.*;
@@ -102,7 +102,7 @@ public class PublishRepresentativeDialog extends DialogVS {
         }
         if(operationVS.getJsonStr() != null) {
             try {
-                RepresentativeDto dto = operationVS.getData(RepresentativeDto.class);
+                UserVSDto dto = operationVS.getData(UserVSDto.class);
                 editor.setHtmlText(new String(Base64.getDecoder().decode(dto.getDescription()), StandardCharsets.UTF_8));
                 byte[] imageBytes = Base64.getDecoder().decode(dto.getBase64Image().getBytes());
                 FileUtils.copyBytesToFile(imageBytes, representativeImage);
@@ -121,7 +121,7 @@ public class PublishRepresentativeDialog extends DialogVS {
                 showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterImageLbl"));
                 return;
             }
-            RepresentativeDto dto = new RepresentativeDto();
+            UserVSDto dto = new UserVSDto();
             dto.setOperation(TypeVS.NEW_REPRESENTATIVE);
             dto.setDescription(Base64.getEncoder().encodeToString(editor.getHtmlText().getBytes()));
             dto.setBase64Image(Base64.getEncoder().encodeToString(FileUtils.getBytesFromFile(representativeImage)));
@@ -218,7 +218,7 @@ public class PublishRepresentativeDialog extends DialogVS {
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 showMessage(responseVS);
             } else {
-                RepresentativeDto representativeDto = (RepresentativeDto) responseVS.getMessage(RepresentativeDto.class);
+                UserVSDto representativeDto = (UserVSDto) responseVS.getMessage(UserVSDto.class);
                 String description = new String(Base64.getDecoder().decode(representativeDto.getDescription()),
                         StandardCharsets.UTF_8);
                 Platform.runLater(() -> editor.setHtmlText(description));
