@@ -57,9 +57,8 @@ public class AnonymousRepresentativeDelegationCancelerServlet extends HttpServle
                     requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
             MessageSMIME anonymousMessageSMIME = signatureBean.validateSMIME(
                     requestVS.getAnonymousSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
-            RepresentationDocument representationDocument =
-                    representativeDelegationBean.cancelAnonymousRepresentationDocument(anonymousMessageSMIME);
-            AnonymousDelegation anonymousDelegation = representativeDelegationBean.cancelAnonymousDelegation(messageSMIME);
+            AnonymousDelegation anonymousDelegation = representativeDelegationBean.cancelAnonymousDelegation(
+                    messageSMIME, anonymousMessageSMIME);
 
             byte[] receiptBytes = anonymousDelegation.getCancellationSMIME().getContent();
             resp.setContentType(MediaTypeVS.JSON_SIGNED);

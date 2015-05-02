@@ -156,7 +156,9 @@ public class RepresentativeDelegationBean {
         return representationDocument;
     }
 
-    public AnonymousDelegation cancelAnonymousDelegation(MessageSMIME messageSMIME) throws Exception {
+    public AnonymousDelegation cancelAnonymousDelegation(
+            MessageSMIME messageSMIME, MessageSMIME anonymousMessageSMIME) throws Exception {
+        cancelAnonymousRepresentationDocument(anonymousMessageSMIME);
         UserVS userVS = messageSMIME.getUserVS();
         RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
         if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION != request.getOperation()) throw new ValidationExceptionVS(
@@ -181,7 +183,7 @@ public class RepresentativeDelegationBean {
         return anonymousDelegation;
     }
 
-    public RepresentationDocument cancelAnonymousRepresentationDocument(MessageSMIME messageSMIME) throws Exception {
+    private RepresentationDocument cancelAnonymousRepresentationDocument(MessageSMIME messageSMIME) throws Exception {
         RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
         if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION != request.getOperation()) throw new ValidationExceptionVS(
                 "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION' found '" + request.getOperation() + "'");
