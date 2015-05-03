@@ -1,7 +1,5 @@
 package org.votingsystem.web.accesscontrol.servlet;
 
-
-import org.votingsystem.dto.MessageDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -10,8 +8,8 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MultipartRequestVS;
 
 import javax.inject.Inject;

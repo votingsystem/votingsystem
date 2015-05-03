@@ -6,13 +6,12 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.CertificateVSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;

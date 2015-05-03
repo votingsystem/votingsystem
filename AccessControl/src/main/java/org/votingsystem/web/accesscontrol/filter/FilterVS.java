@@ -3,6 +3,7 @@ package org.votingsystem.web.accesscontrol.filter;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
+
 import javax.ejb.EJB;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;

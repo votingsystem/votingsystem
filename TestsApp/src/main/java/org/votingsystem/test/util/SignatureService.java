@@ -2,7 +2,6 @@ package org.votingsystem.test.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.callable.MessageTimeStamper;
-import org.votingsystem.callable.SMIMESignedSender;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.SubscriptionVSDto;
@@ -17,7 +16,6 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.*;
-
 import javax.mail.Header;
 import javax.security.auth.x500.X500PrivateCredential;
 import java.io.ByteArrayInputStream;
@@ -226,10 +224,9 @@ public class SignatureService {
             userList.add(new DNIBundle(userNif, mockDnie, signedMailGenerator));
             SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userNif, toUser,
                     JSON.getMapper().writeValueAsString(groupVSDto), subject);
-            SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
-                    currencyServer.getGroupVSSubscriptionServiceURL(simulationData.getGroupId()),
-                    currencyServer.getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null);
-            ResponseVS responseVS = worker.call();
+            smimeMessage = new MessageTimeStamper(smimeMessage, currencyServer.getTimeStampServiceURL()).call();
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(),  ContentTypeVS.JSON_SIGNED,
+                    currencyServer.getGroupVSSubscriptionServiceURL(simulationData.getGroupId()));
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 throw new org.votingsystem.throwable.ExceptionVS("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
             } else simulationData.getAndIncrementNumRequestsOK();

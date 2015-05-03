@@ -8,11 +8,11 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

@@ -1,9 +1,9 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
 import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
-import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
@@ -19,9 +19,9 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.TypeVS;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
@@ -262,7 +262,7 @@ public class RepresentativeDelegationBean {
                 "r.representative =:representative and r.state =:state").setParameter("representative", representative)
                 .setParameter("state", RepresentationDocument.State.OK);
         long numRepresentations = (long) query.getSingleResult() + 1;//plus the representative itself
-        return UserVSDto.REPRESENTATIVE(representative,  representativeDocument.getActivationSMIME().getId(),
+        return UserVSDto.REPRESENTATIVE(representative, representativeDocument.getActivationSMIME().getId(),
                 numRepresentations, config.getRestURL());
     }
 

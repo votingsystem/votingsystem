@@ -8,8 +8,8 @@ import org.votingsystem.model.voting.AccessRequestVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

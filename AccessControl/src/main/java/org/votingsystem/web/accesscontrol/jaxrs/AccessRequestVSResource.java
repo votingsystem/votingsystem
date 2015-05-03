@@ -4,8 +4,8 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.AccessRequestVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;

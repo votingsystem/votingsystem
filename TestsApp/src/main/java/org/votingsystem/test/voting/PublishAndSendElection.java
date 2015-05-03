@@ -1,6 +1,6 @@
 package org.votingsystem.test.voting;
 
-import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.voting.EventVSChangeDto;
 import org.votingsystem.dto.voting.EventVSDto;
@@ -168,11 +168,10 @@ public class PublishAndSendElection {
         SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF,
                 ContextVS.getInstance().getAccessControl().getName(), JSON.getMapper().writeValueAsString(
                         new EventVSDto(eventVS)), smimeMessageSubject);
-        SMIMESignedSender signedSender = new SMIMESignedSender(smimeMessage,
-                ContextVS.getInstance().getAccessControl().getPublishElectionURL(),
-                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(), ContentTypeVS.JSON_SIGNED, null, null,
-                "eventURL");
-        ResponseVS responseVS = signedSender.call();
+        smimeMessage = new MessageTimeStamper(smimeMessage,
+                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                ContextVS.getInstance().getAccessControl().getPublishElectionURL(), "eventURL");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         String eventURL = ((List<String>)responseVS.getData()).iterator().next();
         byte[] responseBytes = responseVS.getMessageBytes();
@@ -198,11 +197,10 @@ public class PublishAndSendElection {
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF, ContextVS.getInstance().getAccessControl().
                 getName(), JSON.getMapper().writeValueAsString(cancelData), smimeMessageSubject);
-        SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
-                ContextVS.getInstance().getAccessControl().getCancelEventServiceURL(),
-                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
-                ContentTypeVS.JSON_SIGNED, null, null);
-        ResponseVS responseVS = worker.call();
+        smimeMessage = new MessageTimeStamper(smimeMessage,
+                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                ContextVS.getInstance().getAccessControl().getCancelEventServiceURL());
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
     }
 
@@ -211,11 +209,9 @@ public class PublishAndSendElection {
         SignatureService signatureService = SignatureService.getUserVSSignatureService(nif, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(nif, ContextVS.getInstance().getAccessControl().getName(),
                 JSON.getMapper().writeValueAsString(voteVSHelper.getVoteCanceler()), "cancelVote");
-        SMIMESignedSender worker = new SMIMESignedSender(smimeMessage,
-                ContextVS.getInstance().getAccessControl().getVoteCancelerServiceURL(),
-                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
-                ContentTypeVS.JSON_SIGNED, null, null);
-        ResponseVS responseVS = worker.call();
+        smimeMessage = new MessageTimeStamper(smimeMessage, ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                ContextVS.getInstance().getAccessControl().getVoteCancelerServiceURL());
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
     }
 

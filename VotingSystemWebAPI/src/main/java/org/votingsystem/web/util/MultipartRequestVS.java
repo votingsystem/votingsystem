@@ -54,14 +54,14 @@ public class MultipartRequestVS {
                 for(Part part : parts) {
                     if(part.getName().contains(ContextVS.CSR_FILE_NAME)) {
                         csrBytes = IOUtils.toByteArray(part.getInputStream());
-                    } else if(part.getName().contains(ContextVS.REPRESENTATIVE_DATA_FILE_NAME)) {
+                    } else if(part.getName().contains(ContextVS.SMIME_FILE_NAME)) {
                         smime = new SMIMEMessage(part.getInputStream());
                     } else {
                         throw new ValidationExceptionVS("ANONYMOUS_DELEGATION - bad request - file name: " + part.getName());
                     }
                 }
                 if(csrBytes == null) throw new ValidationExceptionVS("ERROR - missing file: " + ContextVS.CSR_FILE_NAME);
-                if(smime == null) throw new ValidationExceptionVS("ERROR - missing file: " + ContextVS.REPRESENTATIVE_DATA_FILE_NAME);
+                if(smime == null) throw new ValidationExceptionVS("ERROR - missing file: " + ContextVS.SMIME_FILE_NAME);
                 break;
             case ANONYMOUS_DELEGATION_CANCELATION:
                 for(Part part : parts) {

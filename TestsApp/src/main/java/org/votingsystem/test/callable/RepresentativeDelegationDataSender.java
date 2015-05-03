@@ -1,15 +1,12 @@
 package org.votingsystem.test.callable;
 
-import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
-import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.JSON;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.*;
 
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -36,12 +33,11 @@ public class RepresentativeDelegationDataSender implements Callable<ResponseVS> 
         String serviceURL = ContextVS.getInstance().getAccessControl().getDelegationServiceURL();
         SMIMEMessage smimeMessage = signatureService.getSMIME(userNIF, toUser, JSON.getMapper().writeValueAsString(
                 getDelegationDto(representativeNIF)), subject);
-        SMIMESignedSender senderSender = new SMIMESignedSender(smimeMessage, serviceURL,
-                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
-                ContentTypeVS.JSON_SIGNED, null, null);
-        ResponseVS reponseVS = senderSender.call();
-        if (ResponseVS.SC_OK == reponseVS.getStatusCode()) reponseVS.setMessage(userNIF);
-        return reponseVS;
+        smimeMessage = new MessageTimeStamper(smimeMessage,
+                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED, serviceURL);
+        if (ResponseVS.SC_OK == responseVS.getStatusCode()) responseVS.setMessage(userNIF);
+        return responseVS;
     }
 
     private RepresentativeDelegationDto getDelegationDto(String representativeNIF) {

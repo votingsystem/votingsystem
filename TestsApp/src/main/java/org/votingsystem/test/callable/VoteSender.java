@@ -1,17 +1,14 @@
 package org.votingsystem.test.callable;
 
 import org.votingsystem.callable.AccessRequestDataSender;
-import org.votingsystem.callable.SMIMESignedSender;
+import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.test.util.SignatureService;
-import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.JSON;
-import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.*;
 
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -37,20 +34,17 @@ public class VoteSender implements Callable<ResponseVS> {
         String contentStr = JSON.getMapper().writeValueAsString(accessRequestDto);
         SMIMEMessage smimeMessage = signatureService.getSMIME(voteVSHelper.getNIF(), toUser, contentStr, smimeMessageSubject);
 
-        AccessRequestDataSender accessRequestDataSender = new AccessRequestDataSender(smimeMessage,
-                accessRequestDto, voteVSHelper.getHashCertVSBase64());
-        ResponseVS responseVS = accessRequestDataSender.call();
+        ResponseVS responseVS = new AccessRequestDataSender(smimeMessage,
+                accessRequestDto, voteVSHelper.getHashCertVSBase64()).call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
             String voteDataStr = JSON.getMapper().writeValueAsString(voteVSHelper.getVote());
             smimeMessage = certificationRequest.getSMIME(voteVSHelper.getHashCertVSBase64(), toUser, voteDataStr,
                     "voteVSMsgSubject", null);
-            SMIMESignedSender sender = new SMIMESignedSender(smimeMessage,
-                    ContextVS.getInstance().getControlCenter().getVoteServiceURL(),
-                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL(),
-                    ContentTypeVS.VOTE, certificationRequest.getKeyPair(),
-                    ContextVS.getInstance().getControlCenter().getX509Certificate());
-            responseVS = sender.call();
+            smimeMessage = new MessageTimeStamper(smimeMessage,
+                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
+            responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.VOTE,
+                    ContextVS.getInstance().getControlCenter().getVoteServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 SMIMEMessage voteReceipt = responseVS.getSMIME();
                 voteVSHelper.setValidatedVote(voteReceipt);

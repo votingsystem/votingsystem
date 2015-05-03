@@ -1,8 +1,8 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.voting.RepresentativeAccreditationsDto;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.voting.RepresentativeAccreditationsDto;
 import org.votingsystem.dto.voting.RepresentativeVotingHistoryDto;
 import org.votingsystem.model.ImageVS;
 import org.votingsystem.model.MessageSMIME;
@@ -17,8 +17,8 @@ import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.EmailTemplateWrapper;
 import org.votingsystem.web.util.MessagesVS;
 

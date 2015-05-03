@@ -64,7 +64,7 @@ public class VoteVS extends EntityVS implements Serializable {
     @Transient private String originHashAccessRequest;
     @Transient private X509Certificate x509Certificate;
     @Transient private TimeStampToken timeStampToken;
-    @Transient private Set<X509Certificate> serverCerts = new HashSet<X509Certificate>();
+    @Transient private Set<X509Certificate> serverCerts = new HashSet<>();
     @Transient private SMIMEMessage receipt;
     @Transient private boolean isValid = false;
 

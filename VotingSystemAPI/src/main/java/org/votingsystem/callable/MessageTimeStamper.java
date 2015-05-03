@@ -35,22 +35,22 @@ public class MessageTimeStamper implements Callable<SMIMEMessage> {
     private SMIMEMessage smimeMessage;
     private TimeStampToken timeStampToken;
     private TimeStampRequest timeStampRequest;
-    private String timeStampServerURL;
+    private String timeStampServiceURL;
       
-    public MessageTimeStamper (SMIMEMessage smimeMessage, String timeStampServerURL) throws Exception {
+    public MessageTimeStamper (SMIMEMessage smimeMessage, String timeStampServiceURL) throws Exception {
         this.smimeMessage = smimeMessage;
         this.timeStampRequest = smimeMessage.getTimeStampRequest();
-        this.timeStampServerURL = timeStampServerURL;
+        this.timeStampServiceURL = timeStampServiceURL;
     }
     
-    public MessageTimeStamper (TimeStampRequest timeStampRequest, String timeStampServerURL) throws Exception {
+    public MessageTimeStamper (TimeStampRequest timeStampRequest, String timeStampServiceURL) throws Exception {
         this.timeStampRequest = timeStampRequest;
-        this.timeStampServerURL = timeStampServerURL;
+        this.timeStampServiceURL = timeStampServiceURL;
     }
         
     @Override public SMIMEMessage call() throws Exception {
         ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY,
-                timeStampServerURL);
+                timeStampServiceURL);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();
             timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));

@@ -9,8 +9,8 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.VoteVSBean;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;

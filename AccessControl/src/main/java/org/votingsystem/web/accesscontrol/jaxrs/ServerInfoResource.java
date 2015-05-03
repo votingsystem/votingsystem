@@ -3,9 +3,9 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.voting.ControlCenterVS;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.ejb.EJB;
 import javax.servlet.http.HttpServletRequest;

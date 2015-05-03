@@ -2,16 +2,16 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
