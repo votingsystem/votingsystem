@@ -40,10 +40,8 @@ public class AccessRequestVSServlet extends HttpServlet {
     private final static Logger log = Logger.getLogger(AccessRequestVSServlet.class.getSimpleName());
 
     @Inject SignatureBean signatureBean;
-    @Inject ConfigVS config;
     @Inject AccessRequestBean accessRequestBean;
-    @Inject CSRBean csrBean;
-    @Inject DAOBean dao;
+    @Inject ConfigVS config;
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -53,19 +51,11 @@ public class AccessRequestVSServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException, IOException {
-        AccessRequestVS accessRequestVS = null;
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ACCESS_REQUEST);
             MessageSMIME messageSMIME = signatureBean.validateSMIME(
                     requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
-            AccessRequestDto requestDto = accessRequestBean.saveRequest(messageSMIME);
-            accessRequestVS = requestDto.getAccessRequestVS();
-            UserVS signer = accessRequestVS.getUserVS();
-            CsrResponse csrResponse = null;
-            if(signer.getType() == UserVS.Type.REPRESENTATIVE) {
-                csrResponse = csrBean.signCertVoteVS(requestVS.getCSRBytes(), requestDto.getEventVS());
-            } else csrResponse = csrBean.signRepresentativeCertVoteVS(
-                    requestVS.getCSRBytes(), requestDto.getEventVS(), signer);
+            CsrResponse csrResponse = accessRequestBean.saveRequest(messageSMIME, requestVS.getCSRBytes());
             resp.setContentType(ContentTypeVS.TEXT_STREAM.getName());
             resp.setContentLength(csrResponse.getIssuedCert().length);
             resp.getOutputStream().write(csrResponse.getIssuedCert());
@@ -78,11 +68,6 @@ public class AccessRequestVSServlet extends HttpServlet {
                 resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(messageDto));
             } else {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
-                if(accessRequestVS != null && accessRequestVS.getId() != null && accessRequestVS.getState()
-                        == AccessRequestVS.State.OK) {
-                    accessRequestVS.setMetaInf(ex.getMessage());
-                    dao.merge(accessRequestVS.setState(AccessRequestVS.State.CANCELED));
-                }
                 resp.setStatus(ResponseVS.SC_ERROR_REQUEST);
                 String message = ex.getMessage() != null ? ex.getMessage(): "EXCEPTION: " + ex.getClass();
                 resp.getOutputStream().write(message.getBytes());

@@ -8,6 +8,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.*;
 
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
@@ -46,6 +47,7 @@ public class RepresentativeDelegationDataSender implements Callable<ResponseVS> 
         RepresentativeDelegationDto delegationDto = new RepresentativeDelegationDto();
         delegationDto.setRepresentative(representative);
         delegationDto.setOperation(TypeVS.REPRESENTATIVE_SELECTION);
+        delegationDto.setUUID(UUID.randomUUID().toString());
         return delegationDto;
     }
 

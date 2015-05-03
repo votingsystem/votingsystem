@@ -34,7 +34,7 @@
 
             <div>
                 <div class="eventContentDiv">
-                    <vs-html-echo html="{{eventvs.content}}"></vs-html-echo>
+                    <vs-html-echo html="{{decodeBase64(eventvs.content)}}"></vs-html-echo>
                 </div>
 
                 <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 0px;font-size: 0.85em;">
@@ -78,6 +78,10 @@
             },
             subpage:false,
             optionVSSelected:null,
+            decodeBase64:function(base64EncodedString) {
+                if(base64EncodedString == null) return null
+                return decodeURIComponent(escape(window.atob(base64EncodedString)))
+            },
             fireSignal:function() {
                 this.fire('core-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
             },

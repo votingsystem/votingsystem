@@ -4,7 +4,7 @@
 <link href="${resourceURL}/vs-highcharts/highcharts-import.html" rel="import">
 <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 
-<polymer-element name="eventvs-election-stats" attributes="title eventVSId">
+<polymer-element name="eventvs-election-stats" attributes="caption eventVSId">
     <template>
         <style></style>
         <core-ajax id="ajax" auto url="{{url}}" handleAs="json" response="{{statsDto}}" method="get"
@@ -18,7 +18,7 @@
     </template>
     <script>
         Polymer('eventvs-election-stats', {
-            title:null,
+            caption:null,
             chartVisible:false,
             publish: {
                 statsDto: {value: {}}
@@ -31,7 +31,7 @@
                     spacingRight: 30,
                     plotBorderWidth: 0
                 },
-                title: {
+                caption: {
                     text: ''
                 },
                 tooltip: {
@@ -61,7 +61,6 @@
             },
             statsDtoChanged: function() {
                 if(this.statsDto == null) return
-                console.log(this.tagName + " - subject: " + this.statsDto.subject);
                 var seriesData = []
                 var numTotalVotes = 0
                 Array.prototype.forEach.call(this.statsDto.fieldsEventVS, function(fieldEvent) {
@@ -69,6 +68,7 @@
                     numTotalVotes += fieldEvent.numVotesVS
                 });
                 this.options.series[0].data = seriesData
+                console.log(this.tagName + " - subject: " + this.statsDto.subject + " - numTotalVotes: " + numTotalVotes);
                 if(numTotalVotes > 0) {
                     var chart = new Highcharts.Chart(this.options);
                     this.chartVisible = true

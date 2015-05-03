@@ -18,7 +18,10 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.dto.voting.*;
+import org.votingsystem.dto.voting.AccessRequestDto;
+import org.votingsystem.dto.voting.RepresentativeDelegationDto;
+import org.votingsystem.dto.voting.VoteVSCancelerDto;
+import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
@@ -126,7 +129,9 @@ public class SignatureService extends Service<ResponseVS> {
                             responseVS = deleteCurrency(operationVS);
                             break;
                         case REPRESENTATIVE_SELECTION:
-                            responseVS = sendSMIME(operationVS);
+                            RepresentativeDelegationDto delegationDto = operationVS.getDocumentToSign(RepresentativeDelegationDto.class);
+                            delegationDto.setUUID(UUID.randomUUID().toString());
+                            responseVS = sendSMIME(JSON.getMapper().writeValueAsString(delegationDto), operationVS);
                             break;
                         case NEW_REPRESENTATIVE:
                             responseVS = sendRepresentativeData(operationVS);
@@ -218,7 +223,7 @@ public class SignatureService extends Service<ResponseVS> {
             String toUser = voteVS.getEventVSURL();
             String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + voteVS.getEventVSId();
             AccessRequestDto accessRequestDto = voteVSHelper.getAccessRequest();
-            SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser, 
+            SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser,
                     JSON.getMapper().writeValueAsString(accessRequestDto), password, msgSubject);
             updateMessage(operationVS.getSignedMessageSubject());
             ResponseVS responseVS = new AccessRequestDataSender(smimeMessage,
@@ -230,11 +235,11 @@ public class SignatureService extends Service<ResponseVS> {
             fromUser = voteVS.getHashCertVSBase64();
             msgSubject = ContextVS.getInstance().getMessage("voteVSSubject");
             smimeMessage = certificationRequest.getSMIME(fromUser, toUser, textToSign, msgSubject, null);
-            String voteServiceURL = ContextVS.getInstance().getControlCenter().getVoteServiceURL();
             updateProgress(70, 100);
             smimeMessage = new MessageTimeStamper(smimeMessage, 
                     ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
-            responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.VOTE, voteServiceURL);
+            responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.VOTE,
+                    ContextVS.getInstance().getControlCenter().getVoteServiceURL());
             updateProgress(90, 100);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 voteVSHelper.setValidatedVote(responseVS.getSMIME());
@@ -384,11 +389,10 @@ public class SignatureService extends Service<ResponseVS> {
                 mapToSend.put(ContextVS.SMIME_FILE_NAME, smimeMessage.getBytes());
                 ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                         ContextVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
-                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    //byte[] decryptedData = Encryptor.decryptFile(responseVS.getMessageBytes(),
-                    // certificationRequest.getPublicKey(), certificationRequest.getPrivateKey());
-                    anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
-                } else return responseVS;
+                if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
+                //byte[] decryptedData = Encryptor.decryptFile(responseVS.getMessageBytes(),
+                // certificationRequest.getPublicKey(), certificationRequest.getPrivateKey());
+                anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
                 updateProgress(60, 100);
                 //this is the delegation request signed with anonymous cert
                 smimeMessage = anonymousDelegation.getCertificationRequest().getSMIME(

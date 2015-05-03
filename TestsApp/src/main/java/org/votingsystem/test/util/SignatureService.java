@@ -16,6 +16,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.*;
+
 import javax.mail.Header;
 import javax.security.auth.x500.X500PrivateCredential;
 import java.io.ByteArrayInputStream;
@@ -225,7 +226,7 @@ public class SignatureService {
             SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userNif, toUser,
                     JSON.getMapper().writeValueAsString(groupVSDto), subject);
             smimeMessage = new MessageTimeStamper(smimeMessage, currencyServer.getTimeStampServiceURL()).call();
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(),  ContentTypeVS.JSON_SIGNED,
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     currencyServer.getGroupVSSubscriptionServiceURL(simulationData.getGroupId()));
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 throw new org.votingsystem.throwable.ExceptionVS("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());

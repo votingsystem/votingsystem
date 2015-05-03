@@ -6,6 +6,7 @@ import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.AccessRequestVS;
 import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.signature.util.CsrResponse;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -14,6 +15,7 @@ import org.votingsystem.web.util.ConfigVS;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.logging.Logger;
 
@@ -23,9 +25,11 @@ public class AccessRequestBean {
     private static Logger log = Logger.getLogger(AccessRequestBean.class.getSimpleName());
 
     @Inject DAOBean dao;
+    @Inject CSRBean csrBean;
     @Inject ConfigVS config;
 
-    public AccessRequestDto saveRequest(MessageSMIME messageSMIME) throws Exception {
+    @Transactional
+    public CsrResponse saveRequest(MessageSMIME messageSMIME, byte[] csr) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
         AccessRequestDto request =  messageSMIME.getSignedContent(AccessRequestDto.class);
         validateAccessRequest(request, signer.getTimeStampToken().getTimeStampInfo().getGenTime());
@@ -40,7 +44,20 @@ public class AccessRequestBean {
             accessRequestVS = dao.persist(new AccessRequestVS(signer, messageSMIME, AccessRequestVS.State.OK,
                     request.getHashAccessRequestBase64(), request.getEventVS()));
             request.setAccessRequestVS(accessRequestVS);
-            return request;
+            CsrResponse csrResponse = null;
+            try {
+                if(signer.getType() == UserVS.Type.REPRESENTATIVE) {
+                    csrResponse = csrBean.signRepresentativeCertVoteVS(csr, request.getEventVS(), signer);
+                } else csrResponse = csrBean.signCertVoteVS(csr, request.getEventVS());
+            } catch (Exception ex) {
+                if(accessRequestVS != null && accessRequestVS.getId() != null && accessRequestVS.getState()
+                        == AccessRequestVS.State.OK) {
+                    accessRequestVS.setMetaInf(ex.getMessage());
+                    dao.merge(accessRequestVS.setState(AccessRequestVS.State.CANCELED));
+                }
+                throw ex;
+            }
+            return csrResponse;
         }
     }
 

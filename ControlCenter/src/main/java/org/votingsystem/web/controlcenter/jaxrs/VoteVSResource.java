@@ -29,7 +29,6 @@ public class VoteVSResource {
 
     private static final Logger log = Logger.getLogger(VoteVSResource.class.getSimpleName());
 
-
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject VoteVSBean voteVSBean;

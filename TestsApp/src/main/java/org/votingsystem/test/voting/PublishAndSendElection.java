@@ -52,11 +52,11 @@ public class PublishAndSendElection {
         UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
         userBaseSimulationData.setUserIndex(100);
         userBaseSimulationData.setNumUsersWithoutRepresentative(1);
-        userBaseSimulationData.setNumUsersWithoutRepresentativeWithVote(0);
-        userBaseSimulationData.setNumRepresentatives(1);
-        userBaseSimulationData.setNumRepresentativesWithVote(0);
-        userBaseSimulationData.setNumUsersWithRepresentative(0);
-        userBaseSimulationData.setNumUsersWithRepresentativeWithVote(0);
+        userBaseSimulationData.setNumUsersWithoutRepresentativeWithVote(1);
+        userBaseSimulationData.setNumRepresentatives(2);
+        userBaseSimulationData.setNumRepresentativesWithVote(1);
+        userBaseSimulationData.setNumUsersWithRepresentative(2);
+        userBaseSimulationData.setNumUsersWithRepresentativeWithVote(1);
 
         simulationData = new VotingSimulationData();
         simulationData.setServerURL("http://localhost:8080/AccessControl");
