@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="org.votingsystem.util.TypeVS" %>
+
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
@@ -67,7 +67,7 @@
             },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
-                if('${TypeVS.SEND_VOTE.toString()}' != this.smimeMessageContent.operation )
+                if('SEND_VOTE' != this.smimeMessageContent.operation )
                     this.messageToUser = '${msg.smimeTypeErrorMsg}' + " - " + this.smimeMessageContent.operation
             },
             checkReceipt: function() {

@@ -27,9 +27,11 @@ public class DecoratedPane extends VBox {
     private HBox toolBar;
     private Button closeButton;
     private Stage stage;
+    private Pane contentPane;
 
     public DecoratedPane(String caption, MenuButton menuButton, Pane contentPane, Stage stage) {
         this.stage = stage;
+        this.contentPane = contentPane;
         setAlignment(Pos.TOP_CENTER);
         fullScreenHelper = new FullScreenHelper(stage);
         setStyle("-fx-background-insets: 3;-fx-effect: dropshadow(three-pass-box, #888, 5, 0, 0, 0);" +
@@ -88,6 +90,10 @@ public class DecoratedPane extends VBox {
 
     public void addResizeListener() {//must be called after Scene has been set
         ResizeHelper.addResizeListener(stage);
+    }
+
+    public Pane getContentPane() {
+        return contentPane;
     }
 
     static class Delta { double x, y; }

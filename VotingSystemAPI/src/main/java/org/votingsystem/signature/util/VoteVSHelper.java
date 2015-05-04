@@ -40,7 +40,7 @@ public class VoteVSHelper {
         voteVSHelper.hashCertVSBase64 = CMSUtils.getHashBase64(
                 voteVSHelper.originHashCertVote, ContextVS.VOTING_DATA_DIGEST);
         voteVSHelper.eventVSId = voteVSDto.getEventVSId();
-        voteVSHelper.eventVSURL = voteVSDto.getEventVSURL();
+        voteVSHelper.eventVSURL = voteVSDto.getEventURL();
         voteVSHelper.genVote(voteVSDto.getOptionSelected());
         return voteVSHelper;
     }
@@ -49,7 +49,7 @@ public class VoteVSHelper {
             throws NoSuchAlgorithmException {
         VoteVSDto voteVSDto =  new VoteVSDto();
         voteVSDto.setEventVSId(eventVSId);
-        voteVSDto.setEventVSURL(eventVSURL);
+        voteVSDto.setEventURL(eventVSURL);
         voteVSDto.setOptionSelected(getRandomOption(options));
         return VoteVSHelper.load(voteVSDto);
     }
@@ -65,7 +65,7 @@ public class VoteVSHelper {
         voteVSDto.setOperation(TypeVS.SEND_VOTE);
         voteVSDto.setHashCertVSBase64(hashCertVSBase64);
         voteVSDto.setEventVSId(eventVSId);
-        voteVSDto.setEventVSURL(eventVSURL);
+        voteVSDto.setEventURL(eventVSURL);
         voteVSDto.setOptionSelected(optionSelected);
         voteVSDto.setUUID(UUID.randomUUID().toString());
     }

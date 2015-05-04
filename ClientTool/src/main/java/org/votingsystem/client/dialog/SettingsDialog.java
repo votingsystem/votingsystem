@@ -11,6 +11,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.votingsystem.client.Browser;
+import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.service.SessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
@@ -50,7 +51,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
     public SettingsDialog() {
         super(new GridPane());
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        gridPane = (GridPane) getParent();
+        gridPane = (GridPane) ((DecoratedPane) getParent()).getContentPane();
         gridPane.setVgap(15);
         ToggleGroup tg = new ToggleGroup();
         signWithDNIeRb = new RadioButton(ContextVS.getMessage("setDNIeSignatureMechanismMsg"));
@@ -104,14 +105,14 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         acceptButton.setOnAction(actionEvent -> validateForm());
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);
         gridPane.setMargin(footerButtonsBox, new Insets(20, 20, 0, 20));
-        gridPane.add(requestCertButton,0,0);
+        gridPane.add(requestCertButton, 0, 0);
         gridPane.setMargin(requestCertButton, new Insets(10, 20, 20, 20));
-        gridPane.add(signWithMobileRb,0,1);
+        gridPane.add(signWithMobileRb, 0, 1);
         gridPane.setMargin(mobileDeviceInfo, new Insets(0, 0, 0, 20));
-        gridPane.add(signWithDNIeRb,0,3);
+        gridPane.add(signWithDNIeRb, 0, 3);
         gridPane.add(signWithKeystoreRb,0,5);
         gridPane.add(footerButtonsBox,0,7);
-        getStage().getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
+        gridPane.getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         gridPane.getStyleClass().add("modal-dialog");
         gridPane.setMinWidth(600);
     }

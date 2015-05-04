@@ -74,8 +74,8 @@ public class VoteVS extends EntityVS implements Serializable {
         id = voteVSDto.getId();
         eventVS = new EventVSElection();
         eventVS.setId(voteVSDto.getEventVSId());
-        eventVS.setUrl(voteVSDto.getEventVSURL());
-        eventURL = voteVSDto.getEventVSURL();
+        eventVS.setUrl(voteVSDto.getEventURL());
+        eventURL = voteVSDto.getEventURL();
         hashCertVSBase64 = voteVSDto.getHashCertVSBase64();
         optionSelected = voteVSDto.getOptionSelected();
         voteUUID = voteVSDto.getUUID();

@@ -1,5 +1,4 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="org.votingsystem.util.TypeVS" %>
 
 <script src="${contextURL}/resources/js/utilsVS.js" type="text/javascript"></script>
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
@@ -67,7 +66,7 @@
             },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
-                if('${TypeVS.CANCEL_VOTE.toString()}' != this.smimeMessageContent.operation )
+                if('CANCEL_VOTE' != this.smimeMessageContent.operation )
                     this.messageToUser = '${msg.smimeTypeErrorMsg}' + " - " + this.smimeMessageContent.operation
             },
             checkReceipt: function() {

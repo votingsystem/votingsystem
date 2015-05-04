@@ -220,7 +220,7 @@ public class SignatureService extends Service<ResponseVS> {
             String fromUser = ContextVS.getInstance().getMessage("electorLbl");
             VoteVSHelper voteVSHelper = VoteVSHelper.load(operationVS.getVoteVS());
             VoteVSDto voteVS = voteVSHelper.getVote();
-            String toUser = voteVS.getEventVSURL();
+            String toUser = voteVS.getEventURL();
             String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + voteVS.getEventVSId();
             AccessRequestDto accessRequestDto = voteVSHelper.getAccessRequest();
             SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser,

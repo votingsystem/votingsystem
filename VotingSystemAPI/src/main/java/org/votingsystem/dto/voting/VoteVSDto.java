@@ -33,7 +33,7 @@ public class VoteVSDto {
     private String hashCertVoteHex;
     private String messageSMIMEURL;
     private String cancelationMessageSMIMEURL;
-    private String eventVSURL;
+    private String eventURL;
     private VoteVS.State state;
     private FieldEventVS optionSelected;
     private String UUID;
@@ -57,7 +57,7 @@ public class VoteVSDto {
             setCancelationMessageSMIMEURL(contextURL + "/voteVS/id/" + voteVS.getId() + "/cancelation");
         }
         setEventVSId(voteVS.getEventVS().getId());
-        setEventVSURL(contextURL + "/eventVSElection/id/" + getEventVSId());
+        setEventURL(contextURL + "/eventVSElection/id/" + getEventVSId());
         setOptionSelected(voteVS.getOptionSelected());
         setHashCertVSBase64(voteVS.getCertificateVS().getHashCertVSBase64());
         if(getHashCertVSBase64() != null) setHashCertVoteHex(StringUtils.toHex(getHashCertVSBase64()));
@@ -131,12 +131,12 @@ public class VoteVSDto {
         this.cancelationMessageSMIMEURL = cancelationMessageSMIMEURL;
     }
 
-    public String getEventVSURL() {
-        return eventVSURL;
+    public String getEventURL() {
+        return eventURL;
     }
 
-    public void setEventVSURL(String eventVSURL) {
-        this.eventVSURL = eventVSURL;
+    public void setEventURL(String eventURL) {
+        this.eventURL = eventURL;
     }
 
     public VoteVS.State getState() {

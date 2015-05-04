@@ -53,11 +53,22 @@ public class DialogVS {
 
     public DialogVS(Pane pane) {
         stage = new Stage(StageStyle.TRANSPARENT);
-        stage.setScene(new Scene(pane));
-        stage.initModality(Modality.APPLICATION_MODAL);
+
+
+        decoratedPane = new DecoratedPane(null, null, pane, stage);
+        stage.setScene(new Scene(decoratedPane));
+        Utils.addMouseDragSupport(stage);
+        stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
+        decoratedPane.getScene().getStylesheets().add(Utils.getResource("/css/dialogvs.css"));
+        decoratedPane.getStyleClass().add("glassBox");
+        decoratedPane.getScene().setFill(Color.TRANSPARENT);
+
+        //stage.setScene(new Scene(pane));
+        //stage.getScene().setFill(Color.TRANSPARENT);
+        //stage.initModality(Modality.APPLICATION_MODAL);
         stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
         stage.centerOnScreen();
-        Utils.addMouseDragSupport(stage);
+        //Utils.addMouseDragSupport(stage);
     }
 
     public Parent getParent() {
