@@ -14,13 +14,13 @@
         </style>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <link href="${contextURL}/resources/css/cryptocurrency_groupvs.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/groupvs.css" media="all" rel="stylesheet" />
         <core-ajax id="ajax" url="{{url}}" handleAs="json" contentType="application/json" on-core-complete="{{ajaxComplete}}"></core-ajax>
         <core-signals on-core-signal-groupvs-details-closed="{{closeGroupDetails}}"></core-signals>
         <core-animated-pages id="pages" hidden?="{{loading}}" flex selected="{{page}}" transitions="cross-fade-all"
                              on-core-animated-pages-transition-end="{{transitionend}}">
             <section id="page1">
-                <div class="pageContentDiv" cross-fade>
+                <div cross-fade>
                     <div layout horizontal center center-justified>
                         <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
                                 on-change="{{groupvsTypeSelect}}" class="form-control">
@@ -34,7 +34,7 @@
                             <div on-tap="{{showGroupDetails}}" class='groupvsDiv item {{ groupvs.state | groupvsClass }}' cross-fade>
                                 <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
                                 <div class='groupvsInfoDiv'><vs-html-echo html="{{groupvs.description}}"></vs-html-echo></div>
-                                <div style="position: relative;display: {{(groupvs.state == 'CANCELED')?'block':'none'}};">
+                                <div hidden?="{{groupvs.state !== 'CANCELED'}}" style="position: relative;">
                                     <div class='groupvsMessageCancelled' style="">${msg.groupvsCancelledLbl}</div>
                                 </div>
                                 <div class='numTotalUsersDiv text-right'>{{groupvs.numActiveUsers}} ${msg.usersLbl}</div>
