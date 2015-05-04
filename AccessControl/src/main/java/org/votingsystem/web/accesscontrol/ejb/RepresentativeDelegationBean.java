@@ -234,7 +234,7 @@ public class RepresentativeDelegationBean {
 
     private void checkUserDelegationStatus(UserVS userVS) throws ValidationExceptionVS, ExceptionVS {
         if(UserVS.Type.REPRESENTATIVE == userVS.getType()) throw new ValidationExceptionVS(
-                "ERROR - user is representative: " + userVS.getNif());
+                messages.get("userIsRepresentativeErrorMsg", userVS.getNif()));
         AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS);
         if (anonymousDelegation != null) {
             String delegationURL = format("{0}/messageSMIME/id/{1}", config.getRestURL(),

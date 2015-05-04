@@ -11,7 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.votingsystem.client.service.SessionService;
+import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.ResultListDto;
@@ -53,7 +53,7 @@ public class UserDeviceSelectorDialog extends DialogVS {
                 ResultListDto<DeviceVSDto> deviceList = HttpHelper.getInstance().getData(
                         new TypeReference<ResultListDto<DeviceVSDto>>(){},
                         ContextVS.getInstance().getCurrencyServer().getConnectedDeviceListByNifServiceURL(
-                                SessionService.getInstance().getUserVS().getNif()), MediaTypeVS.JSON);
+                                BrowserSessionService.getInstance().getUserVS().getNif()), MediaTypeVS.JSON);
                 updateDeviceList(deviceList.getResultList());
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -85,7 +85,7 @@ public class UserDeviceSelectorDialog extends DialogVS {
             });
             boolean deviceFound = false;
             for(DeviceVSDto deviceVSDto: deviceList) {
-                if(!SessionService.getInstance().getDeviceVS().getDeviceId().equals(deviceVSDto.getDeviceId())) {
+                if(!BrowserSessionService.getInstance().getDeviceVS().getDeviceId().equals(deviceVSDto.getDeviceId())) {
                     deviceFound = true;
                     RadioButton radioButton = new RadioButton(deviceVSDto.getDeviceName());
                     radioButton.setUserData(deviceVSDto);

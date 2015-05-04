@@ -116,6 +116,7 @@ public class UserVSDto implements Serializable {
         userVSDto.URL = format("{0}/representative/id/{1}", contextURL, userVS.getId());
         userVSDto.representativeMessageURL = format("{0}/messageSMIME/id/{1}", contextURL, smimeActivationId);
         userVSDto.imageURL = format("{0}/representative/id/{1}/image", contextURL, userVS.getId());
+        userVSDto.description = userVS.getDescription();
         return userVSDto;
     }
 

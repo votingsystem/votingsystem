@@ -106,7 +106,7 @@ public class WebSocketService extends Service<ResponseVS> {
 
         @OnClose public void onClose(Session session, CloseReason closeReason) {
             broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
-            SessionService.getInstance().setIsConnected(false);
+            BrowserSessionService.getInstance().setIsConnected(false);
         }
 
         @OnMessage public void onMessage(String message) {
@@ -169,17 +169,17 @@ public class WebSocketService extends Service<ResponseVS> {
                 case MESSAGEVS_SIGN:
                     if(ResponseVS.SC_CANCELED == messageDto.getStatusCode()){
                         messageDto.setStatusCode(ResponseVS.SC_ERROR);
-                        SessionService.setSignResponse(messageDto);
+                        BrowserSessionService.setSignResponse(messageDto);
                     }
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:
-                    SessionService.setSignResponse(messageDto);
+                    BrowserSessionService.setSignResponse(messageDto);
                     break;
                 case MESSAGEVS_FROM_VS:
                     if(socketSession != null && socketSession.getTypeVS() != null) {
                         switch(socketSession.getTypeVS()) {
                             case MESSAGEVS_SIGN:
-                                SessionService.setSignResponse(messageDto);
+                                BrowserSessionService.setSignResponse(messageDto);
                                 return;
                         }
                     }

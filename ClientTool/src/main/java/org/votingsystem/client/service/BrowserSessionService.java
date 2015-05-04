@@ -40,9 +40,9 @@ import static org.votingsystem.client.Browser.showMessage;
 /**
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SessionService {
+public class BrowserSessionService {
 
-    private static Logger log = Logger.getLogger(SessionService.class.getSimpleName());
+    private static Logger log = Logger.getLogger(BrowserSessionService.class.getSimpleName());
 
     private UserVS userVS;
     private File sessionFile;
@@ -53,9 +53,9 @@ public class SessionService {
     private static CountDownLatch countDownLatch;
     private static SMIMEMessage smimeMessage;
     private static ResponseVS<SMIMEMessage> messageToDeviceResponse;
-    private static final SessionService INSTANCE = new SessionService();
+    private static final BrowserSessionService INSTANCE = new BrowserSessionService();
 
-    private SessionService() {
+    private BrowserSessionService() {
         try {
             sessionFile = new File(ContextVS.APPDIR + File.separator + ContextVS.BROWSER_SESSION_FILE);
             if(sessionFile.createNewFile()) {
@@ -154,7 +154,7 @@ public class SessionService {
         }
     }
 
-    public static SessionService getInstance() {
+    public static BrowserSessionService getInstance() {
         return INSTANCE;
     }
 

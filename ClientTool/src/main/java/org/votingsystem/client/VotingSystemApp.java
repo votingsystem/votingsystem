@@ -2,7 +2,7 @@ package org.votingsystem.client;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import org.votingsystem.client.service.SessionService;
+import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.CurrencyServer;
@@ -117,7 +117,7 @@ public class VotingSystemApp extends Application {
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         browser.setVotingSystemAvailable(true);
                         ContextVS.getInstance().setAccessControl((AccessControlVS) responseVS.getData());
-                        SessionService.getInstance().checkCSRRequest();
+                        BrowserSessionService.getInstance().checkCSRRequest();
                     }
                 } catch(Exception ex) {log.log(Level.SEVERE,ex.getMessage(), ex);}
                 try {

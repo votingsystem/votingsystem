@@ -113,7 +113,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
 
         @OnClose public void onClose(Session session, CloseReason closeReason) {
             broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
-            SessionService.getInstance().setIsConnected(false);
+            BrowserSessionService.getInstance().setIsConnected(false);
             EventBusService.getInstance().post(new ResponseVS(TypeVS.DISCONNECT));
         }
 
@@ -148,13 +148,13 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
     }
 
     public void setConnectionEnabled(boolean isConnectionEnabled){
-        if(SessionService.getInstance().getUserVS() == null) {
+        if(BrowserSessionService.getInstance().getUserVS() == null) {
             CertNotFoundDialog.show(Browser.getWindow());
             return;
         }
         if(isConnectionEnabled) {
             Platform.runLater(() -> {
-                if(CryptoTokenVS.MOBILE != SessionService.getCryptoTokenType()) {
+                if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
                     String password = null;
                     PasswordDialog passwordDialog = new PasswordDialog();
                     passwordDialog.showWithoutPasswordConfirm(
@@ -163,7 +163,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                     if(password == null) {
                         broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
                     } else connect(password);
-                } else if(CryptoTokenVS.MOBILE == SessionService.getCryptoTokenType()) {
+                } else if(CryptoTokenVS.MOBILE == BrowserSessionService.getCryptoTokenType()) {
                     connect(null);
                 }
             });
@@ -205,8 +205,8 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
             boolean isMessageDelivered = false;
             for (DeviceVSDto deviceVSDto : resultListDto.getResultList()) {
                 DeviceVS deviceVS = deviceVSDto.getDeviceVS();
-                if(!SessionService.getInstance().getDeviceVS().getDeviceId().equals(deviceVS.getDeviceId())) {
-                    SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(SessionService.getInstance().getUserVS(),
+                if(!BrowserSessionService.getInstance().getDeviceVS().getDeviceId().equals(deviceVS.getDeviceId())) {
+                    SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(BrowserSessionService.getInstance().getUserVS(),
                             deviceVS, operationVS.getNif(), operationVS.getMessage());
                     sendMessage(JSON.getMapper().writeValueAsString(messageDto));
                     isMessageDelivered = true;
@@ -241,7 +241,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                         messageDto.setOperation(socketSession.getTypeVS());
                         switch(socketSession.getTypeVS()) {
                             case INIT_SIGNED_SESSION:
-                                SessionService.getInstance().initAuthenticatedSession(messageDto, userVS);
+                                BrowserSessionService.getInstance().initAuthenticatedSession(messageDto, userVS);
                                 break;
                             default:
                                 log.log(Level.SEVERE, "MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
@@ -255,11 +255,11 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                 case MESSAGEVS_SIGN:
                     if(ResponseVS.SC_CANCELED == messageDto.getStatusCode()){
                         messageDto.setStatusCode(ResponseVS.SC_ERROR);
-                        SessionService.setSignResponse(messageDto);
+                        BrowserSessionService.setSignResponse(messageDto);
                     }
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:
-                    SessionService.setSignResponse(messageDto);
+                    BrowserSessionService.setSignResponse(messageDto);
                     break;
                 case OPERATION_CANCELED:
                     messageDto.setOperation(socketSession.getTypeVS());
@@ -302,13 +302,13 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
 
         @Override protected ResponseVS call() throws Exception {
             SocketMessageDto dto = SocketMessageDto.INIT_SESSION_REQUEST(
-                    SessionService.getInstance().getDeviceVS().getDeviceId());
+                    BrowserSessionService.getInstance().getDeviceVS().getDeviceId());
             ResponseVS responseVS = null;
             try {
-                if(SessionService.getCryptoTokenType() == CryptoTokenVS.MOBILE) {
+                if(BrowserSessionService.getCryptoTokenType() == CryptoTokenVS.MOBILE) {
                     updateMessage(ContextVS.getMessage("checkDeviceVSCryptoTokenMsg"));
                 } else updateMessage(ContextVS.getMessage("connectionMsg"));
-                SMIMEMessage smimeMessage = SessionService.getSMIME(null, targetServer.getName(),
+                SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, targetServer.getName(),
                         JSON.getMapper().writeValueAsString(dto), password,
                         ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));
                 userVS = smimeMessage.getSigner();

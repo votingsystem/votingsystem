@@ -15,7 +15,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import org.votingsystem.client.service.SessionService;
+import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.client.service.SignatureService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.OperationVS;
@@ -131,7 +131,7 @@ public class BrowserVSPane extends StackPane {
 
     public void processOperationVS(OperationVS operationVS, String passwordDialogMessage) {
         this.operationVS = operationVS;
-        if(CryptoTokenVS.MOBILE != SessionService.getCryptoTokenType()) {
+        if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
             PlatformImpl.runAndWait(() -> setPasswordDialogVisible(true, passwordDialogMessage));
         } else signatureService.processOperationVS("", operationVS);
     }

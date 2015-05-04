@@ -5,6 +5,7 @@
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 
+
 <polymer-element name="representative-cancel-dialog">
     <template>
         <paper-dialog id="xDialog" class="xDialog" autoCloseDisabled layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
@@ -62,6 +63,9 @@
         Polymer('representative-cancel-dialog', {
             ready: function() {
                 console.log(this.tagName + " - ready")
+                this.$.representativeNif.onkeypress = function(event){
+                    if (event.keyCode == 13) this.accept()
+                }.bind(this)
             },
             show: function() {
                 this.$.xDialog.opened = true

@@ -70,7 +70,7 @@ public class SearchResource {
         List<UserVS> representativeList = query.getResultList();
         List<UserVSDto> resultList = new ArrayList<>();
         for(UserVS representative : representativeList) {
-            resultList.add(representativeBean.geRepresentativeDto(representative));
+            resultList.add(representativeBean.getRepresentativeDto(representative));
         }
         Map representativeMap = new HashMap<>();
         representativeMap.put("representatives", resultList);

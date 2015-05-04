@@ -52,7 +52,7 @@ public class RepresentativeResource {
     @Path("/save") @POST
     public Response save(MessageSMIME messageSMIME) throws Exception {
         RepresentativeDocument representativeDocument = representativeBean.saveRepresentative(messageSMIME);
-        UserVSDto representativeDto = representativeBean.geRepresentativeDto(representativeDocument.getUserVS());
+        UserVSDto representativeDto = representativeBean.getRepresentativeDto(representativeDocument.getUserVS());
         return Response.ok().entity(representativeDto).type(MediaTypeVS.JSON).build();
     }
 
@@ -101,7 +101,7 @@ public class RepresentativeResource {
                 .setParameter("type", UserVS.Type.REPRESENTATIVE);
         List<UserVS> representativeList = query.getResultList();
         for(UserVS representative : representativeList) {
-            responseList.add(representativeBean.geRepresentativeDto(representative));
+            responseList.add(representativeBean.getRepresentativeDto(representative));
         }
         //TODO totalCount
         ResultListDto<UserVSDto> resultListDto = new ResultListDto<>(responseList, offset, max, responseList.size());
@@ -124,7 +124,7 @@ public class RepresentativeResource {
             return Response.status(Response.Status.NOT_FOUND).entity(
                     "ERROR - UserVS is not a representative - id: " + id).build();
         }
-        UserVSDto representativeDto = representativeBean.geRepresentativeDto(representative);
+        UserVSDto representativeDto = representativeBean.getRepresentativeDto(representative);
         if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
                     .type(MediaTypeVS.JSON).build();
@@ -146,7 +146,7 @@ public class RepresentativeResource {
         UserVS representative = dao.getSingleResult(UserVS.class, query);
         if(representative == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - UserVS is not a representative - nif: " + nif).build();
-        UserVSDto representativeDto = representativeBean.geRepresentativeDto(representative);
+        UserVSDto representativeDto = representativeBean.getRepresentativeDto(representative);
         if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
                     .type(MediaTypeVS.JSON).build();

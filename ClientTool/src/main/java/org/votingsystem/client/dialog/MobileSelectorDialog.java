@@ -11,7 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.votingsystem.client.service.SessionService;
+import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.ResultListDto;
@@ -103,7 +103,7 @@ public class MobileSelectorDialog extends DialogVS {
                 }
             });
             for(DeviceVSDto dto : deviceList) {
-                if(!SessionService.getInstance().getDeviceVS().getDeviceId().equals(dto.getDeviceId())) {
+                if(!BrowserSessionService.getInstance().getDeviceVS().getDeviceId().equals(dto.getDeviceId())) {
                     RadioButton radioButton = new RadioButton(dto.getDeviceName());
                     radioButton.setUserData(dto);
                     radioButton.setToggleGroup(deviceToggleGroup);

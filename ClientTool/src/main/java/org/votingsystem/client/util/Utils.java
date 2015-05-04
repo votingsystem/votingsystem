@@ -28,7 +28,7 @@ import javafx.stage.Stage;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
-import org.votingsystem.client.service.SessionService;
+import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.OperationVS;
@@ -360,7 +360,7 @@ public class Utils {
                         ContextVS.saveUserKeyStore(userKeyStore, password);
                         ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                                 CryptoTokenVS.JKS_KEYSTORE.toString());
-                        SessionService.getInstance().setUserVS(userVS, false);
+                        BrowserSessionService.getInstance().setUserVS(userVS, false);
                         if(operationVS != null) browserVS.invokeBrowserCallback(
                                 UserVSDto.COMPLETE(userVS), operationVS.getCallerCallback());
                     } catch(Exception ex) {

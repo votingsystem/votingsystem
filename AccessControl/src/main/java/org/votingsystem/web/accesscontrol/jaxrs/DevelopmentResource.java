@@ -109,6 +109,12 @@ public class DevelopmentResource implements Serializable {
             dao.merge(representative.setType(UserVS.Type.USER));
             dao.merge(representativeDocument.setDateCanceled(new Date()).setState(RepresentativeDocument.State.CANCELED));
         }
+        query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
+                .setParameter("type", UserVS.Type.REPRESENTATIVE);
+        List<UserVS> representativeList = query.getResultList();
+        for(UserVS representative : representativeList) {
+            dao.merge(representative.setType(UserVS.Type.USER));
+        }
         stringBuilder.append(" - Num. users updated: " + numUserVSUpdated);
         return Response.ok().entity(stringBuilder.toString()).build();
     }
@@ -117,12 +123,12 @@ public class DevelopmentResource implements Serializable {
     @Path("/test") @GET
     public Response test(@Context ServletContext context, @Context HttpServletRequest req,
                             @Context HttpServletResponse resp) throws Exception {
-        /*Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.state =:state")
+        Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.state =:state")
                 .setParameter("state", RepresentativeDocument.State.OK);
         List<RepresentativeDocument> resultList = query.getResultList();
         for(RepresentativeDocument item : resultList) {
             item.setState(RepresentativeDocument.State.CANCELED).setDateCanceled(new Date());
-        }*/
+        }
 
         log.info(MessagesVS.getCurrentInstance().get("representativeDataLbl"));
         return Response.ok().entity(MessagesVS.getCurrentInstance().get("representativeDataLbl")).build();

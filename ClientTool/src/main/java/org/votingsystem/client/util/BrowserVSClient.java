@@ -7,7 +7,7 @@ import org.votingsystem.client.dto.SignalVSDto;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.client.service.InboxService;
-import org.votingsystem.client.service.SessionService;
+import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.dto.OperationVS;
@@ -141,7 +141,7 @@ public class BrowserVSClient {
                     Browser.getInstance().processSignalVS(operationVS.getData(SignalVSDto.class));
                     break;
                 case REPRESENTATIVE_STATE:
-                    result = JSON.getMapper().writeValueAsString(SessionService.getInstance().getRepresentationState());
+                    result = JSON.getMapper().writeValueAsString(BrowserSessionService.getInstance().getRepresentationState());
                     break;
                 case WALLET_STATE:
                     result = JSON.getMapper().writeValueAsString(Wallet.getWalletDto());

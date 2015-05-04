@@ -155,9 +155,9 @@ public class SignatureService extends Service<ResponseVS> {
         }
 
         private String getOperationMessage(OperationVS operationVS) {
-            if(CryptoTokenVS.MOBILE == SessionService.getCryptoTokenType()) {
+            if(CryptoTokenVS.MOBILE == BrowserSessionService.getCryptoTokenType()) {
                 return operationVS.getSignedMessageSubject() + " - " + ContextVS.getMessage("messageToDeviceProgressMsg",
-                        SessionService.getInstance().getCryptoToken().getDeviceName());
+                        BrowserSessionService.getInstance().getCryptoToken().getDeviceName());
             } else return operationVS.getSignedMessageSubject();
         }
 
@@ -197,7 +197,7 @@ public class SignatureService extends Service<ResponseVS> {
 
         private ResponseVS sendCSRRequest(OperationVS operationVS) throws Exception {
             CertExtensionDto certExtensionDto = operationVS.getData(CertExtensionDto.class);
-            certExtensionDto.setDeviceId(SessionService.getInstance().getDeviceVS().getDeviceId());
+            certExtensionDto.setDeviceId(BrowserSessionService.getInstance().getDeviceVS().getDeviceId());
             certExtensionDto.setDeviceType(DeviceVS.Type.PC);
             certExtensionDto.setDeviceName(InetAddress.getLocalHost().getHostName());
             CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
@@ -209,7 +209,7 @@ public class SignatureService extends Service<ResponseVS> {
                 Long requestId = Long.valueOf(responseVS.getMessage());
                 byte[] serializedCertificationRequest = ObjectUtils.serializeObject(certificationRequest);
                 EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, serializedCertificationRequest);
-                SessionService.getInstance().setCSRRequest(requestId, bundle);
+                BrowserSessionService.getInstance().setCSRRequest(requestId, bundle);
             }
             return responseVS;
         }
@@ -223,7 +223,7 @@ public class SignatureService extends Service<ResponseVS> {
             String toUser = voteVS.getEventURL();
             String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + voteVS.getEventVSId();
             AccessRequestDto accessRequestDto = voteVSHelper.getAccessRequest();
-            SMIMEMessage smimeMessage = SessionService.getSMIME(fromUser, toUser,
+            SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(fromUser, toUser,
                     JSON.getMapper().writeValueAsString(accessRequestDto), password, msgSubject);
             updateMessage(operationVS.getSignedMessageSubject());
             ResponseVS responseVS = new AccessRequestDataSender(smimeMessage,
@@ -274,7 +274,7 @@ public class SignatureService extends Service<ResponseVS> {
 
         //we know this is done in a background thread
         private ResponseVS processNewRepresentative(OperationVS operationVS) throws Exception {
-            SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(),
+            SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, operationVS.getReceiverName(),
                     operationVS.getJsonStr(), password, operationVS.getSignedMessageSubject());
             updateMessage(operationVS.getSignedMessageSubject());
             return HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
@@ -292,7 +292,7 @@ public class SignatureService extends Service<ResponseVS> {
             byte[] fileContent = JSON.getMapper().writeValueAsString(currencyBatch.getCurrencyCSRList()).getBytes();
             mapToSend.put(ContextVS.CSR_FILE_NAME, fileContent);
             String textToSign = JSON.getMapper().writeValueAsString(currencyBatch.getRequestDto());
-            SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(), textToSign,
+            SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, operationVS.getReceiverName(), textToSign,
                     password, operationVS.getSignedMessageSubject());
             updateMessage(operationVS.getSignedMessageSubject());
             mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, smimeMessage.getBytes());
@@ -333,13 +333,13 @@ public class SignatureService extends Service<ResponseVS> {
 
         //we know this is done in a background thread
         private  ResponseVS processAnonymousRepresentativeSelectionCancelation(OperationVS operationVS) throws Exception {
-            RepresentativeDelegationDto delegation = SessionService.getInstance().getAnonymousDelegationDto();
+            RepresentativeDelegationDto delegation = BrowserSessionService.getInstance().getAnonymousDelegationDto();
             if(delegation == null) return new ResponseVS(ResponseVS.SC_ERROR,
                     ContextVS.getMessage("anonymousDelegationDataMissingMsg"));
             RepresentativeDelegationDto anonymousCancelationRequest = delegation.getAnonymousCancelationRequest();
             RepresentativeDelegationDto anonymousRepresentationDocumentCancelationRequest =
                     delegation.getAnonymousRepresentationDocumentCancelationRequest();
-            SMIMEMessage smimeMessage = SessionService.getSMIME(null,
+            SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null,
                     operationVS.getReceiverName(), JSON.getMapper().writeValueAsString(anonymousCancelationRequest),
                     password, operationVS.getSignedMessageSubject());
             SMIMEMessage anonymousSmimeMessage = delegation.getCertificationRequest().getSMIME(delegation.getHashCertVSBase64(),
@@ -377,8 +377,8 @@ public class SignatureService extends Service<ResponseVS> {
             RepresentativeDelegationDto anonymousCertRequest = anonymousDelegation.getAnonymousCertRequest();
             RepresentativeDelegationDto anonymousDelegationRequest = anonymousDelegation.getDelegation();
             try {
-                SMIMEMessage smimeMessage = SessionService.getSMIME(null, ContextVS.getInstance().getAccessControl().
-                        getName(), JSON.getMapper().writeValueAsString(anonymousCertRequest), password,
+                SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, ContextVS.getInstance().getAccessControl().
+                                getName(), JSON.getMapper().writeValueAsString(anonymousCertRequest), password,
                         operationVS.getSignedMessageSubject());
                 anonymousDelegation.setAnonymousDelegationRequestBase64ContentDigest(smimeMessage.getContentDigestStr());
                 updateMessage(operationVS.getSignedMessageSubject());
@@ -407,7 +407,7 @@ public class SignatureService extends Service<ResponseVS> {
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     anonymousDelegation.setDelegationReceipt(responseVS.getSMIME(),
                             ContextVS.getInstance().getAccessControl().getX509Certificate());
-                    SessionService.getInstance().setAnonymousDelegationDto(anonymousDelegation);
+                    BrowserSessionService.getInstance().setAnonymousDelegationDto(anonymousDelegation);
                     return ResponseVS.OK();
                 } else return responseVS;
             } catch (Exception ex) {
@@ -419,12 +419,12 @@ public class SignatureService extends Service<ResponseVS> {
         //we know this is done in a background thread
         private ResponseVS sendSMIME(String documentToSign, OperationVS operationVS, String... header) throws Exception {
             log.info("sendSMIME");
-            SMIMEMessage smimeMessage = SessionService.getSMIME(null, operationVS.getReceiverName(),
+            SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, operationVS.getReceiverName(),
                     documentToSign, password, operationVS.getSignedMessageSubject());
             updateMessage(operationVS.getSignedMessageSubject());
             smimeMessage = new MessageTimeStamper(smimeMessage, operationVS.getTargetServer().getTimeStampServiceURL()).call();
             return HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                    ContextVS.getInstance().getAccessControl().getDelegationServiceURL());
+                    operationVS.getServiceURL());
         }
 
         //we know this is done in a background thread

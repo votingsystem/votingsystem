@@ -19,7 +19,7 @@ import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
 import org.votingsystem.client.Browser;
-import org.votingsystem.client.service.SessionService;
+import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.client.util.BrowserVSClient;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
@@ -162,7 +162,7 @@ public class BrowserVSTabPane extends TabPane {
                                 JSObject win = (JSObject) webView.getEngine().executeScript("window");
                                 win.setMember("clientTool", new BrowserVSClient(webView));
                                 Browser.getInstance().fireCoreSignal("vs-session-data",
-                                        SessionService.getInstance().getBrowserSessionData(), true);
+                                        BrowserSessionService.getInstance().getBrowserSessionData(), true);
                                 Browser.getInstance().runJSCommandCurrentView("setClientToolConnected()");
                             }
                             break;

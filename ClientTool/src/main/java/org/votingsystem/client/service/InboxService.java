@@ -99,7 +99,7 @@ public class InboxService {
     private void showPasswordDialog(final String pinDialogMessage, final boolean isTimeLimited) {
         if(isPasswordVisible.getAndSet(true)) return;
         PlatformImpl.runLater(() -> {
-            if (SessionService.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
+            if (BrowserSessionService.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
                 passwordDialog = new PasswordDialog();
                 String dialogMessage = null;
                 if (pinDialogMessage == null) dialogMessage = ContextVS.getMessage("messageToDevicePasswordMsg");

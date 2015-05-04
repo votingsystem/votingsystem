@@ -157,6 +157,10 @@ public class RepresentativeBean {
         if(UserVS.Type.REPRESENTATIVE == userVS.getType()) {
             result.setState(RepresentationState.REPRESENTATIVE);
             result.setRepresentative(org.votingsystem.dto.UserVSDto.BASIC(userVS));
+            query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS and " +
+                    "r.state =:state").setParameter("userVS", userVS).setParameter("state", RepresentativeDocument.State.OK);
+            RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
+            result.setBase64ContentDigest(representativeDocument.getActivationSMIME().getBase64ContentDigest());
             return result;
         }
         AnonymousDelegation anonymousDelegation = representativeDelegationBean.getAnonymousDelegation(userVS);
@@ -475,7 +479,7 @@ public class RepresentativeBean {
         return metaInf;
     }
 
-    public UserVSDto geRepresentativeDto(UserVS representative) {
+    public UserVSDto getRepresentativeDto(UserVS representative) {
         Query query = dao.getEM().createQuery("select count(d) from RepresentationDocument d where " +
                 "d.representative =:representative and d.state =:state").setParameter("representative", representative)
                 .setParameter("state", RepresentationDocument.State.OK);

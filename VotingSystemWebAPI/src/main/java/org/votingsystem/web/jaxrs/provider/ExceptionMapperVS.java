@@ -29,8 +29,8 @@ public class ExceptionMapperVS implements ExceptionMapper<Exception> {
                     MessageDto messageDto = ((ExceptionVS) exception).getMessageDto();
                     return Response.status(messageDto.getStatusCode()).entity(
                             JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build();
-                } else return Response.status(Response.Status.BAD_REQUEST).entity(
-                        "ExceptionVS:" + exception.getMessage()).type(MediaType.TEXT_PLAIN).build();
+                } else return Response.status(Response.Status.BAD_REQUEST).entity(exception.getMessage())
+                        .type(MediaType.TEXT_PLAIN).build();
             }  else if(exception instanceof NotFoundException) {
                 log.log(Level.SEVERE, "--- NotFoundException --- " + exception.getMessage());
                 return Response.status(Response.Status.NOT_FOUND).entity(
