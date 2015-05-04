@@ -4,7 +4,7 @@
 <link href="${resourceURL}/vs-highcharts/highcharts-import.html" rel="import">
 <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 
-<polymer-element name="eventvs-election-stats" attributes="caption eventVSId">
+<polymer-element name="eventvs-election-stats" attributes="caption eventVSId height">
     <template>
         <style></style>
         <core-ajax id="ajax" auto url="{{url}}" handleAs="json" response="{{statsDto}}" method="get"
@@ -31,8 +31,8 @@
                     spacingRight: 30,
                     plotBorderWidth: 0
                 },
-                caption: {
-                    text: ''
+                title: {
+                    text: this.caption
                 },
                 tooltip: {
                     pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'

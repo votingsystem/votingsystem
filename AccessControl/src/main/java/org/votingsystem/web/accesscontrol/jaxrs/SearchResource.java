@@ -16,6 +16,7 @@ import org.votingsystem.web.util.ConfigVS;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -36,6 +37,7 @@ public class SearchResource {
     @Inject EventVSBean eventVSBean;
     @Inject RepresentativeBean representativeBean;
 
+    @Transactional
     @Path("/eventvsByTag") @GET
     public Response eventvsByTag (@QueryParam("tag") String tag) throws JsonProcessingException {
         if(tag == null) return Response.status(Response.Status.BAD_REQUEST).entity("ERROR - missing param 'tag'").build();
@@ -56,6 +58,7 @@ public class SearchResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
     }
 
+    @Transactional
     @Path("/representative") @GET
     public Response doGet(@QueryParam("searchText") String searchText,
                           @DefaultValue("0") @QueryParam("offset") int offset,
@@ -78,6 +81,7 @@ public class SearchResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeMap)).build();
     }
 
+    @Transactional
     @Path("/eventVS") @GET
     public Response eventVS(@QueryParam("searchText") String searchText, @QueryParam("eventVSState") String eventVSStateReq,
                           @DefaultValue("0") @QueryParam("offset") int offset,
@@ -101,13 +105,12 @@ public class SearchResource {
                 "(e.subject like :searchText or e.content like :searchText)").setParameter("inList", inList)
                 .setParameter("searchText", "%" + searchText + "%");
         List<EventVS> eventvsList = query.getResultList();
-        List<EventVSDto> dtoList = null;
+        List<EventVSDto> dtoList = new ArrayList<>();
         for(EventVS eventVS : eventvsList) {
             dtoList.add(new EventVSDto(eventVS, config.getServerName(), config.getContextURL()));
         }
         ResultListDto<EventVSDto> resultListDto = new ResultListDto<>(dtoList, offset, max, dtoList.size());
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaTypeVS.JSON).build();
     }
-
 
 }

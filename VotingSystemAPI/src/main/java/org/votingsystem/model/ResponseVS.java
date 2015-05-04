@@ -69,7 +69,6 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     @Column(name="statusCode") private Integer statusCode;
     @Column(name="reason", columnDefinition="TEXT") private String reason;
     @Column(name="metaInf", columnDefinition="TEXT") private String metaInf;
-    @Column(name="url") private String url;
     @Column(name="message", columnDefinition="TEXT") private String message;
     @Column(name="typeVS") @Enumerated(EnumType.STRING) private TypeVS type;
     @ManyToOne(fetch=FetchType.LAZY)
@@ -310,14 +309,6 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     public ResponseVS setMessageSMIME(MessageSMIME messageSMIME) {
         this.messageSMIME = messageSMIME;
         return this;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public static ResponseVS OK() {

@@ -12,8 +12,9 @@ public class MessageDto {
 
     private Integer statusCode;
     private String message;
-    @JsonProperty("URL")
     private String URL;
+
+    public MessageDto () {}
 
     public MessageDto(Integer statusCode, String message, String URL) {
         this.statusCode = statusCode;
@@ -50,11 +51,15 @@ public class MessageDto {
         return message;
     }
 
+    @Override public String toString() {
+        return "[statusCode: " + statusCode + " - message: " + message + " - URL: " + URL +"]";
+    }
+
     public String getURL() {
         return URL;
     }
 
-    @Override public String toString() {
-        return "[statusCode: " + statusCode + " - message: " + message + " - URL: " + URL +"]";
+    public void setURL(String URL) {
+        this.URL = URL;
     }
 }
