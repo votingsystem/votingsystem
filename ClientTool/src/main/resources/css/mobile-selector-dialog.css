@@ -17,7 +17,7 @@
     visibility: hidden;
 }
 
-.settings-vbox {
+.pane-border {
     -fx-border-width: 1px;
     -fx-border-color: #6c0404;
     -fx-padding: 10px;

@@ -81,7 +81,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         keyStoreLbl.setContentDisplay(ContentDisplay.LEFT);
         keyStoreVBox.getChildren().addAll(selectKeyStoreButton, keyStoreLbl);
         VBox.setMargin(keyStoreVBox, new Insets(10, 10, 10, 10));
-        keyStoreVBox.getStyleClass().add("settings-vbox");
+        keyStoreVBox.getStyleClass().add("pane-border");
         Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"));
         requestCertButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CERTIFICATE));
         requestCertButton.setOnAction(actionEvent -> {

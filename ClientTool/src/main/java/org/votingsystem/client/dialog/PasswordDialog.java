@@ -4,7 +4,6 @@ import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -12,13 +11,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
+import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
 
@@ -29,11 +24,10 @@ import java.util.logging.Logger;
 /**
  * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class PasswordDialog {
+public class PasswordDialog extends DialogVS {
 
     private static Logger log = Logger.getLogger(PasswordDialog.class.getSimpleName());
-
-    private Stage stage;
+    
     private VBox dialogVBox;
     private Text messageText;
     private Text timeLimitedMessageText;
@@ -47,10 +41,11 @@ public class PasswordDialog {
     boolean isWithPasswordConfirm = true;
 
     public PasswordDialog() {
-        stage = new Stage(StageStyle.TRANSPARENT);
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
-        dialogVBox = new VBox(10);
+        super(new VBox(10));
+        dialogVBox = (VBox)((DecoratedPane) getParent()).getContentPane(); new VBox(10);
+        dialogVBox.getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
+        dialogVBox.getStyleClass().add("modal-dialog");
+        dialogVBox.setStyle("-fx-pref-width: 350px;");
         messageText = new Text();
         messageText.setWrappingWidth(320);
         messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #6c0404;-fx-end-margin: 15;");
@@ -67,32 +62,32 @@ public class PasswordDialog {
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
-        cancelButton.setOnAction(event -> stage.close());
+        cancelButton.setOnAction(event -> hide());
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(event -> checkPasswords());
         acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
-            new EventHandler<KeyEvent>() {
-                public void handle(KeyEvent event) {
-                    if ((event.getCode() == KeyCode.ENTER)) {
-                        acceptButton.fire();
+                new EventHandler<KeyEvent>() {
+                    public void handle(KeyEvent event) {
+                        if ((event.getCode() == KeyCode.ENTER)) {
+                            acceptButton.fire();
+                        }
+                        setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
                     }
-                    setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
                 }
-            }
         );
 
         password2Field.addEventHandler(KeyEvent.KEY_PRESSED,
-            new EventHandler<KeyEvent>() {
-                public void handle(KeyEvent event) {
-                    if ((event.getCode() == KeyCode.ENTER)) {
-                        acceptButton.fire();
+                new EventHandler<KeyEvent>() {
+                    public void handle(KeyEvent event) {
+                        if ((event.getCode() == KeyCode.ENTER)) {
+                            acceptButton.fire();
+                        }
+                        setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
                     }
-                    setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
                 }
-            }
         );
 
         HBox footerButtonsBox = new HBox();
@@ -106,12 +101,6 @@ public class PasswordDialog {
 
         dialogVBox.getChildren().addAll(messageText, password1Text, password1Field, password2Text, password2Field,
                 footerButtonsBox);
-        dialogVBox.getStyleClass().add("modal-dialog");
-        stage.setScene(new Scene(dialogVBox, Color.TRANSPARENT));
-        stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
-        Utils.addMouseDragSupport(stage);
-        dialogVBox.setPrefWidth(350);
-        stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
     }
 
     private void setCapsLockState (boolean pressed) {
@@ -124,7 +113,7 @@ public class PasswordDialog {
     }
 
     public boolean isShowing() {
-        return stage.isShowing();
+        return getStage().isShowing();
     }
 
     private void checkPasswords() {
@@ -137,7 +126,7 @@ public class PasswordDialog {
         else {
             if (password1.equals(password2)) {
                 password = password1;
-                stage.close();
+                getStage().close();
             } else {
                 setMessage(ContextVS.getMessage("passwordError"));
                 password1Field.setText("");
@@ -147,7 +136,7 @@ public class PasswordDialog {
     }
 
     public void close() {
-        stage.close();
+        getStage().close();
     }
 
 
@@ -155,10 +144,10 @@ public class PasswordDialog {
         this.mainMessage = mainMessage;
         isWithPasswordConfirm = true;
         setMessage(mainMessage);
-        stage.sizeToScene();
-        stage.centerOnScreen();
-        stage.toFront();
-        stage.showAndWait();
+        getStage().sizeToScene();
+        getStage().centerOnScreen();
+        getStage().toFront();
+        getStage().showAndWait();
     }
 
     public void showWithoutPasswordConfirm(String mainMessage) {
@@ -182,21 +171,21 @@ public class PasswordDialog {
                                 "timeLimitedWebSocketMessage", visibilityInSeconds - secondsOpened.getAndIncrement())));
                         Thread.sleep(1000);
                     }
-                    PlatformImpl.runLater(() -> {if(stage.isShowing()) stage.close();});
+                    PlatformImpl.runLater(() -> {if(getStage().isShowing()) getStage().close();});
                     return null;
                 }
             };
             new Thread(task).start();
         }
-        stage.sizeToScene();
-        stage.centerOnScreen();
-        stage.toFront();
-        stage.showAndWait();
+        getStage().sizeToScene();
+        getStage().centerOnScreen();
+        getStage().toFront();
+        getStage().showAndWait();
     }
 
     public void toFront() {
-        stage.centerOnScreen();
-        stage.toFront();
+        getStage().centerOnScreen();
+        getStage().toFront();
     }
 
     private void setMessage (String message) {
@@ -205,9 +194,8 @@ public class PasswordDialog {
         if(isCapsLockPressed) {
             if(!dialogVBox.getChildren().contains(capsLockPressedMessageLabel))
                 dialogVBox.getChildren().add(0, capsLockPressedMessageLabel);
-        }
-        else dialogVBox.getChildren().removeAll(capsLockPressedMessageLabel);
-        stage.sizeToScene();
+        } else dialogVBox.getChildren().removeAll(capsLockPressedMessageLabel);
+        getStage().sizeToScene();
     }
 
 }
