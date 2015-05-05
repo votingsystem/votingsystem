@@ -16,7 +16,7 @@
                 </div>
                 <c:forEach var="it" items="${periods}" varStatus="counter">
                     <div>
-                        <a href="${restURL}/reports/week${formatter.format(it.getDateFrom())}">
+                        <a href="${restURL}/reports${spa.formatDate(it.getDateFrom())/week}">
                             <h:outputFormat value="#{msg.transactionsCurrentWeekPeriodMsg}" escape="false">
                                 <f:param value="#{spa.formatDate(it.getDateFrom())}"/>
                             </h:outputFormat>
@@ -24,7 +24,7 @@
                     </div>
                 </c:forEach>
                 <div style="margin:20px 0px;">
-                    <a href="${restURL}/reports/week${spa.now()}">
+                    <a href="${restURL}/reports${spa.now()}/week">
                         ${msg.currentWeekLbl}
                     </a>
                 </div>

@@ -81,7 +81,9 @@ public class DialogVS {
 
 
     public void show() {
+        stage.sizeToScene();
         stage.show();
+        stage.toFront();
     }
 
     public void hide() {

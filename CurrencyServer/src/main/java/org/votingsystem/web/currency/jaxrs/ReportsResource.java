@@ -1,92 +1,158 @@
 package org.votingsystem.web.currency.jaxrs;
 
-import javax.ws.rs.Path;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.util.*;
+import org.votingsystem.web.currency.util.LoggerVS;
+import org.votingsystem.web.util.ConfigVS;
+
+import javax.inject.Inject;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Path("/reports")
 public class ReportsResource {
-    /*
-    "/reports/week/$year/$month/$day"
 
-        def filesService
+    private static final Logger log = Logger.getLogger(ServerInfoResource.class.getName());
 
-    private static Logger reportslog = Logger.getLogger("reportsLog");
-    private static Logger transactionslog = Logger.getLogger("transactionsLog");
+    private static final DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 
-    //main web page
-    def index() {
-        String weekReportsBaseDir = "${config.vs.backupCopyPath}/weekReports"
-        def dir = new File(weekReportsBaseDir)
-        List<TimePeriod> periods = []
-        if(dir.exists()) {
-            DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-            dir.eachFileRecurse (FileType.FILES) { file ->
-                if("balances.json".equals(file.getName())) {
-                    String[] period = file.getParentFile().getName().split("_")
-                    TimePeriod timePeriod = new TimePeriod(formatter.parse(period[0]), formatter.parse(period[1]));
-                    periods.add(timePeriod)
-                }
-            }
-        }
-        render(view:'index', model: [periods:periods])
-        return false
-    }
+    @Inject ConfigVS config;
 
-    def logs() {
-        if(request.contentType?.contains("json")) {
-            RollingFileAppender appender = reportslog.getAppender("CooinServerReports")//logs from ServerReports.log
-            File reportsFile = new File(appender.file)
-            def messageJSON = JSON.parse("{\"records\":[" + reportsFile.text + "]}")
-            messageJSON.numTotalRecords = messageJSON.records.length()
-            render messageJSON as JSON
-            return false
-        } else {
-            render(view:'logs')
-        }
-    }
+    @Path("/{year}/{month}/{day}/week")
+    @GET  @Produces(MediaType.APPLICATION_JSON) @Transactional
+    public Response week(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,
+                          @Context ServletContext context,
+                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        String contentType = req.getContentType() != null ? req.getContentType():"";
+        File reportsFile = new File(LoggerVS.weekPeriodLogPath);
+        Calendar calendar = DateUtils.getCalendar(year, month, day);
 
-    def week() {
-        Calendar calendar = RequestUtils.getCalendar(params)
-        TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar)
-        ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), null)
-        if(request.contentType?.contains("json")) {
-            if(reportFiles.jsonFile.exists()) {
-                render JSON.parse(reportFiles.jsonFile.text) as JSON
+        TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
+
+        if(reportsFile.exists()) {
+            StringBuilder stringBuilder = new StringBuilder("{");
+            stringBuilder.append(FileUtils.getStringFromFile(reportsFile));
+            stringBuilder.append("}");
+            if(contentType.contains("json")) {
+                return Response.ok().type(MediaTypeVS.JSON).entity(stringBuilder.toString()).build();
             } else {
-                response.status = ResponseVS.SC_NOT_FOUND
-                render [:] as JSON
+                req.setAttribute("reportsDto", stringBuilder.toString());
+                context.getRequestDispatcher("/reports/week.xhtml").forward(req, resp);
+                return Response.ok().build();
             }
-            return false
+        } else return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - not found - file: " + LoggerVS.weekPeriodLogPath).build();
+    }
+
+    @Path("/")
+    @GET  @Produces(MediaType.APPLICATION_JSON) @Transactional
+    public Response index(@Context ServletContext context,
+                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        File weekReportsBaseDir = new File(config.getServerDir() +  "/weekReports");
+        List<TimePeriod> periods = new ArrayList<>();
+        if(weekReportsBaseDir.exists()) {
+            Files.list(weekReportsBaseDir.toPath()).forEach(file -> {
+                try {
+                    String[] fileNameParts = file.getFileName().toString().split("_");
+                    TimePeriod timePeriod = new TimePeriod(formatter.parse(fileNameParts[0]), formatter.parse(fileNameParts[1]));
+                    periods.add(timePeriod);
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                }
+            });
+        }
+        req.setAttribute("periods", periods);
+        context.getRequestDispatcher("/reports/index.xhtml").forward(req, resp);
+        return Response.ok().build();
+    }
+
+    @Path("/logs")
+    @GET  @Produces(MediaType.APPLICATION_JSON) @Transactional
+    public Response logs(@Context ServletContext context,
+                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        String contentType = req.getContentType() != null ? req.getContentType():"";
+        File reportsFile = new File(LoggerVS.reporstLogPath);
+        if(!reportsFile.exists()) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - not found - file: " + LoggerVS.reporstLogPath).build();
+        StringBuilder stringBuilder = new StringBuilder("{\"resultList\":[");
+        stringBuilder.append(FileUtils.getStringFromFile(reportsFile));
+        stringBuilder.append("]}");
+
+        if(contentType.contains("json")) {
+            return Response.ok().type(MediaTypeVS.JSON).entity(stringBuilder.toString()).build();
         } else {
-            if(!reportFiles.jsonFile.exists()) {
-                response.status = ResponseVS.SC_PRECONDITION_FAILED
-                render(view:'/error412',  model: [message:message(code:'reportsForPeriodMissingMsg',
-                        args:[timePeriod.toString()])])
-            } else render(view:'week',  model: [reportsFile:reportFiles.reportsFile.text, timePeriod:timePeriod])
+            req.setAttribute("logData", stringBuilder.toString());
+            context.getRequestDispatcher("/reports/logs.xhtml").forward(req, resp);
+            return Response.ok().build();
         }
     }
 
-    def transactionvs() {
-        if(request.contentType?.contains("json")) {
-            RollingFileAppender appender = transactionslog.getAppender("CooinTransactionsReports")
-            File reportsFile = new File(appender.file)
-            //testfile.eachLine{ line ->}
-            def messageJSON = JSON.parse("{\"resultList\":[" + reportsFile.text + "]}")
-            if(params.transactionvsType) {
-                messageJSON.resultList = messageJSON["resultList"].findAll() { item ->
-                    if(item.type.equals(params.transactionvsType)) { return item }
+    @Path("/transactionvs")
+    @GET  @Produces(MediaType.APPLICATION_JSON) @Transactional
+    public Response transactionvs(@Context ServletContext context, @QueryParam("transactionvsType") String transactionvsType,
+                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        String contentType = req.getContentType() != null ? req.getContentType():"";
+        File reportsFile = new File(LoggerVS.transactionsLogPath);
+        if(!reportsFile.exists()) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - not found - file: " + LoggerVS.reporstLogPath).build();
+        ObjectMapper mapper =  JSON.getMapper();
+        String result = null;
+        AtomicLong totalCount = new AtomicLong(0);
+        if(transactionvsType != null) {
+            List<TransactionVSDto> resultList = new ArrayList<>();
+            TransactionVS.Type type = TransactionVS.Type.valueOf(transactionvsType);
+            Files.readAllLines(Paths.get(reportsFile.toURI()), Charset.defaultCharset()).forEach(line -> {
+                    totalCount.getAndIncrement();
+                    try {
+                        TransactionVSDto transactionVSDto =  mapper.readValue(line, TransactionVSDto.class);
+                        if(type == transactionVSDto.getType()) {
+                            resultList.add(transactionVSDto);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-            messageJSON.offset = 0
-            messageJSON.max = messageJSON.resultList.size()
-            messageJSON.totalCount = messageJSON.resultList.size()
-            render messageJSON as JSON
-            return false
+            );
+            ResultListDto<TransactionVSDto> resultListDto = new ResultListDto<>(resultList);
+            result = mapper.writeValueAsString(resultListDto);
         } else {
-            render(view:'transactionvs')
+            StringBuilder stringBuilder = new StringBuilder("{\"resultList\":[");
+            stringBuilder.append(FileUtils.getStringFromFile(reportsFile));
+            stringBuilder.append("]}");
+            result = stringBuilder.toString();
+        }
+        if(contentType.contains("json")) {
+            return Response.ok().type(MediaTypeVS.JSON).entity(result).build();
+        } else {
+            req.setAttribute("transactionsDto", result);
+            context.getRequestDispatcher("/reports/transactionvs.xhtml").forward(req, resp);
+            return Response.ok().build();
         }
     }
-     */
+
 }

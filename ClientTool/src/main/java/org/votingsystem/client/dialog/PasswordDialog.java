@@ -135,19 +135,11 @@ public class PasswordDialog extends DialogVS {
         }
     }
 
-    public void close() {
-        getStage().close();
-    }
-
-
     public void show(String mainMessage) {
         this.mainMessage = mainMessage;
         isWithPasswordConfirm = true;
         setMessage(mainMessage);
-        getStage().sizeToScene();
-        getStage().centerOnScreen();
-        getStage().toFront();
-        getStage().showAndWait();
+        show();
     }
 
     public void showWithoutPasswordConfirm(String mainMessage) {
@@ -177,15 +169,7 @@ public class PasswordDialog extends DialogVS {
             };
             new Thread(task).start();
         }
-        getStage().sizeToScene();
-        getStage().centerOnScreen();
-        getStage().toFront();
-        getStage().showAndWait();
-    }
-
-    public void toFront() {
-        getStage().centerOnScreen();
-        getStage().toFront();
+        show();
     }
 
     private void setMessage (String message) {

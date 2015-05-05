@@ -5,7 +5,6 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
