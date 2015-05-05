@@ -57,11 +57,11 @@ public class DashBoardBean {
          dto.setTransFromGroupVSToAllMembers(new DashBoardDto.TransFromGroupVS(numTrans, numUsers));
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CURRENCY_INIT_PERIOD);
+                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CURRENCY_PERIOD_INIT);
          dto.setNumTransCurrencyInitPeriod((long) query.getSingleResult());
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CURRENCY_INIT_PERIOD_TIME_LIMITED);
+                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED);
          dto.setNumTransCurrencyInitPeriodTimeLimited((long) query.getSingleResult());
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),

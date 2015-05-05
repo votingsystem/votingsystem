@@ -11,8 +11,8 @@
             <option value="" style="color:black;"> - ${msg.selectTransactionTypeLbl} - </option>
             <option value="CURRENCY_REQUEST"> - ${msg.selectCurrencyRequestLbl} - </option>
             <option value="CURRENCY_SEND"> - ${msg.selectCurrencySendLbl} - </option>
-            <option value="CURRENCY_INIT_PERIOD"> - ${msg.currencyInitPeriodLbl} - </option>
-            <option value="CURRENCY_INIT_PERIOD_TIME_LIMITED"> - ${msg.currencyInitPeriodTimeLimitedLbl} - </option>
+            <option value="CURRENCY_PERIOD_INIT"> - ${msg.currencyInitPeriodLbl} - </option>
+            <option value="CURRENCY_PERIOD_INIT_TIME_LIMITED"> - ${msg.currencyInitPeriodTimeLimitedLbl} - </option>
             <option value="FROM_BANKVS"> - ${msg.bankVSInputLbl} - </option>
             <option value="FROM_USERVS"> - ${msg.transactionVSFromUserVS} - </option>
             <option value="FROM_GROUP_TO_MEMBER"> - ${msg.transactionVSFromGroupToMember} - </option>

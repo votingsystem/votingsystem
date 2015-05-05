@@ -65,11 +65,11 @@
                 </template>
                 <div class="transDesc">transFromGroupVSToAllMembers</div>
             </div>
-            <div id="CURRENCY_INIT_PERIOD" class="transBlock" on-click="{{transBlockSelected}}">
+            <div id="CURRENCY_PERIOD_INIT" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencyInitPeriod}}</div>
                 <div class="transDesc">TransCurrencyInitPeriod</div>
             </div>
-            <div id="CURRENCY_INIT_PERIOD_TIME_LIMITED" class="transBlock" on-click="{{transBlockSelected}}">
+            <div id="CURRENCY_PERIOD_INIT_TIME_LIMITED" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencyInitPeriodTimeLimited}}</div>
                 <div class="transDesc">TransCurrencyInitPeriodTimeLimited</div>
             </div>

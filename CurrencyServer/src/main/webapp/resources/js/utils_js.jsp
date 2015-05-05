@@ -79,10 +79,10 @@
             case 'CURRENCY_SEND':
                 transactionDescription = "${msg.selectCurrencySendLbl}"
                 break;
-            case 'CURRENCY_INIT_PERIOD':
+            case 'CURRENCY_PERIOD_INIT':
                 transactionDescription = "${msg.currencyInitPeriodLbl}"
                 break;
-            case 'CURRENCY_INIT_PERIOD_TIME_LIMITED':
+            case 'CURRENCY_PERIOD_INIT_TIME_LIMITED':
                 transactionDescription = "${msg.currencyInitPeriodTimeLimitedLbl}"
                 break;
             case 'FROM_BANKVS':

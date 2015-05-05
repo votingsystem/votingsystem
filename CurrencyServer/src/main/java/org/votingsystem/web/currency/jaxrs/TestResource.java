@@ -182,8 +182,8 @@ public class TestResource {
         nextWeek.set(Calendar.WEEK_OF_YEAR, (nextWeek.get(Calendar.WEEK_OF_YEAR) + 1));
         auditBean.initWeekPeriod(nextWeek);
         /*Query query = dao.getEM().createQuery("select t from TransactionVS t where t.type  in :inList")
-                .setParameter("inList", Arrays.asList(TransactionVS.Type.CURRENCY_INIT_PERIOD,
-                TransactionVS.Type.CURRENCY_INIT_PERIOD_TIME_LIMITED));
+                .setParameter("inList", Arrays.asList(TransactionVS.Type.CURRENCY_PERIOD_INIT,
+                TransactionVS.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED));
         List<TransactionVS> resultList =  query.getResultList();
         for(TransactionVS transactionVS : resultList) {
             dao.getEM().remove(transactionVS);

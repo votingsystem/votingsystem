@@ -187,11 +187,11 @@ public class AuditBean {
                 TagVS currentTagVS = config.getTag(tagVSEntry.getKey());
                 query = dao.getEM().createNamedQuery("findTransByToUserAndStateAndTypeAndTagAndDateCreatedAfter")
                         .setParameter("toUserVS", userVS).setParameter("state", TransactionVS.State.OK)
-                        .setParameter("type", TransactionVS.Type.CURRENCY_INIT_PERIOD)
+                        .setParameter("type", TransactionVS.Type.CURRENCY_PERIOD_INIT)
                         .setParameter("tag", currentTagVS).setParameter("dateFrom", timePeriod.getDateTo());
 
                 long numInitPeriodTransaction = (long) query.getSingleResult();
-                if(numInitPeriodTransaction > 0) throw new ExceptionVS("REPEATED CURRENCY_INIT_PERIOD TransactionVS for " +
+                if(numInitPeriodTransaction > 0) throw new ExceptionVS("REPEATED CURRENCY_PERIOD_INIT TransactionVS for " +
                         "UserVS:" + userVS.getId() + " - tag: " + tagVSEntry.getKey() + " - timePeriod:" + timePeriod);
                 //Send TimeLimited incomes not expended to system
                 BigDecimal timeLimitedNotExpended = TransactionVSUtils.checkRemainingForTag(
@@ -205,9 +205,9 @@ public class AuditBean {
                 SMIMEMessage smimeMessage = signatureBean.getSMIMETimeStamped (signatureBean.getSystemUser().getName(),
                         userVS.getNif(), signedContent, transactionMsgSubject + " - " + signedMessageSubject);
                 MessageSMIME messageSMIME = dao.persist(new MessageSMIME(smimeMessage, signatureBean.getSystemUser(),
-                        TypeVS.CURRENCY_INIT_PERIOD));
+                        TypeVS.CURRENCY_PERIOD_INIT));
                 dao.persist(new TransactionVS(userVS, userVS, amountResult, currency, signedMessageSubject, messageSMIME,
-                        TransactionVS.Type.CURRENCY_INIT_PERIOD, TransactionVS.State.OK, currentTagVS));
+                        TransactionVS.Type.CURRENCY_PERIOD_INIT, TransactionVS.State.OK, currentTagVS));
                 if(timeLimitedNotExpended.compareTo(BigDecimal.ZERO) > 0) {
                     query = dao.getEM().createNamedQuery("findAccountByUserIBANAndStateAndCurrencyAndTag")
                             .setParameter("userIBAN", userVS.getIBAN()).setParameter("state", CurrencyAccount.State.ACTIVE)
@@ -217,7 +217,7 @@ public class AuditBean {
                     accountFromMovements.put(account, timeLimitedNotExpended);
                     TransactionVS transactionVS = dao.persist(new TransactionVS(userVS, signatureBean.getSystemUser(),
                             timeLimitedNotExpended, currency,
-                            signedMessageSubject, messageSMIME,TransactionVS.Type.CURRENCY_INIT_PERIOD_TIME_LIMITED,
+                            signedMessageSubject, messageSMIME,TransactionVS.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED,
                             TransactionVS.State.OK,currentTagVS ));
                     transactionVS.setAccountFromMovements(accountFromMovements);
                 }

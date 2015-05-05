@@ -154,9 +154,9 @@ public class TransactionVSBean {
         if(transactionVS.getState() == TransactionVS.State.OK) {
             boolean isParentTransaction = (transactionVS.getTransactionParent() == null);
             switch(transactionVS.getType()) {
-                case CURRENCY_INIT_PERIOD:
+                case CURRENCY_PERIOD_INIT:
                     break;
-                case CURRENCY_INIT_PERIOD_TIME_LIMITED:
+                case CURRENCY_PERIOD_INIT_TIME_LIMITED:
                     updateUserVSAccountFrom(transactionVS);
                     balancesBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(), transactionVS.getTag());
                     break;
@@ -270,7 +270,7 @@ public class TransactionVSBean {
                     "and t.transactionParent is null and  t.dateCreated between :dateFrom and :dateTo " +
                     "and t.type in (:inList))").setParameter("fromUserVS", fromUserVS).setParameter("state", TransactionVS.State.OK)
                     .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())
-                    .setParameter("notList", Arrays.asList(TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS, TransactionVS.Type.CURRENCY_INIT_PERIOD))
+                    .setParameter("notList", Arrays.asList(TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS, TransactionVS.Type.CURRENCY_PERIOD_INIT))
                     .setParameter("inList", Arrays.asList(TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS));
             transactionList = query.getResultList();
         } else {

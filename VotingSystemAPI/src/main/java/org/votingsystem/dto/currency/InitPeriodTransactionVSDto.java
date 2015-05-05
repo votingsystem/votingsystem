@@ -24,7 +24,7 @@ public class InitPeriodTransactionVSDto {
     public InitPeriodTransactionVSDto() {}
 
     public InitPeriodTransactionVSDto(BigDecimal amount, BigDecimal timeLimitedNotExpended, String tag, UserVS userVS) {
-        this.setOperation(TypeVS.CURRENCY_INIT_PERIOD);
+        this.setOperation(TypeVS.CURRENCY_PERIOD_INIT);
         this.setAmount(amount);
         this.setTimeLimitedNotExpended(timeLimitedNotExpended);
         this.setTag(tag);
