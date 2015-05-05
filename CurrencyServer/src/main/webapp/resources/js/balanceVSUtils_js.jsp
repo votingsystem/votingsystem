@@ -23,63 +23,61 @@
 
             })
         }
-        /*console.log("calculateBalanceResultMap - balanceResult: " +JSONbalanceCashlanceResult))
-         consbalanceCashulateBalanceResultMap - balanceFromMapParam: " +JSON.stringify(balanceFromMapParam))
-         console.log("calculateBalanceResultMap - balanceToMapParam: " +JSON.stringify(balanceToMapParam))*/
-
         return balanceResult
     }
 
-    function enterTagsMapData(allTagsMap, tagBalanceMapParam) {
-        if(tagBalanceMapParam == null) tagBalanceMapParam = {}
-        var tagBalanceMap = toJSON(tagBalanceMapParam)
-        Object.keys(allTagsMap).forEach(function(tag) {
-            if(tagBalanceMap[tag] == null) allTagsMap[tag].push(0)
-            else allTagsMap[tag].push(parseFloat(tagBalanceMap[tag]))
+    function pushTagData(tagDataMap, balanceMap) {
+        if(balanceMap == null) balanceMap = {}
+        var tagBalanceMap = toJSON(balanceMap)
+        Object.keys(tagDataMap).forEach(function(tag) {
+            if(tagBalanceMap[tag] == null) tagDataMap[tag].push(0)
+            else tagDataMap[tag].push(parseFloat(tagBalanceMap[tag]))
         })
-        return allTagsMap
+        return tagDataMap
     }
 
-    function filterMap(detailedBalanceMap, subBalanceParam) {
-        if(detailedBalanceMap == null) return null
+    function filterMap(balanceToMap, param) {
+        if(balanceToMap == null) return null
         var result = {}
-        Object.keys(detailedBalanceMap).forEach(function(tag) {
-            result[tag] = detailedBalanceMap[tag][subBalanceParam]
+        Object.keys(balanceToMap).forEach(function(tag) {
+            result[tag] = balanceToMap[tag][param]
         })
         return result
     }
 
     //we know the order serie -> incomes ,expenses, time limited, available
     //[{"name":"WILDTAG","data":[833.33,110,833.33,723.33]}]
-    function calculateUserBalanceSeries(detailedBalanceToMap, balanceFromMap, balanceCash) {
-        var allTagsMap = {}
+    function calculateUserBalanceSeries(balanceToMap, balanceFromMap, balanceCash) {
+        var tagDataMap = {}
 
         for(var i = 0; i < arguments.length; i++ ) {
             Object.keys(arguments[i]).forEach(function(tag) {
-                if(allTagsMap[tag] == null) allTagsMap[tag] = []
+                if(tagDataMap[tag] == null) tagDataMap[tag] = []
             })
         }
 
-        enterTagsMapData(allTagsMap, filterMap(detailedBalanceToMap, 'total'))
-        enterTagsMapData(allTagsMap, balanceFromMap)
-        enterTagsMapData(allTagsMap, filterMap(detailedBalanceToMap, 'timeLimited'))
-        enterTagsMapData(allTagsMap, balanceCash)
+        pushTagData(tagDataMap, filterMap(balanceToMap, 'total'))
+        pushTagData(tagDataMap, balanceFromMap)
+        pushTagData(tagDataMap, filterMap(balanceToMap, 'timeLimited'))
+        pushTagData(tagDataMap, balanceCash)
 
         var seriesData = []
-        Object.keys(allTagsMap).forEach(function(tag) {
-            seriesData.push({name:tag, data:allTagsMap[tag]})
+        Object.keys(tagDataMap).forEach(function(tag) {
+            seriesData.push({name:tag, data:tagDataMap[tag]})
         })
 
         console.log(" seriesData: " + JSON.stringify(seriesData))
         return seriesData
     }
 
-    function calculateUserBalanceSeriesDonut(detailedBalanceToMap, balanceFromMap, balanceCash) {
-        var seriesData = calculateUserBalanceSeries(detailedBalanceToMap, balanceFromMap, balanceCash)
+    function calculateUserBalanceSeriesDonut(balanceToMap, balanceFromMap, balanceCash) {
+        var seriesData = calculateUserBalanceSeries(balanceToMap, balanceFromMap, balanceCash)
+
         var result = []
         result.push(tagDataForChartDonut(seriesData))
         result.push(tagDataIncomesDetailsForChartDonut(seriesData))
         result.push(tagDataExpensesForChartDonut(seriesData))
+
         return result
     }
 

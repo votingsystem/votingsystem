@@ -2,7 +2,7 @@
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<script src="${contextURL}/resources/js/balanceVSUtils_js.jsp" type="text/javascript"></script>
+<script src="${contextURL}/jsf/resources/js/balanceVSUtils_js.jsp" type="text/javascript"></script>
 
 <polymer-element name="balance-uservs-details" attributes="balance type">
     <template>

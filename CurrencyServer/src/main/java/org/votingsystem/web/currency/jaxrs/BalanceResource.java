@@ -5,6 +5,7 @@ import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.currency.ejb.BalancesBean;
@@ -65,7 +66,7 @@ public class BalanceResource {
             TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
             BalancesDto balancesDto = balancesBean.getBalancesDto(uservs, timePeriod);
             if(req.getContentType() != null && req.getContentType().contains("json")) {
-                return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
+                return Response.ok().type(MediaTypeVS.JSON).entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
             } else {
                 req.setAttribute("balancesDto", JSON.getMapper().writeValueAsString(balancesDto));
                 context.getRequestDispatcher("/balance/userVS.xhtml").forward(req, resp);
