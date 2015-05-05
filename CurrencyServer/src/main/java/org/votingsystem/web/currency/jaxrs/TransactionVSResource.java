@@ -99,6 +99,7 @@ public class TransactionVSResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
+    @Transactional
     @Path("/from/{dateFrom}/to/{dateTo}")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response search(@DefaultValue("0") @QueryParam("offset") int offset,
@@ -111,8 +112,8 @@ public class TransactionVSResource {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         TransactionVS.Type transactionType = null;
         BigDecimal amount = null;
-        Date dateFrom = DateUtils.getURLDate(dateFromStr);
-        Date dateTo = DateUtils.getURLDate(dateToStr);
+        Date dateFrom = DateUtils.getURLPart(dateFromStr);
+        Date dateTo = DateUtils.getURLPart(dateToStr);
         try {
             if(transactionvsType != null) transactionType = TransactionVS.Type.valueOf(transactionvsType);
             else transactionType = TransactionVS.Type.valueOf(searchText);} catch(Exception ex) {}

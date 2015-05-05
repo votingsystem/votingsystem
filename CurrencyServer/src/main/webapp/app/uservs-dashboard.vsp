@@ -35,15 +35,15 @@
         <div layout flex horizontal wrap around-justified>
             <div id="FROM_BANKVS" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{dashBoardDto.numTransFromBankVS}}</div>
-                <div class="transDesc">TransFromBankVS</div>
+                <div class="transDesc">${msg.bankVSInputLbl}</div>
             </div>
             <div id="FROM_USERVS" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{dashBoardDto.numTransFromUserVS}}</div>
-                <div class="transDesc">TransFromUserVS</div>
+                <div class="transDesc">${msg.transactionVSFromUserVS}</div>
             </div>
             <div id="FROM_GROUP_TO_MEMBER" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{dashBoardDto.numTransFromGroupVSToMember}}</div>
-                <div class="transDesc">numTransFromGroupVSToMember</div>
+                <div class="transDesc">${msg.transactionVSFromGroupToMember}</div>
             </div>
             <div id="FROM_GROUP_TO_MEMBER_GROUP" class="transBlock" on-click="{{transBlockSelected}}">
                 <template if="{{dashBoardDto.transFromGroupVSToMemberGroup.numTrans > 0}}">
@@ -53,7 +53,7 @@
                 <template if="{{dashBoardDto.transFromGroupVSToMemberGroup.numTrans === 0}}">
                     <div class="numTrans">0</div>
                 </template>
-                <div class="transDesc">TransFromGroupVSToMemberGroup</div>
+                <div class="transDesc">${msg.transactionVSFromGroupToMemberGroup}</div>
             </div>
             <div id="FROM_GROUP_TO_ALL_MEMBERS" class="transBlock" on-click="{{transBlockSelected}}">
                 <template if="{{dashBoardDto.transFromGroupVSToAllMembers.numTrans > 0}}">
@@ -63,27 +63,27 @@
                 <template if="{{dashBoardDto.transFromGroupVSToAllMembers.numTrans === 0}}">
                     <div class="numTrans">0</div>
                 </template>
-                <div class="transDesc">transFromGroupVSToAllMembers</div>
+                <div class="transDesc">${msg.transactionVSFromGroupToAllMembers}</div>
             </div>
             <div id="CURRENCY_PERIOD_INIT" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencyInitPeriod}}</div>
-                <div class="transDesc">TransCurrencyInitPeriod</div>
+                <div class="transDesc">${msg.currencyPeriodInitLbl}</div>
             </div>
             <div id="CURRENCY_PERIOD_INIT_TIME_LIMITED" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencyInitPeriodTimeLimited}}</div>
-                <div class="transDesc">TransCurrencyInitPeriodTimeLimited</div>
+                <div class="transDesc">${msg.currencyPeriodInitTimeLimitedLbl}</div>
             </div>
             <div id="CURRENCY_REQUEST" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencyRequest}}</div>
-                <div class="transDesc">TransCurrencyRequest</div>
+                <div class="transDesc">${msg.selectCurrencyRequestLbl}</div>
             </div>
             <div id="CURRENCY_SEND" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencySend}}</div>
-                <div class="transDesc">TransCurrencySend</div>
+                <div class="transDesc">${msg.selectCurrencySendLbl}</div>
             </div>
-            <div id="CANCELLATION" class="transBlock" on-click="{{transBlockSelected}}">
+            <div id="CANCELATION" class="transBlock" on-click="{{transBlockSelected}}">
                 <div class="numTrans">{{dashBoardDto.numTransCancellation}}</div>
-                <div class="transDesc">TransCancellation</div>
+                <div class="transDesc">${msg.cancelationsLbl}</div>
             </div>
         </div>
     </template>

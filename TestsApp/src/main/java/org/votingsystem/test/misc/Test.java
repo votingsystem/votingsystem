@@ -1,6 +1,8 @@
 package org.votingsystem.test.misc;
 
 
+import java.awt.*;
+import java.net.URI;
 import java.util.logging.Logger;
 
 /**

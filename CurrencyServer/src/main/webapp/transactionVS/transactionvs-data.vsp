@@ -166,7 +166,7 @@
                         this.caption = "${msg.transactionVSFromGroupToMemberGroup}"
                         break;
                     case 'CURRENCY_PERIOD_INIT':
-                        this.caption = "${msg.currencyInitPeriodLbl}"
+                        this.caption = "${msg.currencyPeriodInitLbl}"
                         this.$.fromUserDiv.innerHTML = "${msg.systemLbl}"
                         break;
                     case 'CURRENCY_SEND':

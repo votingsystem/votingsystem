@@ -324,7 +324,7 @@ public class DateUtils {
         return new TimePeriod(dateFrom, dateTo);
     }
 
-    public static Date getURLDate(String dateStr) throws ParseException {
+    public static Date getURLPart(String dateStr) throws ParseException {
         return urlDateFormatter.parse(dateStr);
     }
 

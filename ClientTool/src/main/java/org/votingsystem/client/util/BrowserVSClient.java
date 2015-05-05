@@ -1,7 +1,10 @@
 package org.votingsystem.client.util;
 
+import com.sun.javafx.application.PlatformImpl;
+import javafx.application.HostServices;
 import javafx.scene.web.WebView;
 import org.votingsystem.client.Browser;
+import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.*;
 import org.votingsystem.client.dto.SignalVSDto;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
@@ -17,6 +20,9 @@ import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.*;
 import org.votingsystem.util.currency.Wallet;
 
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,6 +105,10 @@ public class BrowserVSClient {
                 case NEW_REPRESENTATIVE:
                 case EDIT_REPRESENTATIVE:
                     PublishRepresentativeDialog.show(operationVS, Browser.getInstance().getScene().getWindow());
+                    break;
+                case MAIL_TO:
+                    VotingSystemApp.getInstance().getHostServices().showDocument(
+                            ContextVS.getInstance().getDefaultServer().getServerURL() + "/app/contact.xhtml?openMailClient=true");
                     break;
                 case WALLET_SAVE:
                     PasswordDialog passwordDialog = new PasswordDialog();
