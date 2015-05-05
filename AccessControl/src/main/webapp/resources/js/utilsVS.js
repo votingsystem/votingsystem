@@ -270,7 +270,7 @@ function getRadioValue(radioName) {
     }
 }
 
-var menuType = getParameterByName('menu')
+var menuType = getURLParam('menu')
 if(menuType == null) menuType = 'user'
 
 function updateMenuLinks() {
@@ -321,7 +321,7 @@ function updateMenuLink(urlToUpdate, param) {
 
 
 //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
-function getParameterByName(name, url) {
+function getURLParam(name, url) {
     if(!url) url = location.search
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),  results = regex.exec(url);
@@ -330,7 +330,7 @@ function getParameterByName(name, url) {
 
 function setURLParameter(baseURL, name, value){
     var result;
-    if(getParameterByName(name, baseURL)){
+    if(getURLParam(name, baseURL)){
         result = baseURL.replace(new RegExp('([?|&]'+name + '=)' + '(.+?)(&|$)'),"$1"+encodeURIComponent(value)+"$3");
     }else if(baseURL.length){
         if(baseURL.indexOf("?") < 0) baseURL = baseURL + "?"

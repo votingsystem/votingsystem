@@ -89,8 +89,8 @@
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.page = 0;
-                var certType = getParameterByName('type')
-                var certState = getParameterByName('state')
+                var certType = getURLParam('type')
+                var certState = getURLParam('state')
                 var optionValue = "&type=" + ((certType == "")? "USER":certType) + "&state=" + ((certState == "")?"OK":certState)
                 if(this.url != null) {
                     this.url = updateMenuLink("${restURL}/certificateVS/certs", optionValue)
@@ -114,8 +114,8 @@
                 } else this.$.pageHeader.innerHTML = this.responseData.type
 
 
-                var certType = getParameterByName('type')
-                var certState = getParameterByName('state')
+                var certType = getURLParam('type')
+                var certState = getURLParam('state')
                 var optionValue = "&type=" + ((certType == "")? "USER":certType) + "&state=" + ((certState == "")?"OK":certState)
                 this.setPageHeader(optionValue)
             },
