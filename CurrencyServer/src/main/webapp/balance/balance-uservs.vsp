@@ -31,13 +31,18 @@
         .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
             margin:10px 0 10px 0; text-decoration: underline; cursor: pointer;}
         .tabContent { margin:0px auto 0px auto; width:auto; }
-        paper-tabs.transparent-teal { padding: 0px; background-color: #ffeeee; color:#ba0011;
-            box-shadow: none; cursor: pointer; height: 35px;
+
+        paper-tabs.transparent-teal {
+            background-color: transparent;
+            color: #ba0011;
+            box-shadow: none; height: 35px;
         }
-        paper-tabs.transparent-teal /deep/ #selectionBar {
+
+        paper-tabs.transparent-teal::shadow #selectionBar {
             background-color: #ba0011;
         }
-        paper-tabs.transparent-teal paper-tab /deep/ #ink {
+
+        paper-tabs.transparent-teal paper-tab::shadow #ink {
             color: #ba0011;
         }
         </style>
@@ -51,13 +56,12 @@
                 </div>
             </div>
             <div horizontal layout center center-justified style="text-align: center;font-weight: bold; color: #888; margin:0 0 8px 0;">
-                ${msg.periodLbl}:
                 <div>{{getDate(balance.timePeriod.dateFrom)}} - </div> {{getDate(balance.timePeriod.dateTo)}} </div>
             </div>
-            <div hidden?="{{!status}}" class="messageToUser" style="color: {{message.status == 200?'#388746':'#ba0011'}};">
+            <div hidden?="{{!status}}" class="messageToUser" style="color:{{getColor(message.status)}};">
                 <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                     <div id="messageToUser">{{message}}</div>
-                    <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{message.status == 200?'#388746':'#ba0011'}};"></core-icon></div>
+                    <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{getColor(message.status)}};"></core-icon></div>
 
                 <paper-shadow z="1"></paper-shadow>
             </div>
@@ -98,7 +102,7 @@
                 </div>
                 <div hidden?="{{!smallScreen}}">
                     <paper-tabs style="margin:0px auto 0px auto; cursor: pointer;" class="transparent-teal center"
-                                valueattr="name" selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
+                                valueattr="name" selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" link>
                         <paper-tab name="incomesTab" style="width: 400px">${msg.incomesLbl}</paper-tab>
                         <paper-tab name="expensesTab">${msg.expensesLbl}</paper-tab>
                     </paper-tabs>
@@ -138,6 +142,9 @@
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
+            },
+            getColor:function(statusCode) {
+                return statusCode == 200?'#388746':'#ba0011'
             },
             formatAmount: function(amount) {
                 if(Object.prototype.toString.call(amount) !== '[object String]') return amount.toFixed(2)

@@ -17,6 +17,10 @@ paper-button {
     color: #6c0404;
 }
 
+paper-tabs.transparent-teal::shadow #selectionBar {
+    background-color: #ba0011;
+}
+
 .vs-navbar {
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;

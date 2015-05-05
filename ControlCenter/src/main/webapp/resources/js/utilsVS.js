@@ -364,7 +364,7 @@ VotingSystemClient.setMessage = function (messageJSON) {
 function sendSignalVS(signalData, callback) {
     var result
     var operationVS = new OperationVS(Operation.SIGNAL_VS)
-    operationVS.document = JSON.stringify(signalData)
+    operationVS.jsonStr = JSON.stringify(signalData)
     operationVS.setCallback(callback)
     try {
         result = VotingSystemClient.call(operationVS);

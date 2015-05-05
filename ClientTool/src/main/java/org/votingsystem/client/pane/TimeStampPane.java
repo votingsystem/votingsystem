@@ -132,7 +132,7 @@ public class TimeStampPane extends GridPane {
         HBox buttonsHBox = new HBox();
         Button certValidationButton = new Button(ContextVS.getMessage("validateLbl"));
         certValidationButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
-        certValidationButton.setOnAction(actionEvent -> TimeStampCertValidationPane.showDialog(timeStampToken));
+        certValidationButton.setOnAction(actionEvent -> validateTimeStamp(timeStampToken));
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
         cancelButton.setOnAction(actionEvent -> TimeStampPane.this.getScene().getWindow().hide());
@@ -140,6 +140,21 @@ public class TimeStampPane extends GridPane {
         setMargin(buttonsHBox, new Insets(20, 20, 0, 20));
         add(buttonsHBox, 0, 6, 2, 1);
     }
+
+    private void validateTimeStamp(TimeStampToken timeStampToken) {
+        try {
+            log.info("Validating timeStampToken with cert: " +
+                    ContextVS.getInstance().getDefaultServer().getTimeStampCert().getSubjectDN().toString());
+            timeStampToken.validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider(
+                    ContextVS.PROVIDER).build(ContextVS.getInstance().getDefaultServer().getTimeStampCert()));
+            showMessage(ResponseVS.SC_OK, ContextVS.getMessage("timeStampCertsValidationOKMsg",
+                    ContextVS.getInstance().getDefaultServer().getTimeStampCert().getSubjectDN().toString()));
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+        }
+    }
+
 
     public static void showDialog(final TimeStampToken timeStampToken) {
         log.info("validateBackup");

@@ -46,7 +46,6 @@ public class TransactionVSBean {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject BalancesBean balancesBean;
     @Inject TransactionVSGroupVSBean transactionVSGroupVSBean;
     @Inject TransactionVSBankVSBean transactionVSBankVSBean;
@@ -73,6 +72,7 @@ public class TransactionVSBean {
     }
 
     public ResultListDto<TransactionVSDto> processTransactionVS(MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         TransactionVSDto request = messageSMIME.getSignedContent(TransactionVSDto.class);
         request.validate();
         request.setTransactionVSSMIME(messageSMIME);
@@ -217,6 +217,7 @@ public class TransactionVSBean {
 
 
     public TransactionVSDto getTransactionDto(TransactionVS transactionVS) {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         TransactionVSDto dto = new TransactionVSDto(transactionVS, config.getContextURL());
         dto.setDescription(getTransactionTypeDescription(transactionVS.getType().toString()));
         if(transactionVS.getType()  == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
@@ -235,6 +236,7 @@ public class TransactionVSBean {
     }
 
     public String getTransactionTypeDescription(String transactionType) {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         String typeDescription;
         switch(transactionType) {
             case "CURRENCY_REQUEST":
