@@ -54,21 +54,11 @@
                             {{ "${msg.adminPageTitle}" | setTitle}}
                         </template>
                         <template if="{{'superuser' === menu}}">
-                            <paper-item data-href="${restURL}/userVS/newBankVS">
+                            <paper-item data-href="${contextURL}/userVS/newBankVS.xhtml">
                                 <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankVSLbl}
-                            </paper-item>
-                            <paper-item data-href="${restURL}/certificateVS/addCertificateAuthority"
-                                        style="margin:0px 10px 0px 0px;">
-                                <i class="fa fa-certificate" style="margin:0px 10px 0px 0px;"></i> ${msg.newCAAuthorityLbl}
                             </paper-item>
                             <paper-item data-href="${restURL}/certificateVS/certs">
                                 <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
-                            </paper-item>
-                            <paper-item data-href="${restURL}/userVS/save">
-                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newUserCertLbl}
-                            </paper-item>
-                            <paper-item id="changeToAdmin" data-href="${restURL}/app/contact" on-click="{{changeToAdminMenu}}">
-                                <i class="fa fa-exchange" style="margin:0px 10px 0px 0px;"></i>${msg.changeToAdminMenuLbl}
                             </paper-item>
                             {{ "${msg.superUserTitle}" | setTitle}}
                         </template>

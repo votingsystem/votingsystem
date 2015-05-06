@@ -1,7 +1,7 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
-                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
+        ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="head">
         <link href="${resourceURL}/paper-input/paper-input.html" rel="import"/>
     </ui:define>
@@ -25,11 +25,13 @@
                 </div>
 
                 <form onsubmit="return submitForm()">
-                    <paper-input id="bankVSIBAN" floatinglabel="" style="width:400px; margin:0px 0px 0px 20px;" label="${msg.IBANLbl}"
-                                 validate="" error="${msg.requiredLbl}" required="">
+                    <paper-input id="bankVSIBAN" floatinglabel="" style="width:400px; margin:0px 0px 0px 20px;"
+                             label="${msg.IBANLbl}" validate="" error="${msg.requiredLbl}" required="">
                     </paper-input>
-                    <div style="position:relative; width:100%;">
-                        <vs-texteditor id="textEditor" type="pc" style="height:300px; width:100%;"></vs-texteditor>
+
+                    <div layout="" vertical="" style="margin:15px 0px 0px 0px;">
+                        <label>${msg.descriptionLbl}</label>
+                        <textarea id="description" rows="8" required=""></textarea>
                     </div>
 
                     <div layout="" vertical="" style="margin:15px 0px 0px 0px;">
@@ -39,12 +41,11 @@
 
                     <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
                         <div style="position:absolute; right:0;">
-                            <button class="btn btn-default" style="margin:10px 0px 0px 10px;display:{{(isPending || isCancelled ) ? 'none':'block'}} ">
+                            <button class="btn btn-default" style="margin:10px 0px 0px 10px;">
                                 ${msg.newBankVSLbl} <i class="fa fa fa-check"></i>
                             </button>
                         </div>
                     </div>
-
                 </form>
             </div>
         </div>
@@ -53,7 +54,6 @@
 
             function submitForm() {
                 try {
-                    var textEditor = document.querySelector('#textEditor')
                     if(document.querySelector('#bankVSIBAN').invalid) {
                         showMessageVS('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
                         return false
@@ -62,16 +62,16 @@
                         showMessageVS('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
                         return false
                     }
-                    if(textEditor.getData() == 0) {
-                        textEditor.classList.add("formFieldError");
-                        showMessageVS('${msg.emptyDocumentERRORMsg}', '${msg.dataFormERRORLbl}')
+                    if(!document.querySelector('#description').validity.valid) {
+                        showMessageVS('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
                         return false
                     }
                     var operationVS = new OperationVS(Operation.BANKVS_NEW)
                     operationVS.serviceURL = "${restURL}/userVS/newBankVS"
                     operationVS.signedMessageSubject = "${msg.newBankVSMsgSubject}"
-                    operationVS.jsonStr = JSON.stringify({info:textEditor.getData(),certChainPEM:document.querySelector("#pemCert").value,
-                        iban:document.querySelector("#bankVSIBAN").value, operation:Operation.BANKVS_NEW})
+                    operationVS.jsonStr = JSON.stringify({info:document.querySelector("#description").value,
+                            certChainPEM:document.querySelector("#pemCert").value,
+                            iban:document.querySelector("#bankVSIBAN").value, operation:Operation.BANKVS_NEW})
                     operationVS.setCallback(function(appMessage) {
                         console.log("newBankVSCallback - message: " + appMessage);
                         appMessageJSON = toJSON(appMessage)
@@ -94,13 +94,18 @@
                 }
             }
 
-            document.querySelector("#coreSignals").addEventListener('core-signal-messagedialog-closed', function(e) {
-                if(appMessageJSON != null) {
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        window.location.href = updateMenuLink(appMessageJSON.URL)
+            function listenToNewBankResult() {
+                document.querySelector("#coreSignals").addEventListener('core-signal-messagedialog-closed', function(e) {
+                    if(appMessageJSON != null) {
+                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                            window.location.href = updateMenuLink(appMessageJSON.URL)
+                        }
                     }
-                }
-            });
+                });
+            }
+
+            if(document.querySelector("#coreSignals") != null) listenToNewBankResult()
+            else document.addEventListener('polymer-ready', function() { listenToNewBankResult() })
 
         </script>
     </ui:define>

@@ -29,7 +29,7 @@
                 box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
             }
         </style>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
+        <core-ajax id="ajax" url="{{url}}" response="{{resultListDto}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
         <core-signals on-core-signal-votingsystem-cert-closed="{{closeCertDetails}}"></core-signals>
         <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all">
@@ -45,10 +45,10 @@
                         </select>
                     </div>
 
-                    <h3><div id="pageHeader" class="pageHeader text-center">${msg.trustedCertsPageTitle}</div></h3>
+                    <h3><div id="pageHeader" class="pageHeader text-center">{{pageHeader}}</div></h3>
 
                     <div flex horizontal wrap around-justified layout>
-                        <template repeat="{{cert in responseData.certList}}">
+                        <template repeat="{{cert in resultListDto.resultList}}">
                             <div class="certDiv" style="" on-tap="{{showCert}}">
                                 <div>
                                     <div style="display: inline;">
@@ -86,15 +86,10 @@
     </template>
     <script>
         Polymer('cert-list', {
+            publish: { resultListDto: {}},
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.page = 0;
-                var certType = getURLParam('type')
-                var certState = getURLParam('state')
-                var optionValue = "&type=" + ((certType == "")? "USER":certType) + "&state=" + ((certState == "")?"OK":certState)
-                if(this.url != null) {
-                    this.url = updateMenuLink("${restURL}/certificateVS/certs", optionValue)
-                }
             },
             closeCertDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeCertDetails")
@@ -105,19 +100,16 @@
                 this.$.certDetails.certvs = e.target.templateInstance.model.cert;
                 this.page = 1;
             },
-            responseDataChanged:function() {
-                console.log(this.tagName + " - responseDataChanged")
-                if("${CertificateVS.Type.USER.toString()}" == this.responseData.type) {
-                     this.$.pageHeader.innerHTML = "${msg.userCertsPageTitle}"
-                } else if("${CertificateVS.Type.CERTIFICATE_AUTHORITY.toString()}" == this.responseData.type) {
-                    this.$.pageHeader.innerHTML = "${msg.trustedCertsPageTitle}"
-                } else this.$.pageHeader.innerHTML = this.responseData.type
-
-
+            resultListDtoChanged:function() {
+                if(this.resultListDto == null) return
                 var certType = getURLParam('type')
                 var certState = getURLParam('state')
-                var optionValue = "&type=" + ((certType == "")? "USER":certType) + "&state=" + ((certState == "")?"OK":certState)
-                this.setPageHeader(optionValue)
+                console.log(this.tagName + " - resultListDtoChanged - certType: " + certType + " - certState: " + certState)
+                if("CERTIFICATE_AUTHORITY" == certType) {
+                    this.pageHeader = "${msg.trustedCertsPageTitle}"
+                } else {
+                    this.pageHeader = "${msg.userCertsPageTitle}"
+                }
             },
             getState:function(state){
                 var stateLbl
@@ -125,19 +117,14 @@
                 else if("CANCELED" ==  state) stateLbl = "${msg.certCancelledLbl}"
                 else stateLbl = state
             },
-            setPageHeader: function (urlParams) {
-                if(urlParams.indexOf("${CertificateVS.Type.USER}") > -1)
-                    this.$.pageHeader.innerHTML = "${msg.userCertsPageTitle}"
-                else this.$.pageHeader.innerHTML = "${msg.trustedCertsPageTitle}"
-            },
             certTypeSelect: function () {
                 var optionSelected = this.$.certTypeSelect.value
-                console.log("certTypeSelect: " + optionSelected)
                 if("" != optionSelected) {
                     targetURL = "${restURL}/certificateVS/certs?menu=" + menuType + optionSelected
                     history.pushState(null, null, targetURL);
-                    this.setPageHeader(targetURL)
                     this.$.ajax.url = targetURL
+                    console.log("certTypeSelect - targetURL: " + targetURL)
+                    this.$.ajax.go()
                 }
             }
         });

@@ -340,13 +340,6 @@ public class UserVSResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
-    @Path("/save") @GET
-    public Object saveForm(@Context ServletContext context, @Context HttpServletRequest req,
-                           @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/userVS/newUser.xhtml").forward(req, resp);
-        return Response.ok().build();
-    }
-
     @Path("/save")
     @POST @Produces(MediaType.APPLICATION_JSON)
     public Response save(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {

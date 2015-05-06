@@ -7,8 +7,8 @@
     </ui:define>
     <ui:define name="content">
         <vs-innerpage-signal caption="${msg.certsPageTitle}"></vs-innerpage-signal>
-        <div class="pageContentDiv">
-            <cert-list id="certList" url="${restURL}/certificateVS/certs"></cert-list>
+        <div class="pageContentDiv" style="width: 100%;">
+            <cert-list resultListDto='${resultListDto}'></cert-list>
         </div>
     </ui:define>
 </ui:composition>

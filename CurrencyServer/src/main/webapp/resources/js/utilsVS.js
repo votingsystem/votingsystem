@@ -394,7 +394,7 @@ VotingSystemClient.call = function (messageJSON) {
         var b64_to_utf8 = decodeURIComponent(escape(window.atob(resultBase64)))
         return b64_to_utf8
     } catch(e) {
-        console.log(e)
+        console.log("clientTool not found")
     }
 }
 

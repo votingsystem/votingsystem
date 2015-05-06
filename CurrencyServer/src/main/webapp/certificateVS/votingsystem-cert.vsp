@@ -8,7 +8,6 @@
 <polymer-element name="votingsystem-cert" attributes="url cert subpage">
     <template>
         <style no-shim>
-        .view { :host {position: relative;} }
         .pageWidth {width: 600px;}
         .certDiv {
             background-color: #fefefe;

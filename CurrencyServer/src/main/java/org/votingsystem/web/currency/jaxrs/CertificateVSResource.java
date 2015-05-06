@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import org.votingsystem.dto.CertificateVSDto;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
@@ -18,6 +19,7 @@ import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -77,14 +79,6 @@ public class CertificateVSResource {
         }
     }
 
-    @Path("/addCertificateAuthority")
-    @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response addCertificateAuthority(MessageSMIME messageSMIME, @Context HttpServletRequest req,
-            @Context HttpServletResponse resp) throws Exception {
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(certificateVSBean.addCertificateAuthority(messageSMIME)))
-                .type(MediaTypeVS.JSON).build();
-    }
-
     @Path("/editCert")
     @POST @Produces(MediaType.APPLICATION_JSON)
     public Response editCert(MessageSMIME messageSMIME, @Context HttpServletRequest req,
@@ -93,9 +87,10 @@ public class CertificateVSResource {
         return Response.ok().entity("editCert - certificateVS id: " + certificateVS.getId()).build();
     }
 
+    @Transactional
     @Path("/certs")
-    @GET @Consumes(MediaType.TEXT_PLAIN) @Produces(MediaType.APPLICATION_JSON)
-    public Object certs(@DefaultValue("USER") @QueryParam("type") String typeStr,
+    @GET @Produces(MediaType.APPLICATION_JSON)
+    public Response certs(@DefaultValue("USER") @QueryParam("type") String typeStr,
             @DefaultValue("OK") @QueryParam("state") String stateStr,
             @DefaultValue("") @QueryParam("format") String format, @QueryParam("searchText") String searchText,
             @Context ServletContext context,
@@ -103,45 +98,37 @@ public class CertificateVSResource {
         String contentType = req.getContentType() != null ? req.getContentType(): "";
         CertificateVS.Type type = CertificateVS.Type.valueOf(typeStr);
         CertificateVS.State state = CertificateVS.State.valueOf(stateStr);
-        if(contentType.contains("pem") || contentType.contains("json") || "pem".equals(format)) {
-            Query query;
-            if(searchText != null) {
-                query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type and c.state =:state")
-                        .setParameter("type", type).setParameter("state", state);
-            } else {
-                query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type and c.state =:state " +
-                        "and (c.userVS.name like :searchText or c.userVS.nif like :searchText " +
-                        "or c.userVS.firstName like :searchText or c.userVS.lastName like :searchText " +
-                        "or c.userVS.description like :searchText)").setParameter("type", type)
-                        .setParameter("state", state).setParameter("searchText", "%" + searchText + "%");
-
-            }
-            List<CertificateVS> certificates = query.getResultList();
-            if(certificates.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
-            List resultList = new ArrayList<>();
-            if(req.getContentType() != null && req.getContentType().contains("json")) {
-                for(CertificateVS certificateVS : certificates) {
-                    resultList.add(new CertificateVSDto(certificateVS));
-                }
-                Map resultMap = new HashMap<>();
-                resultMap.put("certList", resultList);
-                resultMap.put("type", type.toString());
-                resultMap.put("state", state.toString());
-                resultMap.put("totalCount", resultList.size());
-                return resultMap;
-            } else {
-                for(CertificateVS certificateVS : certificates) {
-                    resultList.add(certificateVS.getX509Cert());
-                }
-                return Response.ok().entity(CertUtils.getPEMEncoded (resultList)).build();
-            }
+        Query query;
+        if(searchText == null) {
+            query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type and c.state =:state")
+                    .setParameter("type", type).setParameter("state", state);
         } else {
-            Map resultMap = new HashMap<>();
-            resultMap.put("type", type.toString());
-            resultMap.put("state", state.toString());
-            req.setAttribute("certsMap", resultMap);
-            context.getRequestDispatcher("/certificateVS/certs.xhtml").forward(req, resp);
-            return Response.ok().build();
+            query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type and c.state =:state " +
+                    "and (c.userVS.name like :searchText or c.userVS.nif like :searchText " +
+                    "or c.userVS.firstName like :searchText or c.userVS.lastName like :searchText " +
+                    "or c.userVS.description like :searchText)").setParameter("type", type)
+                    .setParameter("state", state).setParameter("searchText", "%" + searchText + "%");
+        }
+        List<CertificateVS> certificates = query.getResultList();
+        if(contentType.contains("pem")) {
+            List<X509Certificate> resultList = new ArrayList<>();
+            for(CertificateVS certificateVS : certificates) {
+                resultList.add(certificateVS.getX509Cert());
+            }
+            return Response.ok().entity(CertUtils.getPEMEncoded(resultList)).build();
+        } else {
+            List<CertificateVSDto> listDto = new ArrayList<>();
+            for(CertificateVS certificateVS : certificates) {
+                listDto.add(new CertificateVSDto(certificateVS));
+            }
+            ResultListDto<CertificateVSDto> resultListDto = new ResultListDto<>(listDto);
+            if(contentType.contains("json")) {
+                return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
+            } else {
+                req.setAttribute("resultListDto", JSON.getMapper().writeValueAsString(resultListDto));
+                context.getRequestDispatcher("/certificateVS/certs.xhtml").forward(req, resp);
+                return Response.ok().build();
+            }
         }
     }
 
