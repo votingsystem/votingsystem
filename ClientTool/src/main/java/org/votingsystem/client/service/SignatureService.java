@@ -17,6 +17,7 @@ import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
+import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
@@ -47,7 +48,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.votingsystem.util.ContextVS.*;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class SignatureService extends Service<ResponseVS> {
 
@@ -135,6 +136,10 @@ public class SignatureService extends Service<ResponseVS> {
                             break;
                         case NEW_REPRESENTATIVE:
                             responseVS = sendRepresentativeData(operationVS);
+                            break;
+                        case CURRENCY_GROUP_EDIT:
+                        case CURRENCY_GROUP_NEW:
+                            responseVS = sendGroupVSData(operationVS);
                             break;
                         case ANONYMOUS_REPRESENTATIVE_SELECTION:
                             responseVS = processAnonymousRepresentativeSelection(operationVS);
@@ -436,6 +441,18 @@ public class SignatureService extends Service<ResponseVS> {
                         .getRepresentativeByNifServiceURL(representativeDto.getNIF());
                 Browser.getInstance().openVotingSystemURL(representativeURL, null);
                 responseVS.setMessage(ContextVS.getMessage("representativeDataSendOKMsg"));
+            }
+            return responseVS;
+        }
+
+        //we know this is done in a background thread
+        private ResponseVS sendGroupVSData(OperationVS operationVS) throws Exception {
+            ResponseVS responseVS = sendSMIME(operationVS.getJsonStr(), operationVS);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                GroupVSDto dto = (GroupVSDto) responseVS.getMessage(GroupVSDto.class);
+                String groupVSURL =  ContextVS.getInstance().getCurrencyServer().getGroupURL(dto.getId());
+                Browser.getInstance().openCurrencyURL(groupVSURL, null);
+                responseVS.setMessage(ContextVS.getMessage("groupVSDataSendOKMsg"));
             }
             return responseVS;
         }

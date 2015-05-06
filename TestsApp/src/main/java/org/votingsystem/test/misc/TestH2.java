@@ -6,7 +6,7 @@ import org.votingsystem.util.ContextVS;
 import java.util.logging.Logger;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class TestH2 {
 

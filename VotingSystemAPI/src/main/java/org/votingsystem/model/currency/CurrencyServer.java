@@ -70,7 +70,7 @@ public class CurrencyServer extends ActorVS implements Serializable {
     }
 
     public String getSaveGroupVSServiceURL() {
-        return getServerURL() + "/rest/groupVS/newGroup";
+        return getServerURL() + "/rest/groupVS/saveGroup";
     }
 
     public String getGroupVSSubscriptionServiceURL(Long groupId) {

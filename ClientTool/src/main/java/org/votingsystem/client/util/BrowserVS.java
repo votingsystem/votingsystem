@@ -6,7 +6,7 @@ import org.votingsystem.client.dto.SignalVSDto;
 import org.votingsystem.dto.OperationVS;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public interface BrowserVS {
 

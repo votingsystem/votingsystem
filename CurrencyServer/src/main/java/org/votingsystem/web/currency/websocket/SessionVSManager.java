@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class SessionVSManager {
 

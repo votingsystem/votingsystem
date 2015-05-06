@@ -3,7 +3,7 @@ package org.votingsystem.client.backup;
 import org.votingsystem.model.ResponseVS;
 
 /**
-* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+* License: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 public interface ValidatorListener<T> {
     

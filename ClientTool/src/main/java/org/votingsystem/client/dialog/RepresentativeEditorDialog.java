@@ -12,7 +12,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.HTMLEditor;
 import javafx.stage.FileChooser;
-import javafx.stage.Window;
 import org.votingsystem.client.Browser;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.UserVSDto;
@@ -32,11 +31,11 @@ import java.util.logging.Logger;
 import static org.votingsystem.client.Browser.showMessage;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class PublishRepresentativeDialog extends DialogVS {
+public class RepresentativeEditorDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(PublishRepresentativeDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(RepresentativeEditorDialog.class.getSimpleName());
 
     private OperationVS operationVS;
     @FXML private Label adviceLbl;
@@ -46,7 +45,7 @@ public class PublishRepresentativeDialog extends DialogVS {
     @FXML private VBox optionsVBox;
     @FXML private ImageView imageView;
     private File representativeImage;
-    private static PublishRepresentativeDialog INSTANCE;
+    private static RepresentativeEditorDialog INSTANCE;
 
     static class OperationVSListener {
         @Subscribe
@@ -57,7 +56,7 @@ public class PublishRepresentativeDialog extends DialogVS {
                         OperationVS operationVS = (OperationVS) responseVS.getData();
                         if((operationVS.getType() == TypeVS.EDIT_REPRESENTATIVE ||
                                 operationVS.getType() == TypeVS.NEW_REPRESENTATIVE) && operationVS != null) {
-                            show(operationVS, null);
+                            show(operationVS);
                             INSTANCE.refreshImage();
                         }
                     }
@@ -66,8 +65,8 @@ public class PublishRepresentativeDialog extends DialogVS {
         }
     }
 
-    public PublishRepresentativeDialog(String caption) throws IOException {
-        super("/fxml/RepresentativeEditor.fxml", caption);
+    public RepresentativeEditorDialog() throws IOException {
+        super("/fxml/RepresentativeEditor.fxml");
     }
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
@@ -177,20 +176,11 @@ public class PublishRepresentativeDialog extends DialogVS {
         });
     }
 
-    public static void show(OperationVS operationVS, Window owner) {
+    public static void show(OperationVS operationVS) {
         Platform.runLater(() -> {
             try {
-                String caption = null;
-                switch (operationVS.getType()) {
-                    case NEW_REPRESENTATIVE:
-                        caption = ContextVS.getMessage("publishRepresentativeLbl");
-                        break;
-                    case EDIT_REPRESENTATIVE:
-                        caption = ContextVS.getMessage("editRepresentativeLbl");
-                        break;
-                }
                 if(INSTANCE == null) {
-                    INSTANCE =  new PublishRepresentativeDialog(caption);
+                    INSTANCE =  new RepresentativeEditorDialog();
                     EventBusService.getInstance().register(new OperationVSListener());
                 }
                 INSTANCE.loadOperationData(operationVS);

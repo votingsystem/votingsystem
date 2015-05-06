@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 import static org.votingsystem.client.Browser.showMessage;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.Listener {
 

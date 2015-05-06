@@ -65,13 +65,21 @@ public class GroupVSBean {
         if(request.getId().longValue() != groupVS.getId().longValue()) {
             throw new ExceptionVS("group id error - expected: " + groupVS.getId() + " - found: " + request.getId());
         }
-        dao.merge(groupVS.setDescription(request.getInfo()));
+        dao.merge(groupVS.setDescription(request.getDescription()));
         return groupVS;
     }
 
     public GroupVS saveGroup(MessageSMIME messageSMIME) throws Exception {
         UserVS signer = messageSMIME.getUserVS();
-        GroupVSDto request = validateNewGroupRequest(messageSMIME.getSignedContent(GroupVSDto.class)) ;
+        GroupVSDto request = messageSMIME.getSignedContent(GroupVSDto.class);
+        if (TypeVS.CURRENCY_GROUP_EDIT == request.getOperation()) {
+            GroupVS groupVS = dao.find(GroupVS.class, request.getId());
+            if(groupVS == null) throw new ValidationExceptionVS("ERROR - GroupVS not found - id: " + request.getId());
+            return editGroup(groupVS, messageSMIME);
+        } else if(TypeVS.CURRENCY_GROUP_NEW == request.getOperation()) {
+            validateNewGroupRequest(request);
+        } else throw new ValidationExceptionVS("ERROR - operation expected CURRENCY_GROUP_EDIT, CURRENCY_GROUP_NEW - " +
+                "found: " + request.getOperation());
         Query query = dao.getEM().createQuery("SELECT u FROM UserVS u WHERE u.name =:name")
                 .setParameter("name", request.getName().trim());
         GroupVS groupVS = dao.getSingleResult(GroupVS.class, query);
@@ -80,7 +88,7 @@ public class GroupVSBean {
         }
         currencyAccountBean.checkUserVSAccount(signer);
         groupVS = dao.persist(new GroupVS(request.getName().trim(), UserVS.State.ACTIVE, signer,
-                request.getInfo(), request.getTags()));
+                request.getDescription(), request.getTags()));
         config.createIBAN(groupVS);
         String fromUser = config.getServerName();
         String toUser = signer.getNif();
@@ -96,9 +104,10 @@ public class GroupVSBean {
         if(groupVSDto.getTags() != null) {
             Set<TagVS> resultTagVSSet = new HashSet<>();
             for(TagVS tagVS: groupVSDto.getTags()) {
-                TagVS tagVSDB = config.getTag(tagVS.getName());
-                if(tagVSDB != null) resultTagVSSet.add(tagVSDB);
-                else throw new ValidationExceptionVS(tagVS.getName() + " not found");
+                Query query = dao.getEM().createNamedQuery("findTagByName").setParameter("name", tagVS.getName().toLowerCase());
+                TagVS tagVSDB = dao.getSingleResult(TagVS.class, query);
+                if(tagVSDB == null) tagVSDB = dao.persist(new TagVS(tagVS.getName().toLowerCase()));
+                resultTagVSSet.add(tagVSDB);
             }
             groupVSDto.setTags(resultTagVSSet);
         }

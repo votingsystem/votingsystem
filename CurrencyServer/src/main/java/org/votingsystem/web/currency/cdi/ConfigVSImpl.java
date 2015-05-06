@@ -132,7 +132,7 @@ public class ConfigVSImpl implements ConfigVS {
                 URL res = res = Thread.currentThread().getContextClassLoader().getResource("defaultTags.txt");
                 String[] defaultTags = FileUtils.getStringFromInputStream(res.openStream()).split(",");
                 for(String tag: defaultTags) {
-                    TagVS newTagVS =  dao.persist(new TagVS(tag));
+                    TagVS newTagVS =  dao.persist(new TagVS(tag.toLowerCase()));
                     dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO,
                             java.util.Currency.getInstance("EUR").getCurrencyCode(), newTagVS));
                 }

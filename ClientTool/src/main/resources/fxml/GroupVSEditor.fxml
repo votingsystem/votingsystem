@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.web.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="725.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label fx:id="adviceLbl" text="Label" textFill="#888888">
+         <VBox.margin>
+            <Insets bottom="15.0" left="20.0" right="20.0" top="10.0" />
+         </VBox.margin>
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <HBox prefHeight="29.0" prefWidth="580.0">
+         <children>
+            <TextField fx:id="caption" prefHeight="25.0" HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
+      <HTMLEditor fx:id="editor" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="334.0" prefWidth="705.0" />
+      <HBox alignment="CENTER" prefWidth="200.0">
+         <children>
+            <Button fx:id="addTagVSButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" text="addTagVSButton">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin></Button>
+            <Button fx:id="tagVSButton" mnemonicParsing="false" text="tagVSButton">
+               <HBox.margin>
+                  <Insets left="50.0" />
+               </HBox.margin>
+            </Button>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="publishButton" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" text="Button">
+               <HBox.margin>
+                  <Insets right="10.0" />
+               </HBox.margin></Button>
+         </children>
+         <VBox.margin>
+            <Insets top="10.0" />
+         </VBox.margin>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="15.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>

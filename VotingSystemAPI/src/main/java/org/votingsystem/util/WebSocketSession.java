@@ -4,7 +4,7 @@ import org.votingsystem.model.DeviceVS;
 import org.votingsystem.signature.util.AESParams;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class WebSocketSession<T> {
 

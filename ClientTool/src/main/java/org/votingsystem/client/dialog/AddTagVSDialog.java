@@ -5,12 +5,15 @@ import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 
 import java.util.logging.Level;
@@ -19,36 +22,40 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class AddVoteOptionDialog extends DialogVS {
+public class AddTagVSDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(AddVoteOptionDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(AddTagVSDialog.class.getSimpleName());
 
     public interface Listener {
-        public void addOption(String optionContent);
+        public void addTagVS(String tagName);
     }
 
     private VBox mainPane;
-    private TextArea textArea;
+    private TextField textField;
     private Listener listener;
     private Label messageLabel;
-    private static AddVoteOptionDialog dialog;
+    private static AddTagVSDialog dialog;
 
-    public AddVoteOptionDialog() {
+    public AddTagVSDialog() {
         super(new VBox(10));
         mainPane = (VBox) ((DecoratedPane) getParent()).getContentPane();
         messageLabel = new Label();
         messageLabel.setWrapText(true);
-        textArea = new TextArea();
-        textArea.setPrefHeight(100);
-        textArea.setPrefWidth(400);
-        HBox.setHgrow(textArea, Priority.ALWAYS);
-        VBox.setVgrow(textArea, Priority.ALWAYS);
-        textArea.setStyle("-fx-word-wrap:break-word;");
-
+        textField = new TextField();
+        HBox.setHgrow(textField, Priority.ALWAYS);
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(actionEvent -> {
-            listener.addOption(textArea.getText());
+            if ("".equals(textField.getText().trim())) {
+                Browser.getInstance().showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterSubjectLbl"));
+                return;
+            }
+            listener.addTagVS(textField.getText());
             hide();
+        });
+        textField.setOnKeyPressed(ke -> {
+            if (ke.getCode().equals(KeyCode.ENTER)) {
+                acceptButton.fire();
+            }
         });
         acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
@@ -58,7 +65,7 @@ public class AddVoteOptionDialog extends DialogVS {
         HBox footerButtonsBox = new HBox(10);
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);
 
-        mainPane.getChildren().addAll(messageLabel, textArea, footerButtonsBox);
+        mainPane.getChildren().addAll(messageLabel, textField, footerButtonsBox);
         mainPane.getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         mainPane.getStyleClass().add("modal-dialog");
     }
@@ -66,15 +73,15 @@ public class AddVoteOptionDialog extends DialogVS {
     public void showMessage(String title, Listener listener) throws JsonProcessingException {
         this.listener = listener;
         messageLabel.setText(title);
-        textArea.setText("");
+        textField.setText("");
         show();
     }
 
-    public static void show(Listener listener) {
+    public static void show(String message, Listener listener) {
         PlatformImpl.runLater(() -> {
             try {
-                if(dialog == null) dialog = new AddVoteOptionDialog();
-                dialog.showMessage(ContextVS.getMessage("enterVoteOptionMsg"), listener);
+                if(dialog == null) dialog = new AddTagVSDialog();
+                dialog.showMessage(message, listener);
             } catch (JsonProcessingException ex) {
                log.log(Level.SEVERE, ex.getMessage(), ex);
             }

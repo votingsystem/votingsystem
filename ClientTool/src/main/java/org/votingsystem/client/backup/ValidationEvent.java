@@ -1,7 +1,7 @@
 package org.votingsystem.client.backup;
 
 /**
-* Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+* License: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 public enum ValidationEvent {
         REPRESENTATIVE, REPRESENTATIVE_FINISH, 

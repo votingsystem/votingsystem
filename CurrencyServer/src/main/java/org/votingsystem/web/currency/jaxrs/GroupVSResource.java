@@ -227,41 +227,13 @@ public class GroupVSResource {
         }
     }
 
-    @Path("/newGroup")
+    @Path("/saveGroup")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Object search(MessageSMIME messageSMIME,  @Context ServletContext context,
+    public Object saveGroup(MessageSMIME messageSMIME,  @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         GroupVS groupVS = groupVSBean.saveGroup(messageSMIME);
-        String URL = config.getRestURL() + "/groupVS/id/" + groupVS.getId();
-        String message =  messages.get("newCurrencyGroupOKMsg", groupVS.getName());
-        MessageDto messageDto = new MessageDto(ResponseVS.SC_OK, message, URL);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build();
-    }
-
-    @Path("/id/{id}/edit")//old_url -> /groupVS/edit/$id
-    @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response edit(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
-                       @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        GroupVS groupVS = dao.find(GroupVS.class, id);
-        if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "GroupVS not found - groupId: " + id).build();
-        groupVS = groupVSBean.editGroup(groupVS, messageSMIME);
-        String URL = config.getRestURL() + "/groupVS/id/" + groupVS.getId();
-        String message =  messages.get("currencyGroupEditedOKMsg", groupVS.getName());
-        MessageDto messageDto = new MessageDto(ResponseVS.SC_OK, message, URL);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build();
-    }
-
-    @Path("/id/{id}/edit") @GET //old_url -> /groupVS/edit/$id
-    public Object editForm(Map requestMap, @PathParam("id") long id, @Context ServletContext context,
-            @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        GroupVS groupVS = dao.find(GroupVS.class, id);
-        if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "GroupVS not found - groupId: " + id).build();
-        GroupVSDto groupVSDto = groupVSBean.getGroupVSDto(groupVS);
-        req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(groupVSDto));
-        context.getRequestDispatcher("/groupVS/edit.xhtml").forward(req, resp);
-        return Response.ok().build();
+        GroupVSDto dto = GroupVSDto.DETAILS(groupVS, null);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/id/{id}/cancel")
@@ -313,27 +285,23 @@ public class GroupVSResource {
 
     @Path("/activateUser")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Object activateUser(MessageSMIME messageSMIME, @Context ServletContext context,
+    public Response activateUser(MessageSMIME messageSMIME, @Context ServletContext context,
                             @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         SubscriptionVS subscriptionVS = subscriptionVSBean.activateUser(messageSMIME);
         currencyAccountBean.checkUserVSAccount(subscriptionVS.getUserVS());
-        Map resultMap = new HashMap<>();
-        resultMap.put("statusCode", ResponseVS.SC_OK);
-        resultMap.put("message", messages.get("currencyGroupUserActivatedMsg", subscriptionVS.getUserVS().getNif(),
-                subscriptionVS.getGroupVS().getName()));
-        return resultMap;
+        MessageDto dto = MessageDto.OK(messages.get("currencyGroupUserActivatedMsg", subscriptionVS.getUserVS().getNif(),
+                subscriptionVS.getGroupVS().getName()), null);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/deActivateUser")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Object deActivateUser(MessageSMIME messageSMIME, @Context ServletContext context,
+    public Response deActivateUser(MessageSMIME messageSMIME, @Context ServletContext context,
                                @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         SubscriptionVS subscriptionVS = subscriptionVSBean.deActivateUser(messageSMIME);
-        Map resultMap = new HashMap<>();
-        resultMap.put("statusCode", ResponseVS.SC_OK);
-        resultMap.put("message", messages.get("currencyGroupUserdeActivatedMsg", subscriptionVS.getUserVS().getNif(),
-                subscriptionVS.getGroupVS().getName()));
-        return resultMap;
+        MessageDto dto = MessageDto.OK(messages.get("currencyGroupUserdeActivatedMsg", subscriptionVS.getUserVS().getNif(),
+                subscriptionVS.getGroupVS().getName()), null);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
     }
 
 }

@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 import static java.text.MessageFormat.format;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class FetchX509Cert {
 

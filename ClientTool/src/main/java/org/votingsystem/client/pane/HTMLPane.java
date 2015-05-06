@@ -10,7 +10,7 @@ import java.io.File;
 import java.util.logging.Logger;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class HTMLPane extends VBox{
 

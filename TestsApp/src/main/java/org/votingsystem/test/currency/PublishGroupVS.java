@@ -9,6 +9,7 @@ import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.*;
 
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.UUID;
@@ -23,7 +24,8 @@ public class PublishGroupVS {
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         GroupVSDto groupVSDto = new GroupVSDto();
-        groupVSDto.setInfo("GroupVS From TESTS Description - " + DateUtils.getDayWeekDateStr(new Date()));
+        String description = "GroupVS From TESTS Description - " + DateUtils.getDayWeekDateStr(new Date());
+        groupVSDto.setDescription(Base64.getEncoder().encodeToString(description.getBytes()));
         groupVSDto.setTags(new HashSet<>());
         groupVSDto.setName("GroupVS From TESTS - " + DateUtils.getDayWeekDateStr(new Date()));
         groupVSDto.setOperation(TypeVS.CURRENCY_GROUP_NEW);

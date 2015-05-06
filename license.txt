@@ -1,4 +1,4 @@
-Todo el trabajo de este repositorio esta sujeto a la licencia:
+Todo el trabajo de este repositorio esta sujeto a la License:
  
 Copyright 2011 Jose. J. García Zornoza
 

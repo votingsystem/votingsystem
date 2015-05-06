@@ -1,7 +1,5 @@
 package org.votingsystem.client.util;
 
-import com.sun.javafx.application.PlatformImpl;
-import javafx.application.HostServices;
 import javafx.scene.web.WebView;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
@@ -20,9 +18,6 @@ import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.*;
 import org.votingsystem.util.currency.Wallet;
 
-import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,7 +26,7 @@ import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * JavaScript interface object
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class BrowserVSClient {
 
@@ -100,11 +95,15 @@ public class BrowserVSClient {
                     WalletPane.showDialog(Browser.getInstance().getScene().getWindow());
                     break;
                 case VOTING_PUBLISHING:
-                    PublishElectionDialog.show(operationVS, Browser.getInstance().getScene().getWindow());
+                    ElectionEditorDialog.show(operationVS, Browser.getInstance().getScene().getWindow());
                     break;
                 case NEW_REPRESENTATIVE:
                 case EDIT_REPRESENTATIVE:
-                    PublishRepresentativeDialog.show(operationVS, Browser.getInstance().getScene().getWindow());
+                    RepresentativeEditorDialog.show(operationVS);
+                    break;
+                case CURRENCY_GROUP_NEW:
+                case CURRENCY_GROUP_EDIT:
+                    GroupVSEditorDialog.show(operationVS);
                     break;
                 case MAIL_TO:
                     VotingSystemApp.getInstance().getHostServices().showDocument(

@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class TransactionVSFromAmountCollector implements Collector<TransactionVS, BigDecimal[], BigDecimal> {
 

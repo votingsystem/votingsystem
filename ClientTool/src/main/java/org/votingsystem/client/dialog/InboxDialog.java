@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class InboxDialog extends DialogVS {
 

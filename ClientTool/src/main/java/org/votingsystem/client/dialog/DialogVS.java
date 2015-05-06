@@ -16,16 +16,20 @@ import org.votingsystem.client.util.Utils;
 import java.io.IOException;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class DialogVS {
 
     private Stage stage;
     private DecoratedPane decoratedPane;
 
+    public DialogVS(String fxmlFilePath) throws IOException {
+        this(fxmlFilePath, StageStyle.TRANSPARENT);
+    }
+
     public DialogVS(String fxmlFilePath, String caption) throws IOException {
         this(fxmlFilePath, StageStyle.TRANSPARENT);
-        if(caption != null) setCaption(caption);
+        setCaption(caption);
     }
 
     public DialogVS(String fxmlFilePath, StageStyle stageStyle) throws IOException {

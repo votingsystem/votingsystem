@@ -116,7 +116,7 @@
             </div>
         </div>
         <div class="eventContentDiv" style="">
-            <vs-html-echo html="{{groupvs.description}}"></vs-html-echo>
+            <vs-html-echo html="{{decodeBase64(groupvs.description)}}"></vs-html-echo>
         </div>
 
         <div layout horizontal>
@@ -154,17 +154,20 @@
 </template>
 <script>
     Polymer('groupvs-details', {
-        isSelected: false,
-        subpage:false,
         publish: { groupvs: {} },
-        isClientToolConnected:false,
         ready : function() {
             console.log(this.tagName + " - ready - subpage: " + this.subpage)
+            this.isSelected = false
+            this.subpage = false
             //this.isClientToolConnected = window['isClientToolConnected']
             this.isClientToolConnected = true
             this.$.transactionvsForm.addEventListener('operation-finished', function (e) {
                 this.page = 0;
             }.bind(this))
+        },
+        decodeBase64:function(base64EncodedString) {
+            if(base64EncodedString == null) return null
+            return decodeURIComponent(escape(window.atob(base64EncodedString)))
         },
         makeTransactionVS:function() {
             console.log(this.tagName + " - makeTransactionVS")
@@ -258,8 +261,9 @@
                 showMessageVS("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name),
                         "${msg.confirmOperationMsg}", 'cancel_group', true)
             } else if('editDataItem' == e.detail.item.id) {
-                window.location.href = "${restURL}/groupVS/edit?menu=admin&id=" +
-                        this.groupvs.id
+                var operationVS = new OperationVS(Operation.CURRENCY_GROUP_EDIT)
+                operationVS.message = this.groupvs.id
+                VotingSystemClient.setMessage(operationVS);
             }
             this.$.configGroupCoreMenu.selected = null
         },

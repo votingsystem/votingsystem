@@ -22,7 +22,6 @@ public class GroupVSDto {
 
     private Long id;
     private String name;
-    private String info;
     private TypeVS operation;
     private UserVS.State state;
     private UserVS.Type type;
@@ -88,23 +87,23 @@ public class GroupVSDto {
     public void validateNewGroupRequest() throws ValidationExceptionVS {
         if(TypeVS.CURRENCY_GROUP_NEW != getOperation()) throw new ValidationExceptionVS(
                 "operation expected: 'CURRENCY_GROUP_NEW' - operation found: " + getOperation());
-        if(getName() == null) throw new ValidationExceptionVS("missing param 'groupvsName'");
-        if(getInfo() == null) throw new ValidationExceptionVS("missing param 'groupvsInfo'");
+        if(name == null) throw new ValidationExceptionVS("missing param 'groupvsName'");
+        if(description == null) throw new ValidationExceptionVS("missing param 'groupvsInfo'");
     }
 
     public void validateCancelRequest() throws ValidationExceptionVS {
         if(TypeVS.CURRENCY_GROUP_CANCEL != getOperation()) throw new ValidationExceptionVS(
                 "operation expected: 'CURRENCY_GROUP_CANCEL' - operation found: " + getOperation());
-        if(getName() == null) throw new ValidationExceptionVS("missing param 'name'");
-        if(getId() == null) throw new ValidationExceptionVS("missing param 'id'");
+        if(name == null) throw new ValidationExceptionVS("missing param 'name'");
+        if(id == null) throw new ValidationExceptionVS("missing param 'id'");
     }
 
     public void validateEditRequest() throws ValidationExceptionVS {
         if(TypeVS.CURRENCY_GROUP_NEW != getOperation()) throw new ValidationExceptionVS(
                 "operation expected: 'CURRENCY_GROUP_NEW' - operation found: " + getOperation());
         if(getName() == null) throw new ValidationExceptionVS("missing param 'name'");
-        if(getId() == null) throw new ValidationExceptionVS("missing param 'id'");
-        if(getInfo() == null) throw new ValidationExceptionVS("missing param 'info'");
+        if(id == null) throw new ValidationExceptionVS("missing param 'id'");
+        if(description == null) throw new ValidationExceptionVS("missing param 'info'");
     }
 
     public void validateSubscriptionRequest() throws ValidationExceptionVS {
@@ -120,14 +119,6 @@ public class GroupVSDto {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getInfo() {
-        return info;
-    }
-
-    public void setInfo(String info) {
-        this.info = info;
     }
 
     public UserVS.State getState() {

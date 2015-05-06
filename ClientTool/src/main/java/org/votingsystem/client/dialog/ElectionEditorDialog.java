@@ -38,11 +38,11 @@ import java.util.logging.Logger;
 import static org.votingsystem.client.Browser.showMessage;
 
 /**
- * Licencia: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class PublishElectionDialog  extends DialogVS implements AddVoteOptionDialog.Listener {
+public class ElectionEditorDialog extends DialogVS implements AddVoteOptionDialog.Listener {
 
-    private static Logger log = Logger.getLogger(PublishElectionDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(ElectionEditorDialog.class.getSimpleName());
 
     private OperationVS operationVS;
 
@@ -74,7 +74,7 @@ public class PublishElectionDialog  extends DialogVS implements AddVoteOptionDia
         EventBusService.getInstance().register(new OperationVSListener());
     }
 
-    public PublishElectionDialog(OperationVS operationVS) throws IOException {
+    public ElectionEditorDialog(OperationVS operationVS) throws IOException {
         super("/fxml/PublishVoteEditor.fxml", ContextVS.getMessage("publishElectionLbl"));
         setOperationVS(operationVS);
     }
@@ -160,7 +160,7 @@ public class PublishElectionDialog  extends DialogVS implements AddVoteOptionDia
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 try {
-                    PublishElectionDialog dialog = new PublishElectionDialog(operationVS);
+                    ElectionEditorDialog dialog = new ElectionEditorDialog(operationVS);
                     dialog.show();
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
