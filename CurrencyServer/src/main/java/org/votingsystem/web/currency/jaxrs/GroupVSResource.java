@@ -227,6 +227,7 @@ public class GroupVSResource {
         }
     }
 
+    @Transactional
     @Path("/saveGroup")
     @POST @Produces(MediaType.APPLICATION_JSON)
     public Object saveGroup(MessageSMIME messageSMIME,  @Context ServletContext context,
@@ -236,8 +237,9 @@ public class GroupVSResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
     }
 
+
     @Path("/id/{id}/cancel")
-    @POST
+    @POST @Transactional
     public Response cancel(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         GroupVS groupVS = dao.find(GroupVS.class, id);

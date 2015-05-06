@@ -148,7 +148,7 @@ public class SignatureService extends Service<ResponseVS> {
                             responseVS = processAnonymousRepresentativeSelectionCancelation(operationVS);
                             break;
                         default:
-                            responseVS = sendSMIME(operationVS);
+                            responseVS = sendSMIME(operationVS.updateUUID());
                     }
                     updateProgress(100, 100);
                     return responseVS;
@@ -427,7 +427,6 @@ public class SignatureService extends Service<ResponseVS> {
             SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, operationVS.getReceiverName(),
                     documentToSign, password, operationVS.getSignedMessageSubject());
             updateMessage(operationVS.getSignedMessageSubject());
-            smimeMessage = new MessageTimeStamper(smimeMessage, operationVS.getTargetServer().getTimeStampServiceURL()).call();
             return HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     operationVS.getServiceURL());
         }

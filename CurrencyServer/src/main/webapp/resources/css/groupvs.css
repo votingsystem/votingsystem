@@ -19,17 +19,17 @@
 
 .groupvsMessageCancelled {
     position:absolute;
-    opacity:1.4;
+    opacity:0.4;
     left:20%;
-    top:-60px;
-    font-size: 1.8em;
+    top:-45px;
+    font-size: 1.2em;
     font-weight: bold;
     color:#91140a;
     text-transform:uppercase;
-    transform:rotate(20deg);
-    -ms-transform:rotate(20deg);
-    -webkit-transform:rotate(20deg);
-    -moz-transform: rotate(20deg);
+    transform:rotate(17deg);
+    -ms-transform:rotate(17deg);
+    -webkit-transform:rotate(17deg);
+    -moz-transform: rotate(17deg);
 }
 
 .groupvsDiv {

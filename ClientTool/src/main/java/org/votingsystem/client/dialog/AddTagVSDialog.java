@@ -46,7 +46,7 @@ public class AddTagVSDialog extends DialogVS {
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(actionEvent -> {
             if ("".equals(textField.getText().trim())) {
-                Browser.getInstance().showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterSubjectLbl"));
+                Browser.getInstance().showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("emptyFieldErrorMsg"));
                 return;
             }
             listener.addTagVS(textField.getText());

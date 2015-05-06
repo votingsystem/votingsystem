@@ -56,7 +56,6 @@ public class GroupVSDto {
         result.setRepresentative(representative);
         result.setType(groupVS.getType());
         result.setTags(groupVS.getTagVSSet());
-
         return result;
     }
 
@@ -85,32 +84,32 @@ public class GroupVSDto {
     }
 
     public void validateNewGroupRequest() throws ValidationExceptionVS {
-        if(TypeVS.CURRENCY_GROUP_NEW != getOperation()) throw new ValidationExceptionVS(
-                "operation expected: 'CURRENCY_GROUP_NEW' - operation found: " + getOperation());
+        if(TypeVS.CURRENCY_GROUP_NEW != operation) throw new ValidationExceptionVS(
+                "operation expected: 'CURRENCY_GROUP_NEW' - operation found: " + operation);
         if(name == null) throw new ValidationExceptionVS("missing param 'groupvsName'");
         if(description == null) throw new ValidationExceptionVS("missing param 'groupvsInfo'");
     }
 
     public void validateCancelRequest() throws ValidationExceptionVS {
-        if(TypeVS.CURRENCY_GROUP_CANCEL != getOperation()) throw new ValidationExceptionVS(
-                "operation expected: 'CURRENCY_GROUP_CANCEL' - operation found: " + getOperation());
+        if(TypeVS.CURRENCY_GROUP_CANCEL != operation) throw new ValidationExceptionVS(
+                "operation expected: 'CURRENCY_GROUP_CANCEL' - operation found: " + operation);
         if(name == null) throw new ValidationExceptionVS("missing param 'name'");
         if(id == null) throw new ValidationExceptionVS("missing param 'id'");
     }
 
     public void validateEditRequest() throws ValidationExceptionVS {
-        if(TypeVS.CURRENCY_GROUP_NEW != getOperation()) throw new ValidationExceptionVS(
-                "operation expected: 'CURRENCY_GROUP_NEW' - operation found: " + getOperation());
-        if(getName() == null) throw new ValidationExceptionVS("missing param 'name'");
+        if(TypeVS.CURRENCY_GROUP_EDIT != operation) throw new ValidationExceptionVS(
+                "operation expected: 'CURRENCY_GROUP_EDIT' - operation found: " + operation);
+        if(name == null) throw new ValidationExceptionVS("missing param 'name'");
         if(id == null) throw new ValidationExceptionVS("missing param 'id'");
         if(description == null) throw new ValidationExceptionVS("missing param 'info'");
     }
 
     public void validateSubscriptionRequest() throws ValidationExceptionVS {
-        if(TypeVS.CURRENCY_GROUP_SUBSCRIBE != getOperation()) throw new ValidationExceptionVS(
-                "operation expected: 'CURRENCY_GROUP_SUBSCRIBE' - operation found: " + getOperation());
-        if(getName() == null) throw new ValidationExceptionVS("missing param 'name'");
-        if(getId() == null) throw new ValidationExceptionVS("missing param 'id'");
+        if(TypeVS.CURRENCY_GROUP_SUBSCRIBE != operation) throw new ValidationExceptionVS(
+                "operation expected: 'CURRENCY_GROUP_SUBSCRIBE' - operation found: " + operation);
+        if(name == null) throw new ValidationExceptionVS("missing param 'name'");
+        if(id == null) throw new ValidationExceptionVS("missing param 'id'");
     }
 
     public String getName() {

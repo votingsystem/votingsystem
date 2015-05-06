@@ -3,6 +3,7 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.VoteVSDto;
@@ -15,6 +16,7 @@ import org.votingsystem.util.TypeVS;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,6 +70,13 @@ public class OperationVS {
 
     public TypeVS getType() {
         return getOperation();
+    }
+
+    public OperationVS updateUUID() throws IOException {
+        Map<String, Object> dataMap = JSON.getMapper().readValue(jsonStr, new TypeReference<HashMap<String, Object>>() {});
+        dataMap.put("uuid", java.util.UUID.randomUUID().toString());
+        jsonStr = JSON.getMapper().writeValueAsString(dataMap);
+        return this;
     }
 
     public String getFileName() {
