@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
@@ -40,10 +41,10 @@ public class TransactionVSGroupVSBean {
     @Inject WalletBean walletBean;
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
 
     public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         GroupVS groupVS = validateRequest(request);
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 groupVS.getIBAN(), request.getTag(), request.getAmount(), request.getCurrencyCode());
@@ -81,6 +82,7 @@ public class TransactionVSGroupVSBean {
 
 
     public GroupVS validateRequest(TransactionVSDto dto) throws ValidationExceptionVS {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         Query query = dao.getEM().createNamedQuery("findUserByRepresentativeAndIBAN").setParameter(
                 "representative", dto.getSigner()).setParameter("IBAN", dto.getFromUserIBAN());
         GroupVS groupVS = dao.getSingleResult(GroupVS.class, query);
@@ -112,6 +114,7 @@ public class TransactionVSGroupVSBean {
 
     private ResultListDto<TransactionVSDto> processTransactionVSForAllMembers(TransactionVSDto request,
                                  Map<CurrencyAccount, BigDecimal> accountFromMovements, GroupVS groupVS) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         BigDecimal numReceptors = new BigDecimal(request.getNumReceptors());
         BigDecimal userPart = request.getAmount().divide(numReceptors, 2, RoundingMode.FLOOR);
         TransactionVS transactionParent = dao.persist(request.getTransactionVS(groupVS, null, accountFromMovements));
@@ -119,12 +122,13 @@ public class TransactionVSGroupVSBean {
                 .setParameter("groupVS", groupVS).setParameter("state", SubscriptionVS.State.ACTIVE);
         List<SubscriptionVS> subscriptionList = query.getResultList();
         List<TransactionVSDto> resultList = new ArrayList<>();
+        ObjectMapper mapper = JSON.getMapper();
         for(SubscriptionVS subscription : subscriptionList) {
             String toUserNIF = subscription.getUserVS().getNif();
             TransactionVSDto triggeredDto = request.getGroupVSChild(
                     toUserNIF, userPart, subscriptionList.size(), config.getRestURL());
             SMIMEMessage receipt = signatureBean.getSMIME(signatureBean.getSystemUser().getNif(),
-                    toUserNIF, JSON.getMapper().writeValueAsString(triggeredDto), request.getOperation().toString(), null);
+                    toUserNIF, mapper.writeValueAsString(triggeredDto), request.getOperation().toString(), null);
             MessageSMIME messageSMIMEReceipt = dao.persist(new MessageSMIME(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS,
                     request.getTransactionVSSMIME()));
             TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(transactionParent,
@@ -133,8 +137,12 @@ public class TransactionVSGroupVSBean {
         }
         log.info("transactionVS: " + transactionParent.getId() + " - operation: " + request.getOperation().toString());
         ResultListDto<TransactionVSDto> resultDto = new ResultListDto(resultList);
-        resultDto.setMessage(messages.get("transactionVSFromGroupToAllMembersGroupOKMsg", request.getAmount().toString() + " " +
-                request.getCurrencyCode()));
+        MessageSMIME requestMessageSMIME = request.getTransactionVSSMIME();
+        SMIMEMessage parentReceipt = signatureBean.getSMIMEMultiSigned(request.getSigner().getNif(),
+                requestMessageSMIME.getSMIME(), messages.get("fromGroupVSToAllMembersLbl"));
+        dao.merge(requestMessageSMIME.setSMIME(parentReceipt));
+        resultDto.setMessage(messages.get("transactionVSFromGroupToAllMembersGroupOKMsg",
+                request.getAmount().toString() + " " + request.getCurrencyCode()));
         return resultDto;
     }
 

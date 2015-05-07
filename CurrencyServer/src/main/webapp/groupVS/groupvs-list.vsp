@@ -7,6 +7,7 @@
 <link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
 <link href="${elementURL}/groupVS/groupvs-details.vsp" rel="import"/>
 
+
 <polymer-element name="groupvs-list" attributes="url state">
     <template>
         <style no-shim>
@@ -31,7 +32,8 @@
                     </div>
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{groupvs in groupvsList}}">
-                            <div on-tap="{{showGroupDetails}}" class='groupvsDiv item {{ groupvsClass(groupvs.state)}}' style="max-height: 80px;" cross-fade>
+                            <div on-tap="{{showGroupDetails}}" class='groupvsDiv item {{ groupvsClass(groupvs.state)}}'
+                                 style="height: 65px;" cross-fade>
                                 <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
                                 <div hidden?="{{groupvs.state !== 'CANCELED'}}" style="position: relative;">
                                     <div class='groupvsMessageCancelled' style="">${msg.groupvsCancelledLbl}</div>

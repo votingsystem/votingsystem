@@ -27,7 +27,7 @@
     </style>
     <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
     <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-    <core-signals on-core-signal-messagedialog-accept="{{messagedialogAccepted}}" on-core-signal-messagedialog-closed="{{messagedialogClosed}}"
+    <core-signals on-core-signal-messagedialog-accept="{{messagedialogAccepted}}"
                   on-core-signal-uservs-selected="{{showUserDetails}}" ></core-signals>
     <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
          transitions="cross-fade-all">
@@ -178,7 +178,7 @@
                     var caption = '${msg.groupCancelERRORLbl}'
                     if(ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
                         caption = "${msg.groupCancelOKLbl}"
-                        loadURL_VS("${restURL}/groupVS/" + this.groupvs.id)
+                        loadURL_VS("${restURL}/groupVS/id/" + this.groupvs.id)
                     }
                     showMessageVS(this.appMessageJSON.message, caption, this.tagName)
                 }.bind(this))
@@ -189,32 +189,23 @@
         goToWeekBalance:function() {
             loadURL_VS("${restURL}/balance/userVS/id/" + this.groupvs.id)
         },
-        messagedialogClosed:function(e) {
-            console.log("messagedialog signal - messagedialogClosed: " + e)
-            if(this.tagName == e) {
-                if(this.appMessageJSON != null && ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
-                    window.location.href = updateMenuLink(this.appMessageJSON.URL)
-                }
-            }
-        },
         subscribeToGroup: function () {
             console.log("subscribeToGroup")
-            var groupvsRepresentative = {id:this.groupvs.representative.id, nif:this.groupvs.representative.nif}
-            var groupVSData = {id:this.groupvs.id, name:this.groupvs.name , representative:groupvsRepresentative}
+            var representative = {id:this.groupvs.representative.id, nif:this.groupvs.representative.nif}
             var operationVS = new OperationVS(Operation.CURRENCY_GROUP_SUBSCRIBE)
             operationVS.serviceURL = "${restURL}/groupVS/id/" + this.groupvs.id + "/subscribe"
             operationVS.signedMessageSubject = "${msg.subscribeToCurrencyGroupMsg}"
-            operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_SUBSCRIBE, groupvs:groupVSData})
+            operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_SUBSCRIBE,
+                id:this.groupvs.id, name:this.groupvs.name , representative:representative})
             operationVS.setCallback(function(appMessage) {
                 console.log("subscribeToGroupCallback - message: " + appMessage);
                 var appMessageJSON = JSON.parse(appMessage)
                 var caption
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     caption = "${msg.groupSubscriptionOKLbl}"
-                    loadURL_VS( "${restURL}/groupVS/" + this.groupvs.id)
+                    loadURL_VS("${restURL}/groupVS/id/" + this.groupvs.id)
                 } else caption = '${msg.groupSubscriptionERRORLbl}'
-                var msg = appMessageJSON.message
-                showMessageVS(msg, caption)
+                showMessageVS(appMessageJSON.message, caption)
             }.bind(this))
             VotingSystemClient.setMessage(operationVS);
         },
