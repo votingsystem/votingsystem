@@ -53,7 +53,7 @@
                     <div class="rowvs" on-click="{{userSelected}}" layout horizontal center center justified>
                         <template if="{{isNifVisible}}">
                             <div class="nifColumn" style="width: 110px;">
-                                {{uservs.uservs.NIF}}
+                                {{uservs.uservs.nif}}
                             </div>
                         </template>
                         <!--<div style="width:200px;">{{uservs.uservs.iban}}</div>-->

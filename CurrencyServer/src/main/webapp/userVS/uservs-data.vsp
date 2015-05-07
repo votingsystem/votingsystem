@@ -1,7 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 <link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-form.vsp" rel="import"/>
@@ -39,25 +38,25 @@
                 </div>
                 <div hidden?="{{uservs.state === 'ACTIVE'}}" class="uservsCancelled">{{uservs.state}}</div>
                 <div hidden?="{{uservs.state !== 'ACTIVE'}}" layout horizontal center center-justified style="margin:0px 0px 10px 0px;">
-                    <div hidden?="{{!isClientToolConnected || uservs.connectedDevices.length === 0}}">
-                        <paper-button raised on-click="{{showMessageVSDialog}}">
+                    <div hidden?="{{!isClientToolConnected || uservs.connectedDevices.length === 0}}" style="margin:0 20px 0 0;">
+                        <a class="btn btn-red" on-click="{{showMessageVSDialog}}">
                             <i class="fa fa-envelope-o"></i> ${msg.sendMessageVSLbl}
-                        </paper-button>
+                        </a>
                     </div>
-                    <div hidden?="{{'BANKVS' == uservs.type || !isClientToolConnected}}">
-                        <paper-button raised on-click="{{makeTransactionVS}}">
+                    <div hidden?="{{'BANKVS' == uservs.type || !isClientToolConnected}}" style="margin:0 20px 0 0;">
+                        <a class="btn btn-red" on-click="{{makeTransactionVS}}">
                             <i class="fa fa-money"></i> ${msg.makeTransactionVSLbl}
-                        </paper-button>
+                        </a>
                     </div>
-                    <div>
-                        <paper-button raised on-click="{{goToWeekBalance}}">
+                    <div style="margin:0 20px 0 0;">
+                        <a class="btn btn-red" on-click="{{goToWeekBalance}}">
                             <i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}
-                        </paper-button>
+                        </a>
                     </div>
-                    <div hidden?="{{'superuser' !== menuType}}">
-                        <paper-button raised on-click="{{blockUser}}">
+                    <div hidden?="{{'superuser' !== menuType}}" style="margin:0 20px 0 0;">
+                        <a class="btn btn-red" on-click="{{blockUser}}">
                             ${msg.blockUserVSLbl} <i class="fa fa fa-thumbs-o-down"></i>
-                        </paper-button>
+                        </a>
                     </div>
                 </div>
                 <div hidden?="{{!uservs.description}}" style="margin:0 0 20px 0;">

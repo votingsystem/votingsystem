@@ -28,7 +28,7 @@
         </style>
         <div class="card" on-click="{{userSelected}}">
             <template if="{{isNifVisible}}">
-                <div class="nifColumn">{{subscription.uservs.NIF}}</div>
+                <div class="nifColumn">{{subscription.uservs.nif}}</div>
             </template>
             <!--<div style="width:200px;">{{subscription.uservs.iban}}</div>-->
             <div flex horizontal layout center-justified class="userVSname">{{subscription.uservs.name}}</div>

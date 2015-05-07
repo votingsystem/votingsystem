@@ -34,7 +34,7 @@
                 </div>
 
                 <div class="certDiv pageWidth">
-                    <div style="">
+                    <div>
                         <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
                             ${msg.serialNumberLbl}: </span>{{certvs.serialNumber}}</div>
                         <div id="certStateDiv" style="display: inline; margin:0px 0px 0px 20px; font-size: 1.2em; font-weight: bold; float: right;"></div>

@@ -19,7 +19,7 @@
     #drawer { width: 300px; }
   </style>
   <core-drawer-panel id="coreDrawerPanel" narrow="{{narrow}}" responsiveWidth="{{responsiveWidth}}">
-    <div id="drawerItems" vertical layout drawer style="">
+    <div id="drawerItems" vertical layout drawer>
         <content select="[navigation], nav"></content>
     </div>
     <core-header-panel id="mainHeaderPanel" main mode="{{mode}}">

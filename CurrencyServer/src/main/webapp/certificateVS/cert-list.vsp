@@ -49,7 +49,7 @@
 
                     <div flex horizontal wrap around-justified layout>
                         <template repeat="{{cert in resultListDto.resultList}}">
-                            <div class="certDiv" style="" on-tap="{{showCert}}">
+                            <div class="certDiv" on-tap="{{showCert}}">
                                 <div>
                                     <div style="display: inline;">
                                         <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">

@@ -30,7 +30,7 @@
             <div>
                 <template repeat="{{transaction in transactionList}}">
                     <div class="transactionvsRow" layout horizontal on-click="{{viewTransaction}}">
-                        <div class="dateCreated" style="">
+                        <div class="dateCreated">
                             {{getDate(transaction.dateCreated)}}
                         </div>
                        <core-tooltip large label="{{transaction.subject}}" position="top">
@@ -49,12 +49,12 @@
                 </template>
                 <div id="rowTotal" style="display: none;">
                     <div layout horizontal>
-                        <div class="dateCreated" style=""></div>
+                        <div class="dateCreated"></div>
                         <div class="subjectColumn" style="text-align: right;font-weight: bold;">
                             ${msg.totalLbl}:
                         </div>
                         <div class="amountColumn" style="border-top: 1px solid #888;">{{transactionTotal}}</div>
-                        <div class="tagColumn" style=""></div>
+                        <div class="tagColumn"></div>
                     </div>
                 </div>
             </div>

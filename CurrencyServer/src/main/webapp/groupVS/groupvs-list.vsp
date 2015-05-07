@@ -36,7 +36,7 @@
                                  style="height: 65px;" cross-fade>
                                 <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
                                 <div hidden?="{{groupvs.state !== 'CANCELED'}}" style="position: relative;">
-                                    <div class='groupvsMessageCancelled' style="">${msg.groupvsCancelledLbl}</div>
+                                    <div class='groupvsMessageCancelled'>${msg.groupvsCancelledLbl}</div>
                                 </div>
                                 <div class='numTotalUsersDiv text-right'>{{groupvs.numActiveUsers}} ${msg.usersLbl}</div>
                                 <div horizontal layout>

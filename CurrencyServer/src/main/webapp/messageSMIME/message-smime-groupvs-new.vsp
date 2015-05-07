@@ -36,8 +36,8 @@
             </div>
 
             <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-            <div style=""><b>${msg.nameLbl}: </b>{{signedDocument.name}}</div>
-            <div class="eventContentDiv" style="">
+            <div><b>${msg.nameLbl}: </b>{{signedDocument.name}}</div>
+            <div class="eventContentDiv">
                 <vs-html-echo html="{{signedDocument.groupvsInfo}}"></vs-html-echo>
             </div>
             <template if="{{signedDocument.tags.length > 0}}">

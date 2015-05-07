@@ -38,9 +38,9 @@
                 <paper-shadow z="1"></paper-shadow>
             </div>
             <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-            <div style=""><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
+            <div><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
             <div horizontal layout>
-                <div style=""><b>${msg.amountLbl}: </b>{{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
+                <div><b>${msg.amountLbl}: </b>{{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
                 <template if="{{smimeMessageContent.timeLimited}}">
                     <div class="pageHeader" style="margin: 0 0 0 20px;"><b>
                         ${msg.timeLimitedLbl}</b>
@@ -52,8 +52,8 @@
                 <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
                     ${msg.senderLbl}</div>
                 <div id="fromUserDiv">
-                    <div style=""><b>${msg.nameLbl}: </b>{{smimeMessageContent.fromUser}}</div>
-                    <div style=""><b>${msg.IBANLbl}: </b>{{smimeMessageContent.fromUserIBAN}}</div>
+                    <div><b>${msg.nameLbl}: </b>{{smimeMessageContent.fromUser}}</div>
+                    <div><b>${msg.IBANLbl}: </b>{{smimeMessageContent.fromUserIBAN}}</div>
                 </div>
             </div>
             <div hidden?="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">

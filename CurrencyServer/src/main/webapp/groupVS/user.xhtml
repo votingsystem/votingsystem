@@ -11,9 +11,9 @@
         <div style="max-width: 600px; margin:0px auto 0px auto;">
             <div id="messageDiv" class="text-center" style="font-size: 1.4em; color:#6c0404; font-weight: bold;"></div>
             <div style="border: 1px solid #6c0404; width: 500px;margin:auto; padding: 15px;">
-                <div style="font-size: 1.2em; font-weight: bold;">${subscriptionMap.uservs.NIF}</div>
+                <div style="font-size: 1.2em; font-weight: bold;">${subscriptionMap.uservs.nif}</div>
                 <div id="nameDiv" style="font-size: 1.2em;font-weight: bold;">${subscriptionMap.uservs.name}</div>
-                <div id="contentDiv" style="">${msg.subscriptionRequestDateLbl}: <span id="dateCreatedDiv"></span></div>
+                <div id="contentDiv">${msg.subscriptionRequestDateLbl}: <span id="dateCreatedDiv"></span></div>
             </div>
             <button id="activateUserButton" type="button" class="btn btn-default" onclick="activateUser();"
                     style="margin:10px 0px 0px 0px;">${msg.activateUserLbl} <i class="fa fa-thumbs-o-up"></i>
@@ -43,7 +43,7 @@
                 operationVS.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + subscriptionDataJSON.groupvs.name + "'"
                 operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_DEACTIVATE,
                     groupvs:{name:subscriptionDataJSON.groupvs.name, id:subscriptionDataJSON.groupvs.id},
-                    uservs:{name:subscriptionDataJSON.uservs.name, NIF:subscriptionDataJSON.uservs.NIF}, reason:e.detail})
+                    uservs:{name:subscriptionDataJSON.uservs.name, NIF:subscriptionDataJSON.uservs.nif}, reason:e.detail})
                 operationVS.setCallback(function(appMessage) {
                     console.log("deActivateUserCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
@@ -82,7 +82,7 @@
             operationVS.signedMessageSubject = "${msg.activateGroupUserMessageSubject}" + " '" + subscriptionDataJSON.groupvs.name + "'"
             operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,
                 groupvs:{name:subscriptionDataJSON.groupvs.name, id:subscriptionDataJSON.groupvs.id},
-                uservs:{name:subscriptionDataJSON.uservs.name, NIF:subscriptionDataJSON.uservs.NIF}})
+                uservs:{name:subscriptionDataJSON.uservs.name, NIF:subscriptionDataJSON.uservs.nif}})
             operationVS.setCallback(function(appMessage) {
                 console.log("activateUserCallback - message: " + appMessage);
                 var appMessageJSON = toJSON(appMessage)

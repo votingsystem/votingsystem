@@ -34,7 +34,7 @@
                 <template repeat="{{currency in currencyArray}}">
                     <core-tooltip position="top" noarrow="false">
                         <div horizontal layout center center-justified class="currency" on-click="{{showCurrency}}">
-                            <i class="fa {{currency.currencyCode | currencyIcon}}" style=""></i>
+                            <i class="fa {{currency.currencyCode | currencyIcon}}"></i>
                             {{currency.currencyValue}} {{currency.currencyCode}}
                             <template if="{{currency | isTimeLimited}}">
                                 <div style="font-size: 1em; margin: 0 0 0 5px;">

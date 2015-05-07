@@ -100,7 +100,7 @@
                 </div>
             </div>
         </div>
-        <div class="eventContentDiv" style="">
+        <div class="eventContentDiv">
             <vs-html-echo html="{{decodeBase64(groupvs.description)}}"></vs-html-echo>
         </div>
         <div layout horizontal>
@@ -111,7 +111,10 @@
                 </template>
             </div>
             <div class="linkVS" style="margin: 5px 0 0 0;" on-click="{{goToWeekBalance}}">
-                <i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}
+                <a class="btn btn-red"  style="font-size: 0.8em;">
+                    <i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}
+                </a>
+
             </div>
             <div flex></div>
             <div style="margin:5px 10px 0 0; font-size: 0.9em; color:#888;">

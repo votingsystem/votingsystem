@@ -44,12 +44,12 @@
                 </div>
 
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-                <div style=""><b>${msg.subjectLbl}: </b>{{transactionvs.subject}}</div>
+                <div><b>${msg.subjectLbl}: </b>{{transactionvs.subject}}</div>
 
-                <div style=""><b>${msg.amountLbl}: </b>{{transactionvs.amount}} {{transactionvs.currency}}</div>
+                <div><b>${msg.amountLbl}: </b>{{transactionvs.amount}} {{transactionvs.currency}}</div>
 
                 <div horizontal layout>
-                    <div style=""><b>${msg.dateLbl}: </b>{{getDate(transactionvs.dateCreated)}}</div>
+                    <div><b>${msg.dateLbl}: </b>{{getDate(transactionvs.dateCreated)}}</div>
                     <template if="{{transactionvs.validTo}}">
                         <div style="margin: 0 0 0 15px;"><b>${msg.validToLbl}: </b>{{transactionvs.validTo}}</div>
                     </template>
@@ -59,7 +59,7 @@
                         <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
                             ${msg.senderLbl}</div>
                         <div id="fromUserDiv">
-                            <div style=""><b>${msg.nameLbl}: </b>{{transactionvs | getFromUserName}}</div>
+                            <div><b>${msg.nameLbl}: </b>{{transactionvs | getFromUserName}}</div>
                             <div on-click="{{showFromUserIBAN}}">
                                 <b>${msg.IBANLbl}: </b>
                                 <span class="IBANLink">{{transactionvs | getFromUserIBAN}}</span>
@@ -72,7 +72,7 @@
                     <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621">{{receptorLbl}}</div>
                     <div>
                         <template if="{{!receptorMsg}}">
-                            <div style=""><b>${msg.nameLbl}: </b>{{transactionvs.toUserVS.name}}</div>
+                            <div><b>${msg.nameLbl}: </b>{{transactionvs.toUserVS.name}}</div>
                             <div horizontal layout>
                                 <b>${msg.IBANLbl}: </b>
                                 <div on-click="{{showToUserIBAN}}" class="IBANLink"> {{transactionvs.toUserVS.iban}}</div>

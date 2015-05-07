@@ -121,6 +121,7 @@ public class TransactionVSGroupVSBean {
         Query query = dao.getEM().createQuery("SELECT s FROM SubscriptionVS s WHERE s.groupVS =:groupVS AND s.state =:state")
                 .setParameter("groupVS", groupVS).setParameter("state", SubscriptionVS.State.ACTIVE);
         List<SubscriptionVS> subscriptionList = query.getResultList();
+        if(subscriptionList.isEmpty()) throw new ValidationExceptionVS("the group has no active users");
         List<TransactionVSDto> resultList = new ArrayList<>();
         ObjectMapper mapper = JSON.getMapper();
         for(SubscriptionVS subscription : subscriptionList) {

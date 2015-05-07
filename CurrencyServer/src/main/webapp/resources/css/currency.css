@@ -203,6 +203,7 @@ paper-button.button {
     background-image: none;
     border: 1px solid transparent;
     border-radius: 4px;
+    padding:4px;
 }
 .btn:focus,
 .btn:active:focus,
@@ -275,6 +276,39 @@ fieldset[disabled] .btn-default.active {
     color: #fff;
     background-color: #333;
 }
+
+.btn-red {
+    color: #6c0404;
+    background-color: #fff;
+    border-color: #6c0404;
+}
+
+.btn-red:hover,
+.btn-red:focus,
+.btn-red:active,
+.btn-red.active,
+.open .dropdown-toggle.btn-red {
+    color: #6c0404;
+    background-color: #fdf7f9;
+    border-color: #6c0404;
+}
+
+.btn-green {
+    color: #388746;
+    background-color: #fff;
+    border-color: #388746;
+}
+
+.btn-green:hover,
+.btn-green:focus,
+.btn-green:active,
+.btn-green.active,
+.open .dropdown-toggle.btn-green {
+    color: #388746;
+    background-color: #eff9ed;
+    border-color: #388746;
+}
+
 
 .form-control {
     display: block;

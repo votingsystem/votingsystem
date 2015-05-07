@@ -8,56 +8,50 @@
 
 <polymer-element name="groupvs-user" attributes="userId subscriptionDataURLPrefix opened">
     <template>
-        <paper-dialog id="xDialog" layered backdrop class="uservsDialog" on-core-overlay-open="{{onCoreOverlayOpen}}" style="width: 550px;">
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop class="uservsDialog" style="border: 1px solid #6c0404;">
+            <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <style no-shim>
-            .uservsDialog {
-                width: 800px;
-            }
-        </style>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
-                   contentType="application/json" on-core-response="{{ajaxResponse}}"></core-ajax>
-        <div layout vertical>
-            <div layout horizontal center center-justified>
-                <div flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
-                    <div style="text-align: center;">{{subscriptionData.uservs.name}}</div>
+            <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
+                       contentType="application/json" on-core-response="{{ajaxResponse}}"></core-ajax>
+            <div layout vertical>
+                <div layout horizontal center center-justified>
+                    <div flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                        <div style="text-align: center;">{{subscriptionData.uservs.name}}</div>
+                    </div>
+                    <div style="position: absolute; top: 0px; right: 0px;">
+                        <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                    </div>
                 </div>
-                <div style="position: absolute; top: 0px; right: 0px;">
-                    <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                <div>
+                    <div horizontal layout style="font-size: 0.8em; margin: 5px 0 10px 0;">
+                        <div style="font-weight: bold;color:#888;" flex>NIF: {{subscriptionData.uservs.nif}}</div>
+                        <div hidden?="{{!subscriptionData.uservs.iban}}" style="font-weight: bold;color:#888;">
+                            IBAN: {{subscriptionData.uservs.iban}}</div>
+                    </div>
+                    <div id="contentDiv">${msg.subscriptionRequestDateLbl}:
+                        <span id="dateCreatedDiv"> {{getDate(subscriptionData.dateCreated)}}</span></div>
+                </div>
+                <div horizontal layout center center-justified style="margin:10px 0 0 0;">
+                    <div hidden?="{{!isClientToolConnected}}">
+                        <button hidden?="{{'admin' !== menuType || isActive}}" on-click="{{activateUser}}">
+                            <i class="fa fa-thumbs-o-up"></i> ${msg.activateUserLbl}
+                        </button>
+                        <button hidden?="{{'admin' !== menuType || isCancelled}}" on-click="{{initCancellation}}">
+                            <i class="fa fa-thumbs-o-down"></i> ${msg.deActivateUserLbl}
+                        </button>
+                    </div>
+                    <button on-click="{{goToUserVSPage}}">
+                        <i class="fa fa-user"></i> ${msg.userVSPageLbl}
+                    </button>
+                </div>
+                <div id="receipt" style="display:none;"> </div>
+            </div>
+            <div style="position: absolute; width: 100%; top:0px;left:0px;">
+                <div layout horizontal center center-justified style="padding:0px 0px 0px 0px;margin:0px auto 0px auto;">
+                    <reason-dialog id="reasonDialog" caption="${msg.cancelSubscriptionFormCaption}" opened="false"
+                                       messageToUser="${msg.cancelSubscriptionFormMsg}"></reason-dialog>
                 </div>
             </div>
-            <div>
-                <div horizontal layout style="font-size: 0.8em; margin: 5px 0 10px 0;">
-                    <div style="font-weight: bold;color:#888;" flex>NIF: {{subscriptionData.uservs.nif}}</div>
-                    <div hidden?="{{!subscriptionData.uservs.iban}}" style="font-weight: bold;color:#888;">
-                        IBAN: {{subscriptionData.uservs.iban}}</div>
-                </div>
-                <div id="contentDiv">${msg.subscriptionRequestDateLbl}:
-                    <span id="dateCreatedDiv"> {{getDate(subscriptionData.dateCreated)}}</span></div>
-            </div>
-            <div horizontal layout center center-justified style="margin:10px 0 0 0; font-size: 0.9em;">
-                <div hidden?="{{!isClientToolConnected}}">
-                    <paper-button hidden?="{{'admin' !== menuType || isActive}}" raised type="button"
-                                  on-click="{{activateUser}}" style="margin:0 10px;">
-                        <i class="fa fa-thumbs-o-up"></i> ${msg.activateUserLbl}
-                    </paper-button>
-                    <paper-button hidden?="{{'admin' !== menuType || isCancelled}}" raised on-click="{{initCancellation}}" style="margin:0 10px;">
-                        <i class="fa fa-thumbs-o-down"></i> ${msg.deActivateUserLbl}
-                    </paper-button>
-                </div>
-                <paper-button raised type="submit" on-click="{{goToUserVSPage}}" style="margin:0 10px">
-                    <i class="fa fa-user"></i> ${msg.userVSPageLbl}
-                </paper-button>
-            </div>
-            <div id="receipt" style="display:none;"> </div>
-        </div>
-        <div style="position: absolute; width: 100%; top:0px;left:0px;">
-            <div layout horizontal center center-justified style="padding:0px 0px 0px 0px;margin:0px auto 0px auto;">
-                <reason-dialog id="reasonDialog" caption="${msg.cancelSubscriptionFormCaption}" opened="false"
-                                   messageToUser="${msg.cancelSubscriptionFormMsg}"></reason-dialog>
-            </div>
-        </div>
         </paper-dialog>
     </template>
     <script>
@@ -73,7 +67,7 @@
                     operationVS.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + this.subscriptionData.groupvs.name + "'"
                     operationVS.jsonStr = JSON.stringify({groupvsId:this.subscriptionData.groupvs.id,
                         groupvsName:this.subscriptionData.groupvs.name, userVSName:this.subscriptionData.uservs.name,
-                        userVSNIF:this.subscriptionData.uservs.NIF, reason:e.detail})
+                        userVSNIF:this.subscriptionData.uservs.nif, reason:e.detail})
                     operationVS.setCallback(function(appMessage) {
                         console.log("deActivateUserCallback - message: " + appMessage);
                         var appMessageJSON = toJSON(appMessage)
@@ -90,9 +84,6 @@
             getDate:function(timStamp) {
                 return new Date(timStamp).getDayWeekAndHourFormat()
             },
-            onCoreOverlayOpen:function(e) {
-                this.opened = this.$.xDialog.opened
-            },
             goToUserVSPage:function() {
                 loadURL_VS("${restURL}/userVS/id/" + this.userId, "_blank")
                 this.$.xDialog.opened = false
@@ -103,10 +94,8 @@
             show:function(baseURL, userId) {
                 this.subscriptionDataURLPrefix = baseURL
                 this.userId = userId
+                this.$.ajax.url = this.subscriptionDataURLPrefix + "/" + this.userId
                 this.$.xDialog.opened = true
-            },
-            userIdChanged:function() {
-                this.$.ajax.url = this.subscriptionDataURLPrefix + "/" + this.userId + "?mode=simplePage&menu=" + menuType
             },
             activateUser : function(e) {
                 console.log("activateUser")
@@ -116,7 +105,7 @@
                         this.subscriptionData.groupvs.name + "'"
                 operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,
                     groupvsId:this.subscriptionData.groupvs.id, groupvsName:this.subscriptionData.groupvs.name,
-                    userVSName:this.subscriptionData.uservs.name, userVSNIF:this.subscriptionData.uservs.NIF})
+                    userVSName:this.subscriptionData.uservs.name, userVSNIF:this.subscriptionData.uservs.nif})
                 operationVS.setCallback(function(appMessage) {
                     console.log("activateUserCallback - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
@@ -133,7 +122,7 @@
                 VotingSystemClient.setMessage(operationVS);
             },
             initCancellation : function(e) {
-                this.$.reasonDialog.toggle();
+                this.$.reasonDialog.show();
             },
             ajaxResponse:function() {
                 this.isActive = false
