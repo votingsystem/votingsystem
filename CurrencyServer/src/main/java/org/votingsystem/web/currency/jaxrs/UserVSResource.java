@@ -18,17 +18,16 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TimePeriod;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.currency.ejb.*;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
@@ -36,7 +35,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 

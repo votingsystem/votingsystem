@@ -1,7 +1,6 @@
 package org.votingsystem.dto.voting;
 
 
-import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 
 import java.util.ArrayList;

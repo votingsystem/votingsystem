@@ -1,6 +1,5 @@
 package org.votingsystem.signature.smime;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;

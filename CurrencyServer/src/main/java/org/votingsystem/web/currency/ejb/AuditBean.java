@@ -18,11 +18,11 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.currency.TransactionVSUtils;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.currency.util.ReportFiles;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;

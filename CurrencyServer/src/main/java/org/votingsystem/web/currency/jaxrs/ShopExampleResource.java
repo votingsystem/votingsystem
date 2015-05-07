@@ -6,9 +6,9 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.currency.Payment;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.currency.ejb.ShopExampleBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;

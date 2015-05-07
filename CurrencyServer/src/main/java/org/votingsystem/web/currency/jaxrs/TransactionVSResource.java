@@ -10,13 +10,13 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;

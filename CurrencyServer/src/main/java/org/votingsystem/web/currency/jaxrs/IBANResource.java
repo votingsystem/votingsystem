@@ -3,9 +3,9 @@ package org.votingsystem.web.currency.jaxrs;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;

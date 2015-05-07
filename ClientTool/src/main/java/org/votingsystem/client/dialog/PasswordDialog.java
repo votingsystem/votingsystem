@@ -17,7 +17,6 @@ import javafx.scene.text.TextAlignment;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
-
 import java.awt.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;

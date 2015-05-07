@@ -1,22 +1,13 @@
 package org.votingsystem.dto.voting;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.FieldEventVS;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.model.voting.VoteVSCanceler;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CMSUtils;
-import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
-import java.security.NoSuchAlgorithmException;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

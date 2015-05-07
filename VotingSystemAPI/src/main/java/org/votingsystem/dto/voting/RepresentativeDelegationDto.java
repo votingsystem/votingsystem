@@ -10,6 +10,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

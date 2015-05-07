@@ -4,12 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.JSON;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;

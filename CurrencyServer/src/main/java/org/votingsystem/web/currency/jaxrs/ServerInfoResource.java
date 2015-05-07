@@ -1,9 +1,9 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import org.votingsystem.model.ActorVS;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;

@@ -159,7 +159,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
 
     public void setConnectionEnabled(boolean isConnectionEnabled){
         if(BrowserSessionService.getInstance().getUserVS() == null) {
-            CertNotFoundDialog.show(Browser.getWindow());
+            CertNotFoundDialog.showDialog();
             return;
         }
         if(isConnectionEnabled) {

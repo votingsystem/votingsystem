@@ -9,8 +9,11 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
+
 import java.net.InetAddress;
-import java.util.*;
+import java.util.Base64;
+import java.util.List;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SocketMessageContentDto {

@@ -9,10 +9,10 @@ import org.votingsystem.model.currency.BankVSInfo;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

@@ -88,7 +88,7 @@
                 </div>
                 <div hidden?="{{!smallScreen}}">
                     <paper-tabs style="margin:0px auto 0px auto; cursor: pointer;" class="transparent-teal center"
-                                valueattr="name" selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" link>
+                                valueattr="name" selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
                         <paper-tab name="incomesTab" style="width: 400px">${msg.incomesLbl}</paper-tab>
                         <paper-tab name="expensesTab">${msg.expensesLbl}</paper-tab>
                     </paper-tabs>

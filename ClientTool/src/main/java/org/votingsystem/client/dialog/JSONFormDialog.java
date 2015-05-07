@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class JSONFormDialog extends VBox {
+public class JSONFormDialog extends DialogVS {
 
     private static Logger log = Logger.getLogger(JSONFormDialog.class.getSimpleName());
 
@@ -38,18 +38,16 @@ public class JSONFormDialog extends VBox {
         public void processJSONForm(Map jsonForm);
     }
 
-    private final Stage stage;
     private TextArea textArea;
     private Listener listener;
     private Label messageLabel;
     private static JSONFormDialog dialog;
 
     public JSONFormDialog() {
-        stage = new Stage(StageStyle.TRANSPARENT);
-        stage.initModality(Modality.WINDOW_MODAL);
-        stage.setResizable(true);
-        stage.initOwner(Browser.getInstance().getScene().getWindow());
-        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
+        super(new VBox(10));
+        VBox mainDialog = (VBox) getContentPane();
+        mainDialog.getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
+        mainDialog.getStyleClass().add("modal-dialog");
         messageLabel = new Label();
         messageLabel.setWrapText(true);
         textArea = new TextArea();
@@ -63,11 +61,10 @@ public class JSONFormDialog extends VBox {
         acceptButton.setOnAction(actionEvent -> {
             try {
                 Map<String, Object> dataMap = JSON.getMapper().readValue(textArea.getText(),
-                        new TypeReference<HashMap<String, Object>>() {
-                        });
+                        new TypeReference<HashMap<String, Object>>() {});
                 if(listener != null) listener.processJSONForm(dataMap);
                 else log.info("No listeners to send JSON form");
-                stage.hide();
+                hide();
             } catch (IOException ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }
@@ -75,26 +72,18 @@ public class JSONFormDialog extends VBox {
         });
         acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
-        cancelButton.setOnAction(actionEvent -> stage.hide());
+        cancelButton.setOnAction(actionEvent -> hide());
         cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
-
         HBox footerButtonsBox = new HBox(10);
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);
-
-        getChildren().addAll(messageLabel, textArea, footerButtonsBox);
-        getStyleClass().add("modal-dialog");
-        stage.setScene(new Scene(this));
-        stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
-        Utils.addMouseDragSupport(stage);
+        mainDialog.getChildren().addAll(messageLabel, textArea, footerButtonsBox);
     }
 
     public void showMessage(String title, Map dataMap, Listener listener) throws JsonProcessingException {
         this.listener = listener;
         messageLabel.setText(title);
         textArea.setText(JSON.getMapper().configure(SerializationFeature.INDENT_OUTPUT, true).writeValueAsString(dataMap));
-        stage.centerOnScreen();
-        stage.show();
-        stage.toFront();
+        show();
     }
 
     public static void show(Map formData, Listener listener) {

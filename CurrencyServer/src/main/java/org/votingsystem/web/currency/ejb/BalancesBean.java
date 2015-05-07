@@ -12,9 +12,9 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.currency.BalanceUtils;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
@@ -84,7 +84,6 @@ public class BalancesBean {
         return balancesDto;
     }
 
-
     public BalancesDto getUserVSBalancesDto(UserVS userVS, TimePeriod timePeriod) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
                 transactionVSBean.getTransactionFromList(userVS, timePeriod), TransactionVS.Source.FROM);
@@ -95,12 +94,11 @@ public class BalancesBean {
                 transactionVSBean.getTransactionToList(userVS, timePeriod), TransactionVS.Source.TO);
         balancesDto.setTo(balancesToDto);
 
-        balancesToDto.calculateCash();
+        balancesDto.calculateCash();
         if(UserVS.Type.SYSTEM != userVS.getType() && timePeriod.isCurrentWeekPeriod())
             currencyAccountBean.checkBalancesWithCurrencyAccounts(userVS, balancesDto.getBalancesCash());
         return balancesDto;
     }
-
 
     public void updateTagBalance(BigDecimal amount, String currencyCode, TagVS tag) throws Exception {
         Query query = dao.getEM().createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")
