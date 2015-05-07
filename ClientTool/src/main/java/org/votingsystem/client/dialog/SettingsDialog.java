@@ -11,7 +11,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.votingsystem.client.Browser;
-import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
@@ -51,7 +50,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
     public SettingsDialog() {
         super(new GridPane());
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
-        gridPane = (GridPane) ((DecoratedPane) getParent()).getContentPane();
+        gridPane = (GridPane) getContentPane();
         gridPane.setVgap(15);
         ToggleGroup tg = new ToggleGroup();
         signWithDNIeRb = new RadioButton(ContextVS.getMessage("setDNIeSignatureMechanismMsg"));

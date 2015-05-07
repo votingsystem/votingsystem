@@ -28,7 +28,7 @@ import static org.votingsystem.client.Browser.showMessage;
  * JavaScript interface object
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BrowserVSClient {
+public class BrowserVSClient implements PasswordDialog.Listener {
 
     private static Logger log = Logger.getLogger(BrowserVSClient.class.getSimpleName());
 
@@ -110,21 +110,7 @@ public class BrowserVSClient {
                             ContextVS.getInstance().getDefaultServer().getServerURL() + "/app/contact.xhtml?openMailClient=true");
                     break;
                 case WALLET_SAVE:
-                    PasswordDialog passwordDialog = new PasswordDialog();
-                    passwordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("walletPinMsg"));
-                    String password = passwordDialog.getPassword();
-                    if(password != null) {
-                        try {
-                            Wallet.getWallet(password);
-                            Browser.getInstance().fireCoreSignal("vs-wallet-save", null, false);
-                            InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
-                        } catch (WalletException wex) {
-                            Utils.showWalletNotFoundMessage();
-                        } catch (Exception ex) {
-                            log.log(Level.SEVERE, ex.getMessage(), ex);
-                            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                        }
-                    }
+                    PasswordDialog.showWithoutPasswordConfirm(TypeVS.WALLET_SAVE, this, ContextVS.getMessage("walletPinMsg"));
                     break;
                 case MESSAGEVS:
                     if(operationVS.getDocumentToSign() != null) Browser.getInstance().processOperationVS(
@@ -164,6 +150,25 @@ public class BrowserVSClient {
         } finally {
             if(result == null) return result;
             else return Base64.getEncoder().encodeToString(result.getBytes());
+        }
+    }
+
+    @Override public void setPassword(TypeVS passwordType, String password) {
+        switch (passwordType) {
+            case WALLET_SAVE:
+                if(password != null) {
+                    try {
+                        Wallet.getWallet(password);
+                        Browser.getInstance().fireCoreSignal("vs-wallet-save", null, false);
+                        InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
+                    } catch (WalletException wex) {
+                        Utils.showWalletNotFoundMessage();
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                    }
+                }
+                break;
         }
     }
 }

@@ -9,7 +9,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
 
@@ -35,7 +34,7 @@ public class AddVoteOptionDialog extends DialogVS {
 
     public AddVoteOptionDialog() {
         super(new VBox(10));
-        mainPane = (VBox) ((DecoratedPane) getParent()).getContentPane();
+        mainPane = (VBox) getContentPane();
         messageLabel = new Label();
         messageLabel.setWrapText(true);
         textArea = new TextArea();

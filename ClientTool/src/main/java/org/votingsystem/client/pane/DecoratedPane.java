@@ -57,7 +57,7 @@ public class DecoratedPane extends VBox {
         if(caption != null) captionLbl.setText(caption);
         closeButton = new Button();
         closeButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
-        closeButton.setOnAction(actionEvent -> stage.close());
+        closeButton.setOnAction(actionEvent -> getScene().getWindow().hide());
         if(menuButton != null) {
             menuButton.setGraphic(Utils.getIcon(FontAwesomeIcons.BARS));
             toolBar.getChildren().add(menuButton);

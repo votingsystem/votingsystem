@@ -2,7 +2,6 @@ package org.votingsystem.client.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
-import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
@@ -45,7 +44,7 @@ import static org.votingsystem.client.Browser.showMessage;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WebSocketAuthenticatedService extends Service<ResponseVS> {
+public class WebSocketAuthenticatedService extends Service<ResponseVS> implements PasswordDialog.Listener {
 
     private static Logger log = Logger.getLogger(WebSocketAuthenticatedService.class.getSimpleName());
 
@@ -89,6 +88,17 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                     getVotingSystemSSLCerts(), ContextVS.getInstance().getCurrencyServer());
         } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
         return instance;
+    }
+
+    @Override
+    public void setPassword(TypeVS passwordType, String password) {
+        switch (passwordType) {
+            case WEB_SOCKET_INIT:
+                if(password == null) {
+                    broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
+                } else connect(password);
+                break;
+        }
     }
 
     public static class EndpointConfigurator extends ClientEndpointConfig.Configurator {
@@ -153,20 +163,12 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
             return;
         }
         if(isConnectionEnabled) {
-            Platform.runLater(() -> {
-                if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
-                    String password = null;
-                    PasswordDialog passwordDialog = new PasswordDialog();
-                    passwordDialog.showWithoutPasswordConfirm(
-                            ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
-                    password = passwordDialog.getPassword();
-                    if(password == null) {
-                        broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
-                    } else connect(password);
-                } else if(CryptoTokenVS.MOBILE == BrowserSessionService.getCryptoTokenType()) {
-                    connect(null);
-                }
-            });
+            if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
+                PasswordDialog.showWithoutPasswordConfirm(TypeVS.WEB_SOCKET_INIT, this,
+                        ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
+            } else if(CryptoTokenVS.MOBILE == BrowserSessionService.getCryptoTokenType()) {
+                connect(null);
+            }
         } else  {
             if(session != null && session.isOpen()) {
                 try {session.close();}

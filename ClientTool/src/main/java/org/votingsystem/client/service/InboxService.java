@@ -38,7 +38,7 @@ import static org.votingsystem.client.Browser.showMessage;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class InboxService {
+public class InboxService implements PasswordDialog.Listener {
 
     private static Logger log = Logger.getLogger(InboxService.class.getSimpleName());
 
@@ -47,6 +47,7 @@ public class InboxService {
     private List<InboxMessage> messageList = new ArrayList<>();
     private List<InboxMessage> encryptedMessageList = new ArrayList<>();
     private InboxMessage timeLimitedInboxMessage;
+    private InboxMessage currentMessage;
     private File messagesFile;
     private static final InboxService INSTANCE = new InboxService();
     private Button inboxButton;
@@ -195,46 +196,18 @@ public class InboxService {
                 removeMessage(inboxMessage);
                 return;
         }
+        currentMessage = inboxMessage;
         switch(inboxMessage.getTypeVS()) {
             case CURRENCY_WALLET_CHANGE:
-                passwordDialog = new PasswordDialog();
-                passwordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("walletPinMsg"));
-                password = passwordDialog.getPassword();
-                if(password != null) {
-                    try {
-                        Wallet.saveToWallet(inboxMessage.getWebSocketMessage().getCurrencySet(), password);
-                        EventBusService.getInstance().post(inboxMessage.setState(InboxMessage.State.PROCESSED));
-                        removeMessage(inboxMessage);
-                        SocketMessageDto messageDto = inboxMessage.getWebSocketMessage();
-                        WebSocketAuthenticatedService.getInstance().sendMessage(inboxMessage.getWebSocketMessage().
-                                getResponse(ResponseVS.SC_OK, null, messageDto.getOperation()).toString());
-                    } catch (WalletException wex) {
-                        Utils.showWalletNotFoundMessage();
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                    }
-                }
+                PasswordDialog.showWithoutPasswordConfirm(TypeVS.CURRENCY_WALLET_CHANGE, this,
+                        ContextVS.getMessage("walletPinMsg"));
                 break;
             case MESSAGEVS:
                 String msg = MsgUtils.getWebSocketFormattedMessage(inboxMessage);
                 showMessage(msg, ContextVS.getMessage("messageLbl"));
                 break;
             case CURRENCY_IMPORT:
-                passwordDialog = new PasswordDialog();
-                passwordDialog.showWithoutPasswordConfirm(ContextVS.getMessage("walletPinMsg"));
-                password = passwordDialog.getPassword();
-                if(password != null) {
-                    try {
-                        Wallet.getWallet(password);
-                        removeMessage(inboxMessage);
-                    } catch (WalletException wex) {
-                        Utils.showWalletNotFoundMessage();
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                    }
-                }
+                PasswordDialog.showWithoutPasswordConfirm(TypeVS.CURRENCY_IMPORT, this, ContextVS.getMessage("walletPinMsg"));
                 break;
             case MESSAGEVS_TO_DEVICE:
                 showPasswordDialog(ContextVS.getMessage("decryptMsgLbl"), inboxMessage.isTimeLimited());
@@ -274,5 +247,40 @@ public class InboxService {
         this.messageList.addAll(messageList);
         flush();
         InboxDialog.showDialog();
+    }
+
+    @Override public void setPassword(TypeVS passwordType, String password) {
+        switch (passwordType) {
+            case CURRENCY_IMPORT:
+                if(password != null) {
+                    try {
+                        Wallet.getWallet(password);
+                        removeMessage(currentMessage);
+                    } catch (WalletException wex) {
+                        Utils.showWalletNotFoundMessage();
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                    }
+                }
+                break;
+            case CURRENCY_WALLET_CHANGE:
+                if(password != null) {
+                    try {
+                        Wallet.saveToWallet(currentMessage.getWebSocketMessage().getCurrencySet(), password);
+                        EventBusService.getInstance().post(currentMessage.setState(InboxMessage.State.PROCESSED));
+                        removeMessage(currentMessage);
+                        SocketMessageDto messageDto = currentMessage.getWebSocketMessage();
+                        WebSocketAuthenticatedService.getInstance().sendMessage(currentMessage.getWebSocketMessage().
+                                getResponse(ResponseVS.SC_OK, null, messageDto.getOperation()).toString());
+                    } catch (WalletException wex) {
+                        Utils.showWalletNotFoundMessage();
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                    }
+                }
+                break;
+        }
     }
 }

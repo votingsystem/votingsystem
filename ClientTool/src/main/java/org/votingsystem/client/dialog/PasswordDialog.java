@@ -2,6 +2,7 @@ package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
@@ -13,9 +14,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.TypeVS;
 
 import java.awt.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,7 +28,11 @@ import java.util.logging.Logger;
 public class PasswordDialog extends DialogVS {
 
     private static Logger log = Logger.getLogger(PasswordDialog.class.getSimpleName());
-    
+
+    public interface Listener {
+        public void setPassword(TypeVS passwordType, String password);
+    }
+
     private VBox dialogVBox;
     private Text messageText;
     private Text timeLimitedMessageText;
@@ -37,12 +42,15 @@ public class PasswordDialog extends DialogVS {
     private PasswordField password2Field;
     private String password;
     private String mainMessage = null;
+    private Listener listener;
+    private TypeVS passwordType;
     boolean isCapsLockPressed = false;
     boolean isWithPasswordConfirm = true;
+    private static PasswordDialog INSTANCE = null;
 
     public PasswordDialog() {
         super(new VBox(10));
-        dialogVBox = (VBox)((DecoratedPane) getParent()).getContentPane(); new VBox(10);
+        dialogVBox = (VBox) getContentPane();
         dialogVBox.getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         dialogVBox.getStyleClass().add("modal-dialog");
         dialogVBox.setStyle("-fx-pref-width: 350px;");
@@ -62,7 +70,8 @@ public class PasswordDialog extends DialogVS {
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
-        cancelButton.setOnAction(event -> hide());
+        cancelButton.setOnAction(event -> closePasswordDialog());
+        addCloseListener(event -> closePasswordDialog());
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(event -> checkPasswords());
@@ -94,7 +103,6 @@ public class PasswordDialog extends DialogVS {
         footerButtonsBox.getChildren().addAll(cancelButton, Utils.getSpacer(), acceptButton);
         VBox.setMargin(footerButtonsBox, new javafx.geometry.Insets(20, 0, 0, 0));
 
-
         Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));
         password2Text = new Text(ContextVS.getMessage("password2Lbl"));
         password2Text.setStyle("-fx-spacing: 50;");
@@ -116,6 +124,11 @@ public class PasswordDialog extends DialogVS {
         return getStage().isShowing();
     }
 
+    private void closePasswordDialog() {
+        listener.setPassword(passwordType, null);
+        hide();
+    }
+
     private void checkPasswords() {
         log.info("checkPasswords");
         String password1 = new String(password1Field.getText());
@@ -126,6 +139,7 @@ public class PasswordDialog extends DialogVS {
         else {
             if (password1.equals(password2)) {
                 password = password1;
+                listener.setPassword(passwordType, password);
                 getStage().close();
             } else {
                 setMessage(ContextVS.getMessage("passwordError"));
@@ -142,14 +156,21 @@ public class PasswordDialog extends DialogVS {
         show();
     }
 
-    public void showWithoutPasswordConfirm(String mainMessage) {
-        showWithoutPasswordConfirm(mainMessage, null);
+    public static void showWithoutPasswordConfirm(TypeVS passwordType, Listener listener, String mainMessage) {
+        if(INSTANCE == null) INSTANCE = new PasswordDialog();
+        INSTANCE.passwordType = passwordType;
+        INSTANCE.listener = listener;
+        Platform.runLater(() -> {
+            INSTANCE.showWithoutPasswordConfirm(mainMessage, null);
+        });
     }
 
     public void showWithoutPasswordConfirm(String mainMessage, final Integer visibilityInSeconds) {
         this.mainMessage = mainMessage;
         isWithPasswordConfirm = false;
         setMessage(mainMessage);
+        password1Field.setText("");
+        password2Field.setText("");
         if(dialogVBox.getChildren().contains(password2Text) && dialogVBox.getChildren().contains(password2Field)) {
             dialogVBox.getChildren().removeAll(password2Text, password2Field);
         }

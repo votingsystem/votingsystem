@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -34,20 +35,18 @@ public class DialogVS {
 
     public DialogVS(String fxmlFilePath, StageStyle stageStyle) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlFilePath));
+        fxmlLoader.setController(this);
+        decoratedPane = new DecoratedPane(null, null, fxmlLoader.load(), stage);
         stage = new Stage(stageStyle);
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.initOwner(Browser.getInstance().getScene().getWindow());
-        fxmlLoader.setController(this);
-        stage.centerOnScreen();
-
-        decoratedPane = new DecoratedPane(null, null, fxmlLoader.load(), stage);
-
         stage.setScene(new Scene(decoratedPane));
-        Utils.addMouseDragSupport(stage);
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
+        stage.centerOnScreen();
         decoratedPane.getScene().getStylesheets().add(Utils.getResource("/css/dialogvs.css"));
         decoratedPane.getStyleClass().add("glassBox");
         decoratedPane.getScene().setFill(Color.TRANSPARENT);
+        Utils.addMouseDragSupport(stage);
     }
 
     public void setCaption(String caption) {
@@ -56,27 +55,32 @@ public class DialogVS {
     }
 
     public DialogVS(Pane pane) {
-        stage = new Stage(StageStyle.TRANSPARENT);
-
-
         decoratedPane = new DecoratedPane(null, null, pane, stage);
+        stage = new Stage(StageStyle.TRANSPARENT);
         stage.setScene(new Scene(decoratedPane));
-        Utils.addMouseDragSupport(stage);
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initOwner(Browser.getInstance().getScene().getWindow());
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
+        stage.centerOnScreen();
         decoratedPane.getScene().getStylesheets().add(Utils.getResource("/css/dialogvs.css"));
         decoratedPane.getStyleClass().add("glassBox");
         decoratedPane.getScene().setFill(Color.TRANSPARENT);
+        Utils.addMouseDragSupport(stage);
+    }
 
-        //stage.setScene(new Scene(pane));
-        //stage.getScene().setFill(Color.TRANSPARENT);
-        //stage.initModality(Modality.APPLICATION_MODAL);
-        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
-        stage.centerOnScreen();
-        //Utils.addMouseDragSupport(stage);
+    public void addCloseListener(EventHandler eventHandler) {
+        stage.addEventHandler(WindowEvent.WINDOW_HIDDEN, windowEvent -> {
+            eventHandler.handle(windowEvent);
+        });
     }
 
     public Parent getParent() {
         return stage.getScene().getRoot();
+    }
+
+    public Pane getContentPane() {
+        if(decoratedPane == null) return null;
+        return decoratedPane.getContentPane();
     }
 
     public Stage getStage() {
@@ -100,5 +104,3 @@ public class DialogVS {
     }
 
 }
-
-
