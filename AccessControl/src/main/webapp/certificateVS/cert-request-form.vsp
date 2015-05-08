@@ -111,7 +111,7 @@
                 var child = element.childNodes[i];
                 this.removeErrorStyle(child);
                 if(child != undefined) {
-                    if(child.style != undefined) {
+                    if(child.style != undefined && child.tagName === 'INPUT') {
                         //child.style.background = '#fff'
                         child.classList.remove("formFieldError");
                     }

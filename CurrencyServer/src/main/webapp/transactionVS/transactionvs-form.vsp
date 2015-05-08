@@ -22,10 +22,8 @@
             background: #f9f9f9;
             padding:10px 20px 10px 20px;
         }
-        .container{ margin: 0 auto; max-width: 550px; }
-        .adviceToUser {color: #888;font-size: 1.2em; margin: 10px 0 0 0; font-weight: bold;}
         </style>
-        <div class="container">
+        <div style=" margin: 0 auto; max-width: 550px;">
 
             <div layout horizontal center center-justified>
                 <template if="{{subpage}}">
@@ -71,9 +69,9 @@
                         </div>
                         <div hidden?="{{selectedTags.length > 0}}" layout horizontal center center-justified style="font-size: 0.8em;">
                             <div hidden?="{{isPending || isCancelled}}" style="width: 180px; margin:0 10px 0 0;">
-                                <a class="btn btn-default" on-click="{{showTagDialog}}" style="font-size: 1em; margin:10px 0px 10px 10px;">
+                                <button on-click="{{showTagDialog}}" style="font-size: 1em; margin:10px 0px 10px 10px;">
                                     <i class="fa fa-tag"></i> ${msg.addTagLbl}
-                                </a>
+                                </button>
                             </div>
                             <div hidden?="{{selectedTags.length == 0}}">
                                 ${msg.transactionvsWithTagAdvertMsg}
@@ -86,9 +84,9 @@
                             <template repeat="{{tag in selectedTags}}">
                                 <div layout horizontal center center-justified style="font-size: 0.9em;">
                                     <div layout center center-justified style="display: block;">
-                                        <a class="btn btn-red" on-click="{{removeTag}}" style="margin:0px;
+                                        <button on-click="{{removeTag}}" style="margin:0px;
                                         padding:0px; color:#6c0404;"><i class="fa fa-minus" style="padding: 4px;"></i>
-                                        </a>
+                                        </button>
                                     </div>
                                     <div style="display: block;">
                                         <a class="btn btn-default" data-tagId='{{tag.id}}' style="font-size: 0.9em;
@@ -101,9 +99,9 @@
                     </div>
                 </div>
                 <div hidden?="{{!isWithUserSelector}}">
-                    <a class="btn btn-red" on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
+                    <button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
                         <i class="fa fa-user"></i> {{selectReceptorMsg}}
-                    </a>
+                    </button>
                     <div style="margin:10px 0 0 0;">
                         <vs-user-box flex id="receptorBox" boxCaption="${msg.receptorLbl}"></vs-user-box>
                     </div>
@@ -114,9 +112,9 @@
                 <div flex></div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
                     <div flex></div>
-                    <a class="btn btn-green" on-click="{{submit}}" style="margin: 0 0 5px 5px;">
+                    <button on-click="{{submit}}" style="margin: 0 0 5px 5px;">
                         <i class="fa fa-check" style="color: #388746;"></i> ${msg.acceptLbl}
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -155,7 +153,7 @@
 
         },
         openSearchUserDialog:function(){
-            this.$.userVSSelectorDialog.show()
+            this.$.userVSSelectorDialog.show(this.groupId)
         },
         showTagDialog: function() {
             this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
@@ -190,7 +188,7 @@
                 var child = element.childNodes[i];
                 this.removeErrorStyle(child);
                 if(child != undefined) {
-                    if(child.style != undefined) {
+                    if(child.style != undefined && child.tagName === 'INPUT') {
                         child.style.background = '#fff'
                         child.classList.remove("formFieldError");
                     }

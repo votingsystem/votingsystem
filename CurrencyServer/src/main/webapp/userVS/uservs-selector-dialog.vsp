@@ -2,25 +2,26 @@
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 <link href="${elementURL}/userVS/uservs-selector.vsp" rel="import"/>
 
 
 <polymer-element name="uservs-selector-dialog" attributes="groupVSId groupVSState">
     <template>
-        <paper-dialog id="xDialog" layered backdrop class="uservsSearchDialog" title="${msg.userSearchLbl}"
-                             on-core-overlay-open="{{onCoreOverlayOpen}}" style="overflow: auto;">
-        <style no-shim>
-            .uservsSearchDialog {  width: 700px;  min-height: 300px; padding: 10px 20px; }
-        </style>
+        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop
+                style="overflow: auto;width: 700px;  min-height: 300px;">
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <div id="main">
-                <div>
-                    <vs-user-box flex id="receptorBox" boxCaption="${msg.receptorLbl}"></vs-user-box>
+                <div layout horizontal center center-justified>
+                    <div flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                        <div style="text-align: center;">{{msg.userSearchLbl}}</div>
+                    </div>
+                    <div style="position: absolute; top: 0px; right: 0px;">
+                        <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                    </div>
                 </div>
                 <div>
-                    <uservs-selector id="userVSSelector"></uservs-selector>
+                    <uservs-selector id="userVSSelector" groupVSId="{{groupId}}"></uservs-selector>
                 </div>
             </div>
         </paper-dialog>
@@ -28,18 +29,16 @@
     <script>
         Polymer('uservs-selector-dialog', {
             ready: function() {
-                console.log(this.tagName + " - " + this.id + " - ready")
+                console.log(this.tagName + " - ready")
                 if(document.querySelector("#coreSignals")) {
                     document.querySelector("#coreSignals").addEventListener('core-signal-user-clicked', function(e) {
-                        if(!this.$.xDialog.opened) return;
-                        console.log(this.tagName + " - user-clicked - closing dialog")
                         this.$.xDialog.opened = false
                     }.bind(this));
                 }
             },
-            show: function() {
-                console.log(this.tagName + " - show")
-                this.$.receptorBox.removeUsers()
+            show: function(groupVSId) {
+                console.log(this.tagName + " - show - groupVSId: " + groupVSId)
+                this.$.userVSSelector.groupVSId = groupVSId
                 this.$.xDialog.opened = true
             },
             close: function() {

@@ -130,9 +130,9 @@ public class GroupVSResource {
         }
     }
 
-    @Path("/id/{id}/users")
+    @Path("/id/{id}/searchUsers")
     @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
-    public Response listUsers(@PathParam("id") long id,
+    public Response searchUsers(@PathParam("id") long id,
             @DefaultValue("0") @QueryParam("offset") int offset,
             @DefaultValue("100") @QueryParam("max") int max,
             @DefaultValue("") @QueryParam("searchText") String searchText,
@@ -154,13 +154,13 @@ public class GroupVSResource {
         if(contentType.contains("json")) {
             String queryListPrefix = "select s ";
             String querySufix = "from SubscriptionVS s where s.state =:subscriptionState " +
-                    "and s.userVS.state =:userState and (s.userVS.name like :searchText " +
-                    "or s.userVS.firstName like :searchText or s.userVS.lastName like :searchText " +
-                    "or s.userVS.nif like :searchText)";
+                    "and s.userVS.state =:userState and (lower(s.userVS.name) like :searchText " +
+                    "or lower(s.userVS.firstName) like :searchText or lower(s.userVS.lastName) like :searchText " +
+                    "or lower(s.userVS.nif) like :searchText)";
             String queryCountPrefix = "select COUNT(s) ";
             Query query = dao.getEM().createQuery(queryListPrefix + querySufix)
                     .setParameter("subscriptionState", subscriptionState)
-                    .setParameter("userState", userState).setParameter("searchText", "%" + searchText + "%")
+                    .setParameter("userState", userState).setParameter("searchText", "%" + searchText.toLowerCase() + "%")
                     .setFirstResult(offset).setMaxResults(max);
 
             List<SubscriptionVS> userList = query.getResultList();
@@ -184,7 +184,7 @@ public class GroupVSResource {
 
     @Path("/id/{groupId}/listUsers")
     @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
-    public Response users(@PathParam("groupId") long groupId, @Context ServletContext context,
+    public Response listUsers(@PathParam("groupId") long groupId, @Context ServletContext context,
                           @DefaultValue("0") @QueryParam("offset") int offset,
                           @DefaultValue("100") @QueryParam("max") int max,
                           @QueryParam("state") String stateStr,

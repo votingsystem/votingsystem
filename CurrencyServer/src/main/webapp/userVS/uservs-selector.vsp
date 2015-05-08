@@ -2,11 +2,9 @@
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${resourceURL}/paper-input/paper-input.html" rel="import"/>
-<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 <link href="${resourceURL}/core-localstorage/core-localstorage.html" rel="import"/>
 
-<polymer-element name="uservs-selector" attributes="url contactSelector">
+<polymer-element name="uservs-selector" attributes="url contactSelector groupVSId">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -26,22 +24,22 @@
                 <div layout horizontal center center-justified style="margin:0px auto 0px auto;width: 100%;">
                     <input value="{{textToSearch}}" type="text" style="width:200px;" class="form-control"
                            placeholder="${msg.userSearchLbl}" on-keypress="{{searchInputKeyPress}}">
-                    <paper-button raised on-click="{{processSearch}}" style="margin: 0px 0px 0px 5px;">
+                    <button on-click="{{processSearch}}" style="margin: 0px 0px 0px 5px;">
                         <i class="fa fa-search"></i> ${msg.userSearchLbl}
-                    </paper-button>
+                    </button>
                 </div>
                 <div layout horizontal center center-justified style="width: 200px;">
-                    <paper-button raised on-click="{{toggleContactsView}}" style="margin: 0px 10px 0px 5px;" data-button="contacts">
+                    <button on-click="{{toggleContactsView}}" style="margin: 0px 10px 0px 5px;" data-button="contacts">
                         <i class="fa fa-users"></i> ${msg.contactsLbl}
-                    </paper-button>
+                    </button>
                 </div>
             </div>
             <div hidden?="{{modeSearch}}" horizontal layout center center-justified style="width: 100%;">
                 <div flex style="font-size: 1.5em; font-weight: bold; color: #6c0404; text-align: center;">${msg.storeContactsLbl}</div>
                 <div>
-                    <paper-button raised on-click="{{toggleContactsView}}" style="font-size: 0.8em; margin:10px 0px 10px 10px;" data-button="userSearch">
+                    <button on-click="{{toggleContactsView}}" style="font-size: 0.8em; margin:10px 0px 10px 10px;" data-button="userSearch">
                         <i class="fa fa-search"></i> ${msg.userSearchLbl}
-                    </paper-button>
+                    </button>
                 </div>
             </div>
             <div hidden?="{{resultList.length === 0}}" style="display: block;">
@@ -54,9 +52,9 @@
                             </div>
                             <div>
                                 <div hidden?="{{isContactButtonVisible(uservs)}}">
-                                    <paper-button raised on-click="{{toggleContact}}" style="font-size: 0.7em; margin:0 0 0 0;">
+                                    <button on-click="{{toggleContact}}" style="font-size: 0.7em; margin:0 0 0 0;">
                                         {{modeSearch? '${msg.addContactLbl}':'${msg.removeContactLbl}'}}
-                                    </paper-button>
+                                    </button>
                                 </div>
                                 <div flex horizontal layout center center-justified class="nif">{{uservs.nif}}</div>
                             </div>
@@ -146,7 +144,9 @@
             },
             processSearch:function() {
                 if(this.textToSearch.trim() === "") return
-                this.url = "${restURL}/userVS/search?searchText=" + this.textToSearch
+                if(this.groupVSId) this.url = "${restURL}/groupVS/id/" + this.groupVSId + "/searchUsers?searchText=" + this.textToSearch
+                else this.url = "${restURL}/userVS/search?searchText=" + this.textToSearch
+                console.log(this.tagName + " - processSearch - url: " + this.url)
                 this.$.ajax.go()
             },
             toggleContactsView:function(event, detail, target) {

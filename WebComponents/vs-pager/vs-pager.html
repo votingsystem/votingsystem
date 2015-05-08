@@ -33,6 +33,9 @@
             currentpage:0,
             previous: "<< Prev",
             next: "Next >>",
+            ready:function() {
+                this.style.display = 'none'
+            },
             totalChanged: function(){
                 if(typeof this.total === 'undefined') return
                 this.pageCount = Math.ceil(this.total/this.max) -1

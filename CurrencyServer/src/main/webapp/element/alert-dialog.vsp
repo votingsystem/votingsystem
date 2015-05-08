@@ -12,7 +12,7 @@
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop class="votingsystemMessageDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop class="votingsystemMessageDialog">
             <style no-shim>
             .votingsystemMessageDialog {
                 top: 150px;
@@ -50,7 +50,6 @@
             ready: function() {
                 this.isConfirmMessage = this.isConfirmMessage || false
             },
-            onCoreOverlayOpen:function(e) { },
             setMessage: function(message, caption, callerId, isConfirmMessage) {
                 this.reset()
                 this.message = message

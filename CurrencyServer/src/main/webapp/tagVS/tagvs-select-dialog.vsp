@@ -16,7 +16,7 @@
         <vs-i18n id="i18nVS"></vs-i18n>
         <div layout vertical>
             <div layout horizontal center center-justified style="margin:0 0 10px 0;">
-                <div hidden?="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                <div hidden?="{{!caption}}" flex style="top: -10px;font-size: 1.3em; font-weight: bold; color:#6c0404;">
                     <div style="text-align: center;">${msg.addTagLbl}</div>
                 </div>
                 <div style="position: absolute; top: 0px; right: 0px;">
@@ -38,7 +38,7 @@
             <div layout horizontal center center-justified>
                 <input id="tagSearchInput" class="form-control" required autofocus
                        title="{{messages.tagLbl}}" placeholder="{{messages.tagLbl}}"/>
-                <button on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px; width: 100px;">
+                <button on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px; width: 120px;">
                     <i class="fa fa-search"></i> {{messages.tagSearchLbl}}
                 </button>
             </div>

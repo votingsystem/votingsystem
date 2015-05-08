@@ -10,6 +10,8 @@ body {
 }
 .linkvs{}
 
+button i {color: #888; }
+
 paper-button i {padding: 0px 0px 0px 5px; }
 
 paper-button {
@@ -295,8 +297,8 @@ fieldset[disabled] .btn-default.active {
 .form-control {
     display: block;
     width: 100%;
-    height: 27px;
-    padding: 0px 7px;
+    height: 25px;
+    padding: 0px 5px;
     font-size: 14px;
     color: #555;
     background-color: #fff;

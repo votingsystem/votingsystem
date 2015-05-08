@@ -206,10 +206,10 @@ public class UserVSResource {
 
     private Response processSearch(String searchText, int offset, int max) throws Exception {
         Query query = dao.getEM().createQuery("select u from UserVS u where u.state =:state and u.type =:type " +
-                "and (u.name like :searchText or u.firstName like :searchText or u.lastName like :searchText " +
-                "or u.nif like :searchText)").setParameter("type", UserVS.Type.USER)
+                "and (lower(u.name) like :searchText or lower(u.firstName) like :searchText or lower(u.lastName) like :searchText " +
+                "or lower(u.nif) like :searchText)").setParameter("type", UserVS.Type.USER)
                 .setParameter("state", UserVS.State.ACTIVE)
-                .setParameter("searchText", "%" + searchText + "%")
+                .setParameter("searchText", "%" + searchText.toLowerCase() + "%")
                 .setFirstResult(offset).setMaxResults(max);
         List<UserVS> userVSList = query.getResultList();
         List<UserVSDto> resultList = new ArrayList<>();
