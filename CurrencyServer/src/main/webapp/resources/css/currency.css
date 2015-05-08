@@ -116,24 +116,6 @@ paper-tabs.transparent-teal paper-tab::shadow #ink {
     margin:7px 0px 7px 0px;
 }
 
-.dialogAdviceMsg {
-    font-size: 1.3em;
-    font-weight:bold;
-    color: #ba0011;
-    margin:10px auto 15px auto;
-}
-
-.fieldsBox {
-    margin: 10px auto 30px auto;
-    width: 80%;
-}
-
-.fieldsBox legend {
-    font-size: 1.2em;
-    font-weight: bold;
-    color:#6c0404;
-}
-
 .eventContentDiv {
     border: #f2f2f2 solid 1px;
     background: #f9f9f9;

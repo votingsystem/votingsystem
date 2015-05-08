@@ -96,13 +96,13 @@
                 <div layout horizontal>
                     <div flex hidden?="{{smallScreen?(selectedTab !== 'incomesTab'):false}}"
                          style=" margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
-                        <transactionvs-list-balance caption="${msg.incomesLbl}" captionVisible={{!smallScreen}}
+                        <transactionvs-list-balance caption="${msg.incomesLbl}"
                                 transactionList="{{balance.transactionToList}}"
                                 balances="{{balance.balancesTo}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
                     </div>
                     <div  hidden?="{{smallScreen}}" style="width: 1px; border-right: 2px solid  #6c0404; margin:0 10px 0 10px;"></div>
                     <div hidden?="{{smallScreen?(selectedTab !== 'expensesTab'):false}}" flex>
-                        <transactionvs-list-balance id="balanceFromItem" captionVisible={{!smallScreen}}
+                        <transactionvs-list-balance id="balanceFromItem"
                                 transactionList="{{balance.transactionFromList}}" balances="{{balance.balancesFrom}}"
                                 on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
                     </div>

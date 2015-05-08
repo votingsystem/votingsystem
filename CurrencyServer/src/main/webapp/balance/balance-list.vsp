@@ -11,12 +11,13 @@
             .tableHeadervs {
                 margin: 0px 0px 0px 0px;
                 color:#6c0404;
-                background: white;
                 border-bottom: 1px solid #6c0404;
+                background: white;
                 font-weight: bold;
                 padding:5px 0px 5px 0px;
                 width: 100%;
             }
+
             .tableHeadervs div {
                 text-align:center;
             }

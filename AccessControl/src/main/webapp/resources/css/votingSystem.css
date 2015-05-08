@@ -295,21 +295,6 @@ hr {
     display: none;
 }
 
-.fieldsBox {
-    margin: 10px auto 30px auto;
-    width: 80%;
-}
-
-.fieldsBox fieldset{
-    border: 1px solid #ccc;
-}
-
-.fieldsBox legend {
-    font-size: 1.2em;
-    font-weight: bold;
-    color:#6c0404;
-}
-
 .eventMessagePanel {
     padding: 7px 12px 7px 12px;
     margin: 20px auto 20px auto;
