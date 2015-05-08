@@ -2,8 +2,8 @@
 
 <polymer-element name="reason-dialog" attributes="caption messageToUser">
     <template>
-        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop>
-            <div id="container" layout vertical style="overflow-y: auto; border: 1px solid #6c0404;">
+        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop style="border: 1px solid #6c0404;">
+            <div id="container" layout vertical>
                 <div layout horizontal center center-justified>
                     <div hidden?="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">{{caption}}</div>

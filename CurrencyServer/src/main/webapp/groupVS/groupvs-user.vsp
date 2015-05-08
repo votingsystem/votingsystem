@@ -75,9 +75,10 @@
                         var caption = '${msg.deActivateUserERRORLbl}'
                         if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                             caption = "${msg.deActivateUserOKLbl}"
+                            this.opened = false
+                            this.fire('core-signal', {name: "refresh-uservs-list", data: {uservs: this.userId}});
                         }
-                        var msg = appMessageJSON.message
-                        showMessageVS(msg, caption)
+                        showMessageVS(appMessageJSON.message, caption)
                     }.bind(this))
                     VotingSystemClient.setMessage(operationVS);
                 }.bind(this))
