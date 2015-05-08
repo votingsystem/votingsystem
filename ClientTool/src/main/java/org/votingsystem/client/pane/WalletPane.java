@@ -23,6 +23,7 @@ import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.currency.Wallet;
+
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;

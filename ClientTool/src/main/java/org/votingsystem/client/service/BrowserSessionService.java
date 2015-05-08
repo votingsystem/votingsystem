@@ -390,6 +390,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString());
                     showMessage(ResponseVS.SC_OK, ContextVS.getMessage("certInstallOKMsg"));
                     csrFile.delete();
+                    currentResponseVS = null;
                 } catch (Exception ex) {
                     showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                 }

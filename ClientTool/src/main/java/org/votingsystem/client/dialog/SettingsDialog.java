@@ -21,11 +21,13 @@ import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.TypeVS;
+
 import java.io.File;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import static org.votingsystem.client.Browser.showMessage;
 
 /**
