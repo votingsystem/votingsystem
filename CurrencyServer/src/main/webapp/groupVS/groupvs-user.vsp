@@ -11,7 +11,7 @@
         <paper-dialog id="xDialog" autoCloseDisabled layered backdrop class="uservsDialog" style="border: 1px solid #6c0404;">
             <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-            <core-ajax id="ajax" auto url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
+            <core-ajax id="ajax" url="{{url}}" response="{{subscriptionData}}" handleAs="json" method="get"
                        contentType="application/json" on-core-response="{{ajaxResponse}}"></core-ajax>
             <div layout vertical>
                 <div layout horizontal center center-justified>
@@ -57,6 +57,7 @@
     <script>
         Polymer('groupvs-user', {
             isClientToolConnected:false,
+            publish: { subscriptionData: {}},
             ready :  function(e) {
                 this.menuType = menuType
                 this.isClientToolConnected = window['isClientToolConnected']
@@ -91,10 +92,16 @@
             openedChanged:function() {
                 this.async(function() { this.$.xDialog.opened = this.opened});
             },
+            subscriptionDataChanged:function() {
+                console.log(this.tagName + "subscriptionDataChanged - subscriptionData: " + this.subscriptionData)
+            },
             show:function(baseURL, userId) {
-                this.subscriptionDataURLPrefix = baseURL
-                this.userId = userId
-                this.$.ajax.url = this.subscriptionDataURLPrefix + "/" + this.userId
+                if(baseURL && userId) {
+                    this.subscriptionDataURLPrefix = baseURL
+                    this.userId = userId
+                    this.$.ajax.url = this.subscriptionDataURLPrefix + "/" + this.userId
+                    this.$.ajax.go()
+                }
                 this.$.xDialog.opened = true
             },
             activateUser : function(e) {
