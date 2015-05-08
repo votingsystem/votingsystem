@@ -96,7 +96,7 @@ public class RepresentativeEditorDialog extends DialogVS {
                 publishButton.setText(ContextVS.getMessage("saveLbl"));
                 setCaption(ContextVS.getMessage("editRepresentativeLbl"));
                 ProgressDialog.showDialog(new FetchRepresentativeDataTask(operationVS.getNif()),
-                        ContextVS.getMessage("editRepresentativeLbl"), getStage());
+                        ContextVS.getMessage("editRepresentativeLbl"));
                 break;
         }
         if(operationVS.getJsonStr() != null) {

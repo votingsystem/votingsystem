@@ -67,7 +67,7 @@ public class BrowserVSMenuButton extends MenuButton {
         walletMenuItem = new MenuItem(ContextVS.getMessage("walletLbl"));
         walletMenuItem.setVisible(false);
         walletMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.MONEY));
-        walletMenuItem.setOnAction(event -> WalletPane.showDialog(Browser.getInstance().getScene().getWindow()));
+        walletMenuItem.setOnAction(event -> WalletPane.showDialog());
 
         MenuItem settingsMenuItem = new MenuItem(ContextVS.getMessage("settingsLbl"));
         settingsMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.COG));

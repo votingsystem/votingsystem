@@ -111,7 +111,7 @@ public class GroupVSEditorDialog extends DialogVS implements AddTagVSDialog.List
         switch (operationVS.getType()) {
             case CURRENCY_GROUP_EDIT:
                 ProgressDialog.showDialog(new FetchGroupVSDataTask(operationVS.getMessage()),
-                        ContextVS.getMessage("editGroupVSLbl"), getStage());
+                        ContextVS.getMessage("editGroupVSLbl"));
                 setCaption(ContextVS.getMessage("editGroupVSLbl"));
                 addTagVSButton.setVisible(false);
                 tagVSButton.setDisable(true);
@@ -119,7 +119,7 @@ public class GroupVSEditorDialog extends DialogVS implements AddTagVSDialog.List
                 break;
             case CURRENCY_GROUP_NEW:
                 ProgressDialog.showDialog(new FetchGroupVSDataTask(operationVS.getNif()),
-                        ContextVS.getMessage("newGroupVSLbl"), getStage());
+                        ContextVS.getMessage("newGroupVSLbl"));
                 setCaption(ContextVS.getMessage("newGroupVSLbl"));
                 addTagVSButton.setVisible(true);
                 tagVSButton.setVisible(false);

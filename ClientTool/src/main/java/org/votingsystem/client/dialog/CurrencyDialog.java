@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
+import org.votingsystem.client.Browser;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.util.DocumentVS;
@@ -173,14 +174,14 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
         }
     }
 
-    public static void show(final Currency currency, Window owner) {
+    public static void show(final Currency currency) {
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 try {
                     CurrencyDialog currencyDialog = new CurrencyDialog(currency);
                     if(stage == null) {
                         stage = new Stage(StageStyle.TRANSPARENT);
-                        stage.initOwner(owner);
+                        if(Browser.getInstance() != null) stage.initOwner(Browser.getInstance().getScene().getWindow());
                         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
                     }
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Currency.fxml"));
@@ -215,13 +216,13 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
         TransactionVSDto transactionVSDto = TransactionVSDto.CURRENCY_SEND(toUserName, subject, currency.getAmount(),
                 currency.getCurrencyCode(), toUserIBAN, isTimeLimited, currency.getTag().getName());
         ProgressDialog.showDialog(new ProcessFormTask(transactionVSDto, currency, currencyServer),
-                ContextVS.getMessage("sendingMoneyLbl"), stage);
+                ContextVS.getMessage("sendingMoneyLbl"));
     }
 
     @Override public void setSelectedDevice(DeviceVSDto device) {
         log.info("setSelectedDevice - device: " + device.getDeviceName());
         walletChangeTask = new WalletChangeTask(device);
-        ProgressDialog.showDialog(walletChangeTask, ContextVS.getMessage("changeWalletLbl"), stage);
+        ProgressDialog.showDialog(walletChangeTask, ContextVS.getMessage("changeWalletLbl"));
     }
 
     public  class WalletChangeTask extends Task<ResponseVS> {

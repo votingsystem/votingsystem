@@ -72,8 +72,7 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
                     return;
                 }
                 if(backup.getName().endsWith(ContentTypeVS.CURRENCY.getExtension())) {
-                    CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(backup)),
-                            Browser.getInstance().getScene().getWindow());
+                    CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(backup)));
                 } else {
                     openFile(backup);
                 }

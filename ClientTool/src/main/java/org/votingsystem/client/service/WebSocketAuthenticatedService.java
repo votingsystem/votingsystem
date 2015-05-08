@@ -154,7 +154,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
 
     private void connect(String password) {
         ProgressDialog.showDialog(new InitValidatedSessionTask(password, targetServer),
-                ContextVS.getMessage("connectLbl"), Browser.getWindow());
+                ContextVS.getMessage("connectLbl"));
     }
 
     public void setConnectionEnabled(boolean isConnectionEnabled){

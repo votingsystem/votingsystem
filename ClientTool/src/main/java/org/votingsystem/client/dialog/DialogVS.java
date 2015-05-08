@@ -94,6 +94,11 @@ public class DialogVS {
         stage.toFront();
     }
 
+    public void show(String caption) {
+        setCaption(caption);
+        show();
+    }
+
     public void hide() {
         try {
             stage.close();

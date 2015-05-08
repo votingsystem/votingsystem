@@ -119,7 +119,7 @@
                 }
             },
             showCurrency: function(e) {
-                var operationVS = new OperationVS(Operation.OPEN_CURRENCY)
+                var operationVS = new OperationVS(Operation.CURRENCY_OPEN)
                 operationVS.message = e.target.templateInstance.model.currency.object
                 operationVS.setCallback(function(appMessage) {
                     console.log("showCurrency - message: " + appMessage);

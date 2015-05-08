@@ -69,9 +69,8 @@ public class BrowserVSClient implements PasswordDialog.Listener {
                     DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(smimeMessageStr, null);
                     Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
                     break;
-                case OPEN_CURRENCY:
-                    CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject((operationVS.getMessage()).getBytes()),
-                            Browser.getInstance().getScene().getWindow());
+                case CURRENCY_OPEN:
+                    CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject((operationVS.getMessage()).getBytes()));
                     break;
                 case OPEN_SMIME_FROM_URL:
                     Browser.getInstance().processOperationVS(null, operationVS);
@@ -92,7 +91,7 @@ public class BrowserVSClient implements PasswordDialog.Listener {
                     Browser.getInstance().processOperationVS(operationVS, ContextVS.getMessage("newCertPasswDialogMsg"));
                     break;
                 case WALLET_OPEN:
-                    WalletPane.showDialog(Browser.getInstance().getScene().getWindow());
+                    WalletPane.showDialog();
                     break;
                 case VOTING_PUBLISHING:
                     ElectionEditorDialog.show(operationVS, Browser.getInstance().getScene().getWindow());

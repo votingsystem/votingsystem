@@ -112,8 +112,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
                 HBox result = new HBox();
                 Button checkVoteButton = new Button(ContextVS.getMessage("checkVoteLbl"));
                 checkVoteButton.setOnAction(actionEvent -> ProgressDialog.showDialog(new CheckVoteTask(
-                        signedFile.getSMIME().getVoteVS().getX509Certificate()), ContextVS.getMessage("checkVoteLbl"),
-                        Browser.getInstance().getScene().getWindow()));
+                        signedFile.getSMIME().getVoteVS().getX509Certificate()), ContextVS.getMessage("checkVoteLbl")));
                 result.getChildren().add(checkVoteButton);
                 return result;
             default: return Utils.getSpacer();
