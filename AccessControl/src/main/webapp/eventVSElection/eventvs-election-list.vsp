@@ -35,7 +35,7 @@
                     </div>
                     <div layout flex horizontal wrap around-justified>
                         <template repeat="{{eventvs in resultListDto.resultList}}">
-                            <div on-tap="{{showEventVSDetails}}" class='card eventDiv linkvs {{getEventVSClass(eventvs.state)}}'>
+                            <div on-tap="{{showEventVSDetails}}" class='card eventDiv {{getEventVSClass(eventvs.state)}}'>
                                 <div layout horizontal center center-justified eventvsId-data="{{eventvs.id}}" class='eventSubjectDiv'>
                                     {{getSubject(eventvs.subject)}}
                                 </div>

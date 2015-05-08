@@ -24,12 +24,12 @@
                 <div layout horizontal center center-justified style="margin:0px auto 0px auto;width: 100%;">
                     <input value="{{textToSearch}}" type="text" style="width:200px;" class="form-control"
                            placeholder="${msg.userSearchLbl}" on-keypress="{{searchInputKeyPress}}">
-                    <button on-click="{{processSearch}}" style="margin: 0px 0px 0px 5px;">
+                    <button on-click="{{processSearch}}" style="font-size: 1.2em;margin: 0px 0px 0px 5px;">
                         <i class="fa fa-search"></i> ${msg.userSearchLbl}
                     </button>
                 </div>
                 <div layout horizontal center center-justified style="width: 200px;">
-                    <button on-click="{{toggleContactsView}}" style="margin: 0px 10px 0px 5px;" data-button="contacts">
+                    <button on-click="{{toggleContactsView}}" style="font-size: 1.1em;margin: 0px 10px 0px 5px;" data-button="contacts">
                         <i class="fa fa-users"></i> ${msg.contactsLbl}
                     </button>
                 </div>
@@ -37,7 +37,7 @@
             <div hidden?="{{modeSearch}}" horizontal layout center center-justified style="width: 100%;">
                 <div flex style="font-size: 1.5em; font-weight: bold; color: #6c0404; text-align: center;">${msg.storeContactsLbl}</div>
                 <div>
-                    <button on-click="{{toggleContactsView}}" style="font-size: 0.8em; margin:10px 0px 10px 10px;" data-button="userSearch">
+                    <button on-click="{{toggleContactsView}}" style="font-size: 1.1em;margin:10px 0px 10px 10px;" data-button="userSearch">
                         <i class="fa fa-search"></i> ${msg.userSearchLbl}
                     </button>
                 </div>

@@ -40,7 +40,7 @@
                             <i class="fa fa-thumbs-o-down"></i> ${msg.deActivateUserLbl}
                         </button>
                     </div>
-                    <button on-click="{{goToUserVSPage}}">
+                    <button class="btnvs" on-click="{{goToUserVSPage}}">
                         <i class="fa fa-user"></i> ${msg.userVSPageLbl}
                     </button>
                 </div>

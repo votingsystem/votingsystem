@@ -278,23 +278,12 @@ function updateMenuLinks() {
     var attr = 'href'
     var elems = document.getElementsByTagName(elem);
     var arrayElements = Array.prototype.slice.call(elems);
-    var groupElements = document.getElementsByClassName('linkvs');
-    arrayElements.concat(Array.prototype.slice.call(groupElements))
     for (var i = 0; i < elems.length; i++) {
         if(elems[i][attr].indexOf("mailto:") > -1) continue
         if(elems[i][attr].indexOf("menu=" + menuType) < 0) {
             if(elems[i][attr].indexOf("?") < 0) {
                 elems[i][attr] = elems[i][attr] + "?menu=" + menuType;
             } else elems[i][attr] = elems[i][attr] + "&menu=" + menuType;
-        }
-    }
-    for (var j = 0; j < groupElements.length; j++) {
-        var attrValue = groupElements[j].getAttribute("data-href")
-        if(attrValue == null) continue
-        if(attrValue.indexOf("menu=" + menuType) < 0) {
-            if(attrValue.indexOf("?") < 0) {
-                groupElements[j].setAttribute("data-href", attrValue + "?menu=" + menuType )
-            } else groupElements[j].setAttribute("data-href", attrValue + "&menu=" + menuType );
         }
     }
 }

@@ -110,11 +110,10 @@
                         <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i>{{tag.name}}</a>
                 </template>
             </div>
-            <div class="linkVS" style="margin: 5px 0 0 0;" on-click="{{goToWeekBalance}}">
+            <div style="margin: 5px 0 0 0;" on-click="{{goToWeekBalance}}">
                 <a class="btn btn-red"  style="font-size: 0.8em;">
                     <i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}
                 </a>
-
             </div>
             <div flex></div>
             <div style="margin:5px 10px 0 0; font-size: 0.9em; color:#888;">

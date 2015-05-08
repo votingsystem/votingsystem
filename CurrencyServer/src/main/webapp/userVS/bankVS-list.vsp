@@ -13,7 +13,7 @@
         <div layout flex horizontal wrap around-justified>
             <template repeat="{{bankVS in bankVSListDto}}">
                 <div class="bankvs" on-click="{{showDetails}}')">
-                    <div class="nameColumn linkVS" style="font-size: 1.2em;">{{bankVS.name}}</div>
+                    <div class="nameColumn" style="font-size: 1.2em;">{{bankVS.name}}</div>
                     <div class="descriptionColumn">{{bankVS.description}}</div>
                 </div>
             </template>

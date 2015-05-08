@@ -34,9 +34,9 @@ public class TimeStampRequest {
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         simulationData = new SimulationData();
-        simulationData.setServerURL("http://www.sistemavotacion.org/TimeStampServer");
-        simulationData.setMaxPendingResponses(10);
-        simulationData.setNumRequestsProjected(10);
+        simulationData.setServerURL("http://currency:8080/TimeStampServer");
+        simulationData.setMaxPendingResponses(1);
+        simulationData.setNumRequestsProjected(1);
         Map timerMap = new HashMap<>();
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");

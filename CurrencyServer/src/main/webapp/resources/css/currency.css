@@ -8,9 +8,8 @@ body {
     margin: 0 auto 0 auto;
     padding: 0 0px 0 0px;
 }
-.linkvs{}
 
-button i {color: #888; }
+button i{color: #888; }
 
 paper-button i {padding: 0px 0px 0px 5px; }
 
@@ -168,6 +167,7 @@ paper-button.button {
 .text-center {
     text-align: center;
 }
+
 /*This is from bootstrap http://getbootstrap.com/css/*/
 .btn {
     display: inline-block;

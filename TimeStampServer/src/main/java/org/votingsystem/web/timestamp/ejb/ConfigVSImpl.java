@@ -4,6 +4,7 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -51,6 +52,7 @@ public class ConfigVSImpl implements ConfigVS {
             URL res = Thread.currentThread().getContextClassLoader().getResource(resourceFile);
             props.load(res.openStream());
             contextURL = (String) props.get("vs.contextURL");
+            ContextVS.getInstance();
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

@@ -38,7 +38,7 @@
             <div layout horizontal center center-justified>
                 <input id="tagSearchInput" class="form-control" required autofocus
                        title="{{messages.tagLbl}}" placeholder="{{messages.tagLbl}}"/>
-                <button on-click="{{searchTag}}" style="margin: 0px 0px 0px 5px; width: 120px;">
+                <button on-click="{{searchTag}}" style="font-size: 1.1em;margin: 0px 0px 0px 5px; width: 140px;">
                     <i class="fa fa-search"></i> {{messages.tagSearchLbl}}
                 </button>
             </div>
@@ -60,7 +60,7 @@
 
             <div layout horizontal style="margin:20px 0 0 0;">
                 <div flex></div>
-                <button on-click="{{processTags}}">
+                <button on-click="{{processTags}}" style="font-size: 1.1em;">
                     <i class="fa fa-check" style="color: #388746;"></i> {{messages.acceptLbl}}
                 </button>
             </div>

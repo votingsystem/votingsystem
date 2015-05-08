@@ -50,9 +50,12 @@
             <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
                 <div>
                     <div horizontal layout center center-justified>
-                        <input type="text" id="amount" class="form-control" style="width:150px;margin:0 10px 0 0;" pattern="^[0-9]*$" required
-                               title="${msg.amountLbl}" placeholder="${msg.amountLbl}"/>
-                        <vs-currency-selector id="currencySelector"></vs-currency-selector>
+                        <div>
+                            <input type="text" id="amount" class="form-control"
+                                   style="width:150px;margin:7px 10px 0 0;" pattern="^[0-9]*$" required
+                                   title="${msg.amountLbl}" placeholder="${msg.amountLbl}"/>
+                        </div>
+                        <div><vs-currency-selector id="currencySelector"></vs-currency-selector></div>
                     </div>
                     <div>
                         <input type="text" id="transactionvsSubject" class="form-control" required
@@ -99,7 +102,7 @@
                     </div>
                 </div>
                 <div hidden?="{{!isWithUserSelector}}">
-                    <button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;">
+                    <button on-click="{{openSearchUserDialog}}" style="margin: 0 0 5px 5px;font-size: 1.2em;">
                         <i class="fa fa-user"></i> {{selectReceptorMsg}}
                     </button>
                     <div style="margin:10px 0 0 0;">
@@ -112,7 +115,7 @@
                 <div flex></div>
                 <div layout horizontal style="margin:10px 20px 0px 0px;">
                     <div flex></div>
-                    <button on-click="{{submit}}" style="margin: 0 0 5px 5px;">
+                    <button on-click="{{submit}}" style="margin: 0 0 5px 5px;font-size: 1.2em;">
                         <i class="fa fa-check" style="color: #388746;"></i> ${msg.acceptLbl}
                     </button>
                 </div>
