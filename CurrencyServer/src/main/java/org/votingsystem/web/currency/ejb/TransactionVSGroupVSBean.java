@@ -80,7 +80,6 @@ public class TransactionVSGroupVSBean {
         }
     }
 
-
     public GroupVS validateRequest(TransactionVSDto dto) throws ValidationExceptionVS {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         Query query = dao.getEM().createNamedQuery("findUserByRepresentativeAndIBAN").setParameter(

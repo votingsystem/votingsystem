@@ -3,6 +3,7 @@ package org.votingsystem.web.currency.jaxrs;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.SubscriptionVSDto;
@@ -164,15 +165,15 @@ public class GroupVSResource {
                     .setFirstResult(offset).setMaxResults(max);
 
             List<SubscriptionVS> userList = query.getResultList();
-            List<SubscriptionVSDto> resultList = new ArrayList<>();
+            List<UserVSDto> resultList = new ArrayList<>();
             for(SubscriptionVS subscriptionVS : userList) {
-                resultList.add(SubscriptionVSDto.DETAILED(subscriptionVS, config.getRestURL()));
+                resultList.add(UserVSDto.COMPLETE(subscriptionVS.getUserVS()));
             }
             query = dao.getEM().createQuery(queryCountPrefix + querySufix)
                     .setParameter("subscriptionState", subscriptionState)
-                    .setParameter("userState", userState).setParameter("searchText", "%" + searchText + "%");
+                    .setParameter("userState", userState).setParameter("searchText", "%" + searchText.toLowerCase() + "%");
             totalCount = (long) query.getSingleResult();
-            ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
+            ResultListDto resultListDto = new ResultListDto(resultList, offset, resultList.size(), totalCount);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         } else {
             req.setAttribute("groupVSId", groupVS.getId());

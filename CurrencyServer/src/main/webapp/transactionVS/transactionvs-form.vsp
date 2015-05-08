@@ -86,14 +86,10 @@
                             <div>${msg.selectedTagsAdvice}</div>
                             <template repeat="{{tag in selectedTags}}">
                                 <div layout horizontal center center-justified style="font-size: 0.9em;">
-                                    <div layout center center-justified style="display: block;">
-                                        <button on-click="{{removeTag}}" style="margin:0px;
-                                        padding:0px; color:#6c0404;"><i class="fa fa-minus" style="padding: 4px;"></i>
-                                        </button>
-                                    </div>
                                     <div style="display: block;">
-                                        <a class="btn btn-default" data-tagId='{{tag.id}}' style="font-size: 0.9em;
-                                        margin:5px 5px 0px 5px;padding:3px;"><i class="fa fa-tag"></i> {{tag.name}}
+                                        <a class="btn btn-default" data-tagId='{{tag.id}}'  on-click="{{removeTag}}"
+                                           style="font-size: 0.9em;margin:5px 5px 0px 5px;padding:3px;">
+                                            <i class="fa fa-minus" style="color:#6c0404;"></i> {{tag.name}}
                                         </a>
                                     </div>
                                 </div>
@@ -109,7 +105,7 @@
                         <vs-user-box flex id="receptorBox" boxCaption="${msg.receptorLbl}"></vs-user-box>
                     </div>
                 </div>
-                <div hidden?="{{isWithUserSelector}}" style="margin:10px 0 0 0; text-align: center; font-weight: bold; color:#6c0404;">
+                <div hidden?="{{isWithUserSelector}}" style="margin:10px 0 0 0;text-align:center;font-weight:bold;color:#6c0404;">
                     {{selectReceptorMsg}}
                 </div>
                 <div flex></div>
@@ -148,12 +144,10 @@
                     if(this.$.receptorBox) this.$.receptorBox.addUser(e.detail)
                 }.bind(this));
             }
-
             this.$.tagDialog.addEventListener('tag-selected', function (e) {
                 console.log("tag-selected: " + JSON.stringify(e.detail))
                 this.selectedTags = e.detail
             }.bind(this))
-
         },
         openSearchUserDialog:function(){
             this.$.userVSSelectorDialog.show(this.groupId)

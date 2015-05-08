@@ -30,7 +30,7 @@
                 <div flex horizontal wrap layout>
                     <template repeat="{{tag in selectedTagList}}">
                         <div><a class="btn btn-default" on-click="{{removeTag}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
-                            {{tag.name}} <i class="fa fa-minus"></i></a></div>
+                            <i class="fa fa-minus"></i> {{tag.name}}</a></div>
                     </template>
                 </div>
             </div>
@@ -38,7 +38,7 @@
             <div layout horizontal center center-justified>
                 <input id="tagSearchInput" class="form-control" required autofocus
                        title="{{messages.tagLbl}}" placeholder="{{messages.tagLbl}}"/>
-                <button on-click="{{searchTag}}" style="font-size: 1.1em;margin: 0px 0px 0px 5px; width: 140px;">
+                <button on-click="{{searchTag}}" style="font-size: 1.1em;margin: 0px 0px 0px 5px; width: 160px;">
                     <i class="fa fa-search"></i> {{messages.tagSearchLbl}}
                 </button>
             </div>
@@ -53,7 +53,7 @@
                 <div flex horizontal wrap layout center center-justified>
                     <template repeat="{{tag in searchResultTagList}}">
                         <a class="btn btn-default" on-click="{{selectTag}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
-                            {{tag.name}} <i class="fa fa-plus" style="color: #6c0404;"></i></a>
+                            <i class="fa fa-plus" style="color: #6c0404;"></i> {{tag.name}}</a>
                     </template>
                 </div>
             </div>

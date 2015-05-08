@@ -21,7 +21,7 @@
                     </div>
                 </div>
                 <div>
-                    <uservs-selector id="userVSSelector" groupVSId="{{groupId}}"></uservs-selector>
+                    <uservs-selector id="userVSSelector" groupVSId="{{groupId}}" contactSelector="false"></uservs-selector>
                 </div>
             </div>
         </paper-dialog>
@@ -42,6 +42,7 @@
                 this.$.xDialog.opened = true
             },
             close: function() {
+                this.$.userVSSelector.reset()
                 this.$.xDialog.opened = false
             }
         });

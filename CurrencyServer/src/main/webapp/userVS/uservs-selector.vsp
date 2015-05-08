@@ -10,7 +10,7 @@
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .card {
-                position: relative; display:inline-block; width: 300px; vertical-align: top;
+                width: 300px; vertical-align: top;
                 background-color: #f9f9f9; box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
                 border: 1px solid rgba(0, 0, 0, 0.24); margin: 10px; color: #667; cursor: pointer; padding: 5px;
             }
@@ -20,15 +20,12 @@
         <core-ajax id="ajax" url="{{url}}" response="{{responseData}}" handleAs="json" method="get" on-core-response="{{responseDataReceived}}"
                    contentType="application/json"></core-ajax>
         <div vertical layout center>
-            <div hidden?="{{!modeSearch}}" horizontal layout>
-                <div layout horizontal center center-justified style="margin:0px auto 0px auto;width: 100%;">
+            <div hidden?="{{!modeSearch}}" horizontal layout style="width: 100%;">
+                <div layout horizontal center center-justified flex style="margin:0px auto 0px auto;">
                     <input value="{{textToSearch}}" type="text" style="width:200px;" class="form-control"
                            placeholder="${msg.userSearchLbl}" on-keypress="{{searchInputKeyPress}}">
-                    <button on-click="{{processSearch}}" style="font-size: 1.2em;margin: 0px 0px 0px 5px;">
-                        <i class="fa fa-search"></i> ${msg.userSearchLbl}
-                    </button>
                 </div>
-                <div layout horizontal center center-justified style="width: 200px;">
+                <div hidden?="{{!contactSelector}}">
                     <button on-click="{{toggleContactsView}}" style="font-size: 1.1em;margin: 0px 10px 0px 5px;" data-button="contacts">
                         <i class="fa fa-users"></i> ${msg.contactsLbl}
                     </button>
@@ -37,21 +34,21 @@
             <div hidden?="{{modeSearch}}" horizontal layout center center-justified style="width: 100%;">
                 <div flex style="font-size: 1.5em; font-weight: bold; color: #6c0404; text-align: center;">${msg.storeContactsLbl}</div>
                 <div>
-                    <button on-click="{{toggleContactsView}}" style="font-size: 1.1em;margin:10px 0px 10px 10px;" data-button="userSearch">
-                        <i class="fa fa-search"></i> ${msg.userSearchLbl}
+                    <button on-click="{{toggleContactsView}}" style="font-size: 1.1em;margin:10px 0px 10px 10px; display: block;" data-button="userSearch">
+                        <i class="fa fa-search"></i> ${msg.searchLbl}
                     </button>
                 </div>
             </div>
-            <div hidden?="{{resultList.length === 0}}" style="display: block;">
-                <div layout flex horizontal wrap around-justified >
-                    <template repeat="{{uservs in resultList}}">
-                        <div horizontal layout  class="card" on-click="{{showUserDetails}}">
+            <div horizontal layout wrap around-justified >
+                <template repeat="{{uservs in resultList}}">
+                    <div class="card" style="display: block;">
+                        <div horizontal layout on-click="{{showUserDetails}}">
                             <div layout flex vertical center-justified>
                                 <div class="name">{{uservs.name}}</div>
                                 <div class="name" style="margin: 5px 0 0 0;">{{uservs.lastName}}</div>
                             </div>
                             <div>
-                                <div hidden?="{{isContactButtonVisible(uservs)}}">
+                                <div hidden?="{{isContactButtonHidden(uservs)}}">
                                     <button on-click="{{toggleContact}}" style="font-size: 0.7em; margin:0 0 0 0;">
                                         {{modeSearch? '${msg.addContactLbl}':'${msg.removeContactLbl}'}}
                                     </button>
@@ -59,8 +56,8 @@
                                 <div flex horizontal layout center center-justified class="nif">{{uservs.nif}}</div>
                             </div>
                         </div>
-                    </template>
-                </div>
+                    </div>
+                </template>
             </div>
             <div hidden?="{{responseData.resultList.length !== 0}}"  class="center" id="emptySearchMsg" style="margin:30px 0 30px 0; font-weight: bold;">
                 ${msg.emptyUserSearchResultMsg}
@@ -72,11 +69,12 @@
     <script>
         Polymer('uservs-selector', {
             contactsArray:[],
-            modeSearch:false,
+            publish: {
+                contactSelector: true
+            },
             ready: function() {
-                this.url = this.url || '';
+                this.url = this.url || ''
                 this.resultList = []
-                this.contactSelector = (this.contactSelector != null)?true:false
                 this.modeSearch = !this.contactSelector
                 console.log(this.tagName + " - contactSelector: " + this.contactSelector)
             },
@@ -95,7 +93,6 @@
             showUserDetails:function(e) {
                 document.querySelector("#voting_system_page").dispatchEvent(
                         new CustomEvent('user-clicked', { 'detail': e.target.templateInstance.model.uservs }));
-
                 this.fire('core-signal', {name: "user-clicked", data: e.target.templateInstance.model.uservs});
             },
             reset: function() {
@@ -131,12 +128,12 @@
                 }
                 return isInArray
             },
-            isContactButtonVisible:function (uservs){
+            isContactButtonHidden:function (uservs){
                 if(this.modeSearch && this.contactSelector) {
-                    if(this.isContact(uservs)) return "none"
-                    else return "block"
-                } else if(this.contactSelector) return "block"
-                else return "none"
+                    if(this.isContact(uservs)) return true
+                    else return false
+                } else if(this.contactSelector) return false
+                else return true
             },
             searchInputKeyPress:function (e){
                 var chCode = ('charCode' in e) ? e.charCode : e.keyCode;

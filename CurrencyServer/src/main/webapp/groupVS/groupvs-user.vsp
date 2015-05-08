@@ -75,8 +75,8 @@
                         var caption = '${msg.deActivateUserERRORLbl}'
                         if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                             caption = "${msg.deActivateUserOKLbl}"
-                            this.opened = false
                             this.fire('core-signal', {name: "refresh-uservs-list", data: {uservs: this.userId}});
+                            this.close()
                         }
                         showMessageVS(appMessageJSON.message, caption)
                     }.bind(this))
@@ -115,14 +115,14 @@
                     groupvsId:this.subscriptionData.groupvs.id, groupvsName:this.subscriptionData.groupvs.name,
                     userVSName:this.subscriptionData.uservs.name, userVSNIF:this.subscriptionData.uservs.nif})
                 operationVS.setCallback(function(appMessage) {
-                    console.log("activateUserCallback - message: " + appMessage);
+                    console.log("activateUserCallback - message: " + appMessage)
                     var appMessageJSON = toJSON(appMessage)
                     if(appMessageJSON != null) {
                         var caption = '${msg.activateUserERRORLbl}'
                         if (ResponseVS.SC_OK == appMessageJSON.statusCode) {
                             caption = "${msg.activateUserOKLbl}"
-                            this.opened = false
-                            this.fire('core-signal', {name: "refresh-uservs-list", data: {uservs: this.userId}});
+                            this.fire('core-signal', {name: "refresh-uservs-list", data: {uservs: this.userId}})
+                            this.close()
                         }
                         showMessageVS(appMessageJSON.message, caption)
                     }
