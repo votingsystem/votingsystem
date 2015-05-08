@@ -17,6 +17,7 @@ import javafx.scene.text.TextAlignment;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
+
 import java.awt.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -115,16 +116,12 @@ public class PasswordDialog extends DialogVS {
         setMessage(null);
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public boolean isShowing() {
         return getStage().isShowing();
     }
 
     private void closePasswordDialog() {
-        listener.setPassword(passwordType, null);
+        listener.setPassword(passwordType, password);
         hide();
     }
 
@@ -138,38 +135,53 @@ public class PasswordDialog extends DialogVS {
         else {
             if (password1.equals(password2)) {
                 password = password1;
-                listener.setPassword(passwordType, password);
                 getStage().close();
             } else {
                 setMessage(ContextVS.getMessage("passwordError"));
                 password1Field.setText("");
                 password2Field.setText("");
+                password = null;
             }
         }
     }
 
-    public void show(String mainMessage) {
-        this.mainMessage = mainMessage;
-        isWithPasswordConfirm = true;
-        setMessage(mainMessage);
-        show();
-    }
-
-    public static void showWithoutPasswordConfirm(TypeVS passwordType, Listener listener, String mainMessage) {
+    public static void showWithPasswordConfirm(TypeVS passwordType, Listener listener, String mainMessage) {
         if(INSTANCE == null) INSTANCE = new PasswordDialog();
         INSTANCE.passwordType = passwordType;
         INSTANCE.listener = listener;
         Platform.runLater(() -> {
-            INSTANCE.showWithoutPasswordConfirm(mainMessage, null);
+            INSTANCE.password1Field.setText("");
+            INSTANCE.password2Field.setText("");
+            INSTANCE.password = null;
+            INSTANCE.mainMessage = mainMessage;
+            INSTANCE.isWithPasswordConfirm = true;
+            INSTANCE.setMessage(mainMessage);
+            INSTANCE.show();
         });
     }
 
-    public void showWithoutPasswordConfirm(String mainMessage, final Integer visibilityInSeconds) {
+    public static void showWithoutPasswordConfirm(TypeVS passwordType, Listener listener, String mainMessage) {
+        showWithoutPasswordConfirm(passwordType, listener, mainMessage, null);
+    }
+
+    public static void showWithoutPasswordConfirm(TypeVS passwordType, Listener listener, String mainMessage,
+              Integer visibilityInSeconds) {
+        if(INSTANCE == null) INSTANCE = new PasswordDialog();
+        INSTANCE.passwordType = passwordType;
+        INSTANCE.listener = listener;
+        Platform.runLater(() -> {
+            INSTANCE.showWithoutPasswordConfirm(mainMessage, visibilityInSeconds);
+        });
+    }
+
+
+    private void showWithoutPasswordConfirm(String mainMessage, final Integer visibilityInSeconds) {
         this.mainMessage = mainMessage;
         isWithPasswordConfirm = false;
         setMessage(mainMessage);
         password1Field.setText("");
         password2Field.setText("");
+        password = null;
         if(dialogVBox.getChildren().contains(password2Text) && dialogVBox.getChildren().contains(password2Field)) {
             dialogVBox.getChildren().removeAll(password2Text, password2Field);
         }
@@ -195,6 +207,7 @@ public class PasswordDialog extends DialogVS {
     private void setMessage (String message) {
         if (message == null) messageText.setText(mainMessage);
         else messageText.setText(message);
+        password = null;
         if(isCapsLockPressed) {
             if(!dialogVBox.getChildren().contains(capsLockPressedMessageLabel))
                 dialogVBox.getChildren().add(0, capsLockPressedMessageLabel);

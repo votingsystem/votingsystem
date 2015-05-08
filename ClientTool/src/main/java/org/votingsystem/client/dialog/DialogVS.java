@@ -4,6 +4,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.MenuButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -87,6 +88,9 @@ public class DialogVS {
         return stage;
     }
 
+    public void addMenuButton(MenuButton menuButton) {
+        decoratedPane.addMenuButton(menuButton);
+    }
 
     public void show() {
         stage.sizeToScene();

@@ -20,19 +20,18 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
-
+import org.votingsystem.util.TypeVS;
 import java.io.File;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import static org.votingsystem.client.Browser.showMessage;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Listener {
+public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Listener, PasswordDialog.Listener {
 
     private static Logger log = Logger.getLogger(SettingsDialog.class.getSimpleName());
 
@@ -197,18 +196,15 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         }
         if(userKeyStore != null) {
             if(signWithKeystoreRb.isSelected()) {
-                try {
-                    PasswordDialog passwordDialog = new PasswordDialog();
-                    passwordDialog.show(ContextVS.getMessage("newKeyStorePasswordMsg"));
-                    String password = passwordDialog.getPassword();
-                    UserVS userVS = ContextVS.saveUserKeyStore(userKeyStore, password);
-                    deviceVSDto = BrowserSessionService.getInstance().getDeviceVS().loadUserVS(userVS);
-                } catch(Exception ex) {
-                    showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("errorStoringKeyStoreMsg"));
-                    return;
-                }
+                PasswordDialog.showWithPasswordConfirm(TypeVS.KEYSTORE_SELECT, this,
+                        ContextVS.getMessage("newKeyStorePasswordMsg"));
+                return;
             }
         }
+        close();
+    }
+
+    private void close() {
         if(signWithDNIeRb.isSelected()) deviceVSDto.setType(CryptoTokenVS.DNIe);
         if(signWithMobileRb.isSelected() && deviceVSDto == null) {
             showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("deviceDataMissingErrorMsg"));
@@ -226,4 +222,18 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         getStage().sizeToScene();
     }
 
+    @Override
+    public void setPassword(TypeVS passwordType, String password) {
+        switch (passwordType) {
+            case KEYSTORE_SELECT:
+                try {
+                    UserVS userVS = ContextVS.saveUserKeyStore(userKeyStore, password);
+                    deviceVSDto = BrowserSessionService.getInstance().getDeviceVS().loadUserVS(userVS);
+                    close();
+                } catch (Exception ex) {
+                    showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                }
+                break;
+        }
+    }
 }

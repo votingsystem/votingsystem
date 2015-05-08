@@ -3,7 +3,6 @@ package org.votingsystem.client.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Button;
-import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.ProgressDialog;
@@ -89,7 +88,7 @@ public class InboxService implements PasswordDialog.Listener {
     public void setInboxButton(Button inboxButton) {
         this.inboxButton = inboxButton;
         inboxButton.setOnAction((event) -> {
-            if(!encryptedMessageList.isEmpty()) {
+            if (!encryptedMessageList.isEmpty()) {
                 showPasswordDialog(ContextVS.getMessage("inboxPinDialogMsg"), false);
             } else InboxDialog.showDialog();
         });
@@ -101,30 +100,11 @@ public class InboxService implements PasswordDialog.Listener {
         if(isPasswordVisible.getAndSet(true)) return;
         PlatformImpl.runLater(() -> {
             if (BrowserSessionService.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
-                passwordDialog = new PasswordDialog();
-                String dialogMessage = null;
+                String dialogMessage = pinDialogMessage;
                 if (pinDialogMessage == null) dialogMessage = ContextVS.getMessage("messageToDevicePasswordMsg");
-                else dialogMessage = pinDialogMessage;
                 Integer visibilityInSeconds = null;
-                if(isTimeLimited) {
-                    visibilityInSeconds = TIME_LIMITED_MESSAGE_LIVE;
-                }
-                passwordDialog.showWithoutPasswordConfirm(dialogMessage, visibilityInSeconds);
-                String password = passwordDialog.getPassword();
-                isPasswordVisible.set(false);
-                if (password != null) {
-                    try {
-                        KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password.toCharArray());
-                        PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
-                                password.toCharArray());
-                        ProgressDialog.showDialog(new InboxDecryptTask(privateKey, timeLimitedInboxMessage), 
-                                ContextVS.getMessage("decryptingMessagesMsg"));
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
-                    }
-                } else InboxDialog.showDialog();
-                timeLimitedInboxMessage = null;
+                if(isTimeLimited) visibilityInSeconds = TIME_LIMITED_MESSAGE_LIVE;
+                PasswordDialog.showWithoutPasswordConfirm(TypeVS.MESSAGEVS, this, dialogMessage, visibilityInSeconds);
             } else showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("messageToDeviceService") +
                     " - " + ContextVS.getMessage("jksRequiredMsg")));
         });
@@ -251,6 +231,22 @@ public class InboxService implements PasswordDialog.Listener {
 
     @Override public void setPassword(TypeVS passwordType, String password) {
         switch (passwordType) {
+            case MESSAGEVS:
+                if (password != null) {
+                    try {
+                        KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password.toCharArray());
+                        PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
+                                password.toCharArray());
+                        ProgressDialog.showDialog(new InboxDecryptTask(privateKey, timeLimitedInboxMessage),
+                                ContextVS.getMessage("decryptingMessagesMsg"));
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
+                    }
+                } else InboxDialog.showDialog();
+                timeLimitedInboxMessage = null;
+                isPasswordVisible.set(false);
+                break;
             case CURRENCY_IMPORT:
                 if(password != null) {
                     try {
@@ -281,6 +277,7 @@ public class InboxService implements PasswordDialog.Listener {
                     }
                 }
                 break;
+            default:log.info("unknown passwordType: " + passwordType);
         }
     }
 }

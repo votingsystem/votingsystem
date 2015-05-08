@@ -40,11 +40,12 @@ import static org.votingsystem.client.Browser.showMessage;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BrowserSessionService {
+public class BrowserSessionService implements PasswordDialog.Listener {
 
     private static Logger log = Logger.getLogger(BrowserSessionService.class.getSimpleName());
 
     private UserVS userVS;
+    private ResponseVS currentResponseVS;
     private File sessionFile;
     private File representativeStateFile;
     private RepresentativeDelegationDto anonymousDelegationDto;
@@ -249,7 +250,6 @@ public class BrowserSessionService {
         }
     }
 
-
     public void checkCSRRequest() {
         PlatformImpl.runLater(() -> checkCSR());
     }
@@ -269,53 +269,14 @@ public class BrowserSessionService {
                 String serviceURL = ContextVS.getInstance().getAccessControl().getUserCSRServiceURL(bundleDto.getId());
                 ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, null);
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
-                            responseVS.getMessage().getBytes());
-                    X509Certificate userCert = certificates.iterator().next();
-                    UserVS user = UserVS.getUserVS(userCert);
-                    setUserVS(user, false);
-                    log.info("user: " + user.getNif() + " - certificates.size(): " + certificates.size());
-                    X509Certificate[] certsArray = new X509Certificate[certificates.size()];
-                    certificates.toArray(certsArray);
-                    String passwd = null;
-                    byte[] serializedCertificationRequest = null;
-                    while(passwd == null) {
-                        PasswordDialog passwordDialog = new PasswordDialog();
-                        passwordDialog.show(ContextVS.getMessage("csrPasswMsg"));
-                        passwd = passwordDialog.getPassword();
-                        if(passwd == null) {
-                            Button optionButton = new Button(ContextVS.getMessage("deletePendingCsrMsg"));
-                            optionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
-                            optionButton.setOnAction(event -> deleteCSR());
-                            showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"), optionButton);
-                            return;
-                        }
-                        EncryptedBundle bundle = bundleDto.getEncryptedBundle();
-                        try {
-                            serializedCertificationRequest = Encryptor.pbeAES_Decrypt(passwd, bundle);
-                        } catch (Exception ex) {
-                            passwd = null;
-                            showMessage(ContextVS.getMessage("cryptoTokenPasswdErrorMsg"), ContextVS.getMessage("errorLbl"));
-                        }
-                    }
-                    CertificationRequestVS certificationRequest =
-                            (CertificationRequestVS) ObjectUtils.deSerializeObject(serializedCertificationRequest);
-                    KeyStore userKeyStore = KeyStore.getInstance("JKS");
-                    userKeyStore.load(null);
-                    userKeyStore.setKeyEntry(ContextVS.KEYSTORE_USER_CERT_ALIAS, certificationRequest.getPrivateKey(),
-                            passwd.toCharArray(), certsArray);
-                    ContextVS.saveUserKeyStore(userKeyStore, passwd);
-                    ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                            CryptoTokenVS.JKS_KEYSTORE.toString());
-                    showMessage(ResponseVS.SC_OK, ContextVS.getMessage("certInstallOKMsg"));
-                    csrFile.delete();
+                    currentResponseVS = responseVS;
+                    PasswordDialog.showWithPasswordConfirm(TypeVS.CERT_USER_NEW, this, ContextVS.getMessage("csrPasswMsg"));
                 } else showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("certPendingMsg"));
             } catch (Exception ex) {
                 log.log(Level.SEVERE,ex.getMessage(), ex);
                 showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("errorStoringKeyStoreMsg"));
             }
         }
-
     }
 
     public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
@@ -387,6 +348,52 @@ public class BrowserSessionService {
             if(representativeStateDto != null) JSON.getMapper().writeValue(representativeStateFile, representativeStateDto);
         } catch(Exception ex) {
             log.log(Level.SEVERE,ex.getMessage(), ex);
+        }
+    }
+
+    @Override
+    public void setPassword(TypeVS passwordType, String password) {
+        switch (passwordType) {
+            case CERT_USER_NEW:
+                try {
+                    if(password == null) {
+                        Button optionButton = new Button(ContextVS.getMessage("deletePendingCsrMsg"));
+                        optionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
+                        optionButton.setOnAction(event -> deleteCSR());
+                        showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"), optionButton);
+                        return;
+                    }
+                    File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
+                    EncryptedBundleDto bundleDto = JSON.getMapper().readValue(csrFile, EncryptedBundleDto.class);
+                    Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
+                            currentResponseVS.getMessage().getBytes());
+                    X509Certificate userCert = certificates.iterator().next();
+                    UserVS user = UserVS.getUserVS(userCert);
+                    setUserVS(user, false);
+                    log.info("user: " + user.getNif() + " - certificates.size(): " + certificates.size());
+                    X509Certificate[] certsArray = new X509Certificate[certificates.size()];
+                    certificates.toArray(certsArray);
+                    byte[] serializedCertificationRequest = null;
+                    EncryptedBundle bundle = bundleDto.getEncryptedBundle();
+                    try {
+                        serializedCertificationRequest = Encryptor.pbeAES_Decrypt(password, bundle);
+                    } catch (Exception ex) {
+                        showMessage(ContextVS.getMessage("cryptoTokenPasswdErrorMsg"), ContextVS.getMessage("errorLbl"));
+                    }
+                    CertificationRequestVS certificationRequest =
+                            (CertificationRequestVS) ObjectUtils.deSerializeObject(serializedCertificationRequest);
+                    KeyStore userKeyStore = KeyStore.getInstance("JKS");
+                    userKeyStore.load(null);
+                    userKeyStore.setKeyEntry(ContextVS.KEYSTORE_USER_CERT_ALIAS, certificationRequest.getPrivateKey(),
+                            password.toCharArray(), certsArray);
+                    ContextVS.saveUserKeyStore(userKeyStore, password);
+                    ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString());
+                    showMessage(ResponseVS.SC_OK, ContextVS.getMessage("certInstallOKMsg"));
+                    csrFile.delete();
+                } catch (Exception ex) {
+                    showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                }
+                break;
         }
     }
 

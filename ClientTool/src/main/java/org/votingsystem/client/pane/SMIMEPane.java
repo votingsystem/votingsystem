@@ -10,7 +10,6 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Formatter;

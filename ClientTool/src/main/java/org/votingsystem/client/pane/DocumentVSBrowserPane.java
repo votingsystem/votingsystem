@@ -10,7 +10,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.CurrencyDialog;
 import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.Utils;

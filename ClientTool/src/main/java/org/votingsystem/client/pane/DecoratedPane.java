@@ -84,6 +84,10 @@ public class DecoratedPane extends VBox {
         });
     }
 
+    public void addMenuButton(MenuButton menuButton) {
+        toolBar.getChildren().add(0, menuButton);
+    }
+
     public void setCaption(String caption) {
         captionLbl.setText(caption);
     }

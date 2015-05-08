@@ -340,6 +340,7 @@ public class Utils {
         }
     }
 
+
     public static void selectKeystoreFile(OperationVS operationVS, BrowserVS browserVS) {
         log.info("selectKeystoreFile");
         PlatformImpl.runLater(() -> {
@@ -354,15 +355,22 @@ public class Utils {
                         KeyStore userKeyStore = KeyStoreUtil.getKeyStoreFromBytes(keystoreBytes, null);
                         UserVS userVS = UserVS.getUserVS((X509Certificate)
                                 userKeyStore.getCertificate("UserTestKeysStore"));
-                        PasswordDialog passwordDialog = new PasswordDialog();
-                        passwordDialog.show(ContextVS.getMessage("newKeyStorePasswordMsg"));
-                        String password = passwordDialog.getPassword();
-                        ContextVS.saveUserKeyStore(userKeyStore, password);
-                        ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                                CryptoTokenVS.JKS_KEYSTORE.toString());
-                        BrowserSessionService.getInstance().setUserVS(userVS, false);
-                        if(operationVS != null) browserVS.invokeBrowserCallback(
-                                UserVSDto.COMPLETE(userVS), operationVS.getCallerCallback());
+                        PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
+                            @Override public void setPassword(TypeVS passwordType, String password) {
+                                if(password == null) return;
+                                try {
+                                    ContextVS.saveUserKeyStore(userKeyStore, password);
+                                    ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
+                                            CryptoTokenVS.JKS_KEYSTORE.toString());
+                                    BrowserSessionService.getInstance().setUserVS(userVS, false);
+                                    if(operationVS != null) browserVS.invokeBrowserCallback(
+                                            UserVSDto.COMPLETE(userVS), operationVS.getCallerCallback());
+                                } catch (Exception ex) {
+                                    showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                                }
+                            }
+                        };
+                        PasswordDialog.showWithPasswordConfirm(null, passwordListener, ContextVS.getMessage("newKeyStorePasswordMsg"));
                     } catch(Exception ex) {
                         log.log(Level.SEVERE,ex.getMessage(), ex);
                         if(operationVS != null) browserVS.invokeBrowserCallback(MessageDto.ERROR(ex.getMessage()),
@@ -394,14 +402,16 @@ public class Utils {
 
     public static void createNewWallet() {
         PlatformImpl.runLater(() -> {
-            PasswordDialog passwordDialog = new PasswordDialog();
-            passwordDialog.show(ContextVS.getMessage("newWalletPinMsg"));
-            String password = passwordDialog.getPassword();
-            if(password != null) {
-                try {
-                    Wallet.createWallet(new ArrayList<>(), password);
-                } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
-            }
+            PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
+                @Override public void setPassword(TypeVS passwordType, String password) {
+                    if(password != null) {
+                        try {
+                            Wallet.createWallet(new ArrayList<>(), password);
+                        } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
+                    }
+                }
+            };
+            PasswordDialog.showWithPasswordConfirm(null, passwordListener, ContextVS.getMessage("newWalletPinMsg"));
         });
 
     }

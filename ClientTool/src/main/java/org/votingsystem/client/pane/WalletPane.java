@@ -4,14 +4,13 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.layout.*;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.Window;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import org.votingsystem.client.dialog.*;
 import org.votingsystem.client.util.CurrencyCheckResponse;
 import org.votingsystem.client.util.CurrencyCheckerTask;
@@ -24,7 +23,6 @@ import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.currency.Wallet;
-
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,8 +37,6 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
 
     private static Logger log = Logger.getLogger(WalletPane.class.getSimpleName());
 
-    private MenuButton menuButton;
-    private MenuItem checkCurrencyMenuItem;
     private Map<String, Set<Currency>> currencyMap;
     private static WalletDialog DIALOG_INSTANCE;
 
@@ -50,10 +46,6 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
         getStyleClass().add("main-pane");
         VBox.setVgrow(this, Priority.ALWAYS);
         currencyMap = new HashMap<>();
-        menuButton = new MenuButton();
-        menuButton.setGraphic(Utils.getIcon(FontAwesomeIcons.BARS));
-        checkCurrencyMenuItem =  new MenuItem(ContextVS.getMessage("checkCurrencyMenuItemLbl"));
-        menuButton.getItems().addAll(checkCurrencyMenuItem);
         MenuItem changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
         changeWalletMenuItem.setOnAction(actionEvent -> UserDeviceSelectorDialog.show(ContextVS.getMessage(
                 "userVSDeviceConnected"), ContextVS.getMessage("selectDeviceToTransferCurrencyMsg"), WalletPane.this));;
@@ -105,17 +97,10 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
     }
 
     private void load(Set<Currency> wallet) {
-        checkCurrencyMenuItem.setOnAction(actionEvent -> {
-            ProgressDialog.showDialog(new CurrencyCheckerTask(wallet, this));
-        });
         for(Currency currency : wallet) {
             if(currencyMap.containsKey(currency.getCurrencyCode())) currencyMap.get(currency.getCurrencyCode()).add(currency);
             else currencyMap.put(currency.getCurrencyCode(), new HashSet<>(Arrays.asList(currency)));
         }
-    }
-
-    public MenuButton getMenuButton() {
-        return menuButton;
     }
 
     public static void showDialog() {
@@ -125,14 +110,11 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
                 if(currencySet == null) {
                     PasswordDialog.showWithoutPasswordConfirm(TypeVS.CURRENCY_OPEN, passwordListener,
                             ContextVS.getMessage("walletPinMsg"));
-                }
+                } else DIALOG_INSTANCE.show(currencySet);
             }
         });
     }
 
-    @Override public void setSelectedDevice(DeviceVSDto dto) {
-
-    }
 
     @Override public void processCurrencyStatus(CurrencyCheckResponse response) {
         if(ResponseVS.SC_OK == response.getStatusCode()) {
@@ -166,6 +148,8 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
             if(password != null) {
                 try {
                     Set<Currency> currencySet = Wallet.getWallet(password);
+                    if(DIALOG_INSTANCE == null) DIALOG_INSTANCE = new WalletDialog();
+                    DIALOG_INSTANCE.show(currencySet);
                 } catch (WalletException wex) {
                     Utils.showWalletNotFoundMessage();
                 } catch (Exception ex) {
@@ -176,17 +160,35 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
         }
     };
 
+    @Override
+    public void setSelectedDevice(DeviceVSDto device) {
+        log.info("setSelectedDevice");
+    }
+
 
     private static class WalletDialog extends DialogVS {
 
         private WalletPane walletPane;
+        private MenuButton menuButton;
+        private MenuItem checkCurrencyMenuItem;
 
         public WalletDialog() {
             super(new WalletPane());
             walletPane = (WalletPane) getContentPane();
+            checkCurrencyMenuItem =  new MenuItem(ContextVS.getMessage("checkCurrencyMenuItemLbl"));
+            menuButton = new MenuButton();
+            menuButton.setGraphic(Utils.getIcon(FontAwesomeIcons.BARS));
+            menuButton.getItems().addAll(checkCurrencyMenuItem);
+            addMenuButton(menuButton);
+            setCaption(ContextVS.getMessage("walletLbl"));
         }
 
         private void show(Set<Currency> currencySet) {
+            if(currencySet.isEmpty()) menuButton.setVisible(false);
+            else menuButton.setVisible(true);
+            checkCurrencyMenuItem.setOnAction(actionEvent -> {
+                ProgressDialog.showDialog(new CurrencyCheckerTask(currencySet, walletPane));
+            });
             walletPane.load(currencySet);
             show();
         }
