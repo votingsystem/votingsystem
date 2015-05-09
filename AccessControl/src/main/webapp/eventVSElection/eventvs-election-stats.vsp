@@ -7,8 +7,7 @@
 <polymer-element name="eventvs-election-stats" attributes="caption eventVSId height">
     <template>
         <style></style>
-        <core-ajax id="ajax" auto url="{{url}}" handleAs="json" response="{{statsDto}}" method="get"
-                   contentType="application/json" on-core-response="{{ajaxResponse}}"></core-ajax>
+        <core-ajax id="ajax" auto url="{{url}}" handleAs="json" response="{{statsDto}}" method="get" contentType="application/json"></core-ajax>
         <div hidden?="{{chartVisible}}" id="messageToUser" vertical layout center center-justified
              style="padding: 10px;font-weight: bold;">
             ${msg.withoutVotesLbl}

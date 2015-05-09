@@ -19,8 +19,7 @@
                 color: #6c0404;
             }
         </style>
-        <core-ajax id="ajax" url="{{url}}" handleAs="json" response="{{dashBoardDto}}" method="get" contentType="application/json"
-                   on-core-response="{{ajaxResponse}}"></core-ajax>
+        <core-ajax id="ajax" url="{{url}}" handleAs="json" response="{{dashBoardDto}}" method="get" contentType="application/json"></core-ajax>
         <div id="selectorContainer" layout horizontal center center-justified relative>
             <paper-dropdown-menu id="dropDownMenu" halign="right" on-core-select="{{selectAction}}">
                 <paper-dropdown class="dropdown colored" transition="">

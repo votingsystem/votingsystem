@@ -17,8 +17,7 @@
             .nif {font-size: 0.7em; color:#888;margin:5px 0 0 0; }
             .name {color: #000; font-size: 0.9em;}
         </style>
-        <core-ajax id="ajax" url="{{url}}" response="{{responseData}}" handleAs="json" method="get" on-core-response="{{responseDataReceived}}"
-                   contentType="application/json"></core-ajax>
+        <core-ajax id="ajax" url="{{url}}" response="{{responseData}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
         <div vertical layout center>
             <div hidden?="{{!modeSearch}}" horizontal layout style="width: 100%;">
                 <div layout horizontal center center-justified flex style="margin:0px auto 0px auto;">
@@ -98,7 +97,7 @@
             reset: function() {
                 this.resultList = []
             },
-            responseDataReceived: function() {
+            responseDataChanged: function() {
                 console.log(this.tagName + " - responseDataReceived - num. users: " + this.responseData.resultList.length)
                 this.resultList = this.responseData.resultList
             },
