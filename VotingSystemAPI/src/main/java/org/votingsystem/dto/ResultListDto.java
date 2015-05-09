@@ -10,9 +10,10 @@ public class ResultListDto<T> {
 
     private List<T> resultList;
     private Integer offset;
+    private Integer statusCode;
     private Integer max;
     private Long totalCount;
-    private Object State;
+    private Object state;
     private String message;
     private TypeVS type;
 
@@ -81,11 +82,11 @@ public class ResultListDto<T> {
     }
 
     public Object getState() {
-        return State;
+        return state;
     }
 
     public void setState(Object state) {
-        State = state;
+        this.state = state;
     }
 
     public String getMessage() {
@@ -102,5 +103,13 @@ public class ResultListDto<T> {
 
     public void setType(TypeVS type) {
         this.type = type;
+    }
+
+    public Integer getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(Integer statusCode) {
+        this.statusCode = statusCode;
     }
 }

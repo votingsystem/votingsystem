@@ -11,6 +11,9 @@ import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.pane.WalletPane;
+import org.votingsystem.client.service.BrowserSessionService;
+import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ContextVS;
 
 import java.util.logging.Logger;
@@ -24,7 +27,7 @@ public class BrowserVSMenuButton extends MenuButton {
 
     private MenuItem voteMenuItem;
     private MenuItem selectRepresentativeMenuItem;
-    private MenuItem currencyUsersProceduresMenuItem;
+    private MenuItem currencyUserMenuItem;
     private MenuItem walletMenuItem;
     private MenuItem votingSystemAdminMenuItem;
     private MenuItem currencyAdminMenuItem;
@@ -57,11 +60,11 @@ public class BrowserVSMenuButton extends MenuButton {
                     ContextVS.getMessage("selectRepresentativeButtonLbl"));
         });
 
-        currencyUsersProceduresMenuItem = new MenuItem(ContextVS.getMessage("financesLbl"));
-        currencyUsersProceduresMenuItem.setVisible(false);
-        currencyUsersProceduresMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.BAR_CHART));
-        currencyUsersProceduresMenuItem.setOnAction(event -> {
-            Browser.getInstance().openCurrencyURL(ContextVS.getInstance().getCurrencyServer().getUserDashBoardURL(),
+        currencyUserMenuItem = new MenuItem(ContextVS.getMessage("financesLbl"));
+        currencyUserMenuItem.setVisible(false);
+        currencyUserMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.BAR_CHART));
+        currencyUserMenuItem.setOnAction(event -> {
+            Browser.getInstance().openCurrencyURL(ContextVS.getInstance().getCurrencyServer().getGroupVSListURL() + "?menu=user",
                     ContextVS.getMessage("currencyUsersLbl"));
         });
         walletMenuItem = new MenuItem(ContextVS.getMessage("walletLbl"));
@@ -88,7 +91,7 @@ public class BrowserVSMenuButton extends MenuButton {
         adminsMenu.getItems().addAll(currencyAdminMenuItem, votingSystemAdminMenuItem);
 
         getItems().addAll(voteMenuItem, selectRepresentativeMenuItem, new SeparatorMenuItem(),
-                walletMenuItem, currencyUsersProceduresMenuItem, new SeparatorMenuItem(),
+                walletMenuItem, currencyUserMenuItem, new SeparatorMenuItem(),
                 signDocumentMenuItem, openFileMenuItem, new SeparatorMenuItem(),
                 settingsMenuItem, new SeparatorMenuItem(), adminsMenu);
     }
@@ -103,7 +106,7 @@ public class BrowserVSMenuButton extends MenuButton {
 
     public void setCurrencyServerAvailable(boolean available) {
         PlatformImpl.runLater(() -> {
-            currencyUsersProceduresMenuItem.setVisible(available);
+            currencyUserMenuItem.setVisible(available);
             walletMenuItem.setVisible(available);
             currencyAdminMenuItem.setVisible(available);
         });

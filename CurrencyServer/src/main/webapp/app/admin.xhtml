@@ -2,14 +2,16 @@
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+    <ui:define name="head">
+        <script>
+            if(document.querySelector("#coreSignals") != null) openDrawer()
+            else document.addEventListener('polymer-ready', function() { openDrawer() })
+            function openDrawer() {
+                document.querySelector('html /deep/ #_navbar').openDrawer()
+            }
+        </script>
+    </ui:define>
     <ui:define name="content">
-        <div style="width: 100%; padding: 30px;">
-            <div vertical="" layout="" center="" center-justified="">
-                <button onclick="loadURL_VS('${restURL}/groupVS')" style="font-size: 1.2em;">
-                    <i class="fa fa-users" style="color: #388746;"></i>
-                    ${msg.groupsLbl}</button>
-            </div>
-        </div>
     </ui:define>
 </ui:composition>
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.GroupVS;
@@ -79,6 +80,7 @@ public class TransactionVSGroupVSBean {
             if (request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
                 resultListDto.setMessage(messages.get("transactionVSFromGroupToMemberGroupOKMsg", request.getAmount() +
                         " " + request.getCurrencyCode()));
+                resultListDto.setStatusCode(ResponseVS.SC_OK);
             }
             return resultListDto;
         }

@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
@@ -11,6 +12,7 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -37,6 +39,7 @@ public class TransactionVSUserVSBean {
 
 
     public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         validateRequest(request);
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 request.getSigner().getIBAN(), request.getTag(), request.getAmount(), request.getCurrencyCode());
@@ -53,7 +56,11 @@ public class TransactionVSUserVSBean {
         TransactionVSDto dto = new TransactionVSDto(transactionVS);
         dto.setMessageSMIME(Base64.getEncoder().encodeToString(request.getTransactionVSSMIME().getContent()));
         List<TransactionVSDto> listDto = Arrays.asList(dto);
-        return new ResultListDto<>(listDto, request.getOperation());
+        ResultListDto<TransactionVSDto> resultListDto = new ResultListDto<>(listDto, request.getOperation());
+        resultListDto.setStatusCode(ResponseVS.SC_OK);
+        resultListDto.setMessage(messages.get("transactionVSFromUserVSOKMsg", request.getAmount() +
+                " " + request.getCurrencyCode(), request.getReceptor().getName()));
+        return resultListDto;
     }
 
     public TransactionVSDto validateRequest(TransactionVSDto dto) throws ValidationExceptionVS {
@@ -64,6 +71,7 @@ public class TransactionVSUserVSBean {
         Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", dto.getToUserIBAN().get(0));
         UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
         if(toUserVS == null) throw new ValidationExceptionVS("invalid 'toUserIBAN':" + dto.getToUserIBAN().get(0));
+        dto.setReceptor(toUserVS);
         return dto;
     }
 

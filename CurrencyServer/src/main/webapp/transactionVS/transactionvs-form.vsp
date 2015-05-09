@@ -26,7 +26,7 @@
 
             <div layout horizontal center center-justified>
                 <template if="{{subpage}}">
-                    <div style="margin: 10px 0 0 0;" title="${msg.backLbl}" >
+                    <div style="margin: 10px 20px 0 0;" title="${msg.backLbl}" >
                         <paper-fab mini icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
                     </div>
                 </template>
@@ -257,11 +257,10 @@
             VotingSystemClient.setMessage(operationVS);
         },
         transactionVSCallback: function (appMessage) {
-            var appMessageJSON = JSON.parse(appMessage)
+            var appMessageJSON = toJSON(appMessage)
             var caption
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "${msg.transactionvsOKLbl}"
-                this.fire('operation-finished')
             } else caption = '${msg.transactionvsERRORLbl}'
             showMessageVS(appMessageJSON.message, caption)
         },
