@@ -9,16 +9,16 @@
 <polymer-element name="uservs-list" attributes="url menuType isNifVisible">
     <template>
         <core-signals on-core-signal-refresh-uservs-list="{{refreshList}}"></core-signals>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{userList}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
+        <core-ajax id="ajax" auto url="{{url}}" response="{{resultListDto}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
         <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
             <div>
-                <template repeat="{{subscription in userList.resultList}}">
+                <template repeat="{{subscription in resultListDto.resultList}}">
                     <uservs-subscription-card subscription="{{subscription}}"></uservs-subscription-card>
                 </template>
-                <vs-pager on-pager-change="{{pagerChange}}" max="{{userList.max}}"
+                <vs-pager on-pager-change="{{pagerChange}}" max="{{resultListDto.max}}"
                           next="${msg.nextLbl}" previous="${msg.previousLbl}"
                           first="${msg.firstLbl}" last="${msg.lastLbl}"
-                          offset="{{userList.offset}}" total="{{userList.totalCount}}"></vs-pager>
+                          offset="{{resultListDto.offset}}" total="{{resultListDto.totalCount}}"></vs-pager>
             </div>
         </div>
     </template>
@@ -32,8 +32,8 @@
             urlChanged:function() {
                 console.log(this.tagName + " - urlChanged: " + this.url)
             },
-            userListChanged:function() {
-                console.log(this.tagName + " - ready - userList: " + JSON.stringify(this.userList))
+            resultListDtoChanged:function() {
+                console.log(this.tagName + " - ready - resultListDto.size: " + this.resultListDto.resultList.length)
             },
             pagerChange: function(e) {
                 var newURL = setURLParameter(this.$.ajax.url, "offset",  e.detail.offset)

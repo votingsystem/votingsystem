@@ -53,22 +53,17 @@ public class TransactionVSUserVSBean {
         TransactionVSDto dto = new TransactionVSDto(transactionVS);
         dto.setMessageSMIME(Base64.getUrlEncoder().encodeToString(request.getTransactionVSSMIME().getContent()));
         List<TransactionVSDto> listDto = Arrays.asList(dto);
-        ResultListDto<TransactionVSDto> resultListDto = new ResultListDto<>(listDto, request.getOperation());
-        return resultListDto;
+        return new ResultListDto<>(listDto, request.getOperation());
     }
 
-
     public TransactionVSDto validateRequest(TransactionVSDto dto) throws ValidationExceptionVS {
-        if(TypeVS.FROM_BANKVS != dto.getOperation()) throw new ValidationExceptionVS(
-                "operation expected: 'FROM_BANKVS' - operation found: " + dto.getOperation());
+        if(TypeVS.FROM_USERVS != dto.getOperation()) throw new ValidationExceptionVS(
+                "operation expected: 'FROM_USERVS' - operation found: " + dto.getOperation());
         if(dto.getToUserIBAN().size() != 1) throw new ValidationExceptionVS(
                 "there can be only one receptor. request.toUserIBAN: " + dto.getToUserIBAN().get(0));
         Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", dto.getToUserIBAN().get(0));
         UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
         if(toUserVS == null) throw new ValidationExceptionVS("invalid 'toUserIBAN':" + dto.getToUserIBAN().get(0));
-        //this is to get data from banks clients
-        if(dto.getFromUserIBAN() == null)  throw new ValidationExceptionVS("missing param 'fromUserIBAN'");
-        if(dto.getFromUser() == null)  throw new ValidationExceptionVS("missing param 'fromUser'");
         return dto;
     }
 

@@ -45,7 +45,7 @@
                     </div>
                     <div hidden?="{{'BANKVS' == uservs.type || !isClientToolConnected}}" style="margin:0 20px 0 0;">
                         <a class="btn btn-red" on-click="{{makeTransactionVS}}">
-                            <i class="fa fa-money"></i> ${msg.makeTransactionVSLbl}
+                            <i class="fa fa-money"></i> ${msg.sendTransactionVSLbl}
                         </a>
                     </div>
                     <div style="margin:0 20px 0 0;">

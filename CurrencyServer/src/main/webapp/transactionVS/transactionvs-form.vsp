@@ -32,7 +32,7 @@
                 </template>
                 <div flex  style="text-align: center; color:#6c0404;">
                     <div>
-                        <div style="font-size: 1.5em; font-weight: bold;">{{operationMsg}}</div>
+                        <div style="font-size: 1.4em; font-weight: bold;">{{operationMsg}}</div>
                         <div>{{fromUserName}}</div>
                     </div>
                 </div>
@@ -48,16 +48,16 @@
             <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
                 <div>
                     <div horizontal layout center center-justified>
+                        <input type="text" id="transactionvsSubject" class="form-control" required
+                               style="margin:25px 0 0 0; width:440px;" title="${msg.subjectLbl}" placeholder="${msg.subjectLbl}"/>
+                    </div>
+                    <div horizontal layout center center-justified>
                         <div>
                             <input type="text" id="amount" class="form-control"
                                    style="width:150px;margin:7px 10px 0 0;" pattern="^[0-9]*$" required
                                    title="${msg.amountLbl}" placeholder="${msg.amountLbl}"/>
                         </div>
                         <div><vs-currency-selector id="currencySelector"></vs-currency-selector></div>
-                    </div>
-                    <div>
-                        <input type="text" id="transactionvsSubject" class="form-control" required
-                               title="${msg.subjectLbl}" placeholder="${msg.subjectLbl}"/>
                     </div>
                 </div>
 
@@ -192,37 +192,18 @@
         },
         submit: function () {
             this.removeErrorStyle(this.$.formDataDiv)
-            switch(this.operation) {
-                case Operation.FROM_GROUP_TO_MEMBER:
-                    if(this.$.receptorBox.getUserList().length == 0){
-                        this.setMessage(500, "${msg.receptorMissingErrorLbl}")
-                        return false
-                    }
-                    break;
-                case Operation.FROM_GROUP_TO_MEMBER_GROUP:
-                    if(this.$.receptorBox.getUserList().length == 0){
-                        this.setMessage(500, "${msg.receptorMissingErrorLbl}")
-                        return false
-                    }
-                    break;
-                case Operation.FROM_GROUP_TO_ALL_MEMBERS:
-                    break;
-            }
             if(!this.$.amount.validity.valid) {
                 //this.$.amount.classList.add("formFieldError")
                 this.$.amount.style.background = '#f6ccd0'
                 this.setMessage(500, "${msg.enterValidAmountMsg}")
                 return
             }
-
             if(!this.$.transactionvsSubject.validity.valid) {
                 //this.$.transactionvsSubject.classList.add("formFieldError")
                 this.$.transactionvsSubject.style.background = '#f6ccd0'
                 this.setMessage(500, "${msg.emptyFieldMsg}")
                 return
             }
-            this.setMessage(200, null)
-
             var tagList = []
             if(this.selectedTags.length > 0) {
                 for(tagIdx in this.selectedTags) {
@@ -230,6 +211,18 @@
                     tagList.push(this.selectedTags[tagIdx].name);
                 }
             } else tagList.push('WILDTAG'); //No tags, receptor can expend money with any tag
+            switch(this.operation) {
+                case Operation.FROM_GROUP_TO_MEMBER_GROUP:
+                    if(this.$.receptorBox.getUserList().length == 0){
+                        this.setMessage(500, "${msg.receptorMissingErrorLbl}")
+                        return false
+                    }
+                    break;
+                case Operation.FROM_USERVS:
+                    return this.transactionFromUser(tagList)
+                    break;
+            }
+            this.setMessage(200, null)
 
             var operationVS = new OperationVS(this.operation)
             operationVS.serviceURL = "${restURL}/transactionVS"
@@ -237,9 +230,8 @@
             var signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
                 timeLimited:this.$.timeLimitedButton.checked, tags:tagList, amount: this.$.amount.value,
                 currencyCode:this.$.currencySelector.getSelected(), fromUser:this.fromUserName,
-                fromUserIBAN:this.fromUserIBAN}
+                fromUserIBAN:this.fromUserIBAN, toUserIBAN: this.getToUserIBAN()}
             if(this.toUserName)  signedContent.toUser = this.toUserName
-            if(this.getToUserIBAN()) signedContent.toUserIBAN = this.getToUserIBAN()
             operationVS.jsonStr = JSON.stringify(signedContent)
             operationVS.setCallback(function(appMessage) {
                     var appMessageJSON = JSON.parse(appMessage)
@@ -252,16 +244,39 @@
                 }.bind(this))
             VotingSystemClient.setMessage(operationVS);
         },
+        transactionFromUser:function(tagList) {
+            this.setMessage(200, null)
+            var operationVS = new OperationVS(this.operation)
+            operationVS.serviceURL = "${restURL}/transactionVS"
+            operationVS.signedMessageSubject = "${msg.transactionVSFromUserVS}"
+            var signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
+                timeLimited:this.$.timeLimitedButton.checked, tags:tagList, amount: this.$.amount.value,
+                currencyCode:this.$.currencySelector.getSelected(), toUser:this.toUserName, toUserIBAN: this.getToUserIBAN()}
+            operationVS.jsonStr = JSON.stringify(signedContent)
+            operationVS.setCallback(this.transactionVSCallback)
+            VotingSystemClient.setMessage(operationVS);
+        },
+        transactionVSCallback: function (appMessage) {
+            var appMessageJSON = JSON.parse(appMessage)
+            var caption
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = "${msg.transactionvsOKLbl}"
+                this.fire('operation-finished')
+            } else caption = '${msg.transactionvsERRORLbl}'
+            showMessageVS(appMessageJSON.message, caption)
+        },
         getToUserIBAN: function () {
+            var result = []
             if(this.operation === Operation.FROM_GROUP_TO_ALL_MEMBERS) return null
-            else {
+            else if(this.operation === Operation.FROM_USERVS) {
+                result.push(this.toUserIBAN);
+            } else {
                 var receptorList = this.$.receptorBox.getUserList()
-                var result = []
                 for(userIdx in receptorList) {
                     result.push(receptorList[userIdx].iban);
                 }
-                return result
             }
+            return result
         },
         setMessage:function(status, message) {
             console.log(this.tagName + " - setMessage - status: " + status, " - message: " + message)
@@ -271,7 +286,7 @@
         back:function() {
             this.fire('operation-finished')
         },
-        init:function(operation, userName, userIBAN, targetGroupId) {
+        init:function(operation, userName, userIBAN, userVSId) {
             console.log(this.id + " - init - operation: " + operation + " - subpage: " + this.subpage +
                     " - userIBAN: " + userIBAN)
             this.reset()
@@ -279,7 +294,7 @@
             this.fromUserName = userName
             this.fromUserIBAN = userIBAN
             this.toUserIBAN = null
-            this.groupId = targetGroupId
+            this.groupId = userVSId
             this.$.transactionvsSubject.value = ""
             this.$.amount.value = ""
             this.isWithUserSelector = true
@@ -300,6 +315,7 @@
                             userName + "'"
                     this.fromUserName = null
                     this.fromUserIBAN = null
+                    this.toUserIBAN = userIBAN
                     this.isWithUserSelector = false
                     this.toUserName = userName
                     this.$.receptorBox.uservsList= [{name:userName, IBAN:userIBAN}]

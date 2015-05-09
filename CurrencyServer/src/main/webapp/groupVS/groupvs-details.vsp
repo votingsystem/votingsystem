@@ -69,8 +69,8 @@
                 <button style="margin:0 20px 0 0; font-size: 1.1em;" on-click="{{subscribeToGroup}}">
                     <i class="fa fa-sign-in"></i> ${msg.subscribeGroupVSLbl}
                 </button>
-                <button style="margin:0 20px 0 0; font-size: 1.1em;" on-click="{{makeTransactionVS}}">
-                    <i class="fa fa-money"></i> ${msg.makeTransactionVSLbl}
+                <button style="margin:0 20px 0 0; font-size: 1.1em;" on-click="{{sendTransactionVS}}">
+                    <i class="fa fa-money"></i> ${msg.sendTransactionVSLbl}
                 </button>
             </div>
             <div hidden?="{{isClientToolConnected}}" id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 20px 0;">
@@ -159,10 +159,9 @@
             if(base64EncodedString == null) return null
             return decodeURIComponent(escape(window.atob(base64EncodedString)))
         },
-        makeTransactionVS:function() {
-            console.log(this.tagName + " - makeTransactionVS")
-            this.$.transactionvsForm.init(Operation.FROM_USERVS, this.groupvs.name, this.groupvs.iban ,
-                    this.groupvs.id)
+        sendTransactionVS:function() {
+            console.log(this.tagName + " - sendTransactionVS")
+            this.$.transactionvsForm.init(Operation.FROM_USERVS, this.groupvs.name, this.groupvs.iban , this.groupvs.id)
             this.page = 1;
         },
         messagedialogAccepted:function(e, detail, sender) {
