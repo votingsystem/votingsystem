@@ -81,10 +81,9 @@ public class TransactionVSBean {
         }
         String transactionTag =  request.getTags().iterator().next();
         if(request.isTimeLimited() && TagVS.WILDTAG.equals(transactionTag.toUpperCase()))
-            throw new ValidationExceptionVS("WILDTAG transactions cannot be time limited");
+            throw new ValidationExceptionVS(messages.get("timeLimitedWildTagErrorMsg"));
         request.setTag(config.getTag(transactionTag));
         if(request.getTag() == null) throw new ValidationExceptionVS("unknown tag:" + transactionTag);
-
 
         LoggerVS.logTransactionVS(request);
 

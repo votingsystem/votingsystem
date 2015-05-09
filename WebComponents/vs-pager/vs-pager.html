@@ -6,22 +6,24 @@
     <template>
         <link rel="stylesheet" href="vs-pager.css">
         <link rel="stylesheet" href="../font-awesome/css/font-awesome.min.css" type="text/css"/>
-        <div class="pagination">
-            <ul>
-                <li><button on-click="{{firstPage}}"><i class="fa fa-angle-double-left"></i></button></li>
-                <li class='{{currentpage === 0 ? "disabled" : ""}}'>
+        <div horizontal layout center center-justified class="pagination">
+            <div horizontal layout hidden?="{{currentpage === 0}}">
+                <div class="first-child"><button on-click="{{firstPage}}"><i class="fa fa-angle-double-left"></i></button></div>
+                <div class='{{currentpage === 0 ? "disabled" : ""}}'>
                     <button on-click="{{prevPage}}"><i class="fa fa-angle-left"></i></button>
-                </li>
-                <template repeat="{{n in currentRange}}">
-                    <li class="{{n == currentpage ? 'active' : ''}}" data-item="{{n}}" on-click="{{setPage}}">
-                        <button>{{n+1}}</button>
-                    </li>
-                </template>
-                <li class='{{currentpage === pageCount? "disabled" : ""}}'>
+                </div>
+            </div>
+            <template repeat="{{n in currentRange}}">
+                <div class="{{n == currentpage ? 'active' : ''}}" data-item="{{n}}" on-click="{{setPage}}">
+                    <button>{{n+1}}</button>
+                </div>
+            </template>
+            <div horizontal layout hidden?="{{currentpage === pageCount}}">
+                <div class='{{currentpage === pageCount? "disabled" : ""}}'>
                     <button on-click="{{nextPage}}"><i class="fa fa-angle-right"></i></button>
-                </li>
-                <li><button on-click="{{lastPage}}"><i class="fa fa-angle-double-right"></i></button></li>
-            </ul>
+                </div>
+                <div class="last-child"><button on-click="{{lastPage}}"><i class="fa fa-angle-double-right"></i></button></div>
+            </div>
         </div>
     </template>
     <script>
@@ -86,7 +88,7 @@
                 if(this.getPageCount() > 0) this.style.display = 'block'
                 else this.style.display = 'none'
                 console.log(this.tagName + " - total: " + this.total +" - offset: "  + this.offset +
-                        " - max: " + this.max  +  " - paginations: " + paginations + " - pageCount: " + this.getPageCount())
+                " - max: " + this.max  +  " - paginations: " + paginations + " - pageCount: " + this.getPageCount())
                 return paginations;
             }
         });

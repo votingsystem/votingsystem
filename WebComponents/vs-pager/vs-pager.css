@@ -6,34 +6,32 @@
     margin: 30px 0 10px 0;
     text-align: center;
 }
-.pagination ul {
-    display: inline-block;
+.pagination div {
     margin: 0;
     padding: 0;
 }
-.pagination li {
-    display: inline;
+.pagination div {
     line-height: 20px;
 }
-.pagination li.active button {
+.pagination div.active button {
     background: #ba0011;
     color: #fff;
 }
-.pagination li.disabled button {
+.pagination div.disabled button {
     color: #ccc;
     cursor: no-drop;
 }
-.pagination li:first-child button {
+.pagination div.first-child button {
     -webkit-border-radius: 5px 0 0 5px;
     -moz-border-radius: 5px 0 0 5px;
     border-radius: 5px 0 0 5px;
 }
-.pagination li:last-child button {
+.pagination div.last-child button {
     -webkit-border-radius: 0 5px 5px 0;
     -moz-border-radius: 0 5px 5px 0;
     border-radius: 0 5px 5px 0;
 }
-.pagination li  button {
+.pagination div  button {
     background-color: #fff;
     border: 1px solid #eeeeee;
     color: #ba0011;

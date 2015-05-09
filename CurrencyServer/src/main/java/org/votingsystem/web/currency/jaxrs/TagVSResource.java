@@ -45,8 +45,8 @@ public class TagVSResource {
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response index(@DefaultValue("") @QueryParam("tag") String tag, @Context ServletContext context,
                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws JsonProcessingException {
-        Query query = dao.getEM().createQuery("select t from TagVS t where t.name like :tag").setParameter("tag",
-                "%" + tag.toUpperCase() + "%");
+        Query query = dao.getEM().createQuery("select t from TagVS t where lower(t.name) like :tag").setParameter("tag",
+                "%" + tag.toLowerCase() + "%");
         List<TagVS> tagVSList = query.getResultList();
         ResultListDto<TagVS> resultListDto = new ResultListDto<>(tagVSList);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();

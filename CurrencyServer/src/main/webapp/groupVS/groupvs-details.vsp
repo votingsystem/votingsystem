@@ -56,7 +56,6 @@
                                  on-core-select="{{showTransactionVSDialog}}" style="width: 300px;">
                             <paper-dropdown class="dropdown colored"  transition="">
                                 <core-menu id="transactionvsCoreMenu">
-                                    <paper-item id="fromGroupToMember">${msg.makeTransactionVSFromGroupVSToMemberLbl}</paper-item>
                                     <paper-item id="fromGroupToMemberGroup">${msg.makeTransactionVSFromGroupVSToMemberGroupLbl}</paper-item>
                                     <paper-item id="fromGroupToAllMember">${msg.makeTransactionVSFromGroupVSToAllMembersLbl}</paper-item>
                                 </core-menu>
@@ -252,10 +251,7 @@
         showTransactionVSDialog:function(e) {
             console.log("showTransactionVSDialog")
             //e.detail.isSelected
-            if('fromGroupToMember' == e.detail.item.id) {
-                this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_MEMBER, this.groupvs.name,
-                        this.groupvs.iban , this.groupvs.id)
-            } else if('fromGroupToMemberGroup' == e.detail.item.id) {
+            if('fromGroupToMemberGroup' == e.detail.item.id) {
                 this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
                         this.groupvs.iban, this.groupvs.id)
             } else if('fromGroupToAllMember' == e.detail.item.id) {

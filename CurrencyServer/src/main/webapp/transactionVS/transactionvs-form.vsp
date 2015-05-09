@@ -64,10 +64,6 @@
                 <div layout horizontal style="margin:15px 0px 15px 0px; border: 1px solid #ccc;
                     font-size: 1.1em; padding: 5px;display: block;}}">
                     <div style="margin:0px 10px 0px 0px; padding:5px;">
-                        <div layout horizontal center center-justified style="margin: 0 0 20px 0;">
-                            <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedButton" toggles/></div>
-                            <div style="color:#6c0404; font-size: 1.1em;">${msg.timeLimitedAdviceMsg}</div>
-                        </div>
                         <div hidden?="{{selectedTags.length > 0}}" layout horizontal center center-justified style="font-size: 0.8em;">
                             <div hidden?="{{isPending || isCancelled}}" style="width: 180px; margin:0 10px 0 0;">
                                 <button on-click="{{showTagDialog}}" style="font-size: 1em; margin:10px 0px 10px 10px;">
@@ -81,6 +77,10 @@
                         </div>
                         <div hidden?="{{selectedTags.length == 0}}" layout horizontal center center-justified
                              style="font-weight:bold;text-align: center;display: block;">
+                            <div layout horizontal center center-justified style="margin: 0 0 20px 0;">
+                                <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedButton" toggles/></div>
+                                <div style="color:#6c0404; font-size: 1.1em;">${msg.timeLimitedAdviceMsg}</div>
+                            </div>
                             <div>${msg.selectedTagsAdvice}</div>
                             <template repeat="{{tag in selectedTags}}">
                                 <div layout horizontal center center-justified style="font-size: 0.9em;">
