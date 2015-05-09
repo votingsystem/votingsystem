@@ -418,6 +418,12 @@ function fireCoreSignal(coreSignalDataBase64) {
     }
 }
 
+document.addEventListener('polymer-ready', function() {
+    console.log("utilsVS.js - polymer-ready - sending pending core signal")
+    if(coreSignalData != null) fireCoreSignal(coreSignalData)
+    coreSignalData = null
+});
+
 //Message -> base64 encoded JSON
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8
 function setClientToolMessage(callerId, message) {
