@@ -51,7 +51,7 @@ public class TransactionVSUserVSBean {
         request.getTransactionVSSMIME().setSMIME(receipt);
         dao.merge(request.getTransactionVSSMIME().refresh());
         TransactionVSDto dto = new TransactionVSDto(transactionVS);
-        dto.setMessageSMIME(Base64.getUrlEncoder().encodeToString(request.getTransactionVSSMIME().getContent()));
+        dto.setMessageSMIME(Base64.getEncoder().encodeToString(request.getTransactionVSSMIME().getContent()));
         List<TransactionVSDto> listDto = Arrays.asList(dto);
         return new ResultListDto<>(listDto, request.getOperation());
     }
