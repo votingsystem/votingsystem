@@ -2,7 +2,6 @@
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
-<script src="${contextURL}/jsf/resources/js/balanceVSUtils_js.jsp" type="text/javascript"></script>
 
 
 <polymer-element name="transactionvs-list-balance" attributes="transactionList caption">
@@ -16,7 +15,7 @@
             width:270px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; font-size: 0.8em;
         }
         .amountColumn {width:130px;text-align: right; font-size: 0.9em;}
-        .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 120px; text-overflow: ellipsis;}
+        .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 150px; text-overflow: ellipsis; padding: 0 5px 0 5px;}
         </style>
         <div layout vertical justified style="display: block; height: 100%;">
             <div horizontal layout center center-justified style="margin: 0 0 10px 0; min-width: 400px;">

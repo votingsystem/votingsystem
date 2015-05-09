@@ -48,6 +48,20 @@ public class BalanceResource {
         return getUserVSBalancesDto(req, resp, context, userId, DateUtils.getWeekPeriod(Calendar.getInstance()));
     }
 
+    @Path("/userVS/id/{userId}/{timePeriod}")
+    @GET @Produces(MediaType.APPLICATION_JSON)
+    public Object userVS(@PathParam("userId") long userId, @PathParam("timePeriod") String lapseStr,
+                         @Context ServletContext context, @Context HttpServletRequest req,
+                         @Context HttpServletResponse resp) throws Exception {
+        UserVS userVS = dao.find(UserVS.class, userId);
+        if(userVS == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("not found - userId: " + userId).build();
+        }
+        TimePeriod.Lapse lapse =  TimePeriod.Lapse.valueOf(lapseStr.toUpperCase());
+        TimePeriod timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(req.getLocale()).getTime(), lapse);
+        return balancesBean.getBalancesDto(userVS, timePeriod);
+    }
+
     @Path("/userVS/id/{userId}/{year}/{month}/{day}")
     @GET  @Produces(MediaType.APPLICATION_JSON)
     public Response userVSWithDate(@PathParam("userId") long userId, @PathParam("year") int year, @PathParam("month") int month,

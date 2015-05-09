@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
@@ -145,18 +146,31 @@ public class TransactionVSResource {
         }
     }
 
-    @Path("/userVS/id/{userId}/{timePeriod}") //old_url -> /userVS/$id/transacionVS/$timePeriod
-    @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object userVS(@PathParam("userId") long userId, @PathParam("timePeriod") String lapseStr,
-                         @Context ServletContext context, @Context HttpServletRequest req,
-                         @Context HttpServletResponse resp) throws Exception {
+    @GET
+    @Path("/userVS/id/{userId}/{timePeriod}") @Transactional
+    public Response transactionsTo(@PathParam("userId") long userId, @Context ServletContext context,
+             @PathParam("timePeriod") String lapseStr,
+             @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         UserVS userVS = dao.find(UserVS.class, userId);
         if(userVS == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("not found - userId: " + userId).build();
         }
         TimePeriod.Lapse lapse =  TimePeriod.Lapse.valueOf(lapseStr.toUpperCase());
         TimePeriod timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(req.getLocale()).getTime(), lapse);
-        return balancesBean.getBalancesDto(userVS, timePeriod);
+        List<TransactionVS> transactionsToList = transactionVSBean.getTransactionToList(userVS, timePeriod);
+        List<TransactionVSDto> transactionsToListDto = new ArrayList<>();
+        for(TransactionVS transaction : transactionsToList) {
+            transactionsToListDto.add(transactionVSBean.getTransactionDto(transaction));
+        }
+        List<TransactionVS> transactionsFromList = transactionVSBean.getTransactionFromList(userVS, timePeriod);
+        List<TransactionVSDto> transactionsFromListDto = new ArrayList<>();
+        for(TransactionVS transaction : transactionsFromList) {
+            transactionsFromListDto.add(transactionVSBean.getTransactionDto(transaction));
+        }
+        BalancesDto balancesDto = new BalancesDto();
+        balancesDto.setTransactionToList(transactionsToListDto);
+        balancesDto.setTransactionFromList(transactionsFromListDto);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
     }
 
     @Path("/currency")
