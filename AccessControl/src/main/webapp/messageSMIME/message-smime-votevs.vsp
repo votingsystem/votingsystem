@@ -4,7 +4,6 @@
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 
-
 <polymer-element name="message-smime-votevs" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
         <style>
@@ -35,10 +34,7 @@
             </div>
             <div hidden?="{{!messageToUser}}">
                 <div  layout horizontal center center-justified  class="messageToUser">
-                    <div>
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
-                    <paper-shadow z="1"></paper-shadow>
+                    <div id="messageToUser">{{messageToUser}}</div>
                 </div>
             </div>
             <div><b>${msg.eventVSLbl}: </b>

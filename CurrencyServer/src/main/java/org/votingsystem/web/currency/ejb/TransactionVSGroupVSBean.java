@@ -51,30 +51,37 @@ public class TransactionVSGroupVSBean {
         if(request.getType() == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
             return processTransactionVSForAllMembers(request, accountFromMovements, groupVS);
         } else {
-            ResultListDto<TransactionVSDto> resultListDto = null;
             List<TransactionVSDto> resultList = new ArrayList<>();
             BigDecimal numReceptors = new BigDecimal(request.getNumReceptors());
             BigDecimal userPart = request.getAmount().divide(numReceptors, 4, RoundingMode.FLOOR);
-            if(request.getType() != TransactionVS.Type.FROM_GROUP_TO_MEMBER ||
-                    request.getType() != TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
+            if(!(request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER ||
+                    request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP)) {
                 throw new ExceptionVS("unknown transaction: " + request.getType().toString());
             }
             TransactionVS transactionParent = dao.persist(request.getTransactionVS(groupVS, null, accountFromMovements));
+            ObjectMapper mapper = JSON.getMapper();
             for(UserVS toUser: request.getToUserVSList()) {
-                TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(
-                        transactionParent, userPart, toUser, toUser.getIBAN()));
+                TransactionVS triggeredTransaction = TransactionVS.generateTriggeredTransaction(
+                        transactionParent, userPart, toUser, toUser.getIBAN());
+                SMIMEMessage receipt = signatureBean.getSMIME(signatureBean.getSystemUser().getNif(),
+                        toUser.getNif(), mapper.writeValueAsString(new TransactionVSDto(triggeredTransaction)),
+                        request.getOperation().toString(), null);
+                MessageSMIME messageSMIMEReceipt = dao.persist(new MessageSMIME(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS,
+                        request.getTransactionVSSMIME()));
+                triggeredTransaction.setMessageSMIME(messageSMIMEReceipt);
+                dao.persist(triggeredTransaction);
                 resultList.add(new TransactionVSDto(triggeredTransaction));
             }
             log.info("transactionType: " + request.getType().toString() + " - num. receptors: " +
                     request.getToUserVSList().size()  + " - TransactionVS parent id: " + transactionParent.getId() +
                     " - amount: " + request.getAmount().toString());
-            resultListDto = new ResultListDto(resultList, request.getOperation());
+            ResultListDto<TransactionVSDto> resultListDto = new ResultListDto(resultList, request.getOperation());
             if(request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER) {
                 resultListDto.setMessage(messages.get("transactionVSFromGroupToMemberOKMsg", request.getAmount() + " " +
                         request.getCurrencyCode(), request.getToUserVSList().iterator().next().getNif()));
             } else if (request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
-                resultListDto.setMessage(messages.get("transactionVSFromGroupToMemberGroupOKMsg", request.getAmount() + " " +
-                        request.getCurrencyCode()));
+                resultListDto.setMessage(messages.get("transactionVSFromGroupToMemberGroupOKMsg", request.getAmount() +
+                        " " + request.getCurrencyCode()));
             }
             return resultListDto;
         }

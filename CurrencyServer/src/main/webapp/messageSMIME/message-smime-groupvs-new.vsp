@@ -29,10 +29,7 @@
                 <b>${msg.dateLbl}: </b> {{timeStampDate}}
             </div>
             <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
-                <div>
-                    <div id="messageToUser">{{messageToUser}}</div>
-                </div>
-                <paper-shadow z="1"></paper-shadow>
+                <div id="messageToUser">{{messageToUser}}</div>
             </div>
 
             <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>

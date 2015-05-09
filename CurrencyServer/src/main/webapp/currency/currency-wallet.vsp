@@ -21,7 +21,6 @@
                         <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
                         <div id="messageToUser">{{messageToUser}}</div>
                     </div>
-                    <paper-shadow z="1"></paper-shadow>
                 </div>
             </div>
             <div hidden?="{{walletLoaded}}" horizontal layout center center-justified style="font-size: 0.9em; ">

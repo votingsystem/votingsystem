@@ -3,7 +3,6 @@
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 <link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 
 
@@ -45,10 +44,7 @@
                     <b>${msg.dateLbl}: </b> {{timeStampDate}}
                 </div>
                 <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
-                    <div>
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
-                    <paper-shadow z="1"></paper-shadow>
+                    <div id="messageToUser">{{messageToUser}}</div>
                 </div>
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
                 <div horizontal layout center-justified>

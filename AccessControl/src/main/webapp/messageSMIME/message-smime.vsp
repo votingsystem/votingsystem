@@ -1,8 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
-<link href="${resourceURL}/paper-shadow/paper-shadow.html" rel="import"/>
 
 <polymer-element name="message-smime" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
@@ -23,9 +20,9 @@
                 <div class="pageHeader"><h3>{{smimeMessageContent.operation}}</h3></div>
                 <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px;">
                     <template if="{{isClientToolConnected}}">
-                        <paper-button raised on-click="{{checkReceipt}}">
+                        <button raised on-click="{{checkReceipt}}">
                             <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
-                        </paper-button>
+                        </button>
                     </template>
                 </div>
             </div>
@@ -33,11 +30,8 @@
                 <b>${msg.timeStampDateLbl}: </b>{{timeStampDate}}
             </div>
             <div hidden?="{{!messageToUser}}">
-                <div  layout horizontal center center-justified  class="messageToUser">
-                    <div>
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
-                    <paper-shadow z="1"></paper-shadow>
+                <div layout horizontal center center-justified  class="messageToUser">
+                    <div id="messageToUser">{{messageToUser}}</div>
                 </div>
             </div>
             <vs-html-echo html="{{smimeMessageContentStr}}"></vs-html-echo>

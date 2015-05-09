@@ -1,8 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
-
 <polymer-element name="transactionvs-data" attributes="transactionvs smimeMessage isClientToolConnected timeStampDate">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
@@ -19,15 +16,7 @@
         </style>
         <div horizontal layout>
             <div layout vertical style="margin: 0px auto; max-width:800px; color:#667;">
-                <div horizontal layout style="margin: 0 0 20px 0;">
-                    <template if="{{transactionvs.tags.length > 0}}">
-                        <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
-                            <template repeat="{{tag in transactionvs.tags}}">
-                                <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em; padding:2px 5px 7px 5px;">
-                                    <i class="fa fa-tag" style="color: #888;"></i> {{tag}}</a>
-                            </template>
-                        </div>
-                    </template>
+                <div horizontal layout style="margin: 0 0 10px 0;">
                     <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">{{caption}}</div>
                 </div>
 
@@ -36,10 +25,7 @@
                 </div>
                 <div hidden?="{{!messageToUser}}">
                     <div  layout horizontal center center-justified  class="messageToUser">
-                        <div>
-                            <div id="messageToUser">{{messageToUser}}</div>
-                        </div>
-                        <paper-shadow z="1"></paper-shadow>
+                        <div id="messageToUser">{{messageToUser}}</div>
                     </div>
                 </div>
 
@@ -80,21 +66,25 @@
                         </template>
                     </div>
                 </div >
-                <div style="margin: 15px 0 15px 0;">
-                    <template if="{{receptorMsg}}">{{receptorMsg}}</template>
+                <div hidden="{{!receptorMsg}}" style="margin: 15px 0 15px 0;">{{receptorMsg}}</div>
+            </div>
+        </div>
+        <div horizontal layout center center-justified style="margin: 20px 0 0 0;">
+            <div hidden?="{{!(transactionvs.tags.length > 0)}}" flex>
+                <template repeat="{{tag in transactionvs.tags}}">
+                    <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em; padding:2px 5px 7px 5px;">
+                        <i class="fa fa-tag" style="color: #888;"></i> {{tag}}</a>
+                </template>
+            </div>
+            <div hidden?="{{!isClientToolConnected}}" layout horizontal style="margin:1px 20px 0px 0px;">
+                <div flex></div>
+                <div>
+                    <button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                        <i class="fa fa-certificate" style="color: #388746;"></i>  ${msg.checkSignatureLbl}
+                    </button>
                 </div>
             </div>
         </div>
-        <template if="{{isClientToolConnected}}">
-            <div layout horizontal style="margin:1px 20px 0px 0px;">
-                <div flex></div>
-                <div>
-                    <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
-                        <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
-                    </paper-button>
-                </div>
-            </div>
-        </template>
     </template>
     <script>
         Polymer('transactionvs-data', {

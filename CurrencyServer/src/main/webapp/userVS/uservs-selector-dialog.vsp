@@ -8,7 +8,7 @@
 <polymer-element name="uservs-selector-dialog" attributes="groupVSId groupVSState">
     <template>
         <paper-dialog id="xDialog" autoCloseDisabled layered backdrop
-                style="overflow: auto;width: 700px;  min-height: 300px;">
+                style="overflow: auto;width: 800px;  min-height: 300px;">
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <div id="main">

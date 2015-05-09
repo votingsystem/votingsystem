@@ -28,7 +28,7 @@ public class TagVS implements Serializable {
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false)
     private Long id;
-    @Column(name="name", nullable=false, length=50) private String name;
+    @Column(name="name", nullable=false, unique=true, length=50) private String name;
     @Column(name="frequency") private Long frequency;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23) private Date dateCreated;

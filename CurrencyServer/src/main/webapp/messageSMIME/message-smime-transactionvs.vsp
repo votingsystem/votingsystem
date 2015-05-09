@@ -22,19 +22,8 @@
         <div layout horizontal>
             <div layout vertical style="margin: 0px auto; color: #667;">
                 <div horizontal layout style="margin: 0 0 10px 0; min-width: 400px;">
-                    <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
-                        <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em;">
-                            <i class="fa fa-tag" style="color: #888;"></i> {{smimeMessageContent.tags[0]}}</a>
-                    </div>
-                    <div layout horizontal center center-justified class="pageHeader" style="margin:0 0 0 20px; font-size: 1.2em;">
+                    <div flex layout horizontal center center-justified class="pageHeader" style="margin:0 0 0 20px; font-size: 1.2em;">
                         {{messageType}}
-                    </div>
-                    <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px; font-size: 0.9em;">
-                        <template if="{{isClientToolConnected}}">
-                            <paper-button raised on-click="{{checkReceipt}}">
-                                <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
-                            </paper-button>
-                        </template>
                     </div>
                 </div>
 
@@ -42,10 +31,7 @@
                     <b>${msg.dateLbl}: </b> {{timeStampDate}}
                 </div>
                 <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
-                    <div>
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
-                    <paper-shadow z="1"></paper-shadow>
+                    <div id="messageToUser">{{messageToUser}}</div>
                 </div>
                 <div horizontal layout center center-justified style="margin:0 0 10px 0;">
                     <div style="font-size: 1.1em; font-weight: bold;">${msg.subjectLbl}:</div>
@@ -83,6 +69,19 @@
                         </div>
                     </div>
                 </div >
+                <div horizontal layout style="margin: 0 0 10px 0; min-width: 400px;">
+                    <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
+                        <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em;">
+                            <i class="fa fa-tag" style="color: #888;"></i> {{smimeMessageContent.tags[0]}}</a>
+                    </div>
+                    <div  horizontal layout end-justified style="margin:10px 0px 10px 0px; font-size: 0.9em;">
+                        <template if="{{isClientToolConnected}}">
+                            <paper-button raised on-click="{{checkReceipt}}">
+                                <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
+                            </paper-button>
+                        </template>
+                    </div>
+                </div>
             </div>
         </div>
 

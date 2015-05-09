@@ -132,9 +132,7 @@ public class ConfigVSImpl implements ConfigVS {
                 URL res = res = Thread.currentThread().getContextClassLoader().getResource("defaultTags.txt");
                 String[] defaultTags = FileUtils.getStringFromInputStream(res.openStream()).split(",");
                 for(String tag: defaultTags) {
-                    TagVS newTagVS =  dao.persist(new TagVS(tag.toLowerCase()));
-                    dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO,
-                            java.util.Currency.getInstance("EUR").getCurrencyCode(), newTagVS));
+                    createtagVS(tag);
                 }
             }
             executorService.submit(() -> {
@@ -176,7 +174,15 @@ public class ConfigVSImpl implements ConfigVS {
     public TagVS getTag(String tagName) throws ValidationExceptionVS {
         Query query = dao.getEM().createNamedQuery("findTagByName").setParameter("name", tagName.toUpperCase());
         TagVS tagVS = dao.getSingleResult(TagVS.class, query);
-        if(tagVS == null) throw new ValidationExceptionVS("tag: " + tagName + " is not active");
+        if(tagVS != null) return tagVS;
+        else return createtagVS(tagName);
+    }
+
+    public TagVS createtagVS(String tagName) {
+        TagVS tagVS =  dao.persist(new TagVS(tagName.toLowerCase()));
+        //TODO dollar, yuan, yen ...
+        dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO,
+                java.util.Currency.getInstance("EUR").getCurrencyCode(), tagVS));
         return tagVS;
     }
 

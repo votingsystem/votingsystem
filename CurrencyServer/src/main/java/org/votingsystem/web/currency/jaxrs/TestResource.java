@@ -1,12 +1,15 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.eventbus.Subscribe;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.DateUtils;
@@ -18,6 +21,7 @@ import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
@@ -55,6 +59,7 @@ public class TestResource {
     @Inject AuditBean auditBean;
     @Inject BalancesBean balanceBean;
     @Inject DAOBean dao;
+    @Inject ConfigVS config;
 
 
     private static ExecutorService executorService;
@@ -62,7 +67,6 @@ public class TestResource {
     static {
         executorService = Executors.newFixedThreadPool(5);
     }
-
 
     class EventBusListener {
         @Subscribe public void newUserVS(UserVS userVS) {
@@ -72,11 +76,8 @@ public class TestResource {
 
     @GET @Path("/test")
     public Response test(@Context ServletContext context, @Context HttpServletRequest req,
-                             @Context HttpServletResponse resp) {
-        UserVS userVS = new UserVS("98765432Q", UserVS.Type.SYSTEM, "test con id");
-        userVS.setId(10000L);
-        dao.merge(userVS);
-        return Response.ok().entity("userVS.getId(): " + userVS.getId()).build();
+                             @Context HttpServletResponse resp) throws JsonProcessingException {
+        return Response.ok().entity("").build();
     }
 
     @GET @Path("/eventBus")

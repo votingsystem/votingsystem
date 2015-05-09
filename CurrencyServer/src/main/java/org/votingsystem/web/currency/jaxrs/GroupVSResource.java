@@ -155,11 +155,12 @@ public class GroupVSResource {
         if(contentType.contains("json")) {
             String queryListPrefix = "select s ";
             String querySufix = "from SubscriptionVS s where s.state =:subscriptionState " +
-                    "and s.userVS.state =:userState and (lower(s.userVS.name) like :searchText " +
+                    "and s.userVS.state =:userState and s.groupVS=:groupVS and (lower(s.userVS.name) like :searchText " +
                     "or lower(s.userVS.firstName) like :searchText or lower(s.userVS.lastName) like :searchText " +
                     "or lower(s.userVS.nif) like :searchText)";
             String queryCountPrefix = "select COUNT(s) ";
             Query query = dao.getEM().createQuery(queryListPrefix + querySufix)
+                    .setParameter("groupVS", groupVS)
                     .setParameter("subscriptionState", subscriptionState)
                     .setParameter("userState", userState).setParameter("searchText", "%" + searchText.toLowerCase() + "%")
                     .setFirstResult(offset).setMaxResults(max);
@@ -170,6 +171,7 @@ public class GroupVSResource {
                 resultList.add(UserVSDto.COMPLETE(subscriptionVS.getUserVS()));
             }
             query = dao.getEM().createQuery(queryCountPrefix + querySufix)
+                    .setParameter("groupVS", groupVS)
                     .setParameter("subscriptionState", subscriptionState)
                     .setParameter("userState", userState).setParameter("searchText", "%" + searchText.toLowerCase() + "%");
             totalCount = (long) query.getSingleResult();

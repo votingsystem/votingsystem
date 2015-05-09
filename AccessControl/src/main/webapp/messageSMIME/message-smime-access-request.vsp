@@ -36,7 +36,6 @@
                     <div>
                         <div id="messageToUser">{{messageToUser}}</div>
                     </div>
-                    <paper-shadow z="1"></paper-shadow>
                 </div>
             </div>
             <div><b>${msg.eventVSLbl}: </b>

@@ -10,7 +10,7 @@
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .card {
-                width: 300px; vertical-align: top;
+                width: 290px; vertical-align: top;
                 background-color: #f9f9f9; box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
                 border: 1px solid rgba(0, 0, 0, 0.24); margin: 10px; color: #667; cursor: pointer; padding: 5px;
             }

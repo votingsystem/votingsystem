@@ -2,8 +2,8 @@
     "userVSList":[],
     "groupVSList":[],
     "bankVSList":[
-        {"fromUserVS":{"id":3}, "bankIBAN":"", "toUserVS":{"id":15}, "operation":"FROM_BANKVS",  "subject":"BankVS transactionvs to userVS",
+        {"fromUserVS":{"id":3}, "bankIBAN":"", "toUserVS":{"id":11}, "operation":"FROM_BANKVS",  "subject":"BankVS transactionvs to userVS",
          "fromUser": "ClientBankVS App1", "fromUserIBAN":"ES8477777777450000012345",
-         "amount":"50000", "currencyCode": "EUR", "tags":["WILDTAG"], "isTimeLimited":false}
+         "amount":"100000", "currencyCode": "EUR", "tags":["WILDTAG"], "isTimeLimited":false}
     ]
 }

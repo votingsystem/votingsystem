@@ -5,7 +5,6 @@
 <link href="${resourceURL}/vs-user-box/vs-user-box.html" rel="import"/>
 <link href="${resourceURL}/vs-currency-selector/vs-currency-selector.html" rel="import"/>
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
-<link href="${resourceURL}/paper-shadow/paper-shadow.html" rel="import"/>
 <link href="${resourceURL}/paper-radio-button/paper-radio-button.html" rel="import"/>
 <link href="${elementURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
 <link href="${elementURL}/userVS/uservs-selector-dialog.vsp" rel="import"/>
@@ -44,7 +43,6 @@
                         <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
                         <div id="messageToUser">{{messageToUser}}</div>
                     </div>
-                    <paper-shadow z="1"></paper-shadow>
                 </div>
             </div>
             <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">

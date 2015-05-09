@@ -17,7 +17,6 @@
                 <div  layout horizontal center center-justified >
                     <div id="messageToUser">{{messageToUser}}</div>
                 </div>
-                <paper-shadow z="1"></paper-shadow>
             </div>
         </div>
     </template>

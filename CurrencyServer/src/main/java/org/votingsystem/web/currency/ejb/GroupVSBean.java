@@ -104,10 +104,7 @@ public class GroupVSBean {
         if(groupVSDto.getTags() != null) {
             Set<TagVS> resultTagVSSet = new HashSet<>();
             for(TagVS tagVS: groupVSDto.getTags()) {
-                Query query = dao.getEM().createNamedQuery("findTagByName").setParameter("name", tagVS.getName().toLowerCase());
-                TagVS tagVSDB = dao.getSingleResult(TagVS.class, query);
-                if(tagVSDB == null) tagVSDB = dao.persist(new TagVS(tagVS.getName().toLowerCase()));
-                resultTagVSSet.add(tagVSDB);
+                resultTagVSSet.add(config.getTag(tagVS.getName()));
             }
             groupVSDto.setTags(resultTagVSSet);
         }

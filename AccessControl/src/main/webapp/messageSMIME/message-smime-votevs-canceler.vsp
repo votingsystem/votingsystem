@@ -2,7 +2,6 @@
 
 <script src="${contextURL}/resources/js/utilsVS.js" type="text/javascript"></script>
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/paper-shadow/paper-shadow.html" rel="import"/>
 <link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 
 
@@ -38,10 +37,7 @@
             </div>
             <template if="{{messageToUser}}">
                 <div  layout horizontal center center-justified  class="messageToUser">
-                    <div>
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
-                    <paper-shadow z="1"></paper-shadow>
+                    <div id="messageToUser">{{messageToUser}}</div>
                 </div>
             </template>
             <div><b>${msg.hashAccessRequestLbl}: </b>{{smimeMessageContent.hashAccessRequestBase64}}</div>

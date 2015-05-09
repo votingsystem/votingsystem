@@ -4,7 +4,6 @@
 <link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
 <link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 
 
 <polymer-element name="eventvs-admin-dialog" attributes="opened">
@@ -31,12 +30,9 @@
                     </div>
                 </div>
 
-                <div style="display:{{messageToUser? 'block':'none'}}">
+                <div hidden?="{{!messageToUser}}" layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                     <div class="messageToUser">
-                        <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
-                            <div id="messageToUser">{{messageToUser}}</div>
-                        </div>
-                        <paper-shadow z="1"></paper-shadow>
+                        {{messageToUser}}
                     </div>
                 </div>
 
