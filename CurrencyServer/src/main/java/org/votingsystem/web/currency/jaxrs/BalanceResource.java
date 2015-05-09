@@ -50,7 +50,7 @@ public class BalanceResource {
 
     @Path("/userVS/id/{userId}/{timePeriod}")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Object userVS(@PathParam("userId") long userId, @PathParam("timePeriod") String lapseStr,
+    public Response userVS(@PathParam("userId") long userId, @PathParam("timePeriod") String lapseStr,
                          @Context ServletContext context, @Context HttpServletRequest req,
                          @Context HttpServletResponse resp) throws Exception {
         UserVS userVS = dao.find(UserVS.class, userId);
@@ -59,7 +59,7 @@ public class BalanceResource {
         }
         TimePeriod.Lapse lapse =  TimePeriod.Lapse.valueOf(lapseStr.toUpperCase());
         TimePeriod timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(req.getLocale()).getTime(), lapse);
-        return balancesBean.getBalancesDto(userVS, timePeriod);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesBean.getBalancesDto(userVS, timePeriod))).build();
     }
 
     @Path("/userVS/id/{userId}/{year}/{month}/{day}")
