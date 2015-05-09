@@ -11,15 +11,13 @@
     .messageToUser { font-weight: bold;  margin:10px auto 10px auto; background: #f9f9f9; padding:10px 20px 10px 20px; max-width: 600px;}
     </style>
     <core-signals on-core-signal-messagedialog-accept="{{messagedialogAccept}}"></core-signals>
-    <template if="{{messageToUser}}">
-        <div style="color: {{status == 200?'#388746':'#ba0011'}};">
-            <div class="messageToUser">
-                <div  layout horizontal center center-justified >
-                    <div id="messageToUser">{{messageToUser}}</div>
-                </div>
+    <div hidden?="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
+        <div class="messageToUser">
+            <div  layout horizontal center center-justified >
+                <div id="messageToUser">{{messageToUser}}</div>
             </div>
         </div>
-    </template>
+    </div>
     <div style="margin: 20px auto 10px auto; text-align: center;max-width: 600px; ">
         ${msg.certRequestAdviceMsg}
     </div>

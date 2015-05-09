@@ -26,16 +26,14 @@
             paper-fab.green { background: #259b24; color: #f0f0f0; }
         </style>
         <div vertical layout>
-            <template if="{{messageToUser}}">
-                <div style="color: {{status == 200?'#388746':'#ba0011'}};">
-                    <div class="messageToUser">
-                        <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
-                            <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
-                            <div id="messageToUser">{{messageToUser}}</div>
-                        </div>
+            <div hidden?="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
+                <div class="messageToUser">
+                    <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
+                        <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
+                        <div id="messageToUser">{{messageToUser}}</div>
                     </div>
                 </div>
-            </template>
+            </div>
 
             <div layout horizontal center center-justified>
                 <div style="margin: 0 10px 0 0;"><paper-radio-button toggles id="timeLimitedRButton"></paper-radio-button></div>

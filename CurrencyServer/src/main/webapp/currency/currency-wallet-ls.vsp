@@ -22,16 +22,14 @@
             }
         </style>
         <div vertical layout>
-            <template if="{{messageToUser}}">
-                <div style="color: {{status == 200?'#388746':'#ba0011'}};">
-                    <div class="messageToUser">
-                        <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
-                            <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
-                            <div id="messageToUser">{{messageToUser}}</div>
-                        </div>
+            <div hidden?="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
+                <div class="messageToUser">
+                    <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
+                        <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
+                        <div id="messageToUser">{{messageToUser}}</div>
                     </div>
                 </div>
-            </template>
+            </div>
         </div>
         <polymer-localstorage id="localstorage" name="currency-request-localstorage" value="{{currencysWallet}}"></polymer-localstorage>
 

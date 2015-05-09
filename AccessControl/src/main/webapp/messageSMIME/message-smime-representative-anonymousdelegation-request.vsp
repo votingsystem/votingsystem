@@ -34,13 +34,11 @@
             <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
                 <b>${msg.timeStampDateLbl}: </b>{{timeStampDate}}
             </div>
-            <template if="{{messageToUser}}">
-                <div  layout horizontal center center-justified  class="messageToUser">
-                    <div>
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
+            <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
+                <div>
+                    <div id="messageToUser">{{messageToUser}}</div>
                 </div>
-            </template>
+            </div>
             <div><b>${msg.weeksAnonymousDelegation}: </b>{{smimeMessageContent.weeksOperationActive}}</div>
             <div horizontal layout style="margin:10px 0 0 0;"><b>${msg.validFromLbl}:</b> {{getDate(smimeMessageContent.dateFrom)}}
                 <span style="margin: 0 0 0 20px;"><b>${msg.toLbl}:</b></span> {{getDate(smimeMessageContent.dateFrom)}}</div>

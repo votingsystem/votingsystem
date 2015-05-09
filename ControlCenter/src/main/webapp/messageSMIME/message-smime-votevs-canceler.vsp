@@ -35,14 +35,12 @@
             <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
                 <b>${msg.timeStampDateLbl}: </b>{{timeStampDate}}
             </div>
-            <template if="{{messageToUser}}">
-                <div  layout horizontal center center-justified  class="messageToUser">
-                    <div>
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
-                    <paper-shadow z="1"></paper-shadow>
+            <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
+                <div>
+                    <div id="messageToUser">{{messageToUser}}</div>
                 </div>
-            </template>
+                <paper-shadow z="1"></paper-shadow>
+            </div>
             <div><b>${msg.hashAccessRequestLbl}: </b>{{smimeMessageContent.hashAccessRequestBase64}}</div>
             <div><b>${msg.originHashAccessRequestLbl}: </b>{{smimeMessageContent.originHashAccessRequest}}</div>
             <div><b>${msg.hashCertVSLbl}: </b>{{smimeMessageContent.hashCertVSBase64}}</div>
