@@ -27,7 +27,6 @@ public class EventVSBean {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject SignatureBean signatureBean;
 
     public void checkEventVSDates (EventVS eventVS) throws ValidationExceptionVS {
@@ -60,6 +59,7 @@ public class EventVSBean {
     }
 
     public MessageSMIME cancelEvent(MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         SMIMEMessage smimeMessageReq = messageSMIME.getSMIME();
         UserVS signer = messageSMIME.getUserVS();
         EventVSDto request = messageSMIME.getSignedContent(EventVSDto.class);

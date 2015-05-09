@@ -30,7 +30,6 @@ public class CertificateVSBean {
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     /*
      * Método para poder añadir certificados de confianza.
@@ -38,6 +37,7 @@ public class CertificateVSBean {
      * añadir el certificado en formato pem en el directorio ./WEB-INF/votingsystem
      */
     public MessageDto addCertificateAuthority(MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         CertificateVSRequest request = messageSMIME.getSignedContent(CertificateVSRequest.class);
         request.validateNewCARequest();
         if(!signatureBean.isAdmin(request.signer.getNif())) throw new ValidationExceptionVS(

@@ -46,7 +46,6 @@ public class CurrencyBean {
     @Inject CSRBean csrBean;
     @Inject WalletBean walletBean;
     @Inject TimeStampBean timeStampBean;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
 
     public CurrencyBatchResponseDto processCurrencyTransaction(CurrencyBatch currencyBatch) throws Exception {
@@ -92,6 +91,7 @@ public class CurrencyBean {
     }
 
     public Currency validateCurrency(Currency currency) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         SMIMEMessage smimeMessage = currency.getSMIME();
         Query query = dao.getEM().createQuery("SELECT c FROM Currency c WHERE c.serialNumber =:serialNumber and c.hashCertVS =:hashCertVS")
                 .setParameter("serialNumber", currency.getX509AnonymousCert().getSerialNumber().longValue())
@@ -115,6 +115,7 @@ public class CurrencyBean {
     }
 
     public CurrencyIssuedDto processCurrencyRequest(CurrencyRequestBatch currencyBatch) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS fromUserVS = currencyBatch.getMessageSMIME().getUserVS();
         //Check cash available for user
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(

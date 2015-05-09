@@ -34,10 +34,10 @@ public class WebSocketBean {
     @Inject DAOBean dao;
     @Inject TransactionVSBean transactionVSBean;
     @Inject SignatureBean signatureBean;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Transactional
     public void processRequest(SocketMessageDto messageDto) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         switch(messageDto.getOperation()) {
             case MESSAGEVS_TO_DEVICE:
                 if(SessionVSManager.getInstance().sendMessageToDevice(messageDto)) {//message send OK

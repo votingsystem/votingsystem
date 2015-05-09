@@ -23,11 +23,11 @@ public class WalletBean {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
 
     public Map<CurrencyAccount, BigDecimal> getAccountMovementsForTransaction(String fromUserIBAN,
                TagVS tag, BigDecimal amount, String currencyCode) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         if(tag == null) throw new ExceptionVS("Transaction without tag!!!");
         if(amount.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS(
                 "negativeAmountRequestedErrorMsg: " +  amount.toString());

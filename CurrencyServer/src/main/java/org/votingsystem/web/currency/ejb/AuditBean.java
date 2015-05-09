@@ -53,7 +53,6 @@ public class AuditBean {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject TransactionVSBean transactionVSBean;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject SignatureBean signatureBean;
     @Inject BalancesBean balancesBean;
 
@@ -124,6 +123,7 @@ public class AuditBean {
     }
 
     public void initWeekPeriod(Calendar requestDate) throws IOException {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         long beginCalc = System.currentTimeMillis();
         //we know this is launch every Monday after 00:00 so we just make sure to select a day from last week
         TimePeriod timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(requestDate));
@@ -164,6 +164,7 @@ public class AuditBean {
 
     public boolean initUserVSWeekPeriod(UserVS userVS, TimePeriod timePeriod, String transactionMsgSubject)
             throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         BalancesDto balancesDto = null;
         String userSubPath;
         if(userVS instanceof GroupVS) {
@@ -231,6 +232,7 @@ public class AuditBean {
 
     //@Transactional
     public Map signPeriodResult(TimePeriod timePeriod) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         long beginCalc = System.currentTimeMillis();
         Query query = dao.getEM().createNamedQuery("countUserActiveByDateAndInList").setParameter("date", timePeriod.getDateFrom())
                 .setParameter("inList", Arrays.asList(UserVS.Type.USER, UserVS.Type.GROUP, UserVS.Type.BANKVS));

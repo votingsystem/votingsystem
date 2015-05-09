@@ -29,7 +29,6 @@ public class MailBean {
     @Resource(name = "java:jboss/mail/gmail")
     private Session session;
     @Inject private ConfigVS config;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Asynchronous
     public void send(String toUser, String subject, String msg) {
@@ -73,14 +72,15 @@ public class MailBean {
 
     @Asynchronous
     public void sendBackupMsg (BackupRequestVS request, String content) {
+        //MessagesVS messages = MessagesVS.getCurrentInstance();
         /*(view:"/mail/backupRequestMessage.jsp", model:[fromUser:fromUser, requestURL:requestURL,
         subject:subject, downloadURL:downloadURL])*/
         log.log(Level.FINE, "sendBackupMsg - email:" + request.getEmail() + " - request:"+ request.getId());
         UserVS toUser = request.getMessageSMIME().getUserVS();
         String downloadURL = config.getRestURL() + "/backupVS/request/id/" + request.getId() + "/download";
         String requestURL = config.getRestURL() + "/backupVS/request/id/" + request.getId();
-        String subject = messages.get("downloadBackupMailSubject");
-        send(toUser.getEmail(), subject, content);
+        //String subject = messages.get("downloadBackupMailSubject");
+        //send(toUser.getEmail(), subject, content);
     }
 
 

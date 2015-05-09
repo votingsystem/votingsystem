@@ -48,10 +48,10 @@ public class VoteVSBean {
     @PersistenceContext private EntityManager em;
     @Inject DAOBean dao;
     @Inject private SignatureBean signatureBean;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Transactional
     public VoteVS validateVote(SMIMEDto smimeDto) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         MessageSMIME messageSMIME = smimeDto.getMessageSMIME();
         EventVSElection eventVS = (EventVSElection) smimeDto.getEventVS();
         eventVS = em.merge(eventVS);
@@ -93,6 +93,7 @@ public class VoteVSBean {
     }
 
     public VoteVSCanceler processCancel (MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS signer = messageSMIME.getUserVS();
         VoteVSCancelerDto request = messageSMIME.getSignedContent(VoteVSCancelerDto.class);
         request.validate();

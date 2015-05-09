@@ -46,9 +46,10 @@ public class RepresentativeDelegationBean {
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject CSRBean csrBean;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
+
 
     public RepresentationDocument saveDelegation(MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
         UserVS userVS = messageSMIME.getUserVS();
         checkUserDelegationStatus(userVS);
@@ -109,6 +110,7 @@ public class RepresentativeDelegationBean {
     }
 
     public RepresentationDocument saveAnonymousDelegation(MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         X509Certificate anonymousX509Cert =  messageSMIME.getAnonymousSigner().getCertificate();
         AnonymousDelegationCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
                 AnonymousDelegationCertExtensionDto.class, anonymousX509Cert,
@@ -186,6 +188,7 @@ public class RepresentativeDelegationBean {
     }
 
     private RepresentationDocument cancelAnonymousRepresentationDocument(MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
         if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION != request.getOperation()) throw new ValidationExceptionVS(
                 "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION' found '" + request.getOperation() + "'");
@@ -232,7 +235,8 @@ public class RepresentativeDelegationBean {
         } else log.info("cancelRepresentationDocument - user without representative - user id: " + userVS.getId());
     }
 
-    private void checkUserDelegationStatus(UserVS userVS) throws ValidationExceptionVS, ExceptionVS {
+    private void checkUserDelegationStatus(UserVS userVS) throws ExceptionVS {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         if(UserVS.Type.REPRESENTATIVE == userVS.getType()) throw new ValidationExceptionVS(
                 messages.get("userIsRepresentativeErrorMsg", userVS.getNif()));
         AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS);

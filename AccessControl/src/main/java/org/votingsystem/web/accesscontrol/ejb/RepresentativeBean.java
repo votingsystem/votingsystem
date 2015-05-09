@@ -49,9 +49,9 @@ public class RepresentativeBean {
     @Inject MailBean mailBean;
     @Inject SignatureBean signatureBean;
     @Inject RepresentativeDelegationBean representativeDelegationBean;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     public RepresentativeDocument saveRepresentative(MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS signer = messageSMIME.getUserVS();
         AnonymousDelegation anonymousDelegation = representativeDelegationBean.getAnonymousDelegation(signer);
         if(anonymousDelegation != null) throw new ValidationExceptionVS(messages.get(
@@ -93,6 +93,7 @@ public class RepresentativeBean {
 
 
     public MessageSMIME processRevoke(MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
         UserVS signer = messageSMIME.getUserVS();
         UserVS representative = null;
@@ -139,6 +140,7 @@ public class RepresentativeBean {
     }
 
     public RepresentationStateDto checkRepresentationState(String nifToCheck) throws ExceptionVS {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         nifToCheck = NifUtils.validate(nifToCheck);
         Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif").setParameter("nif", nifToCheck);
         UserVS userVS  = dao.getSingleResult(UserVS.class, query);
@@ -385,6 +387,7 @@ public class RepresentativeBean {
 
     @Asynchronous
     public void processVotingHistoryRequest(MessageSMIME messageSMIME, String messageTemplate) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         try {
             SMIMEMessage smimeMessage = messageSMIME.getSMIME();
             UserVS userVS = messageSMIME.getUserVS();
@@ -414,6 +417,7 @@ public class RepresentativeBean {
 
     @Asynchronous
     public void processAccreditationsRequest(MessageSMIME messageSMIME, String messageTemplate) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         try {
             UserVS userVS = messageSMIME.getUserVS();
             RepresentativeAccreditationsDto request = messageSMIME.getSignedContent(RepresentativeAccreditationsDto.class);

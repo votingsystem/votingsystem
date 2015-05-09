@@ -30,7 +30,6 @@ public class GroupVSBean {
     private static Logger log = Logger.getLogger(GroupVSBean.class.getSimpleName());
 
     @Inject DAOBean dao;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject ConfigVS config;
     @Inject UserVSBean userVSBean;
     @Inject CurrencyAccountBean currencyAccountBean;
@@ -70,6 +69,7 @@ public class GroupVSBean {
     }
 
     public GroupVS saveGroup(MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS signer = messageSMIME.getUserVS();
         GroupVSDto request = messageSMIME.getSignedContent(GroupVSDto.class);
         if (TypeVS.CURRENCY_GROUP_EDIT == request.getOperation()) {
@@ -112,6 +112,7 @@ public class GroupVSBean {
     }
 
     public SubscriptionVS subscribe(MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         SubscriptionVS subscriptionVS = null;
         UserVS signer = messageSMIME.getUserVS();
         log.info("signer: " + signer.getNif());

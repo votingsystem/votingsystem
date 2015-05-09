@@ -31,7 +31,6 @@ public class ShopExampleBean {
     private static final Map<String, AsyncRequestBundle> transactionRequestMap = new HashMap<>();
 
     @Inject ConfigVS config;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
 
     public void putTransactionRequest(String sessionId, TransactionVSDto transactionRequest) {

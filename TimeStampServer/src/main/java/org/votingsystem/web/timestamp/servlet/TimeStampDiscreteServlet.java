@@ -28,12 +28,12 @@ public class TimeStampDiscreteServlet extends HttpServlet {
 
     private java.util.logging.Logger log = java.util.logging.Logger.getLogger(TimeStampDiscreteServlet.class.getSimpleName());
 
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject TimeStampService timeStampService;
     @Inject DAOBean dao;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         PrintWriter writer = null;
         if(((FilterVS.RequestVSWrapper)req).getContentTypeVS() == ContentTypeVS.TIMESTAMP_QUERY) {
             try {

@@ -55,7 +55,6 @@ public class SignatureBean {
     @Inject ConfigVS config;
     @Inject TimeStampBean timeStampBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
     private SMIMESignedGeneratorVS signedMailGenerator;
     private Encryptor encryptor;
     private Set<TrustAnchor> trustAnchors;
@@ -336,6 +335,7 @@ public class SignatureBean {
     }
 
     public SMIMEDto validatedVote(SMIMEMessage smimeMessage) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         Query query = dao.getEM().createNamedQuery("findMessageSMIMEByBase64ContentDigest")
                 .setParameter("base64ContentDigest", smimeMessage.getContentDigestStr());
         MessageSMIME messageSMIME = dao.getSingleResult(MessageSMIME.class, query);

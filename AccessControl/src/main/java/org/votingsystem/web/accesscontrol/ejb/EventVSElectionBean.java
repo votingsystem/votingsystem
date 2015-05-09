@@ -42,9 +42,9 @@ public class EventVSElectionBean {
     @Inject SignatureBean signatureBean;
     @Inject RepresentativeBean representativeBean;
     @Inject TimeStampBean timeStampBean;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     public EventVSElection saveEvent(MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS userSigner = messageSMIME.getUserVS();
         EventVSDto request  = messageSMIME.getSignedContent(EventVSDto.class);
         request.setDateFinish(DateUtils.resetDay(DateUtils.addDays(request.getDateBegin(), 1).getTime()).getTime());

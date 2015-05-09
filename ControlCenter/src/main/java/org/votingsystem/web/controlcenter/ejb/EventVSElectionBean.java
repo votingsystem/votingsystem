@@ -34,7 +34,6 @@ public class EventVSElectionBean {
 
     private static final Logger log = Logger.getLogger(EventVSElectionBean.class.getSimpleName());
 
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
@@ -72,6 +71,7 @@ public class EventVSElectionBean {
     }
 
     public MessageSMIME cancelEvent(MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS signer = messageSMIME.getUserVS();
         EventVSDto request = messageSMIME.getSignedContent(EventVSDto.class);
         Query query = dao.getEM().createQuery("select e from EventVSElection e where e.accessControlEventVSId =:eventId")

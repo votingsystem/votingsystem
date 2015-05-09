@@ -26,11 +26,11 @@ public class TransactionVSBankVSBean {
 
     private static Logger log = Logger.getLogger(TransactionVSBankVSBean.class.getSimpleName());
 
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject ConfigVS config;
     @Inject DAOBean dao;
 
     public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws ExceptionVS {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         validateRequest(request);
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getSigner().getNif());
         BankVS bankVS = dao.getSingleResult(BankVS.class, query);

@@ -38,7 +38,6 @@ public class BalancesBean {
     @Inject BankVSBean bankVSBean;
     @Inject UserVSBean userVSBean;
     @Inject DAOBean dao;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject TransactionVSBean transactionVSBean;
     @Inject CurrencyAccountBean currencyAccountBean;
 

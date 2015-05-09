@@ -41,10 +41,10 @@ public class VoteVSBean {
     @Inject private ConfigVS config;
     @Inject private DAOBean dao;
     @Inject private SignatureBean signatureBean;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
 
     public VoteVS validateVote(SMIMEDto smimeDto) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         MessageSMIME messageSMIME = smimeDto.getMessageSMIME();
         EventVSElection eventVS = (EventVSElection) smimeDto.getEventVS();
         eventVS = dao.merge(eventVS);
@@ -64,6 +64,7 @@ public class VoteVSBean {
     }
 
     public VoteVSCanceler processCancel (MessageSMIME messageSMIME) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS signer = messageSMIME.getUserVS();
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
         VoteVSCancelerDto request = messageSMIME.getSignedContent(VoteVSCancelerDto.class);

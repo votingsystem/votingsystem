@@ -33,7 +33,6 @@ public class UserVSBean {
     private static Logger log = Logger.getLogger(UserVSBean.class.getSimpleName());
 
     @Inject DAOBean dao;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject ConfigVS config;
     @Inject CurrencyAccountBean currencyAccountBean;
     @Inject UserVSBean userVSBean;
@@ -43,6 +42,7 @@ public class UserVSBean {
     
     
     public UserVS saveUser(MessageSMIME messageSMIMEReq) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS signer = messageSMIMEReq.getUserVS();
         if(!signatureBean.isAdmin(signer.getNif())) throw new ExceptionVS(messages.get("userWithoutPrivilegesErrorMsg",
                 signer.getNif(), TypeVS.CERT_CA_NEW.toString()));

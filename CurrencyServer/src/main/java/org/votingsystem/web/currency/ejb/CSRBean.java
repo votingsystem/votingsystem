@@ -30,7 +30,6 @@ public class CSRBean {
 
     private BigDecimal currencyMinValue = BigDecimal.ONE;
 
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;
@@ -66,6 +65,7 @@ public class CSRBean {
     }
 
     public Currency signCurrencyRequest(Currency currency) throws ExceptionVS {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         if(currencyMinValue.compareTo(currency.getAmount()) > 0) throw new ExceptionVS(messages.get("currencyMinValueError",
                 currencyMinValue.toString(), currency.getAmount().toString()));
         TimePeriod timePeriod = null;
