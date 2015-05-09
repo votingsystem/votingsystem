@@ -285,11 +285,6 @@
             this.isWithUserSelector = true
             this.toUserName = null
             switch(operation) {
-                case Operation.FROM_GROUP_TO_MEMBER:
-                    this.operationMsg = "${msg.transactionVSFromGroupToMember}"
-                    this.selectReceptorMsg = '${msg.selectReceptorMsg}'
-                    this.$.receptorBox.multiSelection = false
-                    break;
                 case Operation.FROM_GROUP_TO_MEMBER_GROUP:
                     this.operationMsg = "${msg.transactionVSFromGroupToMemberGroup}"
                     this.selectReceptorMsg = '${msg.selectReceptorsMsg}'

@@ -76,10 +76,7 @@ public class TransactionVSGroupVSBean {
                     request.getToUserVSList().size()  + " - TransactionVS parent id: " + transactionParent.getId() +
                     " - amount: " + request.getAmount().toString());
             ResultListDto<TransactionVSDto> resultListDto = new ResultListDto(resultList, request.getOperation());
-            if(request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER) {
-                resultListDto.setMessage(messages.get("transactionVSFromGroupToMemberOKMsg", request.getAmount() + " " +
-                        request.getCurrencyCode(), request.getToUserVSList().iterator().next().getNif()));
-            } else if (request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
+            if (request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP) {
                 resultListDto.setMessage(messages.get("transactionVSFromGroupToMemberGroupOKMsg", request.getAmount() +
                         " " + request.getCurrencyCode()));
             }

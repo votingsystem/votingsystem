@@ -36,7 +36,8 @@
                         <button hidden?="{{'admin' !== menuType || isActive}}" on-click="{{activateUser}}">
                             <i class="fa fa-thumbs-o-up"></i> ${msg.activateUserLbl}
                         </button>
-                        <button hidden?="{{'admin' !== menuType || isCancelled}}" on-click="{{initCancellation}}">
+                        <button hidden?="{{'admin' !== menuType || !isActive}}"
+                                on-click="{{initCancellation}}">
                             <i class="fa fa-thumbs-o-down"></i> ${msg.deActivateUserLbl}
                         </button>
                     </div>

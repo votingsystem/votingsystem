@@ -40,10 +40,6 @@
                 <div class="numTrans">{{dashBoardDto.numTransFromUserVS}}</div>
                 <div class="transDesc">${msg.transactionVSFromUserVS}</div>
             </div>
-            <div id="FROM_GROUP_TO_MEMBER" class="transBlock" on-click="{{transBlockSelected}}">
-                <div class="numTrans">{{dashBoardDto.numTransFromGroupVSToMember}}</div>
-                <div class="transDesc">${msg.transactionVSFromGroupToMember}</div>
-            </div>
             <div id="FROM_GROUP_TO_MEMBER_GROUP" class="transBlock" on-click="{{transBlockSelected}}">
                 <template if="{{dashBoardDto.transFromGroupVSToMemberGroup.numTrans > 0}}">
                     <div class="numTrans">{{dashBoardDto.transFromGroupVSToMemberGroup.numTrans}} trans -

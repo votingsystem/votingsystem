@@ -117,9 +117,6 @@
                         this.isReceptorVisible = false
                         this.caption = "${msg.transactionVSFromGroupToAllMembers}"
                         break;
-                    case 'FROM_GROUP_TO_MEMBER':
-                        this.caption = "${msg.transactionVSFromGroupToMember}"
-                        break;
                     case 'FROM_GROUP_TO_MEMBER_GROUP':
                         this.caption = "${msg.transactionVSFromGroupToMemberGroup}"
                         break;

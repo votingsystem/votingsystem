@@ -91,7 +91,6 @@ public class TransactionVSBean {
         switch(request.getOperation()) {
             case FROM_BANKVS:
                 return transactionVSBankVSBean.processTransactionVS(request);
-            case FROM_GROUP_TO_MEMBER:
             case FROM_GROUP_TO_MEMBER_GROUP:
             case FROM_GROUP_TO_ALL_MEMBERS:
                 return transactionVSGroupVSBean.processTransactionVS(request);
@@ -247,9 +246,6 @@ public class TransactionVSBean {
                 break;
             case "FROM_BANKVS":
                 typeDescription = messages.get("bankVSInputLbl");
-                break;
-            case "FROM_GROUP_TO_MEMBER":
-                typeDescription = messages.get("transactionVSFromGroupToMember");
                 break;
             case "FROM_GROUP_TO_MEMBER_GROUP":
                 typeDescription = messages.get("transactionVSFromGroupToMemberGroup");

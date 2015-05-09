@@ -91,9 +91,6 @@
             case 'FROM_USERVS':
                 transactionDescription = "${msg.transactionVSFromUserVS}"
                 break;
-            case 'FROM_GROUP_TO_MEMBER':
-                transactionDescription = "${msg.transactionVSFromGroupToMember}"
-                break;
             case 'FROM_GROUP_TO_MEMBER_GROUP':
                 transactionDescription = "${msg.transactionVSFromGroupToMemberGroup}"
                 break;
