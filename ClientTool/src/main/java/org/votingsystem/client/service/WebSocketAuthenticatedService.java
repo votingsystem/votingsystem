@@ -153,12 +153,11 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     }
 
     private void connect(String password) {
-        ProgressDialog.showDialog(new InitValidatedSessionTask(password, targetServer),
-                ContextVS.getMessage("connectLbl"));
+        ProgressDialog.showDialog(new InitValidatedSessionTask(password, targetServer), null);
     }
 
     public void setConnectionEnabled(boolean isConnectionEnabled){
-        if(BrowserSessionService.getInstance().getUserVS() == null) {
+        if(BrowserSessionService.getInstance().getCryptoToken() == null) {
             CertNotFoundDialog.showDialog();
             return;
         }
@@ -207,7 +206,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
             boolean isMessageDelivered = false;
             for (DeviceVSDto deviceVSDto : resultListDto.getResultList()) {
                 DeviceVS deviceVS = deviceVSDto.getDeviceVS();
-                if(!BrowserSessionService.getInstance().getDeviceVS().getDeviceId().equals(deviceVS.getDeviceId())) {
+                if(!BrowserSessionService.getInstance().getCryptoToken().getDeviceId().equals(deviceVS.getDeviceId())) {
                     SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(BrowserSessionService.getInstance().getUserVS(),
                             deviceVS, operationVS.getNif(), operationVS.getMessage());
                     sendMessage(JSON.getMapper().writeValueAsString(messageDto));
@@ -304,7 +303,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
 
         @Override protected ResponseVS call() throws Exception {
             SocketMessageDto dto = SocketMessageDto.INIT_SESSION_REQUEST(
-                    BrowserSessionService.getInstance().getDeviceVS().getDeviceId());
+                    BrowserSessionService.getInstance().getCryptoToken().getDeviceId());
             ResponseVS responseVS = null;
             try {
                 if(BrowserSessionService.getCryptoTokenType() == CryptoTokenVS.MOBILE) {

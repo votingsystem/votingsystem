@@ -34,6 +34,10 @@ public class DeviceVSDto implements Serializable {
 
     public DeviceVSDto() {}
 
+    public DeviceVSDto(CryptoTokenVS type) {
+        this.type = type;
+    }
+
     public DeviceVSDto(UserVS userVS, CertExtensionDto certExtensionDto) {
         this.NIF = userVS.getNif();
         this.firstName = userVS.getFirstName();
@@ -42,12 +46,6 @@ public class DeviceVSDto implements Serializable {
         this.email = certExtensionDto.getEmail();
         this.deviceId = certExtensionDto.getDeviceId();
         this.deviceType = certExtensionDto.getDeviceType();
-    }
-
-    public DeviceVSDto loadUserVS(UserVS userVS) {
-        setType(CryptoTokenVS.JKS_KEYSTORE);
-        setDeviceName(userVS.getNif() + " - " + userVS.getName());
-        return this;
     }
 
     public DeviceVSDto(Long id, String name) {

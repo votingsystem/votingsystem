@@ -1,5 +1,6 @@
 package org.votingsystem.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import iaik.pkcs.pkcs11.Mechanism;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -377,16 +378,33 @@ public class ContextVS implements BundleActivator {
     }
 
     public static UserVS saveUserKeyStore(KeyStore keyStore, String password) throws Exception{
-        byte[] resultBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
+        byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
         File mainKeyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
         mainKeyStoreFile.createNewFile();
         Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
         UserVS userVS = UserVS.getUserVS((X509Certificate)chain[0]);
         File userVSKeyStoreFile = new File(APPDIR + File.separator + userVS.getNif() + "_" + USER_KEYSTORE_FILE_NAME);
         userVSKeyStoreFile.createNewFile();
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), userVSKeyStoreFile);
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(resultBytes), mainKeyStoreFile);
+        Map keyStoreMap = new HashMap<>();
+        keyStoreMap.put("certPEM", new String(CertUtils.getPEMEncoded((X509Certificate) chain[0])));
+        keyStoreMap.put("keyStore", Base64.getEncoder().encodeToString(keyStoreBytes));
+        JSON.getMapper().writeValue(mainKeyStoreFile, keyStoreMap);
+        JSON.getMapper().writeValue(userVSKeyStoreFile, keyStoreMap);
         return userVS;
+    }
+
+    public static UserVS getKeyStoreUserVS() {
+        try {
+            File keyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
+            if(keyStoreFile.createNewFile()) return null;
+            Map keyStoreMap = JSON.getMapper().readValue(keyStoreFile, new TypeReference<Map<String, String>>() { });
+            Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(
+                    ((String) keyStoreMap.get("certPEM")).getBytes());
+            return UserVS.getUserVS(certChain.iterator().next());
+        } catch(Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+        return null;
     }
 
     public KeyStore getUserKeyStore(char[] password) throws KeyStoreExceptionVS {
@@ -394,12 +412,15 @@ public class ContextVS implements BundleActivator {
         KeyStore keyStore = null;
         try {
             keyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
+            if(keyStoreFile.createNewFile()) throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"));
         } catch(Exception ex) {
             throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
         }
         try {
+            Map keyStoreMap = JSON.getMapper().readValue(keyStoreFile, new TypeReference<Map<String, String>>() {});
+            byte[] keyStoreBytes = Base64.getDecoder().decode((String) keyStoreMap.get("keyStore"));
             keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(new FileInputStream(keyStoreFile), password);
+            keyStore.load(new ByteArrayInputStream(keyStoreBytes), password);
         } catch(Exception ex) {
             throw new KeyStoreExceptionVS(getMessage("cryptoTokenPasswdErrorMsg"), ex);
         }

@@ -85,13 +85,11 @@ public class UserDeviceSelectorDialog extends DialogVS {
             });
             boolean deviceFound = false;
             for(DeviceVSDto deviceVSDto: deviceList) {
-                if(!BrowserSessionService.getInstance().getDeviceVS().getDeviceId().equals(deviceVSDto.getDeviceId())) {
-                    deviceFound = true;
-                    RadioButton radioButton = new RadioButton(deviceVSDto.getDeviceName());
-                    radioButton.setUserData(deviceVSDto);
-                    radioButton.setToggleGroup(deviceToggleGroup);
-                    deviceListBox.getChildren().add(radioButton);
-                }
+                deviceFound = true;
+                RadioButton radioButton = new RadioButton(deviceVSDto.getDeviceName());
+                radioButton.setUserData(deviceVSDto);
+                radioButton.setToggleGroup(deviceToggleGroup);
+                deviceListBox.getChildren().add(radioButton);
             }
             if(!deviceFound) {
                 setCaption(ContextVS.getMessage("deviceListEmptyMsg"));

@@ -1,8 +1,6 @@
 package org.votingsystem.test.misc;
 
 
-import java.awt.*;
-import java.net.URI;
 import java.util.logging.Logger;
 
 /**
@@ -12,7 +10,10 @@ public class Test {
 
     private static final Logger log = Logger.getLogger(Test.class.getName());
 
-    public static void main(String[] args) throws Exception { }
+    public static void main(String[] args) throws Exception {
+
+
+    }
 
 
 }

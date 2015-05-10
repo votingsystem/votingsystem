@@ -51,12 +51,12 @@ public class PasswordDialog extends DialogVS {
     public PasswordDialog() {
         super(new VBox(10));
         dialogVBox = (VBox) getContentPane();
-        dialogVBox.getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
-        dialogVBox.getStyleClass().add("modal-dialog");
-        dialogVBox.setStyle("-fx-pref-width: 350px;");
+        dialogVBox.setStyle("-fx-pref-width: 350px;-fx-padding: 0 20 20 20;-fx-alignment: center;" +
+                "-fx-font-size: 16;-fx-font-weight: bold;-fx-color: #f9f9f9;");
+
         messageText = new Text();
         messageText.setWrappingWidth(320);
-        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #6c0404;-fx-end-margin: 15;");
+        messageText.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-fill: #6c0404;-fx-end-margin: 25;");
         timeLimitedMessageText = new Text();
         timeLimitedMessageText.setStyle("-fx-font-size: 14;-fx-font-weight: bold;-fx-fill: #888;-fx-end-margin: 5; -fx-start-margin: 5;");
         messageText.setTextAlignment(TextAlignment.CENTER);
@@ -105,7 +105,7 @@ public class PasswordDialog extends DialogVS {
 
         Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));
         password2Text = new Text(ContextVS.getMessage("password2Lbl"));
-        password2Text.setStyle("-fx-spacing: 50;");
+        //password2Text.setStyle("-fx-spacing: 50;");
 
         dialogVBox.getChildren().addAll(messageText, password1Text, password1Field, password2Text, password2Field,
                 footerButtonsBox);

@@ -202,7 +202,7 @@ public class SignatureService extends Service<ResponseVS> {
 
         private ResponseVS sendCSRRequest(OperationVS operationVS) throws Exception {
             CertExtensionDto certExtensionDto = operationVS.getData(CertExtensionDto.class);
-            certExtensionDto.setDeviceId(BrowserSessionService.getInstance().getDeviceVS().getDeviceId());
+            certExtensionDto.setDeviceId(HttpHelper.getMAC());
             certExtensionDto.setDeviceType(DeviceVS.Type.PC);
             certExtensionDto.setDeviceName(InetAddress.getLocalHost().getHostName());
             CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(

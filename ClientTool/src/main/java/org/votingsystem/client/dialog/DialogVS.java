@@ -37,8 +37,8 @@ public class DialogVS {
     public DialogVS(String fxmlFilePath, StageStyle stageStyle) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlFilePath));
         fxmlLoader.setController(this);
-        decoratedPane = new DecoratedPane(null, null, fxmlLoader.load(), stage);
         stage = new Stage(stageStyle);
+        decoratedPane = new DecoratedPane(null, null, fxmlLoader.load(), stage);
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.initOwner(Browser.getInstance().getScene().getWindow());
         stage.setScene(new Scene(decoratedPane));
@@ -56,8 +56,8 @@ public class DialogVS {
     }
 
     public DialogVS(Pane pane) {
-        decoratedPane = new DecoratedPane(null, null, pane, stage);
         stage = new Stage(StageStyle.TRANSPARENT);
+        decoratedPane = new DecoratedPane(null, null, pane, stage);
         stage.setScene(new Scene(decoratedPane));
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.initOwner(Browser.getInstance().getScene().getWindow());

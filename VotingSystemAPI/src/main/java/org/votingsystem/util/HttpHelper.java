@@ -458,6 +458,16 @@ public class HttpHelper {
         }
     }
 
+    public static String getMAC() throws SocketException {
+        Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+        byte[] mac = nis.nextElement().getHardwareAddress();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mac.length; i++) {
+            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+        }
+        return sb.toString();
+    }
+
     public static String getLocalIP() throws SocketException {
         Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
         for (NetworkInterface netint : Collections.list(nets)){

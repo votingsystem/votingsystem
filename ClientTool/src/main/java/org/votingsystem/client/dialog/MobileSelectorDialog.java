@@ -103,12 +103,10 @@ public class MobileSelectorDialog extends DialogVS {
                 }
             });
             for(DeviceVSDto dto : deviceList) {
-                if(!BrowserSessionService.getInstance().getDeviceVS().getDeviceId().equals(dto.getDeviceId())) {
-                    RadioButton radioButton = new RadioButton(dto.getDeviceName());
-                    radioButton.setUserData(dto);
-                    radioButton.setToggleGroup(deviceToggleGroup);
-                    deviceListBox.getChildren().add(radioButton);
-                }
+                RadioButton radioButton = new RadioButton(dto.getDeviceName());
+                radioButton.setUserData(dto);
+                radioButton.setToggleGroup(deviceToggleGroup);
+                deviceListBox.getChildren().add(radioButton);
             }
             mainPane.getScene().getWindow().sizeToScene();
         });

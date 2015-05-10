@@ -23,6 +23,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.signature.util.*;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.*;
 
 import java.io.File;
@@ -61,12 +62,13 @@ public class BrowserSessionService implements PasswordDialog.Listener {
             sessionFile = new File(ContextVS.APPDIR + File.separator + ContextVS.BROWSER_SESSION_FILE);
             if(sessionFile.createNewFile()) {
                 browserSessionDto = new BrowserSessionDto();
-                DeviceVSDto deviceVSDto = new DeviceVSDto();
-                deviceVSDto.setDeviceId(UUID.randomUUID().toString());
-                browserSessionDto.setDeviceVS(deviceVSDto);
-                browserSessionDto.setFileType(ContextVS.BROWSER_SESSION_FILE);
             } else {
-                browserSessionDto = JSON.getMapper().readValue(sessionFile, BrowserSessionDto.class);
+                try {
+                    browserSessionDto = JSON.getMapper().readValue(sessionFile, BrowserSessionDto.class);
+                } catch (Exception ex) {
+                    browserSessionDto = new BrowserSessionDto();
+                    log.log(Level.SEVERE, "CORRUPTED BROWSER SESSION FILE!!!", ex);
+                }
             }
             browserSessionDto.setIsConnected(false);
             if(browserSessionDto.getUserVS() != null) userVS = browserSessionDto.getUserVS().getUserVS();
@@ -199,10 +201,6 @@ public class BrowserSessionService implements PasswordDialog.Listener {
         return browserSessionDto.getCryptoToken();
     }
 
-    public DeviceVSDto getDeviceVS() {
-        return browserSessionDto.getDeviceVS();
-    }
-
     public static CryptoTokenVS getCryptoTokenType () {
         String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
         return CryptoTokenVS.valueOf(tokenType);
@@ -232,6 +230,10 @@ public class BrowserSessionService implements PasswordDialog.Listener {
         if(!updated) userVSList.add(browserSessionDto.getUserVS());
         browserSessionDto.setIsConnected(isConnected);
         flush();
+    }
+
+    public UserVS getKeyStoreUserVS() {
+        return ContextVS.getKeyStoreUserVS();
     }
 
     public BrowserSessionDto getBrowserSessionData() {

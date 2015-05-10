@@ -38,9 +38,9 @@
                    title="${msg.emailLbl}" placeholder="${msg.emailLbl}"/>
             <div layout horizontal style="margin:10px 20px 0px 0px;">
                 <div flex></div>
-                <paper-button raised on-click="{{submitForm}}" style="margin: 20px 0px 0px 5px;">
+                <button on-click="{{submitForm}}" style="font-size:1.1em;margin: 20px 0px 0px 5px;">
                     <i class="fa fa-check"></i> ${msg.acceptLbl}
-                </paper-button>
+                </button>
             </div>
         </div>
     </div>
