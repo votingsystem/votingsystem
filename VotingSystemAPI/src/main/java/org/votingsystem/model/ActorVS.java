@@ -307,6 +307,9 @@ public class ActorVS extends EntityVS implements Serializable {
         return getServerURL() + "/rest/userVS/id/" + String.valueOf(id);
     }
 
+    public String getUserVSBalanceURL(String nif) {
+        return getServerURL() + "/rest/balance/userVS/nif/" + nif;
+    }
 
     public String getDeviceListByNifServiceURL(String nif) {
         return getServerURL() + "/rest/deviceVS/nif/" + nif + "/list";

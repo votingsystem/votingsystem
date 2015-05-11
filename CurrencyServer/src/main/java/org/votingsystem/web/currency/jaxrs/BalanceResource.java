@@ -3,10 +3,7 @@ package org.votingsystem.web.currency.jaxrs;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.*;
 import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.CurrencyAccountBean;
 import org.votingsystem.web.currency.util.ReportFiles;
@@ -14,6 +11,7 @@ import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
+import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -41,11 +39,24 @@ public class BalanceResource {
     @Inject CurrencyAccountBean accountBean;
     @Inject BalancesBean balancesBean;
 
-    @GET
-    @Path("/userVS/id/{userId}")
+    @GET @Path("/userVS/id/{userId}")
     public Response userVS(@PathParam("userId") long userId, @Context ServletContext context,
              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        return getUserVSBalancesDto(req, resp, context, userId, DateUtils.getWeekPeriod(Calendar.getInstance()));
+        UserVS uservs = dao.find(UserVS.class, userId);
+        if(uservs == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - UserVS not found - userId: " + userId).build();
+        return getUserVSBalancesDto(req, resp, context, uservs, DateUtils.getWeekPeriod(Calendar.getInstance()));
+    }
+
+    @GET @Path("/userVS/nif/{userNIF}")
+    public Response userVSByNIF(@PathParam("userNIF") String nif, @Context ServletContext context,
+                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        nif = NifUtils.validate(nif);
+        Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", nif);;
+        UserVS uservs = dao.getSingleResult(UserVS.class, query);
+        if(uservs == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - UserVS not found - userId: " + nif).build();
+        return getUserVSBalancesDto(req, resp, context, uservs, DateUtils.getWeekPeriod(Calendar.getInstance()));
     }
 
     @Path("/userVS/id/{userId}/{timePeriod}")
@@ -68,25 +79,24 @@ public class BalanceResource {
             @PathParam("day") int day, @Context ServletContext context, @Context HttpServletRequest req,
             @Context HttpServletResponse resp) throws Exception {
         Calendar calendar = DateUtils.getCalendar(year, month, day);
-        return getUserVSBalancesDto(req, resp, context, userId, DateUtils.getWeekPeriod(calendar));
+        UserVS uservs = dao.find(UserVS.class, userId);
+        if(uservs == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - UserVS not found - userId: " + userId).build();
+        return getUserVSBalancesDto(req, resp, context, uservs, DateUtils.getWeekPeriod(calendar));
     }
 
     private Response getUserVSBalancesDto(HttpServletRequest req, HttpServletResponse resp, ServletContext context,
-               long userId, TimePeriod timePeriod) throws Exception {
+                  UserVS uservs, TimePeriod timePeriod) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType(): "";
-        UserVS uservs = dao.find(UserVS.class, userId);
-        if(uservs == null) {
-            throw new NotFoundException("ERROR - UserVS not found - userId: " + userId);
+
+        BalancesDto balancesDto = balancesBean.getBalancesDto(uservs, timePeriod);
+        if(contentType.contains("json")) {
+            return Response.ok().type(MediaTypeVS.JSON).entity(
+                    JSON.getMapper().writeValueAsBytes(balancesDto)).build();
         } else {
-            BalancesDto balancesDto = balancesBean.getBalancesDto(uservs, timePeriod);
-            if(contentType.contains("json")) {
-                return Response.ok().type(MediaTypeVS.JSON).entity(
-                        JSON.getMapper().writeValueAsBytes(balancesDto)).build();
-            } else {
-                req.setAttribute("balancesDto", JSON.getMapper().writeValueAsString(balancesDto));
-                context.getRequestDispatcher("/balance/userVS.xhtml").forward(req, resp);
-                return Response.ok().build();
-            }
+            req.setAttribute("balancesDto", JSON.getMapper().writeValueAsString(balancesDto));
+            context.getRequestDispatcher("/balance/userVS.xhtml").forward(req, resp);
+            return Response.ok().build();
         }
     }
 

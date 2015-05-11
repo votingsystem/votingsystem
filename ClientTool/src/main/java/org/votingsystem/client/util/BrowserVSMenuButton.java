@@ -64,8 +64,11 @@ public class BrowserVSMenuButton extends MenuButton {
         currencyUserMenuItem.setVisible(false);
         currencyUserMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.BAR_CHART));
         currencyUserMenuItem.setOnAction(event -> {
-            Browser.getInstance().openCurrencyURL(ContextVS.getInstance().getCurrencyServer().getGroupVSListURL() + "?menu=user",
-                    ContextVS.getMessage("currencyUsersLbl"));
+            StringBuilder sb = new StringBuilder();
+            if(BrowserSessionService.getInstance().getUserVS() != null) sb.append(ContextVS.getInstance().getCurrencyServer()
+                    .getUserVSBalanceURL(BrowserSessionService.getInstance().getUserVS().getNif()) + "?menu=user");
+            else sb.append(ContextVS.getInstance().getCurrencyServer().getGroupVSListURL() + "?menu=user");
+            Browser.getInstance().openCurrencyURL(sb.toString(), ContextVS.getMessage("currencyUsersLbl"));
         });
         walletMenuItem = new MenuItem(ContextVS.getMessage("walletLbl"));
         walletMenuItem.setVisible(false);
