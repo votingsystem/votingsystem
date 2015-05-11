@@ -184,8 +184,8 @@ public class AuditBean {
                 reportFiles.getBaseDir().getAbsolutePath()) );
         Map<String, Map<String, BigDecimal>> currencyMap = balancesDto.getBalancesCash();
         Query query = null;
-        for(String currency: currencyMap.keySet()) {
-            for(Map.Entry<String, BigDecimal> tagVSEntry:  currencyMap.get(currency).entrySet()) {
+        for(String currencyCode: currencyMap.keySet()) {
+            for(Map.Entry<String, BigDecimal> tagVSEntry:  currencyMap.get(currencyCode).entrySet()) {
                 TagVS currentTagVS = config.getTag(tagVSEntry.getKey());
                 query = dao.getEM().createQuery("SELECT count (t) FROM TransactionVS t WHERE t.toUserVS =:toUserVS and " +
                         "t.state =:state and t.type =:type and t.tag =:tag and t.dateCreated >=:dateFrom")
@@ -196,32 +196,32 @@ public class AuditBean {
                 long numInitPeriodTransaction = (long) query.getSingleResult();
                 if(numInitPeriodTransaction > 0) throw new ExceptionVS("REPEATED CURRENCY_PERIOD_INIT TransactionVS for " +
                         "UserVS:" + userVS.getId() + " - tag: " + tagVSEntry.getKey() + " - timePeriod:" + timePeriod);
-                BigDecimal timeLimitedNotExpended = balancesDto.getTimeLimitedNotExpended(currency, currentTagVS.getName());
+                BigDecimal timeLimitedNotExpended = balancesDto.getTimeLimitedNotExpended(currencyCode, currentTagVS.getName());
                 BigDecimal amountResult = tagVSEntry.getValue().subtract(timeLimitedNotExpended);
                 String signedMessageSubject =  messages.get("tagInitPeriodMsg", tagVSEntry.getKey());
                 String signedContent = JSON.getMapper().writeValueAsString(new InitPeriodTransactionVSDto(amountResult,
-                        timeLimitedNotExpended, currency, tagVSEntry.getKey(), userVS));
+                        timeLimitedNotExpended, currencyCode, tagVSEntry.getKey(), userVS));
                 SMIMEMessage smimeMessage = signatureBean.getSMIMETimeStamped (signatureBean.getSystemUser().getName(),
                         userVS.getNif(), signedContent, transactionSubject + " - " + signedMessageSubject);
                 MessageSMIME messageSMIME = dao.persist(new MessageSMIME(smimeMessage, signatureBean.getSystemUser(),
                         TypeVS.CURRENCY_PERIOD_INIT));
-                dao.persist(new TransactionVS(userVS, userVS, amountResult, currency, signedMessageSubject, messageSMIME,
+                dao.persist(new TransactionVS(userVS, userVS, amountResult, currencyCode, signedMessageSubject, messageSMIME,
                         TransactionVS.Type.CURRENCY_PERIOD_INIT, TransactionVS.State.OK, currentTagVS));
                 if(timeLimitedNotExpended.compareTo(BigDecimal.ZERO) > 0) {
                     query = dao.getEM().createNamedQuery("findAccountByUserIBANAndStateAndCurrencyAndTag")
                             .setParameter("userIBAN", userVS.getIBAN()).setParameter("state", CurrencyAccount.State.ACTIVE)
-                            .setParameter("currencyCode", currency).setParameter("tag", currentTagVS);
+                            .setParameter("currencyCode", currencyCode).setParameter("tag", currentTagVS);
                     CurrencyAccount account = dao.getSingleResult (CurrencyAccount.class, query);
                     Map accountFromMovements = new HashMap<>();
                     accountFromMovements.put(account, timeLimitedNotExpended);
                     TransactionVS transactionVS = dao.persist(new TransactionVS(userVS, signatureBean.getSystemUser(),
-                            timeLimitedNotExpended, currency,
+                            timeLimitedNotExpended, currencyCode,
                             signedMessageSubject, messageSMIME,TransactionVS.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED,
                             TransactionVS.State.OK,currentTagVS ));
                     transactionVS.setAccountFromMovements(accountFromMovements);
                 }
                 File outputFile = reportFiles.getTagReceiptFile(tagVSEntry.getKey());
-                log.info(currency + " - " + currentTagVS.getName() + " - result: " + outputFile.getAbsolutePath());
+                log.info(currencyCode + " - " + currentTagVS.getName() + " - result: " + outputFile.getAbsolutePath());
                 smimeMessage.writeTo(new FileOutputStream(outputFile));
             }
         }

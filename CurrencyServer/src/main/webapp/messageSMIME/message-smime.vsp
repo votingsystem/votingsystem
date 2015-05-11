@@ -1,8 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-
 <polymer-element name="message-smime" attributes="smimeMessageContent smimeMessage timeStampDate">
     <template>
         <style>
@@ -15,72 +12,73 @@
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
         .systemLbl { color:#6c0404; font-size:1.1em;  }
         </style>
-        <div layout vertical style="margin: 0px auto; max-width:800px;">
-            <div  layout horizontal center center-justified>
-                <div flex></div>
-                <div class="pageHeader"><h3>{{caption}}</h3></div>
-                <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px;">
-                    <template if="{{isClientToolConnected}}">
-                        <button style="font-size: 1.1em;" on-click="{{checkReceipt}}">
-                            <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
-                        </button>
+        <div layout vertical center center-justified style="margin: 0px auto; max-width:800px;">
+            <div>
+                <div  layout horizontal center center-justified>
+                    <div class="pageHeader"><h3>{{caption}}</h3></div>
+                </div>
+                <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
+                    <b>${msg.dateLbl}: </b> {{timeStampDate}}
+                </div>
+                <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
+                    <div id="messageToUser">{{messageToUser}}</div>
+                </div>
+                <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
+                <div><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
+                <div horizontal layout>
+                    <div><b>${msg.amountLbl}: </b>{{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
+                    <template if="{{smimeMessageContent.timeLimited}}">
+                        <div class="pageHeader" style="margin: 0 0 0 20px;"><b>
+                            ${msg.timeLimitedLbl}</b>
+                        </div>
                     </template>
                 </div>
-            </div>
-            <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
-                <b>${msg.dateLbl}: </b> {{timeStampDate}}
-            </div>
-            <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
-                <div id="messageToUser">{{messageToUser}}</div>
-            </div>
-            <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-            <div><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
-            <div horizontal layout>
-                <div><b>${msg.amountLbl}: </b>{{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
-                <template if="{{smimeMessageContent.timeLimited}}">
-                    <div class="pageHeader" style="margin: 0 0 0 20px;"><b>
-                        ${msg.timeLimitedLbl}</b>
-                    </div>
-                </template>
-            </div>
 
-            <div id="fromUserDivContainer" style="margin-left: 20px;">
-                <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
-                    ${msg.senderLbl}</div>
-                <div id="fromUserDiv">
-                    <div><b>${msg.nameLbl}: </b>{{smimeMessageContent.fromUser}}</div>
-                    <div><b>${msg.IBANLbl}: </b>{{smimeMessageContent.fromUserIBAN}}</div>
-                </div>
-            </div>
-            <div hidden?="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
-                <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621;">
-                    {{receptorLbl}}</div>
-                <div layout horizontal>
-                    <div><b>${msg.IBANLbl}: </b></div>
-                    <div layout vertical>
-                        <template repeat="{{IBAN in smimeMessageContent.toUserIBAN}}">
-                            <div on-click="{{showToUserIBAN}}" style="text-decoration: underline; color: #0000ee; cursor: pointer;">{{IBAN}}</div>
-                        </template>
+                <div id="fromUserDivContainer" style="margin-left: 20px;">
+                    <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
+                        ${msg.senderLbl}</div>
+                    <div id="fromUserDiv">
+                        <div><b>${msg.nameLbl}: </b>{{smimeMessageContent.fromUser}}</div>
+                        <div><b>${msg.IBANLbl}: </b>{{smimeMessageContent.fromUserIBAN}}</div>
                     </div>
                 </div>
-            </div >
+                <div hidden?="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
+                    <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621;">
+                        {{receptorLbl}}</div>
+                    <div layout horizontal>
+                        <div><b>${msg.IBANLbl}: </b></div>
+                        <div layout vertical>
+                            <template repeat="{{IBAN in smimeMessageContent.toUserIBAN}}">
+                                <div on-click="{{showToUserIBAN}}" style="text-decoration: underline; color: #0000ee; cursor: pointer;">{{IBAN}}</div>
+                            </template>
+                        </div>
+                    </div>
+                </div >
 
-            <template if="{{smimeMessageContent.operation == 'CURRENCY'}}">
-                <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;color: #621">
-                    {{receptorLbl}}</div>
-                <div><b>{{toUserName}}</b></div>
-                <div layout horizontal>
-                    <div><b>${msg.IBANLbl}: </b>{{IBAN}}</div>
+                <div hidden?="{{smimeMessageContent.operation !== 'CURRENCY'}}">
+                    <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;color: #621">
+                        {{receptorLbl}}
+                    </div>
+                    <div><b>{{toUserName}}</b></div>
+                    <div layout horizontal>
+                        <div><b>${msg.IBANLbl}: </b>{{IBAN}}</div>
+                    </div>
                 </div>
-            </template>
 
-            <template if="{{smimeMessageContent.tags.length > 0}}">
                 <div layout horizontal center center-justified style="margin: 15px 0 0 0;">
                     <template repeat="{{tag in smimeMessageContent.tags}}">
                         <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag.name}}</a>
                     </template>
                 </div>
-            </template>
+                <div>
+                    <div flex></div>
+                    <div hidden?="{{!isClientToolConnected}}" horizontal layout end-justified style="margin:10px 0px 10px 0px;">
+                        <button style="font-size: 1.1em;" on-click="{{checkReceipt}}">
+                            <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </template>
     <script>
