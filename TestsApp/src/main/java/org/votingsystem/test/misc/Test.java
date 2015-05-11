@@ -1,6 +1,7 @@
 package org.votingsystem.test.misc;
 
 
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**

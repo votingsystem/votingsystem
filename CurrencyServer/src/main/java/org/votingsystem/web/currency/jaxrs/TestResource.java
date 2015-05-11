@@ -24,6 +24,7 @@ import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
+import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -77,7 +78,18 @@ public class TestResource {
     @GET @Path("/test")
     public Response test(@Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws JsonProcessingException {
-        return Response.ok().entity("").build();
+        Query query = dao.getEM().createQuery("SELECT COUNT(u) FROM UserVS u " +
+                "WHERE u.state = 'ACTIVE'");
+        long numTotalUsers = (long)query.getSingleResult();
+        log.info("numTotalUsers: " + numTotalUsers);
+
+        try {
+            auditBean.initWeekPeriod(Calendar.getInstance());
+        } catch (Exception ex) {
+            LoggerVS.weekLog(Level.SEVERE, ex.getMessage(), ex);
+        }
+        LoggerVS.weekLog(Level.INFO, "info message - weekPeriodLogPath: " + LoggerVS.weekPeriodLogPath, null);
+        return Response.ok().entity("info message - weekPeriodLogPath: " + LoggerVS.weekPeriodLogPath).build();
     }
 
     @GET @Path("/eventBus")

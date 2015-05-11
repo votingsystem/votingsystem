@@ -97,6 +97,18 @@ public class BalancesDto {
         return result;
     }
 
+    public BigDecimal getTimeLimitedNotExpended(String currencyCode, String tagName) {
+        BigDecimal result = BigDecimal.ZERO;
+        if(balancesTo.containsKey(currencyCode) && balancesTo.get(currencyCode).containsKey(tagName)) {
+            result = balancesTo.get(currencyCode).get(tagName).getTimeLimited();
+        }
+        if(balancesFrom.containsKey(currencyCode) && balancesFrom.get(currencyCode).containsKey(tagName)) {
+            result = result.subtract(balancesFrom.get(currencyCode).get(tagName));
+        }
+        if(result.compareTo(BigDecimal.ZERO) > 0) return result;
+        else return BigDecimal.ZERO;
+    }
+
     public UserVSDto getUserVS() {
         return userVS;
     }

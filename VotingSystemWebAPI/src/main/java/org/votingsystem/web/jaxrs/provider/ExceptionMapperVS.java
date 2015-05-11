@@ -4,6 +4,7 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;

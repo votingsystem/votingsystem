@@ -137,7 +137,7 @@ public class ConfigVSImpl implements ConfigVS {
             }
             executorService.submit(() -> {
                 try {
-                    LoggerVS.init(staticResURL + "/logs");
+                    LoggerVS.init(serverDir + "/logs");
                     timeStampBean.init();
                     signatureBean.init();
                 } catch (Exception ex) {

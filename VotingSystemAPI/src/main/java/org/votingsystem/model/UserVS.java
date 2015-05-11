@@ -32,10 +32,8 @@ import static javax.persistence.GenerationType.IDENTITY;
         @NamedQuery(name = "findUserByType", query = "SELECT u FROM UserVS u WHERE u.type =:type"),
         @NamedQuery(name = "findUserByNIF", query = "SELECT u FROM UserVS u WHERE u.nif =:nif"),
         @NamedQuery(name = "findUserByIBAN", query = "SELECT u FROM UserVS u WHERE u.IBAN =:IBAN"),
-        @NamedQuery(name = "countUserActiveOrCancelledAfter", query = "SELECT COUNT(u) FROM UserVS u " +
-            "WHERE u.dateCancelled is not null or u.dateCancelled >=:dateCancelled"),
         @NamedQuery(name = "findUserActiveOrCancelledAfterAndInList", query = "SELECT u FROM UserVS u " +
-                "WHERE (u.dateCancelled is not null or u.dateCancelled >=:dateCancelled) and u.type in :inList"),
+                "WHERE u.type in :typeList and(u.state = 'ACTIVE' or (u.state in :notActiveList and(u.dateCancelled >=:dateCancelled)))"),
         @NamedQuery(name = "findUserByRepresentativeAndIBAN", query = "SELECT u FROM UserVS u " +
                 "WHERE u.representative =:representative and u.IBAN =:IBAN"),
         @NamedQuery(name = "countUserActiveByDateAndInList", query = "SELECT COUNT(u) FROM UserVS u " +

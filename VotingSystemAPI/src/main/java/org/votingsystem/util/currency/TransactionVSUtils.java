@@ -1,10 +1,6 @@
 package org.votingsystem.util.currency;
 
-import org.votingsystem.dto.currency.IncomesDto;
-import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.throwable.ExceptionVS;
-
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -43,18 +39,4 @@ public class TransactionVSUtils {
         return sb.toString();
     }
 
-
-    public static BigDecimal checkRemainingForTag(Map<String, Map<String, BigDecimal>> balancesFrom,
-                  Map<String, Map<String, IncomesDto>> balancesTo, String tagName, String currencyCode) throws ExceptionVS {
-        BigDecimal result = BigDecimal.ZERO;
-        if(balancesTo.containsKey(currencyCode) && balancesTo.get(currencyCode).containsKey(tagName)) {
-            result = balancesTo.get(currencyCode).get(tagName).getTimeLimited();
-        }
-        if(balancesFrom.containsKey(currencyCode) && balancesFrom.get(currencyCode).containsKey(tagName)) {
-            result = result.subtract(balancesFrom.get(currencyCode).get(tagName));
-        }
-        if(result.compareTo(BigDecimal.ZERO) < 0 && !TagVS.WILDTAG.equals(tagName)) throw new ExceptionVS(
-                "Negative period balance for tag:" + tagName + " - " + currencyCode + result.toString());
-        return result;
-    }
 }

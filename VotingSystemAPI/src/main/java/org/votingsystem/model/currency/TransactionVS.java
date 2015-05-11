@@ -43,8 +43,6 @@ import static javax.persistence.GenerationType.IDENTITY;
                         "and  t.dateCreated between :dateFrom and :dateTo and t.type in (:inList))"),
         @NamedQuery(name="findTransByToUserAndStateAndDateCreatedBetween", query= "SELECT t FROM TransactionVS t " +
                 "WHERE t.toUserVS =:toUserVS and t.state =:state and t.dateCreated between :dateFrom and :dateTo"),
-        @NamedQuery(name="findTransByToUserAndStateAndTypeAndTagAndDateCreatedAfter", query= "SELECT t FROM TransactionVS t " +
-        "WHERE t.toUserVS =:toUserVS and t.state =:state and t.type =:type and t.tag =:tag and t.dateCreated >=:dateFrom"),
         @NamedQuery(name="findTransByFromUserAndTransactionParentNullAndDateCreatedBetween", query= "SELECT t FROM TransactionVS t " +
         "WHERE t.fromUserVS =:fromUserVS and t.transactionParent is null and t.dateCreated between :dateFrom and :dateTo"),
         @NamedQuery(name="findTransByToUserAndDateCreatedBetween", query= "SELECT t FROM TransactionVS t  WHERE " +

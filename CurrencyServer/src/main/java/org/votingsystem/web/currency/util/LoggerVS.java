@@ -61,7 +61,7 @@ public class LoggerVS {
 
             FileHandler weekPeriodHandler = new FileHandler(weekPeriodLogPath);
             weekPeriodHandler.setFormatter(new TransactionVSFormatter());
-            weekPeriodLog.addHandler(reportsHandler);
+            weekPeriodLog.addHandler(weekPeriodHandler);
 
         } catch (Exception ex) { ex.printStackTrace();}
     }

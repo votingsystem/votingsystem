@@ -386,6 +386,11 @@ VotingSystemClient.call = function (messageJSON) {
     }
 }
 
+function querySelector(selector) {
+    if(document.querySelector(selector) != null) return document.querySelector(selector)
+    else return document.querySelector('html /deep/ ' + selector)
+}
+
 function sendSignalVS(signalData, callback) {
     var result
     var operationVS = new OperationVS(Operation.SIGNAL_VS)
