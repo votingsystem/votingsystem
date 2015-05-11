@@ -119,7 +119,7 @@ public class CertificateVSResource {
             return Response.ok().entity(CertUtils.getPEMEncoded (x509Cert)).build();
         } else {
             CertificateVSDto certJSON = new CertificateVSDto(certificate);
-            if(req.getContentType().contains("json")) {
+            if(contentType.contains("json")) {
                 return Response.ok().entity(JSON.getMapper().writeValueAsBytes(certJSON))
                         .type(MediaTypeVS.JSON).build();
             } else {
@@ -233,7 +233,7 @@ public class CertificateVSResource {
             List<CertificateVS> certificates = query.getResultList();
             if(certificates.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
             List resultList = new ArrayList<>();
-            if(req.getContentType() != null && req.getContentType().contains("json")) {
+            if(req.getContentType() != null && contentType.contains("json")) {
                 for(CertificateVS certificateVS : certificates) {
                     resultList.add(new CertificateVSDto(certificateVS));
                 }
@@ -275,8 +275,8 @@ public class CertificateVSResource {
                         .type(MediaTypeVS.PEM).build();
             } else {
                 CertificateVSDto certJSON = new CertificateVSDto(certificate);
-                if(req.getContentType().contains("json")) {
-                   return certJSON;
+                if(contentType.contains("json")) {
+                    return certJSON;
                 } else {
                     req.setAttribute("certMap", JSON.getMapper().writeValueAsString(certJSON));
                     context.getRequestDispatcher("/certificateVS/cert.xhtml").forward(req, resp);

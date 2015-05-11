@@ -102,9 +102,10 @@ public class AppResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response userVS(@Context ServletContext context, @Context HttpServletRequest req,
                            @Context HttpServletResponse resp) throws ServletException, IOException {
+        String contentType = req.getContentType() != null ? req.getContentType(): "";
         TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), -1);//default to 1 hour
         DashBoardDto dto = dashBoardBean.getUserVSInfo(timePeriod);
-        if(req.getContentType() != null && req.getContentType().contains("json")) {
+        if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
         } else {
             req.setAttribute("dashBoardDto", JSON.getMapper().writeValueAsString(dto));
@@ -118,9 +119,10 @@ public class AppResource {
     public Response userVS(@PathParam("numHours") Integer numHours,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws ServletException, IOException {
+        String contentType = req.getContentType() != null ? req.getContentType(): "";
         TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), - numHours);
         DashBoardDto dto = dashBoardBean.getUserVSInfo(timePeriod);
-        if(req.getContentType() != null && req.getContentType().contains("json")) {
+        if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
         } else {
             req.setAttribute("dashBoardDto", JSON.getMapper().writeValueAsString(dto));

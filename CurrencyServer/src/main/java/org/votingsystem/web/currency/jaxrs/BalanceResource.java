@@ -73,12 +73,13 @@ public class BalanceResource {
 
     private Response getUserVSBalancesDto(HttpServletRequest req, HttpServletResponse resp, ServletContext context,
                long userId, TimePeriod timePeriod) throws Exception {
+        String contentType = req.getContentType() != null ? req.getContentType(): "";
         UserVS uservs = dao.find(UserVS.class, userId);
         if(uservs == null) {
             throw new NotFoundException("ERROR - UserVS not found - userId: " + userId);
         } else {
             BalancesDto balancesDto = balancesBean.getBalancesDto(uservs, timePeriod);
-            if(req.getContentType() != null && req.getContentType().contains("json")) {
+            if(contentType.contains("json")) {
                 return Response.ok().type(MediaTypeVS.JSON).entity(
                         JSON.getMapper().writeValueAsBytes(balancesDto)).build();
             } else {
@@ -104,6 +105,7 @@ public class BalanceResource {
     public Object week(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {
+        String contentType = req.getContentType() != null ? req.getContentType(): "";
         Calendar calendar = DateUtils.getCalendar(year, month, day);
         TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
         ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), null);
@@ -112,7 +114,7 @@ public class BalanceResource {
         } else {
             Map<String, Object> dataMap = JSON.getMapper().readValue(reportFiles.getJsonFile(),
                     new TypeReference<HashMap<String, Object>>() {});
-            if(req.getContentType() != null && req.getContentType().contains("json")) {
+            if(contentType.contains("json")) {
                 return dataMap;
             } else {
                 req.setAttribute("balancesJSON", JSON.getMapper().writeValueAsString(dataMap));

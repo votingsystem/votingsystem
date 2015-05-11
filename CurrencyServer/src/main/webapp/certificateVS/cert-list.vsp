@@ -4,6 +4,7 @@
 <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 <link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
 <link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
+<link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
 <link href="${elementURL}/certificateVS/votingsystem-cert.vsp" rel="import"/>
 
 
@@ -75,6 +76,10 @@
                             </div>
                         </template>
                     </div>
+                    <vs-pager on-pager-change="{{pagerChange}}" max="{{resultListDto.max}}"
+                              next="${msg.nextLbl}" previous="${msg.previousLbl}"
+                              first="${msg.firstLbl}" last="${msg.lastLbl}"
+                              offset="{{resultListDto.offset}}" total="{{resultListDto.totalCount}}"></vs-pager>
                 </div>
             </section>
             <section id="page2">
@@ -116,6 +121,16 @@
                 if("OK" == state) stateLbl = "${msg.certOKLbl}"
                 else if("CANCELED" ==  state) stateLbl = "${msg.certCancelledLbl}"
                 else stateLbl = state
+            },
+            pagerChange:function(e) {
+                var certTypeSelectValue = this.$.certTypeSelect.value
+                targetURL = "${restURL}/certificateVS/certs?menu=" + menuType + certTypeSelectValue +
+                        "&max=" + e.detail.max + "&offset=" + e.detail.offset
+                console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
+                history.pushState(null, null, targetURL);
+                this.$.ajax.url = targetURL
+                console.log(this.tagName + "targetURL: " + targetURL)
+                this.$.ajax.go()
             },
             certTypeSelect: function () {
                 var optionSelected = this.$.certTypeSelect.value
