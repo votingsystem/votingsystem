@@ -55,8 +55,7 @@ public class TransactionVSGroupVSBean {
             List<TransactionVSDto> resultList = new ArrayList<>();
             BigDecimal numReceptors = new BigDecimal(request.getNumReceptors());
             BigDecimal userPart = request.getAmount().divide(numReceptors, 4, RoundingMode.FLOOR);
-            if(!(request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER ||
-                    request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP)) {
+            if(!(request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP)) {
                 throw new ExceptionVS("unknown transaction: " + request.getType().toString());
             }
             TransactionVS transactionParent = dao.persist(request.getTransactionVS(groupVS, null, accountFromMovements));

@@ -14,7 +14,6 @@ public class DashBoardDto {
     private TransactionVS.Type type;
     private Long numTransFromBankVS;
     private Long numTransFromUserVS;
-    private Long numTransFromGroupVSToMember;
     private Long numTransCurrencyInitPeriod;
     private Long numTransCurrencyInitPeriodTimeLimited;
     private Long numTransCurrencyRequest;
@@ -60,14 +59,6 @@ public class DashBoardDto {
 
     public void setNumTransFromUserVS(Long numTransFromUserVS) {
         this.numTransFromUserVS = numTransFromUserVS;
-    }
-
-    public Long getNumTransFromGroupVSToMember() {
-        return numTransFromGroupVSToMember;
-    }
-
-    public void setNumTransFromGroupVSToMember(Long numTransFromGroupVSToMember) {
-        this.numTransFromGroupVSToMember = numTransFromGroupVSToMember;
     }
 
     public Long getNumTransCurrencyInitPeriod() {

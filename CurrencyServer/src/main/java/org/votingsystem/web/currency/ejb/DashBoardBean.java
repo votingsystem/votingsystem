@@ -35,10 +35,6 @@ public class DashBoardBean {
          dto.setNumTransFromUserVS((long) query.getSingleResult());
          query = em.createNamedQuery("countTransByToUserVSIsNotNullAndTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_GROUP_TO_MEMBER);
-         dto.setNumTransFromGroupVSToMember((long)query.getSingleResult());
-         query = em.createNamedQuery("countTransByToUserVSIsNotNullAndTypeAndDateCreatedBetween").setParameter(
-                 "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
                  TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP);
          Long numTrans = (long)query.getSingleResult();
          query = em.createNamedQuery("countTransByToUserVSIsNotNullAndTypeAndDateCreatedBetween").setParameter(
