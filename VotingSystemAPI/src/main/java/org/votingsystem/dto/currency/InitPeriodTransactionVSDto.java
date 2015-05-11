@@ -18,15 +18,18 @@ public class InitPeriodTransactionVSDto {
     private BigDecimal timeLimitedNotExpended;
     private UserVSDto toUser;
     private String tag;
+    private String currencyCode;
     private String UUID;
 
 
     public InitPeriodTransactionVSDto() {}
 
-    public InitPeriodTransactionVSDto(BigDecimal amount, BigDecimal timeLimitedNotExpended, String tag, UserVS userVS) {
+    public InitPeriodTransactionVSDto(BigDecimal amount, BigDecimal timeLimitedNotExpended, String currencyCode,
+                      String tag, UserVS userVS) {
         this.setOperation(TypeVS.CURRENCY_PERIOD_INIT);
         this.setAmount(amount);
         this.setTimeLimitedNotExpended(timeLimitedNotExpended);
+        this.setCurrencyCode(currencyCode);
         this.setTag(tag);
         this.setToUser(UserVSDto.BASIC(userVS));
         this.setUUID(java.util.UUID.randomUUID().toString());
@@ -78,5 +81,13 @@ public class InitPeriodTransactionVSDto {
 
     public void setUUID(String UUID) {
         this.UUID = UUID;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 }

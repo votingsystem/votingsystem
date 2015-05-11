@@ -68,7 +68,7 @@ public class MessageSMIMEResource {
             timeStampDate = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
         }
         signedContentMap = messageSMIME.getSignedContentMap();
-        if((boolean)signedContentMap.get("timeLimited")) {
+        if(signedContentMap.containsKey("timeLimited")) {
             signedContentMap.put("validTo", DateUtils.getDayWeekDateStr(
                     DateUtils.getNexMonday(DateUtils.getCalendar(timeStampDate)).getTime()));
         }

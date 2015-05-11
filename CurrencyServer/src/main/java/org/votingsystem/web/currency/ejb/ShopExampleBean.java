@@ -7,7 +7,6 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.util.ConfigVS;
-import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

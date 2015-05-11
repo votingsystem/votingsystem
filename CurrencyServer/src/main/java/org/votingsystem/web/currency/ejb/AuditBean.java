@@ -14,14 +14,12 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
-import org.votingsystem.util.currency.TransactionVSUtils;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.currency.util.ReportFiles;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
-import sun.misc.MessageUtils;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -33,7 +31,6 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
-import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -203,7 +200,7 @@ public class AuditBean {
                 BigDecimal amountResult = tagVSEntry.getValue().subtract(timeLimitedNotExpended);
                 String signedMessageSubject =  messages.get("tagInitPeriodMsg", tagVSEntry.getKey());
                 String signedContent = JSON.getMapper().writeValueAsString(new InitPeriodTransactionVSDto(amountResult,
-                        timeLimitedNotExpended, tagVSEntry.getKey(), userVS));
+                        timeLimitedNotExpended, currency, tagVSEntry.getKey(), userVS));
                 SMIMEMessage smimeMessage = signatureBean.getSMIMETimeStamped (signatureBean.getSystemUser().getName(),
                         userVS.getNif(), signedContent, transactionSubject + " - " + signedMessageSubject);
                 MessageSMIME messageSMIME = dao.persist(new MessageSMIME(smimeMessage, signatureBean.getSystemUser(),
