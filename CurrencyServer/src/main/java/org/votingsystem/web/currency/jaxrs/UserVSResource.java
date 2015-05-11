@@ -54,7 +54,6 @@ public class UserVSResource {
     @Inject SignatureBean signatureBean;
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/") @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -118,8 +117,9 @@ public class UserVSResource {
 
     @Path("/IBAN/{IBAN}")
     @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
-    public Object findByIBAN(@PathParam("IBAN") String IBAN, @Context ServletContext context, @Context HttpServletRequest req,
+    public Response findByIBAN(@PathParam("IBAN") String IBAN, @Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", IBAN);
         UserVS userVS = dao.getSingleResult(UserVS.class, query);
         String msg = null;
@@ -142,6 +142,7 @@ public class UserVSResource {
     @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
     public Response index(@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
                         @Context HttpServletResponse resp) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS userVS = dao.find(UserVS.class, id);
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 messages.get("itemNotFoundMsg", Long.valueOf(id).toString())).build();
@@ -341,6 +342,7 @@ public class UserVSResource {
     @Path("/save")
     @POST @Produces(MediaType.APPLICATION_JSON)
     public Response save(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS newUser = userVSBean.saveUser(messageSMIME);
         MessageDto messageDto = MessageDto.OK(messages.get("certUserNewMsg", newUser.getNif()),
                 config.getContextURL() + "/rest/userVS/id/" + newUser.getId());
@@ -350,6 +352,7 @@ public class UserVSResource {
     @Path("/newBankVS")
     @POST @Produces(MediaType.APPLICATION_JSON)
     public Response newBankVS(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         BankVS newBankVS = bankVSBean.saveBankVS(messageSMIME);
         MessageDto messageDto = new MessageDto(ResponseVS.SC_OK,
                 messages.get("newBankVSOKMsg", newBankVS.getCertificate().getSubjectDN().toString()),

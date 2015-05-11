@@ -16,7 +16,7 @@
         </style>
         <div horizontal layout>
             <div layout vertical style="margin: 0px auto; max-width:800px; color:#667;">
-                <div horizontal layout style="margin: 0 0 10px 0;">
+                <div horizontal layout center center-justified style="margin: 0 0 10px 0;">
                     <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">{{caption}}</div>
                 </div>
 

@@ -8,6 +8,7 @@ import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.web.currency.ejb.AuditBean;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -179,7 +180,7 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     public TagVS createtagVS(String tagName) {
-        TagVS tagVS =  dao.persist(new TagVS(tagName.toLowerCase()));
+        TagVS tagVS =  dao.persist(new TagVS(StringUtils.removeAccents(tagName).toUpperCase()));
         //TODO dollar, yuan, yen ...
         dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO,
                 java.util.Currency.getInstance("EUR").getCurrencyCode(), tagVS));

@@ -8,6 +8,7 @@ import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -42,8 +43,8 @@ public class TagVSResource {
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response index(@DefaultValue("") @QueryParam("tag") String tag, @Context ServletContext context,
                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws JsonProcessingException {
-        Query query = dao.getEM().createQuery("select t from TagVS t where lower(t.name) like :tag").setParameter("tag",
-                "%" + tag.toLowerCase() + "%");
+        Query query = dao.getEM().createQuery("select t from TagVS t where upper(t.name) like :tag").setParameter("tag",
+                "%" + StringUtils.removeAccents(tag).toUpperCase() + "%");
         List<TagVS> tagVSList = query.getResultList();
         ResultListDto<TagVS> resultListDto = new ResultListDto<>(tagVSList);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();

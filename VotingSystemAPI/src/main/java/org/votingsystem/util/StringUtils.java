@@ -171,6 +171,13 @@ public class StringUtils {
         return sb.toString();
     }
 
+    //http://stackoverflow.com/questions/3322152/is-there-a-way-to-get-rid-of-accents-and-convert-a-whole-string-to-regular-lette
+    public static String removeAccents(String string) {
+        string = Normalizer.normalize(string, Normalizer.Form.NFD);
+        //if unicode string = string.replaceAll("\\p{M}", "");
+        return string.replaceAll("[^\\p{ASCII}]", "");
+    }
+
     public static String getRandomAlphaNumeric(int count) {
         StringBuilder builder = new StringBuilder();
         while (count-- != 0) {

@@ -49,7 +49,7 @@ public class TransactionVSDto {
     private Integer numReceptors;
     private TransactionVS.Type type;
     private Set<String> tags;
-    private List<String> toUserIBAN = new ArrayList<>();
+    private List<String> toUserIBAN = null;
     private Long numChildTransactions;
 
     private String infoURL;
@@ -411,7 +411,7 @@ public class TransactionVSDto {
 
     public void loadBankVSTransaction(String UUID) {
         setUUID(UUID);
-        if(toUserIBAN.isEmpty() && toUserVS != null) {
+        if((toUserIBAN == null || toUserIBAN.isEmpty()) && toUserVS != null) {
             toUserIBAN = Arrays.asList(toUserVS.getIBAN());
             toUserVS = null;
         }
@@ -486,8 +486,9 @@ public class TransactionVSDto {
                 receiptDto.getType());
         if(userToType != receiptDto.getUserToType()) throw new ValidationExceptionVS("expected userToType " + userToType +
                 " found " + receiptDto.getUserToType());
-        if(!toUserIBAN.equals(receiptDto.getToUserIBAN())) throw new ValidationExceptionVS("expected toUserIBAN " + toUserIBAN +
-                " found " + receiptDto.getToUserIBAN());
+        if(!new HashSet<>(toUserIBAN).equals(new HashSet<>(receiptDto.getToUserIBAN())) ||
+                toUserIBAN.size() != receiptDto.getToUserIBAN().size()) throw new ValidationExceptionVS(
+                "expected toUserIBAN " + toUserIBAN + " found " + receiptDto.getToUserIBAN());
         if(!subject.equals(receiptDto.getSubject())) throw new ValidationExceptionVS("expected subject " + subject +
                 " found " + receiptDto.getSubject());
         if(!toUser.equals(receiptDto.getToUser())) throw new ValidationExceptionVS(

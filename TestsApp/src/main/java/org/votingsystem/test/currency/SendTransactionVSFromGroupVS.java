@@ -19,7 +19,7 @@ public class SendTransactionVSFromGroupVS {
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SimulationData simulationData = new SimulationData();
-        simulationData.setGroupId(15L);
+        simulationData.setGroupId(5L);
         simulationData.setServerURL("http://localhost:8080/CurrencyServer");
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         ContextVS.getInstance().setDefaultServer(currencyServer);

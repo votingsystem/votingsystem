@@ -76,8 +76,10 @@ public class TransactionVSBean {
         TransactionVSDto request = messageSMIME.getSignedContent(TransactionVSDto.class);
         request.validate();
         request.setTransactionVSSMIME(messageSMIME);
-        for(String IBAN : request.getToUserIBAN()) {
-            config.validateIBAN(IBAN);
+        if(request.getToUserIBAN() != null) {
+            for(String IBAN : request.getToUserIBAN()) {
+                config.validateIBAN(IBAN);
+            }
         }
         String transactionTag =  request.getTags().iterator().next();
         if(request.isTimeLimited() && TagVS.WILDTAG.equals(transactionTag.toUpperCase()))
