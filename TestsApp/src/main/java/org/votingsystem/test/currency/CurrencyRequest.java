@@ -2,12 +2,13 @@ package org.votingsystem.test.currency;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.CurrencyRequestBatch;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
@@ -15,11 +16,13 @@ import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.currency.Wallet;
 
+import java.io.File;
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,12 +59,22 @@ public class CurrencyRequest {
             ResultListDto<String> currencyCertsDto = (ResultListDto<String>) responseVS.getMessage(
                     new TypeReference<ResultListDto<String>>(){});
             requestDto.loadCurrencyCerts(currencyCertsDto.getResultList());
-            Wallet.saveCurrencyToDir(requestDto.getCurrencyMap().values(), ContextVS.getInstance().getProperty("walletDir"));
+            saveCurrencyToDir(requestDto.getCurrencyMap().values(), ContextVS.getInstance().getProperty("walletDir"));
         } else {
             log.log(Level.SEVERE," --- ERROR --- " + responseVS.getMessage());
         }
         System.exit(0);
     }
 
+    public static void saveCurrencyToDir(Collection<Currency> currencyCollection, String walletPath) throws Exception {
+        for(Currency currency : currencyCollection) {
+            CurrencyDto currencyDto = CurrencyDto.serialize(currency);
+            new File(walletPath).mkdirs();
+            File currencyFile = new File(walletPath + UUID.randomUUID().toString() + ContextVS.SERIALIZED_OBJECT_EXTENSION);
+            currencyFile.getParentFile().mkdirs();
+            JSON.getMapper().writeValue(currencyFile, currencyDto);
+            log.info("stored currency: " + currencyFile.getAbsolutePath());
+        }
+    }
 }
 

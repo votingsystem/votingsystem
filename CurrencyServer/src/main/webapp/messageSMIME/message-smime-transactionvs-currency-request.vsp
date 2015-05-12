@@ -1,12 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
-<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 
 
-<polymer-element name="message-smime-transactionvs-currency-request" attributes="signedDocument smimeMessage timeStampDate">
+<polymer-element name="message-smime-transactionvs-currency-request" attributes="smimeMessageContent smimeMessage timeStampDate">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -21,22 +18,11 @@
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic; }
         .iban-link {text-decoration: underline; color: #0000ee; cursor: pointer;}
         </style>
-        <div layout horizontal>
+        <div layout horizontal center center-justified>
             <div layout vertical style="margin: 0px auto; color: #667;">
-                <div horizontal layout style="margin: 0 0 10px 0; min-width: 400px;">
-                    <div layout horizontal center center-justified style="margin: 3px 0 0 0;">
-                        <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em;">
-                            <i class="fa fa-tag" style="color: #888;"></i> {{signedDocument.tag}}</a>
-                    </div>
-                    <div layout horizontal center center-justified class="pageHeader" style="margin:0 0 0 20px; font-size: 1.2em;">
+                <div horizontal layout center center-justified style="margin: 0 0 10px 0; min-width: 400px;">
+                    <div class="pageHeader" style="margin:0 0 0 20px; font-size: 1.2em;">
                         ${msg.currencyRequestLbl}
-                    </div>
-                    <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px; font-size: 0.9em;">
-                        <template if="{{isClientToolConnected}}">
-                            <paper-button raised on-click="{{checkReceipt}}">
-                                <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
-                            </paper-button>
-                        </template>
                     </div>
                 </div>
 
@@ -49,24 +35,29 @@
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
                 <div horizontal layout center-justified>
                     <div style="font-size: 1.1em;"><b>${msg.amountLbl}: </b>
-                        {{signedDocument.totalAmount}} {{signedDocument.currencyCode}}</div>
-                    <template if="{{signedDocument.timeLimited}}">
-                        <core-tooltip large label="${msg.timeLimitedDateMsg} '{{signedDocument.validTo}}'" position="left">
-                            <div class="pageHeader" style="margin: 0 20px 0 0;"><b>
-                                ${msg.timeLimitedLbl}</b>
-                            </div>
-                        </core-tooltip>
-                    </template>
-                </div>
-                <div horizontal layout center-justified>
-                    <div style="margin-left: 20px;">
-                        <div class="actorLbl" style=" margin:10px 0px 0px 0px;">${msg.senderLbl}</div>
-                        <div>
-                            <div><b>${msg.nameLbl}:  </b>{{signedDocument.fromUserVS.name}}</div>
-                        </div>
+                        {{smimeMessageContent.totalAmount}} {{smimeMessageContent.currencyCode}}</div>
+                    <div style="margin:0 0 0 10px;">
+                         ${msg.timeLimitedDateMsg} '{{smimeMessageContent.validTo}}'
                     </div>
                 </div>
+                <div style="margin: 20px 0 0 20px;">
+                    <div class="actorLbl">${msg.senderLbl}</div>
+                    <div>
+                        <div><b>${msg.nameLbl}:  </b>{{smimeMessageContent.fromUserVS.name}}</div>
+                    </div>
+                </div>
+                <div horizontal layout style="margin:10px 0px 10px 0px; ">
+                    <div flex>
+                        <a class="btn btn-default" style="font-size: 0.7em;padding:3px;">
+                            <i class="fa fa-tag" style="color: #888;"></i> {{smimeMessageContent.tagVS.name}}</a>
+                    </div>
+                    <div hidden?="{{!isClientToolConnected}}">
+                        <button raised on-click="{{checkReceipt}}" style="font-size: 1.1em;">
+                            <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
+                        </button>
+                    </div>
 
+                </div>
             </div>
         </div>
 
@@ -74,7 +65,7 @@
     <script>
         Polymer('message-smime-transactionvs-currency-request', {
             publish: {
-                signedDocument: {value: {}}
+                smimeMessageContent: {value: {}}
             },
             isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,
@@ -87,12 +78,12 @@
                 }.bind(this))
                 sendSignalVS({caption:"${msg.transactionVSFromBankVS}"})
             },
-            signedDocumentChanged:function() {
+            smimeMessageContentChanged:function() {
                 this.messageToUser = null
-                console.log(this.tagName + " - signedDocumentChanged: " + JSON.stringify(this.signedDocument))
+                console.log(this.tagName + " - smimeMessageContentChanged: " + JSON.stringify(this.smimeMessageContent))
             },
             showFromUserVSByIBAN:function(e) {
-                loadURL_VS("${restURL}/userVS/BANKVS/IBAN/" + this.signedDocument.bankIBAN, '_blank')
+                loadURL_VS("${restURL}/userVS/BANKVS/IBAN/" + this.smimeMessageContent.bankIBAN, '_blank')
             },
             showToUserVSByIBAN:function(e) {
                 console.log(this.tagName + " - showUserVSByIBAN - " + e)

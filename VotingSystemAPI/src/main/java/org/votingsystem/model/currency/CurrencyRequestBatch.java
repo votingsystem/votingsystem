@@ -17,12 +17,11 @@ public class CurrencyRequestBatch extends BatchRequest implements Serializable  
     public static final long serialVersionUID = 1L;
 
     @OneToOne private MessageSMIME messageSMIME;
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="tagVS", nullable=false) private TagVS tagVS;
     @Column(name="timeLimited", nullable=false) private Boolean timeLimited;
 
     public CurrencyRequestBatch() {}
-
 
     public MessageSMIME getMessageSMIME() {
         return messageSMIME;

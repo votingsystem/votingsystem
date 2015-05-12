@@ -1,11 +1,14 @@
 package org.votingsystem.dto.currency;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CurrencyCertExtensionDto {
+public class CurrencyCertExtensionDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String currencyServerURL;
     private String hashCertVS;

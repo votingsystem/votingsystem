@@ -108,6 +108,7 @@ public class CurrencyBatchDto {
         return getCurrencyBatch();
     }
 
+    @JsonIgnore
     public CurrencyBatch getCurrencyBatch() throws Exception {
         CurrencyBatch currencyBatch = new CurrencyBatch();
         currencyBatch.setOperation(operation);

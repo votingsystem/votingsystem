@@ -30,7 +30,6 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
 
     private static java.util.logging.Logger log = java.util.logging.Logger.getLogger(CurrencyBatch.class.getSimpleName());
 
-
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
     @Column(name="batchAmount") private BigDecimal batchAmount = null;
@@ -61,13 +60,6 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
     public void addCurrency(Currency currency) {
         if(currencyList == null) currencyList = new ArrayList<Currency>();
         currencyList.add(currency);
-    }
-
-    public void addCurrency(File currencyFile) throws IOException {
-        log.info("addCurrency - file name: " + currencyFile.getName());
-        Currency currency = (Currency) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(currencyFile));
-        currency.setFile(currencyFile);
-        addCurrency(currency);
     }
 
     public CurrencyBatchDto getTransactionVSRequest(TypeVS operation, Payment paymentMethod, String subject, String toUserIBAN,
@@ -250,4 +242,7 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
         this.tag = tag;
     }
 
+    public void setLeftOverCurrency(CurrencyDto leftOverCurrency) {
+        this.leftOverCurrency = leftOverCurrency;
+    }
 }

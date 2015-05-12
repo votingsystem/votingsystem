@@ -10,9 +10,10 @@ import org.votingsystem.signature.util.EncryptedBundle;
 import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.WalletException;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.StringUtils;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.*;
@@ -28,17 +29,6 @@ public class Wallet {
 
     private static Set<Currency> wallet;
 
-
-    public static void saveCurrencyToDir(Collection<Currency> currencyCollection, String walletPath) throws Exception {
-        for(Currency currency : currencyCollection) {
-            byte[] currencySerialized =  ObjectUtils.serializeObject(currency);
-            new File(walletPath).mkdirs();
-            File currencyFile = FileUtils.copyStreamToFile(new ByteArrayInputStream(currencySerialized), new File(
-                    walletPath + UUID.randomUUID().toString() + ContextVS.SERIALIZED_OBJECT_EXTENSION));
-            log.info("stored currency: " + currencyFile.getAbsolutePath());
-        }
-    }
-
     public static List<CurrencyDto> getPlainWalletDto() throws Exception {
         File walletFile = new File(ContextVS.APPDIR + File.separator + ContextVS.PLAIN_WALLET_FILE_NAME);
         if(!walletFile.exists()) return new ArrayList<>();
@@ -47,7 +37,7 @@ public class Wallet {
     }
 
     public static Set<Currency> getPlainWallet() throws Exception {
-        return CurrencyDto.getCurrencySet(getPlainWalletDto());
+        return CurrencyDto.deSerializeCollection(getPlainWalletDto());
     }
 
     public static void savePlainWalletDto(Collection<CurrencyDto> walletList) throws Exception {
@@ -91,7 +81,7 @@ public class Wallet {
             throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
         EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, JSON.getMapper().writeValueAsBytes(currencyDtoCollection));
         JSON.getMapper().writeValue(walletFile.file, new EncryptedBundleDto(bundle));
-        wallet = CurrencyDto.getCurrencySet(currencyDtoCollection);
+        wallet = CurrencyDto.deSerializeCollection(currencyDtoCollection);
         return wallet;
     }
 
@@ -102,7 +92,7 @@ public class Wallet {
         walletFile.getParentFile().mkdirs();
         EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, JSON.getMapper().writeValueAsBytes(walletDto));
         JSON.getMapper().writeValue(walletFile, new EncryptedBundleDto(bundle));
-        wallet = CurrencyDto.getCurrencySet(walletDto);
+        wallet = CurrencyDto.deSerializeCollection(walletDto);
     }
 
     public static Set<Currency> getWallet() {

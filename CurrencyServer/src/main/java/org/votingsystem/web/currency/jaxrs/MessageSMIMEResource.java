@@ -74,9 +74,7 @@ public class MessageSMIMEResource {
         }
         TypeVS operation = TypeVS.valueOf((String) signedContentMap.get("operation"));
         if(TypeVS.CURRENCY_SEND != operation) {
-            if(signedContentMap.containsKey("fromUserVS")) {
-                signedContentMap.put("fromUserVS", UserVSDto.BASIC(messageSMIME.getUserVS()));
-            }
+            signedContentMap.put("fromUserVS", UserVSDto.BASIC(messageSMIME.getUserVS()));
         }
         switch(operation) {
             case CURRENCY_GROUP_NEW:

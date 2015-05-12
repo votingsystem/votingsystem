@@ -5,7 +5,6 @@ import org.votingsystem.dto.CertValidationDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.throwable.ExceptionVS;

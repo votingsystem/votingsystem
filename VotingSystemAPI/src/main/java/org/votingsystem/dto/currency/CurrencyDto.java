@@ -15,6 +15,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.TimePeriod;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -27,7 +28,9 @@ import java.util.Set;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CurrencyDto {
+public class CurrencyDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private BigDecimal amount;
@@ -93,8 +96,8 @@ public class CurrencyDto {
         currencyDto.setTag(currency.getTag().getName());
         currencyDto.setTimeLimited(currency.getIsTimeLimited());
         currencyDto.setObject(ObjectUtils.serializeObjectToString(currency));
-        if(currency.getCertificationRequest() != null)
-            currencyDto.setCertificationRequest(new String(currency.getCertificationRequest().getCsrPEM()));
+        //if(currency.getCertificationRequest() != null)
+        //    currencyDto.setCertificationRequest(new String(currency.getCertificationRequest().getCsrPEM()));
         return currencyDto;
     }
 
@@ -121,13 +124,14 @@ public class CurrencyDto {
     }
 
     public Currency deSerialize() throws Exception {
-        if(certificationRequest != null) {
+        /*if(certificationRequest != null) {
             CertificationRequestVS certificationRequestVS = (CertificationRequestVS) ObjectUtils.deSerializeObject(
                     certificationRequest.getBytes());
             return Currency.fromCertificationRequestVS(certificationRequestVS);
         } else {
             return (Currency) ObjectUtils.deSerializeObject(object.getBytes());
-        }
+        }*/
+        return (Currency) ObjectUtils.deSerializeObject(object.getBytes());
     }
 
     public static Set<Currency> deSerializeCollection(Collection<CurrencyDto> currencyCollection) throws Exception {
@@ -137,15 +141,6 @@ public class CurrencyDto {
         }
         return result;
     }
-
-    public static Set<Currency> getCurrencySet(Collection<CurrencyDto> currencyDtoCollection) throws Exception {
-        Set<Currency> currencySet = new HashSet<>();
-        for(CurrencyDto currencyDto : currencyDtoCollection) {
-            currencySet.add(currencyDto.deSerialize());
-        }
-        return currencySet;
-    }
-
 
     public Currency loadCertData(X509Certificate x509AnonymousCert, TimePeriod timePeriod, TagVS tagVS,
                                  CertificateVS authorityCertificateVS) throws CertificateEncodingException {

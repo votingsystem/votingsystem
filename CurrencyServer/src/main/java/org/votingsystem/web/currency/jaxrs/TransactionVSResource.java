@@ -3,6 +3,7 @@ package org.votingsystem.web.currency.jaxrs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.BalancesDto;
+import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
@@ -174,10 +175,10 @@ public class TransactionVSResource {
     }
 
     @Path("/currency")
-    @POST @Produces(MediaType.APPLICATION_JSON) @Consumes({"application/json"})
-    public Response currency(CurrencyBatch currencyBatch) throws Exception {
+    @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
+    public Response currency(CurrencyBatchDto currencyBatchDto) throws Exception {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
-                currencyBean.processCurrencyTransaction(currencyBatch))).build() ;
+                currencyBean.processCurrencyTransaction(currencyBatchDto.getCurrencyBatch()))).build() ;
     }
 
 }
