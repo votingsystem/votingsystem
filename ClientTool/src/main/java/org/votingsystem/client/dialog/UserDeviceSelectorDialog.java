@@ -20,6 +20,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MediaTypeVS;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,7 +68,7 @@ public class UserDeviceSelectorDialog extends DialogVS {
         footerBox.getChildren().remove(acceptButton);
     }
 
-    private void updateDeviceList(List<DeviceVSDto> deviceList) {
+    private void updateDeviceList(Collection<DeviceVSDto> deviceList) {
         PlatformImpl.runLater(() -> {
             if(mainPane.getChildren().contains(progressBar)) mainPane.getChildren().remove(progressBar);
             if(!deviceListBox.getChildren().isEmpty()) deviceListBox.getChildren().removeAll(

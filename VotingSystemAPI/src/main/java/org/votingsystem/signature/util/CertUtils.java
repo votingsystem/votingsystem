@@ -3,6 +3,7 @@ package org.votingsystem.signature.util;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.X509Extension;
@@ -369,6 +370,20 @@ public class CertUtils {
         DERTaggedObject derTaggedObject = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(extensionValue);
         String extensionData = ((DERUTF8String) derTaggedObject.getObject()).getString();
         return JSON.getMapper().readValue(extensionData, type);
+    }
+
+    public static <T> T getCertExtensionData(Class<T> type, PKCS10CertificationRequest csr, int tagNo) throws Exception {
+        CertificationRequestInfo info = csr.getCertificationRequestInfo();
+        Enumeration csrAttributes = info.getAttributes().getObjects();
+        T certExtensionDto = null;
+        while(csrAttributes.hasMoreElements()) {
+            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
+            if(attribute.getTagNo() == tagNo) {
+                String certAttributeJSONStr = ((DERUTF8String)attribute.getObject()).getString();
+                certExtensionDto = JSON.getMapper().readValue(certAttributeJSONStr, type);
+            }
+        }
+        return certExtensionDto;
     }
 
     public static String getHashCertVS(X509Certificate x509Cert, String oid) throws IOException {

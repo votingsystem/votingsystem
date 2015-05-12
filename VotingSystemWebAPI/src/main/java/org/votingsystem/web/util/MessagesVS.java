@@ -1,7 +1,6 @@
 package org.votingsystem.web.util;
 
 import org.votingsystem.model.TagVS;
-import org.votingsystem.util.ContextVS;
 
 import java.text.MessageFormat;
 import java.util.Locale;
@@ -17,7 +16,7 @@ public class MessagesVS {
     private Locale locale;
 
     private static ThreadLocal<MessagesVS> instance = new ThreadLocal() {
-        protected ContextVS initialValue() {
+        protected MessagesVS initialValue() {
             return null;
         }
     };
@@ -50,11 +49,11 @@ public class MessagesVS {
         return (MessagesVS)instance.get();
     }
 
-    protected static void setCurrentInstance(MessagesVS context) {
-        if(context == null) {
+    protected static void setCurrentInstance(MessagesVS messagesVS) {
+        if(messagesVS == null) {
             instance.remove();
         } else {
-            instance.set(context);
+            instance.set(messagesVS);
         }
     }
 

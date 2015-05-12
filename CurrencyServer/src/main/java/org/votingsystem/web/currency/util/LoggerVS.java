@@ -1,14 +1,12 @@
 package org.votingsystem.web.currency.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.model.TagVS;
-import org.votingsystem.util.DateUtils;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.JSON;
 
 import java.io.File;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -87,17 +85,9 @@ public class LoggerVS {
         transactionslog.info(JSON.getMapper().writeValueAsString(dto) + ",");
     }
 
-    public static void logCurrencyIssued(long id, String currency, BigDecimal amount,
-                TagVS tag, boolean isTimeLimited, Date dateCreated, Date validTo) throws JsonProcessingException {
-        Map<String,Object> dataMap = new HashMap();
-        dataMap.put("id", id);
-        dataMap.put("currency", currency);
-        dataMap.put("amount", amount.setScale(2, RoundingMode.FLOOR).toString());
-        dataMap.put("tag", tag.getName());
-        dataMap.put("isTimeLimited", isTimeLimited);
-        dataMap.put("dateCreated", DateUtils.getDayWeekDateStr(dateCreated));
-        dataMap.put("validTo", DateUtils.getDayWeekDateStr(validTo));
-        currencyIssuedlog.info(JSON.getMapper().writeValueAsString(dataMap) + ",");
+    public static void logCurrencyIssued(Currency currency) throws JsonProcessingException {
+        CurrencyDto currencyDto = new CurrencyDto(currency);
+        currencyIssuedlog.info(JSON.getMapper().writeValueAsString(currencyDto) + ",");
     }
 
     public static void weekLog(Level level, String msg, Throwable thrown) {

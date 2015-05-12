@@ -3,12 +3,13 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.util.TypeVS;
 
-import java.util.List;
+import java.util.Collection;
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ResultListDto<T> {
 
-    private List<T> resultList;
+    private Collection<T> resultList;
     private Integer offset;
     private Integer statusCode;
     private Integer max;
@@ -19,27 +20,27 @@ public class ResultListDto<T> {
 
     public ResultListDto() { }
 
-    public ResultListDto(List<T> resultList) {
+    public ResultListDto(Collection<T> resultList) {
         this(resultList, 0, resultList.size(), Long.valueOf(resultList.size()));
     }
 
-    public ResultListDto(List<T> resultList, TypeVS type) {
+    public ResultListDto(Collection<T> resultList, TypeVS type) {
         this(resultList, 0, resultList.size(), Long.valueOf(resultList.size()));
         this.type = type;
     }
 
-    public ResultListDto(List<T> resultList, Integer offset, Integer max, Long totalCount) {
+    public ResultListDto(Collection<T> resultList, Integer offset, Integer max, Long totalCount) {
         this.resultList = resultList;
         this.offset = offset;
         this.max = max;
         this.totalCount = totalCount;
     }
 
-    public ResultListDto(List<T> resultList, Integer offset, Integer max, Integer totalCount) {
+    public ResultListDto(Collection<T> resultList, Integer offset, Integer max, Integer totalCount) {
         this(resultList, offset, max, Long.valueOf(totalCount));
     }
 
-    public static <T> ResultListDto GROUPVS(List<T> groupList, Object state, Integer offset, Integer max, Long totalCount) {
+    public static <T> ResultListDto GROUPVS(Collection<T> groupList, Object state, Integer offset, Integer max, Long totalCount) {
         ResultListDto<T> result = new ResultListDto<T>();
         result.setResultList(groupList);
         result.setState(state);
@@ -49,11 +50,11 @@ public class ResultListDto<T> {
         return result;
     }
 
-    public List<T> getResultList() {
+    public Collection<T> getResultList() {
         return resultList;
     }
 
-    public void setResultList(List<T> resultList) {
+    public void setResultList(Collection<T> resultList) {
         this.resultList = resultList;
     }
 

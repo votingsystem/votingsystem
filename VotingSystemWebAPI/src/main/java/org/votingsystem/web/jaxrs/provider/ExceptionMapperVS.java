@@ -1,10 +1,14 @@
 package org.votingsystem.web.jaxrs.provider;
 
 import org.votingsystem.dto.MessageDto;
+import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.TypeVS;
+import org.votingsystem.web.ejb.DAOBean;
 
+import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -19,9 +23,16 @@ public class ExceptionMapperVS implements ExceptionMapper<Exception> {
 
     private static final Logger log = Logger.getLogger(ExceptionMapperVS.class.getSimpleName());
 
+    @Inject DAOBean dao;
+
     @Override
     public Response toResponse(Exception exception) {
         try {
+            if(MessageSMIME.getCurrentMessageSMIME() != null) {
+                MessageSMIME messageSMIME = MessageSMIME.getCurrentMessageSMIME();
+                messageSMIME.setType(TypeVS.EXCEPTION).setReason(exception.getMessage());
+                dao.merge(messageSMIME);
+            }
             if(exception instanceof NotFoundException) {
                 log.log(Level.SEVERE, "--- NotFoundException --- " + exception.getMessage());
                 return Response.status(Response.Status.NOT_FOUND).entity(

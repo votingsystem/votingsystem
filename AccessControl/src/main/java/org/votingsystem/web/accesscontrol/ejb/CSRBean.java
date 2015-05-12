@@ -77,7 +77,7 @@ public class CSRBean {
         Date validFrom = new Date();
         Date validTo = DateUtils.addDays(validFrom, 365).getTime(); //one year
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getContent());
-        X509Certificate issuedCert = signatureBean.signCSR(csr, null, validFrom, validTo, null);
+        X509Certificate issuedCert = signatureBean.signCSR(csr, null, validFrom, validTo);
         csrRequest.setSerialNumber(issuedCert.getSerialNumber().longValue());
         dao.persist(csrRequest.setState(UserRequestCsrVS.State.OK));
         CertificateVS certificate = dao.persist(CertificateVS.USER(csrRequest.getUserVS(), issuedCert));

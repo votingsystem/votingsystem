@@ -1,14 +1,17 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
-import org.votingsystem.dto.currency.CurrencyIssuedDto;
+import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.model.BatchRequest;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.model.currency.*;
+import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.currency.CurrencyBatch;
+import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertExtensionCheckerVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -81,10 +84,8 @@ public class CurrencyBean {
             dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
         }
         if(currencyBatch.getLeftOverCurrency() != null) {
-            currencyBatch.getLeftOverCurrency().setTag(config.getTag(
-                    currencyBatch.getLeftOverCurrency().getCertExtensionDto().getTag()));
-            Currency leftOverCoin = csrBean.signCurrencyRequest(currencyBatch.getLeftOverCurrency());
-            responseDto.setLeftOverCoin(new String(leftOverCoin.getIssuedCertPEM(), "UTF-8"));
+            String leftOverCoin = csrBean.signCurrencyRequest(currencyBatch.getLeftOverCurrency(), tagVS);
+            responseDto.setLeftOverCoin(leftOverCoin);
         }
         responseDto.setReceipt(Base64.getEncoder().encodeToString(receipt.getBytes()));
         return responseDto;
@@ -114,22 +115,22 @@ public class CurrencyBean {
         return currency;
     }
 
-    public CurrencyIssuedDto processCurrencyRequest(CurrencyRequestBatch currencyBatch) throws Exception {
+    public ResultListDto<String> processCurrencyRequest(CurrencyRequestDto requestDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS fromUserVS = currencyBatch.getMessageSMIME().getUserVS();
+        UserVS fromUserVS = requestDto.getMessageSMIME().getUserVS();
         //Check cash available for user
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
-                fromUserVS.getIBAN(), currencyBatch.getTagVS(), currencyBatch.getRequestAmount(), currencyBatch.getCurrencyCode());
-        currencyBatch = csrBean.signCurrencyBatchRequest(currencyBatch);
-        TransactionVS userTransaction = currencyBatch.getTransactionVS(messages.get("currencyRequestLbl"), accountFromMovements);
+                fromUserVS.getIBAN(), requestDto.getTagVS(), requestDto.getTotalAmount(), requestDto.getCurrencyCode());
+        Set<String> currencyCertSet = csrBean.signCurrencyRequest(requestDto);
+        TransactionVS userTransaction = requestDto.getTransactionVS(messages.get("currencyRequestLbl"), accountFromMovements);
         dao.persist(userTransaction);
-        String message = messages.get("withdrawalMsg", currencyBatch.getRequestAmount().toString(),
-                currencyBatch.getCurrencyCode()) + " " + messages.getTagMessage(currencyBatch.getTagVS().getName());
-        CurrencyIssuedDto dto = new CurrencyIssuedDto(currencyBatch.getIssuedCurrencyListPEM(), message);
+        ResultListDto resultListDto = new ResultListDto(currencyCertSet);
+        resultListDto.setMessage(messages.get("withdrawalMsg", requestDto.getTotalAmount().toString(),
+                requestDto.getCurrencyCode()) + " " + messages.getTagMessage(requestDto.getTagVS().getName()));
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(signatureBean.getSystemUser().getName(),
-                fromUserVS.getNif(), currencyBatch.getMessageSMIME().getSMIME(), null);
-        dao.merge(currencyBatch.getMessageSMIME().setSMIME(receipt).refresh());
-        return dto;
+                fromUserVS.getNif(), requestDto.getMessageSMIME().getSMIME(), null);
+        dao.merge(requestDto.getMessageSMIME().setSMIME(receipt).refresh());
+        return resultListDto;
     }
 
     public Map<String, Currency.State> checkBundleState(List<String> hashCertVSList) {

@@ -2,6 +2,7 @@ package org.votingsystem.model.currency;
 
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
+import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.BatchRequest;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
@@ -43,7 +44,7 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
     @Column(name="subject") private String subject;
 
     @Transient private List<Currency> currencyList;
-    @Transient private Currency leftOverCurrency;
+    @Transient private CurrencyDto leftOverCurrency;
     @Transient private BigDecimal leftOver;
     @Transient private TypeVS operation;
     @Transient private String currencyCode;
@@ -122,7 +123,7 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
         return result;
     }
 
-    public Currency getLeftOverCurrency() {
+    public CurrencyDto getLeftOverCurrency() {
         return leftOverCurrency;
     }
 

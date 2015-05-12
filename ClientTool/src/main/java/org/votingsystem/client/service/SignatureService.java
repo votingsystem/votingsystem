@@ -1,5 +1,6 @@
 package org.votingsystem.client.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -14,11 +15,9 @@ import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.OperationVS;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.dto.currency.CurrencyDto;
-import org.votingsystem.dto.currency.CurrencyIssuedDto;
-import org.votingsystem.dto.currency.GroupVSDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.*;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.VoteVSCancelerDto;
@@ -290,13 +289,12 @@ public class SignatureService extends Service<ResponseVS> {
             log.info("sendCurrencyRequest");
             TransactionVSDto transactionVSDto = operationVS.getDocumentToSign(TransactionVSDto.class);
             TagVS tag = new TagVS(transactionVSDto.getTags().iterator().next());
-            CurrencyRequestBatch currencyBatch = CurrencyRequestBatch.createRequest(transactionVSDto.getAmount(),
-                    transactionVSDto.getAmount(), transactionVSDto.getCurrencyCode(), tag,
-                    transactionVSDto.isTimeLimited(), operationVS.getTargetServer().getServerURL());
-            Map<String, Object> mapToSend = new HashMap<String, Object>();
-            byte[] fileContent = JSON.getMapper().writeValueAsString(currencyBatch.getCurrencyCSRList()).getBytes();
-            mapToSend.put(ContextVS.CSR_FILE_NAME, fileContent);
-            String textToSign = JSON.getMapper().writeValueAsString(currencyBatch.getRequestDto());
+            CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionVSDto,
+                    transactionVSDto.getAmount(), operationVS.getTargetServer().getServerURL());
+            Map<String, Object> mapToSend = new HashMap<>();
+            byte[] requestBytes = JSON.getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());
+            mapToSend.put(ContextVS.CSR_FILE_NAME, requestBytes);
+            String textToSign =  JSON.getMapper().writeValueAsString(requestDto);
             SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, operationVS.getReceiverName(), textToSign,
                     password, operationVS.getSignedMessageSubject());
             updateMessage(operationVS.getSignedMessageSubject());
@@ -304,13 +302,15 @@ public class SignatureService extends Service<ResponseVS> {
             ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                     ((CurrencyServer)operationVS.getTargetServer()).getCurrencyRequestServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                CurrencyIssuedDto dto = (CurrencyIssuedDto) responseVS.getMessage(CurrencyIssuedDto.class);
-                currencyBatch.loadIssuedCurrency(dto.getIssuedCurrency());
-                Wallet.saveToPlainWallet(currencyBatch.getCurrencyMap().values());
-                responseVS = new ResponseVS(responseVS.getStatusCode(), dto.getMessage());
+                ResultListDto<String> resultListDto = (ResultListDto<String>) responseVS.getMessage(
+                        new TypeReference<ResultListDto<String>>(){});
+                requestDto.loadCurrencyCerts(resultListDto.getResultList());
+
+                Wallet.saveToPlainWallet(requestDto.getCurrencyMap().values());
+                responseVS = new ResponseVS(responseVS.getStatusCode(), resultListDto.getMessage());
                 InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"), new Date());
                 inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(MapUtils.getCurrencyMap(
-                        currencyBatch.getCurrencyMap().values()))).setTypeVS(TypeVS.CURRENCY_IMPORT);
+                        requestDto.getCurrencyMap().values()))).setTypeVS(TypeVS.CURRENCY_IMPORT);
                 InboxService.getInstance().newMessage(inboxMessage, false);
             }
             return responseVS;

@@ -48,9 +48,9 @@
                 <div layout vertical center center-justified>
                 <div horizontal layout center center-justified>
                     <div style="width: 250px;">
-                        <paper-button raised on-click="{{showTagDialog}}" style="font-size: 0.7em;margin:10px 10px 10px 10px;">
+                        <button on-click="{{showTagDialog}}" style="font-size: 0.8em;margin:10px 10px 10px 10px;">
                             <i class="fa fa-tag"></i> ${msg.addTagLbl}
-                        </paper-button>
+                        </button>
                     </div>
                     <div>${msg.transactionvsWithTagAdvertMsg}</div>
                 </div>

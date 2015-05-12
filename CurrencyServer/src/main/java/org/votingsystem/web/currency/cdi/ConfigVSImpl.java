@@ -6,6 +6,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.StringUtils;
@@ -136,6 +137,7 @@ public class ConfigVSImpl implements ConfigVS {
                     createtagVS(tag);
                 }
             }
+            ContextVS.getInstance();
             executorService.submit(() -> {
                 try {
                     LoggerVS.init(serverDir + "/logs");

@@ -1,14 +1,16 @@
 package org.votingsystem.web.currency.servlet;
 
-import org.votingsystem.dto.currency.CurrencyIssuedDto;
+import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.currency.CurrencyRequestBatch;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
+import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MultipartRequestVS;
@@ -31,6 +33,7 @@ public class CurrencyRequestServlet extends HttpServlet {
 
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;
+    @Inject DAOBean dao;
     @Inject CurrencyBean currencyBean;
 
     @Override
@@ -39,18 +42,23 @@ public class CurrencyRequestServlet extends HttpServlet {
     }
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        MessageSMIME messageSMIME = null;
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.CURRENCY_REQUEST);
-            MessageSMIME messageSMIME = signatureBean.validateSMIME(
+            messageSMIME = signatureBean.validateSMIME(
                     requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
-            CurrencyRequestBatch currencyBatch = CurrencyRequestBatch.validateRequest(requestVS.getCSRBytes(),
+            CurrencyRequestDto requestDto = CurrencyRequestDto.validateRequest(requestVS.getCSRBytes(),
                     messageSMIME, config.getContextURL());
-            currencyBatch.setTagVS(config.getTag(currencyBatch.getTagVS().getName()));
-            CurrencyIssuedDto dto = currencyBean.processCurrencyRequest(currencyBatch);
+            requestDto.setTagVSDB(config.getTag(requestDto.getTagVS().getName()));
+            ResultListDto<String> dto = currencyBean.processCurrencyRequest(requestDto);
             resp.setContentType(MediaTypeVS.JSON);
             resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(dto));
         } catch (ExceptionVS ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
+            if(messageSMIME != null) {
+                messageSMIME.setType(TypeVS.EXCEPTION).setReason(ex.getMessage());
+                dao.merge(messageSMIME);
+            }
             if(ex.getMessageDto() != null) {
                 resp.setStatus(ex.getMessageDto().getStatusCode());
                 resp.setContentType(MediaTypeVS.JSON);

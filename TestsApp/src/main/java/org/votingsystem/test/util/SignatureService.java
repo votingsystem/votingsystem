@@ -238,7 +238,7 @@ public class SignatureService {
         return userList;
     }
 
-    public List<SubscriptionVSDto> validateUserVSSubscriptions(Long groupVSId, CurrencyServer currencyServer,
+    public Collection<SubscriptionVSDto> validateUserVSSubscriptions(Long groupVSId, CurrencyServer currencyServer,
                            List<DNIBundle> userList) throws Exception {
         log.info("validateUserVSSubscriptions");
         Map<String, DNIBundle> userVSMap = new HashMap<>();

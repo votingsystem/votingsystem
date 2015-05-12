@@ -61,6 +61,24 @@ public class MessageSMIME extends EntityVS implements Serializable {
     @Column(name="lastUpdated", length=23, insertable=true)
     private Date lastUpdated;
 
+    private static ThreadLocal<MessageSMIME> instance = new ThreadLocal() {
+        protected MessageSMIME initialValue() {
+            return null;
+        }
+    };
+
+    public static MessageSMIME getCurrentMessageSMIME() {
+        return (MessageSMIME)instance.get();
+    }
+
+    public static void setCurrentInstance(MessageSMIME messageSMIME) {
+        if(messageSMIME == null) {
+            instance.remove();
+        } else {
+            instance.set(messageSMIME);
+        }
+    }
+
     @Transient private transient SMIMEMessage smimeMessage;
     @Transient private transient Set<UserVS> signers;
     @Transient private transient UserVS anonymousSigner;

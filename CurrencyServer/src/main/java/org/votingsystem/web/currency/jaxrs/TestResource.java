@@ -7,9 +7,11 @@ import org.iban4j.Iban;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.service.EventBusService;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
@@ -22,12 +24,12 @@ import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
-import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.AsyncResponse;
@@ -75,20 +77,17 @@ public class TestResource {
 
     @GET @Path("/test")
     public Response test(@Context ServletContext context, @Context HttpServletRequest req,
-                             @Context HttpServletResponse resp) throws JsonProcessingException {
-        Query query = dao.getEM().createQuery("SELECT COUNT(u) FROM UserVS u " +
-                "WHERE u.state = 'ACTIVE'");
-        long numTotalUsers = (long)query.getSingleResult();
-        log.info("numTotalUsers: " + numTotalUsers);
-
-        try {
-            auditBean.initWeekPeriod(Calendar.getInstance());
-        } catch (Exception ex) {
-            LoggerVS.weekLog(Level.SEVERE, ex.getMessage(), ex);
-        }
-        LoggerVS.weekLog(Level.INFO, "info message - weekPeriodLogPath: " + LoggerVS.weekPeriodLogPath, null);
-        return Response.ok().entity("info message - weekPeriodLogPath: " + LoggerVS.weekPeriodLogPath).build();
+                             @Context HttpServletResponse resp) throws JsonProcessingException, ValidationExceptionVS {
+        return Response.ok().build();
     }
+
+    @POST @Path("/testSMIME")
+    public Response testSMIME(MessageSMIME messageSMIME, @Context ServletContext context, @Context HttpServletRequest req,
+                         @Context HttpServletResponse resp) throws JsonProcessingException, ValidationExceptionVS {
+        log.info(messageSMIME.getBase64ContentDigest());
+        throw new ValidationExceptionVS("Test: " + messageSMIME.getBase64ContentDigest());
+    }
+
 
     @GET @Path("/eventBus")
     public Response eventBus(@Context ServletContext context, @Context HttpServletRequest req,

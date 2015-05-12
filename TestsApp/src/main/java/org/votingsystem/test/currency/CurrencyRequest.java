@@ -1,6 +1,9 @@
 package org.votingsystem.test.currency;
 
-import org.votingsystem.dto.currency.CurrencyIssuedDto;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.currency.CurrencyRequestDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
@@ -33,22 +36,27 @@ public class CurrencyRequest {
         BigDecimal totalAmount = new BigDecimal(10);
         String curencyCode = "EUR";
         TagVS tag = new TagVS("HIDROGENO");
-        Boolean isTimeLimited = true;
-        CurrencyRequestBatch requestBatch = CurrencyRequestBatch.createRequest(totalAmount, totalAmount, curencyCode, tag,
-                isTimeLimited, ContextVS.getInstance().getCurrencyServer().getServerURL());
+        TransactionVSDto transactionVSDto = new TransactionVSDto();
+        transactionVSDto.setAmount(totalAmount);
+        transactionVSDto.setCurrencyCode(curencyCode);
+        transactionVSDto.setTag(tag);
+        transactionVSDto.setTimeLimited(true);
+        CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionVSDto, totalAmount,
+                ContextVS.getInstance().getCurrencyServer().getServerURL());
         String messageSubject = "TEST_CURRENCY_REQUEST_DATA_MSG_SUBJECT";
         Map<String, Object> mapToSend = new HashMap<>();
-        byte[] requestBytes = JSON.getMapper().writeValueAsString(requestBatch.getCurrencyCSRList()).getBytes();
+        byte[] requestBytes = JSON.getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());
         mapToSend.put(ContextVS.CSR_FILE_NAME, requestBytes);
-        String signatureContent =  JSON.getMapper().writeValueAsString(requestBatch.getRequestDto());
+        String textToSign =  JSON.getMapper().writeValueAsString(requestDto);
         SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(fromUserVS.getNif(),
-                currencyServer.getName(), signatureContent, messageSubject);
+                currencyServer.getName(), textToSign, messageSubject);
         mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, smimeMessage.getBytes());
         ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend, currencyServer.getCurrencyRequestServiceURL());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            CurrencyIssuedDto dto = (CurrencyIssuedDto) responseVS.getMessage(CurrencyIssuedDto.class);
-            requestBatch.loadIssuedCurrency(dto.getIssuedCurrency());
-            Wallet.saveCurrencyToDir(requestBatch.getCurrencyMap().values(), ContextVS.getInstance().getProperty("walletDir"));
+            ResultListDto<String> currencyCertsDto = (ResultListDto<String>) responseVS.getMessage(
+                    new TypeReference<ResultListDto<String>>(){});
+            requestDto.loadCurrencyCerts(currencyCertsDto.getResultList());
+            Wallet.saveCurrencyToDir(requestDto.getCurrencyMap().values(), ContextVS.getInstance().getProperty("walletDir"));
         } else {
             log.log(Level.SEVERE," --- ERROR --- " + responseVS.getMessage());
         }

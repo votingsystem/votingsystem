@@ -9,6 +9,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.currency.Payment;
 
@@ -41,8 +42,8 @@ public class CurrencyBatchDto {
     private BigDecimal batchAmount;
     private BigDecimal leftOver;
     private AtomicBoolean initialized = new AtomicBoolean(Boolean.FALSE);
-    @JsonIgnore private Currency leftOverCurrency;
-    @JsonIgnore private List<Currency> currencyList = new ArrayList<Currency>();
+    @JsonIgnore private PKCS10CertificationRequest leftOverCurrencyCSR;
+    @JsonIgnore private List<Currency> currencyList = new ArrayList<>();
 
 
     public CurrencyBatchDto() {}
@@ -68,9 +69,11 @@ public class CurrencyBatchDto {
 
     @JsonIgnore
     public CurrencyBatch loadCurrencyBatch() throws Exception {
-        if(getCsrCurrency() != null) {
-            PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(getCsrCurrency().getBytes());
-            setLeftOverCurrency(new Currency(csr));
+        CurrencyCertExtensionDto certExtensionDto = null;
+        if(csrCurrency != null) {
+            leftOverCurrencyCSR = CertUtils.fromPEMToPKCS10CertificationRequest(csrCurrency.getBytes());
+            certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+                    leftOverCurrencyCSR, ContextVS.CURRENCY_TAG);
         }
         for(String currencyItem : getCurrency()) {
             SMIMEMessage smimeMessage = new SMIMEMessage(Base64.getDecoder().decode(currencyItem.getBytes()));
@@ -96,12 +99,12 @@ public class CurrencyBatchDto {
             }
         }
         setLeftOver(getCurrencyAmount().subtract(getBatchAmount()));
-        if(getLeftOver().compareTo(BigDecimal.ZERO) < 0) new ValidationExceptionVS(
+        if(leftOver.compareTo(BigDecimal.ZERO) < 0) new ValidationExceptionVS(
                 "CurrencyTransactionBatch insufficientCash - required '" + getBatchAmount().toString() + "' " + "found '" +
                         getCurrencyAmount().toString() + "'");
-        if(getLeftOverCurrency() != null && getLeftOver().compareTo(getLeftOverCurrency().getAmount()) != 0) new ValidationExceptionVS(
-                "CurrencyTransactionBatch leftOverMissMatch, expected '" + getLeftOver().toString() +
-                        "found '" + getLeftOverCurrency().getAmount().toString() + "'");
+        if(leftOverCurrencyCSR != null && leftOver.compareTo(certExtensionDto.getAmount()) != 0) new ValidationExceptionVS(
+                "CurrencyTransactionBatch leftOverMissMatch, expected '" + leftOver.toString() +
+                        "found '" + certExtensionDto.getAmount().toString() + "'");
         return getCurrencyBatch();
     }
 
@@ -180,14 +183,6 @@ public class CurrencyBatchDto {
 
     public void setToUserIBAN(String toUserIBAN) {
         this.toUserIBAN = toUserIBAN;
-    }
-
-    public Currency getLeftOverCurrency() {
-        return leftOverCurrency;
-    }
-
-    public void setLeftOverCurrency(Currency leftOverCurrency) {
-        this.leftOverCurrency = leftOverCurrency;
     }
 
     public Payment getPaymentMethod() {
@@ -278,4 +273,11 @@ public class CurrencyBatchDto {
         this.toUserName = toUserName;
     }
 
+    public PKCS10CertificationRequest getLeftOverCurrencyCSR() {
+        return leftOverCurrencyCSR;
+    }
+
+    public void setLeftOverCurrencyCSR(PKCS10CertificationRequest leftOverCurrencyCSR) {
+        this.leftOverCurrencyCSR = leftOverCurrencyCSR;
+    }
 }
