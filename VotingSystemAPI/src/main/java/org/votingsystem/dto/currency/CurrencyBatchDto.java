@@ -26,7 +26,7 @@ public class CurrencyBatchDto {
 
     private BigDecimal currencyAmount = BigDecimal.ZERO;
 
-    private TypeVS operation;
+    private TypeVS operation = TypeVS.CURRENCY_SEND;
     private List<String> currency;
     private String csrCurrency;
     private List<String> hashCertVSCurrency;
@@ -46,9 +46,7 @@ public class CurrencyBatchDto {
 
     public CurrencyBatchDto() {}
 
-
     public CurrencyBatchDto(CurrencyBatch currencyBatch) {
-        this.operation = currencyBatch.getOperation();
         this.subject = currencyBatch.getSubject();
         this.toUserIBAN = currencyBatch.getToUserIBAN();
         this.batchAmount = currencyBatch.getBatchAmount();
@@ -107,7 +105,6 @@ public class CurrencyBatchDto {
     @JsonIgnore
     public CurrencyBatch getCurrencyBatch() throws Exception {
         CurrencyBatch currencyBatch = new CurrencyBatch();
-        currencyBatch.setOperation(operation);
         currencyBatch.setSubject(subject);
         currencyBatch.setToUserIBAN(toUserIBAN);
         currencyBatch.setBatchAmount(batchAmount);

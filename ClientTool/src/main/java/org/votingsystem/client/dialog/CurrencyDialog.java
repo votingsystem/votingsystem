@@ -269,8 +269,8 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
         @Override protected ResponseVS call() throws Exception {
             updateProgress(1, 10);
             updateMessage(ContextVS.getMessage("transactionInProgressMsg"));
-            CurrencyBatchDto dto =  transactionBatch.getTransactionVSRequest(TypeVS.CURRENCY_SEND,
-                    transactionVSDto.getSubject(), transactionVSDto.getToUserIBAN().get(0), currency.getAmount(),
+            CurrencyBatchDto dto =  transactionBatch.getDto(transactionVSDto.getSubject(),
+                    transactionVSDto.getToUserIBAN().get(0), currency.getAmount(),
                     currency.getCurrencyCode(), currency.getTag().getName(), false, currencyServer.getTimeStampServiceURL());
             updateProgress(3, 10);
             ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsString(dto).getBytes(),

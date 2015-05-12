@@ -40,7 +40,6 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
     @Transient private List<Currency> currencyList;
     @Transient private CurrencyDto leftOverCurrency;
     @Transient private BigDecimal leftOver;
-    @Transient private TypeVS operation;
     @Transient private String currencyCode;
     @Transient private String toUserIBAN;
 
@@ -55,10 +54,9 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
         currencyList.add(currency);
     }
 
-    public CurrencyBatchDto getTransactionVSRequest(TypeVS operation, String subject, String toUserIBAN,
+    public CurrencyBatchDto getDto(String subject, String toUserIBAN,
             BigDecimal batchAmount, String currencyCode, String tag, Boolean isTimeLimited, String timeStampServiceURL)
             throws Exception {
-        this.setOperation(operation);
         this.subject = subject;
         this.toUserIBAN = toUserIBAN;
         this.setBatchAmount(batchAmount);
@@ -196,14 +194,6 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
     public CurrencyBatch setMessageSMIME(MessageSMIME messageSMIME) {
         this.messageSMIME = messageSMIME;
         return this;
-    }
-
-    public TypeVS getOperation() {
-        return operation;
-    }
-
-    public void setOperation(TypeVS operation) {
-        this.operation = operation;
     }
 
     public void setBatchAmount(BigDecimal batchAmount) {

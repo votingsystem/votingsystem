@@ -37,8 +37,7 @@ public class CurrencySendFromWallet {
         CurrencyDto currencyDto = JSON.getMapper().readValue(currencyFiles[0], CurrencyDto.class);
         CurrencyBatch transactionBatch = new CurrencyBatch();
         transactionBatch.addCurrency(currencyDto.deSerialize());
-        CurrencyBatchDto dto =  transactionBatch.getTransactionVSRequest(TypeVS.CURRENCY_SEND,
-                "First Currency Transaction",
+        CurrencyBatchDto dto =  transactionBatch.getDto("First Currency Transaction",
                 "ES4678788989450000000002", new BigDecimal(9), "EUR", "WILDTAG", false, currencyServer.getTimeStampServiceURL());
         byte[] dtoBytes = JSON.getMapper().writeValueAsBytes(dto);
         dto = JSON.getMapper().readValue(dtoBytes, CurrencyBatchDto.class);
