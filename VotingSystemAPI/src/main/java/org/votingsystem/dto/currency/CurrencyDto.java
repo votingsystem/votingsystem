@@ -77,7 +77,7 @@ public class CurrencyDto implements Serializable {
         this.amount = currency.getAmount();
         this.currencyCode = currency.getCurrencyCode();
         this.tag = currency.getTag().getName();
-        this.timeLimited = currency.getIsTimeLimited();
+        this.timeLimited = currency.getTimeLimited();
         this.dateCreated = currency.getDateCreated();
         this.notBefore = currency.getValidFrom();
         this.notAfter = currency.getValidTo();
@@ -94,7 +94,7 @@ public class CurrencyDto implements Serializable {
         currencyDto.setCurrencyCode(currency.getCurrencyCode());
         currencyDto.setHashCertVS(currency.getHashCertVS());
         currencyDto.setTag(currency.getTag().getName());
-        currencyDto.setTimeLimited(currency.getIsTimeLimited());
+        currencyDto.setTimeLimited(currency.getTimeLimited());
         currencyDto.setObject(ObjectUtils.serializeObjectToString(currency));
         //if(currency.getCertificationRequest() != null)
         //    currencyDto.setCertificationRequest(new String(currency.getCertificationRequest().getCsrPEM()));
@@ -149,7 +149,7 @@ public class CurrencyDto implements Serializable {
         currency.setCurrencyCode(currencyCode);
         currency.setTag(tagVS);
         currency.setHashCertVS(hashCertVS);
-        currency.setIsTimeLimited(timeLimited);
+        currency.setTimeLimited(timeLimited);
         currency.setX509AnonymousCert(x509AnonymousCert);
         currency.setSerialNumber(x509AnonymousCert.getSerialNumber().longValue());
         currency.setContent(x509AnonymousCert.getEncoded());

@@ -11,11 +11,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
-import org.votingsystem.util.currency.Payment;
-
 import javax.persistence.*;
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.security.cert.TrustAnchor;
@@ -36,8 +32,7 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
     @Column(name="currencyAmount") private BigDecimal currencyAmount = null;
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="tagVS", nullable=false) private TagVS tagVS;
-    @Column(name="isTimeLimited") private Boolean isTimeLimited = Boolean.FALSE;
-    @Column(name="paymentMethod", nullable=false) @Enumerated(EnumType.STRING) private Payment paymentMethod;
+    @Column(name="timeLimited") private Boolean timeLimited = Boolean.FALSE;
     @OneToOne private MessageSMIME messageSMIME;
     @Column(name="batchUUID") private String batchUUID;
     @Column(name="subject") private String subject;
@@ -48,8 +43,6 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
     @Transient private TypeVS operation;
     @Transient private String currencyCode;
     @Transient private String toUserIBAN;
-    @Transient private String tag;
-
 
     public CurrencyBatch() {}
 
@@ -62,16 +55,15 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
         currencyList.add(currency);
     }
 
-    public CurrencyBatchDto getTransactionVSRequest(TypeVS operation, Payment paymentMethod, String subject, String toUserIBAN,
+    public CurrencyBatchDto getTransactionVSRequest(TypeVS operation, String subject, String toUserIBAN,
             BigDecimal batchAmount, String currencyCode, String tag, Boolean isTimeLimited, String timeStampServiceURL)
             throws Exception {
         this.setOperation(operation);
-        this.paymentMethod = paymentMethod;
         this.subject = subject;
         this.toUserIBAN = toUserIBAN;
         this.setBatchAmount(batchAmount);
         this.currencyCode = currencyCode;
-        this.tag = tag;
+        this.tagVS = new TagVS(tag);
         this.batchUUID = UUID.randomUUID().toString();
         CurrencyBatchDto dto = new CurrencyBatchDto(this);
         List<String> currencyTransactionBatch = new ArrayList<String>();
@@ -108,7 +100,7 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
 
     public Map<String, Currency> getCurrencyMap() throws ExceptionVS {
         if(currencyList == null) throw new ExceptionVS("Empty currencyList");
-        Map<String, Currency> result = new HashMap<String, Currency>();
+        Map<String, Currency> result = new HashMap<>();
         for(Currency currency : currencyList) {
             result.put(currency.getHashCertVS(), currency);
         }
@@ -140,10 +132,6 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
         this.currencyAmount = currencyAmount;
     }
 
-    public String getTag() {
-        return tag;
-    }
-
     public TagVS getTagVS() {
         return tagVS;
     }
@@ -166,14 +154,6 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
 
     public void setBatchUUID(String batchUUID) {
         this.batchUUID = batchUUID;
-    }
-
-    public Payment getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(Payment paymentMethod) {
-        this.paymentMethod = paymentMethod;
     }
 
     public UserVS getToUserVS() {
@@ -209,14 +189,6 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
         this.leftOver = leftOver;
     }
 
-    public Boolean getIsTimeLimited() {
-        return isTimeLimited;
-    }
-
-    public void setIsTimeLimited(Boolean isTimeLimited) {
-        this.isTimeLimited = isTimeLimited;
-    }
-
     public MessageSMIME getMessageSMIME() {
         return messageSMIME;
     }
@@ -238,11 +210,15 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
         this.batchAmount = batchAmount;
     }
 
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
     public void setLeftOverCurrency(CurrencyDto leftOverCurrency) {
         this.leftOverCurrency = leftOverCurrency;
+    }
+
+    public Boolean getTimeLimited() {
+        return timeLimited;
+    }
+
+    public void setTimeLimited(Boolean timeLimited) {
+        this.timeLimited = timeLimited;
     }
 }

@@ -16,8 +16,6 @@ import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
-import org.votingsystem.util.currency.Payment;
-
 import javax.persistence.*;
 import java.io.*;
 import java.math.BigDecimal;
@@ -49,15 +47,22 @@ public class Currency extends EntityVS implements Serializable  {
         this.x509AnonymousCert = x509AnonymousCert;
     }
 
+    public Boolean getTimeLimited() {
+        return timeLimited;
+    }
+
+    public void setTimeLimited(Boolean timeLimited) {
+        this.timeLimited = timeLimited;
+    }
+
     public enum State { OK, EXPENDED, LAPSED, ERROR;} //Lapsed -> for not expended time limited currency
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="subject") private String subject;
     @Column(name="amount") private BigDecimal amount = null;
-    @Column(name="paymentMethod") @Enumerated(EnumType.STRING) private Payment paymentMethod;
     @Column(name="currency", nullable=false) private String currencyCode;
-    @Column(name="isTimeLimited") private Boolean isTimeLimited = Boolean.FALSE;
+    @Column(name="isTimeLimited") private Boolean timeLimited = Boolean.FALSE;
 
     @Column(name="hashCertVS") private String hashCertVS;
     @Column(name="originHashCertVS") private String originHashCertVS;
@@ -115,7 +120,6 @@ public class Currency extends EntityVS implements Serializable  {
                 "' CurrencyBatchDto amount  '" + currencyBatchDto.getCurrencyAmount() + "'");
         this.batchAmount = currencyBatchDto.getBatchAmount();
         this.batchUUID = currencyBatchDto.getBatchUUID();
-        this.paymentMethod = currencyBatchDto.getPaymentMethod();
         this.operation = currencyBatchDto.getOperation();
         if(TypeVS.CURRENCY_SEND != operation)
             throw new ExceptionVS("Expected operation 'CURRENCY_SEND' - found: " + currencyBatchDto.getOperation() + "'");
@@ -133,7 +137,7 @@ public class Currency extends EntityVS implements Serializable  {
         this.subject = currencyBatchDto.getSubject();
         this.toUserIBAN = currencyBatchDto.getToUserIBAN();
         this.toUserName = currencyBatchDto.getToUserName();
-        this.isTimeLimited = currencyBatchDto.isTimeLimited();
+        this.setTimeLimited(currencyBatchDto.getTimeLimited());
     }
 
     public Currency(String currencyServerURL, BigDecimal amount, String currencyCode, TagVS tag) {
@@ -221,14 +225,6 @@ public class Currency extends EntityVS implements Serializable  {
 
     public TypeVS getOperation() {
         return operation;
-    }
-
-    public Boolean getIsTimeLimited() {
-        return isTimeLimited;
-    }
-
-    public void setIsTimeLimited(Boolean isTimeLimited) {
-        this.isTimeLimited = isTimeLimited;
     }
 
     public File getFile() {
@@ -444,14 +440,6 @@ public class Currency extends EntityVS implements Serializable  {
 
     public void setCertificationRequest(CertificationRequestVS certificationRequest) {
         this.certificationRequest = certificationRequest;
-    }
-
-    public Payment getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(Payment paymentMethod) {
-        this.paymentMethod = paymentMethod;
     }
 
     public static boolean checkIfTimeLimited(Date notBefore, Date notAfter) {

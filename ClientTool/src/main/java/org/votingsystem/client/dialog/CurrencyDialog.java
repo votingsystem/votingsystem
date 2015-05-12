@@ -30,8 +30,6 @@ import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.*;
-import org.votingsystem.util.currency.Payment;
-
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -272,9 +270,8 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
             updateProgress(1, 10);
             updateMessage(ContextVS.getMessage("transactionInProgressMsg"));
             CurrencyBatchDto dto =  transactionBatch.getTransactionVSRequest(TypeVS.CURRENCY_SEND,
-                    Payment.CURRENCY_BATCH, transactionVSDto.getSubject(),
-                    transactionVSDto.getToUserIBAN().get(0), currency.getAmount(), currency.getCurrencyCode(),
-                    currency.getTag().getName(), false, currencyServer.getTimeStampServiceURL());
+                    transactionVSDto.getSubject(), transactionVSDto.getToUserIBAN().get(0), currency.getAmount(),
+                    currency.getCurrencyCode(), currency.getTag().getName(), false, currencyServer.getTimeStampServiceURL());
             updateProgress(3, 10);
             ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsString(dto).getBytes(),
                     ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());

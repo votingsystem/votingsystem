@@ -51,14 +51,11 @@ public class CurrencyBean {
     @Inject TimeStampBean timeStampBean;
 
 
-    public CurrencyBatchResponseDto processCurrencyTransaction(CurrencyBatch currencyBatch) throws Exception {
-        CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto();
+    public CurrencyBatchResponseDto processCurrencyTransaction(CurrencyBatchDto currencyBatchDto) throws Exception {
         List<Currency> validatedCurrencyList = new ArrayList<>();
+        CurrencyBatch currencyBatch = currencyBatchDto.getCurrencyBatch();
+        currencyBatch.setTagVS(config.getTag(currencyBatchDto.getTag()));
         Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", currencyBatch.getToUserIBAN());
-        TagVS tagVS = config.getTag(currencyBatch.getTag());
-        if(tagVS == null) throw new ExceptionVS(
-                "CurrencyTransactionBatch:" + currencyBatch.getBatchUUID() + " missing TagVS");
-        currencyBatch.setTagVS(tagVS);
         UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
         currencyBatch.setToUserVS(toUserVS);
         if(toUserVS == null) throw new ExceptionVS("CurrencyTransactionBatch:" + currencyBatch.getBatchUUID() +
@@ -66,28 +63,25 @@ public class CurrencyBean {
         for(Currency currency : currencyBatch.getCurrencyList()) {
             validatedCurrencyList.add(validateCurrency(currency));
         }
-        CurrencyBatchDto dto = new CurrencyBatchDto(currencyBatch);
         SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
-                currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(dto), currencyBatch.getSubject());
-        MessageSMIME messageSMIME = new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT);
-        dao.persist(messageSMIME);
+                currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(currencyBatchDto),
+                currencyBatch.getSubject());
+        MessageSMIME messageSMIME =  dao.persist(new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT));
         dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));
         log.info("currencyBatch:" + currencyBatch.getId() + " - messageSMIME:" + messageSMIME.getId());
         Date validTo = null;
         //TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         //if(currencyBatch.isTimeLimited == true) validTo = timePeriod.getDateTo()
-
-        TransactionVS transactionVS = TransactionVS.CURRENCY_BATCH(currencyBatch, toUserVS, validTo, messageSMIME);
-        dao.persist(transactionVS);
-
+        TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_BATCH(
+                currencyBatch, toUserVS, validTo, messageSMIME));
         for(Currency currency : validatedCurrencyList) {
             dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
         }
+        CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto(receipt);
         if(currencyBatch.getLeftOverCurrency() != null) {
-            String leftOverCoin = csrBean.signCurrencyRequest(currencyBatch.getLeftOverCurrency(), tagVS);
+            String leftOverCoin = csrBean.signCurrencyRequest(currencyBatch.getLeftOverCurrency(), currencyBatch.getTagVS());
             responseDto.setLeftOverCoin(leftOverCoin);
         }
-        responseDto.setReceipt(Base64.getEncoder().encodeToString(receipt.getBytes()));
         return responseDto;
     }
 

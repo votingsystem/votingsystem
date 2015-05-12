@@ -4,12 +4,12 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.currency.Payment;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.currency.ejb.ShopExampleBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
-
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -46,8 +46,8 @@ public class ShopExampleResource {
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         TransactionVSDto dto = TransactionVSDto.CURRENCY_SEND_REQUEST("currency shop example", UserVS.Type.GROUP,
                 new BigDecimal(1), "EUR", "ES0878788989450000000007", "shop example payment - " + new Date(), TagVS.WILDTAG);
-        dto.setPaymentOptions(Arrays.asList(Payment.SIGNED_TRANSACTION,
-                Payment.CURRENCY_BATCH, Payment.CASH_SEND));
+        dto.setPaymentOptions(Arrays.asList(TransactionVS.Type.FROM_USERVS,
+                TransactionVS.Type.CURRENCY_SEND, TransactionVS.Type.CURRENCY_CHANGE));
         String shopSessionID = dto.getUUID().substring(0, 8);
         String paymentInfoServiceURL = config.getRestURL() + "/shop/" + shopSessionID;
         shopExampleBean.putTransactionRequest(shopSessionID, dto);

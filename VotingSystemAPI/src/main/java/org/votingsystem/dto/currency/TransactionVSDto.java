@@ -13,8 +13,6 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
-import org.votingsystem.util.currency.Payment;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
@@ -54,8 +52,7 @@ public class TransactionVSDto {
 
     private String infoURL;
     private UserVS.Type userToType;
-    private Payment paymentMethod;
-    private List<Payment> paymentOptions;
+    private List<TransactionVS.Type> paymentOptions;
     private Date date;
     private List<String> coinCsrList;
     private TransactionVSDetailsDto details;
@@ -472,11 +469,11 @@ public class TransactionVSDto {
         this.userToType = userToType;
     }
 
-    public List<Payment> getPaymentOptions() {
+    public List<TransactionVS.Type> getPaymentOptions() {
         return paymentOptions;
     }
 
-    public void setPaymentOptions(List<Payment> paymentOptions) {
+    public void setPaymentOptions(List<TransactionVS.Type> paymentOptions) {
         this.paymentOptions = paymentOptions;
     }
 

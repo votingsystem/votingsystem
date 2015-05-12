@@ -67,7 +67,7 @@ public class CurrencyRequestDto {
         for(int i = 0; i < divideAndRemainder[0].intValue(); i++) {
             Currency currency = new Currency(serverURL, currencyValue, transactionVSDto.getCurrencyCode(),
                     currencyRequestDto.tagVS);
-            currency.setIsTimeLimited(transactionVSDto.isTimeLimited());
+            currency.setTimeLimited(transactionVSDto.isTimeLimited());
             requestCSRSet.add(new String(currency.getCertificationRequest().getCsrPEM()));
             currencyMap.put(currency.getHashCertVS(), currency);
         }

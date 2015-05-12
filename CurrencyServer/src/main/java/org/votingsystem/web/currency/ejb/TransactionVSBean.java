@@ -170,17 +170,9 @@ public class TransactionVSBean {
                     balancesBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(), transactionVS.getTag());
                     break;
                 case CURRENCY_SEND:
-                    switch(transactionVS.getCurrencyTransactionBatch().getPaymentMethod()) {
-                        case CURRENCY_BATCH:
-                            updateUserVSAccountTo(transactionVS);
-                            balancesBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
-                                    transactionVS.getTag());
-                            break;
-                        case CASH_SEND:
-                            balancesBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
-                                    transactionVS.getTag());
-                            break;
-                    }
+                    updateUserVSAccountTo(transactionVS);
+                    balancesBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
+                            transactionVS.getTag());
                     break;
                 default:
                     if(isParentTransaction) {//Parent transaction, to system before trigger to receptors

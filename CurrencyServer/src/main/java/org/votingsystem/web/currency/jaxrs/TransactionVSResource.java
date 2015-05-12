@@ -178,7 +178,7 @@ public class TransactionVSResource {
     @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
     public Response currency(CurrencyBatchDto currencyBatchDto) throws Exception {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
-                currencyBean.processCurrencyTransaction(currencyBatchDto.getCurrencyBatch()))).build() ;
+                currencyBean.processCurrencyTransaction(currencyBatchDto))).build() ;
     }
 
 }

@@ -10,8 +10,6 @@ import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
-import org.votingsystem.util.currency.Payment;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.math.BigDecimal;
@@ -40,8 +38,8 @@ public class CurrencySendFromWallet {
         CurrencyBatch transactionBatch = new CurrencyBatch();
         transactionBatch.addCurrency(currencyDto.deSerialize());
         CurrencyBatchDto dto =  transactionBatch.getTransactionVSRequest(TypeVS.CURRENCY_SEND,
-                Payment.CURRENCY_BATCH, "First Currency Transaction",
-                "ES0878788989450000000007", new BigDecimal(9), "EUR", "WILDTAG", false, currencyServer.getTimeStampServiceURL());
+                "First Currency Transaction",
+                "ES4678788989450000000002", new BigDecimal(9), "EUR", "WILDTAG", false, currencyServer.getTimeStampServiceURL());
         byte[] dtoBytes = JSON.getMapper().writeValueAsBytes(dto);
         dto = JSON.getMapper().readValue(dtoBytes, CurrencyBatchDto.class);
 
