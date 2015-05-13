@@ -15,10 +15,10 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
+
 import java.math.BigDecimal;
 import java.security.cert.TrustAnchor;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -68,7 +68,7 @@ public class CurrencyBatchDto {
         for (Currency currency : currencyList) {
             SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(currency.getHashCertVS(),
                     StringUtils.getNormalized(currency.getToUserName()), JSON.getMapper().writeValueAsString(
-                    CurrencyDto.BATCH_ITEM(this, currency)), subject, null);
+                            CurrencyDto.BATCH_ITEM(this, currency)), subject, null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServiceURL);
             currency.setSMIME(timeStamper.call());
             currencySet.add(Base64.getEncoder().encodeToString(currency.getSMIME().getBytes()));

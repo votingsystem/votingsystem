@@ -63,7 +63,7 @@ public class Currency extends EntityVS implements Serializable  {
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="subject") private String subject;
     @Column(name="amount") private BigDecimal amount = null;
-    @Column(name="amount") private BigDecimal batchAmount = null;
+    @Column(name="batchAmount") private BigDecimal batchAmount = null;
     @Column(name="currency", nullable=false) private String currencyCode;
     @Column(name="isTimeLimited") private Boolean timeLimited = Boolean.FALSE;
 

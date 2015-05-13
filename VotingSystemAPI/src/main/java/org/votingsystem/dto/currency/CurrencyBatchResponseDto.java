@@ -2,6 +2,7 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.signature.smime.SMIMEMessage;
+
 import java.util.Base64;
 
 /**
