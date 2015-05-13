@@ -104,7 +104,6 @@ public class Currency extends EntityVS implements Serializable  {
     @Transient private transient SMIMEMessage smimeMessage;
     @Transient private String toUserIBAN;
     @Transient private String toUserName;
-    @Transient private CurrencyDto certSubjectDto;
     @Transient private CurrencyCertExtensionDto certExtensionDto;
 
     public Currency() {}
@@ -150,19 +149,25 @@ public class Currency extends EntityVS implements Serializable  {
         } catch(Exception ex) {  ex.printStackTrace(); }
     }
 
-    public Currency(X509Certificate x509AnonymousCert, TagVS tagVS, CertificateVS authorityCertificateVS) throws Exception {
-        initCertData(x509AnonymousCert);
-        this.tagVS = tagVS;
-        this.authorityCertificateVS = authorityCertificateVS;
+    public static Currency FROM_CERT(X509Certificate x509AnonymousCert, TagVS tagVS,
+                                     CertificateVS authorityCertificateVS) throws Exception {
+        Currency currency = new Currency();
+        currency.initCertData(x509AnonymousCert);
+        currency.tagVS = tagVS;
+        currency.authorityCertificateVS = authorityCertificateVS;
+        currency.state = State.OK;
+        return currency;
     }
 
     public Currency initCertData(X509Certificate x509AnonymousCert) throws Exception {
         this.x509AnonymousCert = x509AnonymousCert;
+        this.content = x509AnonymousCert.getEncoded();
+        this.serialNumber = x509AnonymousCert.getSerialNumber().longValue();
         String subjectDN = x509AnonymousCert.getSubjectDN().toString();
         this.certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 x509AnonymousCert, ContextVS.CURRENCY_OID);
         if(certExtensionDto == null) throw new ValidationExceptionVS("error missing cert extension data");
-        certSubjectDto = CurrencyDto.getCertSubjectDto(subjectDN, hashCertVS);
+        CurrencyDto certSubjectDto = CurrencyDto.getCertSubjectDto(subjectDN, hashCertVS);
         hashCertVS = certExtensionDto.getHashCertVS();
         currencyServerURL = certExtensionDto.getCurrencyServerURL();
         amount = certExtensionDto.getAmount();
@@ -170,8 +175,6 @@ public class Currency extends EntityVS implements Serializable  {
         validFrom = x509AnonymousCert.getNotBefore();
         validTo = x509AnonymousCert.getNotAfter();
         timeLimited = certExtensionDto.getTimeLimited();
-        certSubjectDto.setNotBefore(x509AnonymousCert.getNotBefore());
-        certSubjectDto.setNotAfter(x509AnonymousCert.getNotAfter());
         tagVS = new TagVS(certExtensionDto.getTag());
         if(!certSubjectDto.getCurrencyServerURL().equals(certExtensionDto.getCurrencyServerURL()))
             throw new ValidationExceptionVS("currencyServerURL: " + currencyServerURL + " - certSubject: " + subjectDN);

@@ -57,8 +57,7 @@ public class CSRBean {
             for(CurrencyDto currencyDto : requestDto.getCurrencyDtoMap().values()) {
                 X509Certificate x509AnonymousCert = signatureBean.signCSR(
                         currencyDto.getCsrPKCS10(), null, timePeriod.getDateFrom(), timePeriod.getDateTo());
-                Currency currency = currencyDto.loadCertData(x509AnonymousCert, timePeriod, requestDto.getTagVS(),
-                        authorityCertificateVS);
+                Currency currency = Currency.FROM_CERT(x509AnonymousCert, requestDto.getTagVS(), authorityCertificateVS);
                 issuedCurrencySet.add(dao.persist(currency));
                 issuedCertSet.add(new String(CertUtils.getPEMEncoded(x509AnonymousCert)));
                 LoggerVS.logCurrencyIssued(currency);
@@ -91,7 +90,7 @@ public class CSRBean {
         try {
             X509Certificate x509AnonymousCert = signatureBean.signCSR(
                     pkcs10Req, null, timePeriod.getDateFrom(), timePeriod.getDateTo());
-            Currency currency = dao.persist(new Currency(x509AnonymousCert, tagVS, authorityCertificateVS));
+            Currency currency = dao.persist(Currency.FROM_CERT(x509AnonymousCert, tagVS, authorityCertificateVS));
             LoggerVS.logCurrencyIssued(currency);
             return new String(CertUtils.getPEMEncoded(x509AnonymousCert));
         } catch(Exception ex) {

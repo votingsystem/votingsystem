@@ -112,21 +112,18 @@ public class CurrencyRequestDto {
         Map<String, CurrencyDto> currencyDtoMap = new HashMap<>();
         for(String currencyCSR : requestDto.requestCSRSet) {
             CurrencyDto currencyDto = new CurrencyDto(CertUtils.fromPEMToPKCS10CertificationRequest(currencyCSR.getBytes()));
-            if(!currencyDto.getTag().equals(requestDto.getTagVS().getName())) throw new ValidationExceptionVS(
-                    "requestDto tag: " + requestDto.getTagVS().getName() + " - CurrencyCSRDto tag: " + currencyDto.getTag());
-            if(currencyDto.getAmount().compareTo(currencyDto.getAmount()) != 0) throw new ValidationExceptionVS(
-                    "amount error - CurrencyCSRDto amount: " + currencyDto.getAmount() + " - csr amount: " +
-                            currencyDto.getAmount());
-            if(!currencyDto.getCurrencyCode().equals(currencyDto.getCurrencyCode())) throw new ValidationExceptionVS(
+            if(!currencyDto.getCurrencyCode().equals(requestDto.getCurrencyCode())) throw new ValidationExceptionVS(
                     "currency error - CurrencyCSRDto currencyCode: " + currencyDto.getCurrencyCode() +
                             " - csr currencyCode: " + currencyDto.getCurrencyCode());
-            if(!currencyDto.getTag().equals(currencyDto.getTag())) throw new ValidationExceptionVS(
-                    "tag error - CurrencyCSRDto tag: " + currencyDto.getTag() + " - csr tag: " + currencyDto.getTag());
+            if(!currencyDto.getTag().equals(requestDto.getTagVS().getName())) throw new ValidationExceptionVS(
+                    "requestDto tag: " + requestDto.getTagVS().getName() + " - CurrencyCSRDto tag: " + currencyDto.getTag());
             if (!contextURL.equals(currencyDto.getCurrencyServerURL()))  throw new ExceptionVS("serverURL error - " +
                     " serverURL: " + contextURL + " - csr serverURL: " + currencyDto.getCurrencyServerURL());
             csrRequestAmount = csrRequestAmount.add(currencyDto.getAmount());
             currencyDtoMap.put(currencyDto.getHashCertVS(), currencyDto);
         }
+        if(requestDto.getTotalAmount().compareTo(csrRequestAmount) != 0) throw new ValidationExceptionVS(MessageFormat.format(
+                "Amount mismatch - CurrencyRequestDto ''{0}'' - csr ''{1}''", requestDto.getTotalAmount(), csrRequestAmount));
         requestDto.setCurrencyDtoMap(currencyDtoMap);
         return requestDto;
     }

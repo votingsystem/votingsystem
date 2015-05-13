@@ -55,8 +55,6 @@ public class CurrencyBean {
 
     public CurrencyBatchResponseDto processCurrencyBatch(CurrencyBatchDto batchDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        if(batchDto.getCurrencyList().isEmpty())
-            throw new ValidationExceptionVS("CurrencyBatch without signed transactions");
         List<Currency> validatedCurrencyList = new ArrayList<>();
         String leftOverCert = null;
         CurrencyBatch currencyBatch = batchDto.validateRequest(new Date());
@@ -104,7 +102,7 @@ public class CurrencyBean {
         if(currencyDB == null) throw new ExceptionVS("hashCertVSCurrencyInvalidErrorMsg - hashCertVS: " + currency.getHashCertVS());
         if(currencyDB.getState() == Currency.State.EXPENDED) {
             throw new CurrencyExpendedException(currency.getHashCertVS());
-        } else if(currency.getState() == Currency.State.OK) {
+        } else if(currencyDB.getState() == Currency.State.OK) {
             currency = currencyDB.checkRequestWithDB(currency);
             UserVS userVS = smimeMessage.getSigner(); //anonymous signer
             timeStampBean.validateToken(userVS.getTimeStampToken());
@@ -113,7 +111,8 @@ public class CurrencyBean {
             X509Certificate certCaResult = certValidatorResult.getResult().getTrustAnchor().getTrustedCert();
             CertExtensionCheckerVS extensionChecker = certValidatorResult.getChecker();
             //if (extensionChecker.isAnonymousSigner()) { }
-        } else  throw new ExceptionVS(messages.get("currencyStateErrorMsg", currency.getId().toString(), currency.getState().toString()));
+        } else  throw new ExceptionVS(messages.get("currencyStateErrorMsg", currencyDB.getId().toString(),
+                currencyDB.getState().toString()));
         currency.setAuthorityCertificateVS(signatureBean.getServerCertificateVS());
         return currency;
     }

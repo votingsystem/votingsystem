@@ -70,7 +70,7 @@ public class CurrencyBatchDto {
         batchDto.batchUUID = UUID.randomUUID().toString();
         BigDecimal accumulated = BigDecimal.ZERO;
         for (Currency currency : currencyList) {
-            accumulated.add(currency.getAmount());
+            accumulated = accumulated.add(currency.getAmount());
         }
         if(batchAmount.compareTo(accumulated) > 0) {
             throw new ValidationExceptionVS(MessageFormat.format("''{0}'' batchAmount exceeds currency sum ''{1}''",
@@ -93,10 +93,10 @@ public class CurrencyBatchDto {
         return batchDto;
     }
 
-
     @JsonIgnore
     public CurrencyBatch validateRequest(Date checkDate) throws Exception {
         BigDecimal accumulated = BigDecimal.ZERO;
+        currencyList = null;
         for(String currencyItem : currencySet) {
             try {
                 Currency currency = new Currency(new SMIMEMessage(Base64.getDecoder().decode(currencyItem.getBytes())));
@@ -112,12 +112,14 @@ public class CurrencyBatchDto {
                 } else checkCurrencyData(currency);
                 if(checkDate.after(currency.getValidTo())) throw new ValidationExceptionVS(MessageFormat.format(
                         "currency ''{0}'' is lapsed", currency.getHashCertVS()));
-                accumulated.add(currency.getAmount());
+                accumulated = accumulated.add(currency.getAmount());
                 currencyList.add(currency);
             } catch(Exception ex) {
                 throw new ExceptionVS("Error with currency : " + ex.getMessage(), ex);
             }
         }
+        if(currencyList == null || currencyList.isEmpty())
+            throw new ValidationExceptionVS("CurrencyBatch without signed transactions");
         CurrencyCertExtensionDto certExtensionDto = null;
         if(leftOverCSR != null) {
             leftOverPKCS10 = CertUtils.fromPEMToPKCS10CertificationRequest(leftOverCSR.getBytes());
@@ -144,9 +146,11 @@ public class CurrencyBatchDto {
         return currencyBatch;
     }
 
+    @JsonIgnore
     public void validateResponse(CurrencyBatchResponseDto responseDto, Set<TrustAnchor> trustAnchor)
             throws Exception {
         SMIMEMessage receipt = new SMIMEMessage(Base64.getDecoder().decode(responseDto.getReceipt().getBytes()));
+        receipt.isValidSignature();
         CertUtils.verifyCertificate(trustAnchor, false, new ArrayList<>(receipt.getSignersCerts()));
         if(responseDto.getLeftOverCert() != null) {
             leftOverCurrency.initSigner(responseDto.getLeftOverCert().getBytes());
@@ -163,6 +167,7 @@ public class CurrencyBatchDto {
         if(!currencySet.equals(signedDto.getCurrencySet())) throw new ValidationExceptionVS("ERROR - currencySet mismatch");
     }
 
+    @JsonIgnore
     public Map<String, Currency> getCurrencyMap() throws ExceptionVS {
         if(currencyList == null) throw new ExceptionVS("Empty currencyList");
         Map<String, Currency> result = new HashMap<>();
@@ -171,6 +176,8 @@ public class CurrencyBatchDto {
         }
         return result;
     }
+
+    @JsonIgnore
     public void checkCurrencyData(Currency currency) throws ExceptionVS {
         String currencyData = "Currency with hash '" + currency.getHashCertVS() + "' ";
         if(!timeLimited && currency.getTimeLimited()) throw new ValidationExceptionVS(

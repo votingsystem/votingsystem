@@ -128,7 +128,7 @@ public class SMIMEMessage extends MimeMessage {
     public X509Certificate getCurrencyCert() {return currencyCert;}
 
     public Set<X509Certificate> getSignersCerts() {
-        Set<X509Certificate> signerCerts = new HashSet<X509Certificate>();
+        Set<X509Certificate> signerCerts = new HashSet<>();
         for(UserVS userVS : signers) {
             signerCerts.add(userVS.getCertificate());
         }

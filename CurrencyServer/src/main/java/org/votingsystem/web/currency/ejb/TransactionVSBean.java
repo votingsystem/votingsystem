@@ -151,6 +151,7 @@ public class TransactionVSBean {
     }
 
     public void updateCurrencyAccounts(TransactionVS transactionVS) throws Exception {
+        transactionVS = dao.merge(transactionVS);
         if(transactionVS.getState() == TransactionVS.State.OK) {
             boolean isParentTransaction = (transactionVS.getTransactionParent() == null);
             switch(transactionVS.getType()) {

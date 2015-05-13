@@ -69,7 +69,7 @@ public class TransactionVS implements Serializable {
 
     @Column(name="currency", nullable=false) private String currencyCode;
 
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="tag", nullable=false) private TagVS tag;
 
     @Column(name="amount") private BigDecimal amount = null;
@@ -122,7 +122,7 @@ public class TransactionVS implements Serializable {
 
     public static TransactionVS CURRENCY_BATCH(CurrencyBatch batch, UserVS toUserVS, Date validTo,
                MessageSMIME messageSMIME) {
-        TransactionVS transactionVS = USERVS(null, toUserVS, TransactionVS.Type.CURRENCY_SEND, null, batch.getBatchAmount(),
+        TransactionVS transactionVS = BASIC(toUserVS, TransactionVS.Type.CURRENCY_SEND, null, batch.getBatchAmount(),
                 batch.getCurrencyCode(), batch.getSubject(), validTo, messageSMIME, batch.getTagVS());
         transactionVS.setToUserIBAN(batch.getToUserVS().getIBAN());
         transactionVS.setCurrencyTransactionBatch(batch);
@@ -132,9 +132,16 @@ public class TransactionVS implements Serializable {
 
     public static TransactionVS USERVS(UserVS userVS, UserVS toUserVS, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
                BigDecimal amount, String currencyCode, String subject, Date validTo, MessageSMIME messageSMIME, TagVS tag) {
-        TransactionVS transactionVS = new TransactionVS();
+        TransactionVS transactionVS = BASIC(toUserVS, type, accountFromMovements, amount, currencyCode, subject,
+                validTo, messageSMIME, tag);
         transactionVS.setFromUserVS(userVS);
         transactionVS.setFromUserIBAN(userVS.getIBAN());
+        return transactionVS;
+    }
+
+    public static TransactionVS BASIC(UserVS toUserVS, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
+               BigDecimal amount, String currencyCode, String subject, Date validTo, MessageSMIME messageSMIME, TagVS tag) {
+        TransactionVS transactionVS = new TransactionVS();
         transactionVS.setToUserVS(toUserVS);
         transactionVS.setToUserIBAN(toUserVS.getIBAN());
         transactionVS.setType(type);

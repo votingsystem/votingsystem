@@ -169,24 +169,6 @@ public class CurrencyDto implements Serializable {
         return result;
     }
 
-    public Currency loadCertData(X509Certificate x509AnonymousCert, TimePeriod timePeriod, TagVS tagVS,
-                                 CertificateVS authorityCertificateVS) throws CertificateEncodingException {
-        Currency currency = new Currency();
-        currency.setAmount(amount);
-        currency.setCurrencyCode(currencyCode);
-        currency.setTagVS(tagVS);
-        currency.setHashCertVS(hashCertVS);
-        currency.setTimeLimited(timeLimited);
-        currency.setX509AnonymousCert(x509AnonymousCert);
-        currency.setSerialNumber(x509AnonymousCert.getSerialNumber().longValue());
-        currency.setContent(x509AnonymousCert.getEncoded());
-        currency.setState(Currency.State.OK);
-        currency.setValidFrom(timePeriod.getDateFrom());
-        currency.setValidTo(timePeriod.getDateTo());
-        currency.setAuthorityCertificateVS(authorityCertificateVS);
-        return currency;
-    }
-
     public Boolean isTimeLimited() {
         return timeLimited;
     }
