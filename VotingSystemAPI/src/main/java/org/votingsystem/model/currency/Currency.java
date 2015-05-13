@@ -3,7 +3,6 @@ package org.votingsystem.model.currency;
 
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
@@ -126,8 +125,8 @@ public class Currency extends EntityVS implements Serializable  {
                     batchItemDto.getTag());
         tagVS = new TagVS(batchItemDto.getTag());
         Date signatureTime = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
-        if(signatureTime.after(getX509AnonymousCert().getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
-                getX509AnonymousCert().getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
+        if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
+                x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
         this.subject = batchItemDto.getSubject();
         this.toUserIBAN = batchItemDto.getToUserIBAN();
         this.toUserName = batchItemDto.getToUserName();
@@ -161,21 +160,21 @@ public class Currency extends EntityVS implements Serializable  {
 
     public Currency initCertData(X509Certificate x509AnonymousCert) throws Exception {
         this.x509AnonymousCert = x509AnonymousCert;
-        this.content = x509AnonymousCert.getEncoded();
-        this.serialNumber = x509AnonymousCert.getSerialNumber().longValue();
-        String subjectDN = x509AnonymousCert.getSubjectDN().toString();
-        this.certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+        content = x509AnonymousCert.getEncoded();
+        serialNumber = x509AnonymousCert.getSerialNumber().longValue();
+        certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 x509AnonymousCert, ContextVS.CURRENCY_OID);
         if(certExtensionDto == null) throw new ValidationExceptionVS("error missing cert extension data");
-        CurrencyDto certSubjectDto = CurrencyDto.getCertSubjectDto(subjectDN, hashCertVS);
-        hashCertVS = certExtensionDto.getHashCertVS();
-        currencyServerURL = certExtensionDto.getCurrencyServerURL();
         amount = certExtensionDto.getAmount();
         currencyCode = certExtensionDto.getCurrencyCode();
-        validFrom = x509AnonymousCert.getNotBefore();
-        validTo = x509AnonymousCert.getNotAfter();
+        hashCertVS = certExtensionDto.getHashCertVS();
         timeLimited = certExtensionDto.getTimeLimited();
         tagVS = new TagVS(certExtensionDto.getTag());
+        currencyServerURL = certExtensionDto.getCurrencyServerURL();
+        validFrom = x509AnonymousCert.getNotBefore();
+        validTo = x509AnonymousCert.getNotAfter();
+        String subjectDN = x509AnonymousCert.getSubjectDN().toString();
+        CurrencyDto certSubjectDto = CurrencyDto.getCertSubjectDto(subjectDN, hashCertVS);
         if(!certSubjectDto.getCurrencyServerURL().equals(certExtensionDto.getCurrencyServerURL()))
             throw new ValidationExceptionVS("currencyServerURL: " + currencyServerURL + " - certSubject: " + subjectDN);
         if(certSubjectDto.getAmount().compareTo(amount) != 0)
@@ -188,11 +187,13 @@ public class Currency extends EntityVS implements Serializable  {
     }
 
     public Currency checkRequestWithDB(Currency currencyRequest) throws ExceptionVS {
-        if(!currencyRequest.getCurrencyServerURL().equals(currencyServerURL))  throw new ExceptionVS("checkRequestWithDB_currencyServerURL");
+        if(!currencyRequest.getCurrencyServerURL().equals(currencyServerURL))
+            throw new ExceptionVS("checkRequestWithDB_currencyServerURL");
         if(!currencyRequest.getHashCertVS().equals(hashCertVS))  throw new ExceptionVS("checkRequestWithDB_hashCertVS");
         if(!currencyRequest.getCurrencyCode().equals(currencyCode))
             throw new ExceptionVS("checkRequestWithDB_currencyCode");
-        if (!currencyRequest.getCertExtensionDto().getTag().equals(tagVS.getName()))  throw new ExceptionVS("checkRequestWithDB_TagVS");
+        if (!currencyRequest.getCertExtensionDto().getTag().equals(tagVS.getName()))
+            throw new ExceptionVS("checkRequestWithDB_TagVS");
         if(currencyRequest.getAmount().compareTo(amount) != 0)  throw new ExceptionVS("checkRequestWithDB_amount");
         this.smimeMessage = currencyRequest.getSMIME();
         this.x509AnonymousCert = currencyRequest.getX509AnonymousCert();
@@ -221,7 +222,6 @@ public class Currency extends EntityVS implements Serializable  {
     public void setBatchAmount(BigDecimal batchAmount) {
         this.batchAmount = batchAmount;
     }
-
 
     private String getErrorPrefix() {
         return "ERROR - Currency with hash: " + hashCertVS + " - ";
@@ -285,10 +285,6 @@ public class Currency extends EntityVS implements Serializable  {
 
     public void setMetaInf(String metaInf) {
         this.metaInf = metaInf;
-    }
-
-    public byte[] getIssuedCertPEM() throws IOException {
-        return CertUtils.getPEMEncoded(getX509AnonymousCert());
     }
 
     public Long getId() {
@@ -461,26 +457,13 @@ public class Currency extends EntityVS implements Serializable  {
         return validPeriod.getDays() <= 7;//one week
     }
 
-    public void validateReceipt(SMIMEMessage smimeReceipt, Set<TrustAnchor> trustAnchor)
-            throws Exception {
-        if(!smimeMessage.getSigner().getSignedContentDigestBase64().equals(smimeReceipt.getSigner().getSignedContentDigestBase64())){
+    public void validateReceipt(SMIMEMessage smimeReceipt, Set<TrustAnchor> trustAnchor) throws Exception {
+        if(!smimeMessage.getSigner().getSignedContentDigestBase64().equals(
+                smimeReceipt.getSigner().getSignedContentDigestBase64())){
             throw new ExceptionVS("Signer content digest mismatch");
         }
         CertUtils.verifyCertificate(trustAnchor, false, new ArrayList<>(smimeReceipt.getSignersCerts()));
         this.smimeMessage = smimeReceipt;
-    }
-
-    public TransactionVSDto getSendRequest(String toUserName, String toUserIBAN, String subject,
-                                     Boolean isTimeLimited) throws ExceptionVS {
-        this.toUserName = toUserName;
-        this.toUserIBAN = toUserIBAN;
-        this.subject = subject;
-        if(isTimeLimited == false && checkIfTimeLimited(getX509AnonymousCert().getNotBefore(),
-                getX509AnonymousCert().getNotAfter())) {
-            throw new ExceptionVS("Time limited Currency with 'isTimeLimited' signature param set to false");
-        }
-        return TransactionVSDto.CURRENCY_SEND(toUserName, subject, amount, currencyCode, toUserIBAN,
-                isTimeLimited, tagVS.getName());
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {
@@ -499,9 +482,9 @@ public class Currency extends EntityVS implements Serializable  {
         if(smimeMessageBytes != null) {
             smimeMessage = new SMIMEMessage(smimeMessageBytes);
         }
-        if(getX509AnonymousCert() != null) {
-            validFrom = getX509AnonymousCert().getNotBefore();
-            validTo = getX509AnonymousCert().getNotAfter();
+        if(x509AnonymousCert != null) {
+            validFrom = x509AnonymousCert.getNotBefore();
+            validTo = x509AnonymousCert.getNotAfter();
         }
     }
 

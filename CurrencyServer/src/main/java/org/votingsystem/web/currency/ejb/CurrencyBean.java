@@ -16,7 +16,6 @@ import org.votingsystem.signature.util.CertExtensionCheckerVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.CurrencyExpendedException;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
