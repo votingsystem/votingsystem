@@ -140,6 +140,7 @@ public class Currency extends EntityVS implements Serializable  {
         this.currencyServerURL = currencyServerURL;
         this.currencyCode = currencyCode;
         this.tagVS = tag;
+        this.timeLimited = timeLimited;
         try {
             this.originHashCertVS = UUID.randomUUID().toString();
             this.hashCertVS = CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);

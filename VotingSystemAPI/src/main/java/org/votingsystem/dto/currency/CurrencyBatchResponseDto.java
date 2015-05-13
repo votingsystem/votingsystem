@@ -13,6 +13,7 @@ public class CurrencyBatchResponseDto {
 
     private String leftOverCert;
     private String receipt;
+    private String message;
 
     public CurrencyBatchResponseDto() {};
 
@@ -35,5 +36,13 @@ public class CurrencyBatchResponseDto {
 
     public void setLeftOverCert(String leftOverCert) {
         this.leftOverCert = leftOverCert;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

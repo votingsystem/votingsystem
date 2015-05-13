@@ -54,6 +54,7 @@ public class CurrencyBean {
 
 
     public CurrencyBatchResponseDto processCurrencyBatch(CurrencyBatchDto batchDto) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         if(batchDto.getCurrencyList().isEmpty())
             throw new ValidationExceptionVS("CurrencyBatch without signed transactions");
         List<Currency> validatedCurrencyList = new ArrayList<>();
@@ -66,7 +67,7 @@ public class CurrencyBean {
         if(toUserVS == null) throw new ExceptionVS("CurrencyTransactionBatch:" + currencyBatch.getBatchUUID() +
                 " has wrong receptor IBAN '" + batchDto.getToUserIBAN());
         for(Currency currency : batchDto.getCurrencyList()) {
-            validatedCurrencyList.add(validateCurrency(currency));
+            validatedCurrencyList.add(validateBatchItem(currency));
         }
         if(batchDto.getLeftOverPKCS10() != null) {
             leftOverCert = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), currencyBatch.getTagVS());
@@ -87,10 +88,13 @@ public class CurrencyBean {
         for(Currency currency : validatedCurrencyList) {
             dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
         }
-        return new CurrencyBatchResponseDto(receipt, leftOverCert);
+        CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto(receipt, leftOverCert);
+        responseDto.setMessage(messages.get("currencyBatchOKMsg", batchDto.getBatchAmount() + " " + batchDto.getCurrencyCode(),
+                toUserVS.getFullName()));
+        return responseDto;
     }
 
-    public Currency validateCurrency(Currency currency) throws Exception {
+    public Currency validateBatchItem(Currency currency) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         SMIMEMessage smimeMessage = currency.getSMIME();
         Query query = dao.getEM().createQuery("SELECT c FROM Currency c WHERE c.serialNumber =:serialNumber and c.hashCertVS =:hashCertVS")

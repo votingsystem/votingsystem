@@ -3,6 +3,7 @@ package org.votingsystem.test.currency;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
+import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.CurrencyBatch;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 public class CurrencySendFromWallet {
@@ -39,24 +41,25 @@ public class CurrencySendFromWallet {
         //we have al the currencies with its anonymous signed cert, now we can make de transactions
         File currencyFile = currencyFiles[0];
         CurrencyDto currencyDto = JSON.getMapper().readValue(currencyFile, CurrencyDto.class);
-        CurrencyBatchDto currencyBatchDto =  new CurrencyBatchDto("First Currency Transaction",
-                "ES4678788989450000000002", new BigDecimal(9), "EUR", "WILDTAG", true,
-                Arrays.asList(currencyDto.deSerialize()), currencyServer.getTimeStampServiceURL());
-
+        CurrencyBatchDto currencyBatchDto =  CurrencyBatchDto.NEW("First Currency Transaction",
+                "ES4678788989450000000002", new BigDecimal(9), "EUR", "HIDROGENO", true,
+                Arrays.asList(currencyDto.deSerialize()), currencyServer.getServerURL(),
+                currencyServer.getTimeStampServiceURL());
 
         ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsBytes(currencyBatchDto),
                 ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
         log.info("Currency Transaction result: " + responseVS.getStatusCode());
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        Map<String, String> responseMap = JSON.getMapper().readValue(
-                responseVS.getMessage(), new TypeReference<HashMap<String, Object>>() {});
-        log.info("Transaction result:" + responseMap);
-        currencyBatchDto.validateTransactionVSResponse(responseMap, currencyServer.getTrustAnchors());
-
-
-        //FileUtils.copyStreamToFile(new ByteArrayInputStream(ObjectUtils.serializeObject(this)), currencyFile);
+        CurrencyBatchResponseDto responseDto = JSON.getMapper().readValue(responseVS.getMessage(),
+                CurrencyBatchResponseDto.class);
+        currencyBatchDto.validateResponse(responseDto, currencyServer.getTrustAnchors());
         currencyFile.renameTo(new File(currencyFile.getParent() + File.separator + "EXPENDED_" + currencyFile.getName()));
 
+        String walletPath = ContextVS.getInstance().getProperty("walletDir");
+        currencyDto = CurrencyDto.serialize(currencyBatchDto.getLeftOverCurrency());
+        new File(walletPath).mkdirs();
+        currencyFile = new File(walletPath + currencyDto.getHashCertVS()  + "_leftOver_" + ContextVS.SERIALIZED_OBJECT_EXTENSION);
+        JSON.getMapper().writeValue(currencyFile, currencyDto);
         System.exit(0);
     }
 

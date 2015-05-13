@@ -22,6 +22,7 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
+import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
@@ -269,10 +270,10 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
             this.currency = currency;
             this.currencyServer = currencyServer;
             this.transactionVSDto = transactionVSDto;
-            this.batchDto = new CurrencyBatchDto(transactionVSDto.getSubject(),
+            this.batchDto = CurrencyBatchDto.NEW(transactionVSDto.getSubject(),
                     transactionVSDto.getToUserIBAN().get(0), currency.getAmount(),
                     currency.getCurrencyCode(), currency.getTagVS().getName(), false, Arrays.asList(currency),
-                    currencyServer.getTimeStampServiceURL());
+                    currencyServer.getServerURL(),  currencyServer.getTimeStampServiceURL());
         }
 
         @Override protected ResponseVS call() throws Exception {
@@ -286,10 +287,10 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 showMessage(responseVS);
             } else {
-                Map<String, String> responseDataMap = JSON.getMapper().readValue(responseVS.getMessage(),
-                        new TypeReference<HashMap<String, Object>>() {});
-                batchDto.validateTransactionVSResponse(responseDataMap, currencyServer.getTrustAnchors());
-                showMessage(ResponseVS.SC_OK, (String) responseDataMap.get("message"));
+                CurrencyBatchResponseDto responseDto = JSON.getMapper().readValue(responseVS.getMessage(),
+                        CurrencyBatchResponseDto.class);
+                batchDto.validateResponse(responseDto, currencyServer.getTrustAnchors());
+                showMessage(ResponseVS.SC_OK, responseDto.getMessage());
             }
             return responseVS;
         }

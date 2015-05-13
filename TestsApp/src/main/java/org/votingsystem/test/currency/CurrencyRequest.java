@@ -16,7 +16,6 @@ import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -59,19 +58,19 @@ public class CurrencyRequest {
             ResultListDto<String> currencyCertsDto = (ResultListDto<String>) responseVS.getMessage(
                     new TypeReference<ResultListDto<String>>(){});
             requestDto.loadCurrencyCerts(currencyCertsDto.getResultList());
-            saveCurrencyToDir(requestDto.getCurrencyMap().values(), ContextVS.getInstance().getProperty("walletDir"));
+            saveCurrencyToDir(requestDto.getCurrencyMap().values());
         } else {
             log.log(Level.SEVERE," --- ERROR --- " + responseVS.getMessage());
         }
         System.exit(0);
     }
 
-    public static void saveCurrencyToDir(Collection<Currency> currencyCollection, String walletPath) throws Exception {
+    public static void saveCurrencyToDir(Collection<Currency> currencyCollection) throws Exception {
+        String walletPath = ContextVS.getInstance().getProperty("walletDir");
         for(Currency currency : currencyCollection) {
             CurrencyDto currencyDto = CurrencyDto.serialize(currency);
             new File(walletPath).mkdirs();
-            File currencyFile = new File(walletPath + UUID.randomUUID().toString() + ContextVS.SERIALIZED_OBJECT_EXTENSION);
-            currencyFile.getParentFile().mkdirs();
+            File currencyFile = new File(walletPath + currencyDto.getHashCertVS() + ContextVS.SERIALIZED_OBJECT_EXTENSION);
             JSON.getMapper().writeValue(currencyFile, currencyDto);
             log.info("stored currency: " + currencyFile.getAbsolutePath());
         }

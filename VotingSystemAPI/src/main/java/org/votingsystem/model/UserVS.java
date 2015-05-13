@@ -453,7 +453,7 @@ public class UserVS extends EntityVS implements Serializable {
 
     public String getFullName() {
         if(firstName == null) return name;
-        else return name + " " + firstName;
+        else return firstName + " " + lastName;
     }
 
     public static UserVS getUserVS (String subjectDN) {

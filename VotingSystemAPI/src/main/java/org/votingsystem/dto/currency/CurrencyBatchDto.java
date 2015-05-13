@@ -9,6 +9,7 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
@@ -39,6 +40,7 @@ public class CurrencyBatchDto {
     private Boolean timeLimited = Boolean.FALSE;
     private BigDecimal batchAmount;
     private BigDecimal leftOver = BigDecimal.ZERO;
+    @JsonIgnore private Currency leftOverCurrency;
     @JsonIgnore private PKCS10CertificationRequest leftOverPKCS10;
     @JsonIgnore private List<Currency> currencyList;
 
@@ -55,26 +57,40 @@ public class CurrencyBatchDto {
         this.batchUUID  = currencyBatch.getBatchUUID();
     }
 
-    public CurrencyBatchDto(String subject, String toUserIBAN, BigDecimal batchAmount, String currencyCode,  String tag,
-            Boolean timeLimited, List<Currency> currencyList, String timeStampServiceURL) throws Exception {
-        this.subject = subject;
-        this.toUserIBAN = toUserIBAN;
-        this.batchAmount = batchAmount;
-        this.currencyCode = currencyCode;
-        this.tag = tag;
-        this.timeLimited = timeLimited;
-        this.currencyList = currencyList;
-        this.batchUUID = UUID.randomUUID().toString();
-        Set<String> currencySetTemp = new HashSet<>();
+    public static CurrencyBatchDto NEW(String subject, String toUserIBAN, BigDecimal batchAmount, String currencyCode,  String tag,
+            Boolean timeLimited, List<Currency> currencyList, String currencyServerURL, String timeStampServiceURL) throws Exception {
+        CurrencyBatchDto batchDto = new CurrencyBatchDto();
+        batchDto.subject = subject;
+        batchDto.toUserIBAN = toUserIBAN;
+        batchDto.batchAmount = batchAmount;
+        batchDto.currencyCode = currencyCode;
+        batchDto.tag = tag;
+        batchDto.timeLimited = timeLimited;
+        batchDto.currencyList = currencyList;
+        batchDto.batchUUID = UUID.randomUUID().toString();
+        BigDecimal accumulated = BigDecimal.ZERO;
+        for (Currency currency : currencyList) {
+            accumulated.add(currency.getAmount());
+        }
+        if(batchAmount.compareTo(accumulated) > 0) {
+            throw new ValidationExceptionVS(MessageFormat.format("''{0}'' batchAmount exceeds currency sum ''{1}''",
+                    batchAmount, accumulated));
+        } else if(batchAmount.compareTo(accumulated) != 0){
+            batchDto.leftOver = accumulated.subtract(batchAmount);
+            batchDto.leftOverCurrency = new Currency(currencyServerURL, batchDto.leftOver, currencyCode, timeLimited,
+                    new TagVS(tag));
+            batchDto.leftOverCSR = new String(batchDto.leftOverCurrency.getCertificationRequest().getCsrPEM());
+        }
+        batchDto.currencySet = new HashSet<>();
         for (Currency currency : currencyList) {
             SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(currency.getHashCertVS(),
                     StringUtils.getNormalized(currency.getToUserName()), JSON.getMapper().writeValueAsString(
-                    CurrencyDto.BATCH_ITEM(this, currency)), subject, null);
+                    CurrencyDto.BATCH_ITEM(batchDto, currency)), subject, null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServiceURL);
             currency.setSMIME(timeStamper.call());
-            currencySet.add(Base64.getEncoder().encodeToString(currency.getSMIME().getBytes()));
+            batchDto.currencySet.add(Base64.getEncoder().encodeToString(currency.getSMIME().getBytes()));
         }
-        this.currencySet = currencySetTemp;
+        return batchDto;
     }
 
 
@@ -128,23 +144,23 @@ public class CurrencyBatchDto {
         return currencyBatch;
     }
 
-    public void validateTransactionVSResponse(Map<String, String> dataMap, Set<TrustAnchor> trustAnchor) throws Exception {
-        SMIMEMessage receipt = new SMIMEMessage(Base64.getDecoder().decode(((String)dataMap.get("receipt")).getBytes()));
-        if(dataMap.containsKey("leftOverCoin")) {
-
+    public void validateResponse(CurrencyBatchResponseDto responseDto, Set<TrustAnchor> trustAnchor)
+            throws Exception {
+        SMIMEMessage receipt = new SMIMEMessage(Base64.getDecoder().decode(responseDto.getReceipt().getBytes()));
+        CertUtils.verifyCertificate(trustAnchor, false, new ArrayList<>(receipt.getSignersCerts()));
+        if(responseDto.getLeftOverCert() != null) {
+            leftOverCurrency.initSigner(responseDto.getLeftOverCert().getBytes());
         }
-
-
-        Map<String, Currency> currencyMap = getCurrencyMap();
-        if(currencyMap.size() != dataMap.size()) throw new ExceptionVS("Num. currency: '" +
-                currencyMap.size() + "' - num. receipts: " + dataMap.size());
-        for(String hashCertVS : dataMap.keySet()) {
-            SMIMEMessage smimeReceipt = new SMIMEMessage(Base64.getDecoder().decode(dataMap.get(hashCertVS).getBytes()));
-            String signatureHashCertVS = CertUtils.getHashCertVS(smimeReceipt.getCurrencyCert(), ContextVS.CURRENCY_OID);
-            Currency currency = currencyMap.remove(signatureHashCertVS);
-            currency.validateReceipt(smimeReceipt, trustAnchor);
-        }
-        if(currencyMap.size() != 0) throw new ExceptionVS(currencyMap.size() + " Currency transactions without receipt");
+        CurrencyBatchDto signedDto = receipt.getSignedContent(CurrencyBatchDto.class);
+        if(signedDto.getBatchAmount().compareTo(batchAmount) != 0) throw new ValidationExceptionVS(MessageFormat.format(
+            "ERROR - batchAmount ''{0}'' - receipt amount ''{1}''",  batchAmount, signedDto.getBatchAmount()));
+        if(!signedDto.getCurrencyCode().equals(signedDto.getCurrencyCode())) throw new ValidationExceptionVS(MessageFormat.format(
+             "ERROR - batch currencyCode ''{0}'' - receipt currencyCode ''{1}''",  currencyCode, signedDto.getCurrencyCode()));
+        if(timeLimited != signedDto.getTimeLimited()) throw new ValidationExceptionVS(MessageFormat.format(
+                "ERROR - batch timeLimited ''{0}'' - receipt timeLimited ''{1}''",  timeLimited, signedDto.getTimeLimited()));
+        if(!tag.equals(signedDto.getTag())) throw new ValidationExceptionVS(MessageFormat.format(
+                "ERROR - batch tag ''{0}'' - receipt tag ''{1}''",  tag, signedDto.getTag()));
+        if(!currencySet.equals(signedDto.getCurrencySet())) throw new ValidationExceptionVS("ERROR - currencySet mismatch");
     }
 
     public Map<String, Currency> getCurrencyMap() throws ExceptionVS {
@@ -285,4 +301,11 @@ public class CurrencyBatchDto {
         this.leftOverPKCS10 = leftOverPKCS10;
     }
 
+    public Currency getLeftOverCurrency() {
+        return leftOverCurrency;
+    }
+
+    public void setLeftOverCurrency(Currency leftOverCurrency) {
+        this.leftOverCurrency = leftOverCurrency;
+    }
 }
