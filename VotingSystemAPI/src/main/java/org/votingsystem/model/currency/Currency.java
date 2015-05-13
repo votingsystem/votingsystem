@@ -168,6 +168,7 @@ public class Currency extends EntityVS implements Serializable  {
         currencyCode = certExtensionDto.getCurrencyCode();
         validFrom = x509AnonymousCert.getNotBefore();
         validTo = x509AnonymousCert.getNotAfter();
+        timeLimited = certExtensionDto.getTimeLimited();
         certSubjectDto.setNotBefore(x509AnonymousCert.getNotBefore());
         certSubjectDto.setNotAfter(x509AnonymousCert.getNotAfter());
         tagVS = new TagVS(certExtensionDto.getTag());

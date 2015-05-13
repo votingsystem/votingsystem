@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -61,10 +62,10 @@ public class CurrencyDto implements Serializable {
                 "CurrencyBatch currencyCode: " + currencyBatchDto.getCurrencyCode()
                 + " - Currency currencyCode: " + currency.getCurrencyCode());
         if(currency.getTimeLimited() && !currencyBatchDto.getTimeLimited()) throw new ValidationExceptionVS(
-                "TimeLimited currency can't go inside NOT TimeLimited CurrencyBatch");
+                "TimeLimited currency cannot go inside NOT TimeLimited CurrencyBatch");
         if(!TagVS.WILDTAG.equals(currency.getTagVS().getName()) && !currency.getTagVS().getName().equals(
-                currencyBatchDto.getTag())) throw new ValidationExceptionVS(currency.getTagVS().getName() + " Currency " +
-                " can't go inside '" + currencyBatchDto.getTag() + "' CurrencyBatch");
+                currencyBatchDto.getTag())) throw new ValidationExceptionVS(MessageFormat.format(
+                "''{0}'' Currency  cannot go inside ''{1}'' CurrencyBatch", currency.getTagVS().getName(), currencyBatchDto.getTag()));
         CurrencyDto currencyDto = new CurrencyDto(currency);
         currencyDto.subject = currencyBatchDto.getSubject();
         currencyDto.toUserIBAN = currencyBatchDto.getToUserIBAN();

@@ -6,7 +6,6 @@ import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.model.BatchRequest;
 import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyAccount;
@@ -54,12 +53,12 @@ public class CurrencyBean {
     @Inject TimeStampBean timeStampBean;
 
 
-    public CurrencyBatchResponseDto processCurrencyTransaction(CurrencyBatchDto batchDto) throws Exception {
+    public CurrencyBatchResponseDto processCurrencyBatch(CurrencyBatchDto batchDto) throws Exception {
         if(batchDto.getCurrencyList().isEmpty())
             throw new ValidationExceptionVS("CurrencyBatch without signed transactions");
         List<Currency> validatedCurrencyList = new ArrayList<>();
         String leftOverCert = null;
-        CurrencyBatch currencyBatch = batchDto.validateRequest();
+        CurrencyBatch currencyBatch = batchDto.validateRequest(new Date());
         currencyBatch.setTagVS(config.getTag(batchDto.getTag()));
         Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", batchDto.getToUserIBAN());
         UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
@@ -79,8 +78,10 @@ public class CurrencyBean {
         dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));
         log.info("currencyBatch:" + currencyBatch.getId() + " - messageSMIME:" + messageSMIME.getId());
         Date validTo = null;
-        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
-        //if(currencyBatch.isTimeLimited == true) validTo = timePeriod.getDateTo()
+        if(currencyBatch.getTimeLimited() == true) {
+            TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+            validTo = timePeriod.getDateTo();
+        }
         TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_BATCH(
                 currencyBatch, toUserVS, validTo, messageSMIME));
         for(Currency currency : validatedCurrencyList) {
@@ -116,7 +117,7 @@ public class CurrencyBean {
     public ResultListDto<String> processCurrencyRequest(CurrencyRequestDto requestDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS fromUserVS = requestDto.getMessageSMIME().getUserVS();
-        //Check cash available for user
+        //check cash available for user
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 fromUserVS.getIBAN(), requestDto.getTagVS(), requestDto.getTotalAmount(), requestDto.getCurrencyCode());
         Set<String> currencyCertSet = csrBean.signCurrencyRequest(requestDto);

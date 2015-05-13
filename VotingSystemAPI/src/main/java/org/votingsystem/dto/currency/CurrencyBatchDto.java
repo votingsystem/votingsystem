@@ -18,6 +18,7 @@ import org.votingsystem.util.TypeVS;
 
 import java.math.BigDecimal;
 import java.security.cert.TrustAnchor;
+import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -68,7 +69,7 @@ public class CurrencyBatchDto {
         for (Currency currency : currencyList) {
             SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(currency.getHashCertVS(),
                     StringUtils.getNormalized(currency.getToUserName()), JSON.getMapper().writeValueAsString(
-                            CurrencyDto.BATCH_ITEM(this, currency)), subject, null);
+                    CurrencyDto.BATCH_ITEM(this, currency)), subject, null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServiceURL);
             currency.setSMIME(timeStamper.call());
             currencySet.add(Base64.getEncoder().encodeToString(currency.getSMIME().getBytes()));
@@ -78,7 +79,7 @@ public class CurrencyBatchDto {
 
 
     @JsonIgnore
-    public CurrencyBatch validateRequest() throws Exception {
+    public CurrencyBatch validateRequest(Date checkDate) throws Exception {
         BigDecimal accumulated = BigDecimal.ZERO;
         for(String currencyItem : currencySet) {
             try {
@@ -93,6 +94,8 @@ public class CurrencyBatchDto {
                     this.timeLimited = currency.getTimeLimited();
                     this.batchUUID = currency.getBatchUUID();
                 } else checkCurrencyData(currency);
+                if(checkDate.after(currency.getValidTo())) throw new ValidationExceptionVS(MessageFormat.format(
+                        "currency ''{0}'' is lapsed", currency.getHashCertVS()));
                 accumulated.add(currency.getAmount());
                 currencyList.add(currency);
             } catch(Exception ex) {
@@ -155,7 +158,7 @@ public class CurrencyBatchDto {
     public void checkCurrencyData(Currency currency) throws ExceptionVS {
         String currencyData = "Currency with hash '" + currency.getHashCertVS() + "' ";
         if(!timeLimited && currency.getTimeLimited()) throw new ValidationExceptionVS(
-                currencyData + "TimeLimited currency can't go inside NOT TimeLimited batch");
+                currencyData + "TimeLimited currency cannot go inside NOT TimeLimited batch");
         if(!subject.equals(currency.getSubject())) throw new ValidationExceptionVS(
                 currencyData + "expected subject " + subject + " found " + currency.getSubject());
         if(!toUserIBAN.equals(currency.getToUserIBAN())) throw new ValidationExceptionVS(

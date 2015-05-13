@@ -7,7 +7,6 @@ import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
@@ -178,7 +177,7 @@ public class TransactionVSResource {
     @POST @Produces(MediaType.APPLICATION_JSON) @Consumes(MediaType.APPLICATION_JSON)
     public Response currency(CurrencyBatchDto currencyBatchDto) throws Exception {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
-                currencyBean.processCurrencyTransaction(currencyBatchDto))).build() ;
+                currencyBean.processCurrencyBatch(currencyBatchDto))).build() ;
     }
 
 }
