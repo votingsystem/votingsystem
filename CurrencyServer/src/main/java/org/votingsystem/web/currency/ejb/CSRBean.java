@@ -1,5 +1,7 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.model.CertificateVS;
@@ -7,6 +9,7 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TimePeriod;
 import org.votingsystem.web.currency.util.LoggerVS;
@@ -14,7 +17,6 @@ import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
-
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.math.BigDecimal;
@@ -53,7 +55,7 @@ public class CSRBean {
         try {
             for(CurrencyDto currencyDto : requestDto.getCurrencyDtoMap().values()) {
                 X509Certificate x509AnonymousCert = signatureBean.signCSR(
-                        currencyDto.getCsr(), null, timePeriod.getDateFrom(), timePeriod.getDateTo());
+                        currencyDto.getCsrPKCS10(), null, timePeriod.getDateFrom(), timePeriod.getDateTo());
                 Currency currency = currencyDto.loadCertData(x509AnonymousCert, timePeriod, requestDto.getTagVS(),
                         authorityCertificateVS);
                 issuedCurrencySet.add(dao.persist(currency));
@@ -71,13 +73,14 @@ public class CSRBean {
         }
     }
 
-    public String signCurrencyRequest(CurrencyDto currencyDto, TagVS tagVS) throws ExceptionVS {
+    public String signCurrencyRequest(PKCS10CertificationRequest pkcs10Req, TagVS tagVS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        if(currencyMinValue.compareTo(currencyDto.getAmount()) > 0) throw new ExceptionVS(messages.get("currencyMinValueError",
-                currencyMinValue.toString(), currencyDto.getAmount().toString()));
+        CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+                pkcs10Req, ContextVS.CURRENCY_TAG);
+        if(currencyMinValue.compareTo(certExtensionDto.getAmount()) > 0) throw new ExceptionVS(messages.get("currencyMinValueError",
+                currencyMinValue.toString(), certExtensionDto.getAmount().toString()));
         TimePeriod timePeriod = null;
-        Currency currency = null;
-        if(currencyDto.isTimeLimited()) timePeriod = DateUtils.getCurrentWeekPeriod();
+        if(certExtensionDto.getTimeLimited()) timePeriod = DateUtils.getCurrentWeekPeriod();
         else {
             Date dateFrom = DateUtils.resetCalendar().getTime();
             Date dateTo = DateUtils.addDays(dateFrom, 365).getTime(); //one year
@@ -86,9 +89,8 @@ public class CSRBean {
         CertificateVS authorityCertificateVS = signatureBean.getServerCertificateVS();
         try {
             X509Certificate x509AnonymousCert = signatureBean.signCSR(
-                    currencyDto.getCsr(), null, timePeriod.getDateFrom(), timePeriod.getDateTo());
-            currency = currencyDto.loadCertData(x509AnonymousCert, timePeriod, tagVS, authorityCertificateVS);
-            currency = dao.persist(currency);
+                    pkcs10Req, null, timePeriod.getDateFrom(), timePeriod.getDateTo());
+            Currency currency = dao.persist(new Currency(x509AnonymousCert, tagVS, authorityCertificateVS));
             LoggerVS.logCurrencyIssued(currency);
             return new String(CertUtils.getPEMEncoded(x509AnonymousCert));
         } catch(Exception ex) {

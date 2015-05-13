@@ -10,26 +10,14 @@ import java.util.Base64;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CurrencyBatchResponseDto {
 
-    private String leftOverCoin;
+    private String leftOverCert;
     private String receipt;
 
     public CurrencyBatchResponseDto() {};
 
-    public CurrencyBatchResponseDto(SMIMEMessage receipt) throws Exception {
+    public CurrencyBatchResponseDto(SMIMEMessage receipt, String leftOverCert) throws Exception {
         this.receipt = Base64.getEncoder().encodeToString(receipt.getBytes());
-    }
-
-    public CurrencyBatchResponseDto(String receipt, String leftOverCoin) {
-        this.receipt = receipt;
-        this.leftOverCoin = leftOverCoin;
-    }
-
-    public String getLeftOverCoin() {
-        return leftOverCoin;
-    }
-
-    public void setLeftOverCoin(String leftOverCoin) {
-        this.leftOverCoin = leftOverCoin;
+        this.leftOverCert = leftOverCert;
     }
 
     public String getReceipt() {
@@ -38,5 +26,13 @@ public class CurrencyBatchResponseDto {
 
     public void setReceipt(String receipt) {
         this.receipt = receipt;
+    }
+
+    public String getLeftOverCert() {
+        return leftOverCert;
+    }
+
+    public void setLeftOverCert(String leftOverCert) {
+        this.leftOverCert = leftOverCert;
     }
 }

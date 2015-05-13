@@ -310,7 +310,7 @@ public class SocketMessageDto {
     }
 
     public Set<Currency> getCurrencySet() throws Exception {
-        if(currencySet == null && currencyDtoList != null) currencySet = CurrencyDto.deSerializeCollection(currencyDtoList);
+        if(currencySet == null && currencyDtoList != null) currencySet = CurrencyDto.deSerialize(currencyDtoList);
         return currencySet;
     }
 
@@ -447,7 +447,7 @@ public class SocketMessageDto {
         if(content.getFrom() != null) from = content.getFrom();
         if(content.getDeviceFromId() != null) deviceFromId = content.getDeviceFromId();
         if(content.getSmimeMessage() != null) smime = content.getSMIME();
-        if(content.getCurrencyList() != null) currencySet = CurrencyDto.deSerializeCollection(
+        if(content.getCurrencyList() != null) currencySet = CurrencyDto.deSerialize(
                 content.getCurrencyList());
         if(content.getSubject() != null) subject = content.getSubject();
         if(content.getMessage() != null) message = content.getMessage();

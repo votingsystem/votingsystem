@@ -114,6 +114,7 @@ public class TimeStampBean {
                 ContextVS.PROVIDER).build(x509TimeStampServerCert);
         X509CertificateHolder certHolder = timeStampSignerInfoVerifier.getAssociatedCertificate();
         TSPUtil.validateCertificate(certHolder);
+        this.x509TimeStampServerCert = x509TimeStampServerCert;
     }
 
 

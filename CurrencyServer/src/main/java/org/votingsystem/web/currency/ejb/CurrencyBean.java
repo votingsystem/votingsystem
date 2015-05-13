@@ -17,7 +17,10 @@ import org.votingsystem.signature.util.CertExtensionCheckerVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.CurrencyExpendedException;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.TimePeriod;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -51,38 +54,39 @@ public class CurrencyBean {
     @Inject TimeStampBean timeStampBean;
 
 
-    public CurrencyBatchResponseDto processCurrencyTransaction(CurrencyBatchDto currencyBatchDto) throws Exception {
+    public CurrencyBatchResponseDto processCurrencyTransaction(CurrencyBatchDto batchDto) throws Exception {
+        if(batchDto.getCurrencyList().isEmpty())
+            throw new ValidationExceptionVS("CurrencyBatch without signed transactions");
         List<Currency> validatedCurrencyList = new ArrayList<>();
-        CurrencyBatch currencyBatch = currencyBatchDto.getCurrencyBatch();
-        currencyBatch.setTagVS(config.getTag(currencyBatchDto.getTag()));
-        Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", currencyBatch.getToUserIBAN());
+        String leftOverCert = null;
+        CurrencyBatch currencyBatch = batchDto.validateRequest();
+        currencyBatch.setTagVS(config.getTag(batchDto.getTag()));
+        Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", batchDto.getToUserIBAN());
         UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
         currencyBatch.setToUserVS(toUserVS);
         if(toUserVS == null) throw new ExceptionVS("CurrencyTransactionBatch:" + currencyBatch.getBatchUUID() +
-                " has wrong receptor IBAN '" + currencyBatch.getToUserIBAN());
-        for(Currency currency : currencyBatch.getCurrencyList()) {
+                " has wrong receptor IBAN '" + batchDto.getToUserIBAN());
+        for(Currency currency : batchDto.getCurrencyList()) {
             validatedCurrencyList.add(validateCurrency(currency));
         }
+        if(batchDto.getLeftOverPKCS10() != null) {
+            leftOverCert = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), currencyBatch.getTagVS());
+        }
         SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
-                currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(currencyBatchDto),
+                currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(batchDto),
                 currencyBatch.getSubject());
         MessageSMIME messageSMIME =  dao.persist(new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT));
         dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));
         log.info("currencyBatch:" + currencyBatch.getId() + " - messageSMIME:" + messageSMIME.getId());
         Date validTo = null;
-        //TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         //if(currencyBatch.isTimeLimited == true) validTo = timePeriod.getDateTo()
         TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_BATCH(
                 currencyBatch, toUserVS, validTo, messageSMIME));
         for(Currency currency : validatedCurrencyList) {
             dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
         }
-        CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto(receipt);
-        if(currencyBatch.getLeftOverCurrency() != null) {
-            String leftOverCoin = csrBean.signCurrencyRequest(currencyBatch.getLeftOverCurrency(), currencyBatch.getTagVS());
-            responseDto.setLeftOverCoin(leftOverCoin);
-        }
-        return responseDto;
+        return new CurrencyBatchResponseDto(receipt, leftOverCert);
     }
 
     public Currency validateCurrency(Currency currency) throws Exception {
@@ -93,10 +97,10 @@ public class CurrencyBean {
                 .setParameter("hashCertVS", currency.getHashCertVS());
         Currency currencyDB = dao.getSingleResult(Currency.class, query);
         if(currencyDB == null) throw new ExceptionVS("hashCertVSCurrencyInvalidErrorMsg - hashCertVS: " + currency.getHashCertVS());
-        currency = currencyDB.checkRequestWithDB(currency);
-        if(currency.getState() == Currency.State.EXPENDED) {
+        if(currencyDB.getState() == Currency.State.EXPENDED) {
             throw new CurrencyExpendedException(currency.getHashCertVS());
         } else if(currency.getState() == Currency.State.OK) {
+            currency = currencyDB.checkRequestWithDB(currency);
             UserVS userVS = smimeMessage.getSigner(); //anonymous signer
             timeStampBean.validateToken(userVS.getTimeStampToken());
             CertUtils.CertValidatorResultVS certValidatorResult = CertUtils.verifyCertificate(

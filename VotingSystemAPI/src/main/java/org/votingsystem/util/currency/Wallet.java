@@ -37,7 +37,7 @@ public class Wallet {
     }
 
     public static Set<Currency> getPlainWallet() throws Exception {
-        return CurrencyDto.deSerializeCollection(getPlainWalletDto());
+        return CurrencyDto.deSerialize(getPlainWalletDto());
     }
 
     public static void savePlainWalletDto(Collection<CurrencyDto> walletList) throws Exception {
@@ -81,7 +81,7 @@ public class Wallet {
             throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
         EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, JSON.getMapper().writeValueAsBytes(currencyDtoCollection));
         JSON.getMapper().writeValue(walletFile.file, new EncryptedBundleDto(bundle));
-        wallet = CurrencyDto.deSerializeCollection(currencyDtoCollection);
+        wallet = CurrencyDto.deSerialize(currencyDtoCollection);
         return wallet;
     }
 
@@ -92,7 +92,7 @@ public class Wallet {
         walletFile.getParentFile().mkdirs();
         EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, JSON.getMapper().writeValueAsBytes(walletDto));
         JSON.getMapper().writeValue(walletFile, new EncryptedBundleDto(bundle));
-        wallet = CurrencyDto.deSerializeCollection(walletDto);
+        wallet = CurrencyDto.deSerialize(walletDto);
     }
 
     public static Set<Currency> getWallet() {
@@ -112,7 +112,7 @@ public class Wallet {
         EncryptedBundle bundle = bundleDto.getEncryptedBundle();
         byte[] decryptedWalletBytes = Encryptor.pbeAES_Decrypt(pin, bundle);
         List<CurrencyDto> walletDto = JSON.getMapper().readValue(decryptedWalletBytes, new TypeReference<List<CurrencyDto>>() {});
-        wallet = CurrencyDto.deSerializeCollection(walletDto);
+        wallet = CurrencyDto.deSerialize(walletDto);
         Set<Currency> plainWallet = getPlainWallet();
         if(plainWallet.size() > 0) {
             wallet.addAll(plainWallet);

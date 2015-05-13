@@ -124,7 +124,7 @@ public class TransactionVS implements Serializable {
                MessageSMIME messageSMIME) {
         TransactionVS transactionVS = USERVS(null, toUserVS, TransactionVS.Type.CURRENCY_SEND, null, batch.getBatchAmount(),
                 batch.getCurrencyCode(), batch.getSubject(), validTo, messageSMIME, batch.getTagVS());
-        transactionVS.setToUserIBAN(batch.getToUserIBAN());
+        transactionVS.setToUserIBAN(batch.getToUserVS().getIBAN());
         transactionVS.setCurrencyTransactionBatch(batch);
         transactionVS.setState(TransactionVS.State.OK);
         return transactionVS;
