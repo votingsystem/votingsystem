@@ -138,7 +138,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
         currencyHashText.setText(currency.getHashCertVS());
         currencyValueLbl.setText(currency.getAmount().toPlainString());
         currencyLbl.setText(currency.getCurrencyCode());
-        currencyTagLbl.setText(MsgUtils.getTagDescription(currency.getTag().getName()));
+        currencyTagLbl.setText(MsgUtils.getTagDescription(currency.getTagVS().getName()));
         menuButton.setGraphic(Utils.getIcon(FontAwesomeIcons.BARS));
         validFromLbl.setText(ContextVS.getMessage("issuedLbl") + ": " +
                 DateUtils.getDateStr(currency.getValidFrom(), "dd MMM yyyy' 'HH:mm"));
@@ -162,7 +162,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
                     errorMsg =  ContextVS.getMessage("currencyLapsedErrorLbl");
                 } else errorMsg =  ContextVS.getMessage("currencyErrorLbl");
                 String amountStr = currency.getAmount() + " " + currency.getCurrencyCode() + " " +
-                        Utils.getTagForDescription(currency.getTag().getName());
+                        Utils.getTagForDescription(currency.getTagVS().getName());
                 msg = ContextVS.getMessage("currencyInfoErroMsg", errorMsg, amountStr, x509Cert.getIssuerDN().toString(),
                         DateUtils.getDateStr(currency.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
                         DateUtils.getDateStr(currency.getValidTo()), "dd MMM yyyy' 'HH:mm");
@@ -211,9 +211,14 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
         String toUserIBAN = (String) dataMap.get("toUserIBAN");
         Boolean isTimeLimited = (Boolean) dataMap.get("isTimeLimited");
         TransactionVSDto transactionVSDto = TransactionVSDto.CURRENCY_SEND(toUserName, subject, currency.getAmount(),
-                currency.getCurrencyCode(), toUserIBAN, isTimeLimited, currency.getTag().getName());
-        ProgressDialog.showDialog(new ProcessFormTask(transactionVSDto, currency, currencyServer),
-                ContextVS.getMessage("sendingMoneyLbl"));
+                currency.getCurrencyCode(), toUserIBAN, isTimeLimited, currency.getTagVS().getName());
+        try {
+            ProgressDialog.showDialog(new ProcessFormTask(transactionVSDto, currency, currencyServer),
+                    ContextVS.getMessage("sendingMoneyLbl"));
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+        }
     }
 
     @Override public void setSelectedDevice(DeviceVSDto device) {
@@ -255,25 +260,26 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
     public static class ProcessFormTask extends Task<ResponseVS> {
 
         private TransactionVSDto transactionVSDto;
-        private CurrencyBatch transactionBatch;
+        private CurrencyBatchDto batchDto;
         private Currency currency;
         private CurrencyServer currencyServer;
 
-        public ProcessFormTask(TransactionVSDto transactionVSDto, Currency currency, CurrencyServer currencyServer) {
+        public ProcessFormTask(TransactionVSDto transactionVSDto, Currency currency, CurrencyServer currencyServer)
+                throws Exception {
             this.currency = currency;
             this.currencyServer = currencyServer;
             this.transactionVSDto = transactionVSDto;
-            this.transactionBatch = new CurrencyBatch(Arrays.asList(currency));
+            this.batchDto = new CurrencyBatchDto(transactionVSDto.getSubject(),
+                    transactionVSDto.getToUserIBAN().get(0), currency.getAmount(),
+                    currency.getCurrencyCode(), currency.getTagVS().getName(), false, Arrays.asList(currency),
+                    currencyServer.getTimeStampServiceURL());
         }
 
         @Override protected ResponseVS call() throws Exception {
             updateProgress(1, 10);
             updateMessage(ContextVS.getMessage("transactionInProgressMsg"));
-            CurrencyBatchDto dto =  transactionBatch.getDto(transactionVSDto.getSubject(),
-                    transactionVSDto.getToUserIBAN().get(0), currency.getAmount(),
-                    currency.getCurrencyCode(), currency.getTag().getName(), false, currencyServer.getTimeStampServiceURL());
             updateProgress(3, 10);
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsString(dto).getBytes(),
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsString(batchDto).getBytes(),
                     ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
             updateProgress(8, 10);
             log.info("transaction result: " + responseVS.getStatusCode());
@@ -282,7 +288,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
             } else {
                 Map<String, String> responseDataMap = JSON.getMapper().readValue(responseVS.getMessage(),
                         new TypeReference<HashMap<String, Object>>() {});
-                transactionBatch.validateTransactionVSResponse(responseDataMap, currencyServer.getTrustAnchors());
+                batchDto.validateTransactionVSResponse(responseDataMap, currencyServer.getTrustAnchors());
                 showMessage(ResponseVS.SC_OK, (String) responseDataMap.get("message"));
             }
             return responseVS;
