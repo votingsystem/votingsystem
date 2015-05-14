@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyAccountDto;
 import org.votingsystem.model.ActorVS;
@@ -44,13 +45,13 @@ public class ServerInfoResource {
 
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response doGet() throws Exception {
-        ActorVS actorVS = new ActorVS();
-        actorVS.setType(ActorVS.Type.CURRENCY);
+        ActorVSDto actorVS = new ActorVSDto();
+        actorVS.setServerType(ActorVS.Type.CURRENCY);
         actorVS.setName(config.getServerName());
         actorVS.setServerURL(config.getContextURL());
         actorVS.setWebSocketURL(config.getWebSocketURL());
         actorVS.setState(ActorVS.State.OK);
-        actorVS.setEnvironmentVS(config.getMode());
+        actorVS.setEnvironmentMode(config.getMode());
         actorVS.setDate(new Date());
         actorVS.setTimeStampCertPEM(new String(timeStampBean.getSigningCertPEMBytes()));
         actorVS.setTimeStampServerURL(config.getTimeStampServerURL());
