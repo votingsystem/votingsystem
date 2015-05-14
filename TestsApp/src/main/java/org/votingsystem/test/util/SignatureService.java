@@ -75,7 +75,7 @@ public class SignatureService {
         String keyStorePath = ContextVS.getInstance().getProperty("authorityKeyStorePath");
         String keyAlias = ContextVS.getInstance().getProperty("userVSKeyAlias");
         String password = ContextVS.getInstance().getProperty("userVSKeyPassword");
-        KeyStore keyStore = loadKeyStore(keyStorePath, keyAlias, password);
+        KeyStore keyStore = loadKeyStore(keyStorePath, password);
         authoritySignatureService = new SignatureService(keyStore, keyAlias, password);
         signatureServices.put(authoritySignatureService.getUserVS().getNif(), authoritySignatureService);
         return authoritySignatureService;
@@ -90,7 +90,7 @@ public class SignatureService {
         log.info("loading keystore: " + keyStorePath);
         String keyAlias = ContextVS.getInstance().getProperty("userVSKeyAlias", "userVSKeyAlias");
         String password = ContextVS.getInstance().getProperty("userVSKeyPassword", "userVSKeyPassword");
-        KeyStore keyStore = loadKeyStore(keyStorePath, keyAlias, password);
+        KeyStore keyStore = loadKeyStore(keyStorePath, password);
 
         SignatureService signatureService = new SignatureService(keyStore, keyAlias, password);
         signatureServices.put(nif, signatureService);
@@ -128,7 +128,7 @@ public class SignatureService {
         return rootCAPrivateCredential;
     }
 
-    public static KeyStore loadKeyStore(String keyStorePath, String keyAlias, String password) throws Exception {
+    public static KeyStore loadKeyStore(String keyStorePath, String password) throws Exception {
         byte[] keyStoreBytes = ContextVS.getInstance().getResourceBytes(keyStorePath);
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load(new ByteArrayInputStream(keyStoreBytes), password.toCharArray());

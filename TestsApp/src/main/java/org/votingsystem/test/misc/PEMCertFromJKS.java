@@ -33,7 +33,7 @@ public class PEMCertFromJKS {
     }
 
     private static byte[] getPemCertFromKeyStore(String keyStorePath, String keyAlias, String keyPassword) throws Exception {
-        KeyStore keyStore = SignatureService.loadKeyStore(keyStorePath, keyAlias, keyPassword);
+        KeyStore keyStore = SignatureService.loadKeyStore(keyStorePath, keyPassword);
         X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
         return CertUtils.getPEMEncoded(certSigner);
     }

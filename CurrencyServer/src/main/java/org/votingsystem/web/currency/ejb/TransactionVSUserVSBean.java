@@ -36,6 +36,7 @@ public class TransactionVSUserVSBean {
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
     @Inject WalletBean walletBean;
+    @Inject TransactionVSBean transactionVSBean;
 
 
     public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws Exception {
@@ -47,6 +48,7 @@ public class TransactionVSUserVSBean {
         TransactionVS transactionVS = dao.persist(TransactionVS.USERVS(request.getSigner(), request.getReceptor(),
                 request.getType(), accountFromMovements, request.getAmount(), request.getCurrencyCode(),
                 request.getSubject(), request.getValidTo(), request.getTransactionVSSMIME(), request.getTag()));
+        transactionVSBean.newTransactionVS(transactionVS);
         String fromUser = config.getServerName();
         String toUser = request.getSigner().getNif();
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(fromUser, toUser,

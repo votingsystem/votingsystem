@@ -146,11 +146,12 @@ public class TransactionVSResource {
         }
     }
 
-    @GET
     @Path("/userVS/id/{userId}/{timePeriod}") @Transactional
+    @GET @Produces(MediaType.APPLICATION_JSON)
     public Response transactionsTo(@PathParam("userId") long userId, @Context ServletContext context,
              @PathParam("timePeriod") String lapseStr,
              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        String contentType = req.getContentType() != null ? req.getContentType():"";
         UserVS userVS = dao.find(UserVS.class, userId);
         if(userVS == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("not found - userId: " + userId).build();
@@ -170,7 +171,13 @@ public class TransactionVSResource {
         BalancesDto balancesDto = new BalancesDto();
         balancesDto.setTransactionToList(transactionsToListDto);
         balancesDto.setTransactionFromList(transactionsFromListDto);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesDto)).build();
+        if(contentType.contains("json")) return Response.ok().entity(
+                JSON.getMapper().writeValueAsBytes(balancesDto)).build();
+        else {
+            req.setAttribute("balancesDto", JSON.getMapper().writeValueAsString(balancesDto));
+            context.getRequestDispatcher("/transactionVS/userVS.xhtml").forward(req, resp);
+            return Response.ok().build();
+        }
     }
 
     @Path("/currency")

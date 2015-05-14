@@ -124,7 +124,7 @@ public class CurrencyBean {
                 fromUserVS.getIBAN(), requestDto.getTagVS(), requestDto.getTotalAmount(), requestDto.getCurrencyCode());
         Set<String> currencyCertSet = csrBean.signCurrencyRequest(requestDto);
         TransactionVS userTransaction = requestDto.getTransactionVS(messages.get("currencyRequestLbl"), accountFromMovements);
-        dao.persist(userTransaction);
+        transactionVSBean.newTransactionVS(userTransaction);
         ResultListDto resultListDto = new ResultListDto(currencyCertSet);
         resultListDto.setMessage(messages.get("withdrawalMsg", requestDto.getTotalAmount().toString(),
                 requestDto.getCurrencyCode()) + " " + messages.getTagMessage(requestDto.getTagVS().getName()));

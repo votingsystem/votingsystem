@@ -69,8 +69,8 @@ public class CurrencyRequest {
         String walletPath = ContextVS.getInstance().getProperty("walletDir");
         for(Currency currency : currencyCollection) {
             CurrencyDto currencyDto = CurrencyDto.serialize(currency);
-            new File(walletPath).mkdirs();
             File currencyFile = new File(walletPath + currencyDto.getHashCertVS() + ContextVS.SERIALIZED_OBJECT_EXTENSION);
+            currencyFile.getParentFile().mkdirs();
             currencyFile.createNewFile();
             JSON.getMapper().writeValue(currencyFile, currencyDto);
             log.info("stored currency: " + currencyFile.getAbsolutePath());

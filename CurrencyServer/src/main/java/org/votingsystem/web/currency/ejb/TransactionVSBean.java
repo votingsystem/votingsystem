@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.ejb;
 
-import com.google.common.eventbus.Subscribe;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -10,7 +9,6 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.service.EventBusService;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
@@ -23,8 +21,10 @@ import org.votingsystem.web.util.MessagesVS;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.math.BigDecimal;
@@ -32,6 +32,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,30 +46,39 @@ public class TransactionVSBean {
 
     private static Logger log = Logger.getLogger(TransactionVSBean.class.getName());
 
+    private static final BlockingQueue<TransactionVS> queue = new ArrayBlockingQueue(50);
+
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject BalancesBean balancesBean;
     @Inject TransactionVSGroupVSBean transactionVSGroupVSBean;
     @Inject TransactionVSBankVSBean transactionVSBankVSBean;
     @Inject TransactionVSUserVSBean transactionVSUserVSBean;
-
+    @Resource(name="comp/DefaultManagedExecutorService")
+    private ManagedExecutorService executorService;
 
     @PostConstruct public void initialize() {
         log.info(" --- initialize --- ");
-        EventBusService.getInstance().register(this);
+        executorService.submit(() -> {
+            while(true) {
+                updateCurrencyAccounts(queue.take());
+                log.info("--- queue.take - queue.size: " + queue.size());
+            }
+        });
     }
 
     @PreDestroy public void destroy() {
         log.info(" --- destroy --- ");
-        EventBusService.getInstance().unRegister(this);
+
     }
 
-    @Subscribe public void newTransactionVS(final TransactionVS transactionVS) {
-        log.info("newTransactionVS: " + transactionVS.getId());
-        try {
-            updateCurrencyAccounts(transactionVS);
-        } catch (Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
+    public void newTransactionVS(TransactionVS... transactions) {
+        for(TransactionVS transactionVS : transactions) {
+            try {
+                queue.put(transactionVS);
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+            }
         }
     }
 
@@ -151,7 +162,8 @@ public class TransactionVSBean {
     }
 
     public void updateCurrencyAccounts(TransactionVS transactionVS) throws Exception {
-        transactionVS = dao.merge(transactionVS);
+        if(transactionVS.getId() == null) transactionVS = dao.persist(transactionVS);
+        log.info("updateCurrencyAccounts - TransactionVS id: " + transactionVS.getId());
         if(transactionVS.getState() == TransactionVS.State.OK) {
             boolean isParentTransaction = (transactionVS.getTransactionParent() == null);
             switch(transactionVS.getType()) {

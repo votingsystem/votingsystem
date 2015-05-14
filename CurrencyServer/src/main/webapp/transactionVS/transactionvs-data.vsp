@@ -32,7 +32,7 @@
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
                 <div><b>${msg.subjectLbl}: </b>{{transactionvs.subject}}</div>
 
-                <div><b>${msg.amountLbl}: </b>{{transactionvs.amount}} {{transactionvs.currency}}</div>
+                <div><b>${msg.amountLbl}: </b>{{transactionvs.amount}} {{transactionvs.currencyCode}}</div>
 
                 <div horizontal layout>
                     <div><b>${msg.dateLbl}: </b>{{getDate(transactionvs.dateCreated)}}</div>

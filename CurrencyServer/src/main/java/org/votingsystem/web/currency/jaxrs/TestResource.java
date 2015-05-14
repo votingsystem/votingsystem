@@ -10,7 +10,6 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.service.EventBusService;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
@@ -86,17 +85,6 @@ public class TestResource {
                          @Context HttpServletResponse resp) throws JsonProcessingException, ValidationExceptionVS {
         log.info(messageSMIME.getBase64ContentDigest());
         throw new ValidationExceptionVS("Test: " + messageSMIME.getBase64ContentDigest());
-    }
-
-
-    @GET @Path("/eventBus")
-    public Response eventBus(@Context ServletContext context, @Context HttpServletRequest req,
-                          @Context HttpServletResponse resp) {
-        EventBusService.getInstance().register(new EventBusListener());
-        UserVS userVS = new UserVS();
-        userVS.setNif("111111D");
-        EventBusService.getInstance().post(userVS);
-        return Response.ok().entity("").build();
     }
 
     @GET @Path("/")

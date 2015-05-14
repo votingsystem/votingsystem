@@ -3,8 +3,6 @@ package org.votingsystem.model.currency;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.service.EventBusService;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -398,9 +396,7 @@ public class TransactionVS implements Serializable {
     }
 
     @PostPersist
-    public void postPersist() {
-        EventBusService.getInstance().post(this);
-    }
+    public void postPersist() { }
 
 
     @PreUpdate

@@ -1,0 +1,31 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<polymer-element name="transactionvs-uservs">
+    <template>
+        <div>
+            <div style="font-weight: bold;">num. transactionTo: {{balancesDto.transactionToList.length}}</div>
+            <template repeat="{{transaction in balancesDto.transactionToList}}">
+                <div>{{transaction.type}} - {{transaction.amount}} {{transaction.currencyCode}}</div>
+            </template>
+        </div>
+        <div style="margin: 20px 0 0 0;">
+            <div style="font-weight: bold;">num. transactionFrom: {{balancesDto.transactionFromList.length}}</div>
+            <template repeat="{{transaction in balancesDto.transactionFromList}}">
+                <div>{{transaction.type}} - {{transaction.amount}} {{transaction.currencyCode}}</div>
+            </template>
+        </div>
+
+
+    </template>
+    <script>
+        Polymer('transactionvs-uservs', {
+            publish: {
+                balancesDto: {value: {}}
+            },
+            ready: function() {
+                console.log(this.tagName + " - ready")
+            }
+        })
+    </script>
+
+</polymer-element>

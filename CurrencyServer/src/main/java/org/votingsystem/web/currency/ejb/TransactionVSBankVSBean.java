@@ -28,6 +28,8 @@ public class TransactionVSBankVSBean {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
+    @Inject TransactionVSBean transactionVSBean;
+
 
     public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws ExceptionVS {
         MessagesVS messages = MessagesVS.getCurrentInstance();
@@ -40,6 +42,7 @@ public class TransactionVSBankVSBean {
                 request.getValidTo(), request.getTransactionVSSMIME(), request.getTag()));
         TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(
                 transactionParent, transactionParent.getAmount(), request.getReceptor(), request.getReceptor().getIBAN()));
+        transactionVSBean.newTransactionVS(transactionParent, triggeredTransaction);
         log.info("BankVS: " + bankVS.getId() + " - to user: " + request.getReceptor().getId());
         return new ResultListDto(Arrays.asList(new TransactionVSDto(triggeredTransaction)), 0, 1, 1L);
     }
