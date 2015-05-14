@@ -135,8 +135,7 @@ public class TransactionVSBean {
                 if(resultAmount.compareTo(BigDecimal.ZERO) > 0) {
                     dao.merge(wildTagAccount.setBalance(wildTagAccount.getBalance().add(wildTagExpensesForTag)));
                 } else {
-                    dao.merge(wildTagAccount.setBalance(wildTagAccount.getBalance().add(
-                            wildTagExpensesForTag.subtract(resultAmount))));
+                    dao.merge(wildTagAccount.setBalance(wildTagAccount.getBalance().add(transactionVS.getAmount())));
                     resultAmount = BigDecimal.ZERO;
                 }
             }

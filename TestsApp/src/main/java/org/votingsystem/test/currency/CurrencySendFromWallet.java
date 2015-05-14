@@ -35,7 +35,7 @@ public class CurrencySendFromWallet {
         log.info("walletDir: " + walletDir.getAbsolutePath());
         File[] currencyFiles = walletDir.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String fileName) {
-                return !fileName.startsWith("EXPENDED_"); }
+                return !(fileName.startsWith("EXPENDED_") || fileName.startsWith("leftOver_")); }
         });
         if(currencyFiles == null || currencyFiles.length == 0) throw new ExceptionVS(" --- Empty wallet ---");
         //we have al the currencies with its anonymous signed cert, now we can make de transactions
@@ -58,7 +58,8 @@ public class CurrencySendFromWallet {
         String walletPath = ContextVS.getInstance().getProperty("walletDir");
         currencyDto = CurrencyDto.serialize(currencyBatchDto.getLeftOverCurrency());
         new File(walletPath).mkdirs();
-        currencyFile = new File(walletPath + currencyDto.getHashCertVS()  + "_leftOver_" + ContextVS.SERIALIZED_OBJECT_EXTENSION);
+        currencyFile = new File(walletPath + "leftOver_" + StringUtils.toHex(currencyDto.getHashCertVS())  +
+                ContextVS.SERIALIZED_OBJECT_EXTENSION);
         JSON.getMapper().writeValue(currencyFile, currencyDto);
         System.exit(0);
     }

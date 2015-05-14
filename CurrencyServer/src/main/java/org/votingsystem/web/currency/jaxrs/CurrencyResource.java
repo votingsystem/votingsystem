@@ -52,13 +52,6 @@ public class CurrencyResource {
         return Response.ok().build();
     }
 
-    @Path("/wallet") @GET
-    public Object wallet(@Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
-            throws IOException, ServletException {
-        context.getRequestDispatcher("/currency/wallet.xhtml").forward(req, resp);
-        return Response.ok().build();
-    }
-
     @Path("/issuedLog")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Object issuedLog(@Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)

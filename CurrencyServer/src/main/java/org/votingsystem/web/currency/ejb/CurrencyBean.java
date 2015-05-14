@@ -81,7 +81,8 @@ public class CurrencyBean {
             validTo = timePeriod.getDateTo();
         }
         TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_BATCH(
-                currencyBatch, toUserVS, validTo, messageSMIME));
+                currencyBatch, toUserVS, validTo, messageSMIME, currencyBatch.getTagVS()));
+        transactionVSBean.newTransactionVS(transactionVS);
         for(Currency currency : validatedCurrencyList) {
             dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
         }

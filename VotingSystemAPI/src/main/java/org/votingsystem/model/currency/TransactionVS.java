@@ -119,12 +119,13 @@ public class TransactionVS implements Serializable {
     }
 
     public static TransactionVS CURRENCY_BATCH(CurrencyBatch batch, UserVS toUserVS, Date validTo,
-               MessageSMIME messageSMIME) {
+               MessageSMIME messageSMIME, TagVS tagVS) {
         TransactionVS transactionVS = BASIC(toUserVS, TransactionVS.Type.CURRENCY_SEND, null, batch.getBatchAmount(),
                 batch.getCurrencyCode(), batch.getSubject(), validTo, messageSMIME, batch.getTagVS());
         transactionVS.setToUserIBAN(batch.getToUserVS().getIBAN());
         transactionVS.setCurrencyTransactionBatch(batch);
         transactionVS.setState(TransactionVS.State.OK);
+        transactionVS.setTag(tagVS);
         return transactionVS;
     }
 

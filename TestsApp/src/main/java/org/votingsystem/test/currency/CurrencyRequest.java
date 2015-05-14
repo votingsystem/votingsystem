@@ -16,6 +16,8 @@ import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.StringUtils;
+
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -69,7 +71,8 @@ public class CurrencyRequest {
         String walletPath = ContextVS.getInstance().getProperty("walletDir");
         for(Currency currency : currencyCollection) {
             CurrencyDto currencyDto = CurrencyDto.serialize(currency);
-            File currencyFile = new File(walletPath + currencyDto.getHashCertVS() + ContextVS.SERIALIZED_OBJECT_EXTENSION);
+            File currencyFile = new File(walletPath + StringUtils.toHex(currencyDto.getHashCertVS()) +
+                    ContextVS.SERIALIZED_OBJECT_EXTENSION);
             currencyFile.getParentFile().mkdirs();
             currencyFile.createNewFile();
             JSON.getMapper().writeValue(currencyFile, currencyDto);
