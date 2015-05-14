@@ -57,7 +57,7 @@ public class CurrencyAccount extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
 
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="tag") private TagVS tag;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;

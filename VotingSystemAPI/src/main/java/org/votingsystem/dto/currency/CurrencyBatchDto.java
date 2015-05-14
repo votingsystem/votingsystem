@@ -56,8 +56,9 @@ public class CurrencyBatchDto {
         this.batchUUID  = currencyBatch.getBatchUUID();
     }
 
-    public static CurrencyBatchDto NEW(String subject, String toUserIBAN, BigDecimal batchAmount, String currencyCode,  String tag,
-            Boolean timeLimited, List<Currency> currencyList, String currencyServerURL, String timeStampServiceURL) throws Exception {
+    public static CurrencyBatchDto NEW(String subject, String toUserIBAN, BigDecimal batchAmount, String currencyCode,
+            String tag, Boolean timeLimited, List<Currency> currencyList, String currencyServerURL,
+            String timeStampServiceURL) throws Exception {
         CurrencyBatchDto batchDto = new CurrencyBatchDto();
         batchDto.subject = subject;
         batchDto.toUserIBAN = toUserIBAN;

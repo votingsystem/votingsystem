@@ -1,0 +1,33 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<polymer-element name="system-accounts">
+    <template>
+        <style>
+            .accountBlock { border: 1px solid #6c0404; margin: 20px;
+                box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+                cursor: pointer;
+            }
+            .accountBalance { font-size: 2em; color: #6c0404; text-align: center;  padding: 10px;}
+            .tagDesc {background: #6c0404; color: #f9f9f9; padding: 5px;text-align: center;}
+        </style>
+        <div layout flex horizontal wrap around-justified>
+            <template repeat="{{account in accountListDto.resultList}}">
+                <div class="accountBlock" on-click="{{accountBlockSelected}}">
+                    <div class="accountBalance">{{account.amount}} {{account.currencyCode}}</div>
+                    <div class="tagDesc">{{account.tag.name}}</div>
+                </div>
+            </template>
+        </div>
+    </template>
+    <script>
+        Polymer('system-accounts', {
+            publish: {
+                accountListDto: {value: {}}
+            },
+            ready: function() {
+                console.log(this.tagName + " - ready")
+            },
+            accountBlockSelected: function() {}
+        })
+    </script>
+</polymer-element>

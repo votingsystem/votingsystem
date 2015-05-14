@@ -3,13 +3,13 @@
                 template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="head">
-        <link href="${elementURL}/transactionVS/transactionvs-uservs.vsp" rel="import"/>
+        <link href="${elementURL}/serverInfo/system-accounts.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
-        <vs-innerpage-signal caption="${msg.useVSLbl}"></vs-innerpage-signal>
+        <vs-innerpage-signal caption="${msg.systemAccountsLbl}"></vs-innerpage-signal>
         <div class="pageContentDiv">
             <div layout="" horizontal="" center="" center-justified="">
-                <transactionvs-uservs balancesDto="${balancesDto}"></transactionvs-uservs>
+                <system-accounts accountListDto="${accountListDto}"></system-accounts>
             </div>
         </div>
     </ui:define>

@@ -67,6 +67,7 @@ public class ActorVS extends EntityVS implements Serializable {
     @Transient private EnvironmentVS environmentMode;
     @Transient private String certificateURL;
     @Transient private String voteVSInfoURL;
+    @Transient private Date date;
     @Transient private ControlCenterVS controlCenter;
     @Transient private X509Certificate timeStampCert = null;
 
@@ -74,6 +75,14 @@ public class ActorVS extends EntityVS implements Serializable {
 
     public ActorVS(String serverURL) {
         this.serverURL = serverURL;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public void setDateCreated(Date dateCreated) {
