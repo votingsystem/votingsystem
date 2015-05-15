@@ -17,7 +17,6 @@ public class ActorVSDto {
     private String name;
     private String serverURL;
     private String webSocketURL;
-    private String voteVSInfoURL;
     private String timeStampServerURL;
     private String certChainPEM;
     private String timeStampCertPEM;
@@ -69,7 +68,6 @@ public class ActorVSDto {
         actorVS.setServerURL(serverURL);
         actorVS.setWebSocketURL(webSocketURL);
         actorVS.setName(name);
-        actorVS.setVoteVSInfoURL(voteVSInfoURL);
         actorVS.setCertChainPEM(certChainPEM);
         actorVS.setTimeStampServerURL(timeStampServerURL);
         actorVS.setTimeStampCertPEM(timeStampCertPEM);
@@ -180,11 +178,4 @@ public class ActorVSDto {
         this.webSocketURL = webSocketURL;
     }
 
-    public String getVoteVSInfoURL() {
-        return voteVSInfoURL;
-    }
-
-    public void setVoteVSInfoURL(String voteVSInfoURL) {
-        this.voteVSInfoURL = voteVSInfoURL;
-    }
 }

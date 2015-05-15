@@ -8,7 +8,9 @@ import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
@@ -23,6 +25,7 @@ import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
+import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -77,7 +80,14 @@ public class TestResource {
     @GET @Path("/test")
     public Response test(@Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws JsonProcessingException, ValidationExceptionVS {
-        return Response.ok().build();
+        Query query = dao.getEM().createQuery("select SUM(c.balance), tag, c.currencyCode from CurrencyAccount c JOIN c.tag tag where c.state =:state " +
+                "group by tag, c.currencyCode").setParameter("state", CurrencyAccount.State.ACTIVE);
+         List<Object[]> resultList = query.getResultList();
+        for(Object[] result : resultList) {
+            log.info("" + result[0] + ((TagVS)result[1]).getName() + result[2]);
+        }
+
+        return Response.ok().entity("OK").build();
     }
 
     @POST @Path("/testSMIME")

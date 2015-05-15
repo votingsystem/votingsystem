@@ -30,7 +30,6 @@ public class EventVSDto {
     private Date dateFinish;
     private String URL;
     private String publishRequestURL;
-    private String voteVSInfoURL;
     private String eventCACertificateURL;
     private String subject;
     private String content;
@@ -194,10 +193,6 @@ public class EventVSDto {
         return publishRequestURL;
     }
 
-    public String getVoteVSInfoURL() {
-        return voteVSInfoURL;
-    }
-
     public String getEventCACertificateURL() {
         return eventCACertificateURL;
     }
@@ -270,9 +265,6 @@ public class EventVSDto {
         this.publishRequestURL = publishRequestURL;
     }
 
-    public void setVoteVSInfoURL(String voteVSInfoURL) {
-        this.voteVSInfoURL = voteVSInfoURL;
-    }
 
     public void setEventCACertificateURL(String eventCACertificateURL) {
         this.eventCACertificateURL = eventCACertificateURL;

@@ -65,8 +65,6 @@ public class ActorVS extends EntityVS implements Serializable {
     @Transient private Set<TrustAnchor> trustAnchors = null;
     @Transient private CertificateVS certificateVS;
     @Transient private EnvironmentVS environmentMode;
-    @Transient private String certificateURL;
-    @Transient private String voteVSInfoURL;
     @Transient private Date date;
     @Transient private ControlCenterVS controlCenter;
     @Transient private X509Certificate timeStampCert = null;
@@ -183,26 +181,12 @@ public class ActorVS extends EntityVS implements Serializable {
 
     public void setType(Type serverType) { this.serverType = serverType; }
 
-    public String getVoteVSInfoURL() {
-        return voteVSInfoURL;
-    }
-
-    public void setVoteVSInfoURL(String voteVSInfoURL) {
-        this.voteVSInfoURL = voteVSInfoURL;
-    }
-
     public EnvironmentVS getEnvironmentVS() {
         return environmentMode;
     }
 
     public void setEnvironmentVS(EnvironmentVS environmentMode) {
         this.environmentMode = environmentMode;
-    }
-
-    public String getCertificateURL() {return certificateURL;}
-
-    public void setCertificateURL(String certificateURL) {
-        this.certificateURL = certificateURL;
     }
 
     public X509Certificate getTimeStampCert() {

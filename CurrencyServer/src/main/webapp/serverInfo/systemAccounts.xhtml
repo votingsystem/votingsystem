@@ -6,10 +6,10 @@
         <link href="${elementURL}/serverInfo/system-accounts.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
-        <vs-innerpage-signal caption="${msg.systemAccountsLbl}"></vs-innerpage-signal>
+        <vs-innerpage-signal caption="${msg.systemBalanceLbl}"></vs-innerpage-signal>
         <div class="pageContentDiv">
             <div layout="" horizontal="" center="" center-justified="">
-                <system-accounts accountListDto="${accountListDto}"></system-accounts>
+                <system-accounts systemAccountsDto="${systemAccountsDto}"></system-accounts>
             </div>
         </div>
     </ui:define>
