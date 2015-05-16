@@ -1,18 +1,21 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<polymer-element name="reason-dialog" attributes="caption messageToUser">
+<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
+<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
+
+<dom-module name="reason-dialog" attributes="caption messageToUser">
     <template>
         <paper-dialog id="xDialog" autoCloseDisabled layered backdrop style="border: 1px solid #6c0404;">
             <div id="container" layout vertical>
-                <div layout horizontal center center-justified>
-                    <div hidden?="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                <div class="layout horizontal center center-justified">
+                    <div hidden="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">{{caption}}</div>
                     </div>
                     <div style="position: absolute; top: 0px; right: 0px;">
-                        <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                        <paper-icon-button on-click="close" icon="close" style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
                     </div>
                 </div>
-                <div hidden?="{{!messageToUser}}" class="center" style="color: #6c0404;">
+                <div hidden="{{!messageToUser}}" class="center" style="color: #6c0404;">
                     {{messageToUser}}
                 </div>
                 <div vertical layout style="margin:20px 0px 10px 0px;">
@@ -21,8 +24,8 @@
                 </div>
 
                 <div layout horizontal style="margin:10px 20px 0px 0px; margin:10px;">
-                    <div flex></div>
-                    <button on-click="{{submitForm}}">
+                    <div class="flex"></div>
+                    <button on-click="submitForm">
                         <i class="fa fa-check" style="color: #388746;"></i> ${msg.acceptLbl}
                     </button>
                 </div>
@@ -30,7 +33,8 @@
         </paper-dialog>
     </template>
 <script>
-    Polymer('reason-dialog', {
+    Polymer({
+        is:'reason-dialog',
         ready: function() {
             this.opened = false
         },
@@ -48,4 +52,4 @@
         }
     });
 </script>
-</polymer-element>
+</dom-module>

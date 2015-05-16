@@ -1,8 +1,8 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../core-icon/core-icon.html">
-<link rel="import" href="../vs-i18n/vs-i18n.html">
+<link rel="import" href="../vs-i18n/v2s-i18n.html">
 
-<polymer-element name="vs-user-box" attributes="boxCaption multiSelection">
+<dom-module name="vs-user-box" attributes="boxCaption multiSelection">
     <template>
         <style>
             .receptorsBox {
@@ -18,13 +18,13 @@
             }
         </style>
         <vs-i18n id="i18nVS"></vs-i18n>
-        <div hidden?="{{uservsList.length == 0}}" layout vertical style="border: 1px solid #ccc;padding:0px 0px 0px 10px;">
+        <div hidden="{{uservsList.length == 0}}" layout vertical style="border: 1px solid #ccc;padding:0px 0px 0px 10px;">
             <fieldset class="receptorsBox">
                 <legend style="margin:5px 0px 0px 0px;">{{boxCaption}}</legend>
                 <template repeat="{{uservs in uservsList}}">
                     <div layout horizontal style="padding: 0px 10px 0px 10px;">
-                        <core-icon-button icon="close" style="fill:#6c0404;" on-tap="{{removeUser}}"></core-icon-button>
-                        <div flex layout vertical center-justified style='font-size:1em;padding:0px 0 0 0px;vertical-align:middle;'>
+                        <paper-icon-button icon="close" style="fill:#6c0404;" on-tap="removeUser"></paper-icon-button>
+                        <div class="flex" layout vertical center-justified style='font-size:1em;padding:0px 0 0 0px;vertical-align:middle;'>
                             {{(uservs.firstName != null && "" != uservs.firstName) ? uservs.firstName + " " + uservs.lastName:uservs.name}}
                         </div>
                     </div>
@@ -33,7 +33,8 @@
         </div>
     </template>
     <script>
-        Polymer('vs-user-box', {
+        Polymer({
+            is:'vs-user-box',
             publish: {
                 uservsList: {value: []}
             },
@@ -58,7 +59,7 @@
                 return this.uservsList
             },
             removeUser:function(e) {
-                var userToDelete = e.target.templateInstance.model.uservs
+                var userToDelete = e.model.item
                 for(userIdx in this.uservsList) {
                     if(userToDelete.id == this.uservsList[userIdx].id) {
                         this.uservsList.splice(userIdx, 1)
@@ -69,4 +70,4 @@
                 this.uservsList = []
             }
         });</script>
-</polymer-element>
+</dom-module>

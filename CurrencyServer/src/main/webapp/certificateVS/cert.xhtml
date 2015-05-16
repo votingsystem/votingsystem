@@ -22,30 +22,27 @@
         </div>
     </div>
 
-    <div style="position: absolute; width: 100%; top:0px;left:0px;visibility:hidden">
-        <div layout="" horizontal="" center="" center-justified="" style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
-            <reason-dialog id="reasonDialog" caption="${msg.cancelCertFormCaption}" opened="false" isMenuAdmin="true"></reason-dialog>
-        </div>
-    </div>
-        <script>
-            document.addEventListener('polymer-ready', function() {
-                document.querySelector("#reasonDialog").addEventListener('on-submit', function (e) {
-                    var operationVS = new OperationVS(Operation.CERT_EDIT)
-                    operationVS.serviceURL = "${restURL}/certificateVS/editCert"
-                    operationVS.signedMessageSubject = "${msg.cancelCertMessageSubject}"
-                    var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
-                        changeCertToState:"${CertificateVS.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
-                    operationVS.jsonStr = JSON.stringify(signedContent)
-                    operationVS.setCallback(function(appMessage) {
-                        document.querySelector("#certData").url = "${restURL}/certificateVS/cert/" + certMap.serialNumber + "?menu=" + menuType
-                    })
-                    VotingSystemClient.setMessage(operationVS);
-                })
-            });
+    <reason-dialog id="reasonDialog" caption="${msg.cancelCertFormCaption}" opened="false" isMenuAdmin="true"></reason-dialog>
 
-            <c:if test="#{'OK'.equals(certState)}">
-            document.querySelector('#cancelCertButton').style.display = "none"
-            </c:if>
-        </script>
+    <script>
+        document.addEventListener('WebComponentsReady', function() {
+            document.querySelector("#reasonDialog").addEventListener('on-submit', function (e) {
+                var operationVS = new OperationVS(Operation.CERT_EDIT)
+                operationVS.serviceURL = "${restURL}/certificateVS/editCert"
+                operationVS.signedMessageSubject = "${msg.cancelCertMessageSubject}"
+                var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
+                    changeCertToState:"${CertificateVS.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
+                operationVS.jsonStr = JSON.stringify(signedContent)
+                operationVS.setCallback(function(appMessage) {
+                    document.querySelector("#certData").url = "${restURL}/certificateVS/cert/" + certMap.serialNumber + "?menu=" + menuType
+                })
+                VotingSystemClient.setMessage(operationVS);
+            })
+        });
+
+        <c:if test="#{'OK'.equals(certState)}">
+        document.querySelector('#cancelCertButton').style.display = "none"
+        </c:if>
+    </script>
     </ui:define>
 </ui:composition>

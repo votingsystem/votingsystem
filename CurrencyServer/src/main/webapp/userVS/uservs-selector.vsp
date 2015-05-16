@@ -1,10 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 <link href="${resourceURL}/core-localstorage/core-localstorage.html" rel="import"/>
 
-<polymer-element name="uservs-selector" attributes="url contactSelector groupVSId">
+<dom-module name="uservs-selector" attributes="url contactSelector groupVSId">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -17,48 +15,48 @@
             .nif {font-size: 0.7em; color:#888;margin:5px 0 0 0; }
             .name {color: #000; font-size: 0.9em;}
         </style>
-        <core-ajax id="ajax" url="{{url}}" response="{{responseData}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
+        <iron-ajax id="ajax" url="{{url}}" last-response="{{responseData}}" handleAs="json" method="get" contentType="application/json"></iron-ajax>
         <div vertical layout center>
-            <div hidden?="{{!modeSearch}}" horizontal layout style="width: 100%;">
-                <div layout horizontal center center-justified flex style="margin:0px auto 0px auto;">
+            <div hidden="{{!modeSearch}}" class="horizontal layout" style="width: 100%;">
+                <div class="layout horizontal center center-justified flex" style="margin:0px auto 0px auto;">
                     <input value="{{textToSearch}}" type="text" style="width:200px;" class="form-control"
                            placeholder="${msg.userSearchLbl}" on-keypress="{{searchInputKeyPress}}">
                 </div>
-                <div hidden?="{{!contactSelector}}">
-                    <button on-click="{{toggleContactsView}}" style="font-size: 1.1em;margin: 0px 10px 0px 5px;" data-button="contacts">
+                <div hidden="{{!contactSelector}}">
+                    <button on-click="toggleContactsView" style="font-size: 1.1em;margin: 0px 10px 0px 5px;" data-button="contacts">
                         <i class="fa fa-users"></i> ${msg.contactsLbl}
                     </button>
                 </div>
             </div>
-            <div hidden?="{{modeSearch}}" horizontal layout center center-justified style="width: 100%;">
-                <div flex style="font-size: 1.5em; font-weight: bold; color: #6c0404; text-align: center;">${msg.storeContactsLbl}</div>
+            <div hidden="{{modeSearch}}" class="horizontal layout center center-justified" style="width: 100%;">
+                <div class="flex" style="font-size: 1.5em; font-weight: bold; color: #6c0404; text-align: center;">${msg.storeContactsLbl}</div>
                 <div>
-                    <button on-click="{{toggleContactsView}}" style="font-size: 1.1em;margin:10px 0px 10px 10px; display: block;" data-button="userSearch">
+                    <button on-click="toggleContactsView" style="font-size: 1.1em;margin:10px 0px 10px 10px; display: block;" data-button="userSearch">
                         <i class="fa fa-search"></i> ${msg.searchLbl}
                     </button>
                 </div>
             </div>
-            <div horizontal layout wrap around-justified >
+            <div class="horizontal layout wrap around-justified">
                 <template repeat="{{uservs in resultList}}">
                     <div class="card" style="display: block;">
-                        <div horizontal layout on-click="{{showUserDetails}}">
-                            <div layout flex vertical center-justified>
+                        <div class="horizontal layout" on-click="showUserDetails">
+                            <div class="layout flex vertical center-justified">
                                 <div class="name">{{uservs.name}}</div>
                                 <div class="name" style="margin: 5px 0 0 0;">{{uservs.lastName}}</div>
                             </div>
                             <div>
-                                <div hidden?="{{isContactButtonHidden(uservs)}}">
-                                    <button on-click="{{toggleContact}}" style="font-size: 0.7em; margin:0 0 0 0;">
+                                <div hidden="{{isContactButtonHidden(uservs)}}">
+                                    <button on-click="toggleContact" style="font-size: 0.7em; margin:0 0 0 0;">
                                         {{modeSearch? '${msg.addContactLbl}':'${msg.removeContactLbl}'}}
                                     </button>
                                 </div>
-                                <div flex horizontal layout center center-justified class="nif">{{uservs.nif}}</div>
+                                <div class="nif flex horizontal layout center center-justified">{{uservs.nif}}</div>
                             </div>
                         </div>
                     </div>
                 </template>
             </div>
-            <div hidden?="{{responseData.resultList.length !== 0}}"  class="center" id="emptySearchMsg" style="margin:30px 0 30px 0; font-weight: bold;">
+            <div hidden="{{responseData.resultList.length !== 0}}"  class="center" id="emptySearchMsg" style="margin:30px 0 30px 0; font-weight: bold;">
                 ${msg.emptyUserSearchResultMsg}
             </div>
             <core-localstorage id="localstorage" name="contacts-localstorage" value="{{contacts}}"
@@ -66,7 +64,8 @@
         </div>
     </template>
     <script>
-        Polymer('uservs-selector', {
+        Polymer({
+            is:'uservs-selector',
             contactsArray:[],
             publish: {
                 contactSelector: true
@@ -91,8 +90,8 @@
             },
             showUserDetails:function(e) {
                 document.querySelector("#voting_system_page").dispatchEvent(
-                        new CustomEvent('user-clicked', { 'detail': e.target.templateInstance.model.uservs }));
-                this.fire('core-signal', {name: "user-clicked", data: e.target.templateInstance.model.uservs});
+                        new CustomEvent('user-clicked', { 'detail': e.model.item }));
+                this.fire('iron-signal', {name: "user-clicked", data: e.model.item});
             },
             reset: function() {
                 this.resultList = []
@@ -105,7 +104,7 @@
                 this.contacts = JSON.stringify(this.contactsArray)
             },
             toggleContact: function(event, detail, target) {
-                var uservs = target.templateInstance.model.uservs
+                var uservs = e.model.item
                 if(this.modeSearch == true) {
                     console.log("toggleContact - addContact")
                     if(!this.isContact(uservs)) this.contactsArray.push(uservs)
@@ -143,7 +142,7 @@
                 if(this.groupVSId) this.url = "${restURL}/groupVS/id/" + this.groupVSId + "/searchUsers?searchText=" + this.textToSearch
                 else this.url = "${restURL}/userVS/search?searchText=" + this.textToSearch
                 console.log(this.tagName + " - processSearch - url: " + this.url)
-                this.$.ajax.go()
+                this.$.ajax.generateRequest()
             },
             toggleContactsView:function(event, detail, target) {
                 if("contacts" === target.attributes['data-button'].value) this.modeSearch = false
@@ -151,4 +150,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

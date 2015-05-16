@@ -4,14 +4,13 @@
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="head">
         <title>ShopExampleController</title>
-        <script src="${resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
-        <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-        <link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
+        <script src="${resourceURL}/webcomponentsjs/webcomponents-lite.min.js" type="text/javascript"></script>
+        <link href="${resourceURL}/iron-ajax/iron-ajax.html" rel="import"/>
     </ui:define>
     <ui:define name="content">
         <template is="auto-binding">
-            <div vertical="" layout="">
-                <div horizontal="" layout="">
+            <div>
+                <div>
                     <h3>
                         ${msg.transactionValueLbl}:
                         ${transactionRequest.getAmount()} ${transactionRequest.getCurrencyCode()} - ${transactionRequest.getTagName()}
@@ -19,8 +18,8 @@
                 </div>
                 ${msg.paymentOptionsLbl}: ${transactionRequest.getPaymentOptions}
                 <img src="http://localhost:8080/CurrencyServer/QR?cht=qr&amp;chs=250x250&amp;chl=${paymentInfoServiceURL}" alt="read it with your mobile" height="250" width="250"/>
-                <core-ajax auto="" response="{{data}}" on-core-response="{{ajaxHandler}}" handleAs="json"
-                           url="${restURL}/shopExample/listenTransactionChanges/${shopSessionID}"></core-ajax>
+                <iron-ajax auto="" last-response="{{data}}" on-iron-response="{{ajaxHandler}}" handleAs="json"
+                           url="${restURL}/shopExample/listenTransactionChanges/${shopSessionID}"></iron-ajax>
                 <h3>{{data.message}}</h3>
             </div>
         </template>

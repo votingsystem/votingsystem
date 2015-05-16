@@ -1,8 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-
-<polymer-element name="transactionvs-table" attributes="url userNif isUserVSTable transactionsDto">
+<dom-module name="transactionvs-table" attributes="url userNif isUserVSTable transactionsDto">
 <template>
     <style>
     .rowvs { border-bottom: 1px solid #ccc; padding: 10px 0px 10px 0px; cursor: pointer;
@@ -10,8 +8,8 @@
     .rowvs div { text-align:center; }
     .expenseRow { background: #fee; }
     </style>
-    <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
-               contentType="application/json"  on-core-complete="{{ajaxComplete}}"></core-ajax>
+    <iron-ajax id="ajax" auto url="{{url}}" last-response="{{responseData}}" handleAs="json" method="get"
+               contentType="application/json"  on-iron-complete="{{ajaxComplete}}"></iron-ajax>
     <!--JavaFX Webkit gives problems with tables and templates -->
     <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
         <div layout horizontal center center-justified class="tableHeadervs">
@@ -20,11 +18,11 @@
             <div style="width:140px;">${msg.tagLbl}</div>
             <div style="width:110px;">${msg.amountLbl}</div>
             <div style="width:140px;">${msg.dateLbl}</div>
-            <div flex style="width:240px;">${msg.subjectLbl}</div>
+            <div class="flex" style="width:240px;">${msg.subjectLbl}</div>
         </div>
         <div>
             <template repeat="{{transaction in resultList}}">
-                <div layout horizontal center center justified on-click="{{showTransactionDetails}}" class="rowvs {{getClass(transaction)}}">
+                <div layout horizontal center center justified on-click="showTransactionDetails" class="rowvs {{getClass(transaction)}}">
                     <div style="width:80px;">{{transaction | timeLimitedDescription}}</div>
                     <div style="width: 210px;">
                         <a> {{transaction| transactionDescription}}</a>
@@ -32,14 +30,15 @@
                     <div style="width:140px;">{{transaction.tags[0]}}</div>
                     <div style="width:110px;">{{amount(transaction)}}</div>
                     <div style="width:140px;">{{transaction.dateCreated}}</div>
-                    <div flex style="width:240px;">{{transaction.subject}}</div>
+                    <div class="flex" style="width:240px;">{{transaction.subject}}</div>
                 </div>
             </template>
         </div>
     </div>
 </template>
 <script>
-    Polymer('transactionvs-table', {
+    Polymer({
+        is:'transactionvs-table',
         publish: {
             transactionsDto: {value: {}}
         },
@@ -76,7 +75,7 @@
             return result? result.toUpperCase() + transactionTypeLbl : transactionTypeLbl
         },
         showTransactionDetails: function(e) {
-            loadURL_VS(e.target.templateInstance.model.transaction.messageSMIMEURL, "_blank")
+            loadURL_VS(e.model.item.messageSMIMEURL, "_blank")
         },
         newRecordChanged: function(e) {
             console.log("newRecordChanged: " + this.newRecord)
@@ -101,4 +100,4 @@
             this.transactionsDto.resultList.push(transactionvs)
         }
     });</script>
-</polymer-element>
+</dom-module>

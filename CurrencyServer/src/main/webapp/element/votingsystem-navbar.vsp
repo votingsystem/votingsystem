@@ -1,40 +1,29 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/core-ajax/core-xhr.html" rel="import"/>
-<link href="${resourceURL}/font-roboto/roboto.html" rel="import"/>
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
-<link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
-<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 <link href="${resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
-<link href="${resourceURL}/core-drawer-panel/core-drawer-panel.html" rel="import"/>
-<link href="${resourceURL}/core-header-panel/core-header-panel.html" rel="import"/>
-<link href="${resourceURL}/core-toolbar/core-toolbar.html" rel="import"/>
-<link href="${resourceURL}/core-menu/core-menu.html" rel="import"/>
-<link href="${resourceURL}/core-item/core-item.html" rel="import"/>
-<link href="${resourceURL}/core-scaffold/core-scaffold.html" rel="import"/>
+<link href="${resourceURL}/paper-header-panel/paper-header-panel.html" rel="import"/>
+<link href="${resourceURL}/paper-menu/paper-menu.html" rel="import"/>
+<link href="${resourceURL}/paper-drawer-panel/paper-drawer-panel.html" rel="import"/>
 <link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
-<link href="${resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
-<link href="${resourceURL}/core-menu-button/core-menu-button.html" rel="import"/>
-<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
-<link href="${resourceURL}/core-dropdown/core-dropdown.html" rel="import"/>
-<link href="${resourceURL}/vs-navbar/vs-navbar.html" rel="import"/>
+<link href="${resourceURL}/iron-selector/iron-selector.html" rel="import"/>
 
-<polymer-element name="votingsystem-navbar" attributes="url loading menu">
+
+<dom-module name="votingsystem-navbar">
+    <style>
+        .paperMenu { background: #ba0011; color:#ffffff;}
+    </style>
     <template>
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <!--<core-ajax id="ajax" auto on-core-response="{{ajaxResponse}}" on-core-error="{{ajaxError}}" handleAs="document"></core-ajax>-->
-        <core-xhr id="ajax" handleAs=""></core-xhr>
+        <iron-ajax id="ajax" on-response="ajaxResponse" on-iron-error="ajaxError" handle-as="document"></iron-ajax>
         <!-- put core signals names in lower case !!!-->
-        <core-signals on-core-signal-vs-innerpage="{{innerPageSignal}}" on-core-signal-vs-session-data="{{sessionDataSignal}}"
-                      on-core-signal-vs-websocket-message="{{websocketSignal}}"></core-signals>
-        <vs-navbar id="_navbar">
-            <core-header-panel mode="seamed" id="core_header_panel" navigation flex class="vs-navbar">
-                <core-toolbar id="core_toolbar" style="background-color: #ba0011;">
-                </core-toolbar>
-                <core-menu valueattr="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
-                    <core-selector id="coreSelector" selected="{{coreSelectorValue}}" valueattr="data-href" on-core-select="{{drawerItemSelected}}">
+        <iron-signals on-iron-signal-vs-innerpage="{{innerPageSignal}}" on-iron-signal-vs-session-data="{{sessionDataSignal}}"
+                      on-iron-signal-vs-websocket-message="{{websocketSignal}}"></iron-signals>
+        <paper-drawer-panel id="paperDrawerPanel">
+            <div drawer>
+                <paper-menu attr-for-selected="label" id="core_menu" class="paperMenu">
+                    <iron-selector id="coreSelector" selected="{{coreSelectorValue}}" attr-for-selected="data-href" on-iron-select="drawerItemSelected">
                         <paper-item data-href="${restURL}/app/userVSDashboard">
                             <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
                         </paper-item>
@@ -74,31 +63,52 @@
                         <paper-item data-href="${restURL}/app/contact" icon="question-answer">
                             <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
                         </paper-item>
-                    </core-selector>
-                </core-menu>
-            </core-header-panel>
-            <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center;" tool>{{appTitle}}</div>
-            <div id="contentDiv" layout vertical start-justified></div>
+                    </iron-selector>
+                </paper-menu>
+            </div>
+            <div main>
+                <paper-header-panel mode="seamed" id="core_header_panel" class="navigation flex vs-navbar">
+                    <div class="horizontal layout">
+                        <div>
+                            <paper-icon-button id="menuButton" icon="menu" on-tap="togglePanel" paper-drawer-toggle
+                                               class="vs-navbar-icon"></paper-icon-button>
+                        </div>
+                        <div id="appTitle" style="font-size:1.8em; font-weight:bold; color: #f9f9f9;" class="flex horizontal layout center center-justified">
+                            <span>{{appTitle}}</span>
+                        </div>
+                        <div>
+                            <paper-icon-button id="searchButton" icon="search" on-tap="toogleSearchPanel"
+                                               class="vs-navbar-icon"></paper-icon-button>
+                        </div>
+                    </div>
+                </paper-header-panel>
+            </div>
+        </paper-drawer-panel>
+        <div id="contentDiv" style="margin: 60px 0 0 0;">
             <content></content>
-        </vs-navbar>
-        <div hidden?="{{!loading}}" style="width: 30px;margin: 100px auto 0px auto;">
+        </div>
+        <div hidden="{{!loading}}" style="width: 30px;margin: 100px auto 0px auto;">
             <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
         </div>
     </template>
     <script>
-        Polymer('votingsystem-navbar', {
-            appTitle:"${msg.appTitle}",
-            url:'',
-            ajaxOptions:{method:'get', responseType:'document'},
+        Polymer({
+            is:'votingsystem-navbar',
+            properties: {
+                url:{type:String, value:null}
+            },
             ready: function() {
-                this.$._navbar.searchVisible(false)
-                this.fire('nav-bar-ready');
+                this.menu = menuType
+                this.ajaxOptions = {method:'get', responseType:'document'}
+                this.appTitle = "${msg.appTitle}"
                 window.addEventListener('popstate', function(event) {
-                    navBar.url = document.location.href
+                    this.url = document.location.href
                 }.bind(this));
                 this.isClientToolConnected = window['isClientToolConnected']
-                console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected)
-                //window.addEventListener("popstate", function(e) {  });
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected', function() {
+                    this.isClientToolConnected = true
+                }.bind(this))
+                console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected + " - " + this.appTitle )
                 this.loading = false
                 document.querySelector("#navBar").style.display = 'block'
                 document.querySelector("#loadingDiv").style.display = 'none'
@@ -110,13 +120,7 @@
                 console.log("sessionDataSignal")
             },
             websocketSignal:function(e, detail, sender) {
-                if("OPEN" === detail.socketStatus && "INIT_SIGNED_SESSION" === detail.operation) {
-                    this.$._navbar.updateSession(detail.userVS, null)
-                } else if("CLOSED" === detail.socketStatus) {
-                    this.$._navbar.updateSession(null, null)
-                } else console.log("userVS NOT updated")
-                if(detail.messageVSList && detail.messageVSList.length > 0) alert("You have pending messages")
-                //{"locale":"es","operation":"INIT_SIGNED_SESSION","sessionId":"2","userId":2,"messageVSList":[],"state":"PENDING","status":200,"socketStatus":"OPEN"}
+                console.log("websocketSignal")
             },
             innerPageSignal:function(e, detail, sender) {
                 console.log("innerPageSignal - caption:" + detail.caption + " - url: " + detail.url)
@@ -125,7 +129,7 @@
                 if('admin' === menuType) sufix = ' - ${msg.adminLbl}'
                 if('superuser' === menuType) sufix = ' - ${msg.superUserLbl}'
                 if(detail.caption) this.appTitle = detail.caption + sufix
-                if(detail.searchVisible) this.$._navbar.searchVisible(detail.searchVisible)
+                if(detail.searchVisible) console.log("TODO - search visible")
                 if(detail.url) this.loadURL(detail.url)
                 document.dispatchEvent( new Event('innerPageSignal'));
             },
@@ -135,33 +139,26 @@
                 history.pushState(null, null, urlToLoad);
                 var newURL = updateMenuLink(urlToLoad, "mode=innerPage")
                 console.log(this.tagName + " - loadURL: " + newURL)
-                this.ajaxOptions.url = newURL
-                this.ajaxOptions.callback = this.ajaxResponse.bind(this)
-                this.$.ajax.request(this.ajaxOptions)
-                /*if(this.$.ajax.url == newURL)  this.$.ajax.go()
-                 else this.$.ajax.url = newURL*/
+                this.$.ajax.url = newURL
+                this.$.ajax.generateRequest()
             },
             drawerItemSelected: function(e) {
-                if(e.detail.isSelected) {
-                    this.fire('item-selected', this.coreSelectorValue)
-                    if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
-                        window.location.href = window.location.href.replace("menu=superuser", "menu=admin");
-                    } else if('new_groupvs' === this.coreSelectorValue) {
-                        VotingSystemClient.setMessage(new OperationVS(Operation.CURRENCY_GROUP_NEW))
-                    } else this.loadURL(this.coreSelectorValue)
-                    this.coreSelectorValue = null
-                }
+                if('new_groupvs' === this.coreSelectorValue) {
+                    VotingSystemClient.setMessage(new OperationVS(Operation.CURRENCY_GROUP_NEW))
+                } else this.loadURL(this.coreSelectorValue)
+                this.coreSelectorValue = null
             },
             setTitle: function(appTitle) {
                 this.appTitle = appTitle
             },
-            ajaxResponse: function(ajaxDocument, xhr) {
-                console.log("ajaxResponse - status: " + xhr.status)
-                if(400 === xhr.status || 404 === xhr.status) {
+            ajaxResponse: function(e) {
+                console.log("ajaxResponse - status: " + e.detail.xhr.status)
+                if(400 === e.detail.xhr.status || 404 === e.detail.xhr.status) {
                     this.loading = false
                     alert(ajaxDocument.body.innerHTML)
                     return
                 }
+                var ajaxDocument = e.detail.xhr.responseXML
                 if(!ajaxDocument) return
                 var links = ajaxDocument.querySelectorAll('link')
                 var numImports = 0
@@ -182,7 +179,6 @@
                     console.log("script.src: " + script.src)
                     document.head.appendChild(script);
                 }
-                this.innerHTML = ""
                 this.$.contentDiv.innerHTML = ajaxDocument.body.innerHTML
                 updateLinksVS(document.querySelectorAll("#navBar a"))
             },
@@ -196,4 +192,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

@@ -1,28 +1,25 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 <link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
 <link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
 <link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
 <link href="${elementURL}/groupVS/groupvs-details.vsp" rel="import"/>
 
-
-<polymer-element name="groupvs-list" attributes="url state">
+<dom-module name="groupvs-list" attributes="url state">
     <template>
-        <style no-shim>
+        <style>
         vs-html-echo /deep/ p {margin:0px 0px 0px 0px;}
         </style>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <link href="${contextURL}/resources/css/groupvs.css" media="all" rel="stylesheet" />
-        <core-ajax id="ajax" url="{{url}}" handleAs="json" contentType="application/json" on-core-complete="{{ajaxComplete}}"></core-ajax>
-        <core-signals on-core-signal-groupvs-details-closed="{{closeGroupDetails}}"></core-signals>
-        <core-animated-pages id="pages" hidden?="{{loading}}" flex selected="{{page}}" transitions="cross-fade-all"
-                             on-core-animated-pages-transition-end="{{transitionend}}">
+        <iron-ajax id="ajax" url="{{url}}" handleAs="json" contentType="application/json" on-iron-complete="{{ajaxComplete}}"></iron-ajax>
+        <iron-signals on-iron-signal-groupvs-details-closed="{{closeGroupDetails}}"></iron-signals>
+        <core-animated-pages id="pages" hidden="{{loading}}" flex selected="{{page}}" transitions="cross-fade-all"
+                             on-iron-animated-pages-transition-end="{{transitionend}}">
             <section id="page1">
                 <div cross-fade>
-                    <div layout horizontal center center-justified>
+                    <div class="layout horizontal center center-justified">
                         <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
                                 on-change="{{groupvsTypeSelect}}" class="form-control">
                             <option value="ACTIVE"  style="color:#388746;"> - ${msg.selectActiveGroupvsLbl} - </option>
@@ -30,19 +27,19 @@
                             <option value="CANCELED" style="color:#cc1606;"> - ${msg.selectClosedGroupvsLbl} - </option>
                         </select>
                     </div>
-                    <div layout flex horizontal wrap around-justified>
+                    <div class="layout flex horizontal wrap around-justified">
                         <template repeat="{{groupvs in groupvsList}}">
-                            <div on-tap="{{showGroupDetails}}" class='groupvsDiv item {{ groupvsClass(groupvs.state)}}'
+                            <div on-tap="showGroupDetails" class='groupvsDiv item {{ groupvsClass(groupvs.state)}}'
                                  style="height: 65px;" cross-fade>
                                 <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
-                                <div hidden?="{{groupvs.state !== 'CANCELED'}}" style="position: relative;">
+                                <div hidden="{{groupvs.state !== 'CANCELED'}}" style="position: relative;">
                                     <div class='groupvsMessageCancelled'>${msg.groupvsCancelledLbl}</div>
                                 </div>
                                 <div class='numTotalUsersDiv text-right'>{{groupvs.numActiveUsers}} ${msg.usersLbl}</div>
-                                <div horizontal layout>
+                                <div class="horizontal layout">
                                     <div class='groupvsRepresentativeDiv text-right'>{{groupvs | getRepresentativeName}}</div>
-                                    <div flex></div>
-                                    <div hidden?="{{!groupvs.tags || groupvs.tags.length == 0}}" layout horizontal center center-justified style="margin: 5px 5px 2px 0;">
+                                    <div class="flex"></div>
+                                    <div hidden="{{!groupvs.tags || groupvs.tags.length == 0}}" layout horizontal center center-justified style="margin: 5px 5px 2px 0;">
                                         <template repeat="{{tag in groupvs.tags}}">
                                             <a class="btn btn-default" style="font-size: 0.6em;margin:0px 5px 0px 0px;padding:3px;">
                                                 <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i>{{tag.name}}</a>
@@ -68,7 +65,8 @@
 
     </template>
     <script>
-        Polymer('groupvs-list', {
+        Polymer({
+            is:'groupvs-list',
             publish: {
                 groupVSListMap: {value: {}}
             },
@@ -98,7 +96,7 @@
                 history.pushState(null, null, targetURL);
                 this.$.ajax.url = targetURL
                 console.log(this.tagName + "targetURL: " + targetURL)
-                this.$.ajax.go()
+                this.$.ajax.generateRequest()
             },
             closeGroupDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeGroupDetails")
@@ -106,7 +104,7 @@
             },
             showGroupDetails :  function(e) {
                 console.log(this.tagName + " - showGroupDetails")
-                this.$.groupDetails.groupvs = e.target.templateInstance.model.groupvs;
+                this.$.groupDetails.groupvs = e.model.item;
                 this.page = 1;
             },
             getRepresentativeName:function(groupvs) {
@@ -125,7 +123,7 @@
                     targetURL = "${restURL}/groupVS?menu=" + menuType + "&state=" + optionSelected
                     history.pushState(null, null, targetURL);
                     this.$.ajax.url = targetURL
-                    this.$.ajax.go()
+                    this.$.ajax.generateRequest()
                     console.log(this.tagName + " - groupvsTypeSelect: " + targetURL)
                 }
             },
@@ -135,4 +133,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

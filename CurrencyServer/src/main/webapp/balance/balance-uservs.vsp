@@ -1,8 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 <link href="${resourceURL}/core-icon/core-icon.html" rel="import"/>
 <link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 <link href="${resourceURL}/paper-progress/paper-progress.html" rel="import"/>
@@ -11,19 +9,18 @@
 <link href="${resourceURL}/core-media-query/core-media-query.html" rel="import"/>
 <link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
 
-
-<polymer-element name="balance-uservs" attributes="url balance">
+<dom-module name="balance-uservs" attributes="url balance">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop>
             <div style="position: absolute; top: 0px; right: 0px;">
-                <core-icon-button on-click="{{closeTransactionViewer}}" icon="close"
-                                  style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                <paper-icon-button on-click="closeTransactionViewer" icon="close"
+                                  style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
             </div>
             <transactionvs-data id="transactionViewer"></transactionvs-data>
         </paper-dialog>
-        <style no-shim>
+        <style>
         .messageToUser {
             font-weight: bold; margin:10px auto 10px auto; border: 1px solid #ccc; background: #f9f9f9;
             padding:10px 20px 10px 20px;
@@ -33,17 +30,17 @@
         </style>
         <core-media-query query="max-width: 1200px" queryMatches="{{smallScreen}}"></core-media-query>
         <div layout vertical style="padding: 0 20px;">
-            <div horizontal layout center center-justified>
-                <div flex></div>
-                <div id="caption" class="pageTitle" on-click="{{goToUserVSPage}}">{{caption}} - {{userVSName}}</div>
-                <div flex style="font-size: 0.7em; color: #888; font-weight: normal; text-align: right;">
+            <div class="horizontal layout center center-justified">
+                <div class="flex"></div>
+                <div id="caption" class="pageTitle" on-click="goToUserVSPage">{{caption}} - {{userVSName}}</div>
+                <div class="flex" style="font-size: 0.7em; color: #888; font-weight: normal; text-align: right;">
                     {{description}}
                 </div>
             </div>
-            <div horizontal layout center center-justified style="text-align: center;font-weight: bold; color: #888; margin:0 0 8px 0;">
+            <div class="horizontal layout center center-justified" style="text-align: center;font-weight: bold; color: #888; margin:0 0 8px 0;">
                 <div>{{getDate(balance.timePeriod.dateFrom)}} - {{getDate(balance.timePeriod.dateTo)}} </div>
             </div>
-            <div hidden?="{{!status}}" class="messageToUser" style="color:{{getColor(message.status)}};">
+            <div hidden="{{!status}}" class="messageToUser" style="color:{{getColor(message.status)}};">
                 <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                     <div id="messageToUser">{{message}}</div>
                     <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{getColor(message.status)}};"></core-icon></div>
@@ -55,14 +52,14 @@
                             ${msg.cashLbl} - ${msg.currencyLbl} {{currency}}
                         </div>
                         <div>
-                            <div horizontal layout>
+                            <div class="horizontal layout">
                                 <template repeat="{{tag in getMapKeys(balance.balancesCash[currency])}}">
                                     <div style="margin:0 0 0 80px;">
                                         <div>{{tag | tagDescription}}: {{balance.balancesCash[currency][tag] | formatAmount}}</div>
                                         <div>
                                             <template if="{{isTimeLimited(currency, tag)}}">
                                                 <core-tooltip position="bottom" style="max-width: 100px;">
-                                                    <div horizontal layout center center-justified>
+                                                    <div class="horizontal layout center center-justified">
                                                         <paper-progress value="{{getPercentageForTagMsg(currency, tag)}}" style="width: 100px;"></paper-progress>
                                                         <i class="fa fa-clock-o" style="color:#6c0404;font-size: 0.8em; margin:0 0 0 10px;"></i>
                                                     </div>
@@ -82,22 +79,22 @@
                     </template>
                 </div>
             </div>
-            <div hidden?="{{!smallScreen}}">
+            <div hidden="{{!smallScreen}}">
                 <paper-tabs style="margin:0px auto 0px auto; cursor: pointer;" class="transparent-teal center"
-                            valueattr="name" selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
+                            attr-for-selected="name" selected="{{selectedTab}}"  on-iron-select="tabSelected" noink>
                     <paper-tab name="incomesTab" style="width: 400px">${msg.incomesLbl}</paper-tab>
                     <paper-tab name="expensesTab">${msg.expensesLbl}</paper-tab>
                 </paper-tabs>
             </div>
-            <div layout horizontal>
-                <div hidden?="{{smallScreen?(selectedTab !== 'incomesTab'):false}}" flex
+            <div class="layout horizontal">
+                <div hidden="{{smallScreen?(selectedTab !== 'incomesTab'):false}}" flex
                      style=" margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
                     <transactionvs-list-balance caption="${msg.incomesLbl}"
                             transactionList="{{balance.transactionToList}}"
                             balances="{{balance.balancesTo}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
                 </div>
-                <div hidden?="{{smallScreen}}" style="width: 1px; border-right: 2px solid  #6c0404; margin:0 10px 0 10px;"></div>
-                <div hidden?="{{smallScreen?(selectedTab !== 'expensesTab'):false}}" flex
+                <div hidden="{{smallScreen}}" style="width: 1px; border-right: 2px solid  #6c0404; margin:0 10px 0 10px;"></div>
+                <div hidden="{{smallScreen?(selectedTab !== 'expensesTab'):false}}" flex
                      style=" margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
                     <transactionvs-list-balance id="balanceFromItem"
                             transactionList="{{balance.transactionFromList}}" balances="{{balance.balancesFrom}}"
@@ -107,7 +104,8 @@
         </div>
     </template>
     <script>
-        Polymer('balance-uservs', {
+        Polymer({
+            is:'balance-uservs',
             url:null,
             caption:null,
             description:null,
@@ -211,4 +209,4 @@
         });
 
     </script>
-</polymer-element>
+</dom-module>

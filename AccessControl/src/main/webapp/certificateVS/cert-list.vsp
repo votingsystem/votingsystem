@@ -1,17 +1,13 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="org.votingsystem.model.CertificateVS" %>
 
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
 <link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
 <link href="${elementURL}/certificateVS/votingsystem-cert.vsp" rel="import"/>
 
-<polymer-element name="cert-list" attributes="url menuType">
+<dom-module name="cert-list">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <style no-shim>
-            .view { :host {position: relative;} }
+        <style>
             .certDiv {
                 width:540px;
                 height: 140px;
@@ -28,13 +24,13 @@
                 box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
             }
         </style>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
-        <core-signals on-core-signal-votingsystem-cert-closed="{{closeCertDetails}}"></core-signals>
-        <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
+        <iron-ajax id="ajax" auto url="{{url}}" last-response="{{responseData}}" handleAs="json" method="get" contentType="application/json"></iron-ajax>
+        <iron-signals on-iron-signal-votingsystem-cert-closed="{{closeCertDetails}}"></iron-signals>
+        <core-animated-pages id="pages" flex selected="{{page}}" on-iron-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all">
             <section id="page1">
                 <div cross-fade>
-                    <div layout horizontal center center-justified>
+                    <div class="layout horizontal center center-justified">
                         <select id="certTypeSelect" class="form-control"
                                 style="margin:0px auto 0px auto;color:black; max-width: 400px;" on-change="{{certTypeSelect}}">
                             <option value="&type=USER&state=OK"> - ${msg.certUserStateOKLbl} - </option>
@@ -46,9 +42,9 @@
 
                     <h3><div id="pageHeader" class="pageHeader text-center">${msg.trustedCertsPageTitle}</div></h3>
 
-                    <div flex horizontal wrap around-justified layout>
+                    <div class="flex horizontal wrap around-justified layout">
                         <template repeat="{{cert in responseData.certList}}">
-                            <div class="certDiv" style="" on-tap="{{showCert}}">
+                            <div class="certDiv" on-tap="showCert">
                                 <div>
                                     <div style="display: inline;">
                                         <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
@@ -84,7 +80,11 @@
         </core-animated-pages>
     </template>
     <script>
-        Polymer('cert-list', {
+        Polymer({
+            is: "cert-list",
+            properties: {
+                url:{type:String, value:null}
+            },
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.page = 0;
@@ -101,14 +101,14 @@
             },
             showCert :  function(e) {
                 console.log(this.tagName + " - showCertDetails")
-                this.$.certDetails.certvs = e.target.templateInstance.model.cert;
+                this.$.certDetails.certvs = e.model.item;
                 this.page = 1;
             },
             responseDataChanged:function() {
                 console.log(this.tagName + " - responseDataChanged")
-                if("${CertificateVS.Type.USER.toString()}" == this.responseData.type) {
+                if("USER" == this.responseData.type) {
                      this.$.pageHeader.innerHTML = "${msg.userCertsPageTitle}"
-                } else if("${CertificateVS.Type.CERTIFICATE_AUTHORITY.toString()}" == this.responseData.type) {
+                } else if("CERTIFICATE_AUTHORITY" == this.responseData.type) {
                     this.$.pageHeader.innerHTML = "${msg.trustedCertsPageTitle}"
                 } else this.$.pageHeader.innerHTML = this.responseData.type
 
@@ -125,7 +125,7 @@
                 else stateLbl = state
             },
             setPageHeader: function (urlParams) {
-                if(urlParams.indexOf("${CertificateVS.Type.USER}") > -1)
+                if(urlParams.indexOf("USER") > -1)
                     this.$.pageHeader.innerHTML = "${msg.userCertsPageTitle}"
                 else this.$.pageHeader.innerHTML = "${msg.trustedCertsPageTitle}"
             },
@@ -141,4 +141,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

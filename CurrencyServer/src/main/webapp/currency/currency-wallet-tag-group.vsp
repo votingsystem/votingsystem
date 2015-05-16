@@ -1,11 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
 <link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
 <link href="${resourceURL}/paper-progress/paper-progress.html" rel="import"/>
 
-<polymer-element name="currency-wallet-tag-group" attributes="tag, currencyArray">
+<dom-module name="currency-wallet-tag-group" attributes="tag, currencyArray">
     <template>
         <style>
             .tagHeader {font-size: 1.1em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;
@@ -33,7 +32,7 @@
             <div>
                 <template repeat="{{currency in currencyArray}}">
                     <core-tooltip position="top" noarrow="false">
-                        <div horizontal layout center center-justified class="currency" on-click="{{showCurrency}}">
+                        <div class="currency horizontal layout center center-justified" on-click="showCurrency">
                             <i class="fa {{currency.currencyCode | currencyIcon}}"></i>
                             {{currency.currencyValue}} {{currency.currencyCode}}
                             <template if="{{currency | isTimeLimited}}">
@@ -54,7 +53,8 @@
         </div>
     </template>
     <script>
-        Polymer('currency-wallet-tag-group', {
+        Polymer({
+            is:'currency-wallet-tag-group',
             //Info inside currency: currencyServerURL, currencyValue, currencyCode, tag, notBefore, notAfter, hashCertVS
             currencyMsgs:[],
             publish: {
@@ -120,7 +120,7 @@
             },
             showCurrency: function(e) {
                 var operationVS = new OperationVS(Operation.CURRENCY_OPEN)
-                operationVS.message = e.target.templateInstance.model.currency.object
+                operationVS.message = e.model.item.object
                 operationVS.setCallback(function(appMessage) {
                     console.log("showCurrency - message: " + appMessage);
                 }.bind(this))
@@ -128,6 +128,6 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>
 
 

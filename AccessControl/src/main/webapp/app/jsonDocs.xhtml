@@ -1,9 +1,7 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:h="http://java.sun.com/jsf/html"
-                xmlns:f="http://java.sun.com/jsf/core"
-                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
-                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+            xmlns:ui="http://java.sun.com/jsf/facelets"
+            template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
+            ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="title">${msg.electionSystemLbl}</ui:define>
     <ui:define name="head">
         <link href="${resourceURL}/jsoneditor/dist/jsoneditor.min.css" media="all" rel="stylesheet" />
@@ -11,18 +9,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
     </ui:define>
     <ui:define name="content">
-        <div layout="" flex="" horizontal="" wrap="" around-justified="">
-            <div layout="" vertical="">
-                <div layout="" horizontal="" center="" center-justified="">
-                    <paper-button raised="" onclick="validateCert()" style="margin: 0px 0px 0px 5px;">
-                        ${msg.validateCertLbl}
-                    </paper-button>
-                    ${msg.operationForAdminSystemLbl}
+        <div class="layout flex horizontal wrap around-justified">
+            <div>
+                <div class="layout flex horizontal center center-justified">
+                    <button onclick="validateCert()" style="margin: 0px 0px 0px 5px;">
+                        <span>${msg.validateCertLbl}</span>
+                    </button>
+                    <span>${msg.operationForAdminSystemLbl}</span>
                 </div>
                 <div id="validateCert" style="width: 500px; height: 300px;"></div>
             </div>
         </div>
-
         <script>
             var signedContent
 
@@ -50,6 +47,5 @@
                 VotingSystemClient.setMessage(operationVS);
             }
         </script>
-
     </ui:define>
 </ui:composition>

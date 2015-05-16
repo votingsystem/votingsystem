@@ -148,7 +148,7 @@ public class BrowserVSTabPane extends TabPane {
             new ChangeListener<Worker.State>() {
                 @Override public void changed(ObservableValue<? extends Worker.State> ov,
                                               Worker.State oldState, Worker.State newState) {
-                    log.info("newState: " + newState + " - " + webView.getEngine().getLocation());
+                    //log.info("newState: " + newState + " - " + webView.getEngine().getLocation());
                     switch (newState) {
                         case SCHEDULED:
                             toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIcons.COG));

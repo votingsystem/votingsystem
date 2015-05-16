@@ -1,10 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<polymer-element name="transactionvs-card">
+<dom-module name="transactionvs-card">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <style no-shim>
+        <style>
         .card {
             position: relative;
             display: inline-block;
@@ -25,21 +25,22 @@
         .timeInfo {color:#621; text-transform: uppercase; text-align: right; margin: 0 5px 0 0; font-size: 0.8em;}
         .expenseTrans { background: #fee; }
         </style>
-        <div vertical on-click="{{showTransactionDetails}}" class="card {{getClass(transaction)}}">
-            <div horizontal layout>
-                <div flex horizontal layout center-justified class="transactionDescription">{{transactionDescription(transaction)}}</div>
+        <div vertical on-click="showTransactionDetails" class="card {{getClass(transaction)}}">
+            <div class="horizontal layout">
+                <div class="flex horizontal layout center-justified transactionDescription">{{transactionDescription(transaction)}}</div>
                 <div class="date">{{getDate(transaction.dateCreated)}}</div>
             </div>
-            <div id="subjectDiv" horizontal layout center-justified class="subject">{{getSubject(transaction)}}</div>
-            <div horizontal layout>
+            <div id="subjectDiv" class="subject horizontal layout center-justified">{{getSubject(transaction)}}</div>
+            <div class="horizontal layout">
                 <div class="amount">{{amount(transaction)}}</div>
                 <div class="tag">{{transaction.tags[0]}}</div>
-                <div flex class="timeInfo">{{timeLimitedDescription(transaction)}}</div>
+                <div class="flex" class="timeInfo">{{timeLimitedDescription(transaction)}}</div>
             </div>
         </div>
     </template>
     <script>
-        Polymer('transactionvs-card', {
+        Polymer({
+            is:'transactionvs-card',
             publish: {
                 transaction: {value: {}}
             },
@@ -85,10 +86,10 @@
                 return amount
             },
             showTransactionDetails: function(e) {
-                console.log("messageSMIMEURL: " + e.target.templateInstance.model.transaction.messageSMIMEURL)
-                loadURL_VS(e.target.templateInstance.model.transaction.messageSMIMEURL, "_blank")
+                console.log("messageSMIMEURL: " + e.model.item.messageSMIMEURL)
+                loadURL_VS(e.model.item.messageSMIMEURL, "_blank")
             }
 
         });
     </script>
-</polymer-element>
+</dom-module>

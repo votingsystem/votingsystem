@@ -7,7 +7,7 @@
 <link href="${elementURL}/representative/representative-request-accreditations-dialog.vsp" rel="import"/>
 <link href="${elementURL}/representative/representative-request-votinghistory-dialog.vsp" rel="import"/>
 
-<polymer-element name="representative-info" attributes="subpage">
+<dom-module name="representative-info" attributes="subpage">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -26,36 +26,34 @@
             }
         </style>
         <div class="pageContentDiv">
-            <div hidden?="{{'user' !== menuType}}" horizontal layout center-justified style="font-size: 0.9em;">
-                <paper-button raised on-click="{{selectRepresentative}}">
+            <div hidden="{{'user' !== menuType}}" class="horizontal layout center-justified" style="font-size: 0.9em;">
+                <button on-click="selectRepresentative">
                     <i class="fa fa-hand-o-right"></i> ${msg.saveAsRepresentativeLbl}
-                </paper-button>
+                </button>
             </div>
             <div class="text-center" style="margin:20px auto 15px 15px;">
-                <div layout horizontal center center-justified style="width:100%;">
-                    <div>
-                        <template if="{{subpage}}">
-                            <paper-fab mini icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
-                        </template>
+                <div class="layout horizontal center center-justified" style="width:100%;">
+                    <div hidden="{{!subpage}}">
+                        <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
                     </div>
-                    <div flex representativeId-data="{{representative.id}}" class="representativeNameHeader">
+                    <div class="flex" representativeId-data="{{representative.id}}" class="representativeNameHeader">
                         <div>{{representativeFullName}}</div>
                     </div>
-                    <div class="representativeNumRepHeader" style="">
+                    <div class="representativeNumRepHeader">
                         {{representative.numRepresentations}} ${msg.numDelegationsPartMsg}
                     </div>
                 </div>
             </div>
             <div style="margin:0px auto 0px auto;">
                 <paper-tabs style="margin:0px auto 0px auto; cursor: pointer;" class="transparent-teal center"
-                        valueattr="name" selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
+                        attr-for-selected="name" selected="{{selectedTab}}"  on-iron-select="tabSelected" noink>
                     <paper-tab name="profile" style="width: 400px">${msg.profileLbl}</paper-tab>
                     <paper-tab name="votingHistory">${msg.votingHistoryLbl}</paper-tab>
                 </paper-tabs>
-                <div hidden?="{{selectedTab != 'profile'}}" class="tabContent">
-                    <div layout horizontal>
-                        <div hidden?="{{!representative.imageURL}}">
-                            <img id="representativeImg" on-click="{{showImage}}"
+                <div hidden="{{selectedTab != 'profile'}}" class="tabContent">
+                    <div class="layout horizontal">
+                        <div hidden="{{!representative.imageURL}}">
+                            <img id="representativeImg" on-click="showImage"
                                  style="text-align:center; width: 100px;margin-right: 20px;"/>
                         </div>
                         <div style="margin:auto auto">
@@ -64,20 +62,20 @@
                     </div>
                 </div>
 
-                <div hidden?="{{selectedTab !== 'votingHistory'}}" class="tabContent">
+                <div hidden="{{selectedTab !== 'votingHistory'}}" class="tabContent">
                     <template if="{{'admin' == menuType}}">
                         <div style="margin: auto;top: 0; left: 0; right: 0; position:relative;display:table;">
                             <div style="display:table-cell;">
-                                <paper-button raised id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;"
-                                         on-click="{{requestVotingHistory}}">
+                                <button id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                         on-click="requestVotingHistory">
                                     ${msg.requestVotingHistoryLbl}
-                                </paper-button>
+                                </button>
                             </div>
                             <div style="display:table-cell;">
-                                <paper-button raised id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
-                                        on-click="{{requestAccreditations}}">
+                                <button id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                        on-click="requestAccreditations">
                                     ${msg.requestRepresentativeAcreditationsLbl}
-                                </paper-button>
+                                </button>
                             </div>
                         </div>
                     </template>
@@ -90,8 +88,8 @@
         <representative-request-votinghistory-dialog id="votingHistoryDialog"></representative-request-votinghistory-dialog>
     </template>
     <script>
-        Polymer('representative-info', {
-            menuType:menuType,
+        Polymer({
+            is:'representative-info',
             subpage:false,
             publish: {
                 representative: {value: {}}
@@ -125,8 +123,8 @@
                 this.$.representativeImage.show()
             },
             back:function() {
-                this.fire('core-signal', {name: "representative-closed", data: null});
+                this.fire('iron-signal', {name: "representative-closed", data: null});
             }
         });
     </script>
-</polymer-element>
+</dom-module>

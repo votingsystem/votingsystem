@@ -1,19 +1,17 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
 <link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 
 <h2>- dashBoardLbl: - ${msg.dashBoardLbl}</h2>
 
-<polymer-element name="alert-dialog">
+<dom-module name="alert-dialog">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <paper-dialog id="xDialog" autoCloseDisabled layered backdrop class="votingsystemMessageDialog">
-            <style no-shim>
+            <style>
             .votingsystemMessageDialog {
                 top: 150px;
                 box-sizing: border-box; -moz-box-sizing: border-box; font-family: Arial, Helvetica, sans-serif;
@@ -23,30 +21,31 @@
             }
             </style>
             <div>
-                <div layout horizontal center center-justified>
-                    <div hidden?="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                <div class="layout horizontal center center-justified">
+                    <div hidden="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">{{caption}}</div>
                     </div>
                     <div style="position: absolute; top: 0px; right: 0px;">
-                        <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                        <paper-icon-button on-click="close" icon="close" style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
                     </div>
                 </div>
                 <div style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
                     <vs-html-echo html="{{message}}"></vs-html-echo>
                 </div>
                 <div layout horizontal style="margin:0px 20px 0px 0px;">
-                    <div flex></div>
-                    <div hidden?="{{!isConfirmMessage}}">
-                        <paper-button raised on-click="{{accept}}">
+                    <div class="flex"></div>
+                    <div hidden="{{!isConfirmMessage}}">
+                        <button on-click="accept">
                             <i class="fa fa-check"></i> ${msg.acceptLbl}
-                        </paper-button>
+                        </button>
                     </div>
                 </div>
             </div>
         </paper-dialog>
     </template>
     <script>
-        Polymer('alert-dialog', {
+        Polymer({
+            is:'alert-dialog',
             ready: function() {
                 this.isConfirmMessage = this.isConfirmMessage || false
             },
@@ -66,12 +65,12 @@
             },
             accept: function() {
                 this.close()
-                this.fire('core-signal', {name: "messagedialog-accept", data: {callerId:this.callerId}});
+                this.fire('iron-signal', {name: "messagedialog-accept", data: {callerId:this.callerId}});
             },
             close: function() {
                 this.$.xDialog.opened = false
-                this.fire('core-signal', {name: "messagedialog-closed", data: {callerId:this.callerId}});
+                this.fire('iron-signal', {name: "messagedialog-closed", data: {callerId:this.callerId}});
             }
         });
     </script>
-</polymer-element>
+</dom-module>

@@ -1,18 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
 <link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
-<link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 
-<polymer-element name="votevs-result-dialog" attributes="opened url">
+<dom-module name="votevs-result-dialog" attributes="opened url">
     <template>
-        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop class="voteResultDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop class="voteResultDialog">
             <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-            <style no-shim>
+            <style>
             .voteResultDialog {
                 top: 150px;
                 box-sizing: border-box; -moz-box-sizing: border-box; font-family: Arial, Helvetica, sans-serif;
@@ -22,22 +20,22 @@
                 width: 500px;
             }
             </style>
-            <core-signals on-core-signal-messagedialog-accept="{{cancellationConfirmed}}"
-                          on-core-signal-messagedialog-closed="{{confirmDialogClosed}}"></core-signals>
+            <iron-signals on-iron-signal-messagedialog-accept="{{cancellationConfirmed}}"
+                          on-iron-signal-messagedialog-closed="{{confirmDialogClosed}}"></iron-signals>
             <div>
-                <div layout horizontal center center-justified>
-                    <div flex style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
-                        <div hidden?="{{!caption}}" style="text-align: center;">{{caption}}</div>
+                <div class="layout horizontal center center-justified">
+                    <div class="flex" style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
+                        <div hidden="{{!caption}}" style="text-align: center;">{{caption}}</div>
                     </div>
                     <div style="position: absolute; top: 0px; right: 0px;">
-                        <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                        <paper-icon-button on-click="close" icon="close" style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
                     </div>
                 </div>
                 <div style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
                     <vs-html-echo html="{{message}}"></vs-html-echo>
                 </div>
                 <template if="{{messageType == 'VOTE_RESULT'}}">
-                    <div hidden?="{{!optionSelected}}">
+                    <div hidden="{{!optionSelected}}">
                         <p style="text-align: center;">
                             ${msg.confirmOptionDialogMsg}:</p>
                         <div style="font-size: 1.2em; text-align: center;"><b>{{optionSelected}}</b></div>
@@ -45,15 +43,15 @@
                     <template if="{{statusCode == 200}}">
                         <div layout horizontal style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
-                                <paper-button raised on-click="{{checkReceipt}}">
+                                <button on-click="checkReceipt">
                                     <i class="fa fa-certificate"></i>{{checkSignatureButtonMsg}}
-                                </paper-button>
+                                </button>
                             </div>
-                            <div flex></div>
+                            <div class="flex"></div>
                             <div style="margin:10px 0px 10px 0px;">
-                                <paper-button raised on-click="{{cancelVote}}" style="margin: 0px 0px 0px 5px;">
+                                <button on-click="cancelVote" style="margin: 0px 0px 0px 5px;">
                                     <i class="fa fa-times"></i> ${msg.cancelVoteLbl}
-                                </paper-button>
+                                </button>
                             </div>
                         </div>
                     </template>
@@ -62,11 +60,11 @@
                     <template if="{{statusCode == 200}}">
                         <div layout horizontal style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
-                                <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                                <button on-click="checkReceipt" style="margin: 0px 0px 0px 5px;">
                                     <i class="fa fa-certificate"></i>  ${msg.checkVoteLbl}
-                                </paper-button>
+                                </button>
                             </div>
-                            <div flex></div>
+                            <div class="flex"></div>
                         </div>
                     </template>
                 </template>
@@ -74,7 +72,8 @@
         </paper-dialog>
     </template>
     <script>
-        Polymer('votevs-result-dialog', {
+        Polymer({
+            is:'votevs-result-dialog',
             votevsReceipt:null,
             hashCertVSHex:null,
             hashCertVSBase64:null,
@@ -85,9 +84,6 @@
             voteVSCancellationReceipt:null,
             checkSignatureButtonMsg:'${msg.checkVoteLbl}',
             ready: function() {},
-            onCoreOverlayOpen:function(e) {
-                this.opened = this.$.xDialog.opened
-            },
             openedChanged:function() {
                 this.$.xDialog.opened = this.opened
                 if(this.opened == false) this.close()
@@ -162,4 +158,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

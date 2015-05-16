@@ -1,23 +1,57 @@
-<script src="./messages.js"></script>
-
-<polymer-element name="vs-i18n" attributes="messages">
+<dom-module name="vs-i18n">
 <template>
 </template>
 <script>
-    Polymer('vs-i18n', {
-        publish: {
-            messages: {value: {}}
+    Polymer({
+        is:'vs-i18n',
+        test:"hola",
+        messages_i18n : {
+            es: {
+                selectedTagsLbl:"etiquetas seleccionadas",
+                searchResultLbl:"resultado de la búsqueda",
+                tagLbl:"etiqueta",
+                tagSearchLbl:"buscar",
+                acceptLbl:"aceptar",
+                closeLbl:"cerrar",
+                caption:"búsqueda avanzada",
+                fromDate:"fecha desde (dd/mm/aa)",
+                toDate:"fecha hasta (dd/mm/aa)",
+                searchInputMessage:"cadena de búsqueda",
+                dateLbl:"fecha",
+                hourLbl: "hora (hh:mm)",
+                invalidSearchLbl:"introduzca una consulta válida",
+                invalidDateLbl:"no es una fecha válida!",
+                invalidHourLbl:"no es una hora válida!",
+                deleteLbl:"borrar"
+            },
+            en: {
+                selectedTagsLbl:"selected tags",
+                searchResultLbl:"search result",
+                tagLbl:"tag",
+                tagSearchLbl:"search",
+                acceptLbl:"accept",
+                closeLbl:"close",
+                caption:"avanced search",
+                fromDate:"from date (dd/mm/aa)",
+                toDate:"to date (dd/mm/aa)",
+                searchInputMessage:"enter search text",
+                dateLbl:"date",
+                hourLbl: "hour (hh:mm)",
+                invalidSearchLbl:"enter a valid search",
+                invalidDateLbl:"invalid date!",
+                invalidHourLbl:"invalid hour!",
+                deleteLbl:"delete"
+            }
         },
-        ready:function() { },
         getMessages:function() {
             var resultMessages
             var results = new RegExp("[\\?&]locale=([^&#]*)").exec(location.search);
             var userLocale = ((results == null) ? "" : decodeURIComponent(results[1].replace(/\+/g, " "))) || navigator.language
-            if(this.messages[userLocale]) resultMessages = messages_i18n[userLocale]
-            else resultMessages = messages_i18n['es']
+            if(this.messages_i18n[userLocale]) resultMessages = this.messages_i18n[userLocale]
+            else resultMessages = this.messages_i18n['es']
             console.log(this.tagName + " loaded locales for: " + userLocale)
             return resultMessages
         }
     });
 </script>
-</polymer-element>
+</dom-module>

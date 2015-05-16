@@ -1,18 +1,19 @@
 <link rel="import" href="${resourceURL}/vs-highcharts/highcharts-import.html"/>
 
-<polymer-element name="balance-uservs-chart" attributes="chart title yAxisTitle xAxisCategories">
+<dom-module name="balance-uservs-chart">
     <template>
         <style></style>
         <div id="container" style="width: 600px; height: 400px; margin: 0 auto"></div>
     </template>
     <script>
-        Polymer('balance-uservs-chart', {
-            title:null,
-            chart:null,
-            yAxisTitle:null,
-            publish: {
-                xAxisCategories: {value: []},
-                series:{}
+        Polymer({
+            is:'balance-uservs-chart',
+            properties: {
+                xAxisCategories:{type:Object, value:[]},
+                series:{type:Object, value:{}},
+                yAxisTitle:{type:String},
+                chart:{type:String},
+                caption:{type:String}
             },
             options: {
                 chart: {
@@ -149,7 +150,7 @@
                     }
                 ]
                 this.options.chart.renderTo = this.$.container
-                this.options.title.text = this.title
+                this.options.title.text = this.caption
                 var chart = new Highcharts.Chart(this.options);
                 console.log(this.tagName + " - ready")
             },
@@ -159,4 +160,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

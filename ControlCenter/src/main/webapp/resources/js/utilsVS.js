@@ -384,7 +384,7 @@ function fireCoreSignal(coreSignalDataBase64) {
     window['isClientToolConnected'] = true
     if(document.querySelector("#navBar") != null && document.querySelector("#navBar").fire != null) {
         var b64_to_utf8 = decodeURIComponent(escape(window.atob(coreSignalDataBase64)))
-        document.querySelector("#navBar").fire('core-signal', toJSON(b64_to_utf8));
+        document.querySelector("#navBar").fire('iron-signal', toJSON(b64_to_utf8));
         console.log("fireCoreSignal: " + b64_to_utf8)
     } else {
         coreSignalData = coreSignalDataBase64
@@ -392,8 +392,8 @@ function fireCoreSignal(coreSignalDataBase64) {
     }
 }
 
-window.addEventListener('polymer-ready', function() {
-    console.log("utilsVS.js - polymer-ready - sending pending core signal")
+window.addEventListener('WebComponentsReady', function() {
+    console.log("utilsVS.js - WebComponentsReady - sending pending core signal")
     if(coreSignalData != null) fireCoreSignal(coreSignalData)
     coreSignalData = null
 });

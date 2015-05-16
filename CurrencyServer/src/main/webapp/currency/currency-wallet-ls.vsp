@@ -1,13 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-slider/paper-slider.html" rel="import"/>
 <link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 <link href="${resourceURL}/polymer-localstorage/polymer-localstorage.html" rel="import"/>
 <link href="${elementURL}/currency/currency-wallet-tag-group.vsp" rel="import"/>
 
 <!--Test with wallet inside browser localstorage--->
-<polymer-element name="currency-wallet-ls"  on-core-select="{{selectAction}}">
+<dom-module name="currency-wallet-ls"  on-iron-select="selectAction">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -22,7 +21,7 @@
             }
         </style>
         <div vertical layout>
-            <div hidden?="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
+            <div hidden="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
                 <div class="messageToUser">
                     <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                         <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
@@ -38,7 +37,8 @@
         </template>
     </template>
     <script>
-        Polymer('currency-wallet-ls', {
+        Polymer({
+            is:'currency-wallet-ls',
             selectedTags: [],
             currencyCode:null,
             currencysWalletArray:[],
@@ -67,4 +67,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

@@ -10,8 +10,13 @@
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <link rel="shortcut icon" type="image/png" href="#{request.contextPath}/resources/images/icon_16/fa-pie-chart.png" />
+    <link href='//fonts.googleapis.com/css?family=RobotoDraft:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en' rel='stylesheet' type='text/css'/>
     <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-    <script src="${resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
+    <script src="${resourceURL}/webcomponentsjs/webcomponents-lite.min.js" type="text/javascript"></script>
+    <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+    <link href="${resourceURL}/iron-ajax/iron-ajax.html" rel="import"/>
+    <link href="${resourceURL}/iron-signals/iron-signals.html" rel="import"/>
+    <link href="${resourceURL}/iron-icons/iron-icons.html" rel="import"/>
     <h:outputScript name="js/utilsVS.js" />
     <h:outputStylesheet name="css/votingSystem.css" />
     <script src="${contextURL}/jsf/resources/js/utils_js.jsp" type="text/javascript"></script>
@@ -19,11 +24,11 @@
     <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
     <ui:insert name="head" />
     <script>
-        document.addEventListener('polymer-ready', function() {
-            console.log("simplevs - polymer-ready")
+        document.addEventListener('WebComponentsReady', function() {
+            console.log("simplevs - WebComponentsReady")
             document.querySelector('#pageLayoutDiv').style.display = 'block';
             document.querySelector('#loadingDiv').style.display = 'none';
-            document.querySelector('#coreSignals').addEventListener('core-signal-vs-innerpage', function(e) {
+            document.querySelector('#ironSignals').addEventListener('iron-signal-vs-innerpage', function(e) {
                 if(e.detail.title) document.querySelector('#appTitle').innerHTML = e.detail.title
                 document.dispatchEvent( new Event('innerPageSignal'));
             });
@@ -31,7 +36,7 @@
         });
     </script>
 </h:head>
-<h:body id="voting_system_page">
+<h:body>
     <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center; margin:15px auto;"></div>
     <div id="pageLayoutDiv" style="display:none;">
         <ui:insert name="content"/>
@@ -41,7 +46,7 @@
     </div>
 
     <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
-    <core-signals id="coreSignals"></core-signals>
+    <iron-signals id="ironSignals"></iron-signals>
 
 </h:body>
 </html>

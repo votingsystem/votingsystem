@@ -4,20 +4,18 @@
 <%@ taglib prefix="f" uri="http://java.sun.com/jsf/core" %>
 
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
-<link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
 <link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
 <link href="${resourceURL}/core-item/core-item.html" rel="import"/>
-<link href="${resourceURL}/core-selector/core-selector.html" rel="import"/>
+<link href="${resourceURL}/iron-selector/iron-selector.html" rel="import"/>
 <link href="${resourceURL}/paper-dropdown-menu/paper-dropdown-menu.html" rel="import"/>
 <link href="${resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
-<link href="${resourceURL}/core-menu/core-menu.html" rel="import"/>
+<link href="${resourceURL}/paper-menu/paper-menu.html" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-form.vsp" rel="import"/>
 <link href="${elementURL}/userVS/uservs-list.vsp" rel="import"/>
 <link href="${elementURL}/groupVS/groupvs-user.vsp" rel="import"/>
 
-<polymer-element name="groupvs-details" attributes="selectedItem subpage">
+<dom-module name="groupvs-details" attributes="selectedItem subpage">
 <template>
     <style shim-shadowdom>
         body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
@@ -26,26 +24,26 @@
     </style>
     <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
     <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-    <core-signals on-core-signal-messagedialog-accept="{{messagedialogAccepted}}"
-                  on-core-signal-uservs-selected="{{showUserDetails}}" ></core-signals>
-    <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
+    <iron-signals on-iron-signal-messagedialog-accept="{{messagedialogAccepted}}"
+                  on-iron-signal-uservs-selected="{{showUserDetails}}" ></iron-signals>
+    <core-animated-pages id="pages" flex selected="{{page}}" on-iron-animated-pages-transition-end="{{transitionend}}"
          transitions="cross-fade-all">
     <section id="page1">
     <div cross-fade style="max-width: 900px; margin:0 auto;">
         <div vertical layout flex>
             <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
             </div>
-            <div hidden?="{{!isAdminView || !isClientToolConnected}}">
-                <div layout horizontal center center-justified>
-                    <div layout horizontal center center-justified>
+            <div hidden="{{!isAdminView || !isClientToolConnected}}">
+                <div class="layout horizontal center center-justified">
+                    <div class="layout horizontal center center-justified">
                         <i class="fa fa-cogs optionsIcon"></i>
                         <paper-dropdown-menu halign="right" style="width: 200px;"
-                                     label="${msg.configGroupvsLbl}" on-core-select="{{configGroup}}">
+                                     label="${msg.configGroupvsLbl}" on-iron-select="configGroup">
                             <paper-dropdown class="dropdown colored" transition="">
-                                <core-menu id="configGroupCoreMenu">
+                                <paper-menu id="configGroupCoreMenu">
                                     <paper-item id="editDataItem">${msg.editDataLbl}</paper-item>
                                     <paper-item id="cancelGroupVSItem">${msg.cancelGroupVSLbl}</paper-item>
-                                </core-menu>
+                                </paper-menu>
                             </paper-dropdown>
                         </paper-dropdown-menu>
                     </div>
@@ -53,27 +51,27 @@
                     <div layout horizontal center center-justified style="margin:0 0 0 60px;">
                         <i class="fa fa-money optionsIcon"></i>
                         <paper-dropdown-menu label="${msg.makeTransactionVSFromGroupVSLbl}"
-                                 on-core-select="{{showTransactionVSDialog}}" style="width: 300px;">
+                                 on-iron-select="showTransactionVSDialog" style="width: 300px;">
                             <paper-dropdown class="dropdown colored"  transition="">
-                                <core-menu id="transactionvsCoreMenu">
+                                <paper-menu id="transactionvsCoreMenu">
                                     <paper-item id="fromGroupToMemberGroup">${msg.makeTransactionVSFromGroupVSToMemberGroupLbl}</paper-item>
                                     <paper-item id="fromGroupToAllMember">${msg.makeTransactionVSFromGroupVSToAllMembersLbl}</paper-item>
-                                </core-menu>
+                                </paper-menu>
                             </paper-dropdown>
                         </paper-dropdown-menu>
                     </div>
                 </div>
             </div>
 
-            <div hidden?="{{!isUserView}}" layout horizontal center center-justified style="margin:0 0 10px 10px; font-size: 0.9em;">
-                <button style="margin:0 20px 0 0; font-size: 1.1em;" on-click="{{subscribeToGroup}}">
+            <div hidden="{{!isUserView}}" layout horizontal center center-justified style="margin:0 0 10px 10px; font-size: 0.9em;">
+                <button style="margin:0 20px 0 0; font-size: 1.1em;" on-click="subscribeToGroup">
                     <i class="fa fa-sign-in"></i> ${msg.subscribeGroupVSLbl}
                 </button>
-                <button style="margin:0 20px 0 0; font-size: 1.1em;" on-click="{{sendTransactionVS}}">
+                <button style="margin:0 20px 0 0; font-size: 1.1em;" on-click="sendTransactionVS">
                     <i class="fa fa-money"></i> ${msg.sendTransactionVSLbl}
                 </button>
             </div>
-            <div hidden?="{{isClientToolConnected}}" id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 20px 0;">
+            <div hidden="{{isClientToolConnected}}" id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 20px 0;">
                 <f:view>
                     <h:outputFormat value="#{msg.clientToolNeededMsg}" escape="false">
                         <f:param value="#{contextURL}/tools/ClientTool.zip"/>
@@ -85,15 +83,15 @@
                 </f:view>
             </div>
             <div id="pageHeader" layout horizontal center center-justified>
-                <div horizontal layout flex style="padding:7px 0px 0px 7px;">
-                    <div hidden?="{{!subpage}}" style="margin: 10px 20px 10px 0;" title="${msg.backLbl}" >
-                        <paper-fab mini icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+                <div class="horizontal layout flex" style="padding:7px 0px 0px 7px;">
+                    <div hidden="{{!subpage}}" style="margin: 10px 20px 10px 0;" title="${msg.backLbl}" >
+                        <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
                     </div>
                 </div>
                 <div style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
                     <div style="text-align: center;" groupvsId-data="{{groupvs.id}}">{{groupvs.name}}</div>
                 </div>
-                <div flex style="margin:5px 10px 0 0; font-size: 0.7em; color:#888; text-align: right; vertical-align: bottom;">
+                <div class="flex" style="margin:5px 10px 0 0; font-size: 0.7em; color:#888; text-align: right; vertical-align: bottom;">
                     <b>${msg.IBANLbl}: </b>{{groupvs.iban}}
                 </div>
             </div>
@@ -101,19 +99,19 @@
         <div class="eventContentDiv">
             <vs-html-echo html="{{decodeBase64(groupvs.description)}}"></vs-html-echo>
         </div>
-        <div layout horizontal>
-            <div hidden?="{{!groupvs.tags || groupvs.tags.length == 0}}" layout horizontal center center-justified style="margin: 5px 30px 0 0;">
+        <div class="layout horizontal">
+            <div hidden="{{!groupvs.tags || groupvs.tags.length == 0}}" layout horizontal center center-justified style="margin: 5px 30px 0 0;">
                 <template repeat="{{tag in groupvs.tags}}">
                     <a class="btn btn-default" style="font-size: 0.7em;margin:0px 5px 0px 0px;padding:3px;">
                         <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i>{{tag.name}}</a>
                 </template>
             </div>
-            <div style="margin: 5px 0 0 0;" on-click="{{goToWeekBalance}}">
+            <div style="margin: 5px 0 0 0;" on-click="goToWeekBalance">
                 <a class="btn btn-red"  style="font-size: 0.8em;">
                     <i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}
                 </a>
             </div>
-            <div flex></div>
+            <div class="flex"></div>
             <div style="margin:5px 10px 0 0; font-size: 0.9em; color:#888;">
                 <b>${msg.representativeLbl}: </b>{{groupvs.representative.firstName}} {{groupvs.representative.lastName}}
             </div>
@@ -143,7 +141,8 @@
     <groupvs-user id="userDescription"></groupvs-user>
 </template>
 <script>
-    Polymer('groupvs-details', {
+    Polymer({
+        is:'groupvs-details',
         publish: { groupvs: {}, subpage:false },
         ready : function() {
             console.log(this.tagName + " - ready - subpage: " + this.subpage)
@@ -231,7 +230,7 @@
                 this.isAdminView = false
             }
             this.$.userList.url = "${restURL}/groupVS/id/" + this.groupvs.id + "/listUsers"
-            this.fire('core-signal', {name: "vs-innerpage", data: {caption:"${msg.groupvsLbl}"}});
+            this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.groupvsLbl}"}});
             console.log("this.isUserView: " + this.isUserView + " - groupvs.state: " + this.groupvs.state +
                 " - menuType: " + menuType)
         },
@@ -262,7 +261,7 @@
         },
 
         back:function() {
-            this.fire('core-signal', {name: "groupvs-details-closed", data: this.groupvs.id});
+            this.fire('iron-signal', {name: "groupvs-details-closed", data: this.groupvs.id});
         },
         showUserDetails:function(e, detail, sender) {
             console.log(this.tagName + " - showUserDetails")
@@ -270,4 +269,4 @@
         }
     })
 </script>
-</polymer-element>
+</dom-module>

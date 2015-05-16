@@ -1,29 +1,28 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 <link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
 <link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
 <link href="${elementURL}/eventVSElection/eventvs-election.vsp" rel="import"/>
 <link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
 
-<polymer-element name="eventvs-election-list" attributes="url eventvstype eventVSState">
+<dom-module name="eventvs-election-list" attributes="url eventvstype eventVSState">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <style no-shim>
+        <style>
             .card { position: relative; display: inline-block; width: 300px; vertical-align: top;
                 box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); margin: 10px;
             }
         </style>
         <vs-innerpage-signal id="innerpageSignal" caption="${msg.electionSystemLbl}"></vs-innerpage-signal>
-        <core-ajax id="ajax" url="{{url}}" response="{{resultListDto}}" handleAs="json"
-                   contentType="application/json" on-core-complete="{{ajaxComplete}}"></core-ajax>
-        <core-signals on-core-signal-eventvs-election-closed="{{closeEventVSDetails}}"></core-signals>
-        <core-animated-pages hidden?="{{loading}}" id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
+        <iron-ajax id="ajax" url="{{url}}" last-response="{{resultListDto}}" handleAs="json"
+                   contentType="application/json" on-iron-complete="{{ajaxComplete}}"></iron-ajax>
+        <iron-signals on-iron-signal-eventvs-election-closed="{{closeEventVSDetails}}"></iron-signals>
+        <core-animated-pages hidden="{{loading}}" id="pages" flex selected="{{page}}" on-iron-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all">
             <section id="page1">
                 <div cross-fade>
-                    <div layout horizontal center center-justified>
+                    <div class="layout horizontal center center-justified">
                         <template if="{{(eventvstype == 'election')}}">
                             <select id="eventVSStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
                                     on-change="{{eventVSStateSelect}}" class="form-control">
@@ -33,9 +32,9 @@
                             </select>
                         </template>
                     </div>
-                    <div layout flex horizontal wrap around-justified>
+                    <div class="layout flex horizontal wrap around-justified">
                         <template repeat="{{eventvs in resultListDto.resultList}}">
-                            <div on-tap="{{showEventVSDetails}}" class='card eventDiv {{getEventVSClass(eventvs.state)}}'>
+                            <div on-tap="showEventVSDetails" class='card eventDiv {{getEventVSClass(eventvs.state)}}'>
                                 <div layout horizontal center center-justified eventvsId-data="{{eventvs.id}}" class='eventSubjectDiv'>
                                     {{getSubject(eventvs.subject)}}
                                 </div>
@@ -48,7 +47,7 @@
                                         <div class='eventAuthorLblDiv'>${msg.publishedByLbl}:</div>
                                         <div class='eventAuthorValueDiv'>{{eventvs.userVS}}</div>
                                     </div>
-                                    <div hidden?="{{eventvs.state !== 'CANCELED'}}" class='cancelMessage'>
+                                    <div hidden="{{eventvs.state !== 'CANCELED'}}" class='cancelMessage'>
                                         ${msg.eventCancelledLbl}</div>
                                 </div>
                                 <div class='eventDivFooter'>
@@ -74,7 +73,8 @@
 
     </template>
     <script>
-        Polymer('eventvs-election-list', {
+        Polymer({
+            is:'eventvs-election-list',
             publish: {
                 resultListDto: {value: {}}
             },
@@ -107,12 +107,12 @@
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
                 this.$.ajax.url = targetURL
-                this.$.ajax.go()
+                this.$.ajax.generateRequest()
             },
             showEventVSDetails :  function(e) {
                 console.log(this.tagName + " - showEventVSDetails")
                 this.$.eventvsDetails.fireSignal()
-                this.$.eventvsDetails.eventvs = e.target.templateInstance.model.eventvs;
+                this.$.eventvsDetails.eventvs = e.model.item;
                 this.page = 1;
             },
             getRepresentativeName:function(groupvs) {
@@ -146,11 +146,11 @@
                 targetURL = "${restURL}/eventVSElection?menu=" + menuType + "&eventVSState=" + optionSelected
                 history.pushState(null, null, targetURL);
                 this.$.ajax.url = targetURL
-                this.$.ajax.go()
+                this.$.ajax.generateRequest()
             },
             ajaxComplete:function() {
                 this.loading = false
             }
         });
     </script>
-</polymer-element>
+</dom-module>

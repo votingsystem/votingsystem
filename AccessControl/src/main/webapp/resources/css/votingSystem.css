@@ -20,7 +20,6 @@ body {
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;
     color:#f9f9f9;
-    height: 40px;
     z-index: 20;
 }
 
@@ -58,12 +57,6 @@ body {
     outline: 1px solid rgba(0,0,0,0.2);
     box-shadow: 0 4px 16px rgba(0,0,0,0.2);
     margin: auto auto;
-}
-
-#navBarMainMenu {
-    position: fixed;
-    top: 0px;
-    z-index:10;
 }
 
 input:required {
@@ -588,9 +581,4 @@ textarea.form-control {
 .formFieldError{
     font-weight: bold;
     background: #f6ccd0;
-}
-
-paper-button {
-    font-size: 0.8em;
-    color: #6c0404;
 }

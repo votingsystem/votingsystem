@@ -1,6 +1,6 @@
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
+<%@ page contentType="text/html; charset=UTF-8" %>
 
-<polymer-element name="bankVS-list">
+<dom-module name="bankVS-list">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -10,9 +10,9 @@
                 cursor: pointer; text-overflow: ellipsis; max-width: 300px;-moz-border-radius: 3px; border-radius: 4px;
             }
         </style>
-        <div layout flex horizontal wrap around-justified>
+        <div class="layout flex horizontal wrap around-justified">
             <template repeat="{{bankVS in bankVSListDto}}">
-                <div class="bankvs" on-click="{{showDetails}}')">
+                <div class="bankvs" on-click="showDetails')">
                     <div class="nameColumn" style="font-size: 1.2em;">{{bankVS.name}}</div>
                     <div class="descriptionColumn">{{bankVS.description}}</div>
                 </div>
@@ -20,12 +20,13 @@
         </div>
     </template>
     <script>
-        Polymer('bankVS-list', {
+        Polymer({
+            is:'bankVS-list',
             ready: function() { console.log(this.tagName + " - ready")},
             publish: { bankVSListDto: {value: {}} },
             showDetails: function(e) {
-                loadURL_VS("${restURL}/userVS/id/" + e.target.templateInstance.model.bankVS.id)
+                loadURL_VS("${restURL}/userVS/id/" + e.model.item.id)
             }
         });
     </script>
-</polymer-element>
+</dom-module>

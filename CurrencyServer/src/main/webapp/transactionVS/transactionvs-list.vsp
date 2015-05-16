@@ -1,25 +1,24 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/vs-user-box/vs-user-box.html" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-card.vsp" rel="import"/>
 
-
-<polymer-element name="transactionvs-list" attributes="url transactionsDto">
+<dom-module name="transactionvs-list" attributes="url transactionsDto">
 <template>
-    <core-ajax id="ajax" auto url="{{url}}" response="{{responseData}}" handleAs="json" method="get"
-               contentType="application/json"  on-core-complete="{{ajaxComplete}}"></core-ajax>
-    <div layout flex horizontal wrap around-justified>
+    <iron-ajax id="ajax" auto url="{{url}}" last-response="{{responseData}}" handleAs="json" method="get"
+               contentType="application/json"  on-iron-complete="{{ajaxComplete}}"></iron-ajax>
+    <div class="layout flex horizontal wrap around-justified">
         <template repeat="{{transaction in transactionsDto.resultList}}">
             <transactionvs-card transaction="{{transaction}}"></transactionvs-card>
         </template>
-        <div hidden?="{{transactionsDto.resultList.length !== 0}}" style="font-size: 1.3em; margin:30px 0 0 0;">
+        <div hidden="{{transactionsDto.resultList.length !== 0}}" style="font-size: 1.3em; margin:30px 0 0 0;">
             ${msg.withoutMovementsLbl}
         </div>
     </div>
 </template>
 <script>
-    Polymer('transactionvs-list', {
+    Polymer({
+        is:'transactionvs-list',
         publish: {
             transactionsDto: {value: {}}
         },
@@ -38,4 +37,4 @@
             this.transactionsDto.resultList.push(transactionvs)
         }
     });</script>
-</polymer-element>
+</dom-module>

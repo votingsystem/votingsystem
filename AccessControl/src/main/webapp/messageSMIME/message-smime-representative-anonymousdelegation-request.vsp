@@ -1,9 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 
-<polymer-element name="message-smime-representative-anonymousdelegation-request"
+
+<dom-module name="message-smime-representative-anonymousdelegation-request"
                  attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
@@ -19,33 +18,36 @@
                 color:#aaaaaa; font-size:1.1em; margin:0 0 15px 0;font-style:italic;
             }
         </style>
-        <div layout vertical style="margin: 10px auto; max-width: 800px;">
-            <div  layout horizontal center center-justified>
-                <div flex></div>
-                <div class="pageHeader"><h3>${msg.anonymousdelegationRequest}</h3></div>
-                <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px; display: block; min-width: 150px;">
-                    <template if="{{isClientToolConnected}}">
-                        <paper-button raised on-click="{{checkReceipt}}">
+        <div class="layout vertical center center-justified" style="margin: 0px auto; max-width:800px;">
+            <div>
+                <div class="layout horizontal center center-justified">
+                    <div class="pageHeader"><h3>${msg.anonymousdelegationRequest}</h3></div>
+                </div>
+                <div hidden="{{!timeStampDate}}" class="timeStampMsg">
+                    <b>${msg.timeStampDateLbl}: </b><span>{{timeStampDate}}</span>
+                </div>
+                <div hidden="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
+                    <div>
+                        <div id="messageToUser"><span>{{messageToUser}}</span></div>
+                    </div>
+                </div>
+                <div><b>${msg.weeksAnonymousDelegation}: </b><span>{{smimeMessageContent.weeksOperationActive}}</span></div>
+                <div horizontal layout style="margin:10px 0 0 0;"><b>${msg.validFromLbl}:</b> {{getDate(smimeMessageContent.dateFrom)}}
+                    <span style="margin: 0 0 0 20px;"><b>${msg.toLbl}:</b></span> <span>{{getDate(smimeMessageContent.dateFrom)}}</span></div>
+                <div class="layout horizontal">
+                    <div class="flex"></div>
+                    <div hidden="{{!isClientToolConnected}}" class="flex horizontal layout end-justified" style="margin:10px 0px 10px 0px;">
+                        <button on-click="checkReceipt">
                             <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
-                        </paper-button>
-                    </template>
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
-                <b>${msg.timeStampDateLbl}: </b>{{timeStampDate}}
-            </div>
-            <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
-                <div>
-                    <div id="messageToUser">{{messageToUser}}</div>
-                </div>
-            </div>
-            <div><b>${msg.weeksAnonymousDelegation}: </b>{{smimeMessageContent.weeksOperationActive}}</div>
-            <div horizontal layout style="margin:10px 0 0 0;"><b>${msg.validFromLbl}:</b> {{getDate(smimeMessageContent.dateFrom)}}
-                <span style="margin: 0 0 0 20px;"><b>${msg.toLbl}:</b></span> {{getDate(smimeMessageContent.dateFrom)}}</div>
         </div>
     </template>
     <script>
-        Polymer('message-smime-representative-anonymousdelegation-request', {
+        Polymer({
+            is:'message-smime-representative-anonymousdelegation-request',
             publish: {
                 smimeMessageContent: {value: {}}
             },
@@ -80,4 +82,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

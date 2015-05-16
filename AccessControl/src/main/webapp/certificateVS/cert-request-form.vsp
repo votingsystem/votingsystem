@@ -1,17 +1,14 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
-
-<polymer-element name="cert-request-form" attributes="caption opened isMenuAdmin messageToUser">
+<dom-module name="cert-request-form" attributes="caption opened isMenuAdmin messageToUser">
 <template>
     <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
     <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
     <style>
     .messageToUser { font-weight: bold;  margin:10px auto 10px auto; background: #f9f9f9; padding:10px 20px 10px 20px; max-width: 600px;}
     </style>
-    <core-signals on-core-signal-messagedialog-accept="{{messagedialogAccept}}"></core-signals>
-    <div hidden?="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
+    <iron-signals on-iron-signal-messagedialog-accept="{{messagedialogAccept}}"></iron-signals>
+    <div hidden="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
         <div class="messageToUser">
             <div  layout horizontal center center-justified >
                 <div id="messageToUser">{{messageToUser}}</div>
@@ -21,11 +18,11 @@
     <div style="margin: 20px auto 10px auto; text-align: center;max-width: 600px; ">
         ${msg.certRequestAdviceMsg}
     </div>
-    <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
+    <div id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
         <div style="max-width: 600px; margin:10px auto;">
             <input type="text" id="nif" class="form-control" required style="margin: 0 0 10px 0;"
                    title="${msg.nifLbl}" placeholder="${msg.nifLbl}"/>
-            <div horizontal layout>
+            <div class="horizontal layout">
                 <input type="text" id="givenname" class="form-control" required style="margin: 0 0 10px 0;"
                        title="${msg.nameLbl}" placeholder="${msg.nameLbl}"/>
                 <input type="text" id="surname" class="form-control" required style="margin: 0 0 10px 10px;"
@@ -37,8 +34,8 @@
             <input type="email" id="email" class="form-control" required style="margin: 0 0 10px 0;"
                    title="${msg.emailLbl}" placeholder="${msg.emailLbl}"/>
             <div layout horizontal style="margin:10px 20px 0px 0px;">
-                <div flex></div>
-                <button on-click="{{submitForm}}" style="font-size:1.1em;margin: 20px 0px 0px 5px;">
+                <div class="flex"></div>
+                <button on-click="submitForm" style="font-size:1.1em;margin: 20px 0px 0px 5px;">
                     <i class="fa fa-check"></i> ${msg.acceptLbl}
                 </button>
             </div>
@@ -46,7 +43,8 @@
     </div>
 </template>
 <script>
-    Polymer('cert-request-form', {
+    Polymer({
+        is:'cert-request-form',
         ready: function() { },
         submitForm: function () {
             console.log("submitForm")
@@ -117,4 +115,4 @@
         }
     });
 </script>
-</polymer-element>
+</dom-module>

@@ -1,11 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 
-<polymer-element name="uservs-subscription-card">
+<dom-module name="uservs-subscription-card">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <style no-shim>
+        <style>
         .card {
             position: relative;
             display: inline-block;
@@ -26,14 +26,14 @@
         .stateInfo {color:#621; text-transform: uppercase; text-align: right; margin: 0 0 0 5px; font-size: 0.8em;
             font-weight: bold;text-align: left;}
         </style>
-        <div class="card" on-click="{{userSelected}}">
+        <div class="card" on-click="userSelected">
             <template if="{{isNifVisible}}">
                 <div class="nifColumn">{{subscription.uservs.nif}}</div>
             </template>
             <!--<div style="width:200px;">{{subscription.uservs.iban}}</div>-->
-            <div flex horizontal layout center-justified class="userVSname">{{subscription.uservs.name}}</div>
-            <div horizontal layout>
-                <div flex class="stateInfo">{{userState(subscription.state)}}</div>
+            <div class="horizontal layout center-justified userVSname flex">{{subscription.uservs.name}}</div>
+            <div class="horizontal layout">
+                <div class="flex" class="stateInfo">{{userState(subscription.state)}}</div>
                 <div class="date">
                     {{getDate(subscription.dateCreated)}}
                 </div>
@@ -41,7 +41,8 @@
         </div>
     </template>
     <script>
-        Polymer('uservs-subscription-card', {
+        Polymer({
+            is:'uservs-subscription-card',
             isNifVisible:false,
             publish: {
                 subscription: {value: {}}
@@ -68,9 +69,9 @@
                 return userState
             },
             userSelected: function(e) {
-                console.log(this.tagName + " - userSelected - userId: " + e.target.templateInstance.model.subscription.uservs.id)
-                this.fire('core-signal', {name: "uservs-selected", data: e.target.templateInstance.model.subscription.uservs.id});
+                console.log(this.tagName + " - userSelected - userId: " + e.model.item.uservs.id)
+                this.fire('iron-signal', {name: "uservs-selected", data: e.model.item.uservs.id});
             }
         });
     </script>
-</polymer-element>
+</dom-module>

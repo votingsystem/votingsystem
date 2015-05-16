@@ -1,17 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
 <link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 <link href="${resourceURL}/paper-radio-button/paper-radio-button.html" rel="import"/>
 <link href="${resourceURL}/core-icon/core-icon.html" rel="import"/>
-<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
+
 <link href="${resourceURL}/vs-currency-selector/vs-currency-selector.html" rel="import"/>
 <link href="${elementURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
 <link href="${elementURL}/currency/currency-request-result-dialog.vsp" rel="import"/>
 <link href="${resourceURL}/paper-input/paper-input.html" rel="import"/>
 
-<polymer-element name="currency-request-form">
+<dom-module name="currency-request-form">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -26,7 +25,7 @@
             paper-fab.green { background: #259b24; color: #f0f0f0; }
         </style>
         <div vertical layout>
-            <div hidden?="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
+            <div hidden="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
                 <div class="messageToUser">
                     <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                         <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
@@ -35,7 +34,7 @@
                 </div>
             </div>
 
-            <div layout horizontal center center-justified>
+            <div class="layout horizontal center center-justified">
                 <div style="margin: 0 10px 0 0;"><paper-radio-button toggles id="timeLimitedRButton"></paper-radio-button></div>
                 <div style="color:#6c0404; background: #fefefe;font-size: 1.2em; text-align: center;font-weight: bold;">
                     <core-tooltip large label="${msg.receptorTimeLimitedAdviceMsg}" position="bottom">
@@ -45,23 +44,23 @@
             </div>
 
             <div style="max-width: 600px; margin:15px auto; border-bottom: 1px solid #6c0404;border-top: 1px solid #6c0404;">
-                <div layout vertical center center-justified>
-                <div horizontal layout center center-justified>
+                <div class="layout vertical center center-justified">
+                <div class="horizontal layout center center-justified">
                     <div style="width: 250px;">
-                        <button on-click="{{showTagDialog}}" style="font-size: 0.8em;margin:10px 10px 10px 10px;">
+                        <button on-click="showTagDialog" style="font-size: 0.8em;margin:10px 10px 10px 10px;">
                             <i class="fa fa-tag"></i> ${msg.addTagLbl}
                         </button>
                     </div>
                     <div>${msg.transactionvsWithTagAdvertMsg}</div>
                 </div>
                 <template if="{{selectedTags.length > 0}}">
-                    <div layout horizontal center center-justified style="font-weight:bold;font-size: 0.8em; color: #888;
+                    <div class="layout horizontal center center-justified" style="font-weight:bold;font-size: 0.8em; color: #888;
                     margin:0 0 10px 0;">
                         <div style="margin: 0 10px 0 0; vertical-align: bottom;">
                             ${msg.currencyRequestSelectedTagsLbl}
                         </div>
                         <template repeat="{{tag in selectedTags}}">
-                            <a class="btn btn-default" data-tagId='{{tag.id}}' on-click="{{removeTag}}"
+                            <a class="btn btn-default" data-tagId='{{tag.id}}' on-click="removeTag"
                                style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
                                 <i class="fa fa-minus" style="color: #6c0404;"></i> {{tag.name}}</a>
                         </template>
@@ -72,11 +71,11 @@
             </div>
 
             <div style="margin:0 auto; width: 600px;">
-                <div horizontal layout center-justified style="font-size: 1.3em;color: #6c0404;">
+                <div class="horizontal layout center-justified" style="font-size: 1.3em;color: #6c0404;">
                     ${msg.selectAmountLbl}
                 </div>
-                <div layout horizontal center center-justified style="max-width: 600px; margin:0 auto;">
-                    <div layout horizontal center center-justified>
+                <div class="layout horizontal center center-justified" style="max-width: 600px; margin:0 auto;">
+                    <div class="layout horizontal center center-justified">
                         <paper-input-decorator label="${msg.amountLbl}" floatingLabel
                                                error="${msg.onlyNumbersErrorMsg}"
                                                isInvalid="{{!$.inputAmount.validity.valid}}">
@@ -88,17 +87,18 @@
                 </div>
             </div>
 
-            <div horizontal layout style="margin: 20px auto;width: 600px;">
-                <div flex></div>
-                <paper-fab mini icon="done" class="green" on-click="{{submit}}"></paper-fab>
+            <div class="horizontal layout" style="margin: 20px auto;width: 600px;">
+                <div class="flex"></div>
+                <paper-fab mini icon="done" class="green" on-click="submit"></paper-fab>
             </div>
         </div>
         <tagvs-select-dialog id="tagDialog" caption="${msg.addTagDialogCaption}"
-                 serviceURL="${restURL}/tagVS"></tagvs-select-dialog>
+                 service-url="${restURL}/tagVS"></tagvs-select-dialog>
         <currency-request-result-dialog id="resultDialog"></currency-request-result-dialog>
     </template>
     <script>
-        Polymer('currency-request-form', {
+        Polymer({
+            is:'currency-request-form',
             selectedTags: [],
             messageToUser:null,
             ready: function() {
@@ -116,7 +116,7 @@
                 VotingSystemClient.setMessage(new OperationVS(Operation.WALLET_OPEN));
             },
             removeTag: function(e) {
-                var tagToDelete = e.target.templateInstance.model.tag
+                var tagToDelete = e.model.item
                 for(tagIdx in this.selectedTags) {
                     if(tagToDelete.id == this.selectedTags[tagIdx].id) {
                         this.selectedTags.splice(tagIdx, 1)
@@ -164,4 +164,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

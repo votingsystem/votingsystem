@@ -1,13 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
-<link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
 
-<polymer-element name="votingsystem-cert" attributes="url cert subpage">
+<dom-module name="votingsystem-cert" attributes="url cert subpage">
     <template>
-        <style no-shim>
-        .view { :host {position: relative;} }
+        <style>
         .pageWidth {width: 600px;}
         .certDiv {
             background-color: #fefefe;
@@ -19,11 +16,11 @@
         </style>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <core-ajax id="ajax" auto url="{{url}}" response="{{cert}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
+        <iron-ajax id="ajax" auto url="{{url}}" last-response="{{cert}}" handleAs="json" method="get" contentType="application/json"></iron-ajax>
         <div layout vertical center center-justified >
                 <div layout horizontal class="pageWidth">
                     <template if="{{subpage != null || subcert != null}}">
-                        <paper-fab mini icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+                        <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
                     </template>
 
                     <h3 flex>
@@ -32,14 +29,14 @@
                 </div>
 
                 <div class="certDiv pageWidth">
-                    <div style="">
+                    <div>
                         <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
                             ${msg.serialNumberLbl}: </span>{{certvs.serialNumber}}</div>
                         <div id="certStateDiv" style="display: inline; margin:0px 0px 0px 20px; font-size: 1.2em; font-weight: bold; float: right;"></div>
                     </div>
                     <div class='groupvsSubjectDiv'><span style="font-weight: bold;">${msg.subjectLbl}: </span>{{certvs.subjectDN}}</div>
                     <div class=''><span style="font-weight: bold;">${msg.issuerLbl}: </span>
-                        <a id="issuerURL" on-click="{{certIssuerClicked}}" style="cursor: pointer;">{{certvs.issuerDN}}</a>
+                        <a id="issuerURL" on-click="certIssuerClicked" style="cursor: pointer;">{{certvs.issuerDN}}</a>
                     </div>
                     <div class=''><span style="font-weight: bold;">${msg.signatureAlgotithmLbl}: </span>{{certvs.sigAlgName}}</div>
                     <div>
@@ -48,7 +45,7 @@
                         <div class='' style="display: inline; margin:0px 0px 0px 20px;">
                             <span style="font-weight: bold;">${msg.noAfterLbl}: </span>{{certvs.notAfter}}</div>
                     </div>
-                    <div hidden?="{{!certvs.isRoot}}" class="text-center" style="font-weight: bold; display: inline;
+                    <div hidden="{{!certvs.isRoot}}" class="text-center" style="font-weight: bold; display: inline;
                             margin:0px auto 0px auto;color: #6c0404; float:right; text-decoration: underline;">${msg.rootCertLbl}
                     </div>
                 </div>
@@ -66,7 +63,8 @@
         </div>
     </template>
     <script>
-        Polymer('votingsystem-cert', {
+        Polymer({
+            is:'votingsystem-cert',
             publish: {
                 certvs: {value: {}}
             },
@@ -94,12 +92,12 @@
                     this.certvs = previousCert
                     if(this.certsSelectedStack.length == 0) this.subcert = null
                 } else {
-                    console.log(this.tagName + " - core-signal-votingsystem-cert-closed")
-                    this.fire('core-signal', {name: "votingsystem-cert-closed", data: this.certvs.id});
+                    console.log(this.tagName + " - iron-signal-votingsystem-cert-closed")
+                    this.fire('iron-signal', {name: "votingsystem-cert-closed", data: this.certvs.id});
                 }
             },
             certIssuerClicked:function(e) {
-                var issuerSerialNumber = e.target.templateInstance.model.certvs.issuerSerialNumber
+                var issuerSerialNumber = e.model.item.issuerSerialNumber
                 if(issuerSerialNumber != null) {
                     var certURL = "${restURL}/certificateVS/cert/" + issuerSerialNumber
                     console.log(this.tagName + " - certIssuerClicked: " + certURL)
@@ -110,4 +108,4 @@
             }
         })
     </script>
-</polymer-element>
+</dom-module>

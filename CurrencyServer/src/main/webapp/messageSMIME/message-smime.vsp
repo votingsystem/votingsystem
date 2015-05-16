@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<polymer-element name="message-smime" attributes="smimeMessageContent smimeMessage timeStampDate">
+<dom-module name="message-smime" attributes="smimeMessageContent smimeMessage timeStampDate">
     <template>
         <style>
         .messageToUser {
@@ -12,20 +12,20 @@
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
         .systemLbl { color:#6c0404; font-size:1.1em;  }
         </style>
-        <div layout vertical center center-justified style="margin: 0px auto; max-width:800px;">
+        <div class="layout vertical center center-justified" style="margin: 0px auto; max-width:800px;">
             <div>
                 <div  layout horizontal center center-justified>
                     <div class="pageHeader"><h3>{{caption}}</h3></div>
                 </div>
-                <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
+                <div hidden="{{!timeStampDate}}" class="timeStampMsg">
                     <b>${msg.dateLbl}: </b> {{timeStampDate}}
                 </div>
-                <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
+                <div hidden="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
                     <div id="messageToUser">{{messageToUser}}</div>
                 </div>
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
                 <div><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
-                <div horizontal layout>
+                <div class="horizontal layout">
                     <div><b>${msg.amountLbl}: </b>{{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
                     <template if="{{smimeMessageContent.timeLimited}}">
                         <div class="pageHeader" style="margin: 0 0 0 20px;"><b>
@@ -42,25 +42,25 @@
                         <div><b>${msg.IBANLbl}: </b>{{smimeMessageContent.fromUserIBAN}}</div>
                     </div>
                 </div>
-                <div hidden?="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
+                <div hidden="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
                     <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621;">
                         {{receptorLbl}}</div>
-                    <div layout horizontal>
+                    <div class="layout horizontal">
                         <div><b>${msg.IBANLbl}: </b></div>
                         <div layout vertical>
                             <template repeat="{{IBAN in smimeMessageContent.toUserIBAN}}">
-                                <div on-click="{{showToUserIBAN}}" style="text-decoration: underline; color: #0000ee; cursor: pointer;">{{IBAN}}</div>
+                                <div on-click="showToUserIBAN" style="text-decoration: underline; color: #0000ee; cursor: pointer;">{{IBAN}}</div>
                             </template>
                         </div>
                     </div>
                 </div >
 
-                <div hidden?="{{smimeMessageContent.operation !== 'CURRENCY'}}">
+                <div hidden="{{smimeMessageContent.operation !== 'CURRENCY'}}">
                     <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;color: #621">
                         {{receptorLbl}}
                     </div>
                     <div><b>{{toUserName}}</b></div>
-                    <div layout horizontal>
+                    <div class="layout horizontal">
                         <div><b>${msg.IBANLbl}: </b>{{IBAN}}</div>
                     </div>
                 </div>
@@ -71,9 +71,9 @@
                     </template>
                 </div>
                 <div>
-                    <div flex></div>
-                    <div hidden?="{{!isClientToolConnected}}" horizontal layout end-justified style="margin:10px 0px 10px 0px;">
-                        <button style="font-size: 1.1em;" on-click="{{checkReceipt}}">
+                    <div class="flex"></div>
+                    <div hidden="{{!isClientToolConnected}}" class="horizontal layout end-justified" style="margin:10px 0px 10px 0px;">
+                        <button style="font-size: 1.1em;" on-click="checkReceipt">
                             <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
                         </button>
                     </div>
@@ -82,7 +82,8 @@
         </div>
     </template>
     <script>
-        Polymer('message-smime', {
+        Polymer({
+            is:'message-smime',
             publish: {
                 smimeMessageContent: {value: {}}
             },
@@ -142,20 +143,20 @@
                 }
             },
             showToUserInfo:function(e) {
-                var groupURL = "${restURL}/groupVS/" + e.target.templateInstance.model.smimeMessageContent.toUserVS.id
+                var groupURL = "${restURL}/groupVS/" + e.model.item.toUserVS.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },
             showFromUserInfo:function(group) {
-                var groupURL = "${restURL}/groupVS/" +  e.target.templateInstance.model.smimeMessageContent.fromUserVS.id
+                var groupURL = "${restURL}/groupVS/" +  e.model.item.fromUserVS.id
                 console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showInfoIBAN:function(e) {
-                var fromUserIBANInfoURL = "${restURL}/IBAN/from/" + e.target.templateInstance.model.smimeMessageContent.fromUserVS.sender.fromUserIBAN
+                var fromUserIBANInfoURL = "${restURL}/IBAN/from/" + e.model.item.fromUserVS.sender.fromUserIBAN
                 console.log(this.tagName + " - showInfoIBAN - fromUserIBANInfoURL: " + fromUserIBANInfoURL)
             },
             showToUserIBAN:function(e) {
                 console.log(this.tagName + " - showToUserIBAN - " + e)
-                loadURL_VS("${restURL}/userVS/IBAN/" + e.target.templateInstance.model.iban, '_blank')
+                loadURL_VS("${restURL}/userVS/IBAN/"  e.model.item, '_blank')
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)
@@ -167,4 +168,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

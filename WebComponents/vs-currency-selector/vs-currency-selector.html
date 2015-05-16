@@ -2,10 +2,10 @@
 <link href="../paper-dropdown-menu/paper-dropdown-menu.html" rel="import">
 <link href="../paper-dropdown/paper-dropdown.html" rel="import">
 <link href="../paper-item/paper-item.html" rel="import">
-<link href="../core-menu/core-menu.html" rel="import">
+<link href="../paper-menu/paper-menu.html" rel="import">
 
 
-<polymer-element name="vs-currency-selector" on-core-select="{{selectAction}}">
+<dom-module name="vs-currency-selector" on-iron-select="selectAction">
     <template>
         <style>
             body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
@@ -15,19 +15,20 @@
             }
             .colored { color: #6c0404; }
         </style>
-        <paper-dropdown-menu id="dropDownMenu" valueattr="id" halign="right" style="width: 100px;"
-                             on-core-select="{{configGroup}}">
+        <paper-dropdown-menu id="dropDownMenu" attr-for-selected="id" halign="right" style="width: 100px;"
+                             on-iron-select="configGroup">
             <paper-dropdown class="dropdown colored" transition="">
-                <core-menu valueattr="id" id="currencySelectorCoreMenu" selected="EUR">
+                <paper-menu attr-for-selected="id" id="currencySelectorCoreMenu" selected="EUR">
                     <template repeat="{{currencyCodes}}">
                         <paper-item id="{{code}}">{{name}}</paper-item>
                     </template>
-                </core-menu>
+                </paper-menu>
             </paper-dropdown>
         </paper-dropdown-menu>
     </template>
     <script>
-        Polymer('vs-currency-selector', {
+        Polymer({
+            is:'vs-currency-selector',
             currencyCodes: [
                 {name: 'Euro', code: 'EUR'},
                 {name: 'Dollar', code: 'USD'},
@@ -40,9 +41,9 @@
             selectAction: function(e, details) {
                 if(details.isSelected) {
                     this.fire("selected", details.item.id)
-                    this.fire('core-signal', {name: "vs-currency-selector-selected", data: details.item.id});
+                    this.fire('iron-signal', {name: "vs-currency-selector-selected", data: details.item.id});
                 }
             }
         });
     </script>
-</polymer-element>
+</dom-module>

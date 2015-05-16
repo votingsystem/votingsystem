@@ -7,8 +7,7 @@
     <ui:define name="head">
         <title></title>
         <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"/>
-        <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-        <link href="${resourceURL}/font-roboto/roboto.html" rel="import"/>
+        <link href='//fonts.googleapis.com/css?family=RobotoDraft:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en' rel='stylesheet' type='text/css'/>
         <link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
         <style>
             html,body {
@@ -31,7 +30,7 @@
         <h3 style="text-align: center;">
             <a class="headerTitle" href="${contextURL}">${msg.appTitle}</a>
         </h3>
-        <polymer-element name="info-page-tabs">
+        <dom-module name="info-page-tabs">
             <template>
                 <style shim-shadowdom="">
                     .tabContent {
@@ -55,8 +54,8 @@
                     }
                 </style>
                 <div  style="width: 1000px; margin:0px auto 0px auto;">
-                    <paper-tabs  style="width: 1000px;margin:0px auto 0px auto;" class="transparent-teal center" valueattr="name"
-                                 selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink="">
+                    <paper-tabs  style="width: 1000px;margin:0px auto 0px auto;" class="transparent-teal center" attr-for-selected="name"
+                                 selected="{{selectedTab}}"  on-iron-select="tabSelected" noink="">
                         <paper-tab name="info" style="width: 400px">${msg.infoLbl}</paper-tab>
                         <paper-tab name="appData">${msg.appDataLabel}</paper-tab>
                     </paper-tabs>
@@ -72,11 +71,12 @@
             </template>
 
             <script>
-                Polymer('info-page-tabs', {
+                Polymer({
+                    is:'info-page-tabs',
                     selectedTab:'info'
                 });
             </script>
-        </polymer-element>
+        </dom-module>
         <info-page-tabs style="width: 1000px;"></info-page-tabs>
     </ui:define>
 </ui:composition>

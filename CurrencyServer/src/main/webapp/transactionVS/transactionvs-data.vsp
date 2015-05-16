@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<polymer-element name="transactionvs-data" attributes="transactionvs smimeMessage isClientToolConnected timeStampDate">
+<dom-module name="transactionvs-data" attributes="transactionvs smimeMessage isClientToolConnected timeStampDate">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -14,16 +14,16 @@
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
         .IBANLink{ text-decoration: underline; color: #0000ee; cursor: pointer; }
         </style>
-        <div horizontal layout>
-            <div layout vertical style="margin: 0px auto; max-width:800px; color:#667;">
-                <div horizontal layout center center-justified style="margin: 0 0 10px 0;">
+        <div class="horizontal layout">
+            <div class="layout vertical" style="margin: 0px auto; max-width:800px; color:#667;">
+                <div class="horizontal layout center center-justified" style="margin: 0 0 10px 0;">
                     <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">{{caption}}</div>
                 </div>
 
-                <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
+                <div hidden="{{!timeStampDate}}" class="timeStampMsg">
                     <b>${msg.dateLbl}: </b>{{timeStampDate}}
                 </div>
-                <div hidden?="{{!messageToUser}}">
+                <div hidden="{{!messageToUser}}">
                     <div  layout horizontal center center-justified  class="messageToUser">
                         <div id="messageToUser">{{messageToUser}}</div>
                     </div>
@@ -34,7 +34,7 @@
 
                 <div><b>${msg.amountLbl}: </b>{{transactionvs.amount}} {{transactionvs.currencyCode}}</div>
 
-                <div horizontal layout>
+                <div class="horizontal layout">
                     <div><b>${msg.dateLbl}: </b>{{getDate(transactionvs.dateCreated)}}</div>
                     <template if="{{transactionvs.validTo}}">
                         <div style="margin: 0 0 0 15px;"><b>${msg.validToLbl}: </b>{{transactionvs.validTo}}</div>
@@ -46,7 +46,7 @@
                             ${msg.senderLbl}</div>
                         <div id="fromUserDiv">
                             <div><b>${msg.nameLbl}: </b>{{transactionvs | getFromUserName}}</div>
-                            <div on-click="{{showFromUserIBAN}}">
+                            <div on-click="showFromUserIBAN">
                                 <b>${msg.IBANLbl}: </b>
                                 <span class="IBANLink">{{transactionvs | getFromUserIBAN}}</span>
                             </div>
@@ -54,14 +54,14 @@
                     </div>
                 </template>
 
-                <div hidden?="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
+                <div hidden="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
                     <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621">{{receptorLbl}}</div>
                     <div>
                         <template if="{{!receptorMsg}}">
                             <div><b>${msg.nameLbl}: </b>{{transactionvs.toUserVS.name}}</div>
-                            <div horizontal layout>
+                            <div class="horizontal layout">
                                 <b>${msg.IBANLbl}: </b>
-                                <div on-click="{{showToUserIBAN}}" class="IBANLink"> {{transactionvs.toUserVS.iban}}</div>
+                                <div on-click="showToUserIBAN" class="IBANLink"> {{transactionvs.toUserVS.iban}}</div>
                             </div>
                         </template>
                     </div>
@@ -69,17 +69,17 @@
                 <div hidden="{{!receptorMsg}}" style="margin: 15px 0 15px 0;">{{receptorMsg}}</div>
             </div>
         </div>
-        <div horizontal layout center center-justified style="margin: 20px 0 0 0;">
-            <div hidden?="{{!(transactionvs.tags.length > 0)}}" flex>
+        <div class="horizontal layout center center-justified" style="margin: 20px 0 0 0;">
+            <div hidden="{{!(transactionvs.tags.length > 0)}}" flex>
                 <template repeat="{{tag in transactionvs.tags}}">
                     <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em; padding:2px 5px 7px 5px;">
                         <i class="fa fa-tag" style="color: #888;"></i> {{tag}}</a>
                 </template>
             </div>
-            <div hidden?="{{!isClientToolConnected}}" layout horizontal style="margin:1px 20px 0px 0px;">
-                <div flex></div>
+            <div hidden="{{!isClientToolConnected}}" layout horizontal style="margin:1px 20px 0px 0px;">
+                <div class="flex"></div>
                 <div>
-                    <button on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                    <button on-click="checkReceipt" style="margin: 0px 0px 0px 5px;">
                         <i class="fa fa-certificate" style="color: #388746;"></i>  ${msg.checkSignatureLbl}
                     </button>
                 </div>
@@ -87,7 +87,8 @@
         </div>
     </template>
     <script>
-        Polymer('transactionvs-data', {
+        Polymer({
+            is:'transactionvs-data',
             publish: {
                 transactionvs: {value: {}}
             },
@@ -174,15 +175,15 @@
                 }
             },
             showToUserInfo:function(e) {
-                var groupURL = "${restURL}/groupVS/" + e.target.templateInstance.model.transactionvs.toUserVS.id
+                var groupURL = "${restURL}/groupVS/" + e.model.item.toUserVS.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },
             showFromUserInfo:function(group) {
-                var groupURL = "${restURL}/groupVS/" +  e.target.templateInstance.model.transactionvs.fromUserVS.id
+                var groupURL = "${restURL}/groupVS/" +  e.model.item.fromUserVS.id
                 console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showFromUserIBAN:function(e) {
-                var serviceURL =  "${restURL}/userVS/IBAN/" + this.getFromUserIBAN(e.target.templateInstance.model.transactionvs)
+                var serviceURL =  "${restURL}/userVS/IBAN/" + this.getFromUserIBAN(e.model.item)
                 window.open(serviceURL, '_blank');
             },
             showToUserIBAN:function(e) {
@@ -202,4 +203,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

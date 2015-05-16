@@ -1,17 +1,15 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 <link href="${elementURL}/messageSMIME/message-smime.vsp" rel="import"/>
 
-<polymer-element name="message-smime-dialog" attributes="transactionvsURL opened">
+<dom-module name="message-smime-dialog" attributes="transactionvsURL opened">
     <template>
-        <paper-dialog id="xDialog" layered backdrop class="currencyTransactionDialog" on-core-overlay-open="{{onCoreOverlayOpen}}">
+        <paper-dialog id="xDialog" layered backdrop class="currencyTransactionDialog">
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <core-ajax id="ajax" auto url="{{transactionvsURL}}" response="{{transactionvs}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
-            <div hidden?="{{!isProcessing}}">
+        <iron-ajax id="ajax" auto url="{{transactionvsURL}}" last-response="{{transactionvs}}" handleAs="json" method="get" contentType="application/json"></iron-ajax>
+            <div hidden="{{!isProcessing}}">
                 <div layout vertical center center-justified  style="text-align:center;min-height: 150px;">
                     <progress style="margin:20px auto;"></progress>
                 </div>
@@ -22,7 +20,8 @@
         </paper-dialog>
     </template>
     <script>
-        Polymer('message-smime-dialog', {
+        Polymer({
+            is:'message-smime-dialog',
             transactionvsURL:null,
             isProcessing:true,
             ready: function() {
@@ -46,4 +45,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

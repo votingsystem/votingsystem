@@ -1,19 +1,14 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
-<link href="${resourceURL}/core-signals/core-signals.html" rel="import"/>
 <link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
 <link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
 <link href="${elementURL}/certificateVS/votingsystem-cert.vsp" rel="import"/>
 
-
-<polymer-element name="cert-list" attributes="url menuType">
+<dom-module name="cert-list" attributes="url">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <style no-shim>
-            .view { :host {position: relative;} }
+        <style>
             .certDiv {
                 width:540px;
                 height: 140px;
@@ -30,13 +25,13 @@
                 box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
             }
         </style>
-        <core-ajax id="ajax" url="{{url}}" response="{{resultListDto}}" handleAs="json" method="get" contentType="application/json"></core-ajax>
-        <core-signals on-core-signal-votingsystem-cert-closed="{{closeCertDetails}}"></core-signals>
-        <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
+        <iron-ajax id="ajax" url="{{url}}" last-response="{{resultListDto}}" handleAs="json" method="get" contentType="application/json"></iron-ajax>
+        <iron-signals on-iron-signal-votingsystem-cert-closed="{{closeCertDetails}}"></iron-signals>
+        <core-animated-pages id="pages" flex selected="{{page}}" on-iron-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all">
             <section id="page1">
                 <div cross-fade>
-                    <div layout horizontal center center-justified>
+                    <div class="layout horizontal center center-justified">
                         <select id="certTypeSelect" class="form-control" style="margin:0px auto 0px auto;color:black;
                                 max-width: 400px;" on-change="{{certTypeSelect}}">
                             <option value="&type=USER&state=OK"> - ${msg.certUserStateOKLbl} - </option>
@@ -48,9 +43,9 @@
 
                     <h3><div id="pageHeader" class="pageHeader text-center">{{pageHeader}}</div></h3>
 
-                    <div flex horizontal wrap around-justified layout>
+                    <div class="flex" horizontal wrap around-justified layout>
                         <template repeat="{{cert in resultListDto.resultList}}">
-                            <div class="certDiv" on-tap="{{showCert}}">
+                            <div class="certDiv" on-tap="showCert">
                                 <div>
                                     <div style="display: inline;">
                                         <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
@@ -90,7 +85,8 @@
         </core-animated-pages>
     </template>
     <script>
-        Polymer('cert-list', {
+        Polymer({
+            is:'cert-list',
             publish: { resultListDto: {}},
             ready: function() {
                 console.log(this.tagName + " - ready")
@@ -102,7 +98,7 @@
             },
             showCert :  function(e) {
                 console.log(this.tagName + " - showCertDetails")
-                this.$.certDetails.certvs = e.target.templateInstance.model.cert;
+                this.$.certDetails.certvs = e.model.item;
                 this.page = 1;
             },
             resultListDtoChanged:function() {
@@ -130,7 +126,7 @@
                 history.pushState(null, null, targetURL);
                 this.$.ajax.url = targetURL
                 console.log(this.tagName + "targetURL: " + targetURL)
-                this.$.ajax.go()
+                this.$.ajax.generateRequest()
             },
             certTypeSelect: function () {
                 var optionSelected = this.$.certTypeSelect.value
@@ -139,9 +135,9 @@
                     history.pushState(null, null, targetURL);
                     this.$.ajax.url = targetURL
                     console.log("certTypeSelect - targetURL: " + targetURL)
-                    this.$.ajax.go()
+                    this.$.ajax.generateRequest()
                 }
             }
         });
     </script>
-</polymer-element>
+</dom-module>

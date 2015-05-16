@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<polymer-element name="transactionvs-uservs">
+<dom-module name="transactionvs-uservs">
     <template>
         <div>
             <div style="font-weight: bold;">num. transactionTo: {{balancesDto.transactionToList.length}}</div>
@@ -18,7 +18,8 @@
 
     </template>
     <script>
-        Polymer('transactionvs-uservs', {
+        Polymer({
+            is:'transactionvs-uservs',
             publish: {
                 balancesDto: {value: {}}
             },
@@ -28,4 +29,4 @@
         })
     </script>
 
-</polymer-element>
+</dom-module>

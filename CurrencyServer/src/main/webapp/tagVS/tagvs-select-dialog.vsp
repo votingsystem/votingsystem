@@ -1,85 +1,85 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 <link href="${resourceURL}/paper-input/paper-input.html" rel="import"/>
-<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
+<link href="${resourceURL}/iron-iconset/iron-iconset.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${resourceURL}/paper-dialog/paper-dialog-transition.html" rel="import"/>
 <link href="${resourceURL}/vs-i18n/vs-i18n.html" rel="import">
 
-<polymer-element name="tagvs-select-dialog" attributes="caption serviceURL">
+<dom-module name="tagvs-select-dialog">
 <template>
     <paper-dialog id="xDialog" autoCloseDisabled layered backdrop title="{{caption}}" style="max-width: 600px;">
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <vs-i18n id="i18nVS"></vs-i18n>
-        <div layout vertical>
-            <div layout horizontal center center-justified style="margin:0 0 10px 0;">
-                <div hidden?="{{!caption}}" flex style="font-size: 1.3em; font-weight: bold; color:#6c0404;">
+        <div>
+            <div style="margin:0 0 10px 0;">
+                <div class="flex" style="font-size: 1.3em; font-weight: bold; color:#6c0404;">
                     <div style="text-align: center;">${msg.addTagLbl}</div>
                 </div>
                 <div style="position: absolute; top: 0px; right: 0px;">
-                    <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                    <paper-icon-button on-click="close" icon="close" style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
                 </div>
             </div>
 
-            <div hidden?="{{selectedTagList.length == 0}}" layout vertical wrap style="border: 1px solid #ccc;
+            <div hidden="{{tagBoxHidden}}" layout vertical wrap style="border: 1px solid #ccc;
                     padding:10px; margin:0px 0px 10px 0px; display: block;">
-                <div style="font-weight: bold; margin:0px 0px 5px 0px;">{{messages.selectedTagsLbl}}</div>
-                <div flex horizontal wrap layout>
-                    <template repeat="{{tag in selectedTagList}}">
-                        <div><a class="btn btn-default" on-click="{{removeTag}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
-                            <i class="fa fa-minus"></i> {{tag.name}}</a></div>
+                <div style="font-weight: bold; margin:0px 0px 5px 0px;"><span>{{messages.selectedTagsLbl}}</span></div>
+                <div class="flex horizontal wrap layout">
+                    <template is="dom-repeat" items="{{selectedTagList}}">
+                        <div><a class="btn btn-default" on-click="removeTag" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                            <i class="fa fa-minus"></i> <span>{{item.name}}</span></a></div>
                     </template>
                 </div>
             </div>
 
-            <div layout horizontal center center-justified>
+            <div class="layout horizontal center center-justified">
                 <input id="tagSearchInput" class="form-control" required autofocus
                        title="{{messages.tagLbl}}" placeholder="{{messages.tagLbl}}"/>
-                <button on-click="{{searchTag}}" style="font-size: 1.1em;margin: 0px 0px 0px 5px; width: 160px;">
-                    <i class="fa fa-search"></i> {{messages.tagSearchLbl}}
+                <button on-click="searchTag" style="font-size: 1.1em;margin: 0px 0px 0px 5px; width: 160px;">
+                    <i class="fa fa-search"></i> <span>{{messages.tagSearchLbl}}</span>
                 </button>
             </div>
 
-            <div hidden?="{{!searchString}}">
+            <div hidden="{{!searchString}}">
                 <div style="text-align:center;margin:10px 0 0 10px; font-size: 1.1em;">
-                    {{messages.searchResultLbl}} <b>'{{searchString}}'</b>
+                    <span>{{messages.searchResultLbl}}</span> <b><span>{{searchString}}</span></b>
                 </div>
             </div>
-
             <div>
-                <div flex horizontal wrap layout center center-justified>
-                    <template repeat="{{tag in searchResultTagList}}">
-                        <a class="btn btn-default" on-click="{{selectTag}}" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
-                            <i class="fa fa-plus" style="color: #6c0404;"></i> {{tag.name}}</a>
+                <div class="flex horizontal wrap layout center center-justified">
+                    <template is="dom-repeat" items="[[resultListDto.resultList]]">
+                        <a class="btn btn-default" on-click="selectTag" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                            <i class="fa fa-plus" style="color: #6c0404;"></i> <span>{{item.name}}</span></a>
                     </template>
                 </div>
             </div>
 
-            <div layout horizontal style="margin:20px 0 0 0;">
-                <div flex></div>
-                <button on-click="{{processTags}}" style="font-size: 1.1em;">
-                    <i class="fa fa-check" style="color: #388746;"></i> {{messages.acceptLbl}}
+            <div class="layout horizontal" style="margin:20px 0 0 0;">
+                <div class="flex"></div>
+                <button on-click="processTags" style="font-size: 1.1em;">
+                    <i class="fa fa-check" style="color: #388746;"></i> <span>{{messages.acceptLbl}}</span>
                 </button>
             </div>
         </div>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{resultListDto}}" handleAs="json" method="get"
-                   contentType="application/json"></core-ajax>
+        <iron-ajax id="ajax" auto url="{{url}}" last-response="{{resultListDto}}" handleAs="json" method="get"
+                   contentType="application/json"></iron-ajax>
     </paper-dialog>
 </template>
 <script>
-    Polymer('tagvs-select-dialog', {
-        caption: null,
-        isShowingTags: false,
-        maxNumberTags:3,
-        serviceURL: null,
-        searchString:null,
+    Polymer({
+        is:'tagvs-select-dialog',
+        properties: {
+            searchString:{type:String, value:null},
+            numTags:{type:Number, value:1},
+            caption:{type:String, value:null},
+            tagBoxHidden:{type:Boolean, value:false},
+            serviceUrl:{type:String},
+            resultListDto:{type:Object},
+            searchResultTagList:{type:Array, value:[]}
+        },
         ready: function() {
             this.messages = this.$.i18nVS.getMessages()
-            this.selectedTagList = []
-            this.searchResultTagList =[]
             this.$.tagSearchInput.onkeypress = function(event){
                 if (event.keyCode == 13) this.searchTag()
             }.bind(this)
@@ -87,35 +87,28 @@
         close:function() {
             this.$.xDialog.opened = false
             this.$.tagSearchInput.value = ''
-            this.searchResultTagList = []
             this.selectedTagList = []
             this.$.tagSearchInput.value = ""
-            this.isShowingTags = false
             this.searchString = null
             this.$.ajax.url = ""
         },
-        resultListDtoChanged:function () {
-            if(this.resultListDto != null) this.searchResultTagList = this.resultListDto.resultList
-            else this.searchResultTagList = []
-        },
         searchTag: function() {
             if(this.$.tagSearchInput.validity.valid) {
-                this.$.ajax.url = this.serviceURL + "?tag=" + this.$.tagSearchInput.value
+                this.$.ajax.url = this.serviceUrl + "?tag=" + this.$.tagSearchInput.value
                 console.log(this.tagName + " - searchTag - this.$.ajax.url: " + this.$.ajax.url)
                 this.searchString = this.$.tagSearchInput.value
             }
         },
-
         selectTag: function(e) {
-            var selectedTag = e.target.templateInstance.model.tag
+            var selectedTag = e.model.item
             var isNewTag = true
             for(tagIdx in this.selectedTagList) {
                 if(selectedTag.id == this.selectedTagList[tagIdx].id) isNewTag = false
             }
-            console.log("selectTag: " + selectedTag.id + " - isNewTag: " + isNewTag + " - maxNumTags: " + this.maxNumTags +
-                    " - num. tags selected: " + this.selectedTagList.length)
+            console.log("selectTag: " + selectedTag.id + " - isNewTag: " + isNewTag + " - numTags: " + this.numTags +
+                    " - num. tags selected: " + this.selectedTagList.length + " - selectedTagList: " + this.selectedTagList)
             if(isNewTag) {
-                if(this.selectedTagList.length == this.maxNumTags ) {
+                if(this.selectedTagList.length == this.numTags ) {
                     this.searchResultTagList.push(this.selectedTagList[0])
                     this.selectedTagList.splice(0, 1)
                 }
@@ -124,10 +117,11 @@
                     if(selectedTag.id == this.searchResultTagList[tagIdx].id) this.searchResultTagList.splice(tagIdx, 1)
                 }
             }
+            this.selectedTagList = this.selectedTagList.slice(0) //to make changes visible to template
+            this.tagBoxHidden = (this.selectedTagList.length === 0)
         },
-
         removeTag: function(e) {
-            var selectedTag = e.target.templateInstance.model.tag
+            var selectedTag = e.model.item
             for(tagIdx in this.selectedTagList) {
                 if(selectedTag.id == this.selectedTagList[tagIdx].id) {
                     this.selectedTagList.splice(tagIdx, 1)
@@ -135,26 +129,21 @@
                 }
             }
         },
-
         reset: function() {
             this.selectedTagList = []
             this.searchResultTagList = []
         },
-
-        show: function (maxNumberTags, selectedTags) {
-            this.maxNumTags = maxNumberTags
+        show: function (numTags, selectedTags) {
+            if(numTags != null) this.numTags = numTags
             if(selectedTags == null) this.selectedTagList = []
             else this.selectedTagList = selectedTags
-            this.isShowingTags = true
             this.$.xDialog.title = this.caption
             this.$.xDialog.opened = true
         },
-
         processTags: function() {
             this.fire('tag-selected', this.selectedTagList);
             this.close()
         }
-
     });
 </script>
-</polymer-element>
+</dom-module>

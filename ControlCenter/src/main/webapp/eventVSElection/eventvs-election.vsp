@@ -1,11 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
 <link href="${elementURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
 
-<polymer-element name="eventvs-election" attributes="subpage">
+<dom-module name="eventvs-election" attributes="subpage">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -15,13 +14,13 @@
             <div style="margin: 0px 30px;">
             <div layout horizontal center center-justified style="width:100%;">
                 <template if="{{subpage}}">
-                    <paper-fab mini icon="arrow-back" on-click="{{back}}" style="color: white;"></paper-fab>
+                    <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
                 </template>
-                <div flex id="pageTitle" eventvsId-data="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
+                <div class="flex" id="pageTitle" eventvsId-data="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
             </div>
 
             <div layout horizontal style="width: 100%;">
-                <div flex>
+                <div class="flex">
                     <template if="{{'PENDING' == eventvs.state}}">
                         <div style="font-size: 1.2em; font-weight:bold;color:#fba131;">${msg.eventVSPendingMsg}</div>
                     </template>
@@ -41,7 +40,7 @@
                     <b>${msg.publishedByLbl}: </b>{{eventvs.userVS}}
                 </div>
 
-                <div horizontal layout class="fieldsBox" style="">
+                <div class="horizontal layout fieldsBox">
                     <div style="width: 100%;">
                         <fieldset>
                             <legend>${msg.pollFieldLegend}</legend>
@@ -56,9 +55,9 @@
                         </fieldset>
                         <div style="margin: 10px 0 0 0;">
                             <template if="{{'TERMINATED' == eventvs.state}}">
-                                <paper-button raised on-click="{{getResults}}">
+                                <button on-click="getResults">
                                     <i class="fa fa-bar-chart"></i> ${msg.getResultsLbl}
-                                </paper-button>
+                                </button>
                             </template>
                         </div>
                     </div>
@@ -71,8 +70,8 @@
         <eventvs-admin-dialog id="eventVSAdminDialog"></eventvs-admin-dialog>
     </template>
     <script>
-        Polymer('eventvs-election', {
-            menuType:menuType,
+        Polymer({
+            is:'eventvs-election',
             publish: {
                 eventvs: {value: {}}
             },
@@ -83,7 +82,7 @@
                 return decodeURIComponent(escape(window.atob(base64EncodedString)))
             },
             fireSignal:function() {
-                this.fire('core-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
+                this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
             },
             eventvsChanged:function() {
                 this.optionVSSelected = null
@@ -114,8 +113,8 @@
                 } else window.location.href = fileURL
             },
             back:function() {
-                this.fire('core-signal', {name: "eventvs-election-closed", data: null});
+                this.fire('iron-signal', {name: "eventvs-election-closed", data: null});
             }
         });
     </script>
-</polymer-element>
+</dom-module>

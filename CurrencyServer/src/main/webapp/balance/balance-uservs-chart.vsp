@@ -2,15 +2,16 @@
 
 <link rel="import" href="${resourceURL}/vs-highcharts/highcharts-import.html">
 
-<polymer-element name="balance-uservs-chart" attributes="chart title yAxisTitle xAxisCategories">
+<dom-module name="balance-uservs-chart" attributes="chart title yAxisTitle xAxisCategories">
     <template>
         <style></style>
-        <div horizontal layout center center-justified>
+        <div class="horizontal layout center center-justified">
             <div id="container" style="padding: 10px;"></div>
         </div>
     </template>
     <script>
-        Polymer('balance-uservs-chart', {
+        Polymer({
+            is:'balance-uservs-chart',
             title:null,
             chart:null,
             yAxisTitle:null,
@@ -73,4 +74,4 @@
         });
 
     </script>
-</polymer-element>
+</dom-module>

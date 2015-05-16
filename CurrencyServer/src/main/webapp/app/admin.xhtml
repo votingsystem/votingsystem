@@ -4,8 +4,8 @@
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="head">
         <script>
-            if(document.querySelector("#coreSignals") != null) openDrawer()
-            else document.addEventListener('polymer-ready', function() { openDrawer() })
+            if(document.querySelector("#ironSignals") != null) openDrawer()
+            else document.addEventListener('WebComponentsReady', function() { openDrawer() })
             function openDrawer() {
                 document.querySelector('html /deep/ #_navbar').openDrawer()
             }

@@ -3,7 +3,7 @@
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 
 
-<polymer-element name="message-smime-transactionvs-currency-request" attributes="smimeMessageContent smimeMessage timeStampDate">
+<dom-module name="message-smime-transactionvs-currency-request" attributes="smimeMessageContent smimeMessage timeStampDate">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -18,26 +18,26 @@
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic; }
         .iban-link {text-decoration: underline; color: #0000ee; cursor: pointer;}
         </style>
-        <div layout horizontal center center-justified>
-            <div layout vertical style="margin: 0px auto; color: #667;">
-                <div horizontal layout center center-justified style="margin: 0 0 10px 0; min-width: 400px;">
+        <div class="layout vertical center center-justified" style="margin: 0px auto; max-width:800px;">
+            <div class="layout vertical" style="margin: 0px auto; color: #667;">
+                <div class="horizontal layout center center-justified" style="margin: 0 0 10px 0; min-width: 400px;">
                     <div class="pageHeader" style="margin:0 0 0 20px; font-size: 1.2em;">
                         ${msg.currencyRequestLbl}
                     </div>
                 </div>
 
-                <div hidden?="{{!timeStampDate}}" class="timeStampMsg" style="text-align: center;">
-                    <b>${msg.dateLbl}: </b> {{timeStampDate}}
+                <div hidden="{{!timeStampDate}}" class="timeStampMsg" style="text-align: center;">
+                    <b>${msg.dateLbl}: </b> <span>{{timeStampDate}}</span>
                 </div>
-                <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
+                <div hidden="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
                     <div id="messageToUser">{{messageToUser}}</div>
                 </div>
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-                <div horizontal layout center-justified>
+                <div class="horizontal layout center-justified">
                     <div style="font-size: 1.1em;"><b>${msg.amountLbl}: </b>
-                        {{smimeMessageContent.totalAmount}} {{smimeMessageContent.currencyCode}}</div>
+                        <span>{{smimeMessageContent.totalAmount}}</span> <span>{{smimeMessageContent.currencyCode}}</span></div>
                     <div style="margin:0 0 0 10px;">
-                         ${msg.timeLimitedDateMsg} '{{smimeMessageContent.validTo}}'
+                         ${msg.timeLimitedDateMsg} '<span>{{smimeMessageContent.validTo}}</span>'
                     </div>
                 </div>
                 <div style="margin: 20px 0 0 20px;">
@@ -46,13 +46,13 @@
                         <div><b>${msg.nameLbl}:  </b>{{smimeMessageContent.fromUserVS.name}}</div>
                     </div>
                 </div>
-                <div horizontal layout style="margin:10px 0px 10px 0px; ">
-                    <div flex>
+                <div class="horizontal layout" style="margin:10px 0px 10px 0px; ">
+                    <div class="flex">
                         <a class="btn btn-default" style="font-size: 0.7em;padding:3px;">
                             <i class="fa fa-tag" style="color: #888;"></i> {{smimeMessageContent.tagVS.name}}</a>
                     </div>
-                    <div hidden?="{{!isClientToolConnected}}">
-                        <button raised on-click="{{checkReceipt}}" style="font-size: 1.1em;">
+                    <div hidden="{{!isClientToolConnected}}">
+                        <button raised on-click="checkReceipt" style="font-size: 1.1em;">
                             <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
                         </button>
                     </div>
@@ -63,7 +63,8 @@
 
     </template>
     <script>
-        Polymer('message-smime-transactionvs-currency-request', {
+        Polymer({
+            is:'message-smime-transactionvs-currency-request',
             publish: {
                 smimeMessageContent: {value: {}}
             },
@@ -87,7 +88,7 @@
             },
             showToUserVSByIBAN:function(e) {
                 console.log(this.tagName + " - showUserVSByIBAN - " + e)
-                loadURL_VS("${restURL}/userVS/IBAN/" + e.target.templateInstance.model.iban, '_blank')
+                loadURL_VS("${restURL}/userVS/IBAN/" + e.model.item, '_blank')
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)
@@ -99,4 +100,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

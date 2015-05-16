@@ -15,9 +15,9 @@
         <div class="pageContentDiv">
             <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
                 <c:if test="#{'admin'.equals(param.menu) || 'superuser'.equals(param.menu)}">
-                    <paper-button raised="true" onclick="document.querySelector('#reasonDialog').toggle()">
+                    <button onclick="document.querySelector('#reasonDialog').toggle()">
                         ${msg.cancelCertLbl}
-                    </paper-button>
+                    </button>
                 </c:if>
             </div>
         </div>

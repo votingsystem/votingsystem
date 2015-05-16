@@ -1,8 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-
-<polymer-element name="transactionvs-selector" attributes="transactionvsType">
+<dom-module name="transactionvs-selector" attributes="transactionvsType">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -20,15 +18,16 @@
         </select>
     </template>
     <script>
-        Polymer('transactionvs-selector', {
+        Polymer({
+            is:'transactionvs-selector',
             ready: function() {
                 console.log(this.tagName + " - ready")
                 if(this.transactionvsType) this.$.transactionvsTypeSelect.value = this.transactionvsType
             },
             transactionvsTypeSelect:function() {
                 this.fire("selected", this.$.transactionvsTypeSelect.value)
-                this.fire('core-signal', {name: "transactionvs-selector-selected", data: this.$.transactionvsTypeSelect.value});
+                this.fire('iron-signal', {name: "transactionvs-selector-selected", data: this.$.transactionvsTypeSelect.value});
             }
         });
     </script>
-</polymer-element>
+</dom-module>

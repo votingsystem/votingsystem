@@ -1,17 +1,15 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 <link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-form.vsp" rel="import"/>
 <link href="${elementURL}/element/messagevs-send-dialog.vsp" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-table.vsp" rel="import"/>
 
-<polymer-element name="uservs-data" attributes="messageToUser">
+<dom-module name="uservs-data" attributes="messageToUser">
 <template>
     <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
     <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-    <style no-shim>
+    <style>
         .uservsCancelled {
             background: #ff0000; opacity:0.5; left:20%; top:-60px; font-size: 1.8em; font-weight: bold;
             color:#f9f9f9; text-align: center; text-transform:uppercase; transform:rotate(20deg);
@@ -19,52 +17,52 @@
         }
     </style>
 
-    <core-ajax id="ajax" on-core-response="{{ajaxResponse}}" handleAs="json"
-               method="get" contentType="application/json"></core-ajax>
-    <core-animated-pages id="pages" flex selected="{{page}}" on-core-animated-pages-transition-end="{{transitionend}}"
+    <iron-ajax id="ajax" on-iron-response="{{ajaxResponse}}" handleAs="json"
+               method="get" contentType="application/json"></iron-ajax>
+    <core-animated-pages id="pages" flex selected="{{page}}" on-iron-animated-pages-transition-end="{{transitionend}}"
              transitions="cross-fade-all">
         <section id="page1">
-            <div hidden?="{{!uservs.name}}">
+            <div hidden="{{!uservs.name}}">
                 <div layout horizontal center center-justified style="margin: 0 0 15px 0;">
-                    <div hidden?="{{!uservs.firstName}}" flex>
+                    <div hidden="{{!uservs.firstName}}" flex>
                         <div  style="margin: 0 0 0 0; font-size: 0.8em;" flex>{{uservs.firstName}} {{uservs.lastName}}</div>
                     </div>
-                    <div flex style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
+                    <div class="flex" style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
                         <div userId-data="{{uservs.id}}" style="text-align: center;">{{uservs.name}}</div>
                     </div>
-                    <div flex style="margin: 0 0 0 0; font-size: 0.8em;vertical-align: bottom;">
+                    <div class="flex" style="margin: 0 0 0 0; font-size: 0.8em;vertical-align: bottom;">
                         <b>IBAN: </b>{{uservs.iban}}
                     </div>
                 </div>
-                <div hidden?="{{uservs.state === 'ACTIVE'}}" class="uservsCancelled">{{uservs.state}}</div>
-                <div hidden?="{{uservs.state !== 'ACTIVE'}}" layout horizontal center center-justified style="margin:0px 0px 10px 0px;">
-                    <div hidden?="{{!isClientToolConnected || uservs.connectedDevices.length === 0}}" style="margin:0 20px 0 0;">
-                        <a class="btn btn-red" on-click="{{showMessageVSDialog}}">
+                <div hidden="{{uservs.state === 'ACTIVE'}}" class="uservsCancelled">{{uservs.state}}</div>
+                <div hidden="{{uservs.state !== 'ACTIVE'}}" layout horizontal center center-justified style="margin:0px 0px 10px 0px;">
+                    <div hidden="{{!isClientToolConnected || uservs.connectedDevices.length === 0}}" style="margin:0 20px 0 0;">
+                        <a class="btn btn-red" on-click="showMessageVSDialog">
                             <i class="fa fa-envelope-o"></i> ${msg.sendMessageVSLbl}
                         </a>
                     </div>
-                    <div hidden?="{{'BANKVS' == uservs.type || !isClientToolConnected}}" style="margin:0 20px 0 0;">
-                        <a class="btn btn-red" on-click="{{makeTransactionVS}}">
+                    <div hidden="{{'BANKVS' == uservs.type || !isClientToolConnected}}" style="margin:0 20px 0 0;">
+                        <a class="btn btn-red" on-click="makeTransactionVS">
                             <i class="fa fa-money"></i> ${msg.sendTransactionVSLbl}
                         </a>
                     </div>
                     <div style="margin:0 20px 0 0;">
-                        <a class="btn btn-red" on-click="{{goToWeekBalance}}">
+                        <a class="btn btn-red" on-click="goToWeekBalance">
                             <i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}
                         </a>
                     </div>
-                    <div hidden?="{{'superuser' !== menuType}}" style="margin:0 20px 0 0;">
-                        <a class="btn btn-red" on-click="{{blockUser}}">
+                    <div hidden="{{'superuser' !== menuType}}" style="margin:0 20px 0 0;">
+                        <a class="btn btn-red" on-click="blockUser">
                             ${msg.blockUserVSLbl} <i class="fa fa fa-thumbs-o-down"></i>
                         </a>
                     </div>
                 </div>
-                <div hidden?="{{!uservs.description}}" style="margin:0 0 20px 0;">
+                <div hidden="{{!uservs.description}}" style="margin:0 0 20px 0;">
                     <div id="userDescriptionDiv" class="eventContentDiv" style=" border: 1px solid #c0c0c0;padding:10px;">
                         <vs-html-echo html="{{uservs.description}}"></vs-html-echo>
                     </div>
                 </div>
-                <div hidden?="{{!uservs.subscriptionVSList ||  uservs.subscriptionVSList.length === 0}}"
+                <div hidden="{{!uservs.subscriptionVSList ||  uservs.subscriptionVSList.length === 0}}"
                      layout flex horizontal wrap style="border:1px solid #eee; padding: 5px;">
                     <div style="font-size: 0.9em;font-weight: bold; color: #888; margin:0 15px 0 0;">
                         - ${msg.groupsLbl} -
@@ -85,16 +83,15 @@
     <messagevs-send-dialog id="sendMessageDialog" on-message-response="{{sendMessageDialogResponse}}"></messagevs-send-dialog>
 </template>
 <script>
-    Polymer('uservs-data', {
+    Polymer({
+        is:'uservs-data',
         isActive:false,
-        menuType:null,
         uservsType:'',
         isClientToolConnected:false,
         publish: {
             uservsDto: {}
         },
         ready: function() {
-            this.menuType = menuType
             this.isClientToolConnected = window['isClientToolConnected']
             console.log(this.tagName + " - ready - menuType: " + this.menuType + " - isClientToolConnected: " + isClientToolConnected)
             this.$.transactionvsForm.addEventListener('operation-finished', function (e) {
@@ -111,7 +108,7 @@
                 if('BANKVS' == this.uservs.type) uservsType = "${msg.bankVSLbl}"
                 if('USER' == this.uservs.type) uservsType = "${msg.userLbl}"
                 if('SYSTEM' == this.uservs.type) uservsType = "${msg.systemLbl}"
-                this.fire('core-signal', {name: "vs-innerpage", data: {caption:uservsType}});
+                this.fire('iron-signal', {name: "vs-innerpage", data: {caption:uservsType}});
             }
         },
         goToWeekBalance:function() {
@@ -134,7 +131,7 @@
             if(this.$.ajax.url != serviceURL) {
                 console.log(this.tagName + " - showByIBAN - url: " + serviceURL)
                 this.$.ajax.url = serviceURL
-                this.$.ajax.go()
+                this.$.ajax.generateRequest()
             }
         },
         showMessageVSDialog: function () {
@@ -155,4 +152,4 @@
     });
 
 </script>
-</polymer-element>
+</dom-module>

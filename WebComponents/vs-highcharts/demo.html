@@ -1,11 +1,12 @@
 <link rel="import" href="highcharts-import.html">
 
-<polymer-element name="vs-highcharts" attributes="chart title yAxisTitle xAxisCategories">
+<dom-module name="vs-highcharts" attributes="chart title yAxisTitle xAxisCategories">
     <template>
         <div id="container"></div>
     </template>
     <script>
-        Polymer('vs-highcharts', {
+        Polymer({
+            is:'vs-highcharts',
             chart:null,
             title:null,
             yAxisTitle:null,
@@ -45,4 +46,4 @@
         });
 
     </script>
-</polymer-element>
+</dom-module>

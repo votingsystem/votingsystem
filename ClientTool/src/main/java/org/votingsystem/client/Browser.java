@@ -228,7 +228,7 @@ public class Browser extends VBox implements BrowserVS {
     }
 
     public void fireCoreSignal(String name, Object data, boolean fireToAllTabs) {
-        //this.fire('core-signal', {name: "vs-session-data", data: sessionDataJSON});
+        //this.fire('iron-signal', {name: "vs-session-data", data: sessionDataJSON});
         try {
             Map coreSignal = new HashMap<>();
             coreSignal.put("name", name);

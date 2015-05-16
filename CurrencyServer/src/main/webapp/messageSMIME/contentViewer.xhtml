@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="shortcut icon" href="${elementURL}/images/icon_16/fa-bolt.png" type="image/x-icon"/>
-    <script src="${resourceURL}/webcomponentsjs/webcomponents.min.js" type="text/javascript"></script>
+    <script src="${resourceURL}/webcomponentsjs/webcomponents-lite.min.js" type="text/javascript"></script>
     <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
     <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
     <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
@@ -14,14 +14,14 @@
     <script src="${contextURL}/jsf/resources/js/utils_js.jsp" type="text/javascript"/>
     <link href="${elementURL}/messageSMIME/${viewer}.vsp" rel="import"/>
 </h:head>
-<h:body id="voting_system_page">
+<h:body>
 
-    <div id="voting_system_page" layout="" horizontal="" center="" center-justified=""></div>
+    <div id="voting_system_page" class="layout vertical center center-justified"> </div>
     <div id="smimeMessage" style="display:none;">${smimeMessage}</div>
 
     <script>
-        document.addEventListener('polymer-ready', function() {
-            console.log("receiptViewer - polymer-ready")
+        document.addEventListener('WebComponentsReady', function() {
+            console.log("receiptViewer - WebComponentsReady")
             var viewer = document.createElement('${viewer}');
             sendSignalVS({caption:"${msg.signedDocumentLbl}"})
             document.querySelector("#voting_system_page").appendChild(viewer)

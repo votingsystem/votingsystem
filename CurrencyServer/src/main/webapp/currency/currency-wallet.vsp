@@ -1,11 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 <link href="${elementURL}/currency/currency-wallet-tag-group.vsp" rel="import"/>
 
 
-<polymer-element name="currency-wallet"  on-core-select="{{selectAction}}">
+<dom-module name="currency-wallet"  on-iron-select="selectAction">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -15,7 +14,7 @@
             }
         </style>
         <div vertical layout>
-            <div hidden?="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
+            <div hidden="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
                 <div class="messageToUser">
                     <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                         <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
@@ -23,16 +22,16 @@
                     </div>
                 </div>
             </div>
-            <div hidden?="{{walletLoaded}}" horizontal layout center center-justified style="font-size: 0.9em; ">
-                <paper-button raised on-click="{{showPasswdDialog}}" style="margin: 30px 0px 0px 5px;">
+            <div hidden="{{walletLoaded}}" class="horizontal layout center center-justified" style="font-size: 0.9em; ">
+                <button on-click="showPasswdDialog" style="margin: 30px 0px 0px 5px;">
                     <i class="fa fa-money"></i> ${msg.accessToWalletMsg}
-                </paper-button>
+                </button>
             </div>
         </div>
-        <div  layout horizontal center-justified>
+        <div class="layout horizontal center-justified">
             <template repeat="{{tag in plainWalletTagArray}}">
                 <currency-wallet-tag-group tag={{tag}} currencyArray="{{plainWalletTagGroups[tag]}}"
-                                         style="margin:10px 10px 0px 0px; border: 1px solid #ccc;"></currency-wallet-tag-group>
+                     style="margin:10px 10px 0px 0px; border: 1px solid #ccc;"></currency-wallet-tag-group>
             </template>
         </div>
         <template repeat="{{tag in tagArray}}">
@@ -40,7 +39,8 @@
         </template>
     </template>
     <script>
-        Polymer('currency-wallet', {
+        Polymer({
+            is:'currency-wallet',
             selectedTags: [],
             currencyCode:null,
             plainWallet:null,
@@ -97,4 +97,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

@@ -1,18 +1,17 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
 <link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
 <link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
 
 
-<polymer-element name="eventvs-admin-dialog" attributes="opened">
+<dom-module name="eventvs-admin-dialog" attributes="opened">
     <template>
         <paper-dialog flex vertical id="xDialog" layered backdrop opened="{{opened}}" layered="true" sizingTarget="{{$.container}}">
             <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <!-- place all overlay styles inside the overlay target -->
-            <style no-shim>
+            <style>
                 .messageToUser {
                     font-weight: bold;
                     margin:10px auto 10px auto;
@@ -21,16 +20,16 @@
                 }
             </style>
             <div id="container" layout vertical style="overflow-y: auto; width:450px; padding:10px;">
-                <div layout horizontal center center-justified>
-                    <div flex style="font-size: 1.5em; margin:0px 0px 0px 30px;font-weight: bold; color:#6c0404;">
+                <div class="layout horizontal center center-justified">
+                    <div class="flex" style="font-size: 1.5em; margin:0px 0px 0px 30px;font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">${msg.cancelEventCaption}</div>
                     </div>
                     <div style="position: absolute; top: 0px; right: 0px;">
-                        <core-icon-button on-click="{{close}}" icon="close" style="fill:#6c0404; color:#6c0404;"></core-icon-button>
+                        <paper-icon-button on-click="close" icon="close" style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
                     </div>
                 </div>
 
-                <div hidden?="{{!messageToUser}}" layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
+                <div hidden="{{!messageToUser}}" layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
                     <div class="messageToUser">
                         {{messageToUser}}
                     </div>
@@ -55,16 +54,17 @@
                     </div>
                 </div>
                 <div layout horizontal style="margin:10px 20px 0px 0px; margin:10px;">
-                    <div flex></div>
-                    <paper-button raised on-click="{{submitForm}}" style="margin: 0px 0px 0px 5px;">
+                    <div class="flex"></div>
+                    <button on-click="submitForm" style="margin: 0px 0px 0px 5px; font-size: 1.1em;">
                         <i class="fa fa-check"></i> ${msg.acceptLbl}
-                    </paper-button>
+                    </button>
                 </div>
             </div>
         </paper-dialog>
     </template>
     <script>
-        Polymer('eventvs-admin-dialog', {
+        Polymer({
+            is:'eventvs-admin-dialog',
             publish: {
                 eventvs: {value: {}}
             },
@@ -123,4 +123,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

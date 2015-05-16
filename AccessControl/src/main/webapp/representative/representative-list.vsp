@@ -6,11 +6,11 @@
 <link href="${elementURL}/representative/representation-state.vsp" rel="import"/>
 
 
-<polymer-element name="representative-list" attributes="url">
+<dom-module name="representative-list" attributes="url">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <style no-shim>
+        <style>
         .card {
             position: relative;
             display: inline-block;
@@ -55,14 +55,14 @@
             text-overflow: ellipsis;
         }
         </style>
-        <core-signals on-core-signal-representative-closed="{{closeRepresentativeDetails}}"></core-signals>
-        <core-animated-pages hidden?="{{loading}}" id="pages" flex selected="{{page}}"
-                             on-core-animated-pages-transition-end="{{transitionend}}" transitions="cross-fade-all" >
+        <iron-signals on-iron-signal-representative-closed="{{closeRepresentativeDetails}}"></iron-signals>
+        <core-animated-pages hidden="{{loading}}" id="pages" flex selected="{{page}}"
+                             on-iron-animated-pages-transition-end="{{transitionend}}" transitions="cross-fade-all" >
             <section id="page1">
                 <div cross-fade>
-                    <div layout flex horizontal wrap around-justified>
+                    <div class="layout flex horizontal wrap around-justified">
                         <template repeat="{{representative in representativeData.resultList}}">
-                            <div horizontal layout center center-centerjustified on-tap="{{showRepresentativeDetails}}" class='card representativeDiv'>
+                            <div on-tap="showRepresentativeDetails" class='card representativeDiv horizontal layout center center-centerjustified'>
                                 <div class='representativeImgCol'>
                                     <img src='{{representative.imageURL}}'/>
                                 </div>
@@ -87,7 +87,8 @@
         <representation-state id="representationState"></representation-state>
     </template>
     <script>
-        Polymer('representative-list', {
+        Polymer({
+            is:'representative-list',
             publish: {
                 representativeData: {value: {}}
             },
@@ -110,7 +111,7 @@
             },
             showRepresentativeDetails :  function(e) {
                 console.log(this.tagName + " - showRepresentativeDetails")
-                this.$.representativeDetails.representative = e.target.templateInstance.model.representative;
+                this.$.representativeDetails.representative = e.model.item;
                 this.page = 1;
             },
             getRepresentativeName:function(groupvs) {
@@ -121,4 +122,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

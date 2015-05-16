@@ -8,32 +8,31 @@
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
     </ui:define>
     <ui:define name="content">
-        <div layout="" flex="" horizontal="" wrap="" around-justified="">
-            <div layout="" vertical="">
+        <div class="layout flex horizontal wrap around-justified">
+            <div class="layout vertical">
                 <div>
-                    <paper-button raised="" onclick="sendTransactionVSFromBankVS()" style="margin: 0px 0px 0px 5px;">
+                    <button onclick="sendTransactionVSFromBankVS()" style="margin: 0px 0px 0px 5px;">
                         TransactionVS from BankVS
-                    </paper-button>
+                    </button>
                 </div>
-
             </div>
 
-            <div layout="" vertical="">
-                <div layout="" horizontal="" center="" center-justified="">
-                    <paper-button raised="" style="margin: 0px 0px 0px 5px;">TransactionVS</paper-button>
+            <div class="layout vertical">
+                <div class="layout horizontal center center-justified">
+                    <button style="margin: 0px 0px 0px 5px;">TransactionVS</button>
                     - http://currency:8086/CurrencyServer/transaction
                 </div>
                 <div id="transactionvsEditor" style="width: 500px; height: 300px;"></div>
             </div>
 
-            <div layout="" vertical="">
+            <div class="layout vertical">
                 New BankVS
                 <div id="newBankVSEditor" style="width: 500px; height: 400px;"></div>
             </div>
 
-            <div layout="" vertical="">
-                <div><paper-button raised="" onclick="signWithMobile()" style="margin: 0px 0px 0px 5px;">
-                    SignWithMobile</paper-button></div>
+            <div class="layout vertical">
+                <div><button onclick="signWithMobile()" style="margin: 0px 0px 0px 5px;">
+                    SignWithMobile</button></div>
                 <div id="signWithMobileEditor" style="width: 500px; height: 400px;"></div>
             </div>
         </div>

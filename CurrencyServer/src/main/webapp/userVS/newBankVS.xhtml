@@ -29,12 +29,12 @@
                              label="${msg.IBANLbl}" validate="" error="${msg.requiredLbl}" required="">
                     </paper-input>
 
-                    <div layout="" vertical="" style="margin:15px 0px 0px 0px;">
+                    <div style="margin:15px 0px 0px 0px;">
                         <label>${msg.descriptionLbl}</label>
                         <textarea id="description" rows="8" required=""></textarea>
                     </div>
 
-                    <div layout="" vertical="" style="margin:15px 0px 0px 0px;">
+                    <div style="margin:15px 0px 0px 0px;">
                         <label>${msg.pemCertLbl}</label>
                         <textarea id="pemCert" rows="8" required=""></textarea>
                     </div>
@@ -95,7 +95,7 @@
             }
 
             function listenToNewBankResult() {
-                document.querySelector("#coreSignals").addEventListener('core-signal-messagedialog-closed', function(e) {
+                document.querySelector("#ironSignals").addEventListener('iron-signal-messagedialog-closed', function(e) {
                     if(appMessageJSON != null) {
                         if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                             window.location.href = updateMenuLink(appMessageJSON.URL)
@@ -104,8 +104,8 @@
                 });
             }
 
-            if(document.querySelector("#coreSignals") != null) listenToNewBankResult()
-            else document.addEventListener('polymer-ready', function() { listenToNewBankResult() })
+            if(document.querySelector("#ironSignals") != null) listenToNewBankResult()
+            else document.addEventListener('WebComponentsReady', function() { listenToNewBankResult() })
 
         </script>
     </ui:define>

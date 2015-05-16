@@ -1,12 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 <link href="${resourceURL}/paper-dropdown-menu/paper-dropdown-menu.html" rel="import"/>
 <link href="${resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
-<link href="${resourceURL}/core-menu/core-menu.html" rel="import"/>
+<link href="${resourceURL}/paper-menu/paper-menu.html" rel="import"/>
 
-<polymer-element name="uservs-dashboard" attributes="dashBoardDto">
+<dom-module name="uservs-dashboard" attributes="dashBoardDto">
     <template>
         <style>
             .transBlock { border: 1px solid #6c0404; margin: 10px;
@@ -19,28 +17,28 @@
                 color: #6c0404;
             }
         </style>
-        <core-ajax id="ajax" url="{{url}}" handleAs="json" response="{{dashBoardDto}}" method="get" contentType="application/json"></core-ajax>
+        <iron-ajax id="ajax" url="{{url}}" handleAs="json" last-response="{{dashBoardDto}}" method="get" contentType="application/json"></iron-ajax>
         <div id="selectorContainer" layout horizontal center center-justified relative>
-            <paper-dropdown-menu id="dropDownMenu" halign="right" on-core-select="{{selectAction}}">
+            <paper-dropdown-menu id="dropDownMenu" halign="right" on-iron-select="selectAction">
                 <paper-dropdown class="dropdown colored" transition="">
-                    <core-menu selected="0">
+                    <paper-menu selected="0">
                         <paper-item>${msg.lastHourMovementsLbl}</paper-item>
                         <paper-item>${msg.last12HourMovementsLbl}</paper-item>
                         <paper-item>${msg.last24HourMovementsLbl}</paper-item>
-                    </core-menu>
+                    </paper-menu>
                 </paper-dropdown>
             </paper-dropdown-menu>
         </div>
-        <div layout flex horizontal wrap around-justified>
-            <div id="FROM_BANKVS" class="transBlock" on-click="{{transBlockSelected}}">
+        <div class="layout flex horizontal wrap around-justified">
+            <div id="FROM_BANKVS" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransFromBankVS}}</div>
                 <div class="transDesc">${msg.bankVSInputLbl}</div>
             </div>
-            <div id="FROM_USERVS" class="transBlock" on-click="{{transBlockSelected}}">
+            <div id="FROM_USERVS" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransFromUserVS}}</div>
                 <div class="transDesc">${msg.transactionVSFromUserVS}</div>
             </div>
-            <div id="FROM_GROUP_TO_MEMBER_GROUP" class="transBlock" on-click="{{transBlockSelected}}">
+            <div id="FROM_GROUP_TO_MEMBER_GROUP" class="transBlock" on-click="transBlockSelected">
                 <template if="{{dashBoardDto.transFromGroupVSToMemberGroup.numTrans > 0}}">
                     <div class="numTrans">{{dashBoardDto.transFromGroupVSToMemberGroup.numTrans}} trans -
                     {{dashBoardDto.transFromGroupVSToMemberGroup.numUsers}} users</div>
@@ -50,7 +48,7 @@
                 </template>
                 <div class="transDesc">${msg.transactionVSFromGroupToMemberGroup}</div>
             </div>
-            <div id="FROM_GROUP_TO_ALL_MEMBERS" class="transBlock" on-click="{{transBlockSelected}}">
+            <div id="FROM_GROUP_TO_ALL_MEMBERS" class="transBlock" on-click="transBlockSelected">
                 <template if="{{dashBoardDto.transFromGroupVSToAllMembers.numTrans > 0}}">
                     <div class="numTrans">{{dashBoardDto.transFromGroupVSToAllMembers.numTrans}} trans -
                     {{dashBoardDto.transFromGroupVSToAllMembers.numUsers}} users</div>
@@ -60,30 +58,31 @@
                 </template>
                 <div class="transDesc">${msg.transactionVSFromGroupToAllMembers}</div>
             </div>
-            <div id="CURRENCY_PERIOD_INIT" class="transBlock" on-click="{{transBlockSelected}}">
+            <div id="CURRENCY_PERIOD_INIT" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencyInitPeriod}}</div>
                 <div class="transDesc">${msg.currencyPeriodInitLbl}</div>
             </div>
-            <div id="CURRENCY_PERIOD_INIT_TIME_LIMITED" class="transBlock" on-click="{{transBlockSelected}}">
+            <div id="CURRENCY_PERIOD_INIT_TIME_LIMITED" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencyInitPeriodTimeLimited}}</div>
                 <div class="transDesc">${msg.currencyPeriodInitTimeLimitedLbl}</div>
             </div>
-            <div id="CURRENCY_REQUEST" class="transBlock" on-click="{{transBlockSelected}}">
+            <div id="CURRENCY_REQUEST" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencyRequest}}</div>
                 <div class="transDesc">${msg.selectCurrencyRequestLbl}</div>
             </div>
-            <div id="CURRENCY_SEND" class="transBlock" on-click="{{transBlockSelected}}">
+            <div id="CURRENCY_SEND" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencySend}}</div>
                 <div class="transDesc">${msg.selectCurrencySendLbl}</div>
             </div>
-            <div id="CANCELATION" class="transBlock" on-click="{{transBlockSelected}}">
+            <div id="CANCELATION" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransCancellation}}</div>
                 <div class="transDesc">${msg.cancelationsLbl}</div>
             </div>
         </div>
     </template>
 <script>
-    Polymer('uservs-dashboard', {
+    Polymer({
+        is:'uservs-dashboard',
         initialized:false,
         ready: function() { },
         dateFrom:null,
@@ -111,7 +110,7 @@
                 var targetURL = "${restURL}/app/userVSDashboard/hoursAgo/" + numHours
                 console.log(this.tagName + " - targetURL: " + targetURL)
                 this.$.ajax.url = targetURL
-                this.$.ajax.go()
+                this.$.ajax.generateRequest()
             }
         },
         transBlockSelected: function(e) {
@@ -123,4 +122,4 @@
         }
     });
 </script>
-</polymer-element>
+</dom-module>

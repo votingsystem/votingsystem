@@ -1,22 +1,21 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/vs-highcharts/highcharts-import.html" rel="import">
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 
-<polymer-element name="eventvs-election-stats" attributes="caption eventVSId height">
+<dom-module name="eventvs-election-stats" attributes="caption eventVSId height">
     <template>
         <style></style>
-        <core-ajax id="ajax" auto url="{{url}}" handleAs="json" response="{{statsDto}}" method="get" contentType="application/json"></core-ajax>
-        <div hidden?="{{chartVisible}}" id="messageToUser" vertical layout center center-justified
+        <iron-ajax id="ajax" auto url="{{url}}" handleAs="json" last-response="{{statsDto}}" method="get" contentType="application/json"></iron-ajax>
+        <div hidden="{{chartVisible}}" id="messageToUser" vertical layout center center-justified
              style="padding: 10px;font-weight: bold;">
             ${msg.withoutVotesLbl}
         </div>
-        <div hidden?="{{!chartVisible}}" id="graphContainer" vertical layout center center-justified
+        <div hidden="{{!chartVisible}}" id="graphContainer" vertical layout center center-justified
              style="margin:0 0 0 10px; height: 150px; min-width: 250px;"></div>
     </template>
     <script>
-        Polymer('eventvs-election-stats', {
+        Polymer({
+            is:'eventvs-election-stats',
             caption:null,
             chartVisible:false,
             publish: {
@@ -81,4 +80,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

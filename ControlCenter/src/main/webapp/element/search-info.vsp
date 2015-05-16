@@ -1,11 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/core-icon-button/core-icon-button.html" rel="import"/>
+<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
 <link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
 
-
-<polymer-element name="search-info" attributes="opened">
+<dom-module name="search-info" attributes="opened">
     <template>
         <style>
         .eventSearchInfo {
@@ -16,14 +14,15 @@
             border-bottom: 1pt solid #cccccc;
         }
         </style>
-        <div hidden?="{{!isVisible}}" class="eventSearchInfo">
+        <div hidden="{{!isVisible}}" class="eventSearchInfo">
             <div class="eventSearchText">{{searchResultMsg}}</div>
-            <div hidden?="{{!beginSearchMsg}}" class="eventSearchDateBegin">{{beginSearchMsg}}</div>
-            <div hidden?="{{!endSearchMsg}}" class="eventSearchDateFinish">{{endSearchMsg}}</div>
+            <div hidden="{{!beginSearchMsg}}" class="eventSearchDateBegin">{{beginSearchMsg}}</div>
+            <div hidden="{{!endSearchMsg}}" class="eventSearchDateFinish">{{endSearchMsg}}</div>
         </div>
     </template>
     <script>
-        Polymer('search-info', {
+        Polymer({
+            is:'search-info',
             isVisible :false,
             searchResultMsgTemplate:"${msg.searchResultMsg}",
             beginSearchMsgTemplate:"${msg.beginSearchInfoLbl}",
@@ -48,4 +47,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

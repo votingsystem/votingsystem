@@ -45,12 +45,6 @@ body {
     background-color: #6c0404;
 }
 
-#navBarMainMenu {
-    position: fixed;
-    top: 0px;
-    z-index:10;
-}
-
 input:required {
     border: 1px solid rgba(253, 8, 8, 0.29);
 }

@@ -1,42 +1,61 @@
 <link rel="import" href="../polymer/polymer.html">
 
-
-<!--based on http://github.com/addyosmani/page-er -->
-<polymer-element name="vs-pager" attributes="offset total max next previous first last rangeSize">
+<dom-module name="vs-pager">
     <template>
         <link rel="stylesheet" href="vs-pager.css">
         <link rel="stylesheet" href="../font-awesome/css/font-awesome.min.css" type="text/css"/>
-        <div horizontal layout center center-justified class="pagination">
-            <div horizontal layout hidden?="{{currentpage === 0}}">
-                <div class="first-child"><button on-click="{{firstPage}}"><i class="fa fa-angle-double-left"></i></button></div>
-                <div class='{{currentpage === 0 ? "disabled" : ""}}'>
-                    <button on-click="{{prevPage}}"><i class="fa fa-angle-left"></i></button>
+        <div class="pagination horizontal layout center center-justified ">
+            <div class="horizontal layout" hidden="{{prevHidden}}">
+                <div class="first-child"><button on-click="firstPage"><i class="fa fa-angle-double-left"></i></button></div>
+                <div class='{{prevClass}}'>
+                    <button on-click="prevPage"><i class="fa fa-angle-left"></i></button>
                 </div>
             </div>
-            <template repeat="{{n in currentRange}}">
-                <div class="{{n == currentpage ? 'active' : ''}}" data-item="{{n}}" on-click="{{setPage}}">
-                    <button>{{n+1}}</button>
+            <template is="dom-repeat" items="{{selectedTagList}}">
+                <div class="{{getPageClass(item)}}" data-item="{{item}}" on-click="setPage">
+                    <button>{{getPageNumber(item)}}</button>
                 </div>
             </template>
-            <div horizontal layout hidden?="{{currentpage === pageCount}}">
-                <div class='{{currentpage === pageCount? "disabled" : ""}}'>
-                    <button on-click="{{nextPage}}"><i class="fa fa-angle-right"></i></button>
+            <div class="horizontal layout" hidden="{{nextHidden}}">
+                <div class='{{nextClass}}'>
+                    <button on-click="nextPage"><i class="fa fa-angle-right"></i></button>
                 </div>
-                <div class="last-child"><button on-click="{{lastPage}}"><i class="fa fa-angle-double-right"></i></button></div>
+                <div class="last-child"><button on-click="lastPage"><i class="fa fa-angle-double-right"></i></button></div>
             </div>
         </div>
     </template>
     <script>
-        Polymer('vs-pager', {
-            max: 10,
-            currentRange: [],
-            pageCount: 0,
-            rangeSize: 10,
-            currentpage:0,
-            previous: "<< Prev",
-            next: "Next >>",
+        Polymer({
+            is:'vs-pager',
+            properties: {
+                offset:{type:Number},
+                total:{type:Number},
+                max:{type:Number},
+                currentpage:{type:Number, observer:'currentpageChanged'},
+                next:{type:String},
+                previous:{type:String},
+                first:{type:String},
+                last:{type:String}
+            },
             ready:function() {
                 this.style.display = 'none'
+                this.currentRange = []
+                this.pageCount = 0
+                this.rangeSize = 10
+                this.previous = "<< Prev"
+                this.next =  "Next >>"
+            },
+            currentpageChanged:function() {
+                this.prevClass = (this.currentpage === 0) ? "disabled" : ""
+                this.nextClass = (this.currentpage === this.pageCount) ? "disabled" : ""
+                this.nextHidden = (this.currentpage === this.pageCount)
+                this.prevHidden = (this.currentpage === 0)
+            },
+            getPageClass:function(item) {
+                return item == this.currentpage ? 'active' : ''
+            },
+            getPageNumber:function(item) {
+                return item + 1;
             },
             totalChanged: function(){
                 if(typeof this.total === 'undefined') return
@@ -63,7 +82,7 @@
                 return Math.ceil(this.total/this.max) -1
             },
             setPage: function (e) {
-                this.currentpage = e.target.templateInstance.model.n
+                this.currentpage = e.model.item
                 console.log("setPage - currentpage: " + this.currentpage)
             },
             currentpageChanged: function () {
@@ -93,4 +112,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

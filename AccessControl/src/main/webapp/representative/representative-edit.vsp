@@ -2,36 +2,36 @@
 
 <link href="${elementURL}/representative/representative-cancel-dialog.vsp" rel="import"/>
 
-<polymer-element name="representative-edit">
+<dom-module name="representative-edit">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style></style>
-        <div hidden?="{{step !== 'operationSelection'}}">
-            <div layout horizontal center center-justified>
-                <paper-button raised type="button" on-click="{{representativeRevoke}}"
+        <div hidden="{{step !== 'operationSelection'}}">
+            <div class="layout horizontal center center-justified">
+                <button type="button" on-click="representativeRevoke"
                         style="margin:15px 20px 15px 0px;">
                     <i class="fa fa-times"></i> ${msg.removeRepresentativeLbl}
-                </paper-button>
-                <paper-button raised type="button" on-click="{{representativeEdit}}"
+                </button>
+                <button type="button" on-click="representativeEdit"
                         style="margin:15px 20px 15px 0px;">
                     <i class="fa fa-hand-o-right"></i> ${msg.editRepresentativeLbl}
-                </paper-button>
+                </button>
             </div>
         </div>
-        <div hidden?="{{step !== 'requestNIF'}}">
+        <div hidden="{{step !== 'requestNIF'}}">
             <div class="pageHeader"  layout horizontal center center-justified>
                 <h3>${msg.editRepresentativeLbl}</h3>
             </div>
-            <div layout vertical center center-justified style="margin:0px auto 0px auto; width: 500px;">
+            <div class="layout vertical center center-justified" style="margin:0px auto 0px auto; width: 500px;">
                 <label style="margin:0px 0px 20px 0px">${msg.representativeNIFLbl}</label>
                 <input type="text" id="representativeNif" style="width:350px; margin:0px auto 0px auto;" class="form-control"/>
                 <div>
-                    <div layout horizontal style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
-                        <div flex></div>
-                        <paper-button raised on-click="{{checkRepresentativeNIF}}" style="margin: 0px 0px 0px 5px;">
+                    <div class="layout horizontal" style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
+                        <div class="flex"></div>
+                        <button on-click="checkRepresentativeNIF" style="margin: 0px 0px 0px 5px;">
                             <i class="fa fa-check"></i> ${msg.acceptLbl}
-                        </paper-button>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -40,7 +40,8 @@
     <representative-cancel-dialog id="representativeRevokeDialog"></representative-cancel-dialog>
     </template>
     <script>
-        Polymer('representative-edit', {
+        Polymer({
+            is:'representative-edit',
             selectedImagePath:null,
             step:'operationSelection',
             ready: function() {
@@ -67,4 +68,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

@@ -10,13 +10,7 @@ body {
 }
 
 button i{color: #888; }
-
-paper-button i {padding: 0px 0px 0px 5px; }
-
-paper-button {
-    font-size: 0.8em;
-    color: #6c0404;
-}
+button {font-size: 1.1em; }
 
 paper-tabs.transparent-teal::shadow #selectionBar {
     background-color: #ba0011;
@@ -39,7 +33,6 @@ paper-tabs.transparent-teal paper-tab::shadow #ink {
 .vs-navbar {
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;
-    height: 50px;
     z-index: 20;
 }
 
@@ -62,12 +55,6 @@ paper-tabs.transparent-teal paper-tab::shadow #ink {
 .vs-navbar .navbar-nav > li > a:hover, .nav > li > a:focus {
     text-decoration: none;
     background-color: #ba0011;
-}
-
-#navBarMainMenu {
-    position: fixed;
-    top: 0px;
-    z-index:10000;
 }
 
 .pageContentDiv {
@@ -125,18 +112,6 @@ paper-tabs.transparent-teal paper-tab::shadow #ink {
     word-wrap:break-word;
     overflow: hidden;
     border-radius: 2px;
-}
-
-paper-button.button {
-    background-color: #fafafa;
-    color: #6c0404;
-    border: 1px solid #ccc;
-    vertical-align: middle;
-    padding-bottom: 5px;
-    white-space: nowrap;
-    background: none;
-    font-size: 13px;
-    padding: 0px 0px 0px 0px;
 }
 
 .tableHeadervs {

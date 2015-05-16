@@ -1,9 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
-
-<polymer-element name="message-smime" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
+<dom-module name="message-smime" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
         <style>
         .messageToUser {
@@ -16,34 +13,36 @@
             color:#aaaaaa; font-size:1.1em; margin:0 0 15px 0;font-style:italic;
         }
         </style>
-        <div layout vertical style="margin: 10px 30px; max-width:1000px;">
-            <div  layout horizontal center center-justified>
-                <div flex></div>
-                <div class="pageHeader"><h3>{{smimeMessageContent.operation}}</h3></div>
-                <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px;">
-                    <template if="{{isClientToolConnected}}">
-                        <paper-button raised on-click="{{checkReceipt}}">
-                            <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
-                        </paper-button>
-                    </template>
+        <div class="layout vertical center center-justified" style="margin: 0px auto; max-width:800px;">
+            <div>
+                <div class="layout horizontal center center-justified">
+                    <div class="pageHeader"><h3><span>{{smimeMessageContent.operation}}</span></h3></div>
                 </div>
-            </div>
-            <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
-                <b>${msg.timeStampDateLbl}: </b>{{timeStampDate}}
-            </div>
-            <div hidden?="{{!messageToUser}}">
-                <div  layout horizontal center center-justified  class="messageToUser">
-                    <div>
-                        <div id="messageToUser">{{messageToUser}}</div>
+                <div hidden="{{!timeStampDate}}" class="timeStampMsg">
+                    <b>${msg.timeStampDateLbl}: </b><span>{{timeStampDate}}</span>
+                </div>
+                <div hidden="{{!messageToUser}}">
+                    <div  class="messageToUser layout horizontal center center-justified">
+                        <div>
+                            <div id="messageToUser">{{messageToUser}}</div>
+                        </div>
                     </div>
-                    <paper-shadow z="1"></paper-shadow>
+                </div>
+                <vs-html-echo html="{{smimeMessageContentStr}}"></vs-html-echo>
+                <div class="layout horizontal">
+                    <div class="flex"></div>
+                    <div hidden="{{!isClientToolConnected}}" class="flex horizontal layout end-justified" style="margin:10px 0px 10px 0px;">
+                        <button on-click="checkReceipt">
+                            <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
+                        </button>
+                    </div>
                 </div>
             </div>
-            <vs-html-echo html="{{smimeMessageContentStr}}"></vs-html-echo>
         </div>
     </template>
     <script>
-        Polymer('message-smime', {
+        Polymer({
+            is:'message-smime',
             publish: {
                 smimeMessageContent: {value: {}}
             },
@@ -74,4 +73,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

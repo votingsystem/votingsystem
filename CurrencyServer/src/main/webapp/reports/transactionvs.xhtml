@@ -9,7 +9,7 @@
     <ui:define name="content">
         <vs-innerpage-signal caption="${msg.transactionPageTitle}"></vs-innerpage-signal>
         <div class="pageContentDiv">
-            <div layout="" horizontal="" center="" center-justified="">
+            <div class="layout horizontal center center-justified">
                 <transactionvs-selector id="transactionSelector"></transactionvs-selector>
             </div>
 
@@ -20,7 +20,7 @@
         </div>
 
         <script>
-            document.querySelector("#coreSignals").addEventListener('core-signal-transactionvs-selector-selected', function(e) {
+            document.querySelector("#ironSignals").addEventListener('iron-signal-transactionvs-selector-selected', function(e) {
                 var transactionvsType = e.detail
                 console.log("transactionvsType: " + transactionvsType)
                 targetURL = "${restURL}/reports/transactionvs";

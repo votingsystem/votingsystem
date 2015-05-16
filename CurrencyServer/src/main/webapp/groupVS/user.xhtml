@@ -9,8 +9,8 @@
             function openGroupvsUserDialog() {
                 document.querySelector("#userDescription").show()
             }
-            if(document.querySelector("#coreSignals") != null) openGroupvsUserDialog()
-            else document.addEventListener('polymer-ready', function() { openGroupvsUserDialog() })
+            if(document.querySelector("#ironSignals") != null) openGroupvsUserDialog()
+            else document.addEventListener('WebComponentsReady', function() { openGroupvsUserDialog() })
         </script>
     </ui:define>
     <ui:define name="content">

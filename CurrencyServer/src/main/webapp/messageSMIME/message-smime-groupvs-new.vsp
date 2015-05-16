@@ -1,9 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-<link href="${resourceURL}/paper-button/paper-button.html" rel="import"/>
 
-<polymer-element name="message-smime-groupvs-new" attributes="signedDocument smimeMessage timeStampDate">
+
+<dom-module name="message-smime-groupvs-new" attributes="signedDocument smimeMessage timeStampDate">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -13,51 +13,43 @@
             }
             .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic; }
         </style>
-        <div layout vertical style="margin: 0px auto; max-width:800px;">
-            <div  layout horizontal center center-justified>
-                <div flex></div>
-                <div class="pageHeader"><h3>${msg.newGroupVSMsgSubject}</h3></div>
-                <div flex horizontal layout end-justified style="margin:10px 0px 10px 0px;">
-                    <template if="{{isClientToolConnected}}">
-                        <paper-button raised on-click="{{checkReceipt}}">
-                            <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
-                        </paper-button>
-                    </template>
+        <div class="layout vertical center center-justified" style="margin: 0px auto; max-width:800px;">
+            <div>
+                <div class="layout horizontal center center-justified">
+                    <div class="pageHeader"><h3>${msg.newGroupVSMsgSubject}</h3></div>
                 </div>
-            </div>
-            <div hidden?="{{!timeStampDate}}" class="timeStampMsg">
-                <b>${msg.dateLbl}: </b> {{timeStampDate}}
-            </div>
-            <div hidden?="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
-                <div id="messageToUser">{{messageToUser}}</div>
-            </div>
-
-            <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-            <div><b>${msg.nameLbl}: </b>{{signedDocument.name}}</div>
-            <div class="eventContentDiv">
-                <vs-html-echo html="{{signedDocument.groupvsInfo}}"></vs-html-echo>
-            </div>
-            <template if="{{signedDocument.tags.length > 0}}">
-                <div layout horizontal center center-justified style="margin: 15px 0 0 0;">
-                    <template repeat="{{tag in signedDocument.tags}}">
-                        <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag}}</a>
-                    </template>
+                <div hidden="{{!timeStampDate}}" class="timeStampMsg">
+                    <b>${msg.dateLbl}: </b> <span>{{timeStampDate}}</span>
                 </div>
-            </template>
-            <template if="{{isClientToolConnected}}">
-                <div layout horizontal style="margin:0px 20px 0px 0px;">
-                    <div flex></div>
+                <div hidden="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
+                    <div id="messageToUser">{{messageToUser}}</div>
+                </div>
+                <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
+                <div><b>${msg.nameLbl}: </b><span>{{signedDocument.name}}</span></div>
+                <div class="eventContentDiv">
+                    <vs-html-echo html="{{signedDocument.groupvsInfo}}"></vs-html-echo>
+                </div>
+                <template if="{{signedDocument.tags.length > 0}}">
+                    <div layout horizontal center center-justified style="margin: 15px 0 0 0;">
+                        <template repeat="{{tag in signedDocument.tags}}">
+                            <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag}}</a>
+                        </template>
+                    </div>
+                </template>
+                <div hidden="{{!isClientToolConnected}}" layout horizontal style="margin:0px 20px 0px 0px;">
+                    <div class="flex"></div>
                     <div style="margin:10px 0px 10px 0px;">
-                        <paper-button raised on-click="{{checkReceipt}}" style="margin: 0px 0px 0px 5px;">
+                        <button on-click="checkReceipt" style="margin: 0px 0px 0px 5px;">
                             <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
-                        </paper-button>
+                        </button>
                     </div>
                 </div>
-            </template>
+            </div>
         </div>
     </template>
     <script>
-        Polymer('message-smime-groupvs-new', {
+        Polymer({
+            is:'message-smime-groupvs-new',
             publish: {
                 signedDocument: {value: {}}
             },
@@ -78,4 +70,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>

@@ -1,14 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
 <link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
-<link href="${resourceURL}/core-ajax/core-ajax.html" rel="import"/>
 <link href="${elementURL}/balance/balance-list.vsp" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-table.vsp" rel="import"/>
 <link href="${elementURL}/userVS/uservs-list.vsp" rel="import"/>
 
 
-<polymer-element name="groupvs-details-balance-tabs" attributes="groupvs">
+<dom-module name="groupvs-details-balance-tabs" attributes="groupvs">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -27,34 +25,33 @@
             paper-tabs.transparent-teal::shadow #selectionBar { background-color: #ba0011; }
             paper-tabs.transparent-teal paper-tab::shadow #ink { color: #ba0011; }
         </style>
-        <core-ajax id="ajax" auto url="{{url}}" response="{{groupvsWithDetails}}" handleAs="json" method="get"
-                   contentType="application/json"></core-ajax>
+        <iron-ajax id="ajax" auto url="{{url}}" last-response="{{groupvsWithDetails}}" handleAs="json" method="get"
+                   contentType="application/json"></iron-ajax>
         <div  style="margin:0px auto 0px auto;">
-            <paper-tabs  style="margin:0px auto 0px auto; border-bottom: 1px solid #ba0011;" class="transparent-teal center" valueattr="name"
-                         selected="{{selectedTab}}"  on-core-select="{{tabSelected}}" noink>
+            <paper-tabs  style="margin:0px auto 0px auto; border-bottom: 1px solid #ba0011;" class="transparent-teal center" attr-for-selected="name"
+                         selected="{{selectedTab}}"  on-iron-select="tabSelected" noink>
                 <paper-tab name="balanceList" style="width:400px; padding:2px;">${msg.balanceListLbl}</paper-tab>
                 <paper-tab name="transactionsTo" style="padding:2px;">${msg.incomesLbl}</paper-tab>
                 <paper-tab name="transactionsFrom" style="padding:2px;">${msg.expensesLbl}</paper-tab>
                 <paper-tab name="userList" style="padding:2px;">${msg.usersLbl}</paper-tab>
             </paper-tabs>
-            <div hidden?="{{selectedTab !== 'balanceList'}}" id="balanceList" class="tabContent">
+            <div hidden="{{selectedTab !== 'balanceList'}}" id="balanceList" class="tabContent">
                 <balance-list id="balanceList"></balance-list>
             </div>
-            <div hidden?="{{selectedTab !== 'transactionsTo'}}" id="transactionsTo" class="tabContent">
+            <div hidden="{{selectedTab !== 'transactionsTo'}}" id="transactionsTo" class="tabContent">
                 <transactionvs-table id="transactionToTable"></transactionvs-table>
             </div>
-            <div hidden?="{{selectedTab !== 'transactionsFrom'}}" id="transactionsFrom" class="tabContent">
+            <div hidden="{{selectedTab !== 'transactionsFrom'}}" id="transactionsFrom" class="tabContent">
                 <transactionvs-table id="transactionFromTable" isUserVSTable="true"></transactionvs-table>
             </div>
-            <div hidden?="{{selectedTab !== 'userList'}}" id="userList" class="tabContent">
+            <div hidden="{{selectedTab !== 'userList'}}" id="userList" class="tabContent">
                 <uservs-list id="userList"></uservs-list>
             </div>
         </div>
     </template>
-
-
     <script>
-        Polymer('groupvs-details-balance-tabs', {
+        Polymer({
+            is:'groupvs-details-balance-tabs',
             selectedTab:'balanceList',
             groupvs: null,
             ready:function() {
@@ -79,4 +76,4 @@
             }
         });
     </script>
-</polymer-element>
+</dom-module>
