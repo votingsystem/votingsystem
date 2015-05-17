@@ -5,7 +5,7 @@
 
 <dom-module name="reason-dialog" attributes="caption messageToUser">
     <template>
-        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop style="border: 1px solid #6c0404;">
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key style="border: 1px solid #6c0404;">
             <div id="container" layout vertical>
                 <div class="layout horizontal center center-justified">
                     <div hidden="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">

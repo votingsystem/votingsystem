@@ -8,7 +8,7 @@
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop class="votingsystemMessageDialog">
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key class="votingsystemMessageDialog">
             <style>
             .votingsystemMessageDialog {
                 top: 150px;

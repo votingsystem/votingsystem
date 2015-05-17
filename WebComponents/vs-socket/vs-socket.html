@@ -1,16 +1,13 @@
-<link rel="import" href="../polymer/polymer.html">
-
-
-<dom-module name="vs-socket" attributes="socketservice">
+<dom-module name="vs-socket">
     <template>
         <content></content>
     </template>
     <script>
         Polymer({
             is:'vs-socket',
-            socketservice: null,
-            websocket:null,
-            message:null,
+            properties: {
+                socketservice:{type:String, value:null, observer:'socketserviceChanged'}
+            },
             socketserviceChanged:function() {
                 if(this.socketservice == null || "" == this.socketservice) return
                 this.log("connecting to: " + this.socketservice)

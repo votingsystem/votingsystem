@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/core-icon/core-icon.html" rel="import"/>
 <link href="${resourceURL}/vs-user-box/vs-user-box.html" rel="import"/>
 <link href="${resourceURL}/vs-currency-selector/vs-currency-selector.html" rel="import"/>
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
@@ -35,10 +34,11 @@
                     </div>
                 </div>
             </div>
-            <div hidden="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
+            <div hidden="{{!messageToUser}}" style="{{messageToUserStyle}}">
                 <div class="messageToUser">
                     <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
-                        <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
+                        <i class="{{messageToUserIcon}}"  style="{{messageToUserStyle}}"></i>
+                        <core-icon icon="{{status == 200?'check':'error'}}"></core-icon>
                         <div id="messageToUser">{{messageToUser}}</div>
                     </div>
                 </div>
@@ -98,7 +98,7 @@
                         <i class="fa fa-user"></i> {{selectReceptorMsg}}
                     </button>
                     <div style="margin:10px 0 0 0;">
-                        <vs-user-box flex id="receptorBox" boxCaption="${msg.receptorLbl}"></vs-user-box>
+                        <vs-user-box flex id="receptorBox" caption="${msg.receptorLbl}"></vs-user-box>
                     </div>
                 </div>
                 <div hidden="{{isWithUserSelector}}" style="margin:10px 0 0 0;text-align:center;font-weight:bold;color:#6c0404;">
@@ -125,7 +125,11 @@
 <script>
     Polymer({
         is:'transactionvs-form',
-        subpage:false,
+        properties: {
+            subpage:{type:Boolean, value:false},
+            searchString:{type:String, value:null},
+            messageToUser:{type:String, value:null, observer:'messageToUserChanged'}
+        },
         ready: function() {
             console.log(this.tagName + " - " + this.id)
             this.operation = null
@@ -145,6 +149,15 @@
                 console.log("tag-selected: " + JSON.stringify(e.detail))
                 this.selectedTags = e.detail
             }.bind(this))
+        },
+        messageToUserChanged:function(){
+            if(this.status === 200) {
+                this.messageToUserStyle = 'fill:#388746;color:#388746'
+                this.messageToUserIcon = 'fa fa-check'
+            } else {
+                this.messageToUserStyle = 'fill:#ba0011;color:#ba0011'
+                this.messageToUserIcon = 'fa fa-exclamation-triangle'
+            }
         },
         openSearchUserDialog:function(){
             this.$.userVSSelectorDialog.show(this.groupId)

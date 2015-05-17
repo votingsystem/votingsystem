@@ -7,10 +7,9 @@
 <link href="${resourceURL}/paper-header-panel/paper-header-panel.html" rel="import"/>
 <link href="${resourceURL}/paper-toolbar/paper-toolbar.html" rel="import"/>
 <link href="${resourceURL}/paper-menu/paper-menu.html" rel="import"/>
-<link href="${resourceURL}/core-item/core-item.html" rel="import"/>
+<link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
 <link href="${resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
 <link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
-<link href="${resourceURL}/vs-navbar/vs-navbar.html" rel="import"/>
 
 <dom-module name="votingsystem-navbar" attributes="url loading">
     <template>
@@ -25,7 +24,7 @@
                 <paper-toolbar id="core_toolbar" style="background-color: #ba0011;">
                 </paper-toolbar>
                 <paper-menu attr-for-selected="label" id="core_menu" theme="core-light-theme" style="font-size: 1.2em;">
-                    <iron-selector id="coreSelector" selected="{{coreSelectorValue}}" attr-for-selected="data-href" on-iron-select="drawerItemSelected">
+                    <iron-selector id="coreSelector" selected="{{selectorValue}}" attr-for-selected="data-href" on-iron-select="drawerItemSelected">
                         <paper-item data-href="${restURL}/eventVSElection">
                             <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                         </paper-item>
@@ -61,8 +60,6 @@
                 }.bind(this));
                 //window.addEventListener("popstate", function(e) {  });
                 this.loading = false
-                document.querySelector("#navBar").style.display = 'block'
-                document.querySelector("#loadingDiv").style.display = 'none'
             },
             urlChanged: function() { //for history navigation
                 this.loadURL(this.url)
@@ -104,11 +101,11 @@
             },
             drawerItemSelected: function(e) {
                 if(e.detail.isSelected) {
-                    this.fire('item-selected', this.coreSelectorValue)
+                    this.fire('item-selected', this.selectorValue)
                     if(this.$.coreSelector.selectedItem != null && 'changeToAdmin' == this.$.coreSelector.selectedItem.id) {
                         window.location.href = window.location.href.replace("menu=superuser", "menu=admin");
-                    } else this.loadURL(this.coreSelectorValue)
-                    this.coreSelectorValue = null
+                    } else this.loadURL(this.selectorValue)
+                    this.selectorValue = null
                 }
             },
             setTitle: function(appTitle) {

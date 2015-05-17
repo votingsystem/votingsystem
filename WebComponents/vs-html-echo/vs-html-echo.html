@@ -1,6 +1,9 @@
-<dom-module name="vs-html-echo" attributes="html">
+<dom-module name="vs-html-echo">
     <script> Polymer({
         is:'vs-html-echo',
+        properties: {
+            html:{type:String, value:null, observer:'htmlChanged'}
+        },
         htmlChanged: function() {// WARNING: potential XSS vulnerability if `html` comes from an untrusted source
             this.innerHTML = this.html;
         }});</script>

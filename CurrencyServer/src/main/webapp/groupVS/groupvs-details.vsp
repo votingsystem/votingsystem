@@ -5,11 +5,9 @@
 
 
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
-<link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
-<link href="${resourceURL}/core-item/core-item.html" rel="import"/>
+<link href="${resourceURL}/iron-pages/iron-pages.html" rel="import"/>
+<link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
 <link href="${resourceURL}/iron-selector/iron-selector.html" rel="import"/>
-<link href="${resourceURL}/paper-dropdown-menu/paper-dropdown-menu.html" rel="import"/>
-<link href="${resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
 <link href="${resourceURL}/paper-menu/paper-menu.html" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-form.vsp" rel="import"/>
 <link href="${elementURL}/userVS/uservs-list.vsp" rel="import"/>
@@ -18,16 +16,48 @@
 <dom-module name="groupvs-details" attributes="selectedItem subpage">
 <template>
     <style shim-shadowdom>
-        body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
         .optionsIcon {margin:0 5px 0 2px; color:#6c0404;}
-        .colored { color: #6c0404; }
     </style>
     <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
     <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+
+    <paper-dialog id="configDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key style="border: 1px solid #6c0404;">
+        <div style="width: 350px;">
+            <div class="layout horizontal center center-justified">
+                <div hidden="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                    <div style="text-align: center;">${msg.configGroupvsLbl}</div>
+                </div>
+                <div style="position: absolute; top: 0px; right: 0px;">
+                    <paper-icon-button on-click="closeConfigDialog" icon="close" style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
+                </div>
+            </div>
+            <paper-menu id="configGroupMenu"  attr-for-selected="data-option" selected="{{configDialogValue}}" on-iron-select="configGroup">
+                <paper-item data-option="edit">${msg.editDataLbl}</paper-item>
+                <paper-item data-option="cancel">${msg.cancelGroupVSLbl}</paper-item>
+            </paper-menu>
+        </div>
+    </paper-dialog>
+
+    <paper-dialog id="transactionSelectorDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key style="border: 1px solid #6c0404;">
+        <div style="width: 350px;">
+            <div class="layout horizontal center center-justified">
+                <div hidden="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                    <div style="text-align: center;">${msg.makeTransactionVSFromGroupVSLbl}</div>
+                </div>
+                <div style="position: absolute; top: 0px; right: 0px;">
+                    <paper-icon-button on-click="closeTransactionSelectorDialog" icon="close" style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
+                </div>
+            </div>
+            <paper-menu id="transactionSelectorMenu"  attr-for-selected="data-option" selected="{{transactionSelectorDialogValue}}" on-iron-select="transactionSelector">
+                <paper-item data-option="fromGroupToMemberGroup">${msg.makeTransactionVSFromGroupVSToMemberGroupLbl}</paper-item>
+                <paper-item data-option="fromGroupToAllMember">${msg.makeTransactionVSFromGroupVSToAllMembersLbl}</paper-item>
+            </paper-menu>
+        </div>
+    </paper-dialog>
+
     <iron-signals on-iron-signal-messagedialog-accept="{{messagedialogAccepted}}"
                   on-iron-signal-uservs-selected="{{showUserDetails}}" ></iron-signals>
-    <core-animated-pages id="pages" flex selected="{{page}}" on-iron-animated-pages-transition-end="{{transitionend}}"
-         transitions="cross-fade-all">
+    <iron-pages id="pages" flex selected="{{page}}" transitions="cross-fade-all">
     <section id="page1">
     <div cross-fade style="max-width: 900px; margin:0 auto;">
         <div vertical layout flex>
@@ -35,30 +65,13 @@
             </div>
             <div hidden="{{!isAdminView || !isClientToolConnected}}">
                 <div class="layout horizontal center center-justified">
-                    <div class="layout horizontal center center-justified">
-                        <i class="fa fa-cogs optionsIcon"></i>
-                        <paper-dropdown-menu halign="right" style="width: 200px;"
-                                     label="${msg.configGroupvsLbl}" on-iron-select="configGroup">
-                            <paper-dropdown class="dropdown colored" transition="">
-                                <paper-menu id="configGroupCoreMenu">
-                                    <paper-item id="editDataItem">${msg.editDataLbl}</paper-item>
-                                    <paper-item id="cancelGroupVSItem">${msg.cancelGroupVSLbl}</paper-item>
-                                </paper-menu>
-                            </paper-dropdown>
-                        </paper-dropdown-menu>
+                    <div>
+                        <button onclick="javascript:document.querySelector('#configDialog').opened = true">
+                            <i class="fa fa-cogs optionsIcon"></i> ${msg.configGroupvsLbl}</button>
                     </div>
-
-                    <div layout horizontal center center-justified style="margin:0 0 0 60px;">
-                        <i class="fa fa-money optionsIcon"></i>
-                        <paper-dropdown-menu label="${msg.makeTransactionVSFromGroupVSLbl}"
-                                 on-iron-select="showTransactionVSDialog" style="width: 300px;">
-                            <paper-dropdown class="dropdown colored"  transition="">
-                                <paper-menu id="transactionvsCoreMenu">
-                                    <paper-item id="fromGroupToMemberGroup">${msg.makeTransactionVSFromGroupVSToMemberGroupLbl}</paper-item>
-                                    <paper-item id="fromGroupToAllMember">${msg.makeTransactionVSFromGroupVSToAllMembersLbl}</paper-item>
-                                </paper-menu>
-                            </paper-dropdown>
-                        </paper-dropdown-menu>
+                    <div>
+                        <button onclick="javascript:document.querySelector('#transactionSelectorDialog').opened = true">
+                            <i class="fa fa-money optionsIcon"></i> ${msg.makeTransactionVSFromGroupVSLbl}</button>
                     </div>
                 </div>
             </div>
@@ -136,7 +149,7 @@
             <transactionvs-form id="transactionvsForm" subpage></transactionvs-form>
         </div>
     </section>
-    </core-animated-pages>
+    </iron-pages>
 
     <groupvs-user id="userDescription"></groupvs-user>
 </template>
@@ -157,6 +170,12 @@
         decodeBase64:function(base64EncodedString) {
             if(base64EncodedString == null) return null
             return decodeURIComponent(escape(window.atob(base64EncodedString)))
+        },
+        closeTransactionSelectorDialog:function() {
+            this.$.transactionSelectorDialog.opened = false
+        },
+        closeConfigDialog:function() {
+            this.$.configDialog.opened = false
         },
         sendTransactionVS:function() {
             console.log(this.tagName + " - sendTransactionVS")
@@ -234,27 +253,34 @@
             console.log("this.isUserView: " + this.isUserView + " - groupvs.state: " + this.groupvs.state +
                 " - menuType: " + menuType)
         },
-        configGroup:function(e, details) {
-            //e.detail.isSelected = false
-            if('cancelGroupVSItem' == e.detail.item.id) {
+        transactionSelector:function() {
+            if('fromGroupToMemberGroup' === this.transactionSelectorDialogValue) {
+                this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
+                        this.groupvs.iban, this.groupvs.id)
+            } else if('fromGroupToAllMember' == this.transactionSelectorDialogValue) {
+                this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name,
+                        this.groupvs.iban, this.groupvs.id)
+            }
+            this.$.transactionSelectorMenu.selected = null
+        },
+        configGroup:function() {
+            if('edit' === this.configDialogValue) {
                 showMessageVS("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name),
                         "${msg.confirmOperationMsg}", 'cancel_group', true)
-            } else if('editDataItem' == e.detail.item.id) {
+            } else if('cancel' == this.configDialogValu) {
                 var operationVS = new OperationVS(Operation.CURRENCY_GROUP_EDIT)
                 operationVS.message = this.groupvs.id
                 VotingSystemClient.setMessage(operationVS);
             }
-            this.$.configGroupCoreMenu.selected = null
+            this.$.configGroupMenu.selected = null
         },
         showTransactionVSDialog:function(e) {
             console.log("showTransactionVSDialog")
             //e.detail.isSelected
             if('fromGroupToMemberGroup' == e.detail.item.id) {
-                this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
-                        this.groupvs.iban, this.groupvs.id)
-            } else if('fromGroupToAllMember' == e.detail.item.id) {
-                this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name,
-                        this.groupvs.iban, this.groupvs.id)
+
+            } else if('' == e.detail.item.id) {
+
             }
             this.page = 1;
             this.$.transactionvsCoreMenu.selected = null

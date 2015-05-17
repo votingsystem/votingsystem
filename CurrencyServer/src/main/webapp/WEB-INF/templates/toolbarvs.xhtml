@@ -22,42 +22,27 @@
     <link href="${resourceURL}/iron-icons/iron-icons.html" rel="import"/>
     <link href="${elementURL}/element/votingsystem-navbar.vsp" rel="import"/>
     <script src="${contextURL}/jsf/resources/js/utils_js.jsp" type="text/javascript"></script>
-    <link href="${resourceURL}/vs-socket/vs-socket.html" rel="import"/>
     <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
     <ui:insert name="head" />
     <script>
         document.addEventListener('WebComponentsReady', function() {
             console.log("toolbarvs - WebComponentsReady")
-            document.querySelector('#ironSignals').addEventListener('iron-signal-vs-innerpage', function(e) {});
-            if(document.querySelector('#socketvs')) document.querySelector('#socketvs').addEventListener('on-message', function(e) {
-                console.log("toolbarvs - socketvs - message: " + e.detail)
-                var socketMessage = e.detail
-                if(200 != socketMessage.status) {
-                    console.log("toolbarvs - socketvs - error")
-                    showMessageVS(socketMessage.message, 'ERROR')
-                }
-            });
+            document.querySelector("#loadingDiv").style.display = 'none'
+            document.querySelector("#navBar").style.display = 'block'
             updateLinksVS(document.getElementsByTagName('a'))
         });
-
-        function sendSocketVSMessage(dataJSON) {
-            console.log ("sendSocketVSMessage")
-            dataJSON.locale = navigator.language
-            if(document.querySelector("#socketvs")) document.querySelector("#socketvs").sendMessage(JSON.stringify(dataJSON))
-        }
-
-        function updateSessionInfo(sessionData) {
-            if(sessionData.userVSList) document.querySelector("#userSelector").userVSList = sessionData.userVSList
-        }
     </script>
 </h:head>
 <h:body style="margin: 0px; padding: 0px;">
-    <votingsystem-navbar id="navBar" style="display:none;">
-        <ui:insert name="content"/>
-    </votingsystem-navbar>
     <div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto;">
         <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
     </div>
+    <votingsystem-navbar id="navBar" style="display:none;">
+        <div id="voting_system_page">
+            <ui:insert name="content"/>
+        </div>
+    </votingsystem-navbar>
+
     <h:messages styleClass="messages"
                 style="list-style: none; padding:0; margin:0;"
                 errorClass="alert alert-error" infoClass="alert alert-success"

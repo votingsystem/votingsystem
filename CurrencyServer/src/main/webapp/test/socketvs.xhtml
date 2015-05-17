@@ -7,15 +7,14 @@
     <ui:define name="head">
         <title>vs-socket</title>
         <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-        <link rel="import" href="${resourceURL}/vs-socket/vs-socket.html"/>
+        <link href="${resourceURL}/vs-socket/vs-socket.html" rel="import"/>
         <style type="text/css" media="screen"></style>
     </ui:define>
     <ui:define name="content">
-        <div class="pageContentDiv">
-            <vs-socket id="socketvs" socketservice="${config.webSocketURL}">
-                <input id="messageBox" class="text" value="{locale:'es', operation:'LISTEN_TRANSACTIONS'}" name="text"/>
-                <button onclick="sendMessage()">Send message</button>
-            </vs-socket>
+        <div class="pageContentDiv" style="margin: 130px 0 0 250px;">
+            <input id="messageBox" class="text" value="{locale:'es', operation:'LISTEN_TRANSACTIONS'}" name="text"/>
+            <button onclick="sendMessage()">Send message</button>
+            <vs-socket id="socketvs" socketservice="${config.webSocketURL}"></vs-socket>
         </div>
         <script>
             document.querySelector("#socketvs").addEventListener('on-message', function (e) {

@@ -1,8 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../core-icon/core-icon.html">
-<link rel="import" href="../vs-i18n/v2s-i18n.html">
+<link rel="import" href="../vs-i18n/vs-i18n.html">
 
-<dom-module name="vs-user-box" attributes="boxCaption multiSelection">
+<dom-module name="vs-user-box">
     <template>
         <style>
             .receptorsBox {
@@ -18,14 +17,14 @@
             }
         </style>
         <vs-i18n id="i18nVS"></vs-i18n>
-        <div hidden="{{uservsList.length == 0}}" layout vertical style="border: 1px solid #ccc;padding:0px 0px 0px 10px;">
+        <div hidden="{{uservsListHidden}}" style="border: 1px solid #ccc;padding:0px 0px 0px 10px;">
             <fieldset class="receptorsBox">
                 <legend style="margin:5px 0px 0px 0px;">{{boxCaption}}</legend>
-                <template repeat="{{uservs in uservsList}}">
+                <template is="dom-repeat" items="{{resultListDto.resultList}}">
                     <div layout horizontal style="padding: 0px 10px 0px 10px;">
                         <paper-icon-button icon="close" style="fill:#6c0404;" on-tap="removeUser"></paper-icon-button>
-                        <div class="flex" layout vertical center-justified style='font-size:1em;padding:0px 0 0 0px;vertical-align:middle;'>
-                            {{(uservs.firstName != null && "" != uservs.firstName) ? uservs.firstName + " " + uservs.lastName:uservs.name}}
+                        <div class="flex layout vertical center-justified" style='font-size:1em;padding:0px 0 0 0px;vertical-align:middle;'>
+                            {{getUserVSName(item)}}
                         </div>
                     </div>
                 </template>
@@ -35,12 +34,21 @@
     <script>
         Polymer({
             is:'vs-user-box',
-            publish: {
-                uservsList: {value: []}
+            properties: {
+                uservsList:{type:Array, value:[], observer:'uservsListChanged'},
+                caption:{type:String},
+                multiSelection:{type:Boolean}
             },
             ready:function() {
                 this.messages = this.$.i18nVS.getMessages()
                 this.multiSelection = this.multiSelection || true
+                this.uservsListHidden = true
+            },
+            getUserVSName:function(uservs) {
+                return (uservs.firstName != null && "" != uservs.firstName) ? uservs.firstName + " " + uservs.lastName:uservs.name
+            },
+            uservsListChanged:function() {
+                this.uservsListHidden = (uservsList.length === 0)
             },
             addUser:function(userToAdd) {
                 var isNewUser = true
@@ -69,5 +77,6 @@
             removeUsers:function(e) {
                 this.uservsList = []
             }
-        });</script>
+        });
+    </script>
 </dom-module>

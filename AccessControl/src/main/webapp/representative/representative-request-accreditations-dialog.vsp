@@ -5,7 +5,7 @@
 
 <dom-module name="representative-request-accreditations-dialog">
     <template>
-        <paper-dialog id="xDialog" class="vs-dialog"  style="width: 500px;" autoCloseDisabled layered backdrop>
+        <paper-dialog id="xDialog" class="vs-dialog"  style="width: 500px;" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key>
             <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <style></style>

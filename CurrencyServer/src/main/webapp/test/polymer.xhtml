@@ -3,24 +3,24 @@
                 template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="head">
-        <link href="${resourceURL}/iron-ajax/iron-ajax.html" rel="import"/>
         <link href="${elementURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
+        <link href="${resourceURL}/iron-ajax/iron-ajax.html" rel="import"/>
         <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
+        <link href="${elementURL}/groupVS/groupvs-menu.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
         <button onclick="document.querySelector('#tagDialog').show()" style="margin:10px;">Tag dialog</button>
-
+        <button onclick="document.querySelector('#groupMenu').show()" style="margin:10px;">Group menu dialog</button>
         <tagvs-select-dialog id="tagDialog" service-url="${restURL}/tagVS"></tagvs-select-dialog>
-    </ui:define>
-    <script>
-        var operationVS = new OperationVS( this.operation)
-        operationVS.serviceURL = ${restURL}/transactionVS"
-        operationVS.signedMessageSubject = "${msg.transactionvsFromGroupMsgSubject}"
-        operationVS.jsonStr = JSON.stringify({operation:"TEST"})
 
-        operationVS.setCallback(function () {
-            console.log("====#### callback")
-        })
-        window[operationVS.objectId]()
-    </script>
+        <groupvs-menu id="groupMenu" caption="menu caption"></groupvs-menu>
+        <script>
+            document.addEventListener('WebComponentsReady', function() {
+                console.log("polymer.xhtml - WebComponentsReady")
+            })
+            document.querySelector("#groupMenu").addEventListener('option-selected', function(e) {
+                console.log("groupMenu option selected: " + e.detail)
+            })
+        </script>
+    </ui:define>
 </ui:composition>

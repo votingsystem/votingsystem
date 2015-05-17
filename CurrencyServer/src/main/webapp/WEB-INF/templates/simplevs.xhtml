@@ -20,7 +20,6 @@
     <link href="${resourceURL}/iron-signals/iron-signals.html" rel="import"/>
     <link href="${resourceURL}/iron-icons/iron-icons.html" rel="import"/>
     <script src="${contextURL}/jsf/resources/js/utils_js.jsp" type="text/javascript"></script>
-    <link href="${resourceURL}/vs-socket/vs-socket.html" rel="import"/>
     <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
     <ui:insert name="head" />
     <script>
@@ -37,11 +36,13 @@
     </script>
 </h:head>
 <h:body>
-    <div id="pageLayoutDiv" style="display:none;">
-        <ui:insert name="content"/>
-    </div>
-    <div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto">
-        <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
+    <div id="voting_system_page">
+        <div id="pageLayoutDiv" style="display:none;">
+            <ui:insert name="content"/>
+        </div>
+        <div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto">
+            <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
+        </div>
     </div>
 
     <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>

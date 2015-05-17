@@ -1,13 +1,13 @@
-<link rel="import" href="../polymer/polymer.html">
-
-<dom-module name="vs-innerpage-signal" attributes="caption innerPage searchVisible">
+<dom-module name="vs-innerpage-signal">
     <template></template>
     <script>
         Polymer({
             is:'vs-innerpage-signal',
-            caption:null,
-            innerPage:null,
-            searchVisible:false,
+            properties: {
+                caption:{type:String},
+                innerPage:{type:Boolean},
+                searchVisible:{type:Boolean}
+            },
             domReady: function() { this.fireSignal()},
             fireSignal: function() {
                 this.fire('iron-signal', {name: "vs-innerpage", data: {caption:this.caption,

@@ -5,7 +5,7 @@
 
 <dom-module name="representative-cancel-dialog">
     <template>
-        <paper-dialog id="xDialog" class="xDialog" autoCloseDisabled layered backdrop>
+        <paper-dialog id="xDialog" class="xDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key>
             <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <style>

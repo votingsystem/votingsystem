@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets">
 <h:head>
     <title><ui:insert name="title" /></title>
@@ -20,7 +19,6 @@
     <h:outputScript name="js/utilsVS.js" />
     <h:outputStylesheet name="css/votingSystem.css" />
     <script src="${contextURL}/jsf/resources/js/utils_js.jsp" type="text/javascript"></script>
-    <link href="${resourceURL}/vs-socket/vs-socket.html" rel="import"/>
     <link href="${elementURL}/element/alert-dialog.vsp" rel="import"/>
     <ui:insert name="head" />
     <script>
@@ -37,12 +35,14 @@
     </script>
 </h:head>
 <h:body>
-    <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center; margin:15px auto;"></div>
-    <div id="pageLayoutDiv" style="display:none;">
-        <ui:insert name="content"/>
-    </div>
-    <div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto">
-        <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
+    <div id="voting_system_page">
+        <div id="appTitle" style="font-size:1.5em;width: 100%; text-align: center; margin:15px auto;"></div>
+        <div id="pageLayoutDiv" style="display:none;">
+            <ui:insert name="content"/>
+        </div>
+        <div id="loadingDiv" style="width: 30px;margin: 100px auto 0px auto">
+            <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
+        </div>
     </div>
 
     <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>

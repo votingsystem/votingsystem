@@ -8,7 +8,7 @@
 
 <dom-module name="tagvs-select-dialog">
 <template>
-    <paper-dialog id="xDialog" autoCloseDisabled layered backdrop title="{{caption}}" style="max-width: 600px;">
+    <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key title="{{caption}}" style="max-width: 600px;">
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <vs-i18n id="i18nVS"></vs-i18n>

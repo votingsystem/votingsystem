@@ -5,7 +5,7 @@
 
 <dom-module name="groupvs-user" attributes="userId subscriptionDataURLPrefix opened">
     <template>
-        <paper-dialog id="xDialog" autoCloseDisabled layered backdrop class="uservsDialog" style="border: 1px solid #6c0404;">
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key class="uservsDialog" style="border: 1px solid #6c0404;">
             <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <iron-ajax id="ajax" url="{{url}}" last-response="{{subscriptionData}}" handleAs="json" method="get"

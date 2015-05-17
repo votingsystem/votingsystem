@@ -87,7 +87,6 @@
             publish: {
                 smimeMessageContent: {value: {}}
             },
-            isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,
             timeStampDate:null,
             receptorLbl:null,
@@ -95,6 +94,7 @@
             isReceptorVisible:true,
             ready: function() {
                 console.log(this.tagName + " - ready")
+                this.isClientToolConnected = window['isClientToolConnected']
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected', function() {
                     this.isClientToolConnected = true
                 }.bind(this))

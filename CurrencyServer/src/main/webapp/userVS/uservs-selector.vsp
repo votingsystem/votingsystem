@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/core-localstorage/core-localstorage.html" rel="import"/>
+<link href="${resourceURL}/iron-localstorage/iron-localstorage.html" rel="import"/>
 
 <dom-module name="uservs-selector" attributes="url contactSelector groupVSId">
     <template>
@@ -59,8 +59,8 @@
             <div hidden="{{responseData.resultList.length !== 0}}"  class="center" id="emptySearchMsg" style="margin:30px 0 30px 0; font-weight: bold;">
                 ${msg.emptyUserSearchResultMsg}
             </div>
-            <core-localstorage id="localstorage" name="contacts-localstorage" value="{{contacts}}"
-                   on-load="{{contactsChanged}}"></core-localstorage>
+            <iron-localstorage id="localstorage" name="contacts-localstorage" value="{{contacts}}"
+                   on-load="{{contactsChanged}}"></iron-localstorage>
         </div>
     </template>
     <script>

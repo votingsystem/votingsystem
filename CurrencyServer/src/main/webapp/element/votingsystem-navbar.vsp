@@ -11,59 +11,57 @@
 
 <dom-module name="votingsystem-navbar">
     <style>
-        .paperMenu { background: #ba0011; color:#ffffff;}
+        .paperMenu { background: #ba0011; color:#ffffff; height: 100%;}
+        paper-item:hover {color: yellow;cursor: pointer;}
+        paper-item {cursor: pointer;}
     </style>
     <template>
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <iron-ajax id="ajax" on-response="ajaxResponse" on-iron-error="ajaxError" handle-as="document"></iron-ajax>
         <!-- put core signals names in lower case !!!-->
         <iron-signals on-iron-signal-vs-innerpage="{{innerPageSignal}}" on-iron-signal-vs-session-data="{{sessionDataSignal}}"
                       on-iron-signal-vs-websocket-message="{{websocketSignal}}"></iron-signals>
-        <paper-drawer-panel id="paperDrawerPanel">
-            <div drawer>
-                <paper-menu attr-for-selected="label" id="core_menu" class="paperMenu">
-                    <iron-selector id="coreSelector" selected="{{coreSelectorValue}}" attr-for-selected="data-href" on-iron-select="drawerItemSelected">
-                        <paper-item data-href="${restURL}/app/userVSDashboard">
-                            <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
+        <paper-drawer-panel id="paperDrawerPanel" responsive-width="30000px">
+            <div drawer style="height: 100%;">
+                <paper-menu class="paperMenu" attr-for-selected="data-href" selected="{{selectorValue}}" on-iron-select="drawerItemSelected" style="padding:100px 0 0 0;">
+                    <paper-item data-href="${restURL}/app/userVSDashboard">
+                        <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
+                    </paper-item>
+                    <paper-item data-href="${restURL}/groupVS">
+                        <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupvsLbl}
+                    </paper-item>
+                    <paper-item data-href="${restURL}/userVS/search">
+                        <i class="fa fa-user" style="margin:0px 10px 0px 0px;"></i> ${msg.locateUserVSLbl}
+                    </paper-item>
+                    <paper-item data-href="${restURL}/currency/request">
+                        <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> ${msg.doCurrencyRequestLbl}
+                    </paper-item>
+                    <template if="{{'admin' === menu && isClientToolConnected}}">
+                        <paper-item data-href="new_groupvs">
+                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupVSLbl}
                         </paper-item>
-                        <paper-item data-href="${restURL}/groupVS">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupvsLbl}
+                        {{ "${msg.adminPageTitle}" | setTitle}}
+                    </template>
+                    <template if="{{'superuser' === menu}}">
+                        <paper-item data-href="${contextURL}/userVS/newBankVS.xhtml">
+                            <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankVSLbl}
                         </paper-item>
-                        <paper-item data-href="${restURL}/userVS/search">
-                            <i class="fa fa-user" style="margin:0px 10px 0px 0px;"></i> ${msg.locateUserVSLbl}
+                        <paper-item data-href="${restURL}/certificateVS/certs">
+                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
                         </paper-item>
-                        <paper-item data-href="${restURL}/currency/request">
-                            <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> ${msg.doCurrencyRequestLbl}
-                        </paper-item>
-                        <template if="{{'admin' === menu && isClientToolConnected}}">
-                            <paper-item data-href="new_groupvs">
-                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupVSLbl}
-                            </paper-item>
-                            {{ "${msg.adminPageTitle}" | setTitle}}
-                        </template>
-                        <template if="{{'superuser' === menu}}">
-                            <paper-item data-href="${contextURL}/userVS/newBankVS.xhtml">
-                                <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankVSLbl}
-                            </paper-item>
-                            <paper-item data-href="${restURL}/certificateVS/certs">
-                                <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
-                            </paper-item>
-                            {{ "${msg.superUserTitle}" | setTitle}}
-                        </template>
-                        <template if="{{'superuser' !== menu && 'admin' !== menu}}">
-                            {{ "${msg.usersPageTitle}" | setTitle}}
-                        </template>
-                        <paper-item data-href="${restURL}/transactionVS">
-                            <i class="fa fa-line-chart" style="margin:0px 10px 0px 0px;"></i> ${msg.transactionsLbl}
-                        </paper-item>
-                        <paper-item data-href="${restURL}/reports">
-                            <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> ${msg.reportsPageTitle}
-                        </paper-item>
-                        <paper-item data-href="${restURL}/app/contact" icon="question-answer">
-                            <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
-                        </paper-item>
-                    </iron-selector>
+                        {{ "${msg.superUserTitle}" | setTitle}}
+                    </template>
+                    <template if="{{'superuser' !== menu && 'admin' !== menu}}">
+                        {{ "${msg.usersPageTitle}" | setTitle}}
+                    </template>
+                    <paper-item data-href="${restURL}/transactionVS">
+                        <i class="fa fa-line-chart" style="margin:0px 10px 0px 0px;"></i> ${msg.transactionsLbl}
+                    </paper-item>
+                    <paper-item data-href="${restURL}/reports">
+                        <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> ${msg.reportsPageTitle}
+                    </paper-item>
+                    <paper-item data-href="${restURL}/app/contact" icon="question-answer">
+                        <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
+                    </paper-item>
                 </paper-menu>
             </div>
             <div main>
@@ -82,11 +80,11 @@
                         </div>
                     </div>
                 </paper-header-panel>
+                <div id="contentDiv" style="margin:0 0 0 0;">
+                    <content></content>
+                </div>
             </div>
         </paper-drawer-panel>
-        <div id="contentDiv" style="margin: 60px 0 0 0;">
-            <content></content>
-        </div>
         <div hidden="{{!loading}}" style="width: 30px;margin: 100px auto 0px auto;">
             <i class="fa fa-cog fa-spin" style="font-size:3em;color:#ba0011;"></i>
         </div>
@@ -99,7 +97,6 @@
             },
             ready: function() {
                 this.menu = menuType
-                this.ajaxOptions = {method:'get', responseType:'document'}
                 this.appTitle = "${msg.appTitle}"
                 window.addEventListener('popstate', function(event) {
                     this.url = document.location.href
@@ -110,8 +107,6 @@
                 }.bind(this))
                 console.log(this.tagName + " - ready - isClientToolConnected: " + this.isClientToolConnected + " - " + this.appTitle )
                 this.loading = false
-                document.querySelector("#navBar").style.display = 'block'
-                document.querySelector("#loadingDiv").style.display = 'none'
             },
             urlChanged: function() { //for history navigation
                 this.loadURL(this.url)
@@ -143,10 +138,10 @@
                 this.$.ajax.generateRequest()
             },
             drawerItemSelected: function(e) {
-                if('new_groupvs' === this.coreSelectorValue) {
+                if('new_groupvs' === this.selectorValue) {
                     VotingSystemClient.setMessage(new OperationVS(Operation.CURRENCY_GROUP_NEW))
-                } else this.loadURL(this.coreSelectorValue)
-                this.coreSelectorValue = null
+                } else this.loadURL(this.selectorValue)
+                this.selectorValue = null
             },
             setTitle: function(appTitle) {
                 this.appTitle = appTitle
