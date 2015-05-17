@@ -5,8 +5,8 @@
 <dom-module name="eventvs-election-stats" attributes="eventVSId">
     <template>
         <style></style>
-        <iron-ajax id="ajax" auto url="{{url}}" handleAs="json" last-response="{{statsDataMap}}" method="get"
-                   contentType="application/json" on-iron-response="{{ajaxResponse}}"></iron-ajax>
+        <iron-ajax id="ajax" auto url="{{url}}" handle-as="json" last-response="{{statsDataMap}}" method="get"
+                   content-type="application/json" on-iron-response="{{ajaxResponse}}"></iron-ajax>
         <div id="messageToUser" style="padding: 10px;font-weight: bold; text-align:center; display:none">
             ${msg.withoutVotesLbl}
         </div>

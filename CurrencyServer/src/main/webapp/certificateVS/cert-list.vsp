@@ -1,10 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
 <link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
 <link href="${elementURL}/certificateVS/votingsystem-cert.vsp" rel="import"/>
 
-<dom-module name="cert-list" attributes="url">
+<dom-module name="cert-list">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -25,92 +24,85 @@
                 box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
             }
         </style>
-        <iron-ajax id="ajax" url="{{url}}" last-response="{{resultListDto}}" handleAs="json" method="get" contentType="application/json"></iron-ajax>
+        <iron-ajax id="ajax" url="{{url}}" last-response="{{certListDto}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
         <iron-signals on-iron-signal-votingsystem-cert-closed="closeCertDetails"></iron-signals>
-        <core-animated-pages id="pages" flex selected="{{page}}" on-iron-animated-pages-transition-end="{{transitionend}}"
-                             transitions="cross-fade-all">
-            <section id="page1">
-                <div cross-fade>
-                    <div class="layout horizontal center center-justified">
-                        <select id="certTypeSelect" class="form-control" style="margin:0px auto 0px auto;color:black;
+        <div hidden="{{!certDetailsHidden}}">
+            <div class="layout horizontal center center-justified">
+                <select id="certTypeSelect" class="form-control" style="margin:0px auto 0px auto;color:black;
                                 max-width: 400px;" on-change="certTypeSelect">
-                            <option value="&type=USER&state=OK"> - ${msg.certUserStateOKLbl} - </option>
-                            <option value="&type=CERTIFICATE_AUTHORITY&state=OK"> - ${msg.certAuthorityStateOKLbl} - </option>
-                            <option value="&type=USER&state=CANCELED"> - ${msg.certUserStateCancelledLbl} - </option>
-                            <option value="&type=CERTIFICATE_AUTHORITY&state=CANCELED"> - ${msg.certAuthorityStateCancelledLbl} - </option>
-                        </select>
-                    </div>
+                    <option value="&type=USER&state=OK"> - ${msg.certUserStateOKLbl} - </option>
+                    <option value="&type=CERTIFICATE_AUTHORITY&state=OK"> - ${msg.certAuthorityStateOKLbl} - </option>
+                    <option value="&type=USER&state=CANCELED"> - ${msg.certUserStateCancelledLbl} - </option>
+                    <option value="&type=CERTIFICATE_AUTHORITY&state=CANCELED"> - ${msg.certAuthorityStateCancelledLbl} - </option>
+                </select>
+            </div>
 
-                    <h3><div id="pageHeader" class="pageHeader text-center">{{pageHeader}}</div></h3>
+            <h3><div id="pageHeader" class="pageHeader text-center">{{pageHeader}}</div></h3>
 
-                    <div class="flex" horizontal wrap around-justified layout>
-                        <template repeat="{{cert in resultListDto.resultList}}">
-                            <div class="certDiv" on-tap="showCert">
-                                <div>
-                                    <div style="display: inline;">
-                                        <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
+            <div class="flex" horizontal wrap around-justified layout>
+                <template repeat="{{cert in certListDto.resultList}}">
+                    <div class="certDiv" on-tap="showCert">
+                        <div>
+                            <div style="display: inline;">
+                                <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
                                             ${msg.serialNumberLbl}: </span>{{cert.serialNumber}}</div>
-                                        <div id="certStateDiv" style="display: inline; margin:0px 0px 0px 20px; font-size: 1.2em;
+                                <div id="certStateDiv" style="display: inline; margin:0px 0px 0px 20px; font-size: 1.2em;
                                         font-weight: bold; float: right;">{{cert.state | getState}}</div>
-                                    </div>
-                                </div>
-                                <div class='groupvsSubjectDiv'><span style="font-weight: bold;">${msg.subjectLbl}: </span>{{cert.subjectDN}}</div>
-                                <div class=''><span style="font-weight: bold;">${msg.issuerLbl}: </span>
-                                    {{cert.issuerDN}}</div>
-                                <div class=''><span style="font-weight: bold;">${msg.signatureAlgotithmLbl}: </span>{{cert.sigAlgName}}</div>
-                                <div>
-                                    <div class='' style="display: inline;">
-                                        <span style="font-weight: bold;">${msg.noBeforeLbl}: </span>{{cert.notBefore}}</div>
-                                    <div class='' style="display: inline; margin:0px 0px 0px 20px;">
-                                        <span style="font-weight: bold;">${msg.noAfterLbl}: </span>{{cert.notAfter}}</div>
-                                </div>
-                                <div>
-                                    <div class="text-center" style="font-weight: bold; display: {{cert.isRoot ? 'inline': 'none'}};
-                                    margin:0px auto 0px auto;color: #6c0404; float:right; text-decoration: underline;">${msg.rootCertLbl}</div>
-                                </div>
                             </div>
-                        </template>
+                        </div>
+                        <div class='groupvsSubjectDiv'><span style="font-weight: bold;">${msg.subjectLbl}: </span>{{cert.subjectDN}}</div>
+                        <div class=''><span style="font-weight: bold;">${msg.issuerLbl}: </span>
+                            {{cert.issuerDN}}</div>
+                        <div class=''><span style="font-weight: bold;">${msg.signatureAlgotithmLbl}: </span>{{cert.sigAlgName}}</div>
+                        <div>
+                            <div class='' style="display: inline;">
+                                <span style="font-weight: bold;">${msg.noBeforeLbl}: </span>{{cert.notBefore}}</div>
+                            <div class='' style="display: inline; margin:0px 0px 0px 20px;">
+                                <span style="font-weight: bold;">${msg.noAfterLbl}: </span>{{cert.notAfter}}</div>
+                        </div>
+                        <div>
+                            <div class="text-center" style="font-weight: bold; display: {{cert.isRoot ? 'inline': 'none'}};
+                                    margin:0px auto 0px auto;color: #6c0404; float:right; text-decoration: underline;">${msg.rootCertLbl}</div>
+                        </div>
                     </div>
-                    <vs-pager on-pager-change="{{pagerChange}}" max="{{resultListDto.max}}"
-                              next="${msg.nextLbl}" previous="${msg.previousLbl}"
-                              first="${msg.firstLbl}" last="${msg.lastLbl}"
-                              offset="{{resultListDto.offset}}" total="{{resultListDto.totalCount}}"></vs-pager>
-                </div>
-            </section>
-            <section id="page2">
-                <div cross-fade>
-                    <votingsystem-cert id="certDetails" fab-visible="true" cert="{{cert}}"></votingsystem-cert>
-                </div>
-            </section>
-        </core-animated-pages>
+                </template>
+            </div>
+            <vs-pager on-pager-change="{{pagerChange}}" max="{{certListDto.max}}"
+                      next="${msg.nextLbl}" previous="${msg.previousLbl}"
+                      first="${msg.firstLbl}" last="${msg.lastLbl}"
+                      offset="{{certListDto.offset}}" total="{{certListDto.totalCount}}"></vs-pager>
+        </div>
+        <div hidden="{{certDetailsHidden}}">
+            <votingsystem-cert id="certDetails" fab-visible="true" cert="{{cert}}"></votingsystem-cert>
+        </div>
     </template>
     <script>
         Polymer({
             is:'cert-list',
-            publish: { resultListDto: {}},
+            properties: {
+                certListDto:{type:Object, value:null, observer:'certListDtoChanged'}
+            },
             ready: function() {
                 console.log(this.tagName + " - ready")
-                this.page = 0;
+                this.certDetailsHidden = true
+                this.url="${restURL}/certificateVS/certs"
             },
             closeCertDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeCertDetails")
-                this.page = 0;
+                this.certDetailsHidden = true
             },
             showCert :  function(e) {
                 console.log(this.tagName + " - showCertDetails")
                 this.$.certDetails.certvs = e.model.item;
-                this.page = 1;
+                this.certDetailsHidden = false
             },
-            resultListDtoChanged:function() {
-                if(this.resultListDto == null) return
+            certListDtoChanged:function() {
+                if(this.certListDto == null) return
                 var certType = getURLParam('type')
                 var certState = getURLParam('state')
-                console.log(this.tagName + " - resultListDtoChanged - certType: " + certType + " - certState: " + certState)
-                if("CERTIFICATE_AUTHORITY" == certType) {
-                    this.pageHeader = "${msg.trustedCertsPageTitle}"
-                } else {
-                    this.pageHeader = "${msg.userCertsPageTitle}"
-                }
+                console.log(this.tagName + " - certListDtoChanged - certType: " + certType + " - certState: " + certState)
+                if("CERTIFICATE_AUTHORITY" == certType) this.pageHeader = "${msg.trustedCertsPageTitle}"
+                else this.pageHeader = "${msg.userCertsPageTitle}"
             },
             getState:function(state){
                 var stateLbl

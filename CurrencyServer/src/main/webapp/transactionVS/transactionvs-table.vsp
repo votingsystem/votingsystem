@@ -8,8 +8,8 @@
     .rowvs div { text-align:center; }
     .expenseRow { background: #fee; }
     </style>
-    <iron-ajax id="ajax" auto url="{{url}}" last-response="{{responseData}}" handleAs="json" method="get"
-               contentType="application/json"  on-iron-complete="{{ajaxComplete}}"></iron-ajax>
+    <iron-ajax id="ajax" auto url="{{url}}" last-response="{{responseData}}" handle-as="json" method="get"
+               content-type="application/json"  on-iron-complete="{{ajaxComplete}}"></iron-ajax>
     <!--JavaFX Webkit gives problems with tables and templates -->
     <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
         <div layout horizontal center center-justified class="tableHeadervs">

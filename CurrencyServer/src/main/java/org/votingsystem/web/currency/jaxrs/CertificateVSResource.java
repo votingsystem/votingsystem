@@ -136,7 +136,7 @@ public class CertificateVSResource {
             if(contentType.contains("json")) {
                 return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
             } else {
-                req.setAttribute("resultListDto", JSON.getMapper().writeValueAsString(resultListDto));
+                req.setAttribute("certListDto", JSON.getMapper().writeValueAsString(resultListDto));
                 context.getRequestDispatcher("/certificateVS/certs.xhtml").forward(req, resp);
                 return Response.ok().build();
             }

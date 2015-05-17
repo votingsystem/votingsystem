@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/core-animated-pages/core-animated-pages.html" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-form.vsp" rel="import"/>
 <link href="${elementURL}/element/messagevs-send-dialog.vsp" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-table.vsp" rel="import"/>
@@ -17,8 +16,8 @@
         }
     </style>
 
-    <iron-ajax id="ajax" on-iron-response="{{ajaxResponse}}" handleAs="json"
-               method="get" contentType="application/json"></iron-ajax>
+    <iron-ajax id="ajax" on-iron-response="{{ajaxResponse}}" handle-as="json"
+               method="get" content-type="application/json"></iron-ajax>
     <core-animated-pages id="pages" flex selected="{{page}}" on-iron-animated-pages-transition-end="{{transitionend}}"
              transitions="cross-fade-all">
         <section id="page1">

@@ -133,7 +133,7 @@
         <style>
 
         </style>
-        <iron-ajax id="ajax" auto url="{{url}}" handleAs="json" method="get" contentType="application/json"></iron-ajax>
+        <iron-ajax id="ajax" auto url="{{url}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
         <!--JavaFX Webkit gives problems with tables and templates -->
         <div layout center center-justified style="margin: 0px auto 0px auto;">
             <div class="layout flex horizontal wrap around-justified">

@@ -25,8 +25,8 @@
             paper-tabs.transparent-teal::shadow #selectionBar { background-color: #ba0011; }
             paper-tabs.transparent-teal paper-tab::shadow #ink { color: #ba0011; }
         </style>
-        <iron-ajax id="ajax" auto url="{{url}}" last-response="{{groupvsWithDetails}}" handleAs="json" method="get"
-                   contentType="application/json"></iron-ajax>
+        <iron-ajax id="ajax" auto url="{{url}}" last-response="{{groupvsWithDetails}}" handle-as="json" method="get"
+                   content-type="application/json"></iron-ajax>
         <div  style="margin:0px auto 0px auto;">
             <paper-tabs  style="margin:0px auto 0px auto; border-bottom: 1px solid #ba0011;" class="transparent-teal center" attr-for-selected="name"
                          selected="{{selectedTab}}"  on-iron-select="tabSelected" noink>

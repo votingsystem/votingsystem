@@ -41,7 +41,7 @@ public class CertificateVSDto implements Serializable {
             NoSuchProviderException, IOException {
         serialNumber = x509Cert.getSerialNumber().toString();
         isRoot = CertUtils.isSelfSigned(x509Cert);
-        pemCert = new String(CertUtils.getPEMEncoded (x509Cert), "UTF-8");
+        //pemCert = new String(CertUtils.getPEMEncoded (x509Cert), "UTF-8");
         subjectDN = x509Cert.getSubjectDN().toString();
         issuerDN = x509Cert.getIssuerDN().toString();
         sigAlgName = x509Cert.getSigAlgName();

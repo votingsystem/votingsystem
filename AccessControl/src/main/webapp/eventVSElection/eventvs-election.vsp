@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
-<link href="${resourceURL}/core-media-query/core-media-query.html" rel="import"/>
+<link href="${resourceURL}/iron-media-query/iron-media-query.html" rel="import"/>
 <link href="${elementURL}/eventVSElection/eventvs-election-voteconfirm-dialog.vsp" rel="import"/>
 <link href="${elementURL}/element/eventvs-admin-dialog.vsp" rel="import"/>
 <link href="${elementURL}/element/votevs-result-dialog.vsp" rel="import"/>
@@ -26,7 +26,7 @@
                 color: #ba0011;
             }
         </style>
-        <core-media-query query="max-width: 600px" queryMatches="{{smallScreen}}"></core-media-query>
+        <iron-media-query query="max-width: 600px" queryMatches="{{smallScreen}}"></iron-media-query>
         <div>
             <div style="text-align: center;">
                 <template if="{{'admin' == menuType}}">
@@ -132,7 +132,7 @@
         Polymer({
             is:'eventvs-election',
             properties: {
-                eventvs:{type:Object, value:{}}
+                eventvs:{type:Object, value:{}, observer:'eventvsChanged'}
             },
             fireSignal:function() {
                 this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});

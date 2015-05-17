@@ -5,8 +5,8 @@
 
 <dom-module name="transactionvs-list" attributes="url transactionsDto">
 <template>
-    <iron-ajax id="ajax" auto url="{{url}}" last-response="{{responseData}}" handleAs="json" method="get"
-               contentType="application/json"  on-iron-complete="{{ajaxComplete}}"></iron-ajax>
+    <iron-ajax id="ajax" auto url="{{url}}" last-response="{{responseData}}" handle-as="json" method="get"
+               content-type="application/json"  on-iron-complete="{{ajaxComplete}}"></iron-ajax>
     <div class="layout flex horizontal wrap around-justified">
         <template repeat="{{transaction in transactionsDto.resultList}}">
             <transactionvs-card transaction="{{transaction}}"></transactionvs-card>

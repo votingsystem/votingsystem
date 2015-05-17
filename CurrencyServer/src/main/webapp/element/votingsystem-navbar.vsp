@@ -17,7 +17,6 @@
     </style>
     <template>
         <iron-ajax id="ajax" on-response="ajaxResponse" on-iron-error="ajaxError" handle-as="document"></iron-ajax>
-        <!-- put core signals names in lower case !!!-->
         <iron-signals on-iron-signal-vs-innerpage="innerPageSignal" on-iron-signal-vs-session-data="sessionDataSignal"
                       on-iron-signal-vs-websocket-message="websocketSignal"></iron-signals>
         <paper-drawer-panel id="paperDrawerPanel" responsive-width="30000px">
@@ -65,7 +64,7 @@
                 </paper-menu>
             </div>
             <div main>
-                <paper-header-panel mode="seamed" id="core_header_panel" class="navigation flex vs-navbar">
+                <paper-header-panel mode="seamed" id="core_header_panel" class="vs-navbar">
                     <div class="horizontal layout">
                         <div>
                             <paper-icon-button id="menuButton" icon="menu" on-tap="togglePanel" paper-drawer-toggle

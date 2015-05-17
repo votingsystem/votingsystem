@@ -8,7 +8,7 @@
         <paper-dialog id="xDialog" layered backdrop class="currencyTransactionDialog">
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <iron-ajax id="ajax" auto url="{{transactionvsURL}}" last-response="{{transactionvs}}" handleAs="json" method="get" contentType="application/json"></iron-ajax>
+        <iron-ajax id="ajax" auto url="{{transactionvsURL}}" last-response="{{transactionvs}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
             <div hidden="{{!isProcessing}}">
                 <div layout vertical center center-justified  style="text-align:center;min-height: 150px;">
                     <progress style="margin:20px auto;"></progress>

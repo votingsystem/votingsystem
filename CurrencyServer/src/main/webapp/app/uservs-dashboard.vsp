@@ -17,7 +17,7 @@
                 color: #6c0404;
             }
         </style>
-        <iron-ajax id="ajax" url="{{url}}" handleAs="json" last-response="{{dashBoardDto}}" method="get" contentType="application/json"></iron-ajax>
+        <iron-ajax id="ajax" url="{{url}}" handle-as="json" last-response="{{dashBoardDto}}" method="get" content-type="application/json"></iron-ajax>
         <div id="selectorContainer" layout horizontal center center-justified relative>
             <paper-dropdown-menu id="dropDownMenu" halign="right" on-iron-select="selectAction">
                 <paper-dropdown class="dropdown colored" transition="">

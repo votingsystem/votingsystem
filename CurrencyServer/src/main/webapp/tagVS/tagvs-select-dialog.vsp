@@ -62,8 +62,8 @@
                 </button>
             </div>
         </div>
-        <iron-ajax id="ajax" auto url="{{url}}" last-response="{{resultListDto}}" handleAs="json" method="get"
-                   contentType="application/json"></iron-ajax>
+        <iron-ajax id="ajax" auto url="{{url}}" last-response="{{resultListDto}}" handle-as="json" method="get"
+                   content-type="application/json"></iron-ajax>
     </paper-dialog>
 </template>
 <script>

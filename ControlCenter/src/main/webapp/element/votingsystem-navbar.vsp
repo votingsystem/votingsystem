@@ -16,9 +16,7 @@
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <!--<iron-ajax id="ajax" auto on-iron-response="{{ajaxResponse}}" on-iron-error="{{ajaxError}}" handleAs="document"></iron-ajax>-->
         <iron-ajax id="ajax" handleAs=""></iron-ajax>
-        <!-- put core signals names in lower case !!!-->
-        <iron-signals on-iron-signal-vs-innerpage="innerPageSignal" on-iron-signal-vs-session-data="sessionDataSignal"
-                      on-iron-signal-vs-websocket-message="websocketSignal"></iron-signals>
+        <iron-signals on-iron-signal-vs-innerpage="innerPageSignal"></iron-signals>
         <vs-navbar id="_navbar">
             <paper-header-panel mode="seamed" id="core_header_panel" navigation flex class="vs-navbar">
                 <paper-toolbar id="core_toolbar" style="background-color: #ba0011;">
@@ -63,9 +61,6 @@
             },
             urlChanged: function() { //for history navigation
                 this.loadURL(this.url)
-            },
-            sessionDataSignal:function(e, detail, sender) {
-                console.log("sessionDataSignal")
             },
             websocketSignal:function(e, detail, sender) {
                 if("OPEN" === detail.socketStatus && "INIT_SIGNED_SESSION" === detail.operation) {

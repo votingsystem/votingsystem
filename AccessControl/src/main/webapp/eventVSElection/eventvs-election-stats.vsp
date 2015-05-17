@@ -5,7 +5,7 @@
 <dom-module name="eventvs-election-stats" attributes="caption eventVSId height">
     <template>
         <style></style>
-        <iron-ajax id="ajax" auto url="{{url}}" handleAs="json" last-response="{{statsDto}}" method="get" contentType="application/json"></iron-ajax>
+        <iron-ajax id="ajax" auto url="{{url}}" handle-as="json" last-response="{{statsDto}}" method="get" content-type="application/json"></iron-ajax>
         <div hidden="{{chartVisible}}" id="messageToUser" vertical layout center center-justified
              style="padding: 10px;font-weight: bold;">
             ${msg.withoutVotesLbl}

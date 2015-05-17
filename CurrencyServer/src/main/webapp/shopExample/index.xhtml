@@ -18,7 +18,7 @@
                 </div>
                 ${msg.paymentOptionsLbl}: ${transactionRequest.getPaymentOptions}
                 <img src="http://localhost:8080/CurrencyServer/QR?cht=qr&amp;chs=250x250&amp;chl=${paymentInfoServiceURL}" alt="read it with your mobile" height="250" width="250"/>
-                <iron-ajax auto="" last-response="{{data}}" on-iron-response="{{ajaxHandler}}" handleAs="json"
+                <iron-ajax auto="" last-response="{{data}}" on-iron-response="{{ajaxHandler}}" handle-as="json"
                            url="${restURL}/shopExample/listenTransactionChanges/${shopSessionID}"></iron-ajax>
                 <h3>{{data.message}}</h3>
             </div>
