@@ -1,6 +1,7 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
 import org.votingsystem.dto.CertificateVSDto;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
@@ -19,6 +20,7 @@ import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -45,66 +47,66 @@ public class CertificateVSResource {
     @Inject SignatureBean signatureBean;
     @Inject CertificateVSBean certificateVSBean;
 
-
-    @Path("/certs") @GET
+    @Transactional
+    @Path("/certs")
+    @GET @Produces(MediaType.APPLICATION_JSON)
     public Response certs(@DefaultValue("0") @QueryParam("offset") int offset,
                           @DefaultValue("100") @QueryParam("max") int max,
-            @PathParam("serialNumber") Long serialNumber, @DefaultValue("") @QueryParam("searchText") String searchText,
-            @QueryParam("type") String typeReq,
-            @QueryParam("state") String stateReq, @QueryParam("format") String formatReq, @Context ServletContext context,
-            @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
-        CertificateVS.Type type = CertificateVS.Type.USER;
-        CertificateVS.State state = CertificateVS.State.OK;
-        try {type = CertificateVS.Type.valueOf(typeReq);} catch(Exception ex) {}
-        try {state = CertificateVS.State.valueOf(stateReq);} catch(Exception ex) { }
-        if(contentType.contains("pem") || contentType.contains("json") || "pem".equals(formatReq)) {
-            /*Map<String, Object> params = new HashMap<String, Object>();
-            StringBuffer hql = new StringBuffer("select c from CertificateVS c where c.type =:type and c.state =:state");
-            if (searchText != null) {
-                hql.append(" and (c.userVS.name like :searchText or c.userVS.nif like :searchText or c.userVS.firstName like :searchText " +
-                        "or c.userVS.lastName like :searchText or c.userVS.description like :searchText)");
-                params.put("searchText", "%" + searchText + "%");
+                          @DefaultValue("USER") @QueryParam("type") String typeStr,
+                          @DefaultValue("OK") @QueryParam("state") String stateStr,
+                          @DefaultValue("") @QueryParam("format") String format, @QueryParam("searchText") String searchText,
+                          @Context ServletContext context,
+                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        String contentType = req.getContentType() != null ? req.getContentType(): "";
+        CertificateVS.Type type = CertificateVS.Type.valueOf(typeStr);
+        CertificateVS.State state = CertificateVS.State.valueOf(stateStr);
+        Query query;
+        Long totalCount = null;
+        if(searchText == null) {
+            query = dao.getEM().createQuery("select count(c) from CertificateVS c where c.type =:type and c.state =:state")
+                    .setParameter("type", type).setParameter("state", state);
+            totalCount = (long) query.getSingleResult();
+            query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type and c.state =:state")
+                    .setParameter("type", type).setParameter("state", state)
+                    .setFirstResult(offset).setMaxResults(max);;
+        } else {
+            query = dao.getEM().createQuery("select count (c) from CertificateVS c where c.type =:type and c.state =:state " +
+                    "and (c.userVS.name like :searchText or c.userVS.nif like :searchText " +
+                    "or c.userVS.firstName like :searchText or c.userVS.lastName like :searchText " +
+                    "or c.userVS.description like :searchText)").setParameter("type", type)
+                    .setParameter("state", state).setParameter("searchText", "%" + searchText + "%");
+            totalCount = (long) query.getSingleResult();
+            query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type and c.state =:state " +
+                    "and (c.userVS.name like :searchText or c.userVS.nif like :searchText " +
+                    "or c.userVS.firstName like :searchText or c.userVS.lastName like :searchText " +
+                    "or c.userVS.description like :searchText)").setParameter("type", type)
+                    .setParameter("state", state).setParameter("searchText", "%" + searchText + "%")
+                    .setFirstResult(offset).setMaxResults(max);;
+        }
+        List<CertificateVS> certificates = query.getResultList();
+        if(contentType.contains("pem")) {
+            List<X509Certificate> resultList = new ArrayList<>();
+            for(CertificateVS certificateVS : certificates) {
+                resultList.add(certificateVS.getX509Cert());
             }
-            query = dao.getEM().createQuery(hql.toString());
-            for(Map.Entry<String, Object> paramEntry :params.entrySet()) {
-                query.setParameter(paramEntry.getKey(), paramEntry.getValue());
-            }*/
-            searchText = "%" + searchText + "%";
-            Query query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type and c.state =:state and " +
-                    "(c.userVS.name like :searchText or c.userVS.nif like :searchText or c.userVS.firstName like :searchText " +
-                    "or c.userVS.lastName like :searchText or c.userVS.description like :searchText)")
-                    .setParameter("type", type).setParameter("state", state).setParameter("searchText", searchText);
-            List<CertificateVS> certList = query.getResultList();
-            if(contentType.contains("pem") || "pem".equals(formatReq)) {
-                List<X509Certificate> resultList = new ArrayList<>();
-                for(CertificateVS certificateVS : certList) {
-                    resultList.add(certificateVS.getX509Cert());
-                }
-                return Response.ok().entity(CertUtils.getPEMEncoded (resultList)).build();
+            return Response.ok().entity(CertUtils.getPEMEncoded(resultList)).build();
+        } else {
+            List<CertificateVSDto> listDto = new ArrayList<>();
+            for(CertificateVS certificateVS : certificates) {
+                listDto.add(new CertificateVSDto(certificateVS));
+            }
+            ResultListDto<CertificateVSDto> resultListDto = new ResultListDto<>(listDto, offset, max, totalCount);
+            if(contentType.contains("json")) {
+                return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
             } else {
-                List<CertificateVSDto> resultList = new ArrayList<>();
-                for(CertificateVS certificateVS : certList) {
-                    resultList.add(new CertificateVSDto(certificateVS));
-                }
-                Map resultMap = new HashMap<>();
-                resultMap.put("certList", resultList);
-                resultMap.put("type", type);
-                resultMap.put("state", state);
-                resultMap.put("offset", offset);
-                resultMap.put("max", max);
-                resultMap.put("totalCount", resultList.size());
-                return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap))
-                        .type(MediaTypeVS.JSON).build();
+                req.setAttribute("certListDto", JSON.getMapper().writeValueAsString(resultListDto));
+                context.getRequestDispatcher("/certificateVS/certs.xhtml").forward(req, resp);
+                return Response.ok().build();
             }
         }
-        context.getRequestDispatcher("/certificateVS/certs.xhtml").forward(req, resp);
-        return Response.ok().build();
     }
 
-
-    @Path("/serialNumber/{serialNumber}")
-    @GET
+    @GET @Path("/serialNumber/{serialNumber}")
     public Response cert(@PathParam("serialNumber") Long serialNumber, @QueryParam("format") String format,
              @Context ServletContext context,
              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
@@ -130,7 +132,6 @@ public class CertificateVSResource {
             }
         }
     }
-
 
     @Path("/userVS/id/{userId}")
     @GET  @Produces(MediaType.TEXT_PLAIN)
@@ -206,58 +207,6 @@ public class CertificateVSResource {
                              @Context HttpServletResponse resp) throws Exception {
         CertificateVS certificateVS = certificateVSBean.editCert(messageSMIME);
         return Response.ok().entity("editCert - certificateVS id: " + certificateVS.getId()).build();
-    }
-
-    @Path("/certs")
-    @GET @Consumes(MediaType.TEXT_PLAIN) @Produces(MediaType.APPLICATION_JSON)
-    public Object certs(@DefaultValue("USER") @QueryParam("type") String typeStr,
-            @DefaultValue("OK") @QueryParam("state") String stateStr,
-            @DefaultValue("") @QueryParam("format") String format, @QueryParam("searchText") String searchText,
-            @Context ServletContext context,
-            @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType(): "";
-        CertificateVS.Type type = CertificateVS.Type.valueOf(typeStr);
-        CertificateVS.State state = CertificateVS.State.valueOf(stateStr);
-        if(contentType.contains("pem") || contentType.contains("json") || "pem".equals(format)) {
-            Query query;
-            if(searchText != null) {
-                query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type and c.state =:state")
-                        .setParameter("type", type).setParameter("state", state);
-            } else {
-                query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type and c.state =:state " +
-                        "and (c.userVS.name like :searchText or c.userVS.nif like :searchText " +
-                        "or c.userVS.firstName like :searchText or c.userVS.lastName like :searchText " +
-                        "or c.userVS.description like :searchText)").setParameter("type", type)
-                        .setParameter("state", state).setParameter("searchText", "%" + searchText + "%");
-
-            }
-            List<CertificateVS> certificates = query.getResultList();
-            if(certificates.isEmpty()) return Response.status(Response.Status.NOT_FOUND).build();
-            List resultList = new ArrayList<>();
-            if(contentType.contains("json")) {
-                for(CertificateVS certificateVS : certificates) {
-                    resultList.add(new CertificateVSDto(certificateVS));
-                }
-                Map resultMap = new HashMap<>();
-                resultMap.put("certList", resultList);
-                resultMap.put("type", type.toString());
-                resultMap.put("state", state.toString());
-                resultMap.put("totalCount", resultList.size());
-                return resultMap;
-            } else {
-                for(CertificateVS certificateVS : certificates) {
-                    resultList.add(certificateVS.getX509Cert());
-                }
-                return Response.ok().entity(CertUtils.getPEMEncoded (resultList)).build();
-            }
-        } else {
-            Map resultMap = new HashMap<>();
-            resultMap.put("type", type.toString());
-            resultMap.put("state", state.toString());
-            req.setAttribute("certsMap", resultMap);
-            context.getRequestDispatcher("/certificateVS/certs.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
     }
 
     @Path("/cert/{serialNumber}")

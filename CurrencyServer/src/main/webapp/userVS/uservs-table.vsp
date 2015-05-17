@@ -47,7 +47,7 @@
                         <div style="width:170px;">{{uservs.lastUpdated}}</div>
                     </div>
                 </template>
-                <vs-pager on-pager-change="{{pagerChange}}" max="{{userList.max}}"
+                <vs-pager on-pager-change="pagerChange" max="{{userList.max}}"
                           next="${msg.nextLbl}" previous="${msg.previousLbl}"
                           first="${msg.firstLbl}" last="${msg.lastLbl}"
                           offset="{{userList.offset}}" total="{{userList.totalCount}}"></vs-pager>

@@ -12,7 +12,7 @@
                 <template repeat="{{subscription in resultListDto.resultList}}">
                     <uservs-subscription-card subscription="{{subscription}}"></uservs-subscription-card>
                 </template>
-                <vs-pager on-pager-change="{{pagerChange}}" max="{{resultListDto.max}}"
+                <vs-pager on-pager-change="pagerChange" max="{{resultListDto.max}}"
                           next="${msg.nextLbl}" previous="${msg.previousLbl}"
                           first="${msg.firstLbl}" last="${msg.lastLbl}"
                           offset="{{resultListDto.offset}}" total="{{resultListDto.totalCount}}"></vs-pager>

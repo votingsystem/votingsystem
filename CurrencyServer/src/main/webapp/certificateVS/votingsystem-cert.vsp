@@ -1,12 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
 
-<dom-module name="votingsystem-cert" attributes="url cert">
+<dom-module name="votingsystem-cert">
     <template>
         <style>
-        .pageWidth {width: 600px;}
         .certDiv {
             background-color: #fefefe;
             padding: 10px;
@@ -15,62 +13,62 @@
             overflow:hidden;
         }
         </style>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
+        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <iron-ajax id="ajax" auto url="{{url}}" last-response="{{cert}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
-        <div layout vertical center center-justified >
-                <div layout horizontal class="pageWidth">
-                    <div hidden="{{!fabVisible}}" style="margin: 20px 0 0 0;" title="${msg.backLbl}" >
+        <iron-ajax id="ajax" url="{{url}}" last-response="{{cert}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
+        <div class="layout vertical center center-justified">
+            <div style="width: 600px;">
+                <div class="layout horizontal center center-justified" style="width: 100%;">
+                    <div hidden="{{!fabVisible}}">
                         <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
                     </div>
-
-                    <h3 flex>
-                        <div id="pageHeaderDiv" class="pageHeader text-center"></div>
-                    </h3>
+                    <div class="flex">
+                        <h3>
+                            <div id="pageHeaderDiv" class="pageHeader text-center"></div>
+                        </h3>
+                    </div>
                 </div>
 
-                <div class="certDiv pageWidth">
+                <div class="certDiv">
                     <div>
                         <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
                             ${msg.serialNumberLbl}: </span>{{certvs.serialNumber}}</div>
                         <div id="certStateDiv" style="display: inline; margin:0px 0px 0px 20px; font-size: 1.2em; font-weight: bold; float: right;"></div>
                     </div>
                     <div class='groupvsSubjectDiv'><span style="font-weight: bold;">${msg.subjectLbl}: </span>{{certvs.subjectDN}}</div>
-                    <div class=''><span style="font-weight: bold;">${msg.issuerLbl}: </span>
+                    <div><span style="font-weight: bold;">${msg.issuerLbl}: </span>
                         <a id="issuerURL" on-click="certIssuerClicked" style="cursor: pointer;">{{certvs.issuerDN}}</a>
                     </div>
-                    <div class=''><span style="font-weight: bold;">${msg.signatureAlgotithmLbl}: </span>{{certvs.sigAlgName}}</div>
+                    <div><span style="font-weight: bold;">${msg.signatureAlgotithmLbl}: </span>{{certvs.sigAlgName}}</div>
                     <div>
-                        <div class='' style="display: inline;">
-                            <span style="font-weight: bold;">${msg.noBeforeLbl}: </span>{{certvs.notBefore}}</div>
-                        <div class='' style="display: inline; margin:0px 0px 0px 20px;">
-                            <span style="font-weight: bold;">${msg.noAfterLbl}: </span>{{certvs.notAfter}}</div>
+                        <div style="display: inline;">
+                            <span style="font-weight: bold;">${msg.noBeforeLbl}: </span>{{getDate(certvs.notBefore)}}</div>
+                        <div style="display: inline; margin:0px 0px 0px 20px;">
+                            <span style="font-weight: bold;">${msg.noAfterLbl}: </span>{{getDate(certvs.notAfter)}}</div>
                     </div>
-                    <div>
-                        <div hidden="{{!certvs.isRoot}}">
-                            <div class="text-center" style="font-weight: bold; display: inline;
-                            margin:0px auto 0px auto;color: #6c0404; float:right; text-decoration: underline;">${msg.rootCertLbl}</div>
-                        </div>
+                    <div hidden="{{!certvs.isRoot}}" class="text-center" style="font-weight: bold; display: inline;
+                            margin:0px auto 0px auto;color: #6c0404; float:right; text-decoration: underline;">${msg.rootCertLbl}
                     </div>
                 </div>
                 <div style="width: 600px; max-height:400px; overflow-y: auto; margin:20px auto 0px auto;">
                     <div>{{certvs.description}}</div>
                 </div>
 
-                <div style="width: 600px; margin:20px auto 0px auto;">
+                <div class="vertical layout center center-justified" style="width: 600px; margin:20px auto 0px auto;">
                     <div><label>${msg.certPublicKeyLbl}</label></div>
                     <div>
                         <textarea id="pemCertTextArea" style="width:520px; height:300px;font-family: monospace; font-size:0.8em;" readonly></textarea>
                     </div>
                 </div>
-
+            </div>
         </div>
     </template>
     <script>
         Polymer({
             is:'votingsystem-cert',
-            publish: {
-                certvs: {value: {}}
+            properties: {
+                fabVisible:{type:Boolean, value:false},
+                certvs:{type:Object, value:{}, observer:'certvsChanged'}
             },
             certvsChanged: function() {
                 this.$.pemCertTextArea.value = this.certvs.pemCert
@@ -85,9 +83,11 @@
                     this.$.certStateDiv.innerHTML = "${msg.certCancelledLbl}"
                 }
             },
+            getDate:function(dateStamp) {
+                return new Date(dateStamp).getDayWeekFormat()
+            },
             ready: function() {
                 this.certsSelectedStack = []
-                if(this.certvs != null) this.certvsChanged()
             },
             back:function() {
                 var previousCert = this.certsSelectedStack.pop()

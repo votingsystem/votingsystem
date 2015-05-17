@@ -19,7 +19,7 @@
         <iron-ajax id="ajax" on-response="ajaxResponse" on-iron-error="ajaxError" handle-as="document"></iron-ajax>
         <iron-signals on-iron-signal-vs-innerpage="innerPageSignal" on-iron-signal-vs-session-data="sessionDataSignal"
                       on-iron-signal-vs-websocket-message="websocketSignal"></iron-signals>
-        <paper-drawer-panel id="paperDrawerPanel" responsive-width="30000px">
+        <paper-drawer-panel id="paperDrawerPanel" responsive-width="30000px" style="overflow: scroll;">
             <div drawer style="height: 100%;">
                 <paper-menu class="paperMenu" attr-for-selected="data-href" selected="{{selectorValue}}" on-iron-select="drawerItemSelected" style="padding:100px 0 0 0;">
                     <paper-item data-href="${restURL}/app/userVSDashboard">

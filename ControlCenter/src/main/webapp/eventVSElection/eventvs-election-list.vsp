@@ -54,7 +54,7 @@
                             </div>
                         </template>
                     </div>
-                    <vs-pager id="vspager" on-pager-change="{{pagerChange}}" max="{{eventsVSMap.max}}" style="margin: 0 0 100px 0;"
+                    <vs-pager id="vspager" on-pager-change="pagerChange" max="{{eventsVSMap.max}}" style="margin: 0 0 100px 0;"
                               next="${msg.nextLbl}" previous="${msg.previousLbl}"
                               first="${msg.firstLbl}" last="${msg.lastLbl}"
                               offset="{{eventsVSMap.offset}}" total="{{eventsVSMap.totalCount}}"></vs-pager>

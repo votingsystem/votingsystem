@@ -42,7 +42,7 @@
                 </template>
             </div>
 
-            <vs-pager on-pager-change="{{pagerChange}}" max="{{groupListDto.max}}"
+            <vs-pager on-pager-change="pagerChange" max="{{groupListDto.max}}"
                       next="${msg.nextLbl}" previous="${msg.previousLbl}"
                       first="${msg.firstLbl}" last="${msg.lastLbl}"
                       offset="{{groupListDto.offset}}" total="{{groupListDto.totalCount}}"></vs-pager>
