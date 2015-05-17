@@ -4,8 +4,8 @@
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <select id="transactionvsTypeSelect" style="margin:0px auto 10px auto;color:black; max-width: 400px;" class="form-control"
-                on-change="{{transactionvsTypeSelect}}">
+        <select id="transactionvsTypeSelect" style="margin:0px auto 10px auto;color:black; max-width: 400px;"
+                class="form-control" on-change="transactionvsTypeSelect">
             <option value="" style="color:black;"> - ${msg.selectTransactionTypeLbl} - </option>
             <option value="CURRENCY_REQUEST"> - ${msg.selectCurrencyRequestLbl} - </option>
             <option value="CURRENCY_SEND"> - ${msg.selectCurrencySendLbl} - </option>

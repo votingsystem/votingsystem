@@ -7,7 +7,7 @@
 <link href="${elementURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
 <link href="${elementURL}/userVS/uservs-selector-dialog.vsp" rel="import"/>
 
-<dom-module name="transactionvs-form" attributes="subpage">
+<dom-module name="transactionvs-form">
 <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -22,11 +22,9 @@
         <div style=" margin: 0 auto; max-width: 550px;">
 
             <div class="layout horizontal center center-justified">
-                <template if="{{subpage}}">
-                    <div style="margin: 10px 20px 0 0;" title="${msg.backLbl}" >
-                        <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
-                    </div>
-                </template>
+                <div hidden="{{!fabVisible}}" style="margin: 10px 20px 0 0;" title="${msg.backLbl}" >
+                    <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
+                </div>
                 <div class="flex"  style="text-align: center; color:#6c0404;">
                     <div>
                         <div style="font-size: 1.4em; font-weight: bold;">{{operationMsg}}</div>
@@ -126,7 +124,7 @@
     Polymer({
         is:'transactionvs-form',
         properties: {
-            subpage:{type:Boolean, value:false},
+            fabVisible:{type:Boolean, value:false},
             searchString:{type:String, value:null},
             messageToUser:{type:String, value:null, observer:'messageToUserChanged'}
         },
@@ -298,7 +296,7 @@
             this.fire('operation-finished')
         },
         init:function(operation, userName, userIBAN, userVSId) {
-            console.log(this.id + " - init - operation: " + operation + " - subpage: " + this.subpage +
+            console.log(this.id + " - init - operation: " + operation + " - fabVisible: " + this.fabVisible +
                     " - userIBAN: " + userIBAN)
             this.reset()
             this.operation = operation

@@ -7,11 +7,43 @@
         <link href="${resourceURL}/iron-ajax/iron-ajax.html" rel="import"/>
         <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
         <link href="${elementURL}/groupVS/groupvs-menu.vsp" rel="import"/>
+        <style>
+            .select-style {
+                border: 1px solid #ccc;
+                width: 120px;
+                border-radius: 3px;
+                overflow: hidden;
+                background: #fafafa url("img/icon-select.png") no-repeat 90% 50%;
+            }
+
+            .select-style select {
+                padding: 5px 8px;
+                width: 130%;
+                border: none;
+                box-shadow: none;
+                background: transparent;
+                background-image: none;
+                -webkit-appearance: none;
+            }
+
+            .select-style select:focus {
+                outline: none;
+            }
+        </style>
     </ui:define>
     <ui:define name="content">
         <button onclick="document.querySelector('#tagDialog').show()" style="margin:10px;">Tag dialog</button>
-        <button onclick="document.querySelector('#groupMenu').show()" style="margin:10px;">Group menu dialog</button>
+        <button onclick="document.querySelector('#groupMenu').show()" style="margin:10px;" class="btn">Group menu dialog</button>
         <tagvs-select-dialog id="tagDialog" service-url="${restURL}/tagVS"></tagvs-select-dialog>
+
+        <div>
+            <select style="margin: 10px 0 10px 40px; width: 100px; font-size: 2em; height: 50px;" class="form-control">
+                <option value="volvo">EUR</option>
+                <option value="saab">DOLAR</option>
+                <option value="mercedes">YEN</option>
+                <option value="audi">YUAN</option>
+            </select>
+        </div>
 
         <groupvs-menu id="groupMenu" caption="menu caption"></groupvs-menu>
         <script>

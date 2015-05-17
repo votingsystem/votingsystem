@@ -43,7 +43,7 @@ paper-tabs.transparent-teal paper-tab::shadow #ink {
 }
 
 .vs-navbar-icon:hover {
-    color: yellow;
+    color: #fba131;
     cursor: pointer;
 }
 

@@ -4,18 +4,17 @@
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
 <link href="${elementURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
 
-<dom-module name="eventvs-election" attributes="subpage">
+<dom-module name="eventvs-election">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style></style>
-        <div vertical layout>
-
+        <div>
             <div style="margin: 0px 30px;">
             <div layout horizontal center center-justified style="width:100%;">
-                <template if="{{subpage}}">
+                <div hidden="{{!fabVisible}}">
                     <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
-                </template>
+                </div>
                 <div class="flex" id="pageTitle" eventvsId-data="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
             </div>
 
@@ -72,11 +71,10 @@
     <script>
         Polymer({
             is:'eventvs-election',
-            publish: {
-                eventvs: {value: {}}
+            properties: {
+                fabVisible:{type:Boolean, value:false},
+                eventvs:{type:Object, value:{}, observer:'eventvsChanged'}
             },
-            subpage:false,
-            optionVSSelected:null,
             decodeBase64:function(base64EncodedString) {
                 if(base64EncodedString == null) return null
                 return decodeURIComponent(escape(window.atob(base64EncodedString)))
@@ -85,11 +83,10 @@
                 this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
             },
             eventvsChanged:function() {
-                this.optionVSSelected = null
                 this.dateFinish = new Date(this.eventvs.dateFinish)
             },
             ready: function() {
-                console.log(this.tagName + "- subpage:  " + this.subpage)
+                console.log(this.tagName + "- ready")
                 this.$.confirmOptionDialog.addEventListener('optionconfirmed', function (e) {
                     this.submitVote()
                 }.bind(this))

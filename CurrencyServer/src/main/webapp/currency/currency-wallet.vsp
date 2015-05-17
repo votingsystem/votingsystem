@@ -13,7 +13,7 @@
                 background: #f9f9f9;padding:10px 20px 10px 20px; max-width:400px;
             }
         </style>
-        <div vertical layout>
+        <div>
             <div hidden="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
                 <div class="messageToUser">
                     <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">

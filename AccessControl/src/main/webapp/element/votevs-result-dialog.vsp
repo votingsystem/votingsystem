@@ -19,8 +19,8 @@
                 width: 500px;
             }
             </style>
-            <iron-signals on-iron-signal-messagedialog-accept="{{cancellationConfirmed}}"
-                          on-iron-signal-messagedialog-closed="{{confirmDialogClosed}}"></iron-signals>
+            <iron-signals on-iron-signal-messagedialog-accept="cancellationConfirmed"
+                          on-iron-signal-messagedialog-closed="confirmDialogClosed"></iron-signals>
             <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">

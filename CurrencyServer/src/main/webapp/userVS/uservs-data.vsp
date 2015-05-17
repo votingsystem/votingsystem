@@ -76,7 +76,7 @@
         </section>
         <section id="page2">
             <div class="pageContentDiv" cross-fade>
-                <transactionvs-form id="transactionvsForm" subpage></transactionvs-form>
+                <transactionvs-form id="transactionvsForm" fab-visible="true"></transactionvs-form>
             </div>
         </section>
     </core-animated-pages>

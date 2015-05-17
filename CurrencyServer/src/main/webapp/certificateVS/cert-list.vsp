@@ -26,14 +26,14 @@
             }
         </style>
         <iron-ajax id="ajax" url="{{url}}" last-response="{{resultListDto}}" handleAs="json" method="get" contentType="application/json"></iron-ajax>
-        <iron-signals on-iron-signal-votingsystem-cert-closed="{{closeCertDetails}}"></iron-signals>
+        <iron-signals on-iron-signal-votingsystem-cert-closed="closeCertDetails"></iron-signals>
         <core-animated-pages id="pages" flex selected="{{page}}" on-iron-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all">
             <section id="page1">
                 <div cross-fade>
                     <div class="layout horizontal center center-justified">
                         <select id="certTypeSelect" class="form-control" style="margin:0px auto 0px auto;color:black;
-                                max-width: 400px;" on-change="{{certTypeSelect}}">
+                                max-width: 400px;" on-change="certTypeSelect">
                             <option value="&type=USER&state=OK"> - ${msg.certUserStateOKLbl} - </option>
                             <option value="&type=CERTIFICATE_AUTHORITY&state=OK"> - ${msg.certAuthorityStateOKLbl} - </option>
                             <option value="&type=USER&state=CANCELED"> - ${msg.certUserStateCancelledLbl} - </option>
@@ -79,7 +79,7 @@
             </section>
             <section id="page2">
                 <div cross-fade>
-                    <votingsystem-cert id="certDetails" subpage cert="{{cert}}"></votingsystem-cert>
+                    <votingsystem-cert id="certDetails" fab-visible="true" cert="{{cert}}"></votingsystem-cert>
                 </div>
             </section>
         </core-animated-pages>

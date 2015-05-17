@@ -155,18 +155,6 @@ var ResponseVS = {
 		SC_PAUSED:10
 }
 
-function getUrlParam(paramName, staticURL, decode){
-   var currLocation = (staticURL.length)? staticURL : window.location.search,
-       parArr = currLocation.split("?")[1].split("&");
-   
-   for(var i = 0; i < parArr.length; i++){
-        parr = parArr[i].split("=");
-        if(parr[0] == paramName){
-            return (decode) ? decodeURIComponent(parr[1]) : parr[1];
-        }
-   }
-}
-
 function loadjsfile(filename){
 	var fileref=document.createElement('script')
 	fileref.setAttribute("type","text/javascript")

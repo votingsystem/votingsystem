@@ -7,7 +7,7 @@
 <link href="${elementURL}/representative/representative-request-accreditations-dialog.vsp" rel="import"/>
 <link href="${elementURL}/representative/representative-request-votinghistory-dialog.vsp" rel="import"/>
 
-<dom-module name="representative-info" attributes="subpage">
+<dom-module name="representative-info">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -33,7 +33,7 @@
             </div>
             <div class="text-center" style="margin:20px auto 15px 15px;">
                 <div class="layout horizontal center center-justified" style="width:100%;">
-                    <div hidden="{{!subpage}}">
+                    <div hidden="{{!fabVisible}}">
                         <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
                     </div>
                     <div class="flex" representativeId-data="{{representative.id}}" class="representativeNameHeader">
@@ -90,7 +90,6 @@
     <script>
         Polymer({
             is:'representative-info',
-            subpage:false,
             publish: {
                 representative: {value: {}}
             },
@@ -109,14 +108,14 @@
                 this.$.selectRepresentativeDialog.show(this.representative)
             },
             representativeChanged: function() {
-                console.log(this.tagName + ".representativeChanged - subpage:  " + this.subpage + " - selectedTab: " + this.selectedTab)
+                console.log(this.tagName + ".representativeChanged - selectedTab: " + this.selectedTab)
                 console.log(this.tagName + ".representativeChanged:  " + JSON.stringify(this.representative))
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
                 this.$.representativeImg.src = this.representative.imageURL
             },
             ready: function() {
                 this.selectedTab = 'profile'
-                console.log(this.tagName + " - subpage:  " + this.subpage + " - selectedTab: " + this.selectedTab)
+                console.log(this.tagName + " - selectedTab: " + this.selectedTab)
             },
             showImage:function() {
                 console.log(this.tagName + " - showImage")

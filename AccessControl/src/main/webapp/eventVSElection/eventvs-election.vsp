@@ -8,7 +8,7 @@
 <link href="${elementURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
 <link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
 
-<dom-module name="eventvs-election" attributes="subpage">
+<dom-module name="eventvs-election">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -27,7 +27,7 @@
             }
         </style>
         <core-media-query query="max-width: 600px" queryMatches="{{smallScreen}}"></core-media-query>
-        <div vertical layout>
+        <div>
             <div style="text-align: center;">
                 <template if="{{'admin' == menuType}}">
                     <template if="{{'ACTIVE' == eventvs.state || 'PENDING' == eventvs.state}}">
@@ -41,9 +41,9 @@
 
             <div style="margin: 0px 30px;">
             <div layout horizontal center center-justified style="width:100%;">
-                <template if="{{subpage}}">
+                <div hidden="{{"fabVisible}}">
                     <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
-                </template>
+                </div>
 
                 <paper-fab hidden="{{!votevsResul}}" mini icon="mail" on-click="showVoteResul"
                            style="color: #ba0011;margin: 0 0 0 20px;background: #ffeb3b;"></paper-fab>
@@ -89,7 +89,7 @@
                             <legend>${msg.pollFieldLegend}</legend>
                             <div>
                                 <template if="{{'ACTIVE' == eventvs.state}}">
-                                    <div vertical layout>
+                                    <div>
                                         <template repeat="{{optionvs in eventvs.fieldsEventVS}}">
                                             <button on-click="showConfirmDialog"
                                                           style="margin: 30px 0px 0px 5px;font-size: 1.2em; border: 1px solid #6c0404;">
@@ -131,12 +131,9 @@
     <script>
         Polymer({
             is:'eventvs-election',
-            publish: {
-                eventvs: {value: {}}
+            properties: {
+                eventvs:{type:Object, value:{}}
             },
-            subpage:false,
-            votevsResul:null,
-            optionVSSelected:null,
             fireSignal:function() {
                 this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
             },
@@ -154,7 +151,7 @@
                 if('PENDING' == this.eventvs.state) this.$.statsDiv.style.display = 'none'
             },
             ready: function() {
-                console.log(this.tagName + "- subpage:  " + this.subpage)
+                console.log(this.tagName + "- ready")
                 this.selectedTab = 'optionsTab'
                 this.$.confirmOptionDialog.addEventListener('optionconfirmed', function (e) {
                     this.submitVote()

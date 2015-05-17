@@ -5,7 +5,6 @@
 
 
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
-<link href="${resourceURL}/iron-pages/iron-pages.html" rel="import"/>
 <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
 <link href="${resourceURL}/iron-selector/iron-selector.html" rel="import"/>
 <link href="${resourceURL}/paper-menu/paper-menu.html" rel="import"/>
@@ -13,7 +12,7 @@
 <link href="${elementURL}/userVS/uservs-list.vsp" rel="import"/>
 <link href="${elementURL}/groupVS/groupvs-user.vsp" rel="import"/>
 
-<dom-module name="groupvs-details" attributes="selectedItem subpage">
+<dom-module name="groupvs-details">
 <template>
     <style shim-shadowdom>
         .optionsIcon {margin:0 5px 0 2px; color:#6c0404;}
@@ -55,9 +54,9 @@
         </div>
     </paper-dialog>
 
-    <iron-signals on-iron-signal-messagedialog-accept="{{messagedialogAccepted}}"
-                  on-iron-signal-uservs-selected="{{showUserDetails}}" ></iron-signals>
-    <iron-pages id="pages" flex selected="{{page}}" transitions="cross-fade-all">
+    <iron-signals on-iron-signal-messagedialog-accept="messagedialogAccepted"
+                  on-iron-signal-uservs-selected="showUserDetails" ></iron-signals>
+
     <section id="page1">
     <div cross-fade style="max-width: 900px; margin:0 auto;">
         <div vertical layout flex>
@@ -97,7 +96,7 @@
             </div>
             <div id="pageHeader" layout horizontal center center-justified>
                 <div class="horizontal layout flex" style="padding:7px 0px 0px 7px;">
-                    <div hidden="{{!subpage}}" style="margin: 10px 20px 10px 0;" title="${msg.backLbl}" >
+                    <div hidden="{{!fabVisible}}" style="margin: 10px 20px 10px 0;" title="${msg.backLbl}" >
                         <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
                     </div>
                 </div>
@@ -146,21 +145,22 @@
 
     <section id="page2">
         <div cross-fade>
-            <transactionvs-form id="transactionvsForm" subpage></transactionvs-form>
+            <transactionvs-form id="transactionvsForm" fab-visible="true"></transactionvs-form>
         </div>
     </section>
-    </iron-pages>
 
     <groupvs-user id="userDescription"></groupvs-user>
 </template>
 <script>
     Polymer({
         is:'groupvs-details',
-        publish: { groupvs: {}, subpage:false },
+        properties: {
+            fabVisible:{type:Boolean, value:false},
+            groupvs:{type:Object, value:{}}
+        },
         ready : function() {
-            console.log(this.tagName + " - ready - subpage: " + this.subpage)
+            console.log(this.tagName + " - ready - fabVisible: " + this.fabVisible)
             this.isSelected = false
-            this.subpage = this.subpage || false
             //this.isClientToolConnected = window['isClientToolConnected']
             this.isClientToolConnected = true
             this.$.transactionvsForm.addEventListener('operation-finished', function (e) {

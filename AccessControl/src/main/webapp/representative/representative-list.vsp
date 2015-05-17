@@ -55,7 +55,7 @@
             text-overflow: ellipsis;
         }
         </style>
-        <iron-signals on-iron-signal-representative-closed="{{closeRepresentativeDetails}}"></iron-signals>
+        <iron-signals on-iron-signal-representative-closed="closeRepresentativeDetails"></iron-signals>
         <core-animated-pages hidden="{{loading}}" id="pages" flex selected="{{page}}"
                              on-iron-animated-pages-transition-end="{{transitionend}}" transitions="cross-fade-all" >
             <section id="page1">
@@ -80,7 +80,7 @@
 
             <section id="page2">
                 <div cross-fade>
-                    <representative-info id="representativeDetails" page="{{subpage}}" subpage vertical layout></representative-info>
+                    <representative-info id="representativeDetails" fab-visible="true"></representative-info>
                 </div>
             </section>
         </core-animated-pages>
@@ -96,7 +96,6 @@
                 console.log(this.tagName + " - ready")
                 this.loading = true
                 this.page = 0;
-                this.subpage = 0;
                 if(window['isClientToolConnected']) {
                     this.$.representationState.opened = true
                 }

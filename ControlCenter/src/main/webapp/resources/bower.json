@@ -1,12 +1,12 @@
 {
-  "name": "cryptocurrency",
+  "name": "ControlCenter",
   "version": "0.7.0",
   "authors": [
     "JJ <jgzornoza@gmail.com>"
   ],
-  "description": "cryptocurrency",
+  "description": "Voting System  ControlCenter",
   "keywords": [
-    "cryptocurrency",
+    "controlcenter",
     "votingsystem"
   ],
   "license": "Apache 2",

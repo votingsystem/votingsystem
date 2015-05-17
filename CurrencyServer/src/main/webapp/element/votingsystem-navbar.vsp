@@ -12,14 +12,14 @@
 <dom-module name="votingsystem-navbar">
     <style>
         .paperMenu { background: #ba0011; color:#ffffff; height: 100%;}
-        paper-item:hover {color: yellow;cursor: pointer;}
-        paper-item {cursor: pointer;}
+        paper-item {cursor: pointer;font-size: 1.9em;}
+        paper-item:hover {color: #fba131;}
     </style>
     <template>
         <iron-ajax id="ajax" on-response="ajaxResponse" on-iron-error="ajaxError" handle-as="document"></iron-ajax>
         <!-- put core signals names in lower case !!!-->
-        <iron-signals on-iron-signal-vs-innerpage="{{innerPageSignal}}" on-iron-signal-vs-session-data="{{sessionDataSignal}}"
-                      on-iron-signal-vs-websocket-message="{{websocketSignal}}"></iron-signals>
+        <iron-signals on-iron-signal-vs-innerpage="innerPageSignal" on-iron-signal-vs-session-data="sessionDataSignal"
+                      on-iron-signal-vs-websocket-message="websocketSignal"></iron-signals>
         <paper-drawer-panel id="paperDrawerPanel" responsive-width="30000px">
             <div drawer style="height: 100%;">
                 <paper-menu class="paperMenu" attr-for-selected="data-href" selected="{{selectorValue}}" on-iron-select="drawerItemSelected" style="padding:100px 0 0 0;">

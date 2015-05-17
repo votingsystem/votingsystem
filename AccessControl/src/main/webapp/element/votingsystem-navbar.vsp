@@ -15,7 +15,7 @@
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <iron-ajax id="ajax" on-response="ajaxResponse" on-iron-error="ajaxError" handle-as="document"></iron-ajax>
         <!-- put core signals names in lower case !!!-->
-        <iron-signals on-iron-signal-vs-innerpage="{{innerPageSignal}}" on-iron-signal-vs-session-data="{{sessionDataSignal}}">
+        <iron-signals on-iron-signal-vs-innerpage="innerPageSignal" on-iron-signal-vs-session-data="sessionDataSignal">
             </iron-signals>
         <paper-drawer-panel id="paperDrawerPanel">
             <div drawer>

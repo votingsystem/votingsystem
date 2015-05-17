@@ -1,64 +1,55 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/iron-pages/iron-pages.html" rel="import"/>
-<link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
 <link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
 <link href="${elementURL}/groupVS/groupvs-details.vsp" rel="import"/>
 
-<dom-module name="groupvs-list" attributes="url state">
+<dom-module name="groupvs-list">
     <template>
-        <style>
-        vs-html-echo /deep/ p {margin:0px 0px 0px 0px;}
-        </style>
+        <style></style>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <link href="${contextURL}/resources/css/groupvs.css" media="all" rel="stylesheet" />
         <iron-ajax id="ajax" url="{{url}}" handleAs="json" contentType="application/json" on-iron-complete="{{ajaxComplete}}"></iron-ajax>
-        <iron-signals on-iron-signal-groupvs-details-closed="{{closeGroupDetails}}"></iron-signals>
-        <section id="page1">
-            <div cross-fade>
-                <div class="layout horizontal center center-justified">
-                    <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
-                            on-change="{{groupvsTypeSelect}}" class="form-control">
-                        <option value="ACTIVE"  style="color:#388746;"> - ${msg.selectActiveGroupvsLbl} - </option>
-                        <option value="PENDING" style="color:#fba131;"> - ${msg.selectPendingGroupvsLbl} - </option>
-                        <option value="CANCELED" style="color:#cc1606;"> - ${msg.selectClosedGroupvsLbl} - </option>
-                    </select>
-                </div>
-                <div class="layout flex horizontal wrap around-justified">
-                    <template is="dom-repeat" items="{{groupListDto.resultList}}">
-                        <div on-tap="showGroupDetails" class='groupvsDiv item {{ groupvsClass(item.state)}}'
-                             style="height: 65px;" cross-fade>
-                            <div class='groupvsSubjectDiv'>{{item.name}}</div>
-                            <div hidden="{{item.state !== 'CANCELED'}}" style="position: relative;">
-                                <div class='groupvsMessageCancelled'>${msg.groupvsCancelledLbl}</div>
-                            </div>
-                            <div class='numTotalUsersDiv text-right'>{{item.numActiveUsers}} ${msg.usersLbl}</div>
-                            <div class="horizontal layout">
-                                <div class='groupvsRepresentativeDiv text-right'>{{item | getRepresentativeName}}</div>
-                                <div class="flex"></div>
-                                <div hidden="{{!item.tags || item.tags.length == 0}}" layout horizontal center center-justified style="margin: 5px 5px 2px 0;">
-                                    <template repeat="{{tag in item.tags}}">
-                                        <a class="btn btn-default" style="font-size: 0.6em;margin:0px 5px 0px 0px;padding:3px;">
-                                            <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i>{{tag.name}}</a>
-                                    </template>
-                                </div>
+        <iron-signals on-iron-signal-groupvs-details-closed="closeGroupDetails"></iron-signals>
+        <div hidden="{{groupListHidden}}" id="groupListPage">
+            <div class="layout horizontal center center-justified">
+                <select id="groupvsTypeSelect" style="margin:0px auto 0px auto;color:black; max-width: 400px;"
+                        on-change="groupvsTypeSelect" class="form-control">
+                    <option value="ACTIVE"  style="color:#388746;"> - ${msg.selectActiveGroupvsLbl} - </option>
+                    <option value="PENDING" style="color:#fba131;"> - ${msg.selectPendingGroupvsLbl} - </option>
+                    <option value="CANCELED" style="color:#cc1606;"> - ${msg.selectClosedGroupvsLbl} - </option>
+                </select>
+            </div>
+            <div class="layout flex horizontal wrap around-justified">
+                <template is="dom-repeat" items="{{groupListDto.resultList}}">
+                    <div on-tap="showGroupDetails" class$="{{groupvsClass(item.state)}}" style="height: 65px;">
+                        <div class='groupvsSubjectDiv'>{{item.name}}</div>
+                        <div hidden="{{!isItemCanceled(item)}}" style="position: relative;">
+                            <div class='groupvsMessageCancelled'>${msg.groupvsCancelledLbl}</div>
+                        </div>
+                        <div class='numTotalUsersDiv text-right'><span>{{item.numActiveUsers}}</span> ${msg.usersLbl}</div>
+                        <div class="horizontal layout">
+                            <div class='groupvsRepresentativeDiv text-right'>{{getRepresentativeName(item)}}</div>
+                            <div class="flex"></div>
+                            <div hidden="{{!item.tags || item.tags.length == 0}}" layout horizontal center center-justified style="margin: 5px 5px 2px 0;">
+                                <template repeat="{{tag in item.tags}}">
+                                    <a class="btn btn-default" style="font-size: 0.6em;margin:0px 5px 0px 0px;padding:3px;">
+                                        <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i>{{tag.name}}</a>
+                                </template>
                             </div>
                         </div>
-                    </template>
-                </div>
-                <vs-pager on-pager-change="{{pagerChange}}" max="{{groupListDto.max}}"
-                          next="${msg.nextLbl}" previous="${msg.previousLbl}"
-                          first="${msg.firstLbl}" last="${msg.lastLbl}"
-                          offset="{{groupListDto.offset}}" total="{{groupListDto.totalCount}}"></vs-pager>
+                    </div>
+                </template>
             </div>
-        </section>
 
-        <section id="page2">
-            <div class="pageContentDiv" cross-fade>
-                <groupvs-details id="groupDetails" page="{{subpage}}" subpage vertical layout groupvs="{{groupvs}}"></groupvs-details>
-            </div>
-        </section>
+            <vs-pager on-pager-change="{{pagerChange}}" max="{{groupListDto.max}}"
+                      next="${msg.nextLbl}" previous="${msg.previousLbl}"
+                      first="${msg.firstLbl}" last="${msg.lastLbl}"
+                      offset="{{groupListDto.offset}}" total="{{groupListDto.totalCount}}"></vs-pager>
+        </div>
+        <div  hidden="{{groupDetailsHidden}}" id="groupDetailsPage" class="pageContentDiv">
+            <groupvs-details id="groupDetails" fab-visible="true"></groupvs-details>
+        </div>
 
     </template>
     <script>
@@ -79,12 +70,17 @@
                 this.loading = false
             },
             ready :  function(e) {
+                this.state = getURLParam("state")
                 console.log(this.tagName + " - ready - state: " + this.state + " - groupListDto: " + this.groupListDto)
                 if(this.state) this.$.groupvsTypeSelect.value = this.state
                 if(this.groupListDto) this.groupListDtoChanged()
+                this.groupListHidden = false
+                this.groupDetailsHidden = true
+
                 this.loading = true
-                this.page = 0;
-                this.subpage = 0;
+            },
+            isItemCanceled:function(item) {
+                return item.state === 'CANCELED'
             },
             pagerChange:function(e) {
                 var optionSelected = this.$.groupvsTypeSelect.value
@@ -98,21 +94,23 @@
             },
             closeGroupDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeGroupDetails")
-                this.page = 0;
+                this.groupListHidden = false
+                this.groupDetailsHidden = true
             },
             showGroupDetails :  function(e) {
                 console.log(this.tagName + " - showGroupDetails")
                 this.$.groupDetails.groupvs = e.model.item;
-                this.page = 1;
+                this.groupListHidden = !this.groupListHidden
+                this.groupDetailsHidden = !this.groupDetailsHidden
             },
             getRepresentativeName:function(groupvs) {
                 return groupvs.representative.firstName + " " + groupvs.representative.lastName
             },
             groupvsClass:function(state) {
                 switch (state) {
-                    case 'ACTIVE': return "groupvsActive"
-                    case 'PENDING': return "groupvsPending"
-                    case 'CANCELED': return "groupvsFinished"
+                    case 'ACTIVE': return "groupvsDiv groupvs groupvsActive"
+                    case 'PENDING': return "groupvsDiv groupvs groupvsPending"
+                    case 'CANCELED': return "groupvsDiv groupvs groupvsFinished"
                 }
             },
             groupvsTypeSelect: function() {

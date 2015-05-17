@@ -1,12 +1,12 @@
 {
-  "name": "cryptocurrency",
+  "name": "AccessControl",
   "version": "0.7.0",
   "authors": [
     "JJ <jgzornoza@gmail.com>"
   ],
-  "description": "cryptocurrency",
+  "description": "Voting System AccessControl",
   "keywords": [
-    "cryptocurrency",
+    "accesscontrol",
     "votingsystem"
   ],
   "license": "Apache 2",

@@ -7,7 +7,7 @@
         <style></style>
         <iron-ajax id="ajax" auto url="{{url}}" handleAs="json" last-response="{{statsDataMap}}" method="get"
                    contentType="application/json" on-iron-response="{{ajaxResponse}}"></iron-ajax>
-        <div id="messageToUser" vertical layout center center-justified style="padding: 10px;font-weight: bold;display:none">
+        <div id="messageToUser" style="padding: 10px;font-weight: bold; text-align:center; display:none">
             ${msg.withoutVotesLbl}
         </div>
         <div id="graphContainer" vertical layout center center-justified style="margin:0 0 0 10px; height: 150px;display: block;"></div>
