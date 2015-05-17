@@ -15,7 +15,7 @@
         </style>
         <vs-innerpage-signal id="innerpageSignal" caption="${msg.electionSystemLbl}"></vs-innerpage-signal>
         <iron-ajax id="ajax" url="{{url}}" last-response="{{eventsVSMap}}" handle-as="json"
-                   content-type="application/json" on-iron-complete="{{ajaxComplete}}"></iron-ajax>
+                   content-type="application/json"></iron-ajax>
         <iron-signals on-iron-signal-eventvs-election-closed="closeEventVSDetails"></iron-signals>
         <core-animated-pages hidden="{{loading}}" id="pages" flex selected="{{page}}" on-iron-animated-pages-transition-end="{{transitionend}}"
                              transitions="cross-fade-all">
@@ -37,7 +37,7 @@
                                 <div class='eventBodyDiv'>
                                     <div class='eventDateBeginDiv'>
                                         <div class='eventDateBeginLblDiv'>${msg.dateLbl}: </div>
-                                        <div class='eventDateBeginValueDiv'>{{getDate(eventvs.dateBegin)}}
+                                        <div class='eventDateBeginValueDiv'>{{getDate(eventvs.dateBegin)}}</div>
                                     </div>
                                     <div class='eventAuthorDiv'>
                                         <div class='eventAuthorLblDiv'>${msg.publishedByLbl}:</div>
@@ -148,9 +148,6 @@
                 history.pushState(null, null, targetURL);
                 this.$.ajax.url = targetURL
                 this.$.ajax.generateRequest()
-            },
-            ajaxComplete:function() {
-                this.loading = false
             }
         });
     </script>

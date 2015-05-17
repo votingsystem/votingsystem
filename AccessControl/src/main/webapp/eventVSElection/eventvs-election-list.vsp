@@ -4,7 +4,7 @@
 <link href="${elementURL}/eventVSElection/eventvs-election.vsp" rel="import"/>
 <link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
 
-<dom-module name="eventvs-election-list" attributes="url eventvstype eventVSState">
+<dom-module name="eventvs-election-list" attributes="url  eventVSState">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -14,87 +14,77 @@
             }
         </style>
         <vs-innerpage-signal id="innerpageSignal" caption="${msg.electionSystemLbl}"></vs-innerpage-signal>
-        <iron-ajax id="ajax" url="{{url}}" last-response="{{resultListDto}}" handle-as="json"
-                   content-type="application/json" on-iron-complete="{{ajaxComplete}}"></iron-ajax>
+        <iron-ajax id="ajax" url="{{url}}" last-response="{{eventListDto}}" handle-as="json"
+                   content-type="application/json"></iron-ajax>
         <iron-signals on-iron-signal-eventvs-election-closed="closeEventVSDetails"></iron-signals>
-        <core-animated-pages hidden="{{loading}}" id="pages" flex selected="{{page}}" on-iron-animated-pages-transition-end="{{transitionend}}"
-                             transitions="cross-fade-all">
-            <section id="page1">
-                <div cross-fade>
-                    <div class="layout horizontal center center-justified">
-                        <template if="{{(eventvstype == 'election')}}">
-                            <select id="eventVSStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
-                                    on-change="eventVSStateSelect" class="form-control">
-                                <option value="ACTIVE" style="color:#388746;"> - ${msg.selectOpenPollsLbl} - </option>
-                                <option value="PENDING" style="color:#fba131;"> - ${msg.selectPendingPollsLbl} - </option>
-                                <option value="TERMINATED" style="color:#cc1606;"> - ${msg.selectClosedPollsLbl} - </option>
-                            </select>
-                        </template>
-                    </div>
-                    <div class="layout flex horizontal wrap around-justified">
-                        <template repeat="{{eventvs in resultListDto.resultList}}">
-                            <div on-tap="showEventVSDetails" class='card eventDiv {{getEventVSClass(eventvs.state)}}'>
-                                <div layout horizontal center center-justified eventvsId-data="{{eventvs.id}}" class='eventSubjectDiv'>
-                                    {{getSubject(eventvs.subject)}}
-                                </div>
-                                <div class='eventBodyDiv'>
-                                    <div class='eventDateBeginDiv'>
-                                        <div class='eventDateBeginLblDiv'>${msg.dateLbl}:</div>
-                                        <div class='eventDateBeginValueDiv'>{{getDate(eventvs.dateBegin)}}</div>
-                                    </div>
-                                    <div class='eventAuthorDiv'>
-                                        <div class='eventAuthorLblDiv'>${msg.publishedByLbl}:</div>
-                                        <div class='eventAuthorValueDiv'>{{eventvs.userVS}}</div>
-                                    </div>
-                                    <div hidden="{{eventvs.state !== 'CANCELED'}}" class='cancelMessage'>
-                                        ${msg.eventCancelledLbl}</div>
-                                </div>
-                                <div class='eventDivFooter'>
-                                    <div class='eventRemainingDiv'>{{getElapsedTime(eventvs.dateFinish)}}</div>
-                                    <div class='eventStateDiv'>{{getMessage(eventvs.state)}}</div>
-                                </div>
+        <div hidden="{{!eventvsDetailsHidden}}">
+            <div class="layout horizontal center center-justified">
+                <select id="eventVSStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
+                        on-change="eventVSStateSelect" class="form-control">
+                    <option value="ACTIVE" style="color:#388746;"> - ${msg.selectOpenPollsLbl} - </option>
+                    <option value="PENDING" style="color:#fba131;"> - ${msg.selectPendingPollsLbl} - </option>
+                    <option value="TERMINATED" style="color:#cc1606;"> - ${msg.selectClosedPollsLbl} - </option>
+                </select>
+            </div>
+            <div class="layout flex horizontal wrap around-justified">
+                <template is="dom-repeat" items="{{eventListDto.resultList}}">
+                    <div on-tap="showEventVSDetails" class$='{{getEventVSClass(item.state)}}'>
+                        <div  eventvsId-data="{{item.id}}" class='eventSubjectDiv' style="text-align: center;">{{getSubject(item.subject)}}</div>
+                        <div class='eventBodyDiv'>
+                            <div class='eventDateBeginDiv'>
+                                <div class='eventDateBeginLblDiv'>${msg.dateLbl}:</div>
+                                <div class='eventDateBeginValueDiv'>{{getDate(item.dateBegin)}}</div>
                             </div>
-                        </template>
+                            <div class='eventAuthorDiv'>
+                                <div class='eventAuthorLblDiv'>${msg.publishedByLbl}:</div>
+                                <div class='eventAuthorValueDiv'>{{item.userVS}}</div>
+                            </div>
+                            <div hidden="{{item.state !== 'CANCELED'}}" class='cancelMessage'>
+                                ${msg.eventCancelledLbl}</div>
+                        </div>
+                        <div class='eventDivFooter'>
+                            <div class='eventRemainingDiv'>{{getElapsedTime(item.dateFinish)}}</div>
+                            <div class='eventStateDiv'>{{getMessage(item.state)}}</div>
+                        </div>
                     </div>
-                    <vs-pager id="vspager" on-pager-change="pagerChange" max="{{resultListDto.max}}" style="margin: 0 0 100px 0;"
-                              next="${msg.nextLbl}" previous="${msg.previousLbl}"
-                              first="${msg.firstLbl}" last="${msg.lastLbl}"
-                              offset="{{resultListDto.offset}}" total="{{resultListDto.totalCount}}"></vs-pager>
-                </div>
-            </section>
+                </template>
+            </div>
+            <vs-pager id="vspager" on-pager-change="pagerChange" max="{{eventListDto.max}}" style="margin: 0 0 100px 0;"
+                      next="${msg.nextLbl}" previous="${msg.previousLbl}"
+                      first="${msg.firstLbl}" last="${msg.lastLbl}"
+                      offset="{{eventListDto.offset}}" total="{{eventListDto.totalCount}}"></vs-pager>
+        </div>
 
-            <section id="page2">
-                <div cross-fade>
-                    <eventvs-election id="eventvsDetails" fab-visible="true" eventvs="{{eventvs}}"></eventvs-election>
-                </div>
-            </section>
-        </core-animated-pages>
+        <div hidden="{{eventvsDetailsHidden}}">
+            <eventvs-election id="eventvsDetails" fab-visible="true" eventvs="{{eventvs}}"></eventvs-election>
+        </div>
 
     </template>
     <script>
         Polymer({
             is:'eventvs-election-list',
             properties: {
-                resultListDto:{type:Object, value:{}}
+                eventListDto:{type:Object, value:{}, observer:'eventListDtoChanged'}
             },
             ready:function(e) {
+                this.eventVSState = getURLParam('eventVSState')
                 console.log(this.tagName + " - ready - eventVSState: " + this.eventVSState)
                 this.loading = true
-                this.page = 0;
+                this.eventvsDetailsHidden = true
                 if(this.eventVSState) this.$.eventVSStateSelect.value = this.eventVSState
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
             },
-            resultListDtoChanged:function() {
-                if(this.resultListDto == null) return
-                console.log(this.tagName + " - resultListDtoChanged - offset: " + this.resultListDto.offset + " - totalCount: " + this.resultListDto.totalCount)
+            eventListDtoChanged:function() {
+                if(this.eventListDto == null) return
+                console.log(this.tagName + " - eventListDtoChanged - offset: " + this.eventListDto.offset + " - totalCount: " + this.eventListDto.totalCount)
                 this.loading = false
             },
             closeEventVSDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeEventVSDetails")
+                this.eventvsDetailsHidden = true
                 this.$.innerpageSignal.fireSignal()
-                this.page = 0;
             },
             pagerChange:function(e) {
                 var optionSelected = this.$.eventVSStateSelect.value
@@ -111,7 +101,7 @@
                 console.log(this.tagName + " - showEventVSDetails")
                 this.$.eventvsDetails.fireSignal()
                 this.$.eventvsDetails.eventvs = e.model.item;
-                this.page = 1;
+                this.eventvsDetailsHidden = true
             },
             getRepresentativeName:function(groupvs) {
                 return groupvs.representative.firstName + " " + groupvs.representative.lastName
@@ -132,10 +122,10 @@
             },
             getEventVSClass:function(eventVSState) {
                 switch (eventVSState) {
-                    case EventVS.State.ACTIVE: return "eventVSActive"
-                    case EventVS.State.PENDING: return "eventVSPending"
-                    case EventVS.State.TERMINATED: return "eventVSFinished"
-                    case EventVS.State.CANCELED: return "eventVSFinished"
+                    case EventVS.State.ACTIVE: return "card eventDiv eventVSActive"
+                    case EventVS.State.PENDING: return "card eventDiv eventVSPending"
+                    case EventVS.State.TERMINATED: return "card eventDiv eventVSFinished"
+                    case EventVS.State.CANCELED: return "card eventDiv eventVSFinished"
                 }
             },
             eventVSStateSelect: function() {
@@ -145,9 +135,6 @@
                 history.pushState(null, null, targetURL);
                 this.$.ajax.url = targetURL
                 this.$.ajax.generateRequest()
-            },
-            ajaxComplete:function() {
-                this.loading = false
             }
         });
     </script>
