@@ -2,12 +2,8 @@
 
 <dom-module name="representation-state" attributes="opened">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click class="dialog">
-            <style>
-            .dialog {
-                top: 150px;
-            }
-            </style>
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click class="dialog" style="top: 150px;">
+            <style> </style>
             <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; font-weight: bold; color:#6c0404;">

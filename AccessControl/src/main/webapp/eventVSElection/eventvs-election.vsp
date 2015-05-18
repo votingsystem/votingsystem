@@ -35,18 +35,22 @@
 
             <div style="margin: 0px 30px;">
                 <div class="layout horizontal center center-justified" style="width:100%;">
-                    <paper-fab hidden="{{!fabVisible}}" mini icon="arrow-back" on-click="back" style="color: white;">
-                        <i class="fa fa-chevron-left"></i>
-                    </paper-fab>
+                    <div>
+                        <paper-fab hidden="{{!fabVisible}}" mini icon="arrow-back" on-click="back"
+                                   style="color: white;background:#ba0011;"><i class="fa fa-chevron-left"></i>
+                        </paper-fab>
+                    </div>
 
-                    <paper-fab hidden="{{!votevsResul}}" mini icon="mail" on-click="showVoteResul"
-                               style="color: #ba0011;margin: 0 0 0 20px;background: #ffeb3b;"></paper-fab>
+                    <div>
+                        <paper-fab hidden="{{!votevsResul}}" mini icon="mail" on-click="showVoteResul"
+                                   style="color: #ba0011;margin: 0 0 0 20px;background: #ffeb3b;"></paper-fab>
+                    </div>
 
                     <div class="flex" style="text-align: center">
                         <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
                     </div>
                 </div>
-                <div class="{{eventStateRowClass}}">
+                <div class$="{{eventStateRowClass}}">
                     <div class="flex" style="display: block;">
                         <div hidden="{{!isPending}}" style="font-size: 1.3em; font-weight:bold;color:#fba131;">${msg.eventVSPendingMsg}</div>
                         <div hidden="{{!isTerminated}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSFinishedLbl}</div>
@@ -60,8 +64,15 @@
                         <vs-html-echo html="{{decodeBase64(eventvs.content)}}"></vs-html-echo>
                     </div>
 
-                    <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 20px; color:#888; font-size: 0.85em;">
-                        <b>${msg.publishedByLbl}:</b> <span>{{eventvs.userVS}}</span>
+                    <div class="horizontal layout center center-justified">
+                        <div hidden="{{!isTerminated}}" style="margin: 10px 0 0 0;">
+                            <button on-click="getResults">
+                                <i class="fa fa-bar-chart"></i> ${msg.getResultsLbl}
+                            </button>
+                        </div>
+                        <div id="eventAuthorDiv" class="flex" style="margin:0px 20px 0 30px; color:#888; font-size: 0.85em;">
+                            <b>${msg.publishedByLbl}:</b> <span>{{eventvs.userVS}}</span>
+                        </div>
                     </div>
 
                     <div hidden="{{!smallScreen}}">
@@ -72,33 +83,31 @@
                         </paper-tabs>
                     </div>
 
-                    <div class="horizontal layout fieldsBox">
-                        <div hidden="{{optionsDivHidden}}" style="width: 100%;">
-                            <fieldset>
-                                <legend>${msg.pollFieldLegend}</legend>
-                                <div>
-                                    <div hidden="{{isActive}}">
-                                        <template is="dom-repeat" items="{{eventvs.fieldsEventVS}}">
+                    <div class="horizontal layout">
+                        <div hidden="{{optionsDivHidden}}" style="width: 100%; display: block;">
+                            <div>
+                                <div hidden="{{!isActive}}">
+                                    <div style="font-size: 1.4em; font-weight: bold; text-decoration: underline; color:#888;
+                                        margin: 20px 0 0 0;">${msg.pollFieldLegend}:</div>
+                                    <template is="dom-repeat" items="{{eventvs.fieldsEventVS}}">
+                                        <div>
                                             <button on-click="showConfirmDialog"
-                                                    style="margin: 30px 0px 0px 5px;font-size: 1.2em; border: 1px solid #6c0404;">
+                                                    style="margin: 30px 0px 0px 5px;font-size: 1.2em; font-weight:bold;min-width: 500px; padding: 10px;">
                                                 <span>{{item.content}}</span>
                                             </button>
-                                        </template>
-                                    </div>
-                                    <div hidden="{{!isActive}}">
-                                        <template is="dom-repeat" items="{{eventvs.fieldsEventVS}}">
-                                            <div class="voteOption" style="width: 90%;margin: 15px auto 0px auto;
-                                            font-size: 1.3em; font-weight: bold;">
-                                                - <span>{{item.content}}</span>
-                                            </div>
-                                        </template>
-                                    </div>
+                                        </div>
+                                    </template>
                                 </div>
-                            </fieldset>
-                            <div hidden="{{!isTerminated}}" style="margin: 10px 0 0 0;">
-                                <button on-click="getResults">
-                                    <i class="fa fa-bar-chart"></i> ${msg.getResultsLbl}
-                                </button>
+                                <div hidden="{{isActive}}">
+                                    <div style="font-size: 1.4em; font-weight: bold; text-decoration: underline; color:#888;
+                                        margin: 20px 0 10px 0;">${msg.pollFieldLegend}:</div>
+                                    <template is="dom-repeat" items="{{eventvs.fieldsEventVS}}">
+                                        <div class="voteOption" style="width: 90%;margin: 0px auto 15px auto;
+                                            font-size: 1.3em; font-weight: bold;">
+                                            - <span>{{item.content}}</span>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
                         </div>
                         <div id="statsDiv" hidden="{{statsDivHidden}}" class="vertical layout center center-justified">
@@ -108,8 +117,9 @@
                 </div>
             </div>
         </div>
-========smallScreen: <span>{{smallScreen}}</span>
-        <eventvs-election-vote-confirm-dialog id="confirmOptionDialog" on-option-confirmed="submitVote"></eventvs-election-vote-confirm-dialog>
+
+        <eventvs-election-vote-confirm-dialog id="confirmOptionDialog" on-option-confirmed="submitVote">
+            </eventvs-election-vote-confirm-dialog>
         <eventvs-admin-dialog id="eventVSAdminDialog" eventvs="{{eventvs}}"></eventvs-admin-dialog>
         <votevs-result-dialog id="votevsResultDialog"></votevs-result-dialog>
     </template>
@@ -188,8 +198,7 @@
             },
             getResults:function() {
                 console.log("getResults")
-                var fileURL = "${contextURL}/static/backup/" + this.dateFinish.urlFormat() +
-                        "/VOTING_EVENT_" + this.eventvs.id + ".zip"
+                var fileURL = "${contextURL}/static/backup/" + this.dateFinish.urlFormat() + "/VOTING_EVENT_" + this.eventvs.id + ".zip"
                 if(window['isClientToolConnected']) {
                     var operationVS = new OperationVS(Operation.FILE_FROM_URL)
                     operationVS.subject = '${msg.downloadingFileMsg}'

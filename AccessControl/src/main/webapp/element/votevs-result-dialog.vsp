@@ -2,17 +2,8 @@
 
 <dom-module name="votevs-result-dialog" attributes="opened url">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key class="voteResultDialog">
-            <style>
-            .voteResultDialog {
-                top: 150px;
-                box-sizing: border-box; -moz-box-sizing: border-box; font-family: Arial, Helvetica, sans-serif;
-                overflow: auto; background: #f9f9f9; max-width: 500px; width: 400px;
-                outline: 1px solid rgba(0,0,0,0.2);
-                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-                width: 500px;
-            }
-            </style>
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key>
+            <style></style>
             <iron-signals on-iron-signal-messagedialog-accept="cancellationConfirmed"
                           on-iron-signal-messagedialog-closed="confirmDialogClosed"></iron-signals>
             <div>

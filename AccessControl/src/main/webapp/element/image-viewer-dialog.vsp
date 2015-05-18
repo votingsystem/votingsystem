@@ -3,12 +3,7 @@
 <dom-module name="image-viewer-dialog" attributes="url description">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
-            <style>
-            .dialog {
-                font-size: 13px;
-                width: 500px;
-            }
-            </style>
+            <style> </style>
             <div class="layout horizontal center center-justified">
                 <div class="flex" style="font-size: 1.5em; margin:5px 30px 10px 10px;font-weight: bold; color:#6c0404;">
                     <div hidden="{{!description}}" style="text-align: center;">{{description}}</div>

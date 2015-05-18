@@ -37,7 +37,7 @@
                     <b>${msg.publishedByLbl}: </b>{{eventvs.userVS}}
                 </div>
 
-                <div class="horizontal layout fieldsBox">
+                <div class="horizontal layout">
                     <div style="width: 100%;">
                         <fieldset>
                             <legend>${msg.pollFieldLegend}</legend>

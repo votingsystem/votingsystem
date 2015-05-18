@@ -3,12 +3,7 @@
 <dom-module name="representative-select-dialog">
     <template>
         <paper-dialog id="xDialog" class="dialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key>
-            <style>
-            .dialog {
-                width: 800px;
-                color: #888;
-            }
-            </style>
+            <style> </style>
             <div id="container" style="overflow: auto;">
 
                 <div style="font-size: 1.2em;">
