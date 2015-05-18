@@ -13,7 +13,7 @@ button i{color: #888; }
 button {font-size: 1.1em; }
 
 .closeIcon {
-    cursor: pointer;fill:#6c0404; color:#6c0404; font-size: 1.9em; margin: 5px 9px 0 0;
+    cursor: pointer;fill:#6c0404; color:#6c0404; font-size: 1.8em; margin: 3px 6px 2px 0;
 }
 .closeIcon:hover {
     fill:#ba0011; color:#ba0011;

@@ -80,7 +80,6 @@
                 if(detail.caption) this.appTitle = detail.caption + sufix
                 if(detail.searchVisible) this.$._navbar.searchVisible(detail.searchVisible)
                 if(detail.url) this.loadURL(detail.url)
-                document.dispatchEvent( new Event('innerPageSignal'));
             },
             loadURL: function(urlToLoad) {
                 this.loading= true;

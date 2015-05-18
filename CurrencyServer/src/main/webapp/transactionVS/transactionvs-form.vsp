@@ -2,7 +2,6 @@
 
 <link href="${resourceURL}/vs-user-box/vs-user-box.html" rel="import"/>
 <link href="${resourceURL}/vs-currency-selector/vs-currency-selector.html" rel="import"/>
-<link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
 <link href="${resourceURL}/paper-radio-button/paper-radio-button.html" rel="import"/>
 <link href="${elementURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
 <link href="${elementURL}/userVS/uservs-selector-dialog.vsp" rel="import"/>

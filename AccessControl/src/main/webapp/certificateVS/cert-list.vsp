@@ -23,7 +23,6 @@
         </style>
 
         <iron-ajax id="ajax" url="{{url}}" handle-as="json" content-type="application/json" last-response="{{certListDto}}"></iron-ajax>
-        <iron-signals on-iron-signal-votingsystem-cert-closed="closeCertDetails"></iron-signals>
         <div hidden="{{!certDetailsHidden}}">
             <div class="layout horizontal center center-justified">
                 <select id="certTypeSelect" class="form-control" style="margin:0px auto 0px auto;color:black;
@@ -71,7 +70,7 @@
                       offset="{{certListDto.offset}}" total="{{certListDto.totalCount}}"></vs-pager>
         </div>
         <div hidden="{{certDetailsHidden}}">
-            <votingsystem-cert id="certDetails" fab-visible="true" cert="{{cert}}"></votingsystem-cert>
+            <votingsystem-cert id="certDetails" fab-visible="true" cert="{{cert}}" on-cert-closed="closeCertDetails"></votingsystem-cert>
         </div>
     </template>
     <script>

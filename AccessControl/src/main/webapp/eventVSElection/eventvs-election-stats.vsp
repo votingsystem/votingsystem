@@ -2,7 +2,7 @@
 
 <link href="${resourceURL}/vs-highcharts/highcharts-import.html" rel="import">
 
-<dom-module name="eventvs-election-stats" attributes="caption eventVSId height">
+<dom-module name="eventvs-election-stats">
     <template>
         <style></style>
         <iron-ajax id="ajax" url="{{url}}" handle-as="json" last-response="{{statsDto}}" method="get" content-type="application/json"></iron-ajax>
@@ -10,16 +10,15 @@
              style="padding: 10px;font-weight: bold;">
             ${msg.withoutVotesLbl}
         </div>
-        <div hidden="{{!chartVisible}}" id="graphContainer" vertical layout center center-justified
+        <div hidden="{{!chartVisible}}" id="chartDiv" vertical layout center center-justified
              style="margin:0 0 0 10px; height: 150px; min-width: 250px;"></div>
     </template>
     <script>
         Polymer({
             is:'eventvs-election-stats',
-            caption:null,
-            chartVisible:false,
-            publish: {
-                statsDto: {value: {}}
+            properties: {
+                eventvsId:{type:Number},
+                statsDto:{type:Object, observer:'statsDtoChanged'}
             },
             options: {
                 chart: {
@@ -55,7 +54,12 @@
                 }]
             },
             ready: function() {
-                this.options.chart.renderTo = this.$.graphContainer
+                this.options.chart.renderTo = this.$.chartDiv
+                this.chartVisible = false
+                var targetURL = "${restURL}/eventVSElection/id/" + this.eventvsId + "/stats"
+                console.log(this.tagName + "- targetURL: " + targetURL)
+                this.$.ajax.url = targetURL
+                this.$.ajax.generateRequest()
             },
             statsDtoChanged: function() {
                 if(this.statsDto == null) return
@@ -71,13 +75,6 @@
                     var chart = new Highcharts.Chart(this.options);
                     this.chartVisible = true
                 }
-            },
-            eventVSIdChanged: function() {
-                this.chartVisible = false
-                var targetURL = "${restURL}/eventVSElection/id/" + this.eventVSId + "/stats"
-                console.log(this.tagName + "- targetURL: " + targetURL)
-                this.$.ajax.url = targetURL
-                this.$.ajax.generateRequest()
             }
         });
     </script>

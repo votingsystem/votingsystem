@@ -13,7 +13,6 @@
         <vs-innerpage-signal id="innerpageSignal" caption="${msg.electionSystemLbl}"></vs-innerpage-signal>
         <iron-ajax id="ajax" url="{{url}}" last-response="{{eventListDto}}" handle-as="json"
                    content-type="application/json"></iron-ajax>
-        <iron-signals on-iron-signal-eventvs-election-closed="closeEventVSDetails"></iron-signals>
         <div hidden="{{!eventvsDetailsHidden}}">
             <div class="layout horizontal center center-justified">
                 <select id="eventVSStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
@@ -52,7 +51,8 @@
         </div>
 
         <div hidden="{{eventvsDetailsHidden}}">
-            <eventvs-election id="eventvsDetails" fab-visible="true" eventvs="{{eventvs}}"></eventvs-election>
+            <eventvs-election id="eventvsDetails" fab-visible="true" eventvs="{{eventvs}}"
+                              on-eventvs-election-closed="closeEventVSDetails"></eventvs-election>
         </div>
 
     </template>

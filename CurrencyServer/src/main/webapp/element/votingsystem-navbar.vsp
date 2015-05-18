@@ -121,7 +121,6 @@
                 if(detail.caption) this.appTitle = detail.caption + sufix
                 if(detail.searchVisible) console.log("TODO - search visible")
                 if(detail.url) this.loadURL(detail.url)
-                document.dispatchEvent( new Event('innerPageSignal'));
             },
             loadURL: function(urlToLoad) {
                 this.loading= true;

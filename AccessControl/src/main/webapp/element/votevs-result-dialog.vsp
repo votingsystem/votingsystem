@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="votevs-result-dialog" attributes="opened url">
+<dom-module name="votevs-result-dialog">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key>
             <style></style>
@@ -18,17 +18,17 @@
                 <div style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
                     <vs-html-echo html="{{message}}"></vs-html-echo>
                 </div>
-                <template if="{{messageType == 'VOTE_RESULT'}}">
+                <div hidden="{{!isVoteResult}}">
                     <div hidden="{{!optionSelected}}">
                         <p style="text-align: center;">
                             ${msg.confirmOptionDialogMsg}:</p>
                         <div style="font-size: 1.2em; text-align: center;"><b>{{optionSelected}}</b></div>
                     </div>
-                    <template if="{{statusCode == 200}}">
-                        <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
+                    <div hidden="{{!isOK}}">
+                        <div class="layout horizontal" style="margin:15px 0 0 0;">
                             <div style="margin:10px 0px 10px 0px;">
                                 <button on-click="checkReceipt">
-                                    <i class="fa fa-certificate"></i>{{checkSignatureButtonMsg}}
+                                    <i class="fa fa-certificate"></i><span>{{checkSignatureButtonMsg}}</span>
                                 </button>
                             </div>
                             <div class="flex"></div>
@@ -38,10 +38,10 @@
                                 </button>
                             </div>
                         </div>
-                    </template>
-                </template>
-                <template if="{{messageType == 'VOTE_CANCELLATION_RESULT'}}">
-                    <template if="{{statusCode == 200}}">
+                    </div>
+                </div>
+                <div hidden="{{!isCancelationResult}}">
+                    <div hidden="{{!isOK}}">
                         <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
                                 <button on-click="checkReceipt" style="margin: 0px 0px 0px 5px;">
@@ -50,29 +50,35 @@
                             </div>
                             <div class="flex"></div>
                         </div>
-                    </template>
-                </template>
+                    </div>
+                </div>
             </div>
         </paper-dialog>
     </template>
     <script>
         Polymer({
             is:'votevs-result-dialog',
-            votevsReceipt:null,
-            hashCertVSHex:null,
-            hashCertVSBase64:null,
-            statusCode:null,
-            messageType:null,
-            appMessageJSON:null,
-            callerCallback:null,
-            voteVSCancellationReceipt:null,
-            checkSignatureButtonMsg:'${msg.checkVoteLbl}',
-            ready: function() {},
-            openedChanged:function() {
-                this.$.xDialog.opened = this.opened
-                if(this.opened == false) this.close()
+            properties: {
+                votevsReceipt:{type:String},
+                hashCertVSHex:{type:String},
+                hashCertVSBase64:{type:String},
+                statusCode:{type:Number},
+                messageType:{type:String, observer:'messageTypeChanged'},
+                callerCallback:{type:String},
+                voteVSCancellationReceipt:{type:String},
+                checkSignatureButtonMsg:{type:String, value:'${msg.checkVoteLbl}'},
+                appMessageJSON:{type:Object}
+            },
+            ready: function() {
+                console.log(this.tagName + " - ready")
             },
             show: function(appMessageJSON) {
+                console.log(this.tagName + " - show - appMessageJSON: " + appMessageJSON)
+                this.message = null
+                this.caption = null
+                this.optionSelected = null
+                this.votevsReceipt = null
+                this.statusCode = null
                 this.appMessageJSON = appMessageJSON
                 this.statusCode = appMessageJSON.statusCode
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
@@ -92,25 +98,27 @@
                     this.message = appMessageJSON.message
                 }
                 this.messageType = "VOTE_RESULT"
-                this.opened = true
+                this.$.xDialog.opened = true
+            },
+            messageTypeChanged: function() {
+                this.isVoteResult = false
+                this.isCancelationResult = false
+                this.isOK = (this.statusCode == 200)
+                if("VOTE_RESULT" === this.messageType) this.isVoteResult = true
+                if("VOTE_CANCELLATION_RESULT" === this.messageType) this.isCancelationResult = true
             },
             cancelVote: function() {
                 this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
                 this.callerCallback = Math.random().toString(36).substring(7)
                 showMessageVS('${msg.cancelVoteConfirmMsg}', '${msg.cancelVoteLbl}', this.callerCallback, true)
-                this.opened = false
+                this.$.xDialog.opened = false
             },
             confirmDialogClosed: function(e) {
                 console.log("confirmDialogClosed - detail: " + e.detail)
                 if(e.detail == this.callerCallback) this.show(this.appMessageJSON)
             },
             close: function() {
-                this.opened = false
-                this.message = null
-                this.caption = null
-                this.optionSelected = null
-                this.votevsReceipt = null
-                this.statusCode = null
+                this.$.xDialog.opened = false
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)
@@ -135,7 +143,7 @@
                         this.message = "${msg.voteVSCancellationOKMsg}"
                         this.caption =  "${msg.voteVSCancellationCaption}"
                         this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
-                        this.opened = true
+                        this.$.xDialog.opened = true
                     } else showMessageVS(appMessageJSON.message, '${msg.voteVSCancellationErrorCaption}')
                 }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
