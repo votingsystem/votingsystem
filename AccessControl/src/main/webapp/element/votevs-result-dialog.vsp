@@ -40,7 +40,7 @@
                         <div style="font-size: 1.2em; text-align: center;"><b>{{optionSelected}}</b></div>
                     </div>
                     <template if="{{statusCode == 200}}">
-                        <div layout horizontal style="margin:0px 20px 0px 0px;">
+                        <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
                                 <button on-click="checkReceipt">
                                     <i class="fa fa-certificate"></i>{{checkSignatureButtonMsg}}
@@ -57,7 +57,7 @@
                 </template>
                 <template if="{{messageType == 'VOTE_CANCELLATION_RESULT'}}">
                     <template if="{{statusCode == 200}}">
-                        <div layout horizontal style="margin:0px 20px 0px 0px;">
+                        <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
                                 <button on-click="checkReceipt" style="margin: 0px 0px 0px 5px;">
                                     <i class="fa fa-certificate"></i>  ${msg.checkVoteLbl}

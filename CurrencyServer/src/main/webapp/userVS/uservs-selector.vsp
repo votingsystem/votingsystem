@@ -16,7 +16,7 @@
             .name {color: #000; font-size: 0.9em;}
         </style>
         <iron-ajax id="ajax" url="{{url}}" last-response="{{responseData}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
-        <div vertical layout center>
+        <div class="vertical layout center">
             <div hidden="{{!modeSearch}}" class="horizontal layout" style="width: 100%;">
                 <div class="layout horizontal center center-justified flex" style="margin:0px auto 0px auto;">
                     <input value="{{textToSearch}}" type="text" style="width:200px;" class="form-control"

@@ -25,7 +25,7 @@
         .timeInfo {color:#621; text-transform: uppercase; text-align: right; margin: 0 5px 0 0; font-size: 0.8em;}
         .expenseTrans { background: #fee; }
         </style>
-        <div vertical on-click="showTransactionDetails" class="card {{getClass(transaction)}}">
+        <div on-click="showTransactionDetails" class="card {{getClass(transaction)}}">
             <div class="horizontal layout">
                 <div class="flex horizontal layout center-justified transactionDescription">{{transactionDescription(transaction)}}</div>
                 <div class="date">{{getDate(transaction.dateCreated)}}</div>

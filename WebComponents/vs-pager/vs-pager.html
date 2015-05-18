@@ -1,3 +1,5 @@
+<link rel="import" href="../polymer/polymer.html">
+
 <dom-module name="vs-pager">
     <template>
         <link rel="stylesheet" href="vs-pager.css">
@@ -5,17 +7,17 @@
         <div class="pagination horizontal layout center center-justified ">
             <div class="horizontal layout" hidden="{{prevHidden}}">
                 <div class="first-child"><button on-click="firstPage"><i class="fa fa-angle-double-left"></i></button></div>
-                <div class='{{prevClass}}'>
+                <div class$='{{prevClass}}'>
                     <button on-click="prevPage"><i class="fa fa-angle-left"></i></button>
                 </div>
             </div>
-            <template is="dom-repeat" items="{{selectedTagList}}">
-                <div class="{{getPageClass(item)}}" data-item="{{item}}" on-click="setPage">
-                    <button>{{getPageNumber(item)}}</button>
+            <template is="dom-repeat" items="{{currentRange}}">
+                <div class$="{{getPageClass(item.page)}}" data-item="{{item.page}}" on-click="setPage">
+                    <button>{{getPageNumber(item.page)}}</button>
                 </div>
             </template>
             <div class="horizontal layout" hidden="{{nextHidden}}">
-                <div class='{{nextClass}}'>
+                <div class$='{{nextClass}}'>
                     <button on-click="nextPage"><i class="fa fa-angle-right"></i></button>
                 </div>
                 <div class="last-child"><button on-click="lastPage"><i class="fa fa-angle-double-right"></i></button></div>
@@ -27,44 +29,33 @@
             is:'vs-pager',
             properties: {
                 offset:{type:Number},
-                total:{type:Number},
+                total:{type:Number, value:null},
                 max:{type:Number},
-                currentpage:{type:Number, observer:'currentpageChanged'},
-                next:{type:String},
-                previous:{type:String},
+                currentpage:{type:Number, value:0, observer:'currentpageChanged'},
+                next:{type:String, value:"Next >>"},
+                previous:{type:String, value:"<< Prev"},
                 first:{type:String},
                 last:{type:String}
             },
             ready:function() {
+                console.log(this.tagName + " - ready - offset: " + this.offset + " - max: " + this.max)
+                if(this.offset > 0) this.currentpage = Math.ceil(this.offset/this.max) -1
                 this.style.display = 'none'
-                this.currentRange = []
-                this.pageCount = 0
                 this.rangeSize = 10
-                this.previous = "<< Prev"
-                this.next =  "Next >>"
-            },
-            currentpageChanged:function() {
-                this.prevClass = (this.currentpage === 0) ? "disabled" : ""
-                this.nextClass = (this.currentpage === this.pageCount) ? "disabled" : ""
-                this.nextHidden = (this.currentpage === this.pageCount)
-                this.prevHidden = (this.currentpage === 0)
+                this.currentRange = this.range();
             },
             getPageClass:function(item) {
+                console.log(this.tagName  + " getPageClass -  item: " + item + " - currentpage: " + this.currentpage)
                 return item == this.currentpage ? 'active' : ''
             },
             getPageNumber:function(item) {
                 return item + 1;
             },
-            totalChanged: function(){
-                if(typeof this.total === 'undefined') return
-                this.pageCount = Math.ceil(this.total/this.max) -1
-                this.currentRange = this.range();
-            },
             firstPage: function () {
                 this.currentpage = 0;
             },
             lastPage: function () {
-                this.currentpage = this.pageCount;
+                this.currentpage = this.getPageCount();
             },
             prevPage: function () {
                 if ( this.currentpage > 0 ) {
@@ -80,14 +71,21 @@
                 return Math.ceil(this.total/this.max) -1
             },
             setPage: function (e) {
-                this.currentpage = e.model.item
-                console.log("setPage - currentpage: " + this.currentpage)
+                this.currentpage = e.model.item.page
+                console.log(this.tagName + " - setPage - currentpage: " + this.currentpage)
             },
             currentpageChanged: function () {
-                console.log(this.tagName + " - currentpageChanged: " + this.currentpage)
+                if(this.currentRange == null) return
+                console.log(this.tagName + " - currentpageChanged: " + this.currentpage + " - pageCount: " + this.getPageCount())
+                this.range();
+                this.prevClass = (this.currentpage === 0) ? "disabled" : ""
+                this.nextClass = (this.currentpage === this.getPageCount()) ? "disabled" : ""
+                this.nextHidden = (this.currentpage === this.getPageCount())
+                this.prevHidden = (this.currentpage === 0)
                 this.fire('pager-change', { offset: (this.currentpage * this.max), max: this.max });
             },
             range: function () {
+                if(this.offset == null) return
                 var paginations = [];
                 var start = 0;
                 var end =  this.rangeSize;
@@ -100,12 +98,14 @@
                     start = 0
                 }
                 for ( var i = start; i < start + end; i++ ) {
-                    paginations.push(i);
+                    paginations.push({page:i});
                 }
+
                 if(this.getPageCount() > 0) this.style.display = 'block'
                 else this.style.display = 'none'
                 console.log(this.tagName + " - total: " + this.total +" - offset: "  + this.offset +
-                " - max: " + this.max  +  " - paginations: " + paginations + " - pageCount: " + this.getPageCount())
+                    " - max: " + this.max  + " - pageCount: " + this.getPageCount())
+                this.currentRange = paginations
                 return paginations;
             }
         });

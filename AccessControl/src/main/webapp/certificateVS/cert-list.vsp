@@ -7,7 +7,7 @@
     <template>
         <style>
             .certDiv {
-                width:540px;
+                width:500px;
                 padding: 10px;
                 border:1px solid #ccc;
                 background-color: #f9f9f9;
@@ -121,7 +121,7 @@
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
                 this.$.ajax.url = targetURL
-                console.log(this.tagName + "targetURL: " + targetURL)
+                console.log(this.tagName + " - targetURL: " + targetURL)
                 this.$.ajax.generateRequest()
             },
             certTypeSelect: function () {

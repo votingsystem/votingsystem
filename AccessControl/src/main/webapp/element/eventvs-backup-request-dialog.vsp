@@ -29,12 +29,12 @@
                 <p style="text-align: center;">
                     ${msg.backupRequestMsg}
                 </p>
-                <div  layout horizontal center center-justified  style="margin:10px 0px 10px 0px;">
+                <div class="layout horizontal" center center-justified  style="margin:10px 0px 10px 0px;">
                     <input type="email" class="form-control" id="eventBackupUserEmailText" style="width:360px;margin:0px auto 0px auto;"
                            placeholder="${msg.emailInputLbl}" title='${msg.enterEmailLbl}' required/>
                 </div>
 
-                <div layout horizontal style="margin:0px 20px 0px 0px;">
+                <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
                     <div class="flex"></div>
                     <div style="margin:10px 0px 10px 0px;">
                         <button on-click="requestBackup" style="margin: 0px 0px 0px 5px; font-size: 1.1em;">

@@ -41,7 +41,7 @@
                     </div>
                 </div>
             </div>
-            <div layout vertical id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
+            <div id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
                 <div>
                     <div class="horizontal layout center center-justified">
                         <input type="text" id="transactionvsSubject" class="form-control" required
@@ -73,13 +73,13 @@
                         </div>
                         <div hidden="{{selectedTags.length == 0}}" layout horizontal center center-justified
                              style="font-weight:bold;text-align: center;display: block;">
-                            <div layout horizontal center center-justified style="margin: 0 0 20px 0;">
+                            <div class="layout horizontal center center-justified" style="margin: 0 0 20px 0;">
                                 <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedButton" toggles/></div>
                                 <div style="color:#6c0404; font-size: 1.1em;">${msg.timeLimitedAdviceMsg}</div>
                             </div>
                             <div>${msg.selectedTagsAdvice}</div>
                             <template repeat="{{tag in selectedTags}}">
-                                <div layout horizontal center center-justified style="font-size: 0.9em;">
+                                <div class="layout horizontal center center-justified" style="font-size: 0.9em;">
                                     <div style="display: block;">
                                         <a class="btn btn-default" data-tagId='{{tag.id}}'  on-click="removeTag"
                                            style="font-size: 0.9em;margin:5px 5px 0px 5px;padding:3px;">
@@ -103,7 +103,7 @@
                     {{selectReceptorMsg}}
                 </div>
                 <div class="flex"></div>
-                <div layout horizontal style="margin:10px 20px 0px 0px;">
+                <div class="layout horizontal" style="margin:10px 20px 0px 0px;">
                     <div class="flex"></div>
                     <button on-click="submit" style="margin: 0 0 5px 5px;font-size: 1.1em;">
                         <i class="fa fa-check" style="color: #388746;"></i> ${msg.acceptLbl}
@@ -113,12 +113,8 @@
         </div>
 
         <uservs-selector-dialog id="userVSSelectorDialog" groupVSId="{{groupId}}"></uservs-selector-dialog>
-    <div>
-        <div layout horizontal center center-justified style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
-            <tagvs-select-dialog id="tagDialog" caption="${msg.addTagDialogCaption}"
-                service-url="${restURL}/tagVS"></tagvs-select-dialog>
-        </div>
-    </div>
+        <tagvs-select-dialog id="tagDialog" caption="${msg.addTagDialogCaption}" service-url="${restURL}/tagVS"></tagvs-select-dialog>
+
 </template>
 <script>
     Polymer({

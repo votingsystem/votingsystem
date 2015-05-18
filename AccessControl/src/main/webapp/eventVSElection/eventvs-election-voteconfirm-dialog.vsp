@@ -22,7 +22,7 @@
                     ${msg.confirmOptionDialogMsg}:<br>
                     <div style="font-size: 1.3em; text-align: center;"><b>{{optionSelected}}</b></div>
                 </p>
-                <div layout horizontal style="margin:0px 20px 0px 0px;">
+                <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
                     <div class="flex"></div>
                     <div>
                         <button on-click="optionConfirmed" style="margin: 0px 0px 0px 5px; font-size: 1em;">

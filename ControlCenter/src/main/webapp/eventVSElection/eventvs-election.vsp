@@ -11,14 +11,14 @@
         <style></style>
         <div>
             <div style="margin: 0px 30px;">
-            <div layout horizontal center center-justified style="width:100%;">
+            <div class="layout horizontal center center-justified" style="width:100%;">
                 <div hidden="{{!fabVisible}}">
                     <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
                 </div>
-                <div class="flex" id="pageTitle" eventvsId-data="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
+                <div class="flex" id="pageTitle" eventvs-id="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
             </div>
 
-            <div layout horizontal style="width: 100%;">
+            <div class="layout horizontal" style="width: 100%;">
                 <div class="flex">
                     <template if="{{'PENDING' == eventvs.state}}">
                         <div style="font-size: 1.2em; font-weight:bold;color:#fba131;">${msg.eventVSPendingMsg}</div>

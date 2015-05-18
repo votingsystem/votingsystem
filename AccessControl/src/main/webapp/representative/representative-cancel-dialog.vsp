@@ -45,7 +45,7 @@
                     <label style="margin:0px 0px 20px 0px">${msg.representativeNIFLbl}</label>
                     <input type="text" id="representativeNif" style="width:150px; margin:0px auto 0px auto;" class="form-control"/>
                 </div>
-                <div layout horizontal style="margin:0px 20px 0px 0px;">
+                <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
                     <div class="flex"></div>
                     <div>
                         <button on-click="accept" style="margin: 0px 0px 0px 5px;">

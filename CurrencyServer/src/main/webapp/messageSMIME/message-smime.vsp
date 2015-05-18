@@ -47,7 +47,7 @@
                         {{receptorLbl}}</div>
                     <div class="layout horizontal">
                         <div><b>${msg.IBANLbl}: </b></div>
-                        <div layout vertical>
+                        <div>
                             <template repeat="{{IBAN in smimeMessageContent.toUserIBAN}}">
                                 <div on-click="showToUserIBAN" style="text-decoration: underline; color: #0000ee; cursor: pointer;">{{IBAN}}</div>
                             </template>
@@ -65,7 +65,7 @@
                     </div>
                 </div>
 
-                <div layout horizontal center center-justified style="margin: 15px 0 0 0;">
+                <div class="layout horizontal center center-justified" style="margin: 15px 0 0 0;">
                     <template repeat="{{tag in smimeMessageContent.tags}}">
                         <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag.name}}</a>
                     </template>

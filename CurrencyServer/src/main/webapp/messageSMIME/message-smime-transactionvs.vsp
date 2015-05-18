@@ -60,7 +60,7 @@
                     <div class="actorLbl">${msg.receptorLbl}</div>
                     <div class="layout horizontal">
                         <div><b>${msg.IBANLbl}: </b></div>
-                        <div layout vertical>
+                        <div>
                             <template repeat="{{IBAN in smimeMessageContent.toUserIBAN}}">
                                 <div on-click="showToUserVSByIBAN" class="iban-link">{{IBAN}}</div>
                             </template>

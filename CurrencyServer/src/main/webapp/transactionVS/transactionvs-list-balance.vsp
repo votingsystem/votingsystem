@@ -15,7 +15,7 @@
         .amountColumn {width:130px;text-align: right; font-size: 0.9em;}
         .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 150px; text-overflow: ellipsis; padding: 0 5px 0 5px;}
         </style>
-        <div layout vertical justified style="display: block; height: 100%;">
+        <div class="layout vertical justified" style="display: block; height: 100%;">
             <div class="horizontal layout center center-justified" style="margin: 0 0 10px 0; min-width: 400px;">
                 <div class="flex"></div>
                 <div style="font-size: 0.9em;color:#888; font-weight: bold; margin:5px 20px 0 10px;
@@ -31,7 +31,7 @@
                            <div class="subjectColumn" style="width:240px; margin:0 30px 0 0;">{{transaction.subject}}</div>
                        </core-tooltip>
                         <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
-                        <div layout horizontal center center-justified class="tagColumn">
+                        <div class="layout horizontal center center-justified tagColumn">
                             <div class="flex horizontal layout center center-justified">{{transaction.tags[0]}}</div>
                             <div hidden="{{!isTimeLimited(transaction)}}" style="margin:0 0 0 5px; width: 10px;">
                                 <core-tooltip large label="${msg.timeLimitedAdviceMsg}" position="top">

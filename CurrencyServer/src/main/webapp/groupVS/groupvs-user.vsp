@@ -10,7 +10,7 @@
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <iron-ajax id="ajax" url="{{url}}" last-response="{{subscriptionData}}" handle-as="json" method="get"
                        content-type="application/json" on-iron-response="{{ajaxResponse}}"></iron-ajax>
-            <div layout vertical>
+            <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">{{subscriptionData.uservs.name}}</div>

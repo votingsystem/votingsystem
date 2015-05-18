@@ -22,7 +22,7 @@
              transitions="cross-fade-all">
         <section id="page1">
             <div hidden="{{!uservs.name}}">
-                <div layout horizontal center center-justified style="margin: 0 0 15px 0;">
+                <div class="layout horizontal center center-justified" style="margin: 0 0 15px 0;">
                     <div hidden="{{!uservs.firstName}}" flex>
                         <div  style="margin: 0 0 0 0; font-size: 0.8em;" flex>{{uservs.firstName}} {{uservs.lastName}}</div>
                     </div>

@@ -30,7 +30,7 @@
                 <div style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
                     <vs-html-echo html="{{message}}"></vs-html-echo>
                 </div>
-                <div layout horizontal style="margin:0px 20px 0px 0px;">
+                <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
                     <div class="flex"></div>
                     <div hidden="{{!isConfirmMessage}}">
                         <button on-click="accept">

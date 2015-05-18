@@ -33,7 +33,7 @@
                    title="${msg.phoneLbl}" placeholder="${msg.phoneLbl}"/>
             <input type="email" id="email" class="form-control" required style="margin: 0 0 10px 0;"
                    title="${msg.emailLbl}" placeholder="${msg.emailLbl}"/>
-            <div layout horizontal style="margin:10px 20px 0px 0px;">
+            <div class="layout horizontal" style="margin:10px 20px 0px 0px;">
                 <div class="flex"></div>
                 <button on-click="submitForm" style="font-size:1.1em;margin: 20px 0px 0px 5px;">
                     <i class="fa fa-check"></i> ${msg.acceptLbl}

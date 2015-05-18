@@ -87,7 +87,7 @@
                 </div>
 
                 <div hidden="{{step !== 'main'}}">
-                    <div layout horizontal style="margin:0px 20px 0px 0px;">
+                    <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
                         <div class="flex"></div>
                         <div style="margin:10px 0px 10px 0px;">
                             <button on-click="showConfirm" style="margin: 0px 0px 0px 5px;">
@@ -98,7 +98,7 @@
                 </div>
 
                 <div hidden="{{step !== 'confirm'}}">
-                    <div layout horizontal style="margin:0px 20px 0px 0px;  font-size:1.2em;">
+                    <div class="layout horizontal" style="margin:0px 20px 0px 0px;  font-size:1.2em;">
                         <div class="flex"></div>
                         <div style="margin:10px 20px 10px 0px;">
                             <button on-click="cancel" style="margin: 0px 0px 0px 5px;">

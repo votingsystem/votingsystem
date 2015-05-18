@@ -97,9 +97,10 @@ function pad(n, width, z) {
 }
 
 
+
 function showMessageVS(message, caption, callerId, isConfirmMessage) {
     if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
-        document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
+            document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
         document.querySelector("#_votingsystemMessageDialog").setMessage(message, caption, callerId, isConfirmMessage)
     }  else {
         console.log('alert-dialog not found');

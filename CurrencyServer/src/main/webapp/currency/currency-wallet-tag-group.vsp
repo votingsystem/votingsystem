@@ -24,7 +24,7 @@
         </style>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <div vertical layout center center-justified>
+        <div class="vertical layout center center-justified">
             <div class="tagHeader">{{tag | tagDescription}}</div>
             <template repeat="{{currencyMsg in currencyMsgs}}">
                 <div style="margin: 5px 0 0 20px;color: #888;">{{currencyMsg}}</div>

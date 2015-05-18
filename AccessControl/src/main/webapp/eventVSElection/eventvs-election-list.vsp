@@ -4,7 +4,7 @@
 <link href="${elementURL}/eventVSElection/eventvs-election.vsp" rel="import"/>
 <link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
 
-<dom-module name="eventvs-election-list" attributes="url  eventVSState">
+<dom-module name="eventvs-election-list">
     <template>
         <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
@@ -29,7 +29,7 @@
             <div class="layout flex horizontal wrap around-justified">
                 <template is="dom-repeat" items="{{eventListDto.resultList}}">
                     <div on-tap="showEventVSDetails" class$='{{getEventVSClass(item.state)}}'>
-                        <div  eventvsId-data="{{item.id}}" class='eventSubjectDiv' style="text-align: center;">{{getSubject(item.subject)}}</div>
+                        <div  eventvs-id="{{item.id}}" class='eventSubjectDiv' style="text-align: center;">{{getSubject(item.subject)}}</div>
                         <div class='eventBodyDiv'>
                             <div class='eventDateBeginDiv'>
                                 <div class='eventDateBeginLblDiv'>${msg.dateLbl}:</div>
@@ -80,11 +80,11 @@
                 if(this.eventListDto == null) return
                 console.log(this.tagName + " - eventListDtoChanged - offset: " + this.eventListDto.offset + " - totalCount: " + this.eventListDto.totalCount)
                 this.loading = false
+                this.$.vspager.style.display = 'block'
             },
             closeEventVSDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeEventVSDetails")
                 this.eventvsDetailsHidden = true
-                this.$.innerpageSignal.fireSignal()
             },
             pagerChange:function(e) {
                 var optionSelected = this.$.eventVSStateSelect.value
@@ -99,9 +99,8 @@
             },
             showEventVSDetails :  function(e) {
                 console.log(this.tagName + " - showEventVSDetails")
-                this.$.eventvsDetails.fireSignal()
                 this.$.eventvsDetails.eventvs = e.model.item;
-                this.eventvsDetailsHidden = true
+                this.eventvsDetailsHidden = false
             },
             getRepresentativeName:function(groupvs) {
                 return groupvs.representative.firstName + " " + groupvs.representative.lastName

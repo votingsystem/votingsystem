@@ -53,7 +53,7 @@
                         </div>
                     </div>
                 </div>
-                <div layout horizontal style="margin:10px 20px 0px 0px; margin:10px;">
+                <div class="layout horizontal" style="margin:10px 20px 0px 0px; margin:10px;">
                     <div class="flex"></div>
                     <button on-click="submitForm" style="margin: 0px 0px 0px 5px; font-size: 1.1em;">
                         <i class="fa fa-check"></i> ${msg.acceptLbl}

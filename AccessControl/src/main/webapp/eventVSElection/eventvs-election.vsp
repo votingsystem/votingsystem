@@ -28,42 +28,31 @@
         </style>
         <iron-media-query query="max-width: 600px" queryMatches="{{smallScreen}}"></iron-media-query>
         <div>
-            <div style="text-align: center;">
-                <template if="{{'admin' == menuType}}">
-                    <template if="{{'ACTIVE' == eventvs.state || 'PENDING' == eventvs.state}}">
-                        <button type="submit" on-click="showAdminDialog"
-                                style="margin:15px 20px 15px 0px;">
-                            ${msg.adminDocumentLinkLbl} <i class="fa fa fa-check"></i>
-                        </button>
-                    </template>
-                </template>
+            <div hidden="{{adminMenuHidden}}" style="text-align: center;">
+                <button type="submit" on-click="showAdminDialog" style="margin:15px 20px 15px 0px;">
+                    ${msg.adminDocumentLinkLbl} <i class="fa fa fa-check"></i>
+                </button>
             </div>
 
             <div style="margin: 0px 30px;">
-            <div layout horizontal center center-justified style="width:100%;">
-                <div hidden="{{"fabVisible}}">
+            <div class="layout horizontal center center-justified" style="width:100%;">
+                <div hidden="{{fabVisible}}">
                     <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
                 </div>
 
                 <paper-fab hidden="{{!votevsResul}}" mini icon="mail" on-click="showVoteResul"
                            style="color: #ba0011;margin: 0 0 0 20px;background: #ffeb3b;"></paper-fab>
 
-                <div class="flex" id="pageTitle" eventvsId-data="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
+                <div class="flex" id="pageTitle" eventvs-id="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
             </div>
-            <div layout vertical?="{{smallScreen}}" horizontal?="{{!smallScreen}}" style="width: 100%;">
+            <div class="{{eventStateRowClass}}">
                 <div class="flex" style="display: block;">
-                    <template if="{{'PENDING' == eventvs.state}}">
-                        <div style="font-size: 1.3em; font-weight:bold;color:#fba131;">${msg.eventVSPendingMsg}</div>
-                    </template>
-                    <template if="{{'TERMINATED' == eventvs.state}}">
-                        <div style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSFinishedLbl}</div>
-                    </template>
-                    <template if="{{'CANCELED' == eventvs.state}}">
-                        <div style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSCancelledLbl}</div>
-                    </template>
+                    <div hidden="{{!isPending}}" style="font-size: 1.3em; font-weight:bold;color:#fba131;">${msg.eventVSPendingMsg}</div>
+                    <div hidden="{{!isTerminated}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSFinishedLbl}</div>
+                    <div hidden="{{!isCanceled}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSCancelledLbl}</div>
                 </div>
                 <div style="margin:0px 30px 0px 30px; color: #888;"><b>${msg.dateLbl}: </b>
-                    {{getDate(eventvs.dateBegin)}}</div>
+                    <span>{{getDate(eventvs.dateBegin)}}</span></div>
             </div>
             <div>
                 <div class="eventContentDiv">
@@ -71,7 +60,7 @@
                 </div>
 
                 <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 20px; color:#888; font-size: 0.85em;">
-                    <b>${msg.publishedByLbl}: </b>{{eventvs.userVS}}
+                    <b>${msg.publishedByLbl}:</b> <span>{{eventvs.userVS}}</span>
                 </div>
 
                 <template if="{{smallScreen}}">
@@ -116,7 +105,7 @@
                             </template>
                         </div>
                     </div>
-                    <div id="statsDiv" hidden="{{smallScreen?(selectedTab == 'optionsTab'):false}}"  vertical layout center center-justified>
+                    <div id="statsDiv" hidden="{{statsDivHidden}}" class="vertical layout center center-justified">
                         <eventvs-election-stats eventVSId="{{eventvs.id}}"></eventvs-election-stats>
                     </div>
                 </div>
@@ -132,7 +121,8 @@
         Polymer({
             is:'eventvs-election',
             properties: {
-                eventvs:{type:Object, value:{}, observer:'eventvsChanged'}
+                eventvs:{type:Object, value:{}, observer:'eventvsChanged'},
+                smallScreen:{type:Boolean, value:false, observer:'smallScreenChanged'}
             },
             fireSignal:function() {
                 this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
@@ -144,11 +134,34 @@
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
             },
+            smallScreenChanged:function() {
+                this.statsDivHidden = false
+                if(this.smallScreen) {
+                    this.eventStateRowClass = "vertical layout flex"
+                    if(this.selectedTab == 'optionsTab') {
+                        this.statsDivHidden = true
+                    }
+                } else this.eventStateRowClass = "horizontal layout flex"
+            },
             eventvsChanged:function() {
                 this.optionVSSelected = null
                 this.dateFinish = new Date(this.eventvs.dateFinish)
                 this.votevsResul = null;
-                if('PENDING' == this.eventvs.state) this.$.statsDiv.style.display = 'none'
+                this.isPending = false
+                this.isTerminated = false
+                this.isCanceled = false
+                if('PENDING' == this.eventvs.state) {
+                    this.isPending = true
+                    this.$.statsDiv.style.display = 'none'
+                } else if ('TERMINATED' == this.eventvs.state) {
+                    this.isTerminated = true
+                } else if ('CANCELED' == this.eventvs.state) {
+                    this.isCanceled = true
+                }
+                this.adminMenuHidden = true
+                if('admin' === menuType) {
+                    if(this.eventvs.state === 'ACTIVE' || this.eventvs.state === 'PENDING') this.adminMenuHidden = false
+                }
             },
             ready: function() {
                 console.log(this.tagName + "- ready")
@@ -156,6 +169,7 @@
                 this.$.confirmOptionDialog.addEventListener('optionconfirmed', function (e) {
                     this.submitVote()
                 }.bind(this))
+                this.statsDivHidden = false
             },
             showAdminDialog:function() {
                 this.$.eventVSAdminDialog.opened = true

@@ -23,7 +23,7 @@
                     <b>${msg.timeStampDateLbl}: </b><span>{{timeStampDate}}</span>
                 </div>
                 <div hidden="{{!messageToUser}}">
-                    <div layout horizontal center center-justified  class="messageToUser">
+                    <div class="messageToUser layout horizontal center center-justified">
                         <div id="messageToUser"><span>{{messageToUser}}</span></div>
                     </div>
                 </div>

@@ -58,8 +58,8 @@
                   on-iron-signal-uservs-selected="showUserDetails" ></iron-signals>
 
     <section id="page1">
-    <div cross-fade style="max-width: 900px; margin:0 auto;">
-        <div vertical layout flex>
+    <div style="max-width: 900px; margin:0 auto;">
+        <div class="vertical layout flex">
             <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
             </div>
             <div hidden="{{!isAdminView || !isClientToolConnected}}">
@@ -144,7 +144,7 @@
     </section>
 
     <section id="page2">
-        <div cross-fade>
+        <div>
             <transactionvs-form id="transactionvsForm" fab-visible="true"></transactionvs-form>
         </div>
     </section>
