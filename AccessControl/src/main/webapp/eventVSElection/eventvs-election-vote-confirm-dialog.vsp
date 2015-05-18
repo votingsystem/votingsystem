@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="eventvs-vote-confirm-dialog" attributes="opened">
+<dom-module name="eventvs-election-vote-confirm-dialog" attributes="opened">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <style> </style>
@@ -30,28 +30,20 @@
     </template>
     <script>
         Polymer({
-            is:'eventvs-vote-confirm-dialog',
-            publish: {
-                eventvs: {value: {}}
-            },
+            is:'eventvs-election-vote-confirm-dialog',
             ready: function() {
-                console.log(this.tagName + " - ready")
-            },
-            openedChanged:function() {
-                this.$.xDialog.opened = this.opened
-                if(this.opened == false) this.close()
+                console.log(this.tagName + " - ready - ")
             },
             show: function(optionSelected) {
                 this.optionSelected = optionSelected
                 this.opened = true
             },
             optionConfirmed: function() {
-                this.fire('optionconfirmed', this.optionSelected);
+                this.fire('option-confirmed', this.optionSelected);
                 this.opened = false
             },
             close: function() {
                 this.opened = false
-                this.messageToUser = null
             }
         });
     </script>

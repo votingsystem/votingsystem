@@ -2,7 +2,7 @@
 
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
 <link href="${resourceURL}/iron-media-query/iron-media-query.html" rel="import"/>
-<link href="${elementURL}/eventVSElection/eventvs-election-voteconfirm-dialog.vsp" rel="import"/>
+<link href="${elementURL}/eventVSElection/eventvs-election-vote-confirm-dialog.vsp" rel="import"/>
 <link href="${elementURL}/element/eventvs-admin-dialog.vsp" rel="import"/>
 <link href="${elementURL}/element/votevs-result-dialog.vsp" rel="import"/>
 <link href="${elementURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
@@ -25,7 +25,7 @@
                 color: #ba0011;
             }
         </style>
-        <iron-media-query query="max-width: 600px" queryMatches="{{smallScreen}}"></iron-media-query>
+        <iron-media-query query="max-width: 600px" query-matches="{{smallScreen}}"></iron-media-query>
         <div>
             <div hidden="{{adminMenuHidden}}" style="text-align: center;">
                 <button type="submit" on-click="showAdminDialog" style="margin:15px 20px 15px 0px;">
@@ -34,87 +34,82 @@
             </div>
 
             <div style="margin: 0px 30px;">
-            <div class="layout horizontal center center-justified" style="width:100%;">
-                <paper-fab hidden="{{!fabVisible}}" mini icon="arrow-back" on-click="back" style="color: white;">
-                    <i class="fa fa-chevron-left"></i>
-                </paper-fab>
+                <div class="layout horizontal center center-justified" style="width:100%;">
+                    <paper-fab hidden="{{!fabVisible}}" mini icon="arrow-back" on-click="back" style="color: white;">
+                        <i class="fa fa-chevron-left"></i>
+                    </paper-fab>
 
-                <paper-fab hidden="{{!votevsResul}}" mini icon="mail" on-click="showVoteResul"
-                           style="color: #ba0011;margin: 0 0 0 20px;background: #ffeb3b;"></paper-fab>
+                    <paper-fab hidden="{{!votevsResul}}" mini icon="mail" on-click="showVoteResul"
+                               style="color: #ba0011;margin: 0 0 0 20px;background: #ffeb3b;"></paper-fab>
 
-                <div class="flex" style="text-align: center">
-                    <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
+                    <div class="flex" style="text-align: center">
+                        <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
+                    </div>
                 </div>
-            </div>
-            <div class="{{eventStateRowClass}}">
-                <div class="flex" style="display: block;">
-                    <div hidden="{{!isPending}}" style="font-size: 1.3em; font-weight:bold;color:#fba131;">${msg.eventVSPendingMsg}</div>
-                    <div hidden="{{!isTerminated}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSFinishedLbl}</div>
-                    <div hidden="{{!isCanceled}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSCancelledLbl}</div>
+                <div class="{{eventStateRowClass}}">
+                    <div class="flex" style="display: block;">
+                        <div hidden="{{!isPending}}" style="font-size: 1.3em; font-weight:bold;color:#fba131;">${msg.eventVSPendingMsg}</div>
+                        <div hidden="{{!isTerminated}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSFinishedLbl}</div>
+                        <div hidden="{{!isCanceled}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSCancelledLbl}</div>
+                    </div>
+                    <div style="margin:0px 30px 0px 30px; color: #888;"><b>${msg.dateLbl}: </b>
+                        <span>{{getDate(eventvs.dateBegin)}}</span></div>
                 </div>
-                <div style="margin:0px 30px 0px 30px; color: #888;"><b>${msg.dateLbl}: </b>
-                    <span>{{getDate(eventvs.dateBegin)}}</span></div>
-            </div>
-            <div>
-                <div class="eventContentDiv">
-                    <vs-html-echo html="{{decodeBase64(eventvs.content)}}"></vs-html-echo>
-                </div>
+                <div>
+                    <div class="eventContentDiv">
+                        <vs-html-echo html="{{decodeBase64(eventvs.content)}}"></vs-html-echo>
+                    </div>
 
-                <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 20px; color:#888; font-size: 0.85em;">
-                    <b>${msg.publishedByLbl}:</b> <span>{{eventvs.userVS}}</span>
-                </div>
+                    <div id="eventAuthorDiv" class="text-right row" style="margin:0px 20px 20px 20px; color:#888; font-size: 0.85em;">
+                        <b>${msg.publishedByLbl}:</b> <span>{{eventvs.userVS}}</span>
+                    </div>
 
-                <template if="{{smallScreen}}">
-                    <paper-tabs style="margin:0px auto 0px auto; cursor: pointer;" class="transparent-teal center"
-                                attr-for-selected="name" selected="{{selectedTab}}"  on-iron-select="tabSelected" noink>
-                        <paper-tab name="optionsTab" style="width: 400px">${msg.pollFieldLegend}</paper-tab>
-                        <paper-tab name="statsTab">${msg.resultsLbl}</paper-tab>
-                    </paper-tabs>
-                </template>
+                    <div hidden="{{!smallScreen}}">
+                        <paper-tabs style="margin:0px auto 0px auto; cursor: pointer;" class="transparent-teal center"
+                                    attr-for-selected="name" selected="{{selectedTab}}" noink>
+                            <paper-tab name="optionsTab" style="width: 400px">${msg.pollFieldLegend}</paper-tab>
+                            <paper-tab name="statsTab">${msg.resultsLbl}</paper-tab>
+                        </paper-tabs>
+                    </div>
 
-
-                <div class="horizontal layout fieldsBox">
-                    <div hidden="{{smallScreen?(selectedTab != 'optionsTab'):false}}" style="width: 100%;">
-                        <fieldset>
-                            <legend>${msg.pollFieldLegend}</legend>
-                            <div>
-                                <template if="{{'ACTIVE' == eventvs.state}}">
-                                    <div>
-                                        <template repeat="{{optionvs in eventvs.fieldsEventVS}}">
+                    <div class="horizontal layout fieldsBox">
+                        <div hidden="{{optionsDivHidden}}" style="width: 100%;">
+                            <fieldset>
+                                <legend>${msg.pollFieldLegend}</legend>
+                                <div>
+                                    <div hidden="{{isActive}}">
+                                        <template is="dom-repeat" items="{{eventvs.fieldsEventVS}}">
                                             <button on-click="showConfirmDialog"
-                                                          style="margin: 30px 0px 0px 5px;font-size: 1.2em; border: 1px solid #6c0404;">
-                                                <span>{{optionvs.content}}</span>
+                                                    style="margin: 30px 0px 0px 5px;font-size: 1.2em; border: 1px solid #6c0404;">
+                                                <span>{{item.content}}</span>
                                             </button>
                                         </template>
                                     </div>
-                                </template>
-                                <template if="{{'ACTIVE' != eventvs.state}}">
-                                    <template repeat="{{optionvs in eventvs.fieldsEventVS}}">
-                                        <div class="voteOption" style="width: 90%;margin: 15px auto 0px auto;
-                                        font-size: 1.3em; font-weight: bold;">
-                                            - <span>{{optionvs.content}}</span>
-                                        </div>
-                                    </template>
-                                </template>
-                            </div>
-                        </fieldset>
-                        <div style="margin: 10px 0 0 0;">
-                            <template if="{{'TERMINATED' == eventvs.state}}">
+                                    <div hidden="{{!isActive}}">
+                                        <template is="dom-repeat" items="{{eventvs.fieldsEventVS}}">
+                                            <div class="voteOption" style="width: 90%;margin: 15px auto 0px auto;
+                                            font-size: 1.3em; font-weight: bold;">
+                                                - <span>{{item.content}}</span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <div hidden="{{!isTerminated}}" style="margin: 10px 0 0 0;">
                                 <button on-click="getResults">
                                     <i class="fa fa-bar-chart"></i> ${msg.getResultsLbl}
                                 </button>
-                            </template>
+                            </div>
                         </div>
-                    </div>
-                    <div id="statsDiv" hidden="{{statsDivHidden}}" class="vertical layout center center-justified">
-                        <eventvs-election-stats eventVSId="{{eventvs.id}}"></eventvs-election-stats>
+                        <div id="statsDiv" hidden="{{statsDivHidden}}" class="vertical layout center center-justified">
+                            <eventvs-election-stats eventVSId="{{eventvs.id}}"></eventvs-election-stats>
+                        </div>
                     </div>
                 </div>
             </div>
-            </div>
         </div>
-
-        <eventvs-vote-confirm-dialog id="confirmOptionDialog"></eventvs-vote-confirm-dialog>
+========smallScreen: <span>{{smallScreen}}</span>
+        <eventvs-election-vote-confirm-dialog id="confirmOptionDialog" on-option-confirmed="submitVote"></eventvs-election-vote-confirm-dialog>
         <eventvs-admin-dialog id="eventVSAdminDialog" eventvs="{{eventvs}}"></eventvs-admin-dialog>
         <votevs-result-dialog id="votevsResultDialog"></votevs-result-dialog>
     </template>
@@ -125,6 +120,11 @@
                 eventvs:{type:Object, value:{}, observer:'eventvsChanged'},
                 fabVisible:{type:Boolean, value:false},
                 smallScreen:{type:Boolean, value:false, observer:'smallScreenChanged'}
+            },
+            ready: function() {
+                console.log(this.tagName + "- ready")
+                this.selectedTab = 'optionsTab'
+                this.statsDivHidden = false
             },
             fireSignal:function() {
                 this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
@@ -137,18 +137,24 @@
                 return new Date(dateStamp).getDayWeekFormat()
             },
             smallScreenChanged:function() {
+                console.log("smallScreenChanged - smallScreen: " + this.smallScreen)
                 this.statsDivHidden = false
+                this.optionsDivHidden = false
                 if(this.smallScreen) {
                     this.eventStateRowClass = "vertical layout flex"
                     if(this.selectedTab == 'optionsTab') {
                         this.statsDivHidden = true
+                    } else if(this.selectedTab == 'optionsTab') {
+                        this.optionsDivHidden = true
                     }
                 } else this.eventStateRowClass = "horizontal layout flex"
             },
             eventvsChanged:function() {
+                console.log("eventvsChanged - eventvs: " + this.eventvs.state)
                 this.optionVSSelected = null
                 this.dateFinish = new Date(this.eventvs.dateFinish)
                 this.votevsResul = null;
+                this.isActive = false
                 this.isPending = false
                 this.isTerminated = false
                 this.isCanceled = false
@@ -159,19 +165,11 @@
                     this.isTerminated = true
                 } else if ('CANCELED' == this.eventvs.state) {
                     this.isCanceled = true
-                }
+                } else this.isActive = true
                 this.adminMenuHidden = true
                 if('admin' === menuType) {
                     if(this.eventvs.state === 'ACTIVE' || this.eventvs.state === 'PENDING') this.adminMenuHidden = false
                 }
-            },
-            ready: function() {
-                console.log(this.tagName + "- ready")
-                this.selectedTab = 'optionsTab'
-                this.$.confirmOptionDialog.addEventListener('optionconfirmed', function (e) {
-                    this.submitVote()
-                }.bind(this))
-                this.statsDivHidden = false
             },
             showAdminDialog:function() {
                 this.$.eventVSAdminDialog.show()
