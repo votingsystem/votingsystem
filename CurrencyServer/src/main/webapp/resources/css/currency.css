@@ -40,6 +40,7 @@ paper-tabs.transparent-teal paper-tab::shadow #ink {
 .vs-navbar {
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;
+    padding: 5px;
     z-index: 20;
 }
 

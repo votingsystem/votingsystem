@@ -58,7 +58,7 @@
                             ${msg.currencyRequestSelectedTagsLbl}
                         </div>
                         <template repeat="{{tag in selectedTags}}">
-                            <a class="btn btn-default" data-tagId='{{tag.id}}' on-click="removeTag"
+                            <a class="btn btn-default" data-tag-id$='{{tag.id}}' on-click="removeTag"
                                style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
                                 <i class="fa fa-minus" style="color: #6c0404;"></i> {{tag.name}}</a>
                         </template>

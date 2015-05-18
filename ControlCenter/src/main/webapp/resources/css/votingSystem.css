@@ -30,7 +30,7 @@ button {font-size: 1.1em; }
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;
     color:#f9f9f9;
-    height: 40px;
+    padding: 5px;
     z-index: 20;
 }
 

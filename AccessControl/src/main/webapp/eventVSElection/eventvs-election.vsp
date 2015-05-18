@@ -7,6 +7,7 @@
 <link href="${elementURL}/element/votevs-result-dialog.vsp" rel="import"/>
 <link href="${elementURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
 <link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
+<link href="${resourceURL}/iron-icons/iron-icons.html" rel="import"/>
 
 <dom-module name="eventvs-election">
     <template>
@@ -34,14 +35,16 @@
 
             <div style="margin: 0px 30px;">
             <div class="layout horizontal center center-justified" style="width:100%;">
-                <div hidden="{{fabVisible}}">
-                    <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
-                </div>
+                <paper-fab hidden="{{!fabVisible}}" mini icon="arrow-back" on-click="back" style="color: white;">
+                    <i class="fa fa-chevron-left"></i>
+                </paper-fab>
 
                 <paper-fab hidden="{{!votevsResul}}" mini icon="mail" on-click="showVoteResul"
                            style="color: #ba0011;margin: 0 0 0 20px;background: #ffeb3b;"></paper-fab>
 
-                <div class="flex" id="pageTitle" eventvs-id="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
+                <div class="flex" style="text-align: center">
+                    <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
+                </div>
             </div>
             <div class="{{eventStateRowClass}}">
                 <div class="flex" style="display: block;">
@@ -120,6 +123,7 @@
             is:'eventvs-election',
             properties: {
                 eventvs:{type:Object, value:{}, observer:'eventvsChanged'},
+                fabVisible:{type:Boolean, value:false},
                 smallScreen:{type:Boolean, value:false, observer:'smallScreenChanged'}
             },
             fireSignal:function() {

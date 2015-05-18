@@ -25,11 +25,11 @@ button {font-size: 1.1em; }
     max-width: 1200px;
 }
 
-
 .vs-navbar {
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;
     color:#f9f9f9;
+    padding: 5px;
     z-index: 20;
 }
 
@@ -52,21 +52,6 @@ button {font-size: 1.1em; }
 .vs-navbar .navbar-nav > li > a:hover, .nav > li > a:focus {
     text-decoration: none;
     background-color: #6c0404;
-}
-
-.vs-dialog {
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 13px;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    overflow: auto;
-    background: white;
-    padding:10px 30px 30px 30px;
-    outline: 1px solid rgba(0,0,0,0.2);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-    margin: auto auto;
 }
 
 input:required {

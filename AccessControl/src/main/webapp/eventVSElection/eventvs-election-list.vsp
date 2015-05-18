@@ -27,7 +27,7 @@
                 <template is="dom-repeat" items="{{eventListDto.resultList}}">
                     <div on-tap="showEventVSDetails" class$='{{getEventVSClass(item.state)}}'>
                         <div  eventvs-id="{{item.id}}" class='eventSubjectDiv' style="text-align: center;">{{getSubject(item.subject)}}</div>
-                        <div class='eventBodyDiv'>
+                        <div class="eventBodyDiv flex">
                             <div class='eventDateBeginDiv'>
                                 <div class='eventDateBeginLblDiv'>${msg.dateLbl}:</div>
                                 <div class='eventDateBeginValueDiv'>{{getDate(item.dateBegin)}}</div>
@@ -36,8 +36,7 @@
                                 <div class='eventAuthorLblDiv'>${msg.publishedByLbl}:</div>
                                 <div class='eventAuthorValueDiv'>{{item.userVS}}</div>
                             </div>
-                            <div hidden="{{item.state !== 'CANCELED'}}" class='cancelMessage'>
-                                ${msg.eventCancelledLbl}</div>
+                            <div hidden="{{!isCanceled(item)}}" class='cancelMessage'>${msg.eventCancelledLbl}</div>
                         </div>
                         <div class='eventDivFooter'>
                             <div class='eventRemainingDiv'>{{getElapsedTime(item.dateFinish)}}</div>
@@ -69,6 +68,9 @@
                 this.loading = true
                 this.eventvsDetailsHidden = true
                 if(this.eventVSState) this.$.eventVSStateSelect.value = this.eventVSState
+            },
+            isCanceled:function(eventvs) {
+                eventvs.state === 'CANCELED'
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()

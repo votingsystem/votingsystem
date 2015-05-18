@@ -34,7 +34,7 @@
                     <div hidden="{{!fabVisible}}">
                         <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
                     </div>
-                    <div class="flex" representativeId-data="{{representative.id}}" class="representativeNameHeader">
+                    <div class="flex" data-representative-id$="{{representative.id}}" class="representativeNameHeader">
                         <div>{{representativeFullName}}</div>
                     </div>
                     <div class="representativeNumRepHeader">

@@ -1,11 +1,9 @@
-<link rel="import" href="../polymer/polymer.html">
-
 <dom-module name="vs-pager">
     <template>
         <link rel="stylesheet" href="vs-pager.css">
         <link rel="stylesheet" href="../font-awesome/css/font-awesome.min.css" type="text/css"/>
-        <div class="pagination horizontal layout center center-justified ">
-            <div class="horizontal layout" hidden="{{prevHidden}}">
+        <div hidden="{{pagerHidden}}" class="pagination horizontal layout center center-justified ">
+            <div id="pagerMainDiv" class="horizontal layout" hidden="{{prevHidden}}">
                 <div class="first-child"><button on-click="firstPage"><i class="fa fa-angle-double-left"></i></button></div>
                 <div class$='{{prevClass}}'>
                     <button on-click="prevPage"><i class="fa fa-angle-left"></i></button>
@@ -40,8 +38,8 @@
             ready:function() {
                 console.log(this.tagName + " - ready - offset: " + this.offset + " - max: " + this.max)
                 if(this.offset > 0) this.currentpage = Math.ceil(this.offset/this.max) -1
-                this.style.display = 'none'
                 this.rangeSize = 10
+                this.pagerHidden = true
                 this.currentRange = this.range();
             },
             getPageClass:function(item) {
@@ -101,10 +99,10 @@
                     paginations.push({page:i});
                 }
 
-                if(this.getPageCount() > 0) this.style.display = 'block'
-                else this.style.display = 'none'
+                if(this.getPageCount() > 0)this.pagerHidden = false
+                else this.pagerHidden = true
                 console.log(this.tagName + " - total: " + this.total +" - offset: "  + this.offset +
-                    " - max: " + this.max  + " - pageCount: " + this.getPageCount())
+                " - max: " + this.max  + " - pageCount: " + this.getPageCount())
                 this.currentRange = paginations
                 return paginations;
             }

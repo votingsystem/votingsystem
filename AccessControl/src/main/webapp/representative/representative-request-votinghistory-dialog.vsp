@@ -2,7 +2,7 @@
 
 <dom-module name="representative-request-votinghistory-dialog">
     <template>
-        <paper-dialog id="xDialog" class="vs-dialog" style="width: 550px;" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key>
+        <paper-dialog id="xDialog" style="width: 550px;" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key>
             <style></style>
             <div>
                 <div class="layout horizontal center center-justified">

@@ -27,7 +27,7 @@
                         <div  style="margin: 0 0 0 0; font-size: 0.8em;" flex>{{uservs.firstName}} {{uservs.lastName}}</div>
                     </div>
                     <div class="flex" style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
-                        <div userId-data="{{uservs.id}}" style="text-align: center;">{{uservs.name}}</div>
+                        <div data-user-id$="{{uservs.id}}" style="text-align: center;">{{uservs.name}}</div>
                     </div>
                     <div class="flex" style="margin: 0 0 0 0; font-size: 0.8em;vertical-align: bottom;">
                         <b>IBAN: </b>{{uservs.iban}}
