@@ -13,8 +13,6 @@
             overflow:hidden;
         }
         </style>
-        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <iron-ajax id="ajax" url="{{url}}" last-response="{{cert}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
         <div class="layout vertical center center-justified">
             <div style="width: 600px;">

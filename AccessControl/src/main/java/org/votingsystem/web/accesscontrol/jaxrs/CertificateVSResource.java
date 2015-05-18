@@ -27,7 +27,9 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import static java.text.MessageFormat.format;

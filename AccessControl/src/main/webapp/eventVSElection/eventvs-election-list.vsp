@@ -1,13 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
 <link href="${elementURL}/eventVSElection/eventvs-election.vsp" rel="import"/>
 <link href="${resourceURL}/vs-pager/vs-pager.html" rel="import"/>
 
 <dom-module name="eventvs-election-list">
     <template>
-        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .card { position: relative; display: inline-block; width: 300px; vertical-align: top;
                 box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); margin: 10px;

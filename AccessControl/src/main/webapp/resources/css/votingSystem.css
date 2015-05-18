@@ -9,6 +9,16 @@ body {
     padding: 0 0px 0 0px;
 }
 
+button i{color: #888; }
+button {font-size: 1.1em; }
+
+.closeIcon {
+    cursor: pointer;fill:#6c0404; color:#6c0404; font-size: 1.9em; margin: 5px 9px 0 0;
+}
+.closeIcon:hover {
+    fill:#ba0011; color:#ba0011;
+}
+
 .pageContentDiv {
     margin:10px auto 200px auto;
     padding:0px 30px 0px 30px;
@@ -26,7 +36,7 @@ body {
 .vs-navbar-icon {
     color: #f9f9f9;
     cursor: pointer;
-    font-size: 3em;
+    font-size: 1.7em;
 }
 
 .vs-navbar-icon:hover {

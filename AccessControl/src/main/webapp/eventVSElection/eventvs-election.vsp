@@ -10,8 +10,6 @@
 
 <dom-module name="eventvs-election">
     <template>
-        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .tabContent { margin:0px auto 0px auto; width:auto; }
             .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px;}
@@ -172,7 +170,7 @@
                 this.statsDivHidden = false
             },
             showAdminDialog:function() {
-                this.$.eventVSAdminDialog.opened = true
+                this.$.eventVSAdminDialog.show()
             },
             back:function() {
                 this.fire('iron-signal', {name: "eventvs-election-closed", data: null});

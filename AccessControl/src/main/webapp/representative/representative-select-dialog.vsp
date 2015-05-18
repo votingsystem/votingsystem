@@ -1,14 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
-<link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
-<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-
 <dom-module name="representative-select-dialog">
     <template>
         <paper-dialog id="xDialog" class="dialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key>
-            <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
-            <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
             <style>
             .dialog {
                 width: 800px;
@@ -23,7 +17,7 @@
                         <div style="text-align: center;">${msg.saveAsRepresentativeLbl}</div>
                     </div>
                     <div style="position: absolute; top: 0px; right: 0px;">
-                        <paper-icon-button on-click="close" icon="close" style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
+                        <i class="fa fa-times closeIcon" on-click="close"></i>
                     </div>
                 </div>
 

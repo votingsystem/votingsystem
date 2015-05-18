@@ -9,8 +9,6 @@
 
 <dom-module name="representative-info">
     <template>
-        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .tabContent { margin:0px auto 0px auto; width:auto; }
             .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px;}

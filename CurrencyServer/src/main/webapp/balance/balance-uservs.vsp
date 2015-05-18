@@ -1,7 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
-<link href="${resourceURL}/core-icon/core-icon.html" rel="import"/>
 <link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 <link href="${resourceURL}/paper-progress/paper-progress.html" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-data.vsp" rel="import"/>
@@ -15,8 +13,7 @@
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key>
             <div style="position: absolute; top: 0px; right: 0px;">
-                <paper-icon-button on-click="closeTransactionViewer" icon="close"
-                                  style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
+                <i class="fa fa-times closeIcon" on-click="closeTransactionViewer"></i>
             </div>
             <transactionvs-data id="transactionViewer"></transactionvs-data>
         </paper-dialog>

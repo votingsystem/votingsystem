@@ -2,19 +2,14 @@ package org.votingsystem.web.accesscontrol.servlet;
 
 
 import org.votingsystem.dto.MessageDto;
-import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.voting.AccessRequestVS;
 import org.votingsystem.signature.util.CsrResponse;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.AccessRequestBean;
-import org.votingsystem.web.accesscontrol.ejb.CSRBean;
-import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MultipartRequestVS;

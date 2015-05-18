@@ -1,11 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
-<link href="${resourceURL}/vs-html-echo/vs-html-echo.html" rel="import"/>
-
 <dom-module name="image-viewer-dialog" attributes="url description">
     <template>
-        <paper-dialog id="xDialog" layered backdrop>
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <style>
             .dialog {
                 font-size: 13px;
@@ -17,7 +14,7 @@
                     <div hidden="{{!description}}" style="text-align: center;">{{description}}</div>
                 </div>
                 <div style="position: absolute; top: 0px; right: 0px;">
-                    <paper-icon-button on-click="close" icon="close" style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
+                    <i class="fa fa-times closeIcon" on-click="close"></i>
                 </div>
             </div>
             <div class="layout horizontal center center-justified">

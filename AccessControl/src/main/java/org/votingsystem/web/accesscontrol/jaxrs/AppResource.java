@@ -1,13 +1,8 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.votingsystem.model.TagVS;
-import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
-import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -19,7 +14,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

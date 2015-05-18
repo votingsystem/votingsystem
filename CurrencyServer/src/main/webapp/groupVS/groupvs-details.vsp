@@ -27,7 +27,7 @@
                     <div style="text-align: center;">${msg.configGroupvsLbl}</div>
                 </div>
                 <div style="position: absolute; top: 0px; right: 0px;">
-                    <paper-icon-button on-click="closeConfigDialog" icon="close" style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
+                    <i class="fa fa-times closeIcon" on-click="close"></i>
                 </div>
             </div>
             <paper-menu id="configGroupMenu"  attr-for-selected="data-option" selected="{{configDialogValue}}" on-iron-select="configGroup">
@@ -44,7 +44,7 @@
                     <div style="text-align: center;">${msg.makeTransactionVSFromGroupVSLbl}</div>
                 </div>
                 <div style="position: absolute; top: 0px; right: 0px;">
-                    <paper-icon-button on-click="closeTransactionSelectorDialog" icon="close" style="fill:#6c0404; color:#6c0404;"></paper-icon-button>
+                    <i class="fa fa-times closeIcon" on-click="close"></i>
                 </div>
             </div>
             <paper-menu id="transactionSelectorMenu"  attr-for-selected="data-option" selected="{{transactionSelectorDialogValue}}" on-iron-select="transactionSelector">

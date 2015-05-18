@@ -1,15 +1,11 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:h="http://java.sun.com/jsf/html"
-                xmlns:f="http://java.sun.com/jsf/core"
                 template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="head">
         <meta name="HandheldFriendly" content="true" />
         <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no" />
         <meta name="mobile-web-app-capable" content="yes"/>
-        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${elementURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
         <div style="margin: 0 auto;padding: 100px;">

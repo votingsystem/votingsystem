@@ -6,8 +6,6 @@
 
 <dom-module name="eventvs-election">
     <template>
-        <link href="${contextURL}/resources/css/votingSystem.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style></style>
         <div>
             <div style="margin: 0px 30px;">

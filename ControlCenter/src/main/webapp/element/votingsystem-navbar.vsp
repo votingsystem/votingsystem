@@ -9,7 +9,6 @@
 <link href="${resourceURL}/paper-menu/paper-menu.html" rel="import"/>
 <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
 <link href="${resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
-<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
 
 <dom-module name="votingsystem-navbar" attributes="url loading">
     <template>

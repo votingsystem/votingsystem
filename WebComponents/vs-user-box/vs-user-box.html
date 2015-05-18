@@ -22,7 +22,7 @@
                 <legend style="margin:5px 0px 0px 0px;">{{boxCaption}}</legend>
                 <template is="dom-repeat" items="{{resultListDto.resultList}}">
                     <div class="layout horizontal" style="padding: 0px 10px 0px 10px;">
-                        <paper-icon-button icon="close" style="fill:#6c0404;" on-tap="removeUser"></paper-icon-button>
+                        <i class="fa fa-times closeIcon" on-click="removeUser"></i>
                         <div class="flex layout vertical center-justified" style='font-size:1em;padding:0px 0 0 0px;vertical-align:middle;'>{{getUserVSName(item)}}</div>
                     </div>
                 </template>

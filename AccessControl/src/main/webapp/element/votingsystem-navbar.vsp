@@ -7,7 +7,6 @@
 <link href="${resourceURL}/paper-toolbar/paper-toolbar.html" rel="import"/>
 <link href="${resourceURL}/paper-menu/paper-menu.html" rel="import"/>
 <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
-<link href="${resourceURL}/paper-icon-button/paper-icon-button.html" rel="import"/>
 
 <dom-module name="votingsystem-navbar">
     <style>
@@ -59,15 +58,13 @@
                 <paper-header-panel mode="seamed" id="core_header_panel" class="vs-navbar">
                     <div class="horizontal layout">
                         <div>
-                            <paper-icon-button id="menuButton" icon="menu" on-tap="togglePanel" paper-drawer-toggle
-                                               class="vs-navbar-icon"></paper-icon-button>
+                            <i class="fa fa-bars vs-navbar-icon" on-click="togglePanel" paper-drawer-toggle style="margin: 0 10px 0 10px;"></i>
                         </div>
                         <div id="appTitle" style="font-size:1.8em; font-weight:bold; color: #f9f9f9;" class="flex horizontal layout center center-justified">
                             <span>{{appTitle}}</span>
                         </div>
-                        <div>
-                            <paper-icon-button hidden="{{searchHidden}}" id="searchButton" icon="search" on-tap="toogleSearchPanel"
-                                               class="vs-navbar-icon"></paper-icon-button>
+                        <div class="vertical layout center center-justified" style="margin: 0 10px 0 0;">
+                            <i class="fa fa-search vs-navbar-icon" hidden="{{searchHidden}}" on-click="toogleSearchPanel"></i>
                         </div>
                     </div>
                 </paper-header-panel>

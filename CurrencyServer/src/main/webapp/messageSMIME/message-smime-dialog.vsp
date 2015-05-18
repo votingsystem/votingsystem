@@ -1,11 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/paper-dialog/paper-dialog.html" rel="import"/>
 <link href="${elementURL}/messageSMIME/message-smime.vsp" rel="import"/>
 
 <dom-module name="message-smime-dialog" attributes="transactionvsURL opened">
     <template>
-        <paper-dialog id="xDialog" layered backdrop class="currencyTransactionDialog">
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click class="currencyTransactionDialog">
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <iron-ajax id="ajax" auto url="{{transactionvsURL}}" last-response="{{transactionvs}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>

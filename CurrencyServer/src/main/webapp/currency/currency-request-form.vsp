@@ -3,8 +3,6 @@
 <link href="${resourceURL}/paper-fab/paper-fab.html" rel="import"/>
 <link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 <link href="${resourceURL}/paper-radio-button/paper-radio-button.html" rel="import"/>
-<link href="${resourceURL}/core-icon/core-icon.html" rel="import"/>
-
 <link href="${resourceURL}/vs-currency-selector/vs-currency-selector.html" rel="import"/>
 <link href="${elementURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
 <link href="${elementURL}/currency/currency-request-result-dialog.vsp" rel="import"/>
