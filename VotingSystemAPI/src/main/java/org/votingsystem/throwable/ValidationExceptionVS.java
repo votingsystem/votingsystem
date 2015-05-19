@@ -1,10 +1,15 @@
 package org.votingsystem.throwable;
 
+import org.votingsystem.dto.MessageDto;
+
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class ValidationExceptionVS extends ExceptionVS {
 
+    public ValidationExceptionVS(MessageDto messageDto) {
+        super(messageDto);
+    }
 
     public ValidationExceptionVS(String message) {
         super(message);

@@ -45,8 +45,8 @@
     <script>
         Polymer({
             is:'message-smime-votevs-canceler',
-            publish: {
-                smimeMessageContent: {value: {}}
+            properties: {
+                smimeMessageContent:{type:Object, value:{}, observer:'smimeMessageContentChanged'}
             },
             isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,

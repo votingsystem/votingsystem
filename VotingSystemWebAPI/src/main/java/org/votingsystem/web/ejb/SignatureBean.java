@@ -228,7 +228,7 @@ public class SignatureBean {
     public KeyStoreDto generateElectionKeysStore(EventVS eventVS) throws Exception {
         //StringUtils.getRandomAlphaNumeric(7).toUpperCase()
         // _ TODO _ ====== crypto token
-        String eventVSUrl = config.getRestURL() + "/eventVS/id/" + eventVS.getId();
+        String eventVSUrl = config.getRestURL() + "/eventVSElection/id/" + eventVS.getId();
         String strSubjectDNRoot = format("CN=eventVSUrl:{0}, OU=Elections", eventVSUrl);
         KeyStore keyStore = KeyStoreUtil.createRootKeyStore(eventVS.getDateBegin(), eventVS.getDateFinish(),
                 password.toCharArray(), keyAlias, strSubjectDNRoot);

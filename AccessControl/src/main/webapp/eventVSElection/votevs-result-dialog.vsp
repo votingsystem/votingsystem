@@ -45,7 +45,7 @@
                         <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
                             <div style="margin:10px 0px 10px 0px;">
                                 <button on-click="checkReceipt" style="margin: 0px 0px 0px 5px;">
-                                    <i class="fa fa-certificate"></i>  ${msg.checkVoteLbl}
+                                    <i class="fa fa-certificate"></i>  <span>{{checkSignatureButtonMsg}}</span>
                                 </button>
                             </div>
                             <div class="flex"></div>
@@ -78,9 +78,9 @@
                 this.caption = null
                 this.optionSelected = null
                 this.votevsReceipt = null
-                this.statusCode = null
                 this.appMessageJSON = appMessageJSON
                 this.statusCode = appMessageJSON.statusCode
+                this.isOK = (this.statusCode == 200)
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     this.caption = "${msg.voteOKCaption}"
                     this.message = "${msg.voteResultOKMsg}"

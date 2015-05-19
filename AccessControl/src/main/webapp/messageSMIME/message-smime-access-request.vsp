@@ -5,12 +5,6 @@
 <dom-module name="message-smime-access-request" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
     <template>
         <style>
-        .messageToUser {
-            font-weight: bold;
-            margin:10px auto 10px auto;
-            background: #f9f9f9;
-            padding:10px 20px 10px 20px;
-        }
         .timeStampMsg {
             color:#aaaaaa; font-size:1.1em; margin:0 0 15px 0;font-style:italic;
         }
@@ -22,13 +16,6 @@
                 </div>
                 <div hidden="{{!timeStampDate}}" class="timeStampMsg">
                     <b>${msg.timeStampDateLbl}: </b><span>{{timeStampDate}}</span>
-                </div>
-                <div hidden="{{!messageToUser}}">
-                    <div  layout horizontal center center-justified  class="messageToUser">
-                        <div>
-                            <div id="messageToUser">{{messageToUser}}</div>
-                        </div>
-                    </div>
                 </div>
                 <div><b>${msg.eventVSLbl}: </b>
                     <a href="{{smimeMessageContent.eventURL}}" target="_blank">{{smimeMessageContent.eventURL}}</a>
@@ -47,11 +34,10 @@
     <script>
         Polymer({
             is:'message-smime-access-request',
-            publish: {
-                smimeMessageContent: {value: {}}
+            properties: {
+                smimeMessageContent:{type:Object, value:{}}
             },
             isClientToolConnected:window['isClientToolConnected'],
-            messageToUser:null,
             timeStampDate:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
@@ -62,9 +48,6 @@
             attached: function () {
                 console.log(this.tagName + " - attached")
                 this.fire('attached', null);
-            },
-            smimeMessageContentChanged:function() {
-                this.messageToUser = null
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

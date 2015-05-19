@@ -74,7 +74,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getCancelEventServiceURL() {
-        return getServerURL() + "/rest/eventVS/cancelled";
+        return getServerURL() + "/rest/eventVSElection/cancelled";
     }
 
     public String getServerSubscriptionServiceURL() {

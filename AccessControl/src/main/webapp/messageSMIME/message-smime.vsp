@@ -42,8 +42,8 @@
     <script>
         Polymer({
             is:'message-smime',
-            publish: {
-                smimeMessageContent: {value: {}}
+            properties: {
+                smimeMessageContent:{type:Object, value:{}, observer:'smimeMessageContentChanged'}
             },
             isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,

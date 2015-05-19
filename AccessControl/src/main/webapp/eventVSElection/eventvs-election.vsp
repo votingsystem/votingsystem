@@ -2,8 +2,8 @@
 
 <link href="${resourceURL}/iron-media-query/iron-media-query.html" rel="import"/>
 <link href="${elementURL}/eventVSElection/eventvs-election-vote-confirm-dialog.vsp" rel="import"/>
-<link href="${elementURL}/element/eventvs-admin-dialog.vsp" rel="import"/>
-<link href="${elementURL}/element/votevs-result-dialog.vsp" rel="import"/>
+<link href="${elementURL}/eventVSElection/eventvs-admin-dialog.vsp" rel="import"/>
+<link href="${elementURL}/eventVSElection/votevs-result-dialog.vsp" rel="import"/>
 <link href="${elementURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
 <link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
 
@@ -205,7 +205,7 @@
                     operationVS.documentURL = fileURL
                     operationVS.setCallback(function(appMessage) { this.showGetResultsResponse(appMessage) }.bind(this))
                     VotingSystemClient.setMessage(operationVS)
-                } else window.location.href = fileURL
+                } else loadURL_VS(fileURL)
             },
             showGetResultsResponse:function(appMessage) {
                 var appMessageJSON = toJSON(appMessage)

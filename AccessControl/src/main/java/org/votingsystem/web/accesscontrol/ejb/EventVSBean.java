@@ -78,8 +78,8 @@ public class EventVSBean {
                     smimeMessageResp = signatureBean.getSMIMEMultiSigned(fromUser, toUser, smimeMessageReq, subject);
             String controlCenterUrl = ((EventVSElection)eventVS).getControlCenterVS().getServerURL();
             ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageResp.getBytes(),
-                    ContentTypeVS.SIGNED, controlCenterUrl + "/eventVSElection/cancelled");
-            if(ResponseVS.SC_OK != responseVSControlCenter.getStatusCode() ||
+                    ContentTypeVS.JSON_SIGNED, controlCenterUrl + "/rest/eventVSElection/cancel");
+            if(ResponseVS.SC_OK != responseVSControlCenter.getStatusCode() &&
                     ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVSControlCenter.getStatusCode()) {
                 throw new ValidationExceptionVS(
                         "ERROR - controlCenterCommunicationErrorMsg -  controlCenterUrl: " + controlCenterUrl);

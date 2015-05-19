@@ -1,5 +1,6 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.EventVSStatsDto;
@@ -115,6 +116,12 @@ public class EventVSElectionResource {
         return Response.ok().entity(response.getPublishRequestSMIME().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
+    @Path("/cancel") @POST
+    public Response cancelled(MessageSMIME messageSMIME) throws Exception {
+        MessageSMIME response = eventVSBean.cancelEvent(messageSMIME);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(MessageDto.OK(null))).type(MediaTypeVS.JSON).build();
+    }
+
     @Transactional
     @Path("/id/{id}/stats") @GET
     public Response stats(@PathParam("id") long id, @Context ServletContext context,
@@ -131,6 +138,16 @@ public class EventVSElectionResource {
             context.getRequestDispatcher("/eventVSElection/stats.xhtml").forward(req, resp);
             return Response.ok().build();
         }
+    }
+
+    @Transactional
+    @Path("/id/{id}/checkDates") @GET
+    public Response checkDates(@PathParam("id") long id) throws Exception {
+        EventVS eventVS = dao.find(EventVS.class, id);
+        if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSClaim not found - " +
+                "eventId: " + id).build();
+        eventVSBean.checkEventVSDates(eventVS);
+        return Response.ok().build();
     }
 
     @Transactional

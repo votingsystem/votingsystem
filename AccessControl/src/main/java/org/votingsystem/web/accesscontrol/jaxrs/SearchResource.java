@@ -50,7 +50,7 @@ public class SearchResource {
             eventMap.put("id", eventVS.getId());
             eventMap.put("subject", eventVS.getSubject());
             eventMap.put("content", eventVS.getContent());
-            eventMap.put("URL", config.getRestURL() + "/eventVS/id/" + eventVS.getId());
+            eventMap.put("URL", config.getRestURL() + "/eventVSElection/id/" + eventVS.getId());
             resultList.add(eventMap);
         }
         Map resultMap = new HashMap<>();

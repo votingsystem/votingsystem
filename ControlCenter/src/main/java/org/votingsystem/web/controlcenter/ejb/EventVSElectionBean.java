@@ -1,6 +1,7 @@
 package org.votingsystem.web.controlcenter.ejb;
 
 import org.votingsystem.dto.ActorVSDto;
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.*;
@@ -79,8 +80,8 @@ public class EventVSElectionBean {
         EventVSElection eventVS = dao.getSingleResult(EventVSElection.class, query);
         if(eventVS == null) throw new ValidationExceptionVS(
                 "ERROR - EventVSElection not found - accessControlEventVSId: " +request.getEventId());
-        if(EventVS.State.ACTIVE != eventVS.getState()) throw new ValidationExceptionVS(
-                "ERROR - trying to cancel an EventVS tha isn't active");
+        if(EventVS.State.ACTIVE != eventVS.getState()) throw new ValidationExceptionVS(new MessageDto(
+                ResponseVS.SC_ERROR_REQUEST_REPEATED, "ERROR - trying to cancel an EventVS tha isn't active"));
         if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
         request.validateCancelation(eventVS.getAccessControlVS().getServerURL());

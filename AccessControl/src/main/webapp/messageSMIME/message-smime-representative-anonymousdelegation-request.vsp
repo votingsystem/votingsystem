@@ -46,8 +46,8 @@
     <script>
         Polymer({
             is:'message-smime-representative-anonymousdelegation-request',
-            publish: {
-                smimeMessageContent: {value: {}}
+            properties: {
+                smimeMessageContent:{type:Object, value:{}, observer:'smimeMessageContentChanged'}
             },
             isClientToolConnected:window['isClientToolConnected'],
             messageToUser:null,

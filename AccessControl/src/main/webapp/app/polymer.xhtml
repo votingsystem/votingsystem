@@ -32,7 +32,7 @@
     </ui:define>
     <ui:define name="content">
         <button onclick="document.querySelector('#adminDialog').show()" style="margin:10px;">adminDialog</button>
-        <button onclick="showMessageVS('mensaje', 'caption')" style="margin:10px;">alert</button>
+        <button onclick="showMessageVS('mensaje', 'caption', null, true)" style="margin:10px;">alert</button>
 
         <eventvs-admin-dialog id="adminDialog" service-url="${restURL}/tagVS"></eventvs-admin-dialog>
 

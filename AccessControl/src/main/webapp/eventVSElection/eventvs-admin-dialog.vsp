@@ -9,6 +9,7 @@
                     margin:10px auto 10px auto;
                     background: #f9f9f9;
                     padding:10px 20px 10px 20px;
+                    margin:0px 10px 0px 0px;
                 }
             </style>
             <div id="container" layout vertical style="overflow-y: auto; width:450px; padding:10px;">
@@ -21,7 +22,7 @@
                     </div>
                 </div>
 
-                <div hidden="{{!messageToUser}}" layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
+                <div hidden="{{!messageToUser}}" layout horizontal center center-justified>
                     <div class="messageToUser">{{messageToUser}}</div>
                 </div>
                 <div>
@@ -77,16 +78,16 @@
                         messageSubject = '${msg.cancelEventVSMsgSubject}'
                     }
                     var operationVS = new OperationVS(Operation.EVENT_CANCELLATION)
-                    operationVS.serviceURL= "${restURL}/eventVS/cancel"
+                    operationVS.serviceURL= "${restURL}/eventVSElection/cancel"
                     var signedContent = {operation:Operation.EVENT_CANCELLATION,
                         accessControlURL:"${contextURL}", eventId:Number(this.eventvs.id), state:state}
                     operationVS.jsonStr = JSON.stringify(signedContent)
                     operationVS.signedMessageSubject = messageSubject
-                    operationVS.setCallback(function(appMessage) { this.showResponse(appMessage)}.bind(this))
+                    operationVS.setCallback(function(appMessage) { this.cancelationResponse(appMessage)}.bind(this))
                     VotingSystemClient.setMessage(operationVS);
                 }
             },
-            showResponse: function(appMessage) {
+            cancelationResponse: function(appMessage) {
                 console.log("eventvs-admin-dialog callback - message: " + appMessage);
                 var appMessageJSON = toJSON(appMessage)
                 var caption
@@ -94,13 +95,14 @@
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     caption = "${msg.operationOKCaption}"
                     msg = "${msg.documentCancellationOKMsg}".format(this.eventvs.subject);
-                    window.location.href = "${restURL}/eventVSElection/id/" + votingEvent.id
+                    if(this.$.selectDeleteDocument.checked) loadURL_VS("${restURL}/eventVSElection")
+                    else loadURL_VS("${restURL}/eventVSElection/id/" + this.eventvs.id)
                 } else {
                     caption = "${msg.operationERRORCaption}"
                     msg = appMessageJSON.message
                 }
                 showMessageVS(msg, caption)
-                this.click()
+                this.click() //hack to refresh screen
             },
             show: function() {
                 this.$.xDialog.opened = true
