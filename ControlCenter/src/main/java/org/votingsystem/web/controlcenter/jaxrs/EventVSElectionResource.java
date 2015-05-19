@@ -81,7 +81,7 @@ public class EventVSElectionResource {
                 } else if(eventVSState != EventVS.State.DELETED_FROM_SYSTEM) inList = Arrays.asList(eventVSState);
             } catch(Exception ex) {}
         }
-        Query query = dao.getEM().createQuery("select count (e) from EventVSElection e where e.state in :inList order by e.dateBegin desc")
+        Query query = dao.getEM().createQuery("select count (e) from EventVSElection e where e.state in :inList")
                 .setParameter("inList", inList);
         Long totalCount = (Long) query.getSingleResult();
         query = dao.getEM().createQuery("select e from EventVSElection e where e.state in :inList order by e.dateBegin desc")

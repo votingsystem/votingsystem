@@ -87,7 +87,7 @@ public class EventVSElectionBean {
         request.validateCancelation(eventVS.getAccessControlVS().getServerURL());
         String fromUser = config.getServerName();
         String toUser = eventVS.getAccessControlVS().getName();
-        String subject = messages.get("mime.subject.eventCancellationValidated");
+        String subject = messages.get("eventCancelationMsgSubject");
         SMIMEMessage smimeResp = signatureBean.getSMIMEMultiSigned(fromUser, toUser, messageSMIME.getSMIME(), subject);
         dao.merge(messageSMIME.setSMIME(smimeResp));
         eventVS.setState(request.getState()).setDateCanceled(new Date());

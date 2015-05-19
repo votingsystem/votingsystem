@@ -83,7 +83,7 @@ public class EventVSElectionBean {
         Header header = new Header ("serverURL", config.getContextURL());
         String fromUser = config.getServerName();
         String toUser = controlCenterVS.getName();
-        String subject = messages.get("mime.subject.votingEventValidated");
+        String subject = messages.get("votingEventMsgSubject");
         SMIMEMessage smime = signatureBean.getSMIMETimeStamped(fromUser, toUser, JSON.getMapper().writeValueAsString(
                 request), subject, header);
         ResponseVS responseVS = HttpHelper.getInstance().sendData(smime.getBytes(),

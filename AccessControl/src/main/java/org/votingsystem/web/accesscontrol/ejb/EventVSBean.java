@@ -72,7 +72,7 @@ public class EventVSBean {
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
         SMIMEMessage smimeMessageResp = null;
         String fromUser = config.getServerName();
-        String subject = messages.get("mime.subject.eventCancellationValidated");
+        String subject = messages.get("eventCancelationMsgSubject");
         if(eventVS instanceof EventVSElection) {
             String toUser = ((EventVSElection)eventVS).getControlCenterVS().getName();
                     smimeMessageResp = signatureBean.getSMIMEMultiSigned(fromUser, toUser, smimeMessageReq, subject);

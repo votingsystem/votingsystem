@@ -3,110 +3,71 @@
 <link href="${elementURL}/representative/representative-info.vsp" rel="import"/>
 <link href="${elementURL}/representative/representation-state.vsp" rel="import"/>
 
-<dom-module name="representative-list" attributes="url">
+<dom-module name="representative-list">
     <template>
         <style>
-        .card {
-            position: relative;
-            display: inline-block;
-            width: 300px;
-            vertical-align: top;
-            background-color: #fff;
-            box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
-            background-color: #f2f2f2;
-            margin: 10px;
-            padding: 5px 10px;
-        }
         .representativeDiv {
             display:table;
             width:300px;
             background-color: #f2f2f2;
             border: 1px solid #02227a;
+            box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
             margin: 10px 15px 10px 0px;
-            -moz-border-radius: 5px; border-radius: 5px;
-            cursor: pointer; cursor: hand;
-            height:100px;
-            overflow:hidden;
-            float:left;
-        }
-
-        .representativeDiv .representativeImgCol{
-            display:table-cell;
-            vertical-align: middle;
-            max-width: 95px;
-        }
-
-        .representativeDiv .representativeDataCol{
-            display:table-cell;
-            margin-left: 30px;
-        }
-
-        .representativeDiv .numDelegationsData {
-            margin: 10px 10px 0px 10px;
-        }
-
-        .representativeDiv .representativeName {
-            font-size: 1.2em;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            height:90px;
             text-overflow: ellipsis;
         }
         </style>
-        <iron-signals on-iron-signal-representative-closed="closeRepresentativeDetails"></iron-signals>
-        <core-animated-pages hidden="{{loading}}" id="pages" flex selected="{{page}}"
-                             on-iron-animated-pages-transition-end="{{transitionend}}" transitions="cross-fade-all" >
-            <section id="page1">
-                <div cross-fade>
-                    <div class="layout flex horizontal wrap around-justified">
-                        <template repeat="{{representative in representativeData.resultList}}">
-                            <div on-tap="showRepresentativeDetails" class='card representativeDiv horizontal layout center center-centerjustified'>
-                                <div class='representativeImgCol'>
-                                    <img src='{{representative.imageURL}}'/>
-                                </div>
-                                <div class='representativeDataCol'>
-                                    <p class='representativeName'>{{representative.name}}</p>
-                                    <div class='numDelegationsData'>
-                                        {{representative.numRepresentations}} ${msg.numDelegationsPartMsg}
-                                    </div>
-                                </div>
+        <div hidden="{{!detailsHidden}}">
+            <div class="layout flex horizontal wrap around-justified">
+                <template is="dom-repeat" items="{{representativeData.resultList}}">
+                    <div on-tap="showRepresentativeDetails" class='representativeDiv horizontal layout center center center-justified'>
+                        <div style=' max-width: 90px;'>
+                            <img src='{{item.imageURL}}'/>
+                        </div>
+                        <div class='flex vertical layout center center center-justified'>
+                            <p style="text-overflow: ellipsis; font-weight: bold;"><span>{{item.name}}</span></p>
+                            <div style='margin: 10px 10px 0px 10px;'>
+                                <span>{{item.numRepresentations}}</span> ${msg.numDelegationsPartMsg}
                             </div>
-                        </template>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </template>
+            </div>
+        </div>
 
-            <section id="page2">
-                <div cross-fade>
-                    <representative-info id="representativeDetails" fab-visible="true"></representative-info>
-                </div>
-            </section>
-        </core-animated-pages>
+        <div hidden="{{detailsHidden}}">
+            <representative-info id="representativeDetails" fab-visible="true" on-representative-closed="closeRepresentativeDetails">
+                </representative-info>
+        </div>
         <representation-state id="representationState"></representation-state>
     </template>
     <script>
         Polymer({
             is:'representative-list',
-            publish: {
-                representativeData: {value: {}}
+            properties: {
+                representativeData:{type:Object, value:{}, observer:'representativeDataChanged'}
             },
             ready : function(e) {
                 console.log(this.tagName + " - ready")
-                this.loading = true
-                this.page = 0;
+                this.detailsHidden = true
                 if(window['isClientToolConnected']) {
-                    this.$.representationState.opened = true
+                    this.$.representationState.show()
                 }
             },
             representativeDataChanged:function() {
                 console.log(this.tagName + " - representativeData: " + this.representativeData)
-                this.loading = false
             },
             closeRepresentativeDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeRepresentativeDetails")
-                this.page = 0;
+                this.detailsHidden = true
             },
             showRepresentativeDetails :  function(e) {
                 console.log(this.tagName + " - showRepresentativeDetails")
                 this.$.representativeDetails.representative = e.model.item;
-                this.page = 1;
+                this.detailsHidden = false
             },
             getRepresentativeName:function(groupvs) {
                 return groupvs.representative.firstName + " " + groupvs.representative.lastName

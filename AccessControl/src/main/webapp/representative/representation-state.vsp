@@ -1,8 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="representation-state" attributes="opened">
+<dom-module name="representation-state">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click class="dialog" style="top: 150px;">
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click class="dialog">
             <style> </style>
             <div>
                 <div class="layout horizontal center center-justified">
@@ -13,7 +13,7 @@
                         <i class="fa fa-times closeIcon" on-click="close"></i>
                     </div>
                 </div>
-                <div id="representativeInfo" style="margin:10px 0 10px 0;">
+                <div hidden="{{representativeInfoHidden}}" style="margin:10px 0 10px 0;">
                     <div style="color:#6c0404;text-align: center;">{{representativeFullName}}</div>
                     <div hidden="{{!representationState.representative.description}}"
                             style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center;
@@ -24,15 +24,18 @@
                 <div style="font-size: 1.2em; color:#ba0011; font-weight: bold; text-align: center;
                     padding:10px 20px 10px 20px; border-bottom: 1px solid #ba0011; border-top: 1px solid #ba0011;">
                     {{representationState.stateMsg}}
-                    <div id="delegationTimeInfoDiv" class="horizontal layout" style="margin:10px 0 0 0;display: none;font-size: 0.9em">
+                    <div hidden="{{timeInfoHidden}}" class="horizontal layout" style="margin:10px 0 0 0;display: none;font-size: 0.9em">
                         <b>${msg.validFromLbl}:</b> <span>{{getDate(representationState.dateFrom)}}</span>
                         <span style="margin: 0 0 0 20px;"><b>${msg.toLbl}:</b></span>
                         <span>{{getDate(representationState.dateTo)}}</span>
                     </div>
                 </div>
                 <div style="color:#02227a;text-align: center; margin:10px 0 10px 0;">{{representationState.lastCheckedDateMsg}}</div>
+
+                <span>{{result}}</span>
+
                 <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
-                    <button id="cancellationButton" on-click="cancelAnonymousDelegation" style="display: none;">
+                    <button hidden="{{cancellationHidden}}" on-click="cancelAnonymousDelegation">
                         ${msg.cancelAnonymousRepresentationMsg}
                     </button>
                     <div class="flex"></div>
@@ -52,23 +55,22 @@
             ready: function() {
                 console.log(this.tagName + " - ")
             },
-            openedChanged: function() {
-                this.$.xDialog.opened = this.opened
-                if(this.opened) {
-                    var operationVS = new OperationVS(Operation.REPRESENTATIVE_STATE)
-                    var result = VotingSystemClient.call(operationVS)
-                    this.representationState = toJSON(decodeURIComponent(escape(window.atob(result))));
-                    if(this.representationState.representative) {
-                        this.representativeFullName = this.representationState.representative.firstName + " " +
-                                this.representationState.representative.lastName
-                    } else this.$.representativeInfo.display = 'none'
-                    if(this.representationState.state === "WITH_ANONYMOUS_REPRESENTATION") {
-                        this.$.delegationTimeInfoDiv.style.display = 'block'
-                        this.$.cancellationButton.style.display = 'block'
-                    } else if(this.representationState.state === "WITHOUT_REPRESENTATION") {
-                        this.close();
-                    }
+            show: function() {
+                this.cancellationHidden = true
+                this.timeInfoHidden = true
+                var operationVS = new OperationVS(Operation.REPRESENTATIVE_STATE)
+                this.result = decodeURIComponent(escape(window.atob(VotingSystemClient.call(operationVS))))
+                this.representationState = toJSON(this.result);
+                if(this.representationState.representative != null) {
+                    this.representativeFullName = this.representationState.representative.firstName + " " +
+                            this.representationState.representative.lastName
+                } else this.representativeInfoHidden = true
+                if(this.representationState.state === "WITHOUT_REPRESENTATION") return
+                if(this.representationState.state === "WITH_ANONYMOUS_REPRESENTATION") {
+                    this.timeInfoHidden = false
+                    this.cancellationHidden = false
                 }
+                this.$.xDialog.opened = true
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
