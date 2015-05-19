@@ -2,7 +2,10 @@
 
 <dom-module name="representative-select-anonymous-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click style="min-height: 200px; top: 10px; display: block;">
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click style="min-height: 250px; top: 10px; display: block;">
+            <style>
+                :host { display:block;}
+            </style>
             <div>
                 <div style="font-size: 1.1em;">
                 <div class="layout horizontal center center-justified">
@@ -85,8 +88,9 @@
                         return
                     }
                     var operationVS = new OperationVS(Operation.ANONYMOUS_REPRESENTATIVE_SELECTION)
-                    operationVS.jsonStr = JSON.stringify({operation:representativeOperation, representative:this.representative,
-                        weeksOperationActive:this.$.numWeeksAnonymousDelegation.value})
+                    operationVS.jsonStr = JSON.stringify({operation:Operation.ANONYMOUS_REPRESENTATIVE_SELECTION,
+                            representative:this.representative,
+                            weeksOperationActive:this.$.numWeeksAnonymousDelegation.value})
                     operationVS.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'
                     operationVS.setCallback(function(appMessage) { this.delegationResponse(appMessage) }.bind(this))
                     VotingSystemClient.setMessage(operationVS);

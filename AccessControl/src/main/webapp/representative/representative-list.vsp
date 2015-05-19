@@ -7,10 +7,9 @@
     <template>
         <style>
         .representativeDiv {
-            display:table;
             width:300px;
             background-color: #f2f2f2;
-            border: 1px solid #02227a;
+            border: 1px solid #6c0404;
             box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
             margin: 10px 15px 10px 0px;
             -moz-border-radius: 5px;
@@ -21,6 +20,8 @@
         }
         </style>
         <div hidden="{{!detailsHidden}}">
+            <div hidden="{{!representationInfo}}" class="linkVS" on-click="showRepresentativeData"
+                 style="margin: 10px 0 10px 0; text-align: center;" >${msg.userRepresentativeLbl}</div>
             <div class="layout flex horizontal wrap around-justified">
                 <template is="dom-repeat" items="{{representativeData.resultList}}">
                     <div on-tap="showRepresentativeDetails" class='representativeDiv horizontal layout center center center-justified'>
@@ -53,9 +54,8 @@
             ready : function(e) {
                 console.log(this.tagName + " - ready")
                 this.detailsHidden = true
-                if(window['isClientToolConnected']) {
-                    this.$.representationState.show()
-                }
+                if(this.$.representationState.hasData === true) this.representationInfo = true
+                else this.representationInfo = false
             },
             representativeDataChanged:function() {
                 console.log(this.tagName + " - representativeData: " + this.representativeData)
@@ -63,6 +63,9 @@
             closeRepresentativeDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeRepresentativeDetails")
                 this.detailsHidden = true
+            },
+            showRepresentativeData : function() {
+                this.$.representationState.show()
             },
             showRepresentativeDetails :  function(e) {
                 console.log(this.tagName + " - showRepresentativeDetails")

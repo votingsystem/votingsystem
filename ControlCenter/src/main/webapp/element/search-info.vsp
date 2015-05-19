@@ -20,12 +20,12 @@
     <script>
         Polymer({
             is:'search-info',
-            isVisible :false,
-            searchResultMsgTemplate:"${msg.searchResultMsg}",
-            beginSearchMsgTemplate:"${msg.beginSearchInfoLbl}",
-            endSearchMsgTemplate:"${msg.endSearchInfoLbl}",
-
-            ready: function() {},
+            ready: function() {
+                this.isVisible = false,
+                this.searchResultMsgTemplate = "${msg.searchResultMsg}"
+                this.beginSearchMsgTemplate = "${msg.beginSearchInfoLbl}"
+                this.endSearchMsgTemplate = "${msg.endSearchInfoLbl}"
+            },
             show: function(textQuery, dateBeginFrom, dateBeginTo, dateFinishFrom, dateFinishTo) {
                 this.searchResultMsg = searchResultMsgTemplate.format(textQuery)
                 if(!(FormUtils.checkIfEmpty(dateBeginFrom) && FormUtils.checkIfEmpty(dateBeginTo))) {

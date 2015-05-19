@@ -1,16 +1,14 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="cert-request-form" attributes="caption opened isMenuAdmin messageToUser">
+<dom-module name="cert-request-form">
 <template>
     <style>
     .messageToUser { font-weight: bold;  margin:10px auto 10px auto; background: #f9f9f9; padding:10px 20px 10px 20px; max-width: 600px;}
     </style>
     <iron-signals on-iron-signal-messagedialog-accept="messagedialogAccept"></iron-signals>
-    <div hidden="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
-        <div class="messageToUser">
-            <div  layout horizontal center center-justified >
-                <div id="messageToUser">{{messageToUser}}</div>
-            </div>
+    <div hidden="{{!messageToUser}}">
+        <div class="messageToUser layout horizontal center center-justified">
+            <div id="messageToUser">{{messageToUser}}</div>
         </div>
     </div>
     <div style="margin: 20px auto 10px auto; text-align: center;max-width: 600px; ">
@@ -43,7 +41,12 @@
 <script>
     Polymer({
         is:'cert-request-form',
-        ready: function() { },
+        properties: {
+            messageToUser:{type:String, value:null}
+        },
+        ready: function() {
+            console.log(this.tagName + " - ready")
+        },
         submitForm: function () {
             console.log("submitForm")
             this.removeErrorStyle(this.$.formDataDiv)

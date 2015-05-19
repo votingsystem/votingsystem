@@ -2,7 +2,7 @@
 
 <dom-module name="representation-state">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click style="min-height: 300px;">
             <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
@@ -22,7 +22,7 @@
                 </div>
                 <div style="font-size: 1.2em; color:#ba0011; font-weight: bold; text-align: center;
                     padding:10px 20px 10px 20px; border-bottom: 1px solid #ba0011; border-top: 1px solid #ba0011;">
-                    {{representationState.stateMsg}}
+                    <span>{{representationState.stateMsg}}</span>
                     <div hidden="{{timeInfoHidden}}" class="horizontal layout" style="margin:10px 0 0 0;display: none;font-size: 0.9em">
                         <b>${msg.validFromLbl}:</b> <span>{{getDate(representationState.dateFrom)}}</span>
                         <span style="margin: 0 0 0 20px;"><b>${msg.toLbl}:</b></span>
@@ -42,24 +42,30 @@
     <script>
         Polymer({
             is:'representation-state',
+            properties: {
+                hasData:{type:Boolean, value:false}
+            },
             ready: function() {
                 console.log(this.tagName + " - ")
+                if(window['isClientToolConnected']) {
+                    this.cancellationHidden = true
+                    this.timeInfoHidden = true
+                    var operationVS = new OperationVS(Operation.REPRESENTATIVE_STATE)
+                    this.result = decodeURIComponent(escape(window.atob(VotingSystemClient.call(operationVS))))
+                    this.representationState = toJSON(this.result);
+                    if(this.representationState.representative != null) {
+                        this.representativeFullName = this.representationState.representative.firstName + " " +
+                                this.representationState.representative.lastName
+                    } else this.representativeInfoHidden = true
+                    if(this.representationState.state === "WITHOUT_REPRESENTATION") return
+                    if(this.representationState.state === "WITH_ANONYMOUS_REPRESENTATION") {
+                        this.timeInfoHidden = false
+                        this.cancellationHidden = false
+                    }
+                    this.hasData = true
+                }
             },
             show: function() {
-                this.cancellationHidden = true
-                this.timeInfoHidden = true
-                var operationVS = new OperationVS(Operation.REPRESENTATIVE_STATE)
-                this.result = decodeURIComponent(escape(window.atob(VotingSystemClient.call(operationVS))))
-                this.representationState = toJSON(this.result);
-                if(this.representationState.representative != null) {
-                    this.representativeFullName = this.representationState.representative.firstName + " " +
-                            this.representationState.representative.lastName
-                } else this.representativeInfoHidden = true
-                if(this.representationState.state === "WITHOUT_REPRESENTATION") return
-                if(this.representationState.state === "WITH_ANONYMOUS_REPRESENTATION") {
-                    this.timeInfoHidden = false
-                    this.cancellationHidden = false
-                }
                 this.$.xDialog.opened = true
             },
             getDate:function(dateStamp) {

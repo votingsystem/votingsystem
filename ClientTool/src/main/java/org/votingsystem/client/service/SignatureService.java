@@ -422,13 +422,13 @@ public class SignatureService extends Service<ResponseVS> {
         }
 
         //we know this is done in a background thread
-        private ResponseVS sendSMIME(String documentToSign, OperationVS operationVS, String... header) throws Exception {
+        private ResponseVS sendSMIME(String documentToSign, OperationVS operationVS, String... headers) throws Exception {
             log.info("sendSMIME");
             SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, operationVS.getReceiverName(),
                     documentToSign, password, operationVS.getSignedMessageSubject());
             updateMessage(operationVS.getSignedMessageSubject());
             return HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                    operationVS.getServiceURL());
+                    operationVS.getServiceURL(), headers);
         }
 
         //we know this is done in a background thread

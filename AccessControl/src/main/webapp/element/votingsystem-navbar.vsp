@@ -20,45 +20,43 @@
         <paper-drawer-panel id="paperDrawerPanel" responsive-width="30000px" style="overflow: scroll;">
             <div drawer style="height: 100%;">
                 <paper-menu class="paperMenu" attr-for-selected="data-href" selected="{{selectorValue}}" on-iron-select="drawerItemSelected" style="padding:50px 0 0 0;">
-                    <paper-item data-href="${restURL}/eventVSElection">
+                    <paper-item hidden="{{!adminMenuHidden}}" data-href="${restURL}/eventVSElection">
                         <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                     </paper-item>
-                    <paper-item data-href="${restURL}/representative">
+                    <paper-item hidden="{{!adminMenuHidden}}" data-href="${restURL}/representative">
                         <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
                     </paper-item>
-                    <paper-item data-href="${contextURL}/app/tools.xhtml">
+                    <paper-item hidden="{{!adminMenuHidden}}" data-href="${contextURL}/app/tools.xhtml">
                         <i class="fa fa-cogs" style="margin:0px 10px 0px 0px;"></i> ${msg.toolsLbl}
                     </paper-item>
-                    <paper-item data-href="${contextURL}/subscriptionVS/feeds.xhtml">
+                    <paper-item hidden="{{!adminMenuHidden}}" data-href="${contextURL}/subscriptionVS/feeds.xhtml">
                         <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> ${msg.subscriptionLbl}
                     </paper-item>
-                    <paper-item data-href="${contextURL}/app/contact.xhtml">
+                    <paper-item hidden="{{!adminMenuHidden}}" data-href="${contextURL}/app/contact.xhtml">
                         <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
                     </paper-item>
-                    <div hidden="{{adminMenuHidden}}">
-                        <paper-item data-href="${restURL}/eventVSElection">
-                            <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
-                        </paper-item>
-                        <paper-item data-href="publish_election">
-                            <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.publishVoteLbl}
-                        </paper-item>
-                        <paper-item data-href="${restURL}/representative">
-                            <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
-                        </paper-item>
-                        <paper-item data-href="new_representative">
-                            <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.newRepresentativeLbl}
-                        </paper-item>
-                        <paper-item data-href="${contextURL}/representative/edit.xhtml">
-                            <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.editRepresentativeLbl}
-                        </paper-item>
-                    </div>
+                    <paper-item hidden="{{adminMenuHidden}}" data-href="${restURL}/eventVSElection">
+                        <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
+                    </paper-item>
+                    <paper-item hidden="{{adminMenuHidden}}" data-href="publish_election">
+                        <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.publishVoteLbl}
+                    </paper-item>
+                    <paper-item hidden="{{adminMenuHidden}}" data-href="${restURL}/representative">
+                        <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
+                    </paper-item>
+                    <paper-item hidden="{{adminMenuHidden}}" data-href="new_representative">
+                        <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.newRepresentativeLbl}
+                    </paper-item>
+                    <paper-item hidden="{{adminMenuHidden}}" data-href="${contextURL}/representative/edit.xhtml">
+                        <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.editRepresentativeLbl}
+                    </paper-item>
                 </paper-menu>
             </div>
             <div main>
                 <paper-header-panel mode="seamed" id="core_header_panel" class="vs-navbar">
                     <div class="horizontal layout center center-justified">
                         <div>
-                            <i class="fa fa-bars vs-navbar-icon" on-click="togglePanel" paper-drawer-toggle style="margin: 0 10px 0 10px;"></i>
+                            <i class="fa fa-bars vs-navbar-icon" on-click="togglePanel" paper-drawer-toggle style="margin: 0 10px 0 33px;"></i>
                         </div>
                         <div id="appTitle" style="font-size:1.8em; font-weight:bold; color: #f9f9f9; text-align: center;" class="flex">
                             <span>{{appTitle}}</span>

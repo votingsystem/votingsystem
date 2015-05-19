@@ -3,7 +3,7 @@
 
 <dom-module name="representative-select-public-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click style="min-height: 250px;display: block;">
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click style="min-height: 200px;display: block;">
             <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; margin:0px auto;font-weight: bold; color:#6c0404;">
@@ -46,8 +46,10 @@
             },
             accept: function() {
                 var operationVS = new OperationVS(Operation.REPRESENTATIVE_SELECTION)
-                operationVS.jsonStr = JSON.stringify({operation:representativeOperation, representative:this.representative})
+                operationVS.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_SELECTION,
+                        representative:this.representative})
                 operationVS.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'
+                operationVS.serviceURL = '${contextURL}/rest/representative/delegation'
                 operationVS.setCallback(function(appMessage) { this.delegationResponse(appMessage) }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             },
