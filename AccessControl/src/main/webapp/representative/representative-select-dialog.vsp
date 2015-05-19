@@ -1,12 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
+<link href="${elementURL}/representative/representative-select-anonymous-dialog.vsp" rel="import"/>
+<link href="${elementURL}/representative/representative-select-public-dialog.vsp" rel="import"/>
+
 <dom-module name="representative-select-dialog">
     <template>
-        <paper-dialog id="xDialog" class="dialog" with-backdrop no-cancel-on-outside-click>
-            <style> </style>
-            <div id="container" style="overflow: auto;">
-
-                <div style="font-size: 1.2em;">
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click style="min-height: 500px; top: 10px; display: block;">
+            <div style="font-size: 1.1em;">
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; margin:0px auto;font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">${msg.saveAsRepresentativeLbl}</div>
@@ -15,201 +15,63 @@
                         <i class="fa fa-times closeIcon" on-click="close"></i>
                     </div>
                 </div>
-
-                <div hidden="{{step !== 'main'}}">
+                <div>
                     <p>${msg.delegationIntroLbl}</p>
-
                     <div style="font-size:1.2em;font-weight: bold;">${msg.anonymousDelegationLbl}</div>
                     <div>${msg.anonymousDelegationMsg}</div>
-                    <div style="margin: 0 0 0 40px;">
-                        <div id="moreDetailsMsgDiv" class="linkVS" on-click="toggleDetails">
-                            <template if="{{showingDetails}}">
-                                ${msg.hideDetailsMsg}
-                            </template>
-                            <template if="{{!showingDetails}}">
-                                ${msg.showAnoymousDelegationDetailsMsg}
-                            </template>
+                    <div >
+                        <div hidden="{{showingDetails}}" class="linkVS" on-click="toggleDetails">
+                            <div>${msg.showAnoymousDelegationDetailsMsg}</div>
                         </div>
-                        <template if="{{showingDetails}}">
+                        <div hidden="{{!showingDetails}}">
+                            <div class="linkVS" on-click="toggleDetails" style="margin: 0 0 0 40px;" >${msg.hideDetailsMsg}</div>
                             <div>${msg.anonymousDelegationMoreMsg}</div>
-                        </template>
+                        </div>
                     </div>
 
                     <div style="margin:20px 0 0 0;font-size:1.2em;font-weight: bold;">${msg.publicDelegationLbl}</div>
                     <div>${msg.publicDelegationMsg}</div>
 
-                    <div style="margin:20px 0 0 0;">${msg.selectRepresentationCheckboxMsg}:</div>
-                    <div>
-                        <div style="margin:0 0 0 40px;">
-                            <input type="radio" name="delegationType" id="anonymousDelegationCheckbox" on-click="setDelegationType"/>
-                            <label>${msg.anonymousDelegationCheckboxLbl}</label>
+                    <div class="horizontal layout center center-justified" style="margin:15px 0 0 40px;">
+                        <div style="margin:0 20px 0 0;">
+                            <button on-click="anonymousDelegation">${msg.anonymousDelegationLbl}</button>
                         </div>
-                        <div style="margin:0 0 0 40px;">
-                            <input type="radio" name="delegationType" id="publicDelegationCheckbox" checked="checked" on-click="setDelegationType"/>
-                            <label>${msg.publicDelegationCheckboxLbl}</label>
+                        <div>
+                            <button on-click="publicDelegation">${msg.publicDelegationLbl}</button>
                         </div>
                     </div>
                 </div>
-                <div hidden="{{step !== 'confirm'}}" vertical layout center center-justified>
-                    <div style="margin: 20px 0 10px 10px;">
-                        <vs-html-echo id="delegationMsg"></vs-html-echo>
-                    </div>
-                    <div hidden="{{!isAnonymousDelegation}}" style="margin:25px 0 25px 0;">
-                        <vs-html-echo html="{{anonymousDelegationMsg}}"></vs-html-echo>
-                    </div>
-                </div>
-                <div hidden="{{isAnonymousDelegation == false || step !== 'main'}}" vertical layout center center-justified
-                     style="margin:10px 0;">
-                    <label>${msg.numWeeksAnonymousDelegationMsg}</label>
-                    <input type="number" id="numWeeksAnonymousDelegation" min="1" value="" max="52" required
-                           style="width:120px;margin:10px 20px 0px 7px;" class="form-control"
-                           title="${msg.numWeeksAnonymousDelegationMsg}">
-                </div>
-                <div hidden="{{step !== 'anonymousDelegationResponse'}}">
-                    <p style="text-align: center; font-size: 1.2em;">
-                        {{anonymousDelegationResponseMsg}}
-                    </p>
-                    <p style="text-align: center; font-size: 1.2em;">
-                        ${msg.anonymousDelegationReceiptMsg}
-                    </p>
-                </div>
-                </div>
-
-                <div hidden="{{step !== 'main'}}">
-                    <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
-                        <div class="flex"></div>
-                        <div style="margin:10px 0px 10px 0px;">
-                            <button on-click="showConfirm" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-check"></i> ${msg.acceptLbl}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div hidden="{{step !== 'confirm'}}">
-                    <div class="layout horizontal" style="margin:0px 20px 0px 0px;  font-size:1.2em;">
-                        <div class="flex"></div>
-                        <div style="margin:10px 20px 10px 0px;">
-                            <button on-click="cancel" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-times"></i> ${msg.cancelLbl}
-                            </button>
-                        </div>
-                        <div style="margin:10px 0px 10px 0px;">
-                            <button on-click="submit" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-check"></i> ${msg.acceptLbl}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </paper-dialog>
+        <representative-select-anonymous-dialog id="anonymousDialog"></representative-select-anonymous-dialog>
+        <representative-select-public-dialog  id="publicDialog"></representative-select-public-dialog>
     </template>
     <script>
         Polymer({
             is:'representative-select-dialog',
-            step:'main',
-            showingDetails:false,
-            isAnonymousDelegation:false,
-            anonymousDelegationMsg:null,
-            representative:null,
-            anonymousLbl:"${msg.anonymousLbl}",
-            anonymousDelegationResponseMsg:null,
-            representativeFullName:null,
-            publicLbl:"${msg.publicLbl}",
-
+            properties: {
+                representative:{type:Object}
+            },
             ready: function() {
-                this.isConfirmMessage = this.isConfirmMessage || false
                 console.log(this.tagName + " - ready")
             },
-            toggleDetails:function(e) {
+            toggleDetails:function() {
                 this.showingDetails = !this.showingDetails
             },
             show: function(representative) {
                 this.representative = representative
-                this.$.numWeeksAnonymousDelegation.value = ""
-                this.step = 'main'
-                this.isAnonymousDelegation = false
-                this.$.publicDelegationCheckbox.checked = true
+                this.showingDetails = false
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
                 this.$.xDialog.opened = true
-                console.log(this.tagName + " - step: " + this.step)
             },
-            submit: function() {
-                console.log("submit")
-                var representativeOperation
-                if(!this.$.anonymousDelegationCheckbox.checked && !this.$.publicDelegationCheckbox.checked) {
-                    showMessageVS("${msg.selectRepresentationCheckboxMsg}", "${msg.errorLbl}")
-                } else {
-                    if(this.isAnonymousDelegation) {
-                        representativeOperation = Operation.ANONYMOUS_REPRESENTATIVE_SELECTION
-                        if(!this.$.numWeeksAnonymousDelegation.validity.valid) {
-                            this.messageToUser = '${msg.numberFieldLbl}'
-                            return
-                        }
-                    } else {
-                        representativeOperation = Operation.REPRESENTATIVE_SELECTION
-                    }
-                    var operationVS = new OperationVS(representativeOperation)
-                    operationVS.jsonStr = JSON.stringify({operation:representativeOperation, representative:this.representative,
-                        weeksOperationActive:this.$.numWeeksAnonymousDelegation.value})
-                    operationVS.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'
-                    operationVS.setCallback(function(appMessage) { this.delegationResponse(appMessage) }.bind(this))
-                    VotingSystemClient.setMessage(operationVS);
-                }
+            publicDelegation:function() {
+                this.$.publicDialog.show(this.representative)
             },
-            delegationResponse:function(appMessage) {
-                console.log(this.tagName + " - delegationResponse - message: " + appMessage);
-                var appMessageJSON = toJSON(appMessage)
-                var caption = '${msg.operationERRORCaption}'
-                var msg = appMessageJSON.message
-                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                    if(this.isAnonymousDelegation) {
-                        this.step = 'anonymousDelegationResponse'
-                        this.anonymousDelegationResponseMsg = "${msg.selectedRepresentativeMsg}".format(this.representativeFullName)
-                        return
-                    } else {
-                        caption = "${msg.operationOKCaption}"
-                        msg = "${msg.selectedRepresentativeMsg}".format(this.representativeFullName)
-                        this.close()
-                    }
-                } else if (ResponseVS.SC_ERROR_REQUEST_REPEATED == appMessageJSON.statusCode) {
-                    caption = "${msg.anonymousDelegationActiveErrorCaption}"
-                    msg = appMessageJSON.message + "<br/>" +
-                            "${msg.downloadReceiptMsg}".format(appMessageJSON.URL)
-                }
-                showMessageVS(msg, caption)
-                this.click() //hack to refresh screen
-            },
-            setDelegationType:function() {
-                if(this.$.anonymousDelegationCheckbox.checked) {
-                    this.isAnonymousDelegation = true
-                } else this.isAnonymousDelegation = false
-                console.log(this.tagName + " - setDelegationType - isAnonymousDelegation: " + this.isAnonymousDelegation)
+            anonymousDelegation:function() {
+                this.$.anonymousDialog.show(this.representative)
             },
             close: function() {
                 this.$.xDialog.opened = false
-            },
-            showConfirm: function() {
-                this.messageToUser = null
-                var msgTemplate = "${msg.selectRepresentativeConfirmMsg}";
-                if(this.isAnonymousDelegation) {
-                    if(!this.$.numWeeksAnonymousDelegation.validity.valid) {
-                        showMessageVS('${msg.numWeeksAnonymousDelegationMsg}', '${msg.errorLbl}')
-                        return
-                    }
-                    var weeksMsgTemplate = "${msg.numWeeksResultAnonymousDelegationMsg}";
-                    this.$.delegationMsg.html = msgTemplate.format(this.anonymousLbl, this.representative.name)
-                    this.anonymousDelegationMsg = weeksMsgTemplate.format(this.anonymousLbl, this.$.numWeeksAnonymousDelegation.value)
-                } else this.$.delegationMsg.html = msgTemplate.format(this.publicLbl, this.representative.name)
-                this.step = 'confirm'
-            },
-            cancel: function() {
-                if(this.step === 'main') {
-                    this.close()
-                }else if(this.step === 'confirm') {
-                    this.step = 'main'
-                }
             }
         });
     </script>
