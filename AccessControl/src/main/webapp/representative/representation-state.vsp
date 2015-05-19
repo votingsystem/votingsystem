@@ -2,8 +2,7 @@
 
 <dom-module name="representation-state">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click class="dialog">
-            <style> </style>
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
@@ -31,20 +30,11 @@
                     </div>
                 </div>
                 <div style="color:#02227a;text-align: center; margin:10px 0 10px 0;">{{representationState.lastCheckedDateMsg}}</div>
-
-                <span>{{result}}</span>
-
                 <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
+                    <div class="flex"></div>
                     <button hidden="{{cancellationHidden}}" on-click="cancelAnonymousDelegation">
                         ${msg.cancelAnonymousRepresentationMsg}
                     </button>
-                    <div class="flex"></div>
-
-                    <div hidden="{{!isConfirmMessage}}">
-                        <button on-click="accept">
-                            <i class="fa fa-check"></i> ${msg.acceptLbl}
-                        </button>
-                    </div>
                 </div>
             </div>
         </paper-dialog>
@@ -91,9 +81,6 @@
                 }
                 showMessageVS(appMessageJSON.message, caption)
                 this.click() //hack to refresh
-            },
-            accept: function() {
-                this.close()
             },
             close: function() {
                 this.$.xDialog.opened = false

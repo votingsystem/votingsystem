@@ -2,7 +2,7 @@
 
 <dom-module name="representative-select-dialog">
     <template>
-        <paper-dialog id="xDialog" class="dialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key>
+        <paper-dialog id="xDialog" class="dialog" with-backdrop no-cancel-on-outside-click>
             <style> </style>
             <div id="container" style="overflow: auto;">
 

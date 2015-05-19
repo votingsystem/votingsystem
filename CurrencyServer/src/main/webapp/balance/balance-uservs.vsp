@@ -11,7 +11,7 @@
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
         <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key>
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <div style="position: absolute; top: 0px; right: 0px;">
                 <i class="fa fa-times closeIcon" on-click="closeTransactionViewer"></i>
             </div>

@@ -18,7 +18,7 @@
     <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
     <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
 
-    <paper-dialog id="configDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key style="border: 1px solid #6c0404;">
+    <paper-dialog id="configDialog" with-backdrop no-cancel-on-outside-click style="border: 1px solid #6c0404;">
         <div style="width: 350px;">
             <div class="layout horizontal center center-justified">
                 <div hidden="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
@@ -35,7 +35,7 @@
         </div>
     </paper-dialog>
 
-    <paper-dialog id="transactionSelectorDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key style="border: 1px solid #6c0404;">
+    <paper-dialog id="transactionSelectorDialog" with-backdrop no-cancel-on-outside-click style="border: 1px solid #6c0404;">
         <div style="width: 350px;">
             <div class="layout horizontal center center-justified">
                 <div hidden="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">

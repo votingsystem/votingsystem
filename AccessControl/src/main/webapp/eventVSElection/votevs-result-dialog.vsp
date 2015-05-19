@@ -2,7 +2,7 @@
 
 <dom-module name="votevs-result-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click no-cancel-on-esc-key>
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <style></style>
             <iron-signals on-iron-signal-messagedialog-accept="cancellationConfirmed"
                           on-iron-signal-messagedialog-closed="confirmDialogClosed"></iron-signals>
