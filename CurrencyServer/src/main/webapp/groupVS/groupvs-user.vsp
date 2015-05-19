@@ -66,18 +66,22 @@
                         groupvsName:this.subscriptionData.groupvs.name, userVSName:this.subscriptionData.uservs.name,
                         userVSNIF:this.subscriptionData.uservs.nif, reason:e.detail})
                     operationVS.setCallback(function(appMessage) {
-                        console.log("deActivateUserCallback - message: " + appMessage);
-                        var appMessageJSON = toJSON(appMessage)
-                        var caption = '${msg.deActivateUserERRORLbl}'
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            caption = "${msg.deActivateUserOKLbl}"
-                            this.fire('iron-signal', {name: "refresh-uservs-list", data: {uservs: this.userId}});
-                            this.close()
-                        }
-                        showMessageVS(appMessageJSON.message, caption)
+
                     }.bind(this))
                     VotingSystemClient.setMessage(operationVS);
                 }.bind(this))
+            },
+            deActivateResponse:function(appMessage) {
+                console.log(this.tagName + " - deActivateResponse - message: " + appMessage);
+                var appMessageJSON = toJSON(appMessage)
+                var caption = '${msg.deActivateUserERRORLbl}'
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    caption = "${msg.deActivateUserOKLbl}"
+                    this.fire('iron-signal', {name: "refresh-uservs-list", data: {uservs: this.userId}});
+                    this.close()
+                }
+                showMessageVS(appMessageJSON.message, caption)
+                this.click() //hack to refresh screen
             },
             getDate:function(timStamp) {
                 return new Date(timStamp).getDayWeekAndHourFormat()
@@ -110,20 +114,21 @@
                 operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,
                     groupvsId:this.subscriptionData.groupvs.id, groupvsName:this.subscriptionData.groupvs.name,
                     userVSName:this.subscriptionData.uservs.name, userVSNIF:this.subscriptionData.uservs.nif})
-                operationVS.setCallback(function(appMessage) {
-                    console.log("activateUserCallback - message: " + appMessage)
-                    var appMessageJSON = toJSON(appMessage)
-                    if(appMessageJSON != null) {
-                        var caption = '${msg.activateUserERRORLbl}'
-                        if (ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            caption = "${msg.activateUserOKLbl}"
-                            this.fire('iron-signal', {name: "refresh-uservs-list", data: {uservs: this.userId}})
-                            this.close()
-                        }
-                        showMessageVS(appMessageJSON.message, caption)
-                    }
-                }.bind(this))
+                operationVS.setCallback(function(appMessage) { this.activateResponse(appMessage)}.bind(this))
                 VotingSystemClient.setMessage(operationVS);
+            },
+            activateResponse: function(appMessage) {
+                console.log(this.tagName + " - activateResponse - message: " + appMessage)
+                var appMessageJSON = toJSON(appMessage)
+                if(appMessageJSON != null) {
+                    var caption = '${msg.activateUserERRORLbl}'
+                    if (ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                        caption = "${msg.activateUserOKLbl}"
+                        this.fire('iron-signal', {name: "refresh-uservs-list", data: {uservs: this.userId}})
+                        this.close()
+                    }
+                    showMessageVS(appMessageJSON.message, caption)
+                }
             },
             initCancellation : function(e) {
                 this.$.reasonDialog.show();

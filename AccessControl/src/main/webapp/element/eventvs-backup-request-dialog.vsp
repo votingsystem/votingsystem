@@ -69,18 +69,20 @@
                 operationVS.eventVS = this.eventvs
                 operationVS.jsonStr = JSON.stringify(this.eventvs)
                 operationVS.email = this.$.eventBackupUserEmailText.value
-                operationVS.setCallback(function(appMessage) {
-                    console.log("activateUserCallback - message: " + appMessage);
-                    var appMessageJSON = toJSON(appMessage)
-                    var caption = '${msg.operationERRORCaption}'
-                    if(ResponseVS.SC_OK ==  appMessageJSON.statusCode) {
-                        caption = '${msg.operationOKCaption}'
-                        this.fire('backup-request-ok', appMessageJSON.message);
-                        this.opened = false
-                    }
-                    showMessageVS(appMessageJSON.message, caption)
-                }.bind(this))
+                operationVS.setCallback(function(appMessage) { this.showResponse(appMessage)}.bind(this))
                 VotingSystemClient.setMessage(operationVS)
+            },
+            showResponse: function(appMessage) {
+                console.log("activateUserCallback - message: " + appMessage);
+                var appMessageJSON = toJSON(appMessage)
+                var caption = '${msg.operationERRORCaption}'
+                if(ResponseVS.SC_OK ==  appMessageJSON.statusCode) {
+                    caption = '${msg.operationOKCaption}'
+                    this.fire('backup-request-ok', appMessageJSON.message);
+                    this.opened = false
+                }
+                showMessageVS(appMessageJSON.message, caption)
+                this.click()
             },
             close: function() {
                 this.opened = false

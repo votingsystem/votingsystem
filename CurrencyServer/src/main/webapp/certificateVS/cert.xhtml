@@ -35,6 +35,7 @@
                 operationVS.jsonStr = JSON.stringify(signedContent)
                 operationVS.setCallback(function(appMessage) {
                     document.querySelector("#certData").url = "${restURL}/certificateVS/cert/" + certMap.serialNumber + "?menu=" + menuType
+                    this.click() //hack to refresh screen
                 })
                 VotingSystemClient.setMessage(operationVS);
             })

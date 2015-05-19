@@ -146,18 +146,20 @@
                     timeLimited:this.$.timeLimitedRButton.checked, currencyCode:this.$.currencySelector.getSelected(),
                     tags:tagList}
                 operationVS.jsonStr = JSON.stringify(signedContent)
-                operationVS.setCallback(function(appMessage) {
-                    var appMessageJSON = JSON.parse(appMessage)
-                    var caption
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        caption = "${msg.currencyRequestOKCaption}"
-                        this.$.resultDialog.showMessage(caption, appMessageJSON.message)
-                    } else {
-                        caption = '${msg.currencyRequestERRORCaption}'
-                        showMessageVS(appMessageJSON.message, caption)
-                    }
-                }.bind(this))
+                operationVS.setCallback(function(appMessage) { this.showResponse(appMessage)}.bind(this))
                 VotingSystemClient.setMessage(operationVS);
+            },
+            showResponse:function(appMessage) {
+                var appMessageJSON = JSON.parse(appMessage)
+                var caption
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    caption = "${msg.currencyRequestOKCaption}"
+                    this.$.resultDialog.showMessage(caption, appMessageJSON.message)
+                } else {
+                    caption = '${msg.currencyRequestERRORCaption}'
+                    showMessageVS(appMessageJSON.message, caption)
+                }
+                this.click() //hack to refresh screen
             }
         });
     </script>

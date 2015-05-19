@@ -154,32 +154,33 @@
                     operationVS.jsonStr = JSON.stringify({operation:representativeOperation, representative:this.representative,
                         weeksOperationActive:this.$.numWeeksAnonymousDelegation.value})
                     operationVS.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'
-                    operationVS.setCallback(function(appMessage) {
-                        console.log("selectRepresentativeCallback - message: " + appMessage);
-                        var appMessageJSON = toJSON(appMessage)
-                        var caption = '${msg.operationERRORCaption}'
-                        var msg = appMessageJSON.message
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            if(this.isAnonymousDelegation) {
-                                this.step = 'anonymousDelegationResponse'
-                                this.anonymousDelegationResponseMsg = "${msg.selectedRepresentativeMsg}".format(this.representativeFullName)
-                                return
-                            } else {
-                                caption = "${msg.operationOKCaption}"
-                                msg = "${msg.selectedRepresentativeMsg}".format(this.representativeFullName)
-                                this.close()
-                            }
-                        } else if (ResponseVS.SC_ERROR_REQUEST_REPEATED == appMessageJSON.statusCode) {
-                            caption = "${msg.anonymousDelegationActiveErrorCaption}"
-                            msg = appMessageJSON.message + "<br/>" +
-                                    "${msg.downloadReceiptMsg}".format(appMessageJSON.URL)
-                        }
-                        showMessageVS(msg, caption)
-                    }.bind(this))
+                    operationVS.setCallback(function(appMessage) { this.delegationResponse(appMessage) }.bind(this))
                     VotingSystemClient.setMessage(operationVS);
                 }
             },
-
+            delegationResponse:function(appMessage) {
+                console.log(this.tagName + " - delegationResponse - message: " + appMessage);
+                var appMessageJSON = toJSON(appMessage)
+                var caption = '${msg.operationERRORCaption}'
+                var msg = appMessageJSON.message
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    if(this.isAnonymousDelegation) {
+                        this.step = 'anonymousDelegationResponse'
+                        this.anonymousDelegationResponseMsg = "${msg.selectedRepresentativeMsg}".format(this.representativeFullName)
+                        return
+                    } else {
+                        caption = "${msg.operationOKCaption}"
+                        msg = "${msg.selectedRepresentativeMsg}".format(this.representativeFullName)
+                        this.close()
+                    }
+                } else if (ResponseVS.SC_ERROR_REQUEST_REPEATED == appMessageJSON.statusCode) {
+                    caption = "${msg.anonymousDelegationActiveErrorCaption}"
+                    msg = appMessageJSON.message + "<br/>" +
+                            "${msg.downloadReceiptMsg}".format(appMessageJSON.URL)
+                }
+                showMessageVS(msg, caption)
+                this.click() //hack to refresh screen
+            },
             setDelegationType:function() {
                 if(this.$.anonymousDelegationCheckbox.checked) {
                     this.isAnonymousDelegation = true

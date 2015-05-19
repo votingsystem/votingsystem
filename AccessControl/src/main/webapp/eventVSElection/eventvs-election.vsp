@@ -109,7 +109,7 @@
                             </div>
                         </div>
                         <div id="statsDiv" hidden="{{statsDivHidden}}" class="vertical layout center center-justified">
-                            <eventvs-election-stats eventvs-id="{{eventvs.id}}"></eventvs-election-stats>
+                            <eventvs-election-stats id="electionStats" eventvs-id="{{eventvs.id}}"></eventvs-election-stats>
                         </div>
                     </div>
                 </div>
@@ -158,6 +158,7 @@
                 } else this.eventStateRowClass = "horizontal layout flex"
             },
             eventvsChanged:function() {
+                this.$.electionStats
                 console.log("eventvsChanged - eventvs: " + this.eventvs.state)
                 this.optionVSSelected = null
                 this.dateFinish = new Date(this.eventvs.dateFinish)
@@ -178,6 +179,7 @@
                 if('admin' === menuType) {
                     if(this.eventvs.state === 'ACTIVE' || this.eventvs.state === 'PENDING') this.adminMenuHidden = false
                 }
+                this.$.electionStats.eventvsId = this.eventvs.id
             },
             showAdminDialog:function() {
                 this.$.eventVSAdminDialog.show()
@@ -201,12 +203,14 @@
                     var operationVS = new OperationVS(Operation.FILE_FROM_URL)
                     operationVS.subject = '${msg.downloadingFileMsg}'
                     operationVS.documentURL = fileURL
-                    operationVS.setCallback(function(appMessage) {
-                        var appMessageJSON = toJSON(appMessage)
-                        if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message)
-                    }.bind(this))
+                    operationVS.setCallback(function(appMessage) { this.showGetResultsResponse(appMessage) }.bind(this))
                     VotingSystemClient.setMessage(operationVS)
                 } else window.location.href = fileURL
+            },
+            showGetResultsResponse:function(appMessage) {
+                var appMessageJSON = toJSON(appMessage)
+                if(ResponseVS.SC_OK !== appMessageJSON.statusCode) showMessageVS(appMessageJSON.message, "${msg.errorLbl}")
+                this.click()//hack to refresh screen
             },
             showVoteResul:function() {
                 this.$.votevsResultDialog.show(this.votevsResul)
@@ -218,17 +222,19 @@
                 this.eventvs.voteVS = voteVS
                 operationVS.voteVS = voteVS
                 operationVS.signedMessageSubject = '${msg.sendVoteMsgSubject}'
-                operationVS.setCallback(function(appMessage) {
-                    console.log(this.tagName + " - vote callback - message: " + appMessage);
-                    var appMessageJSON = toJSON(appMessage)
-                    appMessageJSON.eventVS = this.eventvs
-                    appMessageJSON.optionSelected = this.optionVSSelected.content
-                    this.votevsResul = appMessageJSON
-                    this.$.votevsResultDialog.show(appMessageJSON)
-                }.bind(this))
+                operationVS.setCallback(function(appMessage) { this.submitVoteResponse(appMessage)}.bind(this))
                 console.log(" - operationVS: " +  JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
+            },
+            submitVoteResponse:function(appMessage) {
+                console.log(this.tagName + " - vote callback - message: " + appMessage);
+                var appMessageJSON = toJSON(appMessage)
+                appMessageJSON.eventVS = this.eventvs
+                appMessageJSON.optionSelected = this.optionVSSelected.content
+                this.votevsResul = appMessageJSON
+                this.$.votevsResultDialog.show(appMessageJSON)
+                this.click(); //hack to refresh screen
             }
-        });
+            });
     </script>
 </dom-module>

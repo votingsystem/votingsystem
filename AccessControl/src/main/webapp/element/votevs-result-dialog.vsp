@@ -134,19 +134,21 @@
                 operationVS.message = this.hashCertVSBase64
                 operationVS.serviceURL = "${restURL}/voteVS/cancel"
                 operationVS.signedMessageSubject = "${msg.cancelVoteLbl}"
-                operationVS.setCallback(function(appMessage) {
-                    console.log("vote cancellation callback - message: " + appMessage);
-                    var appMessageJSON = toJSON(appMessage)
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        this.messageType = "VOTE_CANCELLATION_RESULT"
-                        this.voteVSCancellationReceipt = appMessageJSON.message;
-                        this.message = "${msg.voteVSCancellationOKMsg}"
-                        this.caption =  "${msg.voteVSCancellationCaption}"
-                        this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
-                        this.$.xDialog.opened = true
-                    } else showMessageVS(appMessageJSON.message, '${msg.voteVSCancellationErrorCaption}')
-                }.bind(this))
+                operationVS.setCallback(function(appMessage) { this.cancellationResponse(appMessage) }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
+            },
+            cancellationResponse: function(appMessage) {
+                console.log(this.tagName + " - cancellationResponse: " + appMessage);
+                var appMessageJSON = toJSON(appMessage)
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    this.messageType = "VOTE_CANCELLATION_RESULT"
+                    this.voteVSCancellationReceipt = appMessageJSON.message;
+                    this.message = "${msg.voteVSCancellationOKMsg}"
+                    this.caption =  "${msg.voteVSCancellationCaption}"
+                    this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
+                    this.$.xDialog.opened = true
+                } else showMessageVS(appMessageJSON.message, '${msg.voteVSCancellationErrorCaption}')
+                this.click()
             }
         });
     </script>

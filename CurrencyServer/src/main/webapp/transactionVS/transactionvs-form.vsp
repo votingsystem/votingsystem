@@ -238,16 +238,18 @@
                 fromUserIBAN:this.fromUserIBAN, toUserIBAN: this.getToUserIBAN()}
             if(this.toUserName)  signedContent.toUser = this.toUserName
             operationVS.jsonStr = JSON.stringify(signedContent)
-            operationVS.setCallback(function(appMessage) {
-                    var appMessageJSON = JSON.parse(appMessage)
-                    var caption
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        caption = "${msg.transactionvsOKLbl}"
-                        this.fire('operation-finished')
-                    } else caption = '${msg.transactionvsERRORLbl}'
-                    showMessageVS(appMessageJSON.message, caption)
-                }.bind(this))
+            operationVS.setCallback(function(appMessage) { this.transactionResponse(appMessage)}.bind(this))
             VotingSystemClient.setMessage(operationVS);
+        },
+        transactionResponse:function(appMessage) {
+            var appMessageJSON = JSON.parse(appMessage)
+            var caption
+            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                caption = "${msg.transactionvsOKLbl}"
+                this.fire('operation-finished')
+            } else caption = '${msg.transactionvsERRORLbl}'
+            showMessageVS(appMessageJSON.message, caption)
+            this.click() //hack to refresh screen
         },
         transactionFromUser:function(tagList) {
             this.setMessage(200, null)

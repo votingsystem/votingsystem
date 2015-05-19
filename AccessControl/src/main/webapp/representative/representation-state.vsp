@@ -77,16 +77,18 @@
                 var operationVS = new OperationVS(Operation.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION)
                 operationVS.serviceURL = "${restURL}/representative/cancelAnonymousDelegation"
                 operationVS.signedMessageSubject = '${msg.cancelAnonymousDelegationMsgSubject}'
-                operationVS.setCallback(function(appMessage) {
-                    console.log("selectRepresentativeCallback - message: " + appMessage);
-                    var appMessageJSON = toJSON(appMessage)
-                    var caption = '${msg.operationERRORCaption}'
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        caption = "${msg.operationOKCaption}"
-                    }
-                    showMessageVS(appMessageJSON.message, caption)
-                }.bind(this))
+                operationVS.setCallback(function(appMessage) { this.cancelationResponse(appMessage)}.bind(this))
                 VotingSystemClient.setMessage(operationVS);
+            },
+            cancelationResponse: function(appMessage) {
+                console.log(this.tagName + "cancelationResponse - message: " + appMessage);
+                var appMessageJSON = toJSON(appMessage)
+                var caption = '${msg.operationERRORCaption}'
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    caption = "${msg.operationOKCaption}"
+                }
+                showMessageVS(appMessageJSON.message, caption)
+                this.click() //hack to refresh
             },
             accept: function() {
                 this.close()

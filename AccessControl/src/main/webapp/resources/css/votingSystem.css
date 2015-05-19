@@ -13,7 +13,7 @@ button i{color: #888; }
 button {font-size: 1.1em; }
 
 .closeIcon {
-    cursor: pointer;fill:#6c0404; color:#6c0404; font-size: 1.8em; margin: 3px 6px 2px 0;
+    cursor: pointer;fill:#6c0404; color:#6c0404; font-size: 23px; margin: 3px 6px 2px 0;
 }
 .closeIcon:hover {
     fill:#ba0011; color:#ba0011;
@@ -30,7 +30,6 @@ button {font-size: 1.1em; }
     border-bottom: 1px solid #f9f9f9;
     color:#f9f9f9;
     padding: 5px;
-    z-index: 20;
 }
 
 .vs-navbar-icon {

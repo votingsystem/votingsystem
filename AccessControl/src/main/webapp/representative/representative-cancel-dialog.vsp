@@ -61,23 +61,24 @@
                 operationVS.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_REVOKE, nif:validatedNif})
                 operationVS.serviceURL = "${restURL}/representative/revoke"
                 operationVS.signedMessageSubject = '${msg.removeRepresentativeMsgSubject}'
-                operationVS.setCallback(function(appMessage) {
-                    console.log(this.tagName + "removeRepresentativeCallback - message: " + appMessage);
-                    var appMessageJSON = toJSON(appMessage)
-                    var caption = '${msg.operationERRORCaption}'
-                    var msg = appMessageJSON.message
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        caption = "${msg.operationOKCaption}"
-                        msg = "${msg.removeRepresentativeOKMsg}";
-                    } else if (ResponseVS.SC_CANCELED== appMessageJSON.statusCode) {
-                        caption = "${msg.operationCANCELEDLbl}"
-                    }
-                    showMessageVS(msg, caption)
-                }.bind(this))
+                operationVS.setCallback(function(appMessage) { this.revokeResponse(appMessage) }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
                 this.close()
             },
-
+            revokeResponse: function(appMessage) {
+                console.log(this.tagName + "revokeResponse - message: " + appMessage);
+                var appMessageJSON = toJSON(appMessage)
+                var caption = '${msg.operationERRORCaption}'
+                var msg = appMessageJSON.message
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    caption = "${msg.operationOKCaption}"
+                    msg = "${msg.removeRepresentativeOKMsg}";
+                } else if (ResponseVS.SC_CANCELED== appMessageJSON.statusCode) {
+                    caption = "${msg.operationCANCELEDLbl}"
+                }
+                showMessageVS(msg, caption)
+                this.click() //hack to refresh screen
+            },
             close: function() {
                 this.$.xDialog.opened = false
             }

@@ -101,6 +101,7 @@
                     operationVS.setCallback(function(appMessage) {
                         var appMessageJSON = toJSON(appMessage)
                         if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message)
+                        this.click() //hack t refresh screen
                     }.bind(this))
                     VotingSystemClient.setMessage(operationVS)
                 } else window.location.href = fileURL

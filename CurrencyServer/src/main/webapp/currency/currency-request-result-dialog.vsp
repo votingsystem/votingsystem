@@ -40,16 +40,18 @@
             },
             saveToSecureWallet: function() {
                 var operationVS = new OperationVS(Operation.WALLET_SAVE)
-                operationVS.setCallback(function(appMessage) {
-                    var appMessageJSON = JSON.parse(appMessage)
-                    if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                        this.loadWallet(appMessageJSON.message)
-                    } else {
-                        var caption = '${msg.errorLbl}'
-                        showMessageVS(appMessageJSON.message, caption)
-                    }
-                }.bind(this))
+                operationVS.setCallback(function(appMessage) { this.saveResponse(appMessage)}.bind(this))
                 VotingSystemClient.setMessage(operationVS);
+            },
+            saveResponse:function(appMessage) {
+                var appMessageJSON = JSON.parse(appMessage)
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    this.loadWallet(appMessageJSON.message)
+                } else {
+                    var caption = '${msg.errorLbl}'
+                    showMessageVS(appMessageJSON.message, caption)
+                }
+                this.click()
             },
             showMessage:function(caption, message) {
                 this.caption = caption;

@@ -17,7 +17,7 @@
         Polymer({
             is:'eventvs-election-stats',
             properties: {
-                eventvsId:{type:Number},
+                eventvsId:{type:Number, observer:'loadStats'},
                 statsDto:{type:Object, observer:'statsDtoChanged'}
             },
             options: {
@@ -56,6 +56,9 @@
             ready: function() {
                 this.options.chart.renderTo = this.$.chartDiv
                 this.chartVisible = false
+                if(this.eventvsId != null) this.loadStats()
+            },
+            loadStats: function() {
                 var targetURL = "${restURL}/eventVSElection/id/" + this.eventvsId + "/stats"
                 console.log(this.tagName + "- targetURL: " + targetURL)
                 this.$.ajax.url = targetURL

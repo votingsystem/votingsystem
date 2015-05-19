@@ -32,11 +32,12 @@
     </ui:define>
     <ui:define name="content">
         <button onclick="document.querySelector('#adminDialog').show()" style="margin:10px;">adminDialog</button>
+        <button onclick="showMessageVS('mensaje', 'caption')" style="margin:10px;">alert</button>
 
         <eventvs-admin-dialog id="adminDialog" service-url="${restURL}/tagVS"></eventvs-admin-dialog>
 
         <div>
-            <select style="margin: 10px 0 10px 40px; width: 100px; font-size: 2em; height: 50px;" class="form-control">
+            <select style="margin: 10px 0 10px 40px; width: 120px; font-size: 2em; height: 50px;" class="form-control">
                 <option value="EUR">EUR</option>
                 <option value="DOLAR">DOLAR</option>
                 <option value="YEN">YEN</option>

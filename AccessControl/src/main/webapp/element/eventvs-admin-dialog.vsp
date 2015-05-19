@@ -82,23 +82,25 @@
                         accessControlURL:"${contextURL}", eventId:Number(this.eventvs.id), state:state}
                     operationVS.jsonStr = JSON.stringify(signedContent)
                     operationVS.signedMessageSubject = messageSubject
-                    operationVS.setCallback(function(appMessage) {
-                        console.log("eventvs-admin-dialog callback - message: " + appMessage);
-                        var appMessageJSON = toJSON(appMessage)
-                        var caption
-                        var msg
-                        if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            caption = "${msg.operationOKCaption}"
-                            msg = "${msg.documentCancellationOKMsg}".format(this.eventvs.subject);
-                            window.location.href = "${restURL}/eventVSElection/id/" + votingEvent.id
-                        } else {
-                            caption = "${msg.operationERRORCaption}"
-                            msg = appMessageJSON.message
-                        }
-                        showMessageVS(msg, caption)
-                    }.bind(this))
+                    operationVS.setCallback(function(appMessage) { this.showResponse(appMessage)}.bind(this))
                     VotingSystemClient.setMessage(operationVS);
                 }
+            },
+            showResponse: function(appMessage) {
+                console.log("eventvs-admin-dialog callback - message: " + appMessage);
+                var appMessageJSON = toJSON(appMessage)
+                var caption
+                var msg
+                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                    caption = "${msg.operationOKCaption}"
+                    msg = "${msg.documentCancellationOKMsg}".format(this.eventvs.subject);
+                    window.location.href = "${restURL}/eventVSElection/id/" + votingEvent.id
+                } else {
+                    caption = "${msg.operationERRORCaption}"
+                    msg = appMessageJSON.message
+                }
+                showMessageVS(msg, caption)
+                this.click()
             },
             show: function() {
                 this.$.xDialog.opened = true
