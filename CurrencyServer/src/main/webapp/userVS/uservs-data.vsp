@@ -91,7 +91,7 @@
         ready: function() {
             this.isClientToolConnected = window['isClientToolConnected']
             console.log(this.tagName + " - ready - menuType: " + this.menuType + " - isClientToolConnected: " + isClientToolConnected)
-            this.$.transactionvsForm.addEventListener('operation-finished', function (e) {
+            this.$.transactionvsForm.addEventListener('closed', function (e) {
                 this.page = 0;
             }.bind(this))
             if(this.messageToUser) showMessageVS(this.messageToUser, "${msg.messageLbl}")

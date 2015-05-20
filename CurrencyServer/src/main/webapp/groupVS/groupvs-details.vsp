@@ -3,18 +3,12 @@
 <%@ taglib prefix="h" uri="http://java.sun.com/jsf/html" %>
 <%@ taglib prefix="f" uri="http://java.sun.com/jsf/core" %>
 
-<link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
-<link href="${resourceURL}/iron-selector/iron-selector.html" rel="import"/>
-<link href="${resourceURL}/paper-menu/paper-menu.html" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-form.vsp" rel="import"/>
 <link href="${elementURL}/userVS/uservs-list.vsp" rel="import"/>
 <link href="${elementURL}/groupVS/groupvs-user.vsp" rel="import"/>
 
 <dom-module name="groupvs-details">
 <template>
-    <style shim-shadowdom>
-        .optionsIcon {margin:0 5px 0 2px; color:#6c0404;}
-    </style>
     <paper-dialog id="configDialog" with-backdrop no-cancel-on-outside-click style="border: 1px solid #6c0404;">
         <div style="width: 350px;">
             <div class="layout horizontal center center-justified">
@@ -22,13 +16,13 @@
                     <div style="text-align: center;">${msg.configGroupvsLbl}</div>
                 </div>
                 <div style="position: absolute; top: 0px; right: 0px;">
-                    <i class="fa fa-times closeIcon" on-click="close"></i>
+                    <i class="fa fa-times closeIcon" onclick="javascript:document.querySelector('#configDialog').opened = false;"></i>
                 </div>
             </div>
-            <paper-menu id="configGroupMenu"  attr-for-selected="data-option" selected="{{configDialogValue}}" on-iron-select="configGroup">
-                <paper-item data-option="edit">${msg.editDataLbl}</paper-item>
-                <paper-item data-option="cancel">${msg.cancelGroupVSLbl}</paper-item>
-            </paper-menu>
+            <div class="vertical layout center center-justified" style="padding: 20px 10px 10px 10px;">
+                <button on-click="editGroup" style="margin: 10px; width: 150px;">${msg.editDataLbl}</button>
+                <button on-click="cancelGroup" style="margin: 10px; width: 150px;">${msg.cancelGroupVSLbl}</button>
+            </div>
         </div>
     </paper-dialog>
 
@@ -39,28 +33,27 @@
                     <div style="text-align: center;">${msg.makeTransactionVSFromGroupVSLbl}</div>
                 </div>
                 <div style="position: absolute; top: 0px; right: 0px;">
-                    <i class="fa fa-times closeIcon" on-click="close"></i>
+                    <i class="fa fa-times closeIcon" onclick="javascript:document.querySelector('#transactionSelectorDialog').opened = false;"></i>
                 </div>
             </div>
-            <paper-menu id="transactionSelectorMenu"  attr-for-selected="data-option" selected="{{transactionSelectorDialogValue}}" on-iron-select="transactionSelector">
-                <paper-item data-option="fromGroupToMemberGroup">${msg.makeTransactionVSFromGroupVSToMemberGroupLbl}</paper-item>
-                <paper-item data-option="fromGroupToAllMember">${msg.makeTransactionVSFromGroupVSToAllMembersLbl}</paper-item>
-            </paper-menu>
+            <div class="vertical layout center center-justified" style="padding: 20px 10px 10px 10px;">
+                <button on-click="fromGroupToMemberGroup" style="margin: 10px; width: 250px;">${msg.makeTransactionVSFromGroupVSToMemberGroupLbl}</button>
+                <button on-click="fromGroupToAllMember" style="margin: 10px; width: 250px;">${msg.makeTransactionVSFromGroupVSToAllMembersLbl}</button>
+            </div>
         </div>
     </paper-dialog>
 
     <iron-signals on-iron-signal-messagedialog-accept="messagedialogAccepted"
                   on-iron-signal-uservs-selected="showUserDetails" ></iron-signals>
 
-    <section id="page1">
-    <div style="max-width: 900px; margin:0 auto;">
+    <div hidden="{{detailsHidden}}" style="max-width: 900px; margin:0 auto;">
         <div class="vertical layout flex">
             <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
             </div>
-            <div hidden="{{!isAdminView || !isClientToolConnected}}">
+            <div hidden="{{!isAdminView}}">
                 <div class="layout horizontal center center-justified">
                     <div>
-                        <button onclick="javascript:document.querySelector('#configDialog').opened = true">
+                        <button onclick="javascript:document.querySelector('#configDialog').opened = true" style="margin: 10px;">
                             <i class="fa fa-cogs optionsIcon"></i> ${msg.configGroupvsLbl}</button>
                     </div>
                     <div>
@@ -69,8 +62,7 @@
                     </div>
                 </div>
             </div>
-
-            <div hidden="{{!isUserView}}" layout horizontal center center-justified style="margin:0 0 10px 10px; font-size: 0.9em;">
+            <div hidden="{{!isUserView}}" class="layout horizontal center center-justified" style="margin:0 0 10px 10px;">
                 <button style="margin:0 20px 0 0; font-size: 1.1em;" on-click="subscribeToGroup">
                     <i class="fa fa-sign-in"></i> ${msg.subscribeGroupVSLbl}
                 </button>
@@ -78,7 +70,8 @@
                     <i class="fa fa-money"></i> ${msg.sendTransactionVSLbl}
                 </button>
             </div>
-            <div hidden="{{isClientToolConnected}}" id="clientToolMsg" class="text-center" style="color:#6c0404; font-size: 1.2em;margin:30px 0 20px 0;">
+            <div hidden="{{isClientToolConnected}}" id="clientToolMsg" class="text-center"
+                 style="color:#6c0404; font-size: 1.2em;margin:30px 0 20px 0;">
                 <f:view>
                     <h:outputFormat value="#{msg.clientToolNeededMsg}" escape="false">
                         <f:param value="#{contextURL}/tools/ClientTool.zip"/>
@@ -89,25 +82,28 @@
                     </h:outputFormat>
                 </f:view>
             </div>
-            <div id="pageHeader" layout horizontal center center-justified>
+            <div id="pageHeader" class="layout horizontal center center-justified">
                 <div class="horizontal layout flex" style="padding:7px 0px 0px 7px;">
                     <div hidden="{{!fabVisible}}" style="margin: 10px 20px 10px 0;" title="${msg.backLbl}" >
-                        <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
+                        <paper-fab mini icon="arrow-back" on-click="back"
+                                   style="color: #f9f9f9;margin: 0 0 0 20px;background: #ba0011;"></paper-fab>
                     </div>
                 </div>
                 <div style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
                     <div style="text-align: center;" data-groupvs-id$="{{groupvs.id}}">{{groupvs.name}}</div>
                 </div>
                 <div class="flex" style="margin:5px 10px 0 0; font-size: 0.7em; color:#888; text-align: right; vertical-align: bottom;">
-                    <b>${msg.IBANLbl}: </b>{{groupvs.iban}}
+                    <b>${msg.IBANLbl}:</b> <span>{{groupvs.iban}}</span>
                 </div>
             </div>
         </div>
         <div class="eventContentDiv">
             <vs-html-echo html="{{decodeBase64(groupvs.description)}}"></vs-html-echo>
         </div>
+        isUserView: <span>{{isUserView}}</span>
         <div class="layout horizontal">
-            <div hidden="{{!groupvs.tags || groupvs.tags.length == 0}}" layout horizontal center center-justified style="margin: 5px 30px 0 0;">
+            <div hidden="{{tagsHidden}}" class="layout horizontal center center-justified"
+                    style="margin: 5px 30px 0 0;">
                 <template repeat="{{tag in groupvs.tags}}">
                     <a class="btn btn-default" style="font-size: 0.7em;margin:0px 5px 0px 0px;padding:3px;">
                         <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i>{{tag.name}}</a>
@@ -120,7 +116,7 @@
             </div>
             <div class="flex"></div>
             <div style="margin:5px 10px 0 0; font-size: 0.9em; color:#888;">
-                <b>${msg.representativeLbl}: </b>{{groupvs.representative.firstName}} {{groupvs.representative.lastName}}
+                <b>${msg.representativeLbl}:</b> <span>{{representativeName}}</span>
             </div>
         </div>
 
@@ -129,20 +125,15 @@
                 text-decoration: underline;">
                 ${msg.usersLbl}
             </div>
-
             <div id="userList" style="margin: 0 0 100px 0;">
                 <uservs-list id="userList"></uservs-list>
             </div>
-
         </div>
     </div>
-    </section>
 
-    <section id="page2">
-        <div>
-            <transactionvs-form id="transactionvsForm" fab-visible="true"></transactionvs-form>
-        </div>
-    </section>
+    <div hidden="{{!detailsHidden}}">
+        <transactionvs-form id="transactionvsForm" fab-visible="true"></transactionvs-form>
+    </div>
 
     <groupvs-user id="userDescription"></groupvs-user>
 </template>
@@ -151,20 +142,34 @@
         is:'groupvs-details',
         properties: {
             fabVisible:{type:Boolean, value:false},
-            groupvs:{type:Object, value:{}}
+            groupvs:{type:Object, value:{}, observer:'groupvsChanged'},
+            representativeName:{computed:'_computeRepresentativeName(groupvs)'},
+            tagsHidden:{computed:'_computeTags(groupvs)'}
         },
         ready : function() {
             console.log(this.tagName + " - ready - fabVisible: " + this.fabVisible)
             this.isSelected = false
+            this.detailsHidden = false
             //this.isClientToolConnected = window['isClientToolConnected']
             this.isClientToolConnected = true
-            this.$.transactionvsForm.addEventListener('operation-finished', function (e) {
-                this.page = 0;
+            if(!this.isClientToolConnected) {
+                this.isAdminView = false
+                this.isUserView = false
+            }
+            this.$.transactionvsForm.addEventListener('closed', function (e) {
+                this.detailsHidden = false;
             }.bind(this))
         },
         decodeBase64:function(base64EncodedString) {
             if(base64EncodedString == null) return null
             return decodeURIComponent(escape(window.atob(base64EncodedString)))
+        },
+        _computeTags:function(groupvs) {
+            return (this.groupvs.tags == null || groupvs.tags.length === 0)
+        },
+        _computeRepresentativeName:function(groupvs) {
+            if(groupvs == null || groupvs.representative == null) return
+            return groupvs.representative.firstName + " " + groupvs.representative.lastName
         },
         closeTransactionSelectorDialog:function() {
             this.$.transactionSelectorDialog.opened = false
@@ -175,7 +180,7 @@
         sendTransactionVS:function() {
             console.log(this.tagName + " - sendTransactionVS")
             this.$.transactionvsForm.init(Operation.FROM_USERVS, this.groupvs.name, this.groupvs.iban , this.groupvs.id)
-            this.page = 1;
+            this.detailsHidden = true;
         },
         messagedialogAccepted:function(e, detail, sender) {
             console.log(this.tagName + ".messagedialogAccepted")
@@ -226,13 +231,12 @@
             this.click() //hack to refresh screen
         },
         groupvsChanged:function() {
-            console.log(this.tagName + " - groupvsChanged - groupvs: " + JSON.stringify(this.groupvs))
+            console.log(this.tagName + " - groupvsChanged - menuType: " + menuType)
+            this.isAdminView = false
+            this.isUserView = false
             if(("admin" == menuType || "superuser" == menuType) && 'ACTIVE' == this.groupvs.state) this.isAdminView = true
-            else {
-                this.isAdminView = false
-                if("user" == menuType && 'ACTIVE' == this.groupvs.state) this.isUserView = true
-                else this.isUserView = false
-            }
+            if("user" === menuType && 'ACTIVE' === this.groupvs.state) this.isUserView = true
+
             if('ACTIVE' == this.groupvs.state) {
                 this.$.messagePanel.style.display = 'none'
             } else if('PENDING' == this.groupvs.state) {
@@ -252,26 +256,26 @@
             console.log("this.isUserView: " + this.isUserView + " - groupvs.state: " + this.groupvs.state +
                 " - menuType: " + menuType)
         },
-        transactionSelector:function() {
-            if('fromGroupToMemberGroup' === this.transactionSelectorDialogValue) {
-                this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
-                        this.groupvs.iban, this.groupvs.id)
-            } else if('fromGroupToAllMember' == this.transactionSelectorDialogValue) {
-                this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name,
-                        this.groupvs.iban, this.groupvs.id)
-            }
-            this.$.transactionSelectorMenu.selected = null
+        fromGroupToAllMember:function() {
+            this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name,
+                    this.groupvs.iban, this.groupvs.id)
+            this.detailsHidden = true
+            this.$.transactionSelectorDialog.opened = false
         },
-        configGroup:function() {
-            if('edit' === this.configDialogValue) {
-                showMessageVS("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name),
-                        "${msg.confirmOperationMsg}", 'cancel_group', true)
-            } else if('cancel' == this.configDialogValu) {
-                var operationVS = new OperationVS(Operation.CURRENCY_GROUP_EDIT)
-                operationVS.message = this.groupvs.id
-                VotingSystemClient.setMessage(operationVS);
-            }
-            this.$.configGroupMenu.selected = null
+        fromGroupToMemberGroup:function() {
+            this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
+                    this.groupvs.iban, this.groupvs.id)
+            this.detailsHidden = true
+            this.$.transactionSelectorDialog.opened = false
+        },
+        cancelGroup:function() {
+            var operationVS = new OperationVS(Operation.CURRENCY_GROUP_EDIT)
+            operationVS.message = this.groupvs.id
+            VotingSystemClient.setMessage(operationVS);
+        },
+        editGroup:function() {
+            showMessageVS("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name),
+                    "${msg.confirmOperationMsg}", 'cancel_group', true)
         },
         showTransactionVSDialog:function(e) {
             console.log("showTransactionVSDialog")
@@ -284,7 +288,6 @@
             this.page = 1;
             this.$.transactionvsCoreMenu.selected = null
         },
-
         back:function() {
             this.fire('iron-signal', {name: "groupvs-details-closed", data: this.groupvs.id});
         },

@@ -16,7 +16,8 @@
             <div style="width: 600px;">
                 <div class="layout horizontal center center-justified" style="width: 100%;">
                     <div hidden="{{!fabVisible}}">
-                        <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
+                        <paper-fab mini icon="arrow-back" on-click="back"
+                                   style="color: #f9f9f9;margin: 0 0 0 20px;background: #ba0011;"></paper-fab>
                     </div>
                     <div class="flex">
                         <h3>

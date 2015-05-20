@@ -1,4 +1,3 @@
-<link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../vs-i18n/vs-i18n.html">
 
 <dom-module name="vs-user-box">
@@ -46,7 +45,7 @@
                 return (uservs.firstName != null && "" != uservs.firstName) ? uservs.firstName + " " + uservs.lastName:uservs.name
             },
             uservsListChanged:function() {
-                this.uservsListHidden = (uservsList.length === 0)
+                this.uservsListHidden = (this.uservsList == null || this.uservsList.length === 0)
             },
             addUser:function(userToAdd) {
                 var isNewUser = true
@@ -55,7 +54,7 @@
                     if(userToAdd.id == this.uservsList[userIdx].id) isNewUser = false
                 }
                 console.log("vs-user-box - addUser: " + userToAdd.nif + " - isNewUser: " + isNewUser +
-                        " - multiSelection: " + this.multiSelection)
+                " - multiSelection: " + this.multiSelection)
                 if(isNewUser) {
                     if(!this.multiSelection) this.uservsList = [userToAdd]
                     else this.uservsList.push(userToAdd)

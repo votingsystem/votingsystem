@@ -20,7 +20,7 @@
 
         <div class="layout horizontal center center-justified">
             <div hidden="{{!fabVisible}}" style="margin: 10px 20px 0 0;" title="${msg.backLbl}" >
-                <paper-fab mini icon="arrow-back" on-click="back" style="color: white;"></paper-fab>
+                <paper-fab mini icon="arrow-back" on-click="back" style="color: #f9f9f9;margin: 0 0 0 20px;background: #ba0011;"></paper-fab>
             </div>
             <div class="flex"  style="text-align: center; color:#6c0404;">
                 <div>
@@ -96,9 +96,7 @@
                     <vs-user-box flex id="receptorBox" caption="${msg.receptorLbl}"></vs-user-box>
                 </div>
             </div>
-            <div hidden="{{isWithUserSelector}}" style="margin:10px 0 0 0;text-align:center;font-weight:bold;color:#6c0404;">
-                {{selectReceptorMsg}}
-            </div>
+            <div hidden="{{isWithUserSelector}}" style="margin:10px 0 0 0;text-align:center;font-weight:bold;color:#6c0404;">{{selectReceptorMsg}}</div>
             <div class="flex"></div>
             <div class="layout horizontal" style="margin:10px 20px 0px 0px;">
                 <div class="flex"></div>
@@ -244,7 +242,7 @@
             var caption
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "${msg.transactionvsOKLbl}"
-                this.fire('operation-finished')
+                this.fire('closed')
             } else caption = '${msg.transactionvsERRORLbl}'
             showMessageVS(appMessageJSON.message, caption)
             this.click() //hack to refresh screen
@@ -288,7 +286,7 @@
             this.messageToUser = message
         },
         back:function() {
-            this.fire('operation-finished')
+            this.fire('closed')
         },
         init:function(operation, userName, userIBAN, userVSId) {
             console.log(this.id + " - init - operation: " + operation + " - fabVisible: " + this.fabVisible +
