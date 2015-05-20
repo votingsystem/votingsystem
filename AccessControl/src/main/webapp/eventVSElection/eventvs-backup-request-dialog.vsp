@@ -1,10 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="eventvs-backup-request-dialog" attributes="opened">
+<dom-module name="eventvs-backup-request-dialog">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <style></style>
-            <div id="container" layout vertical style="overflow-y: auto; width:450px; padding:10px;">
+            <div id="container" style="overflow-y: auto; width:450px; padding:10px;">
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">${msg.backupRequestCaption}</div>
@@ -25,7 +25,7 @@
                 <p style="text-align: center;">
                     ${msg.backupRequestMsg}
                 </p>
-                <div class="layout horizontal" center center-justified  style="margin:10px 0px 10px 0px;">
+                <div class="layout horizontal center center-justified"  style="margin:10px 0px 10px 0px;">
                     <input type="email" class="form-control" id="eventBackupUserEmailText" style="width:360px;margin:0px auto 0px auto;"
                            placeholder="${msg.emailInputLbl}" title='${msg.enterEmailLbl}' required/>
                 </div>
@@ -44,18 +44,16 @@
     <script>
         Polymer({
             is:'eventvs-backup-request-dialog',
-            publish: {
-                eventvs: {value: {}}
+            properties: {
+                eventvs:{type:Object, value:{}}
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
             },
-            openedChanged:function() {
-                this.$.xDialog.opened = this.opened
-                if(this.opened == false) this.close()
-            },
             show: function(eventvs) {
+                this.messageToUser = null
                 this.eventvs = eventvs
+                this.$.xDialog.opened = true
             },
             requestBackup: function() {
                 this.messageToUser = null
@@ -79,14 +77,13 @@
                 if(ResponseVS.SC_OK ==  appMessageJSON.statusCode) {
                     caption = '${msg.operationOKCaption}'
                     this.fire('backup-request-ok', appMessageJSON.message);
-                    this.opened = false
+                    this.close()
                 }
                 showMessageVS(appMessageJSON.message, caption)
                 this.click()
             },
             close: function() {
-                this.opened = false
-                this.messageToUser = null
+                this.$.xDialog.opened = false
             }
         });
     </script>

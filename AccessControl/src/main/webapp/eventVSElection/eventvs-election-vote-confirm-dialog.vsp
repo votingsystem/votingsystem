@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="eventvs-election-vote-confirm-dialog" attributes="opened">
+<dom-module name="eventvs-election-vote-confirm-dialog">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <style> </style>

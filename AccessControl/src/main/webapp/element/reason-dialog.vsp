@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="reason-dialog" attributes="caption messageToUser">
+<dom-module name="reason-dialog">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <div id="container" layout vertical>
@@ -32,6 +32,9 @@
 <script>
     Polymer({
         is:'reason-dialog',
+        properties: {
+            caption:{type:String}
+        },
         ready: function() {
             this.opened = false
         },

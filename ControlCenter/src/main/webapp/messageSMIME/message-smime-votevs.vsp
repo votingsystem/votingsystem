@@ -59,10 +59,6 @@
                     this.isClientToolConnected = true
                 }.bind(this))
             },
-            attached: function () {
-                console.log(this.tagName + " - attached")
-                this.fire('attached', null);
-            },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
                 if('SEND_VOTE' != this.smimeMessageContent.operation )

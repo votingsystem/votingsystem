@@ -12,7 +12,7 @@
                     margin:0px 10px 0px 0px;
                 }
             </style>
-            <div id="container" layout vertical style="overflow-y: auto; width:450px; padding:10px;">
+            <div id="container" style="overflow-y: auto; width:450px; padding:10px;">
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; margin:0px 0px 0px 30px;font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">${msg.cancelEventCaption}</div>
@@ -22,7 +22,7 @@
                     </div>
                 </div>
 
-                <div hidden="{{!messageToUser}}" layout horizontal center center-justified>
+                <div hidden="{{!messageToUser}}" style="text-align: center;">
                     <div class="messageToUser">{{messageToUser}}</div>
                 </div>
                 <div>

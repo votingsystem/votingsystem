@@ -2,12 +2,12 @@
 
 <link href="${elementURL}/messageSMIME/message-smime.vsp" rel="import"/>
 
-<dom-module name="message-smime-dialog" attributes="transactionvsURL opened">
+<dom-module name="message-smime-dialog">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
             <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-        <iron-ajax id="ajax" auto url="{{transactionvsURL}}" last-response="{{transactionvs}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
+        <iron-ajax id="ajax" url="{{transactionvsURL}}" last-response="{{transactionvs}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
             <div hidden="{{!isProcessing}}">
                 <div class="layout vertical center center-justified" style="text-align:center;min-height: 150px;">
                     <progress style="margin:20px auto;"></progress>
@@ -21,8 +21,6 @@
     <script>
         Polymer({
             is:'message-smime-dialog',
-            transactionvsURL:null,
-            isProcessing:true,
             ready: function() {
                 console.log(this.tagName + " - " + this.id + " - ready")
                 this.isClientToolConnected = window['isClientToolConnected']
@@ -39,6 +37,7 @@
             show: function(transactionvsURL) {
                 if(this.transactionvsURL != transactionvsURL) this.isProcessing = true
                 this.transactionvsURL = transactionvsURL
+                this.$.ajax.generateResponse()
                 console.log(this.tagName + " - show - transactionvsURL:" + this.transactionvsURL)
                 this.$.xDialog.opened = true
             }

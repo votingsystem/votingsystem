@@ -1,9 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-
-
-<dom-module name="message-smime-representative-anonymousdelegation-request"
-                 attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
+<dom-module name="message-smime-representative-anonymousdelegation-request">
     <template>
         <style>
             .messageToUser {
@@ -49,21 +46,14 @@
             properties: {
                 smimeMessageContent:{type:Object, value:{}, observer:'smimeMessageContentChanged'}
             },
-            isClientToolConnected:window['isClientToolConnected'],
-            messageToUser:null,
-            timeStampDate:null,
             ready: function() {
                 console.log(this.tagName + " - ready - " + document.querySelector("#voting_system_page"))
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected', function() {
-                    this.isClientToolConnected = true
-                }.bind(this))
+                this.isClientToolConnected = window['isClientToolConnected']
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
+                        function() {  this.isClientToolConnected = true }.bind(this))
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
-            },
-            attached: function () {
-                console.log(this.tagName + " - attached")
-                this.fire('attached', null);
             },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
