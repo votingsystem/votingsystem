@@ -2,8 +2,6 @@
 
 <dom-module name="balance-list" attributes="url">
     <template>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .tableHeadervs {
                 margin: 0px 0px 0px 0px;

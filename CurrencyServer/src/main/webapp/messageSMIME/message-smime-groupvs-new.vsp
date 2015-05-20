@@ -6,7 +6,6 @@
 <dom-module name="message-smime-groupvs-new" attributes="signedDocument smimeMessage timeStampDate">
     <template>
         <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .messageToUser { font-weight: bold; margin:10px auto 10px auto;
                 background: #f9f9f9;  padding:10px 20px 10px 20px;

@@ -2,8 +2,6 @@
 
 <dom-module name="transactionvs-card">
     <template>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
         .card {
             position: relative;

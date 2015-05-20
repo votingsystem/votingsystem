@@ -1,10 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/paper-dropdown-menu/paper-dropdown-menu.html" rel="import"/>
-<link href="${resourceURL}/paper-dropdown/paper-dropdown.html" rel="import"/>
-<link href="${resourceURL}/paper-menu/paper-menu.html" rel="import"/>
-
-<dom-module name="uservs-dashboard" attributes="dashBoardDto">
+<dom-module name="uservs-dashboard">
     <template>
         <style>
             .transBlock { border: 1px solid #6c0404; margin: 10px;
@@ -13,21 +9,16 @@
             }
             .numTrans { font-size: 2em; color: #6c0404; text-align: center;}
             .transDesc {background: #6c0404; color: #f9f9f9; padding: 5px;}
-            .colored {
-                color: #6c0404;
-            }
         </style>
-        <iron-ajax id="ajax" url="{{url}}" handle-as="json" last-response="{{dashBoardDto}}" method="get" content-type="application/json"></iron-ajax>
-        <div id="selectorContainer" layout horizontal center center-justified relative>
-            <paper-dropdown-menu id="dropDownMenu" halign="right" on-iron-select="selectAction">
-                <paper-dropdown class="dropdown colored" transition="">
-                    <paper-menu selected="0">
-                        <paper-item>${msg.lastHourMovementsLbl}</paper-item>
-                        <paper-item>${msg.last12HourMovementsLbl}</paper-item>
-                        <paper-item>${msg.last24HourMovementsLbl}</paper-item>
-                    </paper-menu>
-                </paper-dropdown>
-            </paper-dropdown-menu>
+        <iron-ajax id="ajax" url="{{url}}" handle-as="json" last-response="{{dashBoardDto}}" method="get"
+                   content-type="application/json"></iron-ajax>
+        <div class="layout horizontal center center-justified">
+            <select id="transactionLapsedSelect" style="margin: 10px 0 10px 40px; width: 400px; font-size: 1.3em; height: 30px;"
+                    on-change="selectAction" class="form-control">
+                <option value="1">${msg.lastHourMovementsLbl}</option>
+                <option value="12">${msg.last12HourMovementsLbl}</option>
+                <option value="24">${msg.last24HourMovementsLbl}</option>
+            </select>
         </div>
         <div class="layout flex horizontal wrap around-justified">
             <div id="FROM_BANKVS" class="transBlock" on-click="transBlockSelected">
@@ -39,23 +30,11 @@
                 <div class="transDesc">${msg.transactionVSFromUserVS}</div>
             </div>
             <div id="FROM_GROUP_TO_MEMBER_GROUP" class="transBlock" on-click="transBlockSelected">
-                <template if="{{dashBoardDto.transFromGroupVSToMemberGroup.numTrans > 0}}">
-                    <div class="numTrans">{{dashBoardDto.transFromGroupVSToMemberGroup.numTrans}} trans -
-                    {{dashBoardDto.transFromGroupVSToMemberGroup.numUsers}} users</div>
-                </template>
-                <template if="{{dashBoardDto.transFromGroupVSToMemberGroup.numTrans === 0}}">
-                    <div class="numTrans">0</div>
-                </template>
+                <div class="numTrans">{{fromGroupToMemberGroupInfo}}</div>
                 <div class="transDesc">${msg.transactionVSFromGroupToMemberGroup}</div>
             </div>
             <div id="FROM_GROUP_TO_ALL_MEMBERS" class="transBlock" on-click="transBlockSelected">
-                <template if="{{dashBoardDto.transFromGroupVSToAllMembers.numTrans > 0}}">
-                    <div class="numTrans">{{dashBoardDto.transFromGroupVSToAllMembers.numTrans}} trans -
-                    {{dashBoardDto.transFromGroupVSToAllMembers.numUsers}} users</div>
-                </template>
-                <template if="{{dashBoardDto.transFromGroupVSToAllMembers.numTrans === 0}}">
-                    <div class="numTrans">0</div>
-                </template>
+                <div class="numTrans">{{fromGroupToAllMembersInfo}}</div>
                 <div class="transDesc">${msg.transactionVSFromGroupToAllMembers}</div>
             </div>
             <div id="CURRENCY_PERIOD_INIT" class="transBlock" on-click="transBlockSelected">
@@ -83,12 +62,14 @@
 <script>
     Polymer({
         is:'uservs-dashboard',
-        initialized:false,
-        ready: function() { },
-        dateFrom:null,
-        dateTo:null,
-        publish: {
-            dashBoardDto: {value: {}}
+        properties: {
+            dashBoardDto:{type:Object, value:{}, observer:'dashBoardDtoChanged'}
+        },
+        ready: function() {
+            this.lapse = window.location.href.substr(window.location.href.lastIndexOf('/') + 1);
+            if(isNumber(this.lapse)) this.$.transactionLapsedSelect.value = this.lapse
+            else this.lapse = null
+            console.log(this.tagName + " - ready - lapse: " + this.lapse)
         },
         dashBoardDtoChanged: function() {
             if(!this.dashBoardDto) return;
@@ -96,27 +77,25 @@
             console.log(this.tagName + " - timePeriod:" + JSON.stringify(this.dashBoardDto.timePeriod) )
             this.dateFrom = new Date(this.dashBoardDto.timePeriod.dateFrom)
             this.dateTo = new Date(this.dashBoardDto.timePeriod.dateTo)
+            if(this.dashBoardDto.transFromGroupVSToMemberGroup.numTrans > 0) {
+                this.fromGroupToMemberGroupInfo = this.dashBoardDto.transFromGroupVSToMemberGroup.numTrans + " trans - " +
+                        dashBoardDto.transFromGroupVSToMemberGroup.numUsers + " users"
+            } else this.fromGroupToMemberGroupInfo = 0
+            if(this.dashBoardDto.transFromGroupVSToAllMembers.numTrans > 0) {
+                this.fromGroupToAllMembersInfo = this.dashBoardDto.transFromGroupVSToAllMembers.numTrans + " trans - " +
+                        dashBoardDto.transFromGroupVSToAllMembers.numUsers + " users"
+            } else this.fromGroupToAllMembersInfo = 0
         },
-        selectAction: function(e, details) {
-            if(!this.initialized) {
-                this.initialized = true
-                return
-            }
-            if(details.isSelected) {
-                var numHours
-                if("${msg.lastHourMovementsLbl}" === details.item.innerHTML) numHours = 1
-                if("${msg.last12HourMovementsLbl}" === details.item.innerHTML) numHours = 12
-                if("${msg.last24HourMovementsLbl}" === details.item.innerHTML) numHours = 24
-                var targetURL = "${restURL}/app/userVSDashboard/hoursAgo/" + numHours
-                console.log(this.tagName + " - targetURL: " + targetURL)
-                this.$.ajax.url = targetURL
-                this.$.ajax.generateRequest()
-            }
+        selectAction: function() {
+            var targetURL = "${restURL}/app/userVSDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
+            history.pushState(null, null, targetURL);
+            console.log(this.tagName + " - targetURL: " + targetURL)
+            this.$.ajax.url = targetURL
+            this.$.ajax.generateRequest()
         },
         transBlockSelected: function(e) {
-            var targetURL = "${restURL}/transactionVS/from/" +
-                    this.dateFrom.urlFormatWithTime() + "/to/" + this.dateTo.urlFormatWithTime() +
-                    "?transactionvsType=" + e.target.parentNode.id
+            var targetURL = "${restURL}/transactionVS/from/" + this.dateFrom.urlFormatWithTime() + "/to/" +
+                    this.dateTo.urlFormatWithTime() + "?transactionvsType=" + e.target.parentNode.id
             console.log(this.tagName + " - showTransBlock - targetURL: " + targetURL)
             loadURL_VS(targetURL)
         }

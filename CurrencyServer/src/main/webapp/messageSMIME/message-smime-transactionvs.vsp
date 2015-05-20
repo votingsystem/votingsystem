@@ -1,13 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-
-<link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
-
 <dom-module name="message-smime-transactionvs" attributes="smimeMessageContent smimeMessage timeStampDate">
     <template>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
         :host{color: #667;}
         .messageToUser {
@@ -39,11 +33,9 @@
                     <div style="font-size: 1.1em;"><b>${msg.amountLbl}: </b>
                         {{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
                     <div hidden="{{!smimeMessageContent.timeLimited}}">
-                        <core-tooltip large label="${msg.timeLimitedDateMsg} '{{smimeMessageContent.validTo}}'" position="left">
-                            <div class="pageHeader" style="margin: 0 20px 0 0;"><b>
-                                ${msg.timeLimitedLbl}</b>
-                            </div>
-                        </core-tooltip>
+                        <div title="${msg.timeLimitedDateMsg} '{{smimeMessageContent.validTo}}'" class="pageHeader" style="margin: 0 20px 0 0;"><b>
+                            ${msg.timeLimitedLbl}</b>
+                        </div>
                     </div>
                 </div>
                 <div style="margin-left: 20px;">

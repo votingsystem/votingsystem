@@ -6,8 +6,6 @@
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click title="${msg.sendMessageVSDialogCaption}">
             <style></style>
-            <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-            <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
                 <div>
                     <div class="layout horizontal center center-justified">
                         <div class="flex" style="font-size: 1.5em; font-weight: bold; color:#6c0404;">

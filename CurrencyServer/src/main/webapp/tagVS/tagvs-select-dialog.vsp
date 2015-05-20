@@ -6,8 +6,6 @@
 <dom-module name="tagvs-select-dialog">
 <template>
     <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click title="{{caption}}" style="max-width: 600px;">
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <vs-i18n id="i18nVS"></vs-i18n>
         <div>
             <div style="margin:0 0 10px 0;">

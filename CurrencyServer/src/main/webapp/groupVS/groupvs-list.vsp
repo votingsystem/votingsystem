@@ -6,8 +6,6 @@
 <dom-module name="groupvs-list">
     <template>
         <style></style>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <link href="${contextURL}/resources/css/groupvs.css" media="all" rel="stylesheet" />
         <iron-ajax id="ajax" url="{{url}}" handle-as="json" content-type="application/json" on-iron-complete="{{ajaxComplete}}"></iron-ajax>
         <iron-signals on-iron-signal-groupvs-details-closed="closeGroupDetails"></iron-signals>

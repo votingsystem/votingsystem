@@ -109,7 +109,6 @@
             },
             loadURL: function(urlToLoad) {
                 this.loading= true;
-                //history.pushState(null, null, this.url);
                 history.pushState(null, null, urlToLoad);
                 var newURL = updateMenuLink(urlToLoad, "mode=innerPage")
                 console.log(this.tagName + " - loadURL: " + newURL)

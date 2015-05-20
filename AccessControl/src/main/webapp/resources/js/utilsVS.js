@@ -260,7 +260,7 @@ function getRadioValue(radioName) {
     }
 }
 
-var menuType = getURLParam('menu')
+var menuType = getURLParam('menu').toLowerCase();
 if(menuType == null) menuType = 'user'
 
 function updateMenuLinks() {

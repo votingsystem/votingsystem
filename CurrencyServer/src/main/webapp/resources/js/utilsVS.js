@@ -281,8 +281,8 @@ function getFnName(fn) {
 	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
 }
 
-var menuType = getURLParam('menu')
-if(menuType == null) menuType = 'user'
+var menuType = getURLParam('menu').toLowerCase();
+if(menuType == null) menuType = 'user';
 
 function updateMenuLinks() {
     var elem = 'a'
@@ -317,6 +317,10 @@ function updateMenuLink(urlToUpdate, param) {
     }
     if(param != null) result = result + "&" + param
     return result
+}
+
+function isNumber(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript

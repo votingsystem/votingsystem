@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 <link href="${resourceURL}/paper-progress/paper-progress.html" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-data.vsp" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-list-balance.vsp" rel="import"/>
@@ -9,8 +8,6 @@
 
 <dom-module name="balance-uservs" attributes="url balance">
     <template>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <div style="position: absolute; top: 0px; right: 0px;">
                 <i class="fa fa-times closeIcon" on-click="closeTransactionViewer"></i>
@@ -55,13 +52,11 @@
                                         <div>{{tag | tagDescription}}: {{balance.balancesCash[currency][tag] | formatAmount}}</div>
                                         <div>
                                             <template if="{{isTimeLimited(currency, tag)}}">
-                                                <core-tooltip position="bottom" style="max-width: 100px;">
-                                                    <div class="horizontal layout center center-justified">
-                                                        <paper-progress value="{{getPercentageForTagMsg(currency, tag)}}" style="width: 100px;"></paper-progress>
-                                                        <i class="fa fa-clock-o" style="color:#6c0404;font-size: 0.8em; margin:0 0 0 10px;"></i>
-                                                    </div>
-                                                    <div tip>{{getTimeLimitedForTagMsg(currency, tag)}}</div>
-                                                </core-tooltip>
+                                                <div title="{{getTimeLimitedForTagMsg(currency, tag)}}"
+                                                     class="horizontal layout center center-justified">
+                                                    <paper-progress value="{{getPercentageForTagMsg(currency, tag)}}" style="width: 100px;"></paper-progress>
+                                                    <i class="fa fa-clock-o" style="color:#6c0404;font-size: 0.8em; margin:0 0 0 10px;"></i>
+                                                </div>
                                             </template>
                                             <template if="{{!isTimeLimited(currency, tag)}}">
                                                 <div style="text-align: center;">

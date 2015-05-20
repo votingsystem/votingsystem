@@ -6,8 +6,6 @@
 
 <dom-module name="uservs-data" attributes="messageToUser">
 <template>
-    <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-    <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
     <style>
         .uservsCancelled {
             background: #ff0000; opacity:0.5; left:20%; top:-60px; font-size: 1.8em; font-weight: bold;

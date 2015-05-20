@@ -4,8 +4,6 @@
 
 <dom-module name="uservs-selector" attributes="url contactSelector groupVSId">
     <template>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .card {
                 width: 290px; vertical-align: top;

@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
 <link href="${resourceURL}/paper-radio-button/paper-radio-button.html" rel="import"/>
 <link href="${resourceURL}/vs-currency-selector/vs-currency-selector.html" rel="import"/>
 <link href="${elementURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
@@ -9,8 +8,6 @@
 
 <dom-module name="currency-request-form">
     <template>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
             .messageToUser {
                 font-weight: bold;
@@ -34,9 +31,9 @@
             <div class="layout horizontal center center-justified">
                 <div style="margin: 0 10px 0 0;"><paper-radio-button toggles id="timeLimitedRButton"></paper-radio-button></div>
                 <div style="color:#6c0404; background: #fefefe;font-size: 1.2em; text-align: center;font-weight: bold;">
-                    <core-tooltip large label="${msg.receptorTimeLimitedAdviceMsg}" position="bottom">
+                    <div title="${msg.receptorTimeLimitedAdviceMsg}">
                         ${msg.timeLimitedAdviceMsg}
-                    </core-tooltip>
+                    </div>
                 </div>
             </div>
 

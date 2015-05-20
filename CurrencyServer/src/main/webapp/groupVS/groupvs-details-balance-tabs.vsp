@@ -8,8 +8,6 @@
 
 <dom-module name="groupvs-details-balance-tabs" attributes="groupvs">
     <template>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style shim-shadowdom>
             .tabContent {
                 padding: 10px 20px 10px 20px;

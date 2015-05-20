@@ -1,11 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/core-tooltip/core-tooltip.html" rel="import"/>
-
 <dom-module name="transactionvs-list-balance" attributes="transactionList caption">
     <template>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
         .transactionvsRow { cursor: pointer;}
         .dateCreated {font-size: 0.8em; color:#888; width: 140px; margin: 0 7px 0 0;}
@@ -27,16 +23,15 @@
                         <div class="dateCreated">
                             {{getDate(transaction.dateCreated)}}
                         </div>
-                       <core-tooltip large label="{{transaction.subject}}" position="top">
-                           <div class="subjectColumn" style="width:240px; margin:0 30px 0 0;">{{transaction.subject}}</div>
-                       </core-tooltip>
+                        <div title="{{transaction.subject}}" class="subjectColumn"
+                             style="width:240px; margin:0 30px 0 0;">{{transaction.subject}}</div>
                         <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
                         <div class="layout horizontal center center-justified tagColumn">
                             <div class="flex horizontal layout center center-justified">{{transaction.tags[0]}}</div>
                             <div hidden="{{!isTimeLimited(transaction)}}" style="margin:0 0 0 5px; width: 10px;">
-                                <core-tooltip large label="${msg.timeLimitedAdviceMsg}" position="top">
+                                <div title="${msg.timeLimitedAdviceMsg}">
                                     <i class="fa fa-clock-o"></i>
-                                </core-tooltip>
+                                </div>
                             </div>
                         </div>
                     </div>

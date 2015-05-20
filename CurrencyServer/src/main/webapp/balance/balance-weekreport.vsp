@@ -128,8 +128,6 @@
 
 <dom-module name="balance-weekreport" attributes="url">
     <template>
-        <link href="${contextURL}/resources/css/currency.css" media="all" rel="stylesheet" />
-        <link href="${resourceURL}/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <style>
 
         </style>
