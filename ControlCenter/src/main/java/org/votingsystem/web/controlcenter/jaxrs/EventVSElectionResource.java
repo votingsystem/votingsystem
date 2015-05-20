@@ -2,6 +2,7 @@ package org.votingsystem.web.controlcenter.jaxrs;
 
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.dto.voting.EventVSStatsDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.EventVSElection;
@@ -11,7 +12,6 @@ import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.controlcenter.ejb.EventVSElectionBean;
 import org.votingsystem.web.ejb.DAOBean;
-
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;
@@ -42,7 +42,7 @@ public class EventVSElectionResource {
     @Transactional
     @Path("/id/{id}") @GET
     public Response getById (@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
-            @Context HttpServletResponse resp) throws ValidationExceptionVS, IOException, ServletException {
+                             @Context HttpServletResponse resp) throws ValidationExceptionVS, IOException, ServletException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE, EventVS.State.PENDING, EventVS.State.CANCELED,
                 EventVS.State.TERMINATED);
@@ -52,24 +52,22 @@ public class EventVSElectionResource {
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection not found - " +
                 "eventId: " + id).build();
         eventVSBean.checkEventVSDates(eventVS);
-        EventVSDto eventVSDto = new EventVSDto(eventVS, config.getServerName(), config.getRestURL());
+        EventVSDto eventVSDto = new EventVSDto(eventVS);
         if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventVSDto))
-                    .type(MediaTypeVS.JSON).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventVSDto)).type(MediaTypeVS.JSON).build();
         } else {
-            req.setAttribute("eventMap", JSON.getMapper().writeValueAsString(eventVSDto));
+            req.setAttribute("eventDto", JSON.getMapper().writeValueAsString(eventVSDto));
             context.getRequestDispatcher("/eventVSElection/eventVSElection.xhtml").forward(req, resp);
             return Response.ok().build();
         }
     }
 
-
     @Transactional
     @Path("/") @GET
     public Response index (@QueryParam("eventVSState") String eventVSStateReq,
-                         @DefaultValue("0") @QueryParam("offset") int offset,
-                         @DefaultValue("100") @QueryParam("max") int max, @Context ServletContext context,
-                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ValidationExceptionVS,
+                   @DefaultValue("0") @QueryParam("offset") int offset,
+                   @DefaultValue("50") @QueryParam("max") int max, @Context ServletContext context,
+                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ValidationExceptionVS,
             IOException, ServletException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE);
@@ -81,22 +79,23 @@ public class EventVSElectionResource {
                 } else if(eventVSState != EventVS.State.DELETED_FROM_SYSTEM) inList = Arrays.asList(eventVSState);
             } catch(Exception ex) {}
         }
-        Query query = dao.getEM().createQuery("select count (e) from EventVSElection e where e.state in :inList")
+        Query query = dao.getEM().createQuery("select count(e) from EventVSElection e where e.state in :inList")
                 .setParameter("inList", inList);
         Long totalCount = (Long) query.getSingleResult();
         query = dao.getEM().createQuery("select e from EventVSElection e where e.state in :inList order by e.dateBegin desc")
                 .setParameter("inList", inList).setFirstResult(offset).setMaxResults(max);
         List<EventVSElection> resultList = query.getResultList();
         List<EventVSDto> eventVSListDto = new ArrayList<>();
-        for(EventVSElection eventVS : resultList) {
-            eventVSBean.checkEventVSDates(eventVS);
-            eventVSListDto.add(new EventVSDto(eventVS, config.getServerName(), config.getContextURL()));
+        for(EventVSElection eventVSElection : resultList) {
+            eventVSBean.checkEventVSDates(eventVSElection);
+            eventVSListDto.add(new EventVSDto(eventVSElection));
         }
         ResultListDto<EventVSDto> resultListDto = new ResultListDto<>(eventVSListDto, offset, max, totalCount);
         if(contentType.contains("json")){
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaTypeVS.JSON).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
+                    .type(MediaTypeVS.JSON).build();
         } else {
-            req.setAttribute("eventsVSMap", JSON.getMapper().writeValueAsString(resultListDto));
+            req.setAttribute("resultListDto", JSON.getMapper().writeValueAsString(resultListDto));
             context.getRequestDispatcher("/eventVSElection/index.xhtml").forward(req, resp);
             return Response.ok().build();
         }
@@ -122,14 +121,13 @@ public class EventVSElectionResource {
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         EventVSElection eventVS = dao.find(EventVSElection.class, id);
-        if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection not found - " +
-                "eventId: " + id).build();
-        Map statsMap = eventVSBean.getStatsMap(eventVS);
+        if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - EventVSElection not found - eventId: " + id).build();
+        EventVSStatsDto statsDto = eventVSBean.getStats(eventVS);
         if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(statsMap))
-                    .type(MediaTypeVS.JSON).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(statsDto)).type(MediaTypeVS.JSON).build();
         } else {
-            req.setAttribute("statsJSON", JSON.getMapper().writeValueAsString(statsMap));
+            req.setAttribute("statsDto", JSON.getMapper().writeValueAsString(statsDto));
             context.getRequestDispatcher("/eventVSElection/stats.xhtml").forward(req, resp);
             return Response.ok().build();
         }
@@ -137,7 +135,7 @@ public class EventVSElectionResource {
 
     @Path("/id/{id}/publishRequest") @GET
     public Response publishRequest(@PathParam("id") long id, @Context ServletContext context,
-                                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         EventVSElection eventVS = dao.find(EventVSElection.class, id);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection not found - " +
                 "eventId: " + id).build();

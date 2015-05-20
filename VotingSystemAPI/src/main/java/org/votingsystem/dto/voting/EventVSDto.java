@@ -29,7 +29,6 @@ public class EventVSDto {
     private Date dateBegin;
     private Date dateFinish;
     private String URL;
-    private String publishRequestURL;
     private String eventCACertificateURL;
     private String subject;
     private String content;
@@ -62,6 +61,7 @@ public class EventVSDto {
 
     public EventVSDto(EventVS eventVS) {
         this.setId(eventVS.getId());
+        this.setURL(eventVS.getUrl());
         this.setDateCreated(eventVS.getDateCreated());
         this.setSubject(eventVS.getSubject());
         this.setContent(eventVS.getContent());
@@ -83,7 +83,6 @@ public class EventVSDto {
         this(eventVS);
         if(eventVS instanceof EventVSElection) {
             this.setURL(contextURL + "/rest/eventVSElection/id/" + eventVS.getId());
-            this.setPublishRequestURL(contextURL + "/rest/eventVSElection/id/" + eventVS.getId() + "/publishRequest");
             ControlCenterVS controlCenterVS = eventVS.getControlCenterVS();
             if(controlCenterVS != null) this.setControlCenter(new ActorVSDto(
                     controlCenterVS.getServerURL(), controlCenterVS.getName()));
@@ -189,10 +188,6 @@ public class EventVSDto {
         return URL;
     }
 
-    public String getPublishRequestURL() {
-        return publishRequestURL;
-    }
-
     public String getEventCACertificateURL() {
         return eventCACertificateURL;
     }
@@ -260,11 +255,6 @@ public class EventVSDto {
     public void setURL(String URL) {
         this.URL = URL;
     }
-
-    public void setPublishRequestURL(String publishRequestURL) {
-        this.publishRequestURL = publishRequestURL;
-    }
-
 
     public void setEventCACertificateURL(String eventCACertificateURL) {
         this.eventCACertificateURL = eventCACertificateURL;

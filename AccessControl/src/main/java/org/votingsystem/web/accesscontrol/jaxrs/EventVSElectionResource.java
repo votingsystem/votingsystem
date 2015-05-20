@@ -63,7 +63,7 @@ public class EventVSElectionResource {
         if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventVSDto)).type(MediaTypeVS.JSON).build();
         } else {
-            req.setAttribute("eventMap", JSON.getMapper().writeValueAsString(eventVSDto));
+            req.setAttribute("eventDto", JSON.getMapper().writeValueAsString(eventVSDto));
             context.getRequestDispatcher("/eventVSElection/eventVSElection.xhtml").forward(req, resp);
             return Response.ok().build();
         }

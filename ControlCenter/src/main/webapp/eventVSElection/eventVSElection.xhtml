@@ -2,13 +2,14 @@
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+    <ui:define name="title">${msg.electionSystemLbl}</ui:define>
     <ui:define name="head">
         <link href="${elementURL}/eventVSElection/eventvs-election.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
         <vs-innerpage-signal caption="${msg.pollLbl}"></vs-innerpage-signal>
         <div class="pageContentDiv">
-            <eventvs-election id="electionVS" eventvs='${eventMap}'></eventvs-election>
+            <eventvs-election id="electionVS" eventvs='${eventDto}'></eventvs-election>
         </div>
     </ui:define>
 </ui:composition>

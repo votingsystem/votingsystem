@@ -37,7 +37,7 @@
     </script>
 </h:head>
 <h:body style="margin: 0px; padding: 0px;">
-    <votingsystem-navbar id="navBar" menu="${param.menu}" style="display:none;">
+    <votingsystem-navbar id="navBar" style="display:none;">
         <div id="voting_system_page">
             <ui:insert name="content"/>
         </div>
@@ -48,8 +48,7 @@
     <h:messages styleClass="messages"
                 style="list-style: none; padding:0; margin:0;"
                 errorClass="alert alert-error" infoClass="alert alert-success"
-                warnClass="alert alert-warning" globalOnly="true"/><!--<vs-socket id="socketvs" socketservice="${config.webSocketURL}"></vs-socket>-->
-
+                warnClass="alert alert-warning" globalOnly="true"/>
     <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
     <iron-signals id="ironSignals"></iron-signals>
 </h:body>

@@ -1,6 +1,7 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.JSON;
@@ -12,6 +13,7 @@ import org.votingsystem.web.ejb.DAOBean;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -19,10 +21,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Path("/search")
@@ -54,11 +53,12 @@ public class SearchResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
     }
 
+    @Transactional
     @Path("/eventVS") @GET
     public Response eventVS(@QueryParam("searchText") String searchText, @QueryParam("eventVSState") String eventVSStateReq,
-                          @DefaultValue("0") @QueryParam("offset") int offset,
-                          @DefaultValue("100") @QueryParam("max") int max,
-                          @Context Request req, @Context HttpServletResponse resp) throws JsonProcessingException {
+                            @DefaultValue("0") @QueryParam("offset") int offset,
+                            @DefaultValue("100") @QueryParam("max") int max,
+                            @Context Request req, @Context HttpServletResponse resp) throws JsonProcessingException {
         List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE, EventVS.State.PENDING, EventVS.State.CANCELED,
                 EventVS.State.TERMINATED);
         if(eventVSStateReq != null) {
@@ -77,17 +77,12 @@ public class SearchResource {
                 "(e.subject like :searchText or e.content like :searchText)").setParameter("inList", inList)
                 .setParameter("searchText", "%" + searchText + "%");
         List<EventVS> eventvsList = query.getResultList();
-        List resultList = null;
+        List<EventVSDto> dtoList = new ArrayList<>();
         for(EventVS eventVS : eventvsList) {
-            resultList.add(new EventVSDto(eventVS, config.getServerName(), config.getContextURL()));
+            dtoList.add(new EventVSDto(eventVS));
         }
-        Map resultMap = new HashMap<>();
-        resultMap.put("eventVS", resultList);
-        resultMap.put("totalCount", resultList.size());
-        resultMap.put("offset", offset);
-        resultMap.put("max", max);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
+        ResultListDto<EventVSDto> resultListDto = new ResultListDto<>(dtoList, offset, max, dtoList.size());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaTypeVS.JSON).build();
     }
-
 
 }

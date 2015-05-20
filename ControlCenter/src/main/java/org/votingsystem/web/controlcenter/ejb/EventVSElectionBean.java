@@ -3,6 +3,7 @@ package org.votingsystem.web.controlcenter.ejb;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.dto.voting.EventVSStatsDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -148,34 +149,26 @@ public class EventVSElectionBean {
         if (todayDate.before(eventVS.getDateBegin())) eventVS.setState(EventVS.State.PENDING);
     }
 
-    public Map getStatsMap (EventVSElection eventVS) {
-        Map result = new HashMap();
-        result.put("id", eventVS.getId());
-        result.put("subject", eventVS.getSubject());
-        Query query = dao.getEM().createQuery("select count (a) from AccessRequestVS a where a.eventVS =:eventVS")
+    public EventVSStatsDto getStats (EventVSElection eventVS) {
+        EventVSStatsDto statsDto = new EventVSStatsDto();
+        statsDto.setId(eventVS.getId());
+        statsDto.setSubject(eventVS.getSubject() + " - 'this is inside simple quotes' - ");
+        Query query = dao.getEM().createQuery("select count(v) from VoteVS v where v.eventVS =:eventVS")
                 .setParameter("eventVS", eventVS);
-        result.put("numAccessRequests", (long) query.getSingleResult());
-        query = dao.getEM().createQuery("select count(a) from AccessRequestVS a where a.eventVS =:eventVS " +
-                "and a.state =:state").setParameter("eventVS", eventVS).setParameter("state", AccessRequestVS.State.OK);
-        result.put("numAccessRequestsOK", (long) query.getSingleResult());
-        query = dao.getEM().createQuery("select count(a) from AccessRequestVS a where a.eventVS =:eventVS " +
-                "and a.state =:state").setParameter("eventVS", eventVS).setParameter("state", AccessRequestVS.State.CANCELED);
-        result.put("numAccessRequestsCancelled", (long) query.getSingleResult());
-        query = dao.getEM().createQuery("select count(v) from VoteVS v where v.eventVS =:eventVS").setParameter("eventVS", eventVS);
-        result.put("numVotesVS", (long) query.getSingleResult());
+        statsDto.setNumVotesVS((long) query.getSingleResult());
         query = dao.getEM().createQuery("select count(v) from VoteVS v where v.eventVS =:eventVS and v.state =:state")
                 .setParameter("eventVS", eventVS).setParameter("state", VoteVS.State.OK);
-        result.put("numVotesVSOK", (long) query.getSingleResult());
+        statsDto.setNumVotesVSOK((long) query.getSingleResult());
         query = dao.getEM().createQuery("select count(v) from VoteVS v where v.eventVS =:eventVS and v.state =:state")
                 .setParameter("eventVS", eventVS).setParameter("state", VoteVS.State.CANCELED);
-        result.put("numVotesVSVotesVSCANCELED", (long) query.getSingleResult());
+        statsDto.setNumVotesVSVotesVSCANCELED((long) query.getSingleResult());
         for(FieldEventVS option : eventVS.getFieldsEventVS()) {
             query = dao.getEM().createQuery("select count(v) from VoteVS v where v.optionSelected =:option " +
                     "and v.state =:state").setParameter("option", option).setParameter("state", VoteVS.State.OK);
             option.setNumVotesVS((long) query.getSingleResult());
         }
-        result.put("fieldsEventVS", eventVS.getFieldsEventVS());
-        return result;
+        statsDto.setFieldsEventVS(eventVS.getFieldsEventVS());
+        return statsDto;
     }
 
 }

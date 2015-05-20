@@ -78,9 +78,6 @@
     <script>
         Polymer({
             is:'votingsystem-navbar',
-            properties: {
-                url:{type:String, value:null}
-            },
             ready: function() {
                 this.appTitle = "${msg.appTitle}"
                 this.searchHidden = true
