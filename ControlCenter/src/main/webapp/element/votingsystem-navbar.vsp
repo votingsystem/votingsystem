@@ -17,7 +17,7 @@
     <template>
         <iron-ajax id="ajax" on-response="ajaxResponse" on-iron-error="ajaxError" handle-as="document"></iron-ajax>
         <iron-signals on-iron-signal-vs-innerpage="innerPageSignal"></iron-signals>
-        <paper-drawer-panel id="paperDrawerPanel" responsive-width="30000px" style="overflow: scroll;">
+        <paper-drawer-panel id="navBarDrawerPanel" responsive-width="30000px" style="overflow: scroll;">
             <div drawer style="height: 100%;">
                 <paper-menu class="paperMenu" attr-for-selected="data-href" selected="{{selectorValue}}" on-iron-select="drawerItemSelected" style="padding:50px 0 0 0;">
                     <paper-item hidden="{{!adminMenuHidden}}" data-href="${restURL}/eventVSElection">

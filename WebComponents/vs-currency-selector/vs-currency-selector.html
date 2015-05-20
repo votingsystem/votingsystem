@@ -1,48 +1,40 @@
-<link href="../polymer/polymer.html" rel="import">
-<link href="../paper-dropdown-menu/paper-dropdown-menu.html" rel="import">
-<link href="../paper-dropdown/paper-dropdown.html" rel="import">
-<link href="../paper-item/paper-item.html" rel="import">
-<link href="../paper-menu/paper-menu.html" rel="import">
-
-
 <dom-module name="vs-currency-selector" on-iron-select="selectAction">
     <template>
-        <style>
-            body /deep/ paper-dropdown-menu.narrow { max-width: 200px; width: 300px; }
-            .dropdown.colored::shadow #ripple,
-            .dropdown.colored::shadow #background {
-                border: 1px solid #6c0404;
-            }
-            .colored { color: #6c0404; }
-        </style>
-        <paper-dropdown-menu id="dropDownMenu" attr-for-selected="id" halign="right" style="width: 100px;"
-                             on-iron-select="configGroup">
-            <paper-dropdown class="dropdown colored" transition="">
-                <paper-menu attr-for-selected="id" id="currencySelectorCoreMenu" selected="EUR">
-                    <template repeat="{{currencyCodes}}">
-                        <paper-item id="{{code}}">{{name}}</paper-item>
-                    </template>
-                </paper-menu>
-            </paper-dropdown>
-        </paper-dropdown-menu>
+        <select id="currencySelect" on-change="selectAction" class="form-control">
+            <template is="dom-repeat" items="{{currencyCodes}}">
+                <option value="{{item.code}}">{{item.name}}</option>
+            </template>
+        </select>
     </template>
     <script>
         Polymer({
             is:'vs-currency-selector',
-            currencyCodes: [
-                {name: 'Euro', code: 'EUR'},
-                {name: 'Dollar', code: 'USD'},
-                {name: 'Yuan', code: 'CNY'},
-                {name: 'Yen', code: 'JPY'}],
-            ready: function() { console.log(this.tagName + " - ready")},
+            properties: {
+                currencyCodes:{type:Object, value:[
+                    {name: 'Euro', code: 'EUR'},
+                    {name: 'Dollar', code: 'USD'},
+                    {name: 'Yuan', code: 'CNY'},
+                    {name: 'Yen', code: 'JPY'}]},
+                fontSize:{type:String, value:'1.3em'},
+                width:{type:String, value:'100px'},
+                height:{type:String, value:'30px'}
+            },
+            ready: function() {
+                console.log(this.tagName + " - ready")
+                this.$.currencySelect.style.width = this.width
+                this.$.currencySelect.style.fontSize = this.fontSize
+                this.$.currencySelect.style.height = this.height
+            },
             getSelected:function() {
-                return this.$.currencySelectorCoreMenu.selected
+                this.$.currencySelect.value
             },
             selectAction: function(e, details) {
-                if(details.isSelected) {
-                    this.fire("selected", details.item.id)
-                    this.fire('iron-signal', {name: "vs-currency-selector-selected", data: details.item.id});
-                }
+                var selectedCurrency
+                this.currencyCodes.forEach(function(currency) {
+                    if(currency.code === this.$.currencySelect.value) selectedCurrency = currency
+                }.bind(this))
+                this.fire("selected", selectedCurrency)
+                this.fire('iron-signal', {name: "vs-currency-selector-selected", data: selectedCurrency});
             }
         });
     </script>
