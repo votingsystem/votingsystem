@@ -33,7 +33,7 @@ public class PublishAndSendElection {
 
     private static EventVS eventVS;
     private static VotingSimulationData simulationData;
-    private static boolean isWithVoteCancellation = true;
+    private static boolean isWithVoteCancellation = false;
     private static String publisherNIF = "00111222V";
     private static List<String> synchronizedElectorList;
     private static ExecutorService simulatorExecutor;

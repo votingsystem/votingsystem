@@ -1,9 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<script src="${contextURL}/resources/js/utilsVS.js" type="text/javascript"></script>
-
-
-<dom-module name="message-smime-votevs-canceler" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
+<dom-module name="message-smime-votevs-canceler">
     <template>
         <style>
             .messageToUser {
@@ -11,6 +8,7 @@
                 margin:10px auto 10px auto;
                 background: #f9f9f9;
                 padding:10px 20px 10px 20px;
+                text-align: center;
             }
             .timeStampMsg {
                 color:#aaaaaa; font-size:1.1em; margin:0 0 15px 0;font-style:italic;
@@ -24,10 +22,8 @@
                 <div hidden="{{!timeStampDate}}" class="timeStampMsg">
                     <b>${msg.timeStampDateLbl}: </b>{{timeStampDate}}
                 </div>
-                <div hidden="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
-                    <div>
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
+                <div hidden="{{!messageToUser}}" class="messageToUser layout horizontal center center-justified">
+                    <div id="messageToUser">{{messageToUser}}</div>
                 </div>
                 <div><b>${msg.hashAccessRequestLbl}: </b><span>{{smimeMessageContent.hashAccessRequestBase64}}</span></div>
                 <div><b>${msg.originHashAccessRequestLbl}: </b><span>{{smimeMessageContent.originHashAccessRequest}}</span></div>
@@ -47,14 +43,12 @@
     <script>
         Polymer({
             is:'message-smime-votevs-canceler',
-            publish: {
-                smimeMessageContent: {value: {}}
+            properties: {
+                smimeMessageContent:{type:Object, value:{}, observer:'smimeMessageContentChanged'}
             },
-            isClientToolConnected:window['isClientToolConnected'],
-            messageToUser:null,
-            timeStampDate:null,
             ready: function() {
                 console.log(this.tagName + " - ready - " + document.querySelector("#voting_system_page"))
+                this.isClientToolConnected = window['isClientToolConnected']
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected', function() {
                     this.isClientToolConnected = true
                 }.bind(this))

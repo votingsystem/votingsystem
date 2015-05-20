@@ -38,27 +38,6 @@ public class SearchResource {
     @Inject RepresentativeBean representativeBean;
 
     @Transactional
-    @Path("/eventvsByTag") @GET
-    public Response eventvsByTag (@QueryParam("tag") String tag) throws JsonProcessingException {
-        if(tag == null) return Response.status(Response.Status.BAD_REQUEST).entity("ERROR - missing param 'tag'").build();
-        Query query = dao.getEM().createQuery(
-                "select e from EventVS e inner join e.tagVSSet tag where tag.name =:tag").setParameter("tag", tag);
-        List<EventVS> eventVSList = query.getResultList();
-        List<Map> resultList = query.getResultList();
-        for(EventVS eventVS :eventVSList) {
-            Map eventMap = new HashMap<>();
-            eventMap.put("id", eventVS.getId());
-            eventMap.put("subject", eventVS.getSubject());
-            eventMap.put("content", eventVS.getContent());
-            eventMap.put("URL", config.getRestURL() + "/eventVSElection/id/" + eventVS.getId());
-            resultList.add(eventMap);
-        }
-        Map resultMap = new HashMap<>();
-        resultMap.put("eventsVS", resultList);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
-    }
-
-    @Transactional
     @Path("/representative") @GET
     public Response doGet(@QueryParam("searchText") String searchText,
                           @DefaultValue("0") @QueryParam("offset") int offset,

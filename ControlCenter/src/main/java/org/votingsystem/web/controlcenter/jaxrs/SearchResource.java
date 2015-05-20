@@ -6,9 +6,9 @@ import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.controlcenter.ejb.EventVSElectionBean;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -21,7 +21,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 @Path("/search")
@@ -32,26 +34,6 @@ public class SearchResource {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject EventVSElectionBean eventVSElectionBean;
-
-    @Path("/eventvsByTag") @GET
-    public Response eventvsByTag (@QueryParam("tag") String tag) throws JsonProcessingException {
-        if(tag == null) return Response.status(Response.Status.BAD_REQUEST).entity("ERROR - missing param 'tag'").build();
-        Query query = dao.getEM().createQuery(
-                "select e from EventVS e inner join e.tagVSSet tag where tag.name =:tag").setParameter("tag", tag);
-        List<EventVS> eventVSList = query.getResultList();
-        List<Map> resultList = query.getResultList();
-        for(EventVS eventVS :eventVSList) {
-            Map eventMap = new HashMap<>();
-            eventMap.put("id", eventVS.getId());
-            eventMap.put("subject", eventVS.getSubject());
-            eventMap.put("content", eventVS.getContent());
-            eventMap.put("URL", config.getRestURL() + "/eventVSElection/id/" + eventVS.getId());
-            resultList.add(eventMap);
-        }
-        Map resultMap = new HashMap<>();
-        resultMap.put("eventsVS", resultList);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
-    }
 
     @Transactional
     @Path("/eventVS") @GET

@@ -9,9 +9,10 @@ import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.controlcenter.ejb.EventVSElectionBean;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.util.ConfigVS;
+
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;
@@ -24,7 +25,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**

@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 
-<dom-module name="message-smime-votevs" attributes="smimeMessageContent smimeMessage isClientToolConnected timeStampDate">
+<dom-module name="message-smime-votevs">
     <template>
         <style>
         .messageToUser {
@@ -22,12 +22,8 @@
                 <div hidden="{{!timeStampDate}}" class="timeStampMsg">
                     <b>${msg.timeStampDateLbl}: </b>{{timeStampDate}}
                 </div>
-                <div hidden="{{!messageToUser}}">
-                    <div class="messageToUser layout horizontal center center-justified">
-                        <div>
-                            <div id="messageToUser">{{messageToUser}}</div>
-                        </div>
-                    </div>
+                <div hidden="{{!messageToUser}}" class="messageToUser layout horizontal center center-justified">
+                    <div id="messageToUser">{{messageToUser}}</div>
                 </div>
                 <div><b>${msg.eventVSLbl}: </b>
                     <a href="{{smimeMessageContent.eventURL}}?mode=simplePage">{{smimeMessageContent.eventURL}}</a>
@@ -47,14 +43,12 @@
     <script>
         Polymer({
             is:'message-smime-votevs',
-            publish: {
-                smimeMessageContent: {value: {}}
+            properties: {
+                smimeMessageContent:{type:Object, value:{}, observer:'smimeMessageContentChanged'}
             },
-            isClientToolConnected:window['isClientToolConnected'],
-            messageToUser:null,
-            timeStampDate:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
+                this.isClientToolConnected = window['isClientToolConnected']
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected', function() {
                     this.isClientToolConnected = true
                 }.bind(this))

@@ -34,6 +34,7 @@
                     <div class="flex" style="text-align: center">
                         <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
                     </div>
+                    <div hidden="{{!isActive}}" style='color: #888;'>{{getElapsedTime(eventvs.dateFinish)}}</div>
                 </div>
                 <div class$="{{eventStateRowClass}}">
                     <div class="flex" style="display: block;">
@@ -50,9 +51,11 @@
                     </div>
 
                     <div class="horizontal layout center center-justified">
-                        <div style="margin: 10px 0 0 0;">{{eventvs.url}}</div>
-                        <div id="eventAuthorDiv" class="flex" style="margin:0px 20px 0 30px; color:#888; font-size: 0.85em;">
+                        <div id="eventAuthorDiv" class="flex" style="margin:0px 20px 0 40px; color:#888; font-size: 0.85em;">
                             <b>${msg.publishedByLbl}:</b> <span>{{eventvs.userVS}}</span>
+                        </div>
+                        <div style="font-size: 1.1em;">
+                            <a href="{{eventvs.url}}" target="_blank">${msg.accessControlLbl}</a>
                         </div>
                     </div>
 
@@ -108,6 +111,9 @@
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
             },
+            getElapsedTime: function(dateStamp) {
+                return new Date(dateStamp).getElapsedTime() + " ${msg.toCloseLbl}"
+            },
             smallScreenChanged:function() {
                 console.log("smallScreenChanged - smallScreen: " + this.smallScreen)
                 this.statsDivHidden = false
@@ -126,7 +132,6 @@
                 console.log("eventvsChanged - eventvs: " + this.eventvs.state)
                 this.optionVSSelected = null
                 this.dateFinish = new Date(this.eventvs.dateFinish)
-                this.votevsResul = null;
                 this.isActive = false
                 this.isPending = false
                 this.isTerminated = false

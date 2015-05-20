@@ -1,9 +1,9 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
 import org.votingsystem.model.ActorVS;
-import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
+import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.EJB;

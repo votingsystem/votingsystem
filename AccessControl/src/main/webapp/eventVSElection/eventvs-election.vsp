@@ -47,6 +47,8 @@
                     <div class="flex" style="text-align: center">
                         <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
                     </div>
+
+                    <div hidden="{{!isActive}}" style='color: #888;'>{{getElapsedTime(eventvs.dateFinish)}}</div>
                 </div>
                 <div class$="{{eventStateRowClass}}">
                     <div class="flex" style="display: block;">
@@ -143,6 +145,9 @@
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
+            },
+            getElapsedTime: function(dateStamp) {
+                return new Date(dateStamp).getElapsedTime() + " ${msg.toCloseLbl}"
             },
             smallScreenChanged:function() {
                 console.log("smallScreenChanged - smallScreen: " + this.smallScreen)
