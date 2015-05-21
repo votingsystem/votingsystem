@@ -2,6 +2,7 @@ package org.votingsystem.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.http.*;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -17,6 +18,7 @@ import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
@@ -24,9 +26,11 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.DefaultHttpResponseFactory;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.*;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.impl.io.DefaultHttpRequestWriterFactory;
 import org.apache.http.io.HttpMessageParser;
 import org.apache.http.io.HttpMessageParserFactory;
@@ -73,7 +77,7 @@ public class HttpHelper {
     private IdleConnectionEvictor connEvictor;
     private SSLConnectionSocketFactory sslSocketFactory;
     private CloseableHttpClient httpClient;
-    public static HttpHelper INSTANCE = new HttpHelper();
+    public static HttpHelper INSTANCE;
 
     // Use custom message parser / writer to customize the way HTTP
     // messages are parsed from and written out to the data stream.
@@ -183,10 +187,11 @@ public class HttpHelper {
         } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
     }
 
+
     public static HttpHelper getInstance() {
+        if(INSTANCE == null) INSTANCE = new HttpHelper();
         return INSTANCE;
     }
-
 
     public void shutdown () {
         try {
@@ -210,6 +215,7 @@ public class HttpHelper {
         HttpGet httpget = null;
         String responseContentType = null;
         httpget = new HttpGet(serverURL);
+        httpget.setHeader("Accept-Language", Locale.getDefault().getLanguage());
         if(mediaType != null) httpget.setHeader("Content-Type", mediaType);
         response = httpClient.execute(httpget);
         log.info("----------------------------------------");
@@ -257,6 +263,7 @@ public class HttpHelper {
         ContentTypeVS responseContentType = null;
         try {
             httpget = new HttpGet(serverURL);
+            //httpget.setHeader("Accept-Language", Locale.getDefault().getLanguage());
             if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
             response = httpClient.execute(httpget);
             log.info("----------------------------------------");

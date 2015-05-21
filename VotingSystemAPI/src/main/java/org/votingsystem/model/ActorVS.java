@@ -300,8 +300,9 @@ public class ActorVS extends EntityVS implements Serializable {
         return getServerURL() + "/rest/userVS/id/" + String.valueOf(id);
     }
 
-    public String getUserVSBalanceURL(String nif) {
-        return getServerURL() + "/rest/balance/userVS/nif/" + nif;
+    public String getUserVSBalanceURL(String nif, String menu, String locale) {
+        String sufix = (menu != null || locale != null)? "?menu=" + menu + "&locale=" + locale : "";
+        return getServerURL() + "/rest/balance/userVS/nif/" + nif + sufix;
     }
 
     public String getDeviceListByNifServiceURL(String nif) {
@@ -312,4 +313,8 @@ public class ActorVS extends EntityVS implements Serializable {
         return getServerURL() + "/rest/deviceVS/nif/" + nif + "/connected";
     }
 
+    public String getDashBoardURL(String menu, String locale) {
+        String sufix = (menu != null || locale != null)? "?menu=" + menu + "&locale=" + locale : "";
+        return getServerURL() + "/app/admin.xhtml" + sufix;
+    }
 }

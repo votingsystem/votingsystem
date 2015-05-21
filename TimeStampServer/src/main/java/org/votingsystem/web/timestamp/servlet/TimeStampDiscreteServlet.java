@@ -35,7 +35,8 @@ public class TimeStampDiscreteServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         PrintWriter writer = null;
-        if(((FilterVS.RequestVSWrapper)req).getContentTypeVS() == ContentTypeVS.TIMESTAMP_QUERY) {
+        ContentTypeVS contentTypeVS = ContentTypeVS.getByName(req.getContentType());
+        if(contentTypeVS == ContentTypeVS.TIMESTAMP_QUERY) {
             try {
                 TimeStampResponseGenerator responseGenerator = timeStampService.getResponseGeneratorDiscrete(
                         req.getInputStream());

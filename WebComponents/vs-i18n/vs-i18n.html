@@ -42,8 +42,9 @@
         },
         getMessages:function() {
             var resultMessages
-            var results = new RegExp("[\\?&]locale=([^&#]*)").exec(location.search);
-            var userLocale = ((results == null) ? "" : decodeURIComponent(results[1].replace(/\+/g, " "))) || navigator.language
+            var userLocale = getURLParam('locale')
+            if(userLocale !== "") userLocale = userLocale.split("_")[0];
+            else userLocale = navigator.language
             if(this.messages_i18n[userLocale]) resultMessages = this.messages_i18n[userLocale]
             else resultMessages = this.messages_i18n['es']
             console.log(this.tagName + " loaded locales for: " + userLocale)

@@ -57,8 +57,6 @@ public class BrowserVSToolbar extends HBox {
                     connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
                     connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CLOUD_UPLOAD));
                 }
-
-
             });
         }
     }

@@ -57,16 +57,9 @@ public class CurrencyServer extends ActorVS implements Serializable {
         return getServerURL() + "/rest/transactionVS/currency";
     }
 
-    public String getUserDashBoardURL() {
-        return getServerURL() + "/rest/app/userVSDashboard?menu=user";
-    }
-
-    public String getGroupVSListURL() {
-        return getServerURL() + "/rest/groupVS";
-    }
-
-    public String getAdminDashBoardURL() {
-        return getServerURL() + "/app/admin.xhtml?menu=admin";
+    public String getGroupVSListURL(String menu, String locale) {
+        String sufix = (menu != null || locale != null)? "?menu=" + menu + "&locale=" + locale : "";
+        return getServerURL() + "/rest/groupVS" + sufix;
     }
 
     public String getSaveBankServiceURL() {

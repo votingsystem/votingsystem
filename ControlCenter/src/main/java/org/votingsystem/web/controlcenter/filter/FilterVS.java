@@ -47,9 +47,9 @@ public class FilterVS implements Filter {
         req.setAttribute("contextURL", contextURL);
         req.setAttribute("serverName", serverName);
         req.setAttribute("timeStampServerURL", timeStampServerURL);
-        MessagesVS.setCurrentInstance(req.getLocale(), bundleBaseName);
         if(!"HEAD".equals(requestMethod)) {
             RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
+            MessagesVS.setCurrentInstance(req.getLocale(), bundleBaseName);
             log.info(requestMethod + " - " + ((HttpServletRequest)req).getRequestURI() +
                     " - contentType: " + req.getContentType() + " - locale: " + req.getLocale());
             chain.doFilter(requestWrapper, resp);
@@ -58,59 +58,14 @@ public class FilterVS implements Filter {
 
     public class RequestVSWrapper extends HttpServletRequestWrapper {
 
-        private ContentTypeVS contentTypeVS;
-
         public RequestVSWrapper(HttpServletRequest request) {
             super(request);
-            if(request.getCookies() != null) {
-                for(Cookie cookie: request.getCookies()) {
-                    headerMap.put(cookie.getName(), cookie.getValue());
-                }
-            }
-            /*Enumeration<String> headers = request.getHeaderNames();
-            while(headers.hasMoreElements()) {
-                String header = headers.nextElement();
-                log.info("header - " + header + " - value:" + request.getHeader(header));
-            }*/
-            contentTypeVS = ContentTypeVS.getByName(request.getContentType());
         }
 
-        private Map<String, String> headerMap = new HashMap<String, String>();
-
-        public void addHeader(String name, String value) {
-            headerMap.put(name, value);
-        }
-
-        public ContentTypeVS getContentTypeVS() {
-            return contentTypeVS;
-        }
-
-        public void setContentTypeVS(ContentTypeVS contentTypeVS) {
-            this.contentTypeVS = contentTypeVS;
-        }
-
-        @Override public String getHeader(String name) {
-            String headerValue = super.getHeader(name);
-            if (headerMap.containsKey(name)) {
-                headerValue = headerMap.get(name);
-            }
-            return headerValue;
-        }
-
-        @Override public Enumeration<String> getHeaderNames() {
-            List<String> names = Collections.list(super.getHeaderNames());
-            for (String name : headerMap.keySet()) {
-                names.add(name);
-            }
-            return Collections.enumeration(names);
-        }
-
-        @Override public Enumeration<String> getHeaders(String name) {
-            List<String> values = Collections.list(super.getHeaders(name));
-            if (headerMap.containsKey(name)) {
-                values.add(headerMap.get(name));
-            }
-            return Collections.enumeration(values);
+        //hack to solve JavaFX webkit Accept-Language header problem
+        @Override public Locale getLocale() {
+            if(getParameterMap().get("locale") != null) return Locale.forLanguageTag(getParameterMap().get("locale")[0]);
+            else return super.getLocale();
         }
 
     }

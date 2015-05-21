@@ -16,6 +16,7 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ContextVS;
 
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -49,15 +50,16 @@ public class BrowserVSMenuButton extends MenuButton {
         voteMenuItem.setVisible(false);
         voteMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.ENVELOPE));
         voteMenuItem.setOnAction(event -> {
-            Browser.getInstance().openVotingSystemURL(ContextVS.getInstance().getAccessControl().getVotingPageURL(),
+            Browser.getInstance().openVotingSystemURL(ContextVS.getInstance().getAccessControl().getVotingPageURL(
+                            "user", Locale.getDefault().toString()),
                     ContextVS.getMessage("voteButtonLbl"));
         });
         selectRepresentativeMenuItem = new MenuItem(ContextVS.getMessage("selectRepresentativeButtonLbl"));
         selectRepresentativeMenuItem.setVisible(false);
         selectRepresentativeMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.HAND_ALT_RIGHT));
         selectRepresentativeMenuItem.setOnAction(event -> {
-            Browser.getInstance().openVotingSystemURL(ContextVS.getInstance().getAccessControl().getSelectRepresentativePageURL(),
-                    ContextVS.getMessage("selectRepresentativeButtonLbl"));
+            Browser.getInstance().openVotingSystemURL(ContextVS.getInstance().getAccessControl().getSelectRepresentativePageURL(
+                    "user", Locale.getDefault().toString()), ContextVS.getMessage("selectRepresentativeButtonLbl"));
         });
 
         currencyUserMenuItem = new MenuItem(ContextVS.getMessage("financesLbl"));
@@ -66,8 +68,9 @@ public class BrowserVSMenuButton extends MenuButton {
         currencyUserMenuItem.setOnAction(event -> {
             StringBuilder sb = new StringBuilder();
             if(BrowserSessionService.getInstance().getUserVS() != null) sb.append(ContextVS.getInstance().getCurrencyServer()
-                    .getUserVSBalanceURL(BrowserSessionService.getInstance().getUserVS().getNif()) + "?menu=user");
-            else sb.append(ContextVS.getInstance().getCurrencyServer().getGroupVSListURL() + "?menu=user");
+                    .getUserVSBalanceURL(BrowserSessionService.getInstance().getUserVS().getNif(), "user",
+                    Locale.getDefault().toString()));
+            else sb.append(ContextVS.getInstance().getCurrencyServer().getGroupVSListURL("user", Locale.getDefault().toString()));
             Browser.getInstance().openCurrencyURL(sb.toString(), ContextVS.getMessage("currencyUsersLbl"));
         });
         walletMenuItem = new MenuItem(ContextVS.getMessage("walletLbl"));
@@ -80,12 +83,12 @@ public class BrowserVSMenuButton extends MenuButton {
         settingsMenuItem.setOnAction(actionEvent -> SettingsDialog.showDialog());
         currencyAdminMenuItem = new MenuItem(ContextVS.getMessage("currencyAdminLbl"));
         currencyAdminMenuItem.setOnAction(actionEvent -> Browser.getInstance().openCurrencyURL(
-                ContextVS.getInstance().getCurrencyServer().getAdminDashBoardURL(),
+                ContextVS.getInstance().getCurrencyServer().getDashBoardURL("admin", Locale.getDefault().toString()),
                 ContextVS.getMessage("currencyAdminLbl")));
         currencyAdminMenuItem.setVisible(false);
         votingSystemAdminMenuItem = new MenuItem(ContextVS.getMessage("votingSystemProceduresLbl"));
         votingSystemAdminMenuItem.setOnAction(actionEvent -> Browser.getInstance().openVotingSystemURL(
-                ContextVS.getInstance().getAccessControl().getDashBoardURL(),
+                ContextVS.getInstance().getAccessControl().getDashBoardURL("admin", Locale.getDefault().toString()),
                 ContextVS.getMessage("votingSystemProceduresLbl")));
         votingSystemAdminMenuItem.setVisible(false);
 

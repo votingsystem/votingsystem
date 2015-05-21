@@ -107,12 +107,6 @@ public class VotingSystemApp extends Application {
                 }
                 ResponseVS responseVS = null;
                 try {
-                    CookieManager cookieManager = new CookieManager();
-                    Map<String, List<String>> headers = new LinkedHashMap<String, List<String>>();
-                    headers.put("Set-Cookie", Arrays.asList("Accept-Language=" + Locale.getDefault().getLanguage()));
-                    cookieManager.put(new URI(accessControlServerURL), headers);
-                    cookieManager.put(new URI(currencyServerURL), headers);
-                    CookieHandler.setDefault(cookieManager);
                     responseVS = Utils.checkServer(accessControlServerURL);
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         browser.setVotingSystemAvailable(true);
