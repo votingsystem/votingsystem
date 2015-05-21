@@ -29,10 +29,10 @@
                         <div class="horizontal layout">
                             <div class='groupvsRepresentativeDiv text-right'>{{getRepresentativeName(item)}}</div>
                             <div class="flex"></div>
-                            <div hidden="{{!item.tags || item.tags.length == 0}}" layout horizontal center center-justified style="margin: 5px 5px 2px 0;">
-                                <template repeat="{{tag in item.tags}}">
+                            <div hidden="{{!isTaggedGroup(item)}}" layout horizontal center center-justified style="margin: 5px 5px 2px 0;">
+                                <template is="dom-repeat" repeat="{{item.tags}}">
                                     <a class="btn btn-default" style="font-size: 0.6em;margin:0px 5px 0px 0px;padding:3px;">
-                                        <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i>{{tag.name}}</a>
+                                        <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i>{{item.name}}</a>
                                 </template>
                             </div>
                         </div>
@@ -45,10 +45,9 @@
                       first="${msg.firstLbl}" last="${msg.lastLbl}"
                       offset="{{groupListDto.offset}}" total="{{groupListDto.totalCount}}"></vs-pager>
         </div>
-        <div  hidden="{{groupDetailsHidden}}" id="groupDetailsPage" class="pageContentDiv">
+        <div  hidden="{{groupDetailsHidden}}">
             <groupvs-details id="groupDetails" fab-visible="true"></groupvs-details>
         </div>
-
     </template>
     <script>
         Polymer({
@@ -76,6 +75,9 @@
                 this.groupDetailsHidden = true
 
                 this.loading = true
+            },
+            isTaggedGroup:function(groupvs) {
+                return (groupvs.tags && groupvs.tags.length > 0)
             },
             isItemCanceled:function(item) {
                 return item.state === 'CANCELED'

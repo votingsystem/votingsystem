@@ -2,85 +2,65 @@
 
 <link href="${resourceURL}/vs-user-box/vs-user-box.html" rel="import"/>
 <link href="${resourceURL}/vs-currency-selector/vs-currency-selector.html" rel="import"/>
-<link href="${resourceURL}/paper-radio-button/paper-radio-button.html" rel="import"/>
 <link href="${elementURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
 <link href="${elementURL}/userVS/uservs-selector-dialog.vsp" rel="import"/>
 
 <dom-module name="transactionvs-form">
 <template>
-    <style>
-    .messageToUser {
-        font-weight: bold;
-        margin:10px auto 10px auto;
-        background: #f9f9f9;
-        padding:10px 20px 10px 20px;
-    }
-    </style>
+    <style></style>
     <div style=" margin: 0 auto; max-width: 550px;">
-
         <div class="layout horizontal center center-justified">
             <div hidden="{{!fabVisible}}" style="margin: 10px 20px 0 0;" title="${msg.backLbl}" >
                 <paper-fab mini icon="arrow-back" on-click="back" style="color: #f9f9f9;margin: 0 0 0 20px;background: #ba0011;"></paper-fab>
             </div>
-            <div class="flex"  style="text-align: center; color:#6c0404;">
+            <div class="flex" style="text-align: center; color:#6c0404;">
                 <div>
                     <div style="font-size: 1.4em; font-weight: bold;">{{operationMsg}}</div>
                     <div>{{fromUserName}}</div>
                 </div>
             </div>
         </div>
-        <div hidden="{{!messageToUser}}" style="{{messageToUserStyle}}">
-            <div class="messageToUser">
-                <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
-                    <i class="{{messageToUserIcon}}"  style="{{messageToUserStyle}}"></i>
-                    <core-icon icon="{{status == 200?'check':'error'}}"></core-icon>
-                    <div id="messageToUser">{{messageToUser}}</div>
-                </div>
-            </div>
-        </div>
         <div id="formDataDiv" style="padding: 0px 20px 0px 20px; height: 100%;">
-            <div>
-                <div class="horizontal layout center center-justified">
-                    <input type="text" id="transactionvsSubject" class="form-control" required
-                           style="margin:25px 0 0 0; width:440px;" title="${msg.subjectLbl}" placeholder="${msg.subjectLbl}"/>
+            <div class="horizontal layout center center-justified" style="margin: 10px 0 0 0;">
+                <div>
+                    <input type="text" id="amount" class="form-control"
+                           style="width:150px;margin:0 10px 0 0;" pattern="^[0-9]*$" required
+                           title="${msg.amountLbl}" placeholder="${msg.amountLbl}"/>
                 </div>
-                <div class="horizontal layout center center-justified">
-                    <div>
-                        <input type="text" id="amount" class="form-control"
-                               style="width:150px;margin:7px 10px 0 0;" pattern="^[0-9]*$" required
-                               title="${msg.amountLbl}" placeholder="${msg.amountLbl}"/>
-                    </div>
-                    <div><vs-currency-selector id="currencySelector"></vs-currency-selector></div>
-                </div>
+                <div><vs-currency-selector id="currencySelector"></vs-currency-selector></div>
             </div>
 
-            <div class="layout horizontal" style="margin:15px 0px 15px 0px; border: 1px solid #ccc;
-                font-size: 1.1em; padding: 5px;display: block;}}">
+            <div class="horizontal layout center center-justified">
+                <input type="text" id="transactionvsSubject" class="form-control" required
+                       style="margin:20px 0 0 0; width:440px;" title="${msg.subjectLbl}" placeholder="${msg.subjectLbl}"/>
+            </div>
+
+            <div class="layout horizontal" style="margin:20px 0px 15px 0px; border: 1px solid #ccc; font-size: 1.1em; padding: 5px;">
                 <div style="margin:0px 10px 0px 0px; padding:5px;">
-                    <div hidden="{{selectedTags.length > 0}}" layout horizontal center center-justified style="font-size: 0.8em;">
-                        <div hidden="{{isPending || isCancelled}}" style="width: 180px; margin:0 10px 0 0;">
-                            <button on-click="showTagDialog" style="font-size: 1em; margin:10px 0px 10px 10px;">
-                                <i class="fa fa-tag"></i> ${msg.addTagLbl}
-                            </button>
-                        </div>
-                        <div hidden="{{selectedTags.length == 0}}">
+                    <div hidden="{{tagSelected}}" class="layout horizontal center center-justified" style="font-size: 0.8em;">
+                        <button on-click="showTagDialog" style="font-size: 1em; margin:10px 0px 10px 10px;">
+                            <i class="fa fa-tag"></i> ${msg.addTagLbl}
+                        </button>
+                        <div hidden="{{selectedTags.length == 0}}" style="margin: 0 0 0 10px;">
                             ${msg.transactionvsWithTagAdvertMsg}
                         </div>
                         <div style="max-width: 400px;">{{selectedTagMsg}}</div>
                     </div>
-                    <div hidden="{{selectedTags.length == 0}}" layout horizontal center center-justified
+                    <div hidden="{{!tagSelected}}" layout horizontal center center-justified
                          style="font-weight:bold;text-align: center;display: block;">
                         <div class="layout horizontal center center-justified" style="margin: 0 0 20px 0;">
-                            <div style="margin: 0 10px 0 0;"><paper-radio-button id="timeLimitedButton" toggles/></div>
-                            <div style="color:#6c0404; font-size: 1.1em;">${msg.timeLimitedAdviceMsg}</div>
+                            <div style="margin: 0 10px 0 0;">
+                                <input type="checkbox" id="timeLimitedButton" style="height: 1.3em; width: 1.3em;">${msg.timeLimitedAdviceMsg}
+                            <div style="color:#6c0404; font-size: 1.1em;"></div>
+                        </div>
                         </div>
                         <div>${msg.selectedTagsAdvice}</div>
-                        <template repeat="{{tag in selectedTags}}">
+                        <template is="dom-repeat" items="{{selectedTags}}">
                             <div class="layout horizontal center center-justified" style="font-size: 0.9em;">
                                 <div style="display: block;">
-                                    <a class="btn btn-default" data-tag-id$='{{tag.id}}'  on-click="removeTag"
+                                    <a class="btn btn-default" data-tag-id$='{{item.id}}'  on-click="removeTag"
                                        style="font-size: 0.9em;margin:5px 5px 0px 5px;padding:3px;">
-                                        <i class="fa fa-minus" style="color:#6c0404;"></i> {{tag.name}}
+                                        <i class="fa fa-minus" style="color:#6c0404;"></i> <span>{{item.name}}</span>
                                     </a>
                                 </div>
                             </div>
@@ -116,8 +96,10 @@
         is:'transactionvs-form',
         properties: {
             fabVisible:{type:Boolean, value:false},
+            selectedTags:{type:Array, value:[], observer:'selectedTagsChanged'},
+            tagSelected:{type:Boolean, value:false},
             searchString:{type:String, value:null},
-            messageToUser:{type:String, value:null, observer:'messageToUserChanged'}
+            selectedTagMsg:{type:String, value:null}
         },
         ready: function() {
             console.log(this.tagName + " - " + this.id)
@@ -139,15 +121,6 @@
                 this.selectedTags = e.detail
             }.bind(this))
         },
-        messageToUserChanged:function(){
-            if(this.status === 200) {
-                this.messageToUserStyle = 'fill:#388746;color:#388746'
-                this.messageToUserIcon = 'fa fa-check'
-            } else {
-                this.messageToUserStyle = 'fill:#ba0011;color:#ba0011'
-                this.messageToUserIcon = 'fa fa-exclamation-triangle'
-            }
-        },
         openSearchUserDialog:function(){
             this.$.userVSSelectorDialog.show(this.groupId)
         },
@@ -155,8 +128,14 @@
             this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
         },
         selectedTagsChanged: function(e) {
-            if(this.selectedTags.length > 0) this.selectedTagMsg = "${msg.onlyTagAllowedExpendingMsg}"
-            else this.selectedTagMsg = null
+            console.log(this.tagName + " - selectedTagsChanged")
+            if(this.selectedTags.length > 0) {
+                this.selectedTagMsg = "${msg.onlyTagAllowedExpendingMsg}"
+                this.tagSelected = true
+            } else {
+                this.selectedTagMsg = null
+                this.tagSelected = false
+            }
         },
         removeTag: function(e) {
             var tagToDelete = e.model.item
@@ -165,6 +144,7 @@
                     this.selectedTags.splice(tagIdx, 1)
                 }
             }
+            this.selectedTags = this.selectedTags.slice(0); //hack to notify array changes
         },
         reset: function() {
             console.log(this.id + " - reset")
@@ -173,7 +153,6 @@
             this.$.amount.value = ""
             this.$.transactionvsSubject.value = ""
             this.$.timeLimitedButton.checked = false
-            this.setMessage(200, null)
             this.$.receptorBox.removeUsers()
             this.$.tagDialog.reset()
         },
@@ -192,17 +171,18 @@
             }
         },
         submit: function () {
+            showMessageVS("${msg.emptyFieldMsg}", "${msg.errorLbl}")
             this.removeErrorStyle(this.$.formDataDiv)
             if(!this.$.amount.validity.valid) {
                 //this.$.amount.classList.add("formFieldError")
                 this.$.amount.style.background = '#f6ccd0'
-                this.setMessage(500, "${msg.enterValidAmountMsg}")
+                showMessageVS("${msg.enterValidAmountMsg}", "${msg.errorLbl}")
                 return
             }
             if(!this.$.transactionvsSubject.validity.valid) {
                 //this.$.transactionvsSubject.classList.add("formFieldError")
                 this.$.transactionvsSubject.style.background = '#f6ccd0'
-                this.setMessage(500, "${msg.emptyFieldMsg}")
+                showMessageVS("${msg.emptyFieldMsg}", "${msg.errorLbl}")
                 return
             }
             var tagList = []
@@ -215,7 +195,7 @@
             switch(this.operation) {
                 case Operation.FROM_GROUP_TO_MEMBER_GROUP:
                     if(this.$.receptorBox.getUserList().length == 0){
-                        this.setMessage(500, "${msg.receptorMissingErrorLbl}")
+                        showMessageVS("${msg.receptorMissingErrorLbl}", "${msg.errorLbl}")
                         return false
                     }
                     break;
@@ -223,8 +203,6 @@
                     return this.transactionFromUser(tagList)
                     break;
             }
-            this.setMessage(200, null)
-
             var operationVS = new OperationVS(this.operation)
             operationVS.serviceURL = "${restURL}/transactionVS"
             operationVS.signedMessageSubject = "${msg.transactionvsFromGroupMsgSubject}"
@@ -248,7 +226,6 @@
             this.click() //hack to refresh screen
         },
         transactionFromUser:function(tagList) {
-            this.setMessage(200, null)
             var operationVS = new OperationVS(this.operation)
             operationVS.serviceURL = "${restURL}/transactionVS"
             operationVS.signedMessageSubject = "${msg.transactionVSFromUserVS}"
@@ -279,11 +256,6 @@
                 }
             }
             return result
-        },
-        setMessage:function(status, message) {
-            console.log(this.tagName + " - setMessage - status: " + status, " - message: " + message)
-            this.status = status
-            this.messageToUser = message
         },
         back:function() {
             this.fire('closed')
@@ -324,6 +296,7 @@
                     break;
             }
             this.selectedTags = []
+            this.tagSelected =  false
             return this.caption
         }
     });

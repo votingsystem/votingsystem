@@ -3,12 +3,6 @@
 <dom-module name="transactionvs-data" attributes="transactionvs smimeMessage isClientToolConnected timeStampDate">
     <template>
         <style>
-        .messageToUser {
-            font-weight: bold;
-            margin:10px auto 10px auto;
-            background: #f9f9f9;
-            padding:10px 20px 10px 20px;
-        }
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
         .IBANLink{ text-decoration: underline; color: #0000ee; cursor: pointer; }
         </style>
@@ -20,11 +14,6 @@
 
                 <div hidden="{{!timeStampDate}}" class="timeStampMsg">
                     <b>${msg.dateLbl}: </b>{{timeStampDate}}
-                </div>
-                <div hidden="{{!messageToUser}}">
-                    <div  layout horizontal center center-justified  class="messageToUser">
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
                 </div>
 
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
@@ -91,7 +80,6 @@
                 transactionvs: {value: {}}
             },
             isClientToolConnected:window['isClientToolConnected'],
-            messageToUser:null,
             timeStampDate:null,
             receptorLbl:null,
             caption:null,
@@ -126,7 +114,6 @@
                 return result
             },
             transactionvsChanged:function() {
-                this.messageToUser = null
                 this.receptorMsg = null
                 this.isSenderVisible = true
                 this.isReceptorVisible = true

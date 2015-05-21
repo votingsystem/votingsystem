@@ -54,19 +54,19 @@
                 <div class="layout horizontal center center-justified">
                     <div>
                         <button onclick="javascript:document.querySelector('#configDialog').opened = true" style="margin: 10px;">
-                            <i class="fa fa-cogs optionsIcon"></i> ${msg.configGroupvsLbl}</button>
+                            <i class="fa fa-cogs"></i> ${msg.configGroupvsLbl}</button>
                     </div>
                     <div>
                         <button onclick="javascript:document.querySelector('#transactionSelectorDialog').opened = true">
-                            <i class="fa fa-money optionsIcon"></i> ${msg.makeTransactionVSFromGroupVSLbl}</button>
+                            <i class="fa fa-money"></i> ${msg.makeTransactionVSFromGroupVSLbl}</button>
                     </div>
                 </div>
             </div>
             <div hidden="{{!isUserView}}" class="layout horizontal center center-justified" style="margin:0 0 10px 10px;">
-                <button style="margin:0 20px 0 0; font-size: 1.1em;" on-click="subscribeToGroup">
+                <button style="margin:0 20px 0 0;" on-click="subscribeToGroup">
                     <i class="fa fa-sign-in"></i> ${msg.subscribeGroupVSLbl}
                 </button>
-                <button style="margin:0 20px 0 0; font-size: 1.1em;" on-click="sendTransactionVS">
+                <button style="margin:0 20px 0 0;" on-click="sendTransactionVS">
                     <i class="fa fa-money"></i> ${msg.sendTransactionVSLbl}
                 </button>
             </div>

@@ -9,25 +9,9 @@
 <dom-module name="currency-request-form">
     <template>
         <style>
-            .messageToUser {
-                font-weight: bold;
-                margin:10px auto 30px auto;
-                background: #f9f9f9;
-                padding:10px 20px 10px 20px;
-                max-width:400px;
-            }
             paper-fab.green { background: #259b24; color: #f0f0f0; }
         </style>
         <div>
-            <div hidden="{{!messageToUser}}" style="color: {{status == 200?'#388746':'#ba0011'}};">
-                <div class="messageToUser">
-                    <div  layout horizontal center center-justified style="margin:0px 10px 0px 0px;">
-                        <core-icon icon="{{status == 200?'check':'error'}}" style="fill:{{status == 200?'#388746':'#ba0011'}};"></core-icon>
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
-                </div>
-            </div>
-
             <div class="layout horizontal center center-justified">
                 <div style="margin: 0 10px 0 0;"><paper-radio-button toggles id="timeLimitedRButton"></paper-radio-button></div>
                 <div style="color:#6c0404; background: #fefefe;font-size: 1.2em; text-align: center;font-weight: bold;">
@@ -94,7 +78,6 @@
         Polymer({
             is:'currency-request-form',
             selectedTags: [],
-            messageToUser:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.selectedTags = []
@@ -119,9 +102,8 @@
             },
             submit:function() {
                 console.log("submit - amountValue: " + this.amountValue + " " + this.$.currencySelector.getSelected())
-                this.messageToUser = null
                 if(!this.amountValue || this.amountValue == 0) {
-                    this.messageToUser = "${msg.amountTooLowMsg}"
+                    showMessageVS("${msg.amountTooLowMsg}", "${msg.errorLbl}")
                     return
                 }
                 if(!this.$.inputAmount.validity.valid) {

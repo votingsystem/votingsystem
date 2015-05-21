@@ -19,7 +19,7 @@
                     </div>
                     <div>
                         <div class="vertical flex layout" style="padding: 10px 10px 10px 10px; min-height:260px; ">
-                            {{messageToUser}}
+                            <span>{{messageToUser}}</span>
                             <div class="flex" style="font-size: 1.3em; color:#6c0404; text-align: center;">
                                 <textarea rows="12" cols="50" maxlength="{{messageVSMaxLength}}" value="{{messageVS}}"></textarea>
                             </div>
@@ -38,9 +38,11 @@
     <script>
         Polymer({
             is:'messagevs-send-dialog',
-            uservs:{},
-            messageVSMaxLength:500,
-            sendMessageTemplateMsg:"${msg.uservsMessageVSLbl}",
+            properties: {
+                uservs:{type:Object},
+                messageVSMaxLength:{type:Number},
+                sendMessageTemplateMsg:{type:String, value:"${msg.uservsMessageVSLbl}"}
+            },
             ready: function() { },
             messageVSChanged: function() {
                 if(this.messageVS.length > this.messageVSMaxLength) this.messageVS = this.messageVS.substring(0,

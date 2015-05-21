@@ -42,8 +42,7 @@
             </div>
             <div style="position: absolute; width: 100%; top:0px;left:0px;">
                 <div class="layout horizontal center center-justified" style="padding:0px 0px 0px 0px;margin:0px auto 0px auto;">
-                    <reason-dialog id="reasonDialog" caption="${msg.cancelSubscriptionFormCaption}" opened="false"
-                                       messageToUser="${msg.cancelSubscriptionFormMsg}"></reason-dialog>
+                    <reason-dialog id="reasonDialog" caption="${msg.cancelSubscriptionFormCaption}" ></reason-dialog>
                 </div>
             </div>
         </paper-dialog>
@@ -129,7 +128,7 @@
                 }
             },
             initCancellation : function(e) {
-                this.$.reasonDialog.show();
+                this.$.reasonDialog.show("${msg.cancelSubscriptionFormMsg}");
             },
             ajaxResponse:function() {
                 this.isActive = false

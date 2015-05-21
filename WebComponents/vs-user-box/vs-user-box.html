@@ -34,7 +34,8 @@
             properties: {
                 uservsList:{type:Array, value:[], observer:'uservsListChanged'},
                 caption:{type:String},
-                multiSelection:{type:Boolean}
+                multiSelection:{type:Boolean},
+                messages:{type:Object}
             },
             ready:function() {
                 this.messages = this.$.i18nVS.getMessages()

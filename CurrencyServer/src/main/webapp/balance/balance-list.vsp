@@ -12,7 +12,6 @@
                 padding:5px 0px 5px 0px;
                 width: 100%;
             }
-
             .tableHeadervs div {
                 text-align:center;
             }
@@ -21,9 +20,7 @@
                 padding: 10px 0px 10px 0px;
                 width: 100%;
             }
-            .rowvs div {
-                text-align:center;
-            }
+            .rowvs div {  text-align:center; }
         </style>
         <iron-ajax id="ajax" auto url="{{url}}" last-response="{{balanceList}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
         <!--JavaFX Webkit gives problems with tables and templates -->
