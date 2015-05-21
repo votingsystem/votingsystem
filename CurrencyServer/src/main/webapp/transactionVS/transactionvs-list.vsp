@@ -5,8 +5,8 @@
 
 <dom-module name="transactionvs-list" attributes="url transactionsDto">
 <template>
-    <iron-ajax id="ajax" auto url="{{url}}" last-response="{{responseData}}" handle-as="json" method="get"
-               content-type="application/json"  on-iron-complete="{{ajaxComplete}}"></iron-ajax>
+    <iron-ajax id="ajax" auto url="{{url}}" last-response="{{transactionsDto}}" handle-as="json" method="get"
+               content-type="application/json" ></iron-ajax>
     <div class="layout flex horizontal wrap around-justified">
         <template repeat="{{transaction in transactionsDto.resultList}}">
             <transactionvs-card transaction="{{transaction}}"></transactionvs-card>
@@ -28,10 +28,6 @@
         },
         transactionsDtoChanged:function() {
             console.log(this.tagName + " - transactionsDtoChanged - transactionsDto: " + this.transactionsDto)
-        },
-        ajaxComplete: function() {
-            console.log(this.tagName + " - ajaxComplete")
-            this.transactionsDto = this.responseData
         },
         addTransaction:function(transactionvs) {
             this.transactionsDto.resultList.push(transactionvs)
