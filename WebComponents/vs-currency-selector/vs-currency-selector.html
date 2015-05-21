@@ -1,10 +1,6 @@
 <dom-module name="vs-currency-selector">
     <template>
-        <select id="currencySelect" on-change="selectAction" class="form-control">
-            <template is="dom-repeat" items="{{currencyCodes}}">
-                <option value="{{item.code}}">{{item.name}}</option>
-            </template>
-        </select>
+        <select id="currencySelect" on-change="selectAction" class="form-control"></select>
     </template>
     <script>
         Polymer({
@@ -21,6 +17,11 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
+                var currencySelect = this.$.currencySelect;
+                //hack, this instead of template inside select because of bug in JavaFX Webkit
+                this.currencyCodes.forEach(function(currency) {
+                    currencySelect.appendChild(new Option(currency.name, currency.code));
+                }.bind(this))
                 this.$.currencySelect.style.width = this.width
                 this.$.currencySelect.style.fontSize = this.fontSize
                 this.$.currencySelect.style.height = this.height

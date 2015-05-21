@@ -48,7 +48,7 @@
 
     <div hidden="{{detailsHidden}}" style="max-width: 900px; margin:0 auto;">
         <div class="vertical layout flex">
-            <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.4em;display:none;">
+            <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.1em;display:none;">
             </div>
             <div hidden="{{!isAdminView}}">
                 <div class="layout horizontal center center-justified">
@@ -245,7 +245,7 @@
             }
             if(this.groupvs.representative) this.representativeName =
                     this.groupvs.representative.firstName + " " + this.groupvs.representative.lastName
-            this.tagsHidden = (this.groupvs.tags == null || groupvs.tags.length === 0)
+            if(this.groupvs.tags) this.tagsHidden = (this.groupvs.tags.length === 0)
             this.$.userList.url = "${restURL}/groupVS/id/" + this.groupvs.id + "/listUsers"
             this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.groupvsLbl}"}});
             console.log("this.isUserView: " + this.isUserView + " - groupvs.state: " + this.groupvs.state +
@@ -264,13 +264,13 @@
             this.$.transactionSelectorDialog.opened = false
         },
         cancelGroup:function() {
+            showMessageVS("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name),
+                    "${msg.confirmOperationMsg}", 'cancel_group', true)
+        },
+        editGroup:function() {
             var operationVS = new OperationVS(Operation.CURRENCY_GROUP_EDIT)
             operationVS.message = this.groupvs.id
             VotingSystemClient.setMessage(operationVS);
-        },
-        editGroup:function() {
-            showMessageVS("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name),
-                    "${msg.confirmOperationMsg}", 'cancel_group', true)
         },
         showTransactionVSDialog:function(e) {
             console.log("showTransactionVSDialog")
