@@ -13,9 +13,9 @@
             <div class="layout horizontal center center-justified" style="margin:0 0 10px 0;">
                 <select id="groupvsTypeSelect" style="font-size: 1.3em; height: 30px; max-width: 400px;"
                         on-change="groupvsTypeSelect" class="form-control">
-                    <option value="ACTIVE"  style="color:#388746;"> - ${msg.selectActiveGroupvsLbl} - </option>
-                    <option value="PENDING" style="color:#fba131;"> - ${msg.selectPendingGroupvsLbl} - </option>
-                    <option value="CANCELED" style="color:#cc1606;"> - ${msg.selectClosedGroupvsLbl} - </option>
+                    <option value="ACTIVE"  style="color:#388746;"> ${msg.selectActiveGroupvsLbl} </option>
+                    <option value="PENDING" style="color:#fba131;"> ${msg.selectPendingGroupvsLbl} </option>
+                    <option value="CANCELED" style="color:#cc1606;"> ${msg.selectClosedGroupvsLbl} </option>
                 </select>
             </div>
             <div class="layout flex horizontal wrap around-justified">

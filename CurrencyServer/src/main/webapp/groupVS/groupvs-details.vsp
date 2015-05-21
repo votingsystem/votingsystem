@@ -100,7 +100,6 @@
         <div class="eventContentDiv">
             <vs-html-echo html="{{decodeBase64(groupvs.description)}}"></vs-html-echo>
         </div>
-        isUserView: <span>{{isUserView}}</span>
         <div class="layout horizontal">
             <div hidden="{{tagsHidden}}" class="layout horizontal center center-justified"
                     style="margin: 5px 30px 0 0;">
@@ -143,8 +142,8 @@
         properties: {
             fabVisible:{type:Boolean, value:false},
             groupvs:{type:Object, value:{}, observer:'groupvsChanged'},
-            representativeName:{computed:'_computeRepresentativeName(groupvs)'},
-            tagsHidden:{computed:'_computeTags(groupvs)'}
+            representativeName:{type:String},
+            tagsHidden:{type:Boolean}
         },
         ready : function() {
             console.log(this.tagName + " - ready - fabVisible: " + this.fabVisible)
@@ -163,13 +162,6 @@
         decodeBase64:function(base64EncodedString) {
             if(base64EncodedString == null) return null
             return decodeURIComponent(escape(window.atob(base64EncodedString)))
-        },
-        _computeTags:function(groupvs) {
-            return (this.groupvs.tags == null || groupvs.tags.length === 0)
-        },
-        _computeRepresentativeName:function(groupvs) {
-            if(groupvs == null || groupvs.representative == null) return
-            return groupvs.representative.firstName + " " + groupvs.representative.lastName
         },
         closeTransactionSelectorDialog:function() {
             this.$.transactionSelectorDialog.opened = false
@@ -251,6 +243,9 @@
                 this.$.messagePanel.style.display = 'block'
                 this.isAdminView = false
             }
+            if(this.groupvs.representative) this.representativeName =
+                    this.groupvs.representative.firstName + " " + this.groupvs.representative.lastName
+            this.tagsHidden = (this.groupvs.tags == null || groupvs.tags.length === 0)
             this.$.userList.url = "${restURL}/groupVS/id/" + this.groupvs.id + "/listUsers"
             this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.groupvsLbl}"}});
             console.log("this.isUserView: " + this.isUserView + " - groupvs.state: " + this.groupvs.state +
