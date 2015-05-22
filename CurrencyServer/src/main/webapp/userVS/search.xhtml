@@ -9,13 +9,14 @@
         <vs-innerpage-signal caption="${msg.userSearchPageTitle}"></vs-innerpage-signal>
         <div class="pageContentDiv">
             <div class="vertical layout center">
-                <uservs-selector id="userVSSelector" style="width:800px; margin:10px 0px 0px 0px;" contact-selector=""></uservs-selector>
+                <uservs-selector style="width:800px; margin:10px 0px 0px 0px;" contact-selector="true"></uservs-selector>
             </div>
         </div>
         <script>
             document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
+                console.log("search.xhtml - user-clicked")
                 if(document.querySelector("#navBar") != null) {
-                    document.querySelector("#navBar").url = "${restURL}/userVS/id/" + e.detail.id + "?menu=" + menuType
+                    document.querySelector("#navBar").loadURL("${restURL}/userVS/id/" + e.detail.id + "?menu=" + menuType)
                 } else window.location.href = "${restURL}/userVS/id/" + e.detail.id + "?menu=" + menuType
             })
         </script>

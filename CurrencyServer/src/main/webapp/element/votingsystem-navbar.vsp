@@ -136,7 +136,7 @@
             loadURL: function(urlToLoad) {
                 this.loading= true;
                 this.updateMenuView()
-                history.pushState(null, null, urlToLoad);
+                history.pushState(null, null, updateMenuLink(urlToLoad));
                 var newURL = updateMenuLink(urlToLoad, "mode=innerPage")
                 console.log(this.tagName + " - loadURL: " + newURL)
                 this.$.ajax.url = newURL

@@ -19,22 +19,20 @@
                 </select>
             </div>
             <div class="layout flex horizontal wrap around-justified">
-                <template is="dom-repeat" items="{{groupListDto.resultList}}">
-                    <div on-tap="showGroupDetails" class$="{{groupvsClass(item.state)}}" style="height: 65px;">
-                        <div class='groupvsSubjectDiv'>{{item.name}}</div>
-                        <div hidden="{{!isItemCanceled(item)}}" style="position: relative;">
+                <template is="dom-repeat" items="{{groupListDto.resultList}}" as="groupvs">
+                    <div on-tap="showGroupDetails" class$="{{groupvsClass(groupvs.state)}}" style="height: 65px;">
+                        <div class='groupvsSubjectDiv'>{{groupvs.name}}</div>
+                        <div hidden="{{!isItemCanceled(groupvs)}}" style="position: relative;">
                             <div class='groupvsMessageCancelled'>${msg.groupvsCancelledLbl}</div>
                         </div>
-                        <div class='numTotalUsersDiv text-right'><span>{{item.numActiveUsers}}</span> ${msg.usersLbl}</div>
+                        <div class='numTotalUsersDiv text-right'><span>{{groupvs.numActiveUsers}}</span> ${msg.usersLbl}</div>
                         <div class="horizontal layout">
-                            <div class='groupvsRepresentativeDiv text-right'>{{getRepresentativeName(item)}}</div>
+                            <div class='groupvsRepresentativeDiv text-right'>{{getRepresentativeName(groupvs)}}</div>
                             <div class="flex"></div>
-                            <div hidden="{{!isTaggedGroup(item)}}" layout horizontal center center-justified style="margin: 5px 5px 2px 0;">
-                                <template is="dom-repeat" repeat="{{item.tags}}">
-                                    <a class="btn btn-default" style="font-size: 0.6em;margin:0px 5px 0px 0px;padding:3px;">
-                                        <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i>{{item.name}}</a>
-                                </template>
-                            </div>
+                            <template is="dom-repeat" items="{{groupvs.tags}}" as="tag">
+                                <a class="btn btn-default" style="font-size: 0.6em;margin:0px 5px 0px 0px;padding:3px;">
+                                    <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i><span>{{tag.name}}</span></a>
+                            </template>
                         </div>
                     </div>
                 </template>
@@ -97,9 +95,9 @@
                 this.groupListHidden = false
                 this.groupDetailsHidden = true
             },
-            showGroupDetails :  function(e) {
+            showGroupDetails :  function(e, details) {
                 console.log(this.tagName + " - showGroupDetails")
-                this.$.groupDetails.groupvs = e.model.item;
+                this.$.groupDetails.groupvs = e.model.groupvs;
                 this.groupListHidden = !this.groupListHidden
                 this.groupDetailsHidden = !this.groupDetailsHidden
             },

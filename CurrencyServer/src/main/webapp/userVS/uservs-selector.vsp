@@ -13,29 +13,29 @@
             .nif {font-size: 0.7em; color:#888;margin:5px 0 0 0; }
             .name {color: #000; font-size: 0.9em;}
         </style>
+        <iron-localstorage id="localstorage" name="contacts-localstorage" value="{{contacts}}"></iron-localstorage>
         <iron-ajax id="ajax" url="{{url}}" last-response="{{userListDto}}" handle-as="json" content-type="application/json"></iron-ajax>
         <div class="vertical layout center">
+            <div hidden={{!contactSelector}} class="horizontal layout center center-justified" style="margin:-10px 0 20px 0;">
+                <div id="searchDiv" class="linkVS" on-click="setSearchView"
+                     style="font-weight: bold; font-size: 1.1em; margin:0 40px 0 0;">${msg.userSearchLbl}</div>
+                <div id="contactDiv" class="linkVS" on-click="setContactsView" style="font-weight: bold; font-size: 1.1em;">${msg.contactsLbl}</div>
+            </div>
+
             <div hidden="{{!modeSearch}}" class="horizontal layout" style="width: 100%;">
                 <div class="layout horizontal center center-justified flex" style="margin:0px auto 0px auto;">
-                    <input value="{{textToSearch}}" type="text" style="width:200px;" class="form-control"
-                           placeholder="${msg.userSearchLbl}" on-keypress="{{searchInputKeyPress}}">
-                </div>
-                <div hidden="{{!contactSelector}}">
-                    <button on-click="toggleContactsView" style="font-size: 1.1em;margin: 0px 10px 0px 5px;" data-button="contacts">
-                        <i class="fa fa-users"></i> ${msg.contactsLbl}
+                    <input id="inputSearch" type="text" style="width:200px;" class="form-control"
+                           placeholder="${msg.userSearchLbl}" on-keypress="searchInputKeyPress">
+                    <button on-click="processSearch" style="margin:0 0 0 5px;">
+                        <i class="fa fa-search"></i> ${msg.searchLbl}
                     </button>
                 </div>
             </div>
             <div hidden="{{modeSearch}}" class="horizontal layout center center-justified" style="width: 100%;">
                 <div class="flex" style="font-size: 1.5em; font-weight: bold; color: #6c0404; text-align: center;">${msg.storeContactsLbl}</div>
-                <div>
-                    <button on-click="toggleContactsView" style="font-size: 1.1em;margin:10px 0px 10px 10px; display: block;" data-button="userSearch">
-                        <i class="fa fa-search"></i> ${msg.searchLbl}
-                    </button>
-                </div>
             </div>
             <div class="horizontal layout wrap around-justified">
-                <template is="dom-repeat" items="{{resultList}}" as="uservs">
+                <template is="dom-repeat" items="{{userListDto.resultList}}" as="uservs">
                     <div class="card" style="display: block;">
                         <div class="horizontal layout" on-click="showUserDetails">
                             <div class="layout flex vertical center-justified">
@@ -54,11 +54,7 @@
                     </div>
                 </template>
             </div>
-            <div hidden="{{!isEmptySearch}}"  class="center" style="margin:30px 0 30px 0; font-weight: bold;">
-                ${msg.emptyUserSearchResultMsg}
-            </div>
-            <iron-localstorage id="localstorage" name="contacts-localstorage" value="{{contacts}}"
-                   on-load="contactsChanged"></iron-localstorage>
+            <div hidden="{{!userListEmpty}}"  class="center" style="margin:30px 0 30px 0; font-weight: bold;">${msg.emptyUserSearchResultMsg}</div>
         </div>
     </template>
     <script>
@@ -67,10 +63,13 @@
             properties: {
                 groupvsId:{type:Number},
                 userListDto:{type:Object, observer:'userListDtoChanged'},
-                contactSelector:{type:Boolean},
-                isEmptySearch:{type:Boolean},
+                contactSelector:{type:Boolean, value:true},
+                modeSearch:{type:Boolean, value:true, observer:'modeSearchChanged'},
+                userListEmpty:{type:Boolean, value:false},
                 selectorModeMsg:{type:String},
-                contactsArray:{type:Array, observer:'contactsArrayChanged'}
+                textToSearch:{type:String},
+                contactsArray:{type:Array, observer:'contactsArrayChanged'},
+                contacts:{type:String, observer:'loadContacts'}
             },
             ready: function() {
                 this.url = this.url || ''
@@ -80,37 +79,54 @@
             modeSearchChanged:function(e) {
                 console.log(this.tagName + " modeSearchChanged - modeSearch: " + this.modeSearch)
                 if(this.modeSearch === true) {
-                    this.textToSearch = ""
                     this.userListDto = {resultList:[]}
-                } else this.userListDto = {resultList:toJSON(this.contacts)}
-                this.selectorModeMsg = modeSearch? '${msg.addContactLbl}':'${msg.removeContactLbl}'
+                    this.$.searchDiv.style.borderBottom = '3px solid'
+                    this.$.contactDiv.style.borderBottom = ''
+                } else {
+                    this.$.searchDiv.style.borderBottom = ''
+                    this.$.contactDiv.style.borderBottom = '3px solid'
+                    this.userListDto = {resultList:toJSON(this.contacts)}
+                }
+                this.userListEmpty = false
+                this.selectorModeMsg = this.modeSearch ? '${msg.addContactLbl}':'${msg.removeContactLbl}'
             },
-            contactsChanged:function(e) {
-                console.log(this.tagName + " - contactsChanged")
+            loadContacts:function(e) {
+                console.log(this.tagName + " - loadContacts")
                 this.contactsArray = toJSON(this.contacts)
                 if(this.contactSelector && !this.modeSearch) this.userListDto = {resultList:toJSON(this.contactsArray)}
             },
             showUserDetails:function(e) {
                 document.querySelector("#voting_system_page").dispatchEvent(
-                        new CustomEvent('user-clicked', { 'detail': e.model.item }));
-                this.fire('iron-signal', {name: "user-clicked", data: e.model.item});
+                        new CustomEvent('user-clicked', { 'detail': e.model.uservs }));
             },
             reset: function() {
                 this.userListDto = {resultList:[]}
             },
             userListDtoChanged: function() {
                 console.log(this.tagName + " - userListDtoChanged - num. users: " + this.userListDto.resultList.length)
-                this.isEmptySearch = (this.userListDto.resultList.length === 0)
+                this.userListEmpty = (this.userListDto.resultList.length === 0)
             },
             contactsArrayChanged: function(e) {
                 this.contacts = JSON.stringify(this.contactsArray)
             },
-            toggleContact: function(event, detail, target) {
-                var uservs = e.model.item
-                if(this.modeSearch == true) {
+            toggleContact: function(e) {
+                e.stopPropagation()
+                var uservs = e.model.uservs
+                if(this.modeSearch === true) {
                     console.log("toggleContact - addContact")
-                    if(!this.isContact(uservs)) this.contactsArray.push(uservs)
-                    target.style.display = 'none'
+                    if(!this.isContact(uservs)) {
+                        this.userListDto = {resultList:[]}
+                        this.contactsArray.push(uservs)
+                        for(userIdx in this.userListDto.resultList) {
+                            if(uservs.id === this.userListDto.resultList[userIdx].id) {
+                                this.userListDto.resultList.splice(userIdx, 1)
+                                console.log("==== deleted: " + userIdx)
+                            }
+                        }
+                        this.userListDto = toJSON(JSON.stringify(this.userListDto)); //notify changes
+                        this.contactsArray =  this.contactsArray.slice(0) //notify changes
+                    }
+                    e.target.style.display = 'none'
                 } else {
                     console.log("toggleContact - removeContact")
                     var result = []
@@ -119,13 +135,13 @@
                     }
                     this.contacts = JSON.stringify(result)
                 }
-                event.stopPropagation()
             },
             isContact:function (uservs){
                 var isInArray = false
                 for(uservsIdx in this.contactsArray) {
                     if(this.contactsArray[uservsIdx].id === uservs.id) return true
                 }
+                console.log(this.tagName + " - isContact: " + isInArray)
                 return isInArray
             },
             isContactButtonHidden:function (uservs){
@@ -140,15 +156,19 @@
                 if (chCode == 13) this.processSearch()
             },
             processSearch:function() {
-                if(this.textToSearch.trim() === "") return
+                this.textToSearch = this.$.inputSearch.value
+                if(this.textToSearch === "") return
                 if(this.groupVSId) this.url = "${restURL}/groupVS/id/" + this.groupVSId + "/searchUsers?searchText=" + this.textToSearch
                 else this.url = "${restURL}/userVS/search?searchText=" + this.textToSearch
                 console.log(this.tagName + " - processSearch - url: " + this.url)
                 this.$.ajax.generateRequest()
             },
-            toggleContactsView:function(event, detail, target) {
-                if("contacts" === target.attributes['data-button'].value) this.modeSearch = false
-                else  this.modeSearch = true
+            setContactsView:function() {
+                this.modeSearch = false
+                if(this.contactsArray.length > 0) this.userListEmpty = false
+            },
+            setSearchView:function() {
+                this.modeSearch = true
             }
         });
     </script>

@@ -28,11 +28,9 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
-                if(document.querySelector("#ironSignals")) {
-                    document.querySelector("#ironSignals").addEventListener('iron-signal-user-clicked', function(e) {
-                        this.$.xDialog.opened = false
-                    }.bind(this));
-                }
+                document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
+                    this.$.xDialog.opened = false
+                }.bind(this))
             },
             show: function(groupVSId) {
                 console.log(this.tagName + " - show - groupVSId: " + groupVSId)
