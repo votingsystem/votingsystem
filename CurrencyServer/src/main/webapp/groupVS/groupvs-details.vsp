@@ -108,10 +108,8 @@
                         <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i><span>{{item.name}}</span></a>
                 </template>
             </div>
-            <div style="margin: 5px 0 0 0;" on-click="goToWeekBalance">
-                <a class="btn btn-red"  style="font-size: 0.8em;">
-                    <i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}
-                </a>
+            <div style="margin: 5px 0 0 0;">
+                <button on-click="goToWeekBalance"><i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}</button>
             </div>
             <div class="flex"></div>
             <div style="margin:5px 10px 0 0; font-size: 0.9em; color:#888;">
@@ -124,7 +122,7 @@
                 text-decoration: underline;">
                 ${msg.usersLbl}
             </div>
-            <div id="userList" style="margin: 0 0 100px 0;">
+            <div style="margin: 0 0 100px 0;">
                 <uservs-list id="userList"></uservs-list>
             </div>
         </div>
@@ -146,7 +144,7 @@
             tagsHidden:{type:Boolean}
         },
         ready : function() {
-            console.log(this.tagName + " - ready - fabVisible: " + this.fabVisible)
+            console.log(this.tagName + " - ready ")
             this.isSelected = false
             this.detailsHidden = false
             //this.isClientToolConnected = window['isClientToolConnected']
@@ -248,6 +246,7 @@
             if(this.groupvs.tags) this.tagsHidden = (this.groupvs.tags.length === 0)
             this.$.userList.url = "${restURL}/groupVS/id/" + this.groupvs.id + "/listUsers"
             this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.groupvsLbl}"}});
+            if(this.groupvs.id) this.$.userList.loadGroupUsers(this.groupvs.id)
             console.log("this.isUserView: " + this.isUserView + " - groupvs.state: " + this.groupvs.state +
                 " - menuType: " + menuType)
         },

@@ -9,15 +9,15 @@
         <iron-ajax id="ajax" url="{{url}}" last-response="{{userListDto}}" handle-as="json"
                    content-type="application/json"></iron-ajax>
         <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
-            <div>
+            <div class="layout flex horizontal wrap around-justified">
                 <template is="dom-repeat" items="{{userListDto.resultList}}" as="subscription">
                     <uservs-subscription-card subscription="{{subscription}}"></uservs-subscription-card>
                 </template>
-                <vs-pager on-pager-change="pagerChange" max="{{userListDto.max}}"
-                          next="${msg.nextLbl}" previous="${msg.previousLbl}"
-                          first="${msg.firstLbl}" last="${msg.lastLbl}"
-                          offset="{{userListDto.offset}}" total="{{userListDto.totalCount}}"></vs-pager>
             </div>
+            <vs-pager on-pager-change="pagerChange" max="{{userListDto.max}}"
+                      next="${msg.nextLbl}" previous="${msg.previousLbl}"
+                      first="${msg.firstLbl}" last="${msg.lastLbl}"
+                      offset="{{userListDto.offset}}" total="{{userListDto.totalCount}}"></vs-pager>
         </div>
     </template>
     <script>
@@ -25,10 +25,19 @@
             is:'uservs-list',
             properties: {
                 userListDto:{type:Object, observer:'userListDtoChanged'},
-                url:{type:String, value:"${restURL}/groupVS/id/${groupVSId}/listUsers"}
+                groupvsId:{type:Number},
+                url:{type:String}
             },
             baseURL:null,
-            ready: function() {console.log(this.tagName + " - ready") },
+            ready: function() {
+                console.log(this.tagName + " - ready")
+            },
+            loadGroupUsers:function(groupvsId) {
+                this.groupvsId = groupvsId
+                console.log(this.tagName + " - loadGroupUsers - groupvsId: " + this.groupvsId)
+                this.url = "${restURL}/groupVS/id/" + this.groupvsId + "/listUsers"
+                this.$.ajax.generateRequest()
+            },
             refreshList: function(state) {
                 this.$.ajax.generateRequest()
             },

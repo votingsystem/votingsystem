@@ -61,7 +61,7 @@
                 } catch (e) {}
             },
             groupListDtoChanged:function() {
-                console.log("groupListDtoChanged")
+                console.log(this.tagName + " - groupListDtoChanged")
                 this.loading = false
             },
             ready :  function(e) {
