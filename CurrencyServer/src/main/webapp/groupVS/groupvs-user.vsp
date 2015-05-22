@@ -2,11 +2,11 @@
 
 <link href="${elementURL}/element/reason-dialog.vsp" rel="import"/>
 
-<dom-module name="groupvs-user" attributes="userId subscriptionDataURLPrefix opened">
+<dom-module name="groupvs-user">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
-            <iron-ajax id="ajax" url="{{url}}" last-response="{{subscriptionData}}" handle-as="json" method="get"
-                       content-type="application/json" on-iron-response="{{ajaxResponse}}"></iron-ajax>
+            <iron-ajax id="ajax" url="{{url}}" last-response="{{subscriptionData}}" handle-as="json"
+                       content-type="application/json" on-response="{{ajaxResponse}}"></iron-ajax>
             <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
@@ -50,10 +50,14 @@
     <script>
         Polymer({
             is:'groupvs-user',
-            isClientToolConnected:false,
-            publish: { subscriptionData: {}},
-            ready :  function(e) {
+            properties: {
+                subscriptionDto: {type:Object},
+                isClientToolConnected: {type:Boolean}
+            },
+            ready:function(e) {
                 this.isClientToolConnected = window['isClientToolConnected']
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
+                        function() {  this.isClientToolConnected = true }.bind(this))
                 this.$.reasonDialog.addEventListener('on-submit', function (e) {
                     console.log("deActivateUser")
                     var operationVS = new OperationVS(Operation.CURRENCY_GROUP_USER_DEACTIVATE)

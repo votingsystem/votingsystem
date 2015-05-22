@@ -2,7 +2,7 @@
 
 <link href="${resourceURL}/iron-localstorage/iron-localstorage.html" rel="import"/>
 
-<dom-module name="uservs-selector" attributes="url contactSelector groupVSId">
+<dom-module name="uservs-selector">
     <template>
         <style>
             .card {
@@ -13,7 +13,7 @@
             .nif {font-size: 0.7em; color:#888;margin:5px 0 0 0; }
             .name {color: #000; font-size: 0.9em;}
         </style>
-        <iron-ajax id="ajax" url="{{url}}" last-response="{{responseData}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
+        <iron-ajax id="ajax" url="{{url}}" last-response="{{userListDto}}" handle-as="json" content-type="application/json"></iron-ajax>
         <div class="vertical layout center">
             <div hidden="{{!modeSearch}}" class="horizontal layout" style="width: 100%;">
                 <div class="layout horizontal center center-justified flex" style="margin:0px auto 0px auto;">
@@ -35,7 +35,7 @@
                 </div>
             </div>
             <div class="horizontal layout wrap around-justified">
-                <template repeat="{{uservs in resultList}}">
+                <template is="dom-repeat" items="{{resultList}}" as="uservs">
                     <div class="card" style="display: block;">
                         <div class="horizontal layout" on-click="showUserDetails">
                             <div class="layout flex vertical center-justified">
@@ -45,7 +45,7 @@
                             <div>
                                 <div hidden="{{isContactButtonHidden(uservs)}}">
                                     <button on-click="toggleContact" style="font-size: 0.7em; margin:0 0 0 0;">
-                                        {{modeSearch? '${msg.addContactLbl}':'${msg.removeContactLbl}'}}
+                                        <span>{{selectorModeMsg}}</span>
                                     </button>
                                 </div>
                                 <div class="nif flex horizontal layout center center-justified">{{uservs.nif}}</div>
@@ -54,23 +54,26 @@
                     </div>
                 </template>
             </div>
-            <div hidden="{{responseData.resultList.length !== 0}}"  class="center" id="emptySearchMsg" style="margin:30px 0 30px 0; font-weight: bold;">
+            <div hidden="{{!isEmptySearch}}"  class="center" style="margin:30px 0 30px 0; font-weight: bold;">
                 ${msg.emptyUserSearchResultMsg}
             </div>
             <iron-localstorage id="localstorage" name="contacts-localstorage" value="{{contacts}}"
-                   on-load="{{contactsChanged}}"></iron-localstorage>
+                   on-load="contactsChanged"></iron-localstorage>
         </div>
     </template>
     <script>
         Polymer({
             is:'uservs-selector',
-            contactsArray:[],
-            publish: {
-                contactSelector: true
+            properties: {
+                groupvsId:{type:Number},
+                userListDto:{type:Object, observer:'userListDtoChanged'},
+                contactSelector:{type:Boolean},
+                isEmptySearch:{type:Boolean},
+                selectorModeMsg:{type:String},
+                contactsArray:{type:Array, observer:'contactsArrayChanged'}
             },
             ready: function() {
                 this.url = this.url || ''
-                this.resultList = []
                 this.modeSearch = !this.contactSelector
                 console.log(this.tagName + " - contactSelector: " + this.contactSelector)
             },
@@ -78,13 +81,14 @@
                 console.log(this.tagName + " modeSearchChanged - modeSearch: " + this.modeSearch)
                 if(this.modeSearch === true) {
                     this.textToSearch = ""
-                    this.resultList = []
-                } else this.resultList = toJSON(this.contacts)
+                    this.userListDto = {resultList:[]}
+                } else this.userListDto = {resultList:toJSON(this.contacts)}
+                this.selectorModeMsg = modeSearch? '${msg.addContactLbl}':'${msg.removeContactLbl}'
             },
             contactsChanged:function(e) {
                 console.log(this.tagName + " - contactsChanged")
                 this.contactsArray = toJSON(this.contacts)
-                if(this.contactSelector && !this.modeSearch) this.resultList = this.contactsArray
+                if(this.contactSelector && !this.modeSearch) this.userListDto = {resultList:toJSON(this.contactsArray)}
             },
             showUserDetails:function(e) {
                 document.querySelector("#voting_system_page").dispatchEvent(
@@ -92,11 +96,11 @@
                 this.fire('iron-signal', {name: "user-clicked", data: e.model.item});
             },
             reset: function() {
-                this.resultList = []
+                this.userListDto = {resultList:[]}
             },
-            responseDataChanged: function() {
-                console.log(this.tagName + " - responseDataReceived - num. users: " + this.responseData.resultList.length)
-                this.resultList = this.responseData.resultList
+            userListDtoChanged: function() {
+                console.log(this.tagName + " - userListDtoChanged - num. users: " + this.userListDto.resultList.length)
+                this.isEmptySearch = (this.userListDto.resultList.length === 0)
             },
             contactsArrayChanged: function(e) {
                 this.contacts = JSON.stringify(this.contactsArray)

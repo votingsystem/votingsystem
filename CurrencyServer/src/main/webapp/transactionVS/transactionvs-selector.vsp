@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="transactionvs-selector" attributes="transactionvsType">
+<dom-module name="transactionvs-selector">
     <template>
         <select id="transactionvsTypeSelect" style="margin:0px auto 10px auto;color:black; max-width: 400px;"
                 class="form-control" on-change="transactionvsTypeSelect">
@@ -18,6 +18,9 @@
     <script>
         Polymer({
             is:'transactionvs-selector',
+            properties: {
+                transactionvsType:{type:String}
+            },
             ready: function() {
                 console.log(this.tagName + " - ready")
                 if(this.transactionvsType) this.$.transactionvsTypeSelect.value = this.transactionvsType

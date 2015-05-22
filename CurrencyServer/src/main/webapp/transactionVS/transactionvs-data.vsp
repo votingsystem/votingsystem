@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="transactionvs-data" attributes="transactionvs smimeMessage isClientToolConnected timeStampDate">
+<dom-module name="transactionvs-data">
     <template>
         <style>
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
@@ -23,44 +23,39 @@
 
                 <div class="horizontal layout">
                     <div><b>${msg.dateLbl}: </b>{{getDate(transactionvs.dateCreated)}}</div>
-                    <template if="{{transactionvs.validTo}}">
-                        <div style="margin: 0 0 0 15px;"><b>${msg.validToLbl}: </b>{{transactionvs.validTo}}</div>
-                    </template>
+                    <div hidden="{{!transactionvs.validTo}}" style="margin: 0 0 0 15px;"><b>${msg.validToLbl}: </b>
+                        <span>{{transactionvs.validTo}}</span></div>
                 </div>
-                <template if="{{isSenderVisible}}">
-                    <div style="margin-left: 20px;">
-                        <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
-                            ${msg.senderLbl}</div>
-                        <div id="fromUserDiv">
-                            <div><b>${msg.nameLbl}: </b>{{transactionvs | getFromUserName}}</div>
-                            <div on-click="showFromUserIBAN">
-                                <b>${msg.IBANLbl}: </b>
-                                <span class="IBANLink">{{transactionvs | getFromUserIBAN}}</span>
-                            </div>
+                <div hidden="{{!isSenderVisible}}" style="margin-left: 20px;">
+                    <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
+                        ${msg.senderLbl}</div>
+                    <div id="fromUserDiv">
+                        <div><b>${msg.nameLbl}: </b>{{transactionvs | getFromUserName}}</div>
+                        <div on-click="showFromUserIBAN">
+                            <b>${msg.IBANLbl}: </b>
+                            <span class="IBANLink">{{transactionvs | getFromUserIBAN}}</span>
                         </div>
                     </div>
-                </template>
+                </div>
 
                 <div hidden="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
                     <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621">{{receptorLbl}}</div>
-                    <div>
-                        <template if="{{!receptorMsg}}">
-                            <div><b>${msg.nameLbl}: </b>{{transactionvs.toUserVS.name}}</div>
-                            <div class="horizontal layout">
-                                <b>${msg.IBANLbl}: </b>
-                                <div on-click="showToUserIBAN" class="IBANLink"> {{transactionvs.toUserVS.iban}}</div>
-                            </div>
-                        </template>
+                    <div hidden="{{receptorMsg}}">
+                        <div><b>${msg.nameLbl}: </b>{{transactionvs.toUserVS.name}}</div>
+                        <div class="horizontal layout">
+                            <b>${msg.IBANLbl}: </b>
+                            <div on-click="showToUserIBAN" class="IBANLink"> {{transactionvs.toUserVS.iban}}</div>
+                        </div>
                     </div>
                 </div >
                 <div hidden="{{!receptorMsg}}" style="margin: 15px 0 15px 0;">{{receptorMsg}}</div>
             </div>
         </div>
         <div class="horizontal layout center center-justified" style="margin: 20px 0 0 0;">
-            <div hidden="{{!(transactionvs.tags.length > 0)}}" flex>
-                <template repeat="{{tag in transactionvs.tags}}">
+            <div hidden="{{!(transactionvs.tags.length > 0)}}" class="flex">
+                <template is="dom-repeat" items="{{transactionvs.tags}}" as="tag">
                     <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em; padding:2px 5px 7px 5px;">
-                        <i class="fa fa-tag" style="color: #888;"></i> {{tag}}</a>
+                        <i class="fa fa-tag" style="color: #888;"></i> <span>{{tag}}</span></a>
                 </template>
             </div>
             <div hidden="{{!isClientToolConnected}}" layout horizontal style="margin:1px 20px 0px 0px;">
@@ -76,16 +71,18 @@
     <script>
         Polymer({
             is:'transactionvs-data',
-            publish: {
-                transactionvs: {value: {}}
+            properties: {
+                transactionvs: {type:Object, value: {}, observer:'transactionvsChanged'},
+                tagsHidden: {type:Boolean, value: true},
+                isReceptorVisible: {type:Boolean},
+                isSenderVisible: {type:Boolean},
+                isClientToolConnected: {type:Boolean, value: false},
+                timeStampDate: {type:String},
+                receptorLbl: {type:String},
+                caption: {type:String},
+                receptorMsg: {type:String},
+                smimeMessage: {type:String}
             },
-            isClientToolConnected:window['isClientToolConnected'],
-            timeStampDate:null,
-            receptorLbl:null,
-            caption:null,
-            isReceptorVisible:true,
-            isSenderVisible:true,
-            receptorMsg:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected', function() {
@@ -117,6 +114,7 @@
                 this.receptorMsg = null
                 this.isSenderVisible = true
                 this.isReceptorVisible = true
+                this.isClientToolConnected = window['isClientToolConnected']
                 if(this.transactionvs.toUserIBAN != null && this.transactionvs.toUserIBAN.length > 1) {
                     this.receptorLbl = '${msg.receptorsLbl}'
                 } else this.receptorLbl = '${msg.receptorLbl}'
@@ -158,6 +156,7 @@
                         this.caption = this.transactionvs.type
 
                 }
+                this.tagsHidden = (transactionvs.tags.length === 0)
             },
             showToUserInfo:function(e) {
                 var groupURL = "${restURL}/groupVS/" + e.model.item.toUserVS.id

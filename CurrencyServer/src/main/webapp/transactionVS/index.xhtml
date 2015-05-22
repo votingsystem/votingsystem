@@ -10,11 +10,11 @@
         <vs-innerpage-signal caption="${msg.transactionPageTitle}"></vs-innerpage-signal>
         <div class="pageContentDiv">
             <div class="horizontal layout center center-justified">
-                <transactionvs-selector id="transactionSelector" transactionvsType="${param.transactionvsType}"></transactionvs-selector>
+                <transactionvs-selector id="transactionSelector" transactionvs-type="${param.transactionvsType}"></transactionvs-selector>
             </div>
             <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
-            <transactionvs-list id="currencyTransactionTable" transactionsDto='${transactionsDto}'></transactionvs-list>
+            <transactionvs-list id="currencyTransactionTable" transactions-dto='${transactionsDto}'></transactionvs-list>
         </div>
         <script>
             function listenToSelectedTransactions() {

@@ -2,7 +2,7 @@
 
 <link href="${elementURL}/userVS/uservs-selector.vsp" rel="import"/>
 
-<dom-module name="uservs-selector-dialog" attributes="groupVSId groupVSState">
+<dom-module name="uservs-selector-dialog">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <div id="main">
@@ -15,7 +15,7 @@
                     </div>
                 </div>
                 <div>
-                    <uservs-selector id="userVSSelector" groupVSId="{{groupId}}" contactSelector="false"></uservs-selector>
+                    <uservs-selector id="userVSSelector" groupvs-id="{{groupId}}" contact-selector="false"></uservs-selector>
                 </div>
             </div>
         </paper-dialog>
@@ -23,6 +23,9 @@
     <script>
         Polymer({
             is:'uservs-selector-dialog',
+            properties :{
+                groupvsId:{type:Object}
+            },
             ready: function() {
                 console.log(this.tagName + " - ready")
                 if(document.querySelector("#ironSignals")) {

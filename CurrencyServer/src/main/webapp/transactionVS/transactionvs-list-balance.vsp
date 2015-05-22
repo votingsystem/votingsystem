@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="transactionvs-list-balance" attributes="transactionList caption">
+<dom-module name="transactionvs-list-balance">
     <template>
         <style>
         .transactionvsRow { cursor: pointer;}
@@ -18,14 +18,12 @@
                     text-decoration: underline;">{{numMovements}} - {{caption}}</div>
             </div>
             <div>
-                <template repeat="{{transaction in transactionList}}">
+                <template is="dom-repeat" items="{{transactionList}}" as="transaction">
                     <div class="transactionvsRow" layout horizontal on-click="viewTransaction">
-                        <div class="dateCreated">
-                            {{getDate(transaction.dateCreated)}}
-                        </div>
+                        <div class="dateCreated">{{getDate(transaction.dateCreated)}}</div>
                         <div title="{{transaction.subject}}" class="subjectColumn"
                              style="width:240px; margin:0 30px 0 0;">{{transaction.subject}}</div>
-                        <div class="amountColumn">{{transaction.amount}} {{transaction.currency}}</div>
+                        <div class="amountColumn"><span>{{transaction.amount}}</span> <span>{{transaction.currency}}</span></div>
                         <div class="layout horizontal center center-justified tagColumn">
                             <div class="flex horizontal layout center center-justified">{{transaction.tags[0]}}</div>
                             <div hidden="{{!isTimeLimited(transaction)}}" style="margin:0 0 0 5px; width: 10px;">
@@ -53,11 +51,11 @@
     <script>
         Polymer({
             is:'transactionvs-list-balance',
-            caption:"${msg.expensesLbl}",
-            numMovements:0 + " ${msg.movementsLbl}",
-            publish: {
-                balances: {value: {}},
-                transactionList: {value: []}
+            properties: {
+                balances: {type:Object, value: {}},
+                transactionList: {type:Array, value: []},
+                numMovements: {type:String, value: 0 + " ${msg.movementsLbl}"},
+                caption: {type:String, value: "${msg.expensesLbl}"}
             },
             ready: function() {
                 console.log(this.tagName + " - ready - transactionList: " + this.transactionList.length)

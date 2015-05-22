@@ -39,8 +39,8 @@
     <script>
         Polymer({
             is:'transactionvs-card',
-            publish: {
-                transaction: {value: {}}
+            properties: {
+                transaction: {type:Object, value: {}}
             },
             ready: function() {
                 this.isConfirmMessage = this.isConfirmMessage || false

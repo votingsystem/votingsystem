@@ -1,25 +1,19 @@
 package org.votingsystem.test.currency;
 
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 public class CurrencySendFromWallet {

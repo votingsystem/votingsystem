@@ -6,7 +6,7 @@
 <link href="${elementURL}/userVS/uservs-list.vsp" rel="import"/>
 
 
-<dom-module name="groupvs-details-balance-tabs" attributes="groupvs">
+<dom-module name="groupvs-details-balance-tabs">
     <template>
         <style shim-shadowdom>
             .tabContent {
@@ -40,7 +40,7 @@
                 <transactionvs-table id="transactionToTable"></transactionvs-table>
             </div>
             <div hidden="{{selectedTab !== 'transactionsFrom'}}" id="transactionsFrom" class="tabContent">
-                <transactionvs-table id="transactionFromTable" isUserVSTable="true"></transactionvs-table>
+                <transactionvs-table id="transactionFromTable"></transactionvs-table>
             </div>
             <div hidden="{{selectedTab !== 'userList'}}" id="userList" class="tabContent">
                 <uservs-list id="userList"></uservs-list>
@@ -50,8 +50,10 @@
     <script>
         Polymer({
             is:'groupvs-details-balance-tabs',
-            selectedTab:'balanceList',
-            groupvs: null,
+            properties: {
+                groupvs:{type:Object},
+                selectedTab:{type:String, value:'balanceList'}
+            },
             ready:function() {
                 console.log(this.tagName + " - ready")
             },

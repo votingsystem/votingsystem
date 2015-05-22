@@ -3,12 +3,10 @@
 <link href="${resourceURL}/vs-user-box/vs-user-box.html" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-card.vsp" rel="import"/>
 
-<dom-module name="transactionvs-list" attributes="url transactionsDto">
+<dom-module name="transactionvs-list">
 <template>
-    <iron-ajax id="ajax" auto url="{{url}}" last-response="{{transactionsDto}}" handle-as="json" method="get"
-               content-type="application/json" ></iron-ajax>
     <div class="layout flex horizontal wrap around-justified">
-        <template repeat="{{transaction in transactionsDto.resultList}}">
+        <template is="dom-repeat" items="{{transactionsDto.resultList}}" as="transaction">
             <transactionvs-card transaction="{{transaction}}"></transactionvs-card>
         </template>
         <div hidden="{{transactionsDto.resultList.length !== 0}}" style="font-size: 1.3em; margin:30px 0 0 0;">
@@ -19,13 +17,10 @@
 <script>
     Polymer({
         is:'transactionvs-list',
-        publish: {
-            transactionsDto: {value: {}}
+        properties: {
+            transactionsDto: {type:Object, value: {}}
         },
         ready :  function(e) { console.log(this.tagName + " - ready") },
-        urlChanged:function() {
-            console.log(this.tagName + " - urlChanged: " + this.url)
-        },
         transactionsDtoChanged:function() {
             console.log(this.tagName + " - transactionsDtoChanged - transactionsDto: " + this.transactionsDto)
         },

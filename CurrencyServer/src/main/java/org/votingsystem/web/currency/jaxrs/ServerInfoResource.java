@@ -1,7 +1,6 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyAccountDto;
 import org.votingsystem.dto.currency.SystemAccountsDto;

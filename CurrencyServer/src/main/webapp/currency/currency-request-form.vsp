@@ -31,20 +31,17 @@
                     </div>
                     <div>${msg.transactionvsWithTagAdvertMsg}</div>
                 </div>
-                <template if="{{selectedTags.length > 0}}">
-                    <div class="layout horizontal center center-justified" style="font-weight:bold;font-size: 0.8em; color: #888;
-                    margin:0 0 10px 0;">
-                        <div style="margin: 0 10px 0 0; vertical-align: bottom;">
-                            ${msg.currencyRequestSelectedTagsLbl}
-                        </div>
-                        <template repeat="{{tag in selectedTags}}">
-                            <a class="btn btn-default" data-tag-id$='{{tag.id}}' on-click="removeTag"
-                               style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
-                                <i class="fa fa-minus" style="color: #6c0404;"></i> {{tag.name}}</a>
-                        </template>
+                <div hidden="{{selectedTagsHidden}}" class="layout horizontal center center-justified" style="font-weight:bold;font-size: 0.8em; color: #888;
+                        margin:0 0 10px 0;">
+                    <div style="margin: 0 10px 0 0; vertical-align: bottom;">
+                        ${msg.currencyRequestSelectedTagsLbl}
                     </div>
-                </template>
-
+                    <template is="dom-repeat" items="{{selectedTags}}" as="tag">
+                        <a class="btn btn-default" data-tag-id$='{{tag.id}}' on-click="removeTag"
+                           style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                            <i class="fa fa-minus" style="color: #6c0404;"></i> <span>{{tag.name}}</span></a>
+                    </template>
+                </div>
                 </div>
             </div>
 
@@ -77,7 +74,10 @@
     <script>
         Polymer({
             is:'currency-request-form',
-            selectedTags: [],
+            properties:{
+                selectedTags: {object:Array, value:[]},
+                selectedTagsHidden: {object:Boolean, value:true}
+            },
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.selectedTags = []
@@ -99,6 +99,8 @@
                         this.selectedTags.splice(tagIdx, 1)
                     }
                 }
+                this.selectedTags = this.selectedTags.slice(0); //hack to notify array changes
+                selectedTagsHidden = (this.selectedTags.length === 0)
             },
             submit:function() {
                 console.log("submit - amountValue: " + this.amountValue + " " + this.$.currencySelector.getSelected())

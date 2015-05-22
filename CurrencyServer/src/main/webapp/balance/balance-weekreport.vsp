@@ -2,7 +2,7 @@
 
 <script src="${contextURL}/jsf/resources/js/balanceVSUtils_js.jsp" type="text/javascript"></script>
 
-<dom-module name="balance-uservs-details" attributes="balance type">
+<dom-module name="balance-uservs-details">
     <template>
         <style>
             .movemenType{
@@ -25,49 +25,48 @@
         </style>
         <div class="card" layout vertical>
             <div hidden="{{!errorMessage}}" class="errorMessage">{{errorMessage}}</div>
-            <div class="userVS">{{infoName}} - {{name}}</div>
+            <div class="userVS"><span>{{infoName}}</span> - <span>{{name}}</span></div>
             <div class="layout horizontal center center-justified">
-                ${msg.numExpensesLbl}: {{balance.transactionFromList.length}} ---
-                ${msg.numIncomesLbl}: {{balance.transactionToList.length}}
+                ${msg.numExpensesLbl}: <span>{{balance.transactionFromList.length}}</span> ---
+                ${msg.numIncomesLbl}: <span>{{balance.transactionToList.length}}</span>
             </div>
 
-            <template if="{{transactionToInfoMap}}">
-                <template repeat="{{currency in getCurrencyList(transactionToInfoMap)}}">
-                    <div class="movemenType">${msg.incomesLbl} - {{currency.currencyName}}</div>
-                    <template repeat="{{tagVS in getTagVSList(currency)}}">
+            <div hidden="{{!transactionToInfoMap}}">
+                <template is="dom-repeat" items="{{getCurrencyList(transactionToInfoMap)}}" as="currency">
+                    <div class="movemenType">${msg.incomesLbl} - <span>{{currency.currencyName}}</span></div>
+                    <template is="dom-repeat" items="{{getTagVSList(currency)}}" as="tagVS">
                         <div class="layout horizontal">
-                            <div class="tagLbl">{{tagVS.name}}</div>  - ${msg.numTransactionVSLbl}: {{tagVS.numTransactionVS}} -
-                        ${msg.amountLbl}: {{tagVS.amount}} {{currency.currencyName}}
+                            <div class="tagLbl">{{tagVS.name}}</div>  - ${msg.numTransactionVSLbl}: <span>{{tagVS.numTransactionVS}}</span> -
+                        ${msg.amountLbl}: <span>{{tagVS.amount}}</span> <span>{{currency.currencyName}}</span>
                         </div>
                     </template>
                 </template>
-            </template>
+            </div>
 
-            <template if="{{transactionFromInfoMap}}">
-                <template repeat="{{currency in getCurrencyList(transactionFromInfoMap)}}">
+            <div hidden="{{!transactionFromInfoMap}}">
+                <template is="dom-repeat" items="{{getCurrencyList(transactionFromInfoMap)}}" as="currency">
                     <div class="movemenType">${msg.expensesLbl} - {{currency.currencyName}}</div>
-                    <template repeat="{{tagVS in getTagVSList(currency)}}">
+                    <template is="dom-repeat" items="{{getTagVSList(currency)}}" as="tagVS">
                         <div class="layout horizontal">
-                            <div class="tagLbl">{{tagVS.name}}</div>  - ${msg.numTransactionVSLbl}: {{tagVS.numTransactionVS}} -
-                            ${msg.amountLbl}: {{tagVS.amount}} {{currency.currencyName}}
+                            <div class="tagLbl">{{tagVS.name}}</div>  - ${msg.numTransactionVSLbl}: <span>{{tagVS.numTransactionVS}}</span> -
+                            ${msg.amountLbl}: <span>{{tagVS.amount}}</span> <span>{{currency.currencyName}}</span>
                         </div>
                     </template>
                 </template>
-            </template>
-
+            </div>
         </div>
-
 
     </template>
     <script>
-
         Polymer({
-            os:'balance-uservs-details',
+            is:'balance-uservs-details',
+            properties:{
+                balance:{type:Object, value:{}},
+                type:{type:String}
+            },
             ready: function() {
                 console.log(this.tagName + " - ready")
-
                 //calculateBalanceResultMap()
-
             },
             getCurrencyList:function(transactionFromInfoMap) {
                 console.log("getCurrencyList")
@@ -125,37 +124,30 @@
     </script>
 </dom-module>
 
-
-<dom-module name="balance-weekreport" attributes="url">
+<dom-module name="balance-weekreport">
     <template>
-        <style>
-
-        </style>
-        <iron-ajax id="ajax" auto url="{{url}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
         <!--JavaFX Webkit gives problems with tables and templates -->
         <div class="layout center center-justified" style="margin: 0px auto 0px auto;">
             <div class="layout flex horizontal wrap around-justified">
                 <balance-uservs-details type="systemVS" balance="{{balances.userBalances.systemBalance}}"></balance-uservs-details>
             </div>
             <div class="layout flex horizontal wrap around-justified">
-                <template repeat="{{groupBalance in balances.userBalances.groupVSBalanceList}}">
+                <template is="dom-repeat" items="{{balances.userBalances.groupVSBalanceList}}" as="groupBalance">
                     <balance-uservs-details type="groupVS" balance="{{groupBalance}}"></balance-uservs-details>
                 </template>
             </div>
             <div class="layout flex horizontal wrap around-justified">
-                <template repeat="{{userBalance in balances.userBalances.userVSBalanceList}}">
+                <template is="dom-repeat" items="{{balances.userBalances.userVSBalanceList}}" as="userBalance">
                     <balance-uservs-details  type="userVS" balance="{{userBalance}}"></balance-uservs-details>
                 </template>
             </div>
-
         </div>
-
     </template>
     <script>
         Polymer({
             is:'balance-weekreport',
-            publish: {
-                balances: {value: {}}
+            properties: {
+                balances: {type:Object, value: {}}
             },
             ready: function() {},
             stringify:function(e) {

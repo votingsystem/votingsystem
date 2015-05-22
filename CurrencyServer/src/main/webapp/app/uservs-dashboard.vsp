@@ -13,7 +13,7 @@
         <iron-ajax id="ajax" url="{{url}}" handle-as="json" last-response="{{dashBoardDto}}" method="get"
                    content-type="application/json"></iron-ajax>
         <div class="layout horizontal center center-justified">
-            <select id="transactionLapsedSelect" style="margin: 10px 0 10px 40px; width: 400px; font-size: 1.3em; height: 30px;"
+            <select id="transactionLapsedSelect" style="margin: 10px 0 10px 40px; width: 400px; font-size: 1.2em; height: 30px;"
                     on-change="selectAction" class="form-control">
                 <option value="1">${msg.lastHourMovementsLbl}</option>
                 <option value="12">${msg.last12HourMovementsLbl}</option>

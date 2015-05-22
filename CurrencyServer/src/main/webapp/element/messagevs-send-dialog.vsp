@@ -2,7 +2,7 @@
 
 <link href="${resourceURL}/paper-toast/paper-toast.html" rel="import"/>
 
-<dom-module name="messagevs-send-dialog" attributes="opened">
+<dom-module name="messagevs-send-dialog">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click title="${msg.sendMessageVSDialogCaption}">
             <style></style>
@@ -48,17 +48,14 @@
                 if(this.messageVS.length > this.messageVSMaxLength) this.messageVS = this.messageVS.substring(0,
                         this.messageVSMaxLength);
             },
-            openedChanged:function() {
-                this.async(function() { this.$.xDialog.opened = this.opened});
-            },
             show: function (uservs) {
                 this.uservs = uservs;
                 this.messageVS = ""
                 this.messageToUser = this.sendMessageTemplateMsg.format(this.uservs.name),
-                this.opened = true
+                        this.$.xDialog.opened = true
             },
             close:function() {
-               this.opened = false
+               this.$.xDialog.opened = false
             },
             sendMessage: function () {
                 console.log("sendMessageVS")
@@ -72,7 +69,7 @@
                 }.bind(this))
                 //alert(JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
-                this.opened = false
+                this.close()
                 this.$.toast.show()
             }
         });

@@ -2,9 +2,8 @@
 
 <link rel="import" href="${resourceURL}/vs-highcharts/highcharts-import.html">
 
-<dom-module name="balance-uservs-chart" attributes="chart title yAxisTitle xAxisCategories">
+<dom-module name="balance-uservs-chart">
     <template>
-        <style></style>
         <div class="horizontal layout center center-justified">
             <div id="container" style="padding: 10px;"></div>
         </div>
@@ -12,12 +11,11 @@
     <script>
         Polymer({
             is:'balance-uservs-chart',
-            title:null,
-            chart:null,
-            yAxisTitle:null,
-            publish: {
-                xAxisCategories: {value: []},
-                series:{}
+            properties: {
+                xAxisCategories: {type:Array, value: []},
+                series:{type:Object, value: {}},
+                yAxisTitle:{type:String},
+                caption:{type:String}
             },
             options: {
                 chart: {
@@ -62,7 +60,7 @@
             ready: function() {
                 this.options.chart.type = this.chart = this.chart || 'bar'
                 this.options.chart.renderTo = this.$.container
-                this.options.title.text = this.title
+                this.options.title.text = this.caption
                 this.options.xAxis.categories = this.xAxisCategories
                 this.options.yAxis.title.text = this.yAxisTitle
 

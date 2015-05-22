@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="message-smime-transactionvs" attributes="smimeMessageContent smimeMessage timeStampDate">
+<dom-module name="message-smime-transactionvs">
     <template>
         <style>
         :host{color: #667;}
@@ -53,7 +53,7 @@
                     <div class="layout horizontal">
                         <div><b>${msg.IBANLbl}: </b></div>
                         <div>
-                            <template repeat="{{IBAN in smimeMessageContent.toUserIBAN}}">
+                            <template is="dom-repeat" items="{{smimeMessageContent.toUserIBAN}}" as="IBAN">
                                 <div on-click="showToUserVSByIBAN" class="iban-link">{{IBAN}}</div>
                             </template>
                         </div>
@@ -64,12 +64,11 @@
                         <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em;">
                             <i class="fa fa-tag" style="color: #888;"></i><span>{{smimeMessageContent.tags[0]}}</span></a>
                     </div>
-                    <div class="horizontal layout end-justified" style="margin:10px 0px 10px 0px; font-size: 0.9em;">
-                        <template if="{{isClientToolConnected}}">
-                            <button on-click="checkReceipt">
-                                <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
-                            </button>
-                        </template>
+                    <div hidden="{{!isClientToolConnected}}" class="horizontal layout end-justified"
+                         style="margin:10px 0px 10px 0px; font-size: 0.9em;">
+                        <button on-click="checkReceipt">
+                            <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -79,21 +78,24 @@
     <script>
         Polymer({
             is:'message-smime-transactionvs',
-            publish: {
-                smimeMessageContent: {value: {}}
+            properties: {
+                smimeMessageContent: {type:Object, value: {}, observer:'smimeMessageContentChanged'},
+                isClientToolConnected: {type:Boolean, value: false},
+                tagsHidden: {type:Boolean, value: true},
+                isReceptorVisible: {type:Boolean, value: false},
+                messageToUser: {type:String},
+                smimeMessage: {type:String},
+                timeStampDate: {type:String},
+                messageType: {type:String},
+                fromUserIBAN: {type:String},
+                toUserIBAN: {type:String},
+                caption: {type:String}
             },
-            isClientToolConnected:window['isClientToolConnected'],
-            messageToUser:null,
-            timeStampDate:null,
-            isReceptorVisible:false,
-            messageType:null,
-            fromUserIBAN:null,
-            toUserIBAN:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected', function() {
-                    this.isClientToolConnected = true
-                }.bind(this))
+                this.isClientToolConnected = window['isClientToolConnected']
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
+                        function() {  this.isClientToolConnected = true }.bind(this))
             },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null

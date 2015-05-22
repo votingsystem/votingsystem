@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="reason-dialog" attributes="caption messageToUser">
+<dom-module name="reason-dialog">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <div id="container" layout vertical>
@@ -12,7 +12,9 @@
                         <i class="fa fa-times closeIcon" on-click="close"></i>
                     </div>
                 </div>
-                <div hidden="{{!messageToUser}}" class="center" style="color: #6c0404;">{{messageToUser}}</div>
+                <div hidden="{{!messageToUser}}" class="center" style="color: #6c0404;">
+                    {{messageToUser}}
+                </div>
                 <div style="margin:20px 0px 10px 0px;">
                     <label>${msg.cancelSubscriptionFormMsg}</label>
                     <textarea id="reason" rows="8" required=""></textarea>
@@ -30,6 +32,9 @@
 <script>
     Polymer({
         is:'reason-dialog',
+        properties: {
+            caption:{type:String}
+        },
         ready: function() {
             this.opened = false
         },
@@ -38,9 +43,9 @@
             this.close()
         },
         show: function(message) {
+            this.$.xDialog.opened = true
             this.messageToUser = message;
             this.$.reason.value = ""
-            this.$.xDialog.opened = true
         },
         close: function() {
             this.$.xDialog.opened = false

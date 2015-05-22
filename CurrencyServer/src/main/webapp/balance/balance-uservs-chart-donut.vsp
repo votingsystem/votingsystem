@@ -2,9 +2,8 @@
 
 <link rel="import" href="${resourceURL}/vs-highcharts/highcharts-import.html">
 
-<dom-module name="balance-uservs-chart-donut" attributes="chart title yAxisTitle xAxisCategories">
+<dom-module name="balance-uservs-chart-donut">
     <template>
-        <style></style>
         <div class="horizontal layout center center-justified">
             <div id="containerDonut" style="padding: 10px;"></div>
         </div>
@@ -12,12 +11,11 @@
     <script>
         Polymer({
             is:'balance-uservs-chart-donut',
-            title:null,
-            chart:null,
-            yAxisTitle:null,
-            publish: {
-                xAxisCategories: {value: []},
-                series:{}
+            properties: {
+                xAxisCategories: {type:Array, value: []},
+                series:{type:Object, value: {}},
+                yAxisTitle:{type:String},
+                caption:{type:String}
             },
             options: {
                 chart: { type: 'pie'},
@@ -34,7 +32,7 @@
                 }
             },
             ready: function() {
-                this.options.title.text = this.title
+                this.options.title.text = this.caption
             },
             setSeries: function(tagData) {
                 this.options.series = [
@@ -75,7 +73,7 @@
                     }
                 ]
                 this.options.chart.renderTo = this.$.containerDonut
-                this.options.title.text = this.title
+                this.options.title.text = this.caption
                 var chart = new Highcharts.Chart(this.options);
                 console.log(this.tagName + " - setSeries")
             }

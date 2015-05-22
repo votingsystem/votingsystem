@@ -152,34 +152,35 @@ public class GroupVSResource {
         UserVS.State userState = UserVS.State.ACTIVE;
         try {userState = UserVS.State.valueOf(userVSStateStr);} catch(Exception ex) {}
         long totalCount = 0L;
-        if(contentType.contains("json")) {
-            String queryListPrefix = "select s ";
-            String querySufix = "from SubscriptionVS s where s.state =:subscriptionState " +
-                    "and s.userVS.state =:userState and s.groupVS=:groupVS and (lower(s.userVS.name) like :searchText " +
-                    "or lower(s.userVS.firstName) like :searchText or lower(s.userVS.lastName) like :searchText " +
-                    "or lower(s.userVS.nif) like :searchText)";
-            String queryCountPrefix = "select COUNT(s) ";
-            Query query = dao.getEM().createQuery(queryListPrefix + querySufix)
-                    .setParameter("groupVS", groupVS)
-                    .setParameter("subscriptionState", subscriptionState)
-                    .setParameter("userState", userState).setParameter("searchText", "%" + searchText.toLowerCase() + "%")
-                    .setFirstResult(offset).setMaxResults(max);
+        String queryListPrefix = "select s ";
+        String querySufix = "from SubscriptionVS s where s.state =:subscriptionState " +
+                "and s.userVS.state =:userState and s.groupVS=:groupVS and (lower(s.userVS.name) like :searchText " +
+                "or lower(s.userVS.firstName) like :searchText or lower(s.userVS.lastName) like :searchText " +
+                "or lower(s.userVS.nif) like :searchText)";
+        String queryCountPrefix = "select COUNT(s) ";
+        Query query = dao.getEM().createQuery(queryListPrefix + querySufix)
+                .setParameter("groupVS", groupVS)
+                .setParameter("subscriptionState", subscriptionState)
+                .setParameter("userState", userState).setParameter("searchText", "%" + searchText.toLowerCase() + "%")
+                .setFirstResult(offset).setMaxResults(max);
 
-            List<SubscriptionVS> userList = query.getResultList();
-            List<UserVSDto> resultList = new ArrayList<>();
-            for(SubscriptionVS subscriptionVS : userList) {
-                resultList.add(UserVSDto.COMPLETE(subscriptionVS.getUserVS()));
-            }
-            query = dao.getEM().createQuery(queryCountPrefix + querySufix)
-                    .setParameter("groupVS", groupVS)
-                    .setParameter("subscriptionState", subscriptionState)
-                    .setParameter("userState", userState).setParameter("searchText", "%" + searchText.toLowerCase() + "%");
-            totalCount = (long) query.getSingleResult();
-            ResultListDto resultListDto = new ResultListDto(resultList, offset, resultList.size(), totalCount);
+        List<SubscriptionVS> userList = query.getResultList();
+        List<UserVSDto> resultList = new ArrayList<>();
+        for(SubscriptionVS subscriptionVS : userList) {
+            resultList.add(UserVSDto.COMPLETE(subscriptionVS.getUserVS()));
+        }
+        query = dao.getEM().createQuery(queryCountPrefix + querySufix)
+                .setParameter("groupVS", groupVS)
+                .setParameter("subscriptionState", subscriptionState)
+                .setParameter("userState", userState).setParameter("searchText", "%" + searchText.toLowerCase() + "%");
+        totalCount = (long) query.getSingleResult();
+        ResultListDto resultListDto = new ResultListDto(resultList, offset, resultList.size(), totalCount);
+        if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         } else {
             req.setAttribute("groupVSId", groupVS.getId());
             req.setAttribute("groupVSName", groupVS.getName());
+            req.setAttribute("userListDto", JSON.getMapper().writeValueAsString(resultListDto));
             context.getRequestDispatcher("/groupVS/listUsers.xhtml").forward(req, resp);
             return Response.ok().build();
         }

@@ -25,7 +25,7 @@
             <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
-            <dom-module name="record-list" attributes="url menuType">
+            <dom-module name="record-list">
                 <template>
                     <style></style>
                     <iron-ajax id="ajax" auto="" url="{{url}}" last-response="{{logData}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
@@ -39,8 +39,8 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <template repeat="{{record in logData.resultList}}">
-                                    <tr><td class="text-center">{{record.date}}</td><td class="text-center">{{record.message}}</td></tr>
+                                <template is="dom-repeat" items="{{logData.resultList}}">
+                                    <tr><td class="text-center">{{item.date}}</td><td class="text-center">{{item.message}}</td></tr>
                                 </template>
                                 </tbody>
                             </table>
@@ -49,13 +49,13 @@
                 </template>
                 <script> Polymer({
                     is:'record-list',
-                    publish: {
-                        logData: {value: {}}
+                    properties: {
+                        logData: {type:Object, value: {}}
                     }
                 });</script>
             </dom-module>
 
-            <record-list id="recordList" logData= '${logData}'></record-list>
+            <record-list id="recordList" log-data= '${logData}'></record-list>
 
         </div>
     </ui:define>

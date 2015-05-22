@@ -50,27 +50,29 @@
                          style="font-weight:bold;text-align: center;display: block;">
                         <div class="layout horizontal center center-justified" style="margin: 0 0 20px 0;">
                             <div style="margin: 0 10px 0 0;">
-                                <input type="checkbox" id="timeLimitedButton" style="height: 1.3em; width: 1.3em;">${msg.timeLimitedAdviceMsg}
-                            <div style="color:#6c0404; font-size: 1.1em;"></div>
-                        </div>
-                        </div>
-                        <div>${msg.selectedTagsAdvice}</div>
-                        <template is="dom-repeat" items="{{selectedTags}}">
-                            <div class="layout horizontal center center-justified" style="font-size: 0.9em;">
-                                <div style="display: block;">
-                                    <a class="btn btn-default" data-tag-id$='{{item.id}}'  on-click="removeTag"
-                                       style="font-size: 0.9em;margin:5px 5px 0px 5px;padding:3px;">
-                                        <i class="fa fa-minus" style="color:#6c0404;"></i> <span>{{item.name}}</span>
-                                    </a>
-                                </div>
+                                <input type="checkbox" id="timeLimitedButton" style="height: 1.3em; width: 1.3em;">
                             </div>
-                        </template>
+                            <div style="color:#888; font-size: 1.1em;">${msg.timeLimitedAdviceMsg}</div>
+                        </div>
+                        <div>
+                            <div>${msg.selectedTagsAdvice}</div>
+                            <template is="dom-repeat" items="{{selectedTags}}">
+                                <div style="font-size: 0.9em;">
+                                    <div>
+                                        <a class="btn btn-default" data-tag-id$='{{item.id}}'  on-click="removeTag"
+                                           style="font-size: 0.9em;margin:5px 5px 0px 5px;padding:3px;">
+                                            <i class="fa fa-minus" style="color:#6c0404;"></i> <span>{{item.name}}</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>
             <div hidden="{{!isWithUserSelector}}">
                 <button on-click="openSearchUserDialog" style="margin: 0 0 5px 5px;font-size: 1.1em;">
-                    <i class="fa fa-user"></i> {{selectReceptorMsg}}
+                    <i class="fa fa-user"></i> <span>{{selectReceptorMsg}}</span>
                 </button>
                 <div style="margin:10px 0 0 0;">
                     <vs-user-box flex id="receptorBox" caption="${msg.receptorLbl}"></vs-user-box>
@@ -87,7 +89,7 @@
         </div>
     </div>
 
-    <uservs-selector-dialog id="userVSSelectorDialog" groupVSId="{{groupId}}"></uservs-selector-dialog>
+    <uservs-selector-dialog id="userVSSelectorDialog" groupvs-id="{{groupId}}"></uservs-selector-dialog>
     <tagvs-select-dialog id="tagDialog" caption="${msg.addTagDialogCaption}" service-url="${restURL}/tagVS"></tagvs-select-dialog>
 
 </template>
@@ -156,7 +158,6 @@
             this.$.receptorBox.removeUsers()
             this.$.tagDialog.reset()
         },
-
         removeErrorStyle: function (element) {
             var formElements = element.children
             for(var i = 0; i < element.childNodes.length; i++) {

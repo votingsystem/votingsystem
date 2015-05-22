@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="transactionvs-table" attributes="url userNif isUserVSTable transactionsDto">
+<dom-module name="transactionvs-table">
 <template>
     <style>
     .rowvs { border-bottom: 1px solid #ccc; padding: 10px 0px 10px 0px; cursor: pointer;
@@ -20,7 +20,7 @@
             <div class="flex" style="width:240px;">${msg.subjectLbl}</div>
         </div>
         <div>
-            <template repeat="{{transaction in resultList}}">
+            <template is="dom-repeat" items="{{resultList}}" as="transaction">
                 <div on-click="showTransactionDetails" class="{{getClass(transaction)}}">
                     <div style="width:80px;">{{transaction | timeLimitedDescription}}</div>
                     <div style="width: 210px;">
@@ -38,19 +38,17 @@
 <script>
     Polymer({
         is:'transactionvs-table',
-        publish: {
-            transactionsDto: {value: {}, observer:'transactionsDtoChanged'}
+        properties: {
+            transactionsDto: {type:Object, value: {}, observer:'transactionsDtoChanged'}
         },
         ready:function(e) {
             this.userNif = null
-            this.isUserVSTable = false;
             console.log(this.tagName + " - ready")
         },
         urlChanged:function() {
             console.log(this.tagName + " - urlChanged: " + this.url)
         },
         getClass: function(transactionvs) {
-            if(!this.isUserVSTable) return
             if(transactionvs.fromUserVS && transactionvs.fromUserVS.nif == this.userNif) {
                 return "expenseRow horizontal layout center center justified rowvs"
             } else return "horizontal layout center center justified rowvs"

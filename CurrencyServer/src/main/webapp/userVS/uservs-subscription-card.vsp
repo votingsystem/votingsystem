@@ -24,9 +24,7 @@
             font-weight: bold;text-align: left;}
         </style>
         <div class="card" on-click="userSelected">
-            <template if="{{isNifVisible}}">
-                <div class="nifColumn">{{subscription.uservs.nif}}</div>
-            </template>
+            <div hidden="{{nifHidden}}" class="nifColumn">{{subscription.uservs.nif}}</div>
             <!--<div style="width:200px;">{{subscription.uservs.iban}}</div>-->
             <div class="horizontal layout center-justified userVSname flex">{{subscription.uservs.name}}</div>
             <div class="horizontal layout">
@@ -40,9 +38,9 @@
     <script>
         Polymer({
             is:'uservs-subscription-card',
-            isNifVisible:false,
-            publish: {
-                subscription: {value: {}}
+            properties: {
+                subscription: {type:Object, value: {}},
+                nifHidden: {type:Boolean, value: false}
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()

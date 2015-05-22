@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="balance-list" attributes="url">
+<dom-module name="balance-list">
     <template>
         <style>
             .tableHeadervs {
@@ -32,12 +32,12 @@
                 <div class="flex">${msg.lastUpdateLbl}</div>
             </div>
             <div>
-                <template repeat="{{account in balanceList.accounts}}">
+                <template is="dom-repeat" items="{{balanceList.accounts}}">
                     <div class="rowvs" layout horizontal center center-justified>
-                        <div class="flex" style="width: 80px;">{{account.tag.name | tagDescription}}</div>
-                        <div class="flex" style="width:80px;">{{account.amount | formatAmount}}</div>
-                        <div>{{account.currency}}</div>
-                        <div class="flex">{{account.lastUpdated}}</div>
+                        <div class="flex" style="width: 80px;">{{tagDescription(item.tag.name)}}</div>
+                        <div class="flex" style="width:80px;">{{formatAmount(item.amount)}}</div>
+                        <div>{{item.currency}}</div>
+                        <div class="flex">{{item.lastUpdated}}</div>
                     </div>
                 </template>
             </div>

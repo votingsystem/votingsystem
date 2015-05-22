@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="message-smime-transactionvs-from-bankvs" attributes="smimeMessage isClientToolConnected timeStampDate">
+<dom-module name="message-smime-transactionvs-from-bankvs">
     <template>
         <style>
         .messageToUser {
@@ -35,18 +35,15 @@
                 <div><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
                 <div class="horizontal layout">
                     <div class="flex"><b>${msg.amountLbl}: </b>{{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
-                    <template if="{{smimeMessageContent.timeLimited}}">
-                        <div class="pageHeader" title="${msg.timeLimitedDateMsg} '{{smimeMessageContent.validTo}}'"
-                             style="margin: 0 20px 0 0;"><b>
-                            ${msg.timeLimitedLbl}</b>
-                        </div>
-                    </template>
+                    <div hidden="{{!smimeMessageContent.timeLimited}}" class="pageHeader"
+                         style="margin: 0 20px 0 0;"><b>${msg.timeLimitedLbl}</b> ${msg.timeLimitedDateMsg} <span>{{smimeMessageContent.validTo}}</span>
+                    </div>
                 </div>
                 <div style="margin-left: 20px;">
                     <div class="actorLbl" style=" margin:10px 0px 0px 0px;">${msg.senderLbl}</div>
                     <div>
-                        <div><b>${msg.nameLbl}:  </b>{{smimeMessageContent.fromUser}}</div>
-                        <div><b>${msg.IBANLbl}: </b>{{smimeMessageContent.fromUserIBAN}}</div>
+                        <div><b>${msg.nameLbl}:  </b><span>{{smimeMessageContent.fromUser}}</span></div>
+                        <div><b>${msg.IBANLbl}: </b><span>{{smimeMessageContent.fromUserIBAN}}</span></div>
                         <div on-click="showFromUserVSByIBAN">
                             <b>${msg.bankVSIBANLbl}: </b>
                             <span class="iban-link">{{smimeMessageContent.fromUserIBAN}}</span>
@@ -54,21 +51,19 @@
                     </div>
                 </div>
                 <div hidden="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
-                    <div class="actorLbl">
-                        ${msg.receptorLbl}
-                    </div>
+                    <div class="actorLbl">${msg.receptorLbl}</div>
                     <div class="layout horizontal">
                         <div><b>${msg.IBANLbl}: </b></div>
                         <div>
-                            <template repeat="{{IBAN in smimeMessageContent.toUserIBAN}}">
+                            <template is="dom-repeat" items="{{smimeMessageContent.toUserIBAN}}" as="IBAN">
                                 <div on-click="showToUserVSByIBAN" class="iban-link">{{IBAN}}</div>
                             </template>
                         </div>
                     </div>
                 </div >
                 <div  layout horizontal center center-justified style="margin: 15px 0 0 0;">
-                    <div hidden="{{!(smimeMessageContent.tags.length > 0)}}" layout horizontal center center-justified>
-                        <template repeat="{{tag in smimeMessageContent.tags}}">
+                    <div hidden="{{tagsHidden}}" layout horizontal center center-justified>
+                        <template is="dom-repeat" items="{{signedDocument.tags}}" as="tag">
                             <a class="btn btn-default" style="font-size: 0.7em;">
                                 <i class="fa fa-tag" style="color: #888;"></i> {{tag}}</a>
                         </template>
@@ -87,23 +82,27 @@
     <script>
         Polymer({
             is:'message-smime-transactionvs-from-bankvs',
-            publish: {
-                smimeMessageContent: {value: {}}
+            properties: {
+                smimeMessageContent: {type:Object, value: {}, observer:'smimeMessageContentChanged'},
+                isClientToolConnected: {type:Boolean, value: false},
+                tagsHidden: {type:Boolean, value: true},
+                isReceptorVisible: {type:Boolean, value: true},
+                messageToUser: {type:String},
+                smimeMessage: {type:String},
+                timeStampDate: {type:String},
+                caption: {type:String}
             },
-            isClientToolConnected:window['isClientToolConnected'],
-            messageToUser:null,
-            timeStampDate:null,
-            isReceptorVisible:true,
             ready: function() {
                 console.log(this.tagName + " - ready")
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected', function() {
-                    this.isClientToolConnected = true
-                }.bind(this))
+                this.isClientToolConnected = window['isClientToolConnected']
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
+                        function() {  this.isClientToolConnected = true }.bind(this))
                 sendSignalVS({caption:"${msg.transactionVSFromBankVS}"})
             },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
                 console.log(this.tagName + " - smimeMessageContentChanged: " + JSON.stringify(this.smimeMessageContent))
+                this.tagsHidden = (smimeMessageContent.tags.length === 0)
             },
             showFromUserVSByIBAN:function(e) {
                 loadURL_VS("${restURL}/userVS/IBAN/" + this.smimeMessageContent.bankIBAN, '_blank')

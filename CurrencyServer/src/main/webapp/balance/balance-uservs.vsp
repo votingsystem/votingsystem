@@ -6,7 +6,7 @@
 <link href="${resourceURL}/iron-media-query/iron-media-query.html" rel="import"/>
 <link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
 
-<dom-module name="balance-uservs" attributes="url balance">
+<dom-module name="balance-uservs">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <div style="position: absolute; top: 0px; right: 0px;">
@@ -15,45 +15,39 @@
             <transactionvs-data id="transactionViewer"></transactionvs-data>
         </paper-dialog>
         <style>
-        .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
-            margin:10px 0 10px 0; text-decoration: underline; cursor: pointer;}
+            .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
+                margin:10px 0 10px 0; text-decoration: underline; cursor: pointer;}
         </style>
         <iron-media-query query="max-width: 1200px" query-matches="{{smallScreen}}"></iron-media-query>
         <div style="padding: 0 20px;">
             <div class="horizontal layout center center-justified">
                 <div class="flex"></div>
-                <div id="caption" class="pageTitle" on-click="goToUserVSPage">{{caption}} - {{userVSName}}</div>
-                <div class="flex" style="font-size: 0.7em; color: #888; font-weight: normal; text-align: right;">
-                    {{description}}
-                </div>
+                <div id="caption" class="pageTitle" on-click="goToUserVSPage"><span>{{caption}}</span> - <span>{{userVSName}}</span></div>
+                <div class="flex" style="font-size: 0.7em; color: #888; font-weight: normal; text-align: right;">{{description}}</div>
             </div>
             <div class="horizontal layout center center-justified" style="text-align: center;font-weight: bold; color: #888; margin:0 0 8px 0;">
-                <div>{{getDate(balance.timePeriod.dateFrom)}} - {{getDate(balance.timePeriod.dateTo)}} </div>
+                <div><span>{{getDate(balance.timePeriod.dateFrom)}}</span> - <span>{{getDate(balance.timePeriod.dateTo)}}</span></div>
             </div>
             <div class="layout horizontal" style="width: 100%; border-bottom: 2px solid #6c0404; padding: 10px 0 10px 0;">
                 <div style="min-width: 300px; margin: 0 0 0 20px;">
-                    <template repeat="{{currency in getMapKeys(balance.balancesCash)}}">
+                    <template is="dom-repeat" items="{{getMapKeys(balance.balancesCash)}}" as="currency">
                         <div style="font-weight: bold;color:#6c0404; margin: 0 0 5px 0;">
-                            ${msg.cashLbl} - ${msg.currencyLbl} {{currency}}
+                            ${msg.cashLbl} - ${msg.currencyLbl} <span>{{currency}}</span>
                         </div>
                         <div>
                             <div class="horizontal layout">
-                                <template repeat="{{tag in getMapKeys(balance.balancesCash[currency])}}">
+                                <template is="dom-repeat" items="{{getMapKeys(balance.balancesCash[currency])}}" as="tag">
                                     <div style="margin:0 0 0 80px;">
-                                        <div>{{tag | tagDescription}}: {{balance.balancesCash[currency][tag] | formatAmount}}</div>
+                                        <div><span>{{tagDescription(tag)}}</span>: <span>{{formatAmount(balance.balancesCash[currency][tag])}}</span></div>
                                         <div>
-                                            <template if="{{isTimeLimited(currency, tag)}}">
-                                                <div title="{{getTimeLimitedForTagMsg(currency, tag)}}"
-                                                     class="horizontal layout center center-justified">
-                                                    <paper-progress value="{{getPercentageForTagMsg(currency, tag)}}" style="width: 100px;"></paper-progress>
-                                                    <i class="fa fa-clock-o" style="color:#6c0404;font-size: 0.8em; margin:0 0 0 10px;"></i>
-                                                </div>
-                                            </template>
-                                            <template if="{{!isTimeLimited(currency, tag)}}">
-                                                <div style="text-align: center;">
-                                                    <i class="fa fa-check" style="color:darkgreen;font-size: 0.8em; margin:0 0 0 10px;"></i>
-                                                </div>
-                                            </template>
+                                            <div hidden="{{!isTimeLimited(currency, tag)}}" title="{{getTimeLimitedForTagMsg(currency, tag)}}"
+                                                 class="horizontal layout center center-justified">
+                                                <paper-progress value="{{getPercentageForTagMsg(currency, tag)}}" style="width: 100px;"></paper-progress>
+                                                <i class="fa fa-clock-o" style="color:#6c0404;font-size: 0.8em; margin:0 0 0 10px;"></i>
+                                            </div>
+                                            <div hidden="{{isTimeLimited(currency, tag)}}" style="text-align: center;">
+                                                <i class="fa fa-check" style="color:darkgreen;font-size: 0.8em; margin:0 0 0 10px;"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </template>
@@ -73,14 +67,14 @@
                 <div hidden="{{smallScreen?(selectedTab !== 'incomesTab'):false}}" flex
                      style=" margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
                     <transactionvs-list-balance caption="${msg.incomesLbl}"
-                            transactionList="{{balance.transactionToList}}"
+                            transaction-list="{{balance.transactionToList}}"
                             balances="{{balance.balancesTo}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
                 </div>
                 <div hidden="{{smallScreen}}" style="width: 1px; border-right: 2px solid  #6c0404; margin:0 10px 0 10px;"></div>
                 <div hidden="{{smallScreen?(selectedTab !== 'expensesTab'):false}}" flex
                      style=" margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
                     <transactionvs-list-balance id="balanceFromItem"
-                            transactionList="{{balance.transactionFromList}}" balances="{{balance.balancesFrom}}"
+                            transaction-list="{{balance.transactionFromList}}" balances="{{balance.balancesFrom}}"
                             on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
                 </div>
             </div>
@@ -89,13 +83,12 @@
     <script>
         Polymer({
             is:'balance-uservs',
-            url:null,
-            caption:null,
             description:null,
-            transactionFromTotal:null,
-            selectedTab:'incomesTab',
-            publish: {
-                balance: {value: {}}
+            properties: {
+                balance: {type:Object, value: {}},
+                selectedTab: {type:String, value:'incomesTab'},
+                caption: {type:String},
+                url: {type:String}
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()

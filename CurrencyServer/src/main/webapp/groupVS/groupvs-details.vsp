@@ -66,7 +66,7 @@
                 <button style="margin:0 20px 0 0;" on-click="subscribeToGroup">
                     <i class="fa fa-sign-in"></i> ${msg.subscribeGroupVSLbl}
                 </button>
-                <button style="margin:0 20px 0 0;" on-click="sendTransactionVS">
+                <button style="margin:0 20px 0 0; font-size: 1em;" on-click="sendTransactionVS">
                     <i class="fa fa-money"></i> ${msg.sendTransactionVSLbl}
                 </button>
             </div>
@@ -103,9 +103,9 @@
         <div class="layout horizontal">
             <div hidden="{{tagsHidden}}" class="layout horizontal center center-justified"
                     style="margin: 5px 30px 0 0;">
-                <template repeat="{{tag in groupvs.tags}}">
+                <template is="dom-repeat" items="{{groupvs.tags}}">
                     <a class="btn btn-default" style="font-size: 0.7em;margin:0px 5px 0px 0px;padding:3px;">
-                        <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i>{{tag.name}}</a>
+                        <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i><span>{{item.name}}</span></a>
                 </template>
             </div>
             <div style="margin: 5px 0 0 0;" on-click="goToWeekBalance">
@@ -271,17 +271,6 @@
             var operationVS = new OperationVS(Operation.CURRENCY_GROUP_EDIT)
             operationVS.message = this.groupvs.id
             VotingSystemClient.setMessage(operationVS);
-        },
-        showTransactionVSDialog:function(e) {
-            console.log("showTransactionVSDialog")
-            //e.detail.isSelected
-            if('fromGroupToMemberGroup' == e.detail.item.id) {
-
-            } else if('' == e.detail.item.id) {
-
-            }
-            this.page = 1;
-            this.$.transactionvsCoreMenu.selected = null
         },
         back:function() {
             this.fire('iron-signal', {name: "groupvs-details-closed", data: this.groupvs.id});

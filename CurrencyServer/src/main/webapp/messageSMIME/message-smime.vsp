@@ -26,47 +26,42 @@
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
                 <div><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
                 <div class="horizontal layout">
-                    <div><b>${msg.amountLbl}: </b>{{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
-                    <template if="{{smimeMessageContent.timeLimited}}">
-                        <div class="pageHeader" style="margin: 0 0 0 20px;"><b>
-                            ${msg.timeLimitedLbl}</b>
-                        </div>
-                    </template>
+                    <div><b>${msg.amountLbl}: </b><span>{{smimeMessageContent.amount}}</span> <span>{{smimeMessageContent.currencyCode}}</span></div>
+                    <div hidden="{{!smimeMessageContent.timeLimited}}" class="pageHeader" style="margin: 0 0 0 20px;"><b>
+                        ${msg.timeLimitedLbl}</b>
+                    </div>
                 </div>
 
                 <div id="fromUserDivContainer" style="margin-left: 20px;">
                     <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
                         ${msg.senderLbl}</div>
                     <div id="fromUserDiv">
-                        <div><b>${msg.nameLbl}: </b>{{smimeMessageContent.fromUser}}</div>
-                        <div><b>${msg.IBANLbl}: </b>{{smimeMessageContent.fromUserIBAN}}</div>
+                        <div><b>${msg.nameLbl}:</b> <span>{{smimeMessageContent.fromUser}}</span></div>
+                        <div><b>${msg.IBANLbl}:</b> <span>{{smimeMessageContent.fromUserIBAN}}</span></div>
                     </div>
                 </div>
                 <div hidden="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
-                    <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621;">
-                        {{receptorLbl}}</div>
+                    <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621;">{{receptorLbl}}</div>
                     <div class="layout horizontal">
                         <div><b>${msg.IBANLbl}: </b></div>
                         <div>
-                            <template repeat="{{IBAN in smimeMessageContent.toUserIBAN}}">
+                            <template is="dom-repeat" items="{{smimeMessageContent.toUserIBAN}}" as="IBAN">
                                 <div on-click="showToUserIBAN" style="text-decoration: underline; color: #0000ee; cursor: pointer;">{{IBAN}}</div>
                             </template>
                         </div>
                     </div>
                 </div >
 
-                <div hidden="{{smimeMessageContent.operation !== 'CURRENCY'}}">
-                    <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;color: #621">
-                        {{receptorLbl}}
-                    </div>
-                    <div><b>{{toUserName}}</b></div>
-                    <div class="layout horizontal">
-                        <div><b>${msg.IBANLbl}: </b>{{IBAN}}</div>
-                    </div>
+                <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;color: #621">
+                    {{receptorLbl}}
+                </div>
+                <div><b>{{toUserName}}</b></div>
+                <div class="layout horizontal">
+                    <div><b>${msg.IBANLbl}: </b>{{IBAN}}</div>
                 </div>
 
                 <div class="layout horizontal center center-justified" style="margin: 15px 0 0 0;">
-                    <template repeat="{{tag in smimeMessageContent.tags}}">
+                    <template is="dom-repeat" items="{{signedDocument.tags}}" as="tag">
                         <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag.name}}</a>
                     </template>
                 </div>
@@ -85,7 +80,8 @@
         Polymer({
             is:'message-smime',
             properties: {
-                smimeMessageContent:{type:Object, value:{}, observer:'smimeMessageContentChanged'}
+                smimeMessageContent:{type:Object, value:{}, observer:'smimeMessageContentChanged'},
+                isClientToolConnected: {type:Boolean, value: false}
             },
             ready: function() {
                 console.log(this.tagName + " - ready")

@@ -1,10 +1,8 @@
-<link href="../polymer/polymer.html" rel="import">
 <link href="../paper-dialog/paper-dialog.html" rel="import">
 <link href="../paper-input/paper-input.html" rel="import">
 <link rel="import" href="../vs-i18n/vs-i18n.html">
 
-
-<dom-module name="vs-advanced-search-dialog" attributes="opened transition">
+<dom-module name="vs-advanced-search-dialog">
 <template>
     <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
         <style> </style>
@@ -96,7 +94,6 @@
                 this.setMessage(200, null)
             }
         },
-
         validateForm: function() {
             this.isValidForm = true
             //if(this.$.searchInputMessage.inputValue.length > 0 && !this.$.searchInputMessage.invalid)
@@ -117,7 +114,6 @@
             } else this.setMessage(200, null)
             return this.isValidForm
         },
-
         submitForm: function() {
             if(this.validateForm()) {
                 var advancedSearchFromValue = (this.dateFromInputvalue.length > 0)? DateUtils.parseInput(this.dateFromInputvalue):null
@@ -136,7 +132,6 @@
                 this.fire('iron-signal', {name: "advanced-search", data: userSearch});
             }
         },
-
         setMessage:function(status, message) {
             console.log(this.tagName + " - setMessage - status: " + status, " - message: " + message)
             this.status = status

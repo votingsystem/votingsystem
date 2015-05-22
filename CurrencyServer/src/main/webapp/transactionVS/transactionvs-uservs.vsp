@@ -3,25 +3,23 @@
 <dom-module name="transactionvs-uservs">
     <template>
         <div>
-            <div style="font-weight: bold;">num. transactionTo: {{balancesDto.transactionToList.length}}</div>
-            <template repeat="{{transaction in balancesDto.transactionToList}}">
-                <div>{{transaction.type}} - {{transaction.amount}} {{transaction.currencyCode}}</div>
+            <div style="font-weight: bold;">num. transactionTo: <span>{{balancesDto.transactionToList.length}}</span></div>
+            <template is="dom-repeat" items="{{balancesDto.transactionToList}}" as="transaction">
+                <div><span>{{transaction.type}}</span> - <span>{{transaction.amount}}</span> <span>{{transaction.currencyCode}}</span></div>
             </template>
         </div>
         <div style="margin: 20px 0 0 0;">
-            <div style="font-weight: bold;">num. transactionFrom: {{balancesDto.transactionFromList.length}}</div>
-            <template repeat="{{transaction in balancesDto.transactionFromList}}">
-                <div>{{transaction.type}} - {{transaction.amount}} {{transaction.currencyCode}}</div>
+            <div style="font-weight: bold;">num. transactionFrom: <span>{{balancesDto.transactionFromList.length}}</span></div>
+            <template is="dom-repeat" items="{{balancesDto.transactionFromList}}" as="transaction">
+                <div><span>{{transaction.type}}</span> - <span>{{transaction.amount}}</span> <span>{{transaction.currencyCode}}</span></div>
             </template>
         </div>
-
-
     </template>
     <script>
         Polymer({
             is:'transactionvs-uservs',
-            publish: {
-                balancesDto: {value: {}}
+            properties: {
+                balancesDto: {type:Object, value: {}}
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
