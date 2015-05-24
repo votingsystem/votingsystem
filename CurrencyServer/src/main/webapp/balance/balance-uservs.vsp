@@ -4,10 +4,13 @@
 <link href="${elementURL}/transactionVS/transactionvs-data.vsp" rel="import"/>
 <link href="${elementURL}/transactionVS/transactionvs-list-balance.vsp" rel="import"/>
 <link href="${resourceURL}/iron-media-query/iron-media-query.html" rel="import"/>
-<link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
 
 <dom-module name="balance-uservs">
     <template>
+        <style>
+            .tab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;}
+            .tabSelected { border-bottom: 2px solid #ba0011;}
+        </style>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <div style="position: absolute; top: 0px; right: 0px;">
                 <i class="fa fa-times closeIcon" on-click="closeTransactionViewer"></i>
@@ -56,22 +59,19 @@
                     </template>
                 </div>
             </div>
-            <div hidden="{{!smallScreen}}">
-                <paper-tabs style="margin:0px auto 0px auto; cursor: pointer;" class="transparent-teal center"
-                            attr-for-selected="name" selected="{{selectedTab}}"  on-iron-select="tabSelected" noink>
-                    <paper-tab name="incomesTab" style="width: 400px">${msg.incomesLbl}</paper-tab>
-                    <paper-tab name="expensesTab">${msg.expensesLbl}</paper-tab>
-                </paper-tabs>
+            <div class="horizontal layout" hidden="{{!smallScreen}}">
+                <div id="incomesDiv" on-click="setIncomesView" class="tab">${msg.incomesLbl}</div>
+                <div id="expensesDiv"  on-click="setExpensesView"  class="tab">${msg.expensesLbl}</div>
             </div>
             <div class="layout horizontal">
-                <div hidden="{{smallScreen?(selectedTab !== 'incomesTab'):false}}" flex
+                <div hidden="{{incomesTabHidden}}" class="flex"
                      style=" margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
                     <transactionvs-list-balance caption="${msg.incomesLbl}"
                             transaction-list="{{balance.transactionToList}}"
                             balances="{{balance.balancesTo}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
                 </div>
                 <div hidden="{{smallScreen}}" style="width: 1px; border-right: 2px solid  #6c0404; margin:0 10px 0 10px;"></div>
-                <div hidden="{{smallScreen?(selectedTab !== 'expensesTab'):false}}" flex
+                <div hidden="{{expensesTabHidden}}" class="flex"
                      style=" margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
                     <transactionvs-list-balance id="balanceFromItem"
                             transaction-list="{{balance.transactionFromList}}" balances="{{balance.balancesFrom}}"
@@ -83,15 +83,36 @@
     <script>
         Polymer({
             is:'balance-uservs',
-            description:null,
             properties: {
                 balance: {type:Object, value: {}},
                 selectedTab: {type:String, value:'incomesTab'},
                 caption: {type:String},
+                smallScreen: {type:Boolean, observer:'smallScreenChanged'},
+                incomesTabHidden: {type:Boolean},
+                expensesTabHidden: {type:Boolean},
+                description: {type:String},
                 url: {type:String}
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
+            },
+            setIncomesView: function() {
+                this.selectedTab = 'incomesTab'
+                this.$.incomesDiv.className = 'tab tabSelected'
+                this.$.expensesDiv.className = 'tab'
+                this.setTabs()
+            },
+            setExpensesView: function() {
+                this.selectedTab = 'expensesTab'
+                this.$.expensesDiv.className = 'tab tabSelected'
+                this.$.incomesDiv.className = 'tab'
+            },
+            setTabs: function() {
+                this.expensesTabHidden = (this.smallScreen?(this.selectedTab !== 'expensesTab'):true)
+                this.incomesTabHidden = (this.smallScreen?(this.selectedTab !== 'incomesTab'):true)
+            },
+            smallScreenChanged: function() {
+                this.setTabs()
             },
             formatAmount: function(amount) {
                 if(Object.prototype.toString.call(amount) !== '[object String]') return amount.toFixed(2)
@@ -167,7 +188,6 @@
                     this.userVSName = this.balance.userVS.firstName + " " + this.balance.userVS.lastName
                     this.caption = "${msg.userLbl}"
                 }
-
             },
             closeTransactionViewer: function(e) {
                 this.$.xDialog.opened = false;
@@ -178,6 +198,5 @@
                 this.$.xDialog.opened = true;
             }
         });
-
     </script>
 </dom-module>

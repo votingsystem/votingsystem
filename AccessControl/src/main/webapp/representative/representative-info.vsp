@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
 <link href="${elementURL}/element/image-viewer-dialog.vsp" rel="import"/>
 <link href="${elementURL}/representative/representative-select-dialog.vsp" rel="import"/>
 <link href="${elementURL}/representative/representative-request-accreditations-dialog.vsp" rel="import"/>
@@ -12,15 +11,8 @@
             .tabContent { margin:0px auto 0px auto; width:auto; }
             .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px; text-align: center;}
             .representativeNumRepHeader { text-overflow: ellipsis; color:#888;}
-            paper-tabs.transparent-teal { padding: 0px; background-color: #ba0011; color:#f9f9f9;
-                box-shadow: none; cursor: pointer; height: 35px;
-            }
-            paper-tabs.transparent-teal::shadow #selectionBar {
-                background-color: #ba0011;
-            }
-            paper-tabs.transparent-teal paper-tab::shadow #ink {
-                color: #ba0011;
-            }
+            .tab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;}
+            .tabSelected { border-bottom: 2px solid #ba0011;}
         </style>
         <div class="pageContentDiv">
             <div hidden="{{'user' !== menuType}}" class="horizontal layout center-justified" style="font-size: 0.9em;">
@@ -42,11 +34,12 @@
                 </div>
             </div>
             <div style="margin:0px auto 0px auto;">
-                <paper-tabs style="margin:0px auto 0px auto; cursor: pointer;" class="transparent-teal center"
-                        attr-for-selected="name" selected="{{selectedTab}}" noink>
-                    <paper-tab name="profile" style="text-align: center;" class="flex">${msg.profileLbl}</paper-tab>
-                    <paper-tab name="votingHistory" style="text-align: center;" class="flex">${msg.votingHistoryLbl}</paper-tab>
-                </paper-tabs>
+
+                <div class="horizontal layout" hidden="{{!smallScreen}}" style="margin: 20px 0 0 0;">
+                    <div id="profileDiv" on-click="setProfileView" class="tab">${msg.profileLbl}</div>
+                    <div id="votingDiv"  on-click="setVotingHistoryView"  class="tab">${msg.votingHistoryLbl}</div>
+                </div>
+
                 <div hidden="{{votingTabSelected}}" class="tabContent">
                     <div class="layout horizontal">
                         <div hidden="{{!representative.imageURL}}">
@@ -101,9 +94,22 @@
             _checkIfAdmin:function(representative) {
                 return 'admin' === menuType
             },
+            setProfileView:function() {
+                this.selectedTab = 'profile'
+            },
+            setVotingHistoryView:function() {
+                this.selectedTab = 'votingHistory'
+            },
             selectedTabChanged:function() {
                 console.log(this.tagName + " selectedTabChanged - selectedTab: " + this.selectedTab)
                 this.votingTabSelected = (this.selectedTab === 'votingHistory')
+                if( this.selectedTab === 'votingHistory') {
+                    this.$.votingDiv.className = 'tab tabSelected'
+                    this.$.profileDiv.className = 'tab'
+                } else {
+                    this.$.profileDiv.className = 'tab tabSelected'
+                    this.$.votingDiv.className = 'tab'
+                }
             },
             decodeBase64:function(base64EncodedString) {
                 if(base64EncodedString == null) return null

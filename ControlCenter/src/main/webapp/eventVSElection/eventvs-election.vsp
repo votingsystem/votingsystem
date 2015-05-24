@@ -2,7 +2,6 @@
 
 <link href="${resourceURL}/iron-media-query/iron-media-query.html" rel="import"/>
 <link href="${elementURL}/eventVSElection/eventvs-election-stats.vsp" rel="import"/>
-<link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
 
 <dom-module name="eventvs-election">
     <template>
@@ -10,15 +9,8 @@
             .tabContent { margin:0px auto 0px auto; width:auto; }
             .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px;}
             .representativeNumRepHeader { text-overflow: ellipsis; color:#888;}
-            paper-tabs.transparent-teal { padding: 0px; background-color: #ba0011; color:#f9f9f9;
-                box-shadow: none; cursor: pointer; height: 35px;
-            }
-            paper-tabs.transparent-teal::shadow #selectionBar {
-                background-color: #ba0011;
-            }
-            paper-tabs.transparent-teal paper-tab::shadow #ink {
-                color: #ba0011;
-            }
+            .tab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;}
+            .tabSelected { border-bottom: 2px solid #ba0011;}
         </style>
         <iron-media-query query="max-width: 600px" query-matches="{{smallScreen}}"></iron-media-query>
         <div>
@@ -59,12 +51,9 @@
                         </div>
                     </div>
 
-                    <div hidden="{{!smallScreen}}">
-                        <paper-tabs style="margin:15px auto 0px auto; cursor: pointer;" class="transparent-teal center flex"
-                                    attr-for-selected="name" selected="{{selectedTab}}" noink>
-                            <paper-tab name="optionsTab" class="flex" style="text-align: center;">${msg.pollFieldLegend}</paper-tab>
-                            <paper-tab name="statsTab" class="flex" style="text-align: center;">${msg.resultsLbl}</paper-tab>
-                        </paper-tabs>
+                    <div class="horizontal layout" hidden="{{!smallScreen}}" style="margin: 20px 0 0 0;">
+                        <div id="pollDiv" on-click="setPollView" class="tab">${msg.pollFieldLegend}</div>
+                        <div id="resultsDiv"  on-click="setResultsView"  class="tab">${msg.resultsLbl}</div>
                     </div>
 
                     <div class="horizontal layout">
@@ -114,17 +103,33 @@
             getElapsedTime: function(dateStamp) {
                 return new Date(dateStamp).getElapsedTime() + " ${msg.toCloseLbl}"
             },
+            setResultsView: function() {
+                this.selectedTab = 'statsTab'
+                this.$.resultsDiv.className = 'tab tabSelected'
+                this.$.pollDiv.className = 'tab'
+                this.setTabs()
+            },
+            setPollView: function() {
+                this.selectedTab = 'optionsTab'
+                this.$.pollDiv.className = 'tab tabSelected'
+                this.$.resultsDiv.className = 'tab'
+            },
+            setTabs:function() {
+                if(this.selectedTab == 'optionsTab') {
+                    this.statsDivHidden = true
+                    this.setPollView()
+                } else if(this.selectedTab == 'statsTab') {
+                    this.optionsDivHidden = true
+                    this.setResultsView()
+                }
+            },
             smallScreenChanged:function() {
                 console.log("smallScreenChanged - smallScreen: " + this.smallScreen)
                 this.statsDivHidden = false
                 this.optionsDivHidden = false
                 if(this.smallScreen) {
                     this.eventStateRowClass = "vertical layout flex"
-                    if(this.selectedTab == 'optionsTab') {
-                        this.statsDivHidden = true
-                    } else if(this.selectedTab == 'statsTab') {
-                        this.optionsDivHidden = true
-                    }
+                    this.setTabs()
                 } else this.eventStateRowClass = "horizontal layout flex"
             },
             eventvsChanged:function() {

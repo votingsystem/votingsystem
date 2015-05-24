@@ -19,24 +19,6 @@ button {font-size: 1em; }
     fill:#ba0011; color:#ba0011;
 }
 
-paper-tabs.transparent-teal::shadow #selectionBar {
-    background-color: #ba0011;
-}
-
-paper-tabs.transparent-teal {
-    background-color: transparent;
-    color: #ba0011;
-    box-shadow: none; height: 35px;
-}
-
-paper-tabs.transparent-teal::shadow #selectionBar {
-    background-color: #ba0011;
-}
-
-paper-tabs.transparent-teal paper-tab::shadow #ink {
-    color: #ba0011;
-}
-
 .vs-navbar {
     background-color: #ba0011;
     border-bottom: 1px solid #f9f9f9;

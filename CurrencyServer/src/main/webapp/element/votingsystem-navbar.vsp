@@ -95,7 +95,7 @@
                 this.loading = false
             },
             urlChanged: function() { //for history navigation
-                this.loadURL(this.url)
+                if(this.url) this.loadURL(this.url)
             },
             openDrawer:function(e, detail, sender) {
                 this.$.navBarDrawerPanel.openDrawer()

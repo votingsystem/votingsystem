@@ -2,75 +2,9 @@
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
-    <ui:define name="head">
-        <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"/>
-        <link href='//fonts.googleapis.com/css?family=RobotoDraft:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en' rel='stylesheet' type='text/css'/>
-        <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-        <link href="${resourceURL}/paper-tabs/paper-tabs.html" rel="import"/>
-        <style>
-            html,body {
-                height: 100%;
-                margin: 0;
-                font-family: 'RobotoDraft', sans-serif;
-            }
-            .headerTitle {
-                font-size: 26px;
-                font-weight:bold;
-                line-height: 1;
-                display:block;
-                margin: 10px auto 0px auto;
-                color:#ba0011;
-                text-decoration: none;
-            }
-        </style>
-    </ui:define>
     <ui:define name="content">
-        <dom-module name="info-page-tabs">
-            <template>
-                <style shim-shadowdom="">
-                    .tabContent {
-                        padding: 10px 20px 10px 20px;
-                        margin:0px auto 0px auto;
-                        width:auto;
-                    }
-                    paper-tabs.transparent-teal {
-                        background-color: transparent;
-                        color:#ba0011;
-                        box-shadow: none;
-                        cursor: pointer;
-                    }
-
-                    paper-tabs.transparent-teal::shadow #selectionBar {
-                        background-color: #ba0011;
-                    }
-
-                    paper-tabs.transparent-teal paper-tab::shadow #ink {
-                        color: #ba0011;
-                    }
-                </style>
-                <div  style="width: 1000px; margin:0px auto 0px auto;">
-                    <paper-tabs style="width: 1000px;margin:0px auto 0px auto;" class="transparent-teal center" attr-for-selected="name"
-                                 selected="{{selectedTab}}"  on-iron-select="tabSelected" noink="">
-                        <paper-tab name="info" style="width: 400px">${msg.infoLbl}</paper-tab>
-                        <paper-tab name="appData">${msg.appDataLabel}</paper-tab>
-                    </paper-tabs>
-                    <div id="infoDiv" hidden="{{selectedTab !== 'info'}}"  class="tabContent" style="display:{{selectedTab == 'info'?'block':'none'}}">
-                        <div class="mainLink"><a href="http://www.sistemavotacion.org">${msg.webSiteLbl}</a></div>
-                        <div class="mainLink"><a href="https://github.com/votingsystem/votingsystem/tree/master/AccessControl">
-                            ${msg.sourceCodeLbl}</a>
-                        </div>
-                        <div class="mainLink"><a href="https://github.com/votingsystem/votingsystem/wiki/Control-de-Acceso">${msg.wikiLabel}</a></div>
-                    </div>
-                </div>
-            </template>
-
-            <script>
-                Polymer({
-                    is:'info-page-tabs',
-                    selectedTab:'info'
-                });
-            </script>
-        </dom-module>
-        <info-page-tabs style="width: 1000px;"></info-page-tabs>
+        <div><a href="http://www.sistemavotacion.org">${msg.webSiteLbl}</a></div>
+        <div><a href="https://github.com/votingsystem/votingsystem/tree/master/AccessControl">${msg.sourceCodeLbl}</a></div>
+        <div><a href="https://github.com/votingsystem/votingsystem/wiki/Control-de-Acceso">${msg.wikiLabel}</a></div>
     </ui:define>
 </ui:composition>

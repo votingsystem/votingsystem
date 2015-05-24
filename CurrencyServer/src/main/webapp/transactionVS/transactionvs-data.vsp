@@ -90,6 +90,7 @@
                 }.bind(this))
             },
             getDate:function(dateStamp) {
+                if(!dateStamp) return null
                 return new Date(dateStamp).getDayWeekFormat()
             },
             getFromUserName: function (transactionvs) {
@@ -156,7 +157,7 @@
                         this.caption = this.transactionvs.type
 
                 }
-                this.tagsHidden = (transactionvs.tags.length === 0)
+                this.tagsHidden = (!this.transactionvs.tags || this.transactionvs.tags.length === 0)
             },
             showToUserInfo:function(e) {
                 var groupURL = "${restURL}/groupVS/" + e.model.item.toUserVS.id

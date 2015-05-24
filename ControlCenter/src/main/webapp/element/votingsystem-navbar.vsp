@@ -75,7 +75,7 @@
                 this.loading = false
             },
             urlChanged: function() { //for history navigation
-                this.loadURL(this.url)
+                if(this.url) this.loadURL(this.url)
             },
             innerPageSignal:function(e, detail, sender) {
                 console.log("innerPageSignal - caption:" + detail.caption + " - url: " + detail.url)

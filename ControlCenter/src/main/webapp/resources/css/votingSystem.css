@@ -144,21 +144,10 @@ hr {
     text-decoration: none;
 }
 
-.mainLinkContainer {
-    display:table;
-}
-
 .linkVS {
     cursor: pointer;
     color: #0066cc;
     text-decoration: underline;
-}
-
-.content .mainLink {
-    font-size: 20px;
-    color:#0066cc;
-    line-height: 1;
-    display:table-cell;
 }
 
 [class*='col-'] {
@@ -171,26 +160,6 @@ hr {
     vertical-align:middle;
 }
 
-.appLink {
-    text-decoration: none;
-    cursor: pointer;
-    cursor: hand;
-    color: #09287e;
-    display:inline;
-}
-
-.appLink:hover {
-    text-decoration: underline;
-}
-
-.publishPageTitle {
-    font-size:1.5em;
-    font-weight: bold;
-    display: table;
-    color:#6c0404;
-    margin: 5px auto 20px auto;
-}
-
 .datetime {
     color: #52515e;
     font-style: italic;
@@ -199,14 +168,6 @@ hr {
 #eventAuthorDiv {
     color: #52515e;
     font-style: italic;
-}
-
-.publishPageTitle p {
-    width:600px;
-    margin: 0px 0px 0px 0px;
-    text-align:center;
-    overflow:hidden;
-    text-overflow: ellipsis;
 }
 
 .eventContentDiv {
