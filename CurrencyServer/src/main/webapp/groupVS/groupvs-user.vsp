@@ -4,13 +4,13 @@
 
 <dom-module name="groupvs-user">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
-            <iron-ajax id="ajax" url="{{url}}" last-response="{{subscriptionData}}" handle-as="json"
-                       content-type="application/json" on-response="{{ajaxResponse}}"></iron-ajax>
-            <div>
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click style="min-height: 300px;">
+            <iron-ajax id="ajax" url="{{url}}" last-response="{{subscriptionDto}}" handle-as="json" content-type="application/json"></iron-ajax>
+            <div style="height: 400px;">
+
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
-                        <div style="text-align: center;">{{subscriptionData.uservs.name}}</div>
+                        <div style="text-align: center;">{{subscriptionDto.uservs.name}}</div>
                     </div>
                     <div style="position: absolute; top: 0px; right: 0px;">
                         <i class="fa fa-times closeIcon" on-click="close"></i>
@@ -18,21 +18,25 @@
                 </div>
                 <div>
                     <div class="horizontal layout" style="font-size: 0.8em; margin: 5px 0 10px 0;">
-                        <div style="font-weight: bold;color:#888;" flex>NIF: {{subscriptionData.uservs.nif}}</div>
-                        <div hidden="{{!subscriptionData.uservs.iban}}" style="font-weight: bold;color:#888;">
-                            IBAN: <span>{{subscriptionData.uservs.iban}}</span></div>
+                        <div style="font-weight: bold;color:#888;" class="flex">NIF: <span>{{subscriptionDto.uservs.nif}}</span></div>
+                        <div hidden="{{!subscriptionDto.uservs.iban}}" style="font-weight: bold;color:#888;">
+                            IBAN: <span>{{subscriptionDto.uservs.iban}}</span></div>
                     </div>
                     <div id="contentDiv">${msg.subscriptionRequestDateLbl}:
-                        <span id="dateCreatedDiv">{{getDate(subscriptionData.dateCreated)}}</span></div>
+                        <span id="dateCreatedDiv">{{getDate(subscriptionDto.dateCreated)}}</span></div>
                 </div>
-                <div class="horizontal layout center center-justified" style="margin:10px 0 0 0;">
+                <div class="horizontal layout center center-justified" style="margin:10px 0 30px 0;">
                     <div hidden="{{!isClientToolConnected}}">
-                        <button hidden="{{'admin' !== menuType || isActive}}" on-click="activateUser">
-                            <i class="fa fa-thumbs-o-up"></i> ${msg.activateUserLbl}
-                        </button>
-                        <button hidden="{{'admin' !== menuType || !isActive}}" on-click="initCancellation">
-                            <i class="fa fa-thumbs-o-down"></i> ${msg.deActivateUserLbl}
-                        </button>
+                        <div hidden="{{isActive}}">
+                            <button hidden="{{!isAdmin}}" on-click="activateUser">
+                                <i class="fa fa-thumbs-o-up"></i> ${msg.activateUserLbl}
+                            </button>
+                        </div>
+                        <div hidden="{{!isActive}}">
+                            <button hidden="{{!isAdmin}}" on-click="initCancellation">
+                                <i class="fa fa-thumbs-o-down"></i> ${msg.deActivateUserLbl}
+                            </button>
+                        </div>
                     </div>
                     <button class="btnvs" on-click="goToUserVSPage">
                         <i class="fa fa-user"></i> ${msg.userVSPageLbl}
@@ -51,8 +55,10 @@
         Polymer({
             is:'groupvs-user',
             properties: {
-                subscriptionDto: {type:Object},
-                isClientToolConnected: {type:Boolean}
+                subscriptionDto: {type:Object, observer:'subscriptionDtoChanged'},
+                isClientToolConnected: {type:Boolean},
+                isActive: {type:Boolean},
+                isAdmin: {type:Boolean}
             },
             ready:function(e) {
                 this.isClientToolConnected = window['isClientToolConnected']
@@ -62,10 +68,10 @@
                     console.log("deActivateUser")
                     var operationVS = new OperationVS(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
                     operationVS.serviceURL = "${restURL}/groupVS/deActivateUser"
-                    operationVS.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + this.subscriptionData.groupvs.name + "'"
-                    operationVS.jsonStr = JSON.stringify({groupvsId:this.subscriptionData.groupvs.id,
-                        groupvsName:this.subscriptionData.groupvs.name, userVSName:this.subscriptionData.uservs.name,
-                        userVSNIF:this.subscriptionData.uservs.nif, reason:e.detail})
+                    operationVS.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + this.subscriptionDto.groupvs.name + "'"
+                    operationVS.jsonStr = JSON.stringify({groupvsId:this.subscriptionDto.groupvs.id,
+                        groupvsName:this.subscriptionDto.groupvs.name, userVSName:this.subscriptionDto.uservs.name,
+                        userVSNIF:this.subscriptionDto.uservs.nif, reason:e.detail})
                     operationVS.setCallback(function(appMessage) {
 
                     }.bind(this))
@@ -94,8 +100,23 @@
             openedChanged:function() {
                 this.async(function() { this.$.xDialog.opened = this.opened});
             },
-            subscriptionDataChanged:function() {
-                console.log(this.tagName + "subscriptionDataChanged - subscriptionData: " + this.subscriptionData)
+            subscriptionDtoChanged:function() {
+                console.log(this.tagName + "subscriptionDtoChanged - subscriptionDto: " + this.subscriptionDto)
+                this.isActive = false
+                this.isPending = false
+                this.isCancelled = false
+                this.isAdmin = false
+                if('ACTIVE' == this.subscriptionDto.state) {
+                    this.isActive = true
+                    this.caption = "${msg.userStateActiveLbl}"
+                } else if('PENDING' == this.subscriptionDto.state) {
+                    this.isPending = true
+                    this.caption = "${msg.userStatePendingLbl}"
+                } else if('CANCELED' == this.subscriptionDto.state) {
+                    this.isCancelled = true
+                    this.caption = "${msg.userStateCancelledLbl}"
+                }
+                this.isAdmin = ('admin' === menuType || 'superuser' === menuType)
             },
             show:function(baseURL, userId) {
                 if(baseURL && userId) {
@@ -111,10 +132,10 @@
                 var operationVS = new OperationVS(Operation.CURRENCY_GROUP_USER_ACTIVATE)
                 operationVS.serviceURL = "${restURL}/groupVS/activateUser"
                 operationVS.signedMessageSubject = "${msg.activateGroupUserMessageSubject}" + " '" +
-                        this.subscriptionData.groupvs.name + "'"
+                        this.subscriptionDto.groupvs.name + "'"
                 operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,
-                    groupvsId:this.subscriptionData.groupvs.id, groupvsName:this.subscriptionData.groupvs.name,
-                    userVSName:this.subscriptionData.uservs.name, userVSNIF:this.subscriptionData.uservs.nif})
+                    groupvsId:this.subscriptionDto.groupvs.id, groupvsName:this.subscriptionDto.groupvs.name,
+                    userVSName:this.subscriptionDto.uservs.name, userVSNIF:this.subscriptionDto.uservs.nif})
                 operationVS.setCallback(function(appMessage) { this.activateResponse(appMessage)}.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             },
@@ -133,21 +154,6 @@
             },
             initCancellation : function(e) {
                 this.$.reasonDialog.show("${msg.cancelSubscriptionFormMsg}");
-            },
-            ajaxResponse:function() {
-                this.isActive = false
-                this.isPending = false
-                this.isCancelled = false
-                if('ACTIVE' == this.subscriptionData.state) {
-                    this.isActive = true
-                    this.caption = "${msg.userStateActiveLbl}"
-                } else if('PENDING' == this.subscriptionData.state) {
-                    this.isPending = true
-                    this.caption = "${msg.userStatePendingLbl}"
-                } else if('CANCELED' == this.subscriptionData.state) {
-                    this.isCancelled = true
-                    this.caption = "${msg.userStateCancelledLbl}"
-                }
             },
             close: function() {
                 this.$.xDialog.opened = false

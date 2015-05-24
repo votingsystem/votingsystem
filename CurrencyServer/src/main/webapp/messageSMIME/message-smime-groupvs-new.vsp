@@ -59,7 +59,7 @@
                         function() {  this.isClientToolConnected = true }.bind(this))
             },
             smimeMessageContentChanged: function() {
-                this.tagsHidden = (smimeMessageContent.tags.length === 0)
+                this.tagsHidden = (this.smimeMessageContent.tags.length === 0)
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

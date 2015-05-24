@@ -12,9 +12,7 @@
                         <i class="fa fa-times closeIcon" on-click="close"></i>
                     </div>
                 </div>
-                <div hidden="{{!messageToUser}}" class="center" style="color: #6c0404;">
-                    {{messageToUser}}
-                </div>
+                <div hidden="{{!messageToUser}}" class="center" style="color: #6c0404;">{{messageToUser}}</div>
                 <div style="margin:20px 0px 10px 0px;">
                     <label>${msg.cancelSubscriptionFormMsg}</label>
                     <textarea id="reason" rows="8" required=""></textarea>

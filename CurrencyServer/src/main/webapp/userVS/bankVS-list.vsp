@@ -9,7 +9,7 @@
             }
         </style>
         <div class="layout flex horizontal wrap around-justified">
-            <template is="dom-repeat" items="{{bankVSListDto}}" as="bankVS">
+            <template is="dom-repeat" items="{{bankvsListDto}}" as="bankVS">
                 <div class="bankvs" on-click="showDetails">
                     <div class="nameColumn" style="font-size: 1.2em;">{{bankVS.name}}</div>
                     <div class="descriptionColumn">{{bankVS.description}}</div>
@@ -21,11 +21,11 @@
         Polymer({
             is:'bankVS-list',
             properties: {
-                bankVSListDto: {type:Object, value: {}}
+                bankvsListDto: {type:Object, value: {}}
             },
             ready: function() { console.log(this.tagName + " - ready")},
             showDetails: function(e) {
-                loadURL_VS("${restURL}/userVS/id/" + e.model.item.id)
+                loadURL_VS("${restURL}/userVS/id/" + e.model.bankVS.id)
             }
         });
     </script>

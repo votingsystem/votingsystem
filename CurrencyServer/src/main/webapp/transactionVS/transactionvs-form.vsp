@@ -174,7 +174,7 @@
         submit: function () {
             showMessageVS("${msg.emptyFieldMsg}", "${msg.errorLbl}")
             this.removeErrorStyle(this.$.formDataDiv)
-            if(!this.$.amount.validity.valid) {
+            if(!this.$.amount.validity.valid || this.$.amount.value == 0) {
                 //this.$.amount.classList.add("formFieldError")
                 this.$.amount.style.background = '#f6ccd0'
                 showMessageVS("${msg.enterValidAmountMsg}", "${msg.errorLbl}")

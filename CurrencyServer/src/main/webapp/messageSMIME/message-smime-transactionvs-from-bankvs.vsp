@@ -13,8 +13,8 @@
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic; }
         .iban-link {text-decoration: underline; color: #0000ee; cursor: pointer;}
         </style>
-        <div class="layout horizontal">
-            <div style="margin: 0px auto; color: #667;">
+        <div class="layout vertical center center-justified" style="margin: 0px auto; max-width:800px;">
+            <div class="layout vertical center center-justified" style="margin: 0px auto; color: #667;">
                 <div class="horizontal layout" style="margin: 0 0 20px 0;">
                     <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">
                         ${msg.transactionVSFromBankVS}
@@ -22,7 +22,7 @@
                 </div>
 
                 <div hidden="{{!timeStampDate}}" class="timeStampMsg">
-                    <b>${msg.dateLbl}: </b> {{timeStampDate}}
+                    <b>${msg.dateLbl}: </b> <span>{{timeStampDate}}</span>
                 </div>
 
                 <div hidden="{{!messageToUser}}">
@@ -42,7 +42,7 @@
                 <div style="margin-left: 20px;">
                     <div class="actorLbl" style=" margin:10px 0px 0px 0px;">${msg.senderLbl}</div>
                     <div>
-                        <div><b>${msg.nameLbl}:  </b><span>{{smimeMessageContent.fromUser}}</span></div>
+                        <div><b>${msg.nameLbl}: </b><span>{{smimeMessageContent.fromUser}}</span></div>
                         <div><b>${msg.IBANLbl}: </b><span>{{smimeMessageContent.fromUserIBAN}}</span></div>
                         <div on-click="showFromUserVSByIBAN">
                             <b>${msg.bankVSIBANLbl}: </b>
@@ -93,7 +93,7 @@
                 caption: {type:String}
             },
             ready: function() {
-                console.log(this.tagName + " - ready")
+                console.log(this.tagName + " - ready" + window['isClientToolConnected'])
                 this.isClientToolConnected = window['isClientToolConnected']
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
                         function() {  this.isClientToolConnected = true }.bind(this))
@@ -102,7 +102,7 @@
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
                 console.log(this.tagName + " - smimeMessageContentChanged: " + JSON.stringify(this.smimeMessageContent))
-                this.tagsHidden = (smimeMessageContent.tags.length === 0)
+                this.tagsHidden = (!this.smimeMessageContent.tags || this.smimeMessageContent.tags.length === 0)
             },
             showFromUserVSByIBAN:function(e) {
                 loadURL_VS("${restURL}/userVS/IBAN/" + this.smimeMessageContent.bankIBAN, '_blank')

@@ -26,6 +26,7 @@
         },
         addTransaction:function(transactionvs) {
             this.transactionsDto.resultList.push(transactionvs)
+            this.transactionsDto = toJSON(JSON.stringify(this.transactionsDto)) // hack to notify changes
         }
     });</script>
 </dom-module>

@@ -156,7 +156,7 @@
                 if (chCode == 13) this.processSearch()
             },
             processSearch:function() {
-                this.textToSearch = this.$.inputSearch.value
+                this.textToSearch = this.$.inputSearch.value.trim()
                 if(this.textToSearch === "") return
                 if(this.groupVSId) this.url = "${restURL}/groupVS/id/" + this.groupVSId + "/searchUsers?searchText=" + this.textToSearch
                 else this.url = "${restURL}/userVS/search?searchText=" + this.textToSearch

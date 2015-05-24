@@ -84,8 +84,8 @@
                 return amount
             },
             showTransactionDetails: function(e) {
-                console.log("messageSMIMEURL: " + e.model.item.messageSMIMEURL)
-                loadURL_VS(e.model.item.messageSMIMEURL, "_blank")
+                console.log("messageSMIMEURL: " + this.transaction.messageSMIMEURL)
+                loadURL_VS(this.transaction.messageSMIMEURL, "_blank")
             }
 
         });

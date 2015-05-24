@@ -28,7 +28,6 @@
                 groupvsId:{type:Number},
                 url:{type:String}
             },
-            baseURL:null,
             ready: function() {
                 console.log(this.tagName + " - ready")
             },
