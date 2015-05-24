@@ -87,7 +87,6 @@
                 console.log("messageSMIMEURL: " + this.transaction.messageSMIMEURL)
                 loadURL_VS(this.transaction.messageSMIMEURL, "_blank")
             }
-
         });
     </script>
 </dom-module>

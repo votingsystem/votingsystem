@@ -3,29 +3,20 @@
 <dom-module name="message-smime-transactionvs-currency-request">
     <template>
         <style>
-        .messageToUser {
-            font-weight: bold;
-            margin:10px auto 10px auto;
-            background: #f9f9f9;
-            padding:10px 20px 10px 20px;
-        }
         .actorLbl {font-size: 1.2em; text-decoration: underline;font-weight: bold; color: #621; }
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic; }
         .iban-link {text-decoration: underline; color: #0000ee; cursor: pointer;}
         </style>
         <div class="layout vertical center center-justified" style="margin: 0px auto; max-width:800px;">
             <div class="layout vertical" style="margin: 0px auto; color: #667;">
-                <div class="horizontal layout center center-justified" style="margin: 0 0 10px 0; min-width: 400px;">
+                <div class="horizontal layout center center-justified" style="margin: 0 0 10px 0;">
                     <div class="pageHeader" style="margin:0 0 0 20px; font-size: 1.2em;">
                         ${msg.currencyRequestLbl}
                     </div>
                 </div>
 
-                <div hidden="{{!timeStampDate}}" class="timeStampMsg" style="text-align: center;">
+                <div hidden="{{!timeStampDate}}" class="timeStampMsg" >
                     <b>${msg.dateLbl}: </b> <span>{{timeStampDate}}</span>
-                </div>
-                <div hidden="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
-                    <div id="messageToUser">{{messageToUser}}</div>
                 </div>
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
                 <div class="horizontal layout center-justified">
@@ -38,24 +29,22 @@
                 <div style="margin: 20px 0 0 20px;">
                     <div class="actorLbl">${msg.senderLbl}</div>
                     <div>
-                        <div><b>${msg.nameLbl}:  </b>{{smimeMessageContent.fromUserVS.name}}</div>
+                        <div><b>${msg.nameLbl}:</b> <span>{{smimeMessageContent.fromUserVS.name}}</span></div>
                     </div>
                 </div>
                 <div class="horizontal layout" style="margin:10px 0px 10px 0px; ">
                     <div class="flex">
                         <a class="btn btn-default" style="font-size: 0.7em;padding:3px;">
-                            <i class="fa fa-tag" style="color: #888;"></i> {{smimeMessageContent.tagVS.name}}</a>
+                            <i class="fa fa-tag" style="color: #888;"></i> <span>{{smimeMessageContent.tagVS.name}}</span></a>
                     </div>
                     <div hidden="{{!isClientToolConnected}}">
                         <button raised on-click="checkReceipt" style="font-size: 1.1em;">
                             <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
                         </button>
                     </div>
-
                 </div>
             </div>
         </div>
-
     </template>
     <script>
         Polymer({
@@ -65,7 +54,6 @@
                 isClientToolConnected: {type:Boolean, value: false},
                 tagsHidden: {type:Boolean, value: true},
                 isReceptorVisible: {type:Boolean, value: true},
-                messageToUser: {type:String},
                 smimeMessage: {type:String},
                 timeStampDate: {type:String},
                 caption: {type:String}
@@ -78,7 +66,6 @@
                 sendSignalVS({caption:"${msg.transactionVSFromBankVS}"})
             },
             smimeMessageContentChanged:function() {
-                this.messageToUser = null
                 console.log(this.tagName + " - smimeMessageContentChanged: " + JSON.stringify(this.smimeMessageContent))
             },
             showFromUserVSByIBAN:function(e) {

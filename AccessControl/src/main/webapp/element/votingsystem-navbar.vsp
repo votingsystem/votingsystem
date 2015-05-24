@@ -1,10 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
 <link href="${resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
 <link href="${resourceURL}/paper-drawer-panel/paper-drawer-panel.html" rel="import"/>
 <link href="${resourceURL}/paper-header-panel/paper-header-panel.html" rel="import"/>
-<link href="${resourceURL}/paper-toolbar/paper-toolbar.html" rel="import"/>
 <link href="${resourceURL}/paper-menu/paper-menu.html" rel="import"/>
 <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
 
@@ -15,7 +13,7 @@
         paper-item:hover {color: #fba131;}
     </style>
     <template>
-        <iron-ajax id="ajax" on-response="ajaxResponse" on-iron-error="ajaxError" handle-as="document"></iron-ajax>
+        <iron-ajax id="ajax" on-response="ajaxResponse" handle-as="document"></iron-ajax>
         <iron-signals on-iron-signal-vs-innerpage="innerPageSignal"></iron-signals>
         <paper-drawer-panel id="navBarDrawerPanel" responsive-width="30000px" style="overflow: scroll;">
             <div drawer style="height: 100%;">
@@ -56,7 +54,7 @@
                 <paper-header-panel mode="seamed" id="core_header_panel" class="vs-navbar">
                     <div class="horizontal layout center center-justified">
                         <div>
-                            <i class="fa fa-bars vs-navbar-icon" on-click="togglePanel" paper-drawer-toggle style="margin: 0 10px 0 33px;"></i>
+                            <i class="fa fa-bars vs-navbar-icon" paper-drawer-toggle style="margin: 0 10px 0 33px;"></i>
                         </div>
                         <div id="appTitle" style="font-size:1.8em; font-weight:bold; color: #f9f9f9; text-align: center;" class="flex">
                             <span>{{appTitle}}</span>
@@ -78,6 +76,9 @@
     <script>
         Polymer({
             is:'votingsystem-navbar',
+            properties: {
+                url:{type:String, value:null, observer:'urlChanged'}
+            },
             ready: function() {
                 this.appTitle = "${msg.appTitle}"
                 this.searchHidden = true
@@ -157,14 +158,6 @@
                 }
                 this.$.contentDiv.innerHTML = ajaxDocument.body.innerHTML
                 updateLinksVS(document.querySelectorAll("#navBar a"))
-            },
-            ajaxError: function(e) {
-                console.log(this.tagName + " - ajaxError")
-                if(ResponseVS.SC_PRECONDITION_FAILED == e.detail.xhr.status) {
-                    this.loading = false
-                    var response = e.detail.xhr.responseText
-                    showMessageVS(response, '${msg.errorLbl}')
-                }
             }
         });
     </script>
