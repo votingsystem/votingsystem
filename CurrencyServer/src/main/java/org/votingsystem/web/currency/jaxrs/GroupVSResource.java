@@ -211,7 +211,7 @@ public class GroupVSResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
-    @Path("/id/{id}/balance") //old_url -> /groupVS/$id/balance"
+    @Path("/id/{id}/balance")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Object balance(@PathParam("id") long id,
                             @DefaultValue("0") @QueryParam("offset") int offset,

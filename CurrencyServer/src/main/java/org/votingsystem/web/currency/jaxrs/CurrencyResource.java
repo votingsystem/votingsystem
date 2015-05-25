@@ -69,7 +69,7 @@ public class CurrencyResource {
     }
 
     @Path("/hash/{hashCertVSHex}/state") @GET
-    public Response state(@PathParam("hashCertVSHex") String hashCertVSHex) { // old_url -> /currency/$hashCertVSHex/state
+    public Response state(@PathParam("hashCertVSHex") String hashCertVSHex) {
         HexBinaryAdapter hexConverter = new HexBinaryAdapter();
         String hashCertVSBase64 = new String(hexConverter.unmarshal(hashCertVSHex));
         Query query = dao.getEM().createQuery("select c from Currency c where c.hashCertVS =:hashCertVS")
@@ -82,7 +82,7 @@ public class CurrencyResource {
                     .entity(messages.get("currencyExpendedShortErrorMsg")).build();
             case OK:
                 if(currency.getValidTo().after(new Date())) {
-                    return Response.status(ResponseVS.SC_CURRENCY_OK).entity(messages.get("currencyOKMsg")).build();
+                    return Response.status(999).entity(messages.get("currencyOKMsg")).build();
                 } else {
                     dao.merge(currency.setState(Currency.State.LAPSED));
                     return Response.status(ResponseVS.SC_CURRENCY_LAPSED).entity(

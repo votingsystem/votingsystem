@@ -110,7 +110,7 @@ public class BalanceResource {
         } else return accountBean.getAccountsBalanceMap(userVS);
     }
 
-    @Path("/week/{year}/{month}/{day}") //old_url -> /balance/week/$year/$month/$day
+    @Path("/week/{year}/{month}/{day}")
     @GET  @Produces(MediaType.APPLICATION_JSON)
     public Object week(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
@@ -135,7 +135,7 @@ public class BalanceResource {
     }
 
 
-    @Path("/weekdb/{year}/{month}/{day}") // old_url -> /balance/weekdb/$year/$month/$day
+    @Path("/weekdb/{year}/{month}/{day}")
     @GET  @Produces(MediaType.APPLICATION_JSON)
     public Object weekdb(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,
                        @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)

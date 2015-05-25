@@ -36,7 +36,7 @@ public class IBANResource {
     @Inject ConfigVS config;
     @Inject TransactionVSBean transactionVSBean;
 
-    @Path("/from/{IBANCode}") //old_url -> /IBAN/from/$IBANCode
+    @Path("/from/{IBANCode}")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Object from(@PathParam("IBANCode") String IBANCode, @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {

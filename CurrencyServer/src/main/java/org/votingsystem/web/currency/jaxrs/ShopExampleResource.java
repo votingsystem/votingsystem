@@ -60,7 +60,7 @@ public class ShopExampleResource {
 
     //Called with async Javascript from the web page that shows the QR code, we store an AsyncContext in order to notify
     //the web client of any change in the requested transaction state
-    @Path("/listenTransactionChanges/{shopSessionID}") //old_url -> /shop/listenTransactionChanges/$shopSessionID
+    @Path("/listenTransactionChanges/{shopSessionID}")
     @POST @Produces(MediaType.APPLICATION_JSON)
     public Response listenTransactionChanges(@PathParam("shopSessionID") String shopSessionID,
            @Context HttpServletRequest req, @Suspended AsyncResponse asyncResponse) throws Exception {
