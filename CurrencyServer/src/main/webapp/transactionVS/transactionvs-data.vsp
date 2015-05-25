@@ -6,67 +6,75 @@
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
         .IBANLink{ text-decoration: underline; color: #0000ee; cursor: pointer; }
         </style>
-        <div class="horizontal layout">
-            <div class="layout vertical" style="margin: 0px auto; max-width:800px; color:#667;">
-                <div class="horizontal layout center center-justified" style="margin: 0 0 10px 0;">
-                    <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">{{caption}}</div>
-                </div>
-
-                <div hidden="{{!timeStampDate}}" class="timeStampMsg">
-                    <b>${msg.dateLbl}: </b>{{timeStampDate}}
-                </div>
-
-                <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-                <div><b>${msg.subjectLbl}: </b>{{transactionvs.subject}}</div>
-
-                <div><b>${msg.amountLbl}: </b>{{transactionvs.amount}} {{transactionvs.currencyCode}}</div>
-
-                <div class="horizontal layout">
-                    <div><b>${msg.dateLbl}: </b>{{getDate(transactionvs.dateCreated)}}</div>
-                    <div hidden="{{!transactionvs.validTo}}" style="margin: 0 0 0 15px;"><b>${msg.validToLbl}: </b>
-                        <span>{{transactionvs.validTo}}</span></div>
-                </div>
-                <div hidden="{{!isSenderVisible}}" style="margin-left: 20px;">
-                    <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
-                        ${msg.senderLbl}</div>
-                    <div id="fromUserDiv">
-                        <div><b>${msg.nameLbl}: </b>{{transactionvs | getFromUserName}}</div>
-                        <div on-click="showFromUserIBAN">
-                            <b>${msg.IBANLbl}: </b>
-                            <span class="IBANLink">{{transactionvs | getFromUserIBAN}}</span>
-                        </div>
+        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
+            <div>
+                <div class="layout horizontal center center-justified" style="margin: 0px auto; max-width:800px; color:#667;">
+                    <div hidden="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                        <div style="text-align: center;">{{caption}}</div>
+                    </div>
+                    <div style="position: absolute; top: 0px; right: 0px;">
+                        <i class="fa fa-times closeIcon" on-click="close"></i>
                     </div>
                 </div>
 
-                <div hidden="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
-                    <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621">{{receptorLbl}}</div>
-                    <div hidden="{{receptorMsg}}">
-                        <div><b>${msg.nameLbl}: </b>{{transactionvs.toUserVS.name}}</div>
-                        <div class="horizontal layout">
-                            <b>${msg.IBANLbl}: </b>
-                            <div on-click="showToUserIBAN" class="IBANLink"> {{transactionvs.toUserVS.iban}}</div>
+                <div style="margin: 10px auto 0 auto; max-width:800px; color:#667;">
+                    <div hidden="{{!timeStampDate}}" class="timeStampMsg">
+                        <b>${msg.dateLbl}:</b> <span>{{timeStampDate}}</span>
+                    </div>
+
+                    <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
+                    <div><b>${msg.subjectLbl}: </b>{{transactionvs.subject}}</div>
+
+                    <div><b>${msg.amountLbl}: </b>{{transactionvs.amount}} {{transactionvs.currencyCode}}</div>
+
+                    <div class="horizontal layout">
+                        <div><b>${msg.dateLbl}: </b>{{getDate(transactionvs.dateCreated)}}</div>
+                        <div hidden="{{!transactionvs.validTo}}" style="margin: 0 0 0 15px;"><b>${msg.validToLbl}: </b>
+                            <span>{{transactionvs.validTo}}</span></div>
+                    </div>
+                    <div hidden="{{!isSenderVisible}}" style="margin-left: 20px;">
+                        <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
+                            ${msg.senderLbl}</div>
+                        <div id="fromUserDiv">
+                            <div><b>${msg.nameLbl}: </b>{{getFromUserName(transactionvs)}}</div>
+                            <div on-click="showFromUserIBAN">
+                                <b>${msg.IBANLbl}: </b>
+                                <span class="IBANLink">{{getFromUserIBAN(transactionvs)}}</span>
+                            </div>
                         </div>
                     </div>
-                </div >
-                <div hidden="{{!receptorMsg}}" style="margin: 15px 0 15px 0;">{{receptorMsg}}</div>
-            </div>
-        </div>
-        <div class="horizontal layout center center-justified" style="margin: 20px 0 0 0;">
-            <div hidden="{{!(transactionvs.tags.length > 0)}}" class="flex">
-                <template is="dom-repeat" items="{{transactionvs.tags}}" as="tag">
-                    <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em; padding:2px 5px 7px 5px;">
-                        <i class="fa fa-tag" style="color: #888;"></i> <span>{{tag}}</span></a>
-                </template>
-            </div>
-            <div hidden="{{!isClientToolConnected}}" layout horizontal style="margin:1px 20px 0px 0px;">
-                <div class="flex"></div>
-                <div>
-                    <button on-click="checkReceipt" style="margin: 0px 0px 0px 5px;">
-                        <i class="fa fa-certificate" style="color: #388746;"></i>  ${msg.checkSignatureLbl}
-                    </button>
+
+                    <div hidden="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
+                        <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621">{{receptorLbl}}</div>
+                        <div hidden="{{receptorMsg}}">
+                            <div><b>${msg.nameLbl}: </b> <span>{{transactionvs.toUserVS.name}}</span></div>
+                            <div class="horizontal layout">
+                                <b>${msg.IBANLbl}: </b>
+                                <div on-click="showToUserIBAN" class="IBANLink">{{transactionvs.toUserVS.iban}}</div>
+                            </div>
+                        </div>
+                    </div >
+                    <div hidden="{{!receptorMsg}}" style="margin: 15px 0 15px 0;">{{receptorMsg}}</div>
+                </div>
+
+                <div class="horizontal layout center center-justified" style="margin: 20px 0 0 0;">
+                    <div hidden="{{!(transactionvs.tags.length > 0)}}" class="flex">
+                        <template is="dom-repeat" items="{{transactionvs.tags}}" as="tag">
+                            <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em; padding:2px 5px 7px 5px;">
+                                <i class="fa fa-tag" style="color: #888;"></i> <span>{{tag}}</span></a>
+                        </template>
+                    </div>
+                    <div hidden="{{!isClientToolConnected}}" layout horizontal style="margin:1px 20px 0px 0px;">
+                        <div class="flex"></div>
+                        <div>
+                            <button on-click="checkReceipt" style="margin: 0px 0px 0px 5px;">
+                                <i class="fa fa-certificate" style="color: #388746;"></i>  ${msg.checkSignatureLbl}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </paper-dialog>
     </template>
     <script>
         Polymer({
@@ -158,17 +166,18 @@
 
                 }
                 this.tagsHidden = (!this.transactionvs.tags || this.transactionvs.tags.length === 0)
+                this.timeStampDate = this.getDate(this.transactionvs.dateCreated)
             },
             showToUserInfo:function(e) {
-                var groupURL = "${restURL}/groupVS/" + e.model.item.toUserVS.id
+                var groupURL = "${restURL}/groupVS/" + this.transactionvs.toUserVS.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },
             showFromUserInfo:function(group) {
-                var groupURL = "${restURL}/groupVS/" +  e.model.item.fromUserVS.id
+                var groupURL = "${restURL}/groupVS/" +  this.transactionvs.fromUserVS.id
                 console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showFromUserIBAN:function(e) {
-                var serviceURL =  "${restURL}/userVS/IBAN/" + this.getFromUserIBAN(e.model.item)
+                var serviceURL =  "${restURL}/userVS/IBAN/" + this.getFromUserIBAN(this.transactionvs)
                 window.open(serviceURL, '_blank');
             },
             showToUserIBAN:function(e) {
@@ -185,6 +194,13 @@
                     console.log("saveReceiptCallback - message: " + appMessage);
                 }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
+            },
+            show: function(transactionvs) {
+                this.transactionvs = transactionvs
+                this.$.xDialog.opened = true;
+            },
+            close: function(e) {
+                this.$.xDialog.opened = false;
             }
         });
     </script>

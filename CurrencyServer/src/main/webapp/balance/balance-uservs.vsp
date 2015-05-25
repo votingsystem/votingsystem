@@ -8,19 +8,14 @@
 <dom-module name="balance-uservs">
     <template>
         <style>
+            .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
+                margin:10px 0 10px 0; cursor: pointer;}
+            .pageTitle:hover { text-decoration: underline; }
             .tab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;}
             .tabSelected { border-bottom: 2px solid #ba0011;}
         </style>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
-            <div style="position: absolute; top: 0px; right: 0px;">
-                <i class="fa fa-times closeIcon" on-click="closeTransactionViewer"></i>
-            </div>
-            <transactionvs-data id="transactionViewer"></transactionvs-data>
-        </paper-dialog>
-        <style>
-            .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
-                margin:10px 0 10px 0; text-decoration: underline; cursor: pointer;}
-        </style>
+        <transactionvs-data id="transactionViewer"></transactionvs-data>
+
         <iron-media-query query="max-width: 1200px" query-matches="{{smallScreen}}"></iron-media-query>
         <div style="padding: 0 20px;">
             <div class="horizontal layout center center-justified">
@@ -39,9 +34,9 @@
                         </div>
                         <div>
                             <div class="horizontal layout">
-                                <template is="dom-repeat" items="{{getMapKeys(balance.balancesCash[currency])}}" as="tag">
+                                <template is="dom-repeat" items="{{getTagMapKeys(currency)}}" as="tag">
                                     <div style="margin:0 0 0 80px;">
-                                        <div><span>{{tagDescription(tag)}}</span>: <span>{{formatAmount(balance.balancesCash[currency][tag])}}</span></div>
+                                        <div><span>{{tagDescription(tag)}}</span>: <span>{{formatAmount(currency, tag)}}</span></div>
                                         <div>
                                             <div hidden="{{!isTimeLimited(currency, tag)}}" title="{{getTimeLimitedForTagMsg(currency, tag)}}"
                                                  class="horizontal layout center center-justified">
@@ -68,14 +63,14 @@
                      style=" margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
                     <transactionvs-list-balance caption="${msg.incomesLbl}"
                             transaction-list="{{balance.transactionToList}}"
-                            balances="{{balance.balancesTo}}" on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
+                            balances="{{balance.balancesTo}}" on-transactionviewer="viewTransaction"></transactionvs-list-balance>
                 </div>
                 <div hidden="{{smallScreen}}" style="width: 1px; border-right: 2px solid  #6c0404; margin:0 10px 0 10px;"></div>
                 <div hidden="{{expensesTabHidden}}" class="flex"
                      style=" margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
                     <transactionvs-list-balance id="balanceFromItem"
                             transaction-list="{{balance.transactionFromList}}" balances="{{balance.balancesFrom}}"
-                            on-transactionviewer="{{viewTransaction}}"></transactionvs-list-balance>
+                            on-transactionviewer="viewTransaction"></transactionvs-list-balance>
                 </div>
             </div>
         </div>
@@ -85,11 +80,11 @@
             is:'balance-uservs',
             properties: {
                 balance: {type:Object, value: {}},
-                selectedTab: {type:String, value:'incomesTab'},
+                selectedTab: {type:String, value:'incomesTab', observer:'selectedTabChanged'},
                 caption: {type:String},
                 smallScreen: {type:Boolean, observer:'smallScreenChanged'},
-                incomesTabHidden: {type:Boolean},
-                expensesTabHidden: {type:Boolean},
+                incomesTabHidden: {type:Boolean, value:false},
+                expensesTabHidden: {type:Boolean, value:false},
                 description: {type:String},
                 url: {type:String}
             },
@@ -98,23 +93,31 @@
             },
             setIncomesView: function() {
                 this.selectedTab = 'incomesTab'
-                this.$.incomesDiv.className = 'tab tabSelected'
-                this.$.expensesDiv.className = 'tab'
-                this.setTabs()
             },
             setExpensesView: function() {
                 this.selectedTab = 'expensesTab'
-                this.$.expensesDiv.className = 'tab tabSelected'
-                this.$.incomesDiv.className = 'tab'
             },
-            setTabs: function() {
-                this.expensesTabHidden = (this.smallScreen?(this.selectedTab !== 'expensesTab'):true)
-                this.incomesTabHidden = (this.smallScreen?(this.selectedTab !== 'incomesTab'):true)
+            selectedTabChanged: function() {
+                if(this.selectedTab === 'expensesTab') {
+                    this.$.expensesDiv.className = 'tab tabSelected'
+                    this.$.incomesDiv.className = 'tab'
+                } else {
+                    this.$.incomesDiv.className = 'tab tabSelected'
+                    this.$.expensesDiv.className = 'tab'
+                }
+                if(this.smallScreen) {
+                    this.expensesTabHidden = (this.smallScreen?(this.selectedTab !== 'expensesTab'):true)
+                    this.incomesTabHidden = (this.smallScreen?(this.selectedTab !== 'incomesTab'):true)
+                } else {
+                    this.expensesTabHidden = false
+                    this.incomesTabHidden = false
+                }
             },
             smallScreenChanged: function() {
-                this.setTabs()
+                this.selectedTabChanged()
             },
-            formatAmount: function(amount) {
+            formatAmount: function(currency, tag) {
+                var amount = this.balance.balancesCash[currency][tag]
                 if(Object.prototype.toString.call(amount) !== '[object String]') return amount.toFixed(2)
                 else return amount
             },
@@ -138,11 +141,11 @@
                 return "${msg.timeLimitedForTagMsg}".format(tagCash.toFixed(2), currency,  this.tagDescription(tag))
             },
             getPercentageForTagMsg: function(currency, tag) {
-                var expendedFromTag = 0
+                var expendedFromTag
                 if(this.balance.balancesFrom[currency] != null && this.balance.balancesFrom[currency][tag] != null) {
                     expendedFromTag = this.balance.balancesFrom[currency][tag]
                 }
-                expendedFromTag = expendedFromTag == null? 0 : expendedFromTag
+                expendedFromTag = (expendedFromTag == null? 0 : expendedFromTag)
                 var tagToExpend = this.balance.balancesTo[currency][tag].timeLimited
                 var pertecentageExpended = expendedFromTag * 100 / tagToExpend
                 //console.log("pertecentageExpended: " + pertecentageExpended)
@@ -151,6 +154,10 @@
             isTimeLimited: function(currency, tag) {
                 if(this.balance.balancesTo[currency][tag].timeLimited == 0) return false
                 else return true
+            },
+            getTagMapKeys: function(currency) {
+                var result = Object.keys(this.balance.balancesCash[currency])
+                return result
             },
             getMapKeys: function(e) {
                 if(e == null) return []
@@ -189,13 +196,9 @@
                     this.caption = "${msg.userLbl}"
                 }
             },
-            closeTransactionViewer: function(e) {
-                this.$.xDialog.opened = false;
-            },
             viewTransaction: function(e) {
                 //console.log(this.tagName + " - viewTransaction - e.detail: " + JSON.stringify(e.detail))
-                this.$.transactionViewer.transactionvs = e.detail
-                this.$.xDialog.opened = true;
+                this.$.transactionViewer.show(e.detail)
             }
         });
     </script>

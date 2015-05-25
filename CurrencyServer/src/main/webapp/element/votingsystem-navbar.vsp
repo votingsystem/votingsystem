@@ -19,11 +19,11 @@
         <paper-drawer-panel id="navBarDrawerPanel" responsive-width="30000px" style="overflow: scroll;">
             <div drawer style="height: 100%;">
                 <paper-menu class="paperMenu" attr-for-selected="data-href" selected="{{selectorValue}}" on-iron-select="drawerItemSelected" style="padding:50px 0 0 0;">
-                    <paper-item data-href="${restURL}/app/userVSDashboard">
-                        <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
-                    </paper-item>
                     <paper-item data-href="${restURL}/groupVS">
                         <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupvsLbl}
+                    </paper-item>
+                    <paper-item data-href="${restURL}/app/userVSDashboard">
+                        <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
                     </paper-item>
                     <paper-item data-href="${restURL}/userVS/search">
                         <i class="fa fa-user" style="margin:0px 10px 0px 0px;"></i> ${msg.locateUserVSLbl}

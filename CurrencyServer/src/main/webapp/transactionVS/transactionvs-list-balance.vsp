@@ -3,7 +3,6 @@
 <dom-module name="transactionvs-list-balance">
     <template>
         <style>
-        .transactionvsRow { cursor: pointer;}
         .dateCreated {font-size: 0.8em; color:#888; width: 140px; margin: 0 7px 0 0;}
         .subjectColumn {
             width:270px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; font-size: 0.8em;
@@ -15,15 +14,15 @@
             <div class="horizontal layout center center-justified" style="margin: 0 0 10px 0; min-width: 400px;">
                 <div class="flex"></div>
                 <div style="font-size: 0.9em;color:#888; font-weight: bold; margin:5px 20px 0 10px;
-                    text-decoration: underline;">{{numMovements}} - {{caption}}</div>
+                    text-decoration: underline;"><span>{{numMovements}}</span> - <span>{{caption}}</span></div>
             </div>
             <div>
                 <template is="dom-repeat" items="{{transactionList}}" as="transaction">
-                    <div class="transactionvsRow" layout horizontal on-click="viewTransaction">
+                    <div class="transactionvsRow layout horizontal" on-click="viewTransaction" style="cursor: pointer;">
                         <div class="dateCreated">{{getDate(transaction.dateCreated)}}</div>
                         <div title="{{transaction.subject}}" class="subjectColumn"
                              style="width:240px; margin:0 30px 0 0;">{{transaction.subject}}</div>
-                        <div class="amountColumn"><span>{{transaction.amount}}</span> <span>{{transaction.currency}}</span></div>
+                        <div class="amountColumn"><span>{{transaction.amount}}</span> <span>{{transaction.currencyCode}}</span></div>
                         <div class="layout horizontal center center-justified tagColumn">
                             <div class="flex horizontal layout center center-justified">{{transaction.tags[0]}}</div>
                             <div hidden="{{!isTimeLimited(transaction)}}" style="margin:0 0 0 5px; width: 10px;">
@@ -52,8 +51,8 @@
         Polymer({
             is:'transactionvs-list-balance',
             properties: {
-                balances: {type:Object, value: {}},
-                transactionList: {type:Array, value: []},
+                balances: {type:Object, value: {}, observer:'balancesChanged'},
+                transactionList: {type:Array, value: [], observer:'transactionListChanged'},
                 numMovements: {type:String, value: 0 + " ${msg.movementsLbl}"},
                 caption: {type:String, value: "${msg.expensesLbl}"}
             },
@@ -67,7 +66,7 @@
                 return (tranctionvs.validTo != null)
             },
             viewTransaction: function(e) {
-                this.fire("transactionviewer", e.model.item)
+                this.fire("transactionviewer", e.model.transaction)
             },
             transactionListChanged:function() {
                 this.numMovements = this.transactionList.length + " ${msg.movementsLbl}"

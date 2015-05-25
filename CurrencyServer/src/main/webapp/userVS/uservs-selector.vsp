@@ -62,7 +62,7 @@
             is:'uservs-selector',
             properties: {
                 groupvsId:{type:Number},
-                userListDto:{type:Object, observer:'userListDtoChanged'},
+                userListDto:{type:Object, value:{resultList:[]}, observer:'userListDtoChanged'},
                 contactSelector:{type:Boolean, value:true},
                 modeSearch:{type:Boolean, value:true, observer:'modeSearchChanged'},
                 userListEmpty:{type:Boolean, value:false},
@@ -103,7 +103,11 @@
                 this.userListDto = {resultList:[]}
             },
             userListDtoChanged: function() {
-                console.log(this.tagName + " - userListDtoChanged - num. users: " + this.userListDto.resultList.length)
+                if(!this.userListDto.resultList) {
+                    console.log(this.tagName + " - userListDtoChanged - null userListDto.resultList")
+                    return
+                }
+                console.log(this.tagName + " - userListDtoChanged - num. users: " + JSON.stringify(this.userListDto))
                 this.userListEmpty = (this.userListDto.resultList.length === 0)
             },
             contactsArrayChanged: function(e) {
