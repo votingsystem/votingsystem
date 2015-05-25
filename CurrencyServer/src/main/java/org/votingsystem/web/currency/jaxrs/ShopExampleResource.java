@@ -2,9 +2,11 @@ package org.votingsystem.web.currency.jaxrs;
 
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.web.currency.ejb.ShopExampleBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -72,8 +74,9 @@ public class ShopExampleResource {
             }
         });
         asyncResponse.setTimeout(180, TimeUnit.SECONDS);
-        shopExampleBean.bindContext(shopSessionID, asyncResponse);
-        return Response.ok().entity("AsyncResponse binded").build();
+        int statusCode = shopExampleBean.bindContext(shopSessionID, asyncResponse);
+        if(ResponseVS.SC_OK != statusCode) asyncResponse.resume(Response.status(statusCode).entity("session expired").build());
+        return Response.ok().build();
     }
 
     //Called from the mobile after reading the QR code. The mobile fetch the transaction data
@@ -96,6 +99,12 @@ public class ShopExampleResource {
               @Context HttpServletRequest req) throws Exception {
         shopExampleBean.sendResponse(uuid, messageSMIME.getSMIME());
         return Response.ok().entity("valid receipt").build();
+    }
+
+    @Path("/{uuid}/payment/currency_change") @POST
+    public Response paymentCurrencyChange(@PathParam("uuid") String uuid, @Context HttpServletRequest req) throws Exception {
+        throw new ValidationExceptionVS("TODO currency_change");
+        //return Response.ok().entity("valid receipt").build();
     }
 
 }

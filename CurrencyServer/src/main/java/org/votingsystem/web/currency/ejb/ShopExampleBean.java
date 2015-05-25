@@ -45,8 +45,11 @@ public class ShopExampleBean {
         return transactionRequestMap.keySet();
     }
 
-    public void bindContext(String sessionId, AsyncResponse asyncResponse) {
-        transactionRequestMap.get(sessionId).asyncResponse = asyncResponse;
+    public int bindContext(String sessionId, AsyncResponse asyncResponse) {
+        if(transactionRequestMap.get(sessionId) != null) {
+            transactionRequestMap.get(sessionId).asyncResponse = asyncResponse;
+            return ResponseVS.SC_OK;
+        } else return ResponseVS.SC_ERROR;
     }
 
     public void sendResponse(String sessionId, SMIMEMessage smimeMessage) throws ExceptionVS, IOException, ParseException {

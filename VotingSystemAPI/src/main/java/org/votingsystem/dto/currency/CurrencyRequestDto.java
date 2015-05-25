@@ -77,14 +77,14 @@ public class CurrencyRequestDto {
 
 
     public void loadCurrencyCerts(Collection<String> currencyCerts) throws Exception {
-        log.info("CurrencyRequestBatch - Num IssuedCurrency: " + currencyCerts.size());
+        log.info("loadCurrencyCerts - Num IssuedCurrency: " + currencyCerts.size());
         if(currencyCerts.size() != currencyMap.size()) {
             log.log(Level.SEVERE, "Num currency requested: " + currencyMap.size() +
                     " - num. currency received: " + currencyCerts.size());
         }
         for(String pemCert:currencyCerts) {
             Currency currency = loadCurrencyCert(pemCert);
-            getCurrencyMap().replace(currency.getHashCertVS(), currency);
+            currencyMap.replace(currency.getHashCertVS(), currency);
         }
     }
 

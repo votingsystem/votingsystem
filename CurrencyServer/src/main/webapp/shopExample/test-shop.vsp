@@ -4,8 +4,9 @@
     <template>
         <div class="vertical layout center center-justified">
             <h3>
-                ${msg.transactionValueLbl}:
-                ${transactionRequest.getAmount()} ${transactionRequest.getCurrencyCode()} - ${transactionRequest.getTagName()}
+                ${msg.amountLbl}:
+                <span>{{transactionRequest.amount}}</span> <span>{{transactionRequest.currencyCode}}</span> -
+                <span>{{transactionRequest.tagName}}</span>
             </h3>
             <div>${msg.paymentOptionsLbl}:</div>
 
@@ -15,7 +16,7 @@
                 <option value="CURRENCY_CHANGE" style="color:#cc1606;">Intercambio complétamente anónimo</option>
             </select>
 
-            <img src="{{qrCodeServiceUrl}}" alt="read it with your mobile" height="250" width="250"/>
+            <img src="{{qrCodeServiceUrl}}" alt="read it with your mobile" height="250" width="250" style="margin: 5px 0 0 0;"/>
             <iron-ajax auto="" last-response="{{ajaxResponse}}" handle-as="json" url="{{transactionServiceURL}}"></iron-ajax>
             <h3>{{data.message}}</h3>
         </div>
