@@ -5,10 +5,12 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
+import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -29,9 +31,9 @@ public class TransactionVSBankVSBean {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject TransactionVSBean transactionVSBean;
+    @Inject SignatureBean signatureBean;
 
-
-    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws ExceptionVS {
+    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         validateRequest(request);
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getSigner().getNif());
@@ -42,6 +44,9 @@ public class TransactionVSBankVSBean {
                 request.getValidTo(), request.getTransactionVSSMIME(), request.getTag()));
         TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(
                 transactionParent, transactionParent.getAmount(), request.getReceptor(), request.getReceptor().getIBAN()));
+        SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(request.getTransactionVSSMIME().getUserVS().getNif(),
+                request.getTransactionVSSMIME().getSMIME(), messages.get("bankVSInputLbl"));
+        dao.merge(request.getTransactionVSSMIME().setSMIME(receipt));
         transactionVSBean.newTransactionVS(transactionParent, triggeredTransaction);
         log.info("BankVS: " + bankVS.getId() + " - to user: " + request.getReceptor().getId());
         return new ResultListDto(Arrays.asList(new TransactionVSDto(triggeredTransaction)), 0, 1, 1L);

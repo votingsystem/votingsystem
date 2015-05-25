@@ -314,7 +314,8 @@ function updateMenuLink(urlToUpdate, param) {
     if(result.indexOf("menu=") < 0) {
         if(result.indexOf("?") < 0) result = result + "?menu=" + menuType
         else result = result + "&menu=" + menuType
-    } else if(result.indexOf("locale=") < 0) {
+    }
+    if(result.indexOf("locale=") < 0) {
         result = result + "&locale=" + getURLParam('locale').toLowerCase();
     }
     if(param != null) result = result + "&" + param
