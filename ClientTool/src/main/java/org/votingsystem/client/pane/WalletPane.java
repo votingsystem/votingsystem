@@ -45,9 +45,6 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
         getStylesheets().add(Utils.getResource("/css/wallet-pane.css"));
         getStyleClass().add("main-pane");
         VBox.setVgrow(this, Priority.ALWAYS);
-        MenuItem changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
-        changeWalletMenuItem.setOnAction(actionEvent -> UserDeviceSelectorDialog.show(ContextVS.getMessage(
-                "userVSDeviceConnected"), ContextVS.getMessage("selectDeviceToTransferCurrencyMsg"), WalletPane.this));;
     }
 
     private void load(Set<Currency> wallet) {

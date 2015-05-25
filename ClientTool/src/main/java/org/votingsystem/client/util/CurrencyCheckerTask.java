@@ -8,6 +8,7 @@ import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.JSON;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -47,7 +48,7 @@ public class CurrencyCheckerTask extends Task<CurrencyCheckResponse> {
             Set<String> hashCertSet = currencySet.stream().map(currency -> {return currency.getHashCertVS();}).collect(toSet());
             List requestList = new ArrayList<>();
             requestList.addAll(hashCertSet);
-            responseVS = HttpHelper.getInstance().sendData(requestList.toString().getBytes(),
+            responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsBytes(requestList),
                     ContentTypeVS.JSON, currencyServer.getCurrencyBundleStateServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 Map<String, Currency.State> result = (Map<String, Currency.State>) responseVS.getMessage(

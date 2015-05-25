@@ -82,7 +82,7 @@ public class CurrencyResource {
                     .entity(messages.get("currencyExpendedShortErrorMsg")).build();
             case OK:
                 if(currency.getValidTo().after(new Date())) {
-                    return Response.status(999).entity(messages.get("currencyOKMsg")).build();
+                    return Response.status(ResponseVS.SC_CURRENCY_OK).entity(messages.get("currencyOKMsg")).build();
                 } else {
                     dao.merge(currency.setState(Currency.State.LAPSED));
                     return Response.status(ResponseVS.SC_CURRENCY_LAPSED).entity(
