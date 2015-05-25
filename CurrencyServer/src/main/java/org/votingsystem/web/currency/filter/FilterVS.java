@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.logging.Logger;
 
-@WebFilter("/*")
+@WebFilter(urlPatterns = {"/*"}, asyncSupported=true)
 public class FilterVS implements Filter {
 
     private static final Logger log = Logger.getLogger(FilterVS.class.getSimpleName());

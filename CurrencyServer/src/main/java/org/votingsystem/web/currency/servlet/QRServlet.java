@@ -6,7 +6,6 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.web.currency.util.QRUtils;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -28,6 +27,12 @@ public class QRServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse resp)
+            throws ServletException, IOException {
+        processRequest(request, resp);
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse resp)
             throws ServletException, IOException {
         processRequest(request, resp);
     }

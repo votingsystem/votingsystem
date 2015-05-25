@@ -13,7 +13,6 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
@@ -119,6 +118,20 @@ public class TransactionVSDto {
         dto.setTags(new HashSet<>(Arrays.asList(tag)));
         dto.setCurrencyCode(currencyCode);
         dto.setTimeLimited(isTimeLimited);
+        dto.setUUID(java.util.UUID.randomUUID().toString());
+        return dto;
+    }
+
+    public static TransactionVSDto BASIC(String toUser, UserVS.Type userToType, BigDecimal amount,
+                 String currencyCode, String toUserIBAN, String subject, String tag) {
+        TransactionVSDto dto = new TransactionVSDto();
+        dto.setUserToType(userToType);
+        dto.setToUser(toUser);
+        dto.setAmount(amount);
+        dto.setCurrencyCode(currencyCode);
+        dto.setSubject(subject);
+        dto.setToUserIBAN(Arrays.asList(toUserIBAN));
+        dto.setTags(new HashSet<>(Arrays.asList(tag)));
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
     }

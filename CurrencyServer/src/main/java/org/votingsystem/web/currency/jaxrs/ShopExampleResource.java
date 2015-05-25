@@ -39,21 +39,21 @@ public class ShopExampleResource {
     @Inject ConfigVS config;
     @Inject ShopExampleBean shopExampleBean;
 
-    //After user interaction we have the data of the service the user wants to buy, with that we create a TransactionRequest
+    //After user interaction we have the data of the product/service the user wants to buy, with that we create a TransactionRequest
     //and show the QR code with the URL of the transaction data to offer the user the possibility to check the order with the mobile.
     @Path("/") @GET
     public Object index(@QueryParam("uuid") String uuid, @Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        TransactionVSDto dto = TransactionVSDto.CURRENCY_SEND_REQUEST("currency shop example", UserVS.Type.GROUP,
+        TransactionVSDto dto = TransactionVSDto.BASIC("currency shop example", UserVS.Type.GROUP,
                 new BigDecimal(1), "EUR", "ES0878788989450000000007", "shop example payment - " + new Date(), TagVS.WILDTAG);
         dto.setPaymentOptions(Arrays.asList(TransactionVS.Type.FROM_USERVS,
                 TransactionVS.Type.CURRENCY_SEND, TransactionVS.Type.CURRENCY_CHANGE));
-        String shopSessionID = dto.getUUID().substring(0, 8);
-        String paymentInfoServiceURL = config.getRestURL() + "/shop/" + shopSessionID;
-        shopExampleBean.putTransactionRequest(shopSessionID, dto);
+        String sessionID = dto.getUUID().substring(0, 8);
+        String paymentInfoServiceURL = config.getRestURL() + "/shop/" + sessionID;
+        shopExampleBean.putTransactionRequest(sessionID, dto);
         req.setAttribute("paymentInfoServiceURL", paymentInfoServiceURL);
-        req.setAttribute("shopSessionID", shopSessionID);
-        req.setAttribute("transactionRequest", dto);
+        req.setAttribute("sessionID", sessionID);
+        req.setAttribute("transactionRequest", JSON.getMapper().writeValueAsString(dto));
         context.getRequestDispatcher("/shopExample/index.xhtml").forward(req, resp);
         return Response.ok().build();
     }
@@ -61,7 +61,7 @@ public class ShopExampleResource {
     //Called with async Javascript from the web page that shows the QR code, we store an AsyncContext in order to notify
     //the web client of any change in the requested transaction state
     @Path("/listenTransactionChanges/{shopSessionID}")
-    @POST @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(MediaType.APPLICATION_JSON)
     public Response listenTransactionChanges(@PathParam("shopSessionID") String shopSessionID,
            @Context HttpServletRequest req, @Suspended AsyncResponse asyncResponse) throws Exception {
         asyncResponse.setTimeoutHandler(new TimeoutHandler() {

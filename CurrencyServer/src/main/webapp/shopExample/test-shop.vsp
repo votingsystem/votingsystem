@@ -1,0 +1,50 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<dom-module name="test-shop">
+    <template>
+        <div class="vertical layout center center-justified">
+            <h3>
+                ${msg.transactionValueLbl}:
+                ${transactionRequest.getAmount()} ${transactionRequest.getCurrencyCode()} - ${transactionRequest.getTagName()}
+            </h3>
+            <div>${msg.paymentOptionsLbl}:</div>
+
+            <select id="paymentOptionsSelect" style="font-size: 1.3em; height: 30px; max-width: 400px;" class="form-control">
+                <option value="FROM_USERVS"  style="color:#388746;">Ingreso</option>
+                <option value="CURRENCY_SEND" style="color:#fba131;">Ingreso con remitente anónimo</option>
+                <option value="CURRENCY_CHANGE" style="color:#cc1606;">Intercambio complétamente anónimo</option>
+            </select>
+
+            <img src="{{qrCodeServiceUrl}}" alt="read it with your mobile" height="250" width="250"/>
+            <iron-ajax auto="" last-response="{{ajaxResponse}}" handle-as="json" url="{{transactionServiceURL}}"></iron-ajax>
+            <h3>{{data.message}}</h3>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is:'test-shop',
+            properties: {
+                paymentInfoServiceUrl:{type:String, observer:'paymentInfoServiceUrlChanged'},
+                qrCodeServiceUrl:{type:String},
+                transactionServiceURL:{type:String},
+                sessionId:{type:String, observer:'sessionIdChanged'},
+                transactionRequest:{type:Object, observer:'ajaxResponseChanged'},
+                ajaxResponse:{type:Object, observer:'ajaxResponseChanged'}
+            },
+            paymentInfoServiceUrlChanged: function() {
+                this.qrCodeServiceUrl = "${contextURL}/qr?cht=qr&chs=250x250&chl=" + this.paymentInfoServiceUrl
+                console.log(this.tagName + " - qrCodeServiceUrl: " + this.qrCodeServiceUrl)
+            },
+            ajaxResponseChanged: function() {
+                console.log(this.tagName + " - ajaxResponseChanged - ajaxResponse: " + this.ajaxResponse)
+            },
+            sessionIdChanged: function() {
+                this.transactionServiceURL = "${restURL}/shop/listenTransactionChanges/" + this.sessionId
+            },
+            ready: function() {
+                console.log(this.tagName + " - ready - sessionID: " + this.sessionId)
+                console.log(this.tagName + " - ready - paymentInfoServiceURL: " + this.paymentInfoServiceUrl)
+            }
+        });
+    </script>
+</dom-module>

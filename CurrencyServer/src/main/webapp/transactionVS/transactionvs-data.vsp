@@ -25,7 +25,7 @@
                     <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
                     <div><b>${msg.subjectLbl}: </b>{{transactionvs.subject}}</div>
 
-                    <div><b>${msg.amountLbl}: </b>{{transactionvs.amount}} {{transactionvs.currencyCode}}</div>
+                    <div><b>${msg.amountLbl}: </b><span>{{transactionvs.amount}}</span> <span>{{transactionvs.currencyCode}}</span></div>
 
                     <div class="horizontal layout">
                         <div><b>${msg.dateLbl}: </b>{{getDate(transactionvs.dateCreated)}}</div>
@@ -58,7 +58,7 @@
                 </div>
 
                 <div class="horizontal layout center center-justified" style="margin: 20px 0 0 0;">
-                    <div hidden="{{!(transactionvs.tags.length > 0)}}" class="flex">
+                    <div hidden="{{tagsHidden}}" class="flex">
                         <template is="dom-repeat" items="{{transactionvs.tags}}" as="tag">
                             <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em; padding:2px 5px 7px 5px;">
                                 <i class="fa fa-tag" style="color: #888;"></i> <span>{{tag}}</span></a>
