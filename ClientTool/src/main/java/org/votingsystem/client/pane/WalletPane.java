@@ -38,7 +38,6 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
 
     private static Logger log = Logger.getLogger(WalletPane.class.getSimpleName());
 
-    private Map<String, Set<Currency>> currencyMap;
     private static WalletDialog DIALOG_INSTANCE;
 
     public WalletPane() {
@@ -46,10 +45,18 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
         getStylesheets().add(Utils.getResource("/css/wallet-pane.css"));
         getStyleClass().add("main-pane");
         VBox.setVgrow(this, Priority.ALWAYS);
-        currencyMap = new HashMap<>();
         MenuItem changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
         changeWalletMenuItem.setOnAction(actionEvent -> UserDeviceSelectorDialog.show(ContextVS.getMessage(
                 "userVSDeviceConnected"), ContextVS.getMessage("selectDeviceToTransferCurrencyMsg"), WalletPane.this));;
+    }
+
+    private void load(Set<Currency> wallet) {
+        Map<String, Set<Currency>> currencyMap = new HashMap<>();
+        getChildren().remove(0, getChildren().size());
+        for(Currency currency : wallet) {
+            if(currencyMap.containsKey(currency.getCurrencyCode())) currencyMap.get(currency.getCurrencyCode()).add(currency);
+            else currencyMap.put(currency.getCurrencyCode(), new HashSet<>(Arrays.asList(currency)));
+        }
         for(String currencyCode : currencyMap.keySet()) {
             Set<Currency> currencySet = currencyMap.get(currencyCode);
             VBox currencyPane = new VBox();
@@ -97,16 +104,10 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
         }
     }
 
-    private void load(Set<Currency> wallet) {
-        for(Currency currency : wallet) {
-            if(currencyMap.containsKey(currency.getCurrencyCode())) currencyMap.get(currency.getCurrencyCode()).add(currency);
-            else currencyMap.put(currency.getCurrencyCode(), new HashSet<>(Arrays.asList(currency)));
-        }
-    }
-
     public static void showDialog() {
         Platform.runLater(new Runnable() {
             @Override public void run() {
+                if(DIALOG_INSTANCE == null) DIALOG_INSTANCE = new WalletDialog();
                 Set<Currency> currencySet = Wallet.getWallet();
                 if(currencySet == null) {
                     PasswordDialog.showWithoutPasswordConfirm(TypeVS.CURRENCY_OPEN, passwordListener,

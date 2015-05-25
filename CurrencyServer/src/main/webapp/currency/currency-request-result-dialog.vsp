@@ -14,16 +14,14 @@
                         <i class="fa fa-times closeIcon" on-click="close"></i>
                     </div>
                 </div>
-                <div style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
+                <div style="font-size: 1.3em; color:#888; font-weight: bold; text-align: center;
+                        padding:20px 20px 10px 20px; display:block;word-wrap:break-word;">
                     <vs-html-echo html="{{message}}"></vs-html-echo>
                 </div>
-                <div hidden="{{isStoredInWallet}}" layout horizontal style="margin:0px 20px 0px 0px;">
-                    <div class="flex"></div>
-                    <div>
-                        <button on-click="saveToSecureWallet">
-                            <i class="fa fa-money"></i> ${msg.saveToSecureWalletMsg}
-                        </button>
-                    </div>
+                <div hidden="{{isStoredInWallet}}" class="horizontal layout flex" style="margin:10px 20px 0px 0px;">
+                    <button on-click="saveToSecureWallet">
+                        <i class="fa fa-money"></i> ${msg.saveToSecureWalletMsg}
+                    </button>
                 </div>
             </div>
         </paper-dialog>

@@ -12,8 +12,6 @@ import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
 import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.client.service.BrowserSessionService;
-import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.model.UserVS;
 import org.votingsystem.util.ContextVS;
 
 import java.util.Locale;

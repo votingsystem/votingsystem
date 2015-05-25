@@ -17,7 +17,10 @@ import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.dto.currency.*;
+import org.votingsystem.dto.currency.CurrencyDto;
+import org.votingsystem.dto.currency.CurrencyRequestDto;
+import org.votingsystem.dto.currency.GroupVSDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.VoteVSCancelerDto;
@@ -25,9 +28,7 @@ import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.model.currency.CurrencyRequestBatch;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.voting.ControlCenterVS;
@@ -288,7 +289,6 @@ public class SignatureService extends Service<ResponseVS> {
         private ResponseVS sendCurrencyRequest(OperationVS operationVS) throws Exception {
             log.info("sendCurrencyRequest");
             TransactionVSDto transactionVSDto = operationVS.getDocumentToSign(TransactionVSDto.class);
-            TagVS tag = new TagVS(transactionVSDto.getTags().iterator().next());
             CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionVSDto,
                     transactionVSDto.getAmount(), operationVS.getTargetServer().getServerURL());
             Map<String, Object> mapToSend = new HashMap<>();

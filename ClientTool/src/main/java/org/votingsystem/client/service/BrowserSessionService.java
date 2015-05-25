@@ -23,7 +23,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.signature.util.*;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.*;
 
 import java.io.File;
@@ -31,7 +30,6 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -29,6 +29,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import static org.votingsystem.client.Browser.showMessage;
 
 /**

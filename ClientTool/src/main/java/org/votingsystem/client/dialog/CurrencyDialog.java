@@ -1,6 +1,5 @@
 package org.votingsystem.client.dialog;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
@@ -27,10 +26,10 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.*;
+
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;

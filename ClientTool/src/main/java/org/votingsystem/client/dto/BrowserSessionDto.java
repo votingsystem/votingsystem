@@ -3,6 +3,7 @@ package org.votingsystem.client.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.UserVSDto;
+
 import java.util.ArrayList;
 import java.util.List;
 
