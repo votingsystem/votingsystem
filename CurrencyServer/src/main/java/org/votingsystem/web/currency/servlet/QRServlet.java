@@ -6,6 +6,7 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.web.currency.util.QRUtils;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;

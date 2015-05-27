@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.jaxrs;
 
-import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
@@ -9,11 +8,11 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.currency.ejb.ShopExampleBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
-
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +25,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -82,15 +83,15 @@ public class ShopExampleResource {
     }
 
     //Called from the mobile after reading the QR code. The mobile fetch the transaction data
-    @Path("/{uuid}")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Path("/{uuid}")
     public Response paymentInfo(@PathParam("uuid") String uuid, @Context HttpServletRequest req) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         TransactionVSDto dto = shopExampleBean.getTransactionRequest(uuid);
         if(dto != null) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
         } else {
-            return Response.status(Response.Status.NOT_FOUND).entity(messages.get("sessionExpiredMsg")).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(messages.get("sessionExpiredMsg"))
+                    .type(MediaType.TEXT_PLAIN + ";charset=utf-8").build();
         }
     }
 
