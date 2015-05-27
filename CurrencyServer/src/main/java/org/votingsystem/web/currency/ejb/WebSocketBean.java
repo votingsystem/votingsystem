@@ -14,7 +14,6 @@ import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
-
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;

@@ -202,7 +202,7 @@ public class InboxService implements PasswordDialog.Listener {
     private void flush() {
         log.info("flush");
         try {
-            List<InboxMessageDto> messageListDto = null;
+            List<InboxMessageDto> messageListDto = new ArrayList<>();
             for(InboxMessage inboxMessage : getMessageList()) {
                 messageListDto.add(new InboxMessageDto(inboxMessage));
             }
