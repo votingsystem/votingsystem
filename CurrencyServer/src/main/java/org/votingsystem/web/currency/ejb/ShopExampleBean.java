@@ -38,7 +38,9 @@ public class ShopExampleBean {
     }
 
     public TransactionVSDto getTransactionRequest(String sessionId) {
-        return transactionRequestMap.get(sessionId).dto;
+        if(transactionRequestMap.containsKey(sessionId)) {
+            return transactionRequestMap.get(sessionId).dto;
+        } else return null;
     }
 
     public Set<String> getSessionKeys() {

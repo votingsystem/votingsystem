@@ -55,7 +55,6 @@ public class GroupVSResource {
     @Inject BalancesBean balancesBean;
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/")
     @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
@@ -246,6 +245,7 @@ public class GroupVSResource {
     @POST @Transactional
     public Response cancel(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
@@ -260,6 +260,7 @@ public class GroupVSResource {
     @POST
     public Object subscribe(MessageSMIME messageSMIME, @PathParam("id") long id, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
@@ -293,6 +294,7 @@ public class GroupVSResource {
     @POST @Produces(MediaType.APPLICATION_JSON)
     public Response activateUser(MessageSMIME messageSMIME, @Context ServletContext context,
                             @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         SubscriptionVS subscriptionVS = subscriptionVSBean.activateUser(messageSMIME);
         currencyAccountBean.checkUserVSAccount(subscriptionVS.getUserVS());
         MessageDto dto = MessageDto.OK(messages.get("currencyGroupUserActivatedMsg", subscriptionVS.getUserVS().getNif(),
@@ -304,6 +306,7 @@ public class GroupVSResource {
     @POST @Produces(MediaType.APPLICATION_JSON)
     public Response deActivateUser(MessageSMIME messageSMIME, @Context ServletContext context,
                                @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         SubscriptionVS subscriptionVS = subscriptionVSBean.deActivateUser(messageSMIME);
         MessageDto dto = MessageDto.OK(messages.get("currencyGroupUserdeActivatedMsg", subscriptionVS.getUserVS().getNif(),
                 subscriptionVS.getGroupVS().getName()), null);

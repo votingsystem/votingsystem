@@ -34,6 +34,10 @@ public class MessageDto {
         return new MessageDto(ResponseVS.SC_ERROR, message, null);
     }
 
+    public static MessageDto BAD_REQUEST(String message) {
+        return new MessageDto(ResponseVS.SC_ERROR_REQUEST, message, null);
+    }
+
     public static MessageDto OK(String message, String URL) {
         return new MessageDto(ResponseVS.SC_OK, message, URL);
     }

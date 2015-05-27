@@ -43,7 +43,6 @@ public class CurrencyResource {
     @Inject ConfigVS config;
     @Inject SignatureBean signatureBean;
     @Inject CurrencyBean currencyBean;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/request") @GET
     public Object request(@Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
@@ -70,6 +69,7 @@ public class CurrencyResource {
 
     @Path("/hash/{hashCertVSHex}/state") @GET
     public Response state(@PathParam("hashCertVSHex") String hashCertVSHex) {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         HexBinaryAdapter hexConverter = new HexBinaryAdapter();
         String hashCertVSBase64 = new String(hexConverter.unmarshal(hashCertVSHex));
         Query query = dao.getEM().createQuery("select c from Currency c where c.hashCertVS =:hashCertVS")

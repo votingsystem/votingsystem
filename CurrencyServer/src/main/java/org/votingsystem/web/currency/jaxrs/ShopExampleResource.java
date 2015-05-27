@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
@@ -11,6 +12,7 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.web.currency.ejb.ShopExampleBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
@@ -46,7 +48,7 @@ public class ShopExampleResource {
     @Path("/") @GET
     public Object index(@QueryParam("uuid") String uuid, @Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        TransactionVSDto dto = TransactionVSDto.BASIC("currency shop example", UserVS.Type.GROUP,
+        TransactionVSDto dto = TransactionVSDto.TRANSACTIONVS_INFO("currency shop example", UserVS.Type.GROUP,
                 new BigDecimal(1), "EUR", "ES0878788989450000000007", "shop example payment - " + new Date(), TagVS.WILDTAG);
         dto.setPaymentOptions(Arrays.asList(TransactionVS.Type.FROM_USERVS,
                 TransactionVS.Type.CURRENCY_SEND, TransactionVS.Type.CURRENCY_CHANGE));
@@ -81,13 +83,14 @@ public class ShopExampleResource {
 
     //Called from the mobile after reading the QR code. The mobile fetch the transaction data
     @Path("/{uuid}")
-    @POST @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(MediaType.APPLICATION_JSON)
     public Response paymentInfo(@PathParam("uuid") String uuid, @Context HttpServletRequest req) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         TransactionVSDto dto = shopExampleBean.getTransactionRequest(uuid);
         if(dto != null) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
         } else {
-            return Response.status(Response.Status.NOT_FOUND).entity("sessionExpiredMsg").build();
+            return Response.status(Response.Status.NOT_FOUND).entity(messages.get("sessionExpiredMsg")).build();
         }
     }
 

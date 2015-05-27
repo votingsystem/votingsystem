@@ -21,7 +21,7 @@ import java.util.*;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TransactionVSDto {
+public class    TransactionVSDto {
 
     private TypeVS operation;
     private Long id;
@@ -57,7 +57,6 @@ public class TransactionVSDto {
     private List<String> coinCsrList;
     private TransactionVSDetailsDto details;
 
-    private TransactionVS.Type transactionType;
     @JsonIgnore private List<UserVS> toUserVSList;
     @JsonIgnore private UserVS signer;
     @JsonIgnore private UserVS receptor;
@@ -92,10 +91,10 @@ public class TransactionVSDto {
         }
     }
 
-    public static TransactionVSDto CURRENCY_SEND_REQUEST(String toUser, UserVS.Type userToType, BigDecimal amount,
+    public static TransactionVSDto PAYMENT_REQUEST(String toUser, UserVS.Type userToType, BigDecimal amount,
                String currencyCode, String toUserIBAN, String subject, String tag) {
         TransactionVSDto dto = new TransactionVSDto();
-        dto.setOperation(TypeVS.CURRENCY_SEND_REQUEST);
+        dto.setOperation(TypeVS.TRANSACTIONVS_INFO);
         dto.setUserToType(userToType);
         dto.setToUser(toUser);
         dto.setAmount(amount);
@@ -138,7 +137,7 @@ public class TransactionVSDto {
 
     public void validate() throws ValidationExceptionVS {
         if(operation == null) throw new ValidationExceptionVS("missing param 'operation'");
-        transactionType = TransactionVS.Type.valueOf(operation.toString());
+        type = TransactionVS.Type.valueOf(operation.toString());
         if(amount == null) throw new ValidationExceptionVS("missing param 'amount'");
         if(getCurrencyCode() == null) throw new ValidationExceptionVS("missing param 'currencyCode'");
         if(subject == null) throw new ValidationExceptionVS("missing param 'subject'");
@@ -350,14 +349,6 @@ public class TransactionVSDto {
 
     public void setNumReceptors(Integer numReceptors) {
         this.numReceptors = numReceptors;
-    }
-
-    public TransactionVS.Type getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(TransactionVS.Type transactionType) {
-        this.transactionType = transactionType;
     }
 
     public List<UserVS> getToUserVSList() {
