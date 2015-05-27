@@ -107,7 +107,7 @@ public class PasswordDialog extends DialogVS {
         password2Text = new Text(ContextVS.getMessage("password2Lbl"));
         //password2Text.setStyle("-fx-spacing: 50;");
 
-        dialogVBox.getChildren().addAll(messageText, password1Text, password1Field, password2Text, password2Field,
+        dialogVBox.getChildren().addAll(messageText, timeLimitedMessageText, password1Text, password1Field, password2Text, password2Field,
                 footerButtonsBox);
     }
 
@@ -153,6 +153,7 @@ public class PasswordDialog extends DialogVS {
             INSTANCE.password1Field.setText("");
             INSTANCE.password2Field.setText("");
             INSTANCE.password = null;
+            INSTANCE.timeLimitedMessageText.setVisible(false);
             INSTANCE.mainMessage = mainMessage;
             INSTANCE.isWithPasswordConfirm = true;
             INSTANCE.setMessage(mainMessage);
@@ -182,11 +183,12 @@ public class PasswordDialog extends DialogVS {
         password1Field.setText("");
         password2Field.setText("");
         password = null;
+        timeLimitedMessageText.setVisible(false);
         if(dialogVBox.getChildren().contains(password2Text) && dialogVBox.getChildren().contains(password2Field)) {
             dialogVBox.getChildren().removeAll(password2Text, password2Field);
         }
         if(visibilityInSeconds != null) {
-            dialogVBox.getChildren().add(1, timeLimitedMessageText);
+            timeLimitedMessageText.setVisible(true);
             Task task = new Task() {
                 @Override protected Object call() throws Exception {
                     AtomicInteger secondsOpened = new AtomicInteger(0);

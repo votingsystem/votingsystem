@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import org.votingsystem.client.dialog.InboxDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.ProgressDialog;
+import org.votingsystem.client.dto.InboxMessageDto;
 import org.votingsystem.client.util.InboxDecryptTask;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.MsgUtils;
@@ -58,16 +59,16 @@ public class InboxService implements PasswordDialog.Listener {
     }
 
     private InboxService() {
-        List messageList = null;
+        List<InboxMessageDto> messageListDto = null;
         try {
             messagesFile = new File(ContextVS.APPDIR + File.separator + ContextVS.INBOX_FILE);
             if(messagesFile.createNewFile()) {
                 messageList = new ArrayList<>();
                 flush();
-            } else messageList =  JSON.getMapper().readValue(messagesFile, new TypeReference<List>() {
+            } else messageListDto =  JSON.getMapper().readValue(messagesFile, new TypeReference<List<InboxMessageDto>>() {
             });
-            for(int i = 0; i < messageList.size(); i++) {
-                InboxMessage inboxMessage = new InboxMessage((Map) messageList.get(i));
+            for(InboxMessageDto dto : messageListDto) {
+                InboxMessage inboxMessage = new InboxMessage(dto);
                 if(inboxMessage.isEncrypted()) encryptedMessageList.add(inboxMessage);
                 else messageList.add(inboxMessage);
             }
@@ -92,8 +93,6 @@ public class InboxService implements PasswordDialog.Listener {
                 showPasswordDialog(ContextVS.getMessage("inboxPinDialogMsg"), false);
             } else InboxDialog.showDialog();
         });
-        if(messageList.size() > 0 || encryptedMessageList.size() > 0) inboxButton.setVisible(true);
-        else inboxButton.setVisible(false);
     }
 
     private void showPasswordDialog(final String pinDialogMessage, final boolean isTimeLimited) {
@@ -115,14 +114,12 @@ public class InboxService implements PasswordDialog.Listener {
             case CURRENCY_IMPORT:
                 messageList.add(inboxMessage);
                 PlatformImpl.runLater(() -> {
-                    inboxButton.setVisible(true);
                     if(openInboxDialog) InboxDialog.showDialog();
                 });
                 break;
             case MESSAGEVS://message comes decrypted with session keys
                 messageList.add(inboxMessage);
                 PlatformImpl.runLater(() -> {
-                    inboxButton.setVisible(true);
                     if(openInboxDialog) InboxDialog.showDialog();
                 });
                 flush();
@@ -131,7 +128,6 @@ public class InboxService implements PasswordDialog.Listener {
                 if(!inboxMessage.isTimeLimited()) {
                     encryptedMessageList.add(inboxMessage);
                     flush();
-                    PlatformImpl.runLater(() -> inboxButton.setVisible(true));
                 } else timeLimitedInboxMessage = inboxMessage;
                 showPasswordDialog(null, inboxMessage.isTimeLimited());
                 break;
@@ -147,8 +143,6 @@ public class InboxService implements PasswordDialog.Listener {
     public void removeMessagesByType(TypeVS typeToRemove) {
         messageList = messageList.stream().filter(m ->  m.getTypeVS() != typeToRemove).collect(toList());
         encryptedMessageList = encryptedMessageList.stream().filter(m ->  m.getTypeVS() != typeToRemove).collect(toList());
-        if(messageList.size() == 0) PlatformImpl.runLater(() -> inboxButton.setVisible(false));
-        else PlatformImpl.runLater(() -> inboxButton.setVisible(true));
         InboxDialog.getInstance().removeMessagesByType(typeToRemove);
         flush();
     }
@@ -158,8 +152,6 @@ public class InboxService implements PasswordDialog.Listener {
                 collect(toList());
         encryptedMessageList = encryptedMessageList.stream().filter(m ->  !m.getMessageID().equals(inboxMessage.getMessageID())).
                 collect(toList());
-        if(messageList.size() == 0) PlatformImpl.runLater(() -> inboxButton.setVisible(false));
-        else PlatformImpl.runLater(() -> inboxButton.setVisible(true));
         InboxDialog.getInstance().removeMessage(inboxMessage);
         flush();
     }
@@ -210,11 +202,12 @@ public class InboxService implements PasswordDialog.Listener {
     private void flush() {
         log.info("flush");
         try {
-            List messageList = new ArrayList<>();
+            List<InboxMessageDto> messageListDto = null;
             for(InboxMessage inboxMessage : getMessageList()) {
-                messageList.add(inboxMessage.toMap());
+                messageListDto.add(new InboxMessageDto(inboxMessage));
             }
-            FileUtils.copyStreamToFile(new ByteArrayInputStream(messageList.toString().getBytes()), messagesFile);
+            FileUtils.copyStreamToFile(new ByteArrayInputStream(JSON.getMapper().writeValueAsBytes(messageListDto)),
+                    messagesFile);
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -267,8 +260,9 @@ public class InboxService implements PasswordDialog.Listener {
                         EventBusService.getInstance().post(currentMessage.setState(InboxMessage.State.PROCESSED));
                         removeMessage(currentMessage);
                         SocketMessageDto messageDto = currentMessage.getWebSocketMessage();
-                        WebSocketAuthenticatedService.getInstance().sendMessage(currentMessage.getWebSocketMessage().
-                                getResponse(ResponseVS.SC_OK, null, messageDto.getOperation()).toString());
+                        String socketMsgStr = JSON.getMapper().writeValueAsString(messageDto.
+                                getResponse(ResponseVS.SC_OK, null, messageDto.getOperation()));
+                        WebSocketAuthenticatedService.getInstance().sendMessage(socketMsgStr);
                     } catch (WalletException wex) {
                         Utils.showWalletNotFoundMessage();
                     } catch (Exception ex) {

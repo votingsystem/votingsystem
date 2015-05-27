@@ -98,8 +98,8 @@ public class BrowserVSToolbar extends HBox {
 
         HBox navButtonBox = new HBox();
         navButtonBox.getChildren().addAll(prevButton, forwardButton);
-        getChildren().addAll(newTabButton, navButtonBox, locationField, reloadButton, Utils.createSpacer(), connectionButton,
-                msgButton, menuButton, closeButton);
+        getChildren().addAll(newTabButton, navButtonBox, locationField, reloadButton, Utils.createSpacer(), msgButton,
+                connectionButton, menuButton, closeButton);
 
         final ContextMenu contextMenu = new ContextMenu();
         MenuItem minimizeItem = new MenuItem(ContextVS.getMessage("minimizeLbl"));

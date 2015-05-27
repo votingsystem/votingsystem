@@ -1,13 +1,12 @@
 package org.votingsystem.client.util;
 
+import org.votingsystem.client.dto.InboxMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
-
 import java.security.PrivateKey;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,17 +60,14 @@ public class InboxMessage<T> {
         this.UUID = webSocketMessage.getUUID();
     }
 
-    public InboxMessage(Map dataMap) throws ParseException {
-        if(dataMap.containsKey("typeVS")) typeVS = TypeVS.valueOf((String) dataMap.get("typeVS"));
-        if(dataMap.containsKey("operation")) typeVS = TypeVS.valueOf((String) dataMap.get("operation"));
-        if(dataMap.containsKey("date")) date = DateUtils.getDateFromString((String) dataMap.get("date"));
-        if(dataMap.containsKey("messageID")) messageID = (String) dataMap.get("messageID");
-        try {
-            SocketMessageDto messageDto = (SocketMessageDto) dataMap.get("webSocketMessage");
-            load(messageDto);
-        } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
-        if(dataMap.containsKey("message")) message = (String) dataMap.get("message");
-        UUID = (String) dataMap.get("UUID");
+    public InboxMessage(InboxMessageDto dto) throws ParseException {
+        typeVS = dto.getTypeVS();
+        typeVS = dto.getOperation();
+        date = dto.getDate();
+        messageID = dto.getMessageID();
+        load(dto.getWebSocketMessage());
+        message = dto.getMessage();
+        UUID = dto.getUUID();
     }
 
     public Date getDate() {
@@ -156,16 +152,5 @@ public class InboxMessage<T> {
         this.data = data;
     }
 
-    public Map toMap() {
-        Map result = new HashMap<>();
-        result.put("from", from);
-        result.put("date", DateUtils.getISODateStr(date));
-        result.put("message", message);
-        result.put("typeVS", typeVS.toString());
-        if(webSocketMessage != null) result.put("webSocketMessage", webSocketMessage);
-        result.put("messageID", messageID);
-        result.put("UUID", getUUID());
-        return result;
-    }
 
 }

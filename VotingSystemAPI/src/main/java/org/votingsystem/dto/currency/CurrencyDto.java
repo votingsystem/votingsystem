@@ -8,6 +8,7 @@ import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ObjectUtils;
@@ -43,7 +44,6 @@ public class CurrencyDto implements Serializable {
     private Boolean timeLimited;
     private String batchUUID;
     private String object;
-    private String certificationRequest;
     private Date notBefore;
     private Date notAfter;
     private Date dateCreated;
@@ -118,12 +118,10 @@ public class CurrencyDto implements Serializable {
         currencyDto.setHashCertVS(currency.getHashCertVS());
         currencyDto.setTag(currency.getTagVS().getName());
         currencyDto.setTimeLimited(currency.getTimeLimited());
-        currencyDto.setObject(ObjectUtils.serializeObjectToString(currency));
-        //if(currency.getCertificationRequest() != null)
-        //    currencyDto.setCertificationRequest(new String(currency.getCertificationRequest().getCsrPEM()));
+        //CertificationRequestVS instead of Currency to make it easier deserialization on Android
+        currencyDto.setObject(ObjectUtils.serializeObjectToString(currency.getCertificationRequest()));
         return currencyDto;
     }
-
 
     public static CurrencyDto getCertSubjectDto(String subjectDN, String hashCertVS) {
         CurrencyDto currencyDto = new CurrencyDto();
@@ -140,21 +138,20 @@ public class CurrencyDto implements Serializable {
 
     public static Set<CurrencyDto> serializeCollection(Collection<Currency> currencyCollection) throws Exception {
         Set<CurrencyDto> result = new HashSet<>();
-        for(Currency currency : currencyCollection) {
+        for (Currency currency : currencyCollection) {
             result.add(CurrencyDto.serialize(currency));
         }
         return result;
     }
 
     public Currency deSerialize() throws Exception {
-        /*if(certificationRequest != null) {
-            CertificationRequestVS certificationRequestVS = (CertificationRequestVS) ObjectUtils.deSerializeObject(
-                    certificationRequest.getBytes());
+        try {
+            CertificationRequestVS certificationRequestVS =
+                    (CertificationRequestVS) ObjectUtils.deSerializeObject(object.getBytes());
             return Currency.fromCertificationRequestVS(certificationRequestVS);
-        } else {
+        }catch (Exception ex) {
             return (Currency) ObjectUtils.deSerializeObject(object.getBytes());
-        }*/
-        return (Currency) ObjectUtils.deSerializeObject(object.getBytes());
+        }
     }
 
     public static Set<Currency> deSerialize(Collection<CurrencyDto> currencyCollection) throws Exception {
@@ -187,14 +184,6 @@ public class CurrencyDto implements Serializable {
 
     public void setHashCertVS(String hashCertVS) {
         this.hashCertVS = hashCertVS;
-    }
-
-    public String getCertificationRequest() {
-        return certificationRequest;
-    }
-
-    public void setCertificationRequest(String certificationRequest) {
-        this.certificationRequest = certificationRequest;
     }
 
     public String getCurrencyCode() {

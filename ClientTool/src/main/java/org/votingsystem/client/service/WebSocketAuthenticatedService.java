@@ -190,6 +190,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     }
 
     public void sendMessage(String message) {
+        log.info("sendMessage: " + message);
         try {
             session.getBasicRemote().sendText(message);
         } catch(Exception ex) {

@@ -433,8 +433,7 @@ public class SocketMessageDto {
 
     public void decryptMessage(PrivateKey privateKey) throws Exception {
         byte[] decryptedBytes = Encryptor.decryptCMS(aesParams.getBytes(), privateKey);
-        this.aesEncryptParams = AESParams.load(JSON.getMapper().readValue(new String(decryptedBytes),
-                new TypeReference<HashMap<String, Object>>() { }));
+        this.aesEncryptParams = AESParams.load(JSON.getMapper().readValue(new String(decryptedBytes), AESParamsDto.class));
         decryptMessage(this.aesEncryptParams);
     }
 
