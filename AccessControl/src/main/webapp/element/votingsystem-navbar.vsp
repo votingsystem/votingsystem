@@ -2,14 +2,13 @@
 
 <link href="${resourceURL}/vs-innerpage-signal/vs-innerpage-signal.html" rel="import"/>
 <link href="${resourceURL}/paper-drawer-panel/paper-drawer-panel.html" rel="import"/>
-<link href="${resourceURL}/paper-header-panel/paper-header-panel.html" rel="import"/>
 <link href="${resourceURL}/paper-menu/paper-menu.html" rel="import"/>
 <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
 
 <dom-module name="votingsystem-navbar">
     <style>
         .paperMenu { background: #ba0011; color:#ffffff; height: 100%;}
-        paper-item {cursor: pointer;font-size: 1.9em;}
+        paper-item {cursor: pointer;font-size: 1.2em;}
         paper-item:hover {color: #fba131;}
     </style>
     <template>
@@ -51,19 +50,17 @@
                 </paper-menu>
             </div>
             <div main>
-                <paper-header-panel mode="seamed" id="core_header_panel" class="vs-navbar">
-                    <div class="horizontal layout center center-justified">
-                        <div>
-                            <i class="fa fa-bars vs-navbar-icon" paper-drawer-toggle style="margin: 0 10px 0 33px;"></i>
-                        </div>
-                        <div id="appTitle" style="font-size:1.8em; font-weight:bold; color: #f9f9f9; text-align: center;" class="flex">
-                            <span>{{appTitle}}</span>
-                        </div>
-                        <div style="margin: 0 10px 0 0;">
-                            <i class="fa fa-search vs-navbar-icon" hidden="{{searchHidden}}" on-click="toogleSearchPanel"></i>
-                        </div>
+                <div class="vs-navbar horizontal layout center center-justified">
+                    <div>
+                        <i class="fa fa-bars vs-navbar-icon" paper-drawer-toggle style="margin: 0 10px 0 33px;"></i>
                     </div>
-                </paper-header-panel>
+                    <div id="appTitle" style="font-size:1.8em; font-weight:bold; color: #f9f9f9; text-align: center;" class="flex">
+                        <span>{{appTitle}}</span>
+                    </div>
+                    <div style="margin: 0 10px 0 0;">
+                        <i class="fa fa-search vs-navbar-icon" hidden="{{searchHidden}}" on-click="toogleSearchPanel"></i>
+                    </div>
+                </div>
                 <div id="contentDiv">
                     <content></content>
                 </div>
