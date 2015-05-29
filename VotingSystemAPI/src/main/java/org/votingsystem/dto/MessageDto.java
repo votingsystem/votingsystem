@@ -7,10 +7,11 @@ import org.votingsystem.model.ResponseVS;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MessageDto {
+public class MessageDto<T> {
 
     private Integer statusCode;
     private String message;
+    private T data;
     private String URL;
 
     public MessageDto () {}
@@ -64,5 +65,13 @@ public class MessageDto {
 
     public void setURL(String URL) {
         this.URL = URL;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
     }
 }

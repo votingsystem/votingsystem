@@ -90,6 +90,12 @@ public class TestResource {
         return Response.ok().entity("OK").build();
     }
 
+    @POST @Path("/testPost")
+    public Response testPost(@Context ServletContext context, @Context HttpServletRequest req, byte[] postData,
+                         @Context HttpServletResponse resp) throws JsonProcessingException, ValidationExceptionVS {
+        return Response.ok().entity("POST-DATA:" + new String(postData) ).build();
+    }
+
     @POST @Path("/testSMIME")
     public Response testSMIME(MessageSMIME messageSMIME, @Context ServletContext context, @Context HttpServletRequest req,
                          @Context HttpServletResponse resp) throws JsonProcessingException, ValidationExceptionVS {

@@ -104,7 +104,8 @@ public class SMIMEMessage extends MimeMessage {
         setHeader("Message-ID", messageId);
     }
 
-    public String getSignedContent() {
+    public String getSignedContent() throws Exception {
+        if(signedContent == null) isValidSignature();
         return signedContent;
     }
 

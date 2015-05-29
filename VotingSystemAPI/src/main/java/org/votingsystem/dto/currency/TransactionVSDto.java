@@ -50,7 +50,6 @@ public class    TransactionVSDto {
     private List<String> toUserIBAN = null;
     private Long numChildTransactions;
 
-    private String infoURL;
     private UserVS.Type userToType;
     private List<TransactionVS.Type> paymentOptions;
     private List<String> coinCsrList;
@@ -482,9 +481,12 @@ public class    TransactionVSDto {
         this.paymentOptions = paymentOptions;
     }
 
-    public void validateReceipt(SMIMEMessage smimeMessage) throws IOException, ValidationExceptionVS {
+    public void validateReceipt(SMIMEMessage smimeMessage) throws Exception {
         TransactionVSDto receiptDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), TransactionVSDto.class);
-        if(type != receiptDto.getType()) throw new ValidationExceptionVS("expected type " + type + " found " +
+        if(type == TransactionVS.Type.TRANSACTIONVS_INFO) {
+                if(!paymentOptions.contains(receiptDto.getType())) throw new ValidationExceptionVS("unexpected type " +
+                receiptDto.getType());
+        } else if(type != receiptDto.getType()) throw new ValidationExceptionVS("expected type " + type + " found " +
                 receiptDto.getType());
         if(userToType != receiptDto.getUserToType()) throw new ValidationExceptionVS("expected userToType " + userToType +
                 " found " + receiptDto.getUserToType());
@@ -499,9 +501,9 @@ public class    TransactionVSDto {
                 "expected amount " + amount + " amount " + receiptDto.getAmount());
         if(!currencyCode.equals(receiptDto.getCurrencyCode())) throw new ValidationExceptionVS(
                 "expected currencyCode " + currencyCode + " found " + receiptDto.getCurrencyCode());
-        if(UUID.equals(receiptDto.getUUID())) throw new ValidationExceptionVS(
+        if(!UUID.equals(receiptDto.getUUID())) throw new ValidationExceptionVS(
                 "expected UUID " + UUID + " found " + receiptDto.getUUID());
-        if(!details.equals(receiptDto.getDetails())) throw new ValidationExceptionVS(
+        if(details != null && !details.equals(receiptDto.getDetails())) throw new ValidationExceptionVS(
                 "expected details " + details + " found " + receiptDto.getDetails());}
 
     public TransactionVSDetailsDto getDetails() {

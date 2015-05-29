@@ -6,6 +6,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
@@ -99,14 +100,17 @@ public class ShopExampleResource {
     //here you must check with the tools of your choice the validity of the receipt. The receipt is an standard
     //S/MIME document (http://en.wikipedia.org/wiki/S/MIME)
     @Path("/{uuid}/payment") @POST
-    public Response payment(@PathParam("uuid") String uuid, MessageSMIME messageSMIME,
+    public Response payment(@PathParam("uuid") String uuid, byte[] postData,
               @Context HttpServletRequest req) throws Exception {
-        shopExampleBean.sendResponse(uuid, messageSMIME.getSMIME());
+        SMIMEMessage message = new SMIMEMessage(postData);
+        //here you have the receipt, validate it with your tools
+        shopExampleBean.sendResponse(uuid, message);
         return Response.ok().entity("valid receipt").build();
     }
 
     @Path("/{uuid}/payment/currency_change") @POST
-    public Response paymentCurrencyChange(@PathParam("uuid") String uuid, @Context HttpServletRequest req) throws Exception {
+    public Response paymentCurrencyChange(@PathParam("uuid") String uuid, byte[] postData,
+            @Context HttpServletRequest req) throws Exception {
         throw new ValidationExceptionVS("TODO currency_change");
         //return Response.ok().entity("valid receipt").build();
     }

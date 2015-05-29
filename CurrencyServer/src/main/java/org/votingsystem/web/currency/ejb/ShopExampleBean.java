@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -17,6 +18,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -60,10 +62,14 @@ public class ShopExampleBean {
         if(asyncRequestBundle != null) {
             try {
                 asyncRequestBundle.dto.validateReceipt(smimeMessage);
+                MessageDto<TransactionVSDto> messageDto = MessageDto.OK("OK");
+                messageDto.setData(asyncRequestBundle.dto);
                 asyncRequestBundle.asyncResponse.resume(Response.ok().entity(JSON.getMapper()
-                        .writeValueAsBytes(asyncRequestBundle.dto)).type(MediaTypeVS.JSON).build());
+                        .writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build());
             } catch (Exception ex) {
-                asyncRequestBundle.asyncResponse.resume(Response.status(ResponseVS.SC_ERROR).entity(ex.getMessage()).build());
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+                asyncRequestBundle.asyncResponse.resume(Response.status(ResponseVS.SC_OK).entity(
+                        JSON.getMapper().writeValueAsBytes(MessageDto.ERROR(ex.getMessage()))).build());
             }
         } else throw new ExceptionVS("transactionRequest with sessionId:" + sessionId + " has expired");
     }
