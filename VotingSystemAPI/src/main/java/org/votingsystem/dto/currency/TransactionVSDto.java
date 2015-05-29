@@ -53,7 +53,6 @@ public class    TransactionVSDto {
     private String infoURL;
     private UserVS.Type userToType;
     private List<TransactionVS.Type> paymentOptions;
-    private Date date;
     private List<String> coinCsrList;
     private TransactionVSDetailsDto details;
 
@@ -102,6 +101,7 @@ public class    TransactionVSDto {
         dto.setSubject(subject);
         dto.setToUserIBAN(Arrays.asList(toUserIBAN));
         dto.setTags(new HashSet<>(Arrays.asList(tag)));
+        dto.setDateCreated(new Date());
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
     }
