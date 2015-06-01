@@ -110,10 +110,12 @@ public class SMIMEMessage extends MimeMessage {
     }
 
     public <T> T getSignedContent(Class<T> type) throws Exception {
+        if(signedContent == null) isValidSignature();
         return JSON.getMapper().readValue(signedContent, type);
     }
 
-    public <T> T getSignedContent(TypeReference type) throws IOException {
+    public <T> T getSignedContent(TypeReference type) throws Exception {
+        if(signedContent == null) isValidSignature();
         return JSON.getMapper().readValue(signedContent, type);
     }
 

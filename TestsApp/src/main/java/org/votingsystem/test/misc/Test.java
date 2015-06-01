@@ -12,7 +12,6 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-
 import java.util.logging.Logger;
 
 /**
@@ -21,10 +20,6 @@ import java.util.logging.Logger;
 public class Test {
 
     private static final Logger log = Logger.getLogger(Test.class.getName());
-
-    public static void main(String[] args) throws Exception {
-        sendSMIME();
-    }
 
     private static void sendSMIME() throws Exception {
         ContextVS.getInstance().initTestEnvironment(

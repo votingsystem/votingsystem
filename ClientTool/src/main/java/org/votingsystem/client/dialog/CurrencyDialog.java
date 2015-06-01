@@ -270,7 +270,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
             this.currencyServer = currencyServer;
             this.transactionVSDto = transactionVSDto;
             this.batchDto = CurrencyBatchDto.NEW(transactionVSDto.getSubject(),
-                    transactionVSDto.getToUserIBAN().get(0), currency.getAmount(),
+                    transactionVSDto.getToUserIBAN().iterator().next(), currency.getAmount(),
                     currency.getCurrencyCode(), currency.getTagVS().getName(), false, Arrays.asList(currency),
                     currencyServer.getServerURL(),  currencyServer.getTimeStampServiceURL());
         }

@@ -47,7 +47,7 @@ public class    TransactionVSDto {
     private Integer numReceptors;
     private TransactionVS.Type type;
     private Set<String> tags;
-    private List<String> toUserIBAN = null;
+    private Set<String> toUserIBAN = null;
     private Long numChildTransactions;
 
     private UserVS.Type userToType;
@@ -98,7 +98,7 @@ public class    TransactionVSDto {
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);
         dto.setSubject(subject);
-        dto.setToUserIBAN(Arrays.asList(toUserIBAN));
+        dto.setToUserIBAN(new HashSet<>(Arrays.asList(toUserIBAN)));
         dto.setTags(new HashSet<>(Arrays.asList(tag)));
         dto.setDateCreated(new Date());
         dto.setUUID(java.util.UUID.randomUUID().toString());
@@ -112,7 +112,7 @@ public class    TransactionVSDto {
         dto.setSubject(subject);
         dto.setToUser(toUser);
         dto.setAmount(amount);
-        dto.setToUserIBAN(Arrays.asList(toUserIBAN));
+        dto.setToUserIBAN(new HashSet<>(Arrays.asList(toUserIBAN)));
         dto.setTags(new HashSet<>(Arrays.asList(tag)));
         dto.setCurrencyCode(currencyCode);
         dto.setTimeLimited(isTimeLimited);
@@ -128,7 +128,7 @@ public class    TransactionVSDto {
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);
         dto.setSubject(subject);
-        dto.setToUserIBAN(Arrays.asList(toUserIBAN));
+        dto.setToUserIBAN(new HashSet<>(Arrays.asList(toUserIBAN)));
         dto.setTags(new HashSet<>(Arrays.asList(tag)));
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
@@ -373,11 +373,11 @@ public class    TransactionVSDto {
         this.tag = tag;
     }
 
-    public List<String> getToUserIBAN() {
+    public Set<String> getToUserIBAN() {
         return toUserIBAN;
     }
 
-    public void setToUserIBAN(List<String> toUserIBAN) {
+    public void setToUserIBAN(Set<String> toUserIBAN) {
         this.toUserIBAN = toUserIBAN;
     }
 
@@ -413,7 +413,7 @@ public class    TransactionVSDto {
     public void loadBankVSTransaction(String UUID) {
         setUUID(UUID);
         if((toUserIBAN == null || toUserIBAN.isEmpty()) && toUserVS != null) {
-            toUserIBAN = Arrays.asList(toUserVS.getIBAN());
+            toUserIBAN = new HashSet<>(Arrays.asList(toUserVS.getIBAN()));
             toUserVS = null;
         }
     }
@@ -482,10 +482,41 @@ public class    TransactionVSDto {
     }
 
     public void validateReceipt(SMIMEMessage smimeMessage) throws Exception {
+        TypeVS typeVS = TypeVS.valueOf(smimeMessage.getHeader("TypeVS")[0]);
+        switch(typeVS) {
+            case FROM_USERVS:
+                validateFromUserVSReceipt(smimeMessage);
+                break;
+            case CURRENCY_SEND:
+                validateCurrencySendReceipt(smimeMessage);
+                break;
+        }
+    }
+
+    private void validateCurrencySendReceipt(SMIMEMessage smimeMessage) throws Exception {
+        CurrencyBatchDto receiptDto = smimeMessage.getSignedContent(CurrencyBatchDto.class);
+        if(TypeVS.CURRENCY_SEND != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
+                TypeVS.CURRENCY_SEND + " - found: " + receiptDto.getOperation());
+        if(type == TransactionVS.Type.TRANSACTIONVS_INFO) {
+            if(!paymentOptions.contains(TransactionVS.Type.CURRENCY_SEND)) throw new ValidationExceptionVS(
+                    "unexpected type: " + receiptDto.getOperation());
+        }
+        Set<String> receptorsSet = new HashSet<>(Arrays.asList(receiptDto.getToUserIBAN()));
+        if(!toUserIBAN.equals(receptorsSet)) throw new ValidationExceptionVS(
+                "expected toUserIBAN " + toUserIBAN + " found " + receiptDto.getToUserIBAN());
+        if(amount.compareTo(receiptDto.getBatchAmount()) != 0) throw new ValidationExceptionVS(
+                "expected amount " + amount + " amount " + receiptDto.getBatchAmount());
+        if(!currencyCode.equals(receiptDto.getCurrencyCode())) throw new ValidationExceptionVS(
+                "expected currencyCode " + currencyCode + " found " + receiptDto.getCurrencyCode());
+        if(!UUID.equals(receiptDto.getBatchUUID())) throw new ValidationExceptionVS(
+                "expected UUID " + UUID + " found " + receiptDto.getBatchUUID());
+    }
+
+    private void validateFromUserVSReceipt(SMIMEMessage smimeMessage) throws Exception {
         TransactionVSDto receiptDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), TransactionVSDto.class);
         if(type == TransactionVS.Type.TRANSACTIONVS_INFO) {
-                if(!paymentOptions.contains(receiptDto.getType())) throw new ValidationExceptionVS("unexpected type " +
-                receiptDto.getType());
+            if(!paymentOptions.contains(receiptDto.getType())) throw new ValidationExceptionVS("unexpected type " +
+                    receiptDto.getType());
         } else if(type != receiptDto.getType()) throw new ValidationExceptionVS("expected type " + type + " found " +
                 receiptDto.getType());
         if(userToType != receiptDto.getUserToType()) throw new ValidationExceptionVS("expected userToType " + userToType +
@@ -504,7 +535,9 @@ public class    TransactionVSDto {
         if(!UUID.equals(receiptDto.getUUID())) throw new ValidationExceptionVS(
                 "expected UUID " + UUID + " found " + receiptDto.getUUID());
         if(details != null && !details.equals(receiptDto.getDetails())) throw new ValidationExceptionVS(
-                "expected details " + details + " found " + receiptDto.getDetails());}
+                "expected details " + details + " found " + receiptDto.getDetails());
+    }
+
 
     public TransactionVSDetailsDto getDetails() {
         return details;

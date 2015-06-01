@@ -7,34 +7,29 @@
             <div class="horizontal layout center center-justified" style="font-size: 1.2em;">
                 <div><a href="${contextURL}/app/index.xhtml">inicio</a></div>
             </div>
-            <h1 class="pageHeader" style="text-align: center;">transacciones</h1>
+            <h1 class="pageHeader" style="text-align: center;">ingresos</h1>
             <div class="text-justify" style="margin: 0 auto 0 auto; font-size: 1.2em;">
-                <p>El intercambio monetario puede producirse mediante <b>transacciones firmadas</b>,
-                    <b>transacciones firmadas anónimas</b>, o mediante intercambio de directo de <b>certificados-moneda</b></p>
-                <ul><li>En las <b>transacciones firmadas</b> queda perfectamente definida la identidad del pagador y del
+                <p>El intercambio monetario puede producirse mediante:</p>
+                <ul><li><b>INGRESOS</b>, que quedan reflejados en un documento firmado que identifica al pagador y al
                     cobrador.</li>
-                    <li>En las <b>transacciones anónimas</b> queda perfectamente definida sólo la identidad del cobrador,
-                        la identidad del pagador es anónima. Para este tipo de transacciones es necesario utilizar un <b>certificados-moneda</b>.</li>
-                    <li>En los <b>intercambios directos de certificados-moneda</b> permanecen anónimos tanto el cobrador como el pagador (aunque
+                    <li><b>INGRESOS ANONIMOS</b>, que quedan reflejados en un documento firmado que identifica únicamente al
+                        cobrador. La identidad del pagador es anónima. Para este tipo de transacciones es necesario utilizar un <b>certificados-moneda</b>.</li>
+                    <li><b>INTERCAMBIOS DE MONEDA ANONIMOS</b> en los que permanecen anónimos tanto el cobrador como el pagador (aunque
                         existen mecanismos para poder evitar fraudes ...).</li></ul>
 
-                <h4>Notas sobre transacciones firmadas</h4>
+                <h4>Notas sobre los 'ingresos'</h4>
                 <ul>
-                    <li>Las transacciones están firmadas con <b>certificados de usuario (NO anónimos)</b></li>
-                    <li>Los usuarios no tienen asociada ninguna etiqueta, cuando un usuario hace una transacción directa
-                        a otro usuario el dinero sale de la cuenta de <b>gastos libres</b></li>
+                    <li>Los usuarios no tienen asociada ninguna etiqueta, cuando un usuario hace una ingreso a otro usuario
+                        el dinero sale de la cuenta de <b>gastos libres</b>.</li>
                     <li>Es posible hacer un <b>ingreso con etiqueta</b> a otro usuario pero el intercambio directo entre usuarios procede siempre de la cuenta de
                         <b>gastos libres</b>, es decir, aunque un usuario tenga disponible en su cuenta asociada a esa
                         etiqueta, si el ingreso es a otro <b>usuario</b> el dinero se extraerá de la cuenta de <b>gastos libres</b></li>
                 </ul>
-                <h4>Notas sobre transacciones anónimas</h4>
+                <h4>Notas sobre 'ingresos anónimos'</h4>
                 <ul>
                     <li>Las transacciones están firmadas con <b>certificados-moneda (anónimos)</b></li>
                     <li>El dinero para la retirada de certificados-moneda sale siempre de la cuenta de <b>gastos libres</b></li>
                     <li>Existen mecanismos para poder intercambiar certificados-moneda y hacer transacciones seguras complétamente anónimas</li>
-                    <li>El valor de un <b>certificado-moneda</b> se puede hacer llegar a otro usuario mediante una
-                        <b>transacción firmada anónima</b>, en cuyo caso el importe se ingresa en la cuenta del usuario,
-                        o intercambiando el <b>certificado-moneda</b></li>
                     <li>Un <b>certificado-moneda</b> puede tener asociado una etiqueta para que sólo pueda ser utilizado
                         en servicios o productos asociados a esa etiqueta</li>
                 </ul>

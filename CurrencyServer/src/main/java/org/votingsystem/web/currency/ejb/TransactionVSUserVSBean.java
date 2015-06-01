@@ -69,10 +69,10 @@ public class TransactionVSUserVSBean {
         if(TypeVS.FROM_USERVS != dto.getOperation()) throw new ValidationExceptionVS(
                 "operation expected: 'FROM_USERVS' - operation found: " + dto.getOperation());
         if(dto.getToUserIBAN().size() != 1) throw new ValidationExceptionVS(
-                "there can be only one receptor. request.toUserIBAN: " + dto.getToUserIBAN().get(0));
-        Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", dto.getToUserIBAN().get(0));
+                "there can be only one receptor. request.toUserIBAN: " + dto.getToUserIBAN().iterator().next());
+        Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", dto.getToUserIBAN().iterator().next());
         UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
-        if(toUserVS == null) throw new ValidationExceptionVS("invalid 'toUserIBAN':" + dto.getToUserIBAN().get(0));
+        if(toUserVS == null) throw new ValidationExceptionVS("invalid 'toUserIBAN':" + dto.getToUserIBAN().iterator().next());
         dto.setReceptor(toUserVS);
         return dto;
     }

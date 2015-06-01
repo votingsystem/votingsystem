@@ -3,7 +3,6 @@ package org.votingsystem.web.currency.jaxrs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
@@ -16,6 +15,7 @@ import org.votingsystem.web.currency.ejb.ShopExampleBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
+
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -28,8 +28,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +52,7 @@ public class ShopExampleResource {
     public Object index(@QueryParam("uuid") String uuid, @Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST("currency shop example", UserVS.Type.GROUP,
-                new BigDecimal(1), "EUR", "ES0878788989450000000007", "shop example payment - " + new Date(), TagVS.WILDTAG);
+                new BigDecimal(4), "EUR", "ES0878788989450000000007", "shop example payment - " + new Date(), TagVS.WILDTAG);
         dto.setPaymentOptions(Arrays.asList(TransactionVS.Type.FROM_USERVS,
                 TransactionVS.Type.CURRENCY_SEND, TransactionVS.Type.CURRENCY_CHANGE));
         String sessionID = dto.getUUID().substring(0, 8);
