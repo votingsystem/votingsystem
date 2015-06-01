@@ -1,5 +1,7 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
@@ -31,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -73,8 +76,12 @@ public class ShopExampleResource {
         asyncResponse.setTimeoutHandler(new TimeoutHandler() {
             @Override
             public void handleTimeout(AsyncResponse asyncResponse) {
-                asyncResponse.resume(Response.status(Response.Status.SERVICE_UNAVAILABLE)
-                        .entity("Operation time out.").build());
+                MessageDto messageDto = MessageDto.ERROR("Operation time out");
+                try {
+                    asyncResponse.resume(Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).build());
+                } catch (JsonProcessingException ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                }
             }
         });
         asyncResponse.setTimeout(180, TimeUnit.SECONDS);

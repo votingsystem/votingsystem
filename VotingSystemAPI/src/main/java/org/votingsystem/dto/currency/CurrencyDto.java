@@ -52,7 +52,6 @@ public class CurrencyDto implements Serializable {
 
     public CurrencyDto() {}
 
-
     public static CurrencyDto BATCH_ITEM(CurrencyBatchDto currencyBatchDto, Currency currency) throws ValidationExceptionVS {
         if(!currencyBatchDto.getCurrencyCode().equals(currency.getCurrencyCode())) throw new ValidationExceptionVS(
                 "CurrencyBatch currencyCode: " + currencyBatchDto.getCurrencyCode()
@@ -70,7 +69,6 @@ public class CurrencyDto implements Serializable {
         currencyDto.batchUUID = currencyBatchDto.getBatchUUID();
         return currencyDto;
     }
-
 
     public CurrencyDto(PKCS10CertificationRequest csrPKCS10) throws Exception {
         this.csrPKCS10 = csrPKCS10;

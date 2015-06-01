@@ -120,10 +120,10 @@ public class Currency extends EntityVS implements Serializable  {
             throw new ExceptionVS(getErrorPrefix() +
                     "expected currencyCode '" + currencyCode + "' - found: '" + batchItemDto.getCurrencyCode());
         }
+        tagVS = new TagVS(batchItemDto.getTag());
         if(!TagVS.WILDTAG.equals(certExtensionDto.getTag()) && !certExtensionDto.getTag().equals(tagVS.getName()))
             throw new ExceptionVS("expected tag '" + certExtensionDto.getTag() + "' - found: '" +
                     batchItemDto.getTag());
-        tagVS = new TagVS(batchItemDto.getTag());
         Date signatureTime = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
                 x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");

@@ -18,6 +18,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,6 +42,7 @@ public class ShopExampleBean {
 
     public TransactionVSDto getTransactionRequest(String sessionId) {
         if(transactionRequestMap.containsKey(sessionId)) {
+            transactionRequestMap.get(sessionId).asyncResponse.setTimeout(180, TimeUnit.SECONDS);
             return transactionRequestMap.get(sessionId).dto;
         } else return null;
     }

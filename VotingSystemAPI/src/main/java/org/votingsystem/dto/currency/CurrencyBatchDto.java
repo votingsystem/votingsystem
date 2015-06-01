@@ -13,9 +13,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
-
 import java.math.BigDecimal;
 import java.security.cert.TrustAnchor;
 import java.text.MessageFormat;
@@ -84,8 +82,8 @@ public class CurrencyBatchDto {
         batchDto.currencySet = new HashSet<>();
         for (Currency currency : currencyList) {
             SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(currency.getHashCertVS(),
-                    StringUtils.getNormalized(currency.getToUserName()), JSON.getMapper().writeValueAsString(
-                    CurrencyDto.BATCH_ITEM(batchDto, currency)), subject, null);
+                    toUserIBAN, JSON.getMapper().writeValueAsString(CurrencyDto.BATCH_ITEM(batchDto, currency)),
+                    subject, null);
             MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServiceURL);
             currency.setSMIME(timeStamper.call());
             batchDto.currencySet.add(Base64.getEncoder().encodeToString(currency.getSMIME().getBytes()));
@@ -160,7 +158,8 @@ public class CurrencyBatchDto {
             "ERROR - batchAmount ''{0}'' - receipt amount ''{1}''",  batchAmount, signedDto.getBatchAmount()));
         if(!signedDto.getCurrencyCode().equals(signedDto.getCurrencyCode())) throw new ValidationExceptionVS(MessageFormat.format(
              "ERROR - batch currencyCode ''{0}'' - receipt currencyCode ''{1}''",  currencyCode, signedDto.getCurrencyCode()));
-        if(timeLimited != signedDto.getTimeLimited()) throw new ValidationExceptionVS(MessageFormat.format(
+        if(timeLimited.booleanValue() != signedDto.getTimeLimited().booleanValue()) throw
+                new ValidationExceptionVS(MessageFormat.format(
                 "ERROR - batch timeLimited ''{0}'' - receipt timeLimited ''{1}''",  timeLimited, signedDto.getTimeLimited()));
         if(!tag.equals(signedDto.getTag())) throw new ValidationExceptionVS(MessageFormat.format(
                 "ERROR - batch tag ''{0}'' - receipt tag ''{1}''",  tag, signedDto.getTag()));
@@ -315,4 +314,5 @@ public class CurrencyBatchDto {
     public void setLeftOverCurrency(Currency leftOverCurrency) {
         this.leftOverCurrency = leftOverCurrency;
     }
+
 }

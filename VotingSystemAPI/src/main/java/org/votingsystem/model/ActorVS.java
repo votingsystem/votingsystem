@@ -201,7 +201,7 @@ public class ActorVS extends EntityVS implements Serializable {
         if(trustAnchors != null) return trustAnchors;
         if(certChainPEM == null) return null;
         certChain = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
-        trustAnchors = new HashSet<TrustAnchor>();
+        trustAnchors = new HashSet<>();
         for (X509Certificate cert:certChain) {
             trustAnchors.add(new TrustAnchor(cert, null));
         }

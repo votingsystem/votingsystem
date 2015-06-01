@@ -9,7 +9,6 @@ import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.math.BigDecimal;
