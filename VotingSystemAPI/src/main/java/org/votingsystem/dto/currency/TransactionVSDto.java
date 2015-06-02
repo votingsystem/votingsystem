@@ -10,6 +10,7 @@ import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
@@ -479,19 +480,18 @@ public class    TransactionVSDto {
         this.paymentOptions = paymentOptions;
     }
 
-    public void validateReceipt(SMIMEMessage smimeMessage) throws Exception {
+    public String validateReceipt(SMIMEMessage smimeMessage) throws Exception {
         TypeVS typeVS = TypeVS.valueOf(smimeMessage.getHeader("TypeVS")[0]);
         switch(typeVS) {
             case FROM_USERVS:
-                validateFromUserVSReceipt(smimeMessage);
-                break;
+                return validateFromUserVSReceipt(smimeMessage);
             case CURRENCY_SEND:
-                validateCurrencySendReceipt(smimeMessage);
-                break;
+                return validateCurrencySendReceipt(smimeMessage);
+            default: throw new ValidationExceptionVS("unknown operation: " + typeVS);
         }
     }
 
-    private void validateCurrencySendReceipt(SMIMEMessage smimeMessage) throws Exception {
+    private String validateCurrencySendReceipt(SMIMEMessage smimeMessage) throws Exception {
         CurrencyBatchDto receiptDto = smimeMessage.getSignedContent(CurrencyBatchDto.class);
         if(TypeVS.CURRENCY_SEND != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
                 TypeVS.CURRENCY_SEND + " - found: " + receiptDto.getOperation());
@@ -508,9 +508,11 @@ public class    TransactionVSDto {
                 "expected currencyCode " + currencyCode + " found " + receiptDto.getCurrencyCode());
         if(!UUID.equals(receiptDto.getBatchUUID())) throw new ValidationExceptionVS(
                 "expected UUID " + UUID + " found " + receiptDto.getBatchUUID());
+        return ContextVS.getMessage("currency_send_receipt_ok_msg", receiptDto.getBatchAmount() + " " + receiptDto.getCurrencyCode(),
+                receiptDto.getTag());
     }
 
-    private void validateFromUserVSReceipt(SMIMEMessage smimeMessage) throws Exception {
+    private String validateFromUserVSReceipt(SMIMEMessage smimeMessage) throws Exception {
         TransactionVSDto receiptDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), TransactionVSDto.class);
         if(type == TransactionVS.Type.TRANSACTIONVS_INFO) {
             if(!paymentOptions.contains(receiptDto.getType())) throw new ValidationExceptionVS("unexpected type " +
@@ -534,6 +536,8 @@ public class    TransactionVSDto {
                 "expected UUID " + UUID + " found " + receiptDto.getUUID());
         if(details != null && !details.equals(receiptDto.getDetails())) throw new ValidationExceptionVS(
                 "expected details " + details + " found " + receiptDto.getDetails());
+        return ContextVS.getMessage("from_uservs_receipt_ok_msg", receiptDto.getAmount() + " " + receiptDto.getCurrencyCode(),
+                receiptDto.getTag());
     }
 
     public TransactionVSDetailsDto getDetails() {

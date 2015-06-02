@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.util.TypeVS;
+
 import java.util.Date;
 
 /**

@@ -115,7 +115,6 @@ public class BrowserVSToolbar extends HBox {
                 contextMenu.show(BrowserVSToolbar.this, mouseEvent.getScreenX(), mouseEvent.getScreenY());
             }
         });
-
         final Delta dragDelta = new Delta();
         setOnMousePressed(mouseEvent -> {  // record a delta distance for the drag and drop operation.
             dragDelta.x = stage.getX() - mouseEvent.getScreenX();
@@ -125,7 +124,6 @@ public class BrowserVSToolbar extends HBox {
             stage.setX(mouseEvent.getScreenX() + dragDelta.x);
             stage.setY(mouseEvent.getScreenY() + dragDelta.y);
         });
-
     }
 
     public Button getPrevButton() {

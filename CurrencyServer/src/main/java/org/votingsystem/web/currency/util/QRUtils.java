@@ -15,7 +15,9 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 
-
+/**
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 public class QRUtils {
 
     public static final Integer MARGIN = 10;

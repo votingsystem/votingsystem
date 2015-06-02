@@ -118,6 +118,11 @@ public class SessionVSManager {
         }
     }
 
+    public String getDeviceSessionId(Long deviceId) {
+        if(!deviceSessionMap.containsKey(deviceId)) return null;
+        else return deviceSessionMap.get(deviceId).getId();
+    }
+
     public static SessionVSManager getInstance() {
         return instance;
     }

@@ -27,6 +27,7 @@ import org.votingsystem.util.*;
 
 import java.io.File;
 import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.List;
@@ -43,13 +44,13 @@ public class BrowserSessionService implements PasswordDialog.Listener {
 
     private static Logger log = Logger.getLogger(BrowserSessionService.class.getSimpleName());
 
-    private UserVS userVS;
     private ResponseVS currentResponseVS;
     private File sessionFile;
     private File representativeStateFile;
     private RepresentativeDelegationDto anonymousDelegationDto;
     private RepresentationStateDto representativeStateDto;
     private BrowserSessionDto browserSessionDto;
+    private static PrivateKey privateKey;
     private static CountDownLatch countDownLatch;
     private static SMIMEMessage smimeMessage;
     private static ResponseVS<SMIMEMessage> messageToDeviceResponse;
@@ -69,7 +70,6 @@ public class BrowserSessionService implements PasswordDialog.Listener {
                 }
             }
             browserSessionDto.setIsConnected(false);
-            if(browserSessionDto.getUserVS() != null) userVS = browserSessionDto.getUserVS().getUserVS();
             flush();
         } catch (Exception ex) {
             log.log(Level.SEVERE,ex.getMessage(), ex);
@@ -78,6 +78,8 @@ public class BrowserSessionService implements PasswordDialog.Listener {
 
     private void loadRepresentationData() throws Exception {
         RepresentationStateDto stateDto = null;
+        UserVS userVS = null;
+        if(browserSessionDto.getUserVS() != null) userVS = browserSessionDto.getUserVS().getUserVS();
         if(userVS != null) {
             stateDto = HttpHelper.getInstance().getData(RepresentationStateDto.class,
                     ContextVS.getInstance().getAccessControl().getRepresentationStateServiceURL(userVS.getNif()),
@@ -164,12 +166,17 @@ public class BrowserSessionService implements PasswordDialog.Listener {
         flush();
     }
 
+    public boolean isConnected() {
+        return browserSessionDto.isConnected();
+    }
+
     public SocketMessageDto initAuthenticatedSession(SocketMessageDto socketMsg, UserVS userVS) {
         try {
             if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
                 socketMsg.setUserVS(userVS);
                 browserSessionDto.setUserVS(UserVSDto.COMPLETE(userVS));
                 browserSessionDto.setIsConnected(true);
+                browserSessionDto.getUserVS().setDeviceVS(socketMsg.getConnectedDevice());
                 flush();
                 ContextVS.getInstance().setConnectedDevice(socketMsg.getConnectedDevice());
                 Browser.getInstance().runJSCommand(CoreSignal.getWebSocketCoreSignalJSCommand(null, SocketMessageDto.ConnectionStatus.OPEN));
@@ -181,6 +188,14 @@ public class BrowserSessionService implements PasswordDialog.Listener {
             log.log(Level.SEVERE,ex.getMessage(), ex);
         }
         return socketMsg;
+    }
+
+    public static byte[] decryptMessage(byte[] base64EncryptedData) throws Exception {
+        if(privateKey != null) return Encryptor.decryptCMS(base64EncryptedData, privateKey);
+        else {
+            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("improperTokenErrorMsg"));
+            return null;
+        }
     }
 
     public void setCSRRequestId(Long id) {
@@ -208,12 +223,25 @@ public class BrowserSessionService implements PasswordDialog.Listener {
         return browserSessionDto.getCsrRequestId();
     }
 
-    public UserVS getUserVS() {
-        return userVS;
+    public UserVS getUserVS()  {
+        try {
+            if(browserSessionDto.getUserVS() != null) return browserSessionDto.getUserVS().getUserVS();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+        return null;
+    }
+
+    public DeviceVSDto getConnectedDevice()  {
+        try {
+            if(browserSessionDto.getUserVS() != null) return browserSessionDto.getUserVS().getDeviceVS();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+        return null;
     }
 
     public void setUserVS(UserVS userVS, boolean isConnected) throws Exception {
-        this.userVS = userVS;
         browserSessionDto.setUserVS(UserVSDto.COMPLETE(userVS));
         List<UserVSDto> userVSList = browserSessionDto.getUserVSList();
         boolean updated = false;
@@ -286,6 +314,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
         switch(CryptoTokenVS.valueOf(tokenType)) {
             case JKS_KEYSTORE:
                 KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password.toCharArray());
+                privateKey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray());
                 SMIMESignedGeneratorVS signedGenerator = new SMIMESignedGeneratorVS(keyStore,
                         ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
                 SMIMEMessage smime = signedGenerator.getSMIME(fromUser, toUser, textToSign, subject);

@@ -7,6 +7,7 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import org.votingsystem.client.Browser;
+import org.votingsystem.client.dialog.QRTransactionFormDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.SignDocumentFormPane;
@@ -28,6 +29,7 @@ public class BrowserVSMenuButton extends MenuButton {
     private MenuItem selectRepresentativeMenuItem;
     private MenuItem currencyUserMenuItem;
     private MenuItem walletMenuItem;
+    private MenuItem qrCodeMenuItem;
     private MenuItem votingSystemAdminMenuItem;
     private MenuItem currencyAdminMenuItem;
 
@@ -76,6 +78,12 @@ public class BrowserVSMenuButton extends MenuButton {
         walletMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.MONEY));
         walletMenuItem.setOnAction(event -> WalletPane.showDialog());
 
+        qrCodeMenuItem = new MenuItem(ContextVS.getMessage("createQRLbl"));
+        qrCodeMenuItem.setVisible(false);
+        qrCodeMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.QRCODE));
+        qrCodeMenuItem.setOnAction(event -> QRTransactionFormDialog.showDialog());
+
+
         MenuItem settingsMenuItem = new MenuItem(ContextVS.getMessage("settingsLbl"));
         settingsMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcons.COG));
         settingsMenuItem.setOnAction(actionEvent -> SettingsDialog.showDialog());
@@ -95,7 +103,7 @@ public class BrowserVSMenuButton extends MenuButton {
         adminsMenu.getItems().addAll(currencyAdminMenuItem, votingSystemAdminMenuItem);
 
         getItems().addAll(voteMenuItem, selectRepresentativeMenuItem, new SeparatorMenuItem(),
-                walletMenuItem, currencyUserMenuItem, new SeparatorMenuItem(),
+                walletMenuItem, qrCodeMenuItem, currencyUserMenuItem, new SeparatorMenuItem(),
                 signDocumentMenuItem, openFileMenuItem, new SeparatorMenuItem(),
                 settingsMenuItem, new SeparatorMenuItem(), adminsMenu);
     }
@@ -112,6 +120,7 @@ public class BrowserVSMenuButton extends MenuButton {
         PlatformImpl.runLater(() -> {
             currencyUserMenuItem.setVisible(available);
             walletMenuItem.setVisible(available);
+            qrCodeMenuItem.setVisible(available);
             currencyAdminMenuItem.setVisible(available);
         });
     }

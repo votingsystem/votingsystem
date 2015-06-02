@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControlVS;
@@ -33,6 +34,7 @@ public class VotingSystemApp extends Application {
 
     private static VotingSystemApp INSTANCE;
     private Map<String, String> smimeMessageMap;
+    private static final Map<String, QRMessageDto> qrMessagesMap = new HashMap<>();
 
     // Create a trust manager that does not validate certificate chains
     private static TrustManager[] trustAllCerts = new TrustManager[] {
@@ -74,6 +76,18 @@ public class VotingSystemApp extends Application {
     @Override public void stop() {
         log.info("stop");
         System.exit(0);//Platform.exit();
+    }
+
+    public void putQRMessage(QRMessageDto messageDto) {
+        qrMessagesMap.put(messageDto.getUUID(), messageDto);
+    }
+
+    public QRMessageDto getQRMessage(String uuid) {
+        return qrMessagesMap.get(uuid);
+    }
+
+    public QRMessageDto removeQRMessage(String uuid) {
+        return qrMessagesMap.remove(uuid);
     }
 
     public static VotingSystemApp getInstance() {

@@ -8,20 +8,20 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.client.Browser;
+import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.CertNotFoundDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.InboxMessage;
-import org.votingsystem.dto.DeviceVSDto;
-import org.votingsystem.dto.OperationVS;
-import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.SocketMessageDto;
+import org.votingsystem.dto.*;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.ExceptionVS;
@@ -220,56 +220,110 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
         } throw new ExceptionVS(ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"));
     }
 
-    private void consumeMessage(final SocketMessageDto messageDto) {
+    private void consumeMessage(final SocketMessageDto socketMsg) {
         try {
-            WebSocketSession socketSession = ContextVS.getInstance().getWSSession(messageDto.getUUID());
-            log.info("consumeMessage - type: " + messageDto.getOperation() + " - status: " + messageDto.getStatusCode());
-            if(ResponseVS.SC_ERROR == messageDto.getStatusCode()) {
-                showMessage(messageDto.getStatusCode(), messageDto.getMessage());
+            WebSocketSession socketSession = ContextVS.getInstance().getWSSession(socketMsg.getUUID());
+            log.info("consumeMessage - type: " + socketMsg.getOperation() + " - status: " + socketMsg.getStatusCode());
+            if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+                showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
                 return;
             }
-            if(socketSession != null && messageDto.isEncrypted()) {
-                messageDto.decryptMessage(socketSession.getAESParams());
+            if(socketSession == null && socketMsg.isEncrypted()) {
+                byte[] decryptedBytes = BrowserSessionService.decryptMessage(socketMsg.getAesParams().getBytes());
+                AESParamsDto aesDto = JSON.getMapper().readValue(decryptedBytes, AESParamsDto.class);
+                AESParams aesParams = AESParams.load(aesDto);
+                socketMsg.decryptMessage(aesParams);
+                ContextVS.getInstance().putWSSession(socketMsg.getUUID(), new WebSocketSession(socketMsg));
+            } else if(socketSession != null && socketMsg.isEncrypted()) {
+                socketMsg.decryptMessage(socketSession.getAESParams());
             }
-            messageDto.setWebSocketSession(socketSession);
+            socketMsg.setWebSocketSession(socketSession);
             ResponseVS responseVS = null;
-            switch(messageDto.getOperation()) {
+            switch(socketMsg.getOperation()) {
                 case MESSAGEVS:
                 case MESSAGEVS_TO_DEVICE:
-                    InboxService.getInstance().newMessage(new InboxMessage(messageDto));
+                    InboxService.getInstance().newMessage(new InboxMessage(socketMsg));
                     break;
                 case MESSAGEVS_FROM_VS:
                     if(socketSession != null) {
-                        messageDto.setOperation(socketSession.getTypeVS());
+                        socketMsg.setOperation(socketSession.getTypeVS());
                         switch(socketSession.getTypeVS()) {
                             case INIT_SIGNED_SESSION:
-                                BrowserSessionService.getInstance().initAuthenticatedSession(messageDto, userVS);
+                                BrowserSessionService.getInstance().initAuthenticatedSession(socketMsg, userVS);
                                 break;
                             default:
                                 log.log(Level.SEVERE, "MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
                         }
-                        responseVS = new ResponseVS(null, messageDto.getOperation(), messageDto);
+                        responseVS = new ResponseVS(null, socketMsg.getOperation(), socketMsg);
                     }
                     break;
                 case MESSAGEVS_FROM_DEVICE:
-                    responseVS = new ResponseVS(null, socketSession.getTypeVS(), messageDto);
+                    responseVS = new ResponseVS(null, socketSession.getTypeVS(), socketMsg);
                     break;
                 case MESSAGEVS_SIGN:
-                    if(ResponseVS.SC_CANCELED == messageDto.getStatusCode()){
-                        messageDto.setStatusCode(ResponseVS.SC_ERROR);
-                        BrowserSessionService.setSignResponse(messageDto);
+                    if(ResponseVS.SC_CANCELED == socketMsg.getStatusCode()){
+                        socketMsg.setStatusCode(ResponseVS.SC_ERROR);
+                        BrowserSessionService.setSignResponse(socketMsg);
                     }
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:
-                    BrowserSessionService.setSignResponse(messageDto);
+                    BrowserSessionService.setSignResponse(socketMsg);
+                    break;
+                case TRANSACTIONVS_INFO:
+                    //response after asking for the details of a QR code
+                    if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
+                        TransactionVSDto dto = socketMsg.getMessage(TransactionVSDto.class);
+                        //dto.setSocketMessageDto(socketMsg);
+                        throw new ExceptionVS("TODO - missing payment form");
+                    } else showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
+                    break;
+                case QR_MESSAGE_INFO:
+                    //the payer has read our QR code and ask for details
+                    if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
+                        SocketMessageDto msgDto = null;
+                        try {
+                            QRMessageDto<TransactionVSDto> qrDto = VotingSystemApp.getInstance().getQRMessage(
+                                    socketMsg.getMessage());
+
+                            //socketMsg.getContent().getHashCertVS();
+
+                            TransactionVSDto transactionDto = qrDto.getData();
+                            msgDto = socketMsg.getResponse(ResponseVS.SC_OK,
+                                    JSON.getMapper().writeValueAsString(transactionDto), TypeVS.TRANSACTIONVS_INFO);
+                            socketSession.setData(qrDto);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            msgDto = socketMsg.getResponse(ResponseVS.SC_ERROR,
+                                    ex.getMessage(), TypeVS.QR_MESSAGE_INFO);
+                        } finally {
+                            session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(msgDto));
+                        }
+                    } else showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
+                    break;
+                case TRANSACTIONVS_RESPONSE:
+                    //the payer has completed the payment and send the details
+                    if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
+                        try {
+                            SMIMEMessage smimeMessage = socketMsg.getSMIME();
+                            QRMessageDto<TransactionVSDto> qrDto =
+                                    (QRMessageDto<TransactionVSDto>) socketSession.getData();
+                            TransactionVSDto transactionDto = qrDto.getData();
+                            String result = transactionDto.validateReceipt(smimeMessage);
+                            showMessage(ResponseVS.SC_OK, result);
+                            VotingSystemApp.getInstance().removeQRMessage(qrDto.getUUID());
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                        }
+                    } else showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
                     break;
                 case OPERATION_CANCELED:
-                    messageDto.setOperation(socketSession.getTypeVS());
-                    messageDto.setStatusCode(ResponseVS.SC_CANCELED);
-                    consumeMessage(messageDto);
+                    socketMsg.setOperation(socketSession.getTypeVS());
+                    socketMsg.setStatusCode(ResponseVS.SC_CANCELED);
+                    consumeMessage(socketMsg);
                     break;
                 default:
-                    log.info("unprocessed socketMsg: " + messageDto.getOperation());
+                    log.info("unprocessed socketMsg: " + socketMsg.getOperation());
             }
             if(responseVS != null) EventBusService.getInstance().post(responseVS);
         } catch(Exception ex) {

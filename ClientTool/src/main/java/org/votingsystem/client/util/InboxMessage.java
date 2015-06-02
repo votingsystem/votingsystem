@@ -2,13 +2,11 @@ package org.votingsystem.client.util;
 
 import org.votingsystem.client.dto.InboxMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
+
 import java.security.PrivateKey;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**

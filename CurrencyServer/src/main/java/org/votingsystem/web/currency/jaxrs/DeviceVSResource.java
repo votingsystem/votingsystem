@@ -32,6 +32,17 @@ public class DeviceVSResource {
 
     @Inject DAOBean dao;
 
+    @Path("/id/{id}")
+    @GET @Produces(MediaType.APPLICATION_JSON)
+    public Response getById(@PathParam("id") Long deviceId) throws Exception {
+        DeviceVS deviceVS = dao.find(DeviceVS.class, deviceId);
+        if(deviceVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - DeviceVS not found - id:" + deviceId).build();
+        DeviceVSDto dto = new DeviceVSDto(deviceVS);
+        dto.setSessionId(SessionVSManager.getInstance().getDeviceSessionId(deviceVS.getId()));
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
+    }
+
     @Path("/nif/{nif}/list")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response list(@PathParam("nif") String nifStr) throws Exception {
