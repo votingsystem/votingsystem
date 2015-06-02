@@ -209,6 +209,14 @@ public class SocketMessageDto {
         this.message = message;
     }
 
+    public <S> S getMessage(Class<S> type) throws Exception {
+        return JSON.getMapper().readValue(message, type);
+    }
+
+    public <T> T getMessage(TypeReference<T> type) throws Exception {
+        return JSON.getMapper().readValue(message, type);
+    }
+
     public String getUUID() {
         return UUID;
     }

@@ -13,7 +13,6 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -52,7 +51,6 @@ public class    TransactionVSDto {
 
     private UserVS.Type userToType;
     private List<TransactionVS.Type> paymentOptions;
-    private List<String> coinCsrList;
     private TransactionVSDetailsDto details;
 
     @JsonIgnore private List<UserVS> toUserVSList;
@@ -537,7 +535,6 @@ public class    TransactionVSDto {
         if(details != null && !details.equals(receiptDto.getDetails())) throw new ValidationExceptionVS(
                 "expected details " + details + " found " + receiptDto.getDetails());
     }
-
 
     public TransactionVSDetailsDto getDetails() {
         return details;

@@ -5,7 +5,7 @@
         <style>
         .dateCreated {font-size: 0.8em; color:#888; width: 140px; margin: 0 7px 0 0;}
         .subjectColumn {
-            width:270px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; font-size: 0.8em;
+            width:330px; overflow: hidden; text-overflow: ellipsis; white-space:nowrap; margin:0px 10px 0px 0px; font-size: 0.8em;
         }
         .amountColumn {width:130px;text-align: right; font-size: 0.9em;}
         .tagColumn {font-size: 0.6em; text-align: center; vertical-align: middle; width: 150px; text-overflow: ellipsis; padding: 0 5px 0 5px;}
@@ -18,10 +18,10 @@
             </div>
             <div>
                 <template is="dom-repeat" items="{{transactionList}}" as="transaction">
-                    <div class="transactionvsRow layout horizontal" on-click="viewTransaction" style="cursor: pointer;">
+                    <div class="layout horizontal" on-click="viewTransaction" style="cursor: pointer;">
                         <div class="dateCreated">{{getDate(transaction.dateCreated)}}</div>
                         <div title="{{transaction.subject}}" class="subjectColumn"
-                             style="width:240px; margin:0 30px 0 0;">{{transaction.subject}}</div>
+                             style="margin:0 30px 0 0;">{{transaction.subject}}</div>
                         <div class="amountColumn"><span>{{transaction.amount}}</span> <span>{{transaction.currencyCode}}</span></div>
                         <div class="layout horizontal center center-justified tagColumn">
                             <div class="flex horizontal layout center center-justified">{{transaction.tags[0]}}</div>
@@ -36,7 +36,7 @@
                 <div id="rowTotal" style="display: none;">
                     <div class="layout horizontal">
                         <div class="dateCreated"></div>
-                        <div class="subjectColumn" style="text-align: right;font-weight: bold;">
+                        <div class="subjectColumn" style="text-align: right;font-weight: bold; width:350px;">
                             ${msg.totalLbl}:
                         </div>
                         <div class="amountColumn" style="border-top: 1px solid #888;">{{transactionTotal}}</div>
