@@ -321,10 +321,12 @@ public class SignatureBean {
 
     public SMIMEDto validateSMIME(SMIMEMessage smimeMessage, ContentTypeVS contenType) throws Exception {
         if (smimeMessage.isValidSignature()) {
+            MessagesVS messages = MessagesVS.getCurrentInstance();
             Query query = dao.getEM().createNamedQuery("findMessageSMIMEByBase64ContentDigest")
                     .setParameter("base64ContentDigest", smimeMessage.getContentDigestStr());
             MessageSMIME messageSMIME = dao.getSingleResult(MessageSMIME.class, query);
-            if(messageSMIME != null) throw new ExceptionVS("'smimeDigestRepeatedErrorMsg'");
+            if(messageSMIME != null) throw new ExceptionVS(messages.get("smimeDigestRepeatedErrorMsg",
+                    smimeMessage.getContentDigestStr()));
             SMIMEDto smimeDto = validateSignersCerts(smimeMessage);
             TypeVS typeVS = TypeVS.OK;
             if(contenType != null && ContentTypeVS.CURRENCY == contenType) typeVS = TypeVS.CURRENCY;
@@ -340,7 +342,8 @@ public class SignatureBean {
         Query query = dao.getEM().createNamedQuery("findMessageSMIMEByBase64ContentDigest")
                 .setParameter("base64ContentDigest", smimeMessage.getContentDigestStr());
         MessageSMIME messageSMIME = dao.getSingleResult(MessageSMIME.class, query);
-        if(messageSMIME != null) throw new ExceptionVS("smimeDigestRepeatedErrorMsg");
+        if(messageSMIME != null) throw new ExceptionVS(messages.get("smimeDigestRepeatedErrorMsg",
+                    smimeMessage.getContentDigestStr()));
         VoteVS voteVS = smimeMessage.getVoteVS();
         SMIMEDto smimeDto = new SMIMEDto(voteVS);
         if(voteVS == null || voteVS.getX509Certificate() == null) throw new ExceptionVS(

@@ -453,11 +453,11 @@ public class SocketMessageDto {
 
     public void decryptMessage(PrivateKey privateKey) throws Exception {
         byte[] decryptedBytes = Encryptor.decryptCMS(aesParams.getBytes(), privateKey);
-        this.aesEncryptParams = AESParams.load(JSON.getMapper().readValue(new String(decryptedBytes), AESParamsDto.class));
-        decryptMessage(this.aesEncryptParams);
+        decryptMessage(AESParams.load(JSON.getMapper().readValue(new String(decryptedBytes), AESParamsDto.class)));
     }
 
     public void decryptMessage(AESParams aesParams) throws Exception {
+        this.aesEncryptParams = aesParams;
         content = JSON.getMapper().readValue(
                 Encryptor.decryptAES(encryptedMessage, aesParams), SocketMessageContentDto.class);
         if(content.getOperation() != null) {

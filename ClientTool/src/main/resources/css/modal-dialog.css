@@ -10,6 +10,7 @@
     -fx-font-size: 16;
     -fx-font-weight: bold;
     -fx-color: #f9f9f9;
+    -fx-text-fill:#434343;
 }
 
 .pane-border {

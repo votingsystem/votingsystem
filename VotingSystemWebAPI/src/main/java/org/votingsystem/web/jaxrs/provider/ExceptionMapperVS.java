@@ -39,7 +39,11 @@ public class ExceptionMapperVS implements ExceptionMapper<Exception> {
                         "NotFoundException: " + exception.getMessage()).type(MediaType.TEXT_PLAIN).build();
             } else if(exception instanceof WebApplicationException) {
                 log.log(Level.SEVERE, "--- WebApplicationException --- " + exception.getMessage(), exception);
-                return Response.status(Response.Status.BAD_REQUEST).entity(
+                if(exception.getCause() instanceof ExceptionVS) {
+                    ExceptionVS exceptionVS = (ExceptionVS) exception.getCause();
+                    return Response.status(Response.Status.BAD_REQUEST).entity(exceptionVS.getMessage())
+                            .type(MediaType.TEXT_PLAIN).build();
+                } else return Response.status(Response.Status.BAD_REQUEST).entity(
                         "WebApplicationException: " + exception.getMessage()).type(MediaType.TEXT_PLAIN).build();
             } else if(exception instanceof ExceptionVS) {
                 log.log(Level.SEVERE, exception.getMessage(), exception);

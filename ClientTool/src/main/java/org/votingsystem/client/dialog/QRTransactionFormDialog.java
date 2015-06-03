@@ -110,16 +110,10 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                                 JSON.getMapper().writeValueAsString(qrDto), 500, 500)));
                         imageView.setImage(qrCodeImage);
                         VotingSystemApp.getInstance().putQRMessage(qrDto);
-                        acceptButton.setText(ContextVS.getMessage("newLbl"));
-                        if (!imageHBox.getChildren().contains(imageView)) imageHBox.getChildren().add(imageView);
-                        if (mainPane.getChildren().contains(formVBox)) mainPane.getChildren().remove(formVBox);
-                        if (mainPane.getChildren().contains(tagHBox)) mainPane.getChildren().remove(tagHBox);
+                        toggleView(false);
                     } else {
                         qrCodeImage = null;
-                        if (imageHBox.getChildren().contains(imageView)) imageHBox.getChildren().remove(imageView);
-                        if (!mainPane.getChildren().contains(formVBox)) mainPane.getChildren().add(0, formVBox);
-                        if (!mainPane.getChildren().contains(tagHBox)) mainPane.getChildren().add(1, tagHBox);
-                        acceptButton.setText(ContextVS.getMessage("acceptLbl"));
+                        toggleView(true);
                     }
                     mainPane.getScene().getWindow().sizeToScene();
                 } catch (Exception ex) {
@@ -128,9 +122,23 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
             });
         });
         tagHBox.setStyle("-fx-border-color: #6c0404; -fx-border-width: 1;-fx-wrap-text: true;");
-        mainPane.setStyle("-fx-font-size: 15; -fx-font-weight: bold;-fx-wrap-text: true;");
+        mainPane.setStyle("-fx-font-size: 15; -fx-font-weight: bold;-fx-wrap-text: true; -fx-text-fill:#434343;");
         if(imageHBox.getChildren().contains(imageView)) imageHBox.getChildren().remove(imageView);
         tagLbl.setWrapText(true);
+    }
+
+    private void toggleView(boolean isFormView) {
+        if(isFormView) {
+            if (imageHBox.getChildren().contains(imageView)) imageHBox.getChildren().remove(imageView);
+            if (!mainPane.getChildren().contains(formVBox)) mainPane.getChildren().add(0, formVBox);
+            if (!mainPane.getChildren().contains(tagHBox)) mainPane.getChildren().add(1, tagHBox);
+            acceptButton.setText(ContextVS.getMessage("acceptLbl"));
+        } else {
+            acceptButton.setText(ContextVS.getMessage("newLbl"));
+            if (!imageHBox.getChildren().contains(imageView)) imageHBox.getChildren().add(imageView);
+            if (mainPane.getChildren().contains(formVBox)) mainPane.getChildren().remove(formVBox);
+            if (mainPane.getChildren().contains(tagHBox)) mainPane.getChildren().remove(tagHBox);
+        }
     }
 
     public static void showDialog() {
@@ -156,6 +164,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                     INSTANCE = new QRTransactionFormDialog();
                 }
                 INSTANCE.selectedTag = null;
+                INSTANCE.toggleView(true);
                 INSTANCE.show(ContextVS.getMessage("createQRLbl"));
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
