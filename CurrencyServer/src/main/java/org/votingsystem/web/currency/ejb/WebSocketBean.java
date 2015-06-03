@@ -60,6 +60,7 @@ public class WebSocketBean {
                                 messageDto.getServerResponse( ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
                                 messages.get("messagevsSignRequestorNotFound"))));
                     } else {
+                        messageDto.setSessionId(messageDto.getSession().getId());
                         callerSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(messageDto));
                         messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                                 messageDto.getServerResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null)));

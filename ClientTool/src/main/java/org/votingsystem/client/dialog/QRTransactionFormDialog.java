@@ -92,7 +92,6 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
             Platform.runLater(() -> {
                 try {
                     if (qrCodeImage == null) {
-
                         TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(
                                 BrowserSessionService.getInstance().getUserVS().getName(), UserVS.Type.USER,
                                 new BigDecimal(amounTxt.getText()), currencyChoiceBox.getSelected(),
@@ -112,7 +111,6 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                         VotingSystemApp.getInstance().putQRMessage(qrDto);
                         toggleView(false);
                     } else {
-                        qrCodeImage = null;
                         toggleView(true);
                     }
                     mainPane.getScene().getWindow().sizeToScene();
@@ -133,6 +131,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
             if (!mainPane.getChildren().contains(formVBox)) mainPane.getChildren().add(0, formVBox);
             if (!mainPane.getChildren().contains(tagHBox)) mainPane.getChildren().add(1, tagHBox);
             acceptButton.setText(ContextVS.getMessage("acceptLbl"));
+            qrCodeImage = null;
         } else {
             acceptButton.setText(ContextVS.getMessage("newLbl"));
             if (!imageHBox.getChildren().contains(imageView)) imageHBox.getChildren().add(imageView);

@@ -53,6 +53,7 @@ public class TransactionVSUserVSBean {
         String toUser = request.getSigner().getNif();
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(fromUser, toUser,
                 request.getTransactionVSSMIME().getSMIME(), request.getTransactionVSSMIME().getSMIME().getSubject());
+        receipt.setHeader("TypeVS", request.getType().toString());
         request.getTransactionVSSMIME().setSMIME(receipt);
         dao.merge(request.getTransactionVSSMIME().refresh());
         TransactionVSDto dto = new TransactionVSDto(transactionVS);

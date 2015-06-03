@@ -222,7 +222,6 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     private void consumeMessage(final SocketMessageDto socketMsg) {
         try {
             WebSocketSession socketSession = ContextVS.getInstance().getWSSession(socketMsg.getUUID());
-            log.info("consumeMessage - type: " + socketMsg.getOperation() + " - status: " + socketMsg.getStatusCode());
             if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
                 showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
                 return;
@@ -236,6 +235,8 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
             }
             socketMsg.setWebSocketSession(socketSession);
             ResponseVS responseVS = null;
+            log.info("consumeMessage - type: " + socketMsg.getOperation() + " - MessageType: " +
+                    socketMsg.getMessageType() + " - status: " + socketMsg.getStatusCode());
             switch(socketMsg.getOperation()) {
                 case MESSAGEVS:
                 case MESSAGEVS_TO_DEVICE:
@@ -278,6 +279,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                     //the payer has read our QR code and ask for details
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         SocketMessageDto msgDto = null;
+                        Long deviceFromId = BrowserSessionService.getInstance().getConnectedDevice().getId();
                         try {
                             QRMessageDto<TransactionVSDto> qrDto = VotingSystemApp.getInstance().getQRMessage(
                                     socketMsg.getMessage());
@@ -285,13 +287,13 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                             //socketMsg.getContent().getHashCertVS();
 
                             TransactionVSDto transactionDto = qrDto.getData();
-                            msgDto = socketMsg.getResponse(ResponseVS.SC_OK,
-                                    JSON.getMapper().writeValueAsString(transactionDto), TypeVS.TRANSACTIONVS_INFO);
+                            msgDto = socketMsg.getResponse(ResponseVS.SC_OK,JSON.getMapper().writeValueAsString(transactionDto),
+                                    deviceFromId, TypeVS.TRANSACTIONVS_INFO);
                             socketSession.setData(qrDto);
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             msgDto = socketMsg.getResponse(ResponseVS.SC_ERROR,
-                                    ex.getMessage(), TypeVS.QR_MESSAGE_INFO);
+                                    ex.getMessage(), deviceFromId, TypeVS.QR_MESSAGE_INFO);
                         } finally {
                             session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(msgDto));
                         }

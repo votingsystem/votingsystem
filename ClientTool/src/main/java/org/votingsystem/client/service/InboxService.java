@@ -263,8 +263,9 @@ public class InboxService implements PasswordDialog.Listener {
                         EventBusService.getInstance().post(currentMessage.setState(InboxMessage.State.PROCESSED));
                         removeMessage(currentMessage);
                         SocketMessageDto messageDto = currentMessage.getWebSocketMessage();
+                        Long deviceFromId = BrowserSessionService.getInstance().getConnectedDevice().getId();
                         String socketMsgStr = JSON.getMapper().writeValueAsString(messageDto.
-                                getResponse(ResponseVS.SC_OK, null, messageDto.getOperation()));
+                                getResponse(ResponseVS.SC_OK, null, deviceFromId, messageDto.getOperation()));
                         WebSocketAuthenticatedService.getInstance().sendMessage(socketMsgStr);
                     } catch (WalletException wex) {
                         Utils.showWalletNotFoundMessage();

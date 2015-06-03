@@ -57,7 +57,7 @@
       </VBox>
       <HBox fx:id="tagHBox" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
          <children>
-            <Button fx:id="addTagButton" minWidth="150.0" mnemonicParsing="false" text="Button" wrapText="true" HBox.hgrow="NEVER" />
+            <Button fx:id="addTagButton" minWidth="150.0" mnemonicParsing="false" text="Button" textAlignment="CENTER" wrapText="true" HBox.hgrow="NEVER" />
             <Label fx:id="tagLbl" text="Label" textAlignment="CENTER" textOverrun="WORD_ELLIPSIS" wrapText="true" HBox.hgrow="ALWAYS">
                <padding>
                   <Insets left="10.0" />

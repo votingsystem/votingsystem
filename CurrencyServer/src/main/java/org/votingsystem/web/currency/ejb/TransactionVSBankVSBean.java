@@ -46,6 +46,7 @@ public class TransactionVSBankVSBean {
                 transactionParent, transactionParent.getAmount(), request.getReceptor(), request.getReceptor().getIBAN()));
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(request.getTransactionVSSMIME().getUserVS().getNif(),
                 request.getTransactionVSSMIME().getSMIME(), messages.get("bankVSInputLbl"));
+        receipt.setHeader("TypeVS", TypeVS.FROM_BANKVS.toString());
         dao.merge(request.getTransactionVSSMIME().setSMIME(receipt));
         transactionVSBean.newTransactionVS(transactionParent, triggeredTransaction);
         log.info("BankVS: " + bankVS.getId() + " - to user: " + request.getReceptor().getId());

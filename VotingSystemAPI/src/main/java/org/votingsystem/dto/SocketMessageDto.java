@@ -78,7 +78,8 @@ public class SocketMessageDto {
         return responseDto;
     }
 
-    public SocketMessageDto getResponse(Integer statusCode, String message, TypeVS operation) throws Exception {
+    public SocketMessageDto getResponse(Integer statusCode, String message, Long deviceFromId, TypeVS operation)
+            throws Exception {
         SocketMessageDto messageDto = new SocketMessageDto();
         messageDto.setOperation(TypeVS.MESSAGEVS_FROM_DEVICE);
         messageDto.setStatusCode(ResponseVS.SC_PROCESSING);
@@ -86,6 +87,7 @@ public class SocketMessageDto {
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
         messageContentDto.setStatusCode(statusCode);
         messageContentDto.setMessage(message);
+        messageContentDto.setDeviceFromId(deviceFromId);
         messageContentDto.setOperation(operation);
         if(aesEncryptParams != null) {
             messageDto.setEncryptedMessage(Encryptor.encryptAES(

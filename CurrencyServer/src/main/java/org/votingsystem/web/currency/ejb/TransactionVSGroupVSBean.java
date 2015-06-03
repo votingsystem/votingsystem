@@ -68,6 +68,7 @@ public class TransactionVSGroupVSBean {
                 SMIMEMessage receipt = signatureBean.getSMIME(signatureBean.getSystemUser().getNif(),
                         toUser.getNif(), mapper.writeValueAsString(new TransactionVSDto(triggeredTransaction)),
                         request.getOperation().toString(), null);
+                receipt.setHeader("TypeVS", request.getType().toString());
                 MessageSMIME messageSMIMEReceipt = dao.persist(new MessageSMIME(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS,
                         request.getTransactionVSSMIME()));
                 triggeredTransaction.setMessageSMIME(messageSMIMEReceipt);
@@ -138,6 +139,7 @@ public class TransactionVSGroupVSBean {
                     toUserNIF, userPart, subscriptionList.size(), config.getRestURL());
             SMIMEMessage receipt = signatureBean.getSMIME(signatureBean.getSystemUser().getNif(),
                     toUserNIF, mapper.writeValueAsString(triggeredDto), request.getOperation().toString(), null);
+            receipt.setHeader("TypeVS", request.getType().toString());
             MessageSMIME messageSMIMEReceipt = dao.persist(new MessageSMIME(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS,
                     request.getTransactionVSSMIME()));
             TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(transactionParent,
@@ -150,6 +152,7 @@ public class TransactionVSGroupVSBean {
         MessageSMIME requestMessageSMIME = request.getTransactionVSSMIME();
         SMIMEMessage parentReceipt = signatureBean.getSMIMEMultiSigned(request.getSigner().getNif(),
                 requestMessageSMIME.getSMIME(), messages.get("fromGroupVSToAllMembersLbl"));
+        parentReceipt.setHeader("TypeVS", request.getType().toString());
         dao.merge(requestMessageSMIME.setSMIME(parentReceipt));
         resultDto.setMessage(messages.get("transactionVSFromGroupToAllMembersGroupOKMsg",
                 request.getAmount().toString() + " " + request.getCurrencyCode()));
