@@ -10,6 +10,7 @@ import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -17,7 +18,10 @@ import javax.net.ssl.X509TrustManager;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

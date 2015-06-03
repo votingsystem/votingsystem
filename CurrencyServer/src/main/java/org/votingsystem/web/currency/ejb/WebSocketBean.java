@@ -83,7 +83,7 @@ public class WebSocketBean {
                     SessionVSManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer);
                     SocketMessageDto responseDto = messageDto.getServerResponse(
                             ResponseVS.SC_WS_CONNECTION_INIT_OK, null);
-                    responseDto.setConnectedDevice(new DeviceVSDto(signer.getDeviceVS()));
+                    responseDto.setConnectedDevice(DeviceVSDto.INIT_AUTHENTICATED_SESSION(signer));
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
                     dao.getEM().merge(messageSMIME.setType(TypeVS.WEB_SOCKET_INIT));
                 } else {

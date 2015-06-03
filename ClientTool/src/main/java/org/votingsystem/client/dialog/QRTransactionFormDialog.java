@@ -6,10 +6,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.control.CurrencyCodeChoiceBox;
 import org.votingsystem.client.control.NumberTextField;
@@ -20,6 +22,7 @@ import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
@@ -42,8 +45,11 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
     private static Logger log = Logger.getLogger(QRTransactionFormDialog.class.getSimpleName());
 
     @FXML private Label tagLbl;
+    @FXML private Label userNameLbl;
+    @FXML private Label userIBANLbl;
     @FXML private CheckBox timeLimitedCheckBox;
     @FXML private NumberTextField amounTxt;
+    @FXML private TextField subjectTxt;
     @FXML private Button addTagButton;
     @FXML private Button acceptButton;
     @FXML private HBox tagHBox;
@@ -63,8 +69,11 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
     }
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
+        userNameLbl.setText(BrowserSessionService.getInstance().getUserVS().getName());
+        userIBANLbl.setText(BrowserSessionService.getInstance().getConnectedDevice().getIBAN());
+        subjectTxt.setPromptText(ContextVS.getMessage("subjectLbl"));
         addTagButton.setText(ContextVS.getMessage("addTagVSLbl"));
-        addTagButton.setWrapText(true);
+
         addTagButton.setOnAction(actionEvent -> {
             if (selectedTag == null) {
                 AddTagVSDialog.show(ContextVS.getMessage("addTagVSLbl"), this);
@@ -83,15 +92,17 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
             Platform.runLater(() -> {
                 try {
                     if (qrCodeImage == null) {
-                        TransactionVSDto dto = new TransactionVSDto();
-                        dto.setAmount(new BigDecimal(amounTxt.getText()));
-                        if((dto.getAmount().compareTo(BigDecimal.ONE) < 0)) {
+
+                        TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(
+                                BrowserSessionService.getInstance().getUserVS().getName(), UserVS.Type.USER,
+                                new BigDecimal(amounTxt.getText()), currencyChoiceBox.getSelected(),
+                                BrowserSessionService.getInstance().getConnectedDevice().getIBAN(), subjectTxt.getText(),
+                                (selectedTag == null ? TagVS.WILDTAG : selectedTag));
+                        if ((dto.getAmount().compareTo(BigDecimal.ONE) < 0)) {
                             showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("amountErrorMsg"));
                             return;
                         }
                         dto.setTimeLimited(timeLimitedCheckBox.isSelected());
-                        if(selectedTag == null) dto.setTag(new TagVS(TagVS.WILDTAG));
-                        else dto.setTag(new TagVS(selectedTag));
                         QRMessageDto qrDto = new QRMessageDto(BrowserSessionService.getInstance().getConnectedDevice(),
                                 TypeVS.TRANSACTIONVS_INFO);
                         qrDto.setData(dto);
@@ -102,10 +113,12 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                         acceptButton.setText(ContextVS.getMessage("newLbl"));
                         if (!imageHBox.getChildren().contains(imageView)) imageHBox.getChildren().add(imageView);
                         if (mainPane.getChildren().contains(formVBox)) mainPane.getChildren().remove(formVBox);
+                        if (mainPane.getChildren().contains(tagHBox)) mainPane.getChildren().remove(tagHBox);
                     } else {
                         qrCodeImage = null;
                         if (imageHBox.getChildren().contains(imageView)) imageHBox.getChildren().remove(imageView);
                         if (!mainPane.getChildren().contains(formVBox)) mainPane.getChildren().add(0, formVBox);
+                        if (!mainPane.getChildren().contains(tagHBox)) mainPane.getChildren().add(1, tagHBox);
                         acceptButton.setText(ContextVS.getMessage("acceptLbl"));
                     }
                     mainPane.getScene().getWindow().sizeToScene();
@@ -114,10 +127,10 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                 }
             });
         });
-        tagLbl.setWrapText(true);
-        tagHBox.setStyle("-fx-border-color: #6c0404; -fx-border-width: 1;");
-        mainPane.setStyle("-fx-font-size: 15; -fx-font-weight: bold;");
+        tagHBox.setStyle("-fx-border-color: #6c0404; -fx-border-width: 1;-fx-wrap-text: true;");
+        mainPane.setStyle("-fx-font-size: 15; -fx-font-weight: bold;-fx-wrap-text: true;");
         if(imageHBox.getChildren().contains(imageView)) imageHBox.getChildren().remove(imageView);
+        tagLbl.setWrapText(true);
     }
 
     public static void showDialog() {

@@ -10,8 +10,31 @@
 
 <VBox fx:id="mainPane" alignment="CENTER" maxHeight="-Infinity" maxWidth="600.0" minHeight="-Infinity" minWidth="-Infinity" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <VBox fx:id="formVBox" alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+      <VBox fx:id="formVBox" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS">
          <children>
+            <HBox>
+               <children>
+                  <Label fx:id="userNameLbl" text="userNameLbl" textFill="#888888" />
+                  <Label text="IBAN:">
+                     <HBox.margin>
+                        <Insets left="30.0" />
+                     </HBox.margin>
+                  </Label>
+                  <Label fx:id="userIBANLbl" text="userIBANLbl" textFill="#888888">
+                     <HBox.margin>
+                        <Insets left="5.0" />
+                     </HBox.margin>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </HBox>
+            <TextField fx:id="subjectTxt">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="20.0" right="20.0" />
+               </VBox.margin>
+            </TextField>
             <HBox alignment="CENTER">
                <children>
                   <NumberTextField fx:id="amounTxt" prefWidth="110.0" />
@@ -30,21 +53,21 @@
                   <Insets bottom="15.0" top="15.0" />
                </VBox.margin>
             </CheckBox>
-            <HBox fx:id="tagHBox" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
-               <children>
-                  <Button fx:id="addTagButton" minWidth="150.0" mnemonicParsing="false" text="Button" HBox.hgrow="NEVER" />
-                  <Label fx:id="tagLbl" text="Label" HBox.hgrow="ALWAYS">
-                     <padding>
-                        <Insets left="10.0" />
-                     </padding>
-                  </Label>
-               </children>
-               <padding>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </padding>
-            </HBox>
          </children>
       </VBox>
+      <HBox fx:id="tagHBox" alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
+         <children>
+            <Button fx:id="addTagButton" minWidth="150.0" mnemonicParsing="false" text="Button" wrapText="true" HBox.hgrow="NEVER" />
+            <Label fx:id="tagLbl" text="Label" textAlignment="CENTER" textOverrun="WORD_ELLIPSIS" wrapText="true" HBox.hgrow="ALWAYS">
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
+            </Label>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </HBox>
       <HBox fx:id="imageHBox" alignment="CENTER">
          <children>
             <ImageView fx:id="imageView" pickOnBounds="true" preserveRatio="true" />

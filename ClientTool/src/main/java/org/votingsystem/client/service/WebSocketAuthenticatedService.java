@@ -21,7 +21,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.AESParams;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.ExceptionVS;

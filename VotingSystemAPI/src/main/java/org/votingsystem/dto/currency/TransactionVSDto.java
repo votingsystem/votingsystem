@@ -363,7 +363,7 @@ public class    TransactionVSDto {
         return tag;
     }
 
-    public String getTagName() {
+    @JsonIgnore public String getTagName() {
         if(tag != null) return tag.getName();
         else if (tags != null && !tags.isEmpty()) return tags.iterator().next();
         return null;

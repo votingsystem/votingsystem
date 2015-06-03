@@ -29,6 +29,7 @@ public class DeviceVSDto implements Serializable {
     private String firstName;
     private String lastName;
     private String NIF;
+    private String IBAN;
     private DeviceVS.Type deviceType;
     private CryptoTokenVS type;
 
@@ -57,6 +58,12 @@ public class DeviceVSDto implements Serializable {
         this.setId(id);
         this.setDeviceId(deviceId);
         this.setSessionId(sessionId);
+    }
+
+    public static DeviceVSDto INIT_AUTHENTICATED_SESSION(UserVS userVS) throws Exception {
+        DeviceVSDto deviceVSDto = new DeviceVSDto(userVS.getDeviceVS());
+        deviceVSDto.setIBAN(userVS.getIBAN());
+        return deviceVSDto;
     }
 
     public DeviceVSDto(DeviceVS deviceVS) throws Exception {
@@ -181,5 +188,13 @@ public class DeviceVSDto implements Serializable {
 
     public void setDeviceType(DeviceVS.Type deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public String getIBAN() {
+        return IBAN;
+    }
+
+    public void setIBAN(String IBAN) {
+        this.IBAN = IBAN;
     }
 }
