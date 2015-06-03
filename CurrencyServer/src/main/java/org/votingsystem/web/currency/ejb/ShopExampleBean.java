@@ -63,7 +63,7 @@ public class ShopExampleBean {
         AsyncRequestBundle asyncRequestBundle = transactionRequestMap.remove(sessionId);
         if(asyncRequestBundle != null) {
             try {
-                asyncRequestBundle.dto.validateReceipt(smimeMessage);
+                asyncRequestBundle.dto.validateReceipt(smimeMessage, true);
                 MessageDto<TransactionVSDto> messageDto = MessageDto.OK("OK");
                 messageDto.setData(asyncRequestBundle.dto);
                 asyncRequestBundle.asyncResponse.resume(Response.ok().entity(JSON.getMapper()

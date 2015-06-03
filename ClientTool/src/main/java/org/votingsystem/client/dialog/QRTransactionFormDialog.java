@@ -23,6 +23,7 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
@@ -32,6 +33,7 @@ import org.votingsystem.util.TypeVS;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,6 +81,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                 AddTagVSDialog.show(ContextVS.getMessage("addTagVSLbl"), this);
             } else {
                 selectedTag = null;
+                formVBox.getChildren().remove(timeLimitedCheckBox);
                 addTagButton.setText(ContextVS.getMessage("addTagVSLbl"));
                 tagLbl.setText(ContextVS.getMessage("addTagMsg"));
             }
@@ -97,6 +100,8 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                                 new BigDecimal(amounTxt.getText()), currencyChoiceBox.getSelected(),
                                 BrowserSessionService.getInstance().getConnectedDevice().getIBAN(), subjectTxt.getText(),
                                 (selectedTag == null ? TagVS.WILDTAG : selectedTag));
+                        dto.setPaymentOptions(Arrays.asList(TransactionVS.Type.FROM_USERVS,
+                                TransactionVS.Type.CURRENCY_SEND, TransactionVS.Type.CURRENCY_CHANGE));
                         if ((dto.getAmount().compareTo(BigDecimal.ONE) < 0)) {
                             showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("amountErrorMsg"));
                             return;
@@ -123,6 +128,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
         mainPane.setStyle("-fx-font-size: 15; -fx-font-weight: bold;-fx-wrap-text: true; -fx-text-fill:#434343;");
         if(imageHBox.getChildren().contains(imageView)) imageHBox.getChildren().remove(imageView);
         tagLbl.setWrapText(true);
+        formVBox.getChildren().remove(timeLimitedCheckBox);
     }
 
     private void toggleView(boolean isFormView) {
@@ -172,9 +178,11 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
     }
 
     @Override public void addTagVS(String tagName) {
+        log.info("addTagVS: " + tagName);
         this.selectedTag = tagName;
         addTagButton.setText(ContextVS.getMessage("removeTagLbl"));
         tagLbl.setText(tagName);
+        formVBox.getChildren().add(3, timeLimitedCheckBox);
     }
 
 }
