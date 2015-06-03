@@ -2,6 +2,7 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.TagVS;
+
 import java.math.BigDecimal;
 
 /**

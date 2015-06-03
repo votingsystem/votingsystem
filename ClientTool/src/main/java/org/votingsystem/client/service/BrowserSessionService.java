@@ -190,11 +190,11 @@ public class BrowserSessionService implements PasswordDialog.Listener {
         return socketMsg;
     }
 
-    public static byte[] decryptMessage(byte[] base64EncryptedData) throws Exception {
-        if(privateKey != null) return Encryptor.decryptCMS(base64EncryptedData, privateKey);
+    public static void decryptMessage(SocketMessageDto socketMessage) throws Exception {
+        if(privateKey != null) socketMessage.decryptMessage(privateKey);
         else {
             showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("improperTokenErrorMsg"));
-            return null;
+            throw new ExceptionVS(ContextVS.getMessage("improperTokenErrorMsg"));
         }
     }
 

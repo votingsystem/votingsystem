@@ -18,6 +18,7 @@ public class WebSocketSession<T> {
     public WebSocketSession(SocketMessageDto socketMsg) {
         this.aesParams = socketMsg.getAesEncryptParams();
         this.typeVS = socketMsg.getOperation();
+        this.UUID = socketMsg.getUUID();
     }
 
     public WebSocketSession(AESParams aesParams, DeviceVS deviceVS, T data, TypeVS typeVS) {

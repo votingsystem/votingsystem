@@ -15,6 +15,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
+
 import javax.mail.Header;
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;

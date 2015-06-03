@@ -20,7 +20,10 @@ import org.votingsystem.util.WebSocketSession;
 import javax.websocket.Session;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.util.*;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SocketMessageDto {
@@ -29,6 +32,7 @@ public class SocketMessageDto {
     public enum ConnectionStatus {OPEN, CLOSED}
 
     private TypeVS operation;
+    private TypeVS messageType;
     private State state = State.PENDING;
     private Integer statusCode;
     private Long deviceFromId;
@@ -114,6 +118,14 @@ public class SocketMessageDto {
 
     public boolean isEncrypted() {
         return encryptedMessage != null;
+    }
+
+    public TypeVS getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(TypeVS messageType) {
+        this.messageType = messageType;
     }
 
     public Long getDeviceFromId() {
@@ -448,7 +460,10 @@ public class SocketMessageDto {
     public void decryptMessage(AESParams aesParams) throws Exception {
         content = JSON.getMapper().readValue(
                 Encryptor.decryptAES(encryptedMessage, aesParams), SocketMessageContentDto.class);
-        if(content.getOperation() != null) operation = content.getOperation();
+        if(content.getOperation() != null) {
+            this.messageType = operation;
+            operation = content.getOperation();
+        }
         if(content.getStatusCode() != null) statusCode = content.getStatusCode();
         if(content.getDeviceFromName() != null) deviceFromName = content.getDeviceFromName();
         if(content.getFrom() != null) from = content.getFrom();

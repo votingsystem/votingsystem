@@ -229,11 +229,9 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                 return;
             }
             if(socketSession == null && socketMsg.isEncrypted()) {
-                byte[] decryptedBytes = BrowserSessionService.decryptMessage(socketMsg.getAesParams().getBytes());
-                AESParamsDto aesDto = JSON.getMapper().readValue(decryptedBytes, AESParamsDto.class);
-                AESParams aesParams = AESParams.load(aesDto);
-                socketMsg.decryptMessage(aesParams);
-                ContextVS.getInstance().putWSSession(socketMsg.getUUID(), new WebSocketSession(socketMsg));
+                BrowserSessionService.decryptMessage(socketMsg);
+                socketSession = new WebSocketSession(socketMsg);
+                ContextVS.getInstance().putWSSession(socketMsg.getUUID(), socketSession);
             } else if(socketSession != null && socketMsg.isEncrypted()) {
                 socketMsg.decryptMessage(socketSession.getAESParams());
             }
@@ -252,7 +250,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                                 BrowserSessionService.getInstance().initAuthenticatedSession(socketMsg, userVS);
                                 break;
                             default:
-                                log.log(Level.SEVERE, "MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
+                                log.log(Level.SEVERE, "MESSAGEVS_FROM_VS - pong - TypeVS: " + socketSession.getTypeVS());
                         }
                         responseVS = new ResponseVS(null, socketMsg.getOperation(), socketMsg);
                     }

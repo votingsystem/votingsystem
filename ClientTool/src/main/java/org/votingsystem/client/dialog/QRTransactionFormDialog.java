@@ -118,22 +118,26 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
         tagHBox.setStyle("-fx-border-color: #6c0404; -fx-border-width: 1;");
         mainPane.setStyle("-fx-font-size: 15; -fx-font-weight: bold;");
         if(imageHBox.getChildren().contains(imageView)) imageHBox.getChildren().remove(imageView);
-        if(!BrowserSessionService.getInstance().isConnected()) {
-            Button connectionButton = new Button();
-            connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CLOUD_UPLOAD));
-            connectionButton.setText(ContextVS.getMessage("connectLbl"));
-            connectionButton.setOnAction(event -> {
-                WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true);
-            });
-            showMessage(ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"), connectionButton);
-        }
-        CryptoTokenVS  tokenType = CryptoTokenVS.valueOf(ContextVS.getInstance().getProperty(
-                ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString()));
-        if(tokenType != CryptoTokenVS.JKS_KEYSTORE) showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("improperTokenMsg"));
     }
 
     public static void showDialog() {
         Platform.runLater(() -> {
+            CryptoTokenVS  tokenType = CryptoTokenVS.valueOf(ContextVS.getInstance().getProperty(
+                    ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString()));
+            if(tokenType != CryptoTokenVS.JKS_KEYSTORE) {
+                showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("improperTokenMsg"));
+                return;
+            }
+            if(!BrowserSessionService.getInstance().isConnected()) {
+                Button connectionButton = new Button();
+                connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CLOUD_UPLOAD));
+                connectionButton.setText(ContextVS.getMessage("connectLbl"));
+                connectionButton.setOnAction(event -> {
+                    WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true);
+                });
+                showMessage(ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"), connectionButton);
+                return;
+            }
             try {
                 if (INSTANCE == null) {
                     INSTANCE = new QRTransactionFormDialog();

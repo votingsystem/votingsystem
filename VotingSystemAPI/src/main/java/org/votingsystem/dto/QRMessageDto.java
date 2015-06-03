@@ -2,7 +2,6 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import org.votingsystem.util.TypeVS;
 
 import java.io.Serializable;
