@@ -3,6 +3,7 @@ package org.votingsystem.web.currency.ejb;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
@@ -39,15 +40,15 @@ public class TransactionVSUserVSBean {
     @Inject TransactionVSBean transactionVSBean;
 
 
-    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws Exception {
+    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request, TagVS tagVS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         validateRequest(request);
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
-                request.getSigner().getIBAN(), request.getTag(), request.getAmount(), request.getCurrencyCode());
+                request.getSigner().getIBAN(), tagVS, request.getAmount(), request.getCurrencyCode());
         //Transactions from users doesn't need parent transaction
         TransactionVS transactionVS = dao.persist(TransactionVS.USERVS(request.getSigner(), request.getReceptor(),
                 request.getType(), accountFromMovements, request.getAmount(), request.getCurrencyCode(),
-                request.getSubject(), request.getValidTo(), request.getTransactionVSSMIME(), request.getTag()));
+                request.getSubject(), request.getValidTo(), request.getTransactionVSSMIME(), tagVS));
         transactionVSBean.newTransactionVS(transactionVS);
         String fromUser = config.getServerName();
         String toUser = request.getSigner().getNif();

@@ -95,11 +95,11 @@ public class TransactionVSPlanDto {
     public static Map<String, Map<String, BigDecimal>> updateCurrencyMap(
             Map<String, Map<String, BigDecimal>> currencyMap, TransactionVSDto transactionVS) {
         if(currencyMap.containsKey(transactionVS.getCurrencyCode())) {
-            if(currencyMap.get(transactionVS.getCurrencyCode()).containsKey(transactionVS.getTag().getName())) {
+            if(currencyMap.get(transactionVS.getCurrencyCode()).containsKey(transactionVS.getTagName())) {
                 BigDecimal newAmount = ((BigDecimal)currencyMap.get(transactionVS.getCurrencyCode()).get(
-                        transactionVS.getTag().getName())).add(transactionVS.getAmount());
-                currencyMap.get(transactionVS.getCurrencyCode()).put(transactionVS.getTag().getName(), newAmount);
-            } else currencyMap.get(transactionVS.getCurrencyCode()).put(transactionVS.getTag().getName(), transactionVS.getAmount());
+                        transactionVS.getTagName())).add(transactionVS.getAmount());
+                currencyMap.get(transactionVS.getCurrencyCode()).put(transactionVS.getTagName(), newAmount);
+            } else currencyMap.get(transactionVS.getCurrencyCode()).put(transactionVS.getTagName(), transactionVS.getAmount());
         } else {
             Map tagMap = new HashMap<>();
             tagMap.put(transactionVS.getTagName(), transactionVS.getAmount());

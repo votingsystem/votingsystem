@@ -12,6 +12,7 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
+
 import java.util.logging.Logger;
 
 /**

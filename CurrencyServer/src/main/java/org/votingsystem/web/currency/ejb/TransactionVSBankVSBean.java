@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.TransactionVS;
@@ -33,7 +34,7 @@ public class TransactionVSBankVSBean {
     @Inject TransactionVSBean transactionVSBean;
     @Inject SignatureBean signatureBean;
 
-    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws Exception {
+    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request, TagVS tagVS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         validateRequest(request);
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getSigner().getNif());
@@ -41,7 +42,7 @@ public class TransactionVSBankVSBean {
         if(bankVS == null) throw new ExceptionVS(messages.get("bankVSPrivilegesErrorMsg", request.getOperation().toString()));
         TransactionVS transactionParent = dao.persist(TransactionVS.BANKVS_PARENT(bankVS, request.getFromUserIBAN(),
                 request.getFromUser(), request.getAmount(), request.getCurrencyCode(), request.getSubject(),
-                request.getValidTo(), request.getTransactionVSSMIME(), request.getTag()));
+                request.getValidTo(), request.getTransactionVSSMIME(), tagVS));
         TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(
                 transactionParent, transactionParent.getAmount(), request.getReceptor(), request.getReceptor().getIBAN()));
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(request.getTransactionVSSMIME().getUserVS().getNif(),

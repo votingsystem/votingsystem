@@ -56,12 +56,13 @@ public class AddTagVSDialog extends DialogVS {
         messageLabel = new Label();
         messageLabel.setWrapText(true);
         textField = new TextField();
-        textField.setPromptText(ContextVS.getMessage("enterSearchTextLbl"));
+        textField.setPromptText(ContextVS.getMessage("searchTextLbl"));
         HBox.setHgrow(textField, Priority.ALWAYS);
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(actionEvent -> {
             if ("".equals(textField.getText().trim())) {
-                Browser.getInstance().showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("emptyFieldErrorMsg"));
+                Browser.getInstance().showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("emptyFieldErrorMsg",
+                        ContextVS.getMessage("searchTextLbl")));
                 return;
             }
             try {
@@ -82,7 +83,7 @@ public class AddTagVSDialog extends DialogVS {
         tagListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             public void changed(ObservableValue<? extends String> observable,
                                 String oldValue, String newValue) {
-                listener.addTagVS(newValue);
+                if(newValue != null) listener.addTagVS(newValue);
                 hide();
             }
         });

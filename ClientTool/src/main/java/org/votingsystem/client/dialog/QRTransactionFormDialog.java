@@ -95,6 +95,11 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
             Platform.runLater(() -> {
                 try {
                     if (qrCodeImage == null) {
+                        if (subjectTxt.getText().trim().equals("")) {
+                            showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("emptyFieldErrorMsg",
+                                    ContextVS.getMessage("subjectLbl")));
+                            return;
+                        }
                         TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(
                                 BrowserSessionService.getInstance().getUserVS().getName(), UserVS.Type.USER,
                                 new BigDecimal(amounTxt.getText()), currencyChoiceBox.getSelected(),
@@ -132,6 +137,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
     }
 
     private void toggleView(boolean isFormView) {
+        log.info("toggleView");
         if(isFormView) {
             if (imageHBox.getChildren().contains(imageView)) imageHBox.getChildren().remove(imageView);
             if (!mainPane.getChildren().contains(formVBox)) mainPane.getChildren().add(0, formVBox);

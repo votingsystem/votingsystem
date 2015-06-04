@@ -22,7 +22,7 @@ import java.util.*;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class    TransactionVSDto {
+public class TransactionVSDto {
 
     private TypeVS operation;
     private Long id;
@@ -58,7 +58,6 @@ public class    TransactionVSDto {
     @JsonIgnore private List<UserVS> toUserVSList;
     @JsonIgnore private UserVS signer;
     @JsonIgnore private UserVS receptor;
-    @JsonIgnore private TagVS tag;
     @JsonIgnore private MessageSMIME transactionVSSMIME;
 
 
@@ -147,7 +146,7 @@ public class    TransactionVSDto {
     }
 
     @JsonIgnore
-    public TransactionVS getTransactionVS() throws Exception {
+    public TransactionVS getTransactionVS(TagVS tagVS) throws Exception {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setId(id);
         transactionVS.setFromUser(fromUser);
@@ -160,7 +159,7 @@ public class    TransactionVSDto {
         if(fromUserVS != null) {
             transactionVS.setFromUserVS(fromUserVS.getUserVS());
         }
-        transactionVS.setTag(getTagVS());
+        transactionVS.setTag(tagVS);
         transactionVS.setIsTimeLimited(timeLimited);
         transactionVS.setSubject(subject);
         transactionVS.setCurrencyCode(currencyCode);
@@ -172,7 +171,7 @@ public class    TransactionVSDto {
 
     @JsonIgnore
     public TransactionVS getTransactionVS(UserVS fromUserVS, UserVS toUserVS,
-              Map<CurrencyAccount, BigDecimal> accountFromMovements) throws Exception {
+                  Map<CurrencyAccount, BigDecimal> accountFromMovements, TagVS tagVS) throws Exception {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setFromUserVS(fromUserVS);
         transactionVS.setFromUserIBAN(fromUserVS.getIBAN());
@@ -185,15 +184,9 @@ public class    TransactionVSDto {
         transactionVS.setSubject(subject);
         transactionVS.setValidTo(validTo);
         transactionVS.setMessageSMIME(transactionVSSMIME);
-        transactionVS.setTag(tag);
         transactionVS.setState(TransactionVS.State.OK);
+        transactionVS.setTag(tagVS);
         return transactionVS;
-    }
-
-    @JsonIgnore public TagVS getTagVS() {
-        if(tag != null) return tag;
-        else if(tags != null && !tags.isEmpty()) return new TagVS(tags.iterator().next());
-        else return null;
     }
 
     public Long getId() {
@@ -359,18 +352,10 @@ public class    TransactionVSDto {
         this.numReceptors = toUserVSList.size();
     }
 
-    public TagVS getTag() {
-        return tag;
-    }
 
     @JsonIgnore public String getTagName() {
-        if(tag != null) return tag.getName();
-        else if (tags != null && !tags.isEmpty()) return tags.iterator().next();
+        if (tags != null && !tags.isEmpty()) return tags.iterator().next();
         return null;
-    }
-
-    public void setTag(TagVS tag) {
-        this.tag = tag;
     }
 
     public Set<String> getToUserIBAN() {
@@ -540,7 +525,7 @@ public class    TransactionVSDto {
                 "expected details " + details + " found " + receiptDto.getDetails());
         String action = isIncome?ContextVS.getMessage("income_lbl"): ContextVS.getMessage("expense_lbl");
         return ContextVS.getMessage("from_uservs_receipt_ok_msg", action, receiptDto.getAmount() + " " +
-                receiptDto.getCurrencyCode(), receiptDto.getTag());
+                receiptDto.getCurrencyCode(), receiptDto.getTagName());
     }
 
     public TransactionVSDetailsDto getDetails() {

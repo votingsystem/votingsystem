@@ -95,19 +95,19 @@ public class TransactionVSBean {
         String transactionTag =  request.getTags().iterator().next();
         if(request.isTimeLimited() && TagVS.WILDTAG.equals(transactionTag.toUpperCase()))
             throw new ValidationExceptionVS(messages.get("timeLimitedWildTagErrorMsg"));
-        request.setTag(config.getTag(transactionTag));
-        if(request.getTag() == null) throw new ValidationExceptionVS("unknown tag:" + transactionTag);
+        TagVS tagVS = config.getTag(transactionTag);
+        if(tagVS == null) throw new ValidationExceptionVS("unknown tag:" + transactionTag);
 
         LoggerVS.logTransactionVS(request);
 
         switch(request.getOperation()) {
             case FROM_BANKVS:
-                return transactionVSBankVSBean.processTransactionVS(request);
+                return transactionVSBankVSBean.processTransactionVS(request, tagVS);
             case FROM_GROUP_TO_MEMBER_GROUP:
             case FROM_GROUP_TO_ALL_MEMBERS:
-                return transactionVSGroupVSBean.processTransactionVS(request);
+                return transactionVSGroupVSBean.processTransactionVS(request, tagVS);
             case FROM_USERVS:
-                return transactionVSUserVSBean.processTransactionVS(request);
+                return transactionVSUserVSBean.processTransactionVS(request, tagVS);
             default:
                 throw new ExceptionVS(messages.get("unknownTransactionErrorMsg",request.getOperation().toString()));
         }

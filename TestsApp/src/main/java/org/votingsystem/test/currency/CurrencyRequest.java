@@ -6,7 +6,6 @@ import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
@@ -20,9 +19,7 @@ import org.votingsystem.util.StringUtils;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,11 +35,10 @@ public class CurrencyRequest {
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         BigDecimal totalAmount = new BigDecimal(10);
         String curencyCode = "EUR";
-        TagVS tag = new TagVS("HIDROGENO");
         TransactionVSDto transactionVSDto = new TransactionVSDto();
         transactionVSDto.setAmount(totalAmount);
         transactionVSDto.setCurrencyCode(curencyCode);
-        transactionVSDto.setTag(tag);
+        transactionVSDto.setTags(new HashSet<>(Arrays.asList("HIDROGENO")));
         transactionVSDto.setTimeLimited(true);
         CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionVSDto, totalAmount,
                 ContextVS.getInstance().getCurrencyServer().getServerURL());

@@ -5,6 +5,7 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.GroupVS;
@@ -45,13 +46,13 @@ public class TransactionVSGroupVSBean {
     @Inject TransactionVSBean transactionVSBean;
 
 
-    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request) throws Exception {
+    public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request,TagVS tagVS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         GroupVS groupVS = validateRequest(request);
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
-                groupVS.getIBAN(), request.getTag(), request.getAmount(), request.getCurrencyCode());
+                groupVS.getIBAN(), tagVS, request.getAmount(), request.getCurrencyCode());
         if(request.getType() == TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS) {
-            return processTransactionVSForAllMembers(request, accountFromMovements, groupVS);
+            return processTransactionVSForAllMembers(request, accountFromMovements, groupVS, tagVS);
         } else {
             List<TransactionVSDto> resultList = new ArrayList<>();
             BigDecimal numReceptors = new BigDecimal(request.getNumReceptors());
@@ -59,7 +60,8 @@ public class TransactionVSGroupVSBean {
             if(!(request.getType() == TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP)) {
                 throw new ExceptionVS("unknown transaction: " + request.getType().toString());
             }
-            TransactionVS transactionParent = dao.persist(request.getTransactionVS(groupVS, null, accountFromMovements));
+            TransactionVS transactionParent =
+                    dao.persist(request.getTransactionVS(groupVS, null, accountFromMovements, tagVS));
             transactionVSBean.newTransactionVS(transactionParent);
             ObjectMapper mapper = JSON.getMapper();
             for(UserVS toUser: request.getToUserVSList()) {
@@ -121,11 +123,11 @@ public class TransactionVSGroupVSBean {
     }
 
     private ResultListDto<TransactionVSDto> processTransactionVSForAllMembers(TransactionVSDto request,
-                                 Map<CurrencyAccount, BigDecimal> accountFromMovements, GroupVS groupVS) throws Exception {
+                 Map<CurrencyAccount, BigDecimal> accountFromMovements, GroupVS groupVS, TagVS tagVS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         BigDecimal numReceptors = new BigDecimal(request.getNumReceptors());
         BigDecimal userPart = request.getAmount().divide(numReceptors, 2, RoundingMode.FLOOR);
-        TransactionVS transactionParent = dao.persist(request.getTransactionVS(groupVS, null, accountFromMovements));
+        TransactionVS transactionParent = dao.persist(request.getTransactionVS(groupVS, null, accountFromMovements, tagVS));
         transactionVSBean.newTransactionVS(transactionParent);
         Query query = dao.getEM().createQuery("SELECT s FROM SubscriptionVS s WHERE s.groupVS =:groupVS AND s.state =:state")
                 .setParameter("groupVS", groupVS).setParameter("state", SubscriptionVS.State.ACTIVE);
