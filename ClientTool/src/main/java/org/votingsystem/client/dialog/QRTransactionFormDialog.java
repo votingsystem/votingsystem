@@ -1,5 +1,7 @@
 package org.votingsystem.client.dialog;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -16,9 +18,11 @@ import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.control.CurrencyCodeChoiceBox;
 import org.votingsystem.client.control.NumberTextField;
 import org.votingsystem.client.service.BrowserSessionService;
+import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.QRMessageDto;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
@@ -66,8 +70,21 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
 
     private static QRTransactionFormDialog INSTANCE;
 
+    class EventBusSocketMsgListener {
+        @Subscribe
+        public void responseVSChange(SocketMessageDto socketMsg) {
+            switch(socketMsg.getOperation()) {
+                case TRANSACTIONVS_RESPONSE:
+                    Platform.runLater(() -> { toggleView(true);});
+                    break;
+                default:log.info("EventBusSocketMsgListener - unprocessed operation: " + socketMsg.getOperation());
+            }
+        }
+    }
+
     public QRTransactionFormDialog() throws IOException {
         super("/fxml/QRTransactionFormPane.fxml");
+        EventBusService.getInstance().register(new EventBusSocketMsgListener());
     }
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete

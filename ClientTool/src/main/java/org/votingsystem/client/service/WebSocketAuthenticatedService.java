@@ -331,6 +331,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                                     BrowserSessionService.getInstance().getConnectedDevice().getId(), TypeVS.OPERATION_FINISHED);
                             sendMessage(JSON.getMapper().writeValueAsString(response));
                             VotingSystemApp.getInstance().removeQRMessage(qrDto.getUUID());
+                            EventBusService.getInstance().post(socketMsg);
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             showMessage(ResponseVS.SC_ERROR, ex.getMessage());

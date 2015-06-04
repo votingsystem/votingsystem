@@ -148,6 +148,7 @@ public class TransactionVSBean {
             log.info("new CurrencyAccount: " + accountTo.getId() + " - for IBAN:" + transactionVS.getToUserIBAN() +
                     " -  tag:" + accountTo.getTag().getName() + " - amount:" + accountTo.getBalance());
         } else dao.merge(accountTo.setBalance(accountTo.getBalance().add(resultAmount)));
+        dao.getEM().flush();
         return accountTo;
     }
 
@@ -157,6 +158,7 @@ public class TransactionVSBean {
         for(Map.Entry<CurrencyAccount, BigDecimal> entry: transactionVS.getAccountFromMovements().entrySet()) {
             CurrencyAccount currencyAccount = entry.getKey();
             dao.merge(currencyAccount.setBalance(currencyAccount.getBalance().subtract(entry.getValue())));
+            dao.getEM().flush();
         }
     }
 
