@@ -29,6 +29,7 @@ public class SocketMessageContentDto {
     private Long deviceFromId;
     private String textToSign;
     private String toUser;
+    private String hashCertVS;
     private String smimeMessage;
     private Set<CurrencyDto> currencyList;
     private String URL;
@@ -194,5 +195,13 @@ public class SocketMessageContentDto {
 
     public void setDeviceToName(String deviceToName) {
         this.deviceToName = deviceToName;
+    }
+
+    public String getHashCertVS() {
+        return hashCertVS;
+    }
+
+    public void setHashCertVS(String hashCertVS) {
+        this.hashCertVS = hashCertVS;
     }
 }

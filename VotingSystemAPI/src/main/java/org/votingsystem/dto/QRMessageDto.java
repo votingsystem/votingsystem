@@ -15,8 +15,11 @@ public class QRMessageDto<T> implements Serializable {
 
     @JsonIgnore private TypeVS typeVS;
     @JsonIgnore private T data;
+    @JsonIgnore private String origingHashCertVS;
     private Long deviceId;
     private Date dateCreated;
+    private String hashCertVS;
+    private String url;
     private String UUID;
 
     public QRMessageDto() {}
@@ -66,5 +69,29 @@ public class QRMessageDto<T> implements Serializable {
 
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
+    }
+
+    public String getOrigingHashCertVS() {
+        return origingHashCertVS;
+    }
+
+    public void setOrigingHashCertVS(String origingHashCertVS) {
+        this.origingHashCertVS = origingHashCertVS;
+    }
+
+    public String getHashCertVS() {
+        return hashCertVS;
+    }
+
+    public void setHashCertVS(String hashCertVS) {
+        this.hashCertVS = hashCertVS;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

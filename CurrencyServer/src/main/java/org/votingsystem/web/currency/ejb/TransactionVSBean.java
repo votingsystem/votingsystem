@@ -61,9 +61,14 @@ public class TransactionVSBean {
     @PostConstruct public void initialize() {
         log.info(" --- initialize --- ");
         executorService.submit(() -> {
-            while(true) {
-                updateCurrencyAccounts(queue.take());
-                log.info("--- queue.take - queue.size: " + queue.size());
+            try {
+                while(true) {
+                    TransactionVS transactionVS = queue.take();
+                    updateCurrencyAccounts(transactionVS);
+                    log.info("--- queue.take - queue.size: " + queue.size());
+                }
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
             }
         });
     }

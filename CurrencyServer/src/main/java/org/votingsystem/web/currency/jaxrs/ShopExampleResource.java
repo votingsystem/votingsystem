@@ -89,8 +89,10 @@ public class ShopExampleResource {
     }
 
     //Called from the mobile after reading the QR code. The mobile fetch the transaction data
-    @GET @Path("/{uuid}")
-    public Response paymentInfo(@PathParam("uuid") String uuid, @Context HttpServletRequest req) throws Exception {
+    @POST @Path("/{uuid}")
+    public Response paymentInfo(@PathParam("uuid") String uuid, byte[] postData, @Context HttpServletRequest req)
+            throws Exception {
+        String hashCertVS = new String(postData);
         MessagesVS messages = MessagesVS.getCurrentInstance();
         TransactionVSDto dto = shopExampleBean.getTransactionRequest(uuid);
         if(dto != null) {

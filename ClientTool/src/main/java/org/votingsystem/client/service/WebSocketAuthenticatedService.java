@@ -287,9 +287,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                         try {
                             QRMessageDto<TransactionVSDto> qrDto = VotingSystemApp.getInstance().getQRMessage(
                                     socketMsg.getMessage());
-
-                            //socketMsg.getContent().getHashCertVS();
-
+                            qrDto.setHashCertVS(socketMsg.getContent().getHashCertVS());
                             TransactionVSDto transactionDto = qrDto.getData();
                             msgDto = socketMsg.getResponse(ResponseVS.SC_OK,JSON.getMapper().writeValueAsString(transactionDto),
                                     deviceFromId, TypeVS.TRANSACTIONVS_INFO);
