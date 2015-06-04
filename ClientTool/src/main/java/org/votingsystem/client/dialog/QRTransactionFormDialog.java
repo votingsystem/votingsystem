@@ -140,7 +140,6 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                     } else {
                         toggleView(true);
                     }
-                    mainPane.getScene().getWindow().sizeToScene();
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
@@ -167,6 +166,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
             if (mainPane.getChildren().contains(formVBox)) mainPane.getChildren().remove(formVBox);
             if (mainPane.getChildren().contains(tagHBox)) mainPane.getChildren().remove(tagHBox);
         }
+        mainPane.getScene().getWindow().sizeToScene();
     }
 
     public static void showDialog() {

@@ -27,6 +27,7 @@ import javax.ejb.Startup;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -113,6 +114,7 @@ public class TransactionVSBean {
         }
     }
 
+    @Transactional
     private CurrencyAccount updateUserVSAccountTo(TransactionVS transactionVS) throws ExceptionVS {
         if(transactionVS.getToUserIBAN() == null) throw new ExceptionVS("transactionVS without toUserIBAN");
         Query query = dao.getEM().createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")
@@ -148,17 +150,16 @@ public class TransactionVSBean {
             log.info("new CurrencyAccount: " + accountTo.getId() + " - for IBAN:" + transactionVS.getToUserIBAN() +
                     " -  tag:" + accountTo.getTag().getName() + " - amount:" + accountTo.getBalance());
         } else dao.merge(accountTo.setBalance(accountTo.getBalance().add(resultAmount)));
-        dao.getEM().flush();
         return accountTo;
     }
 
+    @Transactional
     private void updateUserVSAccountFrom(TransactionVS transactionVS) throws ExceptionVS {
         if(transactionVS.getAccountFromMovements() == null)
             throw new ExceptionVS("TransactionVS without accountFromMovements");
         for(Map.Entry<CurrencyAccount, BigDecimal> entry: transactionVS.getAccountFromMovements().entrySet()) {
             CurrencyAccount currencyAccount = entry.getKey();
             dao.merge(currencyAccount.setBalance(currencyAccount.getBalance().subtract(entry.getValue())));
-            dao.getEM().flush();
         }
     }
 

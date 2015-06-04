@@ -128,7 +128,9 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
         @OnClose public void onClose(Session session, CloseReason closeReason) {
             broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
             BrowserSessionService.getInstance().setIsConnected(false);
-            EventBusService.getInstance().post(new ResponseVS(TypeVS.DISCONNECT));
+            SocketMessageDto socketMessageDto = new SocketMessageDto();
+            socketMessageDto.setOperation(TypeVS.DISCONNECT);
+            EventBusService.getInstance().post(socketMessageDto);
         }
 
         @OnMessage public void onMessage(String message) {
@@ -239,7 +241,6 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                 socketMsg.decryptMessage(socketSession.getAESParams());
             }
             socketMsg.setWebSocketSession(socketSession);
-            ResponseVS responseVS = null;
             log.info("consumeMessage - type: " + socketMsg.getOperation() + " - MessageType: " +
                     socketMsg.getMessageType() + " - status: " + socketMsg.getStatusCode());
             switch(socketMsg.getOperation()) {
@@ -257,11 +258,9 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                             default:
                                 log.log(Level.SEVERE, "MESSAGEVS_FROM_VS - pong - TypeVS: " + socketSession.getTypeVS());
                         }
-                        responseVS = new ResponseVS(null, socketMsg.getOperation(), socketMsg);
                     }
                     break;
                 case MESSAGEVS_FROM_DEVICE:
-                    responseVS = new ResponseVS(null, socketSession.getTypeVS(), socketMsg);
                     break;
                 case MESSAGEVS_SIGN:
                     if(ResponseVS.SC_CANCELED == socketMsg.getStatusCode()){
@@ -331,7 +330,6 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                                     BrowserSessionService.getInstance().getConnectedDevice().getId(), TypeVS.OPERATION_FINISHED);
                             sendMessage(JSON.getMapper().writeValueAsString(response));
                             VotingSystemApp.getInstance().removeQRMessage(qrDto.getUUID());
-                            EventBusService.getInstance().post(socketMsg);
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             showMessage(ResponseVS.SC_ERROR, ex.getMessage());
@@ -346,7 +344,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                 default:
                     log.info("unprocessed socketMsg: " + socketMsg.getOperation());
             }
-            if(responseVS != null) EventBusService.getInstance().post(responseVS);
+            EventBusService.getInstance().post(socketMsg);
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

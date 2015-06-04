@@ -51,11 +51,10 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
     private static Logger log = Logger.getLogger(CurrencyDialog.class.getSimpleName());
 
     class EventBusCurrencyListener {
-        @Subscribe public void responseVSChange(ResponseVS responseVS) {
-            switch(responseVS.getType()) {
+        @Subscribe public void socketMessageChange(SocketMessageDto socketMessage) {
+            switch(socketMessage.getOperation()) {
                 case CURRENCY_WALLET_CHANGE:
-                case MESSAGEVS_FROM_VS:
-                    if(walletChangeTask != null) walletChangeTask.update(responseVS);
+                    if(walletChangeTask != null) walletChangeTask.update(socketMessage);
                     break;
             }
         }
@@ -251,7 +250,7 @@ public class CurrencyDialog implements DocumentVS, JSONFormDialog.Listener, User
             return null;
         }
 
-        public void update(ResponseVS responseVS) {
+        public void update(SocketMessageDto socketMessage) {
             log.info("WalletChangeTask - update");
             countDownLatch.countDown();
         }

@@ -16,6 +16,7 @@ import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.util.BrowserVSMenuButton;
 import org.votingsystem.client.util.Utils;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
@@ -42,22 +43,27 @@ public class BrowserVSToolbar extends HBox {
 
     class EventBusConnectionListener {
         @Subscribe
-        public void responseVSChange(ResponseVS responseVS) {
-            log.info("EventBusConnectionListener - response type: " + responseVS.getType());
-            if(TypeVS.INIT_SIGNED_SESSION == responseVS.getType()) {
+        public void socketMessageChange(SocketMessageDto socketMessage) {
+            log.info("EventBusConnectionListener - response type: " + socketMessage.getOperation());
+            boolean uiUpdated = false;
+            if(TypeVS.INIT_SIGNED_SESSION == socketMessage.getOperation()) {
                 isConnected.set(true);
-            } else if(TypeVS.DISCONNECT == responseVS.getType()) {
+                uiUpdated = true;
+            } else if(TypeVS.DISCONNECT == socketMessage.getOperation()) {
                 isConnected.set(false);
+                uiUpdated = true;
             }
-            PlatformImpl.runLater(() -> {
-                if (isConnected.get()) {
-                    connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.FLASH));
-                    connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("disconnectLbl")));
-                } else {
-                    connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
-                    connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CLOUD_UPLOAD));
-                }
-            });
+            if(uiUpdated) {
+                PlatformImpl.runLater(() -> {
+                    if (isConnected.get()) {
+                        connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.FLASH));
+                        connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("disconnectLbl")));
+                    } else {
+                        connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
+                        connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CLOUD_UPLOAD));
+                    }
+                });
+            }
         }
     }
     public BrowserVSToolbar(Stage stage) {
