@@ -133,6 +133,21 @@ public class Currency extends EntityVS implements Serializable  {
         this.timeLimited = batchItemDto.isTimeLimited();
     }
 
+    public Currency(String currencyServerURL, BigDecimal amount, String currencyCode,
+                    Boolean timeLimited, String hashCertVS, TagVS tag) {
+        this.amount = amount;
+        this.currencyServerURL = currencyServerURL;
+        this.currencyCode = currencyCode;
+        this.tagVS = tag;
+        this.timeLimited = timeLimited;
+        try {
+            this.hashCertVS = hashCertVS;
+            certificationRequest = CertificationRequestVS.getCurrencyRequest(
+                    ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM, ContextVS.PROVIDER,
+                    currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tagVS.getName());
+        } catch(Exception ex) {  ex.printStackTrace(); }
+    }
+
     public Currency(String currencyServerURL, BigDecimal amount, String currencyCode, Boolean timeLimited, TagVS tag) {
         this.amount = amount;
         this.currencyServerURL = currencyServerURL;

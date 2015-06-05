@@ -289,7 +289,8 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                             Currency currency =  new  Currency(
                                     ContextVS.getInstance().getCurrencyServer().getServerURL(),
                                     transactionDto.getAmount(), transactionDto.getCurrencyCode(),
-                                    transactionDto.isTimeLimited(), new TagVS(transactionDto.getTagName()));
+                                    transactionDto.isTimeLimited(), qrDto.getHashCertVS(),
+                                    new TagVS(transactionDto.getTagName()));
                             qrDto.setCurrency(currency);
 
 

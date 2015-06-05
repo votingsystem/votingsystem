@@ -12,6 +12,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.currency.ejb.ShopExampleBean;
+import org.votingsystem.web.currency.util.AsyncRequestShopBundle;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -94,9 +95,11 @@ public class ShopExampleResource {
             throws Exception {
         String hashCertVS = new String(postData);
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        TransactionVSDto dto = shopExampleBean.getTransactionRequest(uuid);
-        if(dto != null) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
+        AsyncRequestShopBundle requestBundle = shopExampleBean.getRequestBundle(uuid);
+        requestBundle.addHashCertVS(hashCertVS);
+        if(requestBundle.getTransactionDto() != null) {
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(requestBundle.getTransactionDto()))
+                    .type(MediaTypeVS.JSON).build();
         } else {
             return Response.status(Response.Status.NOT_FOUND).entity(messages.get("sessionExpiredMsg"))
                     .type(MediaType.TEXT_PLAIN + ";charset=utf-8").build();

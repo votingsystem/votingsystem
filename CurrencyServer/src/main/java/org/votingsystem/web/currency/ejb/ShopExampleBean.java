@@ -3,10 +3,12 @@ package org.votingsystem.web.currency.ejb;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.web.currency.util.AsyncRequestShopBundle;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.ejb.Stateless;
@@ -30,20 +32,27 @@ public class ShopExampleBean {
 
     private static Logger log = Logger.getLogger(ShopExampleBean.class.getName());
 
-    private static final Map<String, AsyncRequestBundle> transactionRequestMap = new HashMap<>();
+    private static final Map<String, AsyncRequestShopBundle> transactionRequestMap = new HashMap<>();
 
     @Inject ConfigVS config;
 
 
     public void putTransactionRequest(String sessionId, TransactionVSDto transactionRequest) {
         log.info("putTransactionRequest - sessionId $sessionId");
-        transactionRequestMap.put(sessionId, new AsyncRequestBundle(transactionRequest, null));
+        transactionRequestMap.put(sessionId, new AsyncRequestShopBundle(transactionRequest, null));
+    }
+
+    public AsyncRequestShopBundle getRequestBundle(String sessionId) {
+        if(transactionRequestMap.containsKey(sessionId)) {
+            transactionRequestMap.get(sessionId).getAsyncResponse().setTimeout(180, TimeUnit.SECONDS);
+            return transactionRequestMap.get(sessionId);
+        } else return null;
     }
 
     public TransactionVSDto getTransactionRequest(String sessionId) {
         if(transactionRequestMap.containsKey(sessionId)) {
-            transactionRequestMap.get(sessionId).asyncResponse.setTimeout(180, TimeUnit.SECONDS);
-            return transactionRequestMap.get(sessionId).dto;
+            transactionRequestMap.get(sessionId).getAsyncResponse().setTimeout(180, TimeUnit.SECONDS);
+            return transactionRequestMap.get(sessionId).getTransactionDto();
         } else return null;
     }
 
@@ -53,36 +62,27 @@ public class ShopExampleBean {
 
     public int bindContext(String sessionId, AsyncResponse asyncResponse) {
         if(transactionRequestMap.get(sessionId) != null) {
-            transactionRequestMap.get(sessionId).asyncResponse = asyncResponse;
+            transactionRequestMap.get(sessionId).setAsyncResponse(asyncResponse);
             return ResponseVS.SC_OK;
         } else return ResponseVS.SC_ERROR;
     }
 
     public void sendResponse(String sessionId, SMIMEMessage smimeMessage) throws ExceptionVS, IOException, ParseException {
         log.info("sendResponse");
-        AsyncRequestBundle asyncRequestBundle = transactionRequestMap.remove(sessionId);
-        if(asyncRequestBundle != null) {
+        AsyncRequestShopBundle AsyncRequestShopBundle = transactionRequestMap.remove(sessionId);
+        if(AsyncRequestShopBundle != null) {
             try {
-                asyncRequestBundle.dto.validateReceipt(smimeMessage, true);
+                AsyncRequestShopBundle.getTransactionDto().validateReceipt(smimeMessage, true);
                 MessageDto<TransactionVSDto> messageDto = MessageDto.OK("OK");
-                messageDto.setData(asyncRequestBundle.dto);
-                asyncRequestBundle.asyncResponse.resume(Response.ok().entity(JSON.getMapper()
+                messageDto.setData(AsyncRequestShopBundle.getTransactionDto());
+                AsyncRequestShopBundle.getAsyncResponse().resume(Response.ok().entity(JSON.getMapper()
                         .writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build());
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
-                asyncRequestBundle.asyncResponse.resume(Response.status(ResponseVS.SC_OK).entity(
+                AsyncRequestShopBundle.getAsyncResponse().resume(Response.status(ResponseVS.SC_OK).entity(
                         JSON.getMapper().writeValueAsBytes(MessageDto.ERROR(ex.getMessage()))).build());
             }
         } else throw new ExceptionVS("transactionRequest with sessionId:" + sessionId + " has expired");
-    }
-
-    private static class AsyncRequestBundle {
-        TransactionVSDto dto;
-        AsyncResponse asyncResponse;
-        public AsyncRequestBundle(TransactionVSDto dto, AsyncResponse asyncResponse) {
-            this.dto = dto;
-            this.asyncResponse = asyncResponse;
-        }
     }
 
 }
