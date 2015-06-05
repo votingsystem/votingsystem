@@ -28,6 +28,7 @@ import org.votingsystem.util.*;
 import java.io.File;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.List;
@@ -51,6 +52,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
     private RepresentationStateDto representativeStateDto;
     private BrowserSessionDto browserSessionDto;
     private static PrivateKey privateKey;
+    private static Certificate[] chain;
     private static CountDownLatch countDownLatch;
     private static SMIMEMessage smimeMessage;
     private static ResponseVS<SMIMEMessage> messageToDeviceResponse;
@@ -313,10 +315,13 @@ public class BrowserSessionService implements PasswordDialog.Listener {
         log.info("getSMIME - tokenType: " + tokenType);
         switch(CryptoTokenVS.valueOf(tokenType)) {
             case JKS_KEYSTORE:
-                KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password.toCharArray());
-                privateKey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray());
-                SMIMESignedGeneratorVS signedGenerator = new SMIMESignedGeneratorVS(keyStore,
-                        ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
+                if(password != null) {
+                    KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password.toCharArray());
+                    privateKey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray());
+                    chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
+                }
+                SMIMESignedGeneratorVS signedGenerator = new SMIMESignedGeneratorVS(
+                        privateKey, chain, ContextVS.DNIe_SIGN_MECHANISM);
                 SMIMEMessage smime = signedGenerator.getSMIME(fromUser, toUser, textToSign, subject);
                 MessageTimeStamper timeStamper = new MessageTimeStamper(smime,
                         ContextVS.getInstance().getDefaultServer().getTimeStampServiceURL());

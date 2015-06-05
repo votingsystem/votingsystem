@@ -80,6 +80,12 @@ public class SocketMessageDto {
 
     public SocketMessageDto getResponse(Integer statusCode, String message, Long deviceFromId, TypeVS operation)
             throws Exception {
+        return getResponse(statusCode, message, deviceFromId, null, operation);
+    }
+
+    public SocketMessageDto getResponse(Integer statusCode, String message, Long deviceFromId, SMIMEMessage smimeMessage,
+            TypeVS operation)
+            throws Exception {
         SocketMessageDto messageDto = new SocketMessageDto();
         messageDto.setOperation(TypeVS.MESSAGEVS_FROM_DEVICE);
         messageDto.setStatusCode(ResponseVS.SC_PROCESSING);
@@ -87,6 +93,7 @@ public class SocketMessageDto {
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
         messageContentDto.setStatusCode(statusCode);
         messageContentDto.setMessage(message);
+        messageContentDto.setSmimeMessage(Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
         messageContentDto.setDeviceFromId(deviceFromId);
         messageContentDto.setOperation(operation);
         if(aesEncryptParams != null) {

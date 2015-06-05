@@ -42,28 +42,35 @@ public class SMIMESignedGeneratorVS {
     private SignerInfoGenerator signerInfoGenerator;
     private JcaSimpleSignerInfoGeneratorBuilder jcaSignerInfoGeneratorBuilder;
     private String signMechanism;
-    
+
+    public SMIMESignedGeneratorVS(PrivateKey key, Certificate[] chain, String signMechanism) throws Exception {
+        init(key, chain, signMechanism);
+    }
+
     public SMIMESignedGeneratorVS(byte[] keyStoreBytes, String keyAlias,
                                   char[] password, String signMechanism) throws Exception {
         KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password);
-        init(keyStore, keyAlias, password, signMechanism);
+        key = (PrivateKey)keyStore.getKey(keyAlias, password);
+        chain = keyStore.getCertificateChain(keyAlias);
+        init(key, chain, signMechanism);
     }
     
     public SMIMESignedGeneratorVS(KeyStore keyStore, String keyAlias,
                                   char[] password, String signMechanism) throws Exception {
-    	init(keyStore, keyAlias, password, signMechanism);
-    }
-    
-    private void init(KeyStore keyStore, String keyAlias, 
-    		char[] password, String signMechanism) throws Exception {
-    	log.info("init");
-        this.signMechanism = signMechanism;
         key = (PrivateKey)keyStore.getKey(keyAlias, password);
         chain = keyStore.getCertificateChain(keyAlias);
+        init(key, chain, signMechanism);
+    }
+
+    private void init(PrivateKey key, Certificate[] chain, String signMechanism) throws Exception {
+        log.info("init");
+        this.key = key;
+        this.chain = chain;
+        this.signMechanism = signMechanism;;
         jcaCertStore = new JcaCertStore( Arrays.asList(chain));
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
-        //create some smime capabilities in case someone wants to respond        
+        //create some smime capabilities in case someone wants to respond
         caps.addCapability(SMIMECapability.dES_EDE3_CBC);
 
         caps.addCapability(SMIMECapability.rC2_CBC, 128);
@@ -80,11 +87,6 @@ public class SMIMESignedGeneratorVS {
         smimeSignedGenerator.addSignerInfoGenerator(signerInfoGenerator);
         // add our pool of certs and cerls (if any) to go with the signature
         smimeSignedGenerator.addCertificates(jcaCertStore);
-    }
-    
-    public SMIMESignedGeneratorVS(PrivateKey key, Certificate[] chain, String signatureMechanism)
-            throws CertificateEncodingException, OperatorCreationException {
-        this(key, Arrays.asList(chain), signatureMechanism);
     }
 
     public SMIMESignedGeneratorVS(PrivateKey key, List<Certificate> chain, String signatureMechanism)

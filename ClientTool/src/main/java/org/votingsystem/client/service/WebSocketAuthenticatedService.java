@@ -19,11 +19,8 @@ import org.votingsystem.client.util.InboxMessage;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.*;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.CurrencyServer;
+import org.votingsystem.model.*;
+import org.votingsystem.model.currency.*;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -36,10 +33,8 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import org.votingsystem.model.currency.Currency;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -289,8 +284,23 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                                     socketMsg.getMessage());
                             qrDto.setHashCertVS(socketMsg.getContent().getHashCertVS());
                             TransactionVSDto transactionDto = qrDto.getData();
+
+
+                            Currency currency =  new  Currency(
+                                    ContextVS.getInstance().getCurrencyServer().getServerURL(),
+                                    transactionDto.getAmount(), transactionDto.getCurrencyCode(),
+                                    transactionDto.isTimeLimited(), new TagVS(transactionDto.getTagName()));
+                            qrDto.setCurrency(currency);
+
+
+                            SMIMEMessage simeMessage = null;
                             msgDto = socketMsg.getResponse(ResponseVS.SC_OK,JSON.getMapper().writeValueAsString(transactionDto),
-                                    deviceFromId, TypeVS.TRANSACTIONVS_INFO);
+                                    deviceFromId, simeMessage, TypeVS.TRANSACTIONVS_INFO);
+
+
+
+
+
                             socketSession.setData(qrDto);
                         } catch (Exception ex) {
                             ex.printStackTrace();
