@@ -10,8 +10,8 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.*;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
@@ -79,6 +79,15 @@ public class TestResource {
 
     @GET @Path("/test")
     public Response test(@Context ServletContext context, @Context HttpServletRequest req,
+            @Context HttpServletResponse resp) throws JsonProcessingException, ValidationExceptionVS {
+        Query query = dao.getEM().createQuery("SELECT c FROM Currency c WHERE c.hashCertVS =:hashCertVS")
+                .setParameter("hashCertVS", "test");
+        Currency currency = dao.getSingleResult(Currency.class, query);
+        return Response.ok().entity("OK").build();
+    }
+
+    @GET @Path("/testQuery")
+    public Response testQuery(@Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws JsonProcessingException, ValidationExceptionVS {
         Query query = dao.getEM().createQuery("select SUM(c.balance), tag, c.currencyCode from CurrencyAccount c JOIN c.tag tag where c.state =:state " +
                 "group by tag, c.currencyCode").setParameter("state", CurrencyAccount.State.ACTIVE);

@@ -56,7 +56,7 @@ public class Currency extends EntityVS implements Serializable  {
         this.tagVS = tagVS;
     }
 
-    public enum State { OK, EXPENDED, LAPSED, ERROR;} //Lapsed -> for not expended time limited currency
+    public enum State { OK, EXPENDED, LAPSED, UNKNOWN, ERROR;} //Lapsed -> for not expended time limited currency
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;

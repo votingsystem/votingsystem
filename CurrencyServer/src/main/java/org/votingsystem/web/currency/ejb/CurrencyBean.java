@@ -100,7 +100,8 @@ public class CurrencyBean {
                 .setParameter("serialNumber", currency.getX509AnonymousCert().getSerialNumber().longValue())
                 .setParameter("hashCertVS", currency.getHashCertVS());
         Currency currencyDB = dao.getSingleResult(Currency.class, query);
-        if(currencyDB == null) throw new ExceptionVS("hashCertVSCurrencyInvalidErrorMsg - hashCertVS: " + currency.getHashCertVS());
+        if(currencyDB == null) throw new ExceptionVS(
+                messages.get("hashCertVSCurrencyInvalidErrorMsg", currency.getHashCertVS()));
         if(currencyDB.getState() == Currency.State.EXPENDED) {
             throw new CurrencyExpendedException(currency.getHashCertVS());
         } else if(currencyDB.getState() == Currency.State.OK) {
@@ -140,10 +141,11 @@ public class CurrencyBean {
         Map<String, Currency.State> result = new HashMap<>();
         Query query = dao.getEM().createQuery("SELECT c FROM Currency c WHERE c.hashCertVS =:hashCertVS");
         for(String hashCertVS : hashCertVSList) {
-            Currency currency = (Currency) query.setParameter("hashCertVS", hashCertVS).getSingleResult();
+            query.setParameter("hashCertVS", hashCertVS);
+            Currency currency = dao.getSingleResult(Currency.class, query);
             if(currency != null) {
                 result.put(hashCertVS, currency.getState());
-            }
+            } else result.put(hashCertVS, Currency.State.UNKNOWN);
         }
         return result;
     }

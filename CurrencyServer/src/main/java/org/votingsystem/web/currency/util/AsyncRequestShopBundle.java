@@ -39,10 +39,9 @@ public class AsyncRequestShopBundle {
         this.asyncResponse = asyncResponse;
     }
 
-    public void addHashCertVS (String hashCertVS) {
+    public void addHashCertVS (String currencyServerURL, String hashCertVS) {
         if(currencyMap == null) currencyMap = new HashMap<>();
-        Currency currency =  new  Currency(
-                ContextVS.getInstance().getCurrencyServer().getServerURL(),
+        Currency currency =  new  Currency(currencyServerURL,
                 transactionDto.getAmount(), transactionDto.getCurrencyCode(),
                 transactionDto.isTimeLimited(), hashCertVS,
                 new TagVS(transactionDto.getTagName()));

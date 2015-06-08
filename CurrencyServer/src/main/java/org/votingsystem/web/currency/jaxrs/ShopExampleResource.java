@@ -6,18 +6,21 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.currency.ejb.ShopExampleBean;
 import org.votingsystem.web.currency.util.AsyncRequestShopBundle;
+import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
-
 import javax.inject.Inject;
+import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +34,7 @@ import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,6 +49,7 @@ public class ShopExampleResource {
 
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;
+    @Inject DAOBean dao;
     @Inject ShopExampleBean shopExampleBean;
 
     //After user interaction we have the data of the product/service the user wants to buy, with that we create a TransactionRequest
@@ -52,8 +57,12 @@ public class ShopExampleResource {
     @Path("/") @GET
     public Object index(@QueryParam("uuid") String uuid, @Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST("currency shop example", UserVS.Type.GROUP,
-                new BigDecimal(4), "EUR", "ES0878788989450000000007", "shop example payment - " + new Date(), TagVS.WILDTAG);
+        Query query = dao.getEM().createQuery("select g from GroupVS g").setMaxResults(1);
+        List<GroupVS> result = query.getResultList();
+        if(result.isEmpty()) throw new ExceptionVS("To do the test you must enter a GroupVS");
+        GroupVS groupVS = result.iterator().next();
+        TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(groupVS.getName(), UserVS.Type.GROUP,
+                new BigDecimal(4), "EUR", groupVS.getIBAN(), "shop example payment - " + new Date(), TagVS.WILDTAG);
         dto.setPaymentOptions(Arrays.asList(TransactionVS.Type.FROM_USERVS,
                 TransactionVS.Type.CURRENCY_SEND, TransactionVS.Type.CURRENCY_CHANGE));
         String sessionID = dto.getUUID().substring(0, 8);
@@ -96,7 +105,7 @@ public class ShopExampleResource {
         String hashCertVS = new String(postData);
         MessagesVS messages = MessagesVS.getCurrentInstance();
         AsyncRequestShopBundle requestBundle = shopExampleBean.getRequestBundle(uuid);
-        requestBundle.addHashCertVS(hashCertVS);
+        requestBundle.addHashCertVS(config.getContextURL(), hashCertVS);
         if(requestBundle.getTransactionDto() != null) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(requestBundle.getTransactionDto()))
                     .type(MediaTypeVS.JSON).build();
