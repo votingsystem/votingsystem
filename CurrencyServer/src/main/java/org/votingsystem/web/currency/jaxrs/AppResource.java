@@ -73,7 +73,7 @@ public class AppResource {
     @GET @Path("/transactions")
     public Response transactions(@Context ServletContext context, @Context HttpServletRequest req,
                           @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/app/transactions.xhtml").forward(req, resp);
+        context.getRequestDispatcher("/app/incomes.xhtml").forward(req, resp);
         return Response.ok().build();
     }
 
