@@ -105,10 +105,12 @@ public class ShopExampleResource {
         String hashCertVS = new String(postData);
         MessagesVS messages = MessagesVS.getCurrentInstance();
         AsyncRequestShopBundle requestBundle = shopExampleBean.getRequestBundle(uuid);
-        requestBundle.addHashCertVS(config.getContextURL(), hashCertVS);
+        String currencyCSR = requestBundle.addHashCertVS(config.getContextURL(), hashCertVS);
+        SMIMEMessage smimeMessage = signatureBean.getSMIME(config.getServerName(), hashCertVS, currencyCSR,
+                messages.get("currencyChangeSubject"));
         if(requestBundle.getTransactionDto() != null) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(requestBundle.getTransactionDto()))
-                    .type(MediaTypeVS.JSON).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(requestBundle.getTransactionDto(
+                    smimeMessage))).type(MediaTypeVS.JSON).build();
         } else {
             return Response.status(Response.Status.NOT_FOUND).entity(messages.get("sessionExpiredMsg"))
                     .type(MediaType.TEXT_PLAIN + ";charset=utf-8").build();

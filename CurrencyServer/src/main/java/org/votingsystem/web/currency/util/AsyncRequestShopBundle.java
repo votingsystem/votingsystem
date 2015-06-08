@@ -3,9 +3,11 @@ package org.votingsystem.web.currency.util;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 
 import javax.ws.rs.container.AsyncResponse;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,16 +41,22 @@ public class AsyncRequestShopBundle {
         this.asyncResponse = asyncResponse;
     }
 
-    public void addHashCertVS (String currencyServerURL, String hashCertVS) {
+    public String addHashCertVS (String currencyServerURL, String hashCertVS) throws Exception {
         if(currencyMap == null) currencyMap = new HashMap<>();
         Currency currency =  new  Currency(currencyServerURL,
                 transactionDto.getAmount(), transactionDto.getCurrencyCode(),
                 transactionDto.isTimeLimited(), hashCertVS,
                 new TagVS(transactionDto.getTagName()));
         currencyMap.put(hashCertVS, currency);
+        return new String(currency.getCertificationRequest().getCsrPEM());
     }
 
     public TransactionVSDto getTransactionDto() {
+        return transactionDto;
+    }
+
+    public TransactionVSDto getTransactionDto(SMIMEMessage smimeMessage) throws Exception {
+        transactionDto.setMessageSMIME(Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
         return transactionDto;
     }
 

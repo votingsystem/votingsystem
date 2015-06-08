@@ -20,7 +20,7 @@
                 <img src="{{qrCodeServiceUrl}}" alt="read it with your mobile"/>
             </div>
             <iron-ajax id="ajax" last-response="{{messageDto}}" handle-as="json" url="{{transactionServiceURL}}"></iron-ajax>
-            <div hidden="{{!messageDto}}" class="horizontal layout" style="border: 1px solid #ba0011;">
+            <div hidden="{{!messageDto}}" class="horizontal layout" style="border: 1px solid #ba0011; padding: 5px 10px 5px 10px; margin: 20px 0 0 0;">
                 <h3 style="min-width: 150px;">statusCode: <span style="color: #888;">{{messageDto.statusCode}}</span></h3>
                 <h3> - message: <span style="color: #888;">{{messageDto.message}}</span></h3>
             </div>

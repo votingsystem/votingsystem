@@ -296,9 +296,10 @@ public class SignatureBean {
         return issuedCert;
     }
 
-    public SMIMEMessage getSMIME (String fromUser,String toUser,String textToSign,String subject, Header header) throws Exception {
+    public SMIMEMessage getSMIME (String fromUser,String toUser,String textToSign,String subject,
+                                  Header... headers) throws Exception {
         log.info("getSMIME - subject: " + subject + "  - fromUser:" + fromUser + " to user: " + toUser);
-        return getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, header);
+        return getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, headers);
     }
 
     public SMIMEMessage getSMIMETimeStamped (String fromUser,String toUser,String textToSign,String subject,
