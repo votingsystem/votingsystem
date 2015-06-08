@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
@@ -33,6 +34,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -123,9 +125,9 @@ public class ShopExampleResource {
     @Path("/{uuid}/payment") @POST
     public Response payment(@PathParam("uuid") String uuid, byte[] postData,
               @Context HttpServletRequest req) throws Exception {
-        SMIMEMessage message = new SMIMEMessage(postData);
+        TransactionResponseDto responseDto = JSON.getMapper().readValue(postData, TransactionResponseDto.class);
         //here you have the receipt, validate it with your tools
-        shopExampleBean.sendResponse(uuid, message);
+        shopExampleBean.sendResponse(uuid, responseDto);
         return Response.ok().entity("valid receipt").build();
     }
 

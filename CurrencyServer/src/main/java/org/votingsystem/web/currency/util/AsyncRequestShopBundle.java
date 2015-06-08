@@ -25,14 +25,6 @@ public class AsyncRequestShopBundle {
         this.asyncResponse = asyncResponse;
     }
 
-    public Map<String, Currency> getCurrencyMap() {
-        return currencyMap;
-    }
-
-    public void setCurrencyMap(Map<String, Currency> currencyMap) {
-        this.currencyMap = currencyMap;
-    }
-
     public AsyncResponse getAsyncResponse() {
         return asyncResponse;
     }
@@ -49,6 +41,10 @@ public class AsyncRequestShopBundle {
                 new TagVS(transactionDto.getTagName()));
         currencyMap.put(hashCertVS, currency);
         return new String(currency.getCertificationRequest().getCsrPEM());
+    }
+
+    public Currency getCurrency(String hashCertVS) {
+        return currencyMap.get(hashCertVS);
     }
 
     public TransactionVSDto getTransactionDto() {

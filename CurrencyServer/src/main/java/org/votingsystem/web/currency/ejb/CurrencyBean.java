@@ -58,14 +58,18 @@ public class CurrencyBean {
         String leftOverCert = null;
         CurrencyBatch currencyBatch = batchDto.validateRequest(new Date());
         currencyBatch.setTagVS(config.getTag(batchDto.getTag()));
+        for(Currency currency : batchDto.getCurrencyList()) {
+            validatedCurrencyList.add(validateBatchItem(currency));
+        }
+        if(batchDto.getOperation() == TypeVS.CURRENCY_CHANGE) {
+            return processAnonymousCurrencyBatch(batchDto, currencyBatch);
+        }
         Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", batchDto.getToUserIBAN());
         UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
         currencyBatch.setToUserVS(toUserVS);
         if(toUserVS == null) throw new ExceptionVS("CurrencyTransactionBatch:" + currencyBatch.getBatchUUID() +
                 " has wrong receptor IBAN '" + batchDto.getToUserIBAN());
-        for(Currency currency : batchDto.getCurrencyList()) {
-            validatedCurrencyList.add(validateBatchItem(currency));
-        }
+
         if(batchDto.getLeftOverPKCS10() != null) {
             leftOverCert = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), currencyBatch.getTagVS());
         }
@@ -90,6 +94,19 @@ public class CurrencyBean {
         CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto(receipt, leftOverCert);
         responseDto.setMessage(messages.get("currencyBatchOKMsg", batchDto.getBatchAmount() + " " + batchDto.getCurrencyCode(),
                 toUserVS.getFullName()));
+        return responseDto;
+    }
+
+    public CurrencyBatchResponseDto processAnonymousCurrencyBatch(CurrencyBatchDto batchDto,
+                                                              CurrencyBatch currencyBatch) throws Exception {
+        String leftOverCert = csrBean.signCurrencyRequest(batchDto.getCurrencyChangePKCS10(), currencyBatch.getTagVS());
+        SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
+                currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(batchDto),
+                currencyBatch.getSubject());
+        receipt.setHeader("TypeVS", batchDto.getOperation().toString());
+        MessageSMIME messageSMIME =  dao.persist(new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT));
+        dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));
+        CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto(receipt, leftOverCert, leftOverCert);
         return responseDto;
     }
 

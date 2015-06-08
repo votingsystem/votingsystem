@@ -1,11 +1,15 @@
 package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
+import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.currency.util.AsyncRequestShopBundle;
@@ -16,10 +20,9 @@ import javax.inject.Inject;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,19 +70,28 @@ public class ShopExampleBean {
         } else return ResponseVS.SC_ERROR;
     }
 
-    public void sendResponse(String sessionId, SMIMEMessage smimeMessage) throws ExceptionVS, IOException, ParseException {
+    public void sendResponse(String sessionId, TransactionResponseDto responseDto) throws Exception{
         log.info("sendResponse");
-        AsyncRequestShopBundle AsyncRequestShopBundle = transactionRequestMap.remove(sessionId);
-        if(AsyncRequestShopBundle != null) {
+        SMIMEMessage smimeMessage = responseDto.getSmime();
+        AsyncRequestShopBundle requestBundle = transactionRequestMap.remove(sessionId);
+        if(requestBundle != null) {
             try {
-                AsyncRequestShopBundle.getTransactionDto().validateReceipt(smimeMessage, true);
+                if(responseDto.getCurrencyChangeCert() != null) {
+                    X509Certificate currencyCert = CertUtils.fromPEMToX509Cert(responseDto.getCurrencyChangeCert().getBytes());
+                    CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
+                            currencyCert, ContextVS.CURRENCY_OID);
+                    Currency currency = requestBundle.getCurrency(certExtensionDto.getHashCertVS());
+                    currency.initSigner(responseDto.getCurrencyChangeCert().getBytes());
+                    log.info("TODO - currency OK save to wallet");
+                }
+                requestBundle.getTransactionDto().validateReceipt(smimeMessage, true);
                 MessageDto<TransactionVSDto> messageDto = MessageDto.OK("OK");
-                messageDto.setData(AsyncRequestShopBundle.getTransactionDto());
-                AsyncRequestShopBundle.getAsyncResponse().resume(Response.ok().entity(JSON.getMapper()
+                messageDto.setData(requestBundle.getTransactionDto());
+                requestBundle.getAsyncResponse().resume(Response.ok().entity(JSON.getMapper()
                         .writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build());
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
-                AsyncRequestShopBundle.getAsyncResponse().resume(Response.status(ResponseVS.SC_OK).entity(
+                requestBundle.getAsyncResponse().resume(Response.status(ResponseVS.SC_OK).entity(
                         JSON.getMapper().writeValueAsBytes(MessageDto.ERROR(ex.getMessage()))).build());
             }
         } else throw new ExceptionVS("transactionRequest with sessionId:" + sessionId + " has expired");

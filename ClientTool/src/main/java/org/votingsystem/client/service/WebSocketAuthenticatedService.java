@@ -284,24 +284,18 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                                     socketMsg.getMessage());
                             qrDto.setHashCertVS(socketMsg.getContent().getHashCertVS());
                             TransactionVSDto transactionDto = qrDto.getData();
-
-
                             Currency currency =  new  Currency(
                                     ContextVS.getInstance().getCurrencyServer().getServerURL(),
                                     transactionDto.getAmount(), transactionDto.getCurrencyCode(),
                                     transactionDto.isTimeLimited(), qrDto.getHashCertVS(),
                                     new TagVS(transactionDto.getTagName()));
                             qrDto.setCurrency(currency);
-
-
-                            SMIMEMessage simeMessage = null;
+                            SMIMEMessage simeMessage = BrowserSessionService.getSMIME(null, targetServer.getName(),
+                                    new String(currency.getCertificationRequest().getCsrPEM()), null,
+                                    ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));
+                            transactionDto.setMessageSMIME(Base64.getEncoder().encodeToString(simeMessage.getBytes()));
                             msgDto = socketMsg.getResponse(ResponseVS.SC_OK,JSON.getMapper().writeValueAsString(transactionDto),
                                     deviceFromId, simeMessage, TypeVS.TRANSACTIONVS_INFO);
-
-
-
-
-
                             socketSession.setData(qrDto);
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -320,6 +314,13 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                             QRMessageDto<TransactionVSDto> qrDto =
                                     (QRMessageDto<TransactionVSDto>) socketSession.getData();
                             TransactionVSDto transactionDto = qrDto.getData();
+                            TypeVS typeVS = TypeVS.valueOf(smimeMessage.getHeader("TypeVS")[0]);
+                            if(TypeVS.CURRENCY_CHANGE == typeVS) {
+                                Currency currency = qrDto.getCurrency();
+                                currency.initSigner(socketMsg.getMessage().getBytes());
+                                log.info("TODO - CURRENCY_CHANGE - save to wallet");
+                            }
+
                             String result = transactionDto.validateReceipt(smimeMessage, true);
 
                             Button openReceiptButton = new Button();
