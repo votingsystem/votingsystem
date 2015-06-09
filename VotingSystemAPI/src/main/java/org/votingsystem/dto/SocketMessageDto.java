@@ -93,7 +93,8 @@ public class SocketMessageDto {
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
         messageContentDto.setStatusCode(statusCode);
         messageContentDto.setMessage(message);
-        messageContentDto.setSmimeMessage(Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
+        if(smimeMessage != null) messageContentDto.setSmimeMessage(
+                Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
         messageContentDto.setDeviceFromId(deviceFromId);
         messageContentDto.setOperation(operation);
         if(aesEncryptParams != null) {

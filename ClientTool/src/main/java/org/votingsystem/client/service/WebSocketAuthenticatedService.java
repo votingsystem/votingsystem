@@ -2,10 +2,8 @@ package org.votingsystem.client.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.scene.control.Button;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
@@ -14,13 +12,12 @@ import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.CertNotFoundDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.ProgressDialog;
-import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.util.InboxMessage;
-import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.*;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.*;
-import org.votingsystem.model.currency.*;
+import org.votingsystem.model.currency.Currency;
+import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -30,11 +27,9 @@ import org.votingsystem.util.*;
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import org.votingsystem.model.currency.Currency;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -313,31 +308,15 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                             SMIMEMessage smimeMessage = socketMsg.getSMIME();
                             QRMessageDto<TransactionVSDto> qrDto =
                                     (QRMessageDto<TransactionVSDto>) socketSession.getData();
-                            TransactionVSDto transactionDto = qrDto.getData();
                             TypeVS typeVS = TypeVS.valueOf(smimeMessage.getHeader("TypeVS")[0]);
                             if(TypeVS.CURRENCY_CHANGE == typeVS) {
                                 Currency currency = qrDto.getCurrency();
                                 currency.initSigner(socketMsg.getMessage().getBytes());
                                 log.info("TODO - CURRENCY_CHANGE - save to wallet");
                             }
-
-                            String result = transactionDto.validateReceipt(smimeMessage, true);
-
-                            Button openReceiptButton = new Button();
-                            openReceiptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CERTIFICATE));
-                            openReceiptButton.setText(ContextVS.getMessage("openReceiptLbl"));
-                            openReceiptButton.setOnAction(event -> {
-                                try {
-                                    DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(
-                                            new String(smimeMessage.getBytes(), StandardCharsets.UTF_8), null);
-                                    Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
-                                } catch (Exception ex) {
-                                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                                }
-                            });
-                            showMessage(result, openReceiptButton);
                             SocketMessageDto response = socketMsg.getResponse(ResponseVS.SC_OK, null,
-                                    BrowserSessionService.getInstance().getConnectedDevice().getId(), TypeVS.OPERATION_FINISHED);
+                                    BrowserSessionService.getInstance().getConnectedDevice().getId(),
+                                    TypeVS.OPERATION_FINISHED);
                             sendMessage(JSON.getMapper().writeValueAsString(response));
                             VotingSystemApp.getInstance().removeQRMessage(qrDto.getUUID());
                         } catch (Exception ex) {

@@ -17,7 +17,6 @@ import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.util.BrowserVSMenuButton;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 

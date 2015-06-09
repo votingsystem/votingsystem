@@ -1,6 +1,5 @@
 package org.votingsystem.client.dialog;
 
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
 import javafx.application.Platform;
@@ -13,11 +12,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.TextAlignment;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.control.CurrencyCodeChoiceBox;
 import org.votingsystem.client.control.NumberTextField;
+import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
@@ -29,6 +28,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
@@ -38,6 +38,7 @@ import org.votingsystem.util.TypeVS;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,6 +78,30 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
             switch(socketMsg.getOperation()) {
                 case TRANSACTIONVS_RESPONSE:
                     Platform.runLater(() -> { toggleView(true);});
+                    try {
+                        if(socketMsg.getWebSocketSession().getData() != null) {
+                            QRMessageDto<TransactionVSDto> qrDto = (QRMessageDto<TransactionVSDto>) socketMsg
+                                    .getWebSocketSession().getData();
+                            TransactionVSDto transactionDto = qrDto.getData();
+                            SMIMEMessage smimeMessage = socketMsg.getSMIME();
+                            String result = transactionDto.validateReceipt(smimeMessage, true);
+                            Button openReceiptButton = new Button();
+                            openReceiptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CERTIFICATE));
+                            openReceiptButton.setText(ContextVS.getMessage("openReceiptLbl"));
+                            openReceiptButton.setOnAction(event -> {
+                                try {
+                                    DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(
+                                            new String(smimeMessage.getBytes(), StandardCharsets.UTF_8), null);
+                                    Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
+                                } catch (Exception ex) {
+                                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                                }
+                            });
+                            showMessage(result, openReceiptButton);
+                        }
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                    }
                     break;
                 default:log.info("EventBusSocketMsgListener - unprocessed operation: " + socketMsg.getOperation());
             }
