@@ -167,6 +167,12 @@ public class ContextVS implements BundleActivator {
         try {
             initDirs(System.getProperty("user.home"));
             KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
+            try {
+                parentBundle = ResourceBundle.getBundle("votingSystemAPI", Locale.getDefault());
+            } catch (Exception ex) {
+                log.info("loading default parent bundle - locale: " + locale);
+                parentBundle = ResourceBundle.getBundle("votingSystemAPI");
+            }
         } catch (Exception ex) { ex.printStackTrace();}
     }
 
@@ -223,10 +229,10 @@ public class ContextVS implements BundleActivator {
         new File(APPTEMPDIR).mkdir();
     }
 
-    public static void initSignatureClient (String localizatedMessagesFileName, String locale){
+    public static void initSignatureClient (String messagesFileName, String locale){
         try {
             log.info("------------- initSignatureClient ----------------- ");
-            INSTANCE = new ContextVS(localizatedMessagesFileName, locale);
+            INSTANCE = new ContextVS(messagesFileName, locale);
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream(CERT_RAIZ_PATH),  new File(APPDIR + CERT_RAIZ_PATH));
             OSValidator.initClassPath();
@@ -243,7 +249,7 @@ public class ContextVS implements BundleActivator {
         if(INSTANCE == null)  INSTANCE = new ContextVS();
         return INSTANCE; 
     }
-    
+
     public void shutdown() {
         try {
             log.info("------------------ shutdown --------------------");

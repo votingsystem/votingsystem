@@ -114,8 +114,6 @@ public class Currency extends EntityVS implements Serializable  {
         CurrencyDto batchItemDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), CurrencyDto.class);
         this.batchUUID = batchItemDto.getBatchUUID();
         this.batchAmount = batchItemDto.getBatchAmount();
-        if(TypeVS.CURRENCY_SEND != batchItemDto.getOperation())
-            throw new ExceptionVS("Expected operation 'CURRENCY_SEND' - found: " + batchItemDto.getOperation() + "'");
         if(!this.currencyCode.equals(batchItemDto.getCurrencyCode())) {
             throw new ExceptionVS(getErrorPrefix() +
                     "expected currencyCode '" + currencyCode + "' - found: '" + batchItemDto.getCurrencyCode());

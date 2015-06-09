@@ -473,6 +473,8 @@ public class TransactionVSDto {
                 return validateFromUserVSReceipt(smimeMessage, isIncome);
             case CURRENCY_SEND:
                 return validateCurrencySendReceipt(smimeMessage, isIncome);
+            case CURRENCY_CHANGE:
+                return validateCurrencyChangeReceipt(smimeMessage, isIncome);
             default: throw new ValidationExceptionVS("unknown operation: " + typeVS);
         }
     }
@@ -494,7 +496,7 @@ public class TransactionVSDto {
                 "expected currencyCode " + currencyCode + " found " + receiptDto.getCurrencyCode());
         if(!UUID.equals(receiptDto.getBatchUUID())) throw new ValidationExceptionVS(
                 "expected UUID " + UUID + " found " + receiptDto.getBatchUUID());
-        String action = isIncome?ContextVS.getMessage("income_lbl"): ContextVS.getMessage("expense_lbl");
+        String action = isIncome ? ContextVS.getMessage("income_lbl"): ContextVS.getMessage("expense_lbl");
         return ContextVS.getMessage("currency_send_receipt_ok_msg", action, receiptDto.getBatchAmount() + " " +
                 receiptDto.getCurrencyCode(), receiptDto.getTag());
     }
@@ -523,9 +525,36 @@ public class TransactionVSDto {
                 "expected UUID " + UUID + " found " + receiptDto.getUUID());
         if(details != null && !details.equals(receiptDto.getDetails())) throw new ValidationExceptionVS(
                 "expected details " + details + " found " + receiptDto.getDetails());
-        String action = isIncome?ContextVS.getMessage("income_lbl"): ContextVS.getMessage("expense_lbl");
+        String action = isIncome ? ContextVS.getMessage("income_lbl"): ContextVS.getMessage("expense_lbl");
         return ContextVS.getMessage("from_uservs_receipt_ok_msg", action, receiptDto.getAmount() + " " +
                 receiptDto.getCurrencyCode(), receiptDto.getTagName());
+    }
+
+    private String validateCurrencyChangeReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
+        CurrencyBatchDto receiptDto = smimeMessage.getSignedContent(CurrencyBatchDto.class);
+        if(TypeVS.CURRENCY_CHANGE != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
+                TypeVS.CURRENCY_CHANGE + " - found: " + receiptDto.getOperation());
+        if(type == TransactionVS.Type.TRANSACTIONVS_INFO) {
+            if(!paymentOptions.contains(TransactionVS.Type.CURRENCY_CHANGE)) throw new ValidationExceptionVS(
+                    "unexpected type: " + receiptDto.getOperation());
+        }
+        Set<String> receptorsSet = new HashSet<>(Arrays.asList(receiptDto.getToUserIBAN()));
+        if(!toUserIBAN.equals(receptorsSet)) throw new ValidationExceptionVS(
+                "expected toUserIBAN " + toUserIBAN + " found " + receiptDto.getToUserIBAN());
+        if(amount.compareTo(receiptDto.getBatchAmount()) != 0) throw new ValidationExceptionVS(
+                "expected amount " + amount + " amount " + receiptDto.getBatchAmount());
+        if(!currencyCode.equals(receiptDto.getCurrencyCode())) throw new ValidationExceptionVS(
+                "expected currencyCode " + currencyCode + " found " + receiptDto.getCurrencyCode());
+        if(!UUID.equals(receiptDto.getBatchUUID())) throw new ValidationExceptionVS(
+                "expected UUID " + UUID + " found " + receiptDto.getBatchUUID());
+        String action = isIncome ? ContextVS.getMessage("income_lbl"): ContextVS.getMessage("expense_lbl");
+
+        String result = ContextVS.getMessage("currency_change_receipt_ok_msg", action, receiptDto.getBatchAmount() + " " +
+                receiptDto.getCurrencyCode(), receiptDto.getTag());
+        if(receiptDto.getTimeLimited()) {
+            result = result + " - " + ContextVS.getMessage("time_remaining_lbl");
+        }
+        return result;
     }
 
     public TransactionVSDetailsDto getDetails() {

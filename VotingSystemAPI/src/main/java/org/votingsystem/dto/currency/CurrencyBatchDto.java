@@ -138,7 +138,7 @@ public class CurrencyBatchDto {
         } else if(leftOver.compareTo(BigDecimal.ZERO) != 0) throw new ValidationExceptionVS(
                 "leftOver request: " + leftOver + " without CSR");
         if(currencyChangeCSR != null) {
-            currencyChangePKCS10 = CertUtils.fromPEMToPKCS10CertificationRequest(leftOverCSR.getBytes());
+            currencyChangePKCS10 = CertUtils.fromPEMToPKCS10CertificationRequest(currencyChangeCSR.getBytes());
             certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                     currencyChangePKCS10, ContextVS.CURRENCY_TAG);
             if(certExtensionDto.getAmount().compareTo(this.batchAmount) != 0) throw new ValidationExceptionVS(
@@ -151,7 +151,6 @@ public class CurrencyBatchDto {
                     "certExtensionDto 'tag' mismatch - request: " + tag + " - csr: " + certExtensionDto.getTag());
             if(timeLimited.booleanValue() !=  certExtensionDto.getTimeLimited().booleanValue())
                 throw new ValidationExceptionVS("certExtensionDto 'timeLimited' mismatch ");
-
         }
         CurrencyBatch currencyBatch = new CurrencyBatch();
         currencyBatch.setSubject(subject);

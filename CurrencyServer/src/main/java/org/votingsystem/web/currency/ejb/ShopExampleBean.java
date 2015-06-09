@@ -71,7 +71,7 @@ public class ShopExampleBean {
     }
 
     public void sendResponse(String sessionId, TransactionResponseDto responseDto) throws Exception{
-        log.info("sendResponse");
+        log.info("sendResponse - sessionId: " + sessionId);
         SMIMEMessage smimeMessage = responseDto.getSmime();
         AsyncRequestShopBundle requestBundle = transactionRequestMap.remove(sessionId);
         if(requestBundle != null) {
