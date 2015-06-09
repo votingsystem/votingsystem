@@ -5,11 +5,13 @@
 
 <dom-module name="transactionvs-list">
 <template>
+    <iron-ajax id="ajax" url="{{url}}" handle-as="json" last-response="{{transactionsDto}}" method="get"
+               content-type="application/json"></iron-ajax>
     <div class="layout flex horizontal wrap around-justified">
         <template is="dom-repeat" items="{{transactionsDto.resultList}}" as="transaction">
             <transactionvs-card transaction="{{transaction}}"></transactionvs-card>
         </template>
-        <div hidden="{{transactionsDto.resultList.length !== 0}}" style="font-size: 1.3em; margin:30px 0 0 0;">
+        <div hidden="{{messageToUserHidden}}" style="font-size: 1.3em; margin:30px 0 0 0;">
             ${msg.withoutMovementsLbl}
         </div>
     </div>
@@ -18,11 +20,17 @@
     Polymer({
         is:'transactionvs-list',
         properties: {
-            transactionsDto: {type:Object, value: {}}
+            transactionsDto: {type:Object, value: {}, observer:'transactionsDtoChanged'}
         },
         ready :  function(e) { console.log(this.tagName + " - ready") },
         transactionsDtoChanged:function() {
             console.log(this.tagName + " - transactionsDtoChanged - transactionsDto: " + this.transactionsDto)
+            this.messageToUserHidden = (this.transactionsDto.resultList.length !== 0)
+
+        },
+        loadURL:function(targetURL) {
+            this.$.ajax.url = targetURL
+            this.$.ajax.generateRequest()
         },
         addTransaction:function(transactionvs) {
             this.transactionsDto.resultList.push(transactionvs)

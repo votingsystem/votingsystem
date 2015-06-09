@@ -292,7 +292,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                             qrDto.setCurrency(currency);
                             SMIMEMessage simeMessage = BrowserSessionService.getSMIME(null, targetServer.getName(),
                                     new String(currency.getCertificationRequest().getCsrPEM()), null,
-                                    ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));
+                                    ContextVS.getMessage("currencyChangeSubject"));
                             transactionDto.setMessageSMIME(Base64.getEncoder().encodeToString(simeMessage.getBytes()));
                             msgDto = socketMsg.getResponse(ResponseVS.SC_OK,JSON.getMapper().writeValueAsString(transactionDto),
                                     deviceFromId, simeMessage, TypeVS.TRANSACTIONVS_INFO);

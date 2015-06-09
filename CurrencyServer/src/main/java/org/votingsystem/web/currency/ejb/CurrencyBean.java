@@ -99,15 +99,19 @@ public class CurrencyBean {
 
     public CurrencyBatchResponseDto processAnonymousCurrencyBatch(CurrencyBatchDto batchDto,
                                                               CurrencyBatch currencyBatch) throws Exception {
-        String leftOverCert = csrBean.signCurrencyRequest(batchDto.getCurrencyChangePKCS10(), currencyBatch.getTagVS());
+        String leftOverCert = null;
+        if(batchDto.getLeftOverPKCS10() != null) {
+            leftOverCert = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), currencyBatch.getTagVS());
+        }
+        String currencyChangeCert = csrBean.signCurrencyRequest(batchDto.getCurrencyChangePKCS10(), currencyBatch.getTagVS());
         SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
                 currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(batchDto),
                 currencyBatch.getSubject());
         receipt.setHeader("TypeVS", batchDto.getOperation().toString());
         MessageSMIME messageSMIME =  dao.persist(new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT));
         dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));
-        CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto(receipt, leftOverCert, leftOverCert);
-        return responseDto;
+
+        return new CurrencyBatchResponseDto(receipt, leftOverCert, currencyChangeCert);
     }
 
     public Currency validateBatchItem(Currency currency) throws Exception {

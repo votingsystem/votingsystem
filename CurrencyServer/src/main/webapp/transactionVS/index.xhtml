@@ -18,18 +18,18 @@
         </div>
         <script>
             function listenToSelectedTransactions() {
-                document.querySelector("#ironSignals").addEventListener('iron-signal-transactionvs-selector-selected', function(e) {
+                document.querySelector("#transactionSelector").addEventListener('selected', function(e) {
                     var transactionvsType = e.detail
                     targetURL = "${restURL}/transactionVS";
                     if("" != transactionvsType) {
                         targetURL = targetURL + "?transactionvsType=" + transactionvsType
                     }
                     history.pushState(null, null, targetURL);
-                    querySelector("#currencyTransactionTable").url = targetURL
-                });
+                    document.querySelector("#currencyTransactionTable").loadURL(targetURL)
+                })
             }
 
-            if(document.querySelector("#ironSignals") != null) listenToSelectedTransactions()
+            if(document.querySelector("#transactionSelector") != null) listenToSelectedTransactions()
             else document.addEventListener('WebComponentsReady', function() { listenToSelectedTransactions() })
 
             function processSearch(textToSearch) {
