@@ -2,6 +2,7 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonParseException;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.model.TagVS;
@@ -15,6 +16,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.cert.TrustAnchor;
 import java.text.MessageFormat;
@@ -43,9 +45,16 @@ public class CurrencyBatchDto {
     @JsonIgnore private PKCS10CertificationRequest leftOverPKCS10;
     @JsonIgnore private PKCS10CertificationRequest currencyChangePKCS10;
     @JsonIgnore private List<Currency> currencyList;
+    @JsonIgnore private byte[] content;
 
 
     public CurrencyBatchDto() {}
+
+    public static CurrencyBatchDto FROM_BYTES(byte[] content) throws IOException {
+        CurrencyBatchDto currencyBatchDto = JSON.getMapper().readValue(content, CurrencyBatchDto.class);
+        currencyBatchDto.setContent(content);
+        return currencyBatchDto;
+    }
 
     public CurrencyBatchDto(CurrencyBatch currencyBatch) {
         this.subject = currencyBatch.getSubject();
@@ -158,6 +167,7 @@ public class CurrencyBatchDto {
         currencyBatch.setCurrencyCode(currencyCode);
         currencyBatch.setTagVS(new TagVS(tag));
         currencyBatch.setTimeLimited(timeLimited);
+        currencyBatch.setContent(content);
         currencyBatch.setBatchUUID(batchUUID);
         return currencyBatch;
     }
@@ -347,5 +357,13 @@ public class CurrencyBatchDto {
 
     public void setCurrencyChangePKCS10(PKCS10CertificationRequest currencyChangePKCS10) {
         this.currencyChangePKCS10 = currencyChangePKCS10;
+    }
+
+    public byte[] getContent() {
+        return content;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
     }
 }

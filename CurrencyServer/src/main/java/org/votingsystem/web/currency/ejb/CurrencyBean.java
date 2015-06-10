@@ -93,8 +93,8 @@ public class CurrencyBean {
             dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
         }
         CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto(receipt, leftOverCert);
-        responseDto.setMessage(messages.get("currencyBatchOKMsg", batchDto.getBatchAmount() + " " + batchDto.getCurrencyCode(),
-                toUserVS.getFullName()));
+        responseDto.setMessage(messages.get("currencyBatchOKMsg", batchDto.getBatchAmount() + " " +
+                batchDto.getCurrencyCode(), toUserVS.getFullName()));
         return responseDto;
     }
 
