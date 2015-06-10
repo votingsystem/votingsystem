@@ -53,6 +53,10 @@
                 <div class="numTrans">{{dashBoardDto.numTransCurrencySend}}</div>
                 <div class="transDesc">${msg.selectCurrencySendLbl}</div>
             </div>
+            <div id="CURRENCY_CHANGE" class="transBlock" on-click="transBlockSelected">
+                <div class="numTrans">{{dashBoardDto.numTransCurrencyChange}}</div>
+                <div class="transDesc">${msg.selectCurrencyChangeLbl}</div>
+            </div>
             <div id="CANCELATION" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransCancellation}}</div>
                 <div class="transDesc">${msg.cancelationsLbl}</div>

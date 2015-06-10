@@ -26,8 +26,8 @@
             sendSignalVS({caption:"${msg.signedDocumentLbl}"})
             document.querySelector("#voting_system_page").appendChild(viewer)
             viewer.smimeMessage = document.querySelector("#smimeMessage").innerHTML;
-            viewer.smimeMessageContent = toJSON('${signedContentMap}')
             viewer.timeStampDate = new Date(${timeStampDate}).getDayWeekAndHourFormat()
+            viewer.smimeMessageContent = toJSON('${signedContentMap}')
         });
     </script>
 </h:body>

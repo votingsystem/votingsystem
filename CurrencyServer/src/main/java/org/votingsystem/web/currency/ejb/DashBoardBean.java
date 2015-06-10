@@ -69,6 +69,10 @@ public class DashBoardBean {
          dto.setNumTransCurrencySend((long)query.getSingleResult());
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
+                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CURRENCY_CHANGE);
+         dto.setNumTransCurrencyChange((long)query.getSingleResult());
+         query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
+                 "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
                  TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CANCELLATION);
          dto.setNumTransCancellation((long) query.getSingleResult());
          return dto;

@@ -18,6 +18,7 @@ public class DashBoardDto {
     private Long numTransCurrencyInitPeriodTimeLimited;
     private Long numTransCurrencyRequest;
     private Long numTransCurrencySend;
+    private Long numTransCurrencyChange;
     private Long numTransCancellation;
 
     private TransFromGroupVS transFromGroupVSToMemberGroup;
@@ -115,6 +116,14 @@ public class DashBoardDto {
 
     public void setTransFromGroupVSToAllMembers(TransFromGroupVS transFromGroupVSToAllMembers) {
         this.transFromGroupVSToAllMembers = transFromGroupVSToAllMembers;
+    }
+
+    public Long getNumTransCurrencyChange() {
+        return numTransCurrencyChange;
+    }
+
+    public void setNumTransCurrencyChange(Long numTransCurrencyChange) {
+        this.numTransCurrencyChange = numTransCurrencyChange;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

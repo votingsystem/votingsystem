@@ -7,6 +7,7 @@
             <option value="" style="color:black;"> - ${msg.selectTransactionTypeLbl} - </option>
             <option value="CURRENCY_REQUEST"> - ${msg.selectCurrencyRequestLbl} - </option>
             <option value="CURRENCY_SEND"> - ${msg.selectCurrencySendLbl} - </option>
+            <option value="CURRENCY_CHANGE"> - ${msg.selectCurrencyChangeLbl} - </option>
             <option value="CURRENCY_PERIOD_INIT"> - ${msg.currencyPeriodInitLbl} - </option>
             <option value="CURRENCY_PERIOD_INIT_TIME_LIMITED"> - ${msg.currencyPeriodInitTimeLimitedLbl} - </option>
             <option value="FROM_BANKVS"> - ${msg.bankVSInputLbl} - </option>

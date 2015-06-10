@@ -18,10 +18,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -31,6 +28,8 @@ import java.util.logging.Logger;
 public class MessageSMIMEResource {
 
     private static final Logger log = Logger.getLogger(MessageSMIMEResource.class.getSimpleName());
+
+    private static final List<TypeVS> anonymousTransaction = Arrays.asList(TypeVS.CURRENCY_SEND, TypeVS.CURRENCY_CHANGE);
 
     @Inject DAOBean dao;
     @Inject UserVSBean userVSBean;
@@ -73,7 +72,7 @@ public class MessageSMIMEResource {
                     DateUtils.getNexMonday(DateUtils.getCalendar(timeStampDate)).getTime()));
         }
         TypeVS operation = TypeVS.valueOf((String) signedContentMap.get("operation"));
-        if(TypeVS.CURRENCY_SEND != operation) {
+        if(!anonymousTransaction.contains(operation)) {
             signedContentMap.put("fromUserVS", UserVSDto.BASIC(messageSMIME.getUserVS()));
         }
         switch(operation) {
@@ -88,6 +87,12 @@ public class MessageSMIMEResource {
                 break;
             case FROM_GROUP_TO_ALL_MEMBERS:
                 viewer = "message-smime-transactionvs";
+                break;
+            case CURRENCY_CHANGE:
+                signedContentMap.remove("currencySet");
+                signedContentMap.remove("currencyChangeCSR");
+                signedContentMap.remove("leftOverCSR");
+                viewer = "message-smime-transactionvs-currency-change";
                 break;
         }
         if(contentType.contains("json")) {
