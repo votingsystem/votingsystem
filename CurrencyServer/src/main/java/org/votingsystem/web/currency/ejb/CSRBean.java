@@ -73,7 +73,7 @@ public class CSRBean {
         }
     }
 
-    public String signCurrencyRequest(PKCS10CertificationRequest pkcs10Req, TagVS tagVS) throws Exception {
+    public Currency signCurrencyRequest(PKCS10CertificationRequest pkcs10Req, TagVS tagVS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 pkcs10Req, ContextVS.CURRENCY_TAG);
@@ -92,7 +92,7 @@ public class CSRBean {
                     pkcs10Req, null, timePeriod.getDateFrom(), timePeriod.getDateTo());
             Currency currency = dao.persist(Currency.FROM_CERT(x509AnonymousCert, tagVS, authorityCertificateVS));
             LoggerVS.logCurrencyIssued(currency);
-            return new String(CertUtils.getPEMEncoded(x509AnonymousCert));
+            return currency;
         } catch(Exception ex) {
             throw new ExceptionVS(messages.get("currencyRequestDataError"));
         }

@@ -6,7 +6,7 @@
         <class>org.votingsystem.model.ActorVS</class>
         <class>org.votingsystem.model.AddressVS</class>
         <class>org.votingsystem.model.BackupRequestVS</class>
-        <class>org.votingsystem.model.BatchRequest</class>
+        <class>org.votingsystem.model.BatchVS</class>
         <class>org.votingsystem.model.CertificateVS</class>
         <class>org.votingsystem.model.DeviceVS</class>
         <class>org.votingsystem.model.currency.GroupVS</class>

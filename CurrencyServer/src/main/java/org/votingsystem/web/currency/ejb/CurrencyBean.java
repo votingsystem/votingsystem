@@ -4,7 +4,7 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
-import org.votingsystem.model.BatchRequest;
+import org.votingsystem.model.BatchVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.Currency;
@@ -55,7 +55,6 @@ public class CurrencyBean {
     public CurrencyBatchResponseDto processCurrencyBatch(CurrencyBatchDto batchDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         List<Currency> validatedCurrencyList = new ArrayList<>();
-        String leftOverCert = null;
         CurrencyBatch currencyBatch = batchDto.validateRequest(new Date());
         currencyBatch.setTagVS(config.getTag(batchDto.getTag()));
         for(Currency currency : batchDto.getCurrencyList()) {
@@ -69,16 +68,18 @@ public class CurrencyBean {
         currencyBatch.setToUserVS(toUserVS);
         if(toUserVS == null) throw new ExceptionVS("CurrencyTransactionBatch:" + currencyBatch.getBatchUUID() +
                 " has wrong receptor IBAN '" + batchDto.getToUserIBAN());
-
+        String leftOverCert = null;
         if(batchDto.getLeftOverPKCS10() != null) {
-            leftOverCert = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), currencyBatch.getTagVS());
+            Currency leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), currencyBatch.getTagVS());
+            currencyBatch.setLeftOver(leftOver);
+            leftOverCert = new String(CertUtils.getPEMEncoded(leftOver.getX509AnonymousCert()));
         }
         SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
                 currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(batchDto),
                 currencyBatch.getSubject());
         receipt.setHeader("TypeVS", batchDto.getOperation().toString());
         MessageSMIME messageSMIME =  dao.persist(new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT));
-        dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));
+        dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchVS.State.OK));
         log.info("currencyBatch:" + currencyBatch.getId() + " - messageSMIME:" + messageSMIME.getId());
         Date validTo = null;
         if(currencyBatch.getTimeLimited() == true) {
@@ -99,19 +100,22 @@ public class CurrencyBean {
 
     public CurrencyBatchResponseDto processAnonymousCurrencyBatch(CurrencyBatchDto batchDto,
                                                               CurrencyBatch currencyBatch) throws Exception {
-        String leftOverCert = null;
+        Currency leftOver = null;
         if(batchDto.getLeftOverPKCS10() != null) {
-            leftOverCert = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), currencyBatch.getTagVS());
+            leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), currencyBatch.getTagVS());
         }
-        String currencyChangeCert = csrBean.signCurrencyRequest(batchDto.getCurrencyChangePKCS10(), currencyBatch.getTagVS());
+        Currency currencyChange = csrBean.signCurrencyRequest(batchDto.getCurrencyChangePKCS10(), currencyBatch.getTagVS());
         SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
                 currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(batchDto),
                 currencyBatch.getSubject());
         receipt.setHeader("TypeVS", batchDto.getOperation().toString());
         MessageSMIME messageSMIME =  dao.persist(new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT));
-        dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchRequest.State.OK));
+        currencyBatch.setLeftOver(leftOver);
+        currencyBatch.setCurrencyChange(currencyChange);
+        dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchVS.State.OK));
 
-        return new CurrencyBatchResponseDto(receipt, leftOverCert, currencyChangeCert);
+        return new CurrencyBatchResponseDto(receipt, new String(CertUtils.getPEMEncoded(leftOver.getX509AnonymousCert())),
+                new String(CertUtils.getPEMEncoded(currencyChange.getX509AnonymousCert())));
     }
 
     public Currency validateBatchItem(Currency currency) throws Exception {

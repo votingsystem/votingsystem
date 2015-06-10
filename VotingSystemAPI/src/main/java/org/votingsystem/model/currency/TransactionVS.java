@@ -89,7 +89,7 @@ public class TransactionVS implements Serializable {
     @Column(name="toUserIBAN") private String toUserIBAN;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
-    @OneToOne private CurrencyBatch currencyTransactionBatch;
+    @OneToOne @JoinColumn(name="currencyBatch")  private CurrencyBatch currencyBatch;
     @Column(name="isTimeLimited") private Boolean isTimeLimited;
     @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
@@ -124,7 +124,7 @@ public class TransactionVS implements Serializable {
         TransactionVS transactionVS = BASIC(toUserVS, TransactionVS.Type.CURRENCY_SEND, null, batch.getBatchAmount(),
                 batch.getCurrencyCode(), batch.getSubject(), validTo, messageSMIME, batch.getTagVS());
         transactionVS.setToUserIBAN(batch.getToUserVS().getIBAN());
-        transactionVS.setCurrencyTransactionBatch(batch);
+        transactionVS.setCurrencyBatch(batch);
         transactionVS.setState(TransactionVS.State.OK);
         transactionVS.setTag(tagVS);
         return transactionVS;
@@ -347,12 +347,12 @@ public class TransactionVS implements Serializable {
         else return tag.getName();
     }
 
-    public CurrencyBatch getCurrencyTransactionBatch() {
-        return currencyTransactionBatch;
+    public CurrencyBatch getCurrencyBatch() {
+        return currencyBatch;
     }
 
-    public void setCurrencyTransactionBatch(CurrencyBatch currencyTransactionBatch) {
-        this.currencyTransactionBatch = currencyTransactionBatch;
+    public void setCurrencyBatch(CurrencyBatch currencyBatch) {
+        this.currencyBatch = currencyBatch;
     }
 
     public static TransactionVS generateTriggeredTransaction(TransactionVS transactionParent, BigDecimal amount,

@@ -15,13 +15,13 @@ import static javax.persistence.GenerationType.IDENTITY;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity
-@Table(name="BatchRequest")
+@Table(name="BatchVS")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn( name="batchType", discriminatorType=DiscriminatorType.STRING)
-@DiscriminatorValue("BatchRequest")
-public class BatchRequest extends EntityVS implements Serializable  {
+@DiscriminatorValue("BatchVS")
+public class BatchVS extends EntityVS implements Serializable  {
 
-    private static Logger log = Logger.getLogger(BatchRequest.class.getSimpleName());
+    private static Logger log = Logger.getLogger(BatchVS.class.getSimpleName());
 
     public static final long serialVersionUID = 1L;
 
@@ -38,11 +38,11 @@ public class BatchRequest extends EntityVS implements Serializable  {
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
-    public BatchRequest(byte[] content) throws IOException {
+    public BatchVS(byte[] content) throws IOException {
         this.content = content;
     }
 
-    public BatchRequest() {}
+    public BatchVS() {}
 
     public Long getId() {
         return id;
@@ -72,7 +72,7 @@ public class BatchRequest extends EntityVS implements Serializable  {
         return state;
     }
 
-    public BatchRequest setState(State state) {
+    public BatchVS setState(State state) {
         this.state = state;
         return this;
     }

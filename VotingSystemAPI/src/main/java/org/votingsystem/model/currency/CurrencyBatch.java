@@ -1,6 +1,6 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.model.BatchRequest;
+import org.votingsystem.model.BatchVS;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
@@ -15,14 +15,17 @@ import java.util.logging.Logger;
  */
 @Entity
 @DiscriminatorValue("CurrencyBatch")
-public class CurrencyBatch extends BatchRequest implements Serializable {
+public class CurrencyBatch extends BatchVS implements Serializable {
 
     private static Logger log = java.util.logging.Logger.getLogger(CurrencyBatch.class.getSimpleName());
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
     @Column(name="batchAmount") private BigDecimal batchAmount;
-    @Column(name="leftOver") private BigDecimal leftOver;
+    @OneToOne
+    @JoinColumn(name="leftOver") private Currency leftOver;
+    @OneToOne
+    @JoinColumn(name="currencyChange") private Currency currencyChange;
     @Column(name="currencyCode") private String currencyCode;
     @ManyToOne(fetch= FetchType.EAGER)
     @JoinColumn(name="tagVS", nullable=false) private TagVS tagVS;
@@ -78,14 +81,6 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
         this.currencyCode = currencyCode;
     }
 
-    public BigDecimal getLeftOver() {
-        return leftOver;
-    }
-
-    public void setLeftOver(BigDecimal leftOver) {
-        this.leftOver = leftOver;
-    }
-
     public MessageSMIME getMessageSMIME() {
         return messageSMIME;
     }
@@ -105,5 +100,21 @@ public class CurrencyBatch extends BatchRequest implements Serializable {
 
     public void setTimeLimited(Boolean timeLimited) {
         this.timeLimited = timeLimited;
+    }
+
+    public Currency getLeftOver() {
+        return leftOver;
+    }
+
+    public void setLeftOver(Currency leftOver) {
+        this.leftOver = leftOver;
+    }
+
+    public Currency getCurrencyChange() {
+        return currencyChange;
+    }
+
+    public void setCurrencyChange(Currency currencyChange) {
+        this.currencyChange = currencyChange;
     }
 }
