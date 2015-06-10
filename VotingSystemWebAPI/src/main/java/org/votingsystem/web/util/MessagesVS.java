@@ -1,6 +1,7 @@
 package org.votingsystem.web.util;
 
 import org.votingsystem.model.TagVS;
+
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;

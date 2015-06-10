@@ -57,7 +57,7 @@
                 caption: {type:String, value: "${msg.expensesLbl}"}
             },
             ready: function() {
-                console.log(this.tagName + " - ready - transactionList: " + this.transactionList.length)
+                console.log(this.tagName + " - ready")
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()

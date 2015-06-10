@@ -26,7 +26,7 @@
                          ${msg.timeLimitedDateMsg} '<span>{{smimeMessageContent.validTo}}</span>'
                     </div>
                 </div>
-                <div class="horizontal layout" style="margin:10px 0px 10px 0px; ">
+                <div class="horizontal layout" style="margin:20px 0px 10px 0px;">
                     <div class="flex">
                         <a class="btn btn-default" style="font-size: 0.7em;padding:3px;">
                             <i class="fa fa-tag" style="color: #888;"></i> <span>{{smimeMessageContent.tag}}</span></a>
@@ -61,13 +61,6 @@
             },
             smimeMessageContentChanged:function() {
                 console.log(this.tagName + " - smimeMessageContentChanged: " + JSON.stringify(this.smimeMessageContent))
-            },
-            showFromUserVSByIBAN:function(e) {
-                loadURL_VS("${restURL}/userVS/BANKVS/IBAN/" + this.smimeMessageContent.bankIBAN, '_blank')
-            },
-            showToUserVSByIBAN:function(e) {
-                console.log(this.tagName + " - showUserVSByIBAN - " + e)
-                loadURL_VS("${restURL}/userVS/IBAN/" + e.model.item, '_blank')
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

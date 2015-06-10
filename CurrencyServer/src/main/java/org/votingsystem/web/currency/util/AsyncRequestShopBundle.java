@@ -4,7 +4,6 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.ContextVS;
 
 import javax.ws.rs.container.AsyncResponse;
 import java.util.Base64;

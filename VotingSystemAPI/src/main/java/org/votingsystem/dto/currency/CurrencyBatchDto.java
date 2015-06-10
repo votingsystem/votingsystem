@@ -2,7 +2,6 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.JsonParseException;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.model.TagVS;

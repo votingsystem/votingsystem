@@ -16,7 +16,6 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.TypeVS;
 
 import javax.persistence.*;
 import java.io.IOException;
@@ -26,9 +25,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
