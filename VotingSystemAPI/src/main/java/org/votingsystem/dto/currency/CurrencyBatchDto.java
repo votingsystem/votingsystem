@@ -211,8 +211,10 @@ public class CurrencyBatchDto {
                 currencyData + "TimeLimited currency cannot go inside NOT TimeLimited batch");
         if(!subject.equals(currency.getSubject())) throw new ValidationExceptionVS(
                 currencyData + "expected subject " + subject + " found " + currency.getSubject());
-        if(!toUserIBAN.equals(currency.getToUserIBAN())) throw new ValidationExceptionVS(
-                currencyData + "expected subject " + toUserIBAN + " found " + currency.getToUserIBAN());
+        if(toUserIBAN != null) {
+            if(!toUserIBAN.equals(currency.getToUserIBAN())) throw new ValidationExceptionVS(
+                    currencyData + "expected toUserIBAN " + toUserIBAN + " found " + currency.getToUserIBAN());
+        }
         if(batchAmount.compareTo(currency.getBatchAmount()) != 0) throw new ValidationExceptionVS(
                 currencyData + "expected batchAmount " + batchAmount + " found " + currency.getBatchAmount());
         if(!currencyCode.equals(currency.getCurrencyCode())) throw new ValidationExceptionVS(

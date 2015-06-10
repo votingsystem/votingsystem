@@ -48,14 +48,6 @@ public class Currency extends EntityVS implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-    public TagVS getTagVS() {
-        return tagVS;
-    }
-
-    public void setTagVS(TagVS tagVS) {
-        this.tagVS = tagVS;
-    }
-
     public enum State { OK, EXPENDED, LAPSED, UNKNOWN, ERROR;} //Lapsed -> for not expended time limited currency
 
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -89,8 +81,7 @@ public class Currency extends EntityVS implements Serializable  {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="transactionvs") private TransactionVS transactionVS;
 
-    @OneToOne private MessageSMIME cancelMessage;
-    @OneToOne private MessageSMIME messageSMIME;
+    @OneToOne @JoinColumn(name="messageSMIME") private MessageSMIME messageSMIME;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="validFrom", length=23) private Date validFrom;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="validTo", length=23) private Date validTo;
@@ -240,6 +231,14 @@ public class Currency extends EntityVS implements Serializable  {
         return "ERROR - Currency with hash: " + hashCertVS + " - ";
     }
 
+    public TagVS getTagVS() {
+        return tagVS;
+    }
+
+    public void setTagVS(TagVS tagVS) {
+        this.tagVS = tagVS;
+    }
+
     public void initSigner(byte[] csrBytes) throws Exception {
         certificationRequest.initSigner(csrBytes);
         initCertData(certificationRequest.getCertificate());
@@ -262,6 +261,10 @@ public class Currency extends EntityVS implements Serializable  {
 
     public String getBatchUUID() {
         return batchUUID;
+    }
+    public Currency setBatchUUID(String batchUUID) {
+        this.batchUUID = batchUUID;
+        return this;
     }
 
     public String getToUserIBAN() {
@@ -338,14 +341,6 @@ public class Currency extends EntityVS implements Serializable  {
 
     public void setOriginHashCertVS(String originHashCertVS) {
         this.originHashCertVS = originHashCertVS;
-    }
-
-    public MessageSMIME getCancelMessage() {
-        return cancelMessage;
-    }
-
-    public void setCancelMessage(MessageSMIME cancelMessage) {
-        this.cancelMessage = cancelMessage;
     }
 
     public MessageSMIME getMessageSMIME() {
@@ -461,13 +456,6 @@ public class Currency extends EntityVS implements Serializable  {
 
     public void setCertificationRequest(CertificationRequestVS certificationRequest) {
         this.certificationRequest = certificationRequest;
-    }
-
-    public static boolean checkIfTimeLimited(Date notBefore, Date notAfter) {
-        LocalDate notBeforeLD = notBefore.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate notAfterLD = notAfter.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        Period validPeriod = Period.between(notBeforeLD, notAfterLD);
-        return validPeriod.getDays() <= 7;//one week
     }
 
     public void validateReceipt(SMIMEMessage smimeReceipt, Set<TrustAnchor> trustAnchor) throws Exception {

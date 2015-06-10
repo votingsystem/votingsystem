@@ -119,7 +119,7 @@ public class TransactionVS implements Serializable {
         this.tag = tag;
     }
 
-    public static TransactionVS CURRENCY_BATCH(CurrencyBatch batch, UserVS toUserVS, Date validTo,
+    public static TransactionVS CURRENCY_SEND(CurrencyBatch batch, UserVS toUserVS, Date validTo,
                MessageSMIME messageSMIME, TagVS tagVS) {
         TransactionVS transactionVS = BASIC(toUserVS, TransactionVS.Type.CURRENCY_SEND, null, batch.getBatchAmount(),
                 batch.getCurrencyCode(), batch.getSubject(), validTo, messageSMIME, batch.getTagVS());
@@ -127,6 +127,22 @@ public class TransactionVS implements Serializable {
         transactionVS.setCurrencyBatch(batch);
         transactionVS.setState(TransactionVS.State.OK);
         transactionVS.setTag(tagVS);
+        transactionVS.setIsTimeLimited(batch.getTimeLimited());
+        return transactionVS;
+    }
+
+    public static TransactionVS CURRENCY_CHANGE(CurrencyBatch batch, Date validTo, MessageSMIME messageSMIME, TagVS tagVS) {
+        TransactionVS transactionVS = new TransactionVS();
+        transactionVS.setType(Type.CURRENCY_CHANGE);
+        transactionVS.setAmount(batch.getBatchAmount());
+        transactionVS.setCurrencyCode(batch.getCurrencyCode());
+        transactionVS.setSubject(batch.getSubject());
+        transactionVS.setValidTo(validTo);
+        transactionVS.setMessageSMIME(messageSMIME);
+        transactionVS.setTag(tagVS);
+        transactionVS.setCurrencyBatch(batch);
+        transactionVS.setState(TransactionVS.State.OK);
+        transactionVS.setIsTimeLimited(batch.getTimeLimited());
         return transactionVS;
     }
 

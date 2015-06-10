@@ -194,6 +194,8 @@ public class TransactionVSBean {
                     balancesBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
                             transactionVS.getTag());
                     break;
+                case CURRENCY_CHANGE:
+                    break;
                 default:
                     if(isParentTransaction) {//Parent transaction, to system before trigger to receptors
                         if(transactionVS.getType() != TransactionVS.Type.FROM_BANKVS) updateUserVSAccountFrom(transactionVS);

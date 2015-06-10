@@ -5,6 +5,9 @@ import org.votingsystem.throwable.ExceptionVS;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -126,6 +129,13 @@ public class DateUtils {
         return formatter.format(date);
     }
 
+    public static boolean checkIfTimeLimited(Date notBefore, Date notAfter) {
+        LocalDate notBeforeLD = notBefore.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate notAfterLD = notAfter.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        Period validPeriod = Period.between(notBeforeLD, notAfterLD);
+        return validPeriod.getDays() <= 7;//one week
+    }
+
     /**
      *  elapsed time in hours/minutes/seconds
      * @return String
@@ -136,8 +146,7 @@ public class DateUtils {
         String seconds = String.format(format, elapsedTime % 60);
         String minutes = String.format(format, (elapsedTime % 3600) / 60);
         String hours = String.format(format, elapsedTime / 3600);
-        String time =  hours + ":" + minutes + ":" + seconds;
-        return time;
+        return hours + ":" + minutes + ":" + seconds;
     }
     
     /**
@@ -152,8 +161,7 @@ public class DateUtils {
         String seconds = String.format(format, elapsedTime % 60);
         String minutes = String.format(format, (elapsedTime % 3600) / 60);
         String hours = String.format(format, elapsedTime / 3600);
-        String time =  hours + ":" + minutes + ":" + seconds + ":" + milliSeconds;
-        return time;
+        return hours + ":" + minutes + ":" + seconds + ":" + milliSeconds;
     }
 
     public static Calendar getMonday(Calendar calendar) {
