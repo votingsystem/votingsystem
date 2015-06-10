@@ -99,26 +99,4 @@ public class ServerInfoResource {
         }
     }
 
-    @GET @Produces(MediaType.APPLICATION_JSON)
-    @Path("/currencyIssued") @Transactional
-    public Response currencyIssued(@Context HttpServletRequest req, @Context HttpServletResponse resp,
-                     @Context ServletContext context) throws IOException, ServletException {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
-        Query query = dao.getEM().createQuery("select SUM(c.amount), tag, c.currencyCode from Currency c JOIN c.tagVS tag where c.state =:state " +
-                "group by tag, c.currencyCode").setParameter("state", Currency.State.OK);
-        List<Object[]> resultList = query.getResultList();
-        List<TagVSDto> tagVSBalanceList = new ArrayList<>();
-        for(Object[] result : resultList) {
-            tagVSBalanceList.add(new TagVSDto((BigDecimal) result[0], (String) result[2], (TagVS) result[1]));
-        }
-        SystemAccountsDto currencyIssuedDto = new SystemAccountsDto(null, tagVSBalanceList);
-        if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyIssuedDto)).build();
-        } else {
-            req.setAttribute("currencyIssuedDto", JSON.getMapper().writeValueAsString(currencyIssuedDto));
-            context.getRequestDispatcher("/serverInfo/currencyIssued.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
-    }
-
 }

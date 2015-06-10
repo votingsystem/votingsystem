@@ -8,7 +8,7 @@
                 innerPage:{type:Boolean},
                 searchVisible:{type:Boolean}
             },
-            domReady: function() { this.fireSignal()},
+            ready: function() { this.fireSignal() },
             fireSignal: function() {
                 this.fire('iron-signal', {name: "vs-innerpage", data: {caption:this.caption,
                     innerPage:this.innerPage, searchVisible:this.searchVisible}});

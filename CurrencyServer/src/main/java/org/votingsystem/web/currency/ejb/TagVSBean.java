@@ -28,6 +28,7 @@ public class TagVSBean {
                 dao.merge(tagVS);
             } else {
                 tag.setFrequency(1L);
+                tagVS.setName(tagVS.getName().trim());
                 tagVS = dao.persist(tag);
             }
             result.add(tagVS);

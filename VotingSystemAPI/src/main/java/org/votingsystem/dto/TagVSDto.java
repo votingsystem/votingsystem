@@ -30,6 +30,14 @@ public class TagVSDto {
         this.currencyCode = currencyCode;
     }
 
+    public static TagVSDto CURRENCY_DATA(BigDecimal amount, String currencyCode, TagVS tagVS) {
+        TagVSDto tagVSDto = new TagVSDto();
+        tagVSDto.setName(tagVS.getName());
+        tagVSDto.setAmount(amount);
+        tagVSDto.setCurrencyCode(currencyCode);
+        return tagVSDto;
+    }
+
     public Long getId() {
         return id;
     }
