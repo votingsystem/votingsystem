@@ -56,7 +56,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         this.signatureMechanism = signatureMechanism;
     }
 
-    public static CertificationRequestVS getVoteRequest(int keySize, String keyName, String signatureMechanism,
+    public static CertificationRequestVS getVoteRequest(String signatureMechanism,
             String provider, String accessControlURL, Long eventId, String hashCertVS)
             throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException,
             IOException {
@@ -71,7 +71,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getAnonymousDelegationRequest(int keySize, String keyName,
+    public static CertificationRequestVS getAnonymousDelegationRequest(
             String signatureMechanism, String provider, String accessControlURL, String hashCertVS,
             Integer weeksOperationActive, Date validFrom, Date validTo) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
@@ -88,7 +88,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getUserRequest (int keySize, String keyName, String signatureMechanism,
+    public static CertificationRequestVS getUserRequest (String signatureMechanism,
             String provider, CertExtensionDto certExtensionDto) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
@@ -101,12 +101,12 @@ public class CertificationRequestVS implements java.io.Serializable {
         return new CertificationRequestVS(keyPair, csr, signatureMechanism);
     }
 
-    public static CertificationRequestVS getCurrencyRequest(int keySize, String keyName,
+    public static CertificationRequestVS getCurrencyRequest(
               String signatureMechanism, String provider, String currencyServerURL, String hashCertVS,
               BigDecimal amount, String currencyCode, Boolean timeLimited, String tagVS) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
-        tagVS = (tagVS == null)? TagVS.WILDTAG:tagVS;
+        tagVS = (tagVS == null)? TagVS.WILDTAG:tagVS.trim();
         X500Principal subject = new X500Principal("CN=currencyServerURL:" + currencyServerURL +
                 ", OU=CURRENCY_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currencyCode +
                 ", OU=TAG:" + tagVS + ", OU=DigitalCurrency");

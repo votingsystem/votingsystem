@@ -134,6 +134,11 @@ public class InboxService implements PasswordDialog.Listener {
                 } else timeLimitedInboxMessage = inboxMessage;
                 showPasswordDialog(null, inboxMessage.isTimeLimited());
                 break;
+            case CURRENCY_WALLET_CHANGE:
+                currentMessage = inboxMessage;
+                PasswordDialog.showWithoutPasswordConfirm(TypeVS.CURRENCY_WALLET_CHANGE, this,
+                        ContextVS.getMessage("walletPinMsg"));
+                break;
             default:
                 log.log(Level.SEVERE, "newMessage - unprocessed message: " + inboxMessage.getTypeVS());
         }

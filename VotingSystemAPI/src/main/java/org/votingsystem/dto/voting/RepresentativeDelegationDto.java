@@ -166,8 +166,7 @@ public class RepresentativeDelegationDto implements Serializable {
         hashAnonymousDelegation = CMSUtils.getHashBase64(originHashAnonymousDelegation, ContextVS.VOTING_DATA_DIGEST);
         dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
         dateTo = DateUtils.addDays(dateFrom, weeksOperationActive * 7).getTime();
-        certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(
-                ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM,
+        certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(ContextVS.VOTE_SIGN_MECHANISM,
                 ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive, dateFrom, dateTo);
         RepresentativeDelegationDto requestDto = getRequest(TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST);
         requestDto.setHashAnonymousDelegation(hashAnonymousDelegation);
@@ -183,7 +182,6 @@ public class RepresentativeDelegationDto implements Serializable {
         delegationDto.setHashCertVSBase64(hashCertVSBase64);
         return delegationDto;
     }
-
 
     public TypeVS getOperation() {
         return operation;

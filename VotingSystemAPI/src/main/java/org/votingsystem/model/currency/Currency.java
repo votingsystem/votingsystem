@@ -128,7 +128,7 @@ public class Currency extends EntityVS implements Serializable  {
         try {
             this.hashCertVS = hashCertVS;
             certificationRequest = CertificationRequestVS.getCurrencyRequest(
-                    ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM, ContextVS.PROVIDER,
+                    ContextVS.VOTE_SIGN_MECHANISM, ContextVS.PROVIDER,
                     currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tagVS.getName());
         } catch(Exception ex) {  ex.printStackTrace(); }
     }
@@ -143,7 +143,7 @@ public class Currency extends EntityVS implements Serializable  {
             this.originHashCertVS = UUID.randomUUID().toString();
             this.hashCertVS = CMSUtils.getHashBase64(getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
             certificationRequest = CertificationRequestVS.getCurrencyRequest(
-                    ContextVS.KEY_SIZE, ContextVS.SIG_NAME, ContextVS.VOTE_SIGN_MECHANISM, ContextVS.PROVIDER,
+                    ContextVS.VOTE_SIGN_MECHANISM, ContextVS.PROVIDER,
                     currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tag.getName());
         } catch(Exception ex) {  ex.printStackTrace(); }
     }

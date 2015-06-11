@@ -234,6 +234,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
             log.info("consumeMessage - type: " + socketMsg.getOperation() + " - MessageType: " +
                     socketMsg.getMessageType() + " - status: " + socketMsg.getStatusCode());
             switch(socketMsg.getOperation()) {
+                case CURRENCY_WALLET_CHANGE:
                 case MESSAGEVS:
                 case MESSAGEVS_TO_DEVICE:
                     InboxService.getInstance().newMessage(new InboxMessage(socketMsg));

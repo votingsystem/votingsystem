@@ -36,7 +36,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
                        String hashCertVSBase64) throws Exception {
         this.smimeMessage = smimeMessage;
         this.receiverCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
-        this.certificationRequest = CertificationRequestVS.getVoteRequest(KEY_SIZE, SIG_NAME, VOTE_SIGN_MECHANISM,
+        this.certificationRequest = CertificationRequestVS.getVoteRequest(VOTE_SIGN_MECHANISM,
                 ContextVS.PROVIDER, ContextVS.getInstance().getAccessControl().getServerURL(),
                 accessRequest.getEventId(), hashCertVSBase64);
     }

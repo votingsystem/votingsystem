@@ -206,7 +206,7 @@ public class SignatureService extends Service<ResponseVS> {
             certExtensionDto.setDeviceType(DeviceVS.Type.PC);
             certExtensionDto.setDeviceName(InetAddress.getLocalHost().getHostName());
             CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
-                    ContextVS.KEY_SIZE, SIG_NAME, SIGN_MECHANISM, PROVIDER, certExtensionDto);
+                    SIGN_MECHANISM, PROVIDER, certExtensionDto);
             byte[] csrBytes = certificationRequest.getCsrPEM();
             ResponseVS responseVS = HttpHelper.getInstance().sendData(csrBytes, null,
                     ((AccessControlVS) operationVS.getTargetServer()).getUserCSRServiceURL());
