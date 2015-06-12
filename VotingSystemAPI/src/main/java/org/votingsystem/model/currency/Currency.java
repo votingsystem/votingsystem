@@ -44,7 +44,17 @@ public class Currency extends EntityVS implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
     public enum State { OK, EXPENDED, LAPSED, UNKNOWN, ERROR;} //Lapsed -> for not expended time limited currency
+
+    public enum Type { LEFT_OVER, CHANGE, REQUEST}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
@@ -64,6 +74,7 @@ public class Currency extends EntityVS implements Serializable  {
     @Column(name="serialNumber", unique=true, nullable=false) private Long serialNumber;
     @Column(name="content", nullable=false) private byte[] content;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
+    @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private Type type;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;

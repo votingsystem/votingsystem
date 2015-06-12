@@ -18,7 +18,7 @@
         </div>
         <script>
             function listenToSelectedTransactions() {
-                document.querySelector("#transactionSelector").addEventListener('selected', function(e) {
+                document.querySelector("#ironSignals").addEventListener('iron-signal-transactionvs-selector-selected', function(e) {
                     var transactionvsType = e.detail
                     targetURL = "${restURL}/transactionVS";
                     if("" != transactionvsType) {
@@ -29,7 +29,7 @@
                 })
             }
 
-            if(document.querySelector("#transactionSelector") != null) listenToSelectedTransactions()
+            if(document.querySelector("#ironSignals") != null) listenToSelectedTransactions()
             else document.addEventListener('WebComponentsReady', function() { listenToSelectedTransactions() })
 
             function processSearch(textToSearch) {

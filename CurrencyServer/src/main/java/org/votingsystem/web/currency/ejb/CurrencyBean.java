@@ -75,7 +75,8 @@ public class CurrencyBean {
                 " has wrong receptor IBAN '" + batchDto.getToUserIBAN());
         String leftOverCert = null;
         if(batchDto.getLeftOverPKCS10() != null) {
-            Currency leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), currencyBatch.getTagVS());
+            Currency leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), Currency.Type.LEFT_OVER,
+                    currencyBatch.getBatchUUID(), currencyBatch.getTagVS());
             currencyBatch.setLeftOver(leftOver);
             leftOverCert = new String(CertUtils.getPEMEncoded(leftOver.getX509AnonymousCert()));
         }
@@ -102,9 +103,11 @@ public class CurrencyBean {
                   CurrencyBatch currencyBatch, List<Currency> validatedCurrencyList, Date validTo) throws Exception {
         Currency leftOver = null;
         if(batchDto.getLeftOverPKCS10() != null) {
-            leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), currencyBatch.getTagVS());
+            leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), Currency.Type.LEFT_OVER,
+                    batchDto.getBatchUUID(), currencyBatch.getTagVS());
         }
-        Currency currencyChange = csrBean.signCurrencyRequest(batchDto.getCurrencyChangePKCS10(), currencyBatch.getTagVS());
+        Currency currencyChange = csrBean.signCurrencyRequest(batchDto.getCurrencyChangePKCS10(), Currency.Type.CHANGE,
+                batchDto.getBatchUUID(), currencyBatch.getTagVS());
         SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
                 currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(batchDto),
                 currencyBatch.getSubject());

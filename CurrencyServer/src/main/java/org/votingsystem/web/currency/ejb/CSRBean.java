@@ -58,6 +58,7 @@ public class CSRBean {
                 X509Certificate x509AnonymousCert = signatureBean.signCSR(
                         currencyDto.getCsrPKCS10(), null, timePeriod.getDateFrom(), timePeriod.getDateTo());
                 Currency currency = Currency.FROM_CERT(x509AnonymousCert, requestDto.getTagVS(), authorityCertificateVS);
+                currency.setType(Currency.Type.REQUEST);
                 issuedCurrencySet.add(dao.persist(currency));
                 issuedCertSet.add(new String(CertUtils.getPEMEncoded(x509AnonymousCert)));
                 LoggerVS.logCurrencyIssued(currency);
@@ -73,7 +74,8 @@ public class CSRBean {
         }
     }
 
-    public Currency signCurrencyRequest(PKCS10CertificationRequest pkcs10Req, TagVS tagVS) throws Exception {
+    public Currency signCurrencyRequest(PKCS10CertificationRequest pkcs10Req, Currency.Type type, String batchUUID,
+                                        TagVS tagVS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 pkcs10Req, ContextVS.CURRENCY_TAG);
@@ -90,7 +92,10 @@ public class CSRBean {
         try {
             X509Certificate x509AnonymousCert = signatureBean.signCSR(
                     pkcs10Req, null, timePeriod.getDateFrom(), timePeriod.getDateTo());
-            Currency currency = dao.persist(Currency.FROM_CERT(x509AnonymousCert, tagVS, authorityCertificateVS));
+            Currency currency = Currency.FROM_CERT(x509AnonymousCert, tagVS, authorityCertificateVS);
+            currency.setBatchUUID(batchUUID);
+            currency.setType(type);
+            currency = dao.persist(currency);
             LoggerVS.logCurrencyIssued(currency);
             return currency;
         } catch(Exception ex) {
