@@ -194,6 +194,11 @@ public class TransactionVSBean {
                     balancesBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
                             transactionVS.getTag());
                     break;
+                case FROM_BANKVS:
+                    updateUserVSAccountTo(transactionVS);
+                    balancesBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(),
+                            transactionVS.getTag());
+                    break;
                 case CURRENCY_CHANGE:
                     break;
                 default:
@@ -205,7 +210,7 @@ public class TransactionVSBean {
                         updateUserVSAccountTo(transactionVS);
                         balancesBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
                                 transactionVS.getTag());
-                        log.info("" + transactionVS.getType() + " - " + transactionVS.getAmount() +  " " +
+                        log.info("transactionVS: " + transactionVS.getType() + " - " + transactionVS.getAmount() +  " " +
                                 transactionVS.getCurrencyCode() + " - " + transactionVS.getTag().getName() + " - " +
                                 "fromUserIBAN: " + transactionVS.getFromUserIBAN() + " - toIBAN: " +
                                 transactionVS.getToUserVS().getIBAN());

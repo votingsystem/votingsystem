@@ -40,18 +40,16 @@ public class TransactionVSBankVSBean {
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getSigner().getNif());
         BankVS bankVS = dao.getSingleResult(BankVS.class, query);
         if(bankVS == null) throw new ExceptionVS(messages.get("bankVSPrivilegesErrorMsg", request.getOperation().toString()));
-        TransactionVS transactionParent = dao.persist(TransactionVS.BANKVS_PARENT(bankVS, request.getFromUserIBAN(),
-                request.getFromUser(), request.getAmount(), request.getCurrencyCode(), request.getSubject(),
-                request.getValidTo(), request.getTransactionVSSMIME(), tagVS));
-        TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(
-                transactionParent, transactionParent.getAmount(), request.getReceptor(), request.getReceptor().getIBAN()));
+        TransactionVS transactionVS = dao.persist(TransactionVS.FROM_BANKVS(bankVS, request.getFromUserIBAN(),
+                request.getFromUser(), request.getReceptor(), request.getAmount(), request.getCurrencyCode(),
+                request.getSubject(), request.getValidTo(), request.getTransactionVSSMIME(), tagVS));
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(request.getTransactionVSSMIME().getUserVS().getNif(),
                 request.getTransactionVSSMIME().getSMIME(), messages.get("bankVSInputLbl"));
         receipt.setHeader("TypeVS", TypeVS.FROM_BANKVS.toString());
         dao.merge(request.getTransactionVSSMIME().setSMIME(receipt));
-        transactionVSBean.newTransactionVS(transactionParent, triggeredTransaction);
+        transactionVSBean.newTransactionVS(transactionVS);
         log.info("BankVS: " + bankVS.getId() + " - to user: " + request.getReceptor().getId());
-        return new ResultListDto(Arrays.asList(new TransactionVSDto(triggeredTransaction)), 0, 1, 1L);
+        return new ResultListDto(Arrays.asList(new TransactionVSDto(transactionVS)), 0, 1, 1L);
     }
 
 

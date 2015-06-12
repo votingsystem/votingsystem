@@ -172,12 +172,14 @@ public class TransactionVS implements Serializable {
         return transactionVS;
     }
 
-    public static TransactionVS BANKVS_PARENT(BankVS bankVS, String bankClientIBAN, String bankClientName,
+    public static TransactionVS FROM_BANKVS(BankVS bankVS, String bankClientIBAN, String bankClientName,  UserVS toUser,
           BigDecimal amount, String currencyCode, String subject, Date validTo, MessageSMIME messageSMIME, TagVS tag) {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setFromUserVS(bankVS);
         transactionVS.setFromUserIBAN(bankClientIBAN);
         transactionVS.setFromUser(bankClientName);
+        transactionVS.setToUserVS(toUser);
+        transactionVS.setToUserIBAN(toUser.getIBAN());
         transactionVS.setAmount(amount);
         transactionVS.setCurrencyCode(currencyCode);
         transactionVS.setSubject(subject);
