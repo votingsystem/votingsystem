@@ -5,7 +5,6 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.TransactionVS;

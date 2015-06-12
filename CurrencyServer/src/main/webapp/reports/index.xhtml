@@ -19,6 +19,11 @@
                         ${msg.currencyIssued}
                     </a>
                 </div>
+                <div style="margin:20px 0px;">
+                    <a href="${restURL}/currencyAccount/system">
+                        ${msg.systemBalanceLbl}
+                    </a>
+                </div>
                 <c:forEach var="it" items="${periods}" varStatus="counter">
                     <div>
                         <a href="${restURL}/reports${spa.formatDate(it.getDateFrom())/week}">

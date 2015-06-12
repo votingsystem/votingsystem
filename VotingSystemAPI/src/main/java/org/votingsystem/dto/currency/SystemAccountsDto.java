@@ -13,12 +13,15 @@ public class SystemAccountsDto {
 
     private List<CurrencyAccountDto> accountList;
     private List<TagVSDto> tagVSBalanceList;
+    private List<TagVSDto> bankVSBalanceList;
 
     public SystemAccountsDto() {}
 
-    public SystemAccountsDto( List<CurrencyAccountDto> accountList, List<TagVSDto> tagVSBalanceList) {
+    public SystemAccountsDto( List<CurrencyAccountDto> accountList, List<TagVSDto> tagVSBalanceList,
+                              List<TagVSDto> bankVSBalanceList) {
         this.accountList = accountList;
         this.tagVSBalanceList = tagVSBalanceList;
+        this.bankVSBalanceList = bankVSBalanceList;
     }
 
 
@@ -36,6 +39,14 @@ public class SystemAccountsDto {
 
     public void setTagVSBalanceList(List<TagVSDto> tagVSBalanceList) {
         this.tagVSBalanceList = tagVSBalanceList;
+    }
+
+    public List<TagVSDto> getBankVSBalanceList() {
+        return bankVSBalanceList;
+    }
+
+    public void setBankVSBalanceList(List<TagVSDto> bankVSBalanceList) {
+        this.bankVSBalanceList = bankVSBalanceList;
     }
 
 }
