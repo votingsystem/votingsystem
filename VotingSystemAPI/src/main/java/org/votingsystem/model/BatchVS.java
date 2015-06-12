@@ -97,8 +97,9 @@ public class BatchVS extends EntityVS implements Serializable  {
         return type;
     }
 
-    public void setType(TypeVS type) {
+    public BatchVS setType(TypeVS type) {
         this.type = type;
+        return this;
     }
 
     public UserVS getUserVS() {

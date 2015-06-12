@@ -7,6 +7,7 @@ import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
+import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
@@ -74,8 +75,8 @@ public class CSRBean {
         }
     }
 
-    public Currency signCurrencyRequest(PKCS10CertificationRequest pkcs10Req, Currency.Type type, String batchUUID,
-                                        TagVS tagVS) throws Exception {
+    public Currency signCurrencyRequest(PKCS10CertificationRequest pkcs10Req, Currency.Type type,
+                                        CurrencyBatch currencyBatch) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 pkcs10Req, ContextVS.CURRENCY_TAG);
@@ -92,8 +93,8 @@ public class CSRBean {
         try {
             X509Certificate x509AnonymousCert = signatureBean.signCSR(
                     pkcs10Req, null, timePeriod.getDateFrom(), timePeriod.getDateTo());
-            Currency currency = Currency.FROM_CERT(x509AnonymousCert, tagVS, authorityCertificateVS);
-            currency.setBatchUUID(batchUUID);
+            Currency currency = Currency.FROM_CERT(x509AnonymousCert, currencyBatch.getTagVS(), authorityCertificateVS);
+            currency.setCurrencyBatch(currencyBatch);
             currency.setType(type);
             currency = dao.persist(currency);
             LoggerVS.logCurrencyIssued(currency);

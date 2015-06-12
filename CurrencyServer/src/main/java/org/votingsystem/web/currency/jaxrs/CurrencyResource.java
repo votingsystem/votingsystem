@@ -3,10 +3,12 @@ package org.votingsystem.web.currency.jaxrs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
+import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
@@ -71,7 +73,7 @@ public class CurrencyResource {
     }
 
     @Path("/hash/{hashCertVSHex}/state") @GET
-    public Response state(@PathParam("hashCertVSHex") String hashCertVSHex) {
+    public Response state(@PathParam("hashCertVSHex") String hashCertVSHex) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         HexBinaryAdapter hexConverter = new HexBinaryAdapter();
         String hashCertVSBase64 = new String(hexConverter.unmarshal(hashCertVSHex));
@@ -80,29 +82,19 @@ public class CurrencyResource {
         Currency currency = dao.getSingleResult(Currency.class, query);
         if(currency == null) return Response.status(ResponseVS.SC_NOT_FOUND).entity(
                 messages.get("currencyNotFoundErrorMsg")).build();
-        switch(currency.getState()) {
-            case EXPENDED: return Response.status(ResponseVS.SC_CURRENCY_EXPENDED)
-                    .entity(messages.get("currencyExpendedShortErrorMsg")).build();
-            case OK:
-                if(currency.getValidTo().after(new Date())) {
-                    return Response.status(ResponseVS.SC_CURRENCY_OK).entity(messages.get("currencyOKMsg")).build();
-                } else {
-                    dao.merge(currency.setState(Currency.State.LAPSED));
-                    return Response.status(ResponseVS.SC_CURRENCY_LAPSED).entity(
-                            messages.get("currencyLapsedShortErrorMsg")).build();
-                }
-            case LAPSED: return Response.status(ResponseVS.SC_CURRENCY_LAPSED).entity(
-                    messages.get("currencyLapsedShortErrorMsg")).build();
-            default:return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("unknown currency state: " + currency.getState()).build();
+        CurrencyStateDto currencyStateDto = new CurrencyStateDto(currency);
+        if(currency.getCurrencyBatch() != null) {
+            query = dao.getEM().createQuery("select c from Currency c where c.currencyBatch =:currencyBatch")
+                    .setParameter("currencyBatch", currency.getCurrencyBatch());
+            currencyStateDto.setBatchResponseCerts(query.getResultList());
         }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyStateDto)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/bundleState")
     @POST @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
     public Response bundleState(List<String> hashCertVSList) throws JsonProcessingException {
-        Map<String, Currency.State> result =  currencyBean.checkBundleState(hashCertVSList);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(result)).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyBean.checkBundleState(hashCertVSList))).build();
     }
 
     @GET @Produces(MediaType.APPLICATION_JSON)

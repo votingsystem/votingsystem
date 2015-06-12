@@ -1,11 +1,15 @@
 package org.votingsystem.dto.currency;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.util.TimePeriod;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PeriodResultDto {
 
     private TimePeriod timePeriod;
@@ -21,7 +25,7 @@ public class PeriodResultDto {
         periodResultDto.setGroupVSBalanceList(new ArrayList<>());
         periodResultDto.setUserVSBalanceList(new ArrayList<>());
         periodResultDto.setBankVSBalanceList(new ArrayList<>());
-        periodResultDto.timePeriod = timePeriod;
+        periodResultDto.setTimePeriod(timePeriod);
         return periodResultDto;
     }
 
@@ -67,5 +71,13 @@ public class PeriodResultDto {
 
     public void setSystemBalance(BalancesDto systemBalance) {
         this.systemBalance = systemBalance;
+    }
+
+    public TimePeriod getTimePeriod() {
+        return timePeriod;
+    }
+
+    public void setTimePeriod(TimePeriod timePeriod) {
+        this.timePeriod = timePeriod;
     }
 }

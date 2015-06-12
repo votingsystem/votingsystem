@@ -2,6 +2,7 @@ package org.votingsystem.client.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.concurrent.Task;
+import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
@@ -51,12 +52,12 @@ public class CurrencyCheckerTask extends Task<CurrencyCheckResponse> {
             responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsBytes(requestList),
                     ContentTypeVS.JSON, currencyServer.getCurrencyBundleStateServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                Map<String, Currency.State> result = (Map<String, Currency.State>) responseVS.getMessage(
-                        new TypeReference<Map<String, Currency.State>>() {});
+                Map<String, CurrencyStateDto> result = (Map<String, CurrencyStateDto>) responseVS.getMessage(
+                        new TypeReference<Map<String, CurrencyStateDto>>() {});
                 Set<String> errorSet = new HashSet<>();
                 Set<String> OKSet = new HashSet<>();
                 for(String hashCertVS : result.keySet()) {
-                    if(Currency.State.OK == result.get(hashCertVS)) OKSet.add(hashCertVS);
+                    if(Currency.State.OK == result.get(hashCertVS).getState()) OKSet.add(hashCertVS);
                     else errorSet.add(hashCertVS);
                 }
                 Integer statusCode = errorSet.size() > 0? ResponseVS.SC_ERROR : ResponseVS.SC_OK;

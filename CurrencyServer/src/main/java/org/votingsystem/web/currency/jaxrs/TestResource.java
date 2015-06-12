@@ -12,11 +12,13 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyAccount;
+import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.currency.MapUtils;
 import org.votingsystem.web.currency.ejb.AuditBean;
 import org.votingsystem.web.currency.ejb.BalancesBean;
@@ -81,10 +83,15 @@ public class TestResource {
     @GET @Path("/test")
     public Response test(@Context ServletContext context, @Context HttpServletRequest req,
             @Context HttpServletResponse resp) throws JsonProcessingException, ValidationExceptionVS {
-        Query query = dao.getEM().createQuery("SELECT c FROM Currency c WHERE c.hashCertVS =:hashCertVS")
-                .setParameter("hashCertVS", "test");
-        Currency currency = dao.getSingleResult(Currency.class, query);
-        return Response.ok().entity("OK").build();
+        Query query = dao.getEM().createQuery("SELECT b FROM BatchVS b WHERE b.content like :operation")
+                .setParameter("operation",  "%CURRENCY_CHANGE%");
+
+        List<CurrencyBatch> resultList = query.getResultList();
+        for(CurrencyBatch currencyBatch : resultList) {
+            currencyBatch.setType(TypeVS.CURRENCY_CHANGE);
+            dao.merge(currencyBatch);
+        }
+        return Response.ok().entity("Updated " + resultList.size() + " messages").build();
     }
 
     @GET @Path("/testQuery")

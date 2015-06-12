@@ -44,13 +44,6 @@ public class Currency extends EntityVS implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-    public Type getType() {
-        return type;
-    }
-
-    public void setType(Type type) {
-        this.type = type;
-    }
 
     public enum State { OK, EXPENDED, LAPSED, UNKNOWN, ERROR;} //Lapsed -> for not expended time limited currency
 
@@ -60,7 +53,6 @@ public class Currency extends EntityVS implements Serializable  {
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="subject") private String subject;
     @Column(name="amount") private BigDecimal amount = null;
-    @Column(name="batchAmount") private BigDecimal batchAmount = null;
     @Column(name="currency", nullable=false) private String currencyCode;
     @Column(name="isTimeLimited") private Boolean timeLimited = Boolean.FALSE;
 
@@ -69,12 +61,13 @@ public class Currency extends EntityVS implements Serializable  {
     @Column(name="currencyServerURL") private String currencyServerURL;
     @Column(name="reason") private String reason;
     @Column(name="metaInf") private String metaInf;
-    @Column(name="batchUUID") private String batchUUID;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="currencyBatch") private CurrencyBatch currencyBatch;
 
     @Column(name="serialNumber", unique=true, nullable=false) private Long serialNumber;
     @Column(name="content", nullable=false) private byte[] content;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
-    @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private Type type;
+    @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
@@ -101,6 +94,7 @@ public class Currency extends EntityVS implements Serializable  {
     @Transient private transient SMIMEMessage smimeMessage;
     @Transient private String toUserIBAN;
     @Transient private String toUserName;
+    @Transient private CurrencyDto batchItemDto;
     @Transient private CurrencyCertExtensionDto certExtensionDto;
 
     public Currency() {}
@@ -109,15 +103,12 @@ public class Currency extends EntityVS implements Serializable  {
         smimeMessage.isValidSignature();
         this.smimeMessage = smimeMessage;
         initCertData(smimeMessage.getCurrencyCert());
-        CurrencyDto batchItemDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), CurrencyDto.class);
-        this.batchUUID = batchItemDto.getBatchUUID();
-        this.batchAmount = batchItemDto.getBatchAmount();
+        batchItemDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), CurrencyDto.class);
         if(!this.currencyCode.equals(batchItemDto.getCurrencyCode())) {
             throw new ExceptionVS(getErrorPrefix() +
                     "expected currencyCode '" + currencyCode + "' - found: '" + batchItemDto.getCurrencyCode());
         }
-        tagVS = new TagVS(batchItemDto.getTag());
-        if(!TagVS.WILDTAG.equals(certExtensionDto.getTag()) && !certExtensionDto.getTag().equals(tagVS.getName()))
+        if(!TagVS.WILDTAG.equals(certExtensionDto.getTag()) && !certExtensionDto.getTag().equals(batchItemDto.getTag()))
             throw new ExceptionVS("expected tag '" + certExtensionDto.getTag() + "' - found: '" +
                     batchItemDto.getTag());
         Date signatureTime = smimeMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
@@ -126,7 +117,6 @@ public class Currency extends EntityVS implements Serializable  {
         this.subject = batchItemDto.getSubject();
         this.toUserIBAN = batchItemDto.getToUserIBAN();
         this.toUserName = batchItemDto.getToUserName();
-        this.timeLimited = batchItemDto.isTimeLimited();
     }
 
     public Currency(String currencyServerURL, BigDecimal amount, String currencyCode,
@@ -214,6 +204,23 @@ public class Currency extends EntityVS implements Serializable  {
         return this;
     }
 
+    public CurrencyBatch getCurrencyBatch() {
+        return currencyBatch;
+    }
+
+    public Currency setCurrencyBatch(CurrencyBatch currencyBatch) {
+        this.currencyBatch = currencyBatch;
+        return this;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
     public void setX509AnonymousCert(X509Certificate x509AnonymousCert) {
         this.x509AnonymousCert = x509AnonymousCert;
     }
@@ -224,14 +231,6 @@ public class Currency extends EntityVS implements Serializable  {
 
     public void setTimeLimited(Boolean timeLimited) {
         this.timeLimited = timeLimited;
-    }
-
-    public BigDecimal getBatchAmount() {
-        return batchAmount;
-    }
-
-    public void setBatchAmount(BigDecimal batchAmount) {
-        this.batchAmount = batchAmount;
     }
 
     private String getErrorPrefix() {
@@ -264,14 +263,6 @@ public class Currency extends EntityVS implements Serializable  {
 
     public void setCertExtensionDto(CurrencyCertExtensionDto certExtensionDto) {
         this.certExtensionDto = certExtensionDto;
-    }
-
-    public String getBatchUUID() {
-        return batchUUID;
-    }
-    public Currency setBatchUUID(String batchUUID) {
-        this.batchUUID = batchUUID;
-        return this;
     }
 
     public String getToUserIBAN() {

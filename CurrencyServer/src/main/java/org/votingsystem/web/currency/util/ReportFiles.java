@@ -17,16 +17,30 @@ public class ReportFiles {
     private File receiptFile;
     private File jsonFile;
 
+    public ReportFiles() {}
+
     public ReportFiles(TimePeriod timePeriod, String baseDirPath, String subPath) {
         String reportsBasePath = baseDirPath + "/backup/weekReports";
         String dateFromPathPart = fileDateFormatter.format(timePeriod.getDateFrom());
         String dateToPathPart = fileDateFormatter.format(timePeriod.getDateTo());
         reportsBasePath = reportsBasePath + "/" + dateFromPathPart + "_" +dateToPathPart + "/";
-        if(subPath != null) reportsBasePath = reportsBasePath + subPath;;
-        setBaseDir(new File(reportsBasePath));
-        getBaseDir().mkdirs();
-        setJsonFile(new File(reportsBasePath + "/balances.json"));
-        setReceiptFile(new File(reportsBasePath + "/weekReportReceipt.p7s"));
+        if(subPath != null) reportsBasePath = reportsBasePath + subPath;
+        baseDir = new File(reportsBasePath);
+        baseDir.mkdirs();
+        jsonFile = new File(reportsBasePath + "/balances.json");
+        receiptFile = new File(reportsBasePath + "/weekReportReceipt.p7s");
+    }
+
+    public static ReportFiles CURRENCY_PERIOD(TimePeriod timePeriod, String baseDirPath) {
+        ReportFiles result = new ReportFiles();
+        String dateFromPathPart = fileDateFormatter.format(timePeriod.getDateFrom());
+        String dateToPathPart = fileDateFormatter.format(timePeriod.getDateTo());
+        String reportsBasePath = baseDirPath + "/backup/currency/" + dateFromPathPart + "_" + dateToPathPart;
+        result.baseDir = new File(reportsBasePath);
+        result.baseDir.mkdirs();
+        result.jsonFile = new File(reportsBasePath + "/currencyMetaInf.json");
+        result.receiptFile = new File(reportsBasePath + "/currencyReportReceipt.p7s");
+        return result;
     }
 
     public File getTagReceiptFile(String tagName) {
