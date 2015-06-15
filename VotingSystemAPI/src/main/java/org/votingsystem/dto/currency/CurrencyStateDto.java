@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CertUtils;
-
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
@@ -19,15 +18,22 @@ public class CurrencyStateDto {
     private Long batchId;
     private Currency.State state;
     private Currency.Type type;
+    private String currencyCert;
     private String leftOverCert;
     private String currencyChangeCert;
     private Date dateCreated;
 
     public CurrencyStateDto() {}
 
-    public CurrencyStateDto(Currency currency) {
+    public CurrencyStateDto(Currency currency) throws Exception {
         hashCertVS = currency.getHashCertVS();
         if(currency.getCurrencyBatch() != null) batchId = currency.getCurrencyBatch().getId();
+        if(currency.getContent() != null) {
+            X509Certificate certX509 = CertUtils.loadCertificate(currency.getContent());
+            currencyCert = new String(CertUtils.getPEMEncoded (certX509));
+        } else if(currency.getX509AnonymousCert() != null) {
+            currencyCert = new String(CertUtils.getPEMEncoded (currency.getX509AnonymousCert()));
+        }
         state = currency.getState();
         type = currency.getType();
         this.dateCreated = currency.getDateCreated();
@@ -107,4 +113,13 @@ public class CurrencyStateDto {
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
     }
+
+    public String getCurrencyCert() {
+        return currencyCert;
+    }
+
+    public void setCurrencyCert(String currencyCert) {
+        this.currencyCert = currencyCert;
+    }
+
 }

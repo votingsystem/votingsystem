@@ -82,16 +82,9 @@ public class TestResource {
 
     @GET @Path("/test")
     public Response test(@Context ServletContext context, @Context HttpServletRequest req,
-            @Context HttpServletResponse resp) throws JsonProcessingException, ValidationExceptionVS {
-        Query query = dao.getEM().createQuery("SELECT b FROM BatchVS b WHERE b.content like :operation")
-                .setParameter("operation",  "%CURRENCY_CHANGE%");
-
-        List<CurrencyBatch> resultList = query.getResultList();
-        for(CurrencyBatch currencyBatch : resultList) {
-            currencyBatch.setType(TypeVS.CURRENCY_CHANGE);
-            dao.merge(currencyBatch);
-        }
-        return Response.ok().entity("Updated " + resultList.size() + " messages").build();
+            @Context HttpServletResponse resp) throws IOException, ValidationExceptionVS {
+        auditBean.initWeekPeriod(Calendar.getInstance());
+        return Response.ok().entity("Init period OK").build();
     }
 
     @GET @Path("/testQuery")

@@ -179,7 +179,7 @@ public class CurrencyBean {
         return resultListDto;
     }
 
-    public Map<String, CurrencyStateDto> checkBundleState(List<String> hashCertVSList) {
+    public Map<String, CurrencyStateDto> checkBundleState(List<String> hashCertVSList) throws Exception {
         Map<String, CurrencyStateDto> result = new HashMap<>();
         Query query = dao.getEM().createQuery("SELECT c FROM Currency c WHERE c.hashCertVS =:hashCertVS");
         for(String hashCertVS : hashCertVSList) {

@@ -196,8 +196,6 @@ public class TransactionVSBean {
                     break;
                 case FROM_BANKVS:
                     updateUserVSAccountTo(transactionVS);
-                    balancesBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(),
-                            transactionVS.getTag());
                     break;
                 case CURRENCY_CHANGE:
                     break;

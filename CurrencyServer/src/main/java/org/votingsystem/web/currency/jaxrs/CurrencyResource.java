@@ -93,7 +93,7 @@ public class CurrencyResource {
 
     @Path("/bundleState")
     @POST @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
-    public Response bundleState(List<String> hashCertVSList) throws JsonProcessingException {
+    public Response bundleState(List<String> hashCertVSList) throws Exception {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyBean.checkBundleState(hashCertVSList))).build();
     }
 
