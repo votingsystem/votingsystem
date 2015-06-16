@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.jaxrs;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
@@ -31,7 +30,9 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**

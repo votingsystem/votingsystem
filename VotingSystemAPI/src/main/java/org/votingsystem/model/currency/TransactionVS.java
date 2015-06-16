@@ -1,5 +1,6 @@
 package org.votingsystem.model.currency;
 
+import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
@@ -97,8 +98,6 @@ public class TransactionVS implements Serializable {
     @Transient private Map<CurrencyAccount, BigDecimal> accountFromMovements;
     @Transient private Long userId;
     @Transient private List<String> toUserVSList;
-    @Transient private Set<Currency> currencySet;
-
 
     public TransactionVS() {}
 
@@ -187,6 +186,21 @@ public class TransactionVS implements Serializable {
         transactionVS.setState(TransactionVS.State.OK);
         transactionVS.setType(TransactionVS.Type.FROM_BANKVS);
         return transactionVS;
+    }
+
+    public static TransactionVS CURRENCY_REQUEST(String subject, Map<CurrencyAccount, BigDecimal> accountFromMovements,
+             CurrencyRequestDto requestDto) {
+        TransactionVS transaction = new TransactionVS();
+        transaction.setType(TransactionVS.Type.CURRENCY_REQUEST);
+        transaction.setState(TransactionVS.State.OK);
+        transaction.setAmount(requestDto.getTotalAmount());
+        transaction.setCurrencyCode(requestDto.getCurrencyCode());
+        transaction.setTag(requestDto.getTagVS());
+        transaction.setSubject(subject);
+        transaction.setMessageSMIME(requestDto.getMessageSMIME());
+        transaction.setFromUserVS(requestDto.getMessageSMIME().getUserVS());
+        transaction.setAccountFromMovements(accountFromMovements);
+        return transaction;
     }
 
     public Long getId() {
@@ -358,15 +372,6 @@ public class TransactionVS implements Serializable {
         this.tag = tag;
     }
 
-    public Set<Currency> getCurrencySet() {
-        return currencySet;
-    }
-
-    public TransactionVS setCurrencySet(Set<Currency> currencySet) {
-        this.currencySet = currencySet;
-        return this;
-    }
-
     public String getTagName() {
         if(tag == null) return null;
         else return tag.getName();
@@ -376,8 +381,9 @@ public class TransactionVS implements Serializable {
         return currencyBatch;
     }
 
-    public void setCurrencyBatch(CurrencyBatch currencyBatch) {
+    public TransactionVS setCurrencyBatch(CurrencyBatch currencyBatch) {
         this.currencyBatch = currencyBatch;
+        return this;
     }
 
     public static TransactionVS generateTriggeredTransaction(TransactionVS transactionParent, BigDecimal amount,

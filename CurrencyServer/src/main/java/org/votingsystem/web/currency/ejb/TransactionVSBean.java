@@ -27,6 +27,8 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
@@ -56,22 +58,26 @@ public class TransactionVSBean {
     @Inject TransactionVSGroupVSBean transactionVSGroupVSBean;
     @Inject TransactionVSBankVSBean transactionVSBankVSBean;
     @Inject TransactionVSUserVSBean transactionVSUserVSBean;
-    @Resource(name="comp/DefaultManagedExecutorService")
-    private ManagedExecutorService executorService;
 
     @PostConstruct public void initialize() {
         log.info(" --- initialize --- ");
-        executorService.submit(() -> {
-            try {
-                while(true) {
-                    TransactionVS transactionVS = queue.take();
-                    updateCurrencyAccounts(transactionVS);
-                    log.info("--- queue.take - queue.size: " + queue.size());
+        try {
+            ManagedExecutorService executorService = InitialContext.doLookup("java:comp/DefaultManagedExecutorService");
+            executorService.submit(() -> {
+                try {
+                    while(true) {
+                        TransactionVS transactionVS = queue.take();
+                        log.info("--- queue.take - queue.size: " + queue.size());
+                        updateCurrencyAccounts(transactionVS);
+                    }
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
-            } catch (Exception ex) {
-                log.log(Level.SEVERE, ex.getMessage(), ex);
-            }
-        });
+            });
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @PreDestroy public void destroy() {
@@ -191,15 +197,28 @@ public class TransactionVSBean {
                     break;
                 case CURRENCY_SEND:
                     updateUserVSAccountTo(transactionVS);
-                    for(Currency currency : transactionVS.getCurrencySet()) {
+                    for(Currency currency : transactionVS.getCurrencyBatch().getValidatedCurrencySet()) {
                         balancesBean.updateTagBalance(currency.getAmount().negate(), currency.getCurrencyCode(),
                                 currency.getTagVS());
                     }
+                    Currency leftOver = transactionVS.getCurrencyBatch().getLeftOver();
+                    if(leftOver != null) balancesBean.updateTagBalance(leftOver.getAmount(), leftOver.getCurrencyCode(),
+                            leftOver.getTagVS());
                     break;
                 case FROM_BANKVS:
                     updateUserVSAccountTo(transactionVS);
                     break;
                 case CURRENCY_CHANGE:
+                    for(Currency currency : transactionVS.getCurrencyBatch().getValidatedCurrencySet()) {
+                        balancesBean.updateTagBalance(currency.getAmount().negate(), currency.getCurrencyCode(),
+                                currency.getTagVS());
+                    }
+                    Currency changeLeftOver = transactionVS.getCurrencyBatch().getLeftOver();
+                    if(changeLeftOver != null) balancesBean.updateTagBalance(changeLeftOver.getAmount(),
+                            changeLeftOver.getCurrencyCode(), changeLeftOver.getTagVS());
+                    Currency currencyChange = transactionVS.getCurrencyBatch().getCurrencyChange();
+                    balancesBean.updateTagBalance(currencyChange.getAmount(),
+                            currencyChange.getCurrencyCode(), currencyChange.getTagVS());
                     break;
                 default:
                     if(isParentTransaction) {//Parent transaction, to system before trigger to receptors

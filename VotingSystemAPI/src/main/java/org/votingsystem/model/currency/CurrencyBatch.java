@@ -8,6 +8,7 @@ import org.votingsystem.model.UserVS;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -16,8 +17,6 @@ import java.util.logging.Logger;
 @Entity
 @DiscriminatorValue("CurrencyBatch")
 public class CurrencyBatch extends BatchVS implements Serializable {
-
-    private static Logger log = java.util.logging.Logger.getLogger(CurrencyBatch.class.getSimpleName());
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUserVS") private UserVS toUserVS;
@@ -33,6 +32,8 @@ public class CurrencyBatch extends BatchVS implements Serializable {
     @OneToOne private MessageSMIME messageSMIME;
     @Column(name="batchUUID") private String batchUUID;
     @Column(name="subject") private String subject;
+
+    @Transient private Set<Currency> validatedCurrencySet;
 
     public CurrencyBatch() {}
 
@@ -116,5 +117,13 @@ public class CurrencyBatch extends BatchVS implements Serializable {
 
     public void setCurrencyChange(Currency currencyChange) {
         this.currencyChange = currencyChange;
+    }
+
+    public Set<Currency> getValidatedCurrencySet() {
+        return validatedCurrencySet;
+    }
+
+    public void setValidatedCurrencySet(Set<Currency> validatedCurrencySet) {
+        this.validatedCurrencySet = validatedCurrencySet;
     }
 }

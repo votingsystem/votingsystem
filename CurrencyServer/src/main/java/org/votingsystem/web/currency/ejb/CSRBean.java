@@ -95,7 +95,6 @@ public class CSRBean {
             X509Certificate x509AnonymousCert = signatureBean.signCSR(
                     pkcs10Req, null, timePeriod.getDateFrom(), timePeriod.getDateTo());
             Currency currency = Currency.FROM_CERT(x509AnonymousCert, tagVS, authorityCertificateVS);
-            currency.setCurrencyBatch(currencyBatch);
             currency.setType(type);
             currency = dao.persist(currency);
             LoggerVS.logCurrencyIssued(currency);

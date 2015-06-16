@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.ejb;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import org.apache.commons.io.IOUtils;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.*;
@@ -35,7 +34,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
-import java.sql.Time;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,65 +72,62 @@ public class CurrencyBean {
             validTo = timePeriod.getDateTo();
         }
         if(batchDto.getOperation() == TypeVS.CURRENCY_CHANGE) {
-            return processAnonymousCurrencyBatch(batchDto, currencyBatch, validatedCurrencySet, validTo);
-        }
-        Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", batchDto.getToUserIBAN());
-        UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
-        currencyBatch.setToUserVS(toUserVS);
-        if(toUserVS == null) throw new ExceptionVS("CurrencyTransactionBatch:" + currencyBatch.getBatchUUID() +
-                " has wrong receptor IBAN '" + batchDto.getToUserIBAN());
-        String leftOverCert = null;
-        if(batchDto.getLeftOverPKCS10() != null) {
-            Currency leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), Currency.Type.LEFT_OVER,
+            //return processAnonymousCurrencyBatch(batchDto, currencyBatch, validatedCurrencySet, validTo);
+            Currency leftOver = null;
+            if(batchDto.getLeftOverPKCS10() != null) {
+                leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), Currency.Type.LEFT_OVER, currencyBatch);
+            }
+            Currency currencyChange = csrBean.signCurrencyRequest(batchDto.getCurrencyChangePKCS10(), Currency.Type.CHANGE,
                     currencyBatch);
+            SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
+                    currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(batchDto),
+                    currencyBatch.getSubject());
+            receipt.setHeader("TypeVS", batchDto.getOperation().toString());
+            MessageSMIME messageSMIME =  dao.persist(new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT));
             currencyBatch.setLeftOver(leftOver);
-            leftOverCert = new String(CertUtils.getPEMEncoded(leftOver.getX509AnonymousCert()));
+            currencyBatch.setCurrencyChange(currencyChange);
+            currencyBatch.setValidatedCurrencySet(validatedCurrencySet);
+            dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchVS.State.OK));
+            TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_CHANGE(
+                    currencyBatch, validTo, messageSMIME, currencyBatch.getTagVS()));
+            transactionVSBean.newTransactionVS(transactionVS.setCurrencyBatch(currencyBatch));
+            for(Currency currency : validatedCurrencySet) {
+                dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
+            }
+            return new CurrencyBatchResponseDto(receipt, new String(CertUtils.getPEMEncoded(leftOver.getX509AnonymousCert())),
+                    new String(CertUtils.getPEMEncoded(currencyChange.getX509AnonymousCert())));
+        } else {
+            Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", batchDto.getToUserIBAN());
+            UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
+            currencyBatch.setToUserVS(toUserVS);
+            if(toUserVS == null) throw new ExceptionVS("CurrencyTransactionBatch:" + currencyBatch.getBatchUUID() +
+                    " has wrong receptor IBAN '" + batchDto.getToUserIBAN());
+            String leftOverCert = null;
+            if(batchDto.getLeftOverPKCS10() != null) {
+                Currency leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), Currency.Type.LEFT_OVER,
+                        currencyBatch);
+                currencyBatch.setLeftOver(leftOver);
+                leftOverCert = new String(CertUtils.getPEMEncoded(leftOver.getX509AnonymousCert()));
+            }
+            SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
+                    currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(batchDto),
+                    currencyBatch.getSubject());
+            receipt.setHeader("TypeVS", batchDto.getOperation().toString());
+            MessageSMIME messageSMIME =  dao.persist(new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT));
+            dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchVS.State.OK));
+            log.info("currencyBatch:" + currencyBatch.getId() + " - messageSMIME:" + messageSMIME.getId());
+            TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_SEND(
+                    currencyBatch, toUserVS, validTo, messageSMIME, currencyBatch.getTagVS()));
+            currencyBatch.setValidatedCurrencySet(validatedCurrencySet);
+            transactionVSBean.newTransactionVS(transactionVS.setCurrencyBatch(currencyBatch));
+            for(Currency currency : validatedCurrencySet) {
+                dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
+            }
+            CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto(receipt, leftOverCert);
+            responseDto.setMessage(messages.get("currencyBatchOKMsg", batchDto.getBatchAmount() + " " +
+                    batchDto.getCurrencyCode(), toUserVS.getFullName()));
+            return responseDto;
         }
-        SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
-                currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(batchDto),
-                currencyBatch.getSubject());
-        receipt.setHeader("TypeVS", batchDto.getOperation().toString());
-        MessageSMIME messageSMIME =  dao.persist(new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT));
-        dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchVS.State.OK));
-        log.info("currencyBatch:" + currencyBatch.getId() + " - messageSMIME:" + messageSMIME.getId());
-        TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_SEND(
-                currencyBatch, toUserVS, validTo, messageSMIME, currencyBatch.getTagVS()));
-        transactionVSBean.newTransactionVS(transactionVS.setCurrencySet(validatedCurrencySet));
-        for(Currency currency : validatedCurrencySet) {
-            dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS)
-                    .setCurrencyBatch(currencyBatch));
-        }
-        CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto(receipt, leftOverCert);
-        responseDto.setMessage(messages.get("currencyBatchOKMsg", batchDto.getBatchAmount() + " " +
-                batchDto.getCurrencyCode(), toUserVS.getFullName()));
-        return responseDto;
-    }
-
-    public CurrencyBatchResponseDto processAnonymousCurrencyBatch(CurrencyBatchDto batchDto,
-                  CurrencyBatch currencyBatch, Set<Currency> validatedCurrencySet, Date validTo) throws Exception {
-        Currency leftOver = null;
-        if(batchDto.getLeftOverPKCS10() != null) {
-            leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), Currency.Type.LEFT_OVER, currencyBatch);
-        }
-        Currency currencyChange = csrBean.signCurrencyRequest(batchDto.getCurrencyChangePKCS10(), Currency.Type.CHANGE,
-                currencyBatch);
-        SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
-                currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(batchDto),
-                currencyBatch.getSubject());
-        receipt.setHeader("TypeVS", batchDto.getOperation().toString());
-        MessageSMIME messageSMIME =  dao.persist(new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT));
-        currencyBatch.setLeftOver(leftOver);
-        currencyBatch.setCurrencyChange(currencyChange);
-        dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchVS.State.OK));
-        TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_CHANGE(
-                currencyBatch, validTo, messageSMIME, currencyBatch.getTagVS()));
-        transactionVSBean.newTransactionVS(transactionVS.setCurrencySet(validatedCurrencySet));
-        for(Currency currency : validatedCurrencySet) {
-            dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS).setCurrencyBatch(
-                    currencyBatch));
-        }
-        return new CurrencyBatchResponseDto(receipt, new String(CertUtils.getPEMEncoded(leftOver.getX509AnonymousCert())),
-                new String(CertUtils.getPEMEncoded(currencyChange.getX509AnonymousCert())));
     }
 
     public Currency validateBatchItem(Currency currency) throws Exception {
@@ -168,7 +163,8 @@ public class CurrencyBean {
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 fromUserVS.getIBAN(), requestDto.getTagVS(), requestDto.getTotalAmount(), requestDto.getCurrencyCode());
         Set<String> currencyCertSet = csrBean.signCurrencyRequest(requestDto);
-        TransactionVS userTransaction = requestDto.getTransactionVS(messages.get("currencyRequestLbl"), accountFromMovements);
+        TransactionVS userTransaction = TransactionVS.CURRENCY_REQUEST(messages.get("currencyRequestLbl"),
+                accountFromMovements, requestDto);
         transactionVSBean.newTransactionVS(userTransaction);
         ResultListDto resultListDto = new ResultListDto(currencyCertSet);
         resultListDto.setMessage(messages.get("withdrawalMsg", requestDto.getTotalAmount().toString(),

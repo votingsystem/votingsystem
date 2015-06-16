@@ -221,20 +221,6 @@ public class CurrencyRequestDto {
         this.messageSMIME = messageSMIME;
     }
 
-    public TransactionVS getTransactionVS(String subject, Map<CurrencyAccount, BigDecimal> accountFromMovements) {
-        TransactionVS transaction = new TransactionVS();
-        transaction.setType(TransactionVS.Type.CURRENCY_REQUEST);
-        transaction.setState(TransactionVS.State.OK);
-        transaction.setAmount(totalAmount);
-        transaction.setCurrencyCode(currencyCode);
-        transaction.setTag(tagVS);
-        transaction.setSubject(subject);
-        transaction.setMessageSMIME(messageSMIME);
-        transaction.setFromUserVS(messageSMIME.getUserVS());
-        transaction.setAccountFromMovements(accountFromMovements);
-        return transaction;
-    }
-
     public void setCurrencyMap(Map<String, Currency> currencyMap) {
         this.currencyMap = currencyMap;
     }
