@@ -63,7 +63,7 @@ public class ShopExampleResource {
         if(result.isEmpty()) throw new ExceptionVS("To do the test you must enter a GroupVS");
         GroupVS groupVS = result.iterator().next();
         TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(groupVS.getName(), UserVS.Type.GROUP,
-                new BigDecimal(4), "EUR", groupVS.getIBAN(), "shop example payment - " + new Date(), "NITROGENO");
+                new BigDecimal(4), "EUR", groupVS.getIBAN(), "shop example payment - " + new Date(), "HIDROGENO");
         dto.setPaymentOptions(Arrays.asList(TransactionVS.Type.FROM_USERVS,
                 TransactionVS.Type.CURRENCY_SEND, TransactionVS.Type.CURRENCY_CHANGE));
         String sessionID = dto.getUUID().substring(0, 8);

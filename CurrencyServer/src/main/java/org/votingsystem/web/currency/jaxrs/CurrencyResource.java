@@ -72,6 +72,7 @@ public class CurrencyResource {
         return Response.ok().build();
     }
 
+    @Transactional
     @Path("/hash/{hashCertVSHex}/state") @GET
     public Response state(@PathParam("hashCertVSHex") String hashCertVSHex) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
@@ -81,7 +82,7 @@ public class CurrencyResource {
                 .setParameter("hashCertVS", hashCertVSBase64);
         Currency currency = dao.getSingleResult(Currency.class, query);
         if(currency == null) return Response.status(ResponseVS.SC_NOT_FOUND).entity(
-                messages.get("currencyNotFoundErrorMsg")).build();
+                messages.get("currencyNotFoundErrorMsg")).type(MediaType.TEXT_PLAIN + ";charset=utf-8").build();
         CurrencyStateDto currencyStateDto = new CurrencyStateDto(currency);
         if(currency.getCurrencyBatch() != null) {
             query = dao.getEM().createQuery("select c from Currency c where c.currencyBatch =:currencyBatch")

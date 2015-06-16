@@ -112,12 +112,8 @@ public class CurrencyBatchDto {
                 Currency currency = new Currency(new SMIMEMessage(Base64.getDecoder().decode(currencyItem.getBytes())));
                 if(currencyList == null) {
                     currencyList = new ArrayList<>();
-                    this.subject = currency.getSubject();
-                    this.toUserIBAN = currency.getToUserIBAN();
-                    this.currencyCode = currency.getCurrencyCode();
-                    this.tag = currency.getTagVS().getName();
-                    this.timeLimited = currency.getTimeLimited();
-                } else checkCurrencyData(currency);
+                }
+                checkBatchItem(currency.getBatchItemDto());
                 if(checkDate.after(currency.getValidTo())) throw new ValidationExceptionVS(MessageFormat.format(
                         "currency ''{0}'' is lapsed", currency.getHashCertVS()));
                 accumulated = accumulated.add(currency.getAmount());
@@ -209,20 +205,18 @@ public class CurrencyBatchDto {
     }
 
     @JsonIgnore
-    public void checkCurrencyData(Currency currency) throws ExceptionVS {
-        String currencyData = "Currency with hash '" + currency.getHashCertVS() + "' ";
-        if(!timeLimited && currency.getTimeLimited()) throw new ValidationExceptionVS(
-                currencyData + "TimeLimited currency cannot go inside NOT TimeLimited batch");
-        if(!subject.equals(currency.getSubject())) throw new ValidationExceptionVS(
-                currencyData + "expected subject " + subject + " found " + currency.getSubject());
+    public void checkBatchItem(CurrencyDto batchItem) throws ExceptionVS {
+        String currencyData = "batchItem with hash '" + batchItem.getHashCertVS() + "' ";
+        if(!subject.equals(batchItem.getSubject())) throw new ValidationExceptionVS(
+                currencyData + "expected subject " + subject + " found " + batchItem.getSubject());
         if(toUserIBAN != null) {
-            if(!toUserIBAN.equals(currency.getToUserIBAN())) throw new ValidationExceptionVS(
-                    currencyData + "expected toUserIBAN " + toUserIBAN + " found " + currency.getToUserIBAN());
+            if(!toUserIBAN.equals(batchItem.getToUserIBAN())) throw new ValidationExceptionVS(
+                    currencyData + "expected toUserIBAN " + toUserIBAN + " found " + batchItem.getToUserIBAN());
         }
-        if(!currencyCode.equals(currency.getCurrencyCode())) throw new ValidationExceptionVS(
-                currencyData + "expected currencyCode " + currencyCode + " found " + currency.getCurrencyCode());
-        if(!tag.equals(currency.getTagVS().getName())) throw new ValidationExceptionVS(
-                currencyData + "expected tag " + tag + " found " + currency.getTagVS().getName());
+        if(!currencyCode.equals(batchItem.getCurrencyCode())) throw new ValidationExceptionVS(
+                currencyData + "expected currencyCode " + currencyCode + " found " + batchItem.getCurrencyCode());
+        if(!tag.equals(batchItem.getTag())) throw new ValidationExceptionVS(
+                currencyData + "expected tag " + tag + " found " + batchItem.getTag());
     }
 
     public TypeVS getOperation() {

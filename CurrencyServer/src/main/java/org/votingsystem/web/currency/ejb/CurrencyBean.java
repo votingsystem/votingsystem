@@ -62,11 +62,11 @@ public class CurrencyBean {
 
     public CurrencyBatchResponseDto processCurrencyBatch(CurrencyBatchDto batchDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        List<Currency> validatedCurrencyList = new ArrayList<>();
+        Set<Currency> validatedCurrencySet = new HashSet<>();
         CurrencyBatch currencyBatch = batchDto.validateRequest(new Date());
         currencyBatch.setTagVS(config.getTag(batchDto.getTag()));
         for(Currency currency : batchDto.getCurrencyList()) {
-            validatedCurrencyList.add(validateBatchItem(currency));
+            validatedCurrencySet.add(validateBatchItem(currency));
         }
         Date validTo = null;
         if(currencyBatch.getTimeLimited() == true) {
@@ -74,7 +74,7 @@ public class CurrencyBean {
             validTo = timePeriod.getDateTo();
         }
         if(batchDto.getOperation() == TypeVS.CURRENCY_CHANGE) {
-            return processAnonymousCurrencyBatch(batchDto, currencyBatch, validatedCurrencyList, validTo);
+            return processAnonymousCurrencyBatch(batchDto, currencyBatch, validatedCurrencySet, validTo);
         }
         Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", batchDto.getToUserIBAN());
         UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
@@ -97,8 +97,8 @@ public class CurrencyBean {
         log.info("currencyBatch:" + currencyBatch.getId() + " - messageSMIME:" + messageSMIME.getId());
         TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_SEND(
                 currencyBatch, toUserVS, validTo, messageSMIME, currencyBatch.getTagVS()));
-        transactionVSBean.newTransactionVS(transactionVS);
-        for(Currency currency : validatedCurrencyList) {
+        transactionVSBean.newTransactionVS(transactionVS.setCurrencySet(validatedCurrencySet));
+        for(Currency currency : validatedCurrencySet) {
             dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS)
                     .setCurrencyBatch(currencyBatch));
         }
@@ -109,7 +109,7 @@ public class CurrencyBean {
     }
 
     public CurrencyBatchResponseDto processAnonymousCurrencyBatch(CurrencyBatchDto batchDto,
-                  CurrencyBatch currencyBatch, List<Currency> validatedCurrencyList, Date validTo) throws Exception {
+                  CurrencyBatch currencyBatch, Set<Currency> validatedCurrencySet, Date validTo) throws Exception {
         Currency leftOver = null;
         if(batchDto.getLeftOverPKCS10() != null) {
             leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), Currency.Type.LEFT_OVER, currencyBatch);
@@ -126,8 +126,8 @@ public class CurrencyBean {
         dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchVS.State.OK));
         TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_CHANGE(
                 currencyBatch, validTo, messageSMIME, currencyBatch.getTagVS()));
-        transactionVSBean.newTransactionVS(transactionVS);
-        for(Currency currency : validatedCurrencyList) {
+        transactionVSBean.newTransactionVS(transactionVS.setCurrencySet(validatedCurrencySet));
+        for(Currency currency : validatedCurrencySet) {
             dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS).setCurrencyBatch(
                     currencyBatch));
         }

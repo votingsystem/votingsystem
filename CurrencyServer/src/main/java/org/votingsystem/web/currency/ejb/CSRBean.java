@@ -80,6 +80,7 @@ public class CSRBean {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 pkcs10Req, ContextVS.CURRENCY_TAG);
+        TagVS tagVS = config.getTag(certExtensionDto.getTag());
         if(currencyMinValue.compareTo(certExtensionDto.getAmount()) > 0) throw new ExceptionVS(messages.get("currencyMinValueError",
                 currencyMinValue.toString(), certExtensionDto.getAmount().toString()));
         TimePeriod timePeriod = null;
@@ -93,7 +94,7 @@ public class CSRBean {
         try {
             X509Certificate x509AnonymousCert = signatureBean.signCSR(
                     pkcs10Req, null, timePeriod.getDateFrom(), timePeriod.getDateTo());
-            Currency currency = Currency.FROM_CERT(x509AnonymousCert, currencyBatch.getTagVS(), authorityCertificateVS);
+            Currency currency = Currency.FROM_CERT(x509AnonymousCert, tagVS, authorityCertificateVS);
             currency.setCurrencyBatch(currencyBatch);
             currency.setType(type);
             currency = dao.persist(currency);

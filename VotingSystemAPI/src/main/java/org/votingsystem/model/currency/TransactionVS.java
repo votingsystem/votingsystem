@@ -7,10 +7,7 @@ import org.votingsystem.model.UserVS;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static javax.persistence.GenerationType.IDENTITY;
@@ -100,6 +97,7 @@ public class TransactionVS implements Serializable {
     @Transient private Map<CurrencyAccount, BigDecimal> accountFromMovements;
     @Transient private Long userId;
     @Transient private List<String> toUserVSList;
+    @Transient private Set<Currency> currencySet;
 
 
     public TransactionVS() {}
@@ -358,6 +356,15 @@ public class TransactionVS implements Serializable {
 
     public void setTag(TagVS tag) {
         this.tag = tag;
+    }
+
+    public Set<Currency> getCurrencySet() {
+        return currencySet;
+    }
+
+    public TransactionVS setCurrencySet(Set<Currency> currencySet) {
+        this.currencySet = currencySet;
+        return this;
     }
 
     public String getTagName() {

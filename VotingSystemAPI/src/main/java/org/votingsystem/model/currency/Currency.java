@@ -44,7 +44,6 @@ public class Currency extends EntityVS implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-
     public enum State { OK, EXPENDED, LAPSED, UNKNOWN, ERROR;} //Lapsed -> for not expended time limited currency
 
     public enum Type { LEFT_OVER, CHANGE, REQUEST}
@@ -157,6 +156,14 @@ public class Currency extends EntityVS implements Serializable  {
         currency.authorityCertificateVS = authorityCertificateVS;
         currency.state = State.OK;
         return currency;
+    }
+
+    public CurrencyDto getBatchItemDto() {
+        return batchItemDto;
+    }
+
+    public void setBatchItemDto(CurrencyDto batchItemDto) {
+        this.batchItemDto = batchItemDto;
     }
 
     public Currency initCertData(X509Certificate x509AnonymousCert) throws Exception {

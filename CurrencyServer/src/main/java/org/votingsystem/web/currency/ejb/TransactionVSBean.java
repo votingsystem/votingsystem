@@ -6,6 +6,7 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.TransactionVS;
@@ -183,7 +184,6 @@ public class TransactionVSBean {
                 case FROM_USERVS:
                     updateUserVSAccountFrom(transactionVS);
                     updateUserVSAccountTo(transactionVS);
-                    balancesBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(), transactionVS.getTag());
                     break;
                 case CURRENCY_REQUEST:
                     updateUserVSAccountFrom(transactionVS);
@@ -191,8 +191,10 @@ public class TransactionVSBean {
                     break;
                 case CURRENCY_SEND:
                     updateUserVSAccountTo(transactionVS);
-                    balancesBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
-                            transactionVS.getTag());
+                    for(Currency currency : transactionVS.getCurrencySet()) {
+                        balancesBean.updateTagBalance(currency.getAmount().negate(), currency.getCurrencyCode(),
+                                currency.getTagVS());
+                    }
                     break;
                 case FROM_BANKVS:
                     updateUserVSAccountTo(transactionVS);
