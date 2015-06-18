@@ -90,7 +90,7 @@ public class CurrencyBean {
             dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchVS.State.OK));
             TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_CHANGE(
                     currencyBatch, validTo, messageSMIME, currencyBatch.getTagVS()));
-            transactionVSBean.newTransactionVS(transactionVS.setCurrencyBatch(currencyBatch));
+            transactionVSBean.updateCurrencyAccounts(transactionVS.setCurrencyBatch(currencyBatch));
             for(Currency currency : validatedCurrencySet) {
                 dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
             }
@@ -119,7 +119,7 @@ public class CurrencyBean {
             TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_SEND(
                     currencyBatch, toUserVS, validTo, messageSMIME, currencyBatch.getTagVS()));
             currencyBatch.setValidatedCurrencySet(validatedCurrencySet);
-            transactionVSBean.newTransactionVS(transactionVS.setCurrencyBatch(currencyBatch));
+            transactionVSBean.updateCurrencyAccounts(transactionVS.setCurrencyBatch(currencyBatch));
             for(Currency currency : validatedCurrencySet) {
                 dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
             }
@@ -165,7 +165,7 @@ public class CurrencyBean {
         Set<String> currencyCertSet = csrBean.signCurrencyRequest(requestDto);
         TransactionVS userTransaction = TransactionVS.CURRENCY_REQUEST(messages.get("currencyRequestLbl"),
                 accountFromMovements, requestDto);
-        transactionVSBean.newTransactionVS(userTransaction);
+        transactionVSBean.updateCurrencyAccounts(userTransaction);
         ResultListDto resultListDto = new ResultListDto(currencyCertSet);
         resultListDto.setMessage(messages.get("withdrawalMsg", requestDto.getTotalAmount().toString(),
                 requestDto.getCurrencyCode()) + " " + messages.getTagMessage(requestDto.getTagVS().getName()));

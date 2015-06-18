@@ -49,7 +49,7 @@ public class TransactionVSUserVSBean {
         TransactionVS transactionVS = dao.persist(TransactionVS.USERVS(request.getSigner(), request.getReceptor(),
                 request.getType(), accountFromMovements, request.getAmount(), request.getCurrencyCode(),
                 request.getSubject(), request.getValidTo(), request.getTransactionVSSMIME(), tagVS));
-        transactionVSBean.newTransactionVS(transactionVS);
+        transactionVSBean.updateCurrencyAccounts(transactionVS);
         String fromUser = config.getServerName();
         String toUser = request.getSigner().getNif();
         SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(fromUser, toUser,

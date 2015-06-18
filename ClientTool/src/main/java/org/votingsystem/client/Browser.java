@@ -186,6 +186,10 @@ public class Browser extends VBox implements BrowserVS {
         PlatformImpl.runLater(() -> new MessageDialog(getInstance().getScene().getWindow()).showHtmlMessage(message, optionButton));
     }
 
+    public static void showMessage(final String message, final Button optionButton, Window parentWindow) {
+        PlatformImpl.runLater(() -> new MessageDialog(parentWindow).showHtmlMessage(message, optionButton));
+    }
+
     public static void showMessage(final String message, final String caption) {
         PlatformImpl.runLater(() -> new MessageDialog(getInstance().getScene().getWindow()).showHtmlMessage(message, caption));
     }

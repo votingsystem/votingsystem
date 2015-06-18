@@ -20,15 +20,9 @@ import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.enterprise.concurrent.ManagedExecutorService;
+import javax.ejb.Asynchronous;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
@@ -36,21 +30,16 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Singleton
-@Startup
+@Stateless
 public class TransactionVSBean {
 
     private static Logger log = Logger.getLogger(TransactionVSBean.class.getName());
-
-    private static final BlockingQueue<TransactionVS> queue = new ArrayBlockingQueue(50);
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
@@ -59,41 +48,6 @@ public class TransactionVSBean {
     @Inject TransactionVSBankVSBean transactionVSBankVSBean;
     @Inject TransactionVSUserVSBean transactionVSUserVSBean;
 
-    @PostConstruct public void initialize() {
-        log.info(" --- initialize --- ");
-        try {
-            ManagedExecutorService executorService = InitialContext.doLookup("java:comp/DefaultManagedExecutorService");
-            executorService.submit(() -> {
-                try {
-                    while(true) {
-                        TransactionVS transactionVS = queue.take();
-                        log.info("--- queue.take - queue.size: " + queue.size());
-                        updateCurrencyAccounts(transactionVS);
-                    }
-                } catch (Exception ex) {
-                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                }
-            });
-        } catch (NamingException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @PreDestroy public void destroy() {
-        log.info(" --- destroy --- ");
-
-    }
-
-    public void newTransactionVS(TransactionVS... transactions) {
-        for(TransactionVS transactionVS : transactions) {
-            try {
-                queue.put(transactionVS);
-            } catch (Exception ex) {
-                log.log(Level.SEVERE, ex.getMessage(), ex);
-            }
-        }
-    }
 
     public ResultListDto<TransactionVSDto> processTransactionVS(MessageSMIME messageSMIME) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
@@ -126,8 +80,7 @@ public class TransactionVSBean {
         }
     }
 
-    @Transactional
-    private CurrencyAccount updateUserVSAccountTo(TransactionVS transactionVS) throws ExceptionVS {
+    private synchronized CurrencyAccount updateUserVSAccountTo(TransactionVS transactionVS) throws ExceptionVS {
         if(transactionVS.getToUserIBAN() == null) throw new ExceptionVS("transactionVS without toUserIBAN");
         Query query = dao.getEM().createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")
                 .setParameter("userIBAN", transactionVS.getToUserIBAN()).setParameter("tag", transactionVS.getTag())
@@ -161,17 +114,22 @@ public class TransactionVSBean {
             dao.persist(accountTo);
             log.info("new CurrencyAccount: " + accountTo.getId() + " - for IBAN:" + transactionVS.getToUserIBAN() +
                     " -  tag:" + accountTo.getTag().getName() + " - amount:" + accountTo.getBalance());
-        } else dao.merge(accountTo.setBalance(accountTo.getBalance().add(resultAmount)));
+        } else {
+            dao.merge(accountTo.setBalance(accountTo.getBalance().add(resultAmount)));
+            log.info("updateUserVSAccountTo - account id: " + accountTo.getId() + " - balance: " +
+                    accountTo.getBalance() + " - LastUpdated: " + accountTo.getLastUpdated());
+        }
         return accountTo;
     }
 
-    @Transactional
-    private void updateUserVSAccountFrom(TransactionVS transactionVS) throws ExceptionVS {
+    private synchronized void updateUserVSAccountFrom(TransactionVS transactionVS) throws ExceptionVS {
         if(transactionVS.getAccountFromMovements() == null)
             throw new ExceptionVS("TransactionVS without accountFromMovements");
         for(Map.Entry<CurrencyAccount, BigDecimal> entry: transactionVS.getAccountFromMovements().entrySet()) {
             CurrencyAccount currencyAccount = entry.getKey();
             dao.merge(currencyAccount.setBalance(currencyAccount.getBalance().subtract(entry.getValue())));
+            log.info("updateUserVSAccountFrom - account id: " + currencyAccount.getId() + " - balance: " +
+                    currencyAccount.getBalance() + " - LastUpdated: " + currencyAccount.getLastUpdated());
         }
     }
 

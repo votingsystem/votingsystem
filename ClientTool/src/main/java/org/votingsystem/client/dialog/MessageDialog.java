@@ -33,6 +33,7 @@ public class MessageDialog extends DialogVS {
 
     public MessageDialog(Window parentWindow) {
         super(new VBox(10));
+        getStage().initOwner(parentWindow);
         mainPane = (VBox) getContentPane();
         messageLabel = new Label();
         messageLabel.setWrapText(true);

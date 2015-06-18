@@ -68,7 +68,8 @@ public class QRDialog extends DialogVS {
                                     log.log(Level.SEVERE, ex.getMessage(), ex);
                                 }
                             });
-                            showMessage(result, openReceiptButton);
+                            Platform.runLater(() -> { hide(); });
+                            showMessage(result, openReceiptButton, mainPane.getScene().getWindow());
                         }
                     } catch (Exception ex) {
                         log.log(Level.SEVERE, ex.getMessage(), ex);

@@ -62,7 +62,7 @@ public class TransactionVSGroupVSBean {
             }
             TransactionVS transactionParent =
                     dao.persist(request.getTransactionVS(groupVS, null, accountFromMovements, tagVS));
-            transactionVSBean.newTransactionVS(transactionParent);
+            transactionVSBean.updateCurrencyAccounts(transactionParent);
             ObjectMapper mapper = JSON.getMapper();
             for(UserVS toUser: request.getToUserVSList()) {
                 TransactionVS triggeredTransaction = TransactionVS.generateTriggeredTransaction(
@@ -75,7 +75,7 @@ public class TransactionVSGroupVSBean {
                         request.getTransactionVSSMIME()));
                 triggeredTransaction.setMessageSMIME(messageSMIMEReceipt);
                 dao.persist(triggeredTransaction);
-                transactionVSBean.newTransactionVS(triggeredTransaction);
+                transactionVSBean.updateCurrencyAccounts(triggeredTransaction);
                 resultList.add(new TransactionVSDto(triggeredTransaction));
             }
             log.info("transactionType: " + request.getType().toString() + " - num. receptors: " +
@@ -128,7 +128,7 @@ public class TransactionVSGroupVSBean {
         BigDecimal numReceptors = new BigDecimal(request.getNumReceptors());
         BigDecimal userPart = request.getAmount().divide(numReceptors, 2, RoundingMode.FLOOR);
         TransactionVS transactionParent = dao.persist(request.getTransactionVS(groupVS, null, accountFromMovements, tagVS));
-        transactionVSBean.newTransactionVS(transactionParent);
+        transactionVSBean.updateCurrencyAccounts(transactionParent);
         Query query = dao.getEM().createQuery("SELECT s FROM SubscriptionVS s WHERE s.groupVS =:groupVS AND s.state =:state")
                 .setParameter("groupVS", groupVS).setParameter("state", SubscriptionVS.State.ACTIVE);
         List<SubscriptionVS> subscriptionList = query.getResultList();
@@ -147,7 +147,7 @@ public class TransactionVSGroupVSBean {
             TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(transactionParent,
                     userPart, subscription.getUserVS(), subscription.getUserVS().getIBAN()));
             resultList.add(new TransactionVSDto(triggeredTransaction));
-            transactionVSBean.newTransactionVS(triggeredTransaction);
+            transactionVSBean.updateCurrencyAccounts(triggeredTransaction);
         }
         log.info("transactionVS: " + transactionParent.getId() + " - operation: " + request.getOperation().toString());
         ResultListDto<TransactionVSDto> resultDto = new ResultListDto(resultList);
