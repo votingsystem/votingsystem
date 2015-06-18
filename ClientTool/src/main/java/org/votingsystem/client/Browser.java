@@ -3,6 +3,7 @@ package org.votingsystem.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
@@ -12,17 +13,22 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import org.votingsystem.client.dialog.MessageDialog;
+import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dto.SignalVSDto;
 import org.votingsystem.client.pane.BrowserVSPane;
 import org.votingsystem.client.pane.BrowserVSTabPane;
 import org.votingsystem.client.pane.BrowserVSToolbar;
+import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.util.*;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.currency.Wallet;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -35,7 +41,7 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class Browser extends VBox implements BrowserVS {
+public class Browser extends VBox implements BrowserVS, PasswordDialog.Listener  {
 
     private static Logger log = java.util.logging.Logger.getLogger(Browser.class.getSimpleName());
 
@@ -186,8 +192,8 @@ public class Browser extends VBox implements BrowserVS {
         PlatformImpl.runLater(() -> new MessageDialog(getInstance().getScene().getWindow()).showHtmlMessage(message, optionButton));
     }
 
-    public static void showMessage(final String message, final Button optionButton, Window parentWindow) {
-        PlatformImpl.runLater(() -> new MessageDialog(parentWindow).showHtmlMessage(message, optionButton));
+    public static void showMessage(final String message, final Parent parent, Window parentWindow) {
+        PlatformImpl.runLater(() -> new MessageDialog(parentWindow).showHtmlMessage(message, parent));
     }
 
     public static void showMessage(final String message, final String caption) {
@@ -219,12 +225,16 @@ public class Browser extends VBox implements BrowserVS {
     }
 
     public void runJSCommandCurrentView(String jsCommand) {
-        PlatformImpl.runLater(() -> {
-            Object currentContent = tabPaneVS.getSelectionModel().getSelectedItem().getContent();
-            if (currentContent instanceof WebView) {
-                ((WebView) currentContent).getEngine().executeScript(jsCommand);
-            } else log.log(Level.SEVERE, "current content is not instance of WebView: " + currentContent.getClass());
-        });
+        if(tabPaneVS.getSelectionModel().getSelectedItem() != null) {
+            PlatformImpl.runLater(() -> {
+                Object currentContent = tabPaneVS.getSelectionModel().getSelectedItem().getContent();
+                if (currentContent instanceof WebView) {
+                    ((WebView) currentContent).getEngine().executeScript(jsCommand);
+                } else log.log(Level.SEVERE, "current content is not instance of WebView: " + currentContent.getClass());
+            });
+        } else {
+            log.info("Browser has no active windows");
+        }
     }
 
     public void registerCallerCallbackView(String callerCallback, WebView webView) {
@@ -243,6 +253,29 @@ public class Browser extends VBox implements BrowserVS {
             else runJSCommandCurrentView(jsCommand);
         } catch (UnsupportedEncodingException | JsonProcessingException ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+    }
+
+    public void saveWallet() {
+        PasswordDialog.showWithoutPasswordConfirm(TypeVS.WALLET_SAVE, this, ContextVS.getMessage("walletPinMsg"));
+    }
+
+    @Override public void setPassword(TypeVS passwordType, String password) {
+        switch (passwordType) {
+            case WALLET_SAVE:
+                if(password != null) {
+                    try {
+                        Wallet.getWallet(password);
+                        Browser.getInstance().fireCoreSignal("vs-wallet-save", null, false);
+                        InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
+                    } catch (WalletException wex) {
+                        Utils.showWalletNotFoundMessage();
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                    }
+                }
+                break;
         }
     }
 

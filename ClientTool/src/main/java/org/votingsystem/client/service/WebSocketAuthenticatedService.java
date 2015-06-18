@@ -23,6 +23,7 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
+import org.votingsystem.util.currency.Wallet;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -55,7 +56,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     private WebSocketAuthenticatedService(Collection<X509Certificate> sslServerCertCollection, ActorVS targetServer) {
         this.targetServer = targetServer;
         if(targetServer.getWebSocketURL().startsWith("wss")) {
-            log.info("settings for SECURE connetion");
+            log.info("settings for SECURE connection");
             try {
                 KeyStore p12Store = KeyStore.getInstance("PKCS12");
                 p12Store.load(null, null);
@@ -313,7 +314,9 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                             if(TypeVS.CURRENCY_CHANGE == typeVS) {
                                 Currency currency = qrDto.getCurrency();
                                 currency.initSigner(socketMsg.getMessage().getBytes());
-                                log.info("TODO - CURRENCY_CHANGE - save to wallet");
+                                qrDto.setCurrency(currency);
+                                qrDto.setTypeVS(TypeVS.CURRENCY_CHANGE);
+                                Wallet.saveToPlainWallet(Arrays.asList(currency));
                             }
                             SocketMessageDto response = socketMsg.getResponse(ResponseVS.SC_OK, null,
                                     BrowserSessionService.getInstance().getConnectedDevice().getId(),

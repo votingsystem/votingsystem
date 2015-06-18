@@ -8,14 +8,15 @@ import org.votingsystem.client.dto.SignalVSDto;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.pane.WalletPane;
 import org.votingsystem.client.service.BrowserSessionService;
-import org.votingsystem.client.service.InboxService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.service.WebSocketService;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.throwable.WalletException;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.ObjectUtils;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.currency.Wallet;
 
 import java.util.Base64;
@@ -28,7 +29,7 @@ import static org.votingsystem.client.Browser.showMessage;
  * JavaScript interface object
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class BrowserVSClient implements PasswordDialog.Listener {
+public class BrowserVSClient {
 
     private static Logger log = Logger.getLogger(BrowserVSClient.class.getSimpleName());
 
@@ -109,7 +110,7 @@ public class BrowserVSClient implements PasswordDialog.Listener {
                             ContextVS.getInstance().getDefaultServer().getServerURL() + "/app/contact.xhtml?openMailClient=true");
                     break;
                 case WALLET_SAVE:
-                    PasswordDialog.showWithoutPasswordConfirm(TypeVS.WALLET_SAVE, this, ContextVS.getMessage("walletPinMsg"));
+                    Browser.getInstance().saveWallet();
                     break;
                 case MESSAGEVS:
                     if(operationVS.getDocumentToSign() != null) Browser.getInstance().processOperationVS(
@@ -152,22 +153,4 @@ public class BrowserVSClient implements PasswordDialog.Listener {
         }
     }
 
-    @Override public void setPassword(TypeVS passwordType, String password) {
-        switch (passwordType) {
-            case WALLET_SAVE:
-                if(password != null) {
-                    try {
-                        Wallet.getWallet(password);
-                        Browser.getInstance().fireCoreSignal("vs-wallet-save", null, false);
-                        InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
-                    } catch (WalletException wex) {
-                        Utils.showWalletNotFoundMessage();
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                    }
-                }
-                break;
-        }
-    }
 }

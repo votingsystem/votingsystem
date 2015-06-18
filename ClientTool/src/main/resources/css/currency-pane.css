@@ -1,23 +1,8 @@
-.glassBox {
-    -fx-background-insets: 3;
-    -fx-effect: dropshadow(three-pass-box, #888, 5, 0, 0, 0);
-    -fx-background-radius: 4;
-    -fx-padding: 5, 5;
-}
-
 .main-dialog {
     -fx-background-radius: 4;
     -fx-pref-width: 375px;
-}
-
-.caption {
-    -fx-text-fill: #888;
-    -fx-font-weight: bold;
-    -fx-background-color: #eee;
-}
-
-.currency-content {
-    -fx-background-color: #fff;
+    -fx-padding: 10px;
+    -fx-background-color:#fff;
 }
 
 .currency-tag {
@@ -28,11 +13,16 @@
 
 .currency-error {
     -fx-background-color: rgba(186,0,17, 0.45) ;
+    -fx-text-fill: #fff;
 }
 
 .statusLbl {
     -fx-font-weight: bold;
     -fx-text-fill: #fff;
+}
+
+.currency-error-msg {
+    -fx-font-size: 1.8em;
 }
 
 .currencyHash {

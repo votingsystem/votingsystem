@@ -1,9 +1,8 @@
 package org.votingsystem.client.dialog;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
-import javafx.scene.control.Button;
+import javafx.scene.Parent;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -72,10 +71,9 @@ public class MessageDialog extends DialogVS {
         show();
     }
 
-    public void showHtmlMessage(String htmlMessage, Button optionButton) {
-        if(optionButton != null) {
-            footerButtonsBox.getChildren().add(0, optionButton);
-            optionButton.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEvent -> hide());
+    public void showHtmlMessage(String htmlMessage, Parent parent) {
+        if(parent != null) {
+            footerButtonsBox.getChildren().add(0, parent);
         }
         messageWebView.getEngine().loadContent(String.format(webViewContent, htmlMessage));
         isHTMLView(true);

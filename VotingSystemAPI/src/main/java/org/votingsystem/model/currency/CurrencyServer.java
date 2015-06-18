@@ -46,7 +46,7 @@ public class CurrencyServer extends ActorVS implements Serializable {
     }
 
     public String getCurrencyStateServiceURL(String hashCertVS) {
-        return getServerURL() + "/rest/currency/" + StringUtils.toHex(hashCertVS) + "/state";
+        return getServerURL() + "/rest/currency/hash/" + StringUtils.toHex(hashCertVS) + "/state";
     }
 
     public String getCurrencyBundleStateServiceURL() {

@@ -7,71 +7,49 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox fx:id="mainPane" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="glassBox" stylesheets="@../css/currency-pane.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox fx:id="mainPane" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="main-dialog" stylesheets="@../css/currency-pane.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <VBox styleClass="main-dialog">
+      <TextField fx:id="currencyHashText" alignment="CENTER" editable="false" styleClass="currencyHash" text="currencyHash" />
+      <HBox alignment="TOP_CENTER" VBox.vgrow="NEVER">
          <children>
-            <HBox alignment="TOP_RIGHT" prefWidth="200.0" styleClass="caption">
+            <HBox alignment="CENTER">
                <children>
-                  <HBox alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="325.0">
-                     <children>
-                        <Label fx:id="serverLbl" maxHeight="1.7976931348623157E308" prefHeight="15.0" styleClass="caption" text="Label" textAlignment="CENTER" HBox.hgrow="ALWAYS" />
-                     </children>
-                  </HBox>
-                  <MenuButton fx:id="menuButton" mnemonicParsing="false">
-                     <HBox.margin>
-                        <Insets right="10.0" />
-                     </HBox.margin>
-                  </MenuButton>
-                  <Button fx:id="closeButton" mnemonicParsing="false" />
-               </children>
-               <padding>
-                  <Insets bottom="2.0" />
-               </padding>
-            </HBox>
-            <VBox fx:id="content" alignment="CENTER" styleClass="currency-content">
-               <children>
-                  <TextField fx:id="currencyHashText" alignment="CENTER" editable="false" styleClass="currencyHash" text="currencyHash" />
-                  <HBox alignment="TOP_CENTER" VBox.vgrow="NEVER">
-                     <children>
-                        <HBox alignment="CENTER">
-                           <children>
-                              <Label fx:id="currencyValueLbl" alignment="CENTER" text="1000000" textFill="#388746">
-                                 <contextMenu>
-                                    <ContextMenu fx:id="contextMenu" />
-                                 </contextMenu>
-                                 <font>
-                                    <Font name="System Bold" size="36.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="currencyLbl" alignment="CENTER" text="EUR" textAlignment="RIGHT" textFill="#388746">
-                                 <font>
-                                    <Font size="35.0" />
-                                 </font>
-                              </Label>
-                           </children>
-                        </HBox>
-                     </children>
-                  </HBox>
-                  <Label fx:id="currencyTagLbl" styleClass="currency-tag" text="currencyTag" textFill="#070707">
+                  <Label fx:id="currencyValueLbl" alignment="CENTER" text="1000000" textFill="#388746">
+                     <contextMenu>
+                        <ContextMenu fx:id="contextMenu" />
+                     </contextMenu>
                      <font>
-                        <Font size="15.0" />
+                        <Font name="System Bold" size="36.0" />
                      </font>
                   </Label>
-                  <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308">
-                     <children>
-                        <Label fx:id="validFromLbl" alignment="CENTER" contentDisplay="CENTER" styleClass="dateInfoLbl" text="validFrom" HBox.hgrow="ALWAYS">
-                           <font>
-                              <Font size="12.0" />
-                           </font>
-                        </Label>
-                        <Region maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
-                        <Label fx:id="validToLbl" alignment="CENTER_RIGHT" styleClass="dateInfoLbl" text="validTo" HBox.hgrow="ALWAYS" />
-                     </children>
-                  </HBox>
+                  <Label fx:id="currencyLbl" alignment="CENTER" text="EUR" textAlignment="RIGHT" textFill="#388746">
+                     <font>
+                        <Font size="35.0" />
+                     </font>
+                  </Label>
                </children>
-            </VBox>
+            </HBox>
          </children>
-      </VBox>
+      </HBox>
+      <Label fx:id="currencyTagLbl" styleClass="currency-tag" text="currencyTag" textFill="#070707">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </Label>
+      <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308">
+         <children>
+            <Label fx:id="validFromLbl" alignment="CENTER" contentDisplay="CENTER" styleClass="dateInfoLbl" text="validFrom" HBox.hgrow="ALWAYS">
+               <font>
+                  <Font size="12.0" />
+               </font>
+            </Label>
+            <Region maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+            <Label fx:id="validToLbl" alignment="CENTER_RIGHT" styleClass="dateInfoLbl" text="validTo" HBox.hgrow="ALWAYS">
+               <HBox.margin>
+                  <Insets left="20.0" />
+               </HBox.margin>
+            </Label>
+         </children>
+      </HBox>
    </children>
 </VBox>

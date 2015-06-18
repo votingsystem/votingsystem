@@ -22,6 +22,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.QRUtils;
+import org.votingsystem.util.TypeVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -69,7 +70,19 @@ public class QRDialog extends DialogVS {
                                 }
                             });
                             Platform.runLater(() -> { hide(); });
-                            showMessage(result, openReceiptButton, mainPane.getScene().getWindow());
+                            if(qrDto.getTypeVS() == TypeVS.CURRENCY_CHANGE) {
+                                Button saveWalletButton = new Button();
+                                saveWalletButton.setGraphic(Utils.getIcon(FontAwesomeIcons.MONEY));
+                                saveWalletButton.setText(ContextVS.getMessage("saveToSecureWalletMsg"));
+                                saveWalletButton.setOnAction(event -> {
+                                    Browser.getInstance().saveWallet();
+                                });
+                                VBox buttonsHBox = new VBox(10);
+                                buttonsHBox.getChildren().addAll(openReceiptButton, saveWalletButton);
+                                showMessage(result, buttonsHBox, mainPane.getScene().getWindow());
+                            } else {
+                                showMessage(result, openReceiptButton, mainPane.getScene().getWindow());
+                            }
                         }
                     } catch (Exception ex) {
                         log.log(Level.SEVERE, ex.getMessage(), ex);

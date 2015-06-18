@@ -18,7 +18,7 @@ public class BrowserSessionDto {
     private Boolean isConnected = Boolean.FALSE;
     private UserVSDto userVS;
     private DeviceVSDto cryptoToken;
-    private List<UserVSDto> userVSList = new ArrayList<>();;
+    private List<UserVSDto> userVSList = new ArrayList<>();
 
 
     public Long getCsrRequestId() {
