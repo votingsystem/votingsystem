@@ -63,7 +63,7 @@ public class ShopExampleResource {
         if(result.isEmpty()) throw new ExceptionVS("To do the test you must enter a GroupVS");
         GroupVS groupVS = result.iterator().next();
         TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(groupVS.getName(), UserVS.Type.GROUP,
-                new BigDecimal(4), "EUR", groupVS.getIBAN(), "shop example payment - " + new Date(), "HIDROGENO");
+                new BigDecimal(5), "EUR", groupVS.getIBAN(), "shop example payment - " + new Date(), "HIDROGENO");
         dto.setPaymentOptions(Arrays.asList(TransactionVS.Type.FROM_USERVS,
                 TransactionVS.Type.CURRENCY_SEND, TransactionVS.Type.CURRENCY_CHANGE));
         String sessionID = dto.getUUID().substring(0, 8);
@@ -128,13 +128,6 @@ public class ShopExampleResource {
         //here you have the receipt, validate it with your tools
         shopExampleBean.sendResponse(uuid, responseDto);
         return Response.ok().entity("valid receipt").build();
-    }
-
-    @Path("/{uuid}/payment/currency_change") @POST
-    public Response paymentCurrencyChange(@PathParam("uuid") String uuid, byte[] postData,
-            @Context HttpServletRequest req) throws Exception {
-        throw new ValidationExceptionVS("TODO currency_change");
-        //return Response.ok().entity("valid receipt").build();
     }
 
 }

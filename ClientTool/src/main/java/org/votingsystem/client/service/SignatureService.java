@@ -45,7 +45,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.util.stream.Collectors.toSet;
-import static org.votingsystem.util.ContextVS.*;
+import static org.votingsystem.util.ContextVS.PROVIDER;
+import static org.votingsystem.util.ContextVS.SIGN_MECHANISM;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

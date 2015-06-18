@@ -82,7 +82,8 @@ public class ShopExampleBean {
                             currencyCert, ContextVS.CURRENCY_OID);
                     Currency currency = requestBundle.getCurrency(certExtensionDto.getHashCertVS());
                     currency.initSigner(responseDto.getCurrencyChangeCert().getBytes());
-                    log.info("TODO - currency OK save to wallet");
+                    log.info("TODO - currency OK save to wallet: " + currency.getAmount() + " " +
+                            currency.getCurrencyCode() + " - " + currency.getTagVS().getName());
                 }
                 requestBundle.getTransactionDto().validateReceipt(smimeMessage, true);
                 MessageDto<TransactionVSDto> messageDto = MessageDto.OK("OK");
