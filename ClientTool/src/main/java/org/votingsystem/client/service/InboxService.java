@@ -230,14 +230,14 @@ public class InboxService implements PasswordDialog.Listener {
         InboxDialog.showDialog();
     }
 
-    @Override public void setPassword(TypeVS passwordType, String password) {
+    @Override public void setPassword(TypeVS passwordType, char[] password) {
         switch (passwordType) {
             case MESSAGEVS:
                 if (password != null) {
                     try {
-                        KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password.toCharArray());
+                        KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password);
                         PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
-                                password.toCharArray());
+                                password);
                         ProgressDialog.showDialog(new InboxDecryptTask(privateKey, timeLimitedInboxMessage),
                                 ContextVS.getMessage("decryptingMessagesMsg"));
                     } catch (Exception ex) {

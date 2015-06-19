@@ -77,9 +77,9 @@ public class QRDialog extends DialogVS {
                                 saveWalletButton.setOnAction(event -> {
                                     Browser.getInstance().saveWallet();
                                 });
-                                VBox buttonsHBox = new VBox(10);
-                                buttonsHBox.getChildren().addAll(openReceiptButton, saveWalletButton);
-                                showMessage(result, buttonsHBox, mainPane.getScene().getWindow());
+                                VBox buttonsVBox = new VBox(10);
+                                buttonsVBox.getChildren().addAll(openReceiptButton, saveWalletButton);
+                                showMessage(result, buttonsVBox, mainPane.getScene().getWindow());
                             } else {
                                 showMessage(result, openReceiptButton, mainPane.getScene().getWindow());
                             }
@@ -116,14 +116,12 @@ public class QRDialog extends DialogVS {
                 JSON.getMapper().writeValueAsString(qrDto), 500, 500)));
         Platform.runLater(() -> {
             imageView.setImage(qrCodeImage);
-            String caption = null;
             TransactionVSDto dto = qrDto.getData() != null ? (TransactionVSDto) qrDto.getData() : null;
             if(dto != null) {
-                caption = dto.getSubject();
+                show(dto.getSubject());
                 infoLbl.setText(dto.getAmount() + " " + dto.getCurrencyCode() + " - " +
                         MsgUtils.getTagDescription(dto.getTagName()));
             }
-            getInstance().show(caption);
         });
     }
 

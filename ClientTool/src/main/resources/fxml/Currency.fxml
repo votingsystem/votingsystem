@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox fx:id="mainPane" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="main-dialog" stylesheets="@../css/currency-pane.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox fx:id="mainPane" alignment="TOP_CENTER" styleClass="main-dialog" stylesheets="@../css/currency-pane.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <TextField fx:id="currencyHashText" alignment="CENTER" editable="false" styleClass="currencyHash" text="currencyHash" />
       <HBox alignment="TOP_CENTER" VBox.vgrow="NEVER">

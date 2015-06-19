@@ -37,7 +37,7 @@ public class BrowserVSPane extends StackPane {
     private Text messageText;
     private boolean isCapsLockPressed = false;
     private Text capsLockPressedMessageText;
-    private String password;
+    private char[] password;
     private PasswordField password1Field;
     private PasswordField password2Field;
     private Text password2Text;
@@ -133,7 +133,7 @@ public class BrowserVSPane extends StackPane {
         this.operationVS = operationVS;
         if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
             PlatformImpl.runAndWait(() -> setPasswordDialogVisible(true, passwordDialogMessage));
-        } else signatureService.processOperationVS("", operationVS);
+        } else signatureService.processOperationVS(null, operationVS);
     }
 
     private void cancel() {
@@ -173,11 +173,11 @@ public class BrowserVSPane extends StackPane {
         setMessage(mainMessage);
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 
-    public void processOperationVS(String password, OperationVS operationVS) {
+    public void processOperationVS(char[] password, OperationVS operationVS) {
         signatureService.processOperationVS(password, operationVS);
     }
 
@@ -191,7 +191,7 @@ public class BrowserVSPane extends StackPane {
             if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));
             else {
                 if (password1.equals(password2)) {
-                    password = password1;
+                    password = password1.toCharArray();
                     setPasswordDialogVisible(false, null);
                     signatureService.processOperationVS(password, operationVS);
                 } else setMessage(ContextVS.getMessage("passwordError"));

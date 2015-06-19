@@ -233,7 +233,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         getStage().sizeToScene();
     }
 
-    @Override public void setPassword(TypeVS passwordType, String password) {
+    @Override public void setPassword(TypeVS passwordType, char[] password) {
         switch (passwordType) {
             case KEYSTORE_SELECT:
                 try {

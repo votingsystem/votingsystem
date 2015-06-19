@@ -56,13 +56,13 @@ public class SignatureService extends Service<ResponseVS> {
     private static Logger log = Logger.getLogger(SignatureService.class.getSimpleName());
 
     private OperationVS operationVS = null;
-    private String password = null;
+    private char[] password = null;
 
     @Override protected Task createTask() {
         return new SignatureTask();
     }
 
-    public void processOperationVS(String password, OperationVS operationVS) {
+    public void processOperationVS(char[] password, OperationVS operationVS) {
         this.operationVS = operationVS;
         this.password = password;
         restart();

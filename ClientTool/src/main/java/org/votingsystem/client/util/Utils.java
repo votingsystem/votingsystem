@@ -356,7 +356,7 @@ public class Utils {
                         UserVS userVS = UserVS.getUserVS((X509Certificate)
                                 userKeyStore.getCertificate("UserTestKeysStore"));
                         PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
-                            @Override public void setPassword(TypeVS passwordType, String password) {
+                            @Override public void setPassword(TypeVS passwordType, char[] password) {
                                 if(password == null) return;
                                 try {
                                     ContextVS.saveUserKeyStore(userKeyStore, password);
@@ -403,7 +403,7 @@ public class Utils {
     public static void createNewWallet() {
         PlatformImpl.runLater(() -> {
             PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
-                @Override public void setPassword(TypeVS passwordType, String password) {
+                @Override public void setPassword(TypeVS passwordType, char[] password) {
                     if(password != null) {
                         try {
                             Wallet.createWallet(new ArrayList<>(), password);

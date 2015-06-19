@@ -152,7 +152,7 @@ public class Browser extends VBox implements BrowserVS, PasswordDialog.Listener 
         browserHelper.processOperationVS(operationVS, passwordDialogMessage);
     }
 
-    @Override public void processOperationVS(String password, OperationVS operationVS) {
+    @Override public void processOperationVS(char[] password, OperationVS operationVS) {
         browserHelper.processOperationVS(password, operationVS);
     }
 
@@ -260,7 +260,7 @@ public class Browser extends VBox implements BrowserVS, PasswordDialog.Listener 
         PasswordDialog.showWithoutPasswordConfirm(TypeVS.WALLET_SAVE, this, ContextVS.getMessage("walletPinMsg"));
     }
 
-    @Override public void setPassword(TypeVS passwordType, String password) {
+    @Override public void setPassword(TypeVS passwordType, char[] password) {
         switch (passwordType) {
             case WALLET_SAVE:
                 if(password != null) {

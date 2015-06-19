@@ -48,7 +48,7 @@ public class SignDocumentFormStackPane extends StackPane {
     private Text messageText;
     private boolean isCapsLockPressed = false;
     private Text capsLockPressedMessageText;
-    private String password;
+    private char[] password;
     private PasswordField password1Field;
     private PasswordField password2Field;
     private VBox passwordVBox;
@@ -204,7 +204,7 @@ public class SignDocumentFormStackPane extends StackPane {
         setMessage(ContextVS.getMessage("passwordMissing"));
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 
@@ -217,7 +217,7 @@ public class SignDocumentFormStackPane extends StackPane {
                 if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));
                 else {
                     if (password1.equals(password2)) {
-                        password = password1;
+                        password = password1.toCharArray();
                         setPasswordDialogVisible(false);
                         initBackgroundTask();
                     } else {

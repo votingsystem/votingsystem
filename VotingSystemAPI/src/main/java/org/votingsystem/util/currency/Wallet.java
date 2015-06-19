@@ -51,12 +51,12 @@ public class Wallet {
         savePlainWalletDto(plainWallet);
     }
 
-    public static void saveToWallet(Collection<Currency> currencyCollection, String pin) throws Exception {
+    public static void saveToWallet(Collection<Currency> currencyCollection, char[] pin) throws Exception {
         Set<CurrencyDto> serializedCurrencyList = CurrencyDto.serializeCollection(currencyCollection);
         saveToWalletDto(serializedCurrencyList, pin);
     }
 
-    public static void saveToWalletDto(Collection<CurrencyDto> currencyDtoCollection, String pin) throws Exception {
+    public static void saveToWalletDto(Collection<CurrencyDto> currencyDtoCollection, char[] pin) throws Exception {
         Set<Currency> storedWallet = getWallet(pin);
         Set<CurrencyDto> storedWalletDto = CurrencyDto.serializeCollection(storedWallet);
         storedWalletDto.addAll(currencyDtoCollection);
@@ -72,20 +72,21 @@ public class Wallet {
         saveWallet(walletDtoToSave, pin);
     }
 
-    public static Set<Currency> saveWallet(Collection<CurrencyDto> currencyDtoCollection, String pin) throws Exception {
-        String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST));
+    public static Set<Currency> saveWallet(Collection<CurrencyDto> currencyDtoCollection, char[] pin) throws Exception {
+        String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST));
         EncryptedWalletList encryptedWalletList = getEncryptedWalletList();
         WalletFile walletFile = encryptedWalletList.getWallet(pinHashHex);
         if(walletFile == null || encryptedWalletList.size() == 0)
             throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
-        EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, JSON.getMapper().writeValueAsBytes(currencyDtoCollection));
+        EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin,
+                JSON.getMapper().writeValueAsBytes(currencyDtoCollection));
         JSON.getMapper().writeValue(walletFile.file, new EncryptedBundleDto(bundle));
         wallet = CurrencyDto.deSerialize(currencyDtoCollection);
         return wallet;
     }
 
-    public static void createWallet(List<CurrencyDto> walletDto, String pin) throws Exception {
-        String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST));
+    public static void createWallet(List<CurrencyDto> walletDto, char[] pin) throws Exception {
+        String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST));
         String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + pinHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File walletFile = new File(ContextVS.APPDIR + File.separator + walletFileName);
         walletFile.getParentFile().mkdirs();
@@ -98,8 +99,8 @@ public class Wallet {
         return wallet;
     }
 
-    public static Set<Currency> getWallet(String pin) throws Exception {
-        String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(pin, ContextVS.VOTING_DATA_DIGEST));
+    public static Set<Currency> getWallet(char[] pin) throws Exception {
+        String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST));
         String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + pinHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File walletFile = new File(ContextVS.APPDIR + File.separator + walletFileName);
         if(!walletFile.exists()) {
@@ -121,11 +122,11 @@ public class Wallet {
         return wallet;
     }
 
-    public static void changePin(String newPin, String oldPin) throws Exception {
+    public static void changePin(char[] newPin, char[] oldPin) throws Exception {
         Set<Currency> wallet = getWallet(oldPin);
         Set<CurrencyDto> walletDto = CurrencyDto.serializeCollection(wallet);
-        String oldPinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(oldPin, ContextVS.VOTING_DATA_DIGEST));
-        String newPinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(newPin, ContextVS.VOTING_DATA_DIGEST));
+        String oldPinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(oldPin), ContextVS.VOTING_DATA_DIGEST));
+        String newPinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(newPin), ContextVS.VOTING_DATA_DIGEST));
         String newWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + newPinHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File newWalletFile = new File(ContextVS.APPDIR + File.separator + newWalletFileName);
         if(!newWalletFile.createNewFile()) throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));

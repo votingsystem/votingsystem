@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -89,7 +90,11 @@ public class DialogVS {
     }
 
     public void addMenuButton(MenuButton menuButton) {
-        decoratedPane.addMenuButton(menuButton);
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+                decoratedPane.addMenuButton(menuButton);
+            }
+        });
     }
 
     public void show() {

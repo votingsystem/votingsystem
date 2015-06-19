@@ -122,7 +122,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
     }
 
     @Override
-    public void setPassword(TypeVS passwordType, String password) {
+    public void setPassword(TypeVS passwordType, char[] password) {
         switch(passwordType) {
             case CURRENCY_OPEN:
                 if(password != null) {
@@ -143,7 +143,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
     }
 
     private static PasswordDialog.Listener passwordListener = new PasswordDialog.Listener(){
-        @Override public void setPassword(TypeVS passwordType, String password) {
+        @Override public void setPassword(TypeVS passwordType, char[] password) {
             if(password != null) {
                 try {
                     Set<Currency> currencySet = Wallet.getWallet(password);

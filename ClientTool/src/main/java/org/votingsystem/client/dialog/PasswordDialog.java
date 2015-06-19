@@ -30,7 +30,7 @@ public class PasswordDialog extends DialogVS {
     private static Logger log = Logger.getLogger(PasswordDialog.class.getSimpleName());
 
     public interface Listener {
-        public void setPassword(TypeVS passwordType, String password);
+        public void setPassword(TypeVS passwordType, char[] password);
     }
 
     private VBox dialogVBox;
@@ -106,8 +106,8 @@ public class PasswordDialog extends DialogVS {
         Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));
         password2Text = new Text(ContextVS.getMessage("password2Lbl"));
         //password2Text.setStyle("-fx-spacing: 50;");
-
-        dialogVBox.getChildren().addAll(messageText, timeLimitedMessageText, password1Text, password1Field, password2Text, password2Field,
+        dialogVBox.getChildren().addAll(messageText, timeLimitedMessageText, password1Text, password1Field,
+                password2Text, password2Field,
                 footerButtonsBox);
     }
 
@@ -121,7 +121,7 @@ public class PasswordDialog extends DialogVS {
     }
 
     private void closePasswordDialog() {
-        listener.setPassword(passwordType, password);
+        listener.setPassword(passwordType, password.toCharArray());
         hide();
     }
 

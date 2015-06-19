@@ -11,10 +11,8 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
-import org.votingsystem.client.util.DocumentVS;
 import org.votingsystem.client.util.MsgUtils;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
@@ -33,8 +31,6 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -45,7 +41,7 @@ import static org.votingsystem.client.Browser.showMessage;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CurrencyDialog extends DialogVS implements DocumentVS, JSONFormDialog.Listener, UserDeviceSelectorDialog.Listener {
+public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog.Listener {
 
     private static Logger log = Logger.getLogger(CurrencyDialog.class.getSimpleName());
 
@@ -61,7 +57,6 @@ public class CurrencyDialog extends DialogVS implements DocumentVS, JSONFormDial
 
     private Currency currency;
     private CurrencyServer currencyServer;
-    private static Stage stage;
 
     @FXML private Label serverLbl;
     @FXML private VBox mainPane;
@@ -73,7 +68,6 @@ public class CurrencyDialog extends DialogVS implements DocumentVS, JSONFormDial
     @FXML private Label currencyLbl;
 
 
-    private MenuItem sendMenuItem;
     private MenuItem changeWalletMenuItem;
     private WalletChangeTask walletChangeTask;
 
@@ -85,16 +79,13 @@ public class CurrencyDialog extends DialogVS implements DocumentVS, JSONFormDial
                     currencyServer = (CurrencyServer) responseVS.getData();
                     responseVS = HttpHelper.getInstance().getData(
                             currencyServer.getCurrencyStateServiceURL(currency.getHashCertVS()), null);
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        sendMenuItem.setText(responseVS.getMessage());
-                        sendMenuItem.setVisible(true);
-                    } else {
+                    if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                         mainPane.getStyleClass().add("currency-error");
                         Label currencyStatusLbl = new Label();
                         currencyStatusLbl.setText(ContextVS.getMessage("invalidCurrency"));
                         currencyStatusLbl.getStyleClass().add("currency-error-msg");
                         mainPane.getChildren().add(1, currencyStatusLbl);
-                        sendMenuItem.setVisible(false);
+                        changeWalletMenuItem.setVisible(false);
                         getStage().sizeToScene();
                         showMessage(ResponseVS.SC_ERROR, responseVS.getMessage());
                     }
@@ -105,6 +96,17 @@ public class CurrencyDialog extends DialogVS implements DocumentVS, JSONFormDial
 
     public CurrencyDialog() throws IOException {
         super("/fxml/Currency.fxml");
+        changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
+        changeWalletMenuItem.setOnAction(actionEvent -> {
+            if(WebSocketAuthenticatedService.getInstance().isConnectedWithAlert()) {
+                UserDeviceSelectorDialog.show(ContextVS.getMessage("userVSDeviceConnected"),
+                        ContextVS.getMessage("selectDeviceToTransferCurrencyMsg"), CurrencyDialog.this);
+            }
+        });
+        MenuButton menuButton = new MenuButton();
+        menuButton.setGraphic(Utils.getIcon(FontAwesomeIcons.BARS));
+        menuButton.getItems().addAll(changeWalletMenuItem);
+        addMenuButton(menuButton);
     }
 
     public void showDialog(Currency currency) {
@@ -116,14 +118,10 @@ public class CurrencyDialog extends DialogVS implements DocumentVS, JSONFormDial
         currencyValueLbl.setText(currency.getAmount().toPlainString());
         currencyLbl.setText(currency.getCurrencyCode());
         currencyTagLbl.setText(MsgUtils.getTagDescription(currency.getTagVS().getName()));
-        MenuButton menuButton = new MenuButton();
-        menuButton.setGraphic(Utils.getIcon(FontAwesomeIcons.BARS));
         validFromLbl.setText(ContextVS.getMessage("issuedLbl") + ": " +
                 DateUtils.getDateStr(currency.getValidFrom(), "dd MMM yyyy' 'HH:mm"));
         validToLbl.setText(ContextVS.getMessage("expiresLbl") + ": " +
                 DateUtils.getDateStr(currency.getValidTo(), "dd MMM yyyy' 'HH:mm"));
-        menuButton.getItems().addAll(sendMenuItem, changeWalletMenuItem);
-        addMenuButton(menuButton);
         try {
             CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
                     ContextVS.getInstance().getCurrencyServer().getTrustAnchors(), false, Arrays.asList(
@@ -158,22 +156,6 @@ public class CurrencyDialog extends DialogVS implements DocumentVS, JSONFormDial
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete
         log.info("initialize");
         EventBusService.getInstance().register(new EventBusCurrencyListener());
-        sendMenuItem = new MenuItem("");
-        Map dataMap = new HashMap<>();
-        dataMap.put("subject", "");
-        dataMap.put("toUserName", "");
-        dataMap.put("toUserIBAN", "");
-        dataMap.put("isTimeLimited", "");
-        sendMenuItem.setOnAction(actionEvent -> JSONFormDialog.show(dataMap, CurrencyDialog.this));
-        MenuItem saveMenuItem = new MenuItem(ContextVS.getMessage("saveLbl"));
-        saveMenuItem.setOnAction(actionEvent -> System.out.println("saveMenuItem"));
-        changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
-        changeWalletMenuItem.setOnAction(actionEvent -> {
-            if(WebSocketAuthenticatedService.getInstance().isConnectedWithAlert()) {
-                UserDeviceSelectorDialog.show(ContextVS.getMessage("userVSDeviceConnected"),
-                        ContextVS.getMessage("selectDeviceToTransferCurrencyMsg"), CurrencyDialog.this);
-            }
-        });
     }
 
     public static void show(final Currency currency) {
@@ -187,31 +169,6 @@ public class CurrencyDialog extends DialogVS implements DocumentVS, JSONFormDial
                 }
             }
         });
-    }
-
-    @Override public byte[] getDocumentBytes() throws Exception {
-        return ObjectUtils.serializeObject(currency);
-    }
-
-    @Override public ContentTypeVS getContentTypeVS() {
-        return ContentTypeVS.CURRENCY;
-    }
-
-    @Override public void processJSONForm(Map dataMap) {
-        log.info("processJSONForm: " + dataMap.toString());
-        String subject = (String) dataMap.get("subject");
-        String toUserName = (String) dataMap.get("toUserName");
-        String toUserIBAN = (String) dataMap.get("toUserIBAN");
-        Boolean isTimeLimited = (Boolean) dataMap.get("isTimeLimited");
-        TransactionVSDto transactionVSDto = TransactionVSDto.CURRENCY_SEND(toUserName, subject, currency.getAmount(),
-                currency.getCurrencyCode(), toUserIBAN, isTimeLimited, currency.getTagVS().getName());
-        try {
-            ProgressDialog.showDialog(new ProcessFormTask(transactionVSDto, currency, currencyServer),
-                    ContextVS.getMessage("sendingMoneyLbl"));
-        } catch (Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-        }
     }
 
     @Override public void setSelectedDevice(DeviceVSDto device) {

@@ -86,7 +86,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     }
 
     @Override
-    public void setPassword(TypeVS passwordType, String password) {
+    public void setPassword(TypeVS passwordType, char[] password) {
         switch (passwordType) {
             case WEB_SOCKET_INIT:
                 if(password == null) {
@@ -149,7 +149,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
         }
     }
 
-    private void connect(String password) {
+    private void connect(char[] password) {
         ProgressDialog.showDialog(new InitValidatedSessionTask(password, targetServer), null);
     }
 
@@ -360,10 +360,10 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
 
     public class InitValidatedSessionTask extends Task<ResponseVS> {
 
-        private String password;
+        private char[] password;
         private ActorVS targetServer;
 
-        public InitValidatedSessionTask (String password, ActorVS targetServer) {
+        public InitValidatedSessionTask (char[] password, ActorVS targetServer) {
             this.password = password;
             this.targetServer = targetServer;
         }

@@ -1,6 +1,7 @@
 package org.votingsystem.client.dialog;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -8,6 +9,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Window;
+import netscape.javascript.JSException;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
@@ -45,7 +47,7 @@ public class MessageDialog extends DialogVS {
         footerButtonsBox = new HBox(10);
         mainPane.getChildren().addAll(messageLabel, messageWebView, footerButtonsBox);
         mainPane.setStyle("-fx-max-width: 600px;-fx-padding: 3 20 20 20;-fx-spacing: 10;-fx-alignment: center;" +
-                "-fx-font-size: 16;-fx-font-weight: bold;-fx-pref-width: 450px;");
+                "-fx-font-size: 16;-fx-font-weight: bold;-fx-pref-width: 500px;");
     }
 
     private void isHTMLView(boolean isHTMLView) {
@@ -55,6 +57,7 @@ public class MessageDialog extends DialogVS {
             } if(mainPane.getChildren().contains(messageLabel)) {
                 mainPane.getChildren().remove(messageLabel);
             }
+            adjustWebViewHeight();
         } else {
             if(mainPane.getChildren().contains(messageWebView)) {
                 mainPane.getChildren().remove(messageWebView);
@@ -98,4 +101,22 @@ public class MessageDialog extends DialogVS {
         show();
     }
 
+    private void adjustWebViewHeight() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Object result = messageWebView.getEngine().executeScript(
+                            "document.getElementById('msgDiv').offsetHeight");
+                    if (result instanceof Integer) {
+                        double height = new Double((Integer) result) + 40;
+                        messageWebView.setPrefHeight(height);
+                    }
+                    mainPane.getScene().getWindow().sizeToScene();
+                } catch (JSException e) {
+                    // not important
+                }
+            }
+        });
+    }
 }

@@ -383,8 +383,8 @@ public class ContextVS implements BundleActivator {
         }
     }
 
-    public static UserVS saveUserKeyStore(KeyStore keyStore, String password) throws Exception{
-        byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password.toCharArray());
+    public static UserVS saveUserKeyStore(KeyStore keyStore, char[] password) throws Exception{
+        byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password);
         File mainKeyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
         mainKeyStoreFile.createNewFile();
         Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);

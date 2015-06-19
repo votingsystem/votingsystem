@@ -421,12 +421,12 @@ public class Encryptor {
         return result;
     }
 
-    public static EncryptedBundle pbeAES_Encrypt(String password, byte[] bytesToEncrypt) throws NoSuchAlgorithmException,
+    public static EncryptedBundle pbeAES_Encrypt(char[] password, byte[] bytesToEncrypt) throws NoSuchAlgorithmException,
             InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException,
             UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         byte[] salt = KeyGeneratorVS.INSTANCE.getSalt();
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
+        KeySpec spec = new PBEKeySpec(password, salt, ITERATION_COUNT, KEY_LENGTH);
         SecretKey secret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, secret);
@@ -435,13 +435,13 @@ public class Encryptor {
         return new EncryptedBundle(cipher.doFinal(bytesToEncrypt), iv, salt);
     }
 
-    public static byte[] pbeAES_Decrypt(String password, EncryptedBundle bundle) throws
+    public static byte[] pbeAES_Decrypt(char[] password, EncryptedBundle bundle) throws
             NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException,
             UnsupportedEncodingException, InvalidKeySpecException, InvalidAlgorithmParameterException,
             InvalidKeyException {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), bundle.salt, ITERATION_COUNT, KEY_LENGTH);
+        KeySpec spec = new PBEKeySpec(password, bundle.salt, ITERATION_COUNT, KEY_LENGTH);
         SecretKey secret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
         cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(bundle.iv));
         return cipher.doFinal(bundle.cipherText);

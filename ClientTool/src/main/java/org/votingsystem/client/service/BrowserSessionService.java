@@ -310,14 +310,14 @@ public class BrowserSessionService implements PasswordDialog.Listener {
     }
 
     public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
-            String password, String subject) throws Exception {
+            char[] password, String subject) throws Exception {
         String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
         log.info("getSMIME - tokenType: " + tokenType);
         switch(CryptoTokenVS.valueOf(tokenType)) {
             case JKS_KEYSTORE:
                 if(password != null) {
-                    KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password.toCharArray());
-                    privateKey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS, password.toCharArray());
+                    KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password);
+                    privateKey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS, password);
                     chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
                 }
                 SMIMESignedGeneratorVS signedGenerator = new SMIMESignedGeneratorVS(
@@ -328,7 +328,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
                 timeStamper.call();
                 return timeStamper.getSMIME();
             case DNIe:
-                return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password.toCharArray(), subject);
+                return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password, subject);
             case MOBILE:
                 countDownLatch = new CountDownLatch(1);
                 DeviceVS deviceVS = getInstance().getCryptoToken().getDeviceVS();
@@ -386,7 +386,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
     }
 
     @Override
-    public void setPassword(TypeVS passwordType, String password) {
+    public void setPassword(TypeVS passwordType, char[] password) {
         switch (passwordType) {
             case CERT_USER_NEW:
                 try {
@@ -419,7 +419,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
                     KeyStore userKeyStore = KeyStore.getInstance("JKS");
                     userKeyStore.load(null);
                     userKeyStore.setKeyEntry(ContextVS.KEYSTORE_USER_CERT_ALIAS, certificationRequest.getPrivateKey(),
-                            password.toCharArray(), certsArray);
+                            password, certsArray);
                     ContextVS.saveUserKeyStore(userKeyStore, password);
                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString());
                     showMessage(ResponseVS.SC_OK, ContextVS.getMessage("certInstallOKMsg"));

@@ -1,6 +1,5 @@
 .main-dialog {
     -fx-background-radius: 4;
-    -fx-pref-width: 375px;
     -fx-padding: 10px;
     -fx-background-color:#fff;
 }
