@@ -48,6 +48,12 @@
             <groupId>org.votingsystem</groupId>
             <artifactId>VotingSystemAPI</artifactId>
             <version>${votingsystem.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>dom4j</groupId>
+                    <artifactId>dom4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax</groupId>
@@ -98,7 +104,7 @@
     <properties>
         <votingsystem.version>0.7.0-SNAPSHOT</votingsystem.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.jboss.bom>8.2.1.Final</version.jboss.bom>
+        <version.jboss.bom>9.0.0.Beta2</version.jboss.bom>
         <version.ejb.plugin>2.3</version.ejb.plugin>
     </properties>
 </project>

@@ -5,8 +5,6 @@ import iaik.pkcs.pkcs11.Mechanism;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
@@ -42,7 +40,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class ContextVS implements BundleActivator {
+public class ContextVS {
 
     private static Logger log = Logger.getLogger(ContextVS.class.getSimpleName());
 
@@ -577,37 +575,6 @@ public class ContextVS implements BundleActivator {
         if(currencyServer != null) return currencyServer;
         throw new ExceptionVS("Missing default server");
     }
-
-    @Override
-    public void start(BundleContext context) throws Exception {
-        log.info(" --- start --- ");
-        INSTANCE = this;
-        try {
-            initDirs(System.getProperty("user.home"));
-            try {
-                parentBundle = ResourceBundle.getBundle("votingSystemAPI", locale);
-            } catch (Exception ex) {
-                log.info("resource bundle not found for locale: " + locale);
-                parentBundle = ResourceBundle.getBundle("votingSystemAPI");
-            }
-            URL res = context.getBundle().getEntry("VotingSystemSSLCert.pem");
-            votingSystemSSLCerts =  CertUtils.fromPEMToX509CertCollection(
-                    FileUtils.getBytesFromStream(res.openStream()));
-            votingSystemSSLTrustAnchors = new HashSet<TrustAnchor>();
-            for(X509Certificate certificate: votingSystemSSLCerts) {
-                TrustAnchor anchor = new TrustAnchor(certificate, null);
-                votingSystemSSLTrustAnchors.add(anchor);
-            }
-        } catch(Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-        }
-    }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        log.info(" --- stop --- ");
-    }
-
 
     public DeviceVSDto getConnectedDevice() {
         return connectedDevice;

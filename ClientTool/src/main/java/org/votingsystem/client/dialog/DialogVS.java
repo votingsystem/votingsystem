@@ -8,10 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.MenuButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
+import javafx.stage.*;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.pane.DecoratedPane;
 import org.votingsystem.client.util.Utils;
@@ -57,11 +54,16 @@ public class DialogVS {
     }
 
     public DialogVS(Pane pane) {
+        this(pane, null);
+    }
+
+    public DialogVS(Pane pane, Window parentWindow) {
         stage = new Stage(StageStyle.TRANSPARENT);
         decoratedPane = new DecoratedPane(null, null, pane, stage);
         stage.setScene(new Scene(decoratedPane));
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.initOwner(Browser.getInstance().getScene().getWindow());
+        if(parentWindow == null) stage.initOwner(Browser.getInstance().getScene().getWindow());
+        else stage.initOwner(parentWindow);
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
         stage.centerOnScreen();
         decoratedPane.getScene().getStylesheets().add(Utils.getResource("/css/dialogvs.css"));

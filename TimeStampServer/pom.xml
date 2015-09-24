@@ -51,6 +51,12 @@
             <groupId>org.votingsystem</groupId>
             <artifactId>VotingSystemAPI</artifactId>
             <version>${votingsystem.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>dom4j</groupId>
+                    <artifactId>dom4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.votingsystem</groupId>
@@ -250,7 +256,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Define the version of the JBoss BOMs we want to import to specify tested stacks. -->
         <version.wildfly.maven.plugin>1.0.2.Final</version.wildfly.maven.plugin>
-        <version.jboss.bom>8.2.1.Final</version.jboss.bom>
+        <version.jboss.bom>9.0.0.Beta2</version.jboss.bom>
         <version.compiler.plugin>3.1</version.compiler.plugin>
         <version.war.plugin>2.5</version.war.plugin>
         <version.ear.plugin>2.6</version.ear.plugin>

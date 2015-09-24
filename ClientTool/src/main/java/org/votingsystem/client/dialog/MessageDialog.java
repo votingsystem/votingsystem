@@ -33,8 +33,7 @@ public class MessageDialog extends DialogVS {
     private WebView messageWebView;
 
     public MessageDialog(Window parentWindow) {
-        super(new VBox(10));
-        getStage().initOwner(parentWindow);
+        super(new VBox(10), parentWindow);
         mainPane = (VBox) getContentPane();
         messageLabel = new Label();
         messageLabel.setWrapText(true);
@@ -101,6 +100,7 @@ public class MessageDialog extends DialogVS {
         show();
     }
 
+    //http://java-no-makanaikata.blogspot.com.es/2012/10/javafx-webview-size-trick.html
     private void adjustWebViewHeight() {
         Platform.runLater(new Runnable() {
             @Override

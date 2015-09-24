@@ -40,7 +40,7 @@ public class PasswordDialog extends DialogVS {
     private PasswordField password1Field;
     private Text password2Text;
     private PasswordField password2Field;
-    private String password;
+    private char[] password;
     private String mainMessage = null;
     private Listener listener;
     private TypeVS passwordType;
@@ -68,9 +68,6 @@ public class PasswordDialog extends DialogVS {
         password1Field = new PasswordField();
         password2Field = new PasswordField();
 
-        Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
-        cancelButton.setOnAction(event -> closePasswordDialog());
         addCloseListener(event -> closePasswordDialog());
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
@@ -100,7 +97,7 @@ public class PasswordDialog extends DialogVS {
         );
 
         HBox footerButtonsBox = new HBox();
-        footerButtonsBox.getChildren().addAll(cancelButton, Utils.getSpacer(), acceptButton);
+        footerButtonsBox.getChildren().addAll(Utils.getSpacer(), acceptButton);
         VBox.setMargin(footerButtonsBox, new javafx.geometry.Insets(20, 0, 0, 0));
 
         Text password1Text = new Text(ContextVS.getMessage("password1Lbl"));
@@ -121,7 +118,7 @@ public class PasswordDialog extends DialogVS {
     }
 
     private void closePasswordDialog() {
-        listener.setPassword(passwordType, password.toCharArray());
+        listener.setPassword(passwordType, password);
         hide();
     }
 
@@ -134,7 +131,7 @@ public class PasswordDialog extends DialogVS {
         if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));
         else {
             if (password1.equals(password2)) {
-                password = password1;
+                password = password1.toCharArray();
                 getStage().close();
             } else {
                 setMessage(ContextVS.getMessage("passwordError"));
