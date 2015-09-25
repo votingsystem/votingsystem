@@ -36,7 +36,7 @@ public class ActorVS extends EntityVS implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    public enum Type {CONTROL_CENTER, ACCESS_CONTROL, CURRENCY, TIMESTAMP_SERVER;}
+    public enum Type {CONTROL_CENTER, ACCESS_CONTROL, CURRENCY, TIMESTAMP_SERVER, SERVER, USER;}
 
     public enum State { SUSPENDED, OK, PAUSED;}
 

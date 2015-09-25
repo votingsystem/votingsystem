@@ -1,4 +1,4 @@
-package org.votingsystem.services.impl;
+package org.votingsystem.service.impl;
 
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
@@ -7,7 +7,7 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.*;
 import org.bouncycastle.util.Store;
-import org.votingsystem.services.TimeStampService;
+import org.votingsystem.service.TimeStampService;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.signature.util.SignatureData;

@@ -2,7 +2,7 @@ package org.votingsystem.web.timestamp.servlet;
 
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TimeStampVS;
-import org.votingsystem.services.TimeStampService;
+import org.votingsystem.service.TimeStampService;
 import org.votingsystem.signature.util.TimeStampResponseGenerator;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.ejb.DAOBean;

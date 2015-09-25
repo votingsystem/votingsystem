@@ -1,4 +1,4 @@
-package org.votingsystem.services;
+package org.votingsystem.service;
 
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TSPException;

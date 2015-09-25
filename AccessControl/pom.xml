@@ -166,7 +166,13 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>4.3.8.Final</version>
+            <version>${hibernate.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>dom4j</groupId>
+                    <artifactId>dom4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Import the EJB API, we use provided scope as the API is included in JBoss WildFly -->
@@ -337,7 +343,7 @@
 
     <properties>
         <votingsystem.version>0.7.0-SNAPSHOT</votingsystem.version>
-        <resteasy.version>3.0.10.Final</resteasy.version>
+        <hibernate.version>5.0.1.Final</hibernate.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Define the version of the JBoss BOMs we want to import to specify tested stacks. -->
         <version.wildfly.maven.plugin>1.0.2.Final</version.wildfly.maven.plugin>

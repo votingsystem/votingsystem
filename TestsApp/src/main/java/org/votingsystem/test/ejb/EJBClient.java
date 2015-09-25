@@ -1,12 +1,15 @@
 package org.votingsystem.test.ejb;
 
-import org.votingsystem.service.VotingSystemRemote;
+import org.votingsystem.model.ActorVS;
+import org.votingsystem.service.EJBRemote;
 import org.votingsystem.test.util.IOUtils;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.NifUtils;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -27,7 +30,7 @@ public class EJBClient {
 
     private final Context context;
     private final List<Future<String>> lastCommands = new ArrayList<>();
-    private VotingSystemRemote votingSystemRemote;
+    private EJBRemote votingSystemRemote;
 
     public EJBClient() throws NamingException {
         final Properties jndiProperties = new Properties();
@@ -37,7 +40,7 @@ public class EJBClient {
     }
 
     private enum Command {
-        VALIDATE_CSR, TEST_ASYNC, GET_MESSAGES, QUIT, INVALID;
+        VALIDATE_CSR, TEST_ASYNC, GET_MESSAGES, KEYSTORE_NEW, QUIT, INVALID;
 
         public static Command parseCommand(String stringCommand) {
             try {
@@ -48,7 +51,7 @@ public class EJBClient {
         }
     }
 
-    private void run() throws NamingException {
+    private void run() throws Exception {
         this.votingSystemRemote = lookupVotingSystemRemoteEJB();
         showWelcomeMessage();
         while (true) {
@@ -64,6 +67,9 @@ public class EJBClient {
                 case GET_MESSAGES:
                     getMessages();
                     break;
+                case KEYSTORE_NEW:
+                    newKeyStore();
+                    break;
                 case QUIT:
                     handleQuit();
                     break;
@@ -71,6 +77,35 @@ public class EJBClient {
                     logger.warning("Unknown command " + stringCommand);
             }
         }
+    }
+
+    private void newKeyStore() throws Exception {
+        ActorVS.Type type =  null;
+        String givenName = null;
+        String surname = null;
+        while(type == null) {
+            String typeInput = IOUtils.readLine("enter type (user, server, timestamp_authority): ");
+            switch (typeInput) {
+                case "user":
+                    type = ActorVS.Type.USER;
+                    givenName = IOUtils.readLine("enter givenName: ");
+                    surname = IOUtils.readLine("enter surname: ");
+                    break;
+                case "server":
+                case "timestamp_authority":
+                    type = ActorVS.Type.TIMESTAMP_SERVER;
+                    givenName = IOUtils.readLine("enter name: ");
+                    break;
+                default:
+                    type = null;
+            }
+        }
+        String nif = IOUtils.readLine("enter nif: ");
+        char[] password = IOUtils.readLine("enter key password: ").toCharArray();
+        byte[] keyStoreBytes = votingSystemRemote.generateKeyStore(type, givenName, surname, nif, password);
+        File outputFile = FileUtils.copyBytesToFile(keyStoreBytes, new File(System.getProperty("user.home") +
+                "/" + givenName + ".jks"));
+        System.out.println("KeyStore saved: " + outputFile.getAbsolutePath());
     }
 
     private void validateCSR() {
@@ -100,17 +135,17 @@ public class EJBClient {
     private void getMessages() {
         boolean displayed = false;
         final List<Future<String>> notFinished = new ArrayList<>();
-        for (Future<String> booking : lastCommands) {
-            if (booking.isDone()) {
+        for (Future<String> command : lastCommands) {
+            if (command.isDone()) {
                 try {
-                    final String result = booking.get();
+                    final String result = command.get();
                     logger.info("message received: " + result);
                     displayed = true;
                 } catch (InterruptedException | ExecutionException e) {
                     logger.warning(e.getMessage());
                 }
             } else {
-                notFinished.add(booking);
+                notFinished.add(command);
             }
         }
         lastCommands.retainAll(notFinished);
@@ -124,14 +159,14 @@ public class EJBClient {
         System.exit(0);
     }
 
-    private VotingSystemRemote lookupVotingSystemRemoteEJB() throws NamingException {
-        return (VotingSystemRemote) context.lookup("ejb:/AccessControl/RemoteTestBean!" + VotingSystemRemote.class.getName());
+    private EJBRemote lookupVotingSystemRemoteEJB() throws NamingException {
+        return (EJBRemote) context.lookup("ejb:/AccessControl/RemoteTestBean!" + EJBRemote.class.getName());
 
     }
 
     private void showWelcomeMessage() {
         System.out.println("voting system remote EJB client");
         System.out.println("------------------------------------------------------");
-        System.out.println("Commands: validate_csr, test_async, get_messages, quit");
+        System.out.println("Commands: validate_csr, test_async, get_messages, keystore_new, quit");
     }
 }

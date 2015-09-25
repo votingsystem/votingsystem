@@ -353,7 +353,6 @@
 
     <properties>
         <votingsystem.version>0.7.0-SNAPSHOT</votingsystem.version>
-        <resteasy.version>3.0.10.Final</resteasy.version>
         <hibernate.version>5.0.1.Final</hibernate.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Define the version of the JBoss BOMs we want to import to specify tested stacks. -->
