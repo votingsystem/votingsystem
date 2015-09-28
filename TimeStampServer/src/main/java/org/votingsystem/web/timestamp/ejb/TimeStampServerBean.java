@@ -36,7 +36,7 @@ public class TimeStampServerBean implements TimeStampService {
     public TimeStampServerBean() { }
 
     @PostConstruct
-    public void initialize() throws Exception {
+    public void initialize() {
         log.info("initialize");
         URL res = Thread.currentThread().getContextClassLoader().getResource("TimeStampServer.jks");
         try {

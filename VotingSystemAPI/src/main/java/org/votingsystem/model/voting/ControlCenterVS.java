@@ -11,7 +11,6 @@ import java.io.Serializable;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity
-@Table(name="ControlCenterVS")
 @DiscriminatorValue("ControlCenterVS")
 public class ControlCenterVS extends ActorVS implements Serializable {
 

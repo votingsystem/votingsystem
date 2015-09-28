@@ -121,34 +121,25 @@ public class TimeStampBean {
     private void fetchTimeStampServerInfo(final ActorVS timeStampServer) {
         log.info("fetchTimeStampServerInfo");
         executorService.submit(() -> {
-            try {
-                AtomicBoolean dataReceived = new AtomicBoolean(Boolean.FALSE);
-                while(!dataReceived.get()) {
-                    ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
-                            timeStampServer.getServerURL()), ContentTypeVS.JSON);
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        try {
-                            ActorVS serverActorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
-                            if(timeStampServer.getServerURL().equals(serverActorVS.getServerURL())) {
-                                if(timeStampServer.getId() != null) {
-                                    timeStampServer.setCertChainPEM(serverActorVS.getCertChainPEM());
-                                    updateTimeStampServer(timeStampServer);
-                                } else updateTimeStampServer(serverActorVS);
-                                return;
-                            } else log.log(Level.SEVERE, "Expected server URL:" + timeStampServer.getServerURL()  +
-                                    " - found " + serverActorVS.getServerURL());
-                        } catch (Exception ex) {
-                            log.log(Level.SEVERE, ex.getMessage(), ex);
-                        }
-                    }
-                    try {Thread.sleep(5000);}
-                    catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
-                    log.log(Level.SEVERE, "ERROR fetching TimeStampServer data - serverURL: " +
-                            timeStampServer.getServerURL() + " - retry");
+            ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
+                    timeStampServer.getServerURL()), ContentTypeVS.JSON);
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                try {
+                    ActorVS serverActorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
+                    if(timeStampServer.getServerURL().equals(serverActorVS.getServerURL())) {
+                        if(timeStampServer.getId() != null) {
+                            timeStampServer.setCertChainPEM(serverActorVS.getCertChainPEM());
+                            updateTimeStampServer(timeStampServer);
+                        } else updateTimeStampServer(serverActorVS);
+                        return;
+                    } else log.log(Level.SEVERE, "Expected server URL:" + timeStampServer.getServerURL()  +
+                            " - found " + serverActorVS.getServerURL());
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
-            } catch (Exception ex) {
-                log.log(Level.SEVERE, ex.getMessage(), ex);
             }
+            log.log(Level.SEVERE, "ERROR fetching TimeStampServer data - serverURL: " +
+                    timeStampServer.getServerURL() + " - retry");
         });
     }
 

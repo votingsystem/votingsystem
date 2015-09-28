@@ -270,33 +270,28 @@ public class ConfigVSImpl implements ConfigVS {
                 controlCenterCert = dao.getSingleResult(CertificateVS.class, query);
                 if(controlCenterCert != null) return ;
             }
-            AtomicBoolean dataReceived = new AtomicBoolean(Boolean.FALSE);
-            while(!dataReceived.get()) {
-                ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON);
-                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
-                    if (ActorVS.Type.CONTROL_CENTER != actorVS.getType()) throw new ExceptionVS(
-                            "ERROR - actorNotControlCenterMsg serverURL: " + serverURL);
-                    if(!actorVS.getServerURL().equals(serverURL)) throw new ExceptionVS(
-                            "ERROR - serverURLMismatch expected URL: " + serverURL + " - found: " + actorVS.getServerURL());
-                    X509Certificate x509Cert = CertUtils.fromPEMToX509CertCollection(
-                            actorVS.getCertChainPEM().getBytes()).iterator().next();
-                    signatureBean.verifyCertificate(x509Cert);
-                    if(controlCenterDB == null) {
-                        controlCenterDB = dao.persist((ControlCenterVS) new ControlCenterVS(actorVS).setX509Certificate(
-                                x509Cert).setState(ActorVS.State.OK));
-                    }
-                    controlCenterDB.setCertChainPEM(actorVS.getCertChainPEM());
-                    controlCenterCert = CertificateVS.ACTORVS(controlCenterDB, x509Cert);
-                    controlCenterCert.setCertChainPEM(actorVS.getCertChainPEM().getBytes());
-                    dao.persist(controlCenterCert);
-                    controlCenter = controlCenterDB;
-                    return;
+            ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON);
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
+                if (ActorVS.Type.CONTROL_CENTER != actorVS.getType()) throw new ExceptionVS(
+                        "ERROR - actorNotControlCenterMsg serverURL: " + serverURL);
+                if(!actorVS.getServerURL().equals(serverURL)) throw new ExceptionVS(
+                        "ERROR - serverURLMismatch expected URL: " + serverURL + " - found: " + actorVS.getServerURL());
+                X509Certificate x509Cert = CertUtils.fromPEMToX509CertCollection(
+                        actorVS.getCertChainPEM().getBytes()).iterator().next();
+                signatureBean.verifyCertificate(x509Cert);
+                if(controlCenterDB == null) {
+                    controlCenterDB = dao.persist((ControlCenterVS) new ControlCenterVS(actorVS).setX509Certificate(
+                            x509Cert).setState(ActorVS.State.OK));
                 }
-                try {Thread.sleep(10000);}
-                catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
-                log.log(Level.SEVERE, "ERROR fetching ControlCenterVS - serverURL: " + serverURL + " - retry");
+                controlCenterDB.setCertChainPEM(actorVS.getCertChainPEM());
+                controlCenterCert = CertificateVS.ACTORVS(controlCenterDB, x509Cert);
+                controlCenterCert.setCertChainPEM(actorVS.getCertChainPEM().getBytes());
+                dao.persist(controlCenterCert);
+                controlCenter = controlCenterDB;
+                return;
             }
+            log.log(Level.SEVERE, "ERROR fetching ControlCenterVS - serverURL: " + serverURL + " - retry");
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

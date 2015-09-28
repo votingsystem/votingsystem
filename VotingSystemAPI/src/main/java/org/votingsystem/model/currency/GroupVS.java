@@ -13,7 +13,6 @@ import java.util.Set;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity
-@Table(name="GroupVS")
 @DiscriminatorValue("GroupVS")
 public class GroupVS extends UserVS implements Serializable {
 

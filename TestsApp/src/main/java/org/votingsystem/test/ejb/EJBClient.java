@@ -140,6 +140,7 @@ public class EJBClient {
         File outputFile = FileUtils.copyBytesToFile(keyStoreBytes, new File(System.getProperty("user.home") +
                 "/" + givenName.replace(" ", "") + ".jks"));
         System.out.println("KeyStore saved: " + outputFile.getAbsolutePath());
+        System.exit(0);
     }
 
     //This is only for testing

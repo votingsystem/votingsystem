@@ -16,7 +16,7 @@ import java.util.Date;
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 //@Indexed
-@Entity @Table(name="EventVSElection") @DiscriminatorValue("EventVSElection")
+@Entity @DiscriminatorValue("EventVSElection")
 public class EventVSElection extends EventVS implements Serializable {
 
     private static final long serialVersionUID = 1L;

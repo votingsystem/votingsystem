@@ -11,7 +11,6 @@ import java.io.Serializable;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity
-@Table(name="AccessControlVS")
 @DiscriminatorValue("AccessControlVS")
 public class AccessControlVS extends ActorVS implements Serializable {
 
