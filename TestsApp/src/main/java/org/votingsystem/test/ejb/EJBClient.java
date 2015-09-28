@@ -1,8 +1,11 @@
 package org.votingsystem.test.ejb;
 
 import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.KeyStoreVS;
 import org.votingsystem.service.EJBRemote;
+import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.test.util.IOUtils;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.NifUtils;
 
@@ -10,9 +13,9 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.io.FileInputStream;
+import java.security.KeyStore;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -20,11 +23,18 @@ import java.util.logging.Logger;
 
 public class EJBClient {
 
-    private static final Logger logger = Logger.getLogger(EJBClient.class.getName());
+    private static final Logger log =  Logger.getLogger(EJBClient.class.getName());
+
+    private static final String ROOT_KEY_ALIAS     = "rootKeys";
+    private static final String ROOT_KEY_PASSW     = "PemPass";
+    private static final String ROOT_KEYSTORE_PATH = "./TestsApp/RootTest.jks";
+
 
     public static void main(String[] args) throws Exception {
-        Logger.getLogger("org.jboss").setLevel(Level.SEVERE);
-        Logger.getLogger("org.votingsystem").setLevel(Level.FINE);
+        log.getLogger("org.jboss").setLevel(Level.SEVERE);
+        log.getLogger("org.votingsystem").setLevel(Level.FINE);
+        ContextVS.getInstance().initTestEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         new EJBClient().run();
     }
 
@@ -74,7 +84,7 @@ public class EJBClient {
                     handleQuit();
                     break;
                 default:
-                    logger.warning("Unknown command " + stringCommand);
+                    log.warning("Unknown command " + stringCommand);
             }
         }
     }
@@ -83,6 +93,7 @@ public class EJBClient {
         ActorVS.Type type =  null;
         String givenName = null;
         String surname = null;
+        String keyAlias = null;
         while(type == null) {
             String typeInput = IOUtils.readLine("enter type (user, server, timestamp_authority): ");
             switch (typeInput) {
@@ -92,9 +103,14 @@ public class EJBClient {
                     surname = IOUtils.readLine("enter surname: ");
                     break;
                 case "server":
+                    type = ActorVS.Type.SERVER;
+                    givenName = IOUtils.readLine("enter name: ");
+                    keyAlias = IOUtils.readLine("enter keyAlias: ");
+                    break;
                 case "timestamp_authority":
                     type = ActorVS.Type.TIMESTAMP_SERVER;
                     givenName = IOUtils.readLine("enter name: ");
+                    keyAlias = IOUtils.readLine("enter keyAlias: ");
                     break;
                 default:
                     type = null;
@@ -102,26 +118,62 @@ public class EJBClient {
         }
         String nif = IOUtils.readLine("enter nif: ");
         char[] password = IOUtils.readLine("enter key password: ").toCharArray();
-        byte[] keyStoreBytes = votingSystemRemote.generateKeyStore(type, givenName, surname, nif, password);
+        byte[] keyStoreBytes = null;
+        if(type == ActorVS.Type.SERVER || type == ActorVS.Type.TIMESTAMP_SERVER) {
+            File rootKeyStoreFile = new File(ROOT_KEYSTORE_PATH);
+            KeyStoreVS rootKeyStore = null;
+            if(rootKeyStoreFile.exists()) {
+                rootKeyStore = new KeyStoreVS(ROOT_KEY_ALIAS, FileUtils.getBytesFromFile(rootKeyStoreFile), null, null);
+                rootKeyStore.setPassword(ROOT_KEY_PASSW);
+                keyStoreBytes = votingSystemRemote.generateServerKeyStore(type, givenName, keyAlias, nif, password,
+                        rootKeyStore);
+            } else {
+                rootKeyStore = generateRootKeyStore();
+                keyStoreBytes = votingSystemRemote.generateServerKeyStore(type, givenName, keyAlias, nif, password,
+                        rootKeyStore);
+                log.info(" --- NEW ROOT KEYSTORE: " + FileUtils.copyBytesToFile(rootKeyStore.getBytes(),
+                        new File(ROOT_KEYSTORE_PATH)).getAbsolutePath());
+            }
+        } else {
+            keyStoreBytes = votingSystemRemote.generateUserKeyStore(givenName, surname, nif, password);
+        }
         File outputFile = FileUtils.copyBytesToFile(keyStoreBytes, new File(System.getProperty("user.home") +
-                "/" + givenName + ".jks"));
+                "/" + givenName.replace(" ", "") + ".jks"));
         System.out.println("KeyStore saved: " + outputFile.getAbsolutePath());
     }
 
+    //This is only for testing
+    private KeyStoreVS generateRootKeyStore() throws Exception {
+        Date validFrom = Calendar.getInstance().getTime();
+        Calendar today_plus_year = Calendar.getInstance();
+        today_plus_year.add(Calendar.YEAR, 1);
+        today_plus_year.set(Calendar.HOUR_OF_DAY, 0);
+        today_plus_year.set(Calendar.MINUTE, 0);
+        today_plus_year.set(Calendar.SECOND, 0);
+        Date validTo = today_plus_year.getTime();
+        KeyStoreVS keyStoreVS = new KeyStoreVS(ROOT_KEY_ALIAS, null, validFrom, validTo);
+        keyStoreVS.setPassword(ROOT_KEY_PASSW);
+        KeyStore keyStore = KeyStoreUtil.createRootKeyStore(validFrom, validTo,
+                keyStoreVS.getPassword().toCharArray(), keyStoreVS.getKeyAlias(),
+                "CN=Voting System Certificate Authority, OU=Certs");
+        keyStoreVS.setBytes(KeyStoreUtil.getBytes(keyStore, keyStoreVS.getPassword().toCharArray()));
+        return keyStoreVS;
+    }
+    
     private void validateCSR() {
         String nif = null, deviceId;
         deviceId = IOUtils.readLine("enter deviceId: ");
         try {
             nif = NifUtils.validate(IOUtils.readLine("enter nif: "));;
         } catch (Exception e1) {
-            logger.warning("wrong nif: " + nif);
+            log.warning("wrong nif: " + nif);
             return;
         }
         try {
             final String retVal = votingSystemRemote.validateCSR(nif, deviceId);
             System.out.println(retVal);
         } catch (Exception e) {
-            logger.warning(e.getMessage());
+            log.warning(e.getMessage());
             return;
         }
     }
@@ -129,7 +181,7 @@ public class EJBClient {
     private void testAsync() {
         String asyncMessage = IOUtils.readLine("Enter async message: ");
         lastCommands.add(votingSystemRemote.testAsync(asyncMessage));
-        logger.info("async message - wait for response");
+        log.info("async message - wait for response");
     }
 
     private void getMessages() {
@@ -139,10 +191,10 @@ public class EJBClient {
             if (command.isDone()) {
                 try {
                     final String result = command.get();
-                    logger.info("message received: " + result);
+                    log.info("message received: " + result);
                     displayed = true;
                 } catch (InterruptedException | ExecutionException e) {
-                    logger.warning(e.getMessage());
+                    log.warning(e.getMessage());
                 }
             } else {
                 notFinished.add(command);
@@ -150,12 +202,12 @@ public class EJBClient {
         }
         lastCommands.retainAll(notFinished);
         if (!displayed) {
-            logger.info("no message received!");
+            log.info("no message received!");
         }
     }
 
     private void handleQuit() {
-        logger.info("handleQuit");
+        log.info("handleQuit");
         System.exit(0);
     }
 

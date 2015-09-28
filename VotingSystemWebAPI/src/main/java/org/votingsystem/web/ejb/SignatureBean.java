@@ -250,7 +250,7 @@ public class SignatureBean {
         X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(localServerCertSigner,
                 serverPrivateKey, keyAlias);
         String testUserDN = null;
-        if(surname == null) testUserDN = format("GIVENNAME={0}, SERIALNUMBER={2}", givenName, nif);
+        if(surname == null) testUserDN = format("GIVENNAME={0}, SERIALNUMBER={1}", givenName, nif);
         else testUserDN = format("GIVENNAME={0}, SURNAME={1} , SERIALNUMBER={2}", givenName, surname, nif);
         //String strSubjectDN = "CN=Voting System Cert Authority , OU=VotingSystem"
         //KeyStore rootCAKeyStore = KeyStoreUtil.createRootKeyStore (validFrom.getTime(), (validTo.getTime() - validFrom.getTime()),
@@ -259,23 +259,6 @@ public class SignatureBean {
         //PrivateKey privateKeySigner = (PrivateKey)rootCAKeyStore.getKey(keyAlias, userPassword.toCharArray());
         //X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(certSigner, privateKeySigner,  keyAlias);
         return KeyStoreUtil.createUserKeyStore(validFrom.getTime(),
-                (validTo.getTime() - validFrom.getTime()), password, ContextVS.KEYSTORE_USER_CERT_ALIAS,
-                rootCAPrivateCredential, testUserDN);
-    }
-
-    public KeyStore generateTimeStampKeyStore(String givenName, String nif, char[] password) throws Exception {
-        log.info("generateTimeStampKeyStore - nif: " + nif);
-        Date validFrom = Calendar.getInstance().getTime();
-        Calendar today_plus_year = Calendar.getInstance();
-        today_plus_year.add(Calendar.YEAR, 1);
-        today_plus_year.set(Calendar.HOUR_OF_DAY, 0);
-        today_plus_year.set(Calendar.MINUTE, 0);
-        today_plus_year.set(Calendar.SECOND, 0);
-        Date validTo = today_plus_year.getTime();
-        X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(localServerCertSigner,
-                serverPrivateKey, keyAlias);
-        String testUserDN = format("GIVENNAME={0}, SERIALNUMBER={2}", givenName, nif);
-        return KeyStoreUtil.createTimeStampingKeyStore(validFrom.getTime(),
                 (validTo.getTime() - validFrom.getTime()), password, ContextVS.KEYSTORE_USER_CERT_ALIAS,
                 rootCAPrivateCredential, testUserDN);
     }

@@ -2,6 +2,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.DeviceVS;
+import org.votingsystem.model.KeyStoreVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.model.voting.UserRequestCsrVS;
@@ -21,10 +22,17 @@ import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
+import javax.security.auth.x500.X500PrivateCredential;
+import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
+
+import static java.text.MessageFormat.format;
 
 @Stateless
 @Remote(EJBRemote.class)
@@ -47,20 +55,68 @@ public class RemoteTestBean implements EJBRemote {
     }
 
     @Override
-    public byte[] generateKeyStore(ActorVS.Type type, String givenName, String surname, String nif,
-                                   char[] password) throws Exception {
+    public byte[] generateUserKeyStore(String givenName, String surname, String nif, char[] password) throws Exception {
+        KeyStore keyStore = signatureBean.generateKeysStore(givenName, surname, nif, password);
+        return KeyStoreUtil.getBytes(keyStore, password);
+    }
+
+    @Override
+    public byte[] generateServerKeyStore(ActorVS.Type type, String givenName, String keyAlias, String nif,
+               char[] password,  KeyStoreVS keyStoreVS) throws Exception {
         log.info("generateKeyStore - type: " + type + " - nif: " + nif);
         KeyStore keyStore = null;
         switch(type) {
             case SERVER:
-            case USER:
-                keyStore = signatureBean.generateKeysStore(givenName, surname, nif, password);
-                break;
+                keyStore = generateServerKeyStore(givenName, keyAlias, nif, password, keyStoreVS);
             case TIMESTAMP_SERVER:
-                keyStore = signatureBean.generateTimeStampKeyStore(givenName, nif, password);
+                keyStore = generateTimeStampKeyStore(givenName, keyAlias, nif, password, keyStoreVS);
                 break;
         }
         return KeyStoreUtil.getBytes(keyStore, password);
+    }
+
+    public KeyStore generateServerKeyStore(String givenName, String keyAlias, String nif, char[] password,
+                  KeyStoreVS rootKeyStoreVS) throws Exception {
+        log.info("generateServerKeyStore - nif: " + nif);
+        Date validFrom = Calendar.getInstance().getTime();
+        Calendar today_plus_year = Calendar.getInstance();
+        today_plus_year.add(Calendar.YEAR, 1);
+        today_plus_year.set(Calendar.HOUR_OF_DAY, 0);
+        today_plus_year.set(Calendar.MINUTE, 0);
+        today_plus_year.set(Calendar.SECOND, 0);
+        Date validTo = today_plus_year.getTime();
+        KeyStore keyStore = KeyStore.getInstance("JKS");
+        keyStore.load(new ByteArrayInputStream(rootKeyStoreVS.getBytes()), rootKeyStoreVS.getPassword().toCharArray());
+        X509Certificate rootCertSigner = (X509Certificate) keyStore.getCertificate(rootKeyStoreVS.getKeyAlias());
+        PrivateKey rootPrivateKey = (PrivateKey)keyStore.getKey(rootKeyStoreVS.getKeyAlias(),
+                rootKeyStoreVS.getPassword().toCharArray());
+        X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(rootCertSigner,
+                rootPrivateKey, rootKeyStoreVS.getKeyAlias());
+        String testUserDN = format("GIVENNAME={0}, SERIALNUMBER={1}", givenName, nif);
+        return KeyStoreUtil.createUserKeyStore(validFrom.getTime(),
+                (validTo.getTime() - validFrom.getTime()), password, keyAlias, rootCAPrivateCredential, testUserDN);
+    }
+
+    public KeyStore generateTimeStampKeyStore(String givenName, String keyAlias, String nif, char[] password,
+                          KeyStoreVS rootKeyStoreVS) throws Exception {
+        log.info("generateTimeStampKeyStore - nif: " + nif);
+        Date validFrom = Calendar.getInstance().getTime();
+        Calendar today_plus_year = Calendar.getInstance();
+        today_plus_year.add(Calendar.YEAR, 1);
+        today_plus_year.set(Calendar.HOUR_OF_DAY, 0);
+        today_plus_year.set(Calendar.MINUTE, 0);
+        today_plus_year.set(Calendar.SECOND, 0);
+        Date validTo = today_plus_year.getTime();
+        KeyStore keyStore = KeyStore.getInstance("JKS");
+        keyStore.load(new ByteArrayInputStream(rootKeyStoreVS.getBytes()), rootKeyStoreVS.getPassword().toCharArray());
+        X509Certificate rootCertSigner = (X509Certificate) keyStore.getCertificate(rootKeyStoreVS.getKeyAlias());
+        PrivateKey rootPrivateKey = (PrivateKey)keyStore.getKey(rootKeyStoreVS.getKeyAlias(),
+                rootKeyStoreVS.getPassword().toCharArray());
+        X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(rootCertSigner,
+                rootPrivateKey, rootKeyStoreVS.getKeyAlias());
+        String testUserDN = format("GIVENNAME={0}, SERIALNUMBER={1}", givenName, nif);
+        return KeyStoreUtil.createTimeStampingKeyStore(validFrom.getTime(),
+                (validTo.getTime() - validFrom.getTime()), password, keyAlias, rootCAPrivateCredential, testUserDN);
     }
 
     @Asynchronous @Override

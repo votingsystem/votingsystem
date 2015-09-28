@@ -27,11 +27,11 @@ public class FetchX509Cert {
     public static void main(String[] args) throws Exception {
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        String serverURL = "http://currency/TimeStampServer";
+        String serverURL = "http://localhost:8080/TimeStampServer";
         String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
         ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
-            throw new ExceptionVS("$serverInfoURL - error: " + responseVS.getMessage());
+            throw new ExceptionVS("serverInfoURL - error: " + responseVS.getMessage());
         ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
         if(serverURL.equals(actorVS.getServerURL())) {
             Collection<X509Certificate> certCollection = CertUtils.fromPEMToX509CertCollection(
