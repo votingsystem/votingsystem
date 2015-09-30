@@ -105,11 +105,11 @@
                 this.tagsHidden = (!this.smimeMessageContent.tags || this.smimeMessageContent.tags.length === 0)
             },
             showFromUserVSByIBAN:function(e) {
-                loadURL_VS("${restURL}/userVS/IBAN/" + this.smimeMessageContent.bankIBAN, '_blank')
+                loadURL_VS("${restURL}/userVS/IBAN/" + this.smimeMessageContent.fromUserIBAN, '_blank')
             },
             showToUserVSByIBAN:function(e) {
-                console.log(this.tagName + " - showUserVSByIBAN - " + e)
-                loadURL_VS("${restURL}/userVS/IBAN/" + e.model.item, '_blank')
+                console.log(this.tagName + " - showUserVSByIBAN:" + e)
+                loadURL_VS("${restURL}/userVS/IBAN/" + e.model.IBAN, '_blank')
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)
