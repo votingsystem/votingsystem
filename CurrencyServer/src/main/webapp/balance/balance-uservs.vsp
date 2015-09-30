@@ -6,14 +6,14 @@
 <link href="${resourceURL}/iron-media-query/iron-media-query.html" rel="import"/>
 
 <dom-module name="balance-uservs">
+    <style>
+        .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
+            margin:10px 0 10px 0; cursor: pointer;}
+        .pageTitle:hover { text-decoration: underline; }
+        .tab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;color:#888;}
+        .tabSelected { border-bottom: 2px solid #ba0011;color:#434343;}
+    </style>
     <template>
-        <style>
-            .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
-                margin:10px 0 10px 0; cursor: pointer;}
-            .pageTitle:hover { text-decoration: underline; }
-            .tab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;color:#888;}
-            .tabSelected { border-bottom: 2px solid #ba0011;color:#434343;}
-        </style>
         <transactionvs-data id="transactionViewer"></transactionvs-data>
 
         <iron-media-query query="max-width: 1200px" query-matches="{{smallScreen}}"></iron-media-query>
@@ -55,8 +55,8 @@
                 </div>
             </div>
             <div class="horizontal layout" hidden="{{!smallScreen}}">
-                <div id="incomesDiv" on-click="setIncomesView" class="tab">${msg.incomesLbl}</div>
-                <div id="expensesDiv"  on-click="setExpensesView"  class="tab">${msg.expensesLbl}</div>
+                <div id="incomesDiv" on-click="setIncomesView" class$="{{incomesDivStyle}}">${msg.incomesLbl}</div>
+                <div id="expensesDiv"  on-click="setExpensesView"  class$="{{expensesDivStyle}}">${msg.expensesLbl}</div>
             </div>
             <div class="layout horizontal">
                 <div hidden="{{incomesTabHidden}}" class="flex"
@@ -86,6 +86,8 @@
                 incomesTabHidden: {type:Boolean, value:false},
                 expensesTabHidden: {type:Boolean, value:false},
                 description: {type:String},
+                incomesDivStyle: {type:String},
+                incomesDivStyle: {type:String},
                 url: {type:String}
             },
             getDate:function(dateStamp) {
@@ -99,11 +101,11 @@
             },
             selectedTabChanged: function() {
                 if(this.selectedTab === 'expensesTab') {
-                    this.$.expensesDiv.className = 'tab tabSelected'
-                    this.$.incomesDiv.className = 'tab'
+                    this.expensesDivStyle = 'tab tabSelected'
+                    this.incomesDivStyle = 'tab'
                 } else {
-                    this.$.incomesDiv.className = 'tab tabSelected'
-                    this.$.expensesDiv.className = 'tab'
+                    this.incomesDivStyle = 'tab tabSelected'
+                    this.expensesDivStyle = 'tab'
                 }
                 if(this.smallScreen) {
                     this.expensesTabHidden = (this.smallScreen?(this.selectedTab !== 'expensesTab'):true)
@@ -112,6 +114,7 @@
                     this.expensesTabHidden = false
                     this.incomesTabHidden = false
                 }
+                console.log("=========== expensesDivStyle: " + this.expensesDivStyle)
             },
             smallScreenChanged: function() {
                 this.selectedTabChanged()

@@ -102,6 +102,10 @@
     font-size: 0.8em;
 }
 
+.groupvsDiv:hover {
+    cursor: pointer;
+}
+
 .groupvsDiv:hover .groupvsRepresentativeDiv{
     display: block;
     cursor: pointer;
