@@ -1,7 +1,7 @@
 package org.votingsystem.client.dialog;
 
 import com.google.common.eventbus.Subscribe;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -174,7 +174,7 @@ public class ElectionEditorDialog extends DialogVS implements AddVoteOptionDialo
         HBox optionHBox = new HBox();
         Button removeOptionButton = new Button(ContextVS.getMessage("deleteLbl"));
         removeOptionButton.setStyle("-fx-min-width:100px;");
-        removeOptionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
+        removeOptionButton.setGraphic(Utils.getIcon(FontAwesomeIcon.TIMES, Utils.COLOR_RED_DARK));
         removeOptionButton.setOnAction(actionEvent -> {
             removeOption(optionHBox, optionContent);
         });

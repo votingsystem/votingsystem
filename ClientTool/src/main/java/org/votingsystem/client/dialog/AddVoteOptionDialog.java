@@ -2,7 +2,7 @@ package org.votingsystem.client.dialog;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -49,10 +49,10 @@ public class AddVoteOptionDialog extends DialogVS {
             listener.addOption(textArea.getText());
             hide();
         });
-        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CHECK));
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
         cancelButton.setOnAction(actionEvent -> hide());
-        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcon.TIMES, Utils.COLOR_RED_DARK));
 
         HBox footerButtonsBox = new HBox(10);
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);

@@ -2,7 +2,7 @@ package org.votingsystem.client.pane;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.concurrent.Task;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -56,10 +56,10 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         WebView signatureContentWebView = new WebView();
         signatureContentWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         if (signedFile.isValidSignature()) {
-            openSignatureInfoButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
+            openSignatureInfoButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CHECK));
             openSignatureInfoButton.setText(ContextVS.getMessage("signatureOKLbl"));
         } else {
-            openSignatureInfoButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
+            openSignatureInfoButton.setGraphic(Utils.getIcon(FontAwesomeIcon.TIMES, Utils.COLOR_RED_DARK));
             openSignatureInfoButton.setText(ContextVS.getMessage("signatureERRORLbl"));
         }
         String contentStr = null;
@@ -73,7 +73,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         signatureContentWebView.getEngine().loadContent(contentStr);
         TimeStampToken timeStampToken = signedFile.getSMIME().getTimeStampToken();
         Button timeStampButton = new Button(ContextVS.getMessage("timeStampButtonLbl"));
-        timeStampButton.setGraphic((Utils.getIcon(FontAwesomeIcons.CLOCK_ALT)));
+        timeStampButton.setGraphic((Utils.getIcon(FontAwesomeIcon.CLOCK_ALT)));
         timeStampButton.setOnAction(actionEvent -> TimeStampPane.showDialog(timeStampToken));
         setMargin(timeStampButton, new Insets(5, 0, 5, 0));
         add(timeStampButton, 0, 0);

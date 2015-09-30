@@ -1,6 +1,6 @@
 package org.votingsystem.client.dialog;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -78,11 +78,11 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                 tagLbl.setText(ContextVS.getMessage("addTagMsg"));
             }
         });
-        addTagButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TAG));
+        addTagButton.setGraphic(Utils.getIcon(FontAwesomeIcon.TAG));
         timeLimitedCheckBox.setText(ContextVS.getMessage("timeLimitedCheckBox"));
         tagLbl.setText(ContextVS.getMessage("addTagMsg"));
         acceptButton.setText(ContextVS.getMessage("acceptLbl"));
-        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CHECK));
         acceptButton.setOnAction(actionEvent -> {
             try {
                 if (subjectTxt.getText().trim().equals("")) {
@@ -127,7 +127,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
             }
             if(!BrowserSessionService.getInstance().isConnected()) {
                 Button connectionButton = new Button();
-                connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CLOUD_UPLOAD));
+                connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CLOUD_UPLOAD));
                 connectionButton.setText(ContextVS.getMessage("connectLbl"));
                 connectionButton.setOnAction(event -> {
                     WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true);

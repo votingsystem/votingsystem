@@ -2,7 +2,7 @@ package org.votingsystem.client.pane;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
@@ -47,7 +47,7 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
         this.backup = fileParam;
         buttonsHBox = new HBox();
         saveButton = new Button(ContextVS.getMessage("saveLbl"));
-        saveButton.setGraphic((Utils.getIcon(FontAwesomeIcons.SAVE)));
+        saveButton.setGraphic((Utils.getIcon(FontAwesomeIcon.SAVE)));
         saveButton.setOnAction(actionEvent ->  saveMessage());
         HBox.setMargin(saveButton, new Insets(5, 10, 0, 0));
         buttonsHBox.getChildren().addAll(Utils.getSpacer(), saveButton);

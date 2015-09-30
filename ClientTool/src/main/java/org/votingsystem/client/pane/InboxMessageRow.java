@@ -1,7 +1,7 @@
 package org.votingsystem.client.pane;
 
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -45,7 +45,7 @@ public class InboxMessageRow implements CurrencyCheckerTask.Listener {
 
     @FXML void initialize() throws Exception { // This method is called by the FXMLLoader when initialization is complete
         messageButton.setWrapText(true);
-        removeButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
+        removeButton.setGraphic(Utils.getIcon(FontAwesomeIcon.TIMES, Utils.COLOR_RED_DARK));
         removeButton.setOnAction((event) ->
                 InboxService.getInstance().processMessage(inboxMessage.setState(InboxMessage.State.REMOVED)));
         if(inboxMessage.isTimeLimited()) {

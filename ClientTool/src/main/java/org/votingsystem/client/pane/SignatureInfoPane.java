@@ -1,6 +1,6 @@
 package org.votingsystem.client.pane;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -48,7 +48,7 @@ public class SignatureInfoPane extends GridPane {
             Label signatureDateValueLabel = new Label(DateUtils.getDateStr(signer.getSignatureDate(), "dd/MMM/yyyy HH:mm"));
             add(signatureDateValueLabel, 1, 1);
             Button timeStampButton = new Button(ContextVS.getMessage("timeStampButtonLbl"));
-            timeStampButton.setGraphic((Utils.getIcon(FontAwesomeIcons.CLOCK_ALT)));
+            timeStampButton.setGraphic((Utils.getIcon(FontAwesomeIcon.CLOCK_ALT)));
             timeStampButton.setOnAction(actionEvent -> TimeStampPane.showDialog(signer.getTimeStampToken()));
             add(timeStampButton, 2, 1);
             setMargin(timeStampButton, new Insets(10, 0, 10, 0));

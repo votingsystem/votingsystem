@@ -3,7 +3,7 @@ package org.votingsystem.client.dialog;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -76,7 +76,7 @@ public class AddTagVSDialog extends DialogVS {
                 acceptButton.fire();
             }
         });
-        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CHECK));
         HBox footerButtonsBox = new HBox(10);
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), acceptButton);
 

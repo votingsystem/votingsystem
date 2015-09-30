@@ -2,7 +2,7 @@ package org.votingsystem.client.pane;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcons;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -106,11 +106,11 @@ public class SignDocumentFormStackPane extends StackPane {
 
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
         cancelButton.setOnAction(actionEvent -> setPasswordDialogVisible(false));
-        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcons.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcon.TIMES, Utils.COLOR_RED_DARK));
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(actionEvent -> initBackgroundTask());
-        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcons.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CHECK));
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
                 if ((event.getCode() == KeyCode.ENTER)) {
