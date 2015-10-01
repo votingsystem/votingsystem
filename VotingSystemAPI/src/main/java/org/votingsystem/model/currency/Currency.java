@@ -44,7 +44,7 @@ public class Currency extends EntityVS implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-    public enum State { OK, EXPENDED, LAPSED, UNKNOWN, ERROR;} //Lapsed -> for not expended time limited currency
+    public enum State { OK, EXPENDED, LAPSED, UNKNOWN, ERROR_CERT_AUTHORITY, ERROR;} //Lapsed -> for not expended time limited currency
 
     public enum Type { LEFT_OVER, CHANGE, REQUEST}
 

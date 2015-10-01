@@ -49,6 +49,11 @@
     -fx-text-fill: #f9f9f9;
 }
 
+.currencyPane-error {
+    -fx-background-color: rgba(186,0,17, 0.45) ;
+    -fx-text-fill: #fff;
+}
+
 .currencyValue {
     -fx-text-fill: #61a753;
     -fx-font-size: 1em;

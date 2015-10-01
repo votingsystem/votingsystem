@@ -20,7 +20,7 @@ import org.votingsystem.client.service.SignatureService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.service.EventBusService;
+import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;

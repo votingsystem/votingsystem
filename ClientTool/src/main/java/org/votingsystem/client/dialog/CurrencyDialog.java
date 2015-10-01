@@ -1,6 +1,6 @@
 package org.votingsystem.client.dialog;
 
-import com.google.common.eventbus.Subscribe;
+
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
@@ -26,6 +26,7 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.*;
+import rx.functions.Action1;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
@@ -45,12 +46,15 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
 
     private static Logger log = Logger.getLogger(CurrencyDialog.class.getSimpleName());
 
-    class EventBusCurrencyListener {
-        @Subscribe public void socketMessageChange(SocketMessageDto socketMessage) {
-            switch(socketMessage.getOperation()) {
-                case CURRENCY_WALLET_CHANGE:
-                    if(walletChangeTask != null) walletChangeTask.update(socketMessage);
-                    break;
+    class EventBusCurrencyListener implements Action1 {
+        @Override public void call(Object event) {
+            if(event instanceof SocketMessageDto) {
+                SocketMessageDto socketMessage = (SocketMessageDto)event;
+                switch(socketMessage.getOperation()) {
+                    case CURRENCY_WALLET_CHANGE:
+                        if(walletChangeTask != null) walletChangeTask.update(socketMessage);
+                        break;
+                }
             }
         }
     }
@@ -80,14 +84,9 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
                     responseVS = HttpHelper.getInstance().getData(
                             currencyServer.getCurrencyStateServiceURL(currency.getHashCertVS()), null);
                     if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                        mainPane.getStyleClass().add("currency-error");
-                        Label currencyStatusLbl = new Label();
-                        currencyStatusLbl.setText(ContextVS.getMessage("invalidCurrency"));
-                        currencyStatusLbl.getStyleClass().add("currency-error-msg");
-                        mainPane.getChildren().add(1, currencyStatusLbl);
-                        changeWalletMenuItem.setVisible(false);
-                        getStage().sizeToScene();
-                        showMessage(ResponseVS.SC_ERROR, responseVS.getMessage());
+                        currency.setState(Currency.State.ERROR);
+                        currency.setReason(responseVS.getReason());
+                        update();
                     }
                 }
             } catch (Exception e) { e.printStackTrace(); }
@@ -109,10 +108,22 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
         addMenuButton(menuButton);
     }
 
+    private void update() {
+        if(currency.getState() == Currency.State.ERROR) {
+            mainPane.getStyleClass().add("currency-error");
+            Label currencyStatusLbl = new Label();
+            currencyStatusLbl.setText(ContextVS.getMessage("invalidCurrency"));
+            currencyStatusLbl.getStyleClass().add("currency-error-msg");
+            mainPane.getChildren().add(1, currencyStatusLbl);
+            changeWalletMenuItem.setVisible(false);
+            getStage().sizeToScene();
+            showMessage(ResponseVS.SC_ERROR, currency.getReason());
+        }
+    }
+
     public void showDialog(Currency currency) {
         this.currency = currency;
         mainPane.getStyleClass().remove("currency-error");
-        PlatformImpl.runLater(statusChecker);
         setCaption(currency.getCurrencyServerURL().split("//")[1]);
         currencyHashText.setText(currency.getHashCertVS());
         currencyValueLbl.setText(currency.getAmount().toPlainString());
@@ -127,6 +138,7 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
                     ContextVS.getInstance().getCurrencyServer().getTrustAnchors(), false, Arrays.asList(
                             currency.getCertificationRequest().getCertificate()));
             X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
+            PlatformImpl.runLater(statusChecker);
             log.info("currency issuer: " + certCaResult.getSubjectDN().toString());
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -142,7 +154,7 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
                         Utils.getTagForDescription(currency.getTagVS().getName());
                 msg = ContextVS.getMessage("currencyInfoErroMsg", errorMsg, amountStr, x509Cert.getIssuerDN().toString(),
                         DateUtils.getDateStr(currency.getValidFrom(), "dd MMM yyyy' 'HH:mm"),
-                        DateUtils.getDateStr(currency.getValidTo()), "dd MMM yyyy' 'HH:mm");
+                        DateUtils.getDateStr(currency.getValidTo(), "dd MMM yyyy' 'HH:mm"));
             }
             showMessage(msg, ContextVS.getMessage("errorLbl"));
         }

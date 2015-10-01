@@ -6,14 +6,14 @@
 <link href="${resourceURL}/iron-media-query/iron-media-query.html" rel="import"/>
 
 <dom-module name="balance-uservs">
-    <style>
-        .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
-            margin:10px 0 10px 0; cursor: pointer;}
-        .pageTitle:hover { text-decoration: underline; }
-        .tab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;color:#888;}
-        .tabSelected { border-bottom: 2px solid #ba0011;color:#434343;}
-    </style>
     <template>
+        <style>
+            .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
+                margin:10px 0 10px 0; cursor: pointer;}
+            .pageTitle:hover { text-decoration: underline; }
+            .tab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;color:#888;}
+            .tabSelected { border-bottom: 2px solid #ba0011;color:#434343;}
+        </style>
         <transactionvs-data id="transactionViewer"></transactionvs-data>
 
         <iron-media-query query="max-width: 1200px" query-matches="{{smallScreen}}"></iron-media-query>

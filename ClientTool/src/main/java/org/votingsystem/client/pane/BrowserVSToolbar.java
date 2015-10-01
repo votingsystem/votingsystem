@@ -1,6 +1,5 @@
 package org.votingsystem.client.pane;
 
-import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.geometry.Pos;
@@ -19,6 +18,7 @@ import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
+import rx.functions.Action1;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
@@ -40,28 +40,31 @@ public class BrowserVSToolbar extends HBox {
     private BrowserVSMenuButton menuButton;
     private AtomicBoolean isConnected = new AtomicBoolean(false);
 
-    class EventBusConnectionListener {
-        @Subscribe
-        public void socketMessageChange(SocketMessageDto socketMessage) {
-            log.info("EventBusConnectionListener - response type: " + socketMessage.getOperation());
-            boolean uiUpdated = false;
-            if(TypeVS.INIT_SIGNED_SESSION == socketMessage.getOperation()) {
-                isConnected.set(true);
-                uiUpdated = true;
-            } else if(TypeVS.DISCONNECT == socketMessage.getOperation()) {
-                isConnected.set(false);
-                uiUpdated = true;
-            }
-            if(uiUpdated) {
-                PlatformImpl.runLater(() -> {
-                    if (isConnected.get()) {
-                        connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcon.FLASH));
-                        connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("disconnectLbl")));
-                    } else {
-                        connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
-                        connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CLOUD_UPLOAD));
-                    }
-                });
+    class EventBusConnectionListener implements Action1 {
+
+        @Override public void call(Object event) {
+            if(event instanceof  SocketMessageDto) {
+                SocketMessageDto socketMessage = (SocketMessageDto) event;
+                log.info("EventBusConnectionListener - response type: " + socketMessage.getOperation());
+                boolean uiUpdated = false;
+                if(TypeVS.INIT_SIGNED_SESSION == socketMessage.getOperation()) {
+                    isConnected.set(true);
+                    uiUpdated = true;
+                } else if(TypeVS.DISCONNECT == socketMessage.getOperation()) {
+                    isConnected.set(false);
+                    uiUpdated = true;
+                }
+                if(uiUpdated) {
+                    PlatformImpl.runLater(() -> {
+                        if (isConnected.get()) {
+                            connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcon.FLASH));
+                            connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("disconnectLbl")));
+                        } else {
+                            connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
+                            connectionButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CLOUD_UPLOAD));
+                        }
+                    });
+                }
             }
         }
     }

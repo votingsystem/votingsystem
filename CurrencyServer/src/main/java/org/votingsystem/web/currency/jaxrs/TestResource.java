@@ -1,7 +1,6 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.eventbus.Subscribe;
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
 import org.votingsystem.dto.currency.BalancesDto;
@@ -69,12 +68,6 @@ public class TestResource {
 
     static {
         executorService = Executors.newFixedThreadPool(5);
-    }
-
-    class EventBusListener {
-        @Subscribe public void newUserVS(UserVS userVS) {
-            log.info("newUserVS: " + userVS.getNif());
-        }
     }
 
     @GET @Path("/test")

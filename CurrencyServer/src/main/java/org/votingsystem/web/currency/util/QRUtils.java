@@ -1,18 +1,15 @@
 package org.votingsystem.web.currency.util;
 
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.io.CharStreams;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-
+import org.apache.commons.io.IOUtils;
 import javax.servlet.ServletRequest;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -22,26 +19,32 @@ public class QRUtils {
 
     public static final Integer MARGIN = 10;
     private static final int MAX_DIMENSION = 4096;
-    private static final Collection<Charset> SUPPORTED_OUTPUT_ENCODINGS = ImmutableSet.<Charset>builder()
-            .add(StandardCharsets.UTF_8).add(StandardCharsets.ISO_8859_1).add(Charset.forName("Shift_JIS")).build();
+    private static final Collection<Charset> SUPPORTED_OUTPUT_ENCODINGS;
 
+    static {
+        SUPPORTED_OUTPUT_ENCODINGS = new HashSet<>();
+        SUPPORTED_OUTPUT_ENCODINGS.add(StandardCharsets.UTF_8);
+        SUPPORTED_OUTPUT_ENCODINGS.add(StandardCharsets.ISO_8859_1);
+        SUPPORTED_OUTPUT_ENCODINGS.add(Charset.forName("Shift_JIS"));
+    }
 
     public static ChartServletRequestParameters parseRequest(ServletRequest request, boolean readBody)
             throws IOException {
-        Preconditions.checkArgument("qr".equals(request.getParameter("cht")), "Bad type");
+        if(!"qr".equals(request.getParameter("cht"))) throw new IllegalArgumentException("Bad type");
         String widthXHeight = request.getParameter("chs");
-        Preconditions.checkNotNull(widthXHeight, "No size");
+        if(widthXHeight == null) throw new IllegalArgumentException("No size");
         int xIndex = widthXHeight.indexOf('x');
-        Preconditions.checkArgument(xIndex >= 0, "Bad size");
+        if(xIndex < 0) throw new IllegalArgumentException("Bad size");
         int width = Integer.parseInt(widthXHeight.substring(0, xIndex));
         int height = Integer.parseInt(widthXHeight.substring(xIndex + 1));
-        Preconditions.checkArgument(width > 0 && height > 0, "Bad size");
-        Preconditions.checkArgument(width <= MAX_DIMENSION && height <= MAX_DIMENSION, "Bad size");
+        if(!(width > 0 && height > 0)) throw new IllegalArgumentException("Bad size");
+        if(!(width <= MAX_DIMENSION && height <= MAX_DIMENSION)) throw new IllegalArgumentException("Bad size");
+
         String outputEncodingName = request.getParameter("choe");
         Charset outputEncoding = StandardCharsets.UTF_8;
         if (outputEncodingName != null) {
             outputEncoding = Charset.forName(outputEncodingName);
-            Preconditions.checkArgument(SUPPORTED_OUTPUT_ENCODINGS.contains(outputEncoding), "Bad output encoding");
+            if(!SUPPORTED_OUTPUT_ENCODINGS.contains(outputEncoding)) throw new IllegalArgumentException("Bad output encoding");
         }
         ErrorCorrectionLevel ecLevel = ErrorCorrectionLevel.L;
         int margin = 4;
@@ -54,16 +57,16 @@ public class QRUtils {
             } else {
                 ecLevel = ErrorCorrectionLevel.valueOf(ldString.substring(0, pipeIndex));
                 margin = Integer.parseInt(ldString.substring(pipeIndex + 1));
-                Preconditions.checkArgument(margin > 0, "Bad margin");
+                if(margin <= 0) throw new IllegalArgumentException("Bad margin");
             }
         }
         String text;
         if (readBody) {
-            text = CharStreams.toString(request.getReader());
+            text = IOUtils.toString(request.getReader());
         } else {
             text = request.getParameter("chl");
         }
-        Preconditions.checkArgument(text != null && !text.isEmpty(), "No input");
+        if(text == null || text.isEmpty()) throw new IllegalArgumentException("No input");
 
         Map<EncodeHintType,Object> hints = new EnumMap<EncodeHintType,Object>(EncodeHintType.class);
         hints.put(EncodeHintType.MARGIN, MARGIN);

@@ -1,6 +1,9 @@
 package org.votingsystem.client.service;
 
-import com.google.common.eventbus.EventBus;
+import rx.functions.Action1;
+import rx.subjects.PublishSubject;
+import rx.subjects.SerializedSubject;
+import rx.subjects.Subject;
 
 import java.util.logging.Logger;
 
@@ -11,20 +14,21 @@ public class EventBusService {
 
     private static Logger log = Logger.getLogger(EventBusService.class.getName());
 
-    private static final String EVENT_BUS_IDENTIFIER = "EventBusService";
-    private static final EventBus eventBus = new EventBus(EVENT_BUS_IDENTIFIER);
+    private final Subject<Object, Object> eventBus = new SerializedSubject<>(PublishSubject.create());
     private static final EventBusService INSTANCE = new EventBusService();
 
-    public void register(Object eventBusListener) {
-        eventBus.register(eventBusListener);
-    }
-
-    public void post(Object eventData) {
-        eventBus.post(eventData);
-    }
 
     public static EventBusService getInstance() {return INSTANCE;}
 
     private EventBusService() {}
+
+
+    public void register(Action1 observer) {
+        eventBus.subscribe(observer);
+    }
+
+    public void post(Object eventData) {
+        eventBus.onNext(eventData);
+    }
 
 }
