@@ -241,7 +241,7 @@ public class RepresentativeDelegationBean {
                 messages.get("userIsRepresentativeErrorMsg", userVS.getNif()));
         AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS);
         if (anonymousDelegation != null) {
-            String delegationURL = format("{0}/messageSMIME/id/{1}", config.getRestURL(),
+            String delegationURL = format("{0}/rest/messageSMIME/id/{1}", config.getContextURL(),
                     anonymousDelegation.getDelegationSMIME().getId());
             throw new ExceptionVS(MessageDto.REQUEST_REPEATED(messages.get("userWithPreviousDelegationErrorMsg", userVS.getNif(),
                     DateUtils.getDateStr(anonymousDelegation.getDateTo())), delegationURL));
@@ -267,7 +267,7 @@ public class RepresentativeDelegationBean {
                 .setParameter("state", RepresentationDocument.State.OK);
         long numRepresentations = (long) query.getSingleResult() + 1;//plus the representative itself
         return UserVSDto.REPRESENTATIVE(representative, representativeDocument.getActivationSMIME().getId(),
-                numRepresentations, config.getRestURL());
+                numRepresentations, config.getContextURL());
     }
 
 }

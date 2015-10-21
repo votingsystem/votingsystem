@@ -65,7 +65,7 @@ public class CertificateVSBean {
         log.info("addCertificateAuthority - new CA - id:" + certificateVS.getId());
         signatureBean.addCertAuthority(certificateVS);
         return new MessageDto(ResponseVS.SC_OK,  messages.get("certUpdatedToCAMsg", x509NewCACert.getSerialNumber().toString()),
-                config.getRestURL() + "/certificateVS/serialNumber/" + x509NewCACert.getSerialNumber().toString());
+                config.getContextURL() + "/rest/certificateVS/serialNumber/" + x509NewCACert.getSerialNumber().toString());
     }
 
     public X509Certificate getVoteCert(byte[] pemCertCollection) throws Exception {

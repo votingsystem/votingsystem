@@ -133,13 +133,7 @@ public class CertificateVSResource {
                 listDto.add(new CertificateVSDto(certificateVS));
             }
             ResultListDto<CertificateVSDto> resultListDto = new ResultListDto<>(listDto, offset, max, totalCount);
-            if(contentType.contains("json")) {
-                return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
-            } else {
-                req.setAttribute("certListDto", JSON.getMapper().writeValueAsString(resultListDto));
-                context.getRequestDispatcher("/certificateVS/certs.xhtml").forward(req, resp);
-                return Response.ok().build();
-            }
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         }
     }
 
@@ -158,14 +152,7 @@ public class CertificateVSResource {
                 return Response.ok().entity(CertUtils.getPEMEncoded(certificate.getX509Cert()))
                         .type(MediaTypeVS.PEM).build();
             } else {
-                if(contentType.contains("json")) {
-                   return Response.ok().entity(JSON.getMapper().writeValueAsBytes(new CertificateVSDto(certificate)));
-                } else {
-                    req.setAttribute("certState", certificate.getState().toString());
-                    req.setAttribute("certDto", JSON.getMapper().writeValueAsString(new CertificateVSDto(certificate)));
-                    context.getRequestDispatcher("/certificateVS/cert.xhtml").forward(req, resp);
-                    return Response.ok().build();
-                }
+                return Response.ok().entity(JSON.getMapper().writeValueAsBytes(new CertificateVSDto(certificate))).build();
             }
         } else return Response.status(Response.Status.NOT_FOUND).entity("serialNumber: " + serialNumber).build();
     }

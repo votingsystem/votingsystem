@@ -1,0 +1,160 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/basic.xhtml">
+  <ui:define name="head">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="application-name" content="VotingSystem"/>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="shortcut icon" type="image/png" href="./resources/images/icon_16/fa-money.png" />
+    <title><ui:insert name="title" /></title>
+    <h:outputStylesheet name="css/currency.css" />
+    <script src="./resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="./resources/js/utilsVS.js" type="text/javascript"></script>
+    <script src="./resources/js/utils_js.vsp" type="text/javascript"></script>
+
+
+
+    <link rel="import" href="./resources/elements.html"/>
+  </ui:define>
+  <ui:define name="content">
+    <div class="fullbleed layout vertical">
+        <template is="dom-bind" id="app">
+            <paper-drawer-panel id="paperDrawerPanel">
+                <paper-scroll-header-panel drawer="" fixed="">
+                    <paper-toolbar class="drawerToolbar">
+                        <span class="paper-font-title">Menu</span>
+                    </paper-toolbar>
+
+                    <paper-menu class="list drawerToolbar" attr-for-selected="data-route" selected="[[route]]">
+                        <a data-route="groupVS" href="/groupVS" on-click="onDataRouteClick">
+                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupvsLbl}
+                        </a>
+                        <a data-route="userVSDashboard" href="/app/userVSDashboard" on-click="onDataRouteClick">
+                            <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
+                        </a>
+                        <a data-route="userVS" href="/userVS/search" on-click="onDataRouteClick">
+                            <i class="fa fa-user" style="margin:0px 10px 0px 0px;"></i> ${msg.locateUserVSLbl}
+                        </a>
+                        <a data-route="currencyRequest" href="/currency/request" on-click="onDataRouteClick">
+                            <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> ${msg.doCurrencyRequestLbl}
+                        </a>
+                        <a hidden="{{!isAdminView}}" data-route="newGroupVS" href="/newGroupVS" on-click="onDataRouteClick">
+                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupVSLbl}
+                        </a>
+                        <a hidden="{{!isSuperUserView}}" data-route="newGroupVS" href="/userVS/newBankVS" on-click="onDataRouteClick">
+                            <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankVSLbl}
+                        </a>
+                        <a hidden="{{!isSuperUserView}}" data-route="certificateVS" href="/certificateVS/certs" on-click="onDataRouteClick">
+                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
+                        </a>
+                        <a data-route="reports" href="/reports" on-click="onDataRouteClick">
+                            <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> ${msg.reportsPageTitle}
+                        </a>
+                        <a data-route="docs" href="/appdocs" on-click="onDataRouteClick">
+                            <i class="fa fa-info" style="margin:0px 10px 0px 0px;"></i> ${msg.docsLbl}
+                        </a>
+                        <a data-route="contact" href="/app/contact" on-click="onDataRouteClick">
+                            <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
+                        </a>
+
+                    </paper-menu>
+                </paper-scroll-header-panel>
+
+                <paper-header-panel main="" condenses="" keep-condensed-header="">
+                    <paper-toolbar id="mainToolbar" >
+                        <i class="fa fa-bars vs-navbar-icon" paper-drawer-toggle="" style="margin: 0 10px 0 10px;"></i>
+                        <span class="flex"></span>
+
+                        <i class="fa fa-search vs-navbar-icon" hidden="{{searchHidden}}" on-click="toogleSearchPanel"></i>
+
+                        <div class="middle middle-container center horizontal layout">
+                            <div class="app-name">{{appTitle}}</div>
+                        </div>
+                    </paper-toolbar>
+
+                    <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
+                        background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
+
+                    <div id="mainContent" class="mainContent"></div>
+                </paper-header-panel>
+
+            </paper-drawer-panel>
+            <h:messages styleClass="messages"
+                        style="list-style: none; padding:0; margin:0;"
+                        errorClass="alert alert-error" infoClass="alert alert-success"
+                        warnClass="alert alert-warning" globalOnly="true"/>
+        </template>
+        <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
+        <iron-signals id="ironSignals"></iron-signals>
+    </div>
+    <script>
+        (function(document) {
+            var app = document.querySelector('#app');
+
+            app.addEventListener('dom-change', function() {
+                console.log('app.js - dom-changespa app ready');
+            });
+
+            window.addEventListener('WebComponentsReady', function() {
+                console.log('app.js - WebComponentsReady');
+            });
+
+            app.onDataRouteClick = function() {
+                var drawerPanel = document.querySelector('#paperDrawerPanel');
+                if (drawerPanel.narrow) {
+                    drawerPanel.closeDrawer();
+                }
+            };
+
+            app.loadMainContent = function(newContentNode, caption, searchVisible) {
+                var mainContentNode = document.querySelector('paper-drawer-panel').querySelector('#mainContent')
+                var beforeContentNode = Polymer.dom(mainContentNode).childNodes[0]
+                if(beforeContentNode) Polymer.dom(mainContentNode).removeChild(beforeContentNode)
+                Polymer.dom(mainContentNode).appendChild(newContentNode)
+                if('admin' === menuType) caption = caption + ' - ${msg.adminLbl}'
+                if('superuser' === menuType) caption = caption + ' - ${msg.superUserLbl}'
+                if(caption) sendSignalVS({caption:caption})
+                if(searchVisible === true) app.searchHidden = false
+                else app.searchHidden = true
+            }
+
+            app.updateMenuView = function() {
+                app.appTitle = "${msg.appTitle}"
+                app.isAdminView = false;
+                app.isSuperUserView = false;
+                app.isUserView = false;
+                if('admin' === menuType) {
+                    app.isAdminView = true;
+                    app.appTitle = app.appTitle + " - ${msg.adminPageTitle}"
+                } else if('superuser' === menuType) {
+                    this.isSuperUserView = true;
+                    app.appTitle = app.appTitle + " - ${msg.superUserTitle}"
+                } else {
+                    this.isUserView = true;
+                }
+            }
+
+            app.updateSearchMessage = function(searchMessage) {
+                if(searchMessage) {
+                    document.querySelector("#pageInfoPanel").innerHTML = searchMessage
+                    document.querySelector("#pageInfoPanel").style.display = "block"
+                } else document.querySelector("#pageInfoPanel").style.display = "none"
+            }
+
+            document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
+                console.log("spa.xhtml - user-clicked")
+                page.show(restURL + "/userVS/id/" + e.detail.id)
+            })
+
+            app.scrollPageToTop = function() {
+                document.getElementById('mainContainer').scrollTop = 0;
+            };
+
+            app.updateMenuView()
+
+        })(document);
+    </script>
+  </ui:define>
+</ui:composition>

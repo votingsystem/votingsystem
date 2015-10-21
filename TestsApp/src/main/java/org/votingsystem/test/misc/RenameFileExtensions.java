@@ -9,9 +9,9 @@ public class RenameFileExtensions {
 
     private static Logger log = Logger.getLogger(RenameFileExtensions.class.getSimpleName());
 
-    private static final String basePath = "/home/jgzornoza/temp/cryptocurrency_webapp";
-    private static final String old_extension = ".jsp";
-    private static final String new_extension = ".vsp";
+    private static final String basePath = "/home/jgzornoza/github/votingsystem/CurrencyServer/src/main/webapp";
+    private static final String old_extension = ".vsp";
+    private static final String new_extension = ".jsp";
 
     public static void main(String[] args) {
         File baseDir =  new File(basePath);

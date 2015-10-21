@@ -1,12 +1,11 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
-                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+                template="/WEB-INF/templates/basic.xhtml">
     <ui:define name="head">
-        <link href="${elementURL}/tagVS/tagvs-select-dialog.vsp" rel="import"/>
-        <link href="${resourceURL}/iron-ajax/iron-ajax.html" rel="import"/>
-        <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
-        <link href="${resourceURL}/vs-currency-selector/vs-currency-selector.html" rel="import"/>
+        <link href="../tagVS/tagvs-select-dialog.vsp" rel="import"/>
+        <link href="../resources/bower_components/iron-ajax/iron-ajax.html" rel="import"/>
+        <link href="../resources/bower_components/paper-item/paper-item.html" rel="import"/>
+        <link href="../resources/bower_components/vs-currency-selector/vs-currency-selector.html" rel="import"/>
         <style>
             .select-style {
                 border: 1px solid #ccc;
@@ -33,7 +32,7 @@
     </ui:define>
     <ui:define name="content">
         <button onclick="document.querySelector('#tagDialog').show()" style="margin:10px;">Tag dialog</button>
-        <tagvs-select-dialog id="tagDialog" service-url="${restURL}/tagVS"></tagvs-select-dialog>
+        <tagvs-select-dialog id="tagDialog"></tagvs-select-dialog>
 
         <vs-currency-selector></vs-currency-selector>
 

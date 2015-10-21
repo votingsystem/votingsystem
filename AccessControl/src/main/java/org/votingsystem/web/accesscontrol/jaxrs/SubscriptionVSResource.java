@@ -47,7 +47,7 @@ public class SubscriptionVSResource {
         List<EventVSElection> eventVSList = query.getResultList();
         List<SyndEntryImpl> feeds = new ArrayList<>();
         for(EventVSElection eventVSElection : eventVSList) {
-            String electionURL = config.getRestURL() + "/eventVSElection/id" + eventVSElection.getId();
+            String electionURL = config.getContextURL() + "/rest/eventVSElection/id" + eventVSElection.getId();
             SyndEntryImpl entry = new SyndEntryImpl();
             entry.setTitle(eventVSElection.getSubject());
             entry.setLink(electionURL);
@@ -63,7 +63,7 @@ public class SubscriptionVSResource {
         SyndFeed feed = new SyndFeedImpl();
         feed.setFeedType(feedType);
         feed.setTitle(messages.get("electionsSubscriptionTitle") + " - " + config.getServerName());
-        feed.setLink(config.getRestURL() + "/eventVSElection");
+        feed.setLink(config.getContextURL() + "/rest/eventVSElection");
         feed.setDescription(messages.get("electionsSubscriptionDescription"));
         feed.setEntries(feeds);
 

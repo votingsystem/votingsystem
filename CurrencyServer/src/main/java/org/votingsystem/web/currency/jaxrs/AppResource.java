@@ -49,13 +49,6 @@ public class AppResource {
         }
     }
 
-    @GET @Path("/tools")
-    public Response tools(@Context ServletContext context, @Context HttpServletRequest req,
-                      @Context HttpServletResponse resp) throws ServletException, IOException {
-        context.getRequestDispatcher("/app/tools.xhtml").forward(req, resp);
-        return Response.ok().build();
-    }
-
     @GET @Path("/accounts")
     public Response accounts(@Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws ServletException, IOException {

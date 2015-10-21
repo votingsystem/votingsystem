@@ -101,6 +101,8 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
         }
     }
 
+
+
     public static void showDialog() {
         Platform.runLater(new Runnable() {
             @Override public void run() {

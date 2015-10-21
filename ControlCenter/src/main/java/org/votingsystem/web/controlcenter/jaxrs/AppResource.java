@@ -36,7 +36,7 @@ public class AppResource {
             context.getRequestDispatcher("/app/index.xhtml").forward(req, resp);
             return Response.ok().build();
         } else {
-            String uri = config.getWebURL() + "/eventVSElection/main?androidClientLoaded=false";
+            String uri = config.getContextURL() + "/eventVSElection/main?androidClientLoaded=false";
             if(browserToken != null) uri = uri + "#" + browserToken;
             if(eventId != null) uri =  uri + "&eventId=" + eventId;
             if(serverURL != null) uri = uri + "&serverURL=" + serverURL;

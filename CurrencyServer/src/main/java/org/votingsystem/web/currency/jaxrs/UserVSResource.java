@@ -151,31 +151,14 @@ public class UserVSResource {
 
     private Response processUserVSResult(UserVS userVS, String msg,
                HttpServletRequest req,  HttpServletResponse resp, ServletContext context) throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
-        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
         Object resultDto = null;
-        String view = null;
         if(userVS instanceof GroupVS) {
             resultDto = groupVSBean.getGroupVSDto((GroupVS) userVS);
-            req.setAttribute("groupvsDto", JSON.getMapper().writeValueAsString(resultDto));
-            view = "/groupVS/groupVS.xhtml";
-        }
-        else if(userVS instanceof BankVS) {
+        } else if(userVS instanceof BankVS) {
             resultDto = UserVSDto.COMPLETE(userVS);
-            req.setAttribute("uservsDto", JSON.getMapper().writeValueAsString(resultDto));
-            req.setAttribute("messageToUser", msg);
-            view = "/userVS/userVS.xhtml";
-        } else {
-            resultDto = UserVSDto.COMPLETE(userVS);
-            req.setAttribute("uservsDto", JSON.getMapper().writeValueAsString(resultDto));
-            view = "/userVS/userVS.xhtml";
-        }
-        if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build() ;
-        } else {
-            context.getRequestDispatcher(view).forward(req, resp);
-            return Response.ok().build();
-        }
+            ((UserVSDto)resultDto).setMessage(msg);
+        } else resultDto = UserVSDto.COMPLETE(userVS);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build() ;
     }
 
     @Path("/search")
@@ -313,18 +296,12 @@ public class UserVSResource {
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response bankVSList(@Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         List<BankVS> bankVSList = dao.findAll(BankVS.class);
         List<UserVSDto> resultList = new ArrayList<>();
         for(BankVS bankVS :  bankVSList) {
             resultList.add(userVSBean.getUserVSDto(bankVS, false));
         }
-        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultList)).build();
-        else {
-            req.setAttribute("bankVSListDto", JSON.getMapper().writeValueAsString(resultList));
-            context.getRequestDispatcher("/userVS/bankVSList.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultList)).build();
     }
 
     @Path("/userInfoTest")

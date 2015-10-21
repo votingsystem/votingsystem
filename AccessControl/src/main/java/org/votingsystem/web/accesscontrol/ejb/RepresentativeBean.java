@@ -347,7 +347,7 @@ public class RepresentativeBean {
         String accreditationsPath =  format("/backup/AccreditationsBackup/{0}/representative{1}", selectedDatePath,
                 representative.getNif());
         String downloadURL = config.getStaticResURL() + accreditationsPath + ".zip";
-        String representativeURL = format("{0}/representative/id/{1}", config.getRestURL(), representative.getId());
+        String representativeURL = format("{0}/rest/representative/id/{1}", config.getContextURL(), representative.getId());
         String basedir = config.getServerDir().getAbsolutePath() + accreditationsPath;
         new File(basedir).mkdirs();
         File zipResult = new File(basedir + ".zip");
@@ -403,8 +403,8 @@ public class RepresentativeBean {
             BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getDownloadURL(),
                     TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
                     representative, messageSMIME, request.getEmail()));
-            String downloadURL = config.getRestURL() + "/backupVS/request/id/" + backupRequest.getId() + "/download";
-            String requestURL = config.getRestURL() + "/backupVS/request/id/" + backupRequest.getId();
+            String downloadURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId() + "/download";
+            String requestURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId();
             String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
             String content = MessageFormat.format(messageTemplate, userVS.getName(), requestURL, representative.getName(),
                     DateUtils.getDayWeekDateStr(request.getDateFrom()), DateUtils.getDayWeekDateStr(request.getDateTo()),
@@ -430,8 +430,8 @@ public class RepresentativeBean {
             RepresentativeAccreditationsMetaInf metaInf = getAccreditationsBackup(representative, request.getSelectedDate());
             BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getFilePath(),
                     TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST, representative, messageSMIME, request.getEmail()));
-            String downloadURL = config.getRestURL() + "/backupVS/request/id/" + backupRequest.getId() + "/download";
-            String requestURL = config.getRestURL() + "/backupVS/request/id/" + backupRequest.getId();
+            String downloadURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId() + "/download";
+            String requestURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId();
             String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
             String content = MessageFormat.format(messageTemplate, userVS.getName(), requestURL, representative.getName(),
                     DateUtils.getDayWeekDateStr(request.getSelectedDate()), downloadURL);
@@ -474,7 +474,7 @@ public class RepresentativeBean {
             IOUtils.write(voteVS.getMessageSMIME().getContent(), new FileOutputStream(smimeFile));
         }
         log.info(format("representative: {0} - numVotes: {1}", representative.getNif(), numVotes));
-        String representativeURL = format("{0}/representative/id/{1}", config.getRestURL(), representative.getId());
+        String representativeURL = format("{0}/rest/representative/id/{1}", config.getContextURL(), representative.getId());
         RepresentativeVotingHistoryMetaInf metaInf = new RepresentativeVotingHistoryMetaInf(numVotes, dateFrom,
                 dateTo, representativeURL, votingHistoryPath + ".zip" , downloadURL);
         metaInfFile = new File(basedir + "/meta.inf");
@@ -495,6 +495,6 @@ public class RepresentativeBean {
         if (representativeDocument == null) throw new NotFoundException(
                 "ERROR - RepresentativeDocument not found - representativeId: " + representative.getId());
         return UserVSDto.REPRESENTATIVE(representative,
-                representativeDocument.getActivationSMIME().getId(), numRepresentations, config.getRestURL());
+                representativeDocument.getActivationSMIME().getId(), numRepresentations, config.getContextURL());
     }
 }

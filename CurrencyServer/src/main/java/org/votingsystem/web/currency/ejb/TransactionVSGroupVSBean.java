@@ -138,7 +138,7 @@ public class TransactionVSGroupVSBean {
         for(SubscriptionVS subscription : subscriptionList) {
             String toUserNIF = subscription.getUserVS().getNif();
             TransactionVSDto triggeredDto = request.getGroupVSChild(
-                    toUserNIF, userPart, subscriptionList.size(), config.getRestURL());
+                    toUserNIF, userPart, subscriptionList.size(), config.getContextURL());
             SMIMEMessage receipt = signatureBean.getSMIME(signatureBean.getSystemUser().getNif(),
                     toUserNIF, mapper.writeValueAsString(triggeredDto), request.getOperation().toString(), null);
             receipt.setHeader("TypeVS", request.getType().toString());

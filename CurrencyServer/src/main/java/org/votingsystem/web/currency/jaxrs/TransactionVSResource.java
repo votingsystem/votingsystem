@@ -33,6 +33,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -70,7 +71,6 @@ public class TransactionVSResource {
               @DefaultValue("100") @QueryParam("max") int max,
               @QueryParam("transactionvsType") String transactionvsType, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         List<TransactionVS.Type> transactionTypeList = Arrays.asList(TransactionVS.Type.values());
         try {
             if(transactionvsType != null) transactionTypeList = Arrays.asList(TransactionVS.Type.valueOf(transactionvsType));
@@ -85,13 +85,7 @@ public class TransactionVSResource {
             resultList.add(transactionVSBean.getTransactionDto(transactionVS));
         }
         ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
-        if(contentType.contains("json")) return Response.ok().entity(
-                JSON.getMapper().writeValueAsBytes(resultListDto)).build();
-        else {
-            req.setAttribute("transactionsDto", JSON.getMapper().writeValueAsString(resultListDto));
-            context.getRequestDispatcher("/transactionVS/index.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
     @Path("/") @POST @Produces(MediaType.APPLICATION_JSON)
@@ -116,7 +110,8 @@ public class TransactionVSResource {
         Date dateFrom = DateUtils.getURLPart(dateFromStr);
         Date dateTo = DateUtils.getURLPart(dateToStr);
         try {
-            if(transactionvsType != null) transactionType = TransactionVS.Type.valueOf(transactionvsType);
+            if(transactionvsType != null && !"ALL".equals(transactionvsType.toUpperCase()))
+                transactionType = TransactionVS.Type.valueOf(transactionvsType);
             else transactionType = TransactionVS.Type.valueOf(searchText);} catch(Exception ex) {}
         try {amount = new BigDecimal(searchText);} catch(Exception ex) {}
         String queryListPrefix = "select t from TransactionVS t ";
@@ -174,9 +169,8 @@ public class TransactionVSResource {
         if(contentType.contains("json")) return Response.ok().entity(
                 JSON.getMapper().writeValueAsBytes(balancesDto)).build();
         else {
-            req.setAttribute("balancesDto", JSON.getMapper().writeValueAsString(balancesDto));
-            context.getRequestDispatcher("/transactionVS/userVS.xhtml").forward(req, resp);
-            return Response.ok().build();
+            req.getSession().setAttribute("balancesDto", JSON.getMapper().writeValueAsString(balancesDto));
+            return Response.temporaryRedirect(new URI("../transactionVS/userVS.xhtml")).build();
         }
     }
 

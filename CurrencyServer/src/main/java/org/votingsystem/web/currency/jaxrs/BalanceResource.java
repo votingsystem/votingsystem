@@ -87,17 +87,9 @@ public class BalanceResource {
 
     private Response getUserVSBalancesDto(HttpServletRequest req, HttpServletResponse resp, ServletContext context,
                   UserVS uservs, TimePeriod timePeriod) throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType(): "";
-
         BalancesDto balancesDto = balancesBean.getBalancesDto(uservs, timePeriod);
-        if(contentType.contains("json")) {
-            return Response.ok().type(MediaTypeVS.JSON).entity(
-                    JSON.getMapper().writeValueAsBytes(balancesDto)).build();
-        } else {
-            req.setAttribute("balancesDto", JSON.getMapper().writeValueAsString(balancesDto));
-            context.getRequestDispatcher("/balance/userVS.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().type(MediaTypeVS.JSON).entity(
+                JSON.getMapper().writeValueAsBytes(balancesDto)).build();
     }
 
     @Path("/userVS/id/{userId}/db")
@@ -110,6 +102,7 @@ public class BalanceResource {
         } else return accountBean.getAccountsBalanceMap(userVS);
     }
 
+    //data for <balance-weekreport>
     @Path("/week/{year}/{month}/{day}")
     @GET  @Produces(MediaType.APPLICATION_JSON)
     public Object week(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,
@@ -124,13 +117,8 @@ public class BalanceResource {
         } else {
             Map<String, Object> dataMap = JSON.getMapper().readValue(reportFiles.getJsonFile(),
                     new TypeReference<HashMap<String, Object>>() {});
-            if(contentType.contains("json")) {
-                return dataMap;
-            } else {
-                req.setAttribute("balancesJSON", JSON.getMapper().writeValueAsString(dataMap));
-                context.getRequestDispatcher("/balance/week.xhtml").forward(req, resp);
-                return Response.ok().build();
-            }
+            return Response.ok().type(MediaTypeVS.JSON).entity(
+                    JSON.getMapper().writeValueAsBytes(dataMap)).build();
         }
     }
 

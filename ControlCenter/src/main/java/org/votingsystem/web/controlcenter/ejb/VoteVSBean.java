@@ -81,7 +81,7 @@ public class VoteVSBean {
                     smimeMessageResp.getContentDigestStr());
         }
         signatureBean.validateVoteCerts(smimeMessageResp, eventVS);
-        smimeMessageResp.setMessageID(format("{0}/messageSMIME/id/{1}", config.getRestURL(), messageSMIME.getId()));
+        smimeMessageResp.setMessageID(format("{0}/rest/messageSMIME/id/{1}", config.getContextURL(), messageSMIME.getId()));
         em.merge(messageSMIME.setSMIME(smimeMessageResp).setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE));
         voteVS.setState(VoteVS.State.OK).setOptionSelected(optionSelected);
         em.persist(certificateVS);

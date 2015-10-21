@@ -32,6 +32,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -55,7 +56,7 @@ public class ShopExampleResource {
     //After user interaction we have the data of the product/service the user wants to buy, with that we create a TransactionRequest
     //and show the QR code with the URL of the transaction data to offer the user the possibility to check the order with the mobile.
     @Path("/") @GET
-    public Object index(@QueryParam("uuid") String uuid, @Context ServletContext context,
+    public Object index(@Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         Query query = dao.getEM().createQuery("select g from GroupVS g").setMaxResults(1);
         List<GroupVS> result = query.getResultList();
@@ -66,13 +67,14 @@ public class ShopExampleResource {
         dto.setPaymentOptions(Arrays.asList(TransactionVS.Type.FROM_USERVS,
                 TransactionVS.Type.CURRENCY_SEND, TransactionVS.Type.CURRENCY_CHANGE));
         String sessionID = dto.getUUID().substring(0, 8);
-        String paymentInfoServiceURL = config.getRestURL() + "/shop/" + sessionID;
+        String paymentInfoServiceURL = config.getContextURL() + "/rest/shop/" + sessionID;
         shopExampleBean.putTransactionRequest(sessionID, dto);
-        req.setAttribute("paymentInfoServiceURL", paymentInfoServiceURL);
-        req.setAttribute("sessionID", sessionID);
-        req.setAttribute("transactionRequest", JSON.getMapper().writeValueAsString(dto));
-        context.getRequestDispatcher("/shopExample/index.xhtml").forward(req, resp);
-        return Response.ok().build();
+
+        req.getSession().setAttribute("transactionRequest", JSON.getMapper().writeValueAsString(dto));
+        req.getSession().setAttribute("paymentInfoServiceURL", paymentInfoServiceURL);
+        req.getSession().setAttribute("sessionID", sessionID);
+
+        return Response.temporaryRedirect(new URI("../shopExample/index.xhtml")).build();
     }
 
     //Called with async Javascript from the web page that shows the QR code, we store an AsyncContext in order to notify

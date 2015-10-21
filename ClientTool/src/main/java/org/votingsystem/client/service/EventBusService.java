@@ -1,10 +1,10 @@
 package org.votingsystem.client.service;
 
+import rx.Subscription;
 import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 import rx.subjects.SerializedSubject;
 import rx.subjects.Subject;
-
 import java.util.logging.Logger;
 
 /**
@@ -23,8 +23,8 @@ public class EventBusService {
     private EventBusService() {}
 
 
-    public void register(Action1 observer) {
-        eventBus.subscribe(observer);
+    public Subscription register(Action1 observer) {
+        return eventBus.subscribe(observer);
     }
 
     public void post(Object eventData) {

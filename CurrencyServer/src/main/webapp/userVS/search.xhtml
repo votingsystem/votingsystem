@@ -1,23 +1,24 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
-                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+                template="/WEB-INF/templates/basic.xhtml">
     <ui:define name="head">
-        <link href="${elementURL}/userVS/uservs-selector.vsp" rel="import"/>
+        <script src="../resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+        <script src="../resources/js/utilsVS.js" type="text/javascript"></script>
+        <script src="../resources/js/utils_js.vsp" type="text/javascript"></script>
+        <link rel="import" href="../resources/bower_components/iron-ajax/iron-ajax.html"/>
+        <link rel="import" href="uservs-selector.vsp"/>
     </ui:define>
     <ui:define name="content">
-        <vs-innerpage-signal caption="${msg.userSearchPageTitle}"></vs-innerpage-signal>
         <div class="pageContentDiv">
             <div class="vertical layout center">
                 <uservs-selector style="width:800px; margin:10px 0px 0px 0px;" contact-selector="true"></uservs-selector>
             </div>
         </div>
         <script>
+            sendSignalVS({caption:"${msg.userSearchPageTitle}"})
             document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
                 console.log("search.xhtml - user-clicked")
-                if(document.querySelector("#navBar") != null) {
-                    document.querySelector("#navBar").loadURL("${restURL}/userVS/id/" + e.detail.id + "?menu=" + menuType)
-                } else window.location.href = "${restURL}/userVS/id/" + e.detail.id + "?menu=" + menuType
+                window.location.href = restURL + "/userVS/id/" + e.detail.id + "?menu=" + menuType
             })
         </script>
     </ui:define>

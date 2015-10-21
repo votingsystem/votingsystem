@@ -404,12 +404,12 @@ public class TransactionVSDto {
     }
 
     public TransactionVSDto getGroupVSChild(String receptorNIF, BigDecimal receptorPart, Integer numReceptors,
-                String restURL) {
+                String contextURL) {
         TransactionVSDto dto =  new TransactionVSDto();
         dto.setOperation(operation);
         dto.setToUser(receptorNIF);
         dto.setAmount(receptorPart);
-        dto.setMessageSMIMEParentURL(restURL + "/messageSMIME/id/" + transactionVSSMIME.getId());
+        dto.setMessageSMIMEParentURL(contextURL + "/rest/messageSMIME/id/" + transactionVSSMIME.getId());
         dto.setNumReceptors(numReceptors);
         return dto;
     }

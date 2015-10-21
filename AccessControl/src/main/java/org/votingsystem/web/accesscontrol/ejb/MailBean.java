@@ -76,8 +76,8 @@ public class MailBean {
         subject:subject, downloadURL:downloadURL])*/
         log.log(Level.FINE, "sendBackupMsg - email:" + request.getEmail() + " - request:"+ request.getId());
         UserVS toUser = request.getMessageSMIME().getUserVS();
-        String downloadURL = config.getRestURL() + "/backupVS/request/id/" + request.getId() + "/download";
-        String requestURL = config.getRestURL() + "/backupVS/request/id/" + request.getId();
+        String downloadURL = config.getContextURL() + "/rest/backupVS/request/id/" + request.getId() + "/download";
+        String requestURL = config.getContextURL() + "/rest/backupVS/request/id/" + request.getId();
         //String subject = messages.get("downloadBackupMailSubject");
         //send(toUser.getEmail(), subject, content);
     }

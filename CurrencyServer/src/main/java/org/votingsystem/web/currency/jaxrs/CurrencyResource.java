@@ -103,7 +103,6 @@ public class CurrencyResource {
     @Path("/issued/currencyCode/{currencyCode}") @Transactional
     public Response currencyIssued(@PathParam("currencyCode") String currencyCode, @Context HttpServletRequest req,
                @Context HttpServletResponse resp, @Context ServletContext context) throws IOException, ServletException {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         List<Currency.State> inState = Arrays.asList(Currency.State.OK, Currency.State.EXPENDED, Currency.State.LAPSED,
                 Currency.State.ERROR);
         Query query = dao.getEM().createQuery("select SUM(c.amount), tag, c.currencyCode, c.state from Currency c " +
@@ -134,13 +133,7 @@ public class CurrencyResource {
             }
         }
         CurrencyIssuedDto currencyIssuedDto = new CurrencyIssuedDto(okListDto, expendedListDto, lapsedListDto, errorListDto);
-        if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyIssuedDto)).build();
-        } else {
-            req.setAttribute("currencyIssuedDto", JSON.getMapper().writeValueAsString(currencyIssuedDto));
-            context.getRequestDispatcher("/currency/currencyIssued.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyIssuedDto)).build();
     }
 
 }

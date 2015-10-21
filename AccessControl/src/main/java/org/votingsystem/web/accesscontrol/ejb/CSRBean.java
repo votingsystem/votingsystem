@@ -106,7 +106,7 @@ public class CSRBean {
         KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
         //TODO ==== vote keystore -- this is for developement
         KeyStoreInfo keyStoreInfo = signatureBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
-        String representativeURL = config.getRestURL() + "/representative/id/" + representative.getId();
+        String representativeURL = config.getContextURL() + "/rest/representative/id/" + representative.getId();
         DERTaggedObject representativeExtension = new DERTaggedObject(
                 ContextVS.REPRESENTATIVE_VOTE_TAG, new DERUTF8String(representativeURL));
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);

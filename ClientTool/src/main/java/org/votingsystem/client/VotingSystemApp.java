@@ -6,6 +6,7 @@ import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -34,6 +35,7 @@ public class VotingSystemApp extends Application {
 
     private static VotingSystemApp INSTANCE;
     private Map<String, String> smimeMessageMap;
+    private Map<String, Currency.State> currencyStateMap = new HashMap<>();
     private static final Map<String, QRMessageDto> qrMessagesMap = new HashMap<>();
 
     // Create a trust manager that does not validate certificate chains
@@ -88,6 +90,10 @@ public class VotingSystemApp extends Application {
 
     public QRMessageDto removeQRMessage(String uuid) {
         return qrMessagesMap.remove(uuid);
+    }
+
+    public void putCurrencyState(String hashCertVS, Currency.State state) {
+        currencyStateMap.put(hashCertVS, state);
     }
 
     public static VotingSystemApp getInstance() {

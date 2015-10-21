@@ -50,18 +50,11 @@ public class ConfigVSImpl implements ConfigVS {
     @Resource(name="comp/DefaultManagedExecutorService")
     private ManagedExecutorService executorService;
 
-    public static final String RESOURCE_PATH= "/resources/bower_components";
-    public static final String WEB_PATH= "/jsf";
-    public static final String REST_PATH= "/rest";
-
 
     private String systemNIF;
     private String contextURL;
     private String accessControlURL;
     private String webSocketURL;
-    private String resourceURL;
-    private String restURL;
-    private String webURL;
     private String serverName;
     private String timeStampServerURL;
     private EnvironmentVS mode;
@@ -97,9 +90,6 @@ public class ConfigVSImpl implements ConfigVS {
             systemNIF = (String) props.get("vs.systemNIF");
             contextURL = (String) props.get("vs.contextURL");
             emailAdmin = (String) props.get("vs.emailAdmin");
-            resourceURL = contextURL + RESOURCE_PATH;
-            restURL = contextURL + REST_PATH;
-            webURL = contextURL + WEB_PATH;
             accessControlURL = (String) props.get("vs.accessControlURL");
             serverName = (String) props.get("vs.serverName");
             timeStampServerURL = (String) props.get("vs.timeStampServerURL");
@@ -203,21 +193,9 @@ public class ConfigVSImpl implements ConfigVS {
         return wildTag;
     }
 
-    public String getResourceURL() {
-        return resourceURL;
-    }
-
-    public String getRestURL() {
-        return restURL;
-    }
-
     @Override
     public String getStaticResURL() {
         return staticResURL;
-    }
-
-    public String getWebURL() {
-        return webURL;
     }
 
     @Override

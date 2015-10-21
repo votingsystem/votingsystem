@@ -157,10 +157,7 @@ public class CertificateVSResource {
         EventVSElection eventVSElection = dao.find(EventVSElection.class, eventId);
         if(eventVSElection == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - EventVSElection not found - eventId: " + eventId).build();
-        Query query = dao.getEM().createQuery("select c from CertificateVS c where c.eventVS =:eventVS and " +
-                "c.type =:type").setParameter("eventVS", eventVSElection).setParameter("type", CertificateVS.Type.VOTEVS_ROOT);
-        CertificateVS certificateCA = dao.getSingleResult(CertificateVS.class, query);
-        X509Certificate certX509 = CertUtils.loadCertificate(certificateCA.getContent());
+        X509Certificate certX509 = CertUtils.loadCertificate(eventVSElection.getCertificateVS().getContent());
         return Response.ok().entity(CertUtils.getPEMEncoded (certX509)).build();
     }
 

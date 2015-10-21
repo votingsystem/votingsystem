@@ -1,7 +1,6 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
-                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+                template="/WEB-INF/templates/basic.xhtml">
     <ui:define name="head">
         <style>
             .tableHeadervs {
@@ -13,14 +12,16 @@
                 padding:5px 0px 5px 0px;
                 width: 100%;
             }
-
             .tableHeadervs div {
                 text-align:center;
             }
         </style>
+        <script src="../resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+        <script src="../resources/js/utilsVS.js" type="text/javascript"></script>
+        <script src="../resources/js/utils_js.vsp" type="text/javascript"></script>
+        <link rel="import" href="../resources/bower_components/iron-ajax/iron-ajax.html"/>
     </ui:define>
     <ui:define name="content">
-        <vs-innerpage-signal caption="${msg.reportsPageTitle}"></vs-innerpage-signal>
         <div class="pageContentDiv">
             <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
@@ -50,12 +51,16 @@
                 <script> Polymer({
                     is:'record-list',
                     properties: {
-                        logData: {type:Object, value: {}}
+                        logData: {type:Object},
+                        url: {type:String, value: restURL + '/reports/logs'}
+                    },
+                    ready: function() {
+                        sendSignalVS({caption:"${msg.reportsPageTitle}"})
                     }
                 });</script>
             </dom-module>
 
-            <record-list id="recordList" log-data= '${logData}'></record-list>
+            <record-list id="recordList"></record-list>
 
         </div>
     </ui:define>

@@ -1,11 +1,10 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
-                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+                template="/WEB-INF/templates/basic.xhtml">
     <ui:define name="head">
         <title>vs-socket</title>
-        <link href="${resourceURL}/polymer/polymer.html" rel="import"/>
-        <link href="${resourceURL}/vs-socket/vs-socket.html" rel="import"/>
+        <link href="../resources/bower_components/polymer/polymer.html" rel="import"/>
+        <link href="../resources/bower_components/vs-socket/vs-socket.html" rel="import"/>
         <style type="text/css" media="screen"></style>
     </ui:define>
     <ui:define name="content">

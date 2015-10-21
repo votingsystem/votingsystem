@@ -70,7 +70,6 @@ public class CurrencyAccountResource {
     @Path("/system") @Transactional
     public Response system(@Context HttpServletRequest req, @Context HttpServletResponse resp,
                              @Context ServletContext context) throws IOException, ServletException {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         Query query = dao.getEM().createQuery("select c FROM CurrencyAccount c where c.userVS =:userVS and c.state =:state")
                 .setParameter("userVS", config.getSystemUser()).setParameter("state", CurrencyAccount.State.ACTIVE);
         List<CurrencyAccount> accountList = query.getResultList();
@@ -98,13 +97,7 @@ public class CurrencyAccountResource {
             bankVSBalanceList.add(new TagVSDto((BigDecimal) result[0], (String) result[2], (TagVS) result[1]));
         }
         SystemAccountsDto systemAccountsDto = new SystemAccountsDto(accountListDto, tagVSBalanceList, bankVSBalanceList);
-        if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(systemAccountsDto)).build();
-        } else {
-            req.setAttribute("systemAccountsDto", JSON.getMapper().writeValueAsString(systemAccountsDto));
-            context.getRequestDispatcher("/currencyAccount/systemAccounts.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(systemAccountsDto)).build();
     }
 
 }

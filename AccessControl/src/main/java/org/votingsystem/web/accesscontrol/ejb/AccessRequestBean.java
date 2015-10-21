@@ -38,7 +38,7 @@ public class AccessRequestBean {
                 .setParameter("eventVS", request.getEventVS()).setParameter("state", AccessRequestVS.State.OK);
         AccessRequestVS accessRequestVS = dao.getSingleResult(AccessRequestVS.class, query);
         if (accessRequestVS != null){
-            throw new ExceptionVS(MessageDto.REQUEST_REPEATED(null, config.getRestURL() + "/messageSMIME/id/" +
+            throw new ExceptionVS(MessageDto.REQUEST_REPEATED(null, config.getContextURL() + "/rest/messageSMIME/id/" +
                     accessRequestVS.getMessageSMIME().getId()));
         } else {
             accessRequestVS = dao.persist(new AccessRequestVS(signer, messageSMIME, AccessRequestVS.State.OK,

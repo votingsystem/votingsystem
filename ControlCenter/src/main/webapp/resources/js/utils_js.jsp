@@ -1,5 +1,5 @@
 <%@page contentType="text/javascript" %>
-    window['serverURL'] = "${contextURL}"
+    var contextURL = "${contextURL}"
 
     function OperationVS(operation, statusCode) {
         this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING

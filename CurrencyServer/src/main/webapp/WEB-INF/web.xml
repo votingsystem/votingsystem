@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-<display-name>CrytoCurrencyServer</display-name>
+    <display-name>CrytoCurrencyServer</display-name>
     <servlet>
         <servlet-name>VS Servlet</servlet-name>
         <servlet-class>org.votingsystem.web.servlet.InitServlet</servlet-class>
@@ -16,10 +16,6 @@
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
-    <mime-mapping>
-        <extension>jsp</extension>
-        <mime-type>text/html</mime-type>
-    </mime-mapping>
     <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
         <url-pattern>/jsf/*</url-pattern>
@@ -29,14 +25,9 @@
         <url-pattern>*.xhtml</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>jsp</servlet-name>
+        <servlet-name>Faces Servlet</servlet-name>
         <url-pattern>*.vsp</url-pattern>
     </servlet-mapping>
-    <env-entry>
-        <env-entry-name>vs.testenventry</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>testenventryValue</env-entry-value>
-    </env-entry>
     <welcome-file-list>
         <welcome-file>/app/index.xhtml</welcome-file>
     </welcome-file-list>

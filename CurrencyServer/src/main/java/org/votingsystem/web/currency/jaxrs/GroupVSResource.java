@@ -174,15 +174,7 @@ public class GroupVSResource {
                 .setParameter("userState", userState).setParameter("searchText", "%" + searchText.toLowerCase() + "%");
         totalCount = (long) query.getSingleResult();
         ResultListDto resultListDto = new ResultListDto(resultList, offset, resultList.size(), totalCount);
-        if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
-        } else {
-            req.setAttribute("groupVSId", groupVS.getId());
-            req.setAttribute("groupVSName", groupVS.getName());
-            req.setAttribute("userListDto", JSON.getMapper().writeValueAsString(resultListDto));
-            context.getRequestDispatcher("/groupVS/listUsers.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
     @Path("/id/{groupId}/listUsers")
@@ -202,7 +194,7 @@ public class GroupVSResource {
         List<SubscriptionVS> subscriptionVSList = query.getResultList();
         List<SubscriptionVSDto> resultList = new ArrayList<>();
         for(SubscriptionVS subscriptionVS : subscriptionVSList) {
-            resultList.add(SubscriptionVSDto.DETAILED(subscriptionVS, config.getRestURL()));
+            resultList.add(SubscriptionVSDto.DETAILED(subscriptionVS, config.getContextURL()));
         }
         query = dao.getEM().createQuery("select count(s) from SubscriptionVS s where s.groupVS.id =:groupId " +
                 "and s.state in :states").setParameter("groupId", groupId).setParameter("states", states);
@@ -250,7 +242,7 @@ public class GroupVSResource {
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
         groupVS = groupVSBean.cancelGroup(groupVS, messageSMIME);
-        String URL = config.getRestURL() + "/groupVS/id/" + groupVS.getId();
+        String URL = config.getContextURL() + "/rest/groupVS/id/" + groupVS.getId();
         String message =  messages.get("currencyGroupCancelledOKMsg", groupVS.getName());
         MessageDto messageDto = new MessageDto(ResponseVS.SC_OK, message, URL);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build();
@@ -280,7 +272,7 @@ public class GroupVSResource {
         SubscriptionVS subscriptionVS = dao.getSingleResult(SubscriptionVS.class, query);
         if(subscriptionVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "SubscriptionVS not found - groupId: " + groupId + " - userId: " + userId).build();
-        SubscriptionVSDto dto = SubscriptionVSDto.DETAILED(subscriptionVS, config.getRestURL());
+        SubscriptionVSDto dto = SubscriptionVSDto.DETAILED(subscriptionVS, config.getContextURL());
         if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto))
                 .type(MediaTypeVS.JSON).build();
         else {

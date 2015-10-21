@@ -99,7 +99,7 @@ public class MessageSMIMEResource {
             Map resultMap = new HashMap<>();
             resultMap.put("operation", signedContentMap.get("operation"));
             resultMap.put("smimeMessage", smimeMessageStr);
-            resultMap.put("signedContentMap", JSON.getMapper().writeValueAsString(signedContentMap));
+            resultMap.put("signedContentMap", signedContentMap);
             resultMap.put("timeStampDate", timeStampDate.getTime());
             resultMap.put("viewer", viewer);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();

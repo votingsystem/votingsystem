@@ -91,7 +91,7 @@ public class VoteVSBean {
                 DateUtils.getDateStr(voteVS.getEventVS().getDateFinish())));
         String toUser = voteVS.getEventVS().getControlCenterVS().getName();
         String subject = messages.get("voteCancelationSubject");
-        smimeMessage.setMessageID(format("{0}/messageSMIME/id/{1}", config.getRestURL(), messageSMIME.getId()));
+        smimeMessage.setMessageID(format("{0}/rest/messageSMIME/id/{1}", config.getContextURL(), messageSMIME.getId()));
         SMIMEMessage smimeMessageReq = signatureBean.getSMIMEMultiSigned(toUser, smimeMessage, subject);
         String cancelerServiceURL = voteVS.getEventVS().getControlCenterVS().getVoteVSCancelerURL();
         ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageReq.getBytes(),

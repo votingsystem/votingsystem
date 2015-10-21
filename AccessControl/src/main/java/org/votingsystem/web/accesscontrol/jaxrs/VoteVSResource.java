@@ -56,7 +56,7 @@ public class VoteVSResource {
         if(voteVS == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - VoteVS not found - voteId: " + id).build();
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
-                new VoteVSDto(voteVS, config.getRestURL()))).type(MediaTypeVS.JSON).build();
+                new VoteVSDto(voteVS, config.getContextURL()))).type(MediaTypeVS.JSON).build();
     }
 
     @Transactional
@@ -72,7 +72,7 @@ public class VoteVSResource {
             return Response.status(Response.Status.BAD_REQUEST).entity(
                     "ERROR - VoteVS not found - hashHex: " + hashHex).build();
         }
-        VoteVSDto dto = new VoteVSDto(voteVS, config.getRestURL());
+        VoteVSDto dto = new VoteVSDto(voteVS, config.getContextURL());
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
     }
 
@@ -105,7 +105,7 @@ public class VoteVSResource {
         VoteVSCanceler voteCanceler = dao.getSingleResult(VoteVSCanceler.class, query);
         if(voteCanceler == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - VoteVSCanceler not found - hashHex: " + hashHex + " - hashBase64: " + hashCertVSBase64).build();
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(new VoteVSDto(voteCanceler, config.getRestURL())))
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(new VoteVSDto(voteCanceler, config.getContextURL())))
                 .entity(MediaTypeVS.JSON).build();
     }
 

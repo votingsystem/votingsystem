@@ -1,15 +1,17 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-        xmlns:ui="http://java.sun.com/jsf/facelets"
-        template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
-        ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/basic.xhtml">
     <ui:define name="head">
         <title>ShopExampleController</title>
-        <link href="${elementURL}/shopExample/test-shop.vsp" rel="import"/>
+        <script src="../resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+        <script src="../resources/js/utilsVS.js" type="text/javascript"></script>
+        <script src="../resources/js/utils_js.vsp" type="text/javascript"></script>
+        <link rel="import" href="../resources/bower_components/iron-ajax/iron-ajax.html"/>
+        <link rel="import" href="test-shop.vsp"/>
     </ui:define>
     <ui:define name="content">
-
-        <div><test-shop transaction-request="${transactionRequest}" payment-info-service-url="${paymentInfoServiceURL}"
-                session-id="${sessionID}"></test-shop></div>
+        <div><test-shop transaction-request="#{transactionRequest}" payment-info-service-url="#{paymentInfoServiceURL}"
+                session-id="#{sessionID}"></test-shop></div>
 
     </ui:define>
 </ui:composition>

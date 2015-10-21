@@ -48,23 +48,15 @@ public class ReportsResource {
     public Response week(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,
                           @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         File reportsFile = new File(LoggerVS.weekPeriodLogPath);
         Calendar calendar = DateUtils.getCalendar(year, month, day);
-
         TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
-
+        //TODO
         if(reportsFile.exists()) {
             StringBuilder stringBuilder = new StringBuilder("{");
             stringBuilder.append(FileUtils.getStringFromFile(reportsFile));
             stringBuilder.append("}");
-            if(contentType.contains("json")) {
-                return Response.ok().type(MediaTypeVS.JSON).entity(stringBuilder.toString()).build();
-            } else {
-                req.setAttribute("reportsDto", stringBuilder.toString());
-                context.getRequestDispatcher("/reports/week.xhtml").forward(req, resp);
-                return Response.ok().build();
-            }
+            return Response.ok().type(MediaTypeVS.JSON).entity(stringBuilder.toString()).build();
         } else return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - not found - file: " + LoggerVS.weekPeriodLogPath).build();
     }
@@ -86,37 +78,26 @@ public class ReportsResource {
                 }
             });
         }
-        req.setAttribute("periods", periods);
-        context.getRequestDispatcher("/reports/index.xhtml").forward(req, resp);
-        return Response.ok().build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(periods)).build();
     }
 
     @Path("/logs")
     @GET  @Produces(MediaType.APPLICATION_JSON) @Transactional
     public Response logs(@Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         File reportsFile = new File(LoggerVS.reporstLogPath);
         if(!reportsFile.exists()) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - not found - file: " + LoggerVS.reporstLogPath).build();
         StringBuilder stringBuilder = new StringBuilder("{\"resultList\":[");
         stringBuilder.append(FileUtils.getStringFromFile(reportsFile));
         stringBuilder.append("]}");
-
-        if(contentType.contains("json")) {
-            return Response.ok().type(MediaTypeVS.JSON).entity(stringBuilder.toString()).build();
-        } else {
-            req.setAttribute("logData", stringBuilder.toString());
-            context.getRequestDispatcher("/reports/logs.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().type(MediaTypeVS.JSON).entity(stringBuilder.toString()).build();
     }
 
     @Path("/transactionvs")
     @GET  @Produces(MediaType.APPLICATION_JSON) @Transactional
     public Response transactionvs(@Context ServletContext context, @QueryParam("transactionvsType") String transactionvsType,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         File reportsFile = new File(LoggerVS.transactionsLogPath);
         if(!reportsFile.exists()) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - not found - file: " + LoggerVS.reporstLogPath).build();
@@ -146,13 +127,7 @@ public class ReportsResource {
             stringBuilder.append("]}");
             result = stringBuilder.toString();
         }
-        if(contentType.contains("json")) {
-            return Response.ok().type(MediaTypeVS.JSON).entity(result).build();
-        } else {
-            req.setAttribute("transactionsDto", result);
-            context.getRequestDispatcher("/reports/transactionvs.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().type(MediaTypeVS.JSON).entity(result).build();
     }
 
 }

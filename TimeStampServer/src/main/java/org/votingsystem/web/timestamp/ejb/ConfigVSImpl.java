@@ -83,9 +83,7 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public void setX509TimeStampServerCert(X509Certificate x509Cert) {
-
-    }
+    public void setX509TimeStampServerCert(X509Certificate x509Cert) { }
 
     @Override
     public String getServerName() {
@@ -116,11 +114,6 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public String getWebURL() {
-        return null;
-    }
-
-    @Override
     public UserVS createIBAN(UserVS userVS) throws ValidationExceptionVS { return null;}
 
     @Override
@@ -145,11 +138,6 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Override
     public ControlCenterVS getControlCenter() {
-        return null;
-    }
-
-    @Override
-    public String getRestURL() {
         return null;
     }
 

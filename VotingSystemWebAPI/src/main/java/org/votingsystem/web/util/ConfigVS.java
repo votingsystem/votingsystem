@@ -35,10 +35,6 @@ public interface ConfigVS  {
 
     public String getWebSocketURL();
 
-    public String getWebURL();
-
-    public String getRestURL();
-
     public String getStaticResURL();
 
     public EnvironmentVS getMode();

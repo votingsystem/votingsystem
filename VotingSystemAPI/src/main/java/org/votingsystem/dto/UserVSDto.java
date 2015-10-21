@@ -30,6 +30,7 @@ public class UserVSDto implements Serializable {
     private UserVS.Type type;
     private String name;
     private String reason;
+    private String message;
     private String description;
     private Set<DeviceVSDto> connectedDevices;
     private DeviceVSDto deviceVS;
@@ -113,9 +114,9 @@ public class UserVSDto implements Serializable {
         UserVSDto userVSDto = BASIC(userVS);
         userVSDto.type = UserVS.Type.REPRESENTATIVE;
         userVSDto.numRepresentations = numRepresentations;
-        userVSDto.URL = format("{0}/representative/id/{1}", contextURL, userVS.getId());
-        userVSDto.representativeMessageURL = format("{0}/messageSMIME/id/{1}", contextURL, smimeActivationId);
-        userVSDto.imageURL = format("{0}/representative/id/{1}/image", contextURL, userVS.getId());
+        userVSDto.URL = format("{0}/rest/representative/id/{1}", contextURL, userVS.getId());
+        userVSDto.representativeMessageURL = format("{0}/rest/messageSMIME/id/{1}", contextURL, smimeActivationId);
+        userVSDto.imageURL = format("{0}/rest/representative/id/{1}/image", contextURL, userVS.getId());
         userVSDto.description = userVS.getDescription();
         return userVSDto;
     }
@@ -360,5 +361,13 @@ public class UserVSDto implements Serializable {
 
     public void setOperation(TypeVS operation) {
         this.operation = operation;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

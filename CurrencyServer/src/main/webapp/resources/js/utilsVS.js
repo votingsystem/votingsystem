@@ -299,15 +299,6 @@ function updateMenuLinks() {
     }
 }
 
-function loadURL_VS(urlToLoad, target) {
-    if(target) {
-        window.open(updateMenuLink(urlToLoad), target);
-    } else {
-        if(document.querySelector('#navBar')) document.querySelector('#navBar').loadURL(urlToLoad)
-        else window.location.href = updateMenuLink(urlToLoad, "&mode=simplePage")
-    }
-}
-
 function updateMenuLink(urlToUpdate, param) {
     if(urlToUpdate == null) return
     var result = urlToUpdate
@@ -406,9 +397,9 @@ function setClientToolConnected() {
 var coreSignalData = null
 function fireCoreSignal(coreSignalDataBase64) {
     window['isClientToolConnected'] = true
-    if(document.querySelector("#navBar") != null && document.querySelector("#navBar").fire != null) {
+    if(document.querySelector("#app") != null && document.querySelector("#app").fire != null) {
         var b64_to_utf8 = decodeURIComponent(escape(window.atob(coreSignalDataBase64)))
-        document.querySelector("#navBar").fire('iron-signal', toJSON(b64_to_utf8));
+        document.querySelector("#app").fire('iron-signal', toJSON(b64_to_utf8));
         console.log("fireCoreSignal: " + b64_to_utf8)
     } else {
         coreSignalData = coreSignalDataBase64

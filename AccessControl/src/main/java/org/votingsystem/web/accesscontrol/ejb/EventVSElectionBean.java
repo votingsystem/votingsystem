@@ -65,7 +65,7 @@ public class EventVSElectionBean {
         request.setFieldsEventVS(eventVS.getFieldsEventVS());
         request.setId(eventVS.getId());
         request.setAccessControlEventVSId(eventVS.getId());
-        request.setURL(config.getRestURL() + "/eventVSElection/id/" + eventVS.getId());
+        request.setURL(config.getContextURL() + "/rest/eventVSElection/id/" + eventVS.getId());
         request.setDateCreated(eventVS.getDateCreated());
         request.setType(EventVS.Type.ELECTION);
 

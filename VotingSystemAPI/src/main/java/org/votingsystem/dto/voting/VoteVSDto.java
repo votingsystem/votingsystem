@@ -37,7 +37,7 @@ public class VoteVSDto {
         this.setId(canceler.getVoteVS().getId());
         this.setCancelerId(canceler.getId());
         this.setState(canceler.getVoteVS().getState());
-        this.setCancelationMessageSMIMEURL(contextURL + "/voteVS/id/" + canceler.getVoteVS().getId() + "/cancelation");
+        this.setCancelationMessageSMIMEURL(contextURL + "/rest/voteVS/id/" + canceler.getVoteVS().getId() + "/cancelation");
     }
 
     public VoteVSDto(VoteVS voteVS, String contextURL) {
@@ -45,16 +45,16 @@ public class VoteVSDto {
         setId(voteVS.getId());
         setState(voteVS.getState());
         if(VoteVS.State.CANCELED == getState()) {
-            setCancelationMessageSMIMEURL(contextURL + "/voteVS/id/" + voteVS.getId() + "/cancelation");
+            setCancelationMessageSMIMEURL(contextURL + "/rest/voteVS/id/" + voteVS.getId() + "/cancelation");
         }
         setEventVSId(voteVS.getEventVS().getId());
-        setEventURL(contextURL + "/eventVSElection/id/" + getEventVSId());
+        setEventURL(contextURL + "/rest/eventVSElection/id/" + getEventVSId());
         setOptionSelected(voteVS.getOptionSelected());
         setHashCertVSBase64(voteVS.getCertificateVS().getHashCertVSBase64());
         if(getHashCertVSBase64() != null) setHashCertVoteHex(StringUtils.toHex(getHashCertVSBase64()));
         String hashHex = hexConverter.marshal(voteVS.getCertificateVS().getHashCertVSBase64().getBytes());
-        setCertificateURL(contextURL + "/certificateVS/hashHex/" + hashHex);
-        setMessageSMIMEURL(contextURL + "/messageSMIME/id/" + voteVS.getMessageSMIME().getId());
+        setCertificateURL(contextURL + "/rest/certificateVS/hashHex/" + hashHex);
+        setMessageSMIMEURL(contextURL + "/rest/messageSMIME/id/" + voteVS.getMessageSMIME().getId());
     }
 
 

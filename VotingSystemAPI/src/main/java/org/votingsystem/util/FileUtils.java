@@ -223,8 +223,7 @@ public class FileUtils {
     }
 
     public static void copyStringToFile(String stringToCopy, File file) throws IOException {
-        FileWriter fileWriter = null;
-        fileWriter = new FileWriter(file);
+        FileWriter fileWriter = new FileWriter(file);
         fileWriter.write(stringToCopy);
         fileWriter.close();
     }

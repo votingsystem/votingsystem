@@ -112,7 +112,7 @@ public class EventVSElectionResource {
     public Response save(MessageSMIME messageSMIME, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         EventVSElection response = eventVSElectionBean.saveEvent(messageSMIME);
-        resp.setHeader("eventURL", format("{0}/eventVSElection/id/{1}", config.getRestURL(), response.getId()));
+        resp.setHeader("eventURL", format("{0}/rest/eventVSElection/id/{1}", config.getContextURL(), response.getId()));
         return Response.ok().entity(response.getPublishRequestSMIME().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 

@@ -3,6 +3,7 @@ package org.votingsystem.web.currency.util;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import org.apache.commons.io.IOUtils;
+
 import javax.servlet.ServletRequest;
 import java.io.IOException;
 import java.nio.charset.Charset;

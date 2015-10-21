@@ -1,7 +1,6 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
-                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+                template="/WEB-INF/templates/basic.xhtml">
     <ui:define name="title">${msg.electionSystemLbl}</ui:define>
     <ui:define name="head">
         <title>${msg.testAccountsPageCaption}</title>
@@ -20,7 +19,7 @@
                 var encodedSubject = encodeURIComponent(transactionSubject)
                 var encodedRefererURL = encodeURIComponent(window.location.href)
                 var encodedReceptor = encodeURIComponent('${msg.receptorTestWebAccountLbl}')
-                var uriData = "${restURL}/app/androidClient?operation=TRANSACTIONVS&amp;amount=20&amp;currencyCode=EUR" +
+                var uriData = restURL + "/app/androidClient?operation=TRANSACTIONVS&amp;amount=20&amp;currencyCode=EUR" +
                         "&amp;tagVS=HIDROGENO&amp;IBAN=" + encodedIBAN + "&amp;subject=" + encodedSubject + "&amp;toUser=" + encodedReceptor +
                         "&amp;toUserIBAN=ES8978788989450000000004&amp;refererURL=" + encodedRefererURL
                 window.location.href = uriData.replace("\n","")

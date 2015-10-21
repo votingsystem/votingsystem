@@ -35,14 +35,14 @@ public class SubscriptionVSDto {
 
     public SubscriptionVSDto() {}
 
-    public static SubscriptionVSDto DETAILED(SubscriptionVS subscriptionVS, String restURL) {
+    public static SubscriptionVSDto DETAILED(SubscriptionVS subscriptionVS, String contextURL) {
         SubscriptionVSDto result = new SubscriptionVSDto();
         result.setId(subscriptionVS.getId());
         result.setState(subscriptionVS.getState());
-        result.setSubscriptionSMIME_URL(restURL + "/messageSMIME/id/" + subscriptionVS.getSubscriptionSMIME().getId());
-        if(subscriptionVS.getActivationSMIME() != null) result.setActivationSMIME_URL(restURL + "/messageSMIME/id/" +
+        result.setSubscriptionSMIME_URL(contextURL + "/rest/messageSMIME/id/" + subscriptionVS.getSubscriptionSMIME().getId());
+        if(subscriptionVS.getActivationSMIME() != null) result.setActivationSMIME_URL(contextURL + "/rest/messageSMIME/id/" +
                 subscriptionVS.getActivationSMIME().getId());
-        if(subscriptionVS.getCancellationSMIME() != null) result.setActivationSMIME_URL(restURL + "/messageSMIME/id/" +
+        if(subscriptionVS.getCancellationSMIME() != null) result.setActivationSMIME_URL(contextURL + "/rest/messageSMIME/id/" +
                 subscriptionVS.getCancellationSMIME().getId());
         result.setDateActivated(subscriptionVS.getDateActivated());
         result.setDateCreated(subscriptionVS.getDateCreated());
