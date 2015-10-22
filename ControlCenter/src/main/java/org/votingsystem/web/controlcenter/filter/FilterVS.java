@@ -40,10 +40,6 @@ public class FilterVS implements Filter {
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         String requestMethod = ((HttpServletRequest)req).getMethod();
-        req.setAttribute("request", req);
-        req.setAttribute("resourceURL", contextURL + "/resources/bower_components");
-        req.setAttribute("elementURL", contextURL + "/jsf");
-        req.setAttribute("restURL", contextURL + "/rest");
         req.setAttribute("contextURL", contextURL);
         req.setAttribute("serverName", serverName);
         req.setAttribute("timeStampServerURL", timeStampServerURL);
@@ -73,7 +69,6 @@ public class FilterVS implements Filter {
     @Override
     public void destroy() {
         servletContext.log("------- FilterVS destroyed -------");
-        servletContext = null;
     }
 
 }

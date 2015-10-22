@@ -3,7 +3,7 @@
                 template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="head">
-        <link href="${elementURL}/certificateVS/cert-list.vsp" rel="import"/>
+        <link href="cert-list.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
         <vs-innerpage-signal caption="${msg.certsPageTitle}"></vs-innerpage-signal>

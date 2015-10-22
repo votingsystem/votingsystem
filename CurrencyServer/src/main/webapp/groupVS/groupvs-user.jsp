@@ -67,7 +67,7 @@
                 this.$.reasonDialog.addEventListener('on-submit', function (e) {
                     console.log("deActivateUser")
                     var operationVS = new OperationVS(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
-                    operationVS.serviceURL = restURL + "/groupVS/deActivateUser"
+                    operationVS.serviceURL = contextURL + "/rest/groupVS/deActivateUser"
                     operationVS.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + this.subscriptionDto.groupvs.name + "'"
                     operationVS.jsonStr = JSON.stringify({groupvsId:this.subscriptionDto.groupvs.id,
                         groupvsName:this.subscriptionDto.groupvs.name, userVSName:this.subscriptionDto.uservs.name,
@@ -94,7 +94,7 @@
                 return new Date(timStamp).getDayWeekAndHourFormat()
             },
             goToUserVSPage:function() {
-                page.show(restURL + "/userVS/id/" + this.userId)
+                page.show(contextURL + "/rest/userVS/id/" + this.userId)
                 this.$.xDialog.opened = false
             },
             openedChanged:function() {
@@ -130,7 +130,7 @@
             activateUser : function(e) {
                 console.log("activateUser")
                 var operationVS = new OperationVS(Operation.CURRENCY_GROUP_USER_ACTIVATE)
-                operationVS.serviceURL = restURL + "/groupVS/activateUser"
+                operationVS.serviceURL = contextURL + "/rest/groupVS/activateUser"
                 operationVS.signedMessageSubject = "${msg.activateGroupUserMessageSubject}" + " '" +
                         this.subscriptionDto.groupvs.name + "'"
                 operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_USER_ACTIVATE,

@@ -78,12 +78,12 @@
             is:'cert-list',
             properties: {
                 certListDto:{type:Object, observer:'certListDtoChanged'},
-                url:{type:String, value: restURL + '/certificateVS/certs'}
+                url:{type:String, value: contextURL + '/rest/certificateVS/certs'}
             },
             ready: function() {
                 console.log(this.tagName + " - ready - ")
                 this.certDetailsHidden = true
-                this.url= restURL + "/certificateVS/certs"
+                this.url= contextURL + "/rest/certificateVS/certs"
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
@@ -116,7 +116,7 @@
             },
             pagerChange:function(e) {
                 var certTypeSelectValue = this.$.certTypeSelect.value
-                targetURL = restURL + "/certificateVS/certs?menu=" + menuType + certTypeSelectValue +
+                targetURL = contextURL + "/rest/certificateVS/certs?menu=" + menuType + certTypeSelectValue +
                         "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
@@ -127,7 +127,7 @@
             certTypeSelect: function () {
                 var optionSelected = this.$.certTypeSelect.value
                 if("" != optionSelected) {
-                    targetURL = restURL + "/certificateVS/certs?menu=" + menuType + optionSelected
+                    targetURL = contextURL + "/rest/certificateVS/certs?menu=" + menuType + optionSelected
                     history.pushState(null, null, targetURL);
                     this.$.ajax.url = targetURL
                     console.log("certTypeSelect - targetURL: " + targetURL)

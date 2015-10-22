@@ -94,11 +94,11 @@
             var app = document.querySelector('#app');
 
             app.addEventListener('dom-change', function() {
-                console.log('app.js - dom-changespa app ready');
+                console.log('spa.xhtml - dom-change');
             });
 
             window.addEventListener('WebComponentsReady', function() {
-                console.log('app.js - WebComponentsReady');
+                console.log('spa.xhtml - WebComponentsReady');
             });
 
             app.onDataRouteClick = function() {
@@ -145,7 +145,7 @@
 
             document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
                 console.log("spa.xhtml - user-clicked")
-                page.show(restURL + "/userVS/id/" + e.detail.id)
+                page.show(contextURL + "/rest/userVS/id/" + e.detail.id)
             })
 
             app.scrollPageToTop = function() {

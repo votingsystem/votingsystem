@@ -92,7 +92,7 @@
             } else this.fromGroupToAllMembersInfo = 0
         },
         selectAction: function() {
-            var targetURL = restURL + "/app/userVSDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
+            var targetURL = contextURL + "/rest/app/userVSDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
             history.pushState(null, null, targetURL);
             console.log(this.tagName + " - targetURL: " + targetURL)
             this.$.ajax.url = targetURL

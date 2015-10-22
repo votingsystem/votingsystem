@@ -1,12 +1,10 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
-                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+                template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
-        <link href="${elementURL}/certificateVS/cert-request-form.vsp" rel="import"/>
+        <link href="cert-request-form.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
-        <vs-innerpage-signal caption="${msg.certRequestLbl}"></vs-innerpage-signal>
         <div id="contentDiv" class="pageContentDiv" style="min-height: 1000px;">
             <cert-request-form></cert-request-form>
         </div>

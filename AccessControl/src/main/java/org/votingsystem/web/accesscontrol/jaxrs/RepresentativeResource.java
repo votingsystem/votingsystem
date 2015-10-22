@@ -33,6 +33,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -66,7 +68,7 @@ public class RepresentativeResource {
     public Response history(MessageSMIME messageSMIME, @Context ServletContext context, @Context HttpServletRequest req,
                             @Context HttpServletResponse resp) throws Exception {
         EmailTemplateWrapper responseWrapper = new EmailTemplateWrapper(resp);
-        context.getRequestDispatcher("/jsf/mail/RepresentativeVotingHistoryDownloadInstructions.jsp").forward(req, responseWrapper);
+        context.getRequestDispatcher("/mail/RepresentativeVotingHistoryDownloadInstructions.vsp").forward(req, responseWrapper);
         String mailTemplate = responseWrapper.toString();
         representativeBean.processVotingHistoryRequest(messageSMIME, mailTemplate);
         RepresentativeVotingHistoryDto request = messageSMIME.getSignedContent(RepresentativeVotingHistoryDto.class);
@@ -78,7 +80,7 @@ public class RepresentativeResource {
                    @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         EmailTemplateWrapper responseWrapper = new EmailTemplateWrapper(resp);
         req.setAttribute("pageTitle", messages.get("representativeAccreditationsLbl"));
-        context.getRequestDispatcher("/jsf/mail/RepresentativeAccreditationRequestDownloadInstructions.jsp").forward(req, responseWrapper);
+        context.getRequestDispatcher("/mail/RepresentativeAccreditationRequestDownloadInstructions.vsp").forward(req, responseWrapper);
         String mailTemplate = responseWrapper.toString();
         RepresentativeAccreditationsDto request = messageSMIME.getSignedContent(RepresentativeAccreditationsDto.class);
         representativeBean.processAccreditationsRequest(messageSMIME, mailTemplate);
@@ -95,7 +97,6 @@ public class RepresentativeResource {
     public Response index( @DefaultValue("0") @QueryParam("offset") int offset, @DefaultValue("50") @QueryParam("max") int max,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws ServletException, IOException {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         List<UserVSDto> responseList = new ArrayList<>();
         Query query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
                 .setParameter("type", UserVS.Type.REPRESENTATIVE);
@@ -105,19 +106,13 @@ public class RepresentativeResource {
         }
         //TODO totalCount
         ResultListDto<UserVSDto> resultListDto = new ResultListDto<>(responseList, offset, max, responseList.size());
-        if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
-                    .type(MediaTypeVS.JSON).build();
-        } else {
-            req.setAttribute("resultListDto", JSON.getMapper().writeValueAsString(resultListDto));
-            context.getRequestDispatcher("/representative/index.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
+                .type(MediaTypeVS.JSON).build();
     }
 
     @Path("/id/{id}") @GET
     public Response indexById(@PathParam("id") Long id, @Context ServletContext context,
-                              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException {
+                              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException, URISyntaxException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         UserVS representative = dao.find(UserVS.class, id);
         if(representative == null || UserVS.Type.REPRESENTATIVE != representative.getType()) {
@@ -129,16 +124,15 @@ public class RepresentativeResource {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
                     .type(MediaTypeVS.JSON).build();
         } else {
-            req.setAttribute("representativeMap", JSON.getMapper().writeValueAsString(representativeDto));
-            context.getRequestDispatcher("/representative/representative.xhtml").forward(req, resp);
-            return Response.ok().build();
+            req.getSession().setAttribute("representativeMap", JSON.getMapper().writeValueAsString(representativeDto));
+            return Response.temporaryRedirect(new URI("../representative/representative.xhtml")).build();
         }
     }
 
     @Transactional
     @Path("/nif/{nif}") @GET
     public Response getByNif(@PathParam("nif") String nifReq, @Context HttpServletRequest req, @Context ServletContext context,
-             @Context HttpServletResponse resp) throws IOException, ExceptionVS, ServletException {
+             @Context HttpServletResponse resp) throws IOException, ExceptionVS, ServletException, URISyntaxException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         String nif = NifUtils.validate(nifReq);
         Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
@@ -151,9 +145,8 @@ public class RepresentativeResource {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
                     .type(MediaTypeVS.JSON).build();
         } else {
-            req.setAttribute("representativeMap", JSON.getMapper().writeValueAsString(representativeDto));
-            context.getRequestDispatcher("/representative/representative.xhtml").forward(req, resp);
-            return Response.ok().build();
+            req.getSession().setAttribute("representativeMap", JSON.getMapper().writeValueAsString(representativeDto));
+            return Response.temporaryRedirect(new URI("../representative/representative.xhtml")).build();
         }
     }
 

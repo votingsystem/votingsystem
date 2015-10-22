@@ -104,30 +104,19 @@ public class GroupVSResource {
                 .setParameter("state", state);
         totalCount = (long) query.getSingleResult();
         ResultListDto resultListDto = ResultListDto.GROUPVS(resultList, state, offset, max, totalCount);
-        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
                 .type(MediaTypeVS.JSON).build();
-        else {
-            req.setAttribute("groupVSList", JSON.getMapper().writeValueAsString(resultListDto));
-            context.getRequestDispatcher("/groupVS/index.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
     }
 
     @Path("/id/{id}")
     @GET @Transactional @Produces(MediaType.APPLICATION_JSON)
     public Response getById(@PathParam("id") long id, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
         GroupVSDto groupVSDto = groupVSBean.getGroupVSDto(groupVS);
-        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(groupVSDto)).type(MediaTypeVS.JSON).build();
-        else {
-            req.setAttribute("groupvsDto", JSON.getMapper().writeValueAsString(groupVSDto));
-            context.getRequestDispatcher("/groupVS/groupVS.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(groupVSDto)).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/id/{id}/searchUsers")
@@ -209,17 +198,11 @@ public class GroupVSResource {
                             @DefaultValue("100") @QueryParam("max") int max,
                             @Context ServletContext context,
                             @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null)  return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
         BalancesDto dto = balancesBean.getBalancesDto(groupVS, DateUtils.getCurrentWeekPeriod());
-        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
-        else {
-            req.setAttribute("groupvsMap", JSON.getMapper().writeValueAsString(dto));
-            context.getRequestDispatcher("/groupVS/groupVS.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
     @Transactional
@@ -266,20 +249,14 @@ public class GroupVSResource {
     public Response user(@PathParam("groupId") long groupId, @PathParam("userId") long userId,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp) 
             throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         Query query = dao.getEM().createQuery("select s from SubscriptionVS s where s.groupVS.id =:groupId " +
                 "and s.userVS.id =:userId").setParameter("groupId", groupId).setParameter("userId", userId);
         SubscriptionVS subscriptionVS = dao.getSingleResult(SubscriptionVS.class, query);
         if(subscriptionVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "SubscriptionVS not found - groupId: " + groupId + " - userId: " + userId).build();
         SubscriptionVSDto dto = SubscriptionVSDto.DETAILED(subscriptionVS, config.getContextURL());
-        if(contentType.contains("json")) return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto))
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto))
                 .type(MediaTypeVS.JSON).build();
-        else {
-            req.setAttribute("subscriptionDto", JSON.getMapper().writeValueAsString(dto));
-            context.getRequestDispatcher("/groupVS/user.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
     }
 
     @Path("/activateUser")

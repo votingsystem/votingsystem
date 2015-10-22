@@ -25,7 +25,8 @@
     "polymer": "Polymer/polymer#^1.0.2",
     "paper-elements": "PolymerElements/paper-elements#^1.0.1",
     "iron-elements": "PolymerElements/iron-elements#^1.0.0",
-    "layout": "Polymer/layout"
+    "layout": "Polymer/layout",
+    "visionmedia-page":"visionmedia/page.js#^1.6.4"
   },
   "resolutions": {
     "polymer": "^1.0.0"

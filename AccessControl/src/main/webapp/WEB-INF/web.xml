@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-<display-name>AccessControl</display-name>
+    <display-name>AccessControl</display-name>
     <servlet>
         <servlet-name>VS Servlet</servlet-name>
         <servlet-class>org.votingsystem.web.servlet.InitServlet</servlet-class>
@@ -11,14 +11,6 @@
         <servlet-name>VS Servlet</servlet-name>
         <url-pattern>/vsservlet/*</url-pattern>
     </servlet-mapping>
-    <mime-mapping>
-        <extension>vsp</extension>
-        <mime-type>text/html</mime-type>
-    </mime-mapping>
-    <mime-mapping>
-        <extension>jsf</extension>
-        <mime-type>text/html</mime-type>
-    </mime-mapping>
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
@@ -34,21 +26,10 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
-        <url-pattern>*.jsf</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>Faces Servlet</servlet-name>
         <url-pattern>*.vsp</url-pattern>
     </servlet-mapping>
-    <security-constraint>
-        <display-name>Restrict direct access to JSP files</display-name>
-        <web-resource-collection>
-            <web-resource-name>JSP files</web-resource-name>
-            <url-pattern>*.jsp</url-pattern>
-        </web-resource-collection>
-        <auth-constraint />
-    </security-constraint>
     <welcome-file-list>
-        <welcome-file>/eventVSElection/index.xhtml</welcome-file>
+        <welcome-file>/spa.xhtml</welcome-file>
     </welcome-file-list>
 </web-app>
+

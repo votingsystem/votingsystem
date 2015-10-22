@@ -105,17 +105,17 @@ public class AccessControlVS extends ActorVS implements Serializable {
 
     public String getDashBoardURL(String menu, String locale) {
         String sufix = (menu != null || locale != null)? "?menu=" + menu + "&locale=" + locale : "";
-        return getServerURL() + "/app/admin.xhtml" + sufix;
+        return getServerURL() + "/spa.xhtml?menu=Admin" + sufix;
     }
 
     public String getVotingPageURL(String menu, String locale) {
         String sufix = (menu != null || locale != null)? "?menu=" + menu + "&locale=" + locale : "";
-        return getServerURL() + "/rest/eventVSElection" + sufix;
+        return getServerURL() + "/spa.xhtml#!/eventVSElection" + sufix;
     }
 
     public String getSelectRepresentativePageURL(String menu, String locale) {
         String sufix = (menu != null || locale != null)? "?menu=" + menu + "&locale=" + locale : "";
-        return getServerURL() + "/rest/representative" + sufix;
+        return getServerURL() + "/spa.xhtml#!/representative" + sufix;
     }
 
     public String getUserCSRServiceURL (Long csrRequestId) {

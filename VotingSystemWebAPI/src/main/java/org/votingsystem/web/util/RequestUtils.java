@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.net.URI;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -55,13 +56,12 @@ public class RequestUtils {
             resultMap.put("viewer", viewer);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
         } else {
-            req.setAttribute("operation", operation);
-            req.setAttribute("smimeMessage", smimeMessageStr);
-            req.setAttribute("signedContentMap", JSON.getMapper().writeValueAsString(signedContentMap));
-            req.setAttribute("timeStampDate", timeStampDate.getTime());
-            req.setAttribute("viewer",  viewer);
-            context.getRequestDispatcher("/messageSMIME/contentViewer.xhtml").forward(req, resp);
-            return Response.ok().build();
+            req.getSession().setAttribute("operation", operation);
+            req.getSession().setAttribute("smimeMessage", smimeMessageStr);
+            req.getSession().setAttribute("signedContentMap", JSON.getMapper().writeValueAsString(signedContentMap));
+            req.getSession().setAttribute("timeStampDate", timeStampDate.getTime());
+            req.getSession().setAttribute("viewer", viewer);
+            return Response.temporaryRedirect(new URI("../messageSMIME/contentViewer.xhtml")).build();
         }
     }
 

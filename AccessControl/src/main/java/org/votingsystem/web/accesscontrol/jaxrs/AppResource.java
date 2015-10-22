@@ -13,6 +13,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,10 +34,9 @@ public class AppResource {
     public Response androidClient(@QueryParam("browserToken") String browserToken, @QueryParam("eventId") String eventId,
             @QueryParam("serverURL") String serverURL, @QueryParam("msg") String msg,
             @Context ServletContext context, @Context HttpServletRequest req,
-                                  @Context HttpServletResponse resp) throws ServletException, IOException {
+                                  @Context HttpServletResponse resp) throws ServletException, IOException, URISyntaxException {
         if(req.getParameter("androidClientLoaded") != null && Boolean.getBoolean(req.getParameter("androidClientLoaded"))) {
-            context.getRequestDispatcher("/app/index.xhtml").forward(req, resp);
-            return Response.ok().build();
+            return Response.temporaryRedirect(new URI("../app/index.xhtml")).build();
         } else {
             String uri = config.getContextURL() + "/eventVSElection/main?androidClientLoaded=false";
             if(browserToken != null) uri = uri + "#" + browserToken;

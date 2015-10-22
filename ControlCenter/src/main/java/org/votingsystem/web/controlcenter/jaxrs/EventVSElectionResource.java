@@ -25,6 +25,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +47,7 @@ public class EventVSElectionResource {
     @Transactional
     @Path("/id/{id}") @GET
     public Response getById (@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
-                             @Context HttpServletResponse resp) throws ValidationExceptionVS, IOException, ServletException {
+                             @Context HttpServletResponse resp) throws ValidationExceptionVS, IOException, ServletException, URISyntaxException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE, EventVS.State.PENDING, EventVS.State.CANCELED,
                 EventVS.State.TERMINATED);
@@ -59,9 +61,8 @@ public class EventVSElectionResource {
         if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventVSDto)).type(MediaTypeVS.JSON).build();
         } else {
-            req.setAttribute("eventDto", JSON.getMapper().writeValueAsString(eventVSDto));
-            context.getRequestDispatcher("/eventVSElection/eventVSElection.xhtml").forward(req, resp);
-            return Response.ok().build();
+            req.getSession().setAttribute("eventDto", JSON.getMapper().writeValueAsString(eventVSDto));
+            return Response.temporaryRedirect(new URI("../eventVSElection/eventVSElection.xhtml")).build();
         }
     }
 
@@ -72,7 +73,6 @@ public class EventVSElectionResource {
                    @DefaultValue("50") @QueryParam("max") int max, @Context ServletContext context,
                    @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ValidationExceptionVS,
             IOException, ServletException {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE);
         if(eventVSStateReq != null) {
             try {
@@ -94,14 +94,8 @@ public class EventVSElectionResource {
             eventVSListDto.add(new EventVSDto(eventVSElection));
         }
         ResultListDto<EventVSDto> resultListDto = new ResultListDto<>(eventVSListDto, offset, max, totalCount);
-        if(contentType.contains("json")){
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
-                    .type(MediaTypeVS.JSON).build();
-        } else {
-            req.setAttribute("resultListDto", JSON.getMapper().writeValueAsString(resultListDto));
-            context.getRequestDispatcher("/eventVSElection/index.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
+                .type(MediaTypeVS.JSON).build();
     }
 
     @Path("/") @POST
@@ -130,9 +124,8 @@ public class EventVSElectionResource {
         if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(statsDto)).type(MediaTypeVS.JSON).build();
         } else {
-            req.setAttribute("statsDto", JSON.getMapper().writeValueAsString(statsDto));
-            context.getRequestDispatcher("/eventVSElection/stats.xhtml").forward(req, resp);
-            return Response.ok().build();
+            req.getSession().setAttribute("statsDto", JSON.getMapper().writeValueAsString(statsDto));
+            return Response.temporaryRedirect(new URI("../eventVSElection/stats.xhtml")).build();
         }
     }
 

@@ -29,6 +29,6 @@
         <url-pattern>*.vsp</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
-        <welcome-file>/app/index.xhtml</welcome-file>
+        <welcome-file>/spa.xhtml</welcome-file>
     </welcome-file-list>
 </web-app>

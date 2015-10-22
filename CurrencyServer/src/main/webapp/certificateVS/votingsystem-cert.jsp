@@ -78,13 +78,13 @@
                 if(menuType === "admin" || menuType === "superuser") this.$.cancelCertButton.style.display = "block"
                 this.$.reasonDialog.addEventListener('on-submit', function (e) {
                         var operationVS = new OperationVS(Operation.CERT_EDIT)
-                        operationVS.serviceURL = restURL + "/certificateVS/editCert"
+                        operationVS.serviceURL = contextURL + "/rest/certificateVS/editCert"
                         operationVS.signedMessageSubject = "${msg.cancelCertMessageSubject}"
                         var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                             changeCertToState:"${CertificateVS.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
                         operationVS.jsonStr = JSON.stringify(signedContent)
                         operationVS.setCallback(function(appMessage) {
-                            this.url = restURL + "/certificateVS/cert/" + certMap.serialNumber + "?menu=" + menuType
+                            this.url = contextURL + "/rest/certificateVS/cert/" + certMap.serialNumber + "?menu=" + menuType
                         })
                         VotingSystemClient.setMessage(operationVS);
                 }.bind(this))
@@ -122,7 +122,7 @@
             certIssuerClicked:function(e) {
                 var issuerSerialNumber = this.certvs.issuerSerialNumber
                 if(issuerSerialNumber != null) {
-                    var certURL = restURL + "/certificateVS/cert/" + issuerSerialNumber
+                    var certURL = contextURL + "/rest/certificateVS/cert/" + issuerSerialNumber
                     console.log(this.tagName + " - certIssuerClicked: " + certURL)
                     this.certsSelectedStack.push(this.certvs)
                     this.url = certURL

@@ -9,7 +9,7 @@ public class RenameFileExtensions {
 
     private static Logger log = Logger.getLogger(RenameFileExtensions.class.getSimpleName());
 
-    private static final String basePath = "/home/jgzornoza/github/votingsystem/CurrencyServer/src/main/webapp";
+    private static final String basePath = "/home/jgzornoza/github/votingsystem/ControlCenter/src/main/webapp";
     private static final String old_extension = ".vsp";
     private static final String new_extension = ".jsp";
 

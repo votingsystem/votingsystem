@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import java.net.URI;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,9 +101,8 @@ public class CertificateVSResource {
             if(contentType.contains("json")) {
                 return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
             } else {
-                req.setAttribute("certListDto", JSON.getMapper().writeValueAsString(resultListDto));
-                context.getRequestDispatcher("/certificateVS/certs.xhtml").forward(req, resp);
-                return Response.ok().build();
+                req.getSession().setAttribute("certListDto", JSON.getMapper().writeValueAsString(resultListDto));
+                return Response.temporaryRedirect(new URI("../certificateVS/certs.xhtml")).build();
             }
         }
     }
@@ -122,14 +122,14 @@ public class CertificateVSResource {
             resp.setHeader("Content-Disposition", format("inline; filename='trustedCert_{0}'", serialNumber));
             return Response.ok().entity(CertUtils.getPEMEncoded (x509Cert)).build();
         } else {
-            CertificateVSDto certJSON = new CertificateVSDto(certificate);
+            CertificateVSDto certDto = new CertificateVSDto(certificate);
             if(contentType.contains("json")) {
-                return Response.ok().entity(JSON.getMapper().writeValueAsBytes(certJSON))
+                return Response.ok().entity(JSON.getMapper().writeValueAsBytes(certDto))
                         .type(MediaTypeVS.JSON).build();
             } else {
-                req.setAttribute("certMap", JSON.getMapper().writeValueAsString(certJSON));
-                context.getRequestDispatcher("/certificateVS/cert.xhtml").forward(req, resp);
-                return Response.ok().build();
+                req.getSession().setAttribute("certMap", certDto);
+                req.getSession().setAttribute("certDto", JSON.getMapper().writeValueAsString(certDto));
+                return Response.temporaryRedirect(new URI("../certificateVS/cert.xhtml")).build();
             }
         }
     }
@@ -155,9 +155,7 @@ public class CertificateVSResource {
         EventVSElection eventVSElection = dao.find(EventVSElection.class, eventId);
         if(eventVSElection == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - EventVSElection not found - eventId: " + eventId).build();
-        Query query = dao.getEM().createQuery("select c from CertificateVS c where c.eventVS =:eventVS and " +
-                "c.type =:type").setParameter("eventVS", eventVSElection).setParameter("type", CertificateVS.Type.VOTEVS_ROOT);
-        CertificateVS certificateCA = dao.getSingleResult(CertificateVS.class, query);
+        CertificateVS certificateCA = eventVSElection.getCertificateVS();
         X509Certificate certX509 = CertUtils.loadCertificate(certificateCA.getContent());
         return Response.ok().entity(CertUtils.getPEMEncoded (certX509)).build();
     }
@@ -225,13 +223,12 @@ public class CertificateVSResource {
                 return Response.ok().entity(CertUtils.getPEMEncoded(certificate.getX509Cert()))
                         .type(MediaTypeVS.PEM).build();
             } else {
-                CertificateVSDto certJSON = new CertificateVSDto(certificate);
+                CertificateVSDto certDto = new CertificateVSDto(certificate);
                 if(contentType.contains("json")) {
-                    return certJSON;
+                    return certDto;
                 } else {
-                    req.setAttribute("certMap", JSON.getMapper().writeValueAsString(certJSON));
-                    context.getRequestDispatcher("/certificateVS/cert.xhtml").forward(req, resp);
-                    return Response.ok().build();
+                    req.getSession().setAttribute("certMap", JSON.getMapper().writeValueAsString(certDto));
+                    return Response.temporaryRedirect(new URI("../certificateVS/cert.xhtml")).build();
                 }
             }
         } else return Response.status(Response.Status.NOT_FOUND).entity("serialNumber: " + serialNumber).build();

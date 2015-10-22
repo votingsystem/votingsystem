@@ -1,5 +1,5 @@
 <html>
-<script src="./bower_components/page/page.js"></script>
+<script src="./bower_components/visionmedia-page/page.js"></script>
 <script>
   window.addEventListener('WebComponentsReady', function() {
 
@@ -8,23 +8,24 @@
           next();
       }
 
-      // Routes
-      var appContact
-      page('/appdocs', scrollToTop, function() {
-          app.route = 'docs';
-          Polymer.Base.importHref('./element/vs-iframe.vsp', function(e) {
-              if(!appContact) appContact = document.createElement('vs-iframe');
-              app.loadMainContent(appContact, "${msg.contactLbl}")
+      var iframeVS
+      function loadFrameVS(url, pageCaption) {
+          Polymer.Base.importHref('./resources/bower_components/vs-iframe/vs-iframe.html', function(e) {
+              if(!iframeVS) iframeVS = document.createElement('vs-iframe');
+              iframeVS.url = url
+              app.loadMainContent(iframeVS, pageCaption)
           });
+      }
+
+      // Routes
+      page('/app/contact', scrollToTop, function() {
+          app.route = 'contact';
+          loadFrameVS(contextURL + "/app/contact.xhtml", "${msg.contactLbl}")
       });
 
-      var appdocs
-      page('/app/contact', scrollToTop, function() {
+      page('/appdocs', scrollToTop, function() {
           app.route = 'docs';
-          Polymer.Base.importHref('./element/vs-iframe.vsp', function(e) {
-              if(!appdocs) appdocs = document.createElement('app-contact');
-              app.loadMainContent(appdocs, "${msg.docsLbl}")
-          });
+          loadFrameVS(contextURL + "/app/index.xhtml", "${msg.docsLbl}")
       });
 
       var userVSDashboard

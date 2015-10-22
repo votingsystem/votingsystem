@@ -4,9 +4,9 @@
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="title">${msg.electionSystemLbl}</ui:define>
     <ui:define name="head">
-        <link href="${resourceURL}/vs-advanced-search-dialog/vs-advanced-search-dialog.html" rel="import"/>
-        <link href="${elementURL}/element/search-info.vsp" rel="import"/>
-        <link href="${elementURL}/representative/representative-list.vsp" rel="import"/>
+        <link href="../resources/bower_components/vs-advanced-search-dialog/vs-advanced-search-dialog.html" rel="import"/>
+        <link href="../element/search-info.vsp" rel="import"/>
+        <link href="representative-list.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
         <vs-innerpage-signal caption="${msg.representativesPageLbl}"></vs-innerpage-signal>
@@ -17,12 +17,12 @@
         <vs-advanced-search-dialog id="advancedSearchDialog"></vs-advanced-search-dialog>
         <script>
             function processSearch(textToSearch, dateBeginFrom, dateBeginTo) {
-                var ajaxUrl= "${restURL}/search/eventVS?searchText=" +
+                var ajaxUrl= contextURL + "/rest/search/eventVS?searchText=" +
                         textToSearch + "&amp;dateBeginFrom=" + dateBeginFrom + "&amp;dateBeginTo=" + dateBeginTo + "&amp;eventvsType=ELECTION"
             }
 
             function processSearchJSON(dataJSON) {
-                var ajaxUrl= "${restURL}/search/eventVS";
+                var ajaxUrl= contextURL + "/rest/search/eventVS";
             }
         </script>
     </ui:define>

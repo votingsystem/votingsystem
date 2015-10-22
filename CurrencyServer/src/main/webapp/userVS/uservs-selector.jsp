@@ -162,8 +162,8 @@
             processSearch:function() {
                 this.textToSearch = this.$.inputSearch.value.trim()
                 if(this.textToSearch === "") return
-                if(this.groupVSId) this.url = restURL + "/groupVS/id/" + this.groupVSId + "/searchUsers?searchText=" + this.textToSearch
-                else this.url = restURL + "/userVS/search?searchText=" + this.textToSearch
+                if(this.groupVSId) this.url = contextURL + "/rest/groupVS/id/" + this.groupVSId + "/searchUsers?searchText=" + this.textToSearch
+                else this.url = contextURL + "/rest/userVS/search?searchText=" + this.textToSearch
                 console.log(this.tagName + " - processSearch - url: " + this.url)
                 this.$.ajax.generateRequest()
             },

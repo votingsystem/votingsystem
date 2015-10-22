@@ -35,6 +35,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.URI;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -170,10 +171,7 @@ public class UserVSResource {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         if(contentType.contains("json")) {
             return processSearch(searchText, offset, max);
-        } else {
-            context.getRequestDispatcher("/userVS/search.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        } else return Response.temporaryRedirect(new URI("../userVS/search.xhtml")).build();
     }
 
     @Path("/search")

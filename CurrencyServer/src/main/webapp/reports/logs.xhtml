@@ -52,7 +52,7 @@
                     is:'record-list',
                     properties: {
                         logData: {type:Object},
-                        url: {type:String, value: restURL + '/reports/logs'}
+                        url: {type:String, value: contextURL + '/rest/reports/logs'}
                     },
                     ready: function() {
                         sendSignalVS({caption:"${msg.reportsPageTitle}"})

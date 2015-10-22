@@ -107,11 +107,11 @@
                 this.tagsHidden = (!this.smimeMessageContent || !this.smimeMessageContent.tags || this.smimeMessageContent.tags.length === 0)
             },
             showFromUserVSByIBAN:function(e) {
-                page.show(restURL + "/userVS/IBAN/" + this.smimeMessageContent.fromUserIBAN, '_blank')
+                page.show(contextURL + "/rest/userVS/IBAN/" + this.smimeMessageContent.fromUserIBAN, '_blank')
             },
             showToUserVSByIBAN:function(e) {
                 console.log(this.tagName + " - showUserVSByIBAN:" + e)
-                page.show(restURL + "/userVS/IBAN/" + e.model.IBAN)
+                page.show(contextURL + "/rest/userVS/IBAN/" + e.model.IBAN)
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

@@ -120,10 +120,10 @@
             this.isAdmin = ('superuser' === menuType || 'admin' === menuType)
          },
         getUserVSURL:function(id) {
-            return restURL + "/userVS/" + id
+            return contextURL + "/rest/userVS/" + id
         },
         goToWeekBalance:function() {
-            page.show(restURL + "/balance/userVS/id/" + this.uservs.id)
+            page.show(contextURL + "/rest/balance/userVS/id/" + this.uservs.id)
         },
         blockUser:function() {
             console.log(this.tagName + " - blockUser")
@@ -134,7 +134,7 @@
             this.page = 1;
         },
         showByIBAN:function(IBAN) {
-            var serviceURL =  "${restURL}/userVS/IBAN/" + IBAN
+            var serviceURL =  contextURL + "/rest/userVS/IBAN/" + IBAN
             if(this.$.ajax.url != serviceURL) {
                 console.log(this.tagName + " - showByIBAN - url: " + serviceURL)
                 this.$.ajax.url = serviceURL

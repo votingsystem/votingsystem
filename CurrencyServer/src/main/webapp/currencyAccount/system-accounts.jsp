@@ -46,7 +46,7 @@
             is:'system-accounts',
             properties: {
                 systemAccountsDto: {type:Object},
-                url: {type:String, value: restURL + '/currencyAccount/system'}
+                url: {type:String, value: contextURL + '/rest/currencyAccount/system'}
             },
             ready: function() {
                 console.log(this.tagName + " - ready - ")

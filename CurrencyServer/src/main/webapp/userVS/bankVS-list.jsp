@@ -23,11 +23,11 @@
             is:'bankVS-list',
             properties: {
                 bankvsListDto: {type:Object, value: {}},
-                url: {type:String, value: restURL + "/userVS/bankVSList"}
+                url: {type:String, value: contextURL + "/rest/userVS/bankVSList"}
             },
             ready: function() { console.log(this.tagName + " - ready")},
             showDetails: function(e) {
-                page.show(restURL + "/userVS/id/" + e.model.bankVS.id)
+                page.show(contextURL + "/rest/userVS/id/" + e.model.bankVS.id)
             }
         });
     </script>

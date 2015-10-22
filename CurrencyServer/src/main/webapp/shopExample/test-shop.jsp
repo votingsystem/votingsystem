@@ -46,7 +46,7 @@
                 if(this.messageDto != null) this.$.qrCodeImgDiv.style.display = 'none'
             },
             sessionIdChanged: function() {
-                this.transactionServiceURL = restURL + "/shop/listenTransactionChanges/" + this.sessionId
+                this.transactionServiceURL = contextURL + "/rest/shop/listenTransactionChanges/" + this.sessionId
                 console.log(this.tagName + " - sessionIdChanged - transactionServiceURL: " +  this.transactionServiceURL)
                 this.$.ajax.generateRequest()
             },

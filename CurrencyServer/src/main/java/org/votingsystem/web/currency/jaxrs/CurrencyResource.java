@@ -50,13 +50,6 @@ public class CurrencyResource {
     @Inject SignatureBean signatureBean;
     @Inject CurrencyBean currencyBean;
 
-    @Path("/request") @GET
-    public Object request(@Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
-            throws IOException, ServletException {
-        context.getRequestDispatcher("/currency/request.xhtml").forward(req, resp);
-        return Response.ok().build();
-    }
-
     @Path("/issuedLog")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Object issuedLog(@Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)

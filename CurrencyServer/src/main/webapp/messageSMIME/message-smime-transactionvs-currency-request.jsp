@@ -69,11 +69,11 @@
                 console.log(this.tagName + " - smimeMessageContentChanged: " + JSON.stringify(this.smimeMessageContent))
             },
             showFromUserVSByIBAN:function(e) {
-                page.show(restURL + "/userVS/IBAN/" + this.smimeMessageContent.bankIBAN)
+                page.show(contextURL + "/rest/userVS/IBAN/" + this.smimeMessageContent.bankIBAN)
             },
             showToUserVSByIBAN:function(e) {
                 console.log(this.tagName + " - showUserVSByIBAN - " + e)
-                page.show(restURL + "/userVS/IBAN/" + e.model.item)
+                page.show(contextURL + "/rest/userVS/IBAN/" + e.model.item)
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

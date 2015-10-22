@@ -1,0 +1,145 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/basic.xhtml">
+  <ui:define name="head">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="application-name" content="VotingSystem"/>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="shortcut icon" type="image/png" href="./resources/images/icon_16/fa-credit-card.png" />
+    <title><ui:insert name="title" /></title>
+    <h:outputStylesheet name="css/votingSystem.css" />
+    <script src="./resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="./resources/js/utilsVS.js" type="text/javascript"></script>
+    <script src="./resources/js/utils_js.vsp" type="text/javascript"></script>
+
+
+
+    <link rel="import" href="./resources/elements.html"/>
+  </ui:define>
+  <ui:define name="content">
+    <div class="fullbleed layout vertical">
+        <template is="dom-bind" id="app">
+            <paper-drawer-panel id="paperDrawerPanel">
+                <paper-scroll-header-panel drawer="" fixed="">
+                    <paper-toolbar class="drawerToolbar">
+                        <span class="paper-font-title">Menu</span>
+                    </paper-toolbar>
+
+                    <paper-menu class="list drawerToolbar" attr-for-selected="data-route" selected="[[route]]">
+                        <a hidden="{{!adminMenuHidden}}" data-route="eventVSElection" href="/eventVSElection" on-click="onDataRouteClick">
+                            <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
+                        </a>
+                        <a hidden="{{!adminMenuHidden}}" data-route="representative" href="/representative" on-click="onDataRouteClick">
+                            <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
+                        </a>
+                        <a hidden="{{!adminMenuHidden}}" data-route="tools" href="/app/tools" on-click="onDataRouteClick">
+                            <i class="fa fa-cogs" style="margin:0px 10px 0px 0px;"></i> ${msg.toolsLbl}
+                        </a>
+                        <a hidden="{{!adminMenuHidden}}" data-route="feeds" href="/subscriptionVS/feeds" on-click="onDataRouteClick">
+                            <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> ${msg.subscriptionLbl}
+                        </a>
+                        <a hidden="{{!adminMenuHidden}}" data-route="contact" href="/app/contact" on-click="onDataRouteClick">
+                            <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
+                        </a>
+                        <a hidden="{{adminMenuHidden}}" data-route="publish_election" href="/publish_election" on-click="onDataRouteClick">
+                            <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.publishVoteLbl}
+                        </a>
+                        <a hidden="{{adminMenuHidden}}" data-route="new_representative" href="/new_representative" on-click="onDataRouteClick">
+                            <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.newRepresentativeLbl}
+                        </a>
+                        <a hidden="{{adminMenuHidden}}" data-route="edit_representative" href="/representative/edit" on-click="onDataRouteClick">
+                            <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.editRepresentativeLbl}
+                        </a>
+
+                    </paper-menu>
+                </paper-scroll-header-panel>
+                <paper-header-panel main="" condenses="" keep-condensed-header="">
+                    <paper-toolbar id="mainToolbar" >
+                        <i class="fa fa-bars vs-navbar-icon" paper-drawer-toggle="" style="margin: 0 10px 0 10px;"></i>
+                        <span class="flex"></span>
+
+                        <i class="fa fa-search vs-navbar-icon" hidden="{{searchHidden}}" on-click="toogleSearchPanel"></i>
+
+                        <div class="middle middle-container center horizontal layout">
+                            <div class="app-name">{{appTitle}}</div>
+                        </div>
+                    </paper-toolbar>
+
+                    <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
+                        background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
+
+                    <div id="mainContent" class="mainContent"></div>
+                </paper-header-panel>
+
+            </paper-drawer-panel>
+            <h:messages styleClass="messages"
+                        style="list-style: none; padding:0; margin:0;"
+                        errorClass="alert alert-error" infoClass="alert alert-success"
+                        warnClass="alert alert-warning" globalOnly="true"/>
+        </template>
+        <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
+        <iron-signals id="ironSignals"></iron-signals>
+    </div>
+    <script>
+        (function(document) {
+            var app = document.querySelector('#app');
+
+            app.addEventListener('dom-change', function() {
+                console.log('spa.xhtml - dom-change');
+            });
+
+            window.addEventListener('WebComponentsReady', function() {
+                console.log('spa.xhtml - WebComponentsReady - app.route: ' + app.route);
+            });
+
+            app.onDataRouteClick = function() {
+                var drawerPanel = document.querySelector('#paperDrawerPanel');
+                if (drawerPanel.narrow) {
+                    drawerPanel.closeDrawer();
+                }
+            };
+
+            app.loadMainContent = function(newContentNode, caption, searchVisible) {
+                var mainContentNode = document.querySelector('paper-drawer-panel').querySelector('#mainContent')
+                var beforeContentNode = Polymer.dom(mainContentNode).childNodes[0]
+                if(beforeContentNode) Polymer.dom(mainContentNode).removeChild(beforeContentNode)
+                Polymer.dom(mainContentNode).appendChild(newContentNode)
+                if('admin' === menuType) caption = caption + ' - ${msg.adminLbl}'
+                if('superuser' === menuType) caption = caption + ' - ${msg.superUserLbl}'
+                if(caption) sendSignalVS({caption:caption})
+                if(searchVisible === true) app.searchHidden = false
+                else app.searchHidden = true
+            }
+
+            app.updateMenuView = function() {
+                app.appTitle = "${msg.appTitle}"
+                app.adminMenuHidden = true;
+                if('admin' === menuType) {
+                    app.adminMenuHidden = false;
+                    app.appTitle = app.appTitle + " - ${msg.adminPageTitle}"
+                }
+            }
+
+            app.updateSearchMessage = function(searchMessage) {
+                if(searchMessage) {
+                    document.querySelector("#pageInfoPanel").innerHTML = searchMessage
+                    document.querySelector("#pageInfoPanel").style.display = "block"
+                } else document.querySelector("#pageInfoPanel").style.display = "none"
+            }
+
+            document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
+                console.log("spa.xhtml - user-clicked")
+                page.show(contextURL + "/rest/userVS/id/" + e.detail.id)
+            })
+
+            app.scrollPageToTop = function() {
+                document.getElementById('mainContainer').scrollTop = 0;
+            };
+
+            app.updateMenuView()
+        })(document);
+    </script>
+  </ui:define>
+</ui:composition>

@@ -132,20 +132,20 @@
                 }
             },
             showToUserInfo:function(e) {
-                var groupURL = restURL + "/groupVS/" + e.model.item.toUserVS.id
+                var groupURL = contextURL + "/rest/groupVS/" + e.model.item.toUserVS.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },
             showFromUserInfo:function(group) {
-                var groupURL = restURL + "/groupVS/" +  e.model.item.fromUserVS.id
+                var groupURL = contextURL + "/rest/groupVS/" +  e.model.item.fromUserVS.id
                 console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showInfoIBAN:function(e) {
-                var fromUserIBANInfoURL = restURL + "/IBAN/from/" + e.model.item.fromUserVS.sender.fromUserIBAN
+                var fromUserIBANInfoURL = contextURL + "/rest/IBAN/from/" + e.model.item.fromUserVS.sender.fromUserIBAN
                 console.log(this.tagName + " - showInfoIBAN - fromUserIBANInfoURL: " + fromUserIBANInfoURL)
             },
             showToUserIBAN:function(e) {
                 console.log(this.tagName + " - showToUserIBAN - " + e)
-                page.show(restURL + "/userVS/IBAN/",  e.model.item, '_blank')
+                page.show(contextURL + "/rest/userVS/IBAN/",  e.model.item, '_blank')
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

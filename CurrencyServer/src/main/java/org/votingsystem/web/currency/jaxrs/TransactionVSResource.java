@@ -104,7 +104,6 @@ public class TransactionVSResource {
                        @PathParam("dateFrom") String dateFromStr, @PathParam("dateTo") String dateToStr,
                        @Context ServletContext context, @Context HttpServletRequest req,
                        @Context HttpServletResponse resp) throws IOException, ParseException, ServletException {
-        String contentType = req.getContentType() != null ? req.getContentType():"";
         TransactionVS.Type transactionType = null;
         BigDecimal amount = null;
         Date dateFrom = DateUtils.getURLPart(dateFromStr);
@@ -132,13 +131,7 @@ public class TransactionVSResource {
             resultList.add(transactionVSBean.getTransactionDto(transactionVS));
         }
         ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
-        if(contentType.contains("json")) return Response.ok().entity(
-                JSON.getMapper().writeValueAsBytes(resultListDto)).build();
-        else {
-            req.setAttribute("transactionsDto", JSON.getMapper().writeValueAsString(resultListDto));
-            context.getRequestDispatcher("/transactionVS/index.xhtml").forward(req, resp);
-            return Response.ok().build();
-        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
     @Path("/userVS/id/{userId}/{timePeriod}") @Transactional

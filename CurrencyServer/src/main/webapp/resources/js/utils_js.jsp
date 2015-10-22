@@ -1,7 +1,6 @@
 <%@page contentType="text/javascript; charset=UTF-8" %>
 
     var contextURL = "${contextURL}"
-    var restURL = "${contextURL}" + "/rest"
 
     function OperationVS(operation, statusCode) {
         this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING

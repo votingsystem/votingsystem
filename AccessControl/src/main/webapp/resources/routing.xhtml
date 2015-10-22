@@ -1,0 +1,82 @@
+<html>
+<script src="./bower_components/visionmedia-page/page.js"></script>
+<script>
+  window.addEventListener('WebComponentsReady', function() {
+
+      function scrollToTop(ctx, next) {
+          app.scrollPageToTop();
+          next();
+      }
+
+      var iframeVS
+      function loadFrameVS(url, pageCaption) {
+          Polymer.Base.importHref('./resources/bower_components/vs-iframe/vs-iframe.html', function(e) {
+              if(!iframeVS) iframeVS = document.createElement('vs-iframe');
+              iframeVS.url = url
+              app.loadMainContent(iframeVS, pageCaption)
+          });
+      }
+
+      // Routes
+      page('/app/contact', scrollToTop, function (ctx) {
+          app.route = 'contact';
+          loadFrameVS(contextURL + "/app/contact.xhtml", "${msg.contactLbl}")
+      });
+
+      page('/app/tools', scrollToTop, function (ctx) {
+          app.route = 'tools';
+          loadFrameVS(contextURL + "/app/tools.xhtml", "${msg.toolsPageTitle}")
+      });
+
+      var editRepresentative
+      page('/representative/edit', scrollToTop, function (ctx) {
+          app.route = 'edit_representative';
+          Polymer.Base.importHref('./representative/representative-edit.vsp', function () {
+              if (!editRepresentative) editRepresentative = document.createElement('representative-edit');
+              app.loadMainContent(editRepresentative, "${msg.editRepresentativeLbl}")
+          });
+      });
+
+      var eventVSElectionList
+      page('/eventVSElection', scrollToTop, function (ctx) {
+          app.route = 'eventVSElection';
+          Polymer.Base.importHref('./eventVSElection/eventvs-election-list.vsp', function () {
+              if (!eventVSElectionList) eventVSElectionList = document.createElement('eventvs-election-list');
+              eventVSElectionList.loadURL(ctx.path, ctx.querystring)
+              app.loadMainContent(eventVSElectionList, "${msg.electionSystemLbl}")
+          });
+      });
+
+      page('/new_representative', scrollToTop, function (ctx) {
+          app.route = 'new_representative';
+          VotingSystemClient.setMessage(new OperationVS(Operation.NEW_REPRESENTATIVE));
+      });
+
+      page('/publish_election', scrollToTop, function (ctx) {
+          app.route = 'publish_election';
+          VotingSystemClient.setMessage(new OperationVS(Operation.VOTING_PUBLISHING));
+      });
+
+      var representativeList
+      page('/representative', scrollToTop, function (ctx) {
+          app.route = 'representative';
+          Polymer.Base.importHref('./representative/representative-list.vsp', function () {
+              if (!representativeList) representativeList = document.createElement('representative-list');
+              app.loadMainContent(representativeList, "${msg.representativesPageLbl}")
+          });
+      });
+
+      page('/subscriptionVS/feeds', scrollToTop, function (ctx) {
+          app.route = 'feeds';
+          loadFrameVS(contextURL + "/subscriptionVS/feeds.xhtml", "${msg.subscriptionLbl}")
+      });
+
+
+      page({
+          hashbang: true // add #! before urls
+      });
+
+      if(!app.route) page("/eventVSElection")
+  })
+</script>
+</html>

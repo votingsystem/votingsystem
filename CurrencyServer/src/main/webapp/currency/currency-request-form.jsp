@@ -119,7 +119,7 @@
                 } else tagList.push('WILDTAG'); //No tags, receptor can expend money with any tag
 
                 var operationVS = new OperationVS(Operation.CURRENCY_REQUEST)
-                operationVS.serviceURL = restURL + "/currency/processRequest"
+                operationVS.serviceURL = contextURL + "/rest/currency/processRequest"
                 operationVS.signedMessageSubject = "${msg.currencyRequestLbl}"
                 var signedContent = {operation:Operation.CURRENCY_REQUEST, amount:this.$.inputAmount.value,
                     timeLimited:this.$.timeLimitedButton.checked, currencyCode:this.$.currencySelector.getSelected(),

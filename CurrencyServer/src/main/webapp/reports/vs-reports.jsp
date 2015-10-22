@@ -12,7 +12,7 @@
                     </a>
                 </div>
                 <div style="margin:20px 0px;">
-                    <a href="#" onclick="javascript:page.show(restURL + '/currency/issued/currencyCode/EUR'); return false;">
+                    <a href="#" onclick="javascript:page.show(contextURL + '/rest/currency/issued/currencyCode/EUR'); return false;">
                         ${msg.currencyIssued}
                     </a>
                 </div>
@@ -23,7 +23,7 @@
                 </div>
 
                 <div style="margin:20px 0px;">
-                    <a href="#"  onclick="javascript:page.show(restURL + '/reports${spa.now()}/week'); return false;">
+                    <a href="#"  onclick="javascript:page.show(contextURL + '/rest/reports${spa.now()}/week'); return false;">
                         ${msg.currentWeekLbl}
                     </a>
                 </div>
@@ -41,7 +41,7 @@
         is:'vs-reports',
         properties: {
             reportsInfoDto: {type:Object},
-            url: {type:String, value: restURL + '/reports'}
+            url: {type:String, value: contextURL + '/rest/reports'}
         },
         ready: function() { },
         getPeriodDescription: function(timePeriod) {
@@ -49,7 +49,7 @@
         },
         getPeriodReportURL: function(timePeriod) {
             var dateFrom = new Date(timePeriod.dateFrom)
-            return restURL + "/reports/" + dateFrom.format() + "/week"
+            return contextURL + "/rest/reports/" + dateFrom.format() + "/week"
         }
     });
 </script>

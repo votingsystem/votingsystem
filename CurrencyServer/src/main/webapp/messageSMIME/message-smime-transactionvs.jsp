@@ -110,10 +110,10 @@
                 sendSignalVS({caption:this.messageType})
             },
             showFromUserVSByIBAN:function(e) {
-                page.show(restURL + "/userVS/IBAN/" + this.fromUserIBAN, '_blank')
+                page.show(contextURL + "/rest/userVS/IBAN/" + this.fromUserIBAN, '_blank')
             },
             showToUserVSByIBAN:function(e) {
-                page.show(restURL + "/userVS/IBAN/" + this.toUserIBAN, '_blank')
+                page.show(contextURL + "/rest/userVS/IBAN/" + this.toUserIBAN, '_blank')
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

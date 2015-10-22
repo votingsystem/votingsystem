@@ -5,7 +5,7 @@
         this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING
         this.operation = operation
         this.receiverName = "${config.serverName}";
-        this.serverURL = "${elementURL}";
+        this.serverURL = contextURL;
         this.objectId = Math.random().toString(36).substring(7);
     }
 

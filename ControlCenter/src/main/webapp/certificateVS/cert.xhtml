@@ -7,8 +7,8 @@
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="title">${msg.contactLbl}</ui:define>
     <ui:define name="head">
-        <link href="${elementURL}/certificateVS/votingsystem-cert.vsp" rel="import"/>
-        <link href="${elementURL}/element/reason-dialog.vsp" rel="import"/>
+        <link href="votingsystem-cert.vsp" rel="import"/>
+        <link href="../element/reason-dialog.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
         <vs-innerpage-signal caption="${msg.trustedCertPageTitle}"></vs-innerpage-signal>

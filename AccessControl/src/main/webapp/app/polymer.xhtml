@@ -3,9 +3,9 @@
                 template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
                 ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
     <ui:define name="head">
-        <link href="${resourceURL}/iron-ajax/iron-ajax.html" rel="import"/>
-        <link href="${resourceURL}/paper-item/paper-item.html" rel="import"/>
-        <link href="${elementURL}/element/eventvs-admin-dialog.vsp" rel="import"/>
+        <link href="../resources/bower_components/iron-ajax/iron-ajax.html" rel="import"/>
+        <link href="../resources/bower_components/paper-item/paper-item.html" rel="import"/>
+        <link href="../eventVSElection/eventvs-admin-dialog.vsp" rel="import"/>
         <style>
             .select-style {
                 border: 1px solid #ccc;
@@ -34,7 +34,7 @@
         <button onclick="document.querySelector('#adminDialog').show()" style="margin:10px;">adminDialog</button>
         <button onclick="showMessageVS('mensaje', 'caption', null, true)" style="margin:10px;">alert</button>
 
-        <eventvs-admin-dialog id="adminDialog" service-url="${restURL}/tagVS"></eventvs-admin-dialog>
+        <eventvs-admin-dialog id="adminDialog"></eventvs-admin-dialog>
 
         <div>
             <select style="margin: 10px 0 10px 40px; width: 120px; font-size: 2em; height: 50px;" class="form-control">

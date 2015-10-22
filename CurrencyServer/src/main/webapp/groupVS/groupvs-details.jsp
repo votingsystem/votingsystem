@@ -178,7 +178,7 @@
             console.log(this.tagName + ".messagedialogAccepted")
             if('cancel_group' == detail.callerId) {
                 var operationVS = new OperationVS(Operation.CURRENCY_GROUP_CANCEL)
-                operationVS.serviceURL = restURL + "/groupVS/id/" + this.groupvs.id + "/cancel"
+                operationVS.serviceURL = contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/cancel"
                 operationVS.signedMessageSubject = "${msg.cancelGroupVSSignedMessageSubject}"
                 operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_CANCEL, name:this.groupvs.name,
                     id:this.groupvs.id})
@@ -192,19 +192,19 @@
             var caption = '${msg.groupCancelERRORLbl}'
             if(ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
                 caption = "${msg.groupCancelOKLbl}"
-                page.show(restURL + "/groupVS/id/" + this.groupvs.id)
+                page.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id)
             }
             showMessageVS(this.appMessageJSON.message, caption, this.tagName)
             this.click()
         },
         goToWeekBalance:function() {
-            page.show(restURL + "/balance/userVS/id/" + this.groupvs.id)
+            page.show(contextURL + "/rest/balance/userVS/id/" + this.groupvs.id)
         },
         subscribeToGroup: function () {
             console.log("subscribeToGroup")
             var representative = {id:this.groupvs.representative.id, nif:this.groupvs.representative.nif}
             var operationVS = new OperationVS(Operation.CURRENCY_GROUP_SUBSCRIBE)
-            operationVS.serviceURL = restURL + "/groupVS/id/" + this.groupvs.id + "/subscribe"
+            operationVS.serviceURL = contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/subscribe"
             operationVS.signedMessageSubject = "${msg.subscribeToCurrencyGroupMsg}"
             operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_SUBSCRIBE,
                 id:this.groupvs.id, name:this.groupvs.name , representative:representative})
@@ -217,7 +217,7 @@
             var caption
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "${msg.groupSubscriptionOKLbl}"
-                page.show(restURL + "/groupVS/id/" + this.groupvs.id)
+                page.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id)
             } else caption = '${msg.groupSubscriptionERRORLbl}'
             showMessageVS(appMessageJSON.message, caption)
             this.click() //hack to refresh screen
@@ -246,7 +246,7 @@
             if(this.groupvs.representative) this.representativeName =
                     this.groupvs.representative.firstName + " " + this.groupvs.representative.lastName
             if(this.groupvs.tags) this.tagsHidden = (this.groupvs.tags.length === 0)
-            this.$.userList.url = restURL + "/groupVS/id/" + this.groupvs.id + "/listUsers"
+            this.$.userList.url = contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/listUsers"
             this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.groupvsLbl}"}});
             if(this.groupvs.id) this.$.userList.loadGroupUsers(this.groupvs.id)
             console.log("this.isUserView: " + this.isUserView + " - groupvs.state: " + this.groupvs.state +
@@ -278,7 +278,7 @@
         },
         showUserDetails:function(e, detail, sender) {
             console.log(this.tagName + " - showUserDetails")
-            this.$.userDescription.show(restURL + "/groupVS/id/" + this.groupvs.id + "/user/id", detail)
+            this.$.userDescription.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/user/id", detail)
         }
     })
 </script>

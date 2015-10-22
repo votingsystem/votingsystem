@@ -58,7 +58,6 @@ public class FilterVS implements Filter {
     @Override
     public void destroy() {
         servletContext.log("------- FilterVS destroyed -------");
-        servletContext = null;
     }
 
 }

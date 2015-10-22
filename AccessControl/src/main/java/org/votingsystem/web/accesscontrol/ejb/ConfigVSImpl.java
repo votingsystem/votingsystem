@@ -22,6 +22,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.persistence.Query;
 import java.io.File;
 import java.net.URL;
@@ -36,6 +37,7 @@ import java.util.logging.Logger;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Singleton
+@Named(value="config")
 @Startup
 public class ConfigVSImpl implements ConfigVS {
 

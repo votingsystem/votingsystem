@@ -34,7 +34,7 @@
             loadGroupUsers:function(groupvsId) {
                 this.groupvsId = groupvsId
                 console.log(this.tagName + " - loadGroupUsers - groupvsId: " + this.groupvsId)
-                this.url = restURL + "/groupVS/id/" + this.groupvsId + "/listUsers"
+                this.url = contextURL + "/rest/groupVS/id/" + this.groupvsId + "/listUsers"
             },
             refreshList: function(state) {
                 this.$.ajax.generateRequest()

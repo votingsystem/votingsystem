@@ -52,7 +52,7 @@
             is:'groupvs-list',
             properties: {
                 groupListDto:{type:Object, value:{}, observer:'groupListDtoChanged'},
-                url:{type:String, value:restURL + "/groupVS",observer:'urlChanged'}
+                url:{type:String, value:contextURL + "/rest/groupVS",observer:'urlChanged'}
             },
             decodeBase64:function(base64EncodedString) {
                 try {
@@ -84,7 +84,7 @@
             },
             pagerChange:function(e) {
                 var optionSelected = this.$.groupvsTypeSelect.value
-                targetURL = restURL + "/groupVS?menu=" + menuType + "&state=" +
+                targetURL = contextURL + "/rest/groupVS?menu=" + menuType + "&state=" +
                         optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
@@ -116,7 +116,7 @@
             groupvsTypeSelect: function() {
                 var optionSelected = this.$.groupvsTypeSelect.value
                 if("" != optionSelected) {
-                    targetURL = restURL + "/groupVS?menu=" + menuType + "&state=" + optionSelected
+                    targetURL = contextURL + "/rest/groupVS?menu=" + menuType + "&state=" + optionSelected
                     history.pushState(null, null, targetURL);
                     this.$.ajax.url = targetURL
                     this.$.ajax.generateRequest()
@@ -125,7 +125,7 @@
             },
             processSearch:function (textToSearch) {
                 app.updateSearchMessage("${msg.searchResultLbl} '" + textToSearch + "'")
-                this.url = restURL + "/search/groupVS?searchText=" + textToSearch
+                this.url = contextURL + "/rest/search/groupVS?searchText=" + textToSearch
             }
         });
     </script>
