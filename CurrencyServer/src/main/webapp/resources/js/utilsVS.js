@@ -284,35 +284,6 @@ function getFnName(fn) {
 var menuType = getURLParam('menu').toLowerCase();
 if(menuType == null) menuType = 'user';
 
-function updateMenuLinks() {
-    var elem = 'a'
-    var attr = 'href'
-    var elems = document.getElementsByTagName(elem);
-    var arrayElements = Array.prototype.slice.call(elems);
-    for (var i = 0; i < elems.length; i++) {
-        if(elems[i][attr].indexOf("mailto:") > -1) continue
-        if(elems[i][attr].indexOf("menu=" + menuType) < 0) {
-            if(elems[i][attr].indexOf("?") < 0) {
-                elems[i][attr] = elems[i][attr] + "?menu=" + menuType;
-            } else elems[i][attr] = elems[i][attr] + "&menu=" + menuType;
-        }
-    }
-}
-
-function updateMenuLink(urlToUpdate, param) {
-    if(urlToUpdate == null) return
-    var result = urlToUpdate
-    if(result.indexOf("menu=") < 0) {
-        if(result.indexOf("?") < 0) result = result + "?menu=" + menuType
-        else result = result + "&menu=" + menuType
-    }
-    if(result.indexOf("locale=") < 0) {
-        result = result + "&locale=" + getURLParam('locale').toLowerCase();
-    }
-    if(param != null) result = result + "&" + param
-    return result
-}
-
 function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }

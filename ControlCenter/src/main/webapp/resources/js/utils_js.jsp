@@ -67,18 +67,6 @@
         return resultStr
     };
 
-    function updateLinksVS(elementsArray) {
-        for (var i = 0; i < elementsArray.length; i++) {
-            //console.log("elementsArray[i].href: " + elementsArray[i].href)
-            if(elementsArray[i].href.indexOf("${contextURL}") > -1) {
-                elementsArray[i].addEventListener('click', function(e) {
-                    document.querySelector('#navBar').loadURL(e.target.href)
-                    e.preventDefault()
-                });
-            } else if("" != elementsArray[i].href.trim()) console.log("utils_js - not system url: " + elementsArray[i].href)
-        }
-    }
-
     window._originalAlert = window.alert;
     window.alert = function(text) {
         if (document.querySelector("#_votingsystemMessageDialog") != null && typeof

@@ -1,7 +1,6 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
             xmlns:ui="http://java.sun.com/jsf/facelets"
-            template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
-            ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+            template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="title">${msg.electionSystemLbl}</ui:define>
     <ui:define name="head">
         <link href="../resources/bower_components/jsoneditor/dist/jsoneditor.min.css" media="all" rel="stylesheet" />

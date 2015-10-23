@@ -37,6 +37,10 @@
           });
       });
 
+      page('/resources/certificationCenters', scrollToTop, function (ctx) {
+          loadFrameVS(contextURL + "/resources/certificationCenters.html")
+      });
+
       var eventVSElectionList
       page('/eventVSElection', scrollToTop, function (ctx) {
           app.route = 'eventVSElection';
@@ -44,6 +48,16 @@
               if (!eventVSElectionList) eventVSElectionList = document.createElement('eventvs-election-list');
               eventVSElectionList.loadURL(ctx.path, ctx.querystring)
               app.loadMainContent(eventVSElectionList, "${msg.electionSystemLbl}")
+          });
+      });
+
+      var eventVSElection
+      page('/rest/eventVSElection/id*', scrollToTop, function (ctx) {
+          app.route = 'eventVSElection';
+          Polymer.Base.importHref('./eventVSElection/eventvs-election.vsp', function () {
+              if (!eventVSElection) eventVSElection = document.createElement('eventvs-election');
+              eventVSElection.url = contextURL + ctx.path
+              app.loadMainContent(eventVSElection, "${msg.electionSystemLbl}")
           });
       });
 
@@ -70,7 +84,6 @@
           app.route = 'feeds';
           loadFrameVS(contextURL + "/subscriptionVS/feeds.xhtml", "${msg.subscriptionLbl}")
       });
-
 
       page({
           hashbang: true // add #! before urls

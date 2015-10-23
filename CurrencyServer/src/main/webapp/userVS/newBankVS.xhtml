@@ -97,7 +97,7 @@
                 document.querySelector("#ironSignals").addEventListener('iron-signal-messagedialog-closed', function(e) {
                     if(appMessageJSON != null) {
                         if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                            window.location.href = updateMenuLink(appMessageJSON.URL)
+                            window.location.href = appMessageJSON.URL
                         }
                     }
                 });

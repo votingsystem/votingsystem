@@ -3,9 +3,9 @@
                 template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
         <link href="representative-info.vsp" rel="import"/>
+        <title>${msg.representativeLbl}</title>
     </ui:define>
     <ui:define name="content">
-        <vs-innerpage-signal caption="${msg.representativeLbl}"></vs-innerpage-signal>
         <div class="pageContentDiv">
             <representative-info id="representative" representative='${representativeMap}'></representative-info>
         </div>

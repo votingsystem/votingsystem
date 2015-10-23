@@ -263,45 +263,6 @@ function getRadioValue(radioName) {
 var menuType = getURLParam('menu').toLowerCase();
 if(menuType == null) menuType = 'user'
 
-function updateMenuLinks() {
-    var elem = 'a'
-    var attr = 'href'
-    var elems = document.getElementsByTagName(elem);
-    var arrayElements = Array.prototype.slice.call(elems);
-    for (var i = 0; i < elems.length; i++) {
-        if(elems[i][attr].indexOf("mailto:") > -1) continue
-        if(elems[i][attr].indexOf("menu=" + menuType) < 0) {
-            if(elems[i][attr].indexOf("?") < 0) {
-                elems[i][attr] = elems[i][attr] + "?menu=" + menuType;
-            } else elems[i][attr] = elems[i][attr] + "&menu=" + menuType;
-        }
-    }
-}
-
-function loadURL_VS(urlToLoad, target) {
-    if(target) {
-        window.open(updateMenuLink(urlToLoad), target);
-    } else {
-        if(document.querySelector('#navBar')) document.querySelector('#navBar').loadURL(urlToLoad)
-        else window.location.href = updateMenuLink(urlToLoad, "&mode=simplePage")
-    }
-}
-
-function updateMenuLink(urlToUpdate, param) {
-    if(urlToUpdate == null) return
-    var result = urlToUpdate
-    if(result.indexOf("menu=") < 0) {
-        if(result.indexOf("?") < 0) result = result + "?menu=" + menuType
-        else result = result + "&menu=" + menuType
-    }
-    if(result.indexOf("locale=") < 0) {
-        result = result + "&locale=" + getURLParam('locale').toLowerCase();
-    }
-    if(param != null) result = result + "&" + param
-    return result
-}
-
-
 //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
 function getURLParam(name, url) {
     if(!url) url = location.search
@@ -373,9 +334,9 @@ function setClientToolConnected() {
 
 var coreSignalData = null
 function fireCoreSignal(coreSignalDataBase64) {
-    if(document.querySelector("#navBar") != null && document.querySelector("#navBar").fire != null) {
+    if(document.querySelector("#app") != null && document.querySelector("#app").fire != null) {
         var b64_to_utf8 = decodeURIComponent(escape(window.atob(coreSignalDataBase64)))
-        document.querySelector("#navBar").fire('iron-signal', toJSON(b64_to_utf8));
+        document.querySelector("#app").fire('iron-signal', toJSON(b64_to_utf8));
         console.log("fireCoreSignal: " + b64_to_utf8)
     } else {
         coreSignalData = coreSignalDataBase64

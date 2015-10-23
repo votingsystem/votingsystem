@@ -1,12 +1,11 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
-                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
+                template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
+        <title>${msg.certsPageTitle}</title>
         <link href="cert-list.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
-        <vs-innerpage-signal caption="${msg.certsPageTitle}"></vs-innerpage-signal>
         <div class="pageContentDiv">
             <cert-list cert-list-dto='${certListDto}'></cert-list>
         </div>

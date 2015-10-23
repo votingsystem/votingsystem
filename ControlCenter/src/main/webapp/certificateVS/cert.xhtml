@@ -3,15 +3,13 @@
                 xmlns:c="http://java.sun.com/jsp/jstl/core"
                 xmlns:h="http://java.sun.com/jsf/html"
                 xmlns:f="http://java.sun.com/jsf/core"
-                template="${'innerPage'.equals(param['mode'])? '/WEB-INF/templates/innervs.xhtml' :
-                ('simplePage'.equals(param['mode']) ? '/WEB-INF/templates/simplevs.xhtml':'/WEB-INF/templates/toolbarvs.xhtml')}">
-    <ui:define name="title">${msg.contactLbl}</ui:define>
+                template="/WEB-INF/templates/polymer.xhtml">
+    <ui:define name="title">${msg.trustedCertPageTitle}</ui:define>
     <ui:define name="head">
         <link href="votingsystem-cert.vsp" rel="import"/>
         <link href="../element/reason-dialog.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
-        <vs-innerpage-signal caption="${msg.trustedCertPageTitle}"></vs-innerpage-signal>
         <div class="pageContentDiv">
             <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
                 <c:if test="#{'admin'.equals(param.menu) || 'superuser'.equals(param.menu)}">
