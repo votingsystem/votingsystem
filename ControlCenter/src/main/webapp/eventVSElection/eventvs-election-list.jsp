@@ -10,7 +10,7 @@
                 box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); margin: 10px;
             }
         </style>
-        <iron-ajax id="ajax" url="{{url}}" last-response="{{eventListDto}}" handle-as="json"
+        <iron-ajax auto id="ajax" url="{{url}}" last-response="{{eventListDto}}" handle-as="json"
                    content-type="application/json"></iron-ajax>
         <div hidden="{{!eventvsDetailsHidden}}">
             <div class="layout horizontal center center-justified">
@@ -59,7 +59,9 @@
         Polymer({
             is:'eventvs-election-list',
             properties: {
-                eventListDto:{type:Object, value:{}, observer:'eventListDtoChanged'}
+                eventListDto:{type:Object, value:{}, observer:'eventListDtoChanged'},
+                url:{type:String},
+                eventVSState:{type:String}
             },
             ready:function(e) {
                 sendSignalVS({caption:"${msg.electionSystemLbl}"})
@@ -68,6 +70,15 @@
                 this.loading = true
                 this.eventvsDetailsHidden = true
                 if(this.eventVSState) this.$.eventVSStateSelect.value = this.eventVSState
+            },
+            loadURL:function(path, querystring) {
+                console.log(this.tagName + " - loadURL - path: " + path + " - querystring: " + querystring)
+                if(querystring) {
+                    this.url = contextURL + "/rest/eventVSElection?" + querystring
+                } else this.url = contextURL + "/rest/eventVSElection"
+                this.eventVSState = getURLParam("eventVSState", path)
+                if(this.eventVSState === "") this.eventVSState = 'ACTIVE'
+                this.$.eventVSStateSelect.value = this.eventVSState
             },
             isCanceled:function(eventvs) {
                 eventvs.state === 'CANCELED'
@@ -127,12 +138,12 @@
                 }
             },
             eventVSStateSelect: function() {
-                var optionSelected = this.$.eventVSStateSelect.value
-                console.log("eventVSStateSelect: " + optionSelected)
-                targetURL = contextURL + "/rest/eventVSElection?menu=" + menuType + "&eventVSState=" + optionSelected
-                history.pushState(null, null, targetURL);
-                this.$.ajax.url = targetURL
-                this.$.ajax.generateRequest()
+                this.eventVSState = this.$.eventVSStateSelect.value
+                console.log("eventVSStateSelect: " + this.eventVSState)
+                targetURL = contextURL + "/rest/eventVSElection?eventVSState=" + this.eventVSState
+                var newURL = setURLParameter(window.location.href, "eventVSState",  this.eventVSState)
+                history.pushState(null, null, newURL);
+                this.url = targetURL
             }
         });
     </script>

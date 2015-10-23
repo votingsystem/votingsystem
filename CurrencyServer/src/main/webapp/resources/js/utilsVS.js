@@ -9,7 +9,7 @@ var Operation = {
     FILE_FROM_URL:"FILE_FROM_URL",
     KEYSTORE_SELECT:"KEYSTORE_SELECT",
     SIGNAL_VS:"SIGNAL_VS",
-    MAIL_TO: "MAIL_TO",
+    BROWSER_URL: "BROWSER_URL",
     LISTEN_TRANSACTIONS: "LISTEN_TRANSACTIONS",
     MESSAGEVS:"MESSAGEVS",
     OPEN_SMIME: "OPEN_SMIME",
@@ -311,35 +311,32 @@ function setURLParameter(baseURL, name, value){
 
 function VotingSystemClient () { }
 
+var clientTool
 VotingSystemClient.setMessage = function (messageJSON) {
-    try {
-        console.log("setMessage - clientTool: " + clientTool)
-    } catch(e) {
-        console.log(e)
+    if(window['isClientToolConnected'] || window.parent['isClientToolConnected']) {
+        if(clientTool == undefined) clientTool = window.top.clientTool //we're inside vs-iframe
+        var messageToSignatureClient = JSON.stringify(messageJSON);
+        //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
+        clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
+    } else {
+        console.log("clientTool undefined")
         if(isAndroid ()) {
             var encodedData = window.btoa(JSON.stringify(messageJSON));
             window.sendAndroidURIMessage(encodedData)
             return
         }
-        window.alert(e)
-        return
+        window.alert("clientTool undefined")
     }
-    var messageToSignatureClient = JSON.stringify(messageJSON);
-//    console.log("setMessage - message: " + messageToSignatureClient);
-    //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
-    clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
 }
 
 VotingSystemClient.call = function (messageJSON) {
-    try {
-        clientTool
+    if(window['isClientToolConnected'] || window.parent['isClientToolConnected']) {
+        if(clientTool == undefined) clientTool = window.top.clientTool //we're inside vs-iframe
         var messageToSignatureClient = JSON.stringify(messageJSON);
         var resultBase64 = clientTool.call(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
         var b64_to_utf8 = decodeURIComponent(escape(window.atob(resultBase64)))
         return b64_to_utf8
-    } catch(e) {
-        console.log("clientTool not found")
-    }
+    } else console.log("clientTool not found")
 }
 
 function querySelector(selector) {
@@ -359,6 +356,9 @@ function sendSignalVS(signalData, callback) {
 
 window['isClientToolConnected'] = false
 
+function checkIfClientToolIsConnected() {
+    return window['isClientToolConnected'] || window.parent['isClientToolConnected']
+}
 
 function setClientToolConnected() {
     window['isClientToolConnected'] = true;

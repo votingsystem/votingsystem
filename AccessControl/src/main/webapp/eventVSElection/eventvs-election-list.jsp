@@ -76,8 +76,10 @@
                 console.log(this.tagName + " - loadURL - path: " + path + " - querystring: " + querystring)
                 if(querystring) {
                     this.url = contextURL + "/rest/eventVSElection?" + querystring
-                    this.$.eventVSStateSelect.value = getURLParam("eventVSState", path)
                 } else this.url = contextURL + "/rest/eventVSElection"
+                this.eventVSState = getURLParam("eventVSState", path)
+                if(this.eventVSState === "") this.eventVSState = 'ACTIVE'
+                this.$.eventVSStateSelect.value = this.eventVSState
             },
             isCanceled:function(eventvs) {
                 eventvs.state === 'CANCELED'

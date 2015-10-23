@@ -105,9 +105,8 @@ public class BrowserVSClient {
                 case CURRENCY_GROUP_EDIT:
                     GroupVSEditorDialog.show(operationVS);
                     break;
-                case MAIL_TO:
-                    VotingSystemApp.getInstance().getHostServices().showDocument(
-                            ContextVS.getInstance().getDefaultServer().getServerURL() + "/app/contact.xhtml?openMailClient=true");
+                case BROWSER_URL:
+                    VotingSystemApp.getInstance().getHostServices().showDocument(operationVS.getDocumentURL());
                     break;
                 case WALLET_SAVE:
                     Browser.getInstance().saveWallet();

@@ -129,11 +129,6 @@
                 } else document.querySelector("#pageInfoPanel").style.display = "none"
             }
 
-            document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
-                console.log("spa.xhtml - user-clicked")
-                page.show(contextURL + "/rest/userVS/id/" + e.detail.id)
-            })
-
             app.scrollPageToTop = function() {
                 document.getElementById('mainContainer').scrollTop = 0;
             };

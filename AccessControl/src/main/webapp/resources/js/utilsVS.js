@@ -10,7 +10,7 @@ var Operation = {
     CANCEL_VOTE:"CANCEL_VOTE",
     SELECT_IMAGE:"SELECT_IMAGE",
     TERMINATED: "TERMINATED",
-    MAIL_TO: "MAIL_TO",
+    BROWSER_URL: "BROWSER_URL",
     ACCESS_REQUEST_CANCELLATION:"ACCESS_REQUEST_CANCELLATION",
     EVENT_CANCELLATION: "EVENT_CANCELLATION",
     SIGNAL_VS:"SIGNAL_VS",
@@ -286,22 +286,32 @@ function setURLParameter(baseURL, name, value){
 
 function VotingSystemClient () { }
 
+var clientTool
 VotingSystemClient.setMessage = function (messageJSON) {
-    try {
-        console.log("setMessage - clientTool: " + clientTool)
-    } catch(e) {
-        console.log(e)
+    if(window['isClientToolConnected'] || window.parent['isClientToolConnected']) {
+        if(clientTool == undefined) clientTool = window.top.clientTool //we're inside vs-iframe
+        var messageToSignatureClient = JSON.stringify(messageJSON);
+        //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
+        clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
+    } else {
+        console.log("clientTool undefined")
         if(isAndroid ()) {
             var encodedData = window.btoa(JSON.stringify(messageJSON));
             window.sendAndroidURIMessage(encodedData)
             return
         }
-        window.alert(e)
-        return
+        window.alert("clientTool undefined")
     }
-    var messageToSignatureClient = JSON.stringify(messageJSON);
-    //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
-    clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
+}
+
+VotingSystemClient.call = function (messageJSON) {
+    if(window['isClientToolConnected'] || window.parent['isClientToolConnected']) {
+        if(clientTool == undefined) clientTool = window.top.clientTool //we're inside vs-iframe
+        var messageToSignatureClient = JSON.stringify(messageJSON);
+        var resultBase64 = clientTool.call(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
+        var b64_to_utf8 = decodeURIComponent(escape(window.atob(resultBase64)))
+        return b64_to_utf8
+    } else console.log("clientTool not found")
 }
 
 function sendSignalVS(signalData, callback) {
@@ -314,17 +324,11 @@ function sendSignalVS(signalData, callback) {
     } catch(ex) { } finally { return result;}
 }
 
-VotingSystemClient.call = function (messageJSON) {
-    try {
-        clientTool
-        var messageToSignatureClient = JSON.stringify(messageJSON);
-        return clientTool.call(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
-    } catch(e) {
-        console.log(e)
-    }
-}
-
 window['isClientToolConnected'] = false
+
+function checkIfClientToolIsConnected() {
+    return window['isClientToolConnected'] || window.parent['isClientToolConnected']
+}
 
 function setClientToolConnected() {
     console.log("setClientToolConnected");
