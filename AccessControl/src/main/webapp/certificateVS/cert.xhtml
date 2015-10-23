@@ -4,28 +4,24 @@
                 template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="title">${msg.electionSystemLbl}</ui:define>
     <ui:define name="head">
-        <link href="votingsystem-cert.vsp" rel="import"/>
+        <link href="vs-cert.vsp" rel="import"/>
         <link href="../element/reason-dialog.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
         <div class="pageContentDiv">
             <div id="adminButtonsDiv" style="width: 600px; margin:20px auto 0px auto;">
                 <c:if test="${'admin'.equals(param.menu) || 'superuser'.equals(param.menu)}">
-                <button onclick="document.querySelector('#reasonDialog').toggle()">
+                <button onclick="document.querySelector('#reasonDialog').show()">
                     <div>${msg.cancelCertLbl}</div>
                 </button>
             </c:if>
             </div>
             <div>
-                <votingsystem-cert id="certData" certvs='#{certDto}'></votingsystem-cert>
+                <vs-cert id="certData" certvs='#{certDto}'></vs-cert>
             </div>
         </div>
 
-        <div style="position: absolute; width: 100%; top:0px;left:0px;visibility:hidden">
-            <div class="layout horizontal center center-justified" style="padding:100px 0px 0px 0px;margin:0px auto 0px auto;">
-                <reason-dialog id="reasonDialog" caption="${msg.cancelCertFormCaption}" opened="false" isMenuAdmin="true"></reason-dialog>
-            </div>
-        </div>
+        <reason-dialog id="reasonDialog" caption="${msg.cancelCertFormCaption}"></reason-dialog>
         <script>
             sendSignalVS({caption:"${msg.trustedCertPageTitle}"})
             document.addEventListener('WebComponentsReady', function() {
@@ -37,12 +33,11 @@
                         changeCertToState:"${CertificateVS.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
                     operationVS.jsonStr = JSON.stringify(signedContent)
                     operationVS.setCallback(function(appMessage) {
-                        document.querySelector("#certData").url = contextURL + "/rest/certificateVS/cert/" + certMap.serialNumber + "?menu=" + menuType
+                        document.querySelector("#certData").url = contextURL + "/rest/certificateVS/serialNumber/" + certMap.serialNumber + "?menu=" + menuType
                     })
                     VotingSystemClient.setMessage(operationVS);
                 })
             });
-
             <c:if test="${'CANCELED'.equals(certMap.state)}">
                 document.querySelector('#cancelCertButton').style.display = "none"
             </c:if>

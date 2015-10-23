@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="../resources/bower_components/vs-pager/vs-pager.html" rel="import"/>
-<link href="votingsystem-cert.vsp" rel="import"/>
+<link href="vs-cert.vsp" rel="import"/>
 
 <dom-module name="cert-list">
     <template>
@@ -33,8 +33,6 @@
                     <option value="&type=CERTIFICATE_AUTHORITY&state=CANCELED"> - ${msg.certAuthorityStateCancelledLbl} - </option>
                 </select>
             </div>
-
-            <h3><div id="pageHeader" class="pageHeader text-center">{{pageHeader}}</div></h3>
 
             <div class="flex" horizontal wrap around-justified layout>
                 <template is="dom-repeat" items="{{certListDto.resultList}}">
@@ -70,7 +68,7 @@
                       offset="{{certListDto.offset}}" total="{{certListDto.totalCount}}"></vs-pager>
         </div>
         <div hidden="{{certDetailsHidden}}">
-            <votingsystem-cert id="certDetails" fab-visible="true" cert="{{cert}}" on-cert-closed="closeCertDetails"></votingsystem-cert>
+            <vs-cert id="certDetails" fab-visible="true" cert="{{cert}}" on-cert-closed="closeCertDetails"></vs-cert>
         </div>
     </template>
     <script>
@@ -104,8 +102,6 @@
                 var certType = getURLParam('type')
                 var certState = getURLParam('state')
                 console.log(this.tagName + " - certListDtoChanged - certType: " + certType + " - certState: " + certState)
-                if("CERTIFICATE_AUTHORITY" == certType) this.pageHeader = "${msg.trustedCertsPageTitle}"
-                else this.pageHeader = "${msg.userCertsPageTitle}"
             },
             getState:function(state){
                 var stateLbl

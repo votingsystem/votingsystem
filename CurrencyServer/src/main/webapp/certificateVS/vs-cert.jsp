@@ -2,7 +2,7 @@
 
 <link href="../element/reason-dialog.vsp" rel="import"/>
 
-<dom-module name="votingsystem-cert">
+<dom-module name="vs-cert">
     <template>
         <style>
         .certDiv {
@@ -67,7 +67,7 @@
     </template>
     <script>
         Polymer({
-            is:'votingsystem-cert',
+            is:'vs-cert',
             properties: {
                 fabVisible:{type:Boolean, value:false},
                 url:{type:String},
@@ -84,7 +84,7 @@
                             changeCertToState:"${CertificateVS.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
                         operationVS.jsonStr = JSON.stringify(signedContent)
                         operationVS.setCallback(function(appMessage) {
-                            this.url = contextURL + "/rest/certificateVS/cert/" + certMap.serialNumber + "?menu=" + menuType
+                            this.url = contextURL + "/rest/certificateVS/serialNumber/" + certMap.serialNumber + "?menu=" + menuType
                         })
                         VotingSystemClient.setMessage(operationVS);
                 }.bind(this))
@@ -115,14 +115,14 @@
                     this.certvs = previousCert
                     if(this.certsSelectedStack.length == 0) this.subcert = null
                 } else {
-                    console.log(this.tagName + " - iron-signal-votingsystem-cert-closed")
+                    console.log(this.tagName + " - iron-signal-vs-cert-closed")
                     this.fire('cert-closed');
                 }
             },
             certIssuerClicked:function(e) {
                 var issuerSerialNumber = this.certvs.issuerSerialNumber
                 if(issuerSerialNumber != null) {
-                    var certURL = contextURL + "/rest/certificateVS/cert/" + issuerSerialNumber
+                    var certURL = contextURL + "/rest/certificateVS/serialNumber/" + issuerSerialNumber
                     console.log(this.tagName + " - certIssuerClicked: " + certURL)
                     this.certsSelectedStack.push(this.certvs)
                     this.url = certURL

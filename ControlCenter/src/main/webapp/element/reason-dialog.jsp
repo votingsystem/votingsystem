@@ -3,7 +3,7 @@
 <dom-module name="reason-dialog">
     <template>
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
-            <div id="container" layout vertical>
+            <div>
                 <div class="layout horizontal center center-justified">
                     <div hidden="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">{{caption}}</div>

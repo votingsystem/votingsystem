@@ -129,11 +129,10 @@ public class CertificateVSResource {
             } else {
                 req.getSession().setAttribute("certMap", certDto);
                 req.getSession().setAttribute("certDto", JSON.getMapper().writeValueAsString(certDto));
-                return Response.temporaryRedirect(new URI("../certificateVS/cert.xhtml")).build();
+                return Response.temporaryRedirect(new URI("../certificateVS/cert.xhtml?menu="+req.getParameter("menu"))).build();
             }
         }
     }
-
 
     @Path("/userVS/id/{userId}")
     @GET  @Produces(MediaType.TEXT_PLAIN)
@@ -206,33 +205,6 @@ public class CertificateVSResource {
                              @Context HttpServletResponse resp) throws Exception {
         CertificateVS certificateVS = certificateVSBean.editCert(messageSMIME);
         return Response.ok().entity("editCert - certificateVS id: " + certificateVS.getId()).build();
-    }
-
-    @Path("/cert/{serialNumber}")
-    @GET  @Produces(MediaType.APPLICATION_JSON)
-    public Object cert(@PathParam("serialNumber") long serialNumber, @Context HttpServletRequest req,
-             @Context HttpServletResponse resp, @DefaultValue("") @QueryParam("format") String format,
-             @Context ServletContext context) throws Exception {
-        String contentType = req.getContentType() != null ? req.getContentType(): "";
-        Query query = dao.getEM().createQuery("select c from CertificateVS c where c.serialNumber =:serialNumber")
-                .setParameter("serialNumber", serialNumber);
-        CertificateVS certificate = dao.getSingleResult(CertificateVS.class, query);
-        if(certificate != null) {
-            if(contentType.contains("pem") || "pem".equals(format)) {
-                resp.setHeader("Content-Disposition", "inline; filename='trustedCert_" + serialNumber + "'");
-                return Response.ok().entity(CertUtils.getPEMEncoded(certificate.getX509Cert()))
-                        .type(MediaTypeVS.PEM).build();
-            } else {
-                CertificateVSDto certDto = new CertificateVSDto(certificate);
-                if(contentType.contains("json")) {
-                    return Response.ok().entity(JSON.getMapper().writeValueAsBytes(certDto)).type(MediaTypeVS.JSON).build();
-                } else {
-                    req.getSession().setAttribute("certMap", certDto);
-                    req.getSession().setAttribute("certDto", JSON.getMapper().writeValueAsString(certDto));
-                    return Response.temporaryRedirect(new URI("../certificateVS/cert.xhtml")).build();
-                }
-            }
-        } else return Response.status(Response.Status.NOT_FOUND).entity("serialNumber: " + serialNumber).build();
     }
 
 }

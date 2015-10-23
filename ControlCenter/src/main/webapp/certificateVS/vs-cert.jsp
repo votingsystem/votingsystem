@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="votingsystem-cert">
+<dom-module name="vs-cert">
     <template>
         <style>
         .certDiv {
@@ -61,7 +61,7 @@
     </template>
     <script>
         Polymer({
-            is:'votingsystem-cert',
+            is:'vs-cert',
             properties: {
                 fabVisible:{type:Boolean, value:false},
                 certvs:{type:Object, value:{}, observer:'certvsChanged'}
@@ -92,14 +92,14 @@
                     this.certvs = previousCert
                     if(this.certsSelectedStack.length == 0) this.subcert = null
                 } else {
-                    console.log(this.tagName + " - iron-signal-votingsystem-cert-closed")
+                    console.log(this.tagName + " - iron-signal-vs-cert-closed")
                     this.fire('cert-closed');
                 }
             },
             certIssuerClicked:function(e) {
                 var issuerSerialNumber = e.model.item.issuerSerialNumber
                 if(issuerSerialNumber != null) {
-                    var certURL = contextURL + "/rest/certificateVS/cert/" + issuerSerialNumber
+                    var certURL = contextURL + "/rest/certificateVS/serialNumber/" + issuerSerialNumber
                     console.log(this.tagName + " - certIssuerClicked: " + certURL)
                     this.certsSelectedStack.push(this.certvs)
                     this.url = certURL

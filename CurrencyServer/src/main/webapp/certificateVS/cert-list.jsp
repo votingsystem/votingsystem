@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="../resources/bower_components/vs-pager/vs-pager.html" rel="import"/>
-<link href="votingsystem-cert.vsp" rel="import"/>
+<link href="vs-cert.vsp" rel="import"/>
 
 <dom-module name="cert-list">
     <template>
@@ -70,7 +70,7 @@
                       offset="{{certListDto.offset}}" total="{{certListDto.totalCount}}"></vs-pager>
         </div>
         <div hidden="{{certDetailsHidden}}">
-            <votingsystem-cert id="certDetails" fab-visible="true" cert="{{cert}}" on-cert-closed="closeCertDetails"></votingsystem-cert>
+            <vs-cert id="certDetails" fab-visible="true" cert="{{cert}}" on-cert-closed="closeCertDetails"></vs-cert>
         </div>
     </template>
     <script>
