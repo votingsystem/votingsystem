@@ -38,7 +38,7 @@
                     VotingSystemClient.setMessage(operationVS);
                 })
             });
-            <c:if test="${'CANCELED'.equals(certMap.state)}">
+            <c:if test="${'CANCELED'.equals(certMap.state.toString())}">
                 document.querySelector('#cancelCertButton').style.display = "none"
             </c:if>
         </script>

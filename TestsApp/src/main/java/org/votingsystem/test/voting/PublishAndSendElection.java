@@ -59,7 +59,7 @@ public class PublishAndSendElection {
         userBaseSimulationData.setNumUsersWithRepresentativeWithVote(1);
 
         simulationData = new VotingSimulationData();
-        simulationData.setServerURL("http://localhost:8080/AccessControl");
+        simulationData.setServerURL("http://currency:8080/AccessControl");
         simulationData.setMaxPendingResponses(50);
         simulationData.setUserBaseData(userBaseSimulationData);
         //simulationData.setEventStateWhenFinished();

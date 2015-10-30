@@ -34,7 +34,7 @@
                         <a hidden="{{!adminMenuHidden}}" data-route="representative" href="/representative" on-click="onDataRouteClick">
                             <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
                         </a>
-                        <a hidden="{{!adminMenuHidden}}" data-route="tools" href="/app/tools" on-click="onDataRouteClick">
+                        <a hidden="{{clientToolConnected}}" data-route="tools" href="/app/tools" on-click="onDataRouteClick">
                             <i class="fa fa-cogs" style="margin:0px 10px 0px 0px;"></i> ${msg.toolsLbl}
                         </a>
                         <a hidden="{{!adminMenuHidden}}" data-route="feeds" href="/subscriptionVS/feeds" on-click="onDataRouteClick">
@@ -92,6 +92,9 @@
 
             window.addEventListener('WebComponentsReady', function() {
                 console.log('spa.xhtml - WebComponentsReady - app.route: ' + app.route);
+                if (checkIfClientToolIsConnected()) {
+                    app.clientToolConnected = true
+                }
             });
 
             app.onDataRouteClick = function() {
@@ -134,6 +137,7 @@
             };
 
             app.updateMenuView()
+
         })(document);
     </script>
   </ui:define>

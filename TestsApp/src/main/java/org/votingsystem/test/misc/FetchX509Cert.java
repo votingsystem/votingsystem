@@ -27,7 +27,7 @@ public class FetchX509Cert {
     public static void main(String[] args) throws Exception {
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        String serverURL = "http://localhost:8080/TimeStampServer";
+        String serverURL = "http://currency:8080/AccessControl";
         String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
         ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
@@ -42,6 +42,8 @@ public class FetchX509Cert {
             X509Certificate x509TimeStampServerCert = certCollection.iterator().next();
             log.info("subjectDN " + x509TimeStampServerCert.getSubjectDN().toString() + " - not valid after:" +
                     x509TimeStampServerCert.getNotAfter());
+            byte[] pemBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert);
+            log.info("PEM cert: " + new String(pemBytes));
             if(new Date().after(x509TimeStampServerCert.getNotAfter())) {
                 log.log(Level.SEVERE, format("{0} signing cert is lapsed - cert not valid after: {1}",
                         serverInfoURL, x509TimeStampServerCert.getNotAfter()));

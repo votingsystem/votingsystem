@@ -131,7 +131,6 @@ public class EventVSElectionResource {
         } else {
             req.getSession().setAttribute("statsDto", JSON.getMapper().writeValueAsString(statsDto));
             return Response.temporaryRedirect(new URI("../eventVSElection/stats.xhtml")).build();
-
         }
     }
 

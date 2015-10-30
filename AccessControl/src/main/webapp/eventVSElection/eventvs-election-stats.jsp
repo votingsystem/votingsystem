@@ -5,7 +5,7 @@
 <dom-module name="eventvs-election-stats">
     <template>
         <style></style>
-        <iron-ajax id="ajax" url="{{url}}" handle-as="json" last-response="{{statsDto}}" method="get" content-type="application/json"></iron-ajax>
+        <iron-ajax auto id="ajax" url="{{url}}" handle-as="json" last-response="{{statsDto}}" method="get" content-type="application/json"></iron-ajax>
         <div hidden="{{chartVisible}}" id="messageToUser" vertical layout center center-justified
              style="padding: 10px;font-weight: bold;">
             ${msg.withoutVotesLbl}
@@ -54,29 +54,31 @@
                 }]
             },
             ready: function() {
+                console.log(this.tagName + " - ready")
                 this.options.chart.renderTo = this.$.chartDiv
                 this.chartVisible = false
-                if(this.eventvsId != null) this.loadStats()
+                if(this.statsDto != null) this.statsDtoChanged()
             },
             loadStats: function() {
                 var targetURL = contextURL + "/rest/eventVSElection/id/" + this.eventvsId + "/stats"
                 console.log(this.tagName + "- targetURL: " + targetURL)
                 this.$.ajax.url = targetURL
-                this.$.ajax.generateRequest()
             },
             statsDtoChanged: function() {
-                if(this.statsDto == null) return
+                if(this.statsDto == null || this.options.chart.renderTo == null) return
                 var seriesData = []
                 var numTotalVotes = 0
                 Array.prototype.forEach.call(this.statsDto.fieldsEventVS, function(fieldEvent) {
+                    console.log("--------fieldEvent: " + fieldEvent)
                     seriesData.push([fieldEvent.content, fieldEvent.numVotesVS])
                     numTotalVotes += fieldEvent.numVotesVS
                 });
                 this.options.series[0].data = seriesData
                 console.log(this.tagName + " - subject: " + this.statsDto.subject + " - numTotalVotes: " + numTotalVotes);
                 if(numTotalVotes > 0) {
-                    var chart = new Highcharts.Chart(this.options);
                     this.chartVisible = true
+                    new Highcharts.Chart(this.options);
+
                 }
             }
         });

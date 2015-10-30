@@ -283,7 +283,7 @@ public class DNIeContentSigner implements ContentSigner {
         byte[] getSignature() {
             byte[] sigBytes = null;
             try {
-               byte[] hashValue = bOut.toByteArray();
+               //byte[] hashValue = bOut.toByteArray();
                //String hashValueStr = new String(Base64.encode(hashValue));
                //log.info(" ------- hashValueStr: " + hashValueStr);
                 sigBytes = pkcs11Session.sign(bOut.toByteArray());
