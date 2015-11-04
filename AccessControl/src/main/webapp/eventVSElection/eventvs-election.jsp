@@ -194,7 +194,7 @@
                 this.fire('eventvs-election-closed');
             },
             showConfirmDialog: function(e) {
-                console.log(this.tagName + " showConfirmDialog---")
+                console.log(this.tagName + " showConfirmDialog")
                 if(!window['isClientToolConnected']) {
                     showMessageVS("${msg.clientToolRequiredErrorMsg}", "${msg.errorLbl}");
                 } else {
