@@ -28,6 +28,9 @@
                     </paper-toolbar>
 
                     <paper-menu class="list drawerToolbar" attr-for-selected="data-route" selected="[[route]]">
+                        <a hidden="{{searchHidden}}" data-route="representative" href="/representative" on-click="toogleSearchPanel">
+                            <i class="fa fa-search" style="margin:0px 10px 0px 0px;"></i> ${msg.searchLbl}
+                        </a>
                         <a data-route="groupVS" href="/groupVS" on-click="onDataRouteClick">
                             <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupvsLbl}
                         </a>
@@ -64,13 +67,16 @@
 
                 <paper-header-panel main="" condenses="" keep-condensed-header="">
                     <paper-toolbar id="mainToolbar" >
-                        <i class="fa fa-bars vs-navbar-icon" paper-drawer-toggle="" style="margin: 0 10px 0 10px;"></i>
-                        <span class="flex"></span>
-
-                        <i class="fa fa-search vs-navbar-icon" hidden="{{searchHidden}}" on-click="toogleSearchPanel"></i>
-
-                        <div class="middle middle-container center horizontal layout">
+                        <div style="margin: 0 12px 0 0;">
+                            <iron-icon paper-drawer-toggle="" icon="icons:menu" style="margin: 0 10px 0 10px;"
+                                       class="vs-navbar-icon"></iron-icon>
+                        </div>
+                        <div class="flex center horizontal layout">
                             <div class="app-name">{{appTitle}}</div>
+                        </div>
+                        <div id="buttonBackDiv" style="margin: 0 8px 0 0; display: none;">
+                            <iron-icon on-click="_back" icon="icons:arrow-back" style="margin:0px 10px 0px 0px;"
+                                       class="vs-navbar-icon"></iron-icon>
                         </div>
                     </paper-toolbar>
 
@@ -100,6 +106,10 @@
             window.addEventListener('WebComponentsReady', function() {
                 console.log('spa.xhtml - WebComponentsReady');
             });
+
+            app._back = function() {
+                history.back();
+            }
 
             app.onDataRouteClick = function() {
                 var drawerPanel = document.querySelector('#paperDrawerPanel');
@@ -154,6 +164,13 @@
 
             app.updateMenuView()
 
+            document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
+                function() {
+                    if(isAndroid()) {
+                        document.querySelector("#buttonBackDiv").style.display = 'block'
+                    }
+                }
+            )
         })(document);
     </script>
   </ui:define>

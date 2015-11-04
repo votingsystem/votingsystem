@@ -17,12 +17,6 @@
 
             <div style="margin: 0px 30px;">
                 <div class="layout horizontal center center-justified" style="width:100%;">
-                    <div>
-                        <paper-fab hidden="{{!fabVisible}}" mini icon="arrow-back" on-click="back"
-                                   style="color: white;background:#ba0011;"><i class="fa fa-chevron-left"></i>
-                        </paper-fab>
-                    </div>
-
                     <div class="flex" style="text-align: center">
                         <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
                     </div>
@@ -82,7 +76,6 @@
             is:'eventvs-election',
             properties: {
                 eventvs:{type:Object, value:{}, observer:'eventvsChanged'},
-                fabVisible:{type:Boolean, value:false},
                 smallScreen:{type:Boolean, value:false, observer:'smallScreenChanged'},
                 selectedTab:{type:String, value:'optionsTab', observer:'smallScreenChanged'}
             },

@@ -29,12 +29,6 @@
             <div style="margin: 0px 30px;">
                 <div class="layout horizontal center center-justified" style="width:100%;">
                     <div>
-                        <paper-fab hidden="{{!fabVisible}}" mini icon="arrow-back" on-click="back"
-                                   style="color: white;background:#ba0011;"><i class="fa fa-chevron-left"></i>
-                        </paper-fab>
-                    </div>
-
-                    <div>
                         <paper-fab hidden="{{!votevsResul}}" mini icon="mail" on-click="showVoteResul"
                                    style="color: #ba0011;margin: 0 0 0 20px;background: #ffeb3b;"></paper-fab>
                     </div>
@@ -74,7 +68,6 @@
                         <div id="pollDiv" on-click="setPollView" class="tab">${msg.pollFieldLegend}</div>
                         <div id="resultsDiv"  on-click="setResultsView"  class="tab">${msg.resultsLbl}</div>
                     </div>
-
                     <div class="horizontal layout">
                         <div hidden="{{optionsDivHidden}}" style="width: 100%; display: block;">
                             <div>
@@ -120,7 +113,6 @@
             is:'eventvs-election',
             properties: {
                 eventvs:{type:Object, value:{}, observer:'eventvsChanged'},
-                fabVisible:{type:Boolean, value:false},
                 smallScreen:{type:Boolean, value:false, observer:'smallScreenChanged'},
                 selectedTab:{type:String, value:'optionsTab', observer:'smallScreenChanged'}
             },
@@ -202,7 +194,7 @@
                 this.fire('eventvs-election-closed');
             },
             showConfirmDialog: function(e) {
-                console.log(this.tagName + " showConfirmDialog")
+                console.log(this.tagName + " showConfirmDialog---")
                 if(!window['isClientToolConnected']) {
                     showMessageVS("${msg.clientToolRequiredErrorMsg}", "${msg.errorLbl}");
                 } else {
