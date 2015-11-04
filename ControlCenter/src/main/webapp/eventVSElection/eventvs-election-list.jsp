@@ -12,7 +12,7 @@
         </style>
         <iron-ajax auto id="ajax" url="{{url}}" last-response="{{eventListDto}}" handle-as="json"
                    content-type="application/json"></iron-ajax>
-        <div hidden="{{!eventvsDetailsHidden}}">
+        <div>
             <div class="layout horizontal center center-justified">
                 <select id="eventVSStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
                         on-change="eventVSStateSelect" class="form-control">
@@ -49,11 +49,6 @@
                       offset="{{eventListDto.offset}}" total="{{eventListDto.totalCount}}"></vs-pager>
         </div>
 
-        <div hidden="{{eventvsDetailsHidden}}">
-            <eventvs-election id="eventvsDetails" fab-visible="true" eventvs="{{eventvs}}"
-                              on-eventvs-election-closed="closeEventVSDetails"></eventvs-election>
-        </div>
-
     </template>
     <script>
         Polymer({
@@ -68,7 +63,6 @@
                 this.eventVSState = getURLParam('eventVSState')
                 console.log(this.tagName + " - ready - eventVSState: " + this.eventVSState)
                 this.loading = true
-                this.eventvsDetailsHidden = true
                 if(this.eventVSState) this.$.eventVSStateSelect.value = this.eventVSState
             },
             loadURL:function(path, querystring) {
@@ -92,10 +86,6 @@
                 this.loading = false
                 this.$.vspager.style.display = 'block'
             },
-            closeEventVSDetails:function(e, detail, sender) {
-                console.log(this.tagName + " - closeEventVSDetails")
-                this.eventvsDetailsHidden = true
-            },
             pagerChange:function(e) {
                 var optionSelected = this.$.eventVSStateSelect.value
                 console.log("eventVSStateSelect: " + optionSelected)
@@ -109,8 +99,8 @@
             },
             showEventVSDetails :  function(e) {
                 console.log(this.tagName + " - showEventVSDetails")
-                this.$.eventvsDetails.eventvs = e.model.item;
-                this.eventvsDetailsHidden = false
+                app.eventvs = e.model.item;
+                page("/eventVSElection/id/" + app.eventvs.id)
             },
             getRepresentativeName:function(groupvs) {
                 return groupvs.representative.firstName + " " + groupvs.representative.lastName

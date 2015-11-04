@@ -60,6 +60,14 @@
               app.loadMainContent(eventVSElection, "${msg.electionSystemLbl}")
           });
       });
+      page('/eventVSElection/id*', scrollToTop, function (ctx) {
+          app.route = 'eventVSElection';
+          Polymer.Base.importHref('./eventVSElection/eventvs-election.vsp', function () {
+              if (!eventVSElection) eventVSElection = document.createElement('eventvs-election');
+              eventVSElection.eventvs = app.eventvs
+              app.loadMainContent(eventVSElection, "${msg.electionSystemLbl}")
+          });
+      });
 
       page('/new_representative', scrollToTop, function (ctx) {
           app.route = 'new_representative';
