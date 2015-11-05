@@ -62,10 +62,6 @@
                         <div class="flex center horizontal layout">
                             <div class="app-name">{{appTitle}}</div>
                         </div>
-                        <div id="buttonBackDiv" style="margin: 0 8px 0 0; display: none;">
-                            <iron-icon on-click="_back" icon="icons:arrow-back" style="margin:0px 10px 0px 0px;"
-                                       class="vs-navbar-icon"></iron-icon>
-                        </div>
                     </paper-toolbar>
 
                     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
@@ -98,8 +94,12 @@
                 }
             });
 
-            app._back = function() {
-                history.back();
+            app.back = function() {
+                history.back()
+                //there's a delay until location.href is updated with history.back()
+                setTimeout(function () {
+                    page(window.location.href.split("\\#!")[1])
+                }, 50);
             }
 
             app.onDataRouteClick = function() {
@@ -142,15 +142,6 @@
             };
 
             app.updateMenuView()
-
-            document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
-                function() {
-                    app.clientToolConnected = true
-                    if(isAndroid()) {
-                        document.querySelector("#buttonBackDiv").style.display = 'block'
-                    }
-                }
-            )
         })(document);
     </script>
   </ui:define>

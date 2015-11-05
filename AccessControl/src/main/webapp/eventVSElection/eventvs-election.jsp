@@ -13,7 +13,7 @@
             .tabContent { margin:0px auto 0px auto; width:auto; }
             .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px;}
             .representativeNumRepHeader { text-overflow: ellipsis; color:#888;}
-            .tab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;}
+            .statsTab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;}
             .tabSelected { border-bottom: 2px solid #ba0011;}
         </style>
         <iron-media-query query="max-width: 600px" query-matches="{{smallScreen}}"></iron-media-query>
@@ -65,8 +65,8 @@
                     </div>
 
                     <div class="horizontal layout" hidden="{{!smallScreen}}" style="margin: 20px 0 0 0;">
-                        <div id="pollDiv" on-click="setPollView" class="tab">${msg.pollFieldLegend}</div>
-                        <div id="resultsDiv"  on-click="setResultsView"  class="tab">${msg.resultsLbl}</div>
+                        <div id="pollDiv" on-click="setPollView" class="statsTab">${msg.pollFieldLegend}</div>
+                        <div id="resultsDiv"  on-click="setResultsView"  class="statsTab">${msg.resultsLbl}</div>
                     </div>
                     <div class="horizontal layout">
                         <div hidden="{{optionsDivHidden}}" style="width: 100%; display: block;">

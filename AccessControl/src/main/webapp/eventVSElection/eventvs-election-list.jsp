@@ -100,7 +100,7 @@
             showEventVSDetails :  function(e) {
                 console.log(this.tagName + " - showEventVSDetails")
                 app.eventvs = e.model.item;
-                page("/eventVSElection/id/" + app.eventvs.id)
+                page("/rest/eventVSElection/id/" + app.eventvs.id)
             },
             getRepresentativeName:function(groupvs) {
                 return groupvs.representative.firstName + " " + groupvs.representative.lastName

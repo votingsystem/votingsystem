@@ -69,7 +69,6 @@
                 var seriesData = []
                 var numTotalVotes = 0
                 Array.prototype.forEach.call(this.statsDto.fieldsEventVS, function(fieldEvent) {
-                    console.log("--------fieldEvent: " + fieldEvent)
                     seriesData.push([fieldEvent.content, fieldEvent.numVotesVS])
                     numTotalVotes += fieldEvent.numVotesVS
                 });
