@@ -13,7 +13,7 @@
     <paper-dialog id="configDialog" with-backdrop no-cancel-on-outside-click style="border: 1px solid #6c0404;">
         <div style="width: 350px;">
             <div class="layout horizontal center center-justified">
-                <div hidden="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
                     <div style="text-align: center;">${msg.configGroupvsLbl}</div>
                 </div>
                 <div style="position: absolute; top: 0px; right: 0px;">
@@ -30,7 +30,7 @@
     <paper-dialog id="transactionSelectorDialog" with-backdrop no-cancel-on-outside-click style="border: 1px solid #6c0404;">
         <div style="width: 350px;">
             <div class="layout horizontal center center-justified">
-                <div hidden="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
                     <div style="text-align: center;">${msg.makeTransactionVSFromGroupVSLbl}</div>
                 </div>
                 <div style="position: absolute; top: 0px; right: 0px;">

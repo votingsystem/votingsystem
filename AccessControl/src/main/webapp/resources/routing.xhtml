@@ -18,12 +18,12 @@
       }
 
       // Routes
-      page('/app/contact', scrollToTop, function (ctx) {
+      page('*/app/contact', scrollToTop, function (ctx) {
           app.route = 'contact';
           loadFrameVS(contextURL + "/app/contact.xhtml", "${msg.contactLbl}")
       });
 
-      page('/app/tools', scrollToTop, function (ctx) {
+      page('*/app/tools', scrollToTop, function (ctx) {
           app.route = 'tools';
           loadFrameVS(contextURL + "/app/tools.xhtml", "${msg.toolsPageTitle}")
       });
@@ -42,7 +42,7 @@
       });
 
       var eventVSElectionList
-      page('/eventVSElection', scrollToTop, function (ctx) {
+      page('*/eventVSElection', scrollToTop, function (ctx) {
           app.route = 'eventVSElection';
           Polymer.Base.importHref('./eventVSElection/eventvs-election-list.vsp', function () {
               if (!eventVSElectionList) eventVSElectionList = document.createElement('eventvs-election-list');
@@ -73,7 +73,7 @@
       });
 
       var representativeList
-      page('/representative', scrollToTop, function (ctx) {
+      page('*/representative', scrollToTop, function (ctx) {
           app.route = 'representative';
           Polymer.Base.importHref('./representative/representative-list.vsp', function () {
               if (!representativeList) representativeList = document.createElement('representative-list');
@@ -81,7 +81,7 @@
           });
       });
 
-      page('/subscriptionVS/feeds', scrollToTop, function (ctx) {
+      page('*/subscriptionVS/feeds', scrollToTop, function (ctx) {
           app.route = 'feeds';
           loadFrameVS(contextURL + "/subscriptionVS/feeds.xhtml", "${msg.subscriptionLbl}")
       });

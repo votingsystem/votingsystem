@@ -6,7 +6,7 @@
             <style> </style>
             <div>
                 <div class="layout horizontal center center-justified">
-                    <div class="flex" style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                    <div class="flex" style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
                         <div hidden="{{!caption}}" style="text-align: center;">{{caption}}</div>
                     </div>
                     <div style="position: absolute; top: 0px; right: 0px;">

@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="../resources/bower_components/iron-media-query/iron-media-query.html" rel="import"/>
-<link href="eventvs-election-vote-confirm-dialog.vsp" rel="import"/>
+<link href="../resources/bower_components/paper-tabs/paper-tabs.html" rel="import"/>
 <link href="eventvs-admin-dialog.vsp" rel="import"/>
 <link href="votevs-result-dialog.vsp" rel="import"/>
 <link href="eventvs-election-stats.vsp" rel="import"/>
@@ -10,12 +10,13 @@
 <dom-module name="eventvs-election">
     <template>
         <style>
-            .tabContent { margin:0px auto 0px auto; width:auto; }
-            .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px;}
-            .representativeNumRepHeader { text-overflow: ellipsis; color:#888;}
-            .statsTab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;}
-            .tabSelected { border-bottom: 2px solid #ba0011;}
+            paper-tabs, paper-toolbar {
+                background-color: #ba0011;
+                color: #fff;
+                box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
+            }
         </style>
+        <iron-signals on-iron-signal-messagedialog-accept="messagedialogConfirmed"></iron-signals>
         <iron-media-query query="max-width: 600px" query-matches="{{smallScreen}}"></iron-media-query>
         <iron-ajax auto url="{{url}}" last-response="{{eventvs}}" handle-as="json"
                    content-type="application/json"></iron-ajax>
@@ -27,6 +28,7 @@
             </div>
 
             <div style="margin: 0px 30px;">
+                <div hidden="{{!isActive}}" style='color: #888;font-size: 0.9em;'>{{getElapsedTime(eventvs.dateFinish)}}</div>
                 <div class="layout horizontal center center-justified" style="width:100%;">
                     <div>
                         <paper-fab hidden="{{!votevsResul}}" mini icon="mail" on-click="showVoteResul"
@@ -36,17 +38,15 @@
                     <div class="flex" style="text-align: center">
                         <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
                     </div>
-
-                    <div hidden="{{!isActive}}" style='color: #888;'>{{getElapsedTime(eventvs.dateFinish)}}</div>
                 </div>
-                <div class$="{{eventStateRowClass}}">
+                <div class="horizontal layout">
                     <div class="flex" style="display: block;">
                         <div hidden="{{!isPending}}" style="font-size: 1.3em; font-weight:bold;color:#fba131;">${msg.eventVSPendingMsg}</div>
                         <div hidden="{{!isTerminated}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSFinishedLbl}</div>
                         <div hidden="{{!isCanceled}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSCancelledLbl}</div>
                     </div>
-                    <div style="margin:0px 30px 0px 30px; color: #888;"><b>${msg.dateLbl}: </b>
-                        <span>{{getDate(eventvs.dateBegin)}}</span></div>
+                    <div hidden="{{isActive}}" style="margin:0px 30px 0px 30px; color: #888;"><b>${msg.dateLbl}: </b>
+                        {{getDate(eventvs.dateBegin)}}</div>
                 </div>
                 <div>
                     <div class="eventContentDiv">
@@ -64,20 +64,24 @@
                         </div>
                     </div>
 
+
+
                     <div class="horizontal layout" hidden="{{!smallScreen}}" style="margin: 20px 0 0 0;">
-                        <div id="pollDiv" on-click="setPollView" class="statsTab">${msg.pollFieldLegend}</div>
-                        <div id="resultsDiv"  on-click="setResultsView"  class="statsTab">${msg.resultsLbl}</div>
+                        <paper-tabs selected="{{selectedTab}}" style="width: 100%; margin: 0 0 10px 0;">
+                            <paper-tab>${msg.pollFieldLegend}</paper-tab>
+                            <paper-tab>${msg.resultsLbl}</paper-tab>
+                        </paper-tabs>
                     </div>
                     <div class="horizontal layout">
                         <div hidden="{{optionsDivHidden}}" style="width: 100%; display: block;">
                             <div>
                                 <div hidden="{{!isActive}}">
-                                    <div style="font-size: 1.4em; font-weight: bold; text-decoration: underline; color:#888;
+                                    <div hidden="{{smallScreen}}" style="font-size: 1.4em; font-weight: bold; text-decoration: underline; color:#888;
                                         margin: 20px 0 0 0;">${msg.pollFieldLegend}:</div>
                                     <template is="dom-repeat" items="{{eventvs.fieldsEventVS}}">
                                         <div>
                                             <button on-click="showConfirmDialog"
-                                                    style="margin: 30px 0px 0px 5px;font-size: 1.2em; font-weight:bold;min-width: 500px; padding: 10px;">
+                                                    style="margin: 30px 0px 0px 5px;font-size: 1.2em; font-weight:bold;width: 100%; max-width: 500px; padding: 10px;">
                                                 <span>{{item.content}}</span>
                                             </button>
                                         </div>
@@ -114,11 +118,10 @@
             properties: {
                 eventvs:{type:Object, value:{}, observer:'eventvsChanged'},
                 smallScreen:{type:Boolean, value:false, observer:'smallScreenChanged'},
-                selectedTab:{type:String, value:'optionsTab', observer:'smallScreenChanged'}
+                selectedTab:{type:Number, value:0, observer:'selectedTabChanged'}
             },
             ready: function() {
                 console.log(this.tagName + "- ready")
-                this.statsDivHidden = false
                 sendSignalVS({caption:"${msg.pollLbl}"})
             },
             fireSignal:function() {
@@ -134,34 +137,28 @@
             getElapsedTime: function(dateStamp) {
                 return new Date(dateStamp).getElapsedTime() + " ${msg.toCloseLbl}"
             },
-            setResultsView: function() {
-                this.selectedTab = 'statsTab'
-                this.$.resultsDiv.className = 'tab tabSelected'
-                this.$.pollDiv.className = 'tab'
-                this.setTabs()
-            },
-            setPollView: function() {
-                this.selectedTab = 'optionsTab'
-                this.$.pollDiv.className = 'tab tabSelected'
-                this.$.resultsDiv.className = 'tab'
-            },
-            setTabs:function() {
-                if(this.selectedTab == 'optionsTab') {
+            selectedTabChanged:function() {
+                console.log("selectedTabChanged - selectedTab: " + this.selectedTab)
+                if(this.selectedTab === 0) {
+                    this.optionsDivHidden = false
                     this.statsDivHidden = true
-                    this.setPollView()
-                } else if(this.selectedTab == 'statsTab') {
+                } else {
                     this.optionsDivHidden = true
-                    this.setResultsView()
+                    this.statsDivHidden = false
+                }
+                if(!this.smallScreen) {
+                    this.optionsDivHidden = false
+                    this.statsDivHidden = false
                 }
             },
             smallScreenChanged:function() {
                 console.log("smallScreenChanged - smallScreen: " + this.smallScreen)
-                this.statsDivHidden = false
-                this.optionsDivHidden = false
+                this.selectedTabChanged()
                 if(this.smallScreen) {
                     this.eventStateRowClass = "vertical layout flex"
-                    this.setTabs()
-                } else this.eventStateRowClass = "horizontal layout flex"
+                } else {
+                    this.eventStateRowClass = "horizontal layout flex"
+                }
             },
             eventvsChanged:function() {
                 this.$.electionStats
@@ -199,7 +196,13 @@
                     showMessageVS("${msg.clientToolRequiredErrorMsg}", "${msg.errorLbl}");
                 } else {
                     this.optionVSSelected = e.model.item
-                    this.$.confirmOptionDialog.show(this.optionVSSelected.content)
+                    //showMessageVS(message, caption, callerId, isConfirmMessage)
+                    showMessageVS(this.optionVSSelected.content, "${msg.confirmOptionDialogCaption}", this.tagName, true);
+                }
+            },
+            messagedialogConfirmed:function(e, detail) {
+                if(this.tagName === detail.callerId) {
+                    this.submitVote()
                 }
             },
             getResults:function() {

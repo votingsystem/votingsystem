@@ -5,7 +5,7 @@
         <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
             <div class="layout vertical">
                 <div class="layout horizontal center center-justified">
-                    <div hidden="{{!caption}}" flex style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
+                    <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">{{caption}}</div>
                     </div>
                     <div style="position: absolute; top: 0px; right: 0px;">
