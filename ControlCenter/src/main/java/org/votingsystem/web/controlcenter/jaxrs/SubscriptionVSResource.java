@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -48,15 +49,16 @@ public class SubscriptionVSResource {
         List<EventVSElection> eventVSList = query.getResultList();
         List<SyndEntryImpl> feeds = new ArrayList<>();
         for(EventVSElection eventVSElection : eventVSList) {
-            String electionURL = config.getContextURL() + "/rest/eventVSElection/id" + eventVSElection.getId();
+            String electionURL = config.getContextURL() + "/rest/eventVSElection/id/" + eventVSElection.getId();
             SyndEntryImpl entry = new SyndEntryImpl();
             entry.setTitle(eventVSElection.getSubject());
             entry.setLink(electionURL);
             entry.setPublishedDate(eventVSElection.getDateCreated());
             SyndContent description = new SyndContentImpl();
             description.setType("text/plain");
-            String feedContent = format("<p>{0}</p><a href='{1}'>{3}</a>", eventVSElection.getContent(),
-                    electionURL, messages.get("vote"));
+            String feedContent = format("<p>{0}</p><a href=''{1}''>{2}</a>", eventVSElection.getContent(),
+                    new String(Base64.getDecoder().decode(eventVSElection.getContent().getBytes())),
+                    messages.get("voteLbl"));
             description.setValue(feedContent);
             entry.setDescription(description);
             feeds.add(entry);
