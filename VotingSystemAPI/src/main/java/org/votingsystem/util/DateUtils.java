@@ -12,20 +12,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.logging.Logger;
 
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 public class DateUtils {
-
-    private static Logger log = Logger.getLogger(DateUtils.class.getSimpleName());
-
-    private static final DateFormat urlDateFormatter = new SimpleDateFormat("yyyyMMdd_HHmm");
-    private static final DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
-    static {
-        isoDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     public static Calendar getCalendar(int year, int month, int day){
         Calendar calendar = Calendar.getInstance();
@@ -67,8 +58,11 @@ public class DateUtils {
     }
 
     public static Date getDateFromString (String dateString) throws ParseException {
-        if(dateString.endsWith("Z")) return isoDateFormat.parse(dateString);
-        else {
+        if(dateString.endsWith("Z")) {
+            DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+            isoDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return isoDateFormat.parse(dateString);
+        } else {
             DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             return formatter.parse(dateString);
         }
@@ -91,6 +85,8 @@ public class DateUtils {
     }
 
     public static String getISODateStr (Date date) {
+        DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+        isoDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return isoDateFormat.format(date);
     }
 
@@ -327,12 +323,14 @@ public class DateUtils {
     }
 
     public static TimePeriod getURLTimePeriod(String dateFromStr, String dateToStr) throws ParseException {
+        DateFormat urlDateFormatter = new SimpleDateFormat("yyyyMMdd_HHmm");
         Date dateFrom = urlDateFormatter.parse(dateFromStr);
         Date dateTo = urlDateFormatter.parse(dateToStr);
         return new TimePeriod(dateFrom, dateTo);
     }
 
     public static Date getURLPart(String dateStr) throws ParseException {
+        DateFormat urlDateFormatter = new SimpleDateFormat("yyyyMMdd_HHmm");
         return urlDateFormatter.parse(dateStr);
     }
 

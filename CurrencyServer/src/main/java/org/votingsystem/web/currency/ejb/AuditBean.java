@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -45,8 +44,6 @@ import static java.text.MessageFormat.format;
 public class AuditBean {
 
     private static Logger log = Logger.getLogger(AuditBean.class.getSimpleName());
-
-    private static final DateFormat fileDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;

@@ -11,8 +11,6 @@ import java.text.SimpleDateFormat;
  */
 public class ReportFiles {
 
-    private static final DateFormat fileDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-
     private File baseDir;
     private File receiptFile;
     private File jsonFile;
@@ -21,6 +19,7 @@ public class ReportFiles {
 
     public ReportFiles(TimePeriod timePeriod, String baseDirPath, String subPath) {
         String reportsBasePath = baseDirPath + "/backup/weekReports";
+        DateFormat fileDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         String dateFromPathPart = fileDateFormatter.format(timePeriod.getDateFrom());
         String dateToPathPart = fileDateFormatter.format(timePeriod.getDateTo());
         reportsBasePath = reportsBasePath + "/" + dateFromPathPart + "_" +dateToPathPart + "/";
@@ -33,6 +32,7 @@ public class ReportFiles {
 
     public static ReportFiles CURRENCY_PERIOD(TimePeriod timePeriod, String baseDirPath) {
         ReportFiles result = new ReportFiles();
+        DateFormat fileDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         String dateFromPathPart = fileDateFormatter.format(timePeriod.getDateFrom());
         String dateToPathPart = fileDateFormatter.format(timePeriod.getDateTo());
         String reportsBasePath = baseDirPath + "/backup/currency/" + dateFromPathPart + "_" + dateToPathPart;

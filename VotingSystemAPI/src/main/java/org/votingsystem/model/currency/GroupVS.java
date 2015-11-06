@@ -5,7 +5,6 @@ import org.votingsystem.model.UserVS;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Set;
 

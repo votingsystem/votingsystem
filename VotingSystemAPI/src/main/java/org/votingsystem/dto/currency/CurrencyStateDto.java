@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CertUtils;
+
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;

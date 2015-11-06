@@ -8,7 +8,10 @@ import org.votingsystem.model.UserVS;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static javax.persistence.GenerationType.IDENTITY;

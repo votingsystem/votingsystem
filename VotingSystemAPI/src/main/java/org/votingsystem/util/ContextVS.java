@@ -22,7 +22,6 @@ import org.votingsystem.throwable.KeyStoreExceptionVS;
 import javax.mail.Session;
 import javax.swing.*;
 import java.io.*;
-import java.net.URL;
 import java.security.KeyStore;
 import java.security.Security;
 import java.security.cert.Certificate;

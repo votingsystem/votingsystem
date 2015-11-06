@@ -39,8 +39,6 @@ public class ReportsResource {
 
     private static final Logger log = Logger.getLogger(ServerInfoResource.class.getName());
 
-    private static final DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-
     @Inject ConfigVS config;
 
     @Path("/{year}/{month}/{day}/week")
@@ -68,6 +66,7 @@ public class ReportsResource {
         File weekReportsBaseDir = new File(config.getServerDir() +  "/weekReports");
         List<TimePeriod> periods = new ArrayList<>();
         if(weekReportsBaseDir.exists()) {
+            DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             Files.list(weekReportsBaseDir.toPath()).forEach(file -> {
                 try {
                     String[] fileNameParts = file.getFileName().toString().split("_");

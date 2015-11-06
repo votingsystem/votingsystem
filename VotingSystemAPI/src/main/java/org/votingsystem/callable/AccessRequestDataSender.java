@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
-import static org.votingsystem.util.ContextVS.*;
+import static org.votingsystem.util.ContextVS.VOTE_SIGN_MECHANISM;
 
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

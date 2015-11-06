@@ -6,8 +6,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;

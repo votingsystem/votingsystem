@@ -8,7 +8,6 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
 

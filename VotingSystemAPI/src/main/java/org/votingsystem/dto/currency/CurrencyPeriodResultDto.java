@@ -2,7 +2,7 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.util.TimePeriod;
-import java.math.BigDecimal;
+
 import java.util.Map;
 import java.util.Set;
 
