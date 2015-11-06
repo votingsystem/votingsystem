@@ -19,8 +19,6 @@
                         balanceResult[currency][tag] = -1 * balanceFromMap[currency][tag]
                     })
                 }
-
-
             })
         }
         return balanceResult
@@ -83,13 +81,11 @@
 
     function tagDataForChartDonut(seriesData) {
         var result = []
-        var colors = Highcharts.getOptions().colors
         for(idx in seriesData) {
             var tagData = seriesData[idx]
             result.push({
                 name: tagData.name,
                 y: tagData.data[0],
-                color: colors[idx]
             });
         }
         return result
@@ -97,7 +93,6 @@
 
     function tagDataIncomesDetailsForChartDonut(seriesData) {
         var result = []
-        var colors = Highcharts.getOptions().colors
         for(idx in seriesData) {
             var tagData = seriesData[idx]
             var brightness = 0.1 - (idx / 2) / 5;
@@ -106,14 +101,12 @@
                 name: '${msg.timeLimitedLbl}',
                 tag:tagData.name,
                 y: tagData.data[2],
-                color: Highcharts.Color(colors[idx]).brighten(brightness).get()
             });
             //add remaining to total
             result.push({
                 name: '${msg.timeFreeLbl}',
                 tag:tagData.name,
                 y: tagData.data[0] - tagData.data[2],
-                color: colors[idx]
             });
         }
         return result
@@ -121,7 +114,6 @@
 
     function tagDataExpensesForChartDonut(seriesData) {
         var result = []
-        var colors = Highcharts.getOptions().colors
         var wildTagAvailable = null
         for(idx in seriesData) {
             var tagData = seriesData[idx]
@@ -129,8 +121,7 @@
             result.push({
                 name: '${msg.expendedLbl}',
                 tag:tagData.name,
-                y: tagData.data[1],
-                color: 'red'
+                y: tagData.data[1]
             });
             //check availbale
             var available = tagData.data[0] - tagData.data[1]
@@ -145,8 +136,7 @@
             result.push({
                 name: '${msg.availableLbl}',
                 tag:tagData.name,
-                y: available,
-                color: Highcharts.Color(colors[idx]).brighten(0.2).get()
+                y: available
             });
         }
         result.forEach(function(data) {

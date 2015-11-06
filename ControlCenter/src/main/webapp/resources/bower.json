@@ -21,7 +21,7 @@
 
   "dependencies": {
     "jsoneditor": "jsoneditor#~4.2.1",
-    "highcharts": "highcharts#~4.1.8",
+    "google-chart":"GoogleWebComponents/google-chart#^1.0.0",
     "font-awesome": "font-awesome#~4.4.0",
     "polymer": "Polymer/polymer#^1.2.0",
     "paper-elements": "PolymerElements/paper-elements#^1.0.5",
