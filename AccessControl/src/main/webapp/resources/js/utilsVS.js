@@ -294,34 +294,20 @@ VotingSystemClient.setMessage = function (messageJSON) {
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
     } else {
-        console.log("clientTool undefined")
+        console.log("clientTool undefined - operation: " + messageJSON.operation)
         if(isAndroid ()) {
             var encodedData = window.btoa(JSON.stringify(messageJSON));
             window.sendAndroidURIMessage(encodedData)
             return
         }
-        window.alert("clientTool undefined")
     }
 }
 
-VotingSystemClient.call = function (messageJSON) {
-    if(window['isClientToolConnected'] || window.parent['isClientToolConnected']) {
-        if(clientTool == undefined) clientTool = window.top.clientTool //we're inside vs-iframe
-        var messageToSignatureClient = JSON.stringify(messageJSON);
-        var resultBase64 = clientTool.call(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
-        var b64_to_utf8 = decodeURIComponent(escape(window.atob(resultBase64)))
-        return b64_to_utf8
-    } else console.log("clientTool not found")
-}
-
-function sendSignalVS(signalData, callback) {
+function sendSignalVS(signalData) {
     var result
     var operationVS = new OperationVS(Operation.SIGNAL_VS)
     operationVS.jsonStr = JSON.stringify(signalData)
-    operationVS.setCallback(callback)
-    try {
-        result = VotingSystemClient.call(operationVS);
-    } catch(ex) { } finally { return result;}
+    VotingSystemClient.setMessage(operationVS);
 }
 
 window['isClientToolConnected'] = false

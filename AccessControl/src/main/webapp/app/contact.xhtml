@@ -18,8 +18,10 @@
                 if (checkIfClientToolIsConnected()) {
                     var operationVS = new OperationVS(Operation.BROWSER_URL)
                     operationVS.documentURL = contextURL + "/app/contact.xhtml?openMailClient=true"
+                    operationVS.email = "${config.emailAdmin}"
                     VotingSystemClient.setMessage(operationVS);
                 } else document.location.href = "mailto:#{config.emailAdmin}";
+
             }
 //]]>
         </script>

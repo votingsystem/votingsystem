@@ -253,7 +253,7 @@ public class Utils {
             if (responseVS == null) {
                 log.log(Level.SEVERE,"Missing receipt data for hash: " + operation.getMessage());
                 try {
-                    browserVS.invokeBrowserCallback(MessageDto.ERROR(null),
+                    browserVS.invokeOperationCallback(MessageDto.ERROR(null),
                             operation.getCallerCallback());
                 } catch (JsonProcessingException ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -271,8 +271,8 @@ public class Utils {
                     File file = fileChooser.showSaveDialog(new Stage());
                     if (file != null) {
                         FileUtils.copyStreamToFile(new FileInputStream(fileToSave), file);
-                        browserVS.invokeBrowserCallback(MessageDto.OK(null), operation.getCallerCallback());
-                    } else browserVS.invokeBrowserCallback(MessageDto.ERROR(null), operation.getCallerCallback());
+                        browserVS.invokeOperationCallback(MessageDto.OK(null), operation.getCallerCallback());
+                    } else browserVS.invokeOperationCallback(MessageDto.ERROR(null), operation.getCallerCallback());
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
@@ -296,16 +296,16 @@ public class Utils {
                     log.info(" - imageFileBytes.length: " + imageFileBytes.length);
                     if (imageFileBytes.length > ContextVS.IMAGE_MAX_FILE_SIZE) {
                         log.info(" - MAX_FILE_SIZE exceeded ");
-                        browserVS.invokeBrowserCallback(MessageDto.ERROR(
+                        browserVS.invokeOperationCallback(MessageDto.ERROR(
                                         ContextVS.getMessage("fileSizeExceeded", ContextVS.IMAGE_MAX_FILE_SIZE_KB)),
                                 operationVS.getCallerCallback());
-                    } else browserVS.invokeBrowserCallback(MessageDto.OK(selectedImage.getAbsolutePath()),
+                    } else browserVS.invokeOperationCallback(MessageDto.OK(selectedImage.getAbsolutePath()),
                             operationVS.getCallerCallback());
-                } else browserVS.invokeBrowserCallback(MessageDto.ERROR(null), operationVS.getCallerCallback());
+                } else browserVS.invokeOperationCallback(MessageDto.ERROR(null), operationVS.getCallerCallback());
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 try {
-                    browserVS.invokeBrowserCallback(MessageDto.ERROR(ex.getMessage()),
+                    browserVS.invokeOperationCallback(MessageDto.ERROR(ex.getMessage()),
                             operationVS.getCallerCallback());
                 } catch (JsonProcessingException e) {
                     log.log(Level.SEVERE, e.getMessage(), e);
@@ -329,7 +329,7 @@ public class Utils {
                         operationVS.setFile(file);
                         browserVS.processOperationVS(operationVS, null);
                     } else try {
-                        browserVS.invokeBrowserCallback(MessageDto.ERROR(null), operationVS.getCallerCallback());
+                        browserVS.invokeOperationCallback(MessageDto.ERROR(null), operationVS.getCallerCallback());
                     } catch (JsonProcessingException ex) {
                         log.log(Level.SEVERE, ex.getMessage(), ex);
                     }
@@ -363,7 +363,7 @@ public class Utils {
                                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                                             CryptoTokenVS.JKS_KEYSTORE.toString());
                                     BrowserSessionService.getInstance().setUserVS(userVS, false);
-                                    if(operationVS != null) browserVS.invokeBrowserCallback(
+                                    if(operationVS != null) browserVS.invokeOperationCallback(
                                             UserVSDto.COMPLETE(userVS), operationVS.getCallerCallback());
                                 } catch (Exception ex) {
                                     showMessage(ResponseVS.SC_ERROR, ex.getMessage());
@@ -373,7 +373,7 @@ public class Utils {
                         PasswordDialog.showWithPasswordConfirm(null, passwordListener, ContextVS.getMessage("newKeyStorePasswordMsg"));
                     } catch(Exception ex) {
                         log.log(Level.SEVERE,ex.getMessage(), ex);
-                        if(operationVS != null) browserVS.invokeBrowserCallback(MessageDto.ERROR(ex.getMessage()),
+                        if(operationVS != null) browserVS.invokeOperationCallback(MessageDto.ERROR(ex.getMessage()),
                                 operationVS.getCallerCallback());
                     }
 
@@ -395,8 +395,8 @@ public class Utils {
         File file = fileChooser.showSaveDialog(new Stage());
         if(file != null){
             FileUtils.copyStringToFile(operation.getMessage(), file);
-            browserVS.invokeBrowserCallback(MessageDto.OK(null), operation.getCallerCallback());
-        } else browserVS.invokeBrowserCallback(MessageDto.ERROR(null), operation.getCallerCallback());
+            browserVS.invokeOperationCallback(MessageDto.OK(null), operation.getCallerCallback());
+        } else browserVS.invokeOperationCallback(MessageDto.ERROR(null), operation.getCallerCallback());
     }
 
 

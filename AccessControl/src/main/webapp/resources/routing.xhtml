@@ -62,6 +62,17 @@
           });
       });
 
+      var representativePage
+      page('/rest/representative/id*', scrollToTop, function (ctx) {
+          app.route = 'representative';
+          Polymer.Base.importHref('./representative/representative-info.vsp', function () {
+              if (!representativePage) representativePage = document.createElement('representative-info');
+              if(app.representative) representativePage.representative = app.representative
+              else representativePage.url = contextURL + ctx.path
+              app.loadMainContent(representativePage, "${msg.representativeLbl}")
+          });
+      });
+
       page('/new_representative', scrollToTop, function (ctx) {
           app.route = 'new_representative';
           VotingSystemClient.setMessage(new OperationVS(Operation.NEW_REPRESENTATIVE));

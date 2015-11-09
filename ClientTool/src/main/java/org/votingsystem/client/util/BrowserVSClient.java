@@ -42,7 +42,7 @@ public class BrowserVSClient {
         try {
             String jsonStr =  StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
             String logMsg = jsonStr.length() > 300 ? jsonStr.substring(0, 300) + "..." : jsonStr;
-            log.info("BrowserVSClient.setMessage: " + logMsg);
+            log.info("BrowsmessageserVSClient.setMessage: " + logMsg);
             OperationVS operationVS = JSON.getMapper().readValue(jsonStr, OperationVS.class);
             Browser.getInstance().registerCallerCallbackView(operationVS.getCallerCallback(), this.webView);
             switch (operationVS.getType()) {
@@ -116,39 +116,19 @@ public class BrowserVSClient {
                             operationVS, null);
                     else  Browser.getInstance().processOperationVS(null, operationVS);
                     break;
+                case SIGNAL_VS:
+                    Browser.getInstance().processSignalVS(operationVS.getData(SignalVSDto.class));
+                    break;
+                case REPRESENTATIVE_STATE:
+                    String result = JSON.getMapper().writeValueAsString(BrowserSessionService.getInstance().getRepresentationState());
+                    Browser.getInstance().invokeOperationCallback(result, operationVS.getCallerCallback());
+                    break;
                 default:
                     Browser.getInstance().processOperationVS(operationVS, null);
             }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             showMessage(new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage()));
-        }
-    }
-
-    public String call(String msgFromBrowser) {
-        String result = null;
-        try {
-            String jsonStr = StringUtils.decodeB64_TO_UTF8(msgFromBrowser);
-            OperationVS operationVS = JSON.getMapper().readValue(jsonStr, OperationVS.class);
-            switch (operationVS.getType()) {
-                case SIGNAL_VS:
-                    Browser.getInstance().processSignalVS(operationVS.getData(SignalVSDto.class));
-                    break;
-                case REPRESENTATIVE_STATE:
-                    result = JSON.getMapper().writeValueAsString(BrowserSessionService.getInstance().getRepresentationState());
-                    break;
-                case WALLET_STATE:
-                    result = JSON.getMapper().writeValueAsString(Wallet.getWalletDto());
-                    break;
-                default:
-                    result = "Unknown operation: '" + operationVS.getType() + "'";
-            }
-        } catch (Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-            result = ex.getMessage();
-        } finally {
-            if(result == null) return result;
-            else return Base64.getEncoder().encodeToString(result.getBytes());
         }
     }
 

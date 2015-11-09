@@ -4,16 +4,21 @@
 <link href="representative-select-dialog.vsp" rel="import"/>
 <link href="representative-request-accreditations-dialog.vsp" rel="import"/>
 <link href="representative-request-votinghistory-dialog.vsp" rel="import"/>
+<link href="../resources/bower_components/paper-tabs/paper-tabs.html" rel="import"/>
 
 <dom-module name="representative-info">
     <template>
         <style>
             .tabContent { margin:0px auto 0px auto; width:auto; }
+            paper-tabs, paper-toolbar {
+                background-color: #ba0011;
+                color: #fff;
+                box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
+            }
             .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px; text-align: center;}
             .representativeNumRepHeader { text-overflow: ellipsis; color:#888;}
-            .tab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;}
-            .tabSelected { border-bottom: 2px solid #ba0011;}
         </style>
+        <iron-ajax auto url="{{url}}" last-response="{{representative}}" handle-as="json" content-type="application/json"></iron-ajax>
         <div class="pageContentDiv">
             <div hidden="{{'user' !== menuType}}" class="horizontal layout center-justified" style="font-size: 0.9em;">
                 <button on-click="selectRepresentative">
@@ -21,10 +26,7 @@
                 </button>
             </div>
             <div class="text-center" style="margin:20px auto 15px 15px;">
-                <div class="layout horizontal center center-justified" style="width:100%;">
-                    <div hidden="{{!fabVisible}}">
-                        <paper-fab mini icon="arrow-back" on-click="back" style="color: white;background:#ba0011;"></paper-fab>
-                    </div>
+                <div class="layout vertical center center-justified" style="width:100%;">
                     <div data-representative-id$="{{representative.id}}" class="flex representativeNameHeader">
                         <div>{{representativeFullName}}</div>
                     </div>
@@ -34,10 +36,11 @@
                 </div>
             </div>
             <div style="margin:0px auto 0px auto;">
-
-                <div class="horizontal layout" hidden="{{!smallScreen}}" style="margin: 20px 0 0 0;">
-                    <div id="profileDiv" on-click="setProfileView" class="tab">${msg.profileLbl}</div>
-                    <div id="votingDiv"  on-click="setVotingHistoryView"  class="tab">${msg.votingHistoryLbl}</div>
+                <div class="horizontal layout" style="margin: 20px 0 0 0;">
+                    <paper-tabs selected="{{selectedTab}}" style="width: 100%; margin: 0 0 10px 0;">
+                        <paper-tab>${msg.profileLbl}</paper-tab>
+                        <paper-tab>${msg.votingHistoryLbl}</paper-tab>
+                    </paper-tabs>
                 </div>
 
                 <div hidden="{{votingTabSelected}}" class="tabContent">
@@ -82,7 +85,7 @@
             is:'representative-info',
             properties: {
                 representative:{type:Object, value:{}, observer:'representativeChanged'},
-                selectedTab:{type:String, value:'profile', observer:'selectedTabChanged'},
+                selectedTab:{type:Number, value:0, observer:'selectedTabChanged'},
                 isAdmin:{computed:'_checkIfAdmin(representative)'}
             },
             requestAccreditations:function(){
@@ -102,13 +105,10 @@
             },
             selectedTabChanged:function() {
                 console.log(this.tagName + " selectedTabChanged - selectedTab: " + this.selectedTab)
-                this.votingTabSelected = (this.selectedTab === 'votingHistory')
-                if( this.selectedTab === 'votingHistory') {
-                    this.$.votingDiv.className = 'tab tabSelected'
-                    this.$.profileDiv.className = 'tab'
+                if(this.selectedTab === 0) {
+                    this.votingTabSelected = false
                 } else {
-                    this.$.profileDiv.className = 'tab tabSelected'
-                    this.$.votingDiv.className = 'tab'
+                    this.votingTabSelected = true
                 }
             },
             decodeBase64:function(base64EncodedString) {
@@ -126,15 +126,11 @@
                 if(this.representative.imageURL != null) this.$.representativeImg.src = this.representative.imageURL
             },
             ready: function() {
-                this.selectedTab = 'profile'
-                console.log(this.tagName + " - selectedTab: " + this.selectedTab)
+                console.log(this.tagName + " - ready")
             },
             showImage:function() {
                 console.log(this.tagName + " - showImage")
                 this.$.representativeImage.show()
-            },
-            back:function() {
-                this.fire('representative-closed');
             }
         });
     </script>

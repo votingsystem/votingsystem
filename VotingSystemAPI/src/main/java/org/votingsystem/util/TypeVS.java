@@ -103,6 +103,6 @@ public enum TypeVS {
 
     WALLET_OPEN,
     WALLET_SAVE,
-    WALLET_STATE, CURRENCY_IMPORT;
+    CURRENCY_IMPORT;
 
 }

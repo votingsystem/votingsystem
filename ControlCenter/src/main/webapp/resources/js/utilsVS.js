@@ -302,23 +302,11 @@ VotingSystemClient.setMessage = function (messageJSON) {
     }
 }
 
-VotingSystemClient.call = function (messageJSON) {
-    if(window['isClientToolConnected'] || window.parent['isClientToolConnected']) {
-        if(clientTool == undefined) clientTool = window.top.clientTool //we're inside vs-iframe
-        var messageToSignatureClient = JSON.stringify(messageJSON);
-        var resultBase64 = clientTool.call(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
-        var b64_to_utf8 = decodeURIComponent(escape(window.atob(resultBase64)))
-        return b64_to_utf8
-    } else console.log("clientTool not found")
-}
-
-function sendSignalVS(signalData, callback) {
+function sendSignalVS(signalData) {
+    var result
     var operationVS = new OperationVS(Operation.SIGNAL_VS)
     operationVS.jsonStr = JSON.stringify(signalData)
-    operationVS.setCallback(callback)
-    try {
-        return VotingSystemClient.call(operationVS);
-    } catch(ex) { return null}
+    VotingSystemClient.setMessage(operationVS);
 }
 
 window['isClientToolConnected'] = false

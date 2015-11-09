@@ -27,7 +27,6 @@ var Operation = {
     CURRENCY_GROUP_USER_DEPOSIT: "CURRENCY_GROUP_USER_DEPOSIT",
     CURRENCY_GROUP_SUBSCRIBE: "CURRENCY_GROUP_SUBSCRIBE",
     CURRENCY_REQUEST: "CURRENCY_REQUEST",
-    WALLET_STATE: "WALLET_STATE",
     WALLET_OPEN: "WALLET_OPEN",
     WALLET_SAVE: "WALLET_SAVE"
 }
@@ -329,29 +328,16 @@ VotingSystemClient.setMessage = function (messageJSON) {
     }
 }
 
-VotingSystemClient.call = function (messageJSON) {
-    if(window['isClientToolConnected'] || window.parent['isClientToolConnected']) {
-        if(clientTool == undefined) clientTool = window.top.clientTool //we're inside vs-iframe
-        var messageToSignatureClient = JSON.stringify(messageJSON);
-        var resultBase64 = clientTool.call(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
-        var b64_to_utf8 = decodeURIComponent(escape(window.atob(resultBase64)))
-        return b64_to_utf8
-    } else console.log("clientTool not found")
-}
-
 function querySelector(selector) {
     if(document.querySelector(selector) != null) return document.querySelector(selector)
     else return document.querySelector('html /deep/ ' + selector)
 }
 
-function sendSignalVS(signalData, callback) {
+function sendSignalVS(signalData) {
     var result
     var operationVS = new OperationVS(Operation.SIGNAL_VS)
     operationVS.jsonStr = JSON.stringify(signalData)
-    operationVS.setCallback(callback)
-    try {
-        result = VotingSystemClient.call(operationVS);
-    } catch(ex) { } finally { return result;}
+    VotingSystemClient.setMessage(operationVS);
 }
 
 window['isClientToolConnected'] = false

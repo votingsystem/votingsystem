@@ -65,7 +65,6 @@
                     </div>
 
 
-
                     <div class="horizontal layout" hidden="{{!smallScreen}}" style="margin: 20px 0 0 0;">
                         <paper-tabs selected="{{selectedTab}}" style="width: 100%; margin: 0 0 10px 0;">
                             <paper-tab>${msg.pollFieldLegend}</paper-tab>

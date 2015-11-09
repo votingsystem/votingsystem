@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="representative-info.vsp" rel="import"/>
 <link href="representation-state.vsp" rel="import"/>
 
 <dom-module name="representative-list">
@@ -21,7 +20,7 @@
         </style>
         <iron-ajax auto url="{{url}}" last-response="{{representativeListDto}}" handle-as="json"
                    content-type="application/json"></iron-ajax>
-        <div hidden="{{!detailsHidden}}">
+        <div>
             <div hidden="{{!representationInfo}}" class="linkVS" on-click="showRepresentativeListDto"
                  style="margin: 10px 0 10px 0; text-align: center;" >${msg.userRepresentativeLbl}</div>
             <div class="layout flex horizontal wrap around-justified">
@@ -40,43 +39,29 @@
                 </template>
             </div>
         </div>
-
-        <div hidden="{{detailsHidden}}">
-            <representative-info id="representativeDetails" fab-visible="true" on-representative-closed="closeRepresentativeDetails">
-                </representative-info>
-        </div>
-        <representation-state id="representationState"></representation-state>
+        <representation-state id="representationState" on-updated-state="representationStateUpdated"></representation-state>
     </template>
     <script>
         Polymer({
             is:'representative-list',
             properties: {
                 representativeListDto:{type:Object},
+                representationInfo:{type:Boolean, value:false},
                 url:{type:String, value: contextURL + "/rest/representative"}
+            },
+            representationStateUpdated : function(e) {
+                this.representationInfo = true
             },
             ready : function(e) {
                 console.log(this.tagName + " - ready")
-                this.detailsHidden = true
-                if(this.$.representationState.hasData === true) this.representationInfo = true
-                else this.representationInfo = false
-            },
-            closeRepresentativeDetails:function(e, detail, sender) {
-                console.log(this.tagName + " - closeRepresentativeDetails")
-                this.detailsHidden = true
             },
             showRepresentativeListDto : function() {
                 this.$.representationState.show()
             },
             showRepresentativeDetails :  function(e) {
                 console.log(this.tagName + " - showRepresentativeDetails")
-                this.$.representativeDetails.representative = e.model.item;
-                this.detailsHidden = false
-            },
-            getRepresentativeName:function(groupvs) {
-                return groupvs.representative.firstName + " " + groupvs.representative.lastName
-            },
-            getSubject:function(eventSubject) {
-                return eventSubject.substring(0,50) + ((eventSubject.length > 50)? "...":"");
+                app.representative = e.model.item;
+                page("/rest/representative/id/" + app.representative.id)
             }
         });
     </script>

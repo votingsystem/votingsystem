@@ -10,7 +10,7 @@ import org.votingsystem.dto.OperationVS;
  */
 public interface BrowserVS {
 
-    public void invokeBrowserCallback(Object dto, String callerCallback) throws JsonProcessingException;
+    public void invokeOperationCallback(Object dto, String callerCallback) throws JsonProcessingException;
     public void processOperationVS(OperationVS operationVS, String passwordDialogMessage);
     public void processOperationVS(char[] password, OperationVS operationVS);
     public void processSignalVS(SignalVSDto signal);

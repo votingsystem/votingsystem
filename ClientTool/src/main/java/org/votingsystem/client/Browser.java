@@ -95,9 +95,9 @@ public class Browser extends VBox implements BrowserVS, PasswordDialog.Listener 
                         return;
                     }
                     if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                        invokeBrowserCallback(responseVS.getMessage(),
+                        invokeOperationCallback(responseVS.getMessage(),
                                 browserHelper.getSignatureService().getOperationVS().getCallerCallback());
-                    } else invokeBrowserCallback(new MessageDto(responseVS.getStatusCode(), responseVS.getMessage()),
+                    } else invokeOperationCallback(new MessageDto(responseVS.getStatusCode(), responseVS.getMessage()),
                             browserHelper.getSignatureService().getOperationVS().getCallerCallback());
                 }
             } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
@@ -127,19 +127,12 @@ public class Browser extends VBox implements BrowserVS, PasswordDialog.Listener 
         showMessage(responseVS.getStatusCode(), responseVS.getMessage());
     }
 
-    @Override public void invokeBrowserCallback(Object dto, String callerCallback) throws JsonProcessingException {
-        String message = JSON.getMapper().writeValueAsString(dto);
-        log.info("invokeBrowserCallback - dto: " + MsgUtils.truncateLog(message));
-        try {
-            WebView operationWebView = webViewMap.remove(callerCallback);
-            final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +
-                    Base64.getEncoder().encodeToString(message.getBytes("UTF8")) + "')";
-            PlatformImpl.runLater(() -> {  operationWebView.getEngine().executeScript(jsCommand); });
-        } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex); }
+    @Override public void invokeOperationCallback(Object dto, String callerCallback) throws JsonProcessingException {
+        invokeOperationCallback(JSON.getMapper().writeValueAsString(dto), callerCallback);
     }
 
-    public void invokeBrowserCallback(String jsonStr, String callerCallback) throws JsonProcessingException {
-        log.info("invokeBrowserCallback - jsonStr: " + MsgUtils.truncateLog(jsonStr));
+    public void invokeOperationCallback(String jsonStr, String callerCallback) throws JsonProcessingException {
+        log.info("invokeOperationCallback - jsonStr: " + MsgUtils.truncateLog(jsonStr));
         try {
             WebView operationWebView = webViewMap.remove(callerCallback);
             final String jsCommand = "setClientToolMessage('" + callerCallback + "','" +

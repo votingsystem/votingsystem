@@ -42,27 +42,27 @@
     <script>
         Polymer({
             is:'representation-state',
-            properties: {
-                hasData:{type:Boolean, value:false}
-            },
+            properties: { },
             ready: function() {
                 console.log(this.tagName + " - ")
                 if(window['isClientToolConnected']) {
                     this.cancellationHidden = true
                     this.timeInfoHidden = true
                     var operationVS = new OperationVS(Operation.REPRESENTATIVE_STATE)
-                    this.result = decodeURIComponent(escape(window.atob(VotingSystemClient.call(operationVS))))
-                    this.representationState = toJSON(this.result);
-                    if(this.representationState.representative != null) {
-                        this.representativeFullName = this.representationState.representative.firstName + " " +
-                                this.representationState.representative.lastName
-                    } else this.representativeInfoHidden = true
-                    if(this.representationState.state === "WITHOUT_REPRESENTATION") return
-                    if(this.representationState.state === "WITH_ANONYMOUS_REPRESENTATION") {
-                        this.timeInfoHidden = false
-                        this.cancellationHidden = false
-                    }
-                    this.hasData = true
+                    operationVS.setCallback(function(appMessage) {
+                        this.representationState = toJSON(appMessage);
+                        if(this.representationState.representative != null) {
+                            this.representativeFullName = this.representationState.representative.firstName + " " +
+                                    this.representationState.representative.lastName
+                        } else this.representativeInfoHidden = true
+                        if(this.representationState.state === "WITHOUT_REPRESENTATION") return
+                        if(this.representationState.state === "WITH_ANONYMOUS_REPRESENTATION") {
+                            this.timeInfoHidden = false
+                            this.cancellationHidden = false
+                        }
+                        this.fire('updated-state');
+                    }.bind(this))
+                    VotingSystemClient.setMessage(operationVS);
                 }
             },
             show: function() {
