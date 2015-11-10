@@ -12,10 +12,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.HTMLEditor;
 import javafx.stage.FileChooser;
 import org.votingsystem.client.Browser;
+import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.util.*;
 import rx.functions.Action1;
 

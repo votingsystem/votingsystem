@@ -42,20 +42,20 @@ public class VotingSystemApp extends Application {
     private static TrustManager[] trustAllCerts = new TrustManager[] {
         new X509TrustManager() {
             public X509Certificate[] getAcceptedIssuers() {
-                System.out.print("trustAllCerts - getAcceptedIssuers");
+                log.info("trustAllCerts - getAcceptedIssuers");
                 try {
                     return ContextVS.getInstance().getVotingSystemSSLCerts().toArray(new X509Certificate[]{});
                 } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex);}
                 return null;
             }
             public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                System.out.print("trustAllCerts - checkClientTrusted");
+                log.info("trustAllCerts - checkClientTrusted");
             }
             public void checkServerTrusted(X509Certificate[] certs, String authType ) throws CertificateException {
-                System.out.print("trustAllCerts - checkServerTrusted");
+                log.info("trustAllCerts - checkServerTrusted");
                 try {
-                    CertUtils.verifyCertificate(ContextVS.getInstance().getVotingSystemSSLTrustAnchors(), false,
-                            Arrays.asList(certs));
+                    /*CertUtils.verifyCertificate(ContextVS.getInstance().getVotingSystemSSLTrustAnchors(), false,
+                            Arrays.asList(certs));*/
                 } catch(Exception ex) {
                     throw new CertificateException(ex.getMessage());
                 }

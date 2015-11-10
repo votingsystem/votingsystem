@@ -60,10 +60,9 @@
                             </button>
                         </div>
                         <div id="eventAuthorDiv" class="flex" style="margin:0px 20px 0 30px; color:#888; font-size: 0.85em;">
-                            <b>${msg.publishedByLbl}:</b> <span>{{eventvs.userVS}}</span>
+                            <b>${msg.byLbl}:</b> <span>{{eventvs.userVS}}</span>
                         </div>
                     </div>
-
 
                     <div class="horizontal layout" hidden="{{!smallScreen}}" style="margin: 20px 0 0 0;">
                         <paper-tabs selected="{{selectedTab}}" style="width: 100%; margin: 0 0 10px 0;">

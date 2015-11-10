@@ -35,7 +35,7 @@
                                 <div class='eventDateBeginValueDiv'>{{getDate(item.dateBegin)}}</div>
                             </div>
                             <div class='eventAuthorDiv'>
-                                <div class='eventAuthorLblDiv'>${msg.publishedByLbl}:</div>
+                                <div class='eventAuthorLblDiv'>${msg.byLbl}:</div>
                                 <div class='eventAuthorValueDiv'>{{item.userVS}}</div>
                             </div>
                             <div hidden="{{!isCanceled(item)}}" class='cancelMessage'>${msg.eventCancelledLbl}</div>

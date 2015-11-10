@@ -17,7 +17,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.currency.Wallet;
 
 import java.util.Base64;
 import java.util.logging.Level;
@@ -42,7 +41,7 @@ public class BrowserVSClient {
         try {
             String jsonStr =  StringUtils.decodeB64_TO_UTF8(messageToSignatureClient);
             String logMsg = jsonStr.length() > 300 ? jsonStr.substring(0, 300) + "..." : jsonStr;
-            log.info("BrowsmessageserVSClient.setMessage: " + logMsg);
+            log.info("BrowserVSClient.setMessage: " + logMsg);
             OperationVS operationVS = JSON.getMapper().readValue(jsonStr, OperationVS.class);
             Browser.getInstance().registerCallerCallbackView(operationVS.getCallerCallback(), this.webView);
             switch (operationVS.getType()) {

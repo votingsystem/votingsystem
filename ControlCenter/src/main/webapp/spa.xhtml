@@ -20,21 +20,17 @@
         <template is="dom-bind" id="app">
             <paper-drawer-panel id="paperDrawerPanel">
                 <paper-scroll-header-panel drawer="" fixed="">
-                    <paper-toolbar class="drawerToolbar">
-                        <span class="paper-font-title">Menu</span>
-                    </paper-toolbar>
-
                     <paper-menu class="list drawerToolbar" attr-for-selected="data-route" selected="[[route]]">
-                        <a hidden="{{!adminMenuHidden}}" data-route="eventVSElection" href="/eventVSElection" on-click="onDataRouteClick">
+                        <a hidden="{{!adminMenuHidden}}" data-route="eventVSElection" href="#{contextURL}/spa.xhtml#!/eventVSElection" on-click="onDataRouteClick">
                             <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                         </a>
                         <a hidden="{{searchHidden}}" data-route="search" href="/search" on-click="toogleSearchPanel">
                             <i class="fa fa-search" style="margin:0px 10px 0px 0px;"></i> ${msg.searchLbl}
                         </a>
-                        <a data-route="feeds" href="/subscriptionVS/feeds" on-click="onDataRouteClick">
+                        <a data-route="feeds" href="#{contextURL}/spa.xhtml#!/subscriptionVS/feeds" on-click="onDataRouteClick">
                             <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> ${msg.subscriptionLbl}
                         </a>
-                        <a data-route="contact" href="/app/contact" on-click="onDataRouteClick">
+                        <a data-route="contact" href="#{contextURL}/spa.xhtml#!/app/contact" on-click="onDataRouteClick">
                             <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
                         </a>
                     </paper-menu>

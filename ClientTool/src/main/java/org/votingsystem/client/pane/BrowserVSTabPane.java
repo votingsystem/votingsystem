@@ -101,7 +101,7 @@ public class BrowserVSTabPane extends TabPane {
 
     public void newTab(final Pane tabContent, final String caption){
         Tab newTab = Utils.getTab(tabContent, caption);
-        newTab.setOnSelectionChanged(event -> toolbar.getLocationField().setText("") );
+        newTab.setOnSelectionChanged(event -> toolbar.getLocationField().setText(TAB_CAPTION_EMPTY) );
         getTabs().add(newTab);
         getSelectionModel().select(newTab);
     }
@@ -111,7 +111,7 @@ public class BrowserVSTabPane extends TabPane {
         if(jsCommand != null) {
             webView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newState) -> {
                 //log.info("newState: " + newState);
-                if (newState == Worker.State.SUCCEEDED) webView.getEngine().executeScript(jsCommand.toString());
+                if (newState == Worker.State.SUCCEEDED) webView.getEngine().executeScript(jsCommand);
             });
         }
         final WebHistory history = webView.getEngine().getHistory();
@@ -181,7 +181,6 @@ public class BrowserVSTabPane extends TabPane {
                     getContent()).getEngine().getHistory().getEntries();
             if(entries.size() > 0){
                 WebHistory.Entry selectedEntry = entries.get(entries.size() -1);
-                if(entries.size() > 1 &&  selectedEntry.getTitle() != null) newTab.setText(selectedEntry.getTitle());
                 log.info("selectedIdx: " + selectedIdx + " - selectedEntry: " + selectedEntry);
                 toolbar.getLocationField().setText(selectedEntry.getUrl());
             }

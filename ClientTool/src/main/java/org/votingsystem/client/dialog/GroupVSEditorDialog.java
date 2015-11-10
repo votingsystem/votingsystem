@@ -9,12 +9,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.web.HTMLEditor;
 import org.votingsystem.client.Browser;
+import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.util.*;
 import rx.functions.Action1;
 
