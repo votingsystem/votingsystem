@@ -1,10 +1,10 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
         xmlns:ui="http://java.sun.com/jsf/facelets"
-        template="/WEB-INF/templates/basic.xhtml">
+        template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="content">
         <div class="pageContentDiv">
             <div class="horizontal layout center center-justified" style="font-size: 1.2em;">
-                <div><a href="${contextURL}/app/index.xhtml">inicio</a></div>
+                <div><a href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/app/index.xhtml&amp;caption=${msg.docsLbl}">inicio</a></div>
             </div>
             <h1 class="pageHeader" style="text-align: center;">cuentas corrientes de usuario</h1>
             <div class="text-justify" style="margin: 0 auto 0 auto; font-size: 1.2em;">

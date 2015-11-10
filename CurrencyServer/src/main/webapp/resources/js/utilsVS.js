@@ -31,13 +31,6 @@ var Operation = {
     WALLET_SAVE: "WALLET_SAVE"
 }
 
-function httpGet(serviceURL){
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", serviceURL, false );
-    xmlHttp.send( null );
-    return xmlHttp.responseText;
-}
-
 function DateUtils(){}
 
 //parse dates with format "2010-08-30 01:02:03" or "2010/08/30 01:02:03"
@@ -183,12 +176,6 @@ var ResponseVS = {
 		SC_PAUSED:10
 }
 
-function loadjsfile(filename){
-	var fileref=document.createElement('script')
-	fileref.setAttribute("type","text/javascript")
- 	fileref.setAttribute("src", filename)
- }
-
 function calculateNIFLetter(dni) {
     var  nifLetters = "TRWAGMYFPDXBNJZSQVHLCKET";
     var module= dni % 23;
@@ -208,22 +195,6 @@ function validateNIF(nif) {
     var letter = nif.substring(8, 9);
     if(letter != calculateNIFLetter(number)) return null;
     else return nif;
-}
-
-function checkInputType(inputType) {
-    if(navigator.userAgent.toLowerCase().indexOf("javafx") > -1) return false;
-    if(null == inputType || '' == inputType.trim()) return false
-    var isSuppported = true
-    var elem = document.createElement("input");
-    elem.type = inputType;
-    if (elem.disabled || elem.type != inputType) isSuppported = false;
-    if("text" != inputType.toLowerCase()) {
-        try {
-            elem.value = "Test";
-            if(elem.value == "Test") isSuppported = false;
-        } catch(e) { console.log(e) }
-    }
-    return isSuppported
 }
 
 //http://www.mkyong.com/javascript/how-to-detect-ie-version-using-javascript/
@@ -274,12 +245,6 @@ function isJavaFX () {
 	return (navigator.userAgent.toLowerCase().indexOf("javafx") > - 1);
 }
 
-function getFnName(fn) {
-	  var f = typeof fn == 'function';
-	  var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));
-	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
-}
-
 var menuType = getURLParam('menu').toLowerCase();
 if(menuType == null) menuType = 'user';
 
@@ -293,6 +258,17 @@ function getURLParam(name, url) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),  results = regex.exec(url);
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function getQueryParam(variable, querystring) {
+    var vars = querystring.split('&');
+    for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split('=');
+        if (decodeURIComponent(pair[0]) == variable) {
+            return decodeURIComponent(pair[1]);
+        }
+    }
+    console.log('Query variable %s not found', variable);
 }
 
 function setURLParameter(baseURL, name, value){
@@ -318,13 +294,12 @@ VotingSystemClient.setMessage = function (messageJSON) {
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
     } else {
-        console.log("clientTool undefined")
+        console.log("clientTool undefined - operation: " + messageJSON.operation)
         if(isAndroid ()) {
             var encodedData = window.btoa(JSON.stringify(messageJSON));
             window.sendAndroidURIMessage(encodedData)
             return
         }
-        window.alert("clientTool undefined")
     }
 }
 

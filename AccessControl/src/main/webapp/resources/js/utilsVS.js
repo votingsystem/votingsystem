@@ -26,13 +26,6 @@ var Operation = {
     REPRESENTATIVE_STATE:"REPRESENTATIVE_STATE"
 }
 
-function httpGet(theUrl){
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", theUrl, false );
-    xmlHttp.send( null );
-    return xmlHttp.responseText;
-}
-
 function DateUtils(){}
 
 //parse dates with format "2010-08-30 01:02:03"
@@ -96,8 +89,6 @@ function pad(n, width, z) {
     return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
-
-
 function showMessageVS(message, caption, callerId, isConfirmMessage) {
     if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
             document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
@@ -126,7 +117,6 @@ String.prototype.format = function() {
 	  });
 	};
 
-	
 String.prototype.getDate = function() {
 	  return new Date(this)
 };
@@ -134,7 +124,6 @@ String.prototype.getDate = function() {
 String.prototype.getElapsedTime = function() {
 	  return this.getDate().getElapsedTime()
 };
-
 
 function toJSON(message){
 	if(message != null) {
@@ -157,12 +146,6 @@ var ResponseVS = {
 		SC_PAUSED:10
 }
 
-function loadjsfile(filename){
-	var fileref=document.createElement('script')
-	fileref.setAttribute("type","text/javascript")
- 	fileref.setAttribute("src", filename)
- }
-
 function calculateNIFLetter(dni) {
     var  nifLetters = "TRWAGMYFPDXBNJZSQVHLCKET";
     var module= dni % 23;
@@ -183,23 +166,6 @@ function validateNIF(nif) {
     if(letter != calculateNIFLetter(number)) return null;
     else return nif;
 }
-
-function checkInputType(inputType) {
-    if(navigator.userAgent.toLowerCase().indexOf("javafx") > -1) return false;
-    if(null == inputType || '' == inputType.trim()) return false
-    var isSuppported = true
-    var elem = document.createElement("input");
-    elem.type = inputType;
-    if (elem.disabled || elem.type != inputType) isSuppported = false;
-    if("text" != inputType.toLowerCase()) {
-        try {
-            elem.value = "Test";
-            if(elem.value == "Test") isSuppported = false;
-        } catch(e) { console.log(e) }
-    }
-    return isSuppported
-}
-
 
 //http://www.mkyong.com/javascript/how-to-detect-ie-version-using-javascript/
 function getInternetExplorerVersion() {
@@ -242,22 +208,6 @@ function isFirefox () {
 
 function isJavaFX () {
 	return (navigator.userAgent.toLowerCase().indexOf("javafx") > - 1);
-}
-
-function getFnName(fn) {
-	  var f = typeof fn == 'function';
-	  var s = f && ((fn.name && ['', fn.name]) || fn.toString().match(/function ([^\(]+)/));
-	  return (!f && 'not a function') || (s && s[1] || 'anonymous');
-}
-
-function getRadioValue(radioName) {
-    var radios = document.getElementsByName(radioName);
-    for (var i = 0, length = radios.length; i < length; i++) {
-        if (radios[i].checked) {
-            return radios[i].value;
-            break;
-        }
-    }
 }
 
 var menuType = getURLParam('menu').toLowerCase();

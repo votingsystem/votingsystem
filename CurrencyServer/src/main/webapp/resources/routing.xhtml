@@ -8,28 +8,23 @@
           next();
       }
 
-      var iframeVS
-      function loadFrameVS(url, pageCaption) {
-          Polymer.Base.importHref('./resources/bower_components/vs-iframe/vs-iframe.html', function(e) {
-              if(!iframeVS) iframeVS = document.createElement('vs-iframe');
-              iframeVS.url = url
-              app.loadMainContent(iframeVS, pageCaption)
-          });
-      }
-
-      // Routes
-      page('/app/contact', scrollToTop, function() {
-          app.route = 'contact';
-          loadFrameVS(contextURL + "/app/contact.xhtml", "${msg.contactLbl}")
-      });
-
-      page('/appdocs', scrollToTop, function() {
-          app.route = 'docs';
-          loadFrameVS(contextURL + "/app/index.xhtml", "${msg.docsLbl}")
+      var pageMap = {}
+      page('*/innerVSPage*', scrollToTop, function(ctx) {
+          if(!app.route) app.route = 'docs'
+          var url = contextURL + getQueryParam('url', ctx.querystring)
+          var pageCaption = getQueryParam('caption', ctx.querystring)
+          console.log("innerVSPage - url: " + url + " - caption: " + pageCaption)
+          if(pageMap[url]) app.loadMainContent(pageMap[url], pageCaption)
+          else {
+              Polymer.Base.importHref(url, function(e) {
+                  pageMap[url] = e.target.import.body
+                  app.loadMainContent(pageMap[url], pageCaption)
+              });
+          }
       });
 
       var userVSDashboard
-      page('/app/userVSDashboard', scrollToTop, function() {
+      page('*/app/userVSDashboard', scrollToTop, function() {
           app.route = 'userVSDashboard';
           Polymer.Base.importHref('./app/uservs-dashboard.vsp', function(e) {
               if(!userVSDashboard) userVSDashboard = document.createElement('uservs-dashboard');
@@ -38,7 +33,7 @@
       });
 
       var certificateVSList
-      page('/certificateVS/certs', scrollToTop, function() {
+      page('*/certificateVS/certs', scrollToTop, function() {
           app.route = 'certificateVS';
           Polymer.Base.importHref('./certificateVS/cert-list.vsp', function(e) {
               if(!certificateVSList) certificateVSList = document.createElement('cert-list');
@@ -56,7 +51,8 @@
       });
 
       var currencyRequest
-      page('/currency/request', scrollToTop, function(data) {
+      page('*/currency/request', scrollToTop, function(data) {
+          app.route = 'currencyRequest';
           Polymer.Base.importHref('./currency/currency-request-form.vsp', function(e) {
               if(!currencyRequest) currencyRequest = document.createElement('currency-request-form');
               app.loadMainContent(currencyRequest, "${msg.doCurrencyRequestLbl}")
@@ -64,7 +60,7 @@
       });
 
       var currencyAccountSystem
-      page('/currencyAccount/system', scrollToTop, function(data) {
+      page('*/currencyAccount/system', scrollToTop, function(data) {
           Polymer.Base.importHref('./currencyAccount/system-accounts.vsp', function(e) {
               if(!currencyAccountSystem) currencyAccountSystem = document.createElement('system-accounts');
               app.loadMainContent(currencyAccountSystem, "${msg.systemBalanceLbl}")
@@ -72,13 +68,13 @@
       });
 
       var groupvsList
-      page('/groupVS', scrollToTop, function() {
+      page('*/groupVS', scrollToTop, function() {
           app.route = 'groupVS';
           Polymer.Base.importHref('./groupVS/groupvs-list.vsp', function(e) {
               if(!groupvsList) {
                   groupvsList = document.createElement('groupvs-list');
               }
-              app.loadMainContent(groupvsList, "${msg.groupVSLbl}", true)
+              app.loadMainContent(groupvsList, "${msg.groupVSLbl}", false)
           });
       });
 
@@ -96,10 +92,9 @@
                   groupvs = document.createElement('groupvs-details');
               }
               groupvs.url = data.path
-              app.loadMainContent(groupvs, "${msg.groupVSLbl}", true)
+              app.loadMainContent(groupvs, "${msg.groupVSLbl}", false)
           });
       });
-
 
       var messageSMIMEViewer
       page('*/messageSMIME/id*', scrollToTop, function(data) {
@@ -111,13 +106,13 @@
           });
       });
 
-      page('/newGroupVS', scrollToTop, function() {
+      page('*/newGroupVS', scrollToTop, function() {
           app.route = 'newGroupVS';
           VotingSystemClient.setMessage(new OperationVS(Operation.CURRENCY_GROUP_NEW))
       });
 
       var reports
-      page('/reports', scrollToTop, function(data) {
+      page('*/reports', scrollToTop, function(data) {
           app.route = 'reports';
           Polymer.Base.importHref('./reports/vs-reports.vsp', function(e) {
               if(!reports) reports = document.createElement('vs-reports');
@@ -166,7 +161,7 @@
       });
 
       var bankVSList
-      page('/userVS/bankVSList', scrollToTop, function(data) {
+      page('*/userVS/bankVSList', scrollToTop, function(data) {
           app.route = 'reports';
           Polymer.Base.importHref('./userVS/bankVS-list.vsp', function(e) {
               if(!bankVSList) bankVSList = document.createElement('bankVS-list');
@@ -193,13 +188,11 @@
           });
       });
 
-
-
-
       page({
           hashbang: true // add #! before urls
       });
 
+      if(!app.route) page("/groupVS")
   });
 </script>
 </html>

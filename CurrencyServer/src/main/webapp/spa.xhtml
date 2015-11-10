@@ -22,44 +22,41 @@
             <paper-drawer-panel id="paperDrawerPanel">
                 <paper-scroll-header-panel drawer="" fixed="">
                     <paper-toolbar class="drawerToolbar">
-                        <span class="paper-font-title">Menu</span>
-                    </paper-toolbar>
-
-                    <paper-menu class="list drawerToolbar" attr-for-selected="data-route" selected="[[route]]">
                         <a hidden="{{searchHidden}}" data-route="search" href="/search" on-click="toogleSearchPanel">
                             <i class="fa fa-search" style="margin:0px 10px 0px 0px;"></i> ${msg.searchLbl}
                         </a>
-                        <a data-route="groupVS" href="/groupVS" on-click="onDataRouteClick">
+                    </paper-toolbar>
+                    <paper-menu class="list drawerToolbar" attr-for-selected="data-route" selected="[[route]]">
+                        <a data-route="groupVS" href="#{contextURL}/spa.xhtml#!/groupVS" on-click="onDataRouteClick">
                             <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupvsLbl}
                         </a>
-                        <a data-route="userVSDashboard" href="/app/userVSDashboard" on-click="onDataRouteClick">
+                        <a data-route="userVSDashboard" href="#{contextURL}/spa.xhtml#!/app/userVSDashboard" on-click="onDataRouteClick">
                             <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
                         </a>
-                        <a data-route="userVS" href="/userVS/search" on-click="onDataRouteClick">
+                        <a data-route="userVS" href="#{contextURL}/spa.xhtml#!/userVS/search" on-click="onDataRouteClick">
                             <i class="fa fa-user" style="margin:0px 10px 0px 0px;"></i> ${msg.locateUserVSLbl}
                         </a>
-                        <a data-route="currencyRequest" href="/currency/request" on-click="onDataRouteClick">
+                        <a data-route="currencyRequest" href="#{contextURL}/spa.xhtml#!/currency/request" on-click="onDataRouteClick">
                             <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> ${msg.doCurrencyRequestLbl}
                         </a>
-                        <a hidden="{{!isAdminView}}" data-route="newGroupVS" href="/newGroupVS" on-click="onDataRouteClick">
+                        <a hidden="{{!isAdminView}}" data-route="newGroupVS" href="#{contextURL}/spa.xhtml#!/newGroupVS" on-click="onDataRouteClick">
                             <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupVSLbl}
                         </a>
-                        <a hidden="{{!isSuperUserView}}" data-route="newGroupVS" href="/userVS/newBankVS" on-click="onDataRouteClick">
+                        <a hidden="{{!isSuperUserView}}" data-route="newGroupVS" href="#{contextURL}/spa.xhtml#!/userVS/newBankVS" on-click="onDataRouteClick">
                             <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankVSLbl}
                         </a>
-                        <a hidden="{{!isSuperUserView}}" data-route="certificateVS" href="/certificateVS/certs" on-click="onDataRouteClick">
+                        <a hidden="{{!isSuperUserView}}" data-route="certificateVS" href="/#{contextURL}/spa.xhtml#!certificateVS/certs" on-click="onDataRouteClick">
                             <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
                         </a>
-                        <a data-route="reports" href="/reports" on-click="onDataRouteClick">
+                        <a data-route="reports" href="#{contextURL}/spa.xhtml#!/reports" on-click="onDataRouteClick">
                             <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> ${msg.reportsPageTitle}
                         </a>
-                        <a data-route="docs" href="/appdocs" on-click="onDataRouteClick">
+                        <a data-route="docs" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/app/index.xhtml&amp;caption=${msg.docsLbl}" on-click="onDataRouteClick">
                             <i class="fa fa-info" style="margin:0px 10px 0px 0px;"></i> ${msg.docsLbl}
                         </a>
-                        <a data-route="contact" href="/app/contact" on-click="onDataRouteClick">
+                        <a data-route="contact" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/app/contact.xhtml&amp;caption=${msg.contactLbl}" on-click="onDataRouteClick">
                             <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
                         </a>
-
                     </paper-menu>
                 </paper-scroll-header-panel>
 
@@ -95,6 +92,7 @@
 
             app.addEventListener('dom-change', function() {
                 console.log('spa.xhtml - dom-change');
+                app.searchHidden = true
             });
 
             window.addEventListener('WebComponentsReady', function() {

@@ -19,15 +19,17 @@
         <template is="dom-bind" id="app">
             <paper-drawer-panel id="paperDrawerPanel">
                 <paper-scroll-header-panel drawer="" fixed="">
+                    <paper-toolbar class="drawerToolbar">
+                        <a hidden="{{searchHidden}}" data-route="search" href="" on-click="toogleSearchPanel">
+                            <i class="fa fa-search" style="margin:0px 10px 0px 0px;"></i> ${msg.searchLbl}
+                        </a>
+                    </paper-toolbar>
                     <paper-menu class="list drawerToolbar" attr-for-selected="data-route" selected="[[route]]">
                         <a hidden="{{!adminMenuHidden}}" data-route="eventVSElection" href="#{contextURL}/spa.xhtml#!/eventVSElection" on-click="onDataRouteClick">
                             <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                         </a>
                         <a hidden="{{!adminMenuHidden}}" data-route="representative" href="#{contextURL}/spa.xhtml#!/representative" on-click="onDataRouteClick">
                             <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
-                        </a>
-                        <a hidden="{{searchHidden}}" data-route="search" href="" on-click="toogleSearchPanel">
-                            <i class="fa fa-search" style="margin:0px 10px 0px 0px;"></i> ${msg.searchLbl}
                         </a>
                         <a hidden="{{clientToolConnected}}" data-route="tools" href="#{contextURL}/spa.xhtml#!/app/tools" on-click="onDataRouteClick">
                             <i class="fa fa-cogs" style="margin:0px 10px 0px 0px;"></i> ${msg.toolsLbl}
@@ -84,6 +86,7 @@
 
             app.addEventListener('dom-change', function() {
                 console.log('spa.xhtml - dom-change');
+                app.searchHidden = true
             });
 
             window.addEventListener('WebComponentsReady', function() {
