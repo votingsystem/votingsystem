@@ -142,9 +142,19 @@
 
       var userVSBalance
       page('*/rest/balance/userVS/id/*', scrollToTop, function(data) {
+          app.route = 'userVS';
           Polymer.Base.importHref('./balance/balance-uservs.vsp', function(e) {
               if(!userVSBalance) userVSBalance = document.createElement('balance-uservs');
               userVSBalance.url = data.path
+              app.loadMainContent(userVSBalance, "${msg.balanceLbl}")
+          });
+      });
+
+      page('/rest/balance/userVS/nif/:nif', scrollToTop, function(ctx) {
+          app.route = 'userVS';
+          Polymer.Base.importHref('./balance/balance-uservs.vsp', function(e) {
+              if(!userVSBalance) userVSBalance = document.createElement('balance-uservs');
+              userVSBalance.url = contextURL + "/rest/balance/userVS/nif/" +  ctx.params.nif
               app.loadMainContent(userVSBalance, "${msg.balanceLbl}")
           });
       });

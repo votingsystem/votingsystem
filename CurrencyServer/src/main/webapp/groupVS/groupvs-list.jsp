@@ -106,12 +106,11 @@
         Polymer({
             is:'groupvs-list',
             properties: {
-                groupListDto:{type:Object,observer:'groupListDtoChanged'},
+                groupListDto:{type:Object, observer:'groupListDtoChanged'},
                 url:{type:String}
             },
             groupListDtoChanged:function() {
                 console.log(this.tagName + " - groupListDtoChanged ")
-                this.groupList = this.groupListDto.resultList
             },
             ready :  function(e) {
                 this.state = getURLParam("state")

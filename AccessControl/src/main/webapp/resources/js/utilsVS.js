@@ -238,8 +238,7 @@ function VotingSystemClient () { }
 
 var clientTool
 VotingSystemClient.setMessage = function (messageJSON) {
-    if(window['isClientToolConnected'] || window.parent['isClientToolConnected']) {
-        if(clientTool == undefined) clientTool = window.top.clientTool //we're inside vs-iframe
+    if(window['isClientToolConnected']) {
         var messageToSignatureClient = JSON.stringify(messageJSON);
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))

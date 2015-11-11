@@ -108,7 +108,6 @@ public class BalanceResource {
     public Object week(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {
-        String contentType = req.getContentType() != null ? req.getContentType(): "";
         Calendar calendar = DateUtils.getCalendar(year, month, day);
         TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
         ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), null);

@@ -130,8 +130,11 @@ public class BrowserVSTabPane extends TabPane {
                 log.info("history change - selectedEntry: " + selectedEntry);
                 String newURL = selectedEntry.getUrl();
                 if (!newURL.contains("?")) newURL = newURL + params;
-                if (history.getEntries().size() > 1 && selectedEntry.getTitle() != null) getSelectionModel().
+                if (history.getEntries().size() > 1 && (selectedEntry.getTitle() != null &&
+                        !"".equals(selectedEntry.getTitle()))) getSelectionModel().
                         getSelectedItem().setText(selectedEntry.getTitle());
+                else if(tabCaption != null) getSelectionModel().getSelectedItem().setText(tabCaption);
+                else getSelectionModel().getSelectedItem().setText(TAB_CAPTION_EMPTY);
                 toolbar.getLocationField().setText(newURL);
             }
         });

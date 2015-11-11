@@ -1,6 +1,6 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                template="/WEB-INF/templates/polymer.xhtml">
+                template="${'true'.equals(param['openMailClient'])? '/WEB-INF/templates/polymer.xhtml' : '/WEB-INF/templates/basic.xhtml'}">
     <ui:define name="title">${msg.contactLbl}</ui:define>
     <ui:define name="content">
         <div class="pageContentDiv" style="font-size: 1.2em; margin: 30px auto; text-align: center;">
@@ -10,14 +10,17 @@
         </div>
         <script>
 //<![CDATA[
+
             //hack to open mail client from javafx app
             if(getURLParam("openMailClient")) {
                 document.location.href = "mailto:${config.emailAdmin}";
             }
+
             function mailTo() {
                 if (checkIfClientToolIsConnected()) {
                     var operationVS = new OperationVS(Operation.BROWSER_URL)
                     operationVS.documentURL = contextURL + "/app/contact.xhtml?openMailClient=true"
+                    operationVS.email = "${config.emailAdmin}"
                     VotingSystemClient.setMessage(operationVS);
                 } else document.location.href = "mailto:#{config.emailAdmin}";
             }
