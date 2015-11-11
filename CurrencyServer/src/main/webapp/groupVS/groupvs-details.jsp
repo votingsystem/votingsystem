@@ -84,13 +84,8 @@
                 </f:view>
             </div>
             <div id="pageHeader" class="layout horizontal center center-justified">
-                <div class="horizontal layout flex" style="padding:7px 0px 0px 7px;">
-                    <div hidden="{{!fabVisible}}" style="margin: 10px 20px 10px 0;" title="${msg.backLbl}" >
-                        <paper-fab mini icon="arrow-back" on-click="back"
-                                   style="color: #f9f9f9;margin: 0 0 0 20px;background: #ba0011;"></paper-fab>
-                    </div>
-                </div>
-                <div style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
+                <div class="horizontal layout center center-justified" style="font-size: 1.5em;
+                    margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
                     <div style="text-align: center;" data-groupvs-id$="{{groupvs.id}}">{{groupvs.name}}</div>
                 </div>
                 <div class="flex" style="margin:5px 10px 0 0; font-size: 0.7em; color:#888; text-align: right; vertical-align: bottom;">
@@ -139,8 +134,7 @@
     Polymer({
         is:'groupvs-details',
         properties: {
-            fabVisible:{type:Boolean, value:false},
-            groupvs:{type:Object, value:{}, observer:'groupvsChanged'},
+            groupvs:{type:Object, observer:'groupvsChanged'},
             representativeName:{type:String},
             url:{type:String},
             tagsHidden:{type:Boolean}
@@ -272,9 +266,6 @@
             var operationVS = new OperationVS(Operation.CURRENCY_GROUP_EDIT)
             operationVS.message = this.groupvs.id
             VotingSystemClient.setMessage(operationVS);
-        },
-        back:function() {
-            this.fire('iron-signal', {name: "groupvs-details-closed", data: this.groupvs.id});
         },
         showUserDetails:function(e, detail, sender) {
             console.log(this.tagName + " - showUserDetails")

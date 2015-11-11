@@ -254,13 +254,14 @@ function isNumber(n) {
 
 //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
 function getURLParam(name, url) {
-    if(!url) url = location.search
+    if(!url) url = window.location.href
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),  results = regex.exec(url);
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
 function getQueryParam(variable, querystring) {
+    if(!querystring) querystring = location.search
     var vars = querystring.split('&');
     for (var i = 0; i < vars.length; i++) {
         var pair = vars[i].split('=');

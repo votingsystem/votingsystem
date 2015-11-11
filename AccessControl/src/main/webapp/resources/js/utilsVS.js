@@ -215,7 +215,7 @@ if(menuType == null) menuType = 'user'
 
 //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
 function getURLParam(name, url) {
-    if(!url) url = location.search
+    if(!url) url = window.location.href
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),  results = regex.exec(url);
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));

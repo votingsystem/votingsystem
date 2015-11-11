@@ -84,15 +84,14 @@
           console.log("routing.xhtml - TODO - groupvsUser - display with groupvs-user - data.path: " + data.path)
       });
 
-      var groupvs
+      var groupvsDetailsPage
       page('*/rest/groupVS/id/*', scrollToTop, function(data) {
           app.route = 'groupVS';
           Polymer.Base.importHref('./groupVS/groupvs-details.vsp', function(e) {
-              if(!groupvs) {
-                  groupvs = document.createElement('groupvs-details');
-              }
-              groupvs.url = data.path
-              app.loadMainContent(groupvs, "${msg.groupVSLbl}", false)
+              if(!groupvsDetailsPage) groupvsDetailsPage = document.createElement('groupvs-details');
+              if(app.groupvs) groupvsDetailsPage.groupvs = app.groupvs
+              else groupvsDetailsPage.url = data.path
+              app.loadMainContent(groupvsDetailsPage, "${msg.groupVSLbl}", false)
           });
       });
 
