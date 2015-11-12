@@ -302,7 +302,7 @@ public class ActorVS extends EntityVS implements Serializable {
 
     public String getUserVSBalanceURL(String nif, String menu, String locale) {
         String sufix = (menu != null || locale != null)? "?menu=" + menu + "&locale=" + locale : "";
-        return getServerURL() + "/" + sufix + "#!/rest/balance/userVS/nif/" + nif;
+        return getServerURL() + "/spa.xhtml" + sufix + "#!/rest/balance/userVS/nif/" + nif;
     }
 
     public String getDeviceListByNifServiceURL(String nif) {

@@ -312,7 +312,6 @@ function sendSignalVS(signalData) {
     var result
     var operationVS = new OperationVS(Operation.SIGNAL_VS)
     operationVS.jsonStr = JSON.stringify(signalData)
-    console.log("=========== operationVS: " + JSON.stringify(operationVS) )
     VotingSystemClient.setMessage(operationVS);
 }
 

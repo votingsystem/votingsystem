@@ -18,7 +18,6 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.StringUtils;
 
-import java.awt.*;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
