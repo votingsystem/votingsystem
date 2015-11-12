@@ -140,9 +140,6 @@
                     if(this.eventvs.state === 'ACTIVE' || this.eventvs.state === 'PENDING') this.adminMenuHidden = false
                 }
                 this.$.electionStats.eventvsId = this.eventvs.id
-            },
-            back:function() {
-                this.fire('eventvs-election-closed');
             }
         });
     </script>

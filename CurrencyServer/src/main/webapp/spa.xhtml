@@ -15,6 +15,7 @@
     <script src="./resources/js/utils_js.vsp" type="text/javascript"></script>
 
     <link rel="import" href="./resources/elements.html"/>
+    <link rel="import" href="./element/search-bar.vsp"/>
   </ui:define>
   <ui:define name="content">
     <div class="fullbleed layout vertical">
@@ -22,9 +23,6 @@
             <paper-drawer-panel id="paperDrawerPanel">
                 <paper-scroll-header-panel drawer="" fixed="">
                     <paper-toolbar class="drawerToolbar">
-                        <a hidden="{{searchHidden}}" data-route="search" href="/search" on-click="toogleSearchPanel">
-                            <i class="fa fa-search" style="margin:0px 10px 0px 0px;"></i> ${msg.searchLbl}
-                        </a>
                     </paper-toolbar>
                     <paper-menu class="list drawerToolbar" attr-for-selected="data-route" selected="[[route]]">
                         <a data-route="groupVS" href="#{contextURL}/spa.xhtml#!/groupVS" on-click="onDataRouteClick">
@@ -66,8 +64,12 @@
                             <iron-icon paper-drawer-toggle="" icon="icons:menu" style="margin: 0 10px 0 10px;"
                                        class="vs-navbar-icon"></iron-icon>
                         </div>
-                        <div class="flex center horizontal layout">
+                        <div class="center horizontal layout flex">
                             <div class="app-name">{{appTitle}}</div>
+                        </div>
+                        <div hidden="{{searchHidden}}">
+                            <search-bar id="appBar" class="horizontal layout center end-justified"
+                                     on-search-request="performSearch"></search-bar>
                         </div>
                     </paper-toolbar>
 
@@ -91,7 +93,7 @@
             var app = document.querySelector('#app');
 
             app.addEventListener('dom-change', function() {
-                console.log('spa.xhtml - dom-change');
+                console.log('spa.xhtml - dom-change - appBar: ' + document.querySelector('#appBar'));
                 app.searchHidden = true
             });
 
@@ -147,6 +149,10 @@
                     document.querySelector("#pageInfoPanel").innerHTML = searchMessage
                     document.querySelector("#pageInfoPanel").style.display = "block"
                 } else document.querySelector("#pageInfoPanel").style.display = "none"
+            }
+
+            app.performSearch = function(e) {
+                console.log("app.performSearch - query: " + e.detail.query )
             }
 
             document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {

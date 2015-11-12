@@ -185,9 +185,6 @@
             showAdminDialog:function() {
                 this.$.eventVSAdminDialog.show()
             },
-            back:function() {
-                this.fire('eventvs-election-closed');
-            },
             showConfirmDialog: function(e) {
                 console.log(this.tagName + " showConfirmDialog")
                 if(!window['isClientToolConnected']) {
