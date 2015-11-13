@@ -1,7 +1,7 @@
 .glassBox {
-    -fx-background-insets: 3;
+    -fx-background-insets: 2;
     -fx-effect: dropshadow(three-pass-box, #888, 5, 0, 0, 0);
-    -fx-background-radius: 4;
+    -fx-background-radius: 2;
     -fx-padding: 3, 3;
 }
 

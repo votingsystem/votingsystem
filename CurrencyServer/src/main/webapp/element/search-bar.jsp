@@ -12,18 +12,14 @@
       z-index: 1001;
     }
 
-    :host ::content iron-icon {
-      margin-right: 15px;
-      cursor: pointer;
-    }
-
     #search {
       position: relative;
       cursor: pointer;
     }
 
-    #search iron-icon {
-      margin-right: 0;
+    .vs-navbar-icon:hover {
+      color: #fba131;
+      cursor: pointer;
     }
 
     #search[show] {
@@ -57,7 +53,7 @@
   <template>
     <content></content>
       <div id="search" class="horizontal layout center" show$="{{showingSearch}}" on-tap="toggleSearch">
-        <i id="searchIcon" class="fa fa-search" style="margin:0px 20px 0px 0px; font-size: 1.3em;"></i>
+        <i id="searchIcon" class="fa fa-search" style="margin:0px 20px 0px 0px; font-size: 1.3em;" ></i>
         <form on-submit="performSearch" class="flex">
           <input type="search" id="query" value="{{query::keyup}}" autocomplete="off" placeholder="${msg.searchLbl}" on-blur="clearSearch">
         </form>
@@ -94,10 +90,10 @@
     updateSearchDisplay: function(showingSearch) {
       if (showingSearch) {
         this.classList.add('search-on');
-        this.$.searchIcon.className = "fa fa-times"
+        this.$.searchIcon.className = "fa fa-times vs-navbar-icon"
       } else {
         this.classList.remove('search-on');
-        this.$.searchIcon.className = "fa fa-search"
+        this.$.searchIcon.className = "fa fa-search vs-navbar-icon"
       }
     },
     hotkeys: function(e) {

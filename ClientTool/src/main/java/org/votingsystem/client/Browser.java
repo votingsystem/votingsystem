@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -114,7 +115,7 @@ public class Browser extends VBox implements BrowserVS, PasswordDialog.Listener 
         browserStage.setScene(new Scene(browserHelper));
         browserStage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
         browserStage.initStyle(StageStyle.TRANSPARENT);
-        browserStage.getScene().setFill(null);
+        //browserStage.getScene().setFill(Color.TRANSPARENT);//-> problems resizing
         ResizeHelper.addResizeListener(browserStage);
         getChildren().addAll(toolBar, tabPaneVS);
     }
