@@ -11,6 +11,9 @@ import javafx.geometry.Side;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -44,6 +47,11 @@ public class BrowserVSTabPane extends TabPane {
     private static final String TAB_CAPTION_EMPTY = "                ";
 
     private BrowserVSToolbar toolbar;
+
+
+    final KeyCombination kbZoomPlus = new KeyCodeCombination(KeyCode.ADD, KeyCombination.CONTROL_DOWN);
+    final KeyCombination kbZoomMinus = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.CONTROL_DOWN);
+
 
     public BrowserVSTabPane(BrowserVSToolbar toolbar) {
         this.toolbar = toolbar;
@@ -197,6 +205,19 @@ public class BrowserVSTabPane extends TabPane {
         getSelectionModel().select(newTab);
         if(URL != null) PlatformImpl.runLater(() -> webView.getEngine().load(URL));
         Browser.getInstance().show();
+        webView.setOnKeyPressed(ke -> {
+            if (kbZoomMinus.match(ke)) {
+                webView.zoomProperty().set(webView.zoomProperty().doubleValue() - 0.25);
+            } else if (kbZoomPlus.match(ke)) {
+                webView.zoomProperty().set(webView.zoomProperty().doubleValue()  + 0.25);
+            }
+        });
+        webView.addEventFilter(ScrollEvent.ANY, (scrollEvent) ->{
+            if (scrollEvent.isControlDown()) {
+                if(scrollEvent.getDeltaY() > 0) webView.zoomProperty().set(webView.zoomProperty().doubleValue()  + 0.25);
+                else webView.zoomProperty().set(webView.zoomProperty().doubleValue() - 0.25);
+            }
+        });
         return webView;
     }
 
