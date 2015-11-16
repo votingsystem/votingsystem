@@ -88,7 +88,7 @@
             } else this.fromGroupToMemberGroupInfo = 0
             if(this.dashBoardDto.transFromGroupVSToAllMembers.numTrans > 0) {
                 this.fromGroupToAllMembersInfo = this.dashBoardDto.transFromGroupVSToAllMembers.numTrans + " trans - " +
-                        dashBoardDto.transFromGroupVSToAllMembers.numUsers + " users"
+                        this.dashBoardDto.transFromGroupVSToAllMembers.numUsers + " users"
             } else this.fromGroupToAllMembersInfo = 0
         },
         selectAction: function() {
@@ -99,7 +99,7 @@
             this.$.ajax.generateRequest()
         },
         transBlockSelected: function(e) {
-            page.show("/transactionVS/from/" + this.dateFrom.urlFormatWithTime() + "/to/" +
+            page.show(contextURL + "/rest/transactionVS/from/" + this.dateFrom.urlFormatWithTime() + "/to/" +
                     this.dateTo.urlFormatWithTime() + "?transactionvsType=" + e.target.parentNode.id)
         }
     });

@@ -20,6 +20,7 @@
   ],
   "dependencies": {
     "jsoneditor": "jsoneditor#~4.2.1",
+    "d3": "d3#~3.5.8",
     "google-chart":"GoogleWebComponents/google-chart#^1.0.0",
     "font-awesome": "font-awesome#~4.4.0",
     "polymer": "Polymer/polymer#^1.2.0",

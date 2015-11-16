@@ -8,12 +8,12 @@ import java.math.BigDecimal;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WalletUser extends SimProcess {
+public class User extends SimProcess {
 
     private UserToUserModel model;
     private BigDecimal walletAmount;
 
-    public WalletUser(Model owner, String name, boolean repeating, boolean showInTrace) {
+    public User(Model owner, String name, boolean repeating, boolean showInTrace) {
         super(owner, name, repeating, showInTrace);
         model = (UserToUserModel) getModel();
     }
@@ -31,4 +31,15 @@ public class WalletUser extends SimProcess {
         
 
     }
+
+    private void extractCurrency() {
+
+    }
+
+    private void consumeCurrency(BigDecimal amount) {
+
+    }
+
+    private void makeAnonymoustransaction(BigDecimal amount) {}
+
 }
