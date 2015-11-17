@@ -28,10 +28,40 @@
                 font-family: sans-serif;
                 font-size: 11px;
             }
+            #tooltip {
+                position: absolute;
+                display: block;
+                height: auto;
+                padding: 10px;
+                background-color: white;
+                -webkit-border-radius: 10px;
+                -moz-border-radius: 10px;
+                border-radius: 10px;
+                -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                pointer-events: none;
+            }
+
+            #tooltip.hidden {
+                display: none;
+            }
+
+            #tooltip p {
+                margin: 0;
+                font-family: sans-serif;
+                font-size: 16px;
+                line-height: 20px;
+            }
         </style>
         <iron-ajax auto="" id="ajax" url="{{url}}" handle-as="json" last-response="{{dashBoardDto}}" method="get"
                    content-type="application/json"></iron-ajax>
         <div id="transactionChart"></div>
+        <div id="tooltip" class="hidden">
+            <p><strong>{{transactionType}}</strong></p>
+            <p><span id="value">{{amount}}</span></p>
+            <p>{{date}}</p>
+        </div>
     </template>
     <script>
         Polymer({
@@ -55,6 +85,29 @@
                 this.yScale = d3.scale.linear().range([this.height - this.padding, this.padding]);
                 this.rScale = d3.scale.linear().range([this.rMin, this.rMax]);
                 this.colorScale = d3.scale.category10();
+                document.onmousemove =  function (event) {
+                    var dot, eventDoc, doc, body, pageX, pageY;
+
+                    event = event || window.event; // IE-ism
+
+                    // If pageX/Y aren't available and clientX/Y are,
+                    // calculate pageX/Y - logic taken from jQuery.
+                    // (This is to support old IE)
+                    if (event.pageX == null && event.clientX != null) {
+                        eventDoc = (event.target && event.target.ownerDocument) || document;
+                        doc = eventDoc.documentElement;
+                        body = eventDoc.body;
+
+                        event.pageX = event.clientX +
+                                (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+                                (doc && doc.clientLeft || body && body.clientLeft || 0);
+                        event.pageY = event.clientY +
+                                (doc && doc.scrollTop  || body && body.scrollTop  || 0) -
+                                (doc && doc.clientTop  || body && body.clientTop  || 0 );
+                    }
+
+                    // Use event.pageX / event.pageY here
+                }
             },
             render:function(data) {
                 this.xScale.domain(d3.extent(data, function (d){
@@ -75,7 +128,7 @@
                 //Create X axis
                 this.svg.append("g")
                         .attr("class", "x axis")
-                        .attr("transform", "translate(0," + (this.height - this.padding) + ")")
+                        .attr("transform", "translate(0," + (this.width - this.padding) + ")")
                         .call(this.xAxis);
 
                 //Create Y axis
@@ -86,11 +139,32 @@
 
                 var circles = this.svg.selectAll("circle").data(data);
                 circles.enter().append("circle");
+                var parentElement = this
+                //http://codepen.io/recursiev/pen/zpJxs
+                var HTMLfixedTip = d3.select("#tooltip");
+
                 circles.attr("class", "transaction")
                         .attr("cx",      function (d){ return   this.xScale(new Date(d.dateCreated).getMinutes())}.bind(this))
                         .attr("cy",      function (d){ return   this.yScale(d.amount) }.bind(this))
                         .attr("r",       function (d){ return   this.rScale(d.amount) }.bind(this))
                         .attr("style",    function (d){ return   this.circleStyle(d) }.bind(this))
+                        .on("mouseover", function(d) {
+                            var matrix = this.getScreenCTM()
+                                    .translate(+this.getAttribute("cx"),
+                                            +this.getAttribute("cy"));
+                            //You can use screen coordinates directly to position
+                            //a fixed-position tooltip
+                            HTMLfixedTip.style("left", (matrix.e) + "px")
+                                    .style("top", (matrix.f + 3) + "px");
+
+                            parentElement.transactionType = d.type
+                            parentElement.date = new Date(d.dateCreated)
+                            d3.select("#tooltip").classed("hidden", false);
+
+                        })
+                        .on("mouseout", function() {
+                            d3.select("#tooltip").classed("hidden", true);
+                        })
                 circles.exit().remove();
 
                 this.svg.append("g")
