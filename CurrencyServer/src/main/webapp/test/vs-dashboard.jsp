@@ -16,16 +16,13 @@
             .axis {
                 z-index: -20;
             }
-
             .axis path,
             .axis line {
                 fill: none;
                 stroke: black;
                 shape-rendering: crispEdges;
             }
-
             .axis text {
-                font-family: sans-serif;
                 font-size: 11px;
             }
             #tooltip {
@@ -42,14 +39,11 @@
                 box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
                 pointer-events: none;
             }
-
             #tooltip.hidden {
                 display: none;
             }
-
             #tooltip p {
                 margin: 0;
-                font-family: sans-serif;
                 font-size: 16px;
                 line-height: 20px;
             }
@@ -59,7 +53,7 @@
         <div id="transactionChart"></div>
         <div id="tooltip" class="hidden">
             <p><strong>{{transactionType}}</strong></p>
-            <p><span id="value">{{amount}}</span></p>
+            <p>{{amount}}</p>
             <p>{{date}}</p>
         </div>
     </template>
@@ -92,50 +86,26 @@
                 this.yScale.domain(d3.extent(data, function (d){ return d.amount }));
                 this.rScale.domain(d3.extent(data, function (d){ return d.amount }));
 
-                //Define X axis
-                this.xAxis = d3.svg.axis()
-                        .scale(this.xScale)
-                        .orient("bottom")
-                        .ticks(5);
-                //Define Y axis
-                this.yAxis = d3.svg.axis()
-                        .scale(this.yScale)
-                        .orient("left")
-                        .ticks(5);
-                //Create X axis
-                this.svg.append("g")
-                        .attr("class", "x axis")
-                        .attr("transform", "translate(0," + (this.width - this.padding) + ")")
-                        .call(this.xAxis);
-
-                //Create Y axis
-                this.svg.append("g")
-                        .attr("class", "y axis")
-                        .attr("transform", "translate(" + this.padding + ",0)")
-                        .call(this.yAxis);
+                this.xAxis = d3.svg.axis().scale(this.xScale).orient("bottom").ticks(5);
+                this.yAxis = d3.svg.axis().scale(this.yScale).orient("left").ticks(5);
 
                 var circles = this.svg.selectAll("circle").data(data);
                 circles.enter().append("circle");
-                var parentElement = this
-                //http://codepen.io/recursiev/pen/zpJxs
+                var hostElement = this
                 var HTMLfixedTip = d3.select("#tooltip");
-
                 circles.attr("class", "transaction")
                         .attr("cx",      function (d){ return   this.xScale(new Date(d.dateCreated).getMinutes())}.bind(this))
                         .attr("cy",      function (d){ return   this.yScale(d.amount) }.bind(this))
                         .attr("r",       function (d){ return   this.rScale(d.amount) }.bind(this))
                         .attr("style",    function (d){ return   this.circleStyle(d) }.bind(this))
                         .on("mouseover", function(d) {
-                            var matrix = this.getScreenCTM()
-                                    .translate(+this.getAttribute("cx"),
-                                            +this.getAttribute("cy"));
-                            //You can use screen coordinates directly to position
-                            //a fixed-position tooltip
-                            HTMLfixedTip.style("left", (matrix.e) + "px")
-                                    .style("top", (matrix.f + 3) + "px");
+                            var matrix = this.getScreenCTM().translate(+this.getAttribute("cx"), +this.getAttribute("cy"));
+                            //a fixed-position tooltip http://codepen.io/recursiev/pen/zpJxs
+                            HTMLfixedTip.style("left", (matrix.e) + "px").style("top", (matrix.f + 3) + "px");
 
-                            parentElement.transactionType = d.type
-                            parentElement.date = new Date(d.dateCreated)
+                            hostElement.transactionType = d.type
+                            hostElement.amount = d.amount + " " + d.currencyCode
+                            hostElement.date = new Date(d.dateCreated).formatWithTime()
                             d3.select("#tooltip").classed("hidden", false);
 
                         })
@@ -143,18 +113,16 @@
                             d3.select("#tooltip").classed("hidden", true);
                         })
                 circles.exit().remove();
-
                 this.svg.append("g")
-                        .attr("class", "x axis")    // <-- Note x added here
+                        .attr("class", "axis")
                         .attr("transform", "translate(0," + (this.height - this.padding) + ")")
                         .call(this.xAxis);
-
                 this.svg.append("g")
-                        .attr("class", "y axis")    // <-- Note y added here
+                        .attr("class", "axis")
                         .attr("transform", "translate(" + this.padding + ",0)")
                         .call(this.yAxis);
 
-                //this is to force the load of inner styles
+                //this is to force the load of polymer <style>
                 Polymer.dom(this.$.transactionChart).appendChild(Polymer.dom(this.$.transactionChart).childNodes[0])
             },
             circleStyle:function(d) {

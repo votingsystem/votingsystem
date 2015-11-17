@@ -24,7 +24,7 @@
       });
 
       var userVSDashboard
-      page('*/app/userVSDashboard', scrollToTop, function() {
+      page('*/app/userVSDashboard*', scrollToTop, function() {
           app.route = 'userVSDashboard';
           Polymer.Base.importHref('./app/uservs-dashboard.vsp', function(e) {
               if(!userVSDashboard) userVSDashboard = document.createElement('uservs-dashboard');

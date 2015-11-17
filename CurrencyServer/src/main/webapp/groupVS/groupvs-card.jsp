@@ -37,7 +37,6 @@
             this.opened = false
         },
         _groupvsChanged:function() {
-            console.log(this.tagName + " _groupvsChanged: " + JSON.stringify(this.groupvs))
         },
         _isItemCanceled:function(item) {
             return item.state === 'CANCELED'

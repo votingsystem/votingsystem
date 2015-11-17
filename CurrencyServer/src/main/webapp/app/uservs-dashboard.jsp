@@ -13,7 +13,7 @@
         <iron-ajax auto id="ajax" url="{{url}}" handle-as="json" last-response="{{dashBoardDto}}" method="get"
                    content-type="application/json"></iron-ajax>
         <div class="layout horizontal center center-justified">
-            <select id="transactionLapsedSelect" style="margin: 10px 0 10px 40px; width: 400px; font-size: 1.2em; height: 30px;"
+            <select id="transactionLapsedSelect" style="margin: 10px 0 10px 40px; width: 400px; font-size: 1.1em; height: 30px;"
                     on-change="selectAction" class="form-control">
                 <option value="1">${msg.lastHourMovementsLbl}</option>
                 <option value="12">${msg.last12HourMovementsLbl}</option>
@@ -72,8 +72,10 @@
         },
         ready: function() {
             this.lapse = window.location.href.substr(window.location.href.lastIndexOf('/') + 1);
-            if(isNumber(this.lapse)) this.$.transactionLapsedSelect.value = this.lapse
-            else this.lapse = null
+            if(isNumber(this.lapse)) {
+                this.$.transactionLapsedSelect.value = this.lapse
+                this.url = contextURL + "/rest/app/userVSDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
+            } else this.lapse = null
             console.log(this.tagName + " - ready - lapse: " + this.lapse)
         },
         dashBoardDtoChanged: function() {
@@ -92,11 +94,11 @@
             } else this.fromGroupToAllMembersInfo = 0
         },
         selectAction: function() {
-            var targetURL = contextURL + "/rest/app/userVSDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
-            history.pushState(null, null, targetURL);
-            console.log(this.tagName + " - targetURL: " + targetURL)
-            this.$.ajax.url = targetURL
-            this.$.ajax.generateRequest()
+            var servicePath = "/rest/app/userVSDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
+            var targetURL = contextURL + servicePath
+            var newURL = contextURL + "/spa.xhtml#!" + servicePath
+            history.pushState(null, null, newURL);
+            this.url = targetURL
         },
         transBlockSelected: function(e) {
             page.show(contextURL + "/rest/transactionVS/from/" + this.dateFrom.urlFormatWithTime() + "/to/" +
