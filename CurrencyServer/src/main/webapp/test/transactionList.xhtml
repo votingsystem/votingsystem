@@ -3,23 +3,20 @@
                 template="/WEB-INF/templates/basic.xhtml">
     <ui:define name="head">
         <title>transactionList</title>
-
+        <link href="../resources/css/currency.css" media="all" rel="stylesheet" />
         <script src="../resources/js/utilsVS.js" type="text/javascript"></script>
 
         <script type="text/javascript" src="../resources/bower_components/d3/d3.min.js"></script>
         <script type="text/javascript" src="../resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-
+        <link rel="import" href="../resources/bower_components/iron-flex-layout/classes/iron-flex-layout.html"/>
         <link rel="import" href="vs-dashboard.vsp"/>
 
-        <style type="text/css" media="screen"></style>
     </ui:define>
     <ui:define name="content">
 
-        <div class="horizontal layout center center-justified flex" style="width: 1000px;">
-            <vs-dashboard></vs-dashboard>
+        <div class="horizontal layout center center-justified" style="width: 100%;">
+            <vs-dashboard outer-width="600" outer-height="400"></vs-dashboard>
         </div>
-
-
 
     </ui:define>
 </ui:composition>
