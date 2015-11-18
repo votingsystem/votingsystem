@@ -115,16 +115,34 @@ public class TransactionVSResource {
         try {amount = new BigDecimal(searchText);} catch(Exception ex) {}
         String queryListPrefix = "select t from TransactionVS t ";
         String queryCountPrefix = "select COUNT(t) from TransactionVS t ";
-        String querySufix = "where t.transactionParent is null " +
+        String querySufix = null;
+        if(transactionType == null && amount == null && searchText == null) {
+            querySufix = "where t.transactionParent is null " +
+                    "and t.dateCreated between :dateFrom and :dateTo";
+        } else querySufix = "where t.transactionParent is null " +
                 "and t.dateCreated between :dateFrom and :dateTo and (t.type =:type or t.amount =:amount " +
                 "or t.subject like :searchText or t.currencyCode like :searchText)";
-        Query query = dao.getEM().createQuery(queryListPrefix + querySufix).setParameter("dateFrom", dateFrom)
-                .setParameter("dateTo", dateTo).setParameter("type", transactionType).setParameter("amount", amount)
-                .setParameter("searchText", searchText).setFirstResult(offset).setMaxResults(max);
+
+        Query query = null;
+        if(transactionType == null && amount == null && searchText == null) {
+            query = dao.getEM().createQuery(queryListPrefix + querySufix).setParameter("dateFrom", dateFrom)
+                    .setParameter("dateTo", dateTo).setFirstResult(offset).setMaxResults(max);
+        } else {
+            query = dao.getEM().createQuery(queryListPrefix + querySufix).setParameter("dateFrom", dateFrom)
+                    .setParameter("dateTo", dateTo).setParameter("amount", amount)
+                    .setParameter("searchText", searchText).setFirstResult(offset).setMaxResults(max);
+        }
+        if(transactionType != null) query.setParameter("type", transactionType);
         List<TransactionVS> transactionList = query.getResultList();
-        query = dao.getEM().createQuery(queryCountPrefix + querySufix).setParameter("dateFrom", dateFrom)
-                .setParameter("dateTo", dateTo).setParameter("type", transactionType).setParameter("amount", amount)
-                .setParameter("searchText", searchText);
+        if(transactionType == null && amount == null && searchText == null) {
+            query = dao.getEM().createQuery(queryCountPrefix + querySufix).setParameter("dateFrom", dateFrom)
+                    .setParameter("dateTo", dateTo);
+        } else {
+            query = dao.getEM().createQuery(queryCountPrefix + querySufix).setParameter("dateFrom", dateFrom)
+                    .setParameter("dateTo", dateTo).setParameter("amount", amount)
+                    .setParameter("searchText", searchText);
+        }
+        if(transactionType != null) query.setParameter("type", transactionType);
         long totalCount = (long) query.getSingleResult();
         List<TransactionVSDto> resultList = new ArrayList<>();
         for(TransactionVS transactionVS :  transactionList) {

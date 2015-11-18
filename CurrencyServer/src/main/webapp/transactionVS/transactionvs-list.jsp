@@ -43,7 +43,7 @@
                 var newURL = setURLParameter(window.location.href, "transactionvsType",  transactionvsType)
                 history.pushState(null, null, newURL);
                 console.log(this.tagName + " - targetURL: " + targetURL);
-                this.loadURL(targetURL)
+                this.url = targetURL
             }.bind(this))
         },
         transactionsDtoChanged:function() {

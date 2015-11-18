@@ -14,7 +14,10 @@
                 opacity: 1.0;
             }
             .axis {
-                z-index: -20;
+                font-size: 8px;
+            }
+            rect {
+                fill: #ddd;
             }
             .axis path,
             .axis line {
@@ -23,7 +26,7 @@
                 shape-rendering: crispEdges;
             }
             .axis text {
-                font-size: 11px;
+                font-size: 8px;
             }
             #tooltip {
                 position: absolute;
@@ -62,71 +65,132 @@
             is:'vs-dashboard',
             properties: {
                 dashBoardDto: {type:Object, observer:'dashBoardDtoChanged'},
-                url:{type:String, value: "/CurrencyServer/rest/transactionVS"},
+                url:{type:String, value: "/CurrencyServer/rest/transactionVS/from/20151116_0000/to/20151118_0000"},
                 width:{type:Number, value: 500},
                 height:{type:Number, value: 350},
-                padding:{type:Number, value: 50}
+                rMin:{type:Number, value: 4},
+                rMax:{type:Number, value: 20},
+                margin:{type:Object, value: {top: 30, right: 20, bottom: 30, left: 50}}
             },
             ready: function() {
-                this.rMin = 5; // "r" stands for radius
-                this.rMax = 20;
-
-                this.svg = d3.select("#transactionChart").append("svg")
-                        .attr("width", this.width)
-                        .attr("height", this.height);
-
-                this.xScale = d3.scale.linear().range([this.padding, this.width - this.padding * 2]);
-                this.yScale = d3.scale.linear().range([this.height - this.padding, this.padding]);
                 this.rScale = d3.scale.linear().range([this.rMin, this.rMax]);
                 this.colorScale = d3.scale.category10();
             },
             render:function(data) {
-                this.xScale.domain(d3.extent(data, function (d){
-                    return new Date(d.dateCreated).getMinutes() }));
-                this.yScale.domain(d3.extent(data, function (d){ return d.amount }));
+                console.log(this.tagName + " - render")
                 this.rScale.domain(d3.extent(data, function (d){ return d.amount }));
+                var xScale = d3.time.scale()
+                        .domain(d3.extent(data, function(d) { return d.dateCreated; }))
+                        .range([0, this.width]);
+                var yScale = d3.scale.linear()
+                        .domain([0, d3.max(data, function(d) { return d.amount; })])
+                        .range([this.height, 0]);
 
-                this.xAxis = d3.svg.axis().scale(this.xScale).orient("bottom").ticks(5);
-                this.yAxis = d3.svg.axis().scale(this.yScale).orient("left").ticks(5);
+                var xAxis = d3.svg.axis().scale(xScale)
+                        .orient("bottom").ticks(5);
+                var yAxis = d3.svg.axis().scale(yScale)
+                        .orient("left").ticks(5);
+                var zoom = d3.behavior.zoom()
+                        .x(xScale)
+                        .y(yScale)
+                        .scaleExtent([-10, 10])
+                        .on("zoom", zoomed);
 
-                var circles = this.svg.selectAll("circle").data(data);
+                var svg = d3.select("#transactionChart")
+                        .append("svg")
+                        .attr("width", this.width + this.margin.left + this.margin.right)
+                        .attr("height", this.height + this.margin.top + this.margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
+                        .call(zoom);
+
+                svg.append("rect")
+                        .attr("width", this.width)
+                        .attr("height", this.height)
+                        .attr("class", "plot");
+
+                var clip = svg.append("clipPath")
+                        .attr("id", "clip")
+                        .append("rect")
+                        .attr("x", 0)
+                        .attr("y", 0)
+                        .attr("width", this.width)
+                        .attr("height", this.height);
+
+                var chartBody = svg.append("g")
+                        .attr("clip-path", "url(#clip)");
+
+                var circles = chartBody.selectAll("circle.node").data(data);
                 circles.enter().append("circle");
                 var hostElement = this
                 var HTMLfixedTip = d3.select("#tooltip");
                 circles.attr("class", "transaction")
-                        .attr("cx",      function (d){ return   this.xScale(new Date(d.dateCreated).getMinutes())}.bind(this))
-                        .attr("cy",      function (d){ return   this.yScale(d.amount) }.bind(this))
-                        .attr("r",       function (d){ return   this.rScale(d.amount) }.bind(this))
+                        .attr("cx",      function (d){ return   xScale(new Date(d.dateCreated))}.bind(this))
+                        .attr("cy",      function (d){ return   yScale(d.amount) }.bind(this))
+                        .attr("r",       function (d){
+                            return this.rScale(d.amount) }.bind(this))
                         .attr("style",    function (d){ return   this.circleStyle(d) }.bind(this))
                         .on("mouseover", function(d) {
                             var matrix = this.getScreenCTM().translate(+this.getAttribute("cx"), +this.getAttribute("cy"));
                             //a fixed-position tooltip http://codepen.io/recursiev/pen/zpJxs
                             HTMLfixedTip.style("left", (matrix.e) + "px").style("top", (matrix.f + 3) + "px");
-
                             hostElement.transactionType = d.type
                             hostElement.amount = d.amount + " " + d.currencyCode
                             hostElement.date = new Date(d.dateCreated).formatWithTime()
                             d3.select("#tooltip").classed("hidden", false);
-
                         })
                         .on("mouseout", function() {
                             d3.select("#tooltip").classed("hidden", true);
                         })
                 circles.exit().remove();
-                this.svg.append("g")
-                        .attr("class", "axis")
-                        .attr("transform", "translate(0," + (this.height - this.padding) + ")")
-                        .call(this.xAxis);
-                this.svg.append("g")
-                        .attr("class", "axis")
-                        .attr("transform", "translate(" + this.padding + ",0)")
-                        .call(this.yAxis);
-
-                //this is to force the load of polymer <style>
+                svg.append("g")			// Add the X Axis
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + this.height + ")")
+                        .call(xAxis);
+                svg.append("g")			// Add the Y Axis
+                        .attr("class", "y axis")
+                        .call(yAxis);
+                svg.append("text")
+                        .attr("transform", "rotate(-90)")
+                        .attr("y", 0 - this.margin.left)
+                        .attr("x",(0 - (this.height / 2)))
+                        .attr("dy", "1em")
+                        .style("text-anchor", "middle")
+                        .text("${msg.amountLbl}");
+                svg.append("text")
+                        .attr("x", (this.width / 2))
+                        .attr("y", 0 - (this.margin.top / 2))
+                        .attr("text-anchor", "middle")
+                        .style("font-size", "16px")
+                        .style("text-decoration", "underline")
+                        .text("${msg.transactionsLbl}");
+                //this is to apply polymer <style>
                 Polymer.dom(this.$.transactionChart).appendChild(Polymer.dom(this.$.transactionChart).childNodes[0])
+                function zoomed() {
+                    svg.select(".x.axis").call(xAxis);
+                    svg.select(".y.axis").call(yAxis);
+                    circles.attr("cx",      function (d){ return   xScale(new Date(d.dateCreated))}.bind(this))
+                            .attr("cy",      function (d){ return   yScale(d.amount) }.bind(this))
+                }
             },
             circleStyle:function(d) {
                 return "fill:" + this.colorScale(d.type) + "; stroke:" + d3.rgb(this.colorScale(d.type)).darker(1)
+            },
+            zoomed:function () {
+                console.log(this.tagName + "- zoomed")
+                if(!this.svg) return
+                this.svg.select(".x.axis").call(this.xAxis);
+                this.svg.select(".y.axis").call(this.yAxis);
+            },
+            reset:function () {
+                /*d3.transition().duration(750).tween("zoom", function() {
+                    var ix = d3.interpolate(this.xScale.domain(), [-this.width / 2, this.width / 2]),
+                            iy = d3.interpolate(this.yScale.domain(), [-this.height / 2, this.height / 2]);
+                    return function(t) {
+                        zoom.x(this.xScale.domain(ix(t))).y(this.yScale.domain(iy(t)));
+                        this.zoomed();
+                    };
+                });*/
             },
             dashBoardDtoChanged:function() {
                 this.render(this.dashBoardDto.resultList)

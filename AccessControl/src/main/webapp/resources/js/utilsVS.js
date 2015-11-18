@@ -243,7 +243,7 @@ VotingSystemClient.setMessage = function (messageJSON) {
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
     } else {
-        console.log("clientTool undefined - operation: " + messageJSON.operation)
+        if(messageJSON.operation !== "SIGNAL_VS") console.log("clientTool undefined - operation: " + messageJSON.operation)
         if(isAndroid ()) {
             var encodedData = window.btoa(JSON.stringify(messageJSON));
             window.sendAndroidURIMessage(encodedData)

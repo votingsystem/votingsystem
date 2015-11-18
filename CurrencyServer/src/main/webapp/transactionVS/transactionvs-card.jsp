@@ -31,7 +31,7 @@
             <div id="subjectDiv" class="subject horizontal layout center-justified">{{getSubject(transaction)}}</div>
             <div class="horizontal layout">
                 <div class="amount">{{amount(transaction)}}</div>
-                <div class="tag">{{transaction.tags[0]}}</div>
+                <div class="tag">{{tag}}</div>
                 <div class="flex" class="timeInfo">{{timeLimitedDescription(transaction)}}</div>
             </div>
         </div>
@@ -40,7 +40,7 @@
         Polymer({
             is:'transactionvs-card',
             properties: {
-                transaction: {type:Object, value: {}}
+                transaction: {type:Object, observer:'transactionChanged'}
             },
             ready: function() {
                 this.isConfirmMessage = this.isConfirmMessage || false
@@ -82,6 +82,9 @@
                 if(isNaN(transaction.amount)) amount = transaction.amount.toFixed(2) + " " + transaction.currency
                 else  amount = transaction.amount + " " + transaction.currencyCode
                 return amount
+            },
+            transactionChanged: function(e) {
+                this.tag = this.transaction.tags[0]
             },
             showTransactionDetails: function(e) {
                 console.log("messageSMIMEURL: " + this.transaction.messageSMIMEURL)
