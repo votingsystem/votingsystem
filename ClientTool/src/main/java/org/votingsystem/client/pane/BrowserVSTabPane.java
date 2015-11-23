@@ -225,7 +225,7 @@ public class BrowserVSTabPane extends TabPane {
 
     private void incrementZoom(WebView webView, double difValue) {
         webView.zoomProperty().set(webView.zoomProperty().doubleValue() + difValue);
-        ZoomDialog.show(webView.zoomProperty(), getScene().getWindow());
+        ZoomDialog.show(webView.zoomProperty());
     }
 
 }
