@@ -2,6 +2,7 @@ package org.votingsystem.client.pane;
 
 import com.sun.javafx.application.PlatformImpl;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -22,6 +23,7 @@ import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
 import org.votingsystem.client.Browser;
+import org.votingsystem.client.dialog.ZoomDialog;
 import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.client.util.BrowserVSClient;
 import org.votingsystem.client.util.Utils;
@@ -207,18 +209,24 @@ public class BrowserVSTabPane extends TabPane {
         Browser.getInstance().show();
         webView.setOnKeyPressed(ke -> {
             if (kbZoomMinus.match(ke)) {
-                webView.zoomProperty().set(webView.zoomProperty().doubleValue() - 0.25);
+                incrementZoom(webView, - 0.10);
             } else if (kbZoomPlus.match(ke)) {
-                webView.zoomProperty().set(webView.zoomProperty().doubleValue()  + 0.25);
+                incrementZoom(webView, 0.10);
+
             }
         });
         webView.addEventFilter(ScrollEvent.ANY, (scrollEvent) ->{
             if (scrollEvent.isControlDown()) {
-                if(scrollEvent.getDeltaY() > 0) webView.zoomProperty().set(webView.zoomProperty().doubleValue()  + 0.25);
-                else webView.zoomProperty().set(webView.zoomProperty().doubleValue() - 0.25);
+                if(scrollEvent.getDeltaY() > 0) incrementZoom(webView, + 0.10);
+                else incrementZoom(webView, - 0.10);
             }
         });
         return webView;
+    }
+
+    private void incrementZoom(WebView webView, double difValue) {
+        webView.zoomProperty().set(webView.zoomProperty().doubleValue() + difValue);
+        ZoomDialog.show(webView.zoomProperty());
     }
 
 }

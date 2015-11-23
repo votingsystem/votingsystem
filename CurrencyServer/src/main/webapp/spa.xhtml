@@ -89,18 +89,10 @@
         <iron-signals id="ironSignals"></iron-signals>
     </div>
     <script>
-        (function(document) {
-            var app = document.querySelector('#app');
-
-            app.addEventListener('dom-change', function() {
-                console.log('spa.xhtml - dom-change');
-                app.searchHidden = true
-            });
-
-            window.addEventListener('WebComponentsReady', function() {
-                console.log('spa.xhtml - WebComponentsReady');
-            });
-
+        document.addEventListener('WebComponentsReady', function() {
+            console.log('spa.xhtml - WebComponentsReady');
+            var app = Polymer.dom(document).querySelector('#app');
+            app.searchHidden = true
             app.back = function() {
                 history.back()
                 //there's a delay until location.href is updated with history.back()
@@ -108,16 +100,14 @@
                     page(window.location.href.split("\\#!")[1])
                 }, 50);
             }
-
             app.onDataRouteClick = function() {
-                var drawerPanel = document.querySelector('#paperDrawerPanel');
-                if (drawerPanel.narrow) {
-                    drawerPanel.closeDrawer();
+                if (this.$.paperDrawerPanel.narrow) {
+                    this.$.paperDrawerPanel.closeDrawer();
                 }
             };
 
             app.loadMainContent = function(newContentNode, caption, searchVisible) {
-                var mainContentNode = document.querySelector('paper-drawer-panel').querySelector('#mainContent')
+                var mainContentNode = app.$.mainContent
                 var beforeContentNode = Polymer.dom(mainContentNode).childNodes[0]
                 if(beforeContentNode) Polymer.dom(mainContentNode).removeChild(beforeContentNode)
                 Polymer.dom(mainContentNode).appendChild(newContentNode)
@@ -165,7 +155,7 @@
             };
 
             app.updateMenuView()
-        })(document);
+        });
     </script>
   </ui:define>
 </ui:composition>

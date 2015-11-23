@@ -33,7 +33,8 @@
                 display: block;
                 height: auto;
                 padding: 10px;
-                background-color: white;
+                background-color: rgba(0, 0, 0, 0.8);
+                color: #fff;
                 -webkit-border-radius: 10px;
                 -moz-border-radius: 10px;
                 border-radius: 10px;
@@ -47,8 +48,7 @@
             }
             #tooltip p {
                 margin: 0;
-                font-size: 16px;
-                line-height: 20px;
+                font-size: 12px;
             }
         </style>
         <iron-ajax auto="" id="ajax" url="{{url}}" handle-as="json" last-response="{{dashBoardDto}}" method="get"
