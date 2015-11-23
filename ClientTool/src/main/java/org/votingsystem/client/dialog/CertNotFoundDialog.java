@@ -1,11 +1,11 @@
 package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
@@ -33,7 +33,7 @@ public class CertNotFoundDialog extends DialogVS {
             Utils.selectKeystoreFile(null, Browser.getInstance());
             hide();
         });
-        importCertButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CHECK));
+        importCertButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CHECK));
         Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"));
         requestCertButton.setOnAction(actionEvent -> {
                 Browser.getInstance().openVotingSystemURL(
@@ -41,7 +41,7 @@ public class CertNotFoundDialog extends DialogVS {
                         ContextVS.getMessage("requestCertLbl"));
                 hide();
             } );
-        requestCertButton.setGraphic(Utils.getIcon(FontAwesomeIcon.TIMES));
+        requestCertButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES));
         HBox footerButtonsBox = new HBox(10);
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), importCertButton, requestCertButton);
         mainDialog.getChildren().addAll(messageLabel, footerButtonsBox);

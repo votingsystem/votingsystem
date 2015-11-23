@@ -1,10 +1,10 @@
 package org.votingsystem.client.pane;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.web.WebView;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.MessageDialog;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.signature.util.CertUtils;
@@ -33,7 +33,7 @@ public class TimeStampCertPane extends GridPane {
         }
         Button showPEMcertButton = new Button(ContextVS.getMessage("showCertPemLbl"));
         showPEMcertButton.setOnAction(actionEvent -> showPEMCert());
-        showPEMcertButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CERTIFICATE));
+        showPEMcertButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
         add(showPEMcertButton, 0, 1);
         WebView certInfoWebView = new WebView();
         certInfoWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));

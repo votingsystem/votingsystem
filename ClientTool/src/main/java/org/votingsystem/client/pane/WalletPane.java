@@ -1,6 +1,5 @@
 package org.votingsystem.client.pane;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,6 +10,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.dialog.*;
 import org.votingsystem.client.util.CurrencyCheckResponse;
 import org.votingsystem.client.util.CurrencyCheckerTask;
@@ -178,7 +178,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
             walletPane = (WalletPane) getContentPane();
             checkCurrencyMenuItem =  new MenuItem(ContextVS.getMessage("checkCurrencyMenuItemLbl"));
             menuButton = new MenuButton();
-            menuButton.setGraphic(Utils.getIcon(FontAwesomeIcon.BARS));
+            menuButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.BARS));
             menuButton.getItems().addAll(checkCurrencyMenuItem);
             addMenuButton(menuButton);
             setCaption(ContextVS.getMessage("walletLbl"));

@@ -1,6 +1,5 @@
 package org.votingsystem.client.pane;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -8,6 +7,7 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.FullScreenHelper;
 import org.votingsystem.client.util.ResizeHelper;
 import org.votingsystem.client.util.Utils;
@@ -56,10 +56,10 @@ public class DecoratedPane extends VBox {
         toolBar.getChildren().add(captionBox);
         if(caption != null) captionLbl.setText(caption);
         closeButton = new Button();
-        closeButton.setGraphic(Utils.getIcon(FontAwesomeIcon.TIMES, Utils.COLOR_RED_DARK));
+        closeButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         closeButton.setOnAction(actionEvent -> getScene().getWindow().hide());
         if(menuButton != null) {
-            menuButton.setGraphic(Utils.getIcon(FontAwesomeIcon.BARS));
+            menuButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.BARS));
             toolBar.getChildren().add(menuButton);
         }
         toolBar.getChildren().add(closeButton);
@@ -82,6 +82,14 @@ public class DecoratedPane extends VBox {
                 }
             }
         });
+    }
+
+    public void setCloseButtonVisible(boolean isVisible) {
+        if(isVisible && !toolBar.getChildren().contains(closeButton)) {
+            toolBar.getChildren().add(closeButton);
+        } else if(!isVisible && toolBar.getChildren().contains(closeButton)) {
+            toolBar.getChildren().remove(closeButton);
+        }
     }
 
     public void addMenuButton(MenuButton menuButton) {

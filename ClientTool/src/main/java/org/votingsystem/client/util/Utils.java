@@ -2,9 +2,6 @@ package org.votingsystem.client.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.GlyphIcon;
-import de.jensd.fx.glyphs.GlyphsDude;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -20,11 +17,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
+import org.controlsfx.glyphfont.GlyphFont;
+import org.controlsfx.glyphfont.GlyphFontRegistry;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.VotingSystemApp;
 import org.votingsystem.client.dialog.PasswordDialog;
@@ -51,6 +51,7 @@ import org.w3c.dom.events.EventTarget;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -79,29 +80,41 @@ public class Utils {
     public static final String EVENT_TYPE_MOUSEOVER = "mouseover";
     public static final String EVENT_TYPE_MOUSEOUT = "mouseclick";
 
+    private static GlyphFont fontAwesome;
+    static {
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("fontawesome-webfont.ttf");
+        fontAwesome = new FontAwesome(is);
+        GlyphFontRegistry.register(fontAwesome);
+    }
+
     private static Logger log = Logger.getLogger(Utils.class.getSimpleName());
 
-    public static Text getIcon(FontAwesomeIcon icon) {
-        Text text = GlyphsDude.createIcon(icon, GlyphIcon.DEFAULT_FONT_SIZE);
-        text.setFill(Color.web(COLOR_BUTTON_OK));
-        return text;
+    public static Glyph getIcon(FontAwesome.Glyph glyph) {
+        return fontAwesome.create(glyph);
     }
 
-    public static Text getIcon(FontAwesomeIcon icon, String color, double size) {
-        Text text = GlyphsDude.createIcon(icon, String.valueOf(size));
-        text.setFill(Color.web(color));
-        return text;
+    public static Glyph getIcon(FontAwesome.Glyph glyph, String color, double size) {
+        return fontAwesome.create(glyph).color(Color.web(color)).size(size);
     }
 
-    public static Text getIcon(FontAwesomeIcon icon, double size) {
-        Text text = GlyphsDude.createIcon(icon, String.valueOf(size));
-        return text;
+    public static Glyph getIcon(FontAwesome.Glyph glyph, double size) {
+        return fontAwesome.create(glyph).size(size);
     }
 
-    public static Text getIcon(FontAwesomeIcon icon, String color) {
-        Text text = GlyphsDude.createIcon(icon, GlyphIcon.DEFAULT_FONT_SIZE);
-        text.setFill(Color.web(color));
-        return text;
+    public static Glyph getIcon(FontAwesome.Glyph glyph, String colorStr) {
+        return Glyph.create( "FontAwesome|" + glyph.name()).color(Color.web(colorStr));
+    }
+
+    public static Button getToolBarButton(FontAwesome.Glyph glyph) {
+        Button toolBarButton = new Button("", fontAwesome.create(glyph));
+        toolBarButton.getStyleClass().add("toolbar-button");
+        return toolBarButton;
+    }
+
+    public static Button getToolBarButton(Glyph glyph) {
+        Button toolBarButton = new Button("", glyph);
+        toolBarButton.getStyleClass().add("toolbar-button");
+        return toolBarButton;
     }
 
     public static Image getIcon(Object baseObject, String key) {
@@ -152,13 +165,6 @@ public class Utils {
         newTab.setText(caption);
         newTab.setContent(content);
         return newTab;
-    }
-
-    public static Button getToolBarButton(Text icon) {
-        Button toolBarButton = new Button();
-        toolBarButton.setGraphic(icon);
-        toolBarButton.getStyleClass().add("toolbar-button");
-        return toolBarButton;
     }
 
     public static void browserVSLinkListener(WebView webView) {

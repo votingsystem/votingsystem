@@ -1,7 +1,6 @@
 package org.votingsystem.client.dialog;
 
 import com.google.zxing.WriterException;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -9,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.service.EventBusService;
@@ -59,7 +59,7 @@ public class QRDialog extends DialogVS {
                                 SMIMEMessage smimeMessage = socketMsg.getSMIME();
                                 String result = transactionDto.validateReceipt(smimeMessage, true);
                                 Button openReceiptButton = new Button();
-                                openReceiptButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CERTIFICATE));
+                                openReceiptButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
                                 openReceiptButton.setText(ContextVS.getMessage("openReceiptLbl"));
                                 openReceiptButton.setOnAction(event -> {
                                     try {
@@ -73,7 +73,7 @@ public class QRDialog extends DialogVS {
                                 Platform.runLater(() -> { hide(); });
                                 if(qrDto.getTypeVS() == TypeVS.CURRENCY_CHANGE) {
                                     Button saveWalletButton = new Button();
-                                    saveWalletButton.setGraphic(Utils.getIcon(FontAwesomeIcon.MONEY));
+                                    saveWalletButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.MONEY));
                                     saveWalletButton.setText(ContextVS.getMessage("saveToSecureWalletMsg"));
                                     saveWalletButton.setOnAction(event -> {
                                         Browser.getInstance().saveWallet();

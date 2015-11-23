@@ -1,8 +1,6 @@
 package org.votingsystem.client.pane;
 
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -22,6 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.ZoomDialog;
 import org.votingsystem.client.service.BrowserSessionService;
@@ -164,11 +163,11 @@ public class BrowserVSTabPane extends TabPane {
                     //log.info("newState: " + newState + " - " + webView.getEngine().getLocation());
                     switch (newState) {
                         case SCHEDULED:
-                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIcon.COG));
+                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesome.Glyph.COG));
                             break;
                         case SUCCEEDED:
                             if(tabCaption == null && URL != null) newTab.setText(TAB_CAPTION_EMPTY);
-                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIcon.REFRESH));
+                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesome.Glyph.REFRESH));
                             Document doc = webView.getEngine().getDocument();
                             Element element = doc.getElementById("voting_system_page");
                             if(element != null) {
@@ -180,7 +179,7 @@ public class BrowserVSTabPane extends TabPane {
                             }
                             break;
                         case FAILED:
-                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesomeIcon.REFRESH));
+                            toolbar.getReloadButton().setGraphic(Utils.getIcon(FontAwesome.Glyph.REFRESH));
                             showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg")));
                             break;
                     }
@@ -226,7 +225,7 @@ public class BrowserVSTabPane extends TabPane {
 
     private void incrementZoom(WebView webView, double difValue) {
         webView.zoomProperty().set(webView.zoomProperty().doubleValue() + difValue);
-        ZoomDialog.show(webView.zoomProperty());
+        ZoomDialog.show(webView.zoomProperty(), getScene().getWindow());
     }
 
 }

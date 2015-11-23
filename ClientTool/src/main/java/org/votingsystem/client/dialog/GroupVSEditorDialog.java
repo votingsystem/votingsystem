@@ -1,6 +1,5 @@
 package org.votingsystem.client.dialog;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -8,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.web.HTMLEditor;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.util.Utils;
@@ -84,13 +84,13 @@ public class GroupVSEditorDialog extends DialogVS implements AddTagVSDialog.List
         addTagVSButton.setOnAction(actionEvent -> {
             AddTagVSDialog.show(ContextVS.getMessage("addGroupVSTagMsg"), this);
         });
-        tagVSButton.setGraphic(Utils.getIcon(FontAwesomeIcon.TIMES, Utils.COLOR_RED_DARK));
+        tagVSButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         tagVSButton.setOnAction(actionEvent -> {
             tagVS = null;
             tagVSButton.setVisible(false);
         });
         publishButton.setVisible(true);
-        publishButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CHECK, Utils.COLOR_RESULT_OK));
+        publishButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CHECK, Utils.COLOR_RESULT_OK));
         editor.setHtmlText("<html><body></body></html>");
     }
 

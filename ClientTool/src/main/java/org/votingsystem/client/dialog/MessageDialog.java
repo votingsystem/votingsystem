@@ -1,6 +1,5 @@
 package org.votingsystem.client.dialog;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
@@ -10,6 +9,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Window;
 import netscape.javascript.JSException;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
@@ -90,10 +90,10 @@ public class MessageDialog extends DialogVS {
         if(statusCode != null) {
             if(ResponseVS.SC_OK == statusCode) {
                 setCaption(null);
-                messageLabel.setGraphic(Utils.getIcon(FontAwesomeIcon.CHECK, Utils.COLOR_RESULT_OK ,32));
+                messageLabel.setGraphic(Utils.getIcon(FontAwesome.Glyph.CHECK, Utils.COLOR_RESULT_OK ,32));
             } else {
                 setCaption(ContextVS.getMessage("errorLbl"));
-                messageLabel.setGraphic(Utils.getIcon(FontAwesomeIcon.TIMES, Utils.COLOR_RED_DARK, 32));
+                messageLabel.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK, 32));
             }
             messageLabel.setGraphicTextGap(15);
         }

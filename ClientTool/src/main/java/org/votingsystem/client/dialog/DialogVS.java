@@ -53,6 +53,12 @@ public class DialogVS {
         else stage.setTitle(caption);
     }
 
+    public void setCaption(String caption, boolean closeButtonVisible) {
+        if(decoratedPane != null) decoratedPane.setCaption(caption);
+        else stage.setTitle(caption);
+        decoratedPane.setCloseButtonVisible(closeButtonVisible);
+    }
+
     public DialogVS(Pane pane) {
         this(pane, null);
     }
@@ -92,11 +98,7 @@ public class DialogVS {
     }
 
     public void addMenuButton(MenuButton menuButton) {
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                decoratedPane.addMenuButton(menuButton);
-            }
-        });
+        Platform.runLater(() -> decoratedPane.addMenuButton(menuButton));
     }
 
     public void show() {

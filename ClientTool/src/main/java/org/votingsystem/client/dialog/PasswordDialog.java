@@ -1,7 +1,6 @@
 package org.votingsystem.client.dialog;
 
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
@@ -14,6 +13,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
@@ -72,7 +72,7 @@ public class PasswordDialog extends DialogVS {
 
         final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(event -> checkPasswords());
-        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CHECK));
 
         password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
                 new EventHandler<KeyEvent>() {

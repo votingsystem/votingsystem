@@ -1,11 +1,11 @@
 package org.votingsystem.client.util;
 
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.QRTransactionFormDialog;
 import org.votingsystem.client.dialog.SettingsDialog;
@@ -35,20 +35,20 @@ public class BrowserVSMenuButton extends MenuButton {
 
 
     public BrowserVSMenuButton () {
-        setGraphic(Utils.getIcon(FontAwesomeIcon.BARS));
+        setGraphic(Utils.getIcon(FontAwesome.Glyph.BARS));
         MenuItem openFileMenuItem = new MenuItem(ContextVS.getMessage("openFileButtonLbl"));
-        openFileMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcon.FOLDER_OPEN));
+        openFileMenuItem.setGraphic(Utils.getIcon(FontAwesome.Glyph.FOLDER_OPEN));
         openFileMenuItem.setOnAction(actionEvent -> {
             DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(null, null);
             Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
         });
         MenuItem signDocumentMenuItem = new MenuItem(ContextVS.getMessage("signDocumentButtonLbl"));
-        signDocumentMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcon.CERTIFICATE));
+        signDocumentMenuItem.setGraphic(Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
         signDocumentMenuItem.setOnAction(actionEvent -> SignDocumentFormPane.showDialog());
 
         voteMenuItem = new MenuItem(ContextVS.getMessage("voteButtonLbl"));
         voteMenuItem.setVisible(false);
-        voteMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcon.ENVELOPE));
+        voteMenuItem.setGraphic(Utils.getIcon(FontAwesome.Glyph.ENVELOPE));
         voteMenuItem.setOnAction(event -> {
             Browser.getInstance().openVotingSystemURL(ContextVS.getInstance().getAccessControl().getVotingPageURL(
                             "user", Locale.getDefault().toString()),
@@ -56,7 +56,7 @@ public class BrowserVSMenuButton extends MenuButton {
         });
         selectRepresentativeMenuItem = new MenuItem(ContextVS.getMessage("selectRepresentativeButtonLbl"));
         selectRepresentativeMenuItem.setVisible(false);
-        selectRepresentativeMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcon.HAND_ALT_RIGHT));
+        selectRepresentativeMenuItem.setGraphic(Utils.getIcon(FontAwesome.Glyph.HAND_ALT_RIGHT));
         selectRepresentativeMenuItem.setOnAction(event -> {
             Browser.getInstance().openVotingSystemURL(ContextVS.getInstance().getAccessControl().getSelectRepresentativePageURL(
                     "user", Locale.getDefault().toString()), ContextVS.getMessage("selectRepresentativeButtonLbl"));
@@ -64,7 +64,7 @@ public class BrowserVSMenuButton extends MenuButton {
 
         currencyUserMenuItem = new MenuItem(ContextVS.getMessage("financesLbl"));
         currencyUserMenuItem.setVisible(false);
-        currencyUserMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcon.BAR_CHART));
+        currencyUserMenuItem.setGraphic(Utils.getIcon(FontAwesome.Glyph.BAR_CHART));
         currencyUserMenuItem.setOnAction(event -> {
             StringBuilder sb = new StringBuilder();
             if(BrowserSessionService.getInstance().getUserVS() != null) sb.append(ContextVS.getInstance().getCurrencyServer()
@@ -75,17 +75,17 @@ public class BrowserVSMenuButton extends MenuButton {
         });
         walletMenuItem = new MenuItem(ContextVS.getMessage("walletLbl"));
         walletMenuItem.setVisible(false);
-        walletMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcon.MONEY));
+        walletMenuItem.setGraphic(Utils.getIcon(FontAwesome.Glyph.MONEY));
         walletMenuItem.setOnAction(event -> WalletPane.showDialog());
 
         qrCodeMenuItem = new MenuItem(ContextVS.getMessage("createQRLbl"));
         qrCodeMenuItem.setVisible(false);
-        qrCodeMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcon.QRCODE));
+        qrCodeMenuItem.setGraphic(Utils.getIcon(FontAwesome.Glyph.QRCODE));
         qrCodeMenuItem.setOnAction(event -> QRTransactionFormDialog.showDialog());
 
 
         MenuItem settingsMenuItem = new MenuItem(ContextVS.getMessage("settingsLbl"));
-        settingsMenuItem.setGraphic(Utils.getIcon(FontAwesomeIcon.COG));
+        settingsMenuItem.setGraphic(Utils.getIcon(FontAwesome.Glyph.COG));
         settingsMenuItem.setOnAction(actionEvent -> SettingsDialog.showDialog());
         currencyAdminMenuItem = new MenuItem(ContextVS.getMessage("currencyAdminLbl"));
         currencyAdminMenuItem.setOnAction(actionEvent -> Browser.getInstance().openCurrencyURL(
@@ -99,7 +99,7 @@ public class BrowserVSMenuButton extends MenuButton {
         votingSystemAdminMenuItem.setVisible(false);
 
         Menu adminsMenu = new Menu(ContextVS.getMessage("adminsMenuLbl"));
-        adminsMenu.setGraphic(Utils.getIcon(FontAwesomeIcon.USERS));
+        adminsMenu.setGraphic(Utils.getIcon(FontAwesome.Glyph.USERS));
         adminsMenu.getItems().addAll(currencyAdminMenuItem, votingSystemAdminMenuItem);
 
         getItems().addAll(voteMenuItem, selectRepresentativeMenuItem, new SeparatorMenuItem(),

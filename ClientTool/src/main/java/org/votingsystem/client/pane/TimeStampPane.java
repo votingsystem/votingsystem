@@ -1,6 +1,5 @@
 package org.votingsystem.client.pane;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -20,6 +19,7 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle.util.CollectionStore;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
@@ -131,10 +131,10 @@ public class TimeStampPane extends GridPane {
         //AttributeTable  table = timeStampToken.getSignedAttributes();
         HBox buttonsHBox = new HBox();
         Button certValidationButton = new Button(ContextVS.getMessage("validateLbl"));
-        certValidationButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CHECK));
+        certValidationButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CHECK));
         certValidationButton.setOnAction(actionEvent -> validateTimeStamp(timeStampToken));
         Button cancelButton = new Button(ContextVS.getMessage("closeLbl"));
-        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcon.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         cancelButton.setOnAction(actionEvent -> TimeStampPane.this.getScene().getWindow().hide());
         buttonsHBox.getChildren().addAll(certValidationButton, Utils.getSpacer(), cancelButton);
         setMargin(buttonsHBox, new Insets(20, 20, 0, 20));

@@ -1,6 +1,5 @@
 package org.votingsystem.client.dialog;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -10,6 +9,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.service.BrowserSessionService;
 import org.votingsystem.client.util.Utils;
@@ -68,7 +68,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         mobileDeviceLbl = new Label();
         mobileDeviceLbl.setStyle("-fx-text-fill: #888;");
         Button mobileDeviceButton = new Button(ContextVS.getMessage("changeMobileDeviceLbl"));
-        mobileDeviceButton.setGraphic(Utils.getIcon(FontAwesomeIcon.EXCHANGE));
+        mobileDeviceButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.EXCHANGE));
         mobileDeviceButton.setOnAction(actionEvent -> MobileSelectorDialog.show(ContextVS.getMessage(
                 "setMobileSignatureMechanismMsg"), ContextVS.getMessage("setMobileSignatureMechanismAdv"),
                 SettingsDialog.this));
@@ -78,7 +78,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         signWithKeystoreRb.setOnAction(actionEvent -> changeCryptoToken(actionEvent));
         keyStoreVBox = new VBox(10);
         Button selectKeyStoreButton = new Button(ContextVS.getMessage("setKeyStoreLbl"));
-        selectKeyStoreButton.setGraphic(Utils.getIcon(FontAwesomeIcon.KEY));
+        selectKeyStoreButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.KEY));
         selectKeyStoreButton.setOnAction(actionEvent -> selectKeystoreFile());
         keyStoreLbl = new Label(ContextVS.getMessage("selectKeyStoreLbl"));
         keyStoreLbl.setContentDisplay(ContentDisplay.LEFT);
@@ -86,7 +86,7 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
         VBox.setMargin(keyStoreVBox, new Insets(10, 10, 10, 10));
         keyStoreVBox.getStyleClass().add("pane-border");
         Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"));
-        requestCertButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CERTIFICATE));
+        requestCertButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
         requestCertButton.setOnAction(actionEvent -> {
             if (ContextVS.getInstance().getAccessControl() != null) {
                 Platform.runLater(() -> {
@@ -102,9 +102,9 @@ public class SettingsDialog extends DialogVS  implements MobileSelectorDialog.Li
 
         HBox footerButtonsBox = new HBox(10);
         Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
-        cancelButton.setGraphic(Utils.getIcon(FontAwesomeIcon.TIMES, Utils.COLOR_RED_DARK));
+        cancelButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         cancelButton.setOnAction(actionEvent -> getStage().close());
-        acceptButton.setGraphic(Utils.getIcon(FontAwesomeIcon.CHECK));
+        acceptButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CHECK));
         acceptButton.setOnAction(actionEvent -> validateForm());
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);
         gridPane.setMargin(footerButtonsBox, new Insets(20, 20, 0, 20));

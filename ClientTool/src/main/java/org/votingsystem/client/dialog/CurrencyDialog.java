@@ -2,7 +2,6 @@ package org.votingsystem.client.dialog;
 
 
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -11,6 +10,7 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.service.EventBusService;
 import org.votingsystem.client.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.util.MsgUtils;
@@ -103,7 +103,7 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
             }
         });
         MenuButton menuButton = new MenuButton();
-        menuButton.setGraphic(Utils.getIcon(FontAwesomeIcon.BARS));
+        menuButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.BARS));
         menuButton.getItems().addAll(changeWalletMenuItem);
         addMenuButton(menuButton);
     }

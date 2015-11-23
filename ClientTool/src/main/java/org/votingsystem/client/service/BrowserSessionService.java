@@ -1,8 +1,8 @@
 package org.votingsystem.client.service;
 
 import com.sun.javafx.application.PlatformImpl;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.control.Button;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.Browser;
 import org.votingsystem.client.dialog.PasswordDialog;
@@ -392,7 +392,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
                 try {
                     if(password == null) {
                         Button optionButton = new Button(ContextVS.getMessage("deletePendingCsrMsg"));
-                        optionButton.setGraphic(Utils.getIcon(FontAwesomeIcon.TIMES, Utils.COLOR_RED_DARK));
+                        optionButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
                         optionButton.setOnAction(event -> deleteCSR());
                         showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"), optionButton);
                         return;
