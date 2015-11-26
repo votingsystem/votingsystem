@@ -52,7 +52,7 @@
                 console.log(this.tagName + " - ready - " + document.querySelector("#voting_system_page"))
                 this.timeStampDate = null
                 this.messageToUser = null
-                this.isClientToolConnected = window['isClientToolConnected']
+                this.isClientToolConnected = (clientTool !== undefined)
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
                         function() {  this.isClientToolConnected = true }.bind(this))
             },

@@ -187,7 +187,7 @@
             },
             showConfirmDialog: function(e) {
                 console.log(this.tagName + " showConfirmDialog")
-                if(!window['isClientToolConnected']) {
+                if((clientTool === undefined)) {
                     showMessageVS("${msg.clientToolRequiredErrorMsg}", "${msg.errorLbl}");
                 } else {
                     this.optionVSSelected = e.model.item
@@ -203,7 +203,7 @@
             getResults:function() {
                 console.log("getResults")
                 var fileURL = "${contextURL}/static/backup/" + this.dateFinish.urlFormat() + "/VOTING_EVENT_" + this.eventvs.id + ".zip"
-                if(window['isClientToolConnected']) {
+                if(clientTool !== undefined) {
                     var operationVS = new OperationVS(Operation.FILE_FROM_URL)
                     operationVS.subject = '${msg.downloadingFileMsg}'
                     operationVS.documentURL = fileURL

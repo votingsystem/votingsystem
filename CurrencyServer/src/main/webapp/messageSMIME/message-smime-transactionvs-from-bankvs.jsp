@@ -93,8 +93,8 @@
                 caption: {type:String}
             },
             ready: function() {
-                console.log(this.tagName + " - ready" + window['isClientToolConnected'])
-                this.isClientToolConnected = window['isClientToolConnected']
+                console.log(this.tagName + " - ready")
+                this.isClientToolConnected = (clientTool !== undefined)
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
                         function() {  this.isClientToolConnected = true }.bind(this))
                 sendSignalVS({caption:"${msg.transactionVSFromBankVS}"})

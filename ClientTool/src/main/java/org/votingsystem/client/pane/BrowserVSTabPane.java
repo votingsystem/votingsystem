@@ -211,7 +211,6 @@ public class BrowserVSTabPane extends TabPane {
                 incrementZoom(webView, - 0.10);
             } else if (kbZoomPlus.match(ke)) {
                 incrementZoom(webView, 0.10);
-
             }
         });
         webView.addEventFilter(ScrollEvent.ANY, (scrollEvent) ->{

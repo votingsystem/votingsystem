@@ -54,12 +54,15 @@
         <iron-ajax auto="" id="ajax" url="{{url}}" handle-as="json" last-response="{{dashBoardDto}}" method="get"
                    content-type="application/json"></iron-ajax>
         <div id="transactionChart"></div>
+
+    </template>
+    <script id="head" type="text/html">
         <div id="tooltip" class="hidden">
             <p><strong>{{transactionType}}</strong></p>
             <p>{{amount}}</p>
             <p>{{date}}</p>
         </div>
-    </template>
+    </script>
     <script>
         Polymer({
             is:'vs-dashboard',
@@ -73,26 +76,28 @@
                 margin:{type:Object, value: {top: 30, right: 20, bottom: 30, left: 50}}
             },
             ready: function() {
+                this.width = this.width - this.margin.left - this.margin.right
+                this.height = this.height - this.margin.top - this.margin.bottom
                 this.rScale = d3.scale.linear().range([this.rMin, this.rMax]);
                 this.colorScale = d3.scale.category10();
             },
             render:function(data) {
                 console.log(this.tagName + " - render")
                 this.rScale.domain(d3.extent(data, function (d){ return d.amount }));
-                var xScale = d3.time.scale()
+                var x = d3.time.scale()
                         .domain(d3.extent(data, function(d) { return d.dateCreated; }))
                         .range([0, this.width]);
-                var yScale = d3.scale.linear()
+                var y = d3.scale.linear()
                         .domain([0, d3.max(data, function(d) { return d.amount; })])
                         .range([this.height, 0]);
 
-                var xAxis = d3.svg.axis().scale(xScale)
+                var xAxis = d3.svg.axis().scale(x)
                         .orient("bottom").ticks(5);
-                var yAxis = d3.svg.axis().scale(yScale)
+                var yAxis = d3.svg.axis().scale(y)
                         .orient("left").ticks(5);
                 var zoom = d3.behavior.zoom()
-                        .x(xScale)
-                        .y(yScale)
+                        .x(x)
+                        .y(y)
                         .scaleExtent([-10, 10])
                         .on("zoom", zoomed);
 
@@ -125,8 +130,8 @@
                 var hostElement = this
                 var HTMLfixedTip = d3.select("#tooltip");
                 circles.attr("class", "transaction")
-                        .attr("cx",      function (d){ return   xScale(new Date(d.dateCreated))}.bind(this))
-                        .attr("cy",      function (d){ return   yScale(d.amount) }.bind(this))
+                        .attr("cx",      function (d){ return   x(new Date(d.dateCreated))}.bind(this))
+                        .attr("cy",      function (d){ return   y(d.amount) }.bind(this))
                         .attr("r",       function (d){
                             return this.rScale(d.amount) }.bind(this))
                         .attr("style",    function (d){ return   this.circleStyle(d) }.bind(this))
@@ -167,27 +172,22 @@
                 //this is to apply polymer <style>
                 Polymer.dom(this.$.transactionChart).appendChild(Polymer.dom(this.$.transactionChart).childNodes[0])
                 function zoomed() {
+                    console.log("zoom.scale: " + zoom.scale() + " - x.domain: " + x.domain())
                     svg.select(".x.axis").call(xAxis);
                     svg.select(".y.axis").call(yAxis);
-                    circles.attr("cx",      function (d){ return   xScale(new Date(d.dateCreated))}.bind(this))
-                            .attr("cy",      function (d){ return   yScale(d.amount) }.bind(this))
+                    circles.attr("cx",      function (d){ return   x(new Date(d.dateCreated))}.bind(this))
+                            .attr("cy",      function (d){ return   y(d.amount) }.bind(this))
                 }
             },
             circleStyle:function(d) {
                 return "fill:" + this.colorScale(d.type) + "; stroke:" + d3.rgb(this.colorScale(d.type)).darker(1)
             },
-            zoomed:function () {
-                console.log(this.tagName + "- zoomed")
-                if(!this.svg) return
-                this.svg.select(".x.axis").call(this.xAxis);
-                this.svg.select(".y.axis").call(this.yAxis);
-            },
             reset:function () {
                 /*d3.transition().duration(750).tween("zoom", function() {
-                    var ix = d3.interpolate(this.xScale.domain(), [-this.width / 2, this.width / 2]),
-                            iy = d3.interpolate(this.yScale.domain(), [-this.height / 2, this.height / 2]);
+                    var ix = d3.interpolate(this.x.domain(), [-this.width / 2, this.width / 2]),
+                            iy = d3.interpolate(this.y.domain(), [-this.height / 2, this.height / 2]);
                     return function(t) {
-                        zoom.x(this.xScale.domain(ix(t))).y(this.yScale.domain(iy(t)));
+                        zoom.x(this.x.domain(ix(t))).y(this.y.domain(iy(t)));
                         this.zoomed();
                     };
                 });*/

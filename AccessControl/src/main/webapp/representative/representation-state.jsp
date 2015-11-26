@@ -45,7 +45,7 @@
             properties: { },
             ready: function() {
                 console.log(this.tagName + " - ")
-                if(window['isClientToolConnected']) {
+                if(clientTool !== undefined) {
                     this.cancellationHidden = true
                     this.timeInfoHidden = true
                     var operationVS = new OperationVS(Operation.REPRESENTATIVE_STATE)

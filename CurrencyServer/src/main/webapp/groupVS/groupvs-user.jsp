@@ -61,7 +61,7 @@
                 isAdmin: {type:Boolean}
             },
             ready:function(e) {
-                this.isClientToolConnected = window['isClientToolConnected']
+                this.isClientToolConnected = (clientTool !== undefined)
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
                         function() {  this.isClientToolConnected = true }.bind(this))
                 this.$.reasonDialog.addEventListener('on-submit', function (e) {

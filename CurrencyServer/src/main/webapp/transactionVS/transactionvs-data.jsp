@@ -123,7 +123,7 @@
                 this.receptorMsg = null
                 this.isSenderVisible = true
                 this.isReceptorVisible = true
-                this.isClientToolConnected = window['isClientToolConnected']
+                this.isClientToolConnected = (clientTool !== undefined)
                 if(this.transactionvs.toUserIBAN != null && this.transactionvs.toUserIBAN.length > 1) {
                     this.receptorLbl = '${msg.receptorsLbl}'
                 } else this.receptorLbl = '${msg.receptorLbl}'

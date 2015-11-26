@@ -238,7 +238,7 @@ function VotingSystemClient () { }
 
 var clientTool
 VotingSystemClient.setMessage = function (messageJSON) {
-    if(window['isClientToolConnected']) {
+    if(clientTool !== undefined) {
         var messageToSignatureClient = JSON.stringify(messageJSON);
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
@@ -259,15 +259,12 @@ function sendSignalVS(signalData) {
     VotingSystemClient.setMessage(operationVS);
 }
 
-window['isClientToolConnected'] = false
-
 function checkIfClientToolIsConnected() {
-    return window['isClientToolConnected'] || window.parent['isClientToolConnected']
+    return (clientTool !== undefined) ||  (window.parent.clientTool !== undefined)
 }
 
 function setClientToolConnected() {
     console.log("setClientToolConnected");
-    window['isClientToolConnected'] = true;
     document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('votingsystem-client-connected', { }))
 }
 

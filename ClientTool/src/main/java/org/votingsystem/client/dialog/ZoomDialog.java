@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
+import org.votingsystem.client.Browser;
 import org.votingsystem.util.ContextVS;
 
 import java.util.logging.Logger;
@@ -52,7 +53,9 @@ public class ZoomDialog extends DialogVS {
         Platform.runLater(() -> {
             INSTANCE.setZoomProperty(zoomProperty);
             if(!INSTANCE.getStage().isShowing()) INSTANCE.show();
-            INSTANCE.getStage().setY(50);
+            INSTANCE.getStage().setY(Browser.getInstance().getScene().getWindow().getY());
+            INSTANCE.getStage().setX(Browser.getInstance().getScene().getWindow().getX() +
+                    (Browser.getInstance().getScene().getWindow().getWidth()/2 - INSTANCE.getStage().getWidth()/2));
             if(INSTANCE.cancelTask != null) INSTANCE.cancelTask.cancel();
             INSTANCE.cancelTask = new Task() {
                 @Override protected Object call() throws Exception {
