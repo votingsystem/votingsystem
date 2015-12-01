@@ -1,7 +1,7 @@
 package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PeriodResultDto {
 
-    private TimePeriod timePeriod;
+    private Interval timePeriod;
     private BalancesDto systemBalance;
     private List<BalancesDto> groupVSBalanceList;
     private List<BalancesDto>  userVSBalanceList;
@@ -20,7 +20,7 @@ public class PeriodResultDto {
 
     public PeriodResultDto() {}
 
-    public static PeriodResultDto init(TimePeriod timePeriod) {
+    public static PeriodResultDto init(Interval timePeriod) {
         PeriodResultDto periodResultDto = new PeriodResultDto();
         periodResultDto.setGroupVSBalanceList(new ArrayList<>());
         periodResultDto.setUserVSBalanceList(new ArrayList<>());
@@ -73,11 +73,11 @@ public class PeriodResultDto {
         this.systemBalance = systemBalance;
     }
 
-    public TimePeriod getTimePeriod() {
+    public Interval getTimePeriod() {
         return timePeriod;
     }
 
-    public void setTimePeriod(TimePeriod timePeriod) {
+    public void setTimePeriod(Interval timePeriod) {
         this.timePeriod = timePeriod;
     }
 }

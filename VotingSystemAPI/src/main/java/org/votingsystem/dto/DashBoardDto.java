@@ -2,7 +2,7 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -10,7 +10,7 @@ import org.votingsystem.util.TimePeriod;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DashBoardDto {
 
-    private TimePeriod timePeriod;
+    private Interval timePeriod;
     private TransactionVS.Type type;
     private Long numTransFromBankVS;
     private Long numTransFromUserVS;
@@ -26,15 +26,15 @@ public class DashBoardDto {
 
     public DashBoardDto () {}
 
-    public DashBoardDto(TimePeriod timePeriod) {
+    public DashBoardDto(Interval timePeriod) {
         this.timePeriod = timePeriod;
     }
 
-    public TimePeriod getTimePeriod() {
+    public Interval getTimePeriod() {
         return timePeriod;
     }
 
-    public void setTimePeriod(TimePeriod timePeriod) {
+    public void setTimePeriod(Interval timePeriod) {
         this.timePeriod = timePeriod;
     }
 

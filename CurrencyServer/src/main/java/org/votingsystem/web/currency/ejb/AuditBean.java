@@ -12,7 +12,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.currency.util.ReportFiles;
@@ -52,10 +52,10 @@ public class AuditBean {
     @Inject BalancesBean balancesBean;
 
     //Check that the sum of all issued Currency match with valid request
-    public void checkCurrencyRequest(TimePeriod timePeriod) { }
+    public void checkCurrencyRequest(Interval timePeriod) { }
 
     //Backup user transactions for timePeriod
-    public BalancesDto backupUserVSTransactionVSList (UserVS userVS, TimePeriod timePeriod) throws IOException {
+    public BalancesDto backupUserVSTransactionVSList (UserVS userVS, Interval timePeriod) throws IOException {
         String lapsePath = DateUtils.getDirPath(timePeriod.getDateFrom());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MMM_dd");
         lapsePath = "/" + formatter.format(timePeriod.getDateFrom()) + "__" +  formatter.format(timePeriod.getDateTo());
@@ -121,7 +121,7 @@ public class AuditBean {
         MessagesVS messages = new MessagesVS(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         long beginCalc = System.currentTimeMillis();
         //we know this is launch every Monday after 00:00 so we just make sure to select a day from last week
-        TimePeriod timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(requestDate));
+        Interval timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(requestDate));
         String transactionSubject =  messages.get("initWeekMsg", DateUtils.getDayWeekDateStr(timePeriod.getDateTo()));
         List<UserVS.State> notActiveList = Arrays.asList(UserVS.State.SUSPENDED, UserVS.State.CANCELED);
         List<UserVS.Type> userVSTypeList = Arrays.asList(UserVS.Type.GROUP, UserVS.Type.USER);
@@ -160,7 +160,7 @@ public class AuditBean {
         }
     }
 
-    public boolean initUserVSWeekPeriod(UserVS userVS, TimePeriod timePeriod, String transactionSubject)
+    public boolean initUserVSWeekPeriod(UserVS userVS, Interval timePeriod, String transactionSubject)
             throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         BalancesDto balancesDto = null;
@@ -226,7 +226,7 @@ public class AuditBean {
     }
 
     //@Transactional
-    public PeriodResultDto signPeriodResult(TimePeriod timePeriod) throws Exception {
+    public PeriodResultDto signPeriodResult(Interval timePeriod) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         long beginCalc = System.currentTimeMillis();
         Query query = dao.getEM().createNamedQuery("countUserActiveByDateAndInList").setParameter("date", timePeriod.getDateFrom())

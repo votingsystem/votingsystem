@@ -17,7 +17,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 import org.votingsystem.web.currency.ejb.*;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
@@ -72,7 +72,7 @@ public class UserVSResource {
                 req.getParameter("state") != null) {
             UserVS.Type userType = UserVS.Type.USER;
             UserVS.State userState = UserVS.State.ACTIVE;
-            TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+            Interval timePeriod = DateUtils.getCurrentWeekPeriod();
             Date dateFrom = null;
             Date dateTo = null;
             try {userType = UserVS.Type.valueOf(req.getParameter("type"));} catch(Exception ex) {}
@@ -256,7 +256,7 @@ public class UserVSResource {
         UserVS userVS = dao.getSingleResult(UserVS.class, query);
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - nif: " + nif).build();
         Calendar calendar = DateUtils.getCalendar(year, month, day);
-        TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
+        Interval timePeriod = DateUtils.getWeekPeriod(calendar);
         BalancesDto dto = balancesBean.getBalancesDto(userVS, timePeriod);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
@@ -269,7 +269,7 @@ public class UserVSResource {
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", nif);
         UserVS userVS = dao.getSingleResult(UserVS.class, query);
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - nif: " + nif).build();
-        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        Interval timePeriod = DateUtils.getCurrentWeekPeriod();
         BalancesDto dto = balancesBean.getBalancesDto(userVS, timePeriod);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
@@ -309,7 +309,7 @@ public class UserVSResource {
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
         Map<String, Object> dataMap = JSON.getMapper().readValue(smimeMessage.getSignedContent(), Map.class);
         //TODO check operation
-        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        Interval timePeriod = DateUtils.getCurrentWeekPeriod();
         BalancesDto dto = balancesBean.getBalancesDto(messageSMIME.getUserVS(), timePeriod);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }

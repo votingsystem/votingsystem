@@ -110,7 +110,7 @@ public class DateUtils {
         return formatter.format(date);
     }
 
-    public static String getTimePeriodPath (TimePeriod timePeriod) {
+    public static String getTimePeriodPath (Interval timePeriod) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MMM_dd");
         return "/" + formatter.format(timePeriod.getDateFrom()) + "__" +  formatter.format(timePeriod.getDateTo());
     }
@@ -206,11 +206,11 @@ public class DateUtils {
         return calendar;
     }
 
-    public static TimePeriod getCurrentWeekPeriod() {
+    public static Interval getCurrentWeekPeriod() {
         return getWeekPeriod(Calendar.getInstance());
     }
 
-    public static TimePeriod getYearPeriod(Calendar selectedDate) {
+    public static Interval getYearPeriod(Calendar selectedDate) {
         Calendar dayFrom = (Calendar) selectedDate.clone();
         dayFrom.set(Calendar.DAY_OF_YEAR, 1);
         dayFrom.set(Calendar.HOUR_OF_DAY, 0);
@@ -219,10 +219,10 @@ public class DateUtils {
         dayFrom.set(Calendar.MILLISECOND, 0);
         Calendar dayTo = (Calendar) dayFrom.clone();
         dayTo.add(Calendar.DAY_OF_YEAR, 365);
-        return new TimePeriod(dayFrom.getTime(), dayTo.getTime());
+        return new Interval(dayFrom.getTime(), dayTo.getTime());
     }
 
-    public static TimePeriod getMonthPeriod(Calendar selectedDate) {
+    public static Interval getMonthPeriod(Calendar selectedDate) {
         Calendar dayFrom = (Calendar) selectedDate.clone();
         dayFrom.set(Calendar.DAY_OF_MONTH, 1);
         dayFrom.set(Calendar.HOUR_OF_DAY, 0);
@@ -231,24 +231,24 @@ public class DateUtils {
         dayFrom.set(Calendar.MILLISECOND, 0);
         Calendar dayTo = (Calendar) dayFrom.clone();
         dayTo.add(Calendar.DAY_OF_MONTH, dayFrom.getActualMaximum(Calendar.DAY_OF_MONTH));
-        return new TimePeriod(dayFrom.getTime(), dayTo.getTime());
+        return new Interval(dayFrom.getTime(), dayTo.getTime());
     }
 
-    public static TimePeriod getWeekPeriod(Calendar selectedDate) {
+    public static Interval getWeekPeriod(Calendar selectedDate) {
         selectedDate.getTime();//to make sure set values are updated
         Calendar weekFromCalendar = getMonday(selectedDate);
         Calendar weekToCalendar = (Calendar) weekFromCalendar.clone();
         weekToCalendar.add(Calendar.DAY_OF_YEAR, 7);
-        return new TimePeriod(weekFromCalendar.getTime(), weekToCalendar.getTime());
+        return new Interval(weekFromCalendar.getTime(), weekToCalendar.getTime());
     }
 
-    public static TimePeriod getWeekPeriod(Date selectedDate) {
+    public static Interval getWeekPeriod(Date selectedDate) {
         Calendar selectedDateCalendar = Calendar.getInstance();
         selectedDateCalendar.setTime(selectedDate);
         return getWeekPeriod(selectedDateCalendar);
     }
 
-    public static TimePeriod addHours(Calendar baseCal, Integer numHours){
+    public static Interval addHours(Calendar baseCal, Integer numHours){
         Calendar cal = (Calendar) baseCal.clone();
         cal.add(Calendar.HOUR, numHours);
         Date dateFrom = null;
@@ -260,10 +260,10 @@ public class DateUtils {
             dateFrom = baseCal.getTime();
             dateTo = cal.getTime();
         }
-        return new TimePeriod(dateFrom, dateTo);
+        return new Interval(dateFrom, dateTo);
     }
 
-    public static TimePeriod getDayPeriod(Calendar selectedDate) {
+    public static Interval getDayPeriod(Calendar selectedDate) {
         Calendar dayFrom = (Calendar) selectedDate.clone();
         dayFrom.set(Calendar.HOUR_OF_DAY, 0);
         dayFrom.set(Calendar.MINUTE, 0);
@@ -271,37 +271,37 @@ public class DateUtils {
         dayFrom.set(Calendar.MILLISECOND, 0);
         Calendar dayTo = (Calendar) dayFrom.clone();
         dayTo.add(Calendar.HOUR_OF_DAY, 24);
-        return new TimePeriod(dayFrom.getTime(), dayTo.getTime());
+        return new Interval(dayFrom.getTime(), dayTo.getTime());
     }
 
-    public static TimePeriod getHourPeriod(Calendar selectedDate) {
+    public static Interval getHourPeriod(Calendar selectedDate) {
         Calendar dayFrom = (Calendar) selectedDate.clone();
         dayFrom.set(Calendar.MINUTE, 0);
         dayFrom.set(Calendar.SECOND, 0);
         dayFrom.set(Calendar.MILLISECOND, 0);
         Calendar dayTo = (Calendar) dayFrom.clone();
         dayTo.add(Calendar.HOUR_OF_DAY, 1);
-        return new TimePeriod(dayFrom.getTime(), dayTo.getTime());
+        return new Interval(dayFrom.getTime(), dayTo.getTime());
     }
 
-    public static TimePeriod getMinutePeriod(Calendar selectedDate) {
+    public static Interval getMinutePeriod(Calendar selectedDate) {
         Calendar dayFrom = (Calendar) selectedDate.clone();
         dayFrom.set(Calendar.SECOND, 0);
         dayFrom.set(Calendar.MILLISECOND, 0);
         Calendar dayTo = (Calendar) dayFrom.clone();
         dayTo.add(Calendar.SECOND, 60);
-        return new TimePeriod(dayFrom.getTime(), dayTo.getTime());
+        return new Interval(dayFrom.getTime(), dayTo.getTime());
     }
 
-    public static TimePeriod getSecondPeriod(Calendar selectedDate) {
+    public static Interval getSecondPeriod(Calendar selectedDate) {
         Calendar dayFrom = (Calendar) selectedDate.clone();
         dayFrom.set(Calendar.MILLISECOND, 0);
         Calendar dayTo = (Calendar) dayFrom.clone();
         dayTo.add(Calendar.MILLISECOND, 1000);
-        return new TimePeriod(dayFrom.getTime(), dayTo.getTime());
+        return new Interval(dayFrom.getTime(), dayTo.getTime());
     }
 
-    public static TimePeriod getLapsePeriod(Date selectedDate, TimePeriod.Lapse timePeriodLapse) throws ExceptionVS {
+    public static Interval getLapsePeriod(Date selectedDate, Interval.Lapse timePeriodLapse) throws ExceptionVS {
         Calendar selectedDateCalendar = Calendar.getInstance();
         selectedDateCalendar.setTime(selectedDate);
         switch(timePeriodLapse) {
@@ -322,11 +322,11 @@ public class DateUtils {
         return result;
     }
 
-    public static TimePeriod getURLTimePeriod(String dateFromStr, String dateToStr) throws ParseException {
+    public static Interval getURLTimePeriod(String dateFromStr, String dateToStr) throws ParseException {
         DateFormat urlDateFormatter = new SimpleDateFormat("yyyyMMdd_HHmm");
         Date dateFrom = urlDateFormatter.parse(dateFromStr);
         Date dateTo = urlDateFormatter.parse(dateToStr);
-        return new TimePeriod(dateFrom, dateTo);
+        return new Interval(dateFrom, dateTo);
     }
 
     public static Date getURLPart(String dateStr) throws ParseException {

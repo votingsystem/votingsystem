@@ -3,7 +3,7 @@ package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.dto.DashBoardDto;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -22,7 +22,7 @@ public class DashBoardBean {
 
     @PersistenceContext private EntityManager em;
 
-     public DashBoardDto getUserVSInfo(TimePeriod timePeriod) {
+     public DashBoardDto getUserVSInfo(Interval timePeriod) {
          log.info("timePeriod: " + timePeriod.toString());
          DashBoardDto dto = new DashBoardDto(timePeriod);
          Query query = em.createNamedQuery("countTransByToUserVSIsNotNullAndTypeAndDateCreatedBetween").setParameter(

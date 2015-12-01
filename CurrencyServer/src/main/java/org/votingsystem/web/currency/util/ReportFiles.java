@@ -1,6 +1,6 @@
 package org.votingsystem.web.currency.util;
 
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -17,7 +17,7 @@ public class ReportFiles {
 
     public ReportFiles() {}
 
-    public ReportFiles(TimePeriod timePeriod, String baseDirPath, String subPath) {
+    public ReportFiles(Interval timePeriod, String baseDirPath, String subPath) {
         String reportsBasePath = baseDirPath + "/backup/weekReports";
         DateFormat fileDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         String dateFromPathPart = fileDateFormatter.format(timePeriod.getDateFrom());
@@ -30,7 +30,7 @@ public class ReportFiles {
         receiptFile = new File(reportsBasePath + "/weekReportReceipt.p7s");
     }
 
-    public static ReportFiles CURRENCY_PERIOD(TimePeriod timePeriod, String baseDirPath) {
+    public static ReportFiles CURRENCY_PERIOD(Interval timePeriod, String baseDirPath) {
         ReportFiles result = new ReportFiles();
         DateFormat fileDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         String dateFromPathPart = fileDateFormatter.format(timePeriod.getDateFrom());

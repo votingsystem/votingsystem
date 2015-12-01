@@ -4,7 +4,7 @@ import org.votingsystem.dto.DashBoardDto;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 import org.votingsystem.web.currency.ejb.DashBoardBean;
 
 import javax.inject.Inject;
@@ -90,7 +90,7 @@ public class AppResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response userVS(@Context ServletContext context, @Context HttpServletRequest req,
                            @Context HttpServletResponse resp) throws ServletException, IOException {
-        TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), -1);//default to 1 hour
+        Interval timePeriod = DateUtils.addHours(Calendar.getInstance(), -1);//default to 1 hour
         DashBoardDto dto = dashBoardBean.getUserVSInfo(timePeriod);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
@@ -100,7 +100,7 @@ public class AppResource {
     public Response userVS(@PathParam("numHours") Integer numHours,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws ServletException, IOException {
-        TimePeriod timePeriod = DateUtils.addHours(Calendar.getInstance(), - numHours);
+        Interval timePeriod = DateUtils.addHours(Calendar.getInstance(), - numHours);
         DashBoardDto dto = dashBoardBean.getUserVSInfo(timePeriod);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }

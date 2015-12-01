@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TimePeriod {
+public class Interval {
 
     public enum Lapse {YEAR, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND}
 
@@ -15,9 +15,9 @@ public class TimePeriod {
     private Date dateTo;
     private Boolean currentWeekPeriod;
 
-    public TimePeriod(){}
+    public Interval(){}
 
-    public TimePeriod(Date dateFrom, Date dateTo) {
+    public Interval(Date dateFrom, Date dateTo) {
         this.dateFrom = new Date(dateFrom.getTime());
         this.dateTo = new Date(dateTo.getTime());
     }
@@ -30,15 +30,15 @@ public class TimePeriod {
         return dateTo;
     }
 
-    public static TimePeriod parse(Map dataMap) throws ParseException {
+    public static Interval parse(Map dataMap) throws ParseException {
         Date dateFrom = DateUtils.getDateFromString((String) dataMap.get("dateFrom"));
         Date dateTo = DateUtils.getDateFromString((String) dataMap.get("dateTo"));
-        return new TimePeriod(dateFrom, dateTo);
+        return new Interval(dateFrom, dateTo);
     }
 
     public Boolean isCurrentWeekPeriod() {
         if(currentWeekPeriod == null) {
-            TimePeriod period = DateUtils.getCurrentWeekPeriod();
+            Interval period = DateUtils.getCurrentWeekPeriod();
             currentWeekPeriod = (dateFrom.compareTo(period.getDateFrom()) >=0 &&
                     dateTo.compareTo(period.getDateTo()) <= 0);
         }

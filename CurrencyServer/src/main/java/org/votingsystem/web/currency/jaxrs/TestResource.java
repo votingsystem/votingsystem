@@ -14,7 +14,7 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 import org.votingsystem.util.currency.MapUtils;
 import org.votingsystem.web.currency.ejb.AuditBean;
 import org.votingsystem.web.currency.ejb.BalancesBean;
@@ -154,7 +154,7 @@ public class TestResource {
     @GET @Path("/checkCooin")
     public Response checkCooin(@Context ServletContext context, @Context HttpServletRequest req,
                         @Context HttpServletResponse resp) throws ServletException, IOException {
-        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        Interval timePeriod = DateUtils.getCurrentWeekPeriod();
         auditBean.checkCurrencyRequest(timePeriod);
         return Response.ok().entity("OK").build();
     }
@@ -232,7 +232,7 @@ public class TestResource {
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Object initWeek() throws Exception {
         UserVS userVS = dao.find(UserVS.class, 2L);
-        TimePeriod timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(Calendar.getInstance()));
+        Interval timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(Calendar.getInstance()));
         auditBean.initUserVSWeekPeriod(userVS, timePeriod, "TestingController");
         return Response.ok().entity("OK").build();
     }

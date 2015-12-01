@@ -1,7 +1,7 @@
 package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +12,7 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CurrencyPeriodResultDto {
 
-    private TimePeriod timePeriod;
+    private Interval timePeriod;
     private Map<String, Map<String, IncomesDto>> leftOverMap;
     private Map<String, Map<String, IncomesDto>> changeMap;
     private Map<String, Map<String, IncomesDto>> requestMap;
@@ -24,11 +24,11 @@ public class CurrencyPeriodResultDto {
     public CurrencyPeriodResultDto() { }
 
 
-    public TimePeriod getTimePeriod() {
+    public Interval getTimePeriod() {
         return timePeriod;
     }
 
-    public void setTimePeriod(TimePeriod timePeriod) {
+    public void setTimePeriod(Interval timePeriod) {
         this.timePeriod = timePeriod;
     }
 

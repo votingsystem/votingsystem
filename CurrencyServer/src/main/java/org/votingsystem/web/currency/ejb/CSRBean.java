@@ -12,7 +12,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -44,12 +44,12 @@ public class CSRBean {
 
 
     public Set<String> signCurrencyRequest (CurrencyRequestDto requestDto) throws ExceptionVS {
-        TimePeriod timePeriod = null;
+        Interval timePeriod = null;
         if(requestDto.getTimeLimited()) timePeriod = DateUtils.getCurrentWeekPeriod();
         else {
             Date dateFrom = DateUtils.resetCalendar().getTime();
             Date dateTo = DateUtils.addDays(dateFrom, 365).getTime(); //one year
-            timePeriod = new TimePeriod(dateFrom, dateTo);
+            timePeriod = new Interval(dateFrom, dateTo);
         }
         CertificateVS authorityCertificateVS = signatureBean.getServerCertificateVS();
         Set<Currency> issuedCurrencySet = new HashSet<>();
@@ -83,12 +83,12 @@ public class CSRBean {
         TagVS tagVS = config.getTag(certExtensionDto.getTag());
         if(currencyMinValue.compareTo(certExtensionDto.getAmount()) > 0) throw new ExceptionVS(messages.get("currencyMinValueError",
                 currencyMinValue.toString(), certExtensionDto.getAmount().toString()));
-        TimePeriod timePeriod = null;
+        Interval timePeriod = null;
         if(certExtensionDto.getTimeLimited()) timePeriod = DateUtils.getCurrentWeekPeriod();
         else {
             Date dateFrom = DateUtils.resetCalendar().getTime();
             Date dateTo = DateUtils.addDays(dateFrom, 365).getTime(); //one year
-            timePeriod = new TimePeriod(dateFrom, dateTo);
+            timePeriod = new Interval(dateFrom, dateTo);
         }
         CertificateVS authorityCertificateVS = signatureBean.getServerCertificateVS();
         try {

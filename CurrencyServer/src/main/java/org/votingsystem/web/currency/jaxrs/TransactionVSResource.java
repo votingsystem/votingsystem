@@ -10,7 +10,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
@@ -162,8 +162,8 @@ public class TransactionVSResource {
         if(userVS == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("not found - userId: " + userId).build();
         }
-        TimePeriod.Lapse lapse =  TimePeriod.Lapse.valueOf(lapseStr.toUpperCase());
-        TimePeriod timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(req.getLocale()).getTime(), lapse);
+        Interval.Lapse lapse =  Interval.Lapse.valueOf(lapseStr.toUpperCase());
+        Interval timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(req.getLocale()).getTime(), lapse);
         List<TransactionVS> transactionsToList = transactionVSBean.getTransactionToList(userVS, timePeriod);
         List<TransactionVSDto> transactionsToListDto = new ArrayList<>();
         for(TransactionVS transaction : transactionsToList) {

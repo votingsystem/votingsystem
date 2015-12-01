@@ -68,8 +68,8 @@ public class BalanceResource {
         if(userVS == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("not found - userId: " + userId).build();
         }
-        TimePeriod.Lapse lapse =  TimePeriod.Lapse.valueOf(lapseStr.toUpperCase());
-        TimePeriod timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(req.getLocale()).getTime(), lapse);
+        Interval.Lapse lapse =  Interval.Lapse.valueOf(lapseStr.toUpperCase());
+        Interval timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(req.getLocale()).getTime(), lapse);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesBean.getBalancesDto(userVS, timePeriod))).build();
     }
 
@@ -86,7 +86,7 @@ public class BalanceResource {
     }
 
     private Response getUserVSBalancesDto(HttpServletRequest req, HttpServletResponse resp, ServletContext context,
-                  UserVS uservs, TimePeriod timePeriod) throws Exception {
+                  UserVS uservs, Interval timePeriod) throws Exception {
         BalancesDto balancesDto = balancesBean.getBalancesDto(uservs, timePeriod);
         return Response.ok().type(MediaTypeVS.JSON).entity(
                 JSON.getMapper().writeValueAsBytes(balancesDto)).build();
@@ -109,7 +109,7 @@ public class BalanceResource {
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {
         Calendar calendar = DateUtils.getCalendar(year, month, day);
-        TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
+        Interval timePeriod = DateUtils.getWeekPeriod(calendar);
         ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), null);
         if(reportFiles.getJsonFile() == null) {
             throw new NotFoundException("reportsForWeekNotFoundMsg - timePeriod: " + timePeriod.toString());
@@ -128,7 +128,7 @@ public class BalanceResource {
                        @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {
         Calendar calendar = DateUtils.getCalendar(year, month, day);
-        TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
+        Interval timePeriod = DateUtils.getWeekPeriod(calendar);
         //TODO balancesBean.calculatePeriod(DateUtils.getWeekPeriod(calendar))
         return new HashMap<>();
     }

@@ -13,7 +13,7 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 import org.votingsystem.util.currency.BalanceUtils;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -197,7 +197,7 @@ public class TransactionVSBean {
 
     //Check the amount from WILDTAG account expended for the param tag
     public BigDecimal checkWildTagExpensesForTag(UserVS userVS, TagVS tagVS, String currencyCode) {
-        TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+        Interval timePeriod = DateUtils.getCurrentWeekPeriod();
         Map<String, Map<String, BigDecimal>> balancesFrom =
                 BalanceUtils.getBalancesFrom(getTransactionFromList(userVS, timePeriod));
         Map<String, Map<String, IncomesDto>> balancesTo = BalanceUtils.getBalancesTo(getTransactionToList(userVS, timePeriod));
@@ -253,7 +253,7 @@ public class TransactionVSBean {
         return typeDescription;
     }
 
-    public List<TransactionVS> getTransactionFromList(UserVS fromUserVS, TimePeriod timePeriod) {
+    public List<TransactionVS> getTransactionFromList(UserVS fromUserVS, Interval timePeriod) {
         List<TransactionVS> transactionList = null;
         Query query = null;
         if(fromUserVS instanceof GroupVS) {
@@ -276,7 +276,7 @@ public class TransactionVSBean {
         return transactionList;
     }
 
-    public List<TransactionVS> getTransactionToList(UserVS toUserVS, TimePeriod timePeriod) {
+    public List<TransactionVS> getTransactionToList(UserVS toUserVS, Interval timePeriod) {
         Query query = dao.getEM().createNamedQuery("findTransByToUserAndStateAndDateCreatedBetween")
                 .setParameter("toUserVS", toUserVS).setParameter("state", TransactionVS.State.OK)
                 .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo());

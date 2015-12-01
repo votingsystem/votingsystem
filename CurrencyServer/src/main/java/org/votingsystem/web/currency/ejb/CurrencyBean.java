@@ -17,7 +17,7 @@ import org.votingsystem.throwable.CurrencyExpendedException;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.currency.util.ReportFiles;
 import org.votingsystem.web.ejb.DAOBean;
@@ -68,7 +68,7 @@ public class CurrencyBean {
         }
         Date validTo = null;
         if(currencyBatch.getTimeLimited() == true) {
-            TimePeriod timePeriod = DateUtils.getCurrentWeekPeriod();
+            Interval timePeriod = DateUtils.getCurrentWeekPeriod();
             validTo = timePeriod.getDateTo();
         }
         if(batchDto.getOperation() == TypeVS.CURRENCY_CHANGE) {
@@ -198,7 +198,7 @@ public class CurrencyBean {
         return result;
     }
 
-    public CurrencyPeriodResultDto createPeriodBackup(TimePeriod timePeriod) throws IOException {
+    public CurrencyPeriodResultDto createPeriodBackup(Interval timePeriod) throws IOException {
         ReportFiles reportFiles = ReportFiles.CURRENCY_PERIOD(timePeriod, config.getServerDir().getAbsolutePath());
         if(reportFiles.getJsonFile().exists())
                 return JSON.getMapper().readValue(reportFiles.getJsonFile(), CurrencyPeriodResultDto.class);

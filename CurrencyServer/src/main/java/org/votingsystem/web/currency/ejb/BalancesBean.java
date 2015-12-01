@@ -10,7 +10,7 @@ import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 import org.votingsystem.util.currency.BalanceUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -40,7 +40,7 @@ public class BalancesBean {
     @Inject TransactionVSBean transactionVSBean;
     @Inject CurrencyAccountBean currencyAccountBean;
 
-    public BalancesDto getSystemBalancesDto(TimePeriod timePeriod) throws Exception {
+    public BalancesDto getSystemBalancesDto(Interval timePeriod) throws Exception {
         log.info("timePeriod: " + timePeriod.toString());
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("timePeriod", timePeriod);
@@ -60,7 +60,7 @@ public class BalancesBean {
         return balancesDto;
     }
 
-    public BalancesDto getBankVSBalancesDto(BankVS bankVS, TimePeriod timePeriod) throws Exception {
+    public BalancesDto getBankVSBalancesDto(BankVS bankVS, Interval timePeriod) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
                 transactionVSBean.getTransactionFromList(bankVS, timePeriod), TransactionVS.Source.FROM);
         balancesDto.setTimePeriod(timePeriod);
@@ -68,7 +68,7 @@ public class BalancesBean {
         return balancesDto;
     }
 
-    public BalancesDto getGroupVSBalancesDto(GroupVS groupVS, TimePeriod timePeriod) throws Exception {
+    public BalancesDto getGroupVSBalancesDto(GroupVS groupVS, Interval timePeriod) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
                 transactionVSBean.getTransactionFromList(groupVS, timePeriod), TransactionVS.Source.FROM);
         balancesDto.setTimePeriod(timePeriod);
@@ -82,7 +82,7 @@ public class BalancesBean {
         return balancesDto;
     }
 
-    public BalancesDto getUserVSBalancesDto(UserVS userVS, TimePeriod timePeriod) throws Exception {
+    public BalancesDto getUserVSBalancesDto(UserVS userVS, Interval timePeriod) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
                 transactionVSBean.getTransactionFromList(userVS, timePeriod), TransactionVS.Source.FROM);
         balancesDto.setTimePeriod(timePeriod);
@@ -122,7 +122,7 @@ public class BalancesBean {
         throw new ExceptionVS("unknown source: " + source);
     }
 
-    public BalancesDto getBalancesDto(UserVS userVS, TimePeriod timePeriod) throws Exception {
+    public BalancesDto getBalancesDto(UserVS userVS, Interval timePeriod) throws Exception {
         if(userVS instanceof BankVS) return getBankVSBalancesDto((BankVS) userVS, timePeriod);
         else if(userVS instanceof GroupVS) return getGroupVSBalancesDto((GroupVS) userVS, timePeriod);
         else return getUserVSBalancesDto(userVS, timePeriod);

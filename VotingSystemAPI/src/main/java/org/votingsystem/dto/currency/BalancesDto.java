@@ -3,7 +3,7 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import java.util.Map;
 public class BalancesDto {
 
     private UserVSDto userVS;
-    private TimePeriod timePeriod;
+    private Interval timePeriod;
     private List<TransactionVSDto> transactionList;
     private List<TransactionVSDto> transactionFromList;
     private List<TransactionVSDto> transactionToList;
@@ -149,11 +149,11 @@ public class BalancesDto {
         this.transactionToList = transactionToList;
     }
 
-    public TimePeriod getTimePeriod() {
+    public Interval getTimePeriod() {
         return timePeriod;
     }
 
-    public void setTimePeriod(TimePeriod timePeriod) {
+    public void setTimePeriod(Interval timePeriod) {
         this.timePeriod = timePeriod;
     }
 

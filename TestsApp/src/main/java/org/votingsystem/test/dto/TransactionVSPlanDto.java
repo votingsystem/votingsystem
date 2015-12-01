@@ -17,7 +17,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.TimePeriod;
+import org.votingsystem.util.Interval;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -32,7 +32,7 @@ public class TransactionVSPlanDto {
     private static Logger log = Logger.getLogger(TransactionVSPlanDto.class.getSimpleName());
 
 
-    private TimePeriod timePeriod;
+    private Interval timePeriod;
     private GroupVSDto groupVSDto;
     @JsonIgnore private CurrencyServer currencyServer;
     private List<TransactionVSDto> bankVSList = new ArrayList<>();
@@ -108,7 +108,7 @@ public class TransactionVSPlanDto {
         return currencyMap;
     }
 
-    public TimePeriod getTimePeriod() {
+    public Interval getTimePeriod() {
         return timePeriod;
     }
 
@@ -140,7 +140,7 @@ public class TransactionVSPlanDto {
         return result;
     }
 
-    public void setTimePeriod(TimePeriod timePeriod) {
+    public void setTimePeriod(Interval timePeriod) {
         this.timePeriod = timePeriod;
     }
 

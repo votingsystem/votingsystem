@@ -48,7 +48,7 @@ public class ReportsResource {
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         File reportsFile = new File(LoggerVS.weekPeriodLogPath);
         Calendar calendar = DateUtils.getCalendar(year, month, day);
-        TimePeriod timePeriod = DateUtils.getWeekPeriod(calendar);
+        Interval timePeriod = DateUtils.getWeekPeriod(calendar);
         //TODO
         if(reportsFile.exists()) {
             StringBuilder stringBuilder = new StringBuilder("{");
@@ -64,13 +64,13 @@ public class ReportsResource {
     public Response index(@Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         File weekReportsBaseDir = new File(config.getServerDir() +  "/weekReports");
-        List<TimePeriod> periods = new ArrayList<>();
+        List<Interval> periods = new ArrayList<>();
         if(weekReportsBaseDir.exists()) {
             DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             Files.list(weekReportsBaseDir.toPath()).forEach(file -> {
                 try {
                     String[] fileNameParts = file.getFileName().toString().split("_");
-                    TimePeriod timePeriod = new TimePeriod(formatter.parse(fileNameParts[0]), formatter.parse(fileNameParts[1]));
+                    Interval timePeriod = new Interval(formatter.parse(fileNameParts[0]), formatter.parse(fileNameParts[1]));
                     periods.add(timePeriod);
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
