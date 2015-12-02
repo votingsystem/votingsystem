@@ -21,15 +21,11 @@
     <div class="fullbleed layout vertical">
         <template is="dom-bind" id="app">
 
-            <paper-drawer-panel id="paperDrawerPanel">
+            <paper-drawer-panel id="paperDrawerPanel" force-narrow="true">
                 <paper-scroll-header-panel drawer="" fixed="">
                     <paper-toolbar id="drawerToolbar">
                         <div class="center horizontal layout flex">
                             <div class="app-name">{{appTitle}}</div>
-                        </div>
-                        <div hidden="{{searchHidden}}">
-                            <search-bar id="appBar" class="horizontal layout center end-justified"
-                                        on-search-request="performSearch"></search-bar>
                         </div>
                     </paper-toolbar>
                     <paper-menu class="list drawerToolbar" attr-for-selected="data-route" selected="[[route]]">
@@ -66,12 +62,20 @@
                     </paper-menu>
                 </paper-scroll-header-panel>
 
-                <paper-header-panel main="" condenses="" keep-condensed-header="">
-                    <div style="margin: 0 12px 0 0;">
-                        <iron-icon paper-drawer-toggle="" icon="icons:menu" style="margin: 10px 0 0 10px; position: absolute;color:#ba0011;cursor: pointer;"
-                                   class="vs-navbar-icon"></iron-icon>
+                <paper-header-panel main="" >
+                    <div class="horizontal layout flex" style="margin: 0 12px 0 0px;position: absolute;width: 100%; ">
+                        <div>
+                            <i paper-drawer-toggle="" class="fa fa-navicon" style="margin:13px 10px 0px 10px;
+                                    font-size: 1.4em; color: #ba0011; cursor: pointer;" ></i>
+                        </div>
+                        <div class="flex"></div>
+                        <div hidden="{{searchHidden}}">
+                            <div style="max-width: 300px;">
+                                <search-bar id="appBar" class="horizontal layout center end-justified"
+                                            on-search-request="performSearch"></search-bar>
+                            </div>
+                        </div>
                     </div>
-
                     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
                         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
@@ -124,10 +128,10 @@
                 app.isUserView = false;
                 if('admin' === menuType) {
                     app.isAdminView = true;
-                    app.appTitle = app.appTitle + " - ${msg.adminPageTitle}"
+                    app.appTitle = "${msg.adminPageTitle}"
                 } else if('superuser' === menuType) {
                     this.isSuperUserView = true;
-                    app.appTitle = app.appTitle + " - ${msg.superUserTitle}"
+                    app.appTitle = "${msg.superUserTitle}"
                 } else {
                     this.isUserView = true;
                 }

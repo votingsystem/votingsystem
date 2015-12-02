@@ -10,7 +10,7 @@
     "votingsystem"
   ],
   "license": "Apache 2",
-  "homepage": "http://www.sistemavotacion.org",
+  "homepage": "https://github.com/votingsystem/votingsystem/tree/master/AccessControl",
   "ignore": [
     "**/.*",
     "node_modules",

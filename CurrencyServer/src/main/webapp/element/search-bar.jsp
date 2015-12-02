@@ -23,20 +23,15 @@
     }
 
     #search[show] {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      left: 0;
-      top: 0;
       padding: 0 16px;
       background: #ba0011;
     }
 
     #search input {
       display: none;
-      font-size: 15px;
+      font-size: 1.2em;
       width: 100%;
-      padding: 10px;
+      padding: 4px;
       border: 0;
       border-radius: 2px;
       -webkit-appearance: none;
@@ -52,9 +47,9 @@
   </style>
   <template>
     <content></content>
-      <div id="search" class="horizontal layout center" show$="{{showingSearch}}" on-tap="toggleSearch">
-        <i id="searchIcon" class="fa fa-search" style="margin:0px 20px 0px 0px; font-size: 1.3em;" ></i>
-        <form on-submit="performSearch" class="flex">
+      <div id="search" class="horizontal layout center" show$="{{showingSearch}}" on-tap="toggleSearch" style="height: 45px;">
+        <i id="searchIcon" class="fa fa-search" style="margin:0px 10px 0px 0px; font-size: 1.3em; color: #ba0011" ></i>
+        <form on-submit="performSearch">
           <input type="search" id="query" value="{{query::keyup}}" autocomplete="off" placeholder="${msg.searchLbl}" on-blur="clearSearch">
         </form>
       </div>
@@ -90,10 +85,12 @@
     updateSearchDisplay: function(showingSearch) {
       if (showingSearch) {
         this.classList.add('search-on');
-        this.$.searchIcon.className = "fa fa-times vs-navbar-icon"
+        this.$.searchIcon.className = "fa fa-times"
+        this.$.searchIcon.style.color = "#f9f9f9";
       } else {
         this.classList.remove('search-on');
-        this.$.searchIcon.className = "fa fa-search vs-navbar-icon"
+        this.$.searchIcon.className = "fa fa-search"
+        this.$.searchIcon.style.color = "#ba0011";
       }
     },
     hotkeys: function(e) {

@@ -1,16 +1,17 @@
 {
-  "name": "cryptocurrency",
+  "name": "CurrencyServer",
   "version": "0.7.0",
   "authors": [
     "JJ <jgzornoza@gmail.com>"
   ],
-  "description": "cryptocurrency",
+  "description": "CurrencyServer",
   "keywords": [
+    "currency",
     "cryptocurrency",
     "votingsystem"
   ],
   "license": "Apache 2",
-  "homepage": "http://www.sistemavotacion.org",
+  "homepage": "https://github.com/votingsystem/votingsystem/tree/master/CurrencyServer",
   "ignore": [
     "**/.*",
     "node_modules",
