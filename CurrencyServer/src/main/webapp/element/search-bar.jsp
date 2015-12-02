@@ -9,16 +9,10 @@
     :host(.search-on) {
       left: 0;
       background: inherit;
-      z-index: 1001;
     }
 
     #search {
       position: relative;
-      cursor: pointer;
-    }
-
-    .vs-navbar-icon:hover {
-      color: #fba131;
       cursor: pointer;
     }
 
