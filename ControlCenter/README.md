@@ -25,7 +25,7 @@ To enable application filters change what follows to the standalone / domain  se
         <servlet-container name="default" allow-non-standard-wrappers="true">
 
 #### install javascript components
-In order to install javascript components you must run [**bower install**](http://bower.io/) inside **main/webapp/resources**.
+In order to install javascript components you must run [**bower install**](http://bower.io/).
 
 #### Build and Deploy on Wildfly
 1. Application environment default is set to DEVELOPMENT, to change that add what follows to the standalone / domain 
