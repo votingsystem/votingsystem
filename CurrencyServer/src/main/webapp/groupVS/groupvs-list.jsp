@@ -10,7 +10,7 @@
         <iron-ajax auto id="ajax" url="{{url}}" handle-as="json" content-type="application/json" last-response="{{groupListDto}}"></iron-ajax>
         <div id="groupListPage">
             <div class="layout horizontal center center-justified" style="margin:0 0 10px 0;">
-                <select id="groupvsTypeSelect" style="font-size: 1.1em; height: 30px; max-width: 400px;"
+                <select id="groupvsTypeSelect" style="font-size: 1.1em; height: 30px; max-width: 400px; margin:0 35px 0 35px;"
                         on-change="groupvsTypeSelect" class="form-control">
                     <option value="ACTIVE"  style="color:#388746;"> ${msg.selectActiveGroupvsLbl} </option>
                     <option value="PENDING" style="color:#fba131;"> ${msg.selectPendingGroupvsLbl} </option>

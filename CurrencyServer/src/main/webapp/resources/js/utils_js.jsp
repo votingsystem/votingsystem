@@ -100,9 +100,6 @@
             window._originalAlert(text);
         }
     }
-    window.sendAndroidURIMessage = function(encodedData) {
-        document.querySelector("#_votingsystemMessageDialog").sendAndroidURIMessage(encodedData)
-    }
 
     var weekdays = [${msg.weekdaysShort}];
     var months = [${msg.monthsShort}];
