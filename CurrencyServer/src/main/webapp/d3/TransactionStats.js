@@ -1,6 +1,7 @@
 function TransactionsStats() {
     this.tags = []
     this.transactionTypes = []
+    this.transactionFilter = []
     this.transactionsData = {}
 }
 

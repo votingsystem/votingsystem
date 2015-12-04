@@ -29,27 +29,16 @@
     font-size: 10px;
 }
 
-.legend .series {
+.legendWrap .series {
     cursor: pointer;
 }
 
-.legend circle {
-    stroke-width: 2px;
+.legendWrap circle {
+    stroke-width: 20px;
 }
 
-.legend .disabled circle {
+.legendWrap .disabled circle {
     fill-opacity: 0;
+    stroke-width: 20px;
 }
 
-.tooltip {
-    position: absolute;
-    text-align: center;
-    padding: 2px;
-    background-color: #888;
-    color: #fff;
-    border-radius: 8px;
-    /*-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);*/
-    pointer-events: none;
-}

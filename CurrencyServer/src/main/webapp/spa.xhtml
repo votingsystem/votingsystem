@@ -63,13 +63,11 @@
                 </paper-scroll-header-panel>
 
                 <paper-header-panel main="" >
-                    <div class="horizontal layout flex" style="margin: 0 12px 0 0px;position: fixed;overflow-y: auto;width: 100%;z-index: 10000; ">
-                        <div>
-                            <i paper-drawer-toggle="" class="fa fa-navicon" style="margin:13px 10px 0px 10px;
-                                    font-size: 1.4em; color: #ba0011; cursor: pointer;" ></i>
+                    <div class="horizontal layout" style="margin:1px 0 0 0;">
+                        <div style="margin:0 30px 0 30px;">
+                            <i paper-drawer-toggle="" class="fa fa-navicon" style="font-size: 1.4em; color: #ba0011; cursor: pointer;" ></i>
                         </div>
-                        <div class="flex"></div>
-                        <div hidden="{{searchHidden}}">
+                        <div id="searchDiv" hidden="{{searchHidden}}" style="display: none;">
                             <div style="max-width: 300px;">
                                 <search-bar id="appBar" class="horizontal layout center end-justified"
                                             on-search-request="performSearch"></search-bar>
@@ -96,6 +94,7 @@
             console.log('spa.xhtml - WebComponentsReady');
             var app = Polymer.dom(document).querySelector('#app');
             app.searchHidden = true
+            app.$.searchDiv.style.display = 'block'
             app.back = function() {
                 history.back()
                 //there's a delay until location.href is updated with history.back()
