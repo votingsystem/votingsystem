@@ -37,6 +37,7 @@
                 is: "scatter-transactions",
                 properties: {
                     legend:{type:Object, value:{height:30, width:500, margin: {top: 15, right: 0, bottom: 0, left: 300}}},
+                    transactionFilter:{type:Array, value:[]},
                     margin:{type:Object, value:{top: 40, right: 10, bottom: 100, left: 50}},
                     chartData:{type:Object, value:{top: 40, right: 10, bottom: 100, left: 50}}
                 },
@@ -59,12 +60,12 @@
                     }.bind(this))
                 },
                 chart:function (data) {
+                    console.log(this.tagName + " - chart")
                     while (this.$.scatterPlotDiv.hasChildNodes()) {
                         this.$.scatterPlotDiv.removeChild(this.$.scatterPlotDiv.lastChild);
                     }
                     this.width = this.$.scatterPlotDiv.offsetWidth;
                     this.height = this.$.scatterPlotDiv.offsetHeight
-                    alert(this.width + ", " + this.height)
                     var svg = d3.select("#scatterPlotDiv").append("svg")
                             .attr('width', this.width)
                             .attr('height', this.height).datum(data).append("g")
@@ -79,7 +80,6 @@
                             xAxis = d3.svg.axis().scale(x).orient('bottom').ticks(5),
                             yAxis = d3.svg.axis().scale(y).orient('left').ticks(5)
                     this.width = this.width - this.margin.left - this.margin.right
-                    console.log("TransactionScatterPlot.js - printing chart")
                     rScale.domain(d3.extent(data, function (d){ return d.amount }));
                     x = x.domain(d3.extent(data, function(d) { return d.dateCreated; })).range([0, this.width]).nice();
                     y = y.domain([0, d3.max(data, function(d) { return d.amount; })]).range([this.height, 0]).nice();
@@ -174,19 +174,12 @@
                             .style("size", "end")
                             .text("${msg.amountLbl}");
 
-                    var transactionFilter = []
                     this.legendDispatch.on('legendClick', function(d, i) {
-                        var index
-                        if((index = transactionFilter.indexOf(d.type)) > -1) {
-                            transactionFilter.splice(index, 1);
-                        } else {
-                            transactionFilter.push(d.type)
-                        }
                         chartBody.selectAll(".transaction").attr("display", function(d) {
-                            if(transactionFilter.indexOf(d.type) > -1) return 'none'
+                            if(this.transactionFilter.indexOf(d.type) > -1) return 'none'
                             else return 'inline'
-                        });
-                    });
+                        }.bind(this));
+                    }.bind(this));
                     function zoomed() {
                         //console.log("zoom.scale: " + zoom.scale() + " - x.domain: " + x.domain()[0])
                         svg.select(".x.axis").call(xAxis);
@@ -201,19 +194,23 @@
                     var series = wrap.selectAll('.series').data(this.transactionsStats.getTransactionTypesData());
                     var seriesEnter = series.enter().append('g').attr('class', 'series disabled')
                             .on('click', function(d, i) {
-                                d.enabled = !d.enabled
-                                series.classed('disabled', function(d1) {
-                                    console.log(d1.type + "------- disabled: " + ((d1.type === d.type) &&  d.enabled))
-                                    return ((d1.type === d.type) &&  d.enabled)});
-                                console.log("seriesEnterseriesEnterseriesEnter" + JSON.stringify(d))
+                                d.enabled = (d.enabled !== undefined)? !d.enabled : false
+                                if(d.enabled) {
+                                    var index
+                                    if((index = this.transactionFilter.indexOf(d.type)) > -1) {
+                                        this.transactionFilter.splice(index, 1);
+                                    }
+                                } else this.transactionFilter.push(d.type)
+                                series.classed('disabled', function(d) {
+                                    return ( this.transactionFilter.indexOf(d.type) > -1)}.bind(this));
                                 this.legendDispatch.legendClick(d, i);
-                            })
+                            }.bind(this))
                             .on('mouseover', function(d, i) {
                                 //this.legendDispatch.legendMouseover(d, i);
-                            })
+                            }.bind(this))
                             .on('mouseout', function(d, i) {
                                 //this.legendDispatch.legendMouseout(d, i);
-                            });
+                            }.bind(this));
 
                     seriesEnter.append('circle')
                             .style('fill', function(d, i){ return this.color(d.type)}.bind(this))
@@ -224,6 +221,7 @@
                             .attr('text-anchor', 'start')
                             .attr('dy', '.32em')
                             .attr('dx', '8');
+                    series.classed('disabled', false);
                     series.exit().remove();
 
                     var ypos = 5,
