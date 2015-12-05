@@ -89,6 +89,7 @@
                 tagsHidden: {type:Boolean, value: true},
                 isReceptorVisible: {type:Boolean, value: true},
                 messageToUser: {type:String},
+                smimeMessage: {type:String},
                 timeStampDate: {type:String},
                 caption: {type:String}
             },
@@ -115,7 +116,8 @@
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)
-                operationVS.message = this.smimeMessageDto.smimeMessage
+                if(this.smimeMessageDto.smimeMessage) operationVS.message = this.smimeMessageDto.smimeMessage
+                else operationVS.message = this.smimeMessage
                 operationVS.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage);
                 }.bind(this))

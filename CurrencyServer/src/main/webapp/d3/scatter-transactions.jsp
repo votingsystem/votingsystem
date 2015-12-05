@@ -1,5 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
+<link href="../resources/d3.html" rel="import"/>
+
 <script type="text/javascript" src="TransactionStats.js"></script>
 
 <dom-module id="scatter-transactions">
@@ -26,9 +28,10 @@
         <button id="resetButton" style="position: absolute; left: 50px; top: 0px;">reset</button>
         <div id="scatterPlotDiv" style="width: 100%; height: 100%; min-height: 200px;"></div>
         <div id="tooltip" class="tooltip" style="">
-            <div><strong>{{transactionType}}</strong></div>
-            <div><a href="{{receiptURL}}">{{amount}}</a></div>
-            <div>{{date}}</div>
+            <div><strong>{{selectedTransaction.type}}</strong></div>
+            <div>{{getDate(selectedTransaction.dateCreated)}}</div>
+            <div><a href="{{selectedTransaction.messageSMIMEURL}}" target="_blank">
+                {{selectedTransaction.amount}} {{selectedTransaction.currencyCode}}</a></div>
         </div>
     </template>
     <script>
@@ -39,7 +42,7 @@
                     legend:{type:Object, value:{height:30, width:500, margin: {top: 15, right: 0, bottom: 0, left: 300}}},
                     transactionFilter:{type:Array, value:[]},
                     margin:{type:Object, value:{top: 40, right: 10, bottom: 100, left: 50}},
-                    chartData:{type:Object, value:{top: 40, right: 10, bottom: 100, left: 50}}
+                    chartData:{type:Object}
                 },
                 ready: function() {
                     console.log(this.tagName + " ready")
@@ -59,6 +62,9 @@
                         this.chart(this.chartData)
                     }.bind(this))
                 },
+                getDate:function (date) {
+                    return new Date(date).formatWithTime()
+                },
                 chart:function (data) {
                     console.log(this.tagName + " - chart")
                     while (this.$.scatterPlotDiv.hasChildNodes()) {
@@ -73,7 +79,7 @@
                             .on("click", function() {
                                 this.$.tooltip.style.display = 'none'
                             }.bind(this));
-
+                    var formatAmount = d3.format("$,.2f")
                     this.height = this.height - this.margin.top - this.margin.bottom;
                     var x = d3.time.scale(),
                             y = d3.scale.linear(),
@@ -82,7 +88,8 @@
                     this.width = this.width - this.margin.left - this.margin.right
                     rScale.domain(d3.extent(data, function (d){ return d.amount }));
                     x = x.domain(d3.extent(data, function(d) { return d.dateCreated; })).range([0, this.width]).nice();
-                    y = y.domain([0, d3.max(data, function(d) { return d.amount; })]).range([this.height, 0]).nice();
+                    y = y.domain([0, d3.max(data, function(d) {
+                        return d.amount; })]).range([this.height, 0]).nice();
                     var zoom = d3.behavior.zoom().x(x).y(y).scaleExtent([-10, 10]).on("zoom", zoomed)
                     var scatterWrap = svg.append("rect")
                             .attr("width", this.width)
@@ -115,10 +122,7 @@
                                 hostElement.$.tooltip.style.display = 'block'
                                 hostElement.$.tooltip.style.top = (d3.event.pageY ) + "px"
                                 hostElement.$.tooltip.style.left = (d3.event.pageX - 30) + "px"
-                                hostElement.transactionType = d.amount
-                                hostElement.receiptURL = d.id
-                                hostElement.amount = d.amount + " " + d.currencyCode
-                                hostElement.date = new Date(d.dateCreated).formatWithTime()
+                                hostElement.selectedTransaction = d
 
                                 var circle = d3.select(this);
                                 circle.transition()
@@ -132,7 +136,6 @@
                                         .attr("y1", circle.attr("cy"))
                                         .attr("y2", hostElement.height)
                                         .style("stroke", circle.style("fill"))
-                                        .transition().delay(200).duration(400).styleTween("opacity", function() { return d3.interpolate(0, .5); })
                                 svg.append("g")
                                         .attr("class", "guide")
                                         .append("line")
@@ -141,8 +144,6 @@
                                         .attr("y1", circle.attr("cy"))
                                         .attr("y2", circle.attr("cy"))
                                         .style("stroke", circle.style("fill"))
-                                        .transition().delay(200).duration(400).styleTween("opacity",
-                                        function() { return d3.interpolate(0, .5); })
                             })
                             .on("mouseout", function(d) {
                                 var circle = d3.select(this);
@@ -187,6 +188,7 @@
                         circles.attr("cx", function (d){ return x(new Date(d.dateCreated))})
                                 .attr("cy", function (d){ return y(d.amount) })
                     }
+                    //hack to refresh styles, I haven't found other way
                     Polymer.dom(this.$.scatterPlotDiv).appendChild(Polymer.dom(this.$.scatterPlotDiv).childNodes[0])
                 },
                 legendChart:function () {

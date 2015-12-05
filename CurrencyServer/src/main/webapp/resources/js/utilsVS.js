@@ -288,7 +288,6 @@ function querySelector(selector) {
 }
 
 function sendSignalVS(signalData) {
-    var result
     var operationVS = new OperationVS(Operation.SIGNAL_VS)
     operationVS.jsonStr = JSON.stringify(signalData)
     VotingSystemClient.setMessage(operationVS);

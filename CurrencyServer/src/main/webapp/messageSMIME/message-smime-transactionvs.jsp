@@ -62,7 +62,7 @@
                 <div class="horizontal layout" style="margin: 0 0 10px 0; min-width: 400px;">
                     <div style="margin: 3px 0 0 0;" class="flex">
                         <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em;">
-                            <i class="fa fa-tag" style="color: #888;"></i><span>{{smimeMessageContent.tags[0]}}</span></a>
+                            <i class="fa fa-tag" style="color: #888;"></i> {{tagName}} </a>
                     </div>
                     <div hidden="{{!isClientToolConnected}}" class="horizontal layout end-justified"
                          style="margin:10px 0px 10px 0px; font-size: 0.9em;">
@@ -100,12 +100,12 @@
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
                 console.log(this.tagName + " - smimeMessageContentChanged: " + JSON.stringify(this.smimeMessageContent))
+                this.tagName = this.smimeMessageContent.tags[0]
                 switch (this.smimeMessageContent.type) {
                     case 'FROM_GROUP_TO_ALL_MEMBERS':
                         this.messageType = "${msg.transactionVSFromGroupToAllMembers}"
                         this.fromUserIBAN = this.smimeMessageContent.fromUserIBAN
                         break;
-                    default: return tagName
                 }
                 sendSignalVS({caption:this.messageType})
             },

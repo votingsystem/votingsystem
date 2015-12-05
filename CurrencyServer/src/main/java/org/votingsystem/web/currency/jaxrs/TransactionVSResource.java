@@ -55,7 +55,7 @@ public class TransactionVSResource {
     @Inject ConfigVS config;
 
     @Path("/id/{id}")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
     public Response get(@PathParam("id") long id) throws UnsupportedEncodingException, JsonProcessingException {
         TransactionVS transactionVS = dao.find(TransactionVS.class, id);
         if(transactionVS != null) {
