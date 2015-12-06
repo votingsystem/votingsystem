@@ -79,7 +79,6 @@
                             .on("click", function() {
                                 this.$.tooltip.style.display = 'none'
                             }.bind(this));
-                    var formatAmount = d3.format("$,.2f")
                     this.height = this.height - this.margin.top - this.margin.bottom;
                     var x = d3.time.scale(),
                             y = d3.scale.linear(),

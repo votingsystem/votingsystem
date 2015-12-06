@@ -17,12 +17,12 @@
   <ui:define name="content">
     <div class="fullbleed layout vertical">
         <template is="dom-bind" id="app">
-            <paper-drawer-panel id="paperDrawerPanel">
+            <paper-drawer-panel id="paperDrawerPanel" force-narrow="true">
                 <paper-scroll-header-panel drawer="" fixed="">
-                    <paper-toolbar class="drawerToolbar">
-                        <a hidden="{{searchHidden}}" data-route="search" href="" on-click="toogleSearchPanel">
-                            <i class="fa fa-search" style="margin:0px 10px 0px 0px;"></i> ${msg.searchLbl}
-                        </a>
+                    <paper-toolbar id="drawerToolbar">
+                        <div class="center horizontal layout flex">
+                            <div class="app-name">{{appTitle}}</div>
+                        </div>
                     </paper-toolbar>
                     <paper-menu class="list drawerToolbar" attr-for-selected="data-route" selected="[[route]]">
                         <a hidden="{{!adminMenuHidden}}" data-route="eventVSElection" href="#{contextURL}/spa.xhtml#!/eventVSElection" on-click="onDataRouteClick">
@@ -54,23 +54,23 @@
 
                     </paper-menu>
                 </paper-scroll-header-panel>
-                <paper-header-panel main="" condenses="" keep-condensed-header="">
-                    <paper-toolbar id="mainToolbar" >
-                        <div style="margin: 0 12px 0 0;">
-                            <iron-icon paper-drawer-toggle="" icon="icons:menu" style="margin: 0 10px 0 10px;"
-                                       class="vs-navbar-icon"></iron-icon>
+                <div main="" >
+                    <div class="horizontal layout" style="margin:1px 0 0 0;">
+                        <div style="margin:0 30px 0 30px;">
+                            <i paper-drawer-toggle="" class="fa fa-navicon" style="font-size: 1.4em; color: #ba0011; cursor: pointer;" ></i>
                         </div>
-                        <div class="flex center horizontal layout">
-                            <div class="app-name">{{appTitle}}</div>
+                        <div id="searchDiv" hidden="{{searchHidden}}" style="display: none;">
+                            <div style="max-width: 300px;">
+                                <search-bar id="appBar" class="horizontal layout center end-justified"
+                                            on-search-request="performSearch"></search-bar>
+                            </div>
                         </div>
-                    </paper-toolbar>
-
+                    </div>
                     <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
                         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
                     <div id="mainContent" class="mainContent"></div>
-                </paper-header-panel>
-
+                </div>
             </paper-drawer-panel>
             <h:messages styleClass="messages"
                         style="list-style: none; padding:0; margin:0;"
