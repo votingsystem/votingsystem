@@ -2,10 +2,7 @@
 
 <dom-module name="representative-select-anonymous-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click style="min-height: 250px; top: 10px; display: block;">
-            <style>
-                :host { display:block;}
-            </style>
+        <div id="modalDialog" class="modalDialog">
             <div>
                 <div style="font-size: 1.1em;">
                 <div class="layout horizontal center center-justified">
@@ -55,7 +52,7 @@
                     </div>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -78,7 +75,8 @@
                 this.confirmStep = false
                 this.$.numWeeksAnonymousDelegation.value = ""
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             accept: function() {
                 console.log("accept")
@@ -135,7 +133,8 @@
                 }
             },
             close: function() {
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             }
         });
     </script>

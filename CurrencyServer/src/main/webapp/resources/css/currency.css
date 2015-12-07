@@ -9,48 +9,49 @@ body {
     padding: 0 0px 0 0px;
 }
 
+#voting_system_page {
+    padding:0px;
+    top: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+#drawer {
+    border-bottom: 1px solid #f9f9f9;
+    z-index: 10;
+    position: absolute;
+    width: 250px;
+    display: block;
+    box-shadow: 3px 5px 5px #888888;
+}
+
+.menuItem {
+    color: #888;
+    padding: 10px 0 10px 10px;
+    font-size: 1.1em;
+    text-decoration: none;
+}
+
+.menuItem:hover {
+    background-color: #c8c8c8;
+}
+
+.menuItemSelected {
+    color: #ba0011;
+}
+
+.menuItem i {
+    width: 23px;
+    color: #888;
+}
+
+.menuItemSelected i{
+    color: #ba0011;
+}
+
 button i{color: #888; }
 button {font-size: 1em; }
-
-.closeIcon {
-    cursor: pointer;fill:#6c0404; color:#6c0404; font-size: 1.9em; margin: 5px 9px 0 0;
-}
-.closeIcon:hover {
-    fill:#ba0011; color:#ba0011;
-}
-
-.vs-navbar {
-    background-color: #ba0011;
-    border-bottom: 1px solid #f9f9f9;
-    padding: 5px;
-    z-index: 20;
-}
-
-.vs-navbar-icon {
-    color: #f9f9f9;
-    cursor: pointer;
-}
-
-.vs-navbar-icon:hover {
-    color: #fba131;
-    cursor: pointer;
-}
-
-.vs-navbar-button {
-    color: #f9f9f9;
-    background-color: #ba0011;
-}
-
-.vs-navbar .navbar-nav > li > a:hover, .nav > li > a:focus {
-    text-decoration: none;
-    background-color: #ba0011;
-}
-
-.pageContentDiv {
-    margin:10px auto 200px auto;
-    padding:0px 15px 0px 15px;
-    max-width: 1400px;
-}
 
 .formFieldError{
     font-weight: bold;
@@ -178,3 +179,38 @@ textarea.form-control {
 
 .linkVS {cursor: pointer; color:#6c0404; margin: 10px;}
 .linkVS:hover {text-decoration: underline;}
+
+.modalDialog {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 99999;
+    opacity:0;
+    -webkit-transition: opacity 200ms ease-in;
+    -moz-transition: opacity 200ms ease-in;
+    transition: opacity 200ms ease-in;
+    pointer-events: none;
+    height: 100%;
+    overflow:scroll;
+}
+
+.modalDialog > div {
+    width: 400px;
+    position: relative;
+    overflow:scroll;
+    margin: 10% auto;
+    padding: 5px 20px 13px 20px;
+    border-radius: 4px;
+    background: #fefefe;
+    height: 100%;
+}
+
+.closeIcon {
+    cursor: pointer;fill:#6c0404; color:#6c0404; font-size: 1.9em; margin: 5px 9px 0 0;
+}
+.closeIcon:hover {
+    fill:#ba0011; color:#ba0011;
+}

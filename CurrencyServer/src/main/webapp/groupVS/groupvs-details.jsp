@@ -10,14 +10,14 @@
 <dom-module name="groupvs-details">
 <template>
     <iron-ajax auto url="{{url}}" method="get" last-response="{{groupvs}}" handle-as="json" content-type="application/json"></iron-ajax>
-    <paper-dialog id="configDialog" with-backdrop no-cancel-on-outside-click style="border: 1px solid #6c0404;">
+    <div id="configDialog" class="modalDialog">
         <div style="width: 350px;">
             <div class="layout horizontal center center-justified">
                 <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
                     <div style="text-align: center;">${msg.configGroupvsLbl}</div>
                 </div>
                 <div style="position: absolute; top: 0px; right: 0px;">
-                    <i class="fa fa-times closeIcon" onclick="javascript:document.querySelector('#configDialog').opened = false;"></i>
+                    <i class="fa fa-times closeIcon" on-click="closeConfigDialog"></i>
                 </div>
             </div>
             <div class="vertical layout center center-justified" style="padding: 20px 10px 10px 10px;">
@@ -25,16 +25,16 @@
                 <button on-click="cancelGroup" style="margin: 10px; width: 150px;">${msg.cancelGroupVSLbl}</button>
             </div>
         </div>
-    </paper-dialog>
+    </div>
 
-    <paper-dialog id="transactionSelectorDialog" with-backdrop no-cancel-on-outside-click style="border: 1px solid #6c0404;">
-        <div style="width: 350px;">
+    <div id="transactionSelectorDialog" class="modalDialog">
+        <div style="width: 400px;">
             <div class="layout horizontal center center-justified">
                 <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
                     <div style="text-align: center;">${msg.makeTransactionVSFromGroupVSLbl}</div>
                 </div>
                 <div style="position: absolute; top: 0px; right: 0px;">
-                    <i class="fa fa-times closeIcon" onclick="javascript:document.querySelector('#transactionSelectorDialog').opened = false;"></i>
+                    <i class="fa fa-times closeIcon" on-click="closeTransactionSelectorDialog"></i>
                 </div>
             </div>
             <div class="vertical layout center center-justified" style="padding: 20px 10px 10px 10px;">
@@ -42,23 +42,23 @@
                 <button on-click="fromGroupToAllMember" style="margin: 10px; width: 250px;">${msg.makeTransactionVSFromGroupVSToAllMembersLbl}</button>
             </div>
         </div>
-    </paper-dialog>
+    </div>
 
     <iron-signals on-iron-signal-messagedialog-accept="messagedialogAccepted"
                   on-iron-signal-uservs-selected="showUserDetails" ></iron-signals>
 
-    <div hidden="{{detailsHidden}}" style="max-width: 900px; margin:0 auto;">
+    <div style="max-width: 900px; margin:0 auto;">
         <div class="vertical layout flex">
             <div id="messagePanel" class="messagePanel messageContent text-center" style="font-size: 1.1em;display:none;">
             </div>
             <div hidden="{{!isAdminView}}">
                 <div class="layout horizontal center center-justified">
                     <div>
-                        <button onclick="javascript:document.querySelector('#configDialog').opened = true" style="margin: 10px;">
+                        <button on-click="openConfigDialog" style="margin: 10px;">
                             <i class="fa fa-cogs"></i> ${msg.configGroupvsLbl}</button>
                     </div>
                     <div>
-                        <button onclick="javascript:document.querySelector('#transactionSelectorDialog').opened = true">
+                        <button on-click="openTransactionSelectorDialog">
                             <i class="fa fa-money"></i> ${msg.makeTransactionVSFromGroupVSLbl}</button>
                     </div>
                 </div>
@@ -124,8 +124,13 @@
         </div>
     </div>
 
-    <div hidden="{{!detailsHidden}}">
-        <transactionvs-form id="transactionvsForm" fab-visible="true"></transactionvs-form>
+    <div id="transactionvsFormDialog" class="modalDialog">
+        <div style="width:600px;">
+            <div style="position: absolute; top: 0px; right: 0px;">
+                <i class="fa fa-times closeIcon" on-click="closeDialog"></i>
+            </div>
+            <transactionvs-form id="transactionvsForm"></transactionvs-form>
+        </div>
     </div>
 
     <groupvs-user id="userDescription"></groupvs-user>
@@ -142,31 +147,25 @@
         ready:function() {
             console.log(this.tagName + " - ready ")
             this.isSelected = false
-            this.detailsHidden = false
-            //this.isClientToolConnected = window['isClientToolConnected']
             this.isClientToolConnected = true
             if(!this.isClientToolConnected) {
                 this.isAdminView = false
                 this.isUserView = false
             }
-            this.$.transactionvsForm.addEventListener('closed', function (e) {
-                this.detailsHidden = false;
-            }.bind(this))
         },
         decodeBase64:function(base64EncodedString) {
             if(base64EncodedString == null) return null
             return decodeURIComponent(escape(window.atob(base64EncodedString)))
         },
-        closeTransactionSelectorDialog:function() {
-            this.$.transactionSelectorDialog.opened = false
-        },
-        closeConfigDialog:function() {
-            this.$.configDialog.opened = false
+        closeDialog:function() {
+            this.$.certDetailsDialog.style.opacity = 0
+            this.$.certDetailsDialog.style['pointer-events'] = 'none'
         },
         sendTransactionVS:function() {
             console.log(this.tagName + " - sendTransactionVS")
             this.$.transactionvsForm.init(Operation.FROM_USERVS, this.groupvs.name, this.groupvs.iban , this.groupvs.id)
-            this.detailsHidden = true;
+            this.$.transactionvsFormDialog.style.opacity = 1
+            this.$.transactionvsFormDialog.style['pointer-events'] = 'auto'
         },
         messagedialogAccepted:function(e, detail, sender) {
             console.log(this.tagName + ".messagedialogAccepted")
@@ -249,14 +248,28 @@
         fromGroupToAllMember:function() {
             this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_ALL_MEMBERS, this.groupvs.name,
                     this.groupvs.iban, this.groupvs.id)
-            this.detailsHidden = true
-            this.$.transactionSelectorDialog.opened = false
+            this.closeTransactionSelectorDialog()
         },
         fromGroupToMemberGroup:function() {
             this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_MEMBER_GROUP, this.groupvs.name,
                     this.groupvs.iban, this.groupvs.id)
-            this.detailsHidden = true
-            this.$.transactionSelectorDialog.opened = false
+            this.closeTransactionSelectorDialog()
+        },
+        closeTransactionSelectorDialog:function() {
+            this.$.transactionSelectorDialog.style.opacity = 0
+            this.$.transactionSelectorDialog.style['pointer-events'] = 'none'
+        },
+        openTransactionSelectorDialog:function() {
+            this.$.transactionSelectorDialog.style.opacity = 1
+            this.$.transactionSelectorDialog.style['pointer-events'] = 'auto'
+        },
+        closeConfigDialog:function() {
+            this.$.configDialog.style.opacity = 0
+            this.$.configDialog.style['pointer-events'] = 'none'
+        },
+        openConfigDialog:function() {
+            this.$.configDialog.style.opacity = 1
+            this.$.configDialog.style['pointer-events'] = 'auto'
         },
         cancelGroup:function() {
             showMessageVS("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name),

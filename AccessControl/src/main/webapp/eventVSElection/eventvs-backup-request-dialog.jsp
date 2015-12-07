@@ -2,8 +2,7 @@
 
 <dom-module name="eventvs-backup-request-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
-            <style></style>
+        <div id="modalDialog" class="modalDialog">
             <div id="container" style="overflow-y: auto; width:450px; padding:10px;">
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
@@ -39,7 +38,7 @@
                     </div>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -53,7 +52,8 @@
             show: function(eventvs) {
                 this.messageToUser = null
                 this.eventvs = eventvs
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             requestBackup: function() {
                 this.messageToUser = null
@@ -83,7 +83,8 @@
                 this.click()
             },
             close: function() {
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             }
         });
     </script>

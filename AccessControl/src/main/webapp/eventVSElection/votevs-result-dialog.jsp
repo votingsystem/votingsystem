@@ -2,8 +2,7 @@
 
 <dom-module name="votevs-result-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
-            <style></style>
+        <div id="modalDialog" class="modalDialog">
             <iron-signals on-iron-signal-messagedialog-accept="cancellationConfirmed"
                           on-iron-signal-messagedialog-closed="confirmDialogClosed"></iron-signals>
             <div>
@@ -54,7 +53,7 @@
                     </div>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -99,7 +98,8 @@
                     this.message = appMessageJSON.message
                 }
                 this.messageType = "VOTE_RESULT"
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             messageTypeChanged: function() {
                 this.isVoteResult = false
@@ -112,14 +112,16 @@
                 this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
                 this.callerCallback = Math.random().toString(36).substring(7)
                 showMessageVS('${msg.cancelVoteConfirmMsg}', '${msg.cancelVoteLbl}', this.callerCallback, true)
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             },
             confirmDialogClosed: function(e) {
                 console.log("confirmDialogClosed - detail: " + e.detail)
                 if(e.detail == this.callerCallback) this.show(this.appMessageJSON)
             },
             close: function() {
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)
@@ -147,7 +149,8 @@
                     this.message = "${msg.voteVSCancellationOKMsg}"
                     this.caption =  "${msg.voteVSCancellationCaption}"
                     this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
-                    this.$.xDialog.opened = true
+                    this.$.modalDialog.style.opacity = 1
+                    this.$.modalDialog.style['pointer-events'] = 'auto'
                 } else showMessageVS(appMessageJSON.message, '${msg.voteVSCancellationErrorCaption}')
                 this.click()
             }

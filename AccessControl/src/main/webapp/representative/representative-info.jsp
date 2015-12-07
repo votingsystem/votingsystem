@@ -19,7 +19,7 @@
             .representativeNumRepHeader { text-overflow: ellipsis; color:#888;}
         </style>
         <iron-ajax auto url="{{url}}" last-response="{{representative}}" handle-as="json" content-type="application/json"></iron-ajax>
-        <div class="pageContentDiv">
+        <div>
             <div hidden="{{'user' !== menuType}}" class="horizontal layout center-justified" style="font-size: 0.9em;">
                 <button on-click="selectRepresentative">
                     <i class="fa fa-hand-o-right"></i> ${msg.saveAsRepresentativeLbl}

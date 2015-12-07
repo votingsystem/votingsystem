@@ -46,7 +46,7 @@
             },
             loadMainContent: function(element) {
                 element.smimeMessageDto = this.smimeMessageDto
-                app.loadMainContent(element)
+                vs.loadMainContent(element)
             },
             ready: function() {
                 console.log(this.tagName + " - ready")

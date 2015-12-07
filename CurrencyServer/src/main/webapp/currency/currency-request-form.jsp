@@ -63,9 +63,11 @@
                     </div>
                 </div>
             </div>
+            <div>
+                <tagvs-select-dialog id="tagDialog" caption="${msg.addTagDialogCaption}"></tagvs-select-dialog>
+            </div>
+            <currency-request-result-dialog id="resultDialog"></currency-request-result-dialog>
         </div>
-        <tagvs-select-dialog id="tagDialog" caption="${msg.addTagDialogCaption}"></tagvs-select-dialog>
-        <currency-request-result-dialog id="resultDialog"></currency-request-result-dialog>
     </template>
     <script>
         Polymer({

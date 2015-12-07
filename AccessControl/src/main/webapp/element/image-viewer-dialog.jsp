@@ -2,8 +2,7 @@
 
 <dom-module name="image-viewer-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click style="height:350px;">
-            <style> </style>
+        <div id="modalDialog" class="modalDialog">
             <div >
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; margin:5px 30px 10px 10px;font-weight: bold; color:#6c0404;">
@@ -17,7 +16,7 @@
                     <img id="representativeImage" src="{{url}}" style="max-width: 400px;"/>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -33,10 +32,12 @@
                 console.log(this.tagName + " - ready")
             },
             show:function() {
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             close: function() {
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             }
         });
     </script>

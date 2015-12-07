@@ -58,7 +58,7 @@
             this.transactionsDto = toJSON(JSON.stringify(this.transactionsDto)) // hack to notify changes
         },
         processSearch:function (textToSearch) {
-            app.updateSearchMessage("${msg.searchResultLbl} '" + textToSearch + "'")
+            vs.updateSearchMessage("${msg.searchResultLbl} '" + textToSearch + "'")
             this.url = contextURL + "/rest/transactionVS?searchText=" + textToSearch
         },
         processSearchJSON:function (dataJSON) {

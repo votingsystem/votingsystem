@@ -8,7 +8,7 @@
         <style type="text/css" media="screen"></style>
     </ui:define>
     <ui:define name="content">
-        <div class="pageContentDiv" style="margin: 130px 0 0 250px;">
+        <div style="margin: 130px 0 0 250px;">
             <input id="messageBox" class="text" value="{locale:'es', operation:'LISTEN_TRANSACTIONS'}" name="text"/>
             <button onclick="sendMessage()">Send message</button>
             <vs-socket id="socketvs" socketservice="${config.webSocketURL}"></vs-socket>

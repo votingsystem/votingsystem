@@ -4,32 +4,17 @@
 
 <dom-module name="vs-cert">
     <template>
-        <style>
-        .certDiv {
-            background-color: #fefefe;
-            padding: 10px;
-            height: 150px;
-            -moz-border-radius: 5px; border-radius: 5px;
-            overflow:hidden;
-        }
-        </style>
         <iron-ajax auto url="{{url}}" last-response="{{certvs}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
         <reason-dialog id="reasonDialog" caption="${msg.cancelCertFormCaption}"></reason-dialog>
         <div class="layout vertical center center-justified">
-            <div style="width: 600px;">
+            <div>
                 <div class="layout horizontal center center-justified" style="width: 100%;">
-                    <div hidden="{{!fabVisible}}">
-                        <paper-fab mini icon="arrow-back" on-click="back"
-                                   style="color: #f9f9f9;margin: 0 0 0 20px;background: #ba0011;"></paper-fab>
-                    </div>
-                    <div class="flex">
-                        <h3>
-                            <div id="pageHeaderDiv" class="pageHeader text-center"></div>
-                        </h3>
-                    </div>
+                    <h3>
+                        <div id="pageHeaderDiv" class="pageHeader text-center"></div>
+                    </h3>
                 </div>
 
-                <div class="certDiv">
+                <div>
                     <div>
                         <div class='groupvsSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
                             ${msg.serialNumberLbl}: </span>{{certvs.serialNumber}}</div>
@@ -50,16 +35,16 @@
                             margin:0px auto 0px auto;color: #6c0404; float:right; text-decoration: underline;">${msg.rootCertLbl}
                     </div>
                 </div>
-                <div style="width: 600px; max-height:400px; overflow-y: auto; margin:20px auto 0px auto;">
+                <div style="max-height:400px; overflow-y: auto; margin:20px auto 0px auto;">
                     <div>{{certvs.description}}</div>
                 </div>
                 <button id="cancelCertButton" on-click="openReasonDialog" style="display: none;">
                     ${msg.cancelCertLbl}
                 </button>
-                <div class="vertical layout center center-justified" style="width: 600px; margin:0px auto 0px auto;">
+                <div class="vertical layout center center-justified" style="margin:0px auto 0px auto;">
                     <div><label>${msg.certPublicKeyLbl}</label></div>
                     <div>
-                        <textarea id="pemCertTextArea" style="width:520px; height:300px;font-family: monospace; font-size:0.8em;" readonly></textarea>
+                        <textarea id="pemCertTextArea" style="width:400px; height:300px;font-family: monospace; font-size:0.8em;" readonly></textarea>
                     </div>
                 </div>
             </div>
@@ -107,17 +92,6 @@
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
-            },
-            back:function() {
-                var previousCert = this.certsSelectedStack.pop()
-                if(previousCert != null) {
-                    this.url = ""
-                    this.certvs = previousCert
-                    if(this.certsSelectedStack.length == 0) this.subcert = null
-                } else {
-                    console.log(this.tagName + " - iron-signal-vs-cert-closed")
-                    this.fire('cert-closed');
-                }
             },
             certIssuerClicked:function(e) {
                 var issuerSerialNumber = this.certvs.issuerSerialNumber

@@ -5,7 +5,7 @@
                 xmlns:c="http://java.sun.com/jsp/jstl/core"
                 template="/WEB-INF/templates/basic.xhtml">
     <ui:define name="content">
-        <div class="pageContentDiv" style="font-size: 1.2em; margin: 30px auto;">
+        <div style="font-size: 1.2em; margin: 30px auto;">
             <c:choose>
                 <c:when test="${request.getHeader('user-agent').toLowerCase().contains('android')}">
                     <div class="userAdvert">

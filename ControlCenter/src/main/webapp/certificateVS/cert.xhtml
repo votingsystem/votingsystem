@@ -8,7 +8,7 @@
         <link href="../element/reason-dialog.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
-        <div class="pageContentDiv">
+        <div>
             <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
                 <c:if test="#{'admin'.equals(param.menu) || 'superuser'.equals(param.menu)}">
                     <button onclick="document.querySelector('#reasonDialog').show()">

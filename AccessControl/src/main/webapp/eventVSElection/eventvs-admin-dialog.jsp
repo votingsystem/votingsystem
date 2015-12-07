@@ -2,16 +2,16 @@
 
 <dom-module name="eventvs-admin-dialog">
     <template>
-        <paper-dialog flex vertical id="xDialog" with-backdrop no-cancel-on-outside-click>
-            <style>
-                .messageToUser {
-                    font-weight: bold;
-                    margin:10px auto 10px auto;
-                    background: #f9f9f9;
-                    padding:10px 20px 10px 20px;
-                    margin:0px 10px 0px 0px;
-                }
-            </style>
+        <style>
+            .messageToUser {
+                font-weight: bold;
+                margin:10px auto 10px auto;
+                background: #f9f9f9;
+                padding:10px 20px 10px 20px;
+                margin:0px 10px 0px 0px;
+            }
+        </style>
+        <div id="modalDialog" class="modalDialog">
             <div id="container" style="overflow-y: auto; width:450px; padding:10px;">
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; margin:0px 0px 0px 30px;font-weight: bold; color:#6c0404;">
@@ -50,7 +50,7 @@
                     </button>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -105,10 +105,12 @@
                 this.click() //hack to refresh screen
             },
             show: function() {
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             close: function() {
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
                 this.messageToUser = null
             }
         });

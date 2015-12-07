@@ -3,7 +3,7 @@
                 template="${'true'.equals(param['openMailClient'])? '/WEB-INF/templates/polymer.xhtml' : '/WEB-INF/templates/basic.xhtml'}">
     <ui:define name="title">${msg.contactLbl}</ui:define>
     <ui:define name="content">
-        <div class="pageContentDiv" style="font-size: 1.2em; margin: 30px auto; text-align: center;">
+        <div style="font-size: 1.2em; margin: 30px auto; text-align: center;">
             <a  href="javascript:mailTo()" style="font-weight: bold;">
                 <i class="fa fa-envelope-o" style="margin:3px 0 0 10px; color: #f0ad4e;"></i> ${msg.emailLbl}
             </a>

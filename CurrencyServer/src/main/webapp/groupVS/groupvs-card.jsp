@@ -33,9 +33,7 @@
             groupvs:{type:Object, observer:'_groupvsChanged'},
             caption:{type:String}
         },
-        ready: function() {
-            this.opened = false
-        },
+        ready: function() { },
         _groupvsChanged:function() {
         },
         _isItemCanceled:function(item) {
@@ -46,8 +44,8 @@
         },
         _showGroupDetails :  function() {
             console.log(this.tagName + " - showGroupDetails")
-            app.groupvs = this.groupvs;
-            page(contextURL + "/rest/groupVS/id/" + app.groupvs.id)
+            vs.groupvs = this.groupvs;
+            page(contextURL + "/rest/groupVS/id/" + vs.groupvs.id)
         },
         _groupvsClass:function(state) {
             switch (state) {

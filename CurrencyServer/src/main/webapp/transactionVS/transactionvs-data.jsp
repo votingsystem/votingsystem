@@ -6,7 +6,7 @@
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
         .IBANLink{ text-decoration: underline; color: #0000ee; cursor: pointer; }
         </style>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
+        <div id="modalDialog" class="modalDialog">
             <div>
                 <div class="layout horizontal center center-justified" style="margin: 0px auto; max-width:800px; color:#667;">
                     <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
@@ -74,7 +74,7 @@
                     </div>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -197,10 +197,12 @@
             },
             show: function(transactionvs) {
                 this.transactionvs = transactionvs
-                this.$.xDialog.opened = true;
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             close: function(e) {
-                this.$.xDialog.opened = false;
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             }
         });
     </script>

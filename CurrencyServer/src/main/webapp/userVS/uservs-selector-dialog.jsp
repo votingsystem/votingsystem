@@ -4,8 +4,8 @@
 
 <dom-module name="uservs-selector-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
-            <div id="main">
+        <div id="modalDialog" class="modalDialog">
+            <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">{{msg.userSearchLbl}}</div>
@@ -18,7 +18,7 @@
                     <uservs-selector id="userVSSelector" groupvs-id="{{groupId}}" contact-selector="false"></uservs-selector>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -29,17 +29,20 @@
             ready: function() {
                 console.log(this.tagName + " - ready")
                 document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
-                    this.$.xDialog.opened = false
+                    this.$.modalDialog.style.opacity = 0
+                    this.$.modalDialog.style['pointer-events'] = 'none'
                 }.bind(this))
             },
             show: function(groupVSId) {
                 console.log(this.tagName + " - show - groupVSId: " + groupVSId)
                 this.$.userVSSelector.groupVSId = groupVSId
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             close: function() {
                 this.$.userVSSelector.reset()
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             }
         });
     </script>

@@ -2,7 +2,7 @@
 
 <dom-module name="representative-cancel-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
+        <div id="modalDialog" class="modalDialog">
             <style>
                 .textDialog {
                     font-size: 1.2em; color:#888; font-weight: bold; text-align: center;
@@ -35,7 +35,7 @@
                     </div>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -47,7 +47,8 @@
                 }.bind(this)
             },
             show: function() {
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
                 this.$.representativeNif.value = ""
             },
             accept: function() {
@@ -80,7 +81,8 @@
                 this.click() //hack to refresh screen
             },
             close: function() {
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             }
         });
     </script>

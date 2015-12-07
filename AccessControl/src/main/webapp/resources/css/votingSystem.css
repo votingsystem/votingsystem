@@ -9,6 +9,15 @@ body {
     padding: 0 0px 0 0px;
 }
 
+#voting_system_page {
+    padding:0px;
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: 100%;
+}
+
 button i{color: #888; }
 button {font-size: 1em; }
 
@@ -17,40 +26,6 @@ button {font-size: 1em; }
 }
 .closeIcon:hover {
     fill:#ba0011; color:#ba0011;
-}
-
-.pageContentDiv {
-    margin:10px auto 200px auto;
-    padding:0px 15px 0px 15px;
-    max-width: 1200px;
-}
-
-.vs-navbar {
-    background-color: #ba0011;
-    border-bottom: 1px solid #f9f9f9;
-    color:#f9f9f9;
-    padding: 5px;
-}
-
-.vs-navbar-icon {
-    color: #f9f9f9;
-    cursor: pointer;
-    font-size: 30px;
-}
-
-.vs-navbar-icon:hover {
-    color: #fba131;
-    cursor: pointer;
-}
-
-.vs-navbar-button {
-    color: #f9f9f9;
-    background-color: #ba0011;
-}
-
-.vs-navbar .navbar-nav > li > a:hover, .nav > li > a:focus {
-    text-decoration: none;
-    background-color: #6c0404;
 }
 
 input:required {
@@ -444,4 +419,28 @@ textarea.form-control {
 .formFieldError{
     font-weight: bold;
     background: #f6ccd0;
+}
+
+.modalDialog {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 99999;
+    opacity:0;
+    -webkit-transition: opacity 200ms ease-in;
+    -moz-transition: opacity 200ms ease-in;
+    transition: opacity 200ms ease-in;
+    pointer-events: none;
+}
+
+.modalDialog > div {
+    width: 400px;
+    position: relative;
+    margin: 10% auto;
+    padding: 5px 20px 13px 20px;
+    border-radius: 4px;
+    background: #fefefe;
 }

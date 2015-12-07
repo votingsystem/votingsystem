@@ -2,7 +2,7 @@
 
 <dom-module name="representation-state">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click style="min-height: 300px;">
+        <div id="modalDialog" class="modalDialog">
             <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
@@ -37,7 +37,7 @@
                     </button>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -66,7 +66,8 @@
                 }
             },
             show: function() {
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
@@ -89,7 +90,8 @@
                 this.click() //hack to refresh
             },
             close: function() {
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             }
         });
     </script>

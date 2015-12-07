@@ -2,7 +2,7 @@
 
 <dom-module name="currency-request-result-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
+        <div id="modalDialog" class="modalDialog">
             <style> </style>
             <iron-signals on-iron-signal-vs-wallet-save="walletSaved"></iron-signals>
             <div>
@@ -24,7 +24,7 @@
                     </button>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -53,10 +53,12 @@
                 this.caption = caption;
                 this.message = message;
                 this.isStoredInWallet = false
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             close: function() {
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             }
         });
     </script>

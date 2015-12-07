@@ -2,8 +2,7 @@
 
 <dom-module name="alert-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
-            <style> </style>
+        <div id="modalDialog" class="modalDialog">
             <div>
                 <div class="layout horizontal center center-justified">
                     <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
@@ -25,7 +24,7 @@
                     </div>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -39,7 +38,8 @@
                 this.caption = caption
                 this.callerId = callerId
                 this.isConfirmMessage = isConfirmMessage
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             reset: function() {
                 this.message = null
@@ -52,7 +52,8 @@
                 this.fire('iron-signal', {name: "messagedialog-accept", data: {callerId:this.callerId}});
             },
             close: function() {
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
                 this.fire('iron-signal', {name: "messagedialog-closed", data: {callerId:this.callerId}});
             }
         });

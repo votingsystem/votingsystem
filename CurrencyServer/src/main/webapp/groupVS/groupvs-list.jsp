@@ -66,7 +66,7 @@
                 }
             },
             processSearch:function (textToSearch) {
-                app.updateSearchMessage("${msg.searchResultLbl} '" + textToSearch + "'")
+                vs.updateSearchMessage("${msg.searchResultLbl} '" + textToSearch + "'")
                 this.url = contextURL + "/rest/search/groupVS?searchText=" + textToSearch
             }
         });

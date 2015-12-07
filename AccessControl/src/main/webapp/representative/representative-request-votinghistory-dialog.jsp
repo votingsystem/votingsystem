@@ -2,8 +2,7 @@
 
 <dom-module name="representative-request-votinghistory-dialog">
     <template>
-        <paper-dialog id="xDialog" style="width: 550px;" with-backdrop no-cancel-on-outside-click>
-            <style></style>
+        <div id="modalDialog" class="modalDialog">
             <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
@@ -25,7 +24,7 @@
                     </div>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -34,7 +33,8 @@
                 console.log(this.tagName + " - ready")
             },
             show: function(representative) {
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
                 this.representative = representative
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
             },
@@ -48,7 +48,8 @@
                 this.close()
             },
             close: function() {
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             }
         });
     </script>

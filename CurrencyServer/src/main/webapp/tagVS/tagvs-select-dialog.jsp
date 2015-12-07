@@ -4,9 +4,9 @@
 
 <dom-module name="tagvs-select-dialog">
 <template>
-    <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click title="{{caption}}" style="max-width: 600px; min-height: 400px;">
+    <div id="modalDialog" class="modalDialog">
         <vs-i18n id="i18nVS"></vs-i18n>
-        <div style="max-width: 600px; height: 100%;">
+        <div style="max-width: 600px;">
             <div style="margin:0 0 10px 0;">
                 <div class="flex" style="font-size: 1.3em; font-weight: bold; color:#6c0404;">
                     <div style="text-align: center;">${msg.addTagLbl}</div>
@@ -60,7 +60,7 @@
         </div>
         <iron-ajax id="ajax" auto url="{{url}}" last-response="{{resultListDto}}" handle-as="json" method="get"
                    content-type="application/json"></iron-ajax>
-    </paper-dialog>
+    </div>
 </template>
 <script>
     Polymer({
@@ -83,7 +83,8 @@
             }.bind(this)
         },
         close:function() {
-            this.$.xDialog.opened = false
+            this.$.modalDialog.style.opacity = 0
+            this.$.modalDialog.style['pointer-events'] = 'none'
             this.$.tagSearchInput.value = ''
             this.selectedTagList = []
             this.searchString = null
@@ -138,8 +139,8 @@
             if(selectedTags == null) this.selectedTagList = []
             else this.selectedTagList = selectedTags
             this.tagBoxHidden = (this.selectedTagList.length === 0)
-            this.$.xDialog.title = this.caption
-            this.$.xDialog.opened = true
+            this.$.modalDialog.style.opacity = 1
+            this.$.modalDialog.style['pointer-events'] = 'auto'
         },
         processTags: function() {
             this.fire('tag-selected', this.selectedTagList);

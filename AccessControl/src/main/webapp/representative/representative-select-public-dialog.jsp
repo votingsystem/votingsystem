@@ -3,7 +3,7 @@
 
 <dom-module name="representative-select-public-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click style="min-height: 200px;display: block;">
+        <div id="modalDialog" class="modalDialog">
             <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; margin:0px auto;font-weight: bold; color:#6c0404;">
@@ -29,7 +29,7 @@
                     </div>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -42,7 +42,8 @@
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
                 var msgTemplate = "${msg.selectRepresentativeConfirmMsg}";
                 this.$.delegationMsg.html = msgTemplate.format("${msg.publicLbl}", this.representative.name)
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             accept: function() {
                 var operationVS = new OperationVS(Operation.REPRESENTATIVE_SELECTION)
@@ -71,7 +72,8 @@
                 this.click() //hack to refresh screen
             },
             close: function() {
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             }
         });
     </script>

@@ -2,7 +2,7 @@
 
 <dom-module name="reason-dialog">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click>
+        <div id="modalDialog" class="modalDialog">
             <div class="layout vertical">
                 <div class="layout horizontal center center-justified">
                     <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
@@ -14,7 +14,7 @@
                 </div>
                 <div hidden="{{!messageToUser}}" class="center" style="color: #6c0404;">{{messageToUser}}</div>
                 <div style="margin:20px 0px 10px 0px;">
-                    <textarea id="reason" rows="8" required=""></textarea>
+                    <textarea id="reason" rows="8" required="" style="width: 400px;"></textarea>
                 </div>
 
                 <div class="layout horizontal" style="margin:10px 20px 0px 0px; margin:10px;">
@@ -24,7 +24,7 @@
                     </button>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
 <script>
     Polymer({
@@ -32,20 +32,20 @@
         properties: {
             caption:{type:String}
         },
-        ready: function() {
-            this.opened = false
-        },
+        ready: function() { },
         submitForm: function() {
             this.fire('on-submit', this.$.reason.value);
             this.close()
         },
         show: function(message) {
-            this.$.xDialog.opened = true
+            this.$.modalDialog.style.opacity = 1
+            this.$.modalDialog.style['pointer-events'] = 'auto'
             this.messageToUser = message;
             this.$.reason.value = ""
         },
         close: function() {
-            this.$.xDialog.opened = false
+            this.$.modalDialog.style.opacity = 0
+            this.$.modalDialog.style['pointer-events'] = 'none'
         }
     });
 </script>

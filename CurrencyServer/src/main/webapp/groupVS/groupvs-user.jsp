@@ -4,7 +4,7 @@
 
 <dom-module name="groupvs-user">
     <template>
-        <paper-dialog id="xDialog" with-backdrop no-cancel-on-outside-click style="min-height: 300px;">
+        <div id="modalDialog" class="modalDialog">
             <iron-ajax id="ajax" url="{{url}}" last-response="{{subscriptionDto}}" handle-as="json" content-type="application/json"></iron-ajax>
             <div style="height: 400px;">
 
@@ -49,7 +49,7 @@
                     <reason-dialog id="reasonDialog" caption="${msg.cancelSubscriptionFormCaption}" ></reason-dialog>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -95,10 +95,8 @@
             },
             goToUserVSPage:function() {
                 page.show(contextURL + "/rest/userVS/id/" + this.userId)
-                this.$.xDialog.opened = false
-            },
-            openedChanged:function() {
-                this.async(function() { this.$.xDialog.opened = this.opened});
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             },
             subscriptionDtoChanged:function() {
                 console.log(this.tagName + "subscriptionDtoChanged - subscriptionDto: " + this.subscriptionDto)
@@ -125,7 +123,8 @@
                     this.$.ajax.url = this.subscriptionDataURLPrefix + "/" + this.userId
                     this.$.ajax.generateRequest()
                 }
-                this.$.xDialog.opened = true
+                this.$.modalDialog.style.opacity = 1
+                this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             activateUser : function(e) {
                 console.log("activateUser")
@@ -156,7 +155,8 @@
                 this.$.reasonDialog.show("${msg.cancelSubscriptionFormMsg}");
             },
             close: function() {
-                this.$.xDialog.opened = false
+                this.$.modalDialog.style.opacity = 0
+                this.$.modalDialog.style['pointer-events'] = 'none'
             }
         });
     </script>

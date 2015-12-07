@@ -10,9 +10,6 @@
     <style></style>
     <div style=" margin: 0 auto; max-width: 550px;">
         <div class="layout horizontal center center-justified">
-            <div hidden="{{!fabVisible}}" style="margin: 10px 20px 0 0;" title="${msg.backLbl}" >
-                <paper-fab mini icon="arrow-back" on-click="back" style="color: #f9f9f9;margin: 0 0 0 20px;background: #ba0011;"></paper-fab>
-            </div>
             <div class="flex" style="text-align: center; color:#6c0404;">
                 <div>
                     <div style="font-size: 1.4em; font-weight: bold;">{{operationMsg}}</div>
@@ -97,7 +94,6 @@
     Polymer({
         is:'transactionvs-form',
         properties: {
-            fabVisible:{type:Boolean, value:false},
             selectedTags:{type:Array, value:[], observer:'selectedTagsChanged'},
             tagSelected:{type:Boolean, value:false},
             searchString:{type:String, value:null},
@@ -221,7 +217,6 @@
             var caption
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "${msg.transactionvsOKLbl}"
-                this.fire('closed')
             } else caption = '${msg.transactionvsERRORLbl}'
             showMessageVS(appMessageJSON.message, caption)
             this.click() //hack to refresh screen
@@ -258,12 +253,8 @@
             }
             return result
         },
-        back:function() {
-            this.fire('closed')
-        },
         init:function(operation, userName, userIBAN, userVSId) {
-            console.log(this.id + " - init - operation: " + operation + " - fabVisible: " + this.fabVisible +
-                    " - userIBAN: " + userIBAN)
+            console.log(this.id + " - init - operation: " + operation + " - userIBAN: " + userIBAN)
             this.reset()
             this.operation = operation
             this.fromUserName = userName

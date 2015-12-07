@@ -19,28 +19,30 @@
     </div>
 
         <representative-cancel-dialog id="representativeRevokeDialog"></representative-cancel-dialog>
-        <paper-dialog id="editDialog" with-backdrop no-cancel-on-outside-click>
-            <div class="layout horizontal center center-justified">
-                <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
-                    <div style="text-align: center;">${msg.editRepresentativeLbl}</div>
+        <div id="editDialog" class="modalDialog">
+            <div>
+                <div class="layout horizontal center center-justified">
+                    <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
+                        <div style="text-align: center;">${msg.editRepresentativeLbl}</div>
+                    </div>
+                    <div style="position: absolute; top: 0px; right: 0px;">
+                        <i class="fa fa-times closeIcon" on-click="closeEdit"></i>
+                    </div>
                 </div>
-                <div style="position: absolute; top: 0px; right: 0px;">
-                    <i class="fa fa-times closeIcon" on-click="closeEdit"></i>
-                </div>
-            </div>
-            <div class="layout vertical center center-justified" style="margin:15px auto 0px auto; width: 250px;">
-                <label style="margin:0px 0px 20px 0px">${msg.representativeNIFLbl}</label>
-                <input type="text" id="representativeNif" style="width:200px; margin:0px auto 0px auto;" class="form-control"/>
-                <div style="width: 100%;">
-                    <div class="layout horizontal" style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
-                        <div class="flex"></div>
-                        <button on-click="checkRepresentativeNIF" style="margin: 0px 0px 0px 5px;">
-                            <i class="fa fa-check"></i> ${msg.acceptLbl}
-                        </button>
+                <div class="layout vertical center center-justified" style="margin:15px auto 0px auto; width: 250px;">
+                    <label style="margin:0px 0px 20px 0px">${msg.representativeNIFLbl}</label>
+                    <input type="text" id="representativeNif" style="width:200px; margin:0px auto 0px auto;" class="form-control"/>
+                    <div style="width: 100%;">
+                        <div class="layout horizontal" style="margin: 15px auto 30px auto;padding:0px 10px 0px 10px;">
+                            <div class="flex"></div>
+                            <button on-click="checkRepresentativeNIF" style="margin: 0px 0px 0px 5px;">
+                                <i class="fa fa-check"></i> ${msg.acceptLbl}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </paper-dialog>
+        </div>
     </template>
     <script>
         Polymer({
@@ -52,10 +54,12 @@
                 }.bind(this)
             },
             closeEdit: function() {
-                this.$.editDialog.opened = false
+                this.$.editDialog.style.opacity = 0
+                this.$.editDialog.style['pointer-events'] = 'none'
             },
             representativeEdit: function() {
-                this.$.editDialog.opened = true
+                this.$.editDialog.style.opacity = 1
+                this.$.editDialog.style['pointer-events'] = 'auto'
             },
             representativeRevoke: function() {
                 this.$.representativeRevokeDialog.show()
@@ -68,7 +72,7 @@
                     var operationVS = new OperationVS(Operation.EDIT_REPRESENTATIVE)
                     operationVS.nif = validatedNif
                     VotingSystemClient.setMessage(operationVS);
-                    this.$.editDialog.opened = false
+                    this.closeEdit()
                 }
             }
         });

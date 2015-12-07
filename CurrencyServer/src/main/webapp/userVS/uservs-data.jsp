@@ -73,7 +73,7 @@
             </template>
         </div>
     </div>
-    <div hidden="{{transactionFormHidden}}" class="pageContentDiv">
+    <div hidden="{{transactionFormHidden}}">
         <transactionvs-form id="transactionvsForm" fab-visible="true"></transactionvs-form>
     </div>
     <messagevs-send-dialog id="sendMessageDialog" on-message-response="{{sendMessageDialogResponse}}"></messagevs-send-dialog>
@@ -98,7 +98,7 @@
             this.isClientToolConnected = (clientTool !== undefined)
             document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
                     function() {  this.isClientToolConnected = true }.bind(this))
-            console.log(this.tagName + " - ready - menuType: " + this.menuType + " - isClientToolConnected: " + isClientToolConnected)
+            console.log(this.tagName + " - ready - menuType: " + this.menuType)
             this.$.transactionvsForm.addEventListener('closed', function (e) {
                 this.page = 0;
             }.bind(this))
