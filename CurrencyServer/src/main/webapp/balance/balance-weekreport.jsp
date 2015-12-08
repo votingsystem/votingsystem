@@ -23,7 +23,6 @@
                 border: 1px solid #ccc;
             }
         </style>
-        <iron-ajax auto id="ajax" url="{{url}}" last-response="{{balance}}" handle-as="json" content-type="application/json"></iron-ajax>
         <div class="card" layout vertical>
             <div hidden="{{!errorMessage}}" class="errorMessage">{{errorMessage}}</div>
             <div class="userVS"><span>{{infoName}}</span> - <span>{{name}}</span></div>
@@ -62,9 +61,9 @@
         Polymer({
             is:'balance-uservs-details',
             properties:{
+                url:{type:String, observer:'getHTTP'},
                 balance:{type:Object},
-                type:{type:String},
-                url:{type:String}
+                type:{type:String}
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
@@ -121,6 +120,13 @@
                 } catch(e) {
                     this.errorMessage = "transactionTo - " + e
                 }
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.balance = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>
@@ -149,7 +155,7 @@
         Polymer({
             is:'balance-weekreport',
             properties: {
-                balances: {type:Object, value: {}}
+                balances: {type:Object}
             },
             ready: function() {},
             stringify:function(e) {

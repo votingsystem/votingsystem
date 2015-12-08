@@ -9,7 +9,6 @@
 
 <dom-module name="groupvs-details">
 <template>
-    <iron-ajax auto url="{{url}}" method="get" last-response="{{groupvs}}" handle-as="json" content-type="application/json"></iron-ajax>
     <div id="configDialog" class="modalDialog">
         <div style="width: 350px;">
             <div class="layout horizontal center center-justified">
@@ -43,9 +42,6 @@
             </div>
         </div>
     </div>
-
-    <iron-signals on-iron-signal-messagedialog-accept="messagedialogAccepted"
-                  on-iron-signal-uservs-selected="showUserDetails" ></iron-signals>
 
     <div style="max-width: 900px; margin:0 auto;">
         <div class="vertical layout flex">
@@ -141,7 +137,7 @@
         properties: {
             groupvs:{type:Object, observer:'groupvsChanged'},
             representativeName:{type:String},
-            url:{type:String},
+            url:{type:String, observer:'getHTTP'},
             tagsHidden:{type:Boolean}
         },
         ready:function() {
@@ -152,6 +148,10 @@
                 this.isAdminView = false
                 this.isUserView = false
             }
+            document.querySelector("#voting_system_page").addEventListener('messagedialog-accept',
+                    function(e) { this.messagedialogAccepted(e) }.bind(this))
+            document.querySelector("#voting_system_page").addEventListener('uservs-selected',
+                    function(e) { this.showUserDetails(e) }.bind(this))
         },
         decodeBase64:function(base64EncodedString) {
             if(base64EncodedString == null) return null
@@ -167,9 +167,9 @@
             this.$.transactionvsFormDialog.style.opacity = 1
             this.$.transactionvsFormDialog.style['pointer-events'] = 'auto'
         },
-        messagedialogAccepted:function(e, detail, sender) {
+        messagedialogAccepted:function(e) {
             console.log(this.tagName + ".messagedialogAccepted")
-            if('cancel_group' == detail.callerId) {
+            if('cancel_group' == e.detail) {
                 var operationVS = new OperationVS(Operation.CURRENCY_GROUP_CANCEL)
                 operationVS.serviceURL = contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/cancel"
                 operationVS.signedMessageSubject = "${msg.cancelGroupVSSignedMessageSubject}"
@@ -280,9 +280,16 @@
             operationVS.message = this.groupvs.id
             VotingSystemClient.setMessage(operationVS);
         },
-        showUserDetails:function(e, detail, sender) {
-            console.log(this.tagName + " - showUserDetails")
-            this.$.userDescription.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/user/id", detail)
+        showUserDetails:function(e) {
+            console.log(this.tagName + " - showUserDetails - user id: " + e.detail)
+            this.$.userDescription.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/user/id", e.detail)
+        },
+        getHTTP: function (targetURL) {
+            if(!targetURL) targetURL = this.url
+            console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+            d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                this.groupvs = toJSON(rawData.response)
+            }.bind(this));
         }
     })
 </script>

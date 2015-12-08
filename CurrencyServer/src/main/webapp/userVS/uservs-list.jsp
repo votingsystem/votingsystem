@@ -5,9 +5,6 @@
 
 <dom-module name="uservs-list">
     <template>
-        <iron-signals on-iron-signal-refresh-uservs-list="refreshList"></iron-signals>
-        <iron-ajax auto id="ajax" url="{{url}}" last-response="{{userListDto}}" handle-as="json"
-                   content-type="application/json"></iron-ajax>
         <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
             <div class="layout flex horizontal wrap around-justified">
                 <template is="dom-repeat" items="{{userListDto.resultList}}" as="subscription">
@@ -24,20 +21,22 @@
         Polymer({
             is:'uservs-list',
             properties: {
+                url:{type:String, observer:'getHTTP'},
                 userListDto:{type:Object, observer:'userListDtoChanged'},
-                groupvsId:{type:Number},
-                url:{type:String}
+                groupvsId:{type:Number}
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
+                document.querySelector("#voting_system_page").addEventListener('refresh-uservs-list',
+                        function() {  this.refreshList() }.bind(this))
             },
             loadGroupUsers:function(groupvsId) {
                 this.groupvsId = groupvsId
                 console.log(this.tagName + " - loadGroupUsers - groupvsId: " + this.groupvsId)
                 this.url = contextURL + "/rest/groupVS/id/" + this.groupvsId + "/listUsers"
             },
-            refreshList: function(state) {
-                this.$.ajax.generateRequest()
+            refreshList: function() {
+                getHTTP(this.url)
             },
             urlChanged:function() {
                 console.log(this.tagName + " - urlChanged: " + this.url)
@@ -47,8 +46,14 @@
             },
             pagerChange: function(e) {
                 var newURL = setURLParameter(this.url, "offset",  e.detail.offset)
-                this.$.ajax.url = setURLParameter(newURL, "max", e.detail.max)
-                console.log(this.tagName + " - pagerChange - newURL: " + this.$.ajax.url)
+                this.url = setURLParameter(newURL, "max", e.detail.max)
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.userListDto = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

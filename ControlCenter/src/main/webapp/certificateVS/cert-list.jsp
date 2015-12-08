@@ -21,8 +21,6 @@
                 box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
             }
         </style>
-
-        <iron-ajax id="ajax" url="{{url}}" handle-as="json" content-type="application/json" last-response="{{certListDto}}"></iron-ajax>
         <div>
             <div class="layout horizontal center center-justified">
                 <select id="certTypeSelect" class="form-control" style="margin:0px auto 0px auto;color:black;
@@ -80,6 +78,7 @@
         Polymer({
             is:'cert-list',
             properties: {
+                url:{type:String, observer:'getHTTP'},
                 certListDto:{type:Object,observer:'certListDtoChanged'},
             },
             ready: function() {
@@ -120,19 +119,22 @@
                         "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
-                this.$.ajax.url = targetURL
-                console.log(this.tagName + " - targetURL: " + targetURL)
-                this.$.ajax.generateRequest()
+                this.url = targetURL
             },
             certTypeSelect: function () {
                 var optionSelected = this.$.certTypeSelect.value
                 if("" != optionSelected) {
                     targetURL = contextURL + "/rest/certificateVS/certs?menu=" + menuType + optionSelected
                     history.pushState(null, null, targetURL);
-                    this.$.ajax.url = targetURL
-                    console.log("certTypeSelect - targetURL: " + targetURL)
-                    this.$.ajax.generateRequest()
+                    this.url = targetURL
                 }
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.certListDto = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

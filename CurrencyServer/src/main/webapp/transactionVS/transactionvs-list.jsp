@@ -6,9 +6,6 @@
 
 <dom-module name="transactionvs-list">
 <template>
-    <iron-ajax auto url="{{url}}" handle-as="json" last-response="{{transactionsDto}}" method="get"
-               content-type="application/json"></iron-ajax>
-
     <div class="horizontal layout center center-justified">
         <transactionvs-selector id="transactionSelector" transactionvs-type="{{transactionvsType}}"></transactionvs-selector>
     </div>
@@ -29,7 +26,7 @@
         is:'transactionvs-list',
         properties: {
             transactionsDto: {type:Object, value: {}, observer:'transactionsDtoChanged'},
-            url:{type:String, observer:'urlChanged'},
+            url:{type:String, observer:'getHTTP'},
             transactionvsType:{type:String}
         },
         ready:function() {
@@ -50,9 +47,6 @@
             console.log(this.tagName + " - transactionsDtoChanged - transactionsDto: " + this.transactionsDto)
             if(this.transactionsDto.resultList) this.messageToUserHidden = (this.transactionsDto.resultList.length !== 0)
         },
-        urlChanged:function() {
-            this.transactionvsType = getURLParam("transactionvsType", this.url)
-        },
         addTransaction:function(transactionvs) {
             this.transactionsDto.resultList.push(transactionvs)
             this.transactionsDto = toJSON(JSON.stringify(this.transactionsDto)) // hack to notify changes
@@ -64,6 +58,14 @@
         processSearchJSON:function (dataJSON) {
             this.params = dataJSON
             this.url = contextURL + "/rest/transactionVS"
+        },
+        getHTTP: function (targetURL) {
+            this.transactionvsType = getURLParam("transactionvsType", this.url)
+            if(!targetURL) targetURL = this.url
+            console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+            d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                this.transactionsDto = toJSON(rawData.response)
+            }.bind(this));
         }
     });</script>
 </dom-module>

@@ -10,8 +10,6 @@
             .numTrans { font-size: 2em; color: #6c0404; text-align: center;}
             .transDesc {background: #6c0404; color: #f9f9f9; padding: 5px;}
         </style>
-        <iron-ajax auto id="ajax" url="{{url}}" handle-as="json" last-response="{{dashBoardDto}}" method="get"
-                   content-type="application/json"></iron-ajax>
         <div class="layout horizontal center center-justified">
             <select id="transactionLapsedSelect" style="margin: 10px 0 10px 40px; width: 400px; font-size: 1.1em; height: 30px;"
                     on-change="selectAction" class="form-control">
@@ -68,7 +66,7 @@
         is:'uservs-dashboard',
         properties: {
             dashBoardDto:{type:Object, value:null, observer:'dashBoardDtoChanged'},
-            url:{type:String, value:contextURL + "/rest/app/userVSDashboard"}
+            url:{type:String, value:contextURL + "/rest/app/userVSDashboard", observer:'getHTTP'}
         },
         ready: function() {
             this.lapse = window.location.href.substr(window.location.href.lastIndexOf('/') + 1);
@@ -103,6 +101,13 @@
         transBlockSelected: function(e) {
             page.show(contextURL + "/rest/transactionVS/from/" + this.dateFrom.urlFormatWithTime() + "/to/" +
                     this.dateTo.urlFormatWithTime() + "?transactionvsType=" + e.target.parentNode.id)
+        },
+        getHTTP: function (targetURL) {
+            if(!targetURL) targetURL = this.url
+            console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+            d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                this.dashBoardDto = toJSON(rawData.response)
+            }.bind(this));
         }
     });
 </script>

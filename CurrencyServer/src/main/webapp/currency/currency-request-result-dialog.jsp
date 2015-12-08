@@ -3,8 +3,6 @@
 <dom-module name="currency-request-result-dialog">
     <template>
         <div id="modalDialog" class="modalDialog">
-            <style> </style>
-            <iron-signals on-iron-signal-vs-wallet-save="walletSaved"></iron-signals>
             <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
@@ -30,7 +28,11 @@
         Polymer({
             is:'currency-request-result-dialog',
             isStoredInWallet:false,
-            ready: function() { },
+            ready: function() {
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-msg',
+                        function(e) {
+                            if(e.name === "vs-wallet-save") this.walletSaved() }.bind(this))
+            },
             walletSaved: function() {
                 this.isStoredInWallet = true;
             },

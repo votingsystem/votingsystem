@@ -12,7 +12,6 @@
             .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px; text-align: center;}
             .representativeNumRepHeader { text-overflow: ellipsis; color:#888;}
         </style>
-        <iron-ajax auto url="{{url}}" last-response="{{representative}}" handle-as="json" content-type="application/json"></iron-ajax>
         <div>
             <div hidden="{{'user' !== menuType}}" class="horizontal layout center-justified" style="font-size: 0.9em;">
                 <button on-click="selectRepresentative">
@@ -80,6 +79,7 @@
         Polymer({
             is:'representative-info',
             properties: {
+                url:{type:String, observer:'getHTTP'},
                 representative:{type:Object, value:{}, observer:'representativeChanged'},
                 isAdmin:{computed:'_checkIfAdmin(representative)'}
             },
@@ -134,6 +134,13 @@
             showImage:function() {
                 console.log(this.tagName + " - showImage")
                 this.$.representativeImage.show()
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.representative = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

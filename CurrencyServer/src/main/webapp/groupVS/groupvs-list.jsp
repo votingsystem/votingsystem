@@ -7,7 +7,6 @@
     <style is="custom-style">
     </style>
     <template>
-        <iron-ajax auto id="ajax" url="{{url}}" handle-as="json" content-type="application/json" last-response="{{groupListDto}}"></iron-ajax>
         <div id="groupListPage">
             <div id="groupStateSelector" class="layout horizontal center center-justified" style="margin:0 0 10px 0;">
                 <select id="groupvsTypeSelect" style="font-size: 1.1em; height: 30px; max-width: 400px; margin:0 35px 0 35px;"
@@ -33,7 +32,7 @@
             is:'groupvs-list',
             properties: {
                 groupListDto:{type:Object, observer:'groupListDtoChanged'},
-                url:{type:String}
+                url:{type:String, observer:'getHTTP'}
             },
             groupListDtoChanged:function() {
                 console.log(this.tagName + " - groupListDtoChanged ")
@@ -53,7 +52,7 @@
                         optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
-                this.$.ajax.url = targetURL
+                this.url = targetURL
             },
             groupvsTypeSelect: function() {
                 var optionSelected = this.$.groupvsTypeSelect.value
@@ -68,6 +67,13 @@
             processSearch:function (textToSearch) {
                 vs.updateSearchMessage("${msg.searchResultLbl} '" + textToSearch + "'")
                 this.url = contextURL + "/rest/search/groupVS?searchText=" + textToSearch
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.groupListDto = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

@@ -8,7 +8,6 @@
                 cursor: pointer; text-overflow: ellipsis; max-width: 300px;-moz-border-radius: 3px; border-radius: 4px;
             }
         </style>
-        <iron-ajax auto id="ajax" url="{{url}}" last-response="{{bankvsListDto}}" handle-as="json" content-type="application/json"></iron-ajax>
         <div class="layout flex horizontal wrap around-justified">
             <template is="dom-repeat" items="{{bankvsListDto}}" as="bankVS">
                 <div class="bankvs" on-click="showDetails">
@@ -23,11 +22,18 @@
             is:'bankVS-list',
             properties: {
                 bankvsListDto: {type:Object, value: {}},
-                url: {type:String, value: contextURL + "/rest/userVS/bankVSList"}
+                url: {type:String, value: contextURL + "/rest/userVS/bankVSList", observer:'getHTTP'}
             },
             ready: function() { console.log(this.tagName + " - ready")},
             showDetails: function(e) {
                 page.show(contextURL + "/rest/userVS/id/" + e.model.bankVS.id)
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.bankvsListDto = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

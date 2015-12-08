@@ -4,8 +4,6 @@
 
 <dom-module name="week-reports">
     <template>
-        <iron-ajax auto id="ajax" url="{{url}}" last-response="{{reportsDto}}" handle-as="json" content-type="application/json"></iron-ajax>
-
         <div class="layout vertical center center-justified" style="max-width:1000px; padding:20px 30px 0px 30px;">
             <div class="pageHeader" style="margin:0px auto; text-align: center;">
             ${msg.periodLbl}: ${spa.formatDate(timePeriod.dateFrom)} - ${spa.formatDate(timePeriod.dateTo)}
@@ -18,7 +16,7 @@
         is:'week-reports',
         properties: {
             reportsDto: {type:Object},
-            url: {type:String}
+            url:{type:String, observer:'getHTTP'}
         },
         ready: function() {
             var options = { mode: 'code', modes: ['code', 'form', 'text', 'tree', 'view'], // allowed modes
@@ -27,6 +25,13 @@
             var reportsDiv = new JSONEditor(this.$.reportsDiv);
             reportsDiv.set(this.reportsDto);
             reportsDiv.expandAll();
+        },
+        getHTTP: function (targetURL) {
+            if(!targetURL) targetURL = this.url
+            console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+            d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                this.reportsDto = toJSON(rawData.response)
+            }.bind(this));
         }
     });
 </script>

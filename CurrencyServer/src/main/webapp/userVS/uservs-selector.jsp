@@ -14,7 +14,6 @@
             .name {color: #000; font-size: 0.9em;}
         </style>
         <iron-localstorage id="localstorage" name="contacts-localstorage" value="{{contacts}}"></iron-localstorage>
-        <iron-ajax id="ajax" url="{{url}}" last-response="{{userListDto}}" handle-as="json" content-type="application/json"></iron-ajax>
         <div class="vertical layout center">
             <div hidden={{!contactSelector}} class="horizontal layout center center-justified" style="margin:-10px 0 20px 0; cursor: pointer;">
                 <div id="searchDiv" on-click="setSearchView"
@@ -61,6 +60,7 @@
         Polymer({
             is:'uservs-selector',
             properties: {
+                url:{type:String, observer:'getHTTP'},
                 groupvsId:{type:Number},
                 userListDto:{type:Object, value:{resultList:[]}, observer:'userListDtoChanged'},
                 contactSelector:{type:Boolean, value:true},
@@ -164,8 +164,6 @@
                 if(this.textToSearch === "") return
                 if(this.groupVSId) this.url = contextURL + "/rest/groupVS/id/" + this.groupVSId + "/searchUsers?searchText=" + this.textToSearch
                 else this.url = contextURL + "/rest/userVS/search?searchText=" + this.textToSearch
-                console.log(this.tagName + " - processSearch - url: " + this.url)
-                this.$.ajax.generateRequest()
             },
             setContactsView:function() {
                 this.modeSearch = false
@@ -173,6 +171,13 @@
             },
             setSearchView:function() {
                 this.modeSearch = true
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.userListDto = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

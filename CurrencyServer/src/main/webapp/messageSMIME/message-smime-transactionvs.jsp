@@ -94,7 +94,7 @@
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.isClientToolConnected = (clientTool !== undefined)
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-msg',
                         function() {  this.isClientToolConnected = true }.bind(this))
             },
             smimeMessageContentChanged:function() {

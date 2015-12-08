@@ -246,19 +246,15 @@ function checkIfClientToolIsConnected() {
 
 function setClientToolConnected() {
     console.log("setClientToolConnected");
-    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('votingsystem-client-connected', { }))
+    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('votingsystem-client-msg', { }))
 }
 
 var coreSignalData = null
 function fireCoreSignal(coreSignalDataBase64) {
-    if(document.querySelector("#app") != null && document.querySelector("#app").fire != null) {
+    if(document.querySelector("#voting_system_page") != null) {
         var b64_to_utf8 = decodeURIComponent(escape(window.atob(coreSignalDataBase64)))
-        document.querySelector("#app").fire('iron-signal', toJSON(b64_to_utf8));
-        console.log("fireCoreSignal: " + b64_to_utf8)
-    } else {
-        coreSignalData = coreSignalDataBase64
-        console.log("fireCoreSignal - navBar not found")
-    }
+        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('votingsystem-client-msg', toJSON(b64_to_utf8)));
+    } else coreSignalData = coreSignalDataBase64
 }
 
 window.addEventListener('WebComponentsReady', function() {

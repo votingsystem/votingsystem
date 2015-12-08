@@ -14,8 +14,6 @@
         </style>
         <vs-advanced-search-dialog id="advancedSearchDialog"></vs-advanced-search-dialog>
         <search-info id="searchInfo"></search-info>
-        <iron-ajax auto url="{{url}}" last-response="{{eventListDto}}" handle-as="json"
-                   content-type="application/json"></iron-ajax>
         <div>
             <div class="layout horizontal center center-justified">
                 <select id="eventVSStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
@@ -59,7 +57,7 @@
             is:'eventvs-election-list',
             properties: {
                 eventListDto:{type:Object, value:{}, observer:'eventListDtoChanged'},
-                url:{type:String},
+                url:{type:String, observer:'getHTTP'},
                 eventVSState:{type:String}
             },
             ready:function(e) {
@@ -141,6 +139,13 @@
             },
             processSearchJSON: function (dataJSON) {
                 this.url = contextURL + "/rest/search/eventVS";
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.eventListDto = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

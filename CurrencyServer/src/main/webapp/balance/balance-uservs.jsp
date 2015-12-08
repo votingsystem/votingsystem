@@ -14,7 +14,6 @@
             .tab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;color:#888;}
             .tabSelected { border-bottom: 2px solid #ba0011;color:#434343;}
         </style>
-        <iron-ajax auto id="ajax" url="{{url}}" method="get" last-response="{{balance}}" handle-as="json" content-type="application/json"></iron-ajax>
         <transactionvs-data id="transactionViewer"></transactionvs-data>
 
         <iron-media-query query="max-width: 1200px" query-matches="{{smallScreen}}"></iron-media-query>
@@ -80,6 +79,7 @@
         Polymer({
             is:'balance-uservs',
             properties: {
+                url:{type:String, observer:'getHTTP'},
                 balance: {type:Object, observer:'balanceChanged'},
                 selectedTab: {type:String, value:'incomesTab', observer:'selectedTabChanged'},
                 caption: {type:String},
@@ -88,7 +88,6 @@
                 expensesTabHidden: {type:Boolean, value:false},
                 description: {type:String},
                 incomesDivStyle: {type:String},
-                url: {type:String}
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
@@ -198,6 +197,13 @@
             viewTransaction: function(e) {
                 //console.log(this.tagName + " - viewTransaction - e.detail: " + JSON.stringify(e.detail))
                 this.$.transactionViewer.show(e.detail)
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.balance = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

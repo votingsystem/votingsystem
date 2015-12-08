@@ -49,12 +49,15 @@
             },
             accept: function() {
                 this.close()
-                this.fire('iron-signal', {name: "messagedialog-accept", data: {callerId:this.callerId}});
+                if(document.querySelector("#voting_system_page"))
+                    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('messagedialog-accept', {detail:this.callerId}))
+
             },
             close: function() {
                 this.$.modalDialog.style.opacity = 0
                 this.$.modalDialog.style['pointer-events'] = 'none'
-                this.fire('iron-signal', {name: "messagedialog-closed", data: {callerId:this.callerId}});
+                if(document.querySelector("#voting_system_page"))
+                    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('messagedialog-closed', {detail:this.callerId}))
             }
         });
     </script>

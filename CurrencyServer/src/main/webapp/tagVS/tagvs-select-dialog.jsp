@@ -58,14 +58,13 @@
                 </button>
             </div>
         </div>
-        <iron-ajax id="ajax" auto url="{{url}}" last-response="{{resultListDto}}" handle-as="json" method="get"
-                   content-type="application/json"></iron-ajax>
     </div>
 </template>
 <script>
     Polymer({
         is:'tagvs-select-dialog',
         properties: {
+            url:{type:String, observer:'getHTTP'},
             searchString:{type:String, value:null},
             numTags:{type:Number, value:1},
             caption:{type:String, value:null},
@@ -88,12 +87,10 @@
             this.$.tagSearchInput.value = ''
             this.selectedTagList = []
             this.searchString = null
-            this.$.ajax.url = ""
         },
         searchTag: function() {
             if(this.$.tagSearchInput.validity.valid) {
-                this.$.ajax.url = this.serviceUrl + "?tag=" + this.$.tagSearchInput.value
-                console.log(this.tagName + " - searchTag - this.$.ajax.url: " + this.$.ajax.url)
+                this.url = this.serviceUrl + "?tag=" + this.$.tagSearchInput.value
                 this.searchString = this.$.tagSearchInput.value
             }
         },
@@ -145,6 +142,13 @@
         processTags: function() {
             this.fire('tag-selected', this.selectedTagList);
             this.close()
+        },
+        getHTTP: function (targetURL) {
+            if(!targetURL) targetURL = this.url
+            console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+            d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                this.resultListDto = toJSON(rawData.response)
+            }.bind(this));
         }
     });
 </script>

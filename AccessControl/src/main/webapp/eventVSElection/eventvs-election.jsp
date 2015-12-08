@@ -12,9 +12,6 @@
                 color: #888;
             }
         </style>
-        <iron-signals on-iron-signal-messagedialog-accept="messagedialogConfirmed"></iron-signals>
-        <iron-ajax auto url="{{url}}" last-response="{{eventvs}}" handle-as="json"
-                   content-type="application/json"></iron-ajax>
         <div>
             <div hidden="{{adminMenuHidden}}" style="text-align: center;">
                 <button type="submit" on-click="showAdminDialog" style="margin:15px 20px 15px 0px;">
@@ -99,11 +96,14 @@
         Polymer({
             is:'eventvs-election',
             properties: {
+                url:{type:String, observer:'getHTTP'},
                 eventvs:{type:Object, observer:'eventvsChanged'},
             },
             ready: function() {
                 console.log(this.tagName + "- ready")
                 sendSignalVS({caption:"${msg.pollLbl}"})
+                document.querySelector("#voting_system_page").addEventListener('messagedialog-accept',
+                        function(e) { this.messagedialogConfirmed(e) }.bind(this))
             },
             fireSignal:function() {
                 this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
@@ -144,8 +144,7 @@
                         .header("Content-Type", "application/json").get(function(err, rawData){
                         this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
                         d3.selectAll(".numVotesClass").style("display", "block")
-                    }.bind(this)
-                );
+                    }.bind(this));
             },
             showAdminDialog:function() {
                 this.$.eventVSAdminDialog.show()
@@ -160,8 +159,8 @@
                     showMessageVS(this.optionVSSelected.content, "${msg.confirmOptionDialogCaption}", this.tagName, true);
                 }
             },
-            messagedialogConfirmed:function(e, detail) {
-                if(this.tagName === detail.callerId) {
+            messagedialogConfirmed:function(e) {
+                if(this.tagName === e.detail) {
                     this.submitVote()
                 }
             },
@@ -203,6 +202,13 @@
                 this.votevsResul = appMessageJSON
                 this.$.votevsResultDialog.show(appMessageJSON)
                 this.click(); //hack to refresh screen
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.eventvs = toJSON(rawData.response)
+                }.bind(this));
             }
             });
     </script>

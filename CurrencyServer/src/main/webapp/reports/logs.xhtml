@@ -19,7 +19,6 @@
         <script src="../resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
         <script src="../resources/js/utilsVS.js" type="text/javascript"></script>
         <script src="../resources/js/utils_js.vsp" type="text/javascript"></script>
-        <link rel="import" href="../resources/bower_components/iron-ajax/iron-ajax.html"/>
     </ui:define>
     <ui:define name="content">
         <div>
@@ -29,7 +28,6 @@
             <dom-module name="record-list">
                 <template>
                     <style></style>
-                    <iron-ajax id="ajax" auto="" url="{{url}}" last-response="{{logData}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
                     <div class="layout vertical center">
                         <div id="record_tableDiv" style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
                             <table class="table tableHeadervs" id="record_table">
@@ -51,11 +49,18 @@
                 <script> Polymer({
                     is:'record-list',
                     properties: {
-                        logData: {type:Object},
-                        url: {type:String, value: contextURL + '/rest/reports/logs'}
+                        url:{type:String, value: contextURL + '/rest/reports/logs', observer:'getHTTP'},
+                        logData: {type:Object}
                     },
                     ready: function() {
                         sendSignalVS({caption:"${msg.reportsPageTitle}"})
+                    },
+                    getHTTP: function (targetURL) {
+                        if(!targetURL) targetURL = this.url
+                        console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                        d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                            this.logData = toJSON(rawData.response)
+                        }.bind(this));
                     }
                 });</script>
             </dom-module>

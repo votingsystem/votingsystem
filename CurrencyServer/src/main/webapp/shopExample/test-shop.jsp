@@ -19,7 +19,6 @@
                 <div style="margin: 25px 0 0 0;font-size: 1.2em;"><b>${msg.readQRMsg}:</b></div>
                 <img src="{{qrCodeServiceUrl}}" alt="read it with your mobile"/>
             </div>
-            <iron-ajax id="ajax" last-response="{{messageDto}}" handle-as="json" url="{{transactionServiceURL}}"></iron-ajax>
             <div hidden="{{!messageDto}}" class="horizontal layout" style="border: 1px solid #ba0011; padding: 5px 10px 5px 10px; margin: 20px 0 0 0;">
                 <h3 style="min-width: 150px;">statusCode: <span style="color: #888;">{{messageDto.statusCode}}</span></h3>
                 <h3> - message: <span style="color: #888;">{{messageDto.message}}</span></h3>
@@ -32,7 +31,7 @@
             properties: {
                 paymentInfoServiceUrl:{type:String, observer:'paymentInfoServiceUrlChanged'},
                 qrCodeServiceUrl:{type:String},
-                transactionServiceURL:{type:String},
+                transactionServiceURL:{type:String, observer:'getHTTP'},
                 sessionId:{type:String, observer:'sessionIdChanged'},
                 transactionRequest:{type:Object, observer:'messageDtoChanged'},
                 messageDto:{type:Object, value:null, observer:'messageDtoChanged'}
@@ -47,12 +46,17 @@
             },
             sessionIdChanged: function() {
                 this.transactionServiceURL = contextURL + "/rest/shop/listenTransactionChanges/" + this.sessionId
-                console.log(this.tagName + " - sessionIdChanged - transactionServiceURL: " +  this.transactionServiceURL)
-                this.$.ajax.generateRequest()
             },
             ready: function() {
                 console.log(this.tagName + " - ready - sessionID: " + this.sessionId)
                 console.log(this.tagName + " - ready - paymentInfoServiceURL: " + this.paymentInfoServiceUrl)
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.messageDto = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

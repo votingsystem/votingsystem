@@ -53,7 +53,7 @@
                 this.timeStampDate = null
                 this.messageToUser = null
                 this.isClientToolConnected = (clientTool !== undefined)
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-msg',
                         function() {  this.isClientToolConnected = true }.bind(this))
             },
             smimeMessageContentChanged:function() {

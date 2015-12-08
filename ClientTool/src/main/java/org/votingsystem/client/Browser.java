@@ -235,7 +235,6 @@ public class Browser extends VBox implements BrowserVS, PasswordDialog.Listener 
     }
 
     public void fireCoreSignal(String name, Object data, boolean fireToAllTabs) {
-        //this.fire('iron-signal', {name: "vs-session-data", data: sessionDataJSON});
         try {
             Map coreSignal = new HashMap<>();
             coreSignal.put("name", name);

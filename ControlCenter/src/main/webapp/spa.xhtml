@@ -2,83 +2,65 @@
                 xmlns:h="http://java.sun.com/jsf/html"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 template="/WEB-INF/templates/basic.xhtml">
-  <ui:define name="head">
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta name="mobile-web-app-capable" content="yes"/>
-    <meta name="application-name" content="VotingSystem"/>
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="shortcut icon" type="image/png" href="./resources/images/icon_16/fa-bolt.png" />
-    <title><ui:insert name="title" /></title>
-    <h:outputStylesheet name="css/votingSystem.css" />
-    <script src="./resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-    <script src="./resources/js/utilsVS.js" type="text/javascript"></script>
-    <script src="./resources/js/utils_js.vsp" type="text/javascript"></script>
-    <link rel="import" href="./resources/elements.html"/>
-  </ui:define>
-  <ui:define name="content">
-    <div class="fullbleed layout vertical">
-        <template is="dom-bind" id="app">
-            <paper-drawer-panel id="paperDrawerPanel" force-narrow="true">
-                <paper-scroll-header-panel drawer="" fixed="">
-                    <paper-toolbar id="drawerToolbar">
-                        <div class="center horizontal layout flex">
-                            <div class="app-name">{{appTitle}}</div>
-                        </div>
-                    </paper-toolbar>
-                    <paper-menu class="list drawerToolbar" attr-for-selected="data-route" selected="[[route]]">
-                        <a hidden="{{!adminMenuHidden}}" data-route="eventVSElection" href="#{contextURL}/spa.xhtml#!/eventVSElection" on-click="onDataRouteClick">
-                            <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
-                        </a>
-                        <a data-route="feeds" href="#{contextURL}/spa.xhtml#!/subscriptionVS/feeds" on-click="onDataRouteClick">
-                            <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> ${msg.subscriptionLbl}
-                        </a>
-                        <a data-route="contact" href="#{contextURL}/spa.xhtml#!/app/contact" on-click="onDataRouteClick">
-                            <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
-                        </a>
-                    </paper-menu>
-                </paper-scroll-header-panel>
-                <div main="" >
-                    <div class="horizontal layout" style="margin:1px 0 0 0;">
-                        <div style="margin:0 30px 0 30px;">
-                            <i paper-drawer-toggle="" class="fa fa-navicon" style="font-size: 1.4em; color: #ba0011; cursor: pointer;" ></i>
-                        </div>
-                        <div id="searchDiv" hidden="{{searchHidden}}" style="display: none;">
-                            <div style="max-width: 300px;">
-                                <search-bar id="appBar" class="horizontal layout center end-justified"
-                                            on-search-request="performSearch"></search-bar>
-                            </div>
-                        </div>
+    <ui:define name="head">
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <meta name="mobile-web-app-capable" content="yes"/>
+        <meta name="application-name" content="VotingSystem"/>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <link rel="shortcut icon" type="image/png" href="./resources/images/icon_16/fa-bolt.png" />
+        <title><ui:insert name="title" /></title>
+        <link href="./resources/bower_components/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
+        <link href="./resources/css/votingSystem.css" media="all" rel="stylesheet" />
+        <script src="./resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+        <link href="./resources/bower_components/polymer/polymer.html" rel="import"/>
+        <link rel="import" href="./resources/bower_components/iron-flex-layout/classes/iron-flex-layout.html"/>
+        <script src="./resources/js/utilsVS.js" type="text/javascript"></script>
+        <script src="./resources/js/utils_js.vsp" type="text/javascript"></script>
+        <script src="./resources/bower_components/d3/d3.min.js" type="text/javascript"></script>
+        <link rel="import" href="./resources/bower_components/vs-html-echo/vs-html-echo.html"/>
+        <link rel="import" href="./element/search-bar.vsp"/>
+        <link rel="import" href="./element/alert-dialog.vsp"/>
+        <link rel="import" href="./resources/routing.xhtml"/>
+    </ui:define>
+    <ui:define name="content">
+        <div id="drawer" style="display: none;">
+            <div style="background-color: #ba0011; color: #f9f9f9;">
+                <div id="pageTitle" class="app-name" style="padding: 8px 0 8px 15px;font-size: 2em; font-weight: bold;"></div>
+            </div>
+            <div class="vertical layout flex" style="background-color: #fefefe;">
+                <a class="menuItem menuItemSelected" data-route="eventVSElection" href="#{contextURL}/spa.xhtml#!/eventVSElection">
+                    <i class="fa fa-envelope"></i> ${msg.electionSystemLbl}
+                </a>
+                <a class="menuItem menuItemSelected clientToolConnected" data-route="feeds" href="#{contextURL}/spa.xhtml#!/subscriptionVS/feeds">
+                    <i class="fa fa-rss"></i> ${msg.subscriptionLbl}
+                </a>
+                <a class="menuItem menuItemSelected" data-route="contact" href="#{contextURL}/spa.xhtml#!/app/contact">
+                    <i class="fa fa-phone"></i> ${msg.contactLbl}
+                </a>
+            </div>
+        </div>
+        <div id='main'>
+            <div class="horizontal layout" style="margin:1px 0 0 0;">
+                <div style="margin:0 30px 0 30px;">
+                    <i id="drawerButton" class="fa fa-navicon" style="font-size: 1.7em; color: #ba0011; cursor: pointer;"></i>
+                </div>
+                <div id="searchDiv" style="display: none;">
+                    <div style="max-width: 300px;">
+                        <search-bar id="searchBar" class="horizontal layout center end-justified"></search-bar>
                     </div>
-                    <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
+                </div>
+            </div>
+
+            <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
                         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
-                    <div id="mainContent" class="mainContent"></div>
-                </div>
-
-            </paper-drawer-panel>
-            <h:messages styleClass="messages"
-                        style="list-style: none; padding:0; margin:0;"
-                        errorClass="alert alert-error" infoClass="alert alert-success"
-                        warnClass="alert alert-warning" globalOnly="true"/>
-        </template>
+            <div id="mainContent" class="mainContent"></div>
+        </div>
         <alert-dialog id="_votingsystemMessageDialog"></alert-dialog>
-        <iron-signals id="ironSignals"></iron-signals>
-    </div>
-    <script>
-        (function(document) {
-            var app = document.querySelector('#app');
+        <script>
+            vs = {}
 
-            app.addEventListener('dom-change', function() {
-                console.log('spa.xhtml - dom-change');
-                app.searchHidden = true
-                app.appTitle = "${msg.appTitle}"
-            });
-
-            window.addEventListener('WebComponentsReady', function() {
-                console.log('spa.xhtml - WebComponentsReady - app.route: ' + app.route);
-            });
-
-            app.back = function() {
+            vs.back = function() {
                 history.back()
                 //there's a delay until location.href is updated with history.back()
                 setTimeout(function () {
@@ -86,34 +68,65 @@
                 }, 50);
             }
 
-            app.onDataRouteClick = function() {
-                var drawerPanel = document.querySelector('#paperDrawerPanel');
-                if (drawerPanel.narrow) {
-                    drawerPanel.closeDrawer();
-                }
-            };
+            d3.select("#drawerButton").on("click", function() {
+                d3.select("#drawer").style({display:'block'});
+                d3.event.stopPropagation();
+            })
 
-            app.loadMainContent = function(newContentNode, caption, searchVisible) {
-                var mainContentNode = document.querySelector('paper-drawer-panel').querySelector('#mainContent')
-                var beforeContentNode = Polymer.dom(mainContentNode).childNodes[0]
-                if(beforeContentNode) Polymer.dom(mainContentNode).removeChild(beforeContentNode)
-                Polymer.dom(mainContentNode).appendChild(newContentNode)
-                if(caption) sendSignalVS({caption:caption})
-                if(searchVisible === true) app.searchHidden = false
-                else app.searchHidden = true
+            d3.select("#voting_system_page").on('click', function(d, i) {
+                d3.select("#drawer").style({display:'none'});
+            })
+
+            vs.updateMenuView = function() {
+                var appTitle = "${msg.appTitle}"
+                d3.selectAll(".isAdminView").style("display", "none")
+                d3.selectAll(".isSuperUserView").style("display", "none")
+                if('admin' === menuType) {
+                    d3.select(".isAdminView").style("display", "block")
+                    appTitle = "${msg.adminPageTitle}"
+                } else if('superuser' === menuType) {
+                    d3.select(".isSuperUserView").style("display", "block")
+                    appTitle = "${msg.superUserTitle}"
+                }
+                d3.select("#pageTitle").text(appTitle)
             }
 
-            app.updateSearchMessage = function(searchMessage) {
+            vs.loadMainContent = function(newContentNode, caption, searchVisible) {
+                var mainContentNode = document.getElementById("mainContent")
+                if(mainContentNode.childNodes[0]) mainContentNode.removeChild(mainContentNode.childNodes[0])
+                mainContentNode.appendChild(newContentNode)
+                if('admin' === menuType) caption = caption + ' - ${msg.adminLbl}'
+                if('superuser' === menuType) caption = caption + ' - ${msg.superUserLbl}'
+                if(caption) sendSignalVS({caption:caption})
+                if(searchVisible === true) d3.select("#searchDiv").style("display", "block")
+                else d3.select("#searchDiv").style("display", "none")
+                d3.selectAll("#drawer .menuItem").each( function(d) {
+                    if(d3.select(this).attr("data-route") === vs.route){
+                        d3.select(this).classed("menuItemSelected", true)
+                    } else d3.select(this).classed("menuItemSelected", false)
+                })
+            }
+
+            vs.updateSearchMessage = function(searchMessage) {
                 if(searchMessage) {
                     document.querySelector("#pageInfoPanel").innerHTML = searchMessage
                     document.querySelector("#pageInfoPanel").style.display = "block"
                 } else document.querySelector("#pageInfoPanel").style.display = "none"
             }
 
-            app.scrollPageToTop = function() {
-                document.getElementById('mainContainer').scrollTop = 0;
+            vs.scrollPageToTop = function() {
+                document.getElementById('mainContent').scrollTop = 0;
             };
-        })(document);
-    </script>
-  </ui:define>
+
+            document.querySelector('#searchBar').addEventListener('search-request', function (e) {
+                console.log("spa.xhtml - search request - query:" + e.detail.query);
+            })
+
+            vs.performSearch = function(e) {
+                console.log("vs.performSearch - query: " + e.detail.query )
+            }
+
+            vs.updateMenuView()
+        </script>
+    </ui:define>
 </ui:composition>

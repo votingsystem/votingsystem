@@ -4,7 +4,6 @@
 
 <dom-module name="vs-cert">
     <template>
-        <iron-ajax auto url="{{url}}" last-response="{{certvs}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
         <reason-dialog id="reasonDialog" caption="${msg.cancelCertFormCaption}"></reason-dialog>
         <div class="layout vertical center center-justified">
             <div>
@@ -54,8 +53,7 @@
         Polymer({
             is:'vs-cert',
             properties: {
-                fabVisible:{type:Boolean, value:false},
-                url:{type:String},
+                url:{type:String, observer:'getHTTP'},
                 certvs:{type:Object, value:{}, observer:'certvsChanged'}
             },
             ready: function() {
@@ -100,8 +98,14 @@
                     console.log(this.tagName + " - certIssuerClicked: " + certURL)
                     this.certsSelectedStack.push(this.certvs)
                     this.url = certURL
-                    this.subcert = true
                 }
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.certvs = toJSON(rawData.response)
+                }.bind(this));
             }
         })
     </script>

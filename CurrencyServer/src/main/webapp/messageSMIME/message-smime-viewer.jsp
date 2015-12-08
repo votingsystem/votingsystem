@@ -1,8 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <dom-module name="message-smime-viewer">
     <template>
-        <iron-ajax auto id="ajax" url="{{url}}" handle-as="json" last-response="{{smimeMessageDto}}" method="get"
-                   content-type="application/json"></iron-ajax>
         <div id="messageViewer" class="layout vertical center center-justified" style="margin: 0px auto; max-width:800px;">
         </div>
     </template>
@@ -18,7 +16,7 @@
                 FROM_GROUP_TO_ALL_MEMBERS:{type:Object, value:null},
                 CURRENCY_CHANGE:{type:Object, value:null},
                 viewer: {type:String, value: ""},
-                url:{type:String, value:null},
+                url:{type:String, observer:'getHTTP'},
                 isClientToolConnected: {type:Boolean, value: false}
             },
             smimeMessageChanged: function() {
@@ -51,8 +49,15 @@
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.isClientToolConnected = (clientTool !== undefined)
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-msg',
                         function() {  this.isClientToolConnected = true }.bind(this))
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.smimeMessageDto = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

@@ -3,8 +3,6 @@
 <dom-module name="votevs-result-dialog">
     <template>
         <div id="modalDialog" class="modalDialog">
-            <iron-signals on-iron-signal-messagedialog-accept="cancellationConfirmed"
-                          on-iron-signal-messagedialog-closed="confirmDialogClosed"></iron-signals>
             <div>
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
@@ -71,6 +69,10 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
+                document.querySelector("#voting_system_page").addEventListener('messagedialog-accept',
+                        function(e) { this.cancellationConfirmed(e) }.bind(this))
+                document.querySelector("#voting_system_page").addEventListener('messagedialog-closed',
+                        function(e) { this.confirmDialogClosed(e) }.bind(this))
             },
             show: function(appMessageJSON) {
                 console.log(this.tagName + " - show - appMessageJSON: " + appMessageJSON)
@@ -132,7 +134,7 @@
                 }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             },
-            cancellationConfirmed: function() {
+            cancellationConfirmed: function(e) {
                 var operationVS = new OperationVS(Operation.CANCEL_VOTE)
                 operationVS.message = this.hashCertVSBase64
                 operationVS.serviceURL = contextURL + "/rest/voteVS/cancel"

@@ -61,7 +61,8 @@
             },
             userSelected: function(e) {
                 console.log(this.tagName + " - userSelected - userId: " + this.subscription.uservs.id)
-                this.fire('iron-signal', {name: "uservs-selected", data: this.subscription.uservs.id});
+                if(document.querySelector("#voting_system_page"))
+                    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('uservs-selected', {detail:this.subscription.uservs.id}))
             }
         });
     </script>

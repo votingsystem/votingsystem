@@ -10,8 +10,6 @@
                 box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); margin: 10px;
             }
         </style>
-        <iron-ajax auto id="ajax" url="{{url}}" last-response="{{eventListDto}}" handle-as="json"
-                   content-type="application/json"></iron-ajax>
         <div>
             <div class="layout horizontal center center-justified">
                 <select id="eventVSStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
@@ -55,7 +53,7 @@
             is:'eventvs-election-list',
             properties: {
                 eventListDto:{type:Object, value:{}, observer:'eventListDtoChanged'},
-                url:{type:String},
+                url:{type:String, observer:'getHTTP'},
                 eventVSState:{type:String}
             },
             ready:function(e) {
@@ -94,8 +92,7 @@
                         optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
-                this.$.ajax.url = targetURL
-                this.$.ajax.generateRequest()
+                this.url = targetURL
             },
             showEventVSDetails :  function(e) {
                 console.log(this.tagName + " - showEventVSDetails")
@@ -134,6 +131,13 @@
                 var newURL = setURLParameter(window.location.href, "eventVSState",  this.eventVSState)
                 history.pushState(null, null, newURL);
                 this.url = targetURL
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.eventListDto = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

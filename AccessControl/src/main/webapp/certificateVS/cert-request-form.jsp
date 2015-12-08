@@ -5,7 +5,6 @@
     <style>
     .messageToUser { font-weight: bold;  margin:10px auto 10px auto; background: #f9f9f9; padding:10px 20px 10px 20px; max-width: 600px;}
     </style>
-    <iron-signals on-iron-signal-messagedialog-accept="messagedialogAccept"></iron-signals>
     <div hidden="{{!messageToUser}}">
         <div class="messageToUser layout horizontal center center-justified">
             <div id="messageToUser">{{messageToUser}}</div>
@@ -46,6 +45,8 @@
         },
         ready: function() {
             console.log(this.tagName + " - ready")
+            document.querySelector("#voting_system_page").addEventListener('messagedialog-accept',
+                    function(e) { this.messagedialogAccept(e) }.bind(this))
         },
         submitForm: function () {
             console.log("submitForm")
@@ -81,10 +82,10 @@
                     "<br/><b>${msg.surnameLbl}:</b> " + this.$.surname.value.toUpperCase() +
                     "<br/><b>${msg.phoneLbl}:</b> " + this.$.phone.value +
                     "<br/><b>${msg.emailLbl}:</b> " + this.$.email.value,
-                    "${msg.checkInputMsg}", null, true)
+                    "${msg.checkInputMsg}", this.tagName, true)
         },
-        messagedialogAccept: function (e, detail, sender) {
-            console.log("messagedialogAccept - callerId:" + detail.callerId)
+        messagedialogAccept: function (e) {
+            console.log("messagedialogAccept - callerId:" + e.detail)
             var operationVS = new OperationVS(Operation.CERT_USER_NEW)
             operationVS.serviceURL = contextURL + "/rest/csr/request"
             operationVS.signedMessageSubject = "${msg.certRequestLbl}"

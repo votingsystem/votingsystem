@@ -10,7 +10,6 @@
             .tagDesc { background: #6c0404; color: #f9f9f9; padding: 5px;text-align: center; }
             .sectionHeader { font-size: 1.8em; font-weight: bold; color: #ba0011;text-align: center;text-decoration: underline; }
         </style>
-        <iron-ajax auto id="ajax" url="{{url}}" last-response="{{currencyIssuedDto}}" handle-as="json" content-type="application/json"></iron-ajax>
         <div hidden="{{okListHidden}}">
             <div class="sectionHeader">${msg.activesLbl}</div>
             <div class="layout flex horizontal wrap around-justified">
@@ -68,7 +67,7 @@
         Polymer({
             is:'currency-issued',
             properties: {
-                url: {type:String},
+                url:{type:String, observer:'getHTTP'},
                 currencyIssuedDto:{type:Object, observer:'currencyIssuedDtoChanged'}
             },
             ready: function() {
@@ -80,6 +79,13 @@
                 this.expendedListHidden = (this.currencyIssuedDto.expendedList.length == 0)
                 this.lapsedListHidden = (this.currencyIssuedDto.lapsedList.length == 0)
                 this.errorListHidden = (this.currencyIssuedDto.errorList.length == 0)
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.currencyIssuedDto = toJSON(rawData.response)
+                }.bind(this));
             }
         })
     </script>

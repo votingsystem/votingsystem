@@ -9,7 +9,6 @@
                 color: #888;
             }
         </style>
-        <iron-ajax auto url="{{url}}" last-response="{{eventvs}}" handle-as="json" content-type="application/json"></iron-ajax>
         <div style="margin: 0px 30px;">
             <div hidden="{{!isActive}}" style='color: #888;'>{{getElapsedTime(eventvs.dateFinish)}}</div>
             <div class="layout horizontal center center-justified" style="width:100%;">
@@ -41,7 +40,7 @@
                 </div>
 
                 <div>
-                    <div style="font-size: 1.4em; font-weight: bold; text-decoration: underline; color:#888;
+                    <div on-click="update" style="font-size: 1.4em; font-weight: bold; text-decoration: underline; color:#888;
                                         margin: 20px 0 10px 0;">${msg.pollFieldLegend}:</div>
                     <template is="dom-repeat" items="{{fieldsEventVS}}">
                         <div class="horizontal layout center center-justified">
@@ -60,7 +59,8 @@
         Polymer({
             is:'eventvs-election',
             properties: {
-                eventvs:{type:Object, observer:'eventvsChanged'
+                url:{type:String, observer:'getHTTP'},
+                eventvs:{type:Object, observer:'eventvsChanged'}
             },
             ready: function() {
                 console.log(this.tagName + "- ready")
@@ -77,6 +77,9 @@
             },
             getElapsedTime: function(dateStamp) {
                 return new Date(dateStamp).getElapsedTime() + " ${msg.toCloseLbl}"
+            },
+            getOptionClass: function(item) {
+                return item
             },
             eventvsChanged:function() {
                 console.log("eventvsChanged - eventvs: " + this.eventvs.state)
@@ -101,9 +104,19 @@
                 d3.xhr(contextURL + "/rest/eventVSElection/id/" + this.eventvs.id + "/stats")
                         .header("Content-Type", "application/json").get(function(err, rawData){
                             this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
-                            d3.selectAll(".numVotesClass").style("display", "block")
+                            this.async(this.update)
                         }.bind(this)
                 );
+            },
+            update: function (targetURL) {
+                d3.selectAll(".numVotesClass").style("display", "block")
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.eventvs = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

@@ -2,16 +2,15 @@
 
 <dom-module name="uservs-viewer">
     <template>
-        <iron-ajax auto id="ajax" url="{{url}}" last-response="{{uservsDto}}" handle-as="json" content-type="application/json"></iron-ajax>
     </template>
     <script>
         Polymer({
             is:'uservs-viewer',
             properties: {
+                url:{type:String, observer:'getHTTP'},
                 groupvsViewer: {type:Object},
                 uservsViewer: {type:Object},
                 uservsDto: {type:Object, observer:'uservsDtoChanged'},
-                url: {type:String}
             },
             ready: function() { console.log(this.tagName + " - ready")},
             uservsDtoChanged: function() {
@@ -29,6 +28,13 @@
                         vs.loadMainContent(uservsViewer)
                     });
                 }
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.uservsDto = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

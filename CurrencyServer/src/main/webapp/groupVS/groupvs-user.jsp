@@ -5,7 +5,6 @@
 <dom-module name="groupvs-user">
     <template>
         <div id="modalDialog" class="modalDialog">
-            <iron-ajax id="ajax" url="{{url}}" last-response="{{subscriptionDto}}" handle-as="json" content-type="application/json"></iron-ajax>
             <div style="height: 400px;">
 
                 <div class="layout horizontal center center-justified">
@@ -55,6 +54,7 @@
         Polymer({
             is:'groupvs-user',
             properties: {
+                url:{type:String, observer:'getHTTP'},
                 subscriptionDto: {type:Object, observer:'subscriptionDtoChanged'},
                 isClientToolConnected: {type:Boolean},
                 isActive: {type:Boolean},
@@ -62,7 +62,7 @@
             },
             ready:function(e) {
                 this.isClientToolConnected = (clientTool !== undefined)
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-connected',
+                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-msg',
                         function() {  this.isClientToolConnected = true }.bind(this))
                 this.$.reasonDialog.addEventListener('on-submit', function (e) {
                     console.log("deActivateUser")
@@ -84,7 +84,8 @@
                 var caption = '${msg.deActivateUserERRORLbl}'
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     caption = "${msg.deActivateUserOKLbl}"
-                    this.fire('iron-signal', {name: "refresh-uservs-list", data: {uservs: this.userId}});
+                    if(document.querySelector("#voting_system_page"))
+                        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('refresh-uservs-list', {uservs: this.userId}))
                     this.close()
                 }
                 showMessageVS(appMessageJSON.message, caption)
@@ -120,8 +121,7 @@
                 if(baseURL && userId) {
                     this.subscriptionDataURLPrefix = baseURL
                     this.userId = userId
-                    this.$.ajax.url = this.subscriptionDataURLPrefix + "/" + this.userId
-                    this.$.ajax.generateRequest()
+                    this.url = this.subscriptionDataURLPrefix + "/" + this.userId
                 }
                 this.$.modalDialog.style.opacity = 1
                 this.$.modalDialog.style['pointer-events'] = 'auto'
@@ -145,7 +145,8 @@
                     var caption = '${msg.activateUserERRORLbl}'
                     if (ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         caption = "${msg.activateUserOKLbl}"
-                        this.fire('iron-signal', {name: "refresh-uservs-list", data: {uservs: this.userId}})
+                        if(document.querySelector("#voting_system_page"))
+                            document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('refresh-uservs-list', {uservs: this.userId}))
                         this.close()
                     }
                     showMessageVS(appMessageJSON.message, caption)
@@ -157,6 +158,13 @@
             close: function() {
                 this.$.modalDialog.style.opacity = 0
                 this.$.modalDialog.style['pointer-events'] = 'none'
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.subscriptionDto = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>

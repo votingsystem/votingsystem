@@ -2,8 +2,6 @@
 
 <dom-module name="vs-reports">
     <template>
-        <iron-ajax auto id="ajax" url="{{url}}" last-response="{{reportsInfoDto}}" handle-as="json" content-type="application/json"></iron-ajax>
-
         <div class="layout vertical center center-justified" style="max-width:1000px; padding:20px 30px 0px 30px;">
             <div>
                 <div style="margin:20px 0px;">
@@ -40,8 +38,8 @@
     Polymer({
         is:'vs-reports',
         properties: {
-            reportsInfoDto: {type:Object},
-            url: {type:String, value: contextURL + '/rest/reports'}
+            url:{type:String, value: contextURL + '/rest/reports', observer:'getHTTP'},
+            reportsInfoDto: {type:Object}
         },
         ready: function() { },
         getPeriodDescription: function(timePeriod) {
@@ -50,6 +48,13 @@
         getPeriodReportURL: function(timePeriod) {
             var dateFrom = new Date(timePeriod.dateFrom)
             return contextURL + "/rest/reports/" + dateFrom.format() + "/week"
+        },
+        getHTTP: function (targetURL) {
+            if(!targetURL) targetURL = this.url
+            console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+            d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                this.reportsInfoDto = toJSON(rawData.response)
+            }.bind(this));
         }
     });
 </script>

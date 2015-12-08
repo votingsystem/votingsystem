@@ -22,7 +22,6 @@
             }
             .rowvs div {  text-align:center; }
         </style>
-        <iron-ajax id="ajax" auto url="{{url}}" last-response="{{balanceList}}" handle-as="json" method="get" content-type="application/json"></iron-ajax>
         <!--JavaFX Webkit gives problems with tables and templates -->
         <div style="margin: 0px auto 0px auto; max-width: 1200px; overflow:auto;">
             <div class="tableHeadervs layout horizontal center center-justified">
@@ -47,6 +46,9 @@
     <script>
         Polymer({
             is:'balance-list',
+            properties: {
+                url:{type:String, observer:'getHTTP'}
+            },
             ready: function() {},
             tagDescription: function(tagName) {
                 switch (tagName) {
@@ -56,6 +58,13 @@
             },
             formatAmount: function(amount) {
                 if(typeof amount == 'number') return amount.toFixed(2)
+            },
+            getHTTP: function (targetURL) {
+                if(!targetURL) targetURL = this.url
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
+                    this.balanceList = toJSON(rawData.response)
+                }.bind(this));
             }
         });
     </script>
