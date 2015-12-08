@@ -6,21 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="application-name" content="VotingSystem"/>
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="shortcut icon" type="image/png" href="./resources/images/icon_16/fa-money.png" />
+    <link rel="shortcut icon" type="image/png" href="./resources/images/icon_16/fa-credit-card.png" />
     <title><ui:insert name="title" /></title>
-    <h:outputStylesheet name="css/currency.css" />
+    <h:outputStylesheet name="css/votingSystem.css" />
     <script src="./resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
     <script src="./resources/js/utilsVS.js" type="text/javascript"></script>
     <script src="./resources/js/utils_js.vsp" type="text/javascript"></script>
-      <script type="text/javascript" src="./resources/bower_components/d3/d3.min.js"></script>
     <link rel="import" href="./resources/elements.html"/>
-    <link rel="import" href="./element/search-bar.vsp"/>
   </ui:define>
   <ui:define name="content">
     <div class="fullbleed layout vertical">
         <template is="dom-bind" id="app">
-
             <paper-drawer-panel id="paperDrawerPanel" force-narrow="true">
                 <paper-scroll-header-panel drawer="" fixed="">
                     <paper-toolbar id="drawerToolbar">
@@ -29,39 +25,35 @@
                         </div>
                     </paper-toolbar>
                     <paper-menu class="list drawerToolbar" attr-for-selected="data-route" selected="[[route]]">
-                        <a data-route="groupVS" href="#{contextURL}/spa.xhtml#!/groupVS" on-click="onDataRouteClick">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupvsLbl}
+                        <a hidden="{{!adminMenuHidden}}" data-route="eventVSElection" href="#{contextURL}/spa.xhtml#!/eventVSElection" on-click="onDataRouteClick">
+                            <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.electionSystemLbl}
                         </a>
-                        <a data-route="userVSDashboard" href="#{contextURL}/spa.xhtml#!/app/userVSDashboard" on-click="onDataRouteClick">
-                            <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
+                        <a hidden="{{!adminMenuHidden}}" data-route="representative" href="#{contextURL}/spa.xhtml#!/representative" on-click="onDataRouteClick">
+                            <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.representativesPageLbl}
                         </a>
-                        <a data-route="userVS" href="#{contextURL}/spa.xhtml#!/userVS/search" on-click="onDataRouteClick">
-                            <i class="fa fa-user" style="margin:0px 10px 0px 0px;"></i> ${msg.locateUserVSLbl}
+                        <a hidden="{{clientToolConnected}}" data-route="tools" href="#{contextURL}/spa.xhtml#!/app/tools" on-click="onDataRouteClick">
+                            <i class="fa fa-cogs" style="margin:0px 10px 0px 0px;"></i> ${msg.toolsLbl}
                         </a>
-                        <a data-route="currencyRequest" href="#{contextURL}/spa.xhtml#!/currency/request" on-click="onDataRouteClick">
-                            <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> ${msg.doCurrencyRequestLbl}
-                        </a>
-                        <a hidden="{{!isAdminView}}" data-route="newGroupVS" href="#{contextURL}/spa.xhtml#!/newGroupVS" on-click="onDataRouteClick">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupVSLbl}
-                        </a>
-                        <a hidden="{{!isSuperUserView}}" data-route="newGroupVS" href="#{contextURL}/spa.xhtml#!/userVS/newBankVS" on-click="onDataRouteClick">
-                            <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankVSLbl}
-                        </a>
-                        <a hidden="{{!isSuperUserView}}" data-route="certificateVS" href="/#{contextURL}/spa.xhtml#!certificateVS/certs" on-click="onDataRouteClick">
-                            <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
-                        </a>
-                        <a data-route="reports" href="#{contextURL}/spa.xhtml#!/reports" on-click="onDataRouteClick">
-                            <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> ${msg.reportsPageTitle}
-                        </a>
-                        <a data-route="docs" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/app/index.xhtml&amp;caption=${msg.docsLbl}" on-click="onDataRouteClick">
-                            <i class="fa fa-info" style="margin:0px 10px 0px 0px;"></i> ${msg.docsLbl}
-                        </a>
-                        <a data-route="contact" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/app/contact.xhtml&amp;caption=${msg.contactLbl}" on-click="onDataRouteClick">
+                        <div hidden="{{clientToolConnected}}">
+                            <a hidden="{{!adminMenuHidden}}" data-route="feeds" href="#{contextURL}/spa.xhtml#!/subscriptionVS/feeds" on-click="onDataRouteClick">
+                                <i class="fa fa-rss" style="margin:0px 10px 0px 0px;"></i> ${msg.subscriptionLbl}
+                            </a>
+                        </div>
+                        <a hidden="{{!adminMenuHidden}}" data-route="contact" href="#{contextURL}/spa.xhtml#!/app/contact" on-click="onDataRouteClick">
                             <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
                         </a>
+                        <a hidden="{{adminMenuHidden}}" data-route="publish_election" href="/publish_election" on-click="onDataRouteClick">
+                            <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.publishVoteLbl}
+                        </a>
+                        <a hidden="{{adminMenuHidden}}" data-route="new_representative" href="/new_representative" on-click="onDataRouteClick">
+                            <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.newRepresentativeLbl}
+                        </a>
+                        <a hidden="{{adminMenuHidden}}" data-route="edit_representative" href="/representative/edit" on-click="onDataRouteClick">
+                            <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.editRepresentativeLbl}
+                        </a>
+
                     </paper-menu>
                 </paper-scroll-header-panel>
-
                 <div main="" >
                     <div class="horizontal layout" style="margin:1px 0 0 0;">
                         <div style="margin:0 30px 0 30px;">
@@ -79,7 +71,6 @@
 
                     <div id="mainContent" class="mainContent"></div>
                 </div>
-
             </paper-drawer-panel>
             <h:messages styleClass="messages"
                         style="list-style: none; padding:0; margin:0;"
@@ -90,11 +81,21 @@
         <iron-signals id="ironSignals"></iron-signals>
     </div>
     <script>
-        document.addEventListener('WebComponentsReady', function() {
-            console.log('spa.xhtml - WebComponentsReady');
-            var app = Polymer.dom(document).querySelector('#app');
-            app.searchHidden = true
-            app.$.searchDiv.style.display = 'block'
+        (function(document) {
+            var app = document.querySelector('#app');
+
+            app.addEventListener('dom-change', function() {
+                console.log('spa.xhtml - dom-change');
+                app.searchHidden = true
+            });
+
+            window.addEventListener('WebComponentsReady', function() {
+                console.log('spa.xhtml - WebComponentsReady - app.route: ' + app.route);
+                if (checkIfClientToolIsConnected()) {
+                    app.clientToolConnected = true
+                }
+            });
+
             app.back = function() {
                 history.back()
                 //there's a delay until location.href is updated with history.back()
@@ -102,14 +103,16 @@
                     page(window.location.href.split("\\#!")[1])
                 }, 50);
             }
+
             app.onDataRouteClick = function() {
-                if (this.$.paperDrawerPanel.narrow) {
-                    this.$.paperDrawerPanel.closeDrawer();
+                var drawerPanel = document.querySelector('#paperDrawerPanel');
+                if (drawerPanel.narrow) {
+                    drawerPanel.closeDrawer();
                 }
             };
 
             app.loadMainContent = function(newContentNode, caption, searchVisible) {
-                var mainContentNode = app.$.mainContent
+                var mainContentNode = document.querySelector('paper-drawer-panel').querySelector('#mainContent')
                 var beforeContentNode = Polymer.dom(mainContentNode).childNodes[0]
                 if(beforeContentNode) Polymer.dom(mainContentNode).removeChild(beforeContentNode)
                 Polymer.dom(mainContentNode).appendChild(newContentNode)
@@ -122,17 +125,10 @@
 
             app.updateMenuView = function() {
                 app.appTitle = "${msg.appTitle}"
-                app.isAdminView = false;
-                app.isSuperUserView = false;
-                app.isUserView = false;
+                app.adminMenuHidden = true;
                 if('admin' === menuType) {
-                    app.isAdminView = true;
-                    app.appTitle = "${msg.adminPageTitle}"
-                } else if('superuser' === menuType) {
-                    this.isSuperUserView = true;
-                    app.appTitle = "${msg.superUserTitle}"
-                } else {
-                    this.isUserView = true;
+                    app.adminMenuHidden = false;
+                    app.appTitle = app.appTitle + " - ${msg.adminPageTitle}"
                 }
             }
 
@@ -143,21 +139,12 @@
                 } else document.querySelector("#pageInfoPanel").style.display = "none"
             }
 
-            app.performSearch = function(e) {
-                console.log("app.performSearch - query: " + e.detail.query )
-            }
-
-            document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
-                console.log("spa.xhtml - user-clicked")
-                page.show(contextURL + "/rest/userVS/id/" + e.detail.id)
-            })
-
             app.scrollPageToTop = function() {
                 document.getElementById('mainContainer').scrollTop = 0;
             };
 
             app.updateMenuView()
-        });
+        })(document);
     </script>
   </ui:define>
 </ui:composition>

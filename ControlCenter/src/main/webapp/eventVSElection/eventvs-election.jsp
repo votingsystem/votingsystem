@@ -1,19 +1,14 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="../resources/bower_components/iron-media-query/iron-media-query.html" rel="import"/>
-<link href="../resources/bower_components/paper-tabs/paper-tabs.html" rel="import"/>
-<link href="eventvs-election-stats.vsp" rel="import"/>
-
 <dom-module name="eventvs-election">
     <template>
         <style>
-            paper-tabs, paper-toolbar {
-                background-color: #ba0011;
-                color: #fff;
-                box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
+            .numVotesClass{
+                font-size: 3em;
+                font-style: italic;
+                color: #888;
             }
         </style>
-        <iron-media-query query="max-width: 600px" query-matches="{{smallScreen}}"></iron-media-query>
         <iron-ajax auto url="{{url}}" last-response="{{eventvs}}" handle-as="json" content-type="application/json"></iron-ajax>
         <div style="margin: 0px 30px;">
             <div hidden="{{!isActive}}" style='color: #888;'>{{getElapsedTime(eventvs.dateFinish)}}</div>
@@ -45,28 +40,17 @@
                     </div>
                 </div>
 
-                <div class="horizontal layout" hidden="{{!smallScreen}}" style="margin: 20px 0 0 0;">
-                    <paper-tabs selected="{{selectedTab}}" style="width: 100%; margin: 0 0 10px 0;">
-                        <paper-tab>${msg.pollFieldLegend}</paper-tab>
-                        <paper-tab>${msg.resultsLbl}</paper-tab>
-                    </paper-tabs>
-                </div>
-
-                <div class="horizontal layout">
-                    <div hidden="{{optionsDivHidden}}" style="width: 100%; display: block;">
-                        <div>
-                            <div style="font-size: 1.4em; font-weight: bold; text-decoration: underline; color:#888;
+                <div>
+                    <div style="font-size: 1.4em; font-weight: bold; text-decoration: underline; color:#888;
                                         margin: 20px 0 10px 0;">${msg.pollFieldLegend}:</div>
-                            <template is="dom-repeat" items="{{eventvs.fieldsEventVS}}">
-                                <div class="voteOption" style="width: 90%;margin: 0px auto 15px auto;
-                                            font-size: 1.3em; font-weight: bold;">
-                                    - <span>{{item.content}}</span>
-                                </div>
-                            </template>
+                    <template is="dom-repeat" items="{{fieldsEventVS}}">
+                        <div class="horizontal layout center center-justified">
+                            <div class="voteOption" style="font-size: 2em; font-weight: bold;">
+                                - {{item.content}}
+                            </div>
+                            <div class="numVotesClass flex" style="display: none;margin:0 0 0 20px;">{{item.numVotesVS}} ${msg.votesLbl}</div>
                         </div>
-                    </div>
-                    <div id="statsDiv" hidden="{{statsDivHidden}}" class="vertical layout center center-justified">
-                        <eventvs-election-stats id="electionStats" eventvs-id="{{eventvs.id}}"></eventvs-election-stats>
+                    </template>
                     </div>
                 </div>
             </div>
@@ -76,13 +60,10 @@
         Polymer({
             is:'eventvs-election',
             properties: {
-                eventvs:{type:Object, observer:'eventvsChanged'},
-                smallScreen:{type:Boolean, value:false, observer:'smallScreenChanged'},
-                selectedTab:{type:Number, value:0, observer:'selectedTabChanged'}
+                eventvs:{type:Object, observer:'eventvsChanged'
             },
             ready: function() {
                 console.log(this.tagName + "- ready")
-                this.statsDivHidden = false
             },
             fireSignal:function() {
                 this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
@@ -97,29 +78,7 @@
             getElapsedTime: function(dateStamp) {
                 return new Date(dateStamp).getElapsedTime() + " ${msg.toCloseLbl}"
             },
-            selectedTabChanged:function() {
-                console.log("selectedTabChanged - selectedTab: " + this.selectedTab)
-                if(this.selectedTab === 0) {
-                    this.optionsDivHidden = false
-                    this.statsDivHidden = true
-                } else {
-                    this.optionsDivHidden = true
-                    this.statsDivHidden = false
-                }
-                if(!this.smallScreen) {
-                    this.optionsDivHidden = false
-                    this.statsDivHidden = false
-                }
-            },
-            smallScreenChanged:function() {
-                console.log("smallScreenChanged - smallScreen: " + this.smallScreen)
-                this.selectedTabChanged()
-                if(this.smallScreen) {
-                    this.eventStateRowClass = "vertical layout flex"
-                } else this.eventStateRowClass = "horizontal layout flex"
-            },
             eventvsChanged:function() {
-                this.$.electionStats
                 console.log("eventvsChanged - eventvs: " + this.eventvs.state)
                 this.optionVSSelected = null
                 this.dateFinish = new Date(this.eventvs.dateFinish)
@@ -139,7 +98,12 @@
                 if('admin' === menuType) {
                     if(this.eventvs.state === 'ACTIVE' || this.eventvs.state === 'PENDING') this.adminMenuHidden = false
                 }
-                this.$.electionStats.eventvsId = this.eventvs.id
+                d3.xhr(contextURL + "/rest/eventVSElection/id/" + this.eventvs.id + "/stats")
+                        .header("Content-Type", "application/json").get(function(err, rawData){
+                            this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
+                            d3.selectAll(".numVotesClass").style("display", "block")
+                        }.bind(this)
+                );
             }
         });
     </script>

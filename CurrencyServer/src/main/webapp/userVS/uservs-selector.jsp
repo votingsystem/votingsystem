@@ -16,10 +16,10 @@
         <iron-localstorage id="localstorage" name="contacts-localstorage" value="{{contacts}}"></iron-localstorage>
         <iron-ajax id="ajax" url="{{url}}" last-response="{{userListDto}}" handle-as="json" content-type="application/json"></iron-ajax>
         <div class="vertical layout center">
-            <div hidden={{!contactSelector}} class="horizontal layout center center-justified" style="margin:-10px 0 20px 0;">
-                <div id="searchDiv" class="linkVS" on-click="setSearchView"
+            <div hidden={{!contactSelector}} class="horizontal layout center center-justified" style="margin:-10px 0 20px 0; cursor: pointer;">
+                <div id="searchDiv" on-click="setSearchView"
                      style="font-weight: bold; font-size: 1.1em; margin:0 40px 0 0;">${msg.userSearchLbl}</div>
-                <div id="contactDiv" class="linkVS" on-click="setContactsView" style="font-weight: bold; font-size: 1.1em;">${msg.contactsLbl}</div>
+                <div id="contactDiv" on-click="setContactsView" style="font-weight: bold; font-size: 1.1em; cursor: pointer;">${msg.contactsLbl}</div>
             </div>
 
             <div hidden="{{!modeSearch}}" class="horizontal layout" style="width: 100%;">

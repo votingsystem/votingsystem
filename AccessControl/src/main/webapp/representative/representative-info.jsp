@@ -4,17 +4,11 @@
 <link href="representative-select-dialog.vsp" rel="import"/>
 <link href="representative-request-accreditations-dialog.vsp" rel="import"/>
 <link href="representative-request-votinghistory-dialog.vsp" rel="import"/>
-<link href="../resources/bower_components/paper-tabs/paper-tabs.html" rel="import"/>
 
 <dom-module name="representative-info">
     <template>
         <style>
             .tabContent { margin:0px auto 0px auto; width:auto; }
-            paper-tabs, paper-toolbar {
-                background-color: #ba0011;
-                color: #fff;
-                box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
-            }
             .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px; text-align: center;}
             .representativeNumRepHeader { text-overflow: ellipsis; color:#888;}
         </style>
@@ -35,14 +29,16 @@
                     </div>
                 </div>
             </div>
-            <div style="margin:0px auto 0px auto;">
-                <div class="horizontal layout" style="margin: 20px 0 0 0;">
-                    <paper-tabs selected="{{selectedTab}}" style="width: 100%; margin: 0 0 10px 0;">
-                        <paper-tab>${msg.profileLbl}</paper-tab>
-                        <paper-tab>${msg.votingHistoryLbl}</paper-tab>
-                    </paper-tabs>
+            <div style="margin: 20px 20px 0 20px;">
+                <div hidden={{!smallScreen}} class="horizontal layout"
+                     style="cursor: pointer;padding:5px 0 0 0;background-color: #ba0011;color:#fefefe;">
+                    <div id="profileDiv" on-click="setProfileView" style="width: 100%;font-weight: bold; font-size: 1.1em;border-bottom: 3px orange solid;" class="horizontal layout center-justified">
+                        <div>${msg.profileLbl}</div>
+                    </div>
+                    <div id="votingHistoryDiv" on-click="setVotingHistoryView" style="width: 100%;font-weight: bold; font-size: 1.1em;" class="horizontal layout center-justified">
+                        <div>${msg.votingHistoryLbl}</div>
+                    </div>
                 </div>
-
                 <div hidden="{{votingTabSelected}}" class="tabContent">
                     <div class="layout horizontal">
                         <div hidden="{{!representative.imageURL}}">
@@ -85,7 +81,6 @@
             is:'representative-info',
             properties: {
                 representative:{type:Object, value:{}, observer:'representativeChanged'},
-                selectedTab:{type:Number, value:0, observer:'selectedTabChanged'},
                 isAdmin:{computed:'_checkIfAdmin(representative)'}
             },
             requestAccreditations:function(){
@@ -98,17 +93,25 @@
                 return 'admin' === menuType
             },
             setProfileView:function() {
-                this.selectedTab = 'profile'
+                this.modeProfile = true
+                this.modeHistoryView = false
+                this.selectedTabChanged()
             },
             setVotingHistoryView:function() {
-                this.selectedTab = 'votingHistory'
+                this.modeProfile = false
+                this.modeHistoryView = true
+                this.selectedTabChanged()
             },
             selectedTabChanged:function() {
-                console.log(this.tagName + " selectedTabChanged - selectedTab: " + this.selectedTab)
-                if(this.selectedTab === 0) {
+                console.log(this.tagName + " selectedTabChanged")
+                this.$.profileDiv.style['border-bottom'] = "0px orange solid"
+                this.$.votingHistoryDiv.style['border-bottom'] = "0px orange solid"
+                if(this.modeProfile === true) {
                     this.votingTabSelected = false
+                    this.$.profileDiv.style['border-bottom'] = "3px orange solid"
                 } else {
                     this.votingTabSelected = true
+                    this.$.votingHistoryDiv.style['border-bottom'] = "3px orange solid"
                 }
             },
             decodeBase64:function(base64EncodedString) {

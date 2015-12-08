@@ -60,8 +60,8 @@
             },
             showRepresentativeDetails :  function(e) {
                 console.log(this.tagName + " - showRepresentativeDetails")
-                app.representative = e.model.item;
-                page("/rest/representative/id/" + app.representative.id)
+                vs.representative = e.model.item;
+                page("/rest/representative/id/" + vs.representative.id)
             }
         });
     </script>

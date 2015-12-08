@@ -74,7 +74,7 @@
                 <div style="position: absolute; top: 0px; right: 0px;">
                     <i class="fa fa-times closeIcon" on-click="closeDialog"></i>
                 </div>
-                <vs-cert id="certDetails" fab-visible="true" cert="{{cert}}"></vs-cert>
+                <vs-cert id="certDetails" cert="{{cert}}"></vs-cert>
             </div>
         </div>
     </template>

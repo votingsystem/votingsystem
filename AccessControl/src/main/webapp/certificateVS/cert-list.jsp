@@ -23,7 +23,7 @@
         </style>
 
         <iron-ajax id="ajax" url="{{url}}" handle-as="json" content-type="application/json" last-response="{{certListDto}}"></iron-ajax>
-        <div hidden="{{!certDetailsHidden}}">
+        <div>
             <div class="layout horizontal center center-justified">
                 <select id="certTypeSelect" class="form-control" style="margin:0px auto 0px auto;color:black;
                                 max-width: 400px;" on-change="certTypeSelect">
@@ -69,8 +69,13 @@
                       first="${msg.firstLbl}" last="${msg.lastLbl}"
                       offset="{{certListDto.offset}}" total="{{certListDto.totalCount}}"></vs-pager>
         </div>
-        <div hidden="{{certDetailsHidden}}">
-            <vs-cert id="certDetails" fab-visible="true" cert="{{cert}}" on-cert-closed="closeCertDetails"></vs-cert>
+        <div id="certDetailsDialog" class="modalDialog">
+            <div style="max-width:450px;">
+                <div style="position: absolute; top: 0px; right: 0px;">
+                    <i class="fa fa-times closeIcon" on-click="closeDialog"></i>
+                </div>
+                <vs-cert id="certDetails" cert="{{cert}}"></vs-cert>
+            </div>
         </div>
     </template>
     <script>
@@ -81,7 +86,6 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready - ")
-                this.certDetailsHidden = true
                 this.url = contextURL + "/rest/certificateVS/certs"
             },
             getDate:function(dateStamp) {
@@ -89,7 +93,6 @@
             },
             closeCertDetails:function(e, detail, sender) {
                 console.log(this.tagName + " - closeCertDetails")
-                this.certDetailsHidden = true
             },
             isRoot : function(item) {
                 return item.root
@@ -97,7 +100,12 @@
             showCert :  function(e) {
                 console.log(this.tagName + " - showCertDetails")
                 this.$.certDetails.certvs = e.model.item;
-                this.certDetailsHidden = false
+                this.$.certDetailsDialog.style.opacity = 1
+                this.$.certDetailsDialog.style['pointer-events'] = 'auto'
+            },
+            closeDialog:function() {
+                this.$.certDetailsDialog.style.opacity = 0
+                this.$.certDetailsDialog.style['pointer-events'] = 'none'
             },
             certListDtoChanged:function() {
                 if(this.certListDto == null) return
