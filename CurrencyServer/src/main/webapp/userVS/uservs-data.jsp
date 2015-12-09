@@ -57,9 +57,7 @@
             </div>
         </div>
         <div hidden="{{!uservs.description}}" style="margin:0 0 20px 0;">
-            <div id="userDescriptionDiv" class="eventContentDiv" style=" border: 1px solid #c0c0c0;padding:10px;">
-                <vs-html-echo html="{{uservs.description}}"></vs-html-echo>
-            </div>
+            <div id="userDescriptionDiv" class="contentDiv" style=" border: 1px solid #c0c0c0;padding:10px;"></div>
         </div>
         <div hidden="{{subscriptionsHidden}}"
              layout flex horizontal wrap style="border:1px solid #eee; padding: 5px;">
@@ -110,13 +108,13 @@
                 if('BANKVS' == this.uservs.type) uservsType = "${msg.bankVSLbl}"
                 if('USER' == this.uservs.type) uservsType = "${msg.userLbl}"
                 if('SYSTEM' == this.uservs.type) uservsType = "${msg.systemLbl}"
-                this.fire('iron-signal', {name: "vs-innerpage", data: {caption:uservsType}});
             }
             this.subscriptionsHidden = (!this.uservs.subscriptionVSList ||  this.uservs.subscriptionVSList.length === 0)
             this.isActive = (this.uservs.state === 'ACTIVE')
             this.isConnected = (this.uservs.connectedDevices && this.uservs.connectedDevices.length > 0)
             this.isBankVS = ('BANKVS' !== this.uservs.type)
             this.isAdmin = ('superuser' === menuType || 'admin' === menuType)
+            d3.select(this).select("#userDescriptionDiv").html(this.uservs.description)
          },
         getUserVSURL:function(id) {
             return contextURL + "/rest/userVS/" + id

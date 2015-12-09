@@ -13,7 +13,7 @@
                     <div class="flex" style="font-size: 1.5em; margin:0px auto;font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">${msg.saveAsRepresentativeLbl}</div>
                     </div>
-                    <div style="position: absolute; top: 0px; right: 0px; font-size: 1.5em;">
+                    <div style="position: absolute; top: 0px; right: 0px; font-size: 1.1em;">
                         <i class="fa fa-times closeIcon" on-click="close"></i>
                     </div>
                 </div>

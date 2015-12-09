@@ -21,12 +21,8 @@
                 </div>
                 </div>
                 <div hidden="{{!confirmStep}}" vertical layout center center-justified>
-                    <div style="margin: 20px 0 10px 10px;">
-                        <vs-html-echo id="delegationMsg"></vs-html-echo>
-                    </div>
-                    <div style="margin:25px 0 25px 0;">
-                        <vs-html-echo html="{{anonymousDelegationMsg}}"></vs-html-echo>
-                    </div>
+                    <div id="delegationMsg" style="margin: 20px 0 10px 10px;"></div>
+                    <div id="anonymousDelegationMsg" style="margin:25px 0 25px 0;"></div>
                 </div>
                 <div hidden="{{!responseStep}}">
                     <p style="text-align: center; font-size: 1.2em;">
@@ -63,11 +59,14 @@
                 confirmStep:{type:Boolean, value:false},
                 responseStep:{type:Boolean, value:false},
                 anonymousLbl:{type:String, value:"${msg.anonymousLbl}"},
-                anonymousDelegationMsg:{type:String, value:"${msg.anonymousLbl}"},
+                anonymousDelegationMsg:{type:String, value:"${msg.anonymousLbl}", observer:'anonymousDelegationMsgChanged'},
                 anonymousDelegationResponseMsg:{type:String},
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
+            },
+            anonymousDelegationMsgChanged: function() {
+                d3.select(this).select("#anonymousDelegationMsg").html(this.anonymousDelegationMsg)
             },
             show: function(representative) {
                 this.representative = representative
@@ -100,7 +99,7 @@
                         return
                     }
                     var weeksMsgTemplate = "${msg.numWeeksResultAnonymousDelegationMsg}";
-                    this.$.delegationMsg.html = msgTemplate.format(this.anonymousLbl, this.representative.name)
+                    d3.select(this).select("#delegationMsg").html(msgTemplate.format(this.anonymousLbl, this.representative.name))
                     this.anonymousDelegationMsg = weeksMsgTemplate.format(this.anonymousLbl, this.$.numWeeksAnonymousDelegation.value)
                     this.confirmStep = true
                     this.infoRequestStep = false

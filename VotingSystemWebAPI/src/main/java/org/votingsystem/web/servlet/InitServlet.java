@@ -55,6 +55,7 @@ public class InitServlet extends HttpServlet{
             config.mainServletInitialized();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
+            throw new RuntimeException("--- InitServlet broken: " + ex.getMessage());
         }
     }
 

@@ -23,8 +23,6 @@
                 switch (this.smimeMessageDto.viewer) {
                     case "message-smime":
                         break;
-                    case "message-smime-groupvs-new":
-                        break;
                     case "message-smime-transactionvs-from-bankvs":
                         if(!this.FROM_BANKVS) {
                             Polymer.Base.importHref(contextURL + '/messageSMIME/message-smime-transactionvs-from-bankvs.vsp', function(e) {

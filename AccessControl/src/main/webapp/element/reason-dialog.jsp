@@ -37,7 +37,8 @@
         },
         ready: function() { },
         submitForm: function() {
-            this.fire('on-submit', this.$.reason.value);
+            document.querySelector("#voting_system_page").dispatchEvent(
+                    new CustomEvent('vs-on-submit', {detail:this.$.reason.value}))
             this.close()
         },
         show: function(message) {

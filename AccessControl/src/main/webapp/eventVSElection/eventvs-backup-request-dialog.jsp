@@ -76,7 +76,6 @@
                 var caption = '${msg.operationERRORCaption}'
                 if(ResponseVS.SC_OK ==  appMessageJSON.statusCode) {
                     caption = '${msg.operationOKCaption}'
-                    this.fire('backup-request-ok', appMessageJSON.message);
                     this.close()
                 }
                 showMessageVS(appMessageJSON.message, caption)

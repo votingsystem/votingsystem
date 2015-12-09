@@ -18,7 +18,6 @@ public class CoreSignal {
         Map messageMap = new HashMap();
         messageMap.put("socketStatus", status.toString());
         messageMap.put("message", message);
-        //this.fire('iron-signal', {name: "vs-websocket-message", data: messageMap});
         coreSignal.put("name", "vs-websocket-message");
         coreSignal.put("data", messageMap);
         String jsCommand = null;

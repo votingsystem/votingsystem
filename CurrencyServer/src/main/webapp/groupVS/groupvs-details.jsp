@@ -89,9 +89,7 @@
                 </div>
             </div>
         </div>
-        <div class="eventContentDiv">
-            <vs-html-echo html="{{decodeBase64(groupvs.description)}}"></vs-html-echo>
-        </div>
+        <div class="contentDiv"></div>
         <div class="layout horizontal">
             <div style="margin: 5px 30px 0 0;">
                 <button on-click="goToWeekBalance"><i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}</button>
@@ -240,8 +238,8 @@
                     this.groupvs.representative.firstName + " " + this.groupvs.representative.lastName
             if(this.groupvs.tags) this.tagsHidden = (this.groupvs.tags.length === 0)
             this.$.userList.url = contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/listUsers"
-            this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.groupvsLbl}"}});
             if(this.groupvs.id) this.$.userList.loadGroupUsers(this.groupvs.id)
+            d3.select(this).select("#contentDiv").html(this.decodeBase64(this.groupvs.description))
             console.log("this.isUserView: " + this.isUserView + " - groupvs.state: " + this.groupvs.state +
                 " - menuType: " + menuType)
         },

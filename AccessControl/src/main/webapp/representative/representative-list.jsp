@@ -20,7 +20,7 @@
         </style>
         <div>
             <div hidden="{{!representationInfo}}" class="linkVS" on-click="showRepresentativeListDto"
-                 style="margin: 10px 0 10px 0; text-align: center;" >${msg.userRepresentativeLbl}</div>
+                 style="margin: 10px 0 10px 0; text-align: center;font-weight: bold;font-size: 1.2em;" >${msg.userRepresentativeLbl}</div>
             <div class="layout flex horizontal wrap around-justified">
                 <template is="dom-repeat" items="{{representativeListDto.resultList}}">
                     <div on-tap="showRepresentativeDetails" class='representativeDiv horizontal layout center center center-justified'>
@@ -37,7 +37,7 @@
                 </template>
             </div>
         </div>
-        <representation-state id="representationState" on-updated-state="representationStateUpdated"></representation-state>
+        <representation-state id="representationState"></representation-state>
     </template>
     <script>
         Polymer({
@@ -47,11 +47,10 @@
                 representationInfo:{type:Boolean, value:false},
                 url:{type:String, value: contextURL + "/rest/representative", observer:'getHTTP'}
             },
-            representationStateUpdated : function(e) {
-                this.representationInfo = true
-            },
             ready : function(e) {
                 console.log(this.tagName + " - ready")
+                document.querySelector("#voting_system_page").addEventListener('updated-state',
+                        function(e) { this.representationInfo = true }.bind(this))
             },
             showRepresentativeListDto : function() {
                 this.$.representationState.show()

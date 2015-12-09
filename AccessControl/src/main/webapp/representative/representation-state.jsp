@@ -17,7 +17,7 @@
                     <div hidden="{{!representationState.representative.description}}"
                             style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center;
                             padding:10px 20px 10px 20px; word-wrap:break-word;">
-                        <vs-html-echo html="{{representationState.representative.description}}"></vs-html-echo>
+                        <div id="descriptionDiv"></div>
                     </div>
                 </div>
                 <div style="font-size: 1.2em; color:#ba0011; font-weight: bold; text-align: center;
@@ -60,7 +60,9 @@
                             this.timeInfoHidden = false
                             this.cancellationHidden = false
                         }
-                        this.fire('updated-state');
+                        if(this.representationState.representative)
+                            d3.select(this).select("#descriptionDiv").html(this.representationState.representative.description)
+                        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('updated-state'))
                     }.bind(this))
                     VotingSystemClient.setMessage(operationVS);
                 }

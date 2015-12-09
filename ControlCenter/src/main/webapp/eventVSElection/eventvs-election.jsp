@@ -26,9 +26,7 @@
                     {{getDate(eventvs.dateBegin)}}</div>
             </div>
             <div>
-                <div class="eventContentDiv">
-                    <vs-html-echo html="{{decodeBase64(eventvs.content)}}"></vs-html-echo>
-                </div>
+                <div class="eventContentDiv"></div>
 
                 <div class="horizontal layout center center-justified">
                     <div id="eventAuthorDiv" class="flex" style="margin:0px 20px 0 20px; color:#888; font-size: 0.85em;">
@@ -65,9 +63,6 @@
             ready: function() {
                 console.log(this.tagName + "- ready")
             },
-            fireSignal:function() {
-                this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
-            },
             decodeBase64:function(base64EncodedString) {
                 if(base64EncodedString == null) return null
                 return decodeURIComponent(escape(window.atob(base64EncodedString)))
@@ -91,7 +86,6 @@
                 this.isCanceled = false
                 if('PENDING' == this.eventvs.state) {
                     this.isPending = true
-                    this.$.statsDiv.style.display = 'none'
                 } else if ('TERMINATED' == this.eventvs.state) {
                     this.isTerminated = true
                 } else if ('CANCELED' == this.eventvs.state) {
@@ -104,12 +98,17 @@
                 d3.xhr(contextURL + "/rest/eventVSElection/id/" + this.eventvs.id + "/stats")
                         .header("Content-Type", "application/json").get(function(err, rawData){
                             this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
-                            this.async(this.update)
+                            this.async(function (targetURL) { d3.select(this).selectAll(".numVotesClass").style("display", "block")}.bind(this))
                         }.bind(this)
                 );
-            },
-            update: function (targetURL) {
-                d3.selectAll(".numVotesClass").style("display", "block")
+                d3.xhr(contextURL + "/rest/eventVSElection/id/" + this.eventvs.id + "/stats")
+                        .header("Content-Type", "application/json").get(function(err, rawData){
+                    if('TERMINATED' == this.eventvs.state) {
+                        this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
+                        d3.select(this).selectAll(".numVotesClass").style("display", "block")
+                    }
+                }.bind(this));
+                d3.select(this).select(".eventContentDiv").html(this.decodeBase64(this.eventvs.content))
             },
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url

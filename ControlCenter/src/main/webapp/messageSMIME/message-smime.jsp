@@ -24,7 +24,7 @@
                 <div hidden="{{!messageToUser}}" class="messageToUser layout horizontal center center-justified">
                     <div id="messageToUser">{{messageToUser}}</div>
                 </div>
-                <vs-html-echo html="{{smimeMessageContentStr}}"></vs-html-echo>
+                <div id="messageContent"></div>
                 <div class="layout horizontal">
                     <div class="flex"></div>
                     <div hidden="{{!isClientToolConnected}}" class="flex horizontal layout end-justified" style="margin:10px 0px 10px 0px;">
@@ -51,7 +51,7 @@
             },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null
-                this.smimeMessageContentStr = JSON.stringify(this.smimeMessageContent)
+                d3.select(this).select("#messageContent").html(JSON.stringify(this.smimeMessageContent))
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

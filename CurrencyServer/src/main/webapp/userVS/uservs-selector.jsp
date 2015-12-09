@@ -1,7 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="../resources/bower_components/iron-localstorage/iron-localstorage.html" rel="import"/>
-
 <dom-module name="uservs-selector">
     <template>
         <style>
@@ -13,7 +11,6 @@
             .nif {font-size: 0.7em; color:#888;margin:5px 0 0 0; }
             .name {color: #000; font-size: 0.9em;}
         </style>
-        <iron-localstorage id="localstorage" name="contacts-localstorage" value="{{contacts}}"></iron-localstorage>
         <div class="vertical layout center">
             <div hidden={{!contactSelector}} class="horizontal layout center center-justified" style="margin:-10px 0 20px 0; cursor: pointer;">
                 <div id="searchDiv" on-click="setSearchView"
@@ -72,9 +69,13 @@
                 contacts:{type:String, observer:'loadContacts'}
             },
             ready: function() {
-                this.url = this.url || ''
                 this.modeSearch = !this.contactSelector
                 console.log(this.tagName + " - contactSelector: " + this.contactSelector)
+                if(typeof(Storage) === "undefined") {
+                    alert("Browser withou localStorage support")
+                } else {
+                    this.contacts = localStorage.contacts
+                }
             },
             modeSearchChanged:function(e) {
                 console.log(this.tagName + " modeSearchChanged - modeSearch: " + this.modeSearch)
@@ -112,6 +113,7 @@
             },
             contactsArrayChanged: function(e) {
                 this.contacts = JSON.stringify(this.contactsArray)
+                localStorage.contacts = this.contacts
             },
             toggleContact: function(e) {
                 e.stopPropagation()
@@ -162,6 +164,7 @@
             processSearch:function() {
                 this.textToSearch = this.$.inputSearch.value.trim()
                 if(this.textToSearch === "") return
+                this.url = null
                 if(this.groupVSId) this.url = contextURL + "/rest/groupVS/id/" + this.groupVSId + "/searchUsers?searchText=" + this.textToSearch
                 else this.url = contextURL + "/rest/userVS/search?searchText=" + this.textToSearch
             },
@@ -174,6 +177,7 @@
             },
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
+                if(!targetURL) return
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
                 d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
                     this.userListDto = toJSON(rawData.response)

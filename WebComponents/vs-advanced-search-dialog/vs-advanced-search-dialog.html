@@ -130,7 +130,7 @@
                 if(searchTo != null) searchTo = searchTo + " " + hourTo
                 var userSearch = {searchText:this.searchMessageInputvalue, searchFrom: searchFrom, searchTo:searchTo}
                 console.log('iron-signal-advanced-search' + JSON.stringify(userSearch))
-                this.fire('iron-signal', {name: "advanced-search", data: userSearch});
+                document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('advanced-search', {detail:userSearch}))
             }
         },
         setMessage:function(status, message) {

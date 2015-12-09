@@ -28,7 +28,6 @@
             },
             transactionvsTypeSelect:function() {
                 this.fire("selected", this.$.transactionvsTypeSelect.value)
-                this.fire('iron-signal', {name: "transactionvs-selector-selected", data: this.$.transactionvsTypeSelect.value});
             },
             transactionvsTypeChanged: function() {
                 this.$.transactionvsTypeSelect.value = this.transactionvsType

@@ -12,9 +12,8 @@
                         <i class="fa fa-times closeIcon" on-click="close"></i>
                     </div>
                 </div>
-                <div style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px;
+                <div id="voteResultMessageDiv" style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px;
                         display:block;word-wrap:break-word;">
-                    <vs-html-echo html="{{message}}"></vs-html-echo>
                 </div>
                 <div hidden="{{!isVoteResult}}">
                     <div hidden="{{!optionSelected}}">
@@ -102,6 +101,7 @@
                 this.messageType = "VOTE_RESULT"
                 this.$.modalDialog.style.opacity = 1
                 this.$.modalDialog.style['pointer-events'] = 'auto'
+                d3.select("#voteResultMessageDiv").html(message)
             },
             messageTypeChanged: function() {
                 this.isVoteResult = false

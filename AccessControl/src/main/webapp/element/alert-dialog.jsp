@@ -12,8 +12,8 @@
                         <i class="fa fa-times closeIcon" on-click="close"></i>
                     </div>
                 </div>
-                <div style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
-                    <vs-html-echo html="{{message}}"></vs-html-echo>
+                <div id="messageDiv" style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center;
+                    padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
                 </div>
                 <div class="layout horizontal"  style="margin:0px 20px 0px 0px;">
                     <div class="flex"></div>
@@ -34,7 +34,7 @@
             },
             setMessage: function(message, caption, callerId, isConfirmMessage) {
                 this.reset()
-                this.message = message
+                d3.select(this).select("#messageDiv").html(message)
                 this.caption = caption
                 this.callerId = callerId
                 this.isConfirmMessage = isConfirmMessage
@@ -42,22 +42,19 @@
                 this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             reset: function() {
-                this.message = null
                 this.callerId = null
                 this.caption = null
                 this.isConfirmMessage = false
             },
             accept: function() {
                 this.close()
-                if(document.querySelector("#voting_system_page"))
-                    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('messagedialog-accept', {detail:this.callerId}))
+                document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('messagedialog-accept', {detail:this.callerId}))
 
             },
             close: function() {
                 this.$.modalDialog.style.opacity = 0
                 this.$.modalDialog.style['pointer-events'] = 'none'
-                if(document.querySelector("#voting_system_page"))
-                    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('messagedialog-closed', {detail:this.callerId}))
+                document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('messagedialog-closed', {detail:this.callerId}))
             }
         });
     </script>

@@ -77,9 +77,6 @@ public class MessageSMIMEResource {
             signedContentMap.put("fromUserVS", UserVSDto.BASIC(messageSMIME.getUserVS()));
         }
         switch(operation) {
-            case CURRENCY_GROUP_NEW:
-                viewer = "message-smime-groupvs-new";
-                break;
             case FROM_BANKVS:
                 viewer = "message-smime-transactionvs-from-bankvs";
                 break;

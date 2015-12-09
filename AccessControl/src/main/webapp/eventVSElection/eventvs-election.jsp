@@ -20,14 +20,16 @@
             </div>
 
             <div style="margin: 0px 30px;">
-                <div hidden="{{!isActive}}" style='color: #888;font-size: 0.9em;'>{{getElapsedTime(eventvs.dateFinish)}}</div>
                 <div class="layout horizontal center center-justified" style="width:100%;">
-                    <div hidden="{{!votevsResul}}" on-click="showVoteResul" style="cursor: pointer;background: #ffeb3b;">
-                        <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;color: #ba0011;font-size: 1.3em;"></i>
+                    <div class="flex horizontal layout center center-justified">
+                        <div hidden="{{!isActive}}" style='color: #888;font-size: 0.9em;'>{{getElapsedTime(eventvs.dateFinish)}}</div>
                     </div>
-
-                    <div class="flex" style="text-align: center">
+                    <div style="text-align: center">
                         <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
+                    </div>
+                    <div class="flex" on-click="showVoteResul">
+                        <div hidden="{{!votevsResul}}" style="cursor: pointer;background: #ffeb3b;width: 50px; text-align: center;">
+                            <i class="fa fa-envelope" style="margin:10px;color: #ba0011;font-size: 1.3em;"></i> </div>
                     </div>
                 </div>
                 <div class="horizontal layout">
@@ -40,9 +42,7 @@
                         {{getDate(eventvs.dateBegin)}}</div>
                 </div>
                 <div>
-                    <div class="eventContentDiv">
-                        <vs-html-echo html="{{decodeBase64(eventvs.content)}}"></vs-html-echo>
-                    </div>
+                    <div id="eventContentDiv"></div>
 
                     <div class="horizontal layout center center-justified">
                         <div hidden="{{!isTerminated}}" style="margin: 10px 0 0 0;">
@@ -105,9 +105,6 @@
                 document.querySelector("#voting_system_page").addEventListener('messagedialog-accept',
                         function(e) { this.messagedialogConfirmed(e) }.bind(this))
             },
-            fireSignal:function() {
-                this.fire('iron-signal', {name: "vs-innerpage", data: {caption:"${msg.pollLbl}"}});
-            },
             decodeBase64:function(base64EncodedString) {
                 if(base64EncodedString == null) return null
                 return decodeURIComponent(escape(window.atob(base64EncodedString)))
@@ -129,7 +126,6 @@
                 this.isCanceled = false
                 if('PENDING' == this.eventvs.state) {
                     this.isPending = true
-                    this.$.statsDiv.style.display = 'none'
                 } else if ('TERMINATED' == this.eventvs.state) {
                     this.isTerminated = true
                 } else if ('CANCELED' == this.eventvs.state) {
@@ -142,9 +138,12 @@
                 this.fieldsEventVS = this.eventvs.fieldsEventVS
                 d3.xhr(contextURL + "/rest/eventVSElection/id/" + this.eventvs.id + "/stats")
                         .header("Content-Type", "application/json").get(function(err, rawData){
-                        this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
-                        d3.selectAll(".numVotesClass").style("display", "block")
+                        if('TERMINATED' == this.eventvs.state) {
+                            this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
+                            this.async(function () { d3.select(this).selectAll(".numVotesClass").style("display", "block")}.bind(this))
+                        }
                     }.bind(this));
+                d3.select(this).select("#eventContentDiv").html(this.decodeBase64(this.eventvs.content))
             },
             showAdminDialog:function() {
                 this.$.eventVSAdminDialog.show()

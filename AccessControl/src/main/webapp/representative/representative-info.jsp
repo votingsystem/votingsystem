@@ -45,7 +45,7 @@
                                  style="text-align:center; width: 100px;margin-right: 20px;"/>
                         </div>
                         <div style="margin:auto auto">
-                            <vs-html-echo html="{{decodeBase64(representative.description)}}"></vs-html-echo>
+                            <div id="representativeDescription"></div>
                         </div>
                     </div>
                 </div>
@@ -127,6 +127,7 @@
                 " - img: " + this.representative.imageURL)
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
                 if(this.representative.imageURL != null) this.$.representativeImg.src = this.representative.imageURL
+                d3.select(this).select("#representativeDescription").html(this.decodeBase64(this.representative.description))
             },
             ready: function() {
                 console.log(this.tagName + " - ready")

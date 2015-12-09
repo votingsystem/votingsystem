@@ -17,7 +17,6 @@
         <script src="./resources/js/utilsVS.js" type="text/javascript"></script>
         <script src="./resources/js/utils_js.vsp" type="text/javascript"></script>
         <script src="./resources/bower_components/d3/d3.min.js" type="text/javascript"></script>
-        <link rel="import" href="./resources/bower_components/vs-html-echo/vs-html-echo.html"/>
         <link rel="import" href="./element/search-bar.vsp"/>
         <link rel="import" href="./element/alert-dialog.vsp"/>
         <link rel="import" href="./resources/routing.xhtml"/>
@@ -118,7 +117,7 @@
                 document.getElementById('mainContent').scrollTop = 0;
             };
 
-            document.querySelector('#searchBar').addEventListener('search-request', function (e) {
+            document.querySelector('#voting_system_page').addEventListener('search-request', function (e) {
                 console.log("spa.xhtml - search request - query:" + e.detail.query);
             })
 

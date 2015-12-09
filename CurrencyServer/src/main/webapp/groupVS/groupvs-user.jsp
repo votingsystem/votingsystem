@@ -64,19 +64,21 @@
                 this.isClientToolConnected = (clientTool !== undefined)
                 document.querySelector("#voting_system_page").addEventListener('votingsystem-client-msg',
                         function() {  this.isClientToolConnected = true }.bind(this))
-                this.$.reasonDialog.addEventListener('on-submit', function (e) {
-                    console.log("deActivateUser")
-                    var operationVS = new OperationVS(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
-                    operationVS.serviceURL = contextURL + "/rest/groupVS/deActivateUser"
-                    operationVS.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + this.subscriptionDto.groupvs.name + "'"
-                    operationVS.jsonStr = JSON.stringify({groupvsId:this.subscriptionDto.groupvs.id,
-                        groupvsName:this.subscriptionDto.groupvs.name, userVSName:this.subscriptionDto.uservs.name,
-                        userVSNIF:this.subscriptionDto.uservs.nif, reason:e.detail})
-                    operationVS.setCallback(function(appMessage) {
 
-                    }.bind(this))
-                    VotingSystemClient.setMessage(operationVS);
-                }.bind(this))
+                document.querySelector("#voting_system_page").addEventListener('vs-on-submit',
+                        function() {
+                            console.log("deActivateUser")
+                            var operationVS = new OperationVS(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
+                            operationVS.serviceURL = contextURL + "/rest/groupVS/deActivateUser"
+                            operationVS.signedMessageSubject = "${msg.deActivateGroupUserMessageSubject}" + " '" + this.subscriptionDto.groupvs.name + "'"
+                            operationVS.jsonStr = JSON.stringify({groupvsId:this.subscriptionDto.groupvs.id,
+                                groupvsName:this.subscriptionDto.groupvs.name, userVSName:this.subscriptionDto.uservs.name,
+                                userVSNIF:this.subscriptionDto.uservs.nif, reason:e.detail})
+                            operationVS.setCallback(function(appMessage) {
+
+                            }.bind(this))
+                            VotingSystemClient.setMessage(operationVS);
+                        }.bind(this))
             },
             deActivateResponse:function(appMessage) {
                 console.log(this.tagName + " - deActivateResponse - message: " + appMessage);
@@ -84,8 +86,7 @@
                 var caption = '${msg.deActivateUserERRORLbl}'
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     caption = "${msg.deActivateUserOKLbl}"
-                    if(document.querySelector("#voting_system_page"))
-                        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('refresh-uservs-list', {uservs: this.userId}))
+                    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('refresh-uservs-list', {uservs: this.userId}))
                     this.close()
                 }
                 showMessageVS(appMessageJSON.message, caption)
@@ -145,8 +146,7 @@
                     var caption = '${msg.activateUserERRORLbl}'
                     if (ResponseVS.SC_OK == appMessageJSON.statusCode) {
                         caption = "${msg.activateUserOKLbl}"
-                        if(document.querySelector("#voting_system_page"))
-                            document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('refresh-uservs-list', {uservs: this.userId}))
+                        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('refresh-uservs-list', {uservs: this.userId}))
                         this.close()
                     }
                     showMessageVS(appMessageJSON.message, caption)

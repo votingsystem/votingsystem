@@ -59,18 +59,19 @@
             ready: function() {
                 this.certsSelectedStack = []
                 if(menuType === "admin" || menuType === "superuser") this.$.cancelCertButton.style.display = "block"
-                this.$.reasonDialog.addEventListener('on-submit', function (e) {
-                    var operationVS = new OperationVS(Operation.CERT_EDIT)
-                    operationVS.serviceURL = contextURL + "/rest/certificateVS/editCert"
-                    operationVS.signedMessageSubject = "${msg.cancelCertMessageSubject}"
-                    var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
-                        changeCertToState:"${CertificateVS.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
-                    operationVS.jsonStr = JSON.stringify(signedContent)
-                    operationVS.setCallback(function(appMessage) {
-                        this.url = contextURL + "/rest/certificateVS/serialNumber/" + certMap.serialNumber + "?menu=" + menuType
-                    })
-                    VotingSystemClient.setMessage(operationVS);
-                }.bind(this))
+                document.querySelector("#voting_system_page").addEventListener('vs-on-submit',
+                        function() {
+                            var operationVS = new OperationVS(Operation.CERT_EDIT)
+                            operationVS.serviceURL = contextURL + "/rest/certificateVS/editCert"
+                            operationVS.signedMessageSubject = "${msg.cancelCertMessageSubject}"
+                            var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
+                                changeCertToState:"${CertificateVS.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
+                            operationVS.jsonStr = JSON.stringify(signedContent)
+                            operationVS.setCallback(function(appMessage) {
+                                this.url = contextURL + "/rest/certificateVS/serialNumber/" + certMap.serialNumber + "?menu=" + menuType
+                            })
+                            VotingSystemClient.setMessage(operationVS);
+                        }.bind(this))
             },
             openReasonDialog: function() {
                 this.$.reasonDialog.show()

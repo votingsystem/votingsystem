@@ -35,7 +35,6 @@
                     if(currency.code === this.$.currencySelect.value) selectedCurrency = currency
                 }.bind(this))
                 this.fire("selected", selectedCurrency)
-                this.fire('iron-signal', {name: "vs-currency-selector-selected", data: selectedCurrency});
             }
         });
     </script>

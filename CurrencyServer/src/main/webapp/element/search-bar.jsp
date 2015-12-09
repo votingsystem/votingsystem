@@ -96,7 +96,8 @@
     },
     performSearch: function(e) {
       e.preventDefault();
-      this.fire('search-request', {query: this.query});
+      document.querySelector("#voting_system_page").dispatchEvent(
+              new CustomEvent('search-request',{detail:{query: this.query}}))
     }
   });
 </script>

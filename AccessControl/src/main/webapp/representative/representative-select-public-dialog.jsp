@@ -15,7 +15,7 @@
                 </div>
 
                 <div class="vertical layout center center-justified" style="margin: 20px 0 10px 10px;">
-                    <vs-html-echo id="delegationMsg"></vs-html-echo>
+                    <div id="delegationMsg"></div>
                 </div>
 
                 <div>
@@ -41,7 +41,7 @@
                 this.representative = representative
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
                 var msgTemplate = "${msg.selectRepresentativeConfirmMsg}";
-                this.$.delegationMsg.html = msgTemplate.format("${msg.publicLbl}", this.representative.name)
+                d3.select(this).select("#delegationMsg").html(msgTemplate.format("${msg.publicLbl}", this.representative.name))
                 this.$.modalDialog.style.opacity = 1
                 this.$.modalDialog.style['pointer-events'] = 'auto'
             },
