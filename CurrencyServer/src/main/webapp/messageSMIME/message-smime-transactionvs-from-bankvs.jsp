@@ -42,7 +42,7 @@
                 <div style="margin-left: 20px;">
                     <div class="actorLbl" style=" margin:10px 0px 0px 0px;">${msg.senderLbl}</div>
                     <div>
-                        <div><b>${msg.nameLbl}: </b><span>{{smimeMessageContent.fromUser}}</span></div>
+                        <div><b>${msg.nameLbl}: </b><span>{{smimeMessageContent.fromUserVS.name}}</span></div>
                         <div><b>${msg.IBANLbl}: </b><span>{{smimeMessageContent.fromUserIBAN}}</span></div>
                         <div on-click="showFromUserVSByIBAN">
                             <b>${msg.bankVSIBANLbl}: </b>
@@ -83,8 +83,8 @@
         Polymer({
             is:'message-smime-transactionvs-from-bankvs',
             properties: {
-                smimeMessageDto:{type:Object, value:{}, observer:'smimeMessageChanged'},
-                smimeMessageContent: {type:Object, value: {}},
+                smimeMessageDto:{type:Object, observer:'smimeMessageChanged'},
+                smimeMessageContent: {type:Object},
                 isClientToolConnected: {type:Boolean, value: false},
                 tagsHidden: {type:Boolean, value: true},
                 isReceptorVisible: {type:Boolean, value: true},

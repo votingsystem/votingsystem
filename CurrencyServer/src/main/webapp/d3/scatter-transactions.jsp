@@ -23,9 +23,24 @@
             border: 0px;
             border-radius: 8px;
         }
+        .icontext {
+            text-anchor: middle;
+            pointer-events: none;
+            font-family: FontAwesome;
+            fill: #fff;
+        }
     </style>
     <template>
-        <button id="resetButton" style="position: absolute; left: 50px; top: 0px;">reset</button>
+        <div class="horizontal layout" style="margin: 4px;">
+            <div>
+                <button id="resetButton" style="">reset</button>
+            </div>
+            <div class="horizontal layout center center-justified" style="border: 1px solid #888; margin: 0 10px 0 10px; font-size: 0.9em;">
+                <input id="timeLimitedCheckbox" type="checkbox" value="timeLimited" on-click="timeCheckboxSelected" checked="true"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}
+                <input id="timeFreeCheckbox" type="checkbox" value="timeFree" on-click="timeCheckboxSelected" style="margin:0 0 0 10px;" checked="true">${msg.timeFreeLbl}
+            </div>
+        </div>
+
         <div id="scatterPlotDiv" style="width: 100%; height: 100%; min-height: 200px;"></div>
         <div id="tooltip" class="tooltip" style="">
             <div><strong>{{selectedTransaction.type}}</strong></div>
@@ -54,13 +69,25 @@
                     window.addEventListener('resize', function(event){
                         this.chart(this.chartData)
                     }.bind(this));
-                    d3.json("/CurrencyServer/rest/transactionVS/from/20151116_0000/to/20151118_0000", function (json) {
+                    d3.json("/CurrencyServer/rest/transactionVS/from/20151116_0000/to/20151210_0000", function (json) {
                         this.chartData = json.resultList
                         this.chartData.forEach(function(transactionvs) {
                             this.transactionsStats.pushTransaction(transactionvs)
                         }.bind(this))
                         this.chart(this.chartData)
                     }.bind(this))
+                },
+                timeCheckboxSelected:function (e) {
+                    console.log("timeCheckboxSelected: " + e.target.value + " - checked: " + e.target.checked)
+
+                    /*d3.select(this).selectAll(".transaction").attr("display", function(d) {
+                        if(d.timeLimited && !this.$.timeLimitedCheckbox.checked) return 'none'
+                        else return 'inline'
+                    }.bind(this));*/
+
+                },
+                filterChart:function (date) {
+
                 },
                 getDate:function (date) {
                     return new Date(date).formatWithTime()
@@ -108,12 +135,10 @@
                         zoom.translate([0, 0]).scale(1)
                         zoomed()
                     }
-                    var circles = chartBody.selectAll(".transaction").data(data);
+                    var nodes = chartBody.selectAll(".transaction").data(data).enter().append("g").attr("class", "transaction")
+                            .attr("transform", function (d){ return 'translate(' + x(new Date(d.dateCreated)) + ' ' + y(d.amount) +')'})
                     var hostElement = this
-                    circles.enter().append("circle");
-                    circles.attr("class", "transaction")
-                            .attr("cx",      function (d){ return   x(new Date(d.dateCreated))})
-                            .attr("cy",      function (d){ return   y(d.amount) })
+                    var circles = nodes.append("circle")
                             .attr("r",       function (d){ return rScale(d.amount) })
                             .attr("style",    function (d){ return   "fill:" +
                                     this.color(d.type) + "; stroke:" + d3.rgb(this.color(d.type)).darker(1)}.bind(this))
@@ -150,7 +175,16 @@
                                 d3.selectAll(".guide").transition().duration(100).styleTween("opacity", function() { return d3.interpolate(.5, 0); }).remove()
                             })
 
-                    circles.exit().remove();
+                    nodes.append("text")
+                            .attr("class","FontAwesome icontext")
+                            .style("font-size", function(d) {
+                                var r = rScale(d.amount)
+                                return Math.min(2 * r, (2 * r - 8) / this.getComputedTextLength() * 24) + "px"; })
+                            .attr("dy", ".35em")
+                            .text(function (d){ if(d.timeLimited) return "\uf017" });
+
+
+
                     this.legendChart()
                     svg.append("g")
                             .attr("class", "x axis")
@@ -175,7 +209,7 @@
                             .text("${msg.amountLbl}");
 
                     this.legendDispatch.on('legendClick', function(d, i) {
-                        chartBody.selectAll(".transaction").attr("display", function(d) {
+                        d3.select(this).selectAll(".transaction").attr("display", function(d) {
                             if(this.transactionFilter.indexOf(d.type) > -1) return 'none'
                             else return 'inline'
                         }.bind(this));
@@ -184,14 +218,13 @@
                         //console.log("zoom.scale: " + zoom.scale() + " - x.domain: " + x.domain()[0])
                         svg.select(".x.axis").call(xAxis);
                         svg.select(".y.axis").call(yAxis);
-                        circles.attr("cx", function (d){ return x(new Date(d.dateCreated))})
-                                .attr("cy", function (d){ return y(d.amount) })
+                        nodes.attr("transform", function (d){ return 'translate(' + x(new Date(d.dateCreated)) + ' ' + y(d.amount) +')'})
                     }
                     //hack to refresh styles, I haven't found other way
                     Polymer.dom(this.$.scatterPlotDiv).appendChild(Polymer.dom(this.$.scatterPlotDiv).childNodes[0])
                 },
                 legendChart:function () {
-                    var wrap = d3.select("#scatterPlotDiv svg").append('g').attr('class', 'legendWrap');
+                    var wrap = d3.select(this).select("svg").append('g').attr('class', 'legendWrap');
                     var series = wrap.selectAll('.series').data(this.transactionsStats.getTransactionTypesData());
                     var seriesEnter = series.enter().append('g').attr('class', 'series disabled')
                             .on('click', function(d, i) {
@@ -218,6 +251,7 @@
                             .style('stroke', function(d, i){ this.color(d.type)}.bind(this))
                             .attr('r', 5);
                     seriesEnter.append('text')
+                            .attr('class', 'legendText')
                             .text(function(d) { return d.type})
                             .attr('text-anchor', 'start')
                             .attr('dy', '.32em')
@@ -227,21 +261,15 @@
 
                     var ypos = 5,
                             newxpos = 5,
-                            maxwidth = 0,
                             xpos;
                     series.attr('transform', function(d, i) {
-                        var length = d3.select(this).select('text').node().getComputedTextLength() + 28;
+                        var length = d3.select(this).select('.legendText').node().getComputedTextLength() + 28;
                         xpos = newxpos;
-                        //TODO: 1) Make sure dot + text of every series fits horizontally, or clip text to fix
-                        //      2) Consider making columns in line so dots line up
-                        //         --all labels same width? or just all in the same column?
-                        //         --optional, or forced always?
                         if (this.width < this.margin.left + this.margin.right + xpos + length) {
                             newxpos = xpos = 5;
                             ypos += 20;
                         }
                         newxpos += length;
-                        if (newxpos > maxwidth) maxwidth = newxpos;
                         return 'translate(' + xpos + ',' + ypos + ')';
                     }.bind(this));
                     this.legend.height = this.legend.margin.top + this.legend.margin.bottom + ypos + 15;

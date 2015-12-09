@@ -13,6 +13,7 @@ import org.votingsystem.client.dialog.CertNotFoundDialog;
 import org.votingsystem.client.dialog.PasswordDialog;
 import org.votingsystem.client.dialog.ProgressDialog;
 import org.votingsystem.client.util.InboxMessage;
+import org.votingsystem.client.util.Utils;
 import org.votingsystem.dto.*;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.*;
@@ -79,8 +80,10 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
 
     public static WebSocketAuthenticatedService getInstance() {
         try {
-            if(instance == null) instance =  new WebSocketAuthenticatedService(ContextVS.getInstance().
-                    getVotingSystemSSLCerts(), ContextVS.getInstance().getCurrencyServer());
+            if(ContextVS.getInstance().getCurrencyServer() != null) {
+                if(instance == null) instance =  new WebSocketAuthenticatedService(ContextVS.getInstance().
+                        getVotingSystemSSLCerts(), ContextVS.getInstance().getCurrencyServer());
+            } else Utils.checkServer(VotingSystemApp.getInstance().getCurrencyServerURL());
         } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
         return instance;
     }
@@ -132,6 +135,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
             }
         }
     }
+
 
     @Override protected Task<ResponseVS> createTask() {
         return new WebSocketTask();

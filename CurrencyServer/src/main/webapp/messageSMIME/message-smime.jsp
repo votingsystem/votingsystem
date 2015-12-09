@@ -24,8 +24,8 @@
                 </div>
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
                 <div><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
-                <div class="horizontal layout">
-                    <div><b>${msg.amountLbl}: </b><span>{{smimeMessageContent.amount}}</span> <span>{{smimeMessageContent.currencyCode}}</span></div>
+                <div class="horizontal layout center center-justified">
+                    <div><b>${msg.amountLbl}: </b> {{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
                     <div hidden="{{!smimeMessageContent.timeLimited}}" class="pageHeader" style="margin: 0 0 0 20px;"><b>
                         ${msg.timeLimitedLbl}</b>
                     </div>
@@ -35,7 +35,7 @@
                     <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
                         ${msg.senderLbl}</div>
                     <div id="fromUserDiv">
-                        <div><b>${msg.nameLbl}:</b> <span>{{smimeMessageContent.fromUser}}</span></div>
+                        <div><b>${msg.nameLbl}:</b> <span>{{smimeMessageContent.fromUserVS.name}}</span></div>
                         <div><b>${msg.IBANLbl}:</b> <span>{{smimeMessageContent.fromUserIBAN}}</span></div>
                     </div>
                 </div>

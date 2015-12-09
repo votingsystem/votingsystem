@@ -79,6 +79,7 @@ public class TransactionVSDto {
         this.setAmount(transactionVS.getAmount());
         this.setType(transactionVS.getType());
         this.setCurrencyCode(transactionVS.getCurrencyCode());
+        this.setTimeLimited(transactionVS.getIsTimeLimited());
     }
 
     public TransactionVSDto(TransactionVS transactionVS, String contextURL) {

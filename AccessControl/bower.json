@@ -22,7 +22,7 @@
     "jsoneditor": "jsoneditor#~4.2.1",
     "d3": "d3#~3.5.8",
     "pk-datepicker":"pk-datepicker#^3.2.2",
-    "font-awesome": "font-awesome#~4.4.0",
+    "font-awesome": "font-awesome#~4.5.0",
     "polymer": "Polymer/polymer#^1.2.0",
     "paper-elements": "PolymerElements/paper-elements#^1.0.5",
     "iron-elements": "PolymerElements/iron-elements#^1.0.4",

@@ -21,11 +21,11 @@ public class PEMCertFromJKS {
     public static void main(String[] args) throws Exception {
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        String keyStorePath="./certs/Cert_USER_07553172H.jks";
+        String keyStorePath="./certs/Cert_BANKVS_03455543T.jks";
         String keyAlias="UserTestKeysStore";
         String keyPassword="ABCDE";
         byte[] pemCertBytes = getPemCertFromKeyStore(keyStorePath, keyAlias, keyPassword);
-        File pemcertFile = new File("Cert_USER_07553172H.pem");
+        File pemcertFile = new File("Cert_BANKVS_03455543T.pem");
         pemcertFile.createNewFile();
         FileUtils.copyStreamToFile(new ByteArrayInputStream(pemCertBytes), pemcertFile);
         log.info("Pem file path: " + pemcertFile.getAbsolutePath());

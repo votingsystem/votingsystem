@@ -17,7 +17,7 @@
         <div class="layout vertical center center-justified" style="margin: 0px auto; max-width:800px;">
             <div style="margin: 0px auto;">
                 <div class="layout horizontal center center-justified">
-                    <div class="pageHeader"><h3>{{messageType}}</h3></div>
+                    <div class="pageHeader" style="text-decoration: underline;"><h3>{{messageType}}</h3></div>
                 </div>
                 <div hidden="{{!timeStampDate}}" class="timeStampMsg" style="text-align: center;">
                     <b>${msg.dateLbl}: </b> {{timeStampDate}}
@@ -29,7 +29,7 @@
                     <div style="font-size: 1.1em; font-weight: bold;">${msg.subjectLbl}:</div>
                     <div style="font-size: 1.2em; ">{{smimeMessageContent.subject}}</div>
                 </div>
-                <div class="horizontal layout center-justified">
+                <div class="horizontal layout center center-justified">
                     <div style="font-size: 1.1em;"><b>${msg.amountLbl}: </b>
                         {{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
                     <div hidden="{{!smimeMessageContent.timeLimited}}">
@@ -41,7 +41,7 @@
                 <div style="margin-left: 20px;">
                     <div class="actorLbl" style=" margin:10px 0px 0px 0px;">${msg.senderLbl}</div>
                     <div>
-                        <div><b>${msg.nameLbl}:  </b>{{smimeMessageContent.fromUser}}</div>
+                        <div><b>${msg.nameLbl}:  </b>{{smimeMessageContent.fromUserVS.name}}</div>
                         <div class="horizontal layout" on-click="showFromUserVSByIBAN">
                             <div><b>${msg.IBANLbl}: </b></div>
                             <div class="iban-link">{{smimeMessageContent.fromUserIBAN}}</div>
@@ -59,12 +59,12 @@
                         </div>
                     </div>
                 </div >
-                <div class="horizontal layout" style="margin: 0 0 10px 0; min-width: 400px;">
-                    <div style="margin: 3px 0 0 0;" class="flex">
-                        <a class="btn btn-default" style="font-size: 0.7em; height: 0.8em;">
+                <div class="horizontal layout center center-justified flex" style="margin: 5px 0 10px 0; min-width: 400px;">
+                    <div>
+                        <a style="font-size: 0.8em; height: 0.8em;">
                             <i class="fa fa-tag" style="color: #888;"></i> {{tagName}} </a>
                     </div>
-                    <div hidden="{{!isClientToolConnected}}" class="horizontal layout end-justified"
+                    <div hidden="{{!isClientToolConnected}}" class="horizontal layout end-justified flex"
                          style="margin:10px 0px 10px 0px; font-size: 0.9em;">
                         <button on-click="checkReceipt">
                             <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
@@ -79,7 +79,7 @@
         Polymer({
             is:'message-smime-transactionvs',
             properties: {
-                smimeMessageContent: {type:Object, value: {}, observer:'smimeMessageContentChanged'},
+                smimeMessageContent: {type:Object, observer:'smimeMessageContentChanged'},
                 isClientToolConnected: {type:Boolean, value: false},
                 tagsHidden: {type:Boolean, value: true},
                 isReceptorVisible: {type:Boolean, value: false},

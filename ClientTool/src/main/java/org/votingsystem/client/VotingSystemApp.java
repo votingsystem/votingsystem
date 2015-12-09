@@ -35,6 +35,8 @@ public class VotingSystemApp extends Application {
     private Map<String, String> smimeMessageMap;
     private Map<String, Currency.State> currencyStateMap = new HashMap<>();
     private static final Map<String, QRMessageDto> qrMessagesMap = new HashMap<>();
+    private String accessControlServerURL;
+    private String currencyServerURL;
 
     // Create a trust manager that does not validate certificate chains
     private static TrustManager[] trustAllCerts = new TrustManager[] {
@@ -98,6 +100,14 @@ public class VotingSystemApp extends Application {
         return INSTANCE;
     }
 
+    public String getCurrencyServerURL() {
+        return currencyServerURL;
+    }
+
+    public String getAccessControlServerURLL() {
+        return accessControlServerURL;
+    }
+
     @Override public void start(final Stage primaryStage) throws Exception {
         INSTANCE = this;
         Browser browser = Browser.init(primaryStage);
@@ -114,8 +124,6 @@ public class VotingSystemApp extends Application {
                     sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
                     HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
                 } catch (GeneralSecurityException ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
-                String accessControlServerURL = null;
-                String currencyServerURL = null;
                 if(loadedFromJar) {
                     accessControlServerURL = ContextVS.getMessage("prodAccessControlServerURL");
                     currencyServerURL = ContextVS.getMessage("prodCurrencyServerURL");

@@ -50,7 +50,7 @@
         Polymer({
             is:'message-smime-transactionvs-currency-request',
             properties: {
-                smimeMessageContent: {type:Object, value: {}, observer:'smimeMessageContentChanged'},
+                smimeMessageContent: {type:Object, observer:'smimeMessageContentChanged'},
                 isClientToolConnected: {type:Boolean, value: false},
                 tagsHidden: {type:Boolean, value: true},
                 isReceptorVisible: {type:Boolean, value: true},

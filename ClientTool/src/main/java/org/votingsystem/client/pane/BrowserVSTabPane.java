@@ -110,7 +110,6 @@ public class BrowserVSTabPane extends TabPane {
 
     public void newTab(final Pane tabContent, final String caption){
         Tab newTab = Utils.getTab(tabContent, caption);
-        newTab.setOnSelectionChanged(event -> toolbar.getLocationField().setText(TAB_CAPTION_EMPTY) );
         getTabs().add(newTab);
         getSelectionModel().select(newTab);
     }
