@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="../resources/d3.html" rel="import"/>
+<link href="../resources/bower_components/vs-checkbox-selector/vs-checkbox-selector.html" rel="import"/>
 
 <script type="text/javascript" src="TransactionStats.js"></script>
 
@@ -29,37 +30,6 @@
             font-family: FontAwesome;
             fill: #fff;
         }
-        .selectBox {
-            position: relative;
-        }
-        .selectBox select {
-            width: 100%;
-            font-weight: bold;
-        }
-        .overSelect {
-            position: absolute;
-            left: 0; right: 0; top: 0; bottom: 0;
-        }
-
-        .selectBox select {
-            width: 100%;
-            font-weight: bold;
-        }
-        .overSelect {
-            position: absolute;
-            left: 0; right: 0; top: 0; bottom: 0;
-        }
-        .checkboxes {
-            display: none;
-            border: 1px #dadada solid;
-            background: #fefefe;
-        }
-        .checkboxes label {
-            display: block;
-        }
-        .checkboxes label:hover {
-            background-color: #dadada;
-        }
     </style>
     <template>
         <div class="horizontal layout" style="margin: 4px;">
@@ -70,39 +40,9 @@
                 <input type="checkbox" value="timeLimited" on-click="timeCheckboxSelected" checked="true"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}
                 <input type="checkbox" value="timeFree" on-click="timeCheckboxSelected" style="margin:0 0 0 10px;" checked="true">${msg.timeFreeLbl}
             </div>
-            <div style="position: relative;width: 300px;">
-                <div class="multiselect" style="width: 300px; position: absolute;">
-                    <div class="selectBox" on-click="showTypeCheckboxes">
-                        <select class="form-control">
-                            <option>${msg.typeLbl}</option>
-                        </select>
-                        <div class="overSelect"></div>
-                    </div>
-                    <div id="typeCheckboxes" class="checkboxes">
-                        <template is="dom-repeat" items="{{transactionTypes}}" as="item">
-                            <label for="{{item}}" style$="{{getTransactionStyle(item)}}"><input id="{{item}}" type="checkbox" value="{{item}}" on-click="typeCheckboxSelected"
-                                     checked="true">{{getTransactionDescription(item)}}</label>
-                        </template>
-                    </div>
-                </div>
-            </div>
 
-            <div style="position: relative;">
-                <div class="multiselect" style="width: 220px; position: absolute;margin: 0 0 0 15px;">
-                    <div  class="selectBox" on-click="showTagCheckboxes">
-                        <select class="form-control">
-                            <option>${msg.tagLbl}</option>
-                        </select>
-                        <div class="overSelect"></div>
-                    </div>
-                    <div id="tagCheckboxes" class="checkboxes">
-                        <template is="dom-repeat" items="{{tags}}" as="tag">
-                            <label for="{{tag}}" ><input id="{{tag}}" type="checkbox" value="{{tag}}" on-click=""
-                                                         checked="true">{{tag}}</label>
-                        </template>
-                    </div>
-                </div>
-            </div>
+            <vs-checkbox-selector id="typeSelector" width="300px" caption="${msg.typeLbl}" on-checkbox-selected="typeCheckboxSelected"></vs-checkbox-selector>
+            <vs-checkbox-selector id="tagSelector" width="200px" caption="${msg.tagLbl}" on-checkbox-selected="tagCheckboxSelected"></vs-checkbox-selector>
 
         </div>
 
@@ -114,30 +54,32 @@
                 {{selectedTransaction.amount}} {{selectedTransaction.currencyCode}}</a>
                 <i hidden={{!selectedTransaction.timeLimited}} class="fa fa-clock-o" style="margin:0px 0px 0px 20px;" title="${msg.timeLimitedLbl}"></i></div>
         </div>
-
-
     </template>
     <script>
         (function() {
             Polymer({
                 is: "scatter-transactions",
                 properties: {
-                    transactionTypes:{type:Array, value:Object.keys(transactionsMap)},
-                    tags:{type:Array},
                     transactionTypeFilter:{type:Array, value:[]},
                     transactionTimeFilter:{type:Array, value:[]},
                     transactionTagFilter:{type:Array, value:[]},
-                    typeCheckBoxExpanded:{type:Boolean, value:false},
-                    tagCheckBoxExpanded:{type:Boolean, value:false},
                     margin:{type:Object, value:{top: 5, right: 10, bottom: 100, left: 50}},
                     chartData:{type:Object}
                 },
                 ready: function() {
                     console.log(this.tagName + " ready")
+
                     this.transactionsStats = new TransactionsStats()
                     var rMin = 5, rMax = 20;
                     this.color = d3.scale.category10(),
                             rScale = d3.scale.linear().range([rMin, rMax])
+
+                    this.$.typeSelector.init(Object.keys(transactionsMap), function(item) {
+                            return 'font-weight: bold; color: ' + this.color(item) + ';'
+                        }.bind(this), function(item) {
+                            return transactionsMap[item].lbl
+                        })
+
                     window.addEventListener('resize', function(event){
                         this.chart(this.chartData)
                     }.bind(this));
@@ -146,44 +88,29 @@
                         this.chartData.forEach(function(transactionvs) {
                             this.transactionsStats.pushTransaction(transactionvs)
                         }.bind(this))
-                        this.tags = this.transactionsStats.tags
+                        this.$.tagSelector.init(this.transactionsStats.tags, null, null)
                         this.chart(this.chartData)
                     }.bind(this))
                 },
-                typeCheckboxSelected:function (e) {
-                    console.log("typeCheckboxSelected: " + e.target.value + " - checked: " + e.target.checked)
-                    if(e.target.checked) {
-                        var index = this.transactionTypeFilter.indexOf(e.target.value)
-                        this.transactionTypeFilter.splice(index, 1)
+                tagCheckboxSelected: function(e) {
+                    console.log("typeCheckboxSelected: " + e.detail.value + " - checked: " + e.detail.checked)
+                    if(e.detail.checked) {
+                        var index = this.transactionTagFilter.indexOf(e.detail.value)
+                        this.transactionTagFilter.splice(index, 1)
                     } else {
-                        this.transactionTypeFilter.push(e.target.value)
+                        this.transactionTagFilter.push(e.detail.value)
                     }
                     this.filterChart()
                 },
-                getTransactionDescription:function (transactionType) {
-                    return transactionsMap[transactionType].lbl
-                },
-                getTransactionStyle:function (transactionType) {
-                    return 'font-weight: bold; color: ' + this.color(transactionType) + ';'
-                },
-                showTagCheckboxes:function (e) {
-                    console.log("==== showTagCheckboxes: " + this.tags + " - tagCheckBoxExpanded: " + this.tagCheckBoxExpanded)
-                    if (!this.tagCheckBoxExpanded) {
-                        this.$.tagCheckboxes.style.display = "block";
-                        this.tagCheckBoxExpanded = true;
+                typeCheckboxSelected:function (e) {
+                    console.log("typeCheckboxSelected: " + e.detail.value + " - checked: " + e.detail.checked)
+                    if(e.detail.checked) {
+                        var index = this.transactionTypeFilter.indexOf(e.detail.value)
+                        this.transactionTypeFilter.splice(index, 1)
                     } else {
-                        this.$.tagCheckboxes.style.display = "none";
-                        this.tagCheckBoxExpanded = false;
+                        this.transactionTypeFilter.push(e.detail.value)
                     }
-                },
-                showTypeCheckboxes:function (e) {
-                    if (!this.typeCheckBoxExpanded) {
-                        this.$.typeCheckboxes.style.display = "block";
-                        this.typeCheckBoxExpanded = true;
-                    } else {
-                        this.$.typeCheckboxes.style.display = "none";
-                        this.typeCheckBoxExpanded = false;
-                    }
+                    this.filterChart()
                 },
                 timeCheckboxSelected:function (e) {
                     console.log("timeCheckboxSelected: " + e.target.value + " - checked: " + e.target.checked)

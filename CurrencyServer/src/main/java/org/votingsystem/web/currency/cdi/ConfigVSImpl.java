@@ -165,9 +165,7 @@ public class ConfigVSImpl implements ConfigVS {
     @Override
     public TagVS getTag(String tagName) throws ValidationExceptionVS {
         Query query = dao.getEM().createNamedQuery("findTagByName").setParameter("name", tagName.toUpperCase());
-        TagVS tagVS = dao.getSingleResult(TagVS.class, query);
-        if(tagVS != null) return tagVS;
-        else return createtagVS(tagName);
+        return dao.getSingleResult(TagVS.class, query);
     }
 
     public TagVS createtagVS(String tagName) {
