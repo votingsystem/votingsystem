@@ -77,17 +77,14 @@
       }
     },
     init: function(checkBoxList, itemStyle, itemDescription) {
-      console.log(this.tagName + "init")
       this.itemStyle = itemStyle
       this.itemDescription = itemDescription
       this.checkBoxList = checkBoxList
     },
     itemCheckboxSelected: function(e) {
-      console.log(this.tagName + " - itemCheckboxSelected: " + e.model.item)
       this.fire("checkbox-selected", {value: e.model.item, checked:e.target.checked})
     },
     _widthChanged: function() {
-      console.log(this.tagName + " - _widthChanged: " + this.width)
       this.$.selectBox.style.width = this.width
       this.$.mainDiv.style.width = this.width
     },

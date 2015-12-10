@@ -18,10 +18,10 @@
             position: absolute;
             text-align: center;
             font-size: 0.8em;
-            color: #fff;
+            color: #888;
             padding: 2px;
-            background: #888;
-            border: 0px;
+            background: #fefefe;
+            border: 1px solid #888;
             border-radius: 8px;
         }
         .icontext {
@@ -37,8 +37,12 @@
                 <button id="resetButton" style="">reset</button>
             </div>
             <div class="horizontal layout center center-justified" style="border: 1px solid #888; margin: 0 10px 0 10px; font-size: 0.9em;">
-                <input type="checkbox" value="timeLimited" on-click="timeCheckboxSelected" checked="true"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}
-                <input type="checkbox" value="timeFree" on-click="timeCheckboxSelected" style="margin:0 0 0 10px;" checked="true">${msg.timeFreeLbl}
+                <div style="color: red;">
+                    <input type="checkbox" value="timeLimited" on-click="timeCheckboxSelected" checked="true" style=""><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}
+                </div>
+                <div>
+                    <input type="checkbox" value="timeFree" on-click="timeCheckboxSelected" style="margin:0 0 0 10px;" checked="true">${msg.timeFreeLbl}
+                </div>
             </div>
 
             <vs-checkbox-selector id="typeSelector" width="300px" caption="${msg.typeLbl}" on-checkbox-selected="typeCheckboxSelected"></vs-checkbox-selector>
@@ -47,12 +51,14 @@
         </div>
 
         <div id="scatterPlotDiv" style="width: 100%; height: 100%; min-height: 200px;"></div>
-        <div id="tooltip" class="tooltip" style="">
-            <div><strong>{{selectedTransaction.type}}</strong></div>
-            <div>{{getDate(selectedTransaction.dateCreated)}}</div>
+        <div id="tooltip" class="tooltip" style="display: none;">
+            <div style$="{{selectedTransactionTypeStyle}}">{{getTransactionDescription(selectedTransaction.type)}}</div>
             <div><a href="{{selectedTransaction.messageSMIMEURL}}" target="_blank">
-                {{selectedTransaction.amount}} {{selectedTransaction.currencyCode}}</a>
-                <i hidden={{!selectedTransaction.timeLimited}} class="fa fa-clock-o" style="margin:0px 0px 0px 20px;" title="${msg.timeLimitedLbl}"></i></div>
+                {{getDate(selectedTransaction.dateCreated)}}</a></div>
+            <div style$="{{selectedTransactionTagStyle}}">
+                {{selectedTransaction.amount}} {{selectedTransaction.currencyCode}} {{selectedTransactionTag}}
+                <i hidden={{!selectedTransaction.timeLimited}} class="fa fa-clock-o" style="margin:0px 0px 0px 5px; color: red;" title="${msg.timeLimitedLbl}"></i>
+            </div>
         </div>
     </template>
     <script>
@@ -63,22 +69,21 @@
                     transactionTypeFilter:{type:Array, value:[]},
                     transactionTimeFilter:{type:Array, value:[]},
                     transactionTagFilter:{type:Array, value:[]},
+                    circlesGradientList:{type:Array, value:[]},
+                    selectedTransaction:{type:Object, observer:'selectedTransactionChanged'},
                     margin:{type:Object, value:{top: 5, right: 10, bottom: 100, left: 50}},
                     chartData:{type:Object}
                 },
                 ready: function() {
                     console.log(this.tagName + " ready")
-
                     this.transactionsStats = new TransactionsStats()
                     var rMin = 5, rMax = 20;
-                    this.color = d3.scale.category10(),
+                    this.color = d3.scale.category20(),
                             rScale = d3.scale.linear().range([rMin, rMax])
 
-                    this.$.typeSelector.init(Object.keys(transactionsMap), function(item) {
-                            return 'font-weight: bold; color: ' + this.color(item) + ';'
-                        }.bind(this), function(item) {
-                            return transactionsMap[item].lbl
-                        })
+                    this.$.typeSelector.init(Object.keys(transactionsMap), function (item) {
+                        return 'font-weight: bold; color: ' + this.color(item) + ';'
+                    }.bind(this), this.getTransactionDescription)
 
                     window.addEventListener('resize', function(event){
                         this.chart(this.chartData)
@@ -88,12 +93,12 @@
                         this.chartData.forEach(function(transactionvs) {
                             this.transactionsStats.pushTransaction(transactionvs)
                         }.bind(this))
-                        this.$.tagSelector.init(this.transactionsStats.tags, null, null)
+                        this.$.tagSelector.init(this.transactionsStats.tags, function (item) {
+                            return 'font-weight: bold; color: ' + this.color(item) + ';' }.bind(this), null)
                         this.chart(this.chartData)
                     }.bind(this))
                 },
                 tagCheckboxSelected: function(e) {
-                    console.log("typeCheckboxSelected: " + e.detail.value + " - checked: " + e.detail.checked)
                     if(e.detail.checked) {
                         var index = this.transactionTagFilter.indexOf(e.detail.value)
                         this.transactionTagFilter.splice(index, 1)
@@ -103,7 +108,6 @@
                     this.filterChart()
                 },
                 typeCheckboxSelected:function (e) {
-                    console.log("typeCheckboxSelected: " + e.detail.value + " - checked: " + e.detail.checked)
                     if(e.detail.checked) {
                         var index = this.transactionTypeFilter.indexOf(e.detail.value)
                         this.transactionTypeFilter.splice(index, 1)
@@ -123,13 +127,37 @@
                     this.filterChart()
                 },
                 filterChart:function () {
+                    this.filteredTransactionsStats = new TransactionsStats()
                     d3.select(this).selectAll(".transaction").attr("display", function(d) {
                         var timeType = d.timeLimited ? 'timeLimited':'timeFree'
                         if(this.transactionTimeFilter.indexOf(timeType) > -1) return 'none'
                         else if(this.transactionTypeFilter.indexOf(d.type) > -1) return 'none'
                         else if(this.transactionTagFilter.indexOf(d.tags[0]) > -1) return 'none'
-                        else return 'inline'
+                        else {
+                            this.filteredTransactionsStats.pushTransaction(d)
+                            return 'inline'
+                        }
                     }.bind(this));
+                },
+                selectedTransactionChanged:function (transaction) {
+                    this.selectedTransactionTag = transaction.tags[0]
+                    this.selectedTransactionTypeStyle = "font-weight:bold;color:" + this.color(transaction.type) + ";";
+                    this.selectedTransactionTagStyle = "color:" + this.color(transaction.tags[0]) + ";"
+                },
+                getTransactionDescription:function (transaction) {
+                    return transactionsMap[transaction].lbl
+                },
+                getCircleGradientId:function (transaction) {
+                    var gradId= transaction.type + "_" + transaction.tags[0]
+                    gradId = gradId.replace(' ', '');
+                    if(this.circlesGradientList.indexOf(gradId) < 0) {
+                        var grad = d3.select(this).select("svg").append("defs").append("linearGradient").attr("id", gradId)
+                                .attr("x1", "0%").attr("x2", "0%").attr("y1", "100%").attr("y2", "0%");
+                        grad.append("stop").attr("offset", "50%").style("stop-color", this.color(transaction.tags[0]));
+                        grad.append("stop").attr("offset", "50%").style("stop-color", this.color(transaction.type));
+                        this.circlesGradientList.push(gradId)
+                    }
+                    return gradId
                 },
                 getDate:function (date) {
                     return new Date(date).formatWithTime()
@@ -177,16 +205,20 @@
                         zoom.translate([0, 0]).scale(1)
                         zoomed()
                     }
-                    var nodes = chartBody.selectAll(".transaction").data(data).enter().append("g").attr("class", "transaction")
-                            .attr("transform", function (d){ return 'translate(' + x(new Date(d.dateCreated)) + ' ' + y(d.amount) +')'})
+                    var circles = chartBody.selectAll(".transaction").data(data).enter().append("circle");
                     var hostElement = this
-                    var circles = nodes.append("circle")
+                    var circles = circles.attr("class", "transaction")
+                            .attr("cx",      function (d){ return   x(new Date(d.dateCreated))})
+                            .attr("cy",      function (d){ return   y(d.amount) })
                             .attr("r",       function (d){ return rScale(d.amount) })
-                            .attr("style",    function (d){ return   "fill:" +
-                                    this.color(d.type) + "; stroke:" + d3.rgb(this.color(d.type)).darker(1)}.bind(this))
+                            .attr("style",    function (d){
+                                var gradientId = hostElement.getCircleGradientId(d)
+                                var stroke = "stroke:#fefefe;"
+                                if(d.timeLimited) stroke = "stroke:red;stroke-width:2px;"
+                                return   "fill:url(#" + gradientId + ")" + ";" + stroke}.bind(this))
                             .on("mouseover", function(d) {
                                 hostElement.$.tooltip.style.display = 'block'
-                                hostElement.$.tooltip.style.top = (d3.event.pageY ) + "px"
+                                hostElement.$.tooltip.style.top = (d3.event.pageY + rScale(d.amount)) + "px"
                                 hostElement.$.tooltip.style.left = (d3.event.pageX - 30) + "px"
                                 hostElement.selectedTransaction = d
 
@@ -201,7 +233,7 @@
                                         .attr("x2", circle.attr("cx"))
                                         .attr("y1", circle.attr("cy"))
                                         .attr("y2", hostElement.height)
-                                        .style("stroke", circle.style("fill"))
+                                        .style("stroke", hostElement.color(d.tags[0]))
                                 svg.append("g")
                                         .attr("class", "guide")
                                         .append("line")
@@ -209,21 +241,13 @@
                                         .attr("x2", 0)
                                         .attr("y1", circle.attr("cy"))
                                         .attr("y2", circle.attr("cy"))
-                                        .style("stroke", circle.style("fill"))
+                                        .style("stroke", hostElement.color(d.tags[0]))
                             })
                             .on("mouseout", function(d) {
                                 var circle = d3.select(this);
                                 circle.transition().duration(800).style("opacity", .5).attr("r", rScale(d.amount)).ease("elastic");
                                 d3.selectAll(".guide").transition().duration(100).styleTween("opacity", function() { return d3.interpolate(.5, 0); }).remove()
                             })
-
-                    nodes.append("text")
-                            .attr("class","FontAwesome icontext")
-                            .style("font-size", function(d) {
-                                var r = rScale(d.amount)
-                                return Math.min(2 * r, (2 * r - 8) / this.getComputedTextLength() * 24) + "px"; })
-                            .attr("dy", ".35em")
-                            .text(function (d){ if(d.timeLimited) return "\uf017" });
 
                     svg.append("g")
                             .attr("class", "x axis")
@@ -250,7 +274,8 @@
                         //console.log("zoom.scale: " + zoom.scale() + " - x.domain: " + x.domain()[0])
                         svg.select(".x.axis").call(xAxis);
                         svg.select(".y.axis").call(yAxis);
-                        nodes.attr("transform", function (d){ return 'translate(' + x(new Date(d.dateCreated)) + ' ' + y(d.amount) +')'})
+                        circles.attr("cx", function (d){ return x(new Date(d.dateCreated))})
+                                .attr("cy", function (d){ return y(d.amount) })
                     }
                     //hack to refresh styles, I haven't found other way
                     Polymer.dom(this.$.scatterPlotDiv).appendChild(Polymer.dom(this.$.scatterPlotDiv).childNodes[0])
