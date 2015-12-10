@@ -58,7 +58,7 @@ public class TimeStampPane extends GridPane {
         setMargin(timeStampDateLabel, new Insets(10, 0 , 10, 0));
 
 
-        TextField timeStampText =new TextField(DateUtils.getDateStr(tsInfo.getGenTime(),"dd/MMM/yyyy HH:mm"));
+        TextField timeStampText =new TextField(DateUtils.getDateStr(tsInfo.getGenTime(),"dd/MMM/yyyy HH:mm:ss"));
         timeStampText.setEditable(false);
         add(timeStampText, 1, 0);
 

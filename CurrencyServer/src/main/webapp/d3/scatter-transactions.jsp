@@ -19,8 +19,8 @@
             text-align: center;
             font-size: 0.8em;
             color: #888;
-            padding: 2px;
-            background: #fefefe;
+            padding: 3px;
+            background: #fafafa;
             border: 1px solid #888;
             border-radius: 8px;
         }
@@ -36,27 +36,26 @@
             <div>
                 <button id="resetButton" style="">reset</button>
             </div>
-            <div class="horizontal layout center center-justified" style="border: 1px solid #888; margin: 0 10px 0 10px; font-size: 0.9em;">
-                <div style="color: red;">
-                    <input type="checkbox" value="timeLimited" on-click="timeCheckboxSelected" checked="true" style=""><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}
-                </div>
-                <div>
-                    <input type="checkbox" value="timeFree" on-click="timeCheckboxSelected" style="margin:0 0 0 10px;" checked="true">${msg.timeFreeLbl}
-                </div>
+            <div class="horizontal layout center center-justified" style="border: 1px solid #888; margin: 0 10px 0 10px; font-size: 0.9em; padding: 0 6px 0 6px;">
+                <input id="timeLimitedCheckBox" type="checkbox" value="timeLimited" on-click="timeCheckboxSelected" checked="true" style="">
+                <span style="color: red;"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}</span>
+                <input id="timeFreeCheckBox" type="checkbox" value="timeFree" on-click="timeCheckboxSelected" style="margin:0 0 0 10px;" checked="true">${msg.timeFreeLbl}
             </div>
 
-            <vs-checkbox-selector id="typeSelector" width="300px" caption="${msg.typeLbl}" on-checkbox-selected="typeCheckboxSelected"></vs-checkbox-selector>
+            <div style="margin: 0 10px 0 10px">
+                <vs-checkbox-selector id="typeSelector" width="300px" caption="${msg.typeLbl}" on-checkbox-selected="typeCheckboxSelected"></vs-checkbox-selector>
+            </div>
             <vs-checkbox-selector id="tagSelector" width="200px" caption="${msg.tagLbl}" on-checkbox-selected="tagCheckboxSelected"></vs-checkbox-selector>
 
         </div>
-
+        <button on-click="sendEvent">test</button>
         <div id="scatterPlotDiv" style="width: 100%; height: 100%; min-height: 200px;"></div>
         <div id="tooltip" class="tooltip" style="display: none;">
             <div style$="{{selectedTransactionTypeStyle}}">{{getTransactionDescription(selectedTransaction.type)}}</div>
-            <div><a href="{{selectedTransaction.messageSMIMEURL}}" target="_blank">
+            <div style="font-size: 0.9em;margin: 0 0 2px 0;"><a href="{{selectedTransaction.messageSMIMEURL}}" target="_blank">
                 {{getDate(selectedTransaction.dateCreated)}}</a></div>
             <div style$="{{selectedTransactionTagStyle}}">
-                {{selectedTransaction.amount}} {{selectedTransaction.currencyCode}} {{selectedTransactionTag}}
+                {{selectedTransaction.amount}} {{selectedTransaction.currencyCode}} - {{selectedTransactionTag}}
                 <i hidden={{!selectedTransaction.timeLimited}} class="fa fa-clock-o" style="margin:0px 0px 0px 5px; color: red;" title="${msg.timeLimitedLbl}"></i>
             </div>
         </div>
@@ -74,6 +73,9 @@
                     margin:{type:Object, value:{top: 5, right: 10, bottom: 100, left: 50}},
                     chartData:{type:Object}
                 },
+                sendEvent: function() {
+                    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('votingsystem-client-msg', {detail:{msg:"hello"}} ));
+                },
                 ready: function() {
                     console.log(this.tagName + " ready")
                     this.transactionsStats = new TransactionsStats()
@@ -85,7 +87,12 @@
                         return 'font-weight: bold; color: ' + this.color(item) + ';'
                     }.bind(this), this.getTransactionDescription)
 
+                    /*document.querySelector('#voting_system_page').addEventListener('votingsystem-client-msg', function (e) {
+                        console.log("votingsystem-client-msg:" + JSON.stringify(e.detail));
+                    }.bind(this))*/
+
                     window.addEventListener('resize', function(event){
+                        this.circlesGradientList = []
                         this.chart(this.chartData)
                     }.bind(this));
                     d3.json("/CurrencyServer/rest/transactionVS/from/20151116_0000/to/20151210_0000", function (json) {
@@ -142,7 +149,7 @@
                 selectedTransactionChanged:function (transaction) {
                     this.selectedTransactionTag = transaction.tags[0]
                     this.selectedTransactionTypeStyle = "font-weight:bold;color:" + this.color(transaction.type) + ";";
-                    this.selectedTransactionTagStyle = "color:" + this.color(transaction.tags[0]) + ";"
+                    this.selectedTransactionTagStyle = "font-size: 0.8em;color:" + this.color(transaction.tags[0]) + ";"
                 },
                 getTransactionDescription:function (transaction) {
                     return transactionsMap[transaction].lbl
@@ -205,9 +212,10 @@
                         zoom.translate([0, 0]).scale(1)
                         zoomed()
                     }
-                    var circles = chartBody.selectAll(".transaction").data(data).enter().append("circle");
+                    var circles = chartBody.selectAll(".transaction").data(data);
                     var hostElement = this
-                    var circles = circles.attr("class", "transaction")
+                    circles.enter().append("circle").attr("class", "transaction");
+                    var circles = circles
                             .attr("cx",      function (d){ return   x(new Date(d.dateCreated))})
                             .attr("cy",      function (d){ return   y(d.amount) })
                             .attr("r",       function (d){ return rScale(d.amount) })

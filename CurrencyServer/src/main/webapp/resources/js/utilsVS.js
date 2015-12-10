@@ -305,7 +305,7 @@ var coreSignalData = null
 function fireCoreSignal(coreSignalDataBase64) {
     if(document.querySelector("#voting_system_page") != null) {
         var b64_to_utf8 = decodeURIComponent(escape(window.atob(coreSignalDataBase64)))
-        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('votingsystem-client-msg', toJSON(b64_to_utf8)));
+        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('votingsystem-client-msg', {detail:toJSON(b64_to_utf8)} ));
     } else coreSignalData = coreSignalDataBase64
 }
 
