@@ -165,7 +165,7 @@
           Polymer.Base.importHref('./transactionVS/transactionvs-list.vsp', function(e) {
               if(!transactionVSList) transactionVSList = document.createElement('transactionvs-list');
               transactionVSList.url = data.path
-              vs.loadMainContent(transactionVSList, "${msg.transactionPageTitle}")
+              vs.loadMainContent(transactionVSList, "${msg.transactionsLbl}")
           });
       });
 

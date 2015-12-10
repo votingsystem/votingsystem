@@ -74,7 +74,7 @@
                         result = result? result + "${msg.incomeLbl} - " : "${msg.incomeLbl} - "
                     }
                 }
-                var transactionTypeLbl = getTransactionVSDescription(transactionvs.type)
+                var transactionTypeLbl = transactionsMap[transactionvs.type].lbl
                 return result? result.toUpperCase() + transactionTypeLbl : transactionTypeLbl
             },
             amount: function(transaction) {

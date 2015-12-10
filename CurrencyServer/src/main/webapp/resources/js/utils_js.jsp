@@ -57,37 +57,16 @@
         return resultStr
     };
 
-    function getTransactionVSDescription(transactionType) {
-        var transactionDescription = "transactionDescription"
-        switch(transactionType) {
-            case 'CURRENCY_REQUEST':
-                transactionDescription = "${msg.selectCurrencyRequestLbl}"
-                break;
-            case 'CURRENCY_SEND':
-                transactionDescription = "${msg.selectCurrencySendLbl}"
-                break;
-            case 'CURRENCY_PERIOD_INIT':
-                transactionDescription = "${msg.currencyPeriodInitLbl}"
-                break;
-            case 'CURRENCY_PERIOD_INIT_TIME_LIMITED':
-                transactionDescription = "${msg.currencyPeriodInitTimeLimitedLbl}"
-                break;
-            case 'FROM_BANKVS':
-                transactionDescription = "${msg.bankVSInputLbl}"
-                break;
-            case 'FROM_USERVS':
-                transactionDescription = "${msg.transactionVSFromUserVS}"
-                break;
-            case 'FROM_GROUP_TO_MEMBER_GROUP':
-                transactionDescription = "${msg.transactionVSFromGroupToMemberGroup}"
-                break;
-            case 'FROM_GROUP_TO_ALL_MEMBERS':
-                transactionDescription = "${msg.transactionVSFromGroupToAllMembers}"
-                break;
-            default: transactionDescription = transactionType
-        }
-        return transactionDescription
-    }
+    var transactionsMap = {
+        CURRENCY_REQUEST:{lbl:"${msg.selectCurrencyRequestLbl}"},
+        CURRENCY_SEND:{lbl:"${msg.selectCurrencySendLbl}"},
+        CURRENCY_PERIOD_INIT:{lbl:"${msg.currencyPeriodInitLbl}"},
+        CURRENCY_PERIOD_INIT_TIME_LIMITED:{lbl:"${msg.currencyPeriodInitTimeLimitedLbl}"},
+        FROM_BANKVS:{lbl:"${msg.bankVSInputLbl}"},
+        FROM_USERVS:{lbl:"${msg.transactionVSFromUserVS}"},
+        FROM_GROUP_TO_MEMBER_GROUP:{lbl:"${msg.transactionVSFromGroupToMemberGroup}"},
+        FROM_GROUP_TO_ALL_MEMBERS:{lbl:"${msg.transactionVSFromGroupToAllMembers}"}}
+
 
     window._originalAlert = window.alert;
     window.alert = function(text) {

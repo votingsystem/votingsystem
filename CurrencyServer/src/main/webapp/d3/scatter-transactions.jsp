@@ -29,6 +29,37 @@
             font-family: FontAwesome;
             fill: #fff;
         }
+        .selectBox {
+            position: relative;
+        }
+        .selectBox select {
+            width: 100%;
+            font-weight: bold;
+        }
+        .overSelect {
+            position: absolute;
+            left: 0; right: 0; top: 0; bottom: 0;
+        }
+
+        .selectBox select {
+            width: 100%;
+            font-weight: bold;
+        }
+        .overSelect {
+            position: absolute;
+            left: 0; right: 0; top: 0; bottom: 0;
+        }
+        .checkboxes {
+            display: none;
+            border: 1px #dadada solid;
+            background: #fefefe;
+        }
+        .checkboxes label {
+            display: block;
+        }
+        .checkboxes label:hover {
+            background-color: #dadada;
+        }
     </style>
     <template>
         <div class="horizontal layout" style="margin: 4px;">
@@ -36,9 +67,43 @@
                 <button id="resetButton" style="">reset</button>
             </div>
             <div class="horizontal layout center center-justified" style="border: 1px solid #888; margin: 0 10px 0 10px; font-size: 0.9em;">
-                <input id="timeLimitedCheckbox" type="checkbox" value="timeLimited" on-click="timeCheckboxSelected" checked="true"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}
-                <input id="timeFreeCheckbox" type="checkbox" value="timeFree" on-click="timeCheckboxSelected" style="margin:0 0 0 10px;" checked="true">${msg.timeFreeLbl}
+                <input type="checkbox" value="timeLimited" on-click="timeCheckboxSelected" checked="true"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}
+                <input type="checkbox" value="timeFree" on-click="timeCheckboxSelected" style="margin:0 0 0 10px;" checked="true">${msg.timeFreeLbl}
             </div>
+            <div style="position: relative;width: 300px;">
+                <div class="multiselect" style="width: 300px; position: absolute;">
+                    <div class="selectBox" on-click="showTypeCheckboxes">
+                        <select class="form-control">
+                            <option>${msg.typeLbl}</option>
+                        </select>
+                        <div class="overSelect"></div>
+                    </div>
+                    <div id="typeCheckboxes" class="checkboxes">
+                        <template is="dom-repeat" items="{{transactionTypes}}" as="item">
+                            <label for="{{item}}" style$="{{getTransactionStyle(item)}}"><input id="{{item}}" type="checkbox" value="{{item}}" on-click="typeCheckboxSelected"
+                                     checked="true">{{getTransactionDescription(item)}}</label>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <div style="position: relative;">
+                <div class="multiselect" style="width: 220px; position: absolute;margin: 0 0 0 15px;">
+                    <div  class="selectBox" on-click="showTagCheckboxes">
+                        <select class="form-control">
+                            <option>${msg.tagLbl}</option>
+                        </select>
+                        <div class="overSelect"></div>
+                    </div>
+                    <div id="tagCheckboxes" class="checkboxes">
+                        <template is="dom-repeat" items="{{tags}}" as="tag">
+                            <label for="{{tag}}" ><input id="{{tag}}" type="checkbox" value="{{tag}}" on-click=""
+                                                         checked="true">{{tag}}</label>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div id="scatterPlotDiv" style="width: 100%; height: 100%; min-height: 200px;"></div>
@@ -46,24 +111,31 @@
             <div><strong>{{selectedTransaction.type}}</strong></div>
             <div>{{getDate(selectedTransaction.dateCreated)}}</div>
             <div><a href="{{selectedTransaction.messageSMIMEURL}}" target="_blank">
-                {{selectedTransaction.amount}} {{selectedTransaction.currencyCode}}</a></div>
+                {{selectedTransaction.amount}} {{selectedTransaction.currencyCode}}</a>
+                <i hidden={{!selectedTransaction.timeLimited}} class="fa fa-clock-o" style="margin:0px 0px 0px 20px;" title="${msg.timeLimitedLbl}"></i></div>
         </div>
+
+
     </template>
     <script>
         (function() {
             Polymer({
                 is: "scatter-transactions",
                 properties: {
-                    legend:{type:Object, value:{height:30, width:500, margin: {top: 15, right: 0, bottom: 0, left: 300}}},
-                    transactionFilter:{type:Array, value:[]},
-                    margin:{type:Object, value:{top: 40, right: 10, bottom: 100, left: 50}},
+                    transactionTypes:{type:Array, value:Object.keys(transactionsMap)},
+                    tags:{type:Array},
+                    transactionTypeFilter:{type:Array, value:[]},
+                    transactionTimeFilter:{type:Array, value:[]},
+                    transactionTagFilter:{type:Array, value:[]},
+                    typeCheckBoxExpanded:{type:Boolean, value:false},
+                    tagCheckBoxExpanded:{type:Boolean, value:false},
+                    margin:{type:Object, value:{top: 5, right: 10, bottom: 100, left: 50}},
                     chartData:{type:Object}
                 },
                 ready: function() {
                     console.log(this.tagName + " ready")
                     this.transactionsStats = new TransactionsStats()
-                    this.legendDispatch = d3.dispatch('legendClick', 'legendMouseover', 'legendMouseout');
-                    var rMin = 4, rMax = 20;
+                    var rMin = 5, rMax = 20;
                     this.color = d3.scale.category10(),
                             rScale = d3.scale.linear().range([rMin, rMax])
                     window.addEventListener('resize', function(event){
@@ -74,20 +146,63 @@
                         this.chartData.forEach(function(transactionvs) {
                             this.transactionsStats.pushTransaction(transactionvs)
                         }.bind(this))
+                        this.tags = this.transactionsStats.tags
                         this.chart(this.chartData)
                     }.bind(this))
                 },
+                typeCheckboxSelected:function (e) {
+                    console.log("typeCheckboxSelected: " + e.target.value + " - checked: " + e.target.checked)
+                    if(e.target.checked) {
+                        var index = this.transactionTypeFilter.indexOf(e.target.value)
+                        this.transactionTypeFilter.splice(index, 1)
+                    } else {
+                        this.transactionTypeFilter.push(e.target.value)
+                    }
+                    this.filterChart()
+                },
+                getTransactionDescription:function (transactionType) {
+                    return transactionsMap[transactionType].lbl
+                },
+                getTransactionStyle:function (transactionType) {
+                    return 'font-weight: bold; color: ' + this.color(transactionType) + ';'
+                },
+                showTagCheckboxes:function (e) {
+                    console.log("==== showTagCheckboxes: " + this.tags + " - tagCheckBoxExpanded: " + this.tagCheckBoxExpanded)
+                    if (!this.tagCheckBoxExpanded) {
+                        this.$.tagCheckboxes.style.display = "block";
+                        this.tagCheckBoxExpanded = true;
+                    } else {
+                        this.$.tagCheckboxes.style.display = "none";
+                        this.tagCheckBoxExpanded = false;
+                    }
+                },
+                showTypeCheckboxes:function (e) {
+                    if (!this.typeCheckBoxExpanded) {
+                        this.$.typeCheckboxes.style.display = "block";
+                        this.typeCheckBoxExpanded = true;
+                    } else {
+                        this.$.typeCheckboxes.style.display = "none";
+                        this.typeCheckBoxExpanded = false;
+                    }
+                },
                 timeCheckboxSelected:function (e) {
                     console.log("timeCheckboxSelected: " + e.target.value + " - checked: " + e.target.checked)
-
-                    /*d3.select(this).selectAll(".transaction").attr("display", function(d) {
-                        if(d.timeLimited && !this.$.timeLimitedCheckbox.checked) return 'none'
-                        else return 'inline'
-                    }.bind(this));*/
-
+                    if(e.target.checked) {
+                        var index = this.transactionTimeFilter.indexOf(e.target.value)
+                        this.transactionTimeFilter.splice(index, 1)
+                    } else {
+                        this.transactionTimeFilter.push(e.target.value)
+                    }
+                    this.filterChart()
                 },
-                filterChart:function (date) {
-
+                filterChart:function () {
+                    d3.select(this).selectAll(".transaction").attr("display", function(d) {
+                        var timeType = d.timeLimited ? 'timeLimited':'timeFree'
+                        if(this.transactionTimeFilter.indexOf(timeType) > -1) return 'none'
+                        else if(this.transactionTypeFilter.indexOf(d.type) > -1) return 'none'
+                        else if(this.transactionTagFilter.indexOf(d.tags[0]) > -1) return 'none'
+                        else return 'inline'
+                    }.bind(this));
                 },
                 getDate:function (date) {
                     return new Date(date).formatWithTime()
@@ -116,7 +231,7 @@
                     x = x.domain(d3.extent(data, function(d) { return d.dateCreated; })).range([0, this.width]).nice();
                     y = y.domain([0, d3.max(data, function(d) {
                         return d.amount; })]).range([this.height, 0]).nice();
-                    var zoom = d3.behavior.zoom().x(x).y(y).scaleExtent([-10, 10]).on("zoom", zoomed)
+                    var zoom = d3.behavior.zoom().x(x).y(y).scaleExtent([-100, 100]).on("zoom", zoomed)
                     var scatterWrap = svg.append("rect")
                             .attr("width", this.width)
                             .attr("height", this.height)
@@ -183,9 +298,6 @@
                             .attr("dy", ".35em")
                             .text(function (d){ if(d.timeLimited) return "\uf017" });
 
-
-
-                    this.legendChart()
                     svg.append("g")
                             .attr("class", "x axis")
                             .attr("transform", "translate(0," + (this.height) + ")")
@@ -207,13 +319,6 @@
                             .style("text-anchor", "end")
                             .style("size", "end")
                             .text("${msg.amountLbl}");
-
-                    this.legendDispatch.on('legendClick', function(d, i) {
-                        d3.select(this).selectAll(".transaction").attr("display", function(d) {
-                            if(this.transactionFilter.indexOf(d.type) > -1) return 'none'
-                            else return 'inline'
-                        }.bind(this));
-                    }.bind(this));
                     function zoomed() {
                         //console.log("zoom.scale: " + zoom.scale() + " - x.domain: " + x.domain()[0])
                         svg.select(".x.axis").call(xAxis);
@@ -222,60 +327,7 @@
                     }
                     //hack to refresh styles, I haven't found other way
                     Polymer.dom(this.$.scatterPlotDiv).appendChild(Polymer.dom(this.$.scatterPlotDiv).childNodes[0])
-                },
-                legendChart:function () {
-                    var wrap = d3.select(this).select("svg").append('g').attr('class', 'legendWrap');
-                    var series = wrap.selectAll('.series').data(this.transactionsStats.getTransactionTypesData());
-                    var seriesEnter = series.enter().append('g').attr('class', 'series disabled')
-                            .on('click', function(d, i) {
-                                d.enabled = (d.enabled !== undefined)? !d.enabled : false
-                                if(d.enabled) {
-                                    var index
-                                    if((index = this.transactionFilter.indexOf(d.type)) > -1) {
-                                        this.transactionFilter.splice(index, 1);
-                                    }
-                                } else this.transactionFilter.push(d.type)
-                                series.classed('disabled', function(d) {
-                                    return ( this.transactionFilter.indexOf(d.type) > -1)}.bind(this));
-                                this.legendDispatch.legendClick(d, i);
-                            }.bind(this))
-                            .on('mouseover', function(d, i) {
-                                //this.legendDispatch.legendMouseover(d, i);
-                            }.bind(this))
-                            .on('mouseout', function(d, i) {
-                                //this.legendDispatch.legendMouseout(d, i);
-                            }.bind(this));
-
-                    seriesEnter.append('circle')
-                            .style('fill', function(d, i){ return this.color(d.type)}.bind(this))
-                            .style('stroke', function(d, i){ this.color(d.type)}.bind(this))
-                            .attr('r', 5);
-                    seriesEnter.append('text')
-                            .attr('class', 'legendText')
-                            .text(function(d) { return d.type})
-                            .attr('text-anchor', 'start')
-                            .attr('dy', '.32em')
-                            .attr('dx', '8');
-                    series.classed('disabled', false);
-                    series.exit().remove();
-
-                    var ypos = 5,
-                            newxpos = 5,
-                            xpos;
-                    series.attr('transform', function(d, i) {
-                        var length = d3.select(this).select('.legendText').node().getComputedTextLength() + 28;
-                        xpos = newxpos;
-                        if (this.width < this.margin.left + this.margin.right + xpos + length) {
-                            newxpos = xpos = 5;
-                            ypos += 20;
-                        }
-                        newxpos += length;
-                        return 'translate(' + xpos + ',' + ypos + ')';
-                    }.bind(this));
-                    this.legend.height = this.legend.margin.top + this.legend.margin.bottom + ypos + 15;
-                    d3.select(".legendWrap").attr('transform', 'translate(' + (this.legend.margin.left) + ',' +
-                            (this.legend.margin.top) + ' )')
-            }
+                }
             });
         })();
     </script>
