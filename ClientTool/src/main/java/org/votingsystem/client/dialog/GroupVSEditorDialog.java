@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import com.google.common.eventbus.Subscribe;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -16,7 +17,6 @@ import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.util.*;
-import rx.functions.Action1;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -47,21 +47,18 @@ public class GroupVSEditorDialog extends DialogVS implements AddTagVSDialog.List
     @FXML private HTMLEditor editor;
     private static GroupVSEditorDialog INSTANCE;
 
-    static class OperationVSListener implements Action1 {
-        @Override public void call(Object event) {
-            if(event instanceof ResponseVS) {
-                ResponseVS responseVS = (ResponseVS)event;
-                switch(responseVS.getType()) {
-                    case CANCELED:
-                        if(responseVS.getData() instanceof OperationVS) {
-                            OperationVS operationVS = (OperationVS) responseVS.getData();
-                            if((operationVS.getType() == TypeVS.CURRENCY_GROUP_NEW ||
-                                    operationVS.getType() == TypeVS.CURRENCY_GROUP_EDIT) && operationVS != null) {
-                                show(operationVS);
-                            }
+    static class OperationVSListener {
+        @Subscribe public void call(ResponseVS responseVS) {
+            switch(responseVS.getType()) {
+                case CANCELED:
+                    if(responseVS.getData() instanceof OperationVS) {
+                        OperationVS operationVS = (OperationVS) responseVS.getData();
+                        if((operationVS.getType() == TypeVS.CURRENCY_GROUP_NEW ||
+                                operationVS.getType() == TypeVS.CURRENCY_GROUP_EDIT) && operationVS != null) {
+                            show(operationVS);
                         }
-                        break;
-                }
+                    }
+                    break;
             }
         }
     }

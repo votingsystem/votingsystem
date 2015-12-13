@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -17,7 +18,6 @@ import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.*;
-import rx.functions.Action1;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,22 +47,19 @@ public class RepresentativeEditorDialog extends DialogVS {
     private File representativeImage;
     private static RepresentativeEditorDialog INSTANCE;
 
-    static class OperationVSListener implements Action1 {
-        @Override public void call(Object event) {
-            if(event instanceof ResponseVS) {
-                ResponseVS responseVS = (ResponseVS)event;
-                switch(responseVS.getType()) {
-                    case CANCELED:
-                        if(responseVS.getData() instanceof OperationVS) {
-                            OperationVS operationVS = (OperationVS) responseVS.getData();
-                            if((operationVS.getType() == TypeVS.EDIT_REPRESENTATIVE ||
-                                    operationVS.getType() == TypeVS.NEW_REPRESENTATIVE) && operationVS != null) {
-                                show(operationVS);
-                                INSTANCE.refreshImage();
-                            }
+    static class OperationVSListener {
+        @Subscribe public void call(ResponseVS  responseVS) {
+            switch(responseVS.getType()) {
+                case CANCELED:
+                    if(responseVS.getData() instanceof OperationVS) {
+                        OperationVS operationVS = (OperationVS) responseVS.getData();
+                        if((operationVS.getType() == TypeVS.EDIT_REPRESENTATIVE ||
+                                operationVS.getType() == TypeVS.NEW_REPRESENTATIVE) && operationVS != null) {
+                            show(operationVS);
+                            INSTANCE.refreshImage();
                         }
-                        break;
-                }
+                    }
+                    break;
             }
         }
     }

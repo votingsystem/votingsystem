@@ -1,6 +1,7 @@
 package org.votingsystem.client.dialog;
 
 
+import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -26,7 +27,6 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.*;
-import rx.functions.Action1;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
@@ -46,15 +46,12 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
 
     private static Logger log = Logger.getLogger(CurrencyDialog.class.getSimpleName());
 
-    class EventBusCurrencyListener implements Action1 {
-        @Override public void call(Object event) {
-            if(event instanceof SocketMessageDto) {
-                SocketMessageDto socketMessage = (SocketMessageDto)event;
-                switch(socketMessage.getOperation()) {
-                    case CURRENCY_WALLET_CHANGE:
-                        if(walletChangeTask != null) walletChangeTask.update(socketMessage);
-                        break;
-                }
+    class EventBusCurrencyListener {
+        @Subscribe public void call(SocketMessageDto socketMessage) {
+            switch(socketMessage.getOperation()) {
+                case CURRENCY_WALLET_CHANGE:
+                    if(walletChangeTask != null) walletChangeTask.update(socketMessage);
+                    break;
             }
         }
     }

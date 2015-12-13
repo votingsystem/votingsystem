@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import com.google.common.eventbus.Subscribe;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -21,7 +22,6 @@ import org.votingsystem.model.voting.FieldEventVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
-import rx.functions.Action1;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -55,20 +55,17 @@ public class ElectionEditorDialog extends DialogVS implements AddVoteOptionDialo
     @FXML private HTMLEditor editor;
     @FXML private VBox optionsVBox;
 
-    static class OperationVSListener implements Action1  {
-        @Override public void call(Object event) {
-            if(event instanceof  ResponseVS) {
-                ResponseVS responseVS = (ResponseVS)event;
-                switch(responseVS.getType()) {
-                    case CANCELED:
-                        if(responseVS.getData() instanceof OperationVS) {
-                            OperationVS operationVS = (OperationVS) responseVS.getData();
-                            if(operationVS.getType() == TypeVS.VOTING_PUBLISHING && operationVS != null) {
-                                show(operationVS, null);
-                            }
+    static class OperationVSListener {
+        @Subscribe public void call(ResponseVS responseVS) {
+            switch(responseVS.getType()) {
+                case CANCELED:
+                    if(responseVS.getData() instanceof OperationVS) {
+                        OperationVS operationVS = (OperationVS) responseVS.getData();
+                        if(operationVS.getType() == TypeVS.VOTING_PUBLISHING && operationVS != null) {
+                            show(operationVS, null);
                         }
-                        break;
-                }
+                    }
+                    break;
             }
         }
     }

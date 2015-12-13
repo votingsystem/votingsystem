@@ -1,5 +1,6 @@
 package org.votingsystem.client.dialog;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.zxing.WriterException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -22,7 +23,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.QRUtils;
 import org.votingsystem.util.TypeVS;
-import rx.functions.Action1;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -45,52 +45,49 @@ public class QRDialog extends DialogVS {
 
     private static QRDialog INSTANCE;
 
-    class EventBusSocketMsgListener implements Action1 {
-        @Override public void call(Object busEvent) {
-            if(busEvent instanceof SocketMessageDto) {
-                SocketMessageDto socketMsg = (SocketMessageDto)busEvent;
-                switch(socketMsg.getOperation()) {
-                    case TRANSACTIONVS_RESPONSE:
-                        try {
-                            if(socketMsg.getWebSocketSession().getData() != null) {
-                                QRMessageDto<TransactionVSDto> qrDto = (QRMessageDto<TransactionVSDto>) socketMsg
-                                        .getWebSocketSession().getData();
-                                TransactionVSDto transactionDto = qrDto.getData();
-                                SMIMEMessage smimeMessage = socketMsg.getSMIME();
-                                String result = transactionDto.validateReceipt(smimeMessage, true);
-                                Button openReceiptButton = new Button();
-                                openReceiptButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
-                                openReceiptButton.setText(ContextVS.getMessage("openReceiptLbl"));
-                                openReceiptButton.setOnAction(event -> {
-                                    try {
-                                        DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(
-                                                new String(smimeMessage.getBytes(), StandardCharsets.UTF_8), null);
-                                        Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
-                                    } catch (Exception ex) {
-                                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                                    }
-                                });
-                                Platform.runLater(() -> { hide(); });
-                                if(qrDto.getTypeVS() == TypeVS.CURRENCY_CHANGE) {
-                                    Button saveWalletButton = new Button();
-                                    saveWalletButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.MONEY));
-                                    saveWalletButton.setText(ContextVS.getMessage("saveToSecureWalletMsg"));
-                                    saveWalletButton.setOnAction(event -> {
-                                        Browser.getInstance().saveWallet();
-                                    });
-                                    VBox buttonsVBox = new VBox(10);
-                                    buttonsVBox.getChildren().addAll(openReceiptButton, saveWalletButton);
-                                    showMessage(result, buttonsVBox, mainPane.getScene().getWindow());
-                                } else {
-                                    showMessage(result, openReceiptButton, mainPane.getScene().getWindow());
+    class EventBusSocketMsgListener {
+        @Subscribe public void call(SocketMessageDto socketMsg) {
+            switch(socketMsg.getOperation()) {
+                case TRANSACTIONVS_RESPONSE:
+                    try {
+                        if(socketMsg.getWebSocketSession().getData() != null) {
+                            QRMessageDto<TransactionVSDto> qrDto = (QRMessageDto<TransactionVSDto>) socketMsg
+                                    .getWebSocketSession().getData();
+                            TransactionVSDto transactionDto = qrDto.getData();
+                            SMIMEMessage smimeMessage = socketMsg.getSMIME();
+                            String result = transactionDto.validateReceipt(smimeMessage, true);
+                            Button openReceiptButton = new Button();
+                            openReceiptButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
+                            openReceiptButton.setText(ContextVS.getMessage("openReceiptLbl"));
+                            openReceiptButton.setOnAction(event -> {
+                                try {
+                                    DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(
+                                            new String(smimeMessage.getBytes(), StandardCharsets.UTF_8), null);
+                                    Browser.getInstance().newTab(documentVSBrowserPane, documentVSBrowserPane.getCaption());
+                                } catch (Exception ex) {
+                                    log.log(Level.SEVERE, ex.getMessage(), ex);
                                 }
+                            });
+                            Platform.runLater(() -> { hide(); });
+                            if(qrDto.getTypeVS() == TypeVS.CURRENCY_CHANGE) {
+                                Button saveWalletButton = new Button();
+                                saveWalletButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.MONEY));
+                                saveWalletButton.setText(ContextVS.getMessage("saveToSecureWalletMsg"));
+                                saveWalletButton.setOnAction(event -> {
+                                    Browser.getInstance().saveWallet();
+                                });
+                                VBox buttonsVBox = new VBox(10);
+                                buttonsVBox.getChildren().addAll(openReceiptButton, saveWalletButton);
+                                showMessage(result, buttonsVBox, mainPane.getScene().getWindow());
+                            } else {
+                                showMessage(result, openReceiptButton, mainPane.getScene().getWindow());
                             }
-                        } catch (Exception ex) {
-                            log.log(Level.SEVERE, ex.getMessage(), ex);
                         }
-                        break;
-                    default:log.info("EventBusSocketMsgListener - unprocessed operation: " + socketMsg.getOperation());
-                }
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                    }
+                    break;
+                default:log.info("EventBusSocketMsgListener - unprocessed operation: " + socketMsg.getOperation());
             }
         }
     }
