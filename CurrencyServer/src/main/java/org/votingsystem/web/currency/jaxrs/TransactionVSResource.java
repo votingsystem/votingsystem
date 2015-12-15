@@ -129,8 +129,8 @@ public class TransactionVSResource {
                     .setParameter("dateTo", dateTo).setFirstResult(offset).setMaxResults(max);
         } else {
             query = dao.getEM().createQuery(queryListPrefix + querySufix).setParameter("dateFrom", dateFrom)
-                    .setParameter("dateTo", dateTo).setParameter("amount", amount)
-                    .setParameter("searchText", searchText).setFirstResult(offset).setMaxResults(max);
+                    .setParameter("dateTo", dateTo).setParameter("type", transactionType).setParameter("amount", amount)
+                    .setParameter("searchText", "%" + searchText + "%").setFirstResult(offset).setMaxResults(max);
         }
         if(transactionType != null) query.setParameter("type", transactionType);
         List<TransactionVS> transactionList = query.getResultList();
@@ -139,8 +139,8 @@ public class TransactionVSResource {
                     .setParameter("dateTo", dateTo);
         } else {
             query = dao.getEM().createQuery(queryCountPrefix + querySufix).setParameter("dateFrom", dateFrom)
-                    .setParameter("dateTo", dateTo).setParameter("amount", amount)
-                    .setParameter("searchText", searchText);
+                    .setParameter("dateTo", dateTo).setParameter("type", transactionType).setParameter("amount", amount)
+                    .setParameter("searchText", "%" + searchText + "%");
         }
         if(transactionType != null) query.setParameter("type", transactionType);
         long totalCount = (long) query.getSingleResult();

@@ -3,13 +3,10 @@
                 template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
         <title>testChart</title>
-        <link href="../d3/scatter-transactions.vsp" rel="import"/>
-        <style>
-        </style>
+        <link href="../d3/transactions-dashboard.vsp" rel="import"/>
+        <link href="../d3/treemap-zoomable.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
-        <div style="height: 600px;">
-            <scatter-transactions></scatter-transactions>
-        </div>
+        <transactions-dashboard></transactions-dashboard>
     </ui:define>
 </ui:composition>

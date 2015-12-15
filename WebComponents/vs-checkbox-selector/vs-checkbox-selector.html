@@ -29,7 +29,9 @@
     .checkboxes {
       display: none;
       border: 1px #dadada solid;
-      background: #fefefe;
+      background: #f7f7f7;
+      position: absolute;
+      z-index: 100;
     }
     .checkboxes label {
       display: block;
@@ -39,20 +41,22 @@
     }
   </style>
   <template>
-    <div id="mainDiv" style="position: relative;">
-      <div class="multiselect" style="position: absolute;">
+    <div id="mainDiv">
+      <div class="multiselect">
         <div id="selectBox" class="selectBox" on-click="_showCheckboxes">
           <select class="form-control">
             <option>{{caption}}</option>
           </select>
           <div class="overSelect"></div>
         </div>
-        <div id="checkboxes" class="checkboxes">
-          <template is="dom-repeat" items="{{checkBoxList}}" as="item">
-            <label for="{{item}}" style$="{{_getItemStyle(item)}}">
-              <input id="{{item}}" type="checkbox" value="{{item}}" on-click="itemCheckboxSelected"
-                                                  checked="true">{{_getItemDescription(item)}}</label>
-          </template>
+        <div style="position: relative;">
+          <div id="checkboxes" class="checkboxes">
+            <template is="dom-repeat" items="{{checkBoxList}}" as="item">
+              <label for="{{item}}" style$="{{_getItemStyle(item)}}">
+                <input id="{{item}}" type="checkbox" value="{{item}}" on-click="itemCheckboxSelected"
+                       checked="true">{{_getItemDescription(item)}}</label>
+            </template>
+          </div>
         </div>
       </div>
     </div>
@@ -67,10 +71,21 @@
       caption: { type: String },
       checkBoxExpanded: { type: Boolean }
     },
+    ready:function() {
+      this.objectId = Math.random().toString(36).substring(7)
+      document.querySelector("#voting_system_page").addEventListener('vs-checkbox-show', function(e) {
+        if(e.detail !== this.objectId) {
+          this.$.checkboxes.style.display = "none";
+          this.checkBoxExpanded = false;
+        }
+      }.bind(this))
+    },
     _showCheckboxes:function (e) {
       if (!this.checkBoxExpanded) {
         this.$.checkboxes.style.display = "block";
         this.checkBoxExpanded = true;
+        var id = this.id
+        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('vs-checkbox-show', {detail:this.objectId}))
       } else {
         this.$.checkboxes.style.display = "none";
         this.checkBoxExpanded = false;
@@ -87,6 +102,7 @@
     _widthChanged: function() {
       this.$.selectBox.style.width = this.width
       this.$.mainDiv.style.width = this.width
+      this.$.checkboxes.style.width = this.width
     },
     _getItemDescription: function(item) {
       if(this.itemDescription) return this.itemDescription(item)

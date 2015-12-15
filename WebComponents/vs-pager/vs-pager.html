@@ -1,4 +1,56 @@
 <dom-module name="vs-pager">
+    <style>
+        :host {
+            display: block;
+        }
+
+        .pagination {
+            margin: 30px 0 10px 0;
+            text-align: center;
+        }
+        .pagination div {
+            margin: 0;
+            padding: 0;
+        }
+        .pagination div {
+            line-height: 20px;
+        }
+        .pagination div.active button {
+            background: #ba0011;
+            color: #fff;
+        }
+        .pagination div.disabled button {
+            color: #ccc;
+            cursor: no-drop;
+        }
+        .pagination div.first-child button {
+            -webkit-border-radius: 5px 0 0 5px;
+            -moz-border-radius: 5px 0 0 5px;
+            border-radius: 5px 0 0 5px;
+        }
+        .pagination div.last-child button {
+            -webkit-border-radius: 0 5px 5px 0;
+            -moz-border-radius: 0 5px 5px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .pagination div  button {
+            background-color: #fff;
+            border: 1px solid #eeeeee;
+            color: #ba0011;
+            cursor: pointer;
+            float: left;
+            min-width: 40px;
+            line-height: 20px;
+            padding: 4px 12px;
+            text-decoration: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
     <template>
         <link rel="stylesheet" href="vs-pager.css">
         <div hidden="{{pagerHidden}}" class="pagination horizontal layout center center-justified ">

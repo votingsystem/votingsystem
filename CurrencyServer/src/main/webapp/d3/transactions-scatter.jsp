@@ -3,153 +3,84 @@
 <link href="../resources/d3.html" rel="import"/>
 <link href="../resources/bower_components/vs-checkbox-selector/vs-checkbox-selector.html" rel="import"/>
 
-<script type="text/javascript" src="TransactionStats.js"></script>
 
-<dom-module id="scatter-transactions">
+<dom-module id="transactions-scatter">
     <link rel="import" type="css" href="transactions-scatter.css">
     <style>
         :host {
             display: block;
             width:100%;
             height: 100%;
+            margin: 0 7px 0 7px;
             position: relative;
+            border: 1px solid #ccc;border-radius: 3px;
         }
         .tooltip {
-            position: absolute;
             text-align: center;
             font-size: 0.8em;
             color: #888;
             padding: 3px;
             background: #fafafa;
             border: 1px solid #888;
-            border-radius: 8px;
-        }
-        .icontext {
-            text-anchor: middle;
-            pointer-events: none;
-            font-family: FontAwesome;
-            fill: #fff;
+            border-radius: 4px;
         }
     </style>
     <template>
-        <div class="horizontal layout" style="margin: 4px;">
-            <div>
-                <button id="resetButton" style="">reset</button>
+        <div id="messageDiv" class="horizontal layout center center-justified flex" style="margin:20px;text-align: center;">${msg.withoutDataLbl}</div>
+        <div id="chartContainerDiv" style="display: none;">
+            <div class="horizontal layout" style="min-height: 60px;">
+                <div id="resetButtonDiv" style="margin: 0 20px 0 0;display: none;">
+                    <button id="resetButton">${msg.resetZoom}</button>
+                </div>
+                <div class="flex horizontal layout center center-justified">
+                    <div id="tooltip" class="tooltip" style="display: none;">
+                        <div style$="{{selectedTransactionTypeStyle}}">{{getTransactionDescription(selectedTransaction.type)}}</div>
+                        <div style="font-size: 0.9em;margin: 0 0 2px 0;"><a href="{{selectedTransaction.messageSMIMEURL}}" target="_blank">
+                            {{getDate(selectedTransaction.dateCreated)}}</a></div>
+                        <div style$="{{selectedTransactionTagStyle}}">
+                            {{selectedTransaction.amount}} {{selectedTransaction.currencyCode}} - {{selectedTransactionTag}}
+                            <i hidden={{!selectedTransaction.timeLimited}} class="fa fa-clock-o" style="margin:0px 0px 0px 5px; color: red;" title="${msg.timeLimitedLbl}"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="horizontal layout center center-justified" style="border: 1px solid #888; margin: 0 10px 0 10px; font-size: 0.9em; padding: 0 6px 0 6px;">
-                <input id="timeLimitedCheckBox" type="checkbox" value="timeLimited" on-click="timeCheckboxSelected" checked="true" style="">
-                <span style="color: red;"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}</span>
-                <input id="timeFreeCheckBox" type="checkbox" value="timeFree" on-click="timeCheckboxSelected" style="margin:0 0 0 10px;" checked="true">${msg.timeFreeLbl}
-            </div>
-
-            <div style="margin: 0 10px 0 10px">
-                <vs-checkbox-selector id="typeSelector" width="300px" caption="${msg.typeLbl}" on-checkbox-selected="typeCheckboxSelected"></vs-checkbox-selector>
-            </div>
-            <vs-checkbox-selector id="tagSelector" width="200px" caption="${msg.tagLbl}" on-checkbox-selected="tagCheckboxSelected"></vs-checkbox-selector>
-
-        </div>
-        <button on-click="sendEvent">test</button>
-        <div id="scatterPlotDiv" style="width: 100%; height: 100%; min-height: 200px;"></div>
-        <div id="tooltip" class="tooltip" style="display: none;">
-            <div style$="{{selectedTransactionTypeStyle}}">{{getTransactionDescription(selectedTransaction.type)}}</div>
-            <div style="font-size: 0.9em;margin: 0 0 2px 0;"><a href="{{selectedTransaction.messageSMIMEURL}}" target="_blank">
-                {{getDate(selectedTransaction.dateCreated)}}</a></div>
-            <div style$="{{selectedTransactionTagStyle}}">
-                {{selectedTransaction.amount}} {{selectedTransaction.currencyCode}} - {{selectedTransactionTag}}
-                <i hidden={{!selectedTransaction.timeLimited}} class="fa fa-clock-o" style="margin:0px 0px 0px 5px; color: red;" title="${msg.timeLimitedLbl}"></i>
-            </div>
+            <div id="scatterPlotDiv" style="width: 100%; height: 100%;"></div>
         </div>
     </template>
     <script>
         (function() {
             Polymer({
-                is: "scatter-transactions",
+                is: "transactions-scatter",
                 properties: {
-                    transactionTypeFilter:{type:Array, value:[]},
-                    transactionTimeFilter:{type:Array, value:[]},
-                    transactionTagFilter:{type:Array, value:[]},
                     circlesGradientList:{type:Array, value:[]},
                     selectedTransaction:{type:Object, observer:'selectedTransactionChanged'},
-                    margin:{type:Object, value:{top: 5, right: 10, bottom: 100, left: 50}},
+                    margin:{type:Object, value:{top: 5, right: 10, bottom: 20, left: 50}},
                     chartData:{type:Object}
-                },
-                sendEvent: function() {
-                    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('votingsystem-client-msg', {detail:{msg:"hello"}} ));
                 },
                 ready: function() {
                     console.log(this.tagName + " ready")
-                    this.transactionsStats = new TransactionsStats()
-                    var rMin = 5, rMax = 20;
-                    this.color = d3.scale.category20(),
-                            rScale = d3.scale.linear().range([rMin, rMax])
-
-                    this.$.typeSelector.init(Object.keys(transactionsMap), function (item) {
-                        return 'font-weight: bold; color: ' + this.color(item) + ';'
-                    }.bind(this), this.getTransactionDescription)
-
-                    /*document.querySelector('#voting_system_page').addEventListener('votingsystem-client-msg', function (e) {
-                        console.log("votingsystem-client-msg:" + JSON.stringify(e.detail));
-                    }.bind(this))*/
-
+                    this.rMin = 5
+                    this.rMax = 20
+                    this.rScale = d3.scale.linear().range([this.rMin, this.rMax])
                     window.addEventListener('resize', function(event){
                         this.circlesGradientList = []
-                        this.chart(this.chartData)
+                        this.chart(this.chartData, this.color)
                     }.bind(this));
-                    d3.json("/CurrencyServer/rest/transactionVS/from/20151116_0000/to/20151210_0000", function (json) {
-                        this.chartData = json.resultList
-                        this.chartData.forEach(function(transactionvs) {
-                            this.transactionsStats.pushTransaction(transactionvs)
-                        }.bind(this))
-                        this.$.tagSelector.init(this.transactionsStats.tags, function (item) {
-                            return 'font-weight: bold; color: ' + this.color(item) + ';' }.bind(this), null)
-                        this.chart(this.chartData)
-                    }.bind(this))
                 },
-                tagCheckboxSelected: function(e) {
-                    if(e.detail.checked) {
-                        var index = this.transactionTagFilter.indexOf(e.detail.value)
-                        this.transactionTagFilter.splice(index, 1)
-                    } else {
-                        this.transactionTagFilter.push(e.detail.value)
-                    }
-                    this.filterChart()
-                },
-                typeCheckboxSelected:function (e) {
-                    if(e.detail.checked) {
-                        var index = this.transactionTypeFilter.indexOf(e.detail.value)
-                        this.transactionTypeFilter.splice(index, 1)
-                    } else {
-                        this.transactionTypeFilter.push(e.detail.value)
-                    }
-                    this.filterChart()
-                },
-                timeCheckboxSelected:function (e) {
-                    console.log("timeCheckboxSelected: " + e.target.value + " - checked: " + e.target.checked)
-                    if(e.target.checked) {
-                        var index = this.transactionTimeFilter.indexOf(e.target.value)
-                        this.transactionTimeFilter.splice(index, 1)
-                    } else {
-                        this.transactionTimeFilter.push(e.target.value)
-                    }
-                    this.filterChart()
-                },
-                filterChart:function () {
-                    this.filteredTransactionsStats = new TransactionsStats()
+                filterChart:function (transStats) {
                     d3.select(this).selectAll(".transaction").attr("display", function(d) {
                         var timeType = d.timeLimited ? 'timeLimited':'timeFree'
-                        if(this.transactionTimeFilter.indexOf(timeType) > -1) return 'none'
-                        else if(this.transactionTypeFilter.indexOf(d.type) > -1) return 'none'
-                        else if(this.transactionTagFilter.indexOf(d.tags[0]) > -1) return 'none'
-                        else {
-                            this.filteredTransactionsStats.pushTransaction(d)
-                            return 'inline'
-                        }
+                        if(transStats.transactionTimeFilter.indexOf(timeType) > -1) return 'none'
+                        else if(transStats.transactionTypeFilter.indexOf(d.type) > -1) return 'none'
+                        else if(transStats.transactionTagFilter.indexOf(d.tags[0]) > -1) return 'none'
+                        else if(transStats.transactionCurrencyFilter.indexOf(d.currencyCode) > -1) return 'none'
+                        else return 'inline'
                     }.bind(this));
                 },
                 selectedTransactionChanged:function (transaction) {
                     this.selectedTransactionTag = transaction.tags[0]
                     this.selectedTransactionTypeStyle = "font-weight:bold;color:" + this.color(transaction.type) + ";";
-                    this.selectedTransactionTagStyle = "font-size: 0.8em;color:" + this.color(transaction.tags[0]) + ";"
+                    this.selectedTransactionTagStyle = "font-size: 0.9em;color:" + this.color(transaction.tags[0]) + ";"
                 },
                 getTransactionDescription:function (transaction) {
                     return transactionsMap[transaction].lbl
@@ -169,13 +100,27 @@
                 getDate:function (date) {
                     return new Date(date).formatWithTime()
                 },
-                chart:function (data) {
+                chart:function (data, color) {
                     console.log(this.tagName + " - chart")
+                    var hostElement = this
+                    this.color = color
+                    this.chartData = data
                     while (this.$.scatterPlotDiv.hasChildNodes()) {
                         this.$.scatterPlotDiv.removeChild(this.$.scatterPlotDiv.lastChild);
                     }
-                    this.width = this.$.scatterPlotDiv.offsetWidth;
-                    this.height = this.$.scatterPlotDiv.offsetHeight
+                    if(!data || data.length === 0) {
+                        console.log(this.tagName + " - without root data")
+                        this.$.messageDiv.style.display = 'block'
+                        this.$.chartContainerDiv.style.display = 'none'
+                        return
+                    } else this.$.messageDiv.style.display = 'none'
+                    this.$.chartContainerDiv.style.display = 'block'
+
+                    var hostOffsets = this.getBoundingClientRect()
+                    console.log("=========== hostOffsets: " + hostOffsets)
+                    this.circlesGradientList = []
+                    this.width = this.getBoundingClientRect().width
+                    this.height = this.getBoundingClientRect().height
                     var svg = d3.select("#scatterPlotDiv").append("svg")
                             .attr('width', this.width)
                             .attr('height', this.height).datum(data).append("g")
@@ -189,7 +134,7 @@
                             xAxis = d3.svg.axis().scale(x).orient('bottom').ticks(5),
                             yAxis = d3.svg.axis().scale(y).orient('left').ticks(5)
                     this.width = this.width - this.margin.left - this.margin.right
-                    rScale.domain(d3.extent(data, function (d){ return d.amount }));
+                    this.rScale.domain(d3.extent(data, function (d){ return d.amount }));
                     x = x.domain(d3.extent(data, function(d) { return d.dateCreated; })).range([0, this.width]).nice();
                     y = y.domain([0, d3.max(data, function(d) {
                         return d.amount; })]).range([this.height, 0]).nice();
@@ -211,14 +156,14 @@
                     resetButton.onclick= function(){
                         zoom.translate([0, 0]).scale(1)
                         zoomed()
+                        hostElement.$.resetButtonDiv.style.display = 'none'
                     }
                     var circles = chartBody.selectAll(".transaction").data(data);
-                    var hostElement = this
                     circles.enter().append("circle").attr("class", "transaction");
                     var circles = circles
                             .attr("cx",      function (d){ return   x(new Date(d.dateCreated))})
                             .attr("cy",      function (d){ return   y(d.amount) })
-                            .attr("r",       function (d){ return rScale(d.amount) })
+                            .attr("r",       function (d){ return hostElement.rScale(d.amount) })
                             .attr("style",    function (d){
                                 var gradientId = hostElement.getCircleGradientId(d)
                                 var stroke = "stroke:#fefefe;"
@@ -226,14 +171,14 @@
                                 return   "fill:url(#" + gradientId + ")" + ";" + stroke}.bind(this))
                             .on("mouseover", function(d) {
                                 hostElement.$.tooltip.style.display = 'block'
-                                hostElement.$.tooltip.style.top = (d3.event.pageY + rScale(d.amount)) + "px"
-                                hostElement.$.tooltip.style.left = (d3.event.pageX - 30) + "px"
+                                //var offsets = hostElement.getBoundingClientRect();
+                                //hostElement.$.tooltip.style.top = (d3.event.pageY - offsets.top + hostElement.rScale(d.amount)) + "px"
+                                //hostElement.$.tooltip.style.left = (d3.event.pageX - 30) + "px"
                                 hostElement.selectedTransaction = d
-
                                 var circle = d3.select(this);
                                 circle.transition()
                                         .duration(800).style("opacity", 1)
-                                        .attr("r", rScale(d.amount) + 3).ease("elastic");
+                                        .attr("r", hostElement.rScale(d.amount) + 3).ease("elastic");
                                 svg.append("g")
                                         .attr("class", "guide")
                                         .append("line")
@@ -253,7 +198,7 @@
                             })
                             .on("mouseout", function(d) {
                                 var circle = d3.select(this);
-                                circle.transition().duration(800).style("opacity", .5).attr("r", rScale(d.amount)).ease("elastic");
+                                circle.transition().duration(800).style("opacity", .5).attr("r", hostElement.rScale(d.amount)).ease("elastic");
                                 d3.selectAll(".guide").transition().duration(100).styleTween("opacity", function() { return d3.interpolate(.5, 0); }).remove()
                             })
 
@@ -280,6 +225,7 @@
                             .text("${msg.amountLbl}");
                     function zoomed() {
                         //console.log("zoom.scale: " + zoom.scale() + " - x.domain: " + x.domain()[0])
+                        hostElement.$.resetButtonDiv.style.display = 'block'
                         svg.select(".x.axis").call(xAxis);
                         svg.select(".y.axis").call(yAxis);
                         circles.attr("cx", function (d){ return x(new Date(d.dateCreated))})

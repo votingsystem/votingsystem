@@ -101,6 +101,14 @@ Date.prototype.daydiff = function (dateToCompare) {
     return (this - dateToCompare)/(1000*60*60*24);
 }
 
+Date.prototype.getMonday = function () {
+    var day = this.getDay(),
+        diff = this.getDate() - day + (day == 0 ? -6:1);
+    var result = new Date(this.setDate(diff));
+    result.setHours(0,0,0,0);
+    return result;
+}
+
 //parse dates with format "yyyy-mm-dd"
 DateUtils.parseInputType = function (dateStr) {
 		var reggie = /(\d{4})-(\d{2})-(\d{2})/;
@@ -310,7 +318,6 @@ function fireCoreSignal(coreSignalDataBase64) {
 }
 
 document.addEventListener('WebComponentsReady', function() {
-    console.log("utilsVS.js - WebComponentsReady - sending pending core signal - coreSignalData: " + coreSignalData)
     if(coreSignalData != null) fireCoreSignal(coreSignalData)
     coreSignalData = null
 });
