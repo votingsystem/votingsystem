@@ -3,8 +3,8 @@ function TransactionsStats() {
     this.transactionTypes = []
     this.currencyCodes = []
     this.transactionsData = {}
-    this.transactionsTreeByType = {name:'transactionsTreeByType', children:[]}
-    this.transactionsTreeByTag = {name:'transactionsTreeByTag', children:[]}
+    this.transactionsTreeByType = {name:'transactionsTreeByType', exchangeCurrency:TransactionsStats.EXCHANGE_CURRENCY, children:[]}
+    this.transactionsTreeByTag = {name:'transactionsTreeByTag', exchangeCurrency:TransactionsStats.EXCHANGE_CURRENCY, children:[]}
     this.emptyTransNode = {timeLimitedAmount: 0, totalAmount:0, numTimeLimitedTransactions:0, numTotalTransactions:0}
 
     this.transactionTypeFilter = []
@@ -94,6 +94,7 @@ TransactionsStats.prototype.setCurrencyPercentages = function () {
 TransactionsStats.USD_TO_EUR = 0.910856
 TransactionsStats.CNY_TO_EUR = 0.141062
 TransactionsStats.JPY_TO_EUR = 0.00753358
+TransactionsStats.EXCHANGE_CURRENCY = "EUR"
 
 TransactionsStats.setCurrencyPercentages = function(transactionsTree) {
     if(!transactionsTree.children) {

@@ -5,7 +5,7 @@
 
 <link href="treemap-zoomable.vsp" rel="import"/>
 <link href="transactions-scatter.vsp" rel="import"/>
-<script type="text/javascript" src="TransactionStats.js"></script>
+<script type="text/javascript" src="../resources/js/TransactionStats.js"></script>
 
 <dom-module name="transactions-dashboard">
     <style>
@@ -113,6 +113,7 @@
             },
             filterChart:function () {
                 this.$.transactionsScatter.filterChart(this.transStats)
+                this.$.treemapByType.filterChart(this.transStats)
             },
             getHTTP:function() {
                 var targetURL = "/CurrencyServer/rest/transactionVS/from/" + this.formatDate(this.$.dateFromDatepicker.getDate()) +

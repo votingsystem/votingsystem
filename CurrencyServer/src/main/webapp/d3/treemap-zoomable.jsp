@@ -19,11 +19,20 @@
             pointer-events: none;
         }
 
-        .header text {
+        .breadcrumb {
+            cursor: pointer;
+            pointer-events: all;
+        }
+
+        .breadcrumb text {
             font-weight: bold;
+            fill: #fff;
             font-size: 0.9em;
         }
 
+        .breadcrumb .breadcrumbAmount{
+            font-size: 0.7em;
+        }
         .childText {
             font-style: italic;
             fill: #555;
@@ -56,16 +65,6 @@
         .children rect.parent,
         .header rect {
             cursor: pointer;
-        }
-
-        .header text {
-            font-size: 0.8em;
-            fill: #fff;
-        }
-
-        .header {
-            cursor: pointer;
-            pointer-events: all;
         }
 
         .children rect.parent {
@@ -109,6 +108,7 @@
     <template>
         <div id="messageDiv" class="horizontal layout center center-justified flex" style="margin:20px;text-align: center;">${msg.withoutDataLbl}</div>
         <div id="chartContainerDiv" style="display: none;">
+            <div id="sequenceMessageDiv" style="text-align: center; font-weight: bold; color: #888; font-size: 1.6em; font-style: italic;">{{sequenceMessage}}</div>
             <div id="sequence"></div>
             <div id="chart" style="padding: 0px; margin: 0px;"></div>
             <div id="tooltip" class="tooltip" style="display: none;">
@@ -123,7 +123,7 @@
                             </div>
                             <div>
                                 <div class="header2">${msg.amountLbl}</div>
-                                <div class="content">{{selectedNode.totalAmount}} {{selectedCurrencyCode}}</div>
+                                <div class="content">{{formatMoney(selectedNode.totalAmount)}} {{selectedCurrencyCode}}</div>
                             </div>
                         </div>
                     </div>
@@ -136,7 +136,7 @@
                             </div>
                             <div>
                                 <div class="header2" style="color:#ba0011;">${msg.amountLbl}</div>
-                                <div class="content">{{selectedNode.timeLimitedAmount}} {{selectedCurrencyCode}} {{selectedNodeTimeLimitedPercentage}}</div>
+                                <div class="content">{{formatMoney(selectedNode.timeLimitedAmount)}} {{selectedCurrencyCode}} {{selectedNodeTimeLimitedPercentage}}</div>
                             </div>
                         </div>
                     </div>
@@ -150,15 +150,16 @@
                 is: "treemap-zoomable",
                 properties: {
                     selectedNode: {type: Object, observer: 'selectedNodeChanged'},
-                    breadcrumb: {type: Object, value: {width: 175, height: 30, s: 3, t: 10}},
+                    breadcrumb: {type: Object, value: {width: 205, height: 30, s: 3, t: 10}},
                     margin: {type: Object, value:  {top: 0, right: 0, bottom: 0, left: 0}},
                     selectedCurrencyCode: {type: String},
-                    treeDepth: {type: Number},
                     width: {type: Number, value:500},
                     height: {type: Number, value:300}
                 },
                 ready: function () {
                     this.$.chart.style.height = this.height + this.margin.top + this.margin.bottom + "px";
+                    this.$.sequenceMessageDiv.style.height = this.breadcrumb.height + "px";
+
                     this.height = this.height - this.margin.top - this.margin.bottom
                     this.x = d3.scale.linear().domain([0, this.width]).range([0, this.width]);
                     this.y = d3.scale.linear().domain([0, this.height]).range([0, this.height]);
@@ -176,8 +177,11 @@
 
                     var trail = d3.select(this).select("#sequence").append("svg")
                             .attr("width", this.width)
-                            .attr("height", 30)
+                            .attr("height", this.breadcrumb.height)
                             .attr("id", "trail");
+
+                },
+                filterChart:function (transStats) {
 
                 },
                 getAncestors: function (node) {
@@ -213,6 +217,9 @@
                     this.selectedNodeTimeLimitedPercentage = "(" + TransactionsStats.getPercentage(
                             this.selectedNode.timeLimitedAmount, this.selectedNode.totalAmount) + " %)"
                 },
+                formatMoney: function (amount) {
+                    return amount.formatMoney()
+                },
                 chart: function (root, color) {
                     console.log(this.tagName + " - chart - " + JSON.stringify(root))
                     if(!root || !root.children || root.children.length === 0) {
@@ -221,6 +228,14 @@
                         this.$.chartContainerDiv.style.display = 'none'
                         return
                     } else this.$.messageDiv.style.display = 'none'
+
+
+                    var currenciesTotalAmount = 0
+                    root.children.forEach(function(node) {
+                        currenciesTotalAmount += node.totalAmount
+                    })
+                    this.sequenceMessage = currenciesTotalAmount.formatMoney() + " " + root.exchangeCurrency
+
                     if(this.$.chart.childNodes[0]) this.$.chart.removeChild(this.$.chart.childNodes[0])
                     this.svg = d3.select(this).select("#chart").append("svg")
                             .attr("width", this.width + this.margin.left + this.margin.right)
@@ -242,7 +257,6 @@
                     display(root);
 
                     function initialize(root) {
-                        hostElement.treeDepth = 0
                         root.x = root.y = 0;
                         root.dx = hostElement.width;
                         root.dy = hostElement.height;
@@ -282,11 +296,18 @@
                     }
 
                     function display(d) {
-                        console.log("display - name: " + d.name + " - d.depth: " + d.depth + " - treeDepth: " + hostElement.treeDepth)
+                        console.log("display - name: " + d.name + " - d.depth: " + d.depth)
+                        if(!d.parent) {
+                            hostElement.$.sequenceMessageDiv.style.display = ''
+                            hostElement.$.sequence.style.display = 'none'
+                        } else {
+                            hostElement.$.sequenceMessageDiv.style.display = 'none'
+                            hostElement.$.sequence.style.display = 'block'
+                        }
 
                         var breadcumGroup = d3.select(this).select("#trail").selectAll("g")
                                 .data(hostElement.getAncestors(d));
-                        breadcumGroup.enter().append("g").attr("class", "header");
+                        breadcumGroup.enter().append("g").attr("class", "breadcrumb");
                         breadcumGroup.append("polygon")
                                 .attr("points", breadcrumbPoints)
                                 .on("click", function (d) {
@@ -298,9 +319,18 @@
                         breadcumGroup.append("text")
                                 .attr("x", (hostElement.breadcrumb.width + hostElement.breadcrumb.t) / 2)
                                 .attr("y", hostElement.breadcrumb.height / 2)
-                                .attr("dy", "0.35em")
+                                .attr("dy", "-0.10em")
                                 .attr("text-anchor", "middle")
                                 .text(function (d) { return  hostElement._getDescriptionWithPercentage(d) });
+                        breadcumGroup.append("text")
+                                .attr("class", "breadcrumbAmount")
+                                .attr("x", (hostElement.breadcrumb.width + hostElement.breadcrumb.t) / 2)
+                                .attr("y", hostElement.breadcrumb.height / 2)
+                                .attr("dy", "1em")
+                                .attr("text-anchor", "middle")
+                                .text(function (d) { return d.totalAmount.formatMoney() + " " + hostElement.selectedCurrencyCode });
+
+
                         // Set position for entering and updating nodes.
                         breadcumGroup.attr("transform", function (d, i) {
                             return "translate(" + i * (hostElement.breadcrumb.width + hostElement.breadcrumb.s) + ", 0)";
@@ -364,7 +394,6 @@
                         function transition(d, increment) {
                             handleMouseOut()
                             if (transitioning || !d) return;
-                            hostElement.treeDepth += increment
                             transitioning = true;
 
                             var g2 = display(d),
@@ -436,6 +465,9 @@
                                 });
                     }
 
+                    function breadcumText(text) {
+                        header
+                    }
                     function childText(text) {
                         text.attr("x", function (d) {
                                     var bbox = d3.select(this).node().getBBox();

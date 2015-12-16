@@ -283,16 +283,16 @@ Or see the LICENSE file that comes with this code.
         <div class="horizontal layout">
             <input type="text" id="dateInput" on-click="show" value='' style="width: 110px;" placeholder="{{caption}}" title="{{caption}}" readonly/>
             <div style="padding: 2px 0 0 0px;">
-                <i class="fa fa-calendar-o" on-click="show" style="color: #ba0011; padding: 0px;"></i>
+                <i class="fa fa-calendar-o" on-click="show" style="color: #ba0011; padding: 0px; font-weight: normal;"></i>
             </div>
         </div>
 
         <div id="modalDialog" class="dateDialog">
             <div>
                 <div class="horizontal layout">
-                    <div class="flex" style="background-color:#ba0011; color: #fefefe;text-align: center;font-size: 1.2em;">{{caption}}</div>
+                    <div class="flex" style="background-color:#ba0011; color: #fefefe;text-align: center;font-size: 1.2em;font-weight: bold;">{{caption}}</div>
                     <div on-click="close" class="datePickerCloseIcon">
-                        <i class="fa fa-times"></i>
+                        <i class="fa fa-times" style="font-weight: normal;"></i>
                     </div>
                 </div>
                 <div header class="vertical layout center center-justified">

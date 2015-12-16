@@ -68,14 +68,26 @@
                     }.bind(this));
                 },
                 filterChart:function (transStats) {
-                    d3.select(this).selectAll(".transaction").attr("display", function(d) {
-                        var timeType = d.timeLimited ? 'timeLimited':'timeFree'
-                        if(transStats.transactionTimeFilter.indexOf(timeType) > -1) return 'none'
-                        else if(transStats.transactionTypeFilter.indexOf(d.type) > -1) return 'none'
-                        else if(transStats.transactionTagFilter.indexOf(d.tags[0]) > -1) return 'none'
-                        else if(transStats.transactionCurrencyFilter.indexOf(d.currencyCode) > -1) return 'none'
-                        else return 'inline'
-                    }.bind(this));
+                    d3.select(this).selectAll(".transaction")
+                            .transition()
+                            .duration(500)
+                            .ease("cubic-in-out")
+                            .style("opacity", function(d) {
+                                var timeType = d.timeLimited ? 'timeLimited':'timeFree'
+                                d.visible = true
+                                if(transStats.transactionTimeFilter.indexOf(timeType) > -1) d.visible = false
+                                else if(transStats.transactionTypeFilter.indexOf(d.type) > -1) d.visible = false
+                                else if(transStats.transactionTagFilter.indexOf(d.tags[0]) > -1) d.visible = false
+                                else if(transStats.transactionCurrencyFilter.indexOf(d.currencyCode) > -1) d.visible = false
+                                if(!d.visible) return 0;
+                                 else {
+                                    d3.select(this).style("display", 'inline')
+                                    return 1;
+                                }
+                            }).each("end", function(d) {
+                                if (d.visible === false) d3.select(this).style("display", 'none')
+
+                            })
                 },
                 selectedTransactionChanged:function (transaction) {
                     this.selectedTransactionTag = transaction.tags[0]
@@ -116,8 +128,6 @@
                     } else this.$.messageDiv.style.display = 'none'
                     this.$.chartContainerDiv.style.display = 'block'
 
-                    var hostOffsets = this.getBoundingClientRect()
-                    console.log("=========== hostOffsets: " + hostOffsets)
                     this.circlesGradientList = []
                     this.width = this.getBoundingClientRect().width
                     this.height = this.getBoundingClientRect().height
