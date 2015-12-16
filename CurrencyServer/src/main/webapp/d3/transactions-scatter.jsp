@@ -13,7 +13,6 @@
             height: 100%;
             margin: 0 7px 0 7px;
             position: relative;
-            border: 1px solid #ccc;border-radius: 3px;
         }
         .tooltip {
             text-align: center;
@@ -26,25 +25,27 @@
         }
     </style>
     <template>
-        <div id="messageDiv" class="horizontal layout center center-justified flex" style="margin:20px;text-align: center;">${msg.withoutDataLbl}</div>
-        <div id="chartContainerDiv" style="display: none;">
-            <div class="horizontal layout" style="min-height: 60px;">
-                <div id="resetButtonDiv" style="margin: 0 20px 0 0;display: none;">
-                    <button id="resetButton">${msg.resetZoom}</button>
-                </div>
-                <div class="flex horizontal layout center center-justified">
-                    <div id="tooltip" class="tooltip" style="display: none;">
-                        <div style$="{{selectedTransactionTypeStyle}}">{{getTransactionDescription(selectedTransaction.type)}}</div>
-                        <div style="font-size: 0.9em;margin: 0 0 2px 0;"><a href="{{selectedTransaction.messageSMIMEURL}}" target="_blank">
-                            {{getDate(selectedTransaction.dateCreated)}}</a></div>
-                        <div style$="{{selectedTransactionTagStyle}}">
-                            {{selectedTransaction.amount}} {{selectedTransaction.currencyCode}} - {{selectedTransactionTag}}
-                            <i hidden={{!selectedTransaction.timeLimited}} class="fa fa-clock-o" style="margin:0px 0px 0px 5px; color: red;" title="${msg.timeLimitedLbl}"></i>
+        <div style="border: 1px solid #ccc;border-radius: 3px; width: 100%;">
+            <div id="messageDiv" class="horizontal layout center center-justified flex" style="margin:20px;text-align: center;">${msg.withoutDataLbl}</div>
+            <div id="chartContainerDiv" style="display: none;">
+                <div class="horizontal layout" style="min-height: 60px;">
+                    <div id="resetButtonDiv" style="margin: 0 20px 0 0;display: none;">
+                        <button id="resetButton">${msg.resetZoom}</button>
+                    </div>
+                    <div class="flex horizontal layout center center-justified">
+                        <div id="tooltip" class="tooltip" style="display: none;">
+                            <div style$="{{selectedTransactionTypeStyle}}">{{getTransactionDescription(selectedTransaction.type)}}</div>
+                            <div style="font-size: 0.9em;margin: 0 0 2px 0;"><a href="{{selectedTransaction.messageSMIMEURL}}" target="_blank">
+                                {{getDate(selectedTransaction.dateCreated)}}</a></div>
+                            <div style$="{{selectedTransactionTagStyle}}">
+                                {{selectedTransaction.amount}} {{selectedTransaction.currencyCode}} - {{selectedTransactionTag}}
+                                <i hidden={{!selectedTransaction.timeLimited}} class="fa fa-clock-o" style="margin:0px 0px 0px 5px; color: red;" title="${msg.timeLimitedLbl}"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <div id="scatterPlotDiv" style="width: 100%; height: 100%;"></div>
             </div>
-            <div id="scatterPlotDiv" style="width: 100%; height: 100%;"></div>
         </div>
     </template>
     <script>
@@ -73,20 +74,13 @@
                             .duration(500)
                             .ease("cubic-in-out")
                             .style("opacity", function(d) {
-                                var timeType = d.timeLimited ? 'timeLimited':'timeFree'
-                                d.visible = true
-                                if(transStats.transactionTimeFilter.indexOf(timeType) > -1) d.visible = false
-                                else if(transStats.transactionTypeFilter.indexOf(d.type) > -1) d.visible = false
-                                else if(transStats.transactionTagFilter.indexOf(d.tags[0]) > -1) d.visible = false
-                                else if(transStats.transactionCurrencyFilter.indexOf(d.currencyCode) > -1) d.visible = false
-                                if(!d.visible) return 0;
+                                if(transStats.checkFilters(d).filtered) return 0;
                                  else {
                                     d3.select(this).style("display", 'inline')
                                     return 1;
                                 }
                             }).each("end", function(d) {
-                                if (d.visible === false) d3.select(this).style("display", 'none')
-
+                                if (d.filtered === true) d3.select(this).style("display", 'none')
                             })
                 },
                 selectedTransactionChanged:function (transaction) {
@@ -136,6 +130,7 @@
                             .attr('height', this.height).datum(data).append("g")
                             .attr("transform", "translate(" + this.margin.left + " ," + this.margin.top + ")")
                             .on("click", function() {
+                                d3.selectAll(".guide").transition().duration(100).styleTween("opacity", function() { return d3.interpolate(.5, 0); }).remove()
                                 this.$.tooltip.style.display = 'none'
                             }.bind(this));
                     this.height = this.height - this.margin.top - this.margin.bottom;
@@ -179,8 +174,11 @@
                                 var stroke = "stroke:#fefefe;"
                                 if(d.timeLimited) stroke = "stroke:red;stroke-width:2px;"
                                 return   "fill:url(#" + gradientId + ")" + ";" + stroke}.bind(this))
-                            .on("mouseover", function(d) {
+                            .on("click", function(d,i){
                                 hostElement.$.tooltip.style.display = 'block'
+                            })
+                            .on("mouseover", function(d) {
+                                hostElement.$.tooltip.style.display = 'inline'
                                 //var offsets = hostElement.getBoundingClientRect();
                                 //hostElement.$.tooltip.style.top = (d3.event.pageY - offsets.top + hostElement.rScale(d.amount)) + "px"
                                 //hostElement.$.tooltip.style.left = (d3.event.pageX - 30) + "px"

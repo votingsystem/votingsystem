@@ -141,6 +141,8 @@ String.prototype.format = function() {
 	    ;
 	  });
 	};
+
+//http://stackoverflow.com/questions/149055/how-can-i-format-numbers-as-money-in-javascript
 //ej: (123456789.12345).formatMoney(3, '.', ',') ->  123,456,789.123
 Number.prototype.formatMoney = function(c, d, t){
     var n = this,

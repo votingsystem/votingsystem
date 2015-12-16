@@ -36,6 +36,7 @@
         .childText {
             font-style: italic;
             fill: #555;
+            font-size: 0.6em
         }
 
         .parentText {
@@ -112,31 +113,31 @@
             <div id="sequence"></div>
             <div id="chart" style="padding: 0px; margin: 0px;"></div>
             <div id="tooltip" class="tooltip" style="display: none;">
-                <div style$="{{_getSelectedNodeTooltipHeaderStyle(selectedNode)}}">{{_getDescriptionWithPercentage(selectedNode)}}</div>
+                <div style$="{{_getSelectedNodeTooltipHeaderStyle(mouseOverNode)}}">{{_getDescriptionWithPercentage(mouseOverNode)}}</div>
                 <div class="horizontal layout center center-justified">
                     <div>
                         <div class="header1">${msg.totalLbl}</div>
                         <div class="horizontal layout center center-justified">
                             <div>
                                 <div class="header2">${msg.movementsLbl}</div>
-                                <div class="content">{{selectedNode.numTotalTransactions}}</div>
+                                <div class="content">{{mouseOverNode.numTotalTransactions}}</div>
                             </div>
                             <div>
                                 <div class="header2">${msg.amountLbl}</div>
-                                <div class="content">{{formatMoney(selectedNode.totalAmount)}} {{selectedCurrencyCode}}</div>
+                                <div class="content">{{formatMoney(mouseOverNode.totalAmount)}} {{selectedCurrencyCode}}</div>
                             </div>
                         </div>
                     </div>
                     <div style="margin: 0 0 0 10px;" class="timeLimitedDiv">
-                        <div class="header1" style="color:#ba0011;"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}</div>
+                        <div class="header1" style="color:#ba0011;"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}  {{mouseOverNodeTimeLimitedPercentage}}</div>
                         <div class="horizontal layout center center-jsutified">
                             <div>
                                 <div class="header2" style="color:#ba0011;">${msg.movementsLbl}</div>
-                                <div class="content">{{selectedNode.numTimeLimitedTransactions}}</div>
+                                <div class="content">{{mouseOverNode.numTimeLimitedTransactions}}</div>
                             </div>
                             <div>
                                 <div class="header2" style="color:#ba0011;">${msg.amountLbl}</div>
-                                <div class="content">{{formatMoney(selectedNode.timeLimitedAmount)}} {{selectedCurrencyCode}} {{selectedNodeTimeLimitedPercentage}}</div>
+                                <div class="content">{{formatMoney(mouseOverNode.timeLimitedAmount)}} {{selectedCurrencyCode}}</div>
                             </div>
                         </div>
                     </div>
@@ -149,7 +150,8 @@
             Polymer({
                 is: "treemap-zoomable",
                 properties: {
-                    selectedNode: {type: Object, observer: 'selectedNodeChanged'},
+                    mouseOverNode: {type: Object, observer: 'mouseOverNodeChanged'},
+                    selectedNode: {type: Object},
                     breadcrumb: {type: Object, value: {width: 205, height: 30, s: 3, t: 10}},
                     margin: {type: Object, value:  {top: 0, right: 0, bottom: 0, left: 0}},
                     selectedCurrencyCode: {type: String},
@@ -179,10 +181,6 @@
                             .attr("width", this.width)
                             .attr("height", this.breadcrumb.height)
                             .attr("id", "trail");
-
-                },
-                filterChart:function (transStats) {
-
                 },
                 getAncestors: function (node) {
                     var path = [];
@@ -203,24 +201,17 @@
                 _getSelectedNodeTooltipHeaderStyle: function (node) {
                     return "font-weight: bold; font-size: 1.1em;color:" + this.color(node.name) + ";"
                 },
-                init: function (color) {
-                    this.color = color
-                    window.addEventListener('resize', function (event) {
-                        //this.circlesGradientList = []
-                        //this.chart(this.chartData)
-                    }.bind(this));
-                },
-                selectedNodeChanged: function () {
-                    var node = this.selectedNode
+                mouseOverNodeChanged: function () {
+                    var node = this.mouseOverNode
                     while (!node.currencyCode) node = node.parent
                     this.selectedCurrencyCode = node.currencyCode
-                    this.selectedNodeTimeLimitedPercentage = "(" + TransactionsStats.getPercentage(
-                            this.selectedNode.timeLimitedAmount, this.selectedNode.totalAmount) + " %)"
+                    this.mouseOverNodeTimeLimitedPercentage = TransactionsStats.getPercentage(
+                            this.mouseOverNode.timeLimitedAmount, this.mouseOverNode.totalAmount) + " %"
                 },
                 formatMoney: function (amount) {
                     return amount.formatMoney()
                 },
-                chart: function (root, color) {
+                chart: function (root, color, filter) {
                     console.log(this.tagName + " - chart - " + JSON.stringify(root))
                     if(!root || !root.children || root.children.length === 0) {
                         console.log(this.tagName + " - without root data")
@@ -228,7 +219,6 @@
                         this.$.chartContainerDiv.style.display = 'none'
                         return
                     } else this.$.messageDiv.style.display = 'none'
-
 
                     var currenciesTotalAmount = 0
                     root.children.forEach(function(node) {
@@ -254,7 +244,8 @@
                     initialize(root);
                     accumulate(root);
                     layout(root);
-                    display(root);
+                    var displayResult = display(root);
+                    if(this.selectedNode) displayResult.transition(this.selectedNode)
 
                     function initialize(root) {
                         root.x = root.y = 0;
@@ -271,6 +262,12 @@
                         if(d.children && d.children.length > 0) {
                             d._children = d.children
                             d.children.forEach(function (d) { accumulate(d)})
+                        }
+                        //back to previous selected node when filtering
+                        if(hostElement.selectedNode) {
+                            if(hostElement.selectedNode.name === d.name) {
+                                hostElement.selectedNode = d
+                            }
                         }
                     }
 
@@ -304,18 +301,13 @@
                             hostElement.$.sequenceMessageDiv.style.display = 'none'
                             hostElement.$.sequence.style.display = 'block'
                         }
-
                         var breadcumGroup = d3.select(this).select("#trail").selectAll("g")
                                 .data(hostElement.getAncestors(d));
                         breadcumGroup.enter().append("g").attr("class", "breadcrumb");
                         breadcumGroup.append("polygon")
                                 .attr("points", breadcrumbPoints)
-                                .on("click", function (d) {
-                                    transition(d.parent, -1)
-                                })
-                                .style("fill", function (d) {
-                                    return hostElement.color(d.name);
-                                });
+                                .on("click", function (d) {  transition(d.parent) })
+                                .style("fill", function (d) {  return hostElement.color(d.name); });
                         breadcumGroup.append("text")
                                 .attr("x", (hostElement.breadcrumb.width + hostElement.breadcrumb.t) / 2)
                                 .attr("y", hostElement.breadcrumb.height / 2)
@@ -330,12 +322,12 @@
                                 .attr("text-anchor", "middle")
                                 .text(function (d) { return d.totalAmount.formatMoney() + " " + hostElement.selectedCurrencyCode });
 
-
                         // Set position for entering and updating nodes.
                         breadcumGroup.attr("transform", function (d, i) {
                             return "translate(" + i * (hostElement.breadcrumb.width + hostElement.breadcrumb.s) + ", 0)";
                         });
                         breadcumGroup.exit().remove();
+                        //hack to refresh element styles
                         Polymer.dom(hostElement.$.sequence).appendChild(Polymer.dom(hostElement.$.sequence).childNodes[0])
 
                         var g1 = hostElement.svg.insert("g", ".header")
@@ -346,18 +338,12 @@
                                 .data(d._children)
                                 .enter().append("g");
 
-                        g.filter(function (d) {
-                                    return d._children;
-                                })
+                        g.filter(function (d) { return d._children; })
                                 .classed("children", true)
-                                .on("click", function (d) {
-                                    transition(d, 1)
-                                });
+                                .on("click", function (d) { transition(d) });
 
                         var childNodes = g.selectAll(".child")
-                                .data(function (d) {
-                                    return d._children || [d];
-                                })
+                                .data(function (d) { return d._children || [d]; })
                                 .enter()
                                 .append("rect")
                                 .attr("class", "child")
@@ -374,29 +360,24 @@
                         g.append("text")
                                 .attr("dy", ".75em")
                                 .attr("class", "parentText")
-                                .text(function (d) {
-                                    return hostElement._getDescriptionWithPercentage(d);
-                                })
+                                .text(function (d) { return hostElement._getDescriptionWithPercentage(d); })
                                 .call(text);
 
                         var childTextList = g.selectAll(".childText")
-                                .data(function (d) {
-                                    return d._children || []
-                                })
+                                .data(function (d) { return d._children || [] })
                         childTextList.enter().append("text")
                                 .attr("class", "childText")
                                 .style({'font-size': '0.6em'})
-                                .text(function (d) {
-                                    return d.description || d.name
-                                })
+                                .text(function (d) { return d.description || d.name })
                         childTextList.call(childText)
 
-                        function transition(d, increment) {
+                        function transition(d) {
+                            hostElement.selectedNode = d
                             handleMouseOut()
                             if (transitioning || !d) return;
                             transitioning = true;
 
-                            var g2 = display(d),
+                            var g2 = display(d).g,
                                     t1 = g1.transition().duration(750),
                                     t2 = g2.transition().duration(750);
 
@@ -444,7 +425,8 @@
 
                         fillRects()
                         Polymer.dom(hostElement.$.chart).appendChild(Polymer.dom(hostElement.$.chart).childNodes[0])
-                        return g;
+                        Polymer.dom(hostElement.$.chart).appendChild(Polymer.dom(hostElement.$.chart).childNodes[0])
+                        return {transition:transition, g:g};
                     }
 
                     function fillRects() {
@@ -463,10 +445,6 @@
                                 .attr("y", function (d) {
                                     return hostElement.y(d.y) + 6;
                                 });
-                    }
-
-                    function breadcumText(text) {
-                        header
                     }
                     function childText(text) {
                         text.attr("x", function (d) {
@@ -500,7 +478,7 @@
 
                     function handleMouseOver(d, i) {
                         var hostElementOffsets = hostElement.$.chart.getBoundingClientRect();
-                        hostElement.selectedNode = d
+                        hostElement.mouseOverNode = d
                         hostElement.$.tooltip.style.display = 'block'
                         var tooltipOffsets = hostElement.$.tooltip.getBoundingClientRect();
                         hostElement.$.tooltip.style.top = hostElementOffsets.top + "px"

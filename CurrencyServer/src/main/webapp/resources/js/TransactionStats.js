@@ -15,6 +15,18 @@ function TransactionsStats() {
 
 TransactionsStats.prototype.pushTransactionForTreeByTag = function(transactionvs) {}
 
+TransactionsStats.prototype.checkFilters = function(transactionvs) {
+    var timeType = transactionvs.timeLimited ? 'timeLimited':'timeFree'
+    transactionvs.filtered = false
+    if(this.transactionTimeFilter.indexOf(timeType) > -1) transactionvs.filtered = true
+    else if(this.transactionTypeFilter.indexOf(transactionvs.type) > -1) transactionvs.filtered = true
+    else if(this.transactionTagFilter.indexOf(transactionvs.tags[0]) > -1) transactionvs.filtered = true
+    else if(this.transactionCurrencyFilter.indexOf(transactionvs.currencyCode) > -1) transactionvs.filtered = true
+    return transactionvs
+}
+
+
+
 TransactionsStats.prototype.pushTransactionForTreeByType = function(transactionvs) {
     var currencyNode
     var typeNode

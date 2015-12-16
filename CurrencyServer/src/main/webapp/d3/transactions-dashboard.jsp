@@ -49,7 +49,10 @@
                 <treemap-zoomable id="treemapByType"></treemap-zoomable>
             </div>
         </div>
-        <transactions-scatter id="transactionsScatter" style="height: 300px;"></transactions-scatter>
+        <div>
+            <transactions-scatter id="transactionsScatter" style="height: 300px; width: 100%;"></transactions-scatter>
+        </div>
+
 
     </template>
     <script>
@@ -113,7 +116,12 @@
             },
             filterChart:function () {
                 this.$.transactionsScatter.filterChart(this.transStats)
-                this.$.treemapByType.filterChart(this.transStats)
+                var filteredTransStats = new TransactionsStats()
+                this.chartData.forEach(function(transactionvs) {
+                    if(!this.transStats.checkFilters(transactionvs).filtered) filteredTransStats.pushTransaction(transactionvs)
+                }.bind(this))
+                TransactionsStats.setCurrencyPercentages(filteredTransStats.transactionsTreeByType)
+                this.$.treemapByType.chart(filteredTransStats.transactionsTreeByType, this.color)
             },
             getHTTP:function() {
                 var targetURL = "/CurrencyServer/rest/transactionVS/from/" + this.formatDate(this.$.dateFromDatepicker.getDate()) +
