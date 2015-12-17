@@ -87,7 +87,7 @@
     </template>
     <script>
         (function() {
-            var colorsScale = d3.scale.ordinal().range(TransactionsStats.colors);
+            var colorsScale;
             Polymer({
                 is: "transactions-scatter",
                 properties: {
@@ -144,9 +144,10 @@
                 getDate:function (date) {
                     return new Date(date).formatWithTime()
                 },
-                chart:function (data) {
+                chart:function (data, color) {
                     console.log(this.tagName + " - chart")
                     var hostElement = this
+                    colorsScale = color
                     this.chartData = data
                     while (this.$.scatterPlotDiv.hasChildNodes()) {
                         this.$.scatterPlotDiv.removeChild(this.$.scatterPlotDiv.lastChild);

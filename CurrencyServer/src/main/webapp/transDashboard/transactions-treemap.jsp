@@ -114,7 +114,7 @@
             <div>
                 <div>
                     <div class="flex" id="sequence"></div>
-                    <div on-click="chartConfig" class="chartConfig"><i id="configIcon" class="fa fa-cogs"></i></div>
+                    <div on-click="showConfig" class="chartConfig"><i id="configIcon" class="fa fa-cogs"></i></div>
                 </div>
                 <div id="chart" style="padding: 0px; margin: 0px;"></div>
             </div>
@@ -149,11 +149,34 @@
                     </div>
                 </div>
             </div>
+
+            <div id="configDialog" class="modalDialog">
+                <div>
+                    <div class="layout horizontal center center-justified">
+                        <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
+                            <div style="text-align: center;">{{caption}}</div>
+                        </div>
+                        <div style="position: absolute; top: 0px; right: 0px;">
+                            <i class="fa fa-times closeIcon" on-click="closeConfig"></i>
+                        </div>
+                    </div>
+                    <div class="horizontal layout center-justified"
+                            style="font-size: 1.2em; color:#888; font-weight: bold; margin:15px 0 0 0; ">
+                        <form action="" on-change="orderByChanged">
+                            <input type="radio" name="orderBy" value="orderByType" checked="checked">${msg.orderTransactionByTypeLbl}<br>
+                            <input type="radio" name="orderBy" value="orderByTag">${msg.orderTransactionByTagLbl}
+                        </form>
+                    </div>
+                    <div class="linkVS" on-click="openFullScreen"
+                         style="margin: 10px 0 10px 0; text-align: center;font-weight: bold;font-size: 1.2em;" >${msg.openNewWindowLbl}</div>
+                </div>
+            </div>
+
         </div>
     </template>
     <script>
         (function () {
-            var colorsScale = d3.scale.ordinal().range(TransactionsStats.colors);
+            var colorsScale;
             Polymer({
                 is: "transactions-treemap",
                 properties: {
@@ -165,15 +188,41 @@
                     selectedCurrencyCode: {type: String},
                     width: {type: Number, value:500},
                     height: {type: Number, value:300},
+                    orderBy: {type: String, value:"orderByType"},
                     fullScreen: {type: Boolean, value:false}
                 },
                 ready: function () {
+                    var supportsOrientationChange = "onorientationchange" in window,
+                            orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
+                    window.addEventListener(orientationEvent, function() {
+                        this.chart(toJSON(this.treemapRoot));
+                    }.bind(this), false);
+
                     if(localStorage.treemapRoot) {
                         this.chart(toJSON(localStorage.treemapRoot))
                     }
                     localStorage.treemapRoot = null
                 },
-                chartConfig: function() {
+                orderByChanged: function(e) {
+                    if("orderByType" === e.target.value && this.orderBy !== "orderByType") {
+                        if(this.selectedNode) this.selectedNode = this._getCurrencyNode(this.selectedNode)
+                        this.fire("filter-request", "orderByType")
+                    } else if("orderByTag" === e.target.value && this.orderBy !== "orderByTag"){
+                        if(this.selectedNode) this.selectedNode = this._getCurrencyNode(this.selectedNode)
+                        this.fire("filter-request", "orderByTag")
+                    }
+                    this.orderBy = e.target.value
+                    this.closeConfig()
+                },
+                showConfig: function() {
+                    this.$.configDialog.style.opacity = 1
+                    this.$.configDialog.style['pointer-events'] = 'auto'
+                },
+                closeConfig: function() {
+                    this.$.configDialog.style.opacity = 0
+                    this.$.configDialog.style['pointer-events'] = 'none'
+                },
+                openFullScreen: function() {
                     localStorage.treemapRoot = this.treemapRoot
                     window.open(contextURL + "/transDashboard/treemap.xhtml", '_blank' );
                 },
@@ -185,6 +234,13 @@
                         current = current.parent;
                     }
                     return path;
+                },
+                _getCurrencyNode: function (node) {
+                    var result = node
+                    while(!result.parent.exchangeCurrency) {
+                        result = result.parent
+                    }
+                    return result
                 },
                 _getDescriptionWithPercentage: function (node) {
                     var percentage = node.percentage
@@ -206,10 +262,13 @@
                 formatMoney: function (amount) {
                     return amount.formatMoney()
                 },
-                chart: function (root) {
+                chart: function (root, color) {
+                    var hostElement = this;
+                    colorsScale = color
                     if(this.fullScreen) {
                         this.width = window.innerWidth -20
                         this.height = window.innerHeight -50
+                        this.$.configIcon.style.display = 'none'
                     }
                     this.$.chart.style.height = this.height + this.margin.top + this.margin.bottom + "px";
                     this.$.sequenceMessageDiv.style.height = this.breadcrumb.height + "px";
@@ -232,6 +291,7 @@
                             .attr("id", "trail");
 
                     this.treemapRoot = JSON.stringify(root)
+
                     if(!root || !root.children || root.children.length === 0) {
                         console.log(this.tagName + " - without root data")
                         this.$.messageDiv.style.display = 'block'
@@ -258,14 +318,12 @@
                             .style("shape-rendering", "crispEdges");
                     this.$.chartContainerDiv.style.display = 'block'
 
-                    var hostElement = this;
-                    var transitioning
-
                     initialize(root);
                     accumulate(root);
                     layout(root);
                     var displayResult = display(root);
-                    if(this.selectedNode) displayResult.transition(this.selectedNode)
+                    if(hostElement.selectedNode)
+                        displayResult.transition(hostElement.selectedNode)
 
                     function initialize(root) {
                         root.x = root.y = 0;
@@ -283,7 +341,7 @@
                             d._children = d.children
                             d.children.forEach(function (d) { accumulate(d)})
                         }
-                        //back to previous selected node when filtering
+                        //back to the parent of previous selected node when filtering
                         if(hostElement.selectedNode) {
                             if(hostElement.selectedNode.name === d.name) {
                                 hostElement.selectedNode = d
@@ -380,7 +438,9 @@
                         g.append("text")
                                 .attr("dy", ".75em")
                                 .attr("class", "parentText")
-                                .text(function (d) { return hostElement._getDescriptionWithPercentage(d); })
+                                .text(function (d) {
+                                    if(d.parent.value) d.percentage = TransactionsStats.getPercentage(d.value, d.parent.value)
+                                    return hostElement._getDescriptionWithPercentage(d); })
                                 .call(text);
 
                         var childTextList = g.selectAll(".childText")
@@ -391,6 +451,7 @@
                                 .text(function (d) { return d.description || d.name })
                         childTextList.call(childText)
 
+                        var transitioning
                         function transition(d) {
                             hostElement.selectedNode = d
                             handleMouseOut()
@@ -451,28 +512,20 @@
                     function fillRects() {
                         hostElement.svg.selectAll("rect.parent")
                                 .style("fill", function (d) {
-                                    if (d.name) {
-                                        return colorsScale(d.name)
-                                    }
+                                    if (d.name) { return colorsScale(d.name) }
                                 }.bind(this))
                     }
 
                     function text(text) {
-                        text.attr("x", function (d) {
-                                    return hostElement.x(d.x) + 6;
-                                })
-                                .attr("y", function (d) {
-                                    return hostElement.y(d.y) + 6;
-                                });
+                        text.attr("x", function (d) { return hostElement.x(d.x) + 6; })
+                                .attr("y", function (d) { return hostElement.y(d.y) + 6; });
                     }
                     function childText(text) {
                         text.attr("x", function (d) {
                                     var bbox = d3.select(this).node().getBBox();
                                     return hostElement.x(d.x) + hostElement.x(d.dx) - bbox.width - 5
                                 })
-                                .attr("y", function (d) {
-                                    return hostElement.y(d.y) + hostElement.y(d.dy) - 4
-                                });
+                                .attr("y", function (d) { return hostElement.y(d.y) + hostElement.y(d.dy) - 4 });
                     }
 
                     function rect(rect) {
