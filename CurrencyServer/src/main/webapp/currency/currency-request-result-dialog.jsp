@@ -46,7 +46,7 @@
                     this.loadWallet(appMessageJSON.message)
                 } else {
                     var caption = '${msg.errorLbl}'
-                    showMessageVS(appMessageJSON.message, caption)
+                    alert(appMessageJSON.message, caption)
                 }
                 this.click()
             },

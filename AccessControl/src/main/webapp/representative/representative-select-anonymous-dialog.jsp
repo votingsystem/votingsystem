@@ -95,7 +95,7 @@
                     this.messageToUser = null
                     var msgTemplate = "${msg.selectRepresentativeConfirmMsg}";
                     if(!this.$.numWeeksAnonymousDelegation.validity.valid) {
-                        showMessageVS('${msg.numWeeksAnonymousDelegationMsg}', '${msg.errorLbl}')
+                        alert('${msg.numWeeksAnonymousDelegationMsg}', '${msg.errorLbl}')
                         return
                     }
                     var weeksMsgTemplate = "${msg.numWeeksResultAnonymousDelegationMsg}";
@@ -121,7 +121,7 @@
                     msg = appMessageJSON.message + "<br/>" +
                             "${msg.downloadReceiptMsg}".format(appMessageJSON.URL)
                 }
-                showMessageVS(msg, caption)
+                alert(msg, caption)
                 this.click() //hack to refresh screen
             },
             cancel: function() {

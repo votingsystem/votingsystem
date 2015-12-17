@@ -67,7 +67,7 @@
             checkRepresentativeNIF: function() {
                 console.log(this.tagName + " - ready")
                 var validatedNif = validateNIF(this.$.representativeNif.value)
-                if(validatedNif == null) showMessageVS('${msg.nifERRORMsg}','${msg.errorLbl}')
+                if(validatedNif == null) alert('${msg.nifERRORMsg}','${msg.errorLbl}')
                 else {
                     var operationVS = new OperationVS(Operation.EDIT_REPRESENTATIVE)
                     operationVS.nif = validatedNif

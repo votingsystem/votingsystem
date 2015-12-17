@@ -66,7 +66,7 @@
                 window[operationVS.objectId] = function(appMessage) {
                     console.log("sendTransactionVSFromBankVS - message: " + appMessage);
                     appMessageJSON = JSON.parse(appMessage)
-                    showMessageVS(JSON.stringify(appMessageJSON.message), "sendTransactionVSFromBankVS " + appMessageJSON.statusCode)
+                    alert(JSON.stringify(appMessageJSON.message), "sendTransactionVSFromBankVS " + appMessageJSON.statusCode)
                 }
                 VotingSystemClient.setMessage(operationVS);
             }
@@ -118,7 +118,7 @@
                 window[operationVS.objectId] = function(appMessage) {
                     console.log("signWithMobile - message: " + appMessage);
                     appMessageJSON = JSON.parse(appMessage)
-                    showMessageVS(JSON.stringify(appMessageJSON.message), "signWithMobile " + appMessageJSON.statusCode)
+                    alert(JSON.stringify(appMessageJSON.message), "signWithMobile " + appMessageJSON.statusCode)
                 }
                 VotingSystemClient.setMessage(operationVS);
             }

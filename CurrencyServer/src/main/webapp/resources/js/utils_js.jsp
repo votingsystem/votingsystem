@@ -68,17 +68,16 @@
         FROM_GROUP_TO_ALL_MEMBERS:{lbl:"${msg.transactionVSFromGroupToAllMembers}"}}
 
 
-    window._originalAlert = window.alert;
-    window.alert = function(text) {
-        if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
-                document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
-            document.querySelector("#_votingsystemMessageDialog").setMessage(text,
-                    "${msg.messageLbl}")
-        }  else {
-            console.log('utils_js - alert-dialog not found');
-            window._originalAlert(text);
-        }
-    }
+    window.addEventListener('WebComponentsReady', function() {
+        Polymer.Base.importHref(contextURL + '/element/alert-dialog.vsp', function(e) {
+            var alertDialog = document.createElement('alert-dialog');
+            window.alert = function(message, caption, callerId, isConfirmMessage) {
+                if(!caption) caption = "${msg.messageLbl}"
+                alertDialog.setMessage(message, caption, callerId, isConfirmMessage)
+            }
+            document.querySelector("body").appendChild(alertDialog)
+        });
+    })
 
     var weekdays = [${msg.weekdaysShort}];
     var months = [${msg.monthsShort}];

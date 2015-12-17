@@ -88,7 +88,7 @@
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     caption = "${msg.operationOKCaption}"
                 }
-                showMessageVS(appMessageJSON.message, caption)
+                alert(appMessageJSON.message, caption)
                 this.click() //hack to refresh
             },
             close: function() {

@@ -77,7 +77,7 @@
                 this.messageToUser = "${msg.emailFieldErrorMsg}"
                 return
             }
-            showMessageVS("<b>${msg.nifLbl}:</b> " + validateNIF(this.$.nif.value) +
+            alert("<b>${msg.nifLbl}:</b> " + validateNIF(this.$.nif.value) +
                     "<br/><b>${msg.nameLbl}:</b> " + this.$.givenname.value.toUpperCase() +
                     "<br/><b>${msg.surnameLbl}:</b> " + this.$.surname.value.toUpperCase() +
                     "<br/><b>${msg.phoneLbl}:</b> " + this.$.phone.value +
@@ -100,8 +100,8 @@
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 page.show("/resources/certificationCenters")
                 message = "${msg.certRequestOKMsg}"
-                showMessageVS(message, '${msg.certRequestLbl}', 'resultMessage',true)
-            } else showMessageVS(message, '${msg.certRequestLbl}')
+                alert(message, '${msg.certRequestLbl}', 'resultMessage',true)
+            } else alert(message, '${msg.certRequestLbl}')
             this.click()
         },
         removeErrorStyle: function (element) {

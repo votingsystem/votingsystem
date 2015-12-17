@@ -101,7 +101,7 @@
                     caption = "${msg.operationERRORCaption}"
                     msg = appMessageJSON.message
                 }
-                showMessageVS(msg, caption)
+                alert(msg, caption)
                 this.click() //hack to refresh screen
             },
             show: function() {

@@ -53,15 +53,15 @@
             function submitForm() {
                 try {
                     if(document.querySelector('#bankVSIBAN').invalid) {
-                        showMessageVS('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
+                        alert('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
                         return false
                     }
                     if(!document.querySelector('#pemCert').validity.valid) {
-                        showMessageVS('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
+                        alert('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
                         return false
                     }
                     if(!document.querySelector('#description').validity.valid) {
-                        showMessageVS('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
+                        alert('${msg.fillAllFieldsERRORLbl}', '${msg.dataFormERRORLbl}')
                         return false
                     }
                     var operationVS = new OperationVS(Operation.BANKVS_NEW)
@@ -80,7 +80,7 @@
                             caption = '${msg.newBankVSOKCaption}'
                             var msgTemplate = '${msg.accessLinkMsg}';
                         }
-                        showMessageVS(msg, caption)
+                        alert(msg, caption)
                         window.scrollTo(0,0);
                         document.querySelector("#bankVSIBAN").click() // haco to refresh screen
                     })

@@ -3,9 +3,9 @@
 <link href="../resources/bower_components/vs-checkbox-selector/vs-checkbox-selector.html" rel="import"/>
 <link href="../resources/bower_components/vs-datepicker/vs-datepicker.html" rel="import"/>
 
-<link href="treemap-zoomable.vsp" rel="import"/>
+<link href="../resources/d3.html" rel="import"/>
+<link href="transactions-treemap.vsp" rel="import"/>
 <link href="transactions-scatter.vsp" rel="import"/>
-<script type="text/javascript" src="../resources/js/TransactionStats.js"></script>
 
 <dom-module name="transactions-dashboard">
     <style>
@@ -17,8 +17,9 @@
         }
     </style>
     <template>
-        <div class="horizontal layout">
-            <div class="vertical layout center" style="border: 1px solid #ccc; margin: 5px;border-radius: 3px;">
+        <div id="fullScreenDiv" style="display: none;"></div>
+        <div class="horizontal layout center center-justified">
+            <div id="selectorDiv" class="vertical layout center" style="border: 1px solid #ccc; margin: 5px;border-radius: 3px;">
                 <div style="color: #888;font-weight: bold;text-decoration: underline;">${msg.filtersLbl}</div>
                 <div class="horizontal layout" style="font-size: 0.9em;margin: 5px 0 5px 0;">
                     <vs-datepicker id="dateFromDatepicker" years-back="5" month-labels='[${msg.monthsShort}]' day-labels='[${msg.weekdaysShort}]' time-enabled
@@ -45,17 +46,17 @@
                     <button on-click="getHTTP"><i id="searchIcon" class="fa fa-search" style="margin:0px 3px 0px 0px;" ></i> ${msg.searchLbl}</button>
                 </div>
             </div>
-            <div>
-                <treemap-zoomable id="treemapByType"></treemap-zoomable>
+            <div id="treemapZoomableDiv">
+                <transactions-treemap id="treemapByType"></transactions-treemap>
             </div>
         </div>
         <div>
             <transactions-scatter id="transactionsScatter" style="height: 300px; width: 100%;"></transactions-scatter>
         </div>
-
-
     </template>
     <script>
+    (function() {
+        var colorsScale = d3.scale.ordinal().range(TransactionsStats.colors);
         Polymer({
             is:'transactions-dashboard',
             properties: {  },
@@ -65,16 +66,12 @@
                 this.$.dateToDatepicker.setDate(new Date())
 
                 this.formatDate = d3.time.format("%Y%m%d_%M%S");
-                this.color = d3.scale.ordinal().range(["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6",
-                        "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300",
-                        "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"]);
 
                 document.querySelector('#voting_system_page').addEventListener('votingsystem-client-msg', function (e) {
                     console.log("votingsystem-client-msg:" + JSON.stringify(e.detail));
                     this.clientMsg = JSON.stringify(e.detail)
                 }.bind(this))
 
-                this.color = d3.scale.category20(),
                 this.getHTTP()
             },
             timeCheckboxSelected:function (e) {
@@ -121,7 +118,7 @@
                     if(!this.transStats.checkFilters(transactionvs).filtered) filteredTransStats.pushTransaction(transactionvs)
                 }.bind(this))
                 TransactionsStats.setCurrencyPercentages(filteredTransStats.transactionsTreeByType)
-                this.$.treemapByType.chart(filteredTransStats.transactionsTreeByType, this.color)
+                this.$.treemapByType.chart(filteredTransStats.transactionsTreeByType)
             },
             getHTTP:function() {
                 var targetURL = "/CurrencyServer/rest/transactionVS/from/" + this.formatDate(this.$.dateFromDatepicker.getDate()) +
@@ -137,20 +134,21 @@
                         this.transStats.pushTransaction(transactionvs)
                     }.bind(this))
                     this.$.tagSelector.init(this.transStats.tags, function (item) {
-                        return 'font-weight: bold; color: ' + this.color(item) + ';' }.bind(this), null)
+                        return 'font-weight: bold; color: ' + colorsScale(item) + ';' }.bind(this), null)
                     this.$.typeSelector.init(this.transStats.transactionTypes, function (item) {
-                            return 'font-weight: bold; color: ' + this.color(item) + ';'
+                            return 'font-weight: bold; color: ' + colorsScale(item) + ';'
                         }.bind(this), function (transaction) {
                             return transactionsMap[transaction].lbl
                         })
                     this.$.currencySelector.init(this.transStats.currencyCodes, function (item) {
-                        return 'font-weight: bold; color: ' + this.color(item) + ';' }.bind(this), null)
+                        return 'font-weight: bold; color: ' + colorsScale(item) + ';' }.bind(this), null)
 
                     TransactionsStats.setCurrencyPercentages(this.transStats.transactionsTreeByType)
-                    this.$.transactionsScatter.chart(this.chartData, this.color)
-                    this.$.treemapByType.chart(this.transStats.transactionsTreeByType, this.color)
+                    this.$.transactionsScatter.chart(this.chartData)
+                    this.$.treemapByType.chart(this.transStats.transactionsTreeByType)
                 }.bind(this))
             }
         });
+    })();
     </script>
 </dom-module>

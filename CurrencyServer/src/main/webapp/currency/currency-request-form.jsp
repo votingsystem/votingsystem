@@ -109,7 +109,7 @@
                 console.log("submit - amountValue: " + this.$.inputAmount.value + " " +
                         this.$.currencySelector.getSelected())
                 if(!this.$.inputAmount.validity.valid || !(this.$.inputAmount.value > 0)) {
-                    showMessageVS("${msg.enterValidAmountMsg}", "${msg.errorLbl}")
+                    alert("${msg.enterValidAmountMsg}", "${msg.errorLbl}")
                     return
                 }
                 var tagList = []
@@ -138,7 +138,7 @@
                     this.$.resultDialog.showMessage(caption, appMessageJSON.message)
                 } else {
                     caption = '${msg.currencyRequestERRORCaption}'
-                    showMessageVS(appMessageJSON.message, caption)
+                    alert(appMessageJSON.message, caption)
                 }
                 this.click() //hack to refresh screen
             }

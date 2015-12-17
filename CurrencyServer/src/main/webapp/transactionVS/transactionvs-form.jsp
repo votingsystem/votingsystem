@@ -168,18 +168,18 @@
             }
         },
         submit: function () {
-            showMessageVS("${msg.emptyFieldMsg}", "${msg.errorLbl}")
+            alert("${msg.emptyFieldMsg}", "${msg.errorLbl}")
             this.removeErrorStyle(this.$.formDataDiv)
             if(!this.$.amount.validity.valid || this.$.amount.value == 0) {
                 //this.$.amount.classList.add("formFieldError")
                 this.$.amount.style.background = '#f6ccd0'
-                showMessageVS("${msg.enterValidAmountMsg}", "${msg.errorLbl}")
+                alert("${msg.enterValidAmountMsg}", "${msg.errorLbl}")
                 return
             }
             if(!this.$.transactionvsSubject.validity.valid) {
                 //this.$.transactionvsSubject.classList.add("formFieldError")
                 this.$.transactionvsSubject.style.background = '#f6ccd0'
-                showMessageVS("${msg.emptyFieldMsg}", "${msg.errorLbl}")
+                alert("${msg.emptyFieldMsg}", "${msg.errorLbl}")
                 return
             }
             var tagList = []
@@ -192,7 +192,7 @@
             switch(this.operation) {
                 case Operation.FROM_GROUP_TO_MEMBER_GROUP:
                     if(this.$.receptorBox.getUserList().length == 0){
-                        showMessageVS("${msg.receptorMissingErrorLbl}", "${msg.errorLbl}")
+                        alert("${msg.receptorMissingErrorLbl}", "${msg.errorLbl}")
                         return false
                     }
                     break;
@@ -218,7 +218,7 @@
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "${msg.transactionvsOKLbl}"
             } else caption = '${msg.transactionvsERRORLbl}'
-            showMessageVS(appMessageJSON.message, caption)
+            alert(appMessageJSON.message, caption)
             this.click() //hack to refresh screen
         },
         transactionFromUser:function(tagList) {
@@ -238,7 +238,7 @@
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "${msg.transactionvsOKLbl}"
             } else caption = '${msg.transactionvsERRORLbl}'
-            showMessageVS(appMessageJSON.message, caption)
+            alert(appMessageJSON.message, caption)
         },
         getToUserIBAN: function () {
             var result = []

@@ -121,16 +121,6 @@ DateUtils.parseInputType = function (dateStr) {
 		return dateObject
 	}
 
-function showMessageVS(message, caption, callerId, isConfirmMessage) {
-    if (document.querySelector("#_votingsystemMessageDialog") != null && typeof
-            document.querySelector("#_votingsystemMessageDialog").setMessage != 'undefined'){
-        document.querySelector("#_votingsystemMessageDialog").setMessage(message, caption, callerId, isConfirmMessage)
-    }  else {
-        console.log('alert-dialog not found');
-        window._originalAlert(message);
-    }
-}
-
 String.prototype.format = function() {
 	  var args = arguments;
 	  var str =  this.replace(/''/g, "'")
@@ -146,7 +136,7 @@ String.prototype.format = function() {
 //ej: (123456789.12345).formatMoney(3, '.', ',') ->  123,456,789.123
 Number.prototype.formatMoney = function(c, d, t){
     var n = this,
-        c = isNaN(c = Math.abs(c)) ? 3 : c,
+        c = isNaN(c = Math.abs(c)) ? 2 : c,
         d = d == undefined ? "." : d,
         t = t == undefined ? "," : t,
         s = n < 0 ? "-" : "",

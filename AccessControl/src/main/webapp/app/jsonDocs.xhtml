@@ -41,7 +41,7 @@
                 window[operationVS.objectId] = function(appMessage) {
                     console.log("publishControlCenter - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
-                    showMessageVS(appMessageJSON.message, "validateCert - status: " + appMessageJSON.statusCode)
+                    alert(appMessageJSON.message, "validateCert - status: " + appMessageJSON.statusCode)
                 }
                 VotingSystemClient.setMessage(operationVS);
             }

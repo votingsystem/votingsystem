@@ -33,7 +33,7 @@
         <div hidden="{{!isActive}}" class="layout horizontal center center-justified" style="margin:0px 0px 10px 0px;">
             <div hidden="{{!isClientToolConnected}}" class="horizontal layout">
                 <div hidden="{{!isConnected}}" style="margin:0 20px 0 0;">
-                    <button on-click="showMessageVSDialog">
+                    <button on-click="alertDialog">
                         <i class="fa fa-envelope-o"></i> ${msg.sendMessageVSLbl}
                     </button>
                 </div>
@@ -99,7 +99,7 @@
             this.$.transactionvsForm.addEventListener('closed', function (e) {
                 this.page = 0;
             }.bind(this))
-            if(this.message) showMessageVS(this.message, "${msg.messageLbl}")
+            if(this.message) alert(this.message, "${msg.messageLbl}")
         },
         uservsChanged:function() {
             console.log(this.tagName + " - uservsDtoChanged - uservs: " + JSON.stringify( this.uservs))
@@ -133,7 +133,7 @@
         showByIBAN:function(IBAN) {
             this.url =  contextURL + "/rest/userVS/IBAN/" + IBAN
         },
-        showMessageVSDialog: function () {
+        alertDialog: function () {
             this.$.sendMessageDialog.show(this.uservs)
         },
         sendMessageDialogResponse:function(e) {
@@ -143,7 +143,7 @@
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = '${msg.sendMessageOKCaption}'
             }
-            showMessageVS(msg, caption)
+            alert(msg, caption)
         },
         getHTTP: function (targetURL) {
             if(!targetURL) targetURL = this.url

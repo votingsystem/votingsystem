@@ -185,7 +185,7 @@
                 caption = "${msg.groupCancelOKLbl}"
                 page.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id)
             }
-            showMessageVS(this.appMessageJSON.message, caption, this.tagName)
+            alert(this.appMessageJSON.message, caption, this.tagName)
             this.click()
         },
         goToWeekBalance:function() {
@@ -210,7 +210,7 @@
                 caption = "${msg.groupSubscriptionOKLbl}"
                 page.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id)
             } else caption = '${msg.groupSubscriptionERRORLbl}'
-            showMessageVS(appMessageJSON.message, caption)
+            alert(appMessageJSON.message, caption)
             this.click() //hack to refresh screen
         },
         groupvsChanged:function() {
@@ -270,7 +270,7 @@
             this.$.configDialog.style['pointer-events'] = 'auto'
         },
         cancelGroup:function() {
-            showMessageVS("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name),
+            alert("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name),
                     "${msg.confirmOperationMsg}", 'cancel_group', true)
         },
         editGroup:function() {

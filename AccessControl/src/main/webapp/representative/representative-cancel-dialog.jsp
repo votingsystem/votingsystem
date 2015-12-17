@@ -55,7 +55,7 @@
                 console.log(this.tagName + " - removeRepresentative")
                 var validatedNif = validateNIF(this.$.representativeNif.value)
                 if(validatedNif == null) {
-                    showMessageVS('${msg.nifERRORMsg}','${msg.errorLbl}')
+                    alert('${msg.nifERRORMsg}','${msg.errorLbl}')
                     return;
                 }
                 var operationVS = new OperationVS(Operation.REPRESENTATIVE_REVOKE)
@@ -77,7 +77,7 @@
                 } else if (ResponseVS.SC_CANCELED== appMessageJSON.statusCode) {
                     caption = "${msg.operationCANCELEDLbl}"
                 }
-                showMessageVS(msg, caption)
+                alert(msg, caption)
                 this.click() //hack to refresh screen
             },
             close: function() {

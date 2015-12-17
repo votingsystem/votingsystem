@@ -151,11 +151,11 @@
             showConfirmDialog: function(e) {
                 console.log(this.tagName + " showConfirmDialog")
                 if((clientTool === undefined)) {
-                    showMessageVS("${msg.clientToolRequiredErrorMsg}", "${msg.errorLbl}");
+                    alert("${msg.clientToolRequiredErrorMsg}", "${msg.errorLbl}");
                 } else {
                     this.optionVSSelected = e.model.item
-                    //showMessageVS(message, caption, callerId, isConfirmMessage)
-                    showMessageVS(this.optionVSSelected.content, "${msg.confirmOptionDialogCaption}", this.tagName, true);
+                    //alert(message, caption, callerId, isConfirmMessage)
+                    alert(this.optionVSSelected.content, "${msg.confirmOptionDialogCaption}", this.tagName, true);
                 }
             },
             messagedialogConfirmed:function(e) {
@@ -176,7 +176,7 @@
             },
             showGetResultsResponse:function(appMessage) {
                 var appMessageJSON = toJSON(appMessage)
-                if(ResponseVS.SC_OK !== appMessageJSON.statusCode) showMessageVS(appMessageJSON.message, "${msg.errorLbl}")
+                if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message, "${msg.errorLbl}")
                 this.click()//hack to refresh screen
             },
             showVoteResul:function() {

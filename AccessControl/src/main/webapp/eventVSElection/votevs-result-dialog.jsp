@@ -113,7 +113,7 @@
             cancelVote: function() {
                 this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
                 this.callerCallback = Math.random().toString(36).substring(7)
-                showMessageVS('${msg.cancelVoteConfirmMsg}', '${msg.cancelVoteLbl}', this.callerCallback, true)
+                alert('${msg.cancelVoteConfirmMsg}', '${msg.cancelVoteLbl}', this.callerCallback, true)
                 this.$.modalDialog.style.opacity = 0
                 this.$.modalDialog.style['pointer-events'] = 'none'
             },
@@ -153,7 +153,7 @@
                     this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
                     this.$.modalDialog.style.opacity = 1
                     this.$.modalDialog.style['pointer-events'] = 'auto'
-                } else showMessageVS(appMessageJSON.message, '${msg.voteVSCancellationErrorCaption}')
+                } else alert(appMessageJSON.message, '${msg.voteVSCancellationErrorCaption}')
                 this.click()
             }
         });

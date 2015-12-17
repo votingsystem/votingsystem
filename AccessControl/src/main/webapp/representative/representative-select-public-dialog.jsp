@@ -68,7 +68,7 @@
                     msg = appMessageJSON.message + "<br/>" +
                             "${msg.downloadReceiptMsg}".format(appMessageJSON.URL)
                 }
-                showMessageVS(msg, caption)
+                alert(msg, caption)
                 this.click() //hack to refresh screen
             },
             close: function() {

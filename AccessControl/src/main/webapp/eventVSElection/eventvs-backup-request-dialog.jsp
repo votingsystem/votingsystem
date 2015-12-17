@@ -78,7 +78,7 @@
                     caption = '${msg.operationOKCaption}'
                     this.close()
                 }
-                showMessageVS(appMessageJSON.message, caption)
+                alert(appMessageJSON.message, caption)
                 this.click()
             },
             close: function() {

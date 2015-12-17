@@ -89,7 +89,7 @@
                     document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('refresh-uservs-list', {uservs: this.userId}))
                     this.close()
                 }
-                showMessageVS(appMessageJSON.message, caption)
+                alert(appMessageJSON.message, caption)
                 this.click() //hack to refresh screen
             },
             getDate:function(timStamp) {
@@ -149,7 +149,7 @@
                         document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('refresh-uservs-list', {uservs: this.userId}))
                         this.close()
                     }
-                    showMessageVS(appMessageJSON.message, caption)
+                    alert(appMessageJSON.message, caption)
                 }
             },
             initCancellation : function(e) {

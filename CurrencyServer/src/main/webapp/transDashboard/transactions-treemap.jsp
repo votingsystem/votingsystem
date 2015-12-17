@@ -2,7 +2,7 @@
 
 <link href="../resources/d3.html" rel="import"/>
 
-<dom-module id="treemap-zoomable">
+<dom-module id="transactions-treemap">
     <style>
         :host {
             display: block;
@@ -10,11 +10,6 @@
             height: 100%;
             position: relative;
         }
-
-        #chart {
-            background: #ddd;
-        }
-
         text {
             pointer-events: none;
         }
@@ -105,13 +100,24 @@
         .timeLimitedDiv {
             color:#ba0011;
         }
+        .chartConfig {
+            position: absolute;top: 5px; right: 10px;cursor: pointer;color:#ba0011;
+        }
+        .chartConfig:hover {
+            color:#FFD67D;
+        }
     </style>
     <template>
         <div id="messageDiv" class="horizontal layout center center-justified flex" style="margin:20px;text-align: center;">${msg.withoutDataLbl}</div>
         <div id="chartContainerDiv" style="display: none;">
             <div id="sequenceMessageDiv" style="text-align: center; font-weight: bold; color: #888; font-size: 1.6em; font-style: italic;">{{sequenceMessage}}</div>
-            <div id="sequence"></div>
-            <div id="chart" style="padding: 0px; margin: 0px;"></div>
+            <div>
+                <div>
+                    <div class="flex" id="sequence"></div>
+                    <div on-click="chartConfig" class="chartConfig"><i id="configIcon" class="fa fa-cogs"></i></div>
+                </div>
+                <div id="chart" style="padding: 0px; margin: 0px;"></div>
+            </div>
             <div id="tooltip" class="tooltip" style="display: none;">
                 <div style$="{{_getSelectedNodeTooltipHeaderStyle(mouseOverNode)}}">{{_getDescriptionWithPercentage(mouseOverNode)}}</div>
                 <div class="horizontal layout center center-justified">
@@ -147,40 +153,29 @@
     </template>
     <script>
         (function () {
+            var colorsScale = d3.scale.ordinal().range(TransactionsStats.colors);
             Polymer({
-                is: "treemap-zoomable",
+                is: "transactions-treemap",
                 properties: {
                     mouseOverNode: {type: Object, observer: 'mouseOverNodeChanged'},
                     selectedNode: {type: Object},
+                    root: {type: Object},
                     breadcrumb: {type: Object, value: {width: 205, height: 30, s: 3, t: 10}},
                     margin: {type: Object, value:  {top: 0, right: 0, bottom: 0, left: 0}},
                     selectedCurrencyCode: {type: String},
                     width: {type: Number, value:500},
-                    height: {type: Number, value:300}
+                    height: {type: Number, value:300},
+                    fullScreen: {type: Boolean, value:false}
                 },
                 ready: function () {
-                    this.$.chart.style.height = this.height + this.margin.top + this.margin.bottom + "px";
-                    this.$.sequenceMessageDiv.style.height = this.breadcrumb.height + "px";
-
-                    this.height = this.height - this.margin.top - this.margin.bottom
-                    this.x = d3.scale.linear().domain([0, this.width]).range([0, this.width]);
-                    this.y = d3.scale.linear().domain([0, this.height]).range([0, this.height]);
-
-                    this.treemap = d3.layout.treemap()
-                            .value(function(d) {return d.totalAmount})
-                            .children(function (d, depth) {
-                                return depth ? null : d._children;
-                            })
-                            .sort(function (a, b) {
-                                return a.value - b.value;
-                            })
-                            .ratio(this.height / this.width * 0.5 * (1 + Math.sqrt(5)))
-                            .round(false);
-
-                    var trail = d3.select(this).select("#sequence").append("svg")
-                            .attr("width", this.width)
-                            .attr("height", this.breadcrumb.height)
-                            .attr("id", "trail");
+                    if(localStorage.treemapRoot) {
+                        this.chart(toJSON(localStorage.treemapRoot))
+                    }
+                    localStorage.treemapRoot = null
+                },
+                chartConfig: function() {
+                    localStorage.treemapRoot = this.treemapRoot
+                    window.open(contextURL + "/transDashboard/treemap.xhtml", '_blank' );
                 },
                 getAncestors: function (node) {
                     var path = [];
@@ -199,7 +194,7 @@
                     if(percentage) return (node.description || node.name) + " " + percentage + "%";
                 },
                 _getSelectedNodeTooltipHeaderStyle: function (node) {
-                    return "font-weight: bold; font-size: 1.1em;color:" + this.color(node.name) + ";"
+                    return "font-weight: bold; font-size: 1.1em;color:" + colorsScale(node.name) + ";"
                 },
                 mouseOverNodeChanged: function () {
                     var node = this.mouseOverNode
@@ -211,8 +206,32 @@
                 formatMoney: function (amount) {
                     return amount.formatMoney()
                 },
-                chart: function (root, color, filter) {
-                    console.log(this.tagName + " - chart - " + JSON.stringify(root))
+                chart: function (root) {
+                    if(this.fullScreen) {
+                        this.width = window.innerWidth -20
+                        this.height = window.innerHeight -50
+                    }
+                    this.$.chart.style.height = this.height + this.margin.top + this.margin.bottom + "px";
+                    this.$.sequenceMessageDiv.style.height = this.breadcrumb.height + "px";
+
+                    this.height = this.height - this.margin.top - this.margin.bottom
+                    this.x = d3.scale.linear().domain([0, this.width]).range([0, this.width]);
+                    this.y = d3.scale.linear().domain([0, this.height]).range([0, this.height]);
+
+                    this.treemap = d3.layout.treemap()
+                            .value(function(d) {return d.totalAmount})
+                            .children(function (d, depth) { return depth ? null : d._children; })
+                            .sort(function (a, b) { return a.value - b.value; })
+                            .ratio(this.height / this.width * 0.5 * (1 + Math.sqrt(5)))
+                            .round(false);
+
+                    if(this.$.sequence.childNodes[0]) this.$.sequence.removeChild(this.$.sequence.childNodes[0])
+                    var trail = d3.select(this).select("#sequence").append("svg")
+                            .attr("width", this.width)
+                            .attr("height", this.breadcrumb.height)
+                            .attr("id", "trail");
+
+                    this.treemapRoot = JSON.stringify(root)
                     if(!root || !root.children || root.children.length === 0) {
                         console.log(this.tagName + " - without root data")
                         this.$.messageDiv.style.display = 'block'
@@ -230,6 +249,8 @@
                     this.svg = d3.select(this).select("#chart").append("svg")
                             .attr("width", this.width + this.margin.left + this.margin.right)
                             .attr("height", this.height + this.margin.bottom + this.margin.top)
+                            .attr("height", this.height + this.margin.bottom + this.margin.top)
+                            .style("background", "#ccc")
                             .style("margin-left", -this.margin.left + "px")
                             .style("margin.right", -this.margin.right + "px")
                             .append("g")
@@ -239,7 +260,6 @@
 
                     var hostElement = this;
                     var transitioning
-                    this.color = color
 
                     initialize(root);
                     accumulate(root);
@@ -307,7 +327,7 @@
                         breadcumGroup.append("polygon")
                                 .attr("points", breadcrumbPoints)
                                 .on("click", function (d) {  transition(d.parent) })
-                                .style("fill", function (d) {  return hostElement.color(d.name); });
+                                .style("fill", function (d) {  return colorsScale(d.name); });
                         breadcumGroup.append("text")
                                 .attr("x", (hostElement.breadcrumb.width + hostElement.breadcrumb.t) / 2)
                                 .attr("y", hostElement.breadcrumb.height / 2)
@@ -422,7 +442,6 @@
                             }
                             return points.join(" ");
                         }
-
                         fillRects()
                         Polymer.dom(hostElement.$.chart).appendChild(Polymer.dom(hostElement.$.chart).childNodes[0])
                         Polymer.dom(hostElement.$.chart).appendChild(Polymer.dom(hostElement.$.chart).childNodes[0])
@@ -433,7 +452,7 @@
                         hostElement.svg.selectAll("rect.parent")
                                 .style("fill", function (d) {
                                     if (d.name) {
-                                        return color(d.name)
+                                        return colorsScale(d.name)
                                     }
                                 }.bind(this))
                     }
@@ -452,24 +471,15 @@
                                     return hostElement.x(d.x) + hostElement.x(d.dx) - bbox.width - 5
                                 })
                                 .attr("y", function (d) {
-                                    var bbox = d3.select(this).node().getBBox();
-                                    return hostElement.y(d.y) + hostElement.y(d.dy) - 2
+                                    return hostElement.y(d.y) + hostElement.y(d.dy) - 4
                                 });
                     }
 
                     function rect(rect) {
-                        rect.attr("x", function (d) {
-                                    return hostElement.x(d.x);
-                                })
-                                .attr("y", function (d) {
-                                    return hostElement.y(d.y);
-                                })
-                                .attr("width", function (d) {
-                                    return hostElement.x(d.x + d.dx) - hostElement.x(d.x);
-                                })
-                                .attr("height", function (d) {
-                                    return hostElement.y(d.y + d.dy) - hostElement.y(d.y);
-                                })
+                        rect.attr("x", function (d) { return hostElement.x(d.x); })
+                                .attr("y", function (d) { return hostElement.y(d.y); })
+                                .attr("width", function (d) { return hostElement.x(d.x + d.dx) - hostElement.x(d.x); })
+                                .attr("height", function (d) { return hostElement.y(d.y + d.dy) - hostElement.y(d.y); })
                     }
 
                     function handleMouseOut(d, i) {

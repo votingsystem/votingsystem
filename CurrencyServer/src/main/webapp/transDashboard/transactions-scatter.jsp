@@ -5,7 +5,6 @@
 
 
 <dom-module id="transactions-scatter">
-    <link rel="import" type="css" href="transactions-scatter.css">
     <style>
         :host {
             display: block;
@@ -13,6 +12,44 @@
             height: 100%;
             margin: 0 7px 0 7px;
             position: relative;
+        }
+        .transaction {
+            stroke-width: 1;
+            opacity: 0.5;
+        }
+        .transaction:hover {
+            cursor: pointer;
+            opacity: 1.0;
+        }
+        .axis {
+            font-size: 10px;
+        }
+        .legendLbl {
+            font-size: 22px;
+            font-weight: bold;
+            color: #888;
+        }
+        .scatterRect {
+            fill: #fefefe;
+        }
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+        .axis text {
+            font-size: 10px;
+        }
+        .legendWrap .series {
+            cursor: pointer;
+        }
+        .legendWrap circle {
+            stroke-width: 20px;
+        }
+        .legendWrap .disabled circle {
+            fill-opacity: 0;
+            stroke-width: 20px;
         }
         .tooltip {
             text-align: center;
@@ -50,6 +87,7 @@
     </template>
     <script>
         (function() {
+            var colorsScale = d3.scale.ordinal().range(TransactionsStats.colors);
             Polymer({
                 is: "transactions-scatter",
                 properties: {
@@ -65,7 +103,7 @@
                     this.rScale = d3.scale.linear().range([this.rMin, this.rMax])
                     window.addEventListener('resize', function(event){
                         this.circlesGradientList = []
-                        this.chart(this.chartData, this.color)
+                        this.chart(this.chartData)
                     }.bind(this));
                 },
                 filterChart:function (transStats) {
@@ -85,8 +123,8 @@
                 },
                 selectedTransactionChanged:function (transaction) {
                     this.selectedTransactionTag = transaction.tags[0]
-                    this.selectedTransactionTypeStyle = "font-weight:bold;color:" + this.color(transaction.type) + ";";
-                    this.selectedTransactionTagStyle = "font-size: 0.9em;color:" + this.color(transaction.tags[0]) + ";"
+                    this.selectedTransactionTypeStyle = "font-weight:bold;color:" + colorsScale(transaction.type) + ";";
+                    this.selectedTransactionTagStyle = "font-size: 0.9em;color:" + colorsScale(transaction.tags[0]) + ";"
                 },
                 getTransactionDescription:function (transaction) {
                     return transactionsMap[transaction].lbl
@@ -97,8 +135,8 @@
                     if(this.circlesGradientList.indexOf(gradId) < 0) {
                         var grad = d3.select(this).select("svg").append("defs").append("linearGradient").attr("id", gradId)
                                 .attr("x1", "0%").attr("x2", "0%").attr("y1", "100%").attr("y2", "0%");
-                        grad.append("stop").attr("offset", "50%").style("stop-color", this.color(transaction.tags[0]));
-                        grad.append("stop").attr("offset", "50%").style("stop-color", this.color(transaction.type));
+                        grad.append("stop").attr("offset", "50%").style("stop-color", colorsScale(transaction.tags[0]));
+                        grad.append("stop").attr("offset", "50%").style("stop-color", colorsScale(transaction.type));
                         this.circlesGradientList.push(gradId)
                     }
                     return gradId
@@ -106,10 +144,9 @@
                 getDate:function (date) {
                     return new Date(date).formatWithTime()
                 },
-                chart:function (data, color) {
+                chart:function (data) {
                     console.log(this.tagName + " - chart")
                     var hostElement = this
-                    this.color = color
                     this.chartData = data
                     while (this.$.scatterPlotDiv.hasChildNodes()) {
                         this.$.scatterPlotDiv.removeChild(this.$.scatterPlotDiv.lastChild);
@@ -131,7 +168,7 @@
                             .attr("transform", "translate(" + this.margin.left + " ," + this.margin.top + ")")
                             .on("click", function() {
                                 d3.selectAll(".guide").transition().duration(100).styleTween("opacity", function() { return d3.interpolate(.5, 0); }).remove()
-                                this.$.tooltip.style.display = 'none'
+                                //this.$.tooltip.style.display = 'none'
                             }.bind(this));
                     this.height = this.height - this.margin.top - this.margin.bottom;
                     var x = d3.time.scale(),
@@ -194,7 +231,7 @@
                                         .attr("x2", circle.attr("cx"))
                                         .attr("y1", circle.attr("cy"))
                                         .attr("y2", hostElement.height)
-                                        .style("stroke", hostElement.color(d.tags[0]))
+                                        .style("stroke", colorsScale(d.tags[0]))
                                 svg.append("g")
                                         .attr("class", "guide")
                                         .append("line")
@@ -202,7 +239,7 @@
                                         .attr("x2", 0)
                                         .attr("y1", circle.attr("cy"))
                                         .attr("y2", circle.attr("cy"))
-                                        .style("stroke", hostElement.color(d.tags[0]))
+                                        .style("stroke", colorsScale(d.tags[0]))
                             })
                             .on("mouseout", function(d) {
                                 var circle = d3.select(this);
