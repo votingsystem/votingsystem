@@ -103,7 +103,7 @@
                     this.rScale = d3.scale.linear().range([this.rMin, this.rMax])
                     window.addEventListener('resize', function(event){
                         this.circlesGradientList = []
-                        this.chart(this.chartData)
+                        this.chart(this.chartData, colorsScale)
                     }.bind(this));
                 },
                 filterChart:function (transStats) {

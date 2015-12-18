@@ -195,7 +195,7 @@
                     var supportsOrientationChange = "onorientationchange" in window,
                             orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
                     window.addEventListener(orientationEvent, function() {
-                        this.chart(toJSON(this.treemapRoot));
+                        this.chart(toJSON(this.treemapRoot), colorsScale);
                     }.bind(this), false);
 
                     if(localStorage.treemapRoot) {
@@ -318,12 +318,21 @@
                             .style("shape-rendering", "crispEdges");
                     this.$.chartContainerDiv.style.display = 'block'
 
+                    var rootSelectedNode
                     initialize(root);
                     accumulate(root);
                     layout(root);
                     var displayResult = display(root);
-                    if(hostElement.selectedNode)
-                        displayResult.transition(hostElement.selectedNode)
+                    if(hostElement.selectedNode) {
+                        //we're updating the chart
+                        if(!rootSelectedNode) {
+                            root.children.forEach(function(d) {
+                                if(d.currencyCode === hostElement.selectedCurrencyCode) rootSelectedNode = d
+                            })
+                        }
+                        displayResult.transition(rootSelectedNode)
+                    }
+
 
                     function initialize(root) {
                         root.x = root.y = 0;
@@ -344,7 +353,7 @@
                         //back to the parent of previous selected node when filtering
                         if(hostElement.selectedNode) {
                             if(hostElement.selectedNode.name === d.name) {
-                                hostElement.selectedNode = d
+                                rootSelectedNode = d
                             }
                         }
                     }
