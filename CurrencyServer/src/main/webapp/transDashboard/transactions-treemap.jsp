@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="../resources/d3.html" rel="import"/>
+<link href="transactions-counter.vsp" rel="import"/>
 
 <dom-module id="transactions-treemap">
     <style>
@@ -110,13 +111,17 @@
     <template>
         <div id="messageDiv" class="horizontal layout center center-justified flex" style="margin:20px;text-align: center;">${msg.withoutDataLbl}</div>
         <div id="chartContainerDiv" style="display: none;">
-            <div id="sequenceMessageDiv" style="text-align: center; font-weight: bold; color: #888; font-size: 1.6em; font-style: italic;">{{sequenceMessage}}</div>
-            <div>
+            <div class="horizontal layout">
                 <div>
-                    <div class="flex" id="sequence"></div>
-                    <div on-click="showConfig" class="chartConfig"><i id="configIcon" class="fa fa-cogs"></i></div>
+                    <div class="horizontal layout center center justified" style="position: relative;">
+                        <div id="sequenceMessageDiv" style="text-align: center; font-weight: bold; color: #888; font-size: 1.6em; font-style: italic;">{{sequenceMessage}}</div>
+                        <div class="flex" id="sequence"> </div>
+                        <div  style="font-size: 0.6em; margin:0 35px 0 0;">{{orderByLbl}}</div>
+                        <div on-click="showConfig" class="chartConfig"><i id="configIcon" class="fa fa-cogs"></i></div>
+                    </div>
+                    <div id="chart" style="padding: 0px; margin: 0px;"></div>
                 </div>
-                <div id="chart" style="padding: 0px; margin: 0px;"></div>
+                <transactions-counter id="transactionsCounter" on-node-click="transactionsCounterNodeClick"></transactions-counter>
             </div>
             <div id="tooltip" class="tooltip" style="display: none;">
                 <div style$="{{_getSelectedNodeTooltipHeaderStyle(mouseOverNode)}}">{{_getDescriptionWithPercentage(mouseOverNode)}}</div>
@@ -130,20 +135,20 @@
                             </div>
                             <div>
                                 <div class="header2">${msg.amountLbl}</div>
-                                <div class="content">{{formatMoney(mouseOverNode.totalAmount)}} {{selectedCurrencyCode}}</div>
+                                <div class="content">{{formatMoney(mouseOverNode.totalAmount)}} {{mouseOverNode.currencyCode}}</div>
                             </div>
                         </div>
                     </div>
                     <div style="margin: 0 0 0 10px;" class="timeLimitedDiv">
                         <div class="header1" style="color:#ba0011;"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}  {{mouseOverNodeTimeLimitedPercentage}}</div>
-                        <div class="horizontal layout center center-jsutified">
+                        <div class="horizontal layout center center-justified">
                             <div>
                                 <div class="header2" style="color:#ba0011;">${msg.movementsLbl}</div>
                                 <div class="content">{{mouseOverNode.numTimeLimitedTransactions}}</div>
                             </div>
                             <div>
                                 <div class="header2" style="color:#ba0011;">${msg.amountLbl}</div>
-                                <div class="content">{{formatMoney(mouseOverNode.timeLimitedAmount)}} {{selectedCurrencyCode}}</div>
+                                <div class="content">{{formatMoney(mouseOverNode.timeLimitedAmount)}} {{mouseOverNode.currencyCode}}</div>
                             </div>
                         </div>
                     </div>
@@ -176,7 +181,6 @@
     </template>
     <script>
         (function () {
-            var colorsScale;
             Polymer({
                 is: "transactions-treemap",
                 properties: {
@@ -185,30 +189,35 @@
                     root: {type: Object},
                     breadcrumb: {type: Object, value: {width: 205, height: 30, s: 3, t: 10}},
                     margin: {type: Object, value:  {top: 0, right: 0, bottom: 0, left: 0}},
-                    selectedCurrencyCode: {type: String},
                     width: {type: Number, value:500},
                     height: {type: Number, value:300},
                     orderBy: {type: String, value:"orderByType"},
+                    orderByLbl: {type: String, value:"${msg.orderByType}"},
                     fullScreen: {type: Boolean, value:false}
                 },
                 ready: function () {
                     var supportsOrientationChange = "onorientationchange" in window,
                             orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
                     window.addEventListener(orientationEvent, function() {
-                        this.chart(toJSON(this.treemapRoot), colorsScale);
+                        this.chart(toJSON(this.treemapRoot));
                     }.bind(this), false);
-
-                    if(localStorage.treemapRoot) {
+                },
+                attached: function () {
+                    if(localStorage.treemapRoot && this.fullScreen) {
                         this.chart(toJSON(localStorage.treemapRoot))
-                    }
-                    localStorage.treemapRoot = null
+                    } else localStorage.treemapRoot = null
+                },
+                transactionsCounterNodeClick: function(e) {
+                    this.transition(e.detail.node)
                 },
                 orderByChanged: function(e) {
                     if("orderByType" === e.target.value && this.orderBy !== "orderByType") {
                         if(this.selectedNode) this.selectedNode = this._getCurrencyNode(this.selectedNode)
+                        this.orderByLbl = "${msg.orderByType}"
                         this.fire("filter-request", "orderByType")
                     } else if("orderByTag" === e.target.value && this.orderBy !== "orderByTag"){
                         if(this.selectedNode) this.selectedNode = this._getCurrencyNode(this.selectedNode)
+                        this.orderByLbl = "${msg.orderByTag}"
                         this.fire("filter-request", "orderByTag")
                     }
                     this.orderBy = e.target.value
@@ -237,8 +246,10 @@
                 },
                 _getCurrencyNode: function (node) {
                     var result = node
-                    while(!result.parent.exchangeCurrency) {
-                        result = result.parent
+                    if(result.parent) {
+                        while(!result.parent.exchangeCurrency) {
+                            result = result.parent
+                        }
                     }
                     return result
                 },
@@ -250,23 +261,21 @@
                     if(percentage) return (node.description || node.name) + " " + percentage + "%";
                 },
                 _getSelectedNodeTooltipHeaderStyle: function (node) {
-                    return "font-weight: bold; font-size: 1.1em;color:" + colorsScale(node.name) + ";"
+                    return "font-weight: bold; font-size: 1.1em;color:" + TransactionsStats.getColorScale(node.name) + ";"
                 },
                 mouseOverNodeChanged: function () {
                     var node = this.mouseOverNode
                     while (!node.currencyCode) node = node.parent
-                    this.selectedCurrencyCode = node.currencyCode
                     this.mouseOverNodeTimeLimitedPercentage = TransactionsStats.getPercentage(
                             this.mouseOverNode.timeLimitedAmount, this.mouseOverNode.totalAmount) + " %"
                 },
                 formatMoney: function (amount) {
                     return amount.formatMoney()
                 },
-                chart: function (root, color) {
+                chart: function (root) {
                     var hostElement = this;
-                    colorsScale = color
                     if(this.fullScreen) {
-                        this.width = window.innerWidth -20
+                        this.width = window.innerWidth - 250
                         this.height = window.innerHeight -50
                         this.$.configIcon.style.display = 'none'
                     }
@@ -322,17 +331,17 @@
                     initialize(root);
                     accumulate(root);
                     layout(root);
-                    var displayResult = display(root);
+                    this.$.transactionsCounter.load(root)
+                    display(root);
                     if(hostElement.selectedNode) {
                         //we're updating the chart
                         if(!rootSelectedNode) {
                             root.children.forEach(function(d) {
-                                if(d.currencyCode === hostElement.selectedCurrencyCode) rootSelectedNode = d
+                                if(d.currencyCode === hostElement.selectedNode.currencyCode) rootSelectedNode = d
                             })
                         }
-                        displayResult.transition(rootSelectedNode)
+                        if(rootSelectedNode) hostElement.transition(rootSelectedNode)
                     }
-
 
                     function initialize(root) {
                         root.x = root.y = 0;
@@ -348,9 +357,11 @@
                     function accumulate(d) {
                         if(d.children && d.children.length > 0) {
                             d._children = d.children
-                            d.children.forEach(function (d) { accumulate(d)})
+                            d.children.forEach(function (d1) {
+                                if(d.currencyCode) d1.currencyCode = d.currencyCode
+                                accumulate(d1)})
                         }
-                        //back to the parent of previous selected node when filtering
+                        //back to previous selected node when filtering, if filter removes de node we must go to the parent
                         if(hostElement.selectedNode) {
                             if(hostElement.selectedNode.name === d.name) {
                                 rootSelectedNode = d
@@ -394,7 +405,7 @@
                         breadcumGroup.append("polygon")
                                 .attr("points", breadcrumbPoints)
                                 .on("click", function (d) {  transition(d.parent) })
-                                .style("fill", function (d) {  return colorsScale(d.name); });
+                                .style("fill", function (d) {  return TransactionsStats.getColorScale(d.name); });
                         breadcumGroup.append("text")
                                 .attr("x", (hostElement.breadcrumb.width + hostElement.breadcrumb.t) / 2)
                                 .attr("y", hostElement.breadcrumb.height / 2)
@@ -407,7 +418,7 @@
                                 .attr("y", hostElement.breadcrumb.height / 2)
                                 .attr("dy", "1em")
                                 .attr("text-anchor", "middle")
-                                .text(function (d) { return d.totalAmount.formatMoney() + " " + hostElement.selectedCurrencyCode });
+                                .text(function (d) { return d.totalAmount.formatMoney() + " " + d.currencyCode });
 
                         // Set position for entering and updating nodes.
                         breadcumGroup.attr("transform", function (d, i) {
@@ -467,7 +478,7 @@
                             if (transitioning || !d) return;
                             transitioning = true;
 
-                            var g2 = display(d).g,
+                            var g2 = display(d),
                                     t1 = g1.transition().duration(750),
                                     t2 = g2.transition().duration(750);
 
@@ -515,14 +526,13 @@
                         fillRects()
                         Polymer.dom(hostElement.$.chart).appendChild(Polymer.dom(hostElement.$.chart).childNodes[0])
                         Polymer.dom(hostElement.$.chart).appendChild(Polymer.dom(hostElement.$.chart).childNodes[0])
-                        return {transition:transition, g:g};
+                        hostElement.transition = transition;
+                        return g;
                     }
 
                     function fillRects() {
                         hostElement.svg.selectAll("rect.parent")
-                                .style("fill", function (d) {
-                                    if (d.name) { return colorsScale(d.name) }
-                                }.bind(this))
+                                .style("fill", function (d) { if (d.name) { return TransactionsStats.getColorScale(d.name) } })
                     }
 
                     function text(text) {

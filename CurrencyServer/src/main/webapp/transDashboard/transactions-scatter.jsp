@@ -87,7 +87,6 @@
     </template>
     <script>
         (function() {
-            var colorsScale;
             Polymer({
                 is: "transactions-scatter",
                 properties: {
@@ -103,7 +102,7 @@
                     this.rScale = d3.scale.linear().range([this.rMin, this.rMax])
                     window.addEventListener('resize', function(event){
                         this.circlesGradientList = []
-                        this.chart(this.chartData, colorsScale)
+                        this.chart(this.chartData)
                     }.bind(this));
                 },
                 filterChart:function (transStats) {
@@ -123,8 +122,8 @@
                 },
                 selectedTransactionChanged:function (transaction) {
                     this.selectedTransactionTag = transaction.tags[0]
-                    this.selectedTransactionTypeStyle = "font-weight:bold;color:" + colorsScale(transaction.type) + ";";
-                    this.selectedTransactionTagStyle = "font-size: 0.9em;color:" + colorsScale(transaction.tags[0]) + ";"
+                    this.selectedTransactionTypeStyle = "font-weight:bold;color:" + TransactionsStats.getColorScale(transaction.type) + ";";
+                    this.selectedTransactionTagStyle = "font-size: 0.9em;color:" + TransactionsStats.getColorScale(transaction.tags[0]) + ";"
                 },
                 getTransactionDescription:function (transaction) {
                     return transactionsMap[transaction].lbl
@@ -135,8 +134,8 @@
                     if(this.circlesGradientList.indexOf(gradId) < 0) {
                         var grad = d3.select(this).select("svg").append("defs").append("linearGradient").attr("id", gradId)
                                 .attr("x1", "0%").attr("x2", "0%").attr("y1", "100%").attr("y2", "0%");
-                        grad.append("stop").attr("offset", "50%").style("stop-color", colorsScale(transaction.tags[0]));
-                        grad.append("stop").attr("offset", "50%").style("stop-color", colorsScale(transaction.type));
+                        grad.append("stop").attr("offset", "50%").style("stop-color", TransactionsStats.getColorScale(transaction.tags[0]));
+                        grad.append("stop").attr("offset", "50%").style("stop-color", TransactionsStats.getColorScale(transaction.type));
                         this.circlesGradientList.push(gradId)
                     }
                     return gradId
@@ -144,10 +143,9 @@
                 getDate:function (date) {
                     return new Date(date).formatWithTime()
                 },
-                chart:function (data, color) {
+                chart:function (data) {
                     console.log(this.tagName + " - chart")
                     var hostElement = this
-                    colorsScale = color
                     this.chartData = data
                     while (this.$.scatterPlotDiv.hasChildNodes()) {
                         this.$.scatterPlotDiv.removeChild(this.$.scatterPlotDiv.lastChild);
@@ -232,7 +230,7 @@
                                         .attr("x2", circle.attr("cx"))
                                         .attr("y1", circle.attr("cy"))
                                         .attr("y2", hostElement.height)
-                                        .style("stroke", colorsScale(d.tags[0]))
+                                        .style("stroke", TransactionsStats.getColorScale(d.tags[0]))
                                 svg.append("g")
                                         .attr("class", "guide")
                                         .append("line")
@@ -240,7 +238,7 @@
                                         .attr("x2", 0)
                                         .attr("y1", circle.attr("cy"))
                                         .attr("y2", circle.attr("cy"))
-                                        .style("stroke", colorsScale(d.tags[0]))
+                                        .style("stroke", TransactionsStats.getColorScale(d.tags[0]))
                             })
                             .on("mouseout", function(d) {
                                 var circle = d3.select(this);

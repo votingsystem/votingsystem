@@ -56,7 +56,6 @@
     </template>
     <script>
     (function() {
-        var colorsScale = d3.scale.ordinal().range(TransactionsStats.colors);
         Polymer({
             is:'transactions-dashboard',
             properties: {
@@ -123,7 +122,7 @@
                 if(this.orderBy === "orderByType") treemapData = filteredTransStats.transactionsTreeByType
                 if(this.orderBy === "orderByTag") treemapData = filteredTransStats.transactionsTreeByTag
                 TransactionsStats.setCurrencyPercentages(treemapData)
-                this.$.transactionTreemap.chart(treemapData, colorsScale)
+                this.$.transactionTreemap.chart(treemapData)
             },
             getHTTP:function() {
                 var targetURL = "/CurrencyServer/rest/transactionVS/from/" + this.formatDate(this.$.dateFromDatepicker.getDate()) +
@@ -139,18 +138,18 @@
                         this.transStats.pushTransaction(transactionvs, "orderByType")
                     }.bind(this))
                     this.$.tagSelector.init(this.transStats.tags, function (item) {
-                        return 'font-weight: bold; color: ' + colorsScale(item) + ';' }.bind(this), null)
+                        return 'font-weight: bold; color: ' + TransactionsStats.getColorScale(item) + ';' }.bind(this), null)
                     this.$.typeSelector.init(this.transStats.transactionTypes, function (item) {
-                            return 'font-weight: bold; color: ' + colorsScale(item) + ';'
+                            return 'font-weight: bold; color: ' + TransactionsStats.getColorScale(item) + ';'
                         }.bind(this), function (transaction) {
                             return transactionsMap[transaction].lbl
                         })
                     this.$.currencySelector.init(this.transStats.currencyCodes, function (item) {
-                        return 'font-weight: bold; color: ' + colorsScale(item) + ';' }.bind(this), null)
+                        return 'font-weight: bold; color: ' + TransactionsStats.getColorScale(item) + ';' }.bind(this), null)
 
                     TransactionsStats.setCurrencyPercentages(this.transStats.transactionsTreeByType)
-                    this.$.transactionsScatter.chart(this.chartData, colorsScale)
-                    this.$.transactionTreemap.chart(this.transStats.transactionsTreeByType, colorsScale)
+                    this.$.transactionsScatter.chart(this.chartData)
+                    this.$.transactionTreemap.chart(this.transStats.transactionsTreeByType)
                 }.bind(this))
             }
         });
