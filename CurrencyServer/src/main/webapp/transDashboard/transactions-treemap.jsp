@@ -115,8 +115,7 @@
                 <div>
                     <div class="horizontal layout center center justified" style="position: relative;">
                         <div id="sequenceMessageDiv" style="text-align: center; font-weight: bold; color: #888; font-size: 1.6em; font-style: italic;">{{sequenceMessage}}</div>
-                        <div class="flex" id="sequence"> </div>
-                        <div  style="font-size: 0.6em; margin:0 35px 0 0;">{{orderByLbl}}</div>
+                        <div id="sequence"> </div>
                         <div on-click="showConfig" class="chartConfig"><i id="configIcon" class="fa fa-cogs"></i></div>
                     </div>
                     <div id="chart" style="padding: 0px; margin: 0px;"></div>
@@ -192,7 +191,6 @@
                     width: {type: Number, value:500},
                     height: {type: Number, value:300},
                     orderBy: {type: String, value:"orderByType"},
-                    orderByLbl: {type: String, value:"${msg.orderByType}"},
                     fullScreen: {type: Boolean, value:false}
                 },
                 ready: function () {
@@ -213,11 +211,11 @@
                 orderByChanged: function(e) {
                     if("orderByType" === e.target.value && this.orderBy !== "orderByType") {
                         if(this.selectedNode) this.selectedNode = this._getCurrencyNode(this.selectedNode)
-                        this.orderByLbl = "${msg.orderByType}"
+                        this.$.transactionsCounter.orderByLbl = "${msg.orderByType}"
                         this.fire("filter-request", "orderByType")
                     } else if("orderByTag" === e.target.value && this.orderBy !== "orderByTag"){
                         if(this.selectedNode) this.selectedNode = this._getCurrencyNode(this.selectedNode)
-                        this.orderByLbl = "${msg.orderByTag}"
+                        this.$.transactionsCounter.orderByLbl = "${msg.orderByTag}"
                         this.fire("filter-request", "orderByTag")
                     }
                     this.orderBy = e.target.value
@@ -331,7 +329,7 @@
                     initialize(root);
                     accumulate(root);
                     layout(root);
-                    this.$.transactionsCounter.load(root)
+                    this.$.transactionsCounter.transactionsMap = root
                     display(root);
                     if(hostElement.selectedNode) {
                         //we're updating the chart

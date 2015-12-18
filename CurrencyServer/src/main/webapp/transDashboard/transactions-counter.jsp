@@ -2,11 +2,14 @@
 
 <dom-module name="transactions-counter">
     <template>
-        <div style="text-decoration: underline;color:#888;">${msg.movementsLbl}</div>
+        <div style="border-bottom: 1px solid #888;color:#888;">
+            <div style="">${msg.movementsLbl}</div>
+            <div style="font-size: 0.6em; margin:0 0 0 0;">{{orderByLbl}}</div>
+        </div>
         <template is="dom-repeat" items="[[transactionsMap.children]]" as="currencyNode">
-            <div on-click="nodeClick" style="[[_getCurrencyStyle(currencyNode.name)]]">[[currencyNode.name]] - [[currencyNode.numTotalTransactions]]</div>
+            <div on-click="nodeClick" style$="[[_getCurrencyStyle(currencyNode.name)]]">[[currencyNode.name]] - [[currencyNode.numTotalTransactions]]</div>
             <template is="dom-repeat" items="[[currencyNode._children]]" as="secondLevelNode">
-                <div on-click="nodeClick" style="[[_getNodeStyle(secondLevelNode.name)]]">[[_getsSecondLevelNodeName(secondLevelNode)]] - [[secondLevelNode.numTotalTransactions]]</div>
+                <div on-click="nodeClick" style$="[[_getNodeStyle(secondLevelNode.name)]]">[[_getsSecondLevelNodeName(secondLevelNode)]] - [[secondLevelNode.numTotalTransactions]]</div>
             </template>
         </template>
     </template>
@@ -15,7 +18,8 @@
             Polymer({
                 is:'transactions-counter',
                 properties: {
-                    transactionsMap: {type: Object}
+                    transactionsMap: {type: Object},
+                    orderByLbl: {type: String, value:"${msg.orderByType}"}
                 },
                 ready: function() { },
                 _getCurrencyStyle: function(currencyCode) {
@@ -31,9 +35,6 @@
                 _getsSecondLevelNodeName: function(secondLevelNode) {
                     if(secondLevelNode.description) return secondLevelNode.description
                     else return secondLevelNode.name
-                },
-                load:function(transactionsMap) {
-                    this.transactionsMap = transactionsMap
                 }
             });
         })()
