@@ -114,7 +114,7 @@
             <div class="horizontal layout">
                 <div>
                     <div class="horizontal layout center center justified" style="position: relative;">
-                        <div id="sequenceMessageDiv" style="text-align: center; font-weight: bold; color: #888; font-size: 1.6em; font-style: italic;">{{sequenceMessage}}</div>
+                        <div id="sequenceMessageDiv" style="text-align: center; font-weight: bold; color: #888; font-size: 1.6em; font-style: italic;">[[sequenceMessage]]</div>
                         <div id="sequence"> </div>
                         <div on-click="showConfig" class="chartConfig"><i id="configIcon" class="fa fa-cogs"></i></div>
                     </div>
@@ -123,31 +123,31 @@
                 <transactions-counter id="transactionsCounter" on-node-click="transactionsCounterNodeClick"></transactions-counter>
             </div>
             <div id="tooltip" class="tooltip" style="display: none;">
-                <div style$="{{_getSelectedNodeTooltipHeaderStyle(mouseOverNode)}}">{{_getDescriptionWithPercentage(mouseOverNode)}}</div>
+                <div style$="[[_getSelectedNodeTooltipHeaderStyle(mouseOverNode)]]">[[_getDescriptionWithPercentage(mouseOverNode)]]</div>
                 <div class="horizontal layout center center-justified">
                     <div>
                         <div class="header1">${msg.totalLbl}</div>
                         <div class="horizontal layout center center-justified">
                             <div>
                                 <div class="header2">${msg.movementsLbl}</div>
-                                <div class="content">{{mouseOverNode.numTotalTransactions}}</div>
+                                <div class="content">[[mouseOverNode.numTotalTransactions]]</div>
                             </div>
                             <div>
                                 <div class="header2">${msg.amountLbl}</div>
-                                <div class="content">{{formatMoney(mouseOverNode.totalAmount)}} {{mouseOverNode.currencyCode}}</div>
+                                <div class="content">[[formatMoney(mouseOverNode.totalAmount)]] [[mouseOverNode.currencyCode]]</div>
                             </div>
                         </div>
                     </div>
                     <div style="margin: 0 0 0 10px;" class="timeLimitedDiv">
-                        <div class="header1" style="color:#ba0011;"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}  {{mouseOverNodeTimeLimitedPercentage}}</div>
+                        <div class="header1" style="color:#ba0011;"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}  [[mouseOverNodeTimeLimitedPercentage]]</div>
                         <div class="horizontal layout center center-justified">
                             <div>
                                 <div class="header2" style="color:#ba0011;">${msg.movementsLbl}</div>
-                                <div class="content">{{mouseOverNode.numTimeLimitedTransactions}}</div>
+                                <div class="content">[[mouseOverNode.numTimeLimitedTransactions]]</div>
                             </div>
                             <div>
                                 <div class="header2" style="color:#ba0011;">${msg.amountLbl}</div>
-                                <div class="content">{{formatMoney(mouseOverNode.timeLimitedAmount)}} {{mouseOverNode.currencyCode}}</div>
+                                <div class="content">[[formatMoney(mouseOverNode.timeLimitedAmount)]] [[mouseOverNode.currencyCode]]</div>
                             </div>
                         </div>
                     </div>
@@ -157,8 +157,8 @@
             <div id="configDialog" class="modalDialog">
                 <div>
                     <div class="layout horizontal center center-justified">
-                        <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
-                            <div style="text-align: center;">{{caption}}</div>
+                        <div hidden="[[!caption]]" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
+                            <div style="text-align: center;">[[caption]]</div>
                         </div>
                         <div style="position: absolute; top: 0px; right: 0px;">
                             <i class="fa fa-times closeIcon" on-click="closeConfig"></i>
