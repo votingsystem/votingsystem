@@ -287,6 +287,8 @@ VotingSystemClient.setMessage = function (messageJSON) {
         var messageToSignatureClient = JSON.stringify(messageJSON);
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
+    } else if(isChrome()) {
+
     } else {
         if(messageJSON.operation !== "SIGNAL_VS") console.log("clientTool undefined - operation: " + messageJSON.operation)
     }

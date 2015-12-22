@@ -76,7 +76,15 @@
             <div id="mainContent" class="mainContent"></div>
         </div>
         <script>
+            debugger; // this is to allow logging from extension content scripts
+
             vs = {}
+
+            var extensionInfoDiv = document.querySelector("#extensionInfoDiv")
+            if(extensionInfoDiv) alert(extensionInfoDiv.innerText)
+            else console.log("============= extensionInfoDiv not foun")
+
+
 
             vs.back = function() {
                 history.back()

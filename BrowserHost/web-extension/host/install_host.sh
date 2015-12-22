@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Copyright 2013 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -30,7 +30,7 @@ mkdir -p $TARGET_DIR
 cp $DIR/$HOST_NAME.json $TARGET_DIR
 
 # Update host path in the manifest.
-HOST_PATH=$DIR/VotingSystemBrowserHost.sh
+HOST_PATH=$DIR/native-messaging-example-host
 ESCAPED_HOST_PATH=${HOST_PATH////\\/}
 sed -i -e "s/HOST_PATH/$ESCAPED_HOST_PATH/" $TARGET_DIR/$HOST_NAME.json
 

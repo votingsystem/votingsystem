@@ -19,13 +19,12 @@ public class BrowserHost {
 
 
     static public void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
-        FileHandler fh = new FileHandler("/home/jgzornoza/ChromeHandler.log");
+        FileHandler fh = new FileHandler("./BrowserExetensionHost.log");
         SimpleFormatter formatter = new SimpleFormatter();
         fh.setFormatter(formatter);
         log.addHandler(fh);
-        log.info("entering while bucle");
+        log.info("waiting for browser messages");
         while(true) {
-            log.info("------------- inside while bucle");
             ByteBuffer buf = ByteBuffer.allocate(1000000);
             System.in.available();
             ReadableByteChannel channel = Channels.newChannel(System.in);
@@ -38,18 +37,19 @@ public class BrowserHost {
     }
 
     private static void processMessageFromBrowser(byte[] messageBytes) throws IOException{
-        log.info("------------- processMessageFromBrowser: " + new String(messageBytes));
-        sendMessageToBrowser();
+        log.info("processMessageFromBrowser: " + new String(messageBytes));
+
+        sendMessageToBrowser(new HashMap<>());
     }
 
-    private static void sendMessageToBrowser() throws IOException{
+    private static void sendMessageToBrowser(Object messageToBrowser) throws IOException{
         log.info("sendMessageToBrowser");
         try {
             Map<String,String> map = new HashMap<String, String>();
             String msg = new Date() + " - España con acentuación";
             map.put("message", msg);
             map.put("UUID", UUID.randomUUID().toString());
-            String base64msg = Base64.getEncoder().encodeToString(JSON.getMapper().writeValueAsBytes(map) );
+            String base64msg = Base64.getEncoder().encodeToString(JSON.getMapper().writeValueAsBytes(messageToBrowser) );
             map.put("native_message", base64msg);
             byte[] messageBytes = JSON.getMapper().writeValueAsBytes(map);
             System.out.write(getBytes(messageBytes.length));

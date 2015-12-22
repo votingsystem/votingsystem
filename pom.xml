@@ -17,7 +17,6 @@
         <module>TimeStampServer</module>
         <module>CurrencyServer</module>
         <module>TestsApp</module>
-        <module>ClientTool</module>
         <module>BrowserHost</module>
     </modules>
 

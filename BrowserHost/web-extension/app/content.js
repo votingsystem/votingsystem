@@ -15,4 +15,11 @@ extensionPort.onMessage.addListener(function onNativeMessage(message) {
   window.postMessage(message, "*");
 });
 
-console.log("content.js - ready - chrome.runtime.id: " + chrome.runtime.id);
+
+var extensionInfoDiv = document.createElement("div");
+extensionInfoDiv.id = "extensionInfoDiv"
+extensionInfoDiv.innerText = chrome.runtime.id;
+extensionInfoDiv.style.display = 'none'
+document.body.appendChild(extensionInfoDiv);
+
+console.log("---content.js - ready - chrome.runtime.id: " + chrome.runtime.id);
