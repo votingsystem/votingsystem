@@ -1,0 +1,9 @@
+{
+  "name": "org.votingsystem.webextension.native",
+  "description": "Voting System and Currencies Chrome Native Messaging",
+  "path": "VotingSystemBrowserHost.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://knldjmfmopnpolahpmmgbagdohdnhkik/"
+  ]
+}
