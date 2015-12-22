@@ -1,5 +1,9 @@
 # web extension
 
+### build java native client
+
+        mvn package
+                
 ### browser extension
 
 This directory contains a chrome application that uses native messaging API that allows to communicate with the
@@ -22,9 +26,5 @@ On Mac and Linux:
   The host is installed only for the user who runs the script. You can later use host/uninstall_host.sh
   to uninstall the host.
 
-
-### build java native client
-
-        mvn package
 
 

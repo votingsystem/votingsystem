@@ -115,6 +115,7 @@
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                     <appendAssemblyId>false</appendAssemblyId>
+                    <outputDirectory>./web-extension/host</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
