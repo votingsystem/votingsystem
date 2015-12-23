@@ -29,7 +29,7 @@ public class SendMultisign {
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         simulationData = new SimulationData();
-        simulationData.setServerURL("http://localhost:8080/AccessControl");
+        simulationData.setServerURL("http://currency:8080/AccessControl");
         simulationData.setMaxPendingResponses(10);
         simulationData.setNumRequestsProjected(1);
         Map timerMap = new HashMap<>();

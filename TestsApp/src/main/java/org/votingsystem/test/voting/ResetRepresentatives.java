@@ -23,7 +23,7 @@ public class ResetRepresentatives {
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         ActorVSDto actorVSDto = HttpHelper.getInstance().getData(ActorVSDto.class,
-                ActorVS.getServerInfoURL("http://localhost:8080/AccessControl"), MediaTypeVS.JSON);
+                ActorVS.getServerInfoURL("http://currency:8080/AccessControl"), MediaTypeVS.JSON);
         AccessControlVS accessControlVS = (AccessControlVS) actorVSDto.getActorVS();
         ContextVS.getInstance().setAccessControl(accessControlVS);
         SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER);
@@ -34,7 +34,7 @@ public class ResetRepresentatives {
         SMIMEMessage smimeMessage = superUserSignatureService.getSMIMETimeStamped(fromUserVS.getNif(),
                 accessControlVS.getName(), JSON.getMapper().writeValueAsString(dataMap), messageSubject);
         ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                "http://localhost:8080/AccessControl/rest/development/resetRepresentatives");
+                "http://currency:8080/AccessControl/rest/development/resetRepresentatives");
         log.info("result - responseVS: " + responseVS.getMessage());
         System.exit(0);
     }

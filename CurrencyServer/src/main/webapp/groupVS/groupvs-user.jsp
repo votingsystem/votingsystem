@@ -61,9 +61,7 @@
                 isAdmin: {type:Boolean}
             },
             ready:function(e) {
-                this.isClientToolConnected = (clientTool !== undefined)
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-msg',
-                        function() {  this.isClientToolConnected = true }.bind(this))
+                this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
 
                 document.querySelector("#voting_system_page").addEventListener('vs-on-submit',
                         function() {

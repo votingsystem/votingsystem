@@ -26,7 +26,7 @@ public class ValidateCert {
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
-                "http://localhost:8080/AccessControl"), ContentTypeVS.JSON);
+                "http://currency:8080/AccessControl"), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
         if(!(actorVS instanceof AccessControlVS)) throw new ExceptionVS("Expected access control but found " +

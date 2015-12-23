@@ -4,26 +4,9 @@
     <ui:define name="title">${msg.contactLbl}</ui:define>
     <ui:define name="content">
         <div style="font-size: 1.2em; margin: 30px auto; text-align: center;">
-            <a  href="javascript:mailTo()" style="font-weight: bold;">
+            <a  href="mailto:#{config.emailAdmin}" style="font-weight: bold;">
                 <i class="fa fa-envelope-o" style="margin:3px 0 0 10px; color: #f0ad4e;"></i> ${msg.emailLbl}
             </a>
         </div>
-        <script>
-//<![CDATA[
-            //hack to open mail client from javafx app
-            if(getURLParam("openMailClient")) {
-                document.location.href = "mailto:${config.emailAdmin}";
-            }
-            function mailTo() {
-                if (checkIfClientToolIsConnected()) {
-                    var operationVS = new OperationVS(Operation.BROWSER_URL)
-                    operationVS.documentURL = contextURL + "/app/contact.xhtml?openMailClient=true"
-                    operationVS.email = "${config.emailAdmin}"
-                    VotingSystemClient.setMessage(operationVS);
-                } else document.location.href = "mailto:#{config.emailAdmin}";
-
-            }
-//]]>
-        </script>
     </ui:define>
 </ui:composition>

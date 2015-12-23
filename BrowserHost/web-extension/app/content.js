@@ -1,25 +1,20 @@
 var extensionPort = chrome.runtime.connect();
 
-window.addEventListener("message", function(event) {
-  if (event.source != window)  return;
+document.querySelector("#voting_system_page").addEventListener('message-to-host',
+    function(event) {
+        extensionPort.postMessage({operation:'message-to-host', content:event.detail});
+    })
 
-  if (event.data.operation && event.data.message_type === 'message_to_extension') {
-    event.data.background = true
-    console.log("content.js - message_to_extension: " + JSON.stringify(event.data));
-    extensionPort.postMessage(event.data);
+extensionPort.onMessage.addListener(function (message) {
+  if(message.message_type === "message_to_webextension") {
+      if(message.operation === "dialog_closed") {
+        console.log("content.js ---------- dialog_closed")
+      }
+  } else {
+      document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message_from_extension', {detail:message}))
   }
-}, false)
-
-extensionPort.onMessage.addListener(function onNativeMessage(message) {
-  message.message_type = 'message_from_extension'
-  window.postMessage(message, "*");
 });
 
+document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message_from_extension'))
 
-var extensionInfoDiv = document.createElement("div");
-extensionInfoDiv.id = "extensionInfoDiv"
-extensionInfoDiv.innerText = chrome.runtime.id;
-extensionInfoDiv.style.display = 'none'
-document.body.appendChild(extensionInfoDiv);
-
-console.log("---content.js - ready - chrome.runtime.id: " + chrome.runtime.id);
+console.log("content.js - ready - chrome.runtime.id: " + chrome.runtime.id);

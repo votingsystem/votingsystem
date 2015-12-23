@@ -26,7 +26,7 @@ public class Test {
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
-                "http://localhost:8080/CurrencyServer"), ContentTypeVS.JSON);
+                "http://currency:8080/CurrencyServer"), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
         ContextVS.getInstance().setDefaultServer(actorVS);

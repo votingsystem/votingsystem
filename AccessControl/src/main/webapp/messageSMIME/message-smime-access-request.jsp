@@ -38,9 +38,7 @@
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.timeStampDate = null
-                this.isClientToolConnected = ((clientTool !== undefined))
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-msg',
-                        function() {  this.isClientToolConnected = true }.bind(this))
+                this.isClientToolConnected = ((clientTool !== undefined)) || vs.webextension_available
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

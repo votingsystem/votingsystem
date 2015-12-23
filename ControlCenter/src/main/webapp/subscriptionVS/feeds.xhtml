@@ -4,21 +4,10 @@
     <ui:define name="title">${msg.subscriptionLbl}</ui:define>
     <ui:define name="content">
         <div style="font-size: 1.2em; margin: 30px auto; text-align: center;">
-            <a target="_blank" href="#" onclick="javascript:openFeedsWindow();return false;">
+            <a target="_blank" href="#{contextURL}/rest/subscriptionVS/elections">
                 <i class="fa fa-rss-square" style="margin:3px 0 0 10px; color: #f0ad4e;"></i> ${msg.subscribeToVotingFeedsLbl}
             </a>
         </div>
-        <script>
-            //<![CDATA[
-            function openFeedsWindow() {
-                if (checkIfClientToolIsConnected()) {
-                    var operationVS = new OperationVS(Operation.BROWSER_URL)
-                    operationVS.documentURL = "#{contextURL}/rest/subscriptionVS/elections"
-                    VotingSystemClient.setMessage(operationVS);
-                } else window.open("#{contextURL}/rest/subscriptionVS/elections", "_blank");
-            }
-            //]]>
-        </script>
     </ui:define>
 </ui:composition>
 

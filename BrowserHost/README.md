@@ -2,7 +2,7 @@
 
 ### build java native client
 
-        mvn package
+        mvn assembly:assembly
                 
 ### browser extension
 

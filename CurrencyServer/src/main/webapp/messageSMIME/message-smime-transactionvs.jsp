@@ -93,9 +93,7 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
-                this.isClientToolConnected = (clientTool !== undefined)
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-msg',
-                        function() {  this.isClientToolConnected = true }.bind(this))
+                this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
             },
             smimeMessageContentChanged:function() {
                 this.messageToUser = null

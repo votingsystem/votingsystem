@@ -92,9 +92,7 @@
             message: {type:String}
         },
         ready: function() {
-            this.isClientToolConnected = (clientTool !== undefined)
-            document.querySelector("#voting_system_page").addEventListener('votingsystem-client-msg',
-                    function() {  this.isClientToolConnected = true }.bind(this))
+            this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
             console.log(this.tagName + " - ready - menuType: " + this.menuType)
             this.$.transactionvsForm.addEventListener('closed', function (e) {
                 this.page = 0;

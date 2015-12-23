@@ -10,7 +10,10 @@ import org.votingsystem.model.ResponseVS;
 public class MessageDto<T> {
 
     private Integer statusCode;
+    private String operation;
+    private String message_type;
     private String message;
+    private String callerCallback;
     private T data;
     private String URL;
 
@@ -47,6 +50,42 @@ public class MessageDto<T> {
         return new MessageDto(ResponseVS.SC_ERROR_REQUEST_REPEATED, message, URL);
     }
 
+
+    public static <T> MessageDto<T> WEB_SOCKET(int statusCode, T data) {
+        MessageDto dto = new MessageDto(statusCode, null);
+        dto.setOperation("vs-websocket-message");
+        dto.setData(data);
+        return dto;
+    }
+
+    public static MessageDto SIGNAL(int statusCode, String operation) {
+        MessageDto dto = new MessageDto(statusCode, null);
+        dto.setOperation(operation);
+        return dto;
+    }
+
+    public static MessageDto NEW_TAB(String url) {
+        MessageDto dto = new MessageDto();
+        dto.setOperation("url_tab");
+        dto.setMessage_type("message_to_webextension");
+        dto.setURL(url);
+        return dto;
+    }
+
+    public static <T> MessageDto<T> OPERATION_CALLBACK(int statusCode, String message, String callerCallback, T data) {
+        MessageDto dto = new MessageDto(statusCode, message);
+        dto.setCallerCallback(callerCallback);
+        dto.setData(data);
+        return dto;
+    }
+
+    public static MessageDto DIALOG_CLOSE() {
+        MessageDto dto = new MessageDto();
+        dto.setOperation("dialog_closed");
+        dto.setMessage_type("message_to_webextension");
+        return dto;
+    }
+
     public Integer getStatusCode() {
         return statusCode;
     }
@@ -73,5 +112,29 @@ public class MessageDto<T> {
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    public String getOperation() {
+        return operation;
+    }
+
+    public void setOperation(String operation) {
+        this.operation = operation;
+    }
+
+    public String getMessage_type() {
+        return message_type;
+    }
+
+    public void setMessage_type(String message_type) {
+        this.message_type = message_type;
+    }
+
+    public String getCallerCallback() {
+        return callerCallback;
+    }
+
+    public void setCallerCallback(String callerCallback) {
+        this.callerCallback = callerCallback;
     }
 }

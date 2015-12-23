@@ -8,8 +8,6 @@ var Operation = {
     DISCONNECT:"DISCONNECT",
     FILE_FROM_URL:"FILE_FROM_URL",
     KEYSTORE_SELECT:"KEYSTORE_SELECT",
-    SIGNAL_VS:"SIGNAL_VS",
-    BROWSER_URL: "BROWSER_URL",
     LISTEN_TRANSACTIONS: "LISTEN_TRANSACTIONS",
     MESSAGEVS:"MESSAGEVS",
     OPEN_SMIME: "OPEN_SMIME",
@@ -287,11 +285,9 @@ VotingSystemClient.setMessage = function (messageJSON) {
         var messageToSignatureClient = JSON.stringify(messageJSON);
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
-    } else if(isChrome()) {
-
-    } else {
-        if(messageJSON.operation !== "SIGNAL_VS") console.log("clientTool undefined - operation: " + messageJSON.operation)
-    }
+    } else if(isChrome() && vs.webextension_available) {
+        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message-to-host', {detail:messageJSON}))
+    } else console.log("clientTool undefined - operation: " + messageJSON.operation)
 }
 
 function querySelector(selector) {
@@ -300,31 +296,13 @@ function querySelector(selector) {
 }
 
 function sendSignalVS(signalData) {
-    var operationVS = new OperationVS(Operation.SIGNAL_VS)
-    operationVS.jsonStr = JSON.stringify(signalData)
-    VotingSystemClient.setMessage(operationVS);
+    var div = document.querySelector("#selectedPageTitle")
+    div.innerText = signalData.caption
 }
 
 function checkIfClientToolIsConnected() {
     return (clientTool !== undefined) || (window.parent.clientTool !== undefined)
 }
-
-function setClientToolConnected() {
-    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('votingsystem-client-msg', { }))
-}
-
-var coreSignalData = null
-function fireCoreSignal(coreSignalDataBase64) {
-    if(document.querySelector("#voting_system_page") != null) {
-        var b64_to_utf8 = decodeURIComponent(escape(window.atob(coreSignalDataBase64)))
-        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('votingsystem-client-msg', {detail:toJSON(b64_to_utf8)} ));
-    } else coreSignalData = coreSignalDataBase64
-}
-
-document.addEventListener('WebComponentsReady', function() {
-    if(coreSignalData != null) fireCoreSignal(coreSignalData)
-    coreSignalData = null
-});
 
 //Message -> base64 encoded JSON
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8

@@ -47,6 +47,7 @@
                         <search-bar id="searchBar" class="horizontal layout center end-justified"></search-bar>
                     </div>
                 </div>
+                <div style="font-size: 1.3em;margin:0 0 0 50px; color: #888;text-decoration: underline;" id="selectedPageTitle"></div>
             </div>
 
             <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;
@@ -56,6 +57,9 @@
         </div>
         <script>
             vs = {}
+
+            document.querySelector("#voting_system_page").addEventListener('message_from_extension',
+                    function(event) { vs.webextension_available = true })
 
             vs.back = function() {
                 history.back()

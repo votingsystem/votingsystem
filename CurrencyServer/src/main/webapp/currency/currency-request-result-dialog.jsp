@@ -28,9 +28,11 @@
             is:'currency-request-result-dialog',
             isStoredInWallet:false,
             ready: function() {
-                document.querySelector("#voting_system_page").addEventListener('votingsystem-client-msg',
-                        function(e) {
-                            if(e.name === "vs-wallet-save") this.walletSaved() }.bind(this))
+                window.addEventListener("message", function(event) {
+                    if (event.data.operation === "vs-wallet-save") {
+                        this.walletSaved();
+                    }
+                }.bind(this), false)
             },
             walletSaved: function() {
                 this.isStoredInWallet = true;

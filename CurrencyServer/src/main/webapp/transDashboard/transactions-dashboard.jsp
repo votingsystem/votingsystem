@@ -68,11 +68,6 @@
 
                 this.formatDate = d3.time.format("%Y%m%d_%M%S");
 
-                document.querySelector('#voting_system_page').addEventListener('votingsystem-client-msg', function (e) {
-                    console.log("votingsystem-client-msg:" + JSON.stringify(e.detail));
-                    this.clientMsg = JSON.stringify(e.detail)
-                }.bind(this))
-
                 this.getHTTP()
             },
             timeCheckboxSelected:function (e) {

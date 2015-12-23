@@ -10,10 +10,8 @@ var Operation = {
     CANCEL_VOTE:"CANCEL_VOTE",
     SELECT_IMAGE:"SELECT_IMAGE",
     TERMINATED: "TERMINATED",
-    BROWSER_URL: "BROWSER_URL",
     ACCESS_REQUEST_CANCELLATION:"ACCESS_REQUEST_CANCELLATION",
     EVENT_CANCELLATION: "EVENT_CANCELLATION",
-    SIGNAL_VS:"SIGNAL_VS",
     NEW_REPRESENTATIVE:"NEW_REPRESENTATIVE",
     EDIT_REPRESENTATIVE:"EDIT_REPRESENTATIVE",
     REPRESENTATIVE_SELECTION:"REPRESENTATIVE_SELECTION",
@@ -217,42 +215,17 @@ VotingSystemClient.setMessage = function (messageJSON) {
         var messageToSignatureClient = JSON.stringify(messageJSON);
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
-    } else {
-        if(messageJSON.operation !== "SIGNAL_VS") console.log("clientTool undefined - operation: " + messageJSON.operation)
-    }
+    } else console.log("clientTool undefined - operation: " + messageJSON.operation)
 }
 
 function sendSignalVS(signalData) {
-    var operationVS = new OperationVS(Operation.SIGNAL_VS)
-    operationVS.jsonStr = JSON.stringify(signalData)
-    VotingSystemClient.setMessage(operationVS);
+    var div = document.querySelector("#selectedPageTitle")
+    div.innerText = signalData.caption
 }
 
 function checkIfClientToolIsConnected() {
     return (clientTool !== undefined) ||  (window.parent.clientTool !== undefined)
 }
-
-function setClientToolConnected() {
-    console.log("setClientToolConnected");
-    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('votingsystem-client-msg', { }))
-}
-
-var coreSignalData = null
-function fireCoreSignal(coreSignalDataBase64) {
-    if(document.querySelector("#voting_system_page") != null) {
-        var b64_to_utf8 = decodeURIComponent(escape(window.atob(coreSignalDataBase64)))
-        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('votingsystem-client-msg', toJSON(b64_to_utf8)));
-    } else coreSignalData = coreSignalDataBase64
-
-}
-
-window.addEventListener('WebComponentsReady', function() {
-    if(coreSignalData != null) {
-        console.log("utilsVS.js - WebComponentsReady -- sending pending core signal")
-        fireCoreSignal(coreSignalData)
-    }
-    coreSignalData = null
-});
 
 //Message -> base64 encoded JSON
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8

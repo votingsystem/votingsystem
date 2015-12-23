@@ -31,7 +31,7 @@ public class VoteValidation {
         ContextVS.getInstance().initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SimulationData simulationData = new SimulationData();
-        simulationData.setServerURL("http://localhost:8080/TimeStampServer");//http://www.sistemavotacion.org/TimeStampServer
+        simulationData.setServerURL("http://currency:8080/TimeStampServer");//http://www.sistemavotacion.org/TimeStampServer
         simulationData.setMaxPendingResponses(10);
         simulationData.setNumRequestsProjected(1);
         Map timerMap = new HashMap<>();

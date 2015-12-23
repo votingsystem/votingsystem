@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox fx:id="mainPane" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="550.0" styleClass="modal-dialog" stylesheets="@../css/mobile-selector-dialog.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <VBox prefWidth="514.0" VBox.vgrow="ALWAYS">
+            <children>
+                <Label fx:id="messageLbl" text="Label" wrapText="true" VBox.vgrow="ALWAYS" />
+                <HBox prefHeight="34.0" prefWidth="494.0">
+                    <children>
+                        <TextField fx:id="nifTextField" onAction="#onEnterNifTextField" prefHeight="32.0" prefWidth="257.0" HBox.hgrow="ALWAYS">
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </TextField>
+                        <Button fx:id="searchDeviceButton" mnemonicParsing="false" onAction="#searchButton" text="Button" />
+                    </children>
+                    <VBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </VBox.margin>
+                </HBox>
+            </children>
+        </VBox>
+      <ProgressBar fx:id="progressBar" prefWidth="200.0" />
+      <VBox fx:id="deviceListBox" prefHeight="0.0" prefWidth="504.0" spacing="10.0" VBox.vgrow="ALWAYS">
+         <VBox.margin>
+            <Insets left="20.0" right="20.0" />
+         </VBox.margin>
+      </VBox>
+        <HBox fx:id="footerBox" alignment="BOTTOM_RIGHT" maxHeight="135.0" prefHeight="11.0" prefWidth="514.0">
+            <children>
+                <Separator stylesheets="@../css/mobile-selector-dialog.css" HBox.hgrow="ALWAYS" />
+                <Button fx:id="acceptButton" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onAction="#acceptButton" text="accept" />
+            </children>
+         <VBox.margin>
+            <Insets left="10.0" right="10.0" top="10.0" />
+         </VBox.margin>
+        </HBox>
+    </children>
+</VBox>
