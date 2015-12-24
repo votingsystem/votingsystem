@@ -1,20 +1,22 @@
-var extensionPort = chrome.runtime.connect();
-
 document.querySelector("#voting_system_page").addEventListener('message-to-host',
     function(event) {
-        extensionPort.postMessage({operation:'message-to-host', content:event.detail});
+        chrome.runtime.sendMessage({operation:'message-to-host', content:event.detail}, function(response) {
+            console.log("message-from-host");
+        });
     })
 
-extensionPort.onMessage.addListener(function (message) {
-  if(message.message_type === "message_to_webextension") {
-      if(message.operation === "dialog_closed") {
-        console.log("content.js ---------- dialog_closed")
-      }
-  } else {
-      document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message_from_extension', {detail:message}))
-  }
+document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message_from_extension'))
+
+
+chrome.extension.onMessage.addListener(function(msg, sender, sendResponse) {
+    if(msg.message_type === "message_to_webextension") {
+        if(msg.operation === "dialog_closed") {
+            console.log("content.js ---------- dialog_closed")
+        }
+    } else {
+        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message_from_extension', {detail:msg}))
+    }
 });
 
-document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message_from_extension'))
 
 console.log("content.js - ready - chrome.runtime.id: " + chrome.runtime.id);

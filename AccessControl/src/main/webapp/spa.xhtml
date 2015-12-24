@@ -71,10 +71,34 @@
             <div id="mainContent" class="mainContent"></div>
         </div>
         <script>
+            debugger; // this is to allow logging from extension content scripts
+
             vs = {}
 
+
+
+
+            function messageFromHost(message) {
+                console.log("messageFromHost: " + message)
+                switch (message) {
+                    case "test":
+                        console.log("testtesttesttesttest")
+                        return;
+                    default:
+                        console.log(" =========== default")
+                }
+                console.log(" outside switch")
+            }
+
+
+            messageFromHost('test')
+
+
+
             document.querySelector("#voting_system_page").addEventListener('message_from_extension',
-                    function(event) { vs.webextension_available = true })
+                    function(event) { vs.webextension_available = true
+                        var isClientToolConnected = ((clientTool !== undefined)) || vs.webextension_available
+                    })
 
             vs.back = function() {
                 history.back()

@@ -6,7 +6,7 @@
                 
 ### browser extension
 
-This directory contains a chrome application that uses native messaging API that allows to communicate with the
+This directory contains a chrome application that uses native messaging API to allow to communication between the browser and the
 native Java client.
 
 In order for this example to work you must first install the native messaging host from the host directory.

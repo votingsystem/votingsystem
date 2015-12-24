@@ -159,6 +159,7 @@ public class BrowserHost extends Application implements PasswordDialog.Listener 
 
     @Override public void stop() {
         log.info("stop");
+        executorService.shutdownNow();
         System.exit(0);//Platform.exit();
     }
 

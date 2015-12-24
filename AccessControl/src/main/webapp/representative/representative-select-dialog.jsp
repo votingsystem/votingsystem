@@ -10,10 +10,10 @@
         <div id="modalDialog" class="modalDialog">
             <div>
                 <div class="layout horizontal center center-justified">
-                    <div class="flex" style="font-size: 1.5em; margin:0px auto;font-weight: bold; color:#6c0404;">
+                    <div flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">${msg.saveAsRepresentativeLbl}</div>
                     </div>
-                    <div style="position: absolute; top: 0px; right: 0px; font-size: 1.1em;">
+                    <div style="position: absolute; top: 0px; right: 0px;">
                         <i class="fa fa-times closeIcon" on-click="close"></i>
                     </div>
                 </div>

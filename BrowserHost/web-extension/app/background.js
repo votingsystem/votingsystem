@@ -1,10 +1,10 @@
 var hostPort
 
-
 function processOperation(messageJSON) {
-    console.log("background.js - processOperation - operation: " + messageJSON.operation)
+    console.table("background.js - processOperation")
     switch(messageJSON.operation) {
         case "message-to-host":
+            console.table("background.js - message-to-host - operation: " + messageJSON.content.operation)
             if(!hostPort) connectToHost(messageJSON.content)
             else hostPort.postMessage(messageJSON.content);
             break;
@@ -19,9 +19,12 @@ function connectToHost(messageJSON) {
         hostPort = chrome.runtime.connectNative("org.votingsystem.webextension.native");
         hostPort.onMessage.addListener(messageFromHost);
         hostPort.onDisconnect.addListener(function () {
-            console.log("Failed to connect: " + chrome.runtime.lastError.message)
+            console.log("- Failed to connect: " + chrome.runtime.lastError.message)
             hostPort = null;
-            chrome.runtime.sendMessage({operation: "host-disconnected", message:chrome.runtime.lastError.message});
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+                chrome.tabs.sendMessage(tabs[0].id, {operation: "host-disconnected", message:chrome.runtime.lastError.message},
+                    function(response) {});
+            });
         });
         if(messageJSON) hostPort.postMessage(messageJSON);
     } catch (e) {
@@ -37,21 +40,12 @@ function messageFromHost(message) {
         switch (messageJSON.operation) {
             case "url_tab":
                 chrome.tabs.create({ url: messageJSON.url });
-                break;
-            default:
-                broadcastNativeMessage(messageJSON)
+                return;
         }
-    } else broadcastNativeMessage(messageJSON)
-}
-
-function broadcastNativeMessage(messageJSON) {
-    activePorts.forEach(function(activePort, index) {
-        try {
-            activePort.postMessage(messageJSON);
-        } catch (e) {
-            console.log(e)
-        }
-    })
+    }
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+        chrome.tabs.sendMessage(tabs[0].id, messageJSON, function(response) {});
+    });
 }
 
 chrome.runtime.onSuspend.addListener( function(request, sender, sendResponse) {
@@ -62,26 +56,21 @@ chrome.runtime.onSuspend.addListener( function(request, sender, sendResponse) {
         })
     });
 
-var activePorts = []
-chrome.runtime.onConnect.addListener(function(port) {
-    console.log("background.js - port connected: " + port.name)
-    activePorts.push(port)
-    port.onDisconnect.addListener(function() {
-        var index = activePorts.indexOf(port);
-        if (index > -1) activePorts.splice(index, 1);
-    });
-    port.onMessage.addListener(function(messageJSON) {
-        processOperation(messageJSON)
-        /*
-         This function becomes invalid when the event listener returns, unless you return true from the event listener
-         to indicate you wish to send a response asynchronously (this will keep the message channel open to the other
-         end until sendResponse is called). https://developer.chrome.com/extensions/runtime#event-onMessage
-         */
-        return true
-    });
-    return true
-});
 
 chrome.runtime.onMessageExternal.addListener(function (request, sender, sendResponse) {
     console.log("background.js - onMessageExternal - request: " + request + " - sender: " + sender)
 })
+
+chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+    chrome.tabs.sendMessage(tabs[0].id, {action: "SendIt"}, function(response) {});
+});
+
+chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
+    request.tabId = sender.tab.id
+    processOperation(request)
+});
+
+
+chrome.runtime.onInstalled.addListener(function() {
+    console.log("background.js - onInstalled");
+});

@@ -38,7 +38,7 @@
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.timeStampDate = null
-                this.isClientToolConnected = ((clientTool !== undefined)) || vs.webextension_available
+                this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

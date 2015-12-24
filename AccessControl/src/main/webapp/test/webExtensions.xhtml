@@ -1,0 +1,64 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/polymer.xhtml">
+    <ui:define name="head">
+    </ui:define>
+    <ui:define name="content">
+        <div id="voting_system_page">
+            <button onclick="sendExternalMessageToExtension()">sendMessageToExtension</button>
+            <button onclick="sendMessageToExtensionWithContentScript()">sendMessageToExtensionWithContentScript</button>
+        </div>
+
+
+        <script>
+            //<![CDATA[
+            debugger; // this is to allow logging from extension content scripts
+            // The ID of the extension we want to talk to.
+            var editorExtensionId = "knldjmfmopnpolahpmmgbagdohdnhkik";
+
+            document.querySelector("#voting_system_page").addEventListener('message_from_extension',
+                    function(event) {
+                        console.log("textWebExtensions - message_from_extension")
+                    })
+
+
+            /**
+             The manifest.json of the extension must have the property:
+             "externally_connectable": {
+                "matches": ["*://*.votingsystem.org/*"]
+             }
+             **/
+            function sendExternalMessageToExtension() {
+                chrome.runtime.sendMessage(editorExtensionId, {operation: "native-message"});
+            }
+
+            /**
+             "content_scripts": [ {
+             "matches": [all urls],
+                "js": ["content.js"]
+                }],
+             **/
+            function sendMessageToExtensionWithContentScript() {
+                document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message-to-host',
+                        {detail:{operation: "WALLET_OPEN" }}))
+            }
+
+            document.querySelector("#voting_system_page").addEventListener('native-message',
+                    function(event) {
+                        if(event.detail.message_type === 'message_to_extension') {
+                            event.detail.background = true
+                            console.log("content.js - message_to_extension: " + JSON.stringify(event.detail));
+                            extensionPort.postMessage(event.detail);
+                        }
+                    })
+
+            window.addEventListener("message", function(event) {
+                if (event.source != window) return;
+                if (event.data.operation && event.data.message_type === 'message_from_extension') {
+                    console.log("webExtensionMsgTest - Content script received: " + JSON.stringify(event.data));
+                }
+            }, false)
+            // ]]>
+        </script>
+    </ui:define>
+</ui:composition>
