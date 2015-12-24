@@ -6,7 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import org.votingsystem.client.webextension.BrowserHost;
-import org.votingsystem.dto.OperationVS;
+import org.votingsystem.client.webextension.util.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.StringUtils;

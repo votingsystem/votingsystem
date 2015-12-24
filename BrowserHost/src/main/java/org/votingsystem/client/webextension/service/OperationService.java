@@ -12,6 +12,7 @@ import org.votingsystem.client.webextension.dialog.DialogVS;
 import org.votingsystem.client.webextension.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.webextension.util.InboxMessage;
 import org.votingsystem.client.webextension.util.MsgUtils;
+import org.votingsystem.client.webextension.util.OperationVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.*;
 import org.votingsystem.dto.currency.CurrencyDto;

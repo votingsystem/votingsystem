@@ -12,7 +12,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.service.EventBusService;
 import org.votingsystem.client.webextension.util.Utils;
-import org.votingsystem.dto.OperationVS;
+import org.votingsystem.client.webextension.util.OperationVS;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;

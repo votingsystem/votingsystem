@@ -14,7 +14,7 @@ import javafx.scene.web.HTMLEditor;
 import javafx.stage.FileChooser;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.service.EventBusService;
-import org.votingsystem.dto.OperationVS;
+import org.votingsystem.client.webextension.util.OperationVS;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.*;

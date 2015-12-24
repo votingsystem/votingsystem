@@ -32,8 +32,8 @@ function connectToHost(messageJSON) {
     }
 }
 
-function messageFromHost(message) {
-    var b64_to_utf8 = decodeURIComponent(escape(window.atob(message.native_message)))
+function messageFromHost(msg) {
+    var b64_to_utf8 = decodeURIComponent(escape(window.atob(msg.native_message)))
     console.log("background.js - messageFromHost: " + b64_to_utf8)
     var messageJSON = JSON.parse(b64_to_utf8)
     if(messageJSON.message_type === "message_to_webextension") {
@@ -51,25 +51,16 @@ function messageFromHost(message) {
 chrome.runtime.onSuspend.addListener( function(request, sender, sendResponse) {
         console.log("background.js - onSuspend")
         if(hostPort) hostPort.disconnect()
-        activePorts.forEach(function(activePort) {
-            try {activePort.disconnect()} catch (e) {}
-        })
     });
-
 
 chrome.runtime.onMessageExternal.addListener(function (request, sender, sendResponse) {
     console.log("background.js - onMessageExternal - request: " + request + " - sender: " + sender)
 })
 
-chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
-    chrome.tabs.sendMessage(tabs[0].id, {action: "SendIt"}, function(response) {});
-});
-
 chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     request.tabId = sender.tab.id
     processOperation(request)
 });
-
 
 chrome.runtime.onInstalled.addListener(function() {
     console.log("background.js - onInstalled");

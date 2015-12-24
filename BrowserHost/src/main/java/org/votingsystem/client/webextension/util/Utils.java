@@ -24,7 +24,6 @@ import org.votingsystem.client.webextension.dialog.PasswordDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.MessageDto;
-import org.votingsystem.dto.OperationVS;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;

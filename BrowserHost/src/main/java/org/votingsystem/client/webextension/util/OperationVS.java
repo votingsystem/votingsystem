@@ -1,4 +1,4 @@
-package org.votingsystem.dto;
+package org.votingsystem.client.webextension.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

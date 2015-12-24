@@ -16,7 +16,7 @@ import org.votingsystem.client.webextension.service.*;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.MessageDto;
-import org.votingsystem.dto.OperationVS;
+import org.votingsystem.client.webextension.util.OperationVS;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
@@ -92,7 +92,7 @@ public class BrowserHost extends Application implements PasswordDialog.Listener 
         return currencyServerURL;
     }
 
-    public String getAccessControlServerURLL() {
+    public String getAccessControlServerURL() {
         return accessControlServerURL;
     }
 
@@ -155,6 +155,8 @@ public class BrowserHost extends Application implements PasswordDialog.Listener 
                 log.log(Level.SEVERE,ex.getMessage(), ex);
             }
         });
+
+        //processMessageToHost(ContextVS.getInstance().getResourceBytes("test.json"));
     }
 
     @Override public void stop() {
