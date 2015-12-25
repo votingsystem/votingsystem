@@ -232,7 +232,7 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         getStage().sizeToScene();
     }
 
-    @Override public void setPassword(TypeVS passwordType, char[] password) {
+    @Override public void processPassword(TypeVS passwordType, char[] password) {
         switch (passwordType) {
             case KEYSTORE_SELECT:
                 try {

@@ -2,19 +2,41 @@ package org.votingsystem.client.webextension.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sun.javafx.application.PlatformImpl;
+import org.votingsystem.client.webextension.BrowserHost;
+import org.votingsystem.client.webextension.dialog.*;
+import org.votingsystem.client.webextension.pane.DocumentVSBrowserPane;
+import org.votingsystem.client.webextension.pane.WalletPane;
+import org.votingsystem.client.webextension.service.BrowserSessionService;
+import org.votingsystem.client.webextension.service.InboxService;
+import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
+import org.votingsystem.client.webextension.service.WebSocketService;
+import org.votingsystem.client.webextension.task.*;
+import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.EventVSDto;
+import org.votingsystem.dto.voting.RepresentationStateDto;
+import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ActorVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.JSON;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.model.currency.Currency;
+import org.votingsystem.model.voting.ControlCenterVS;
+import org.votingsystem.signature.util.CryptoTokenVS;
+import org.votingsystem.throwable.WalletException;
+import org.votingsystem.util.*;
+import org.votingsystem.util.currency.Wallet;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +44,7 @@ import java.util.logging.Logger;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OperationVS {
+public class OperationVS implements PasswordDialog.Listener {
 
     private static Logger log = Logger.getLogger(OperationVS.class.getSimpleName());
 
@@ -42,9 +64,11 @@ public class OperationVS {
     private EventVSDto eventVS;
     private VoteVSDto voteVS;
     private String UUID;
-
-    @JsonProperty("objectId") private String callerCallback;
+    private char[] password;
+    private String callerCallback;
     @JsonIgnore private ActorVS targetServer;
+
+    private ExecutorService executorService;
 
     public OperationVS() {}
 
@@ -242,5 +266,292 @@ public class OperationVS {
         this.UUID = UUID;
     }
 
+    public void processOperationWithPassword(final String passwordDialogMessage) {
+        if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
+            PlatformImpl.runAndWait(() ->
+                    PasswordDialog.showWithoutPasswordConfirm(operation, this, passwordDialogMessage));
+        } else processPassword(operation, null);
+    }
+
+    private String getOperationMessage() {
+        if(CryptoTokenVS.MOBILE == BrowserSessionService.getCryptoTokenType()) {
+            return signedMessageSubject + " - " + ContextVS.getMessage("messageToDeviceProgressMsg",
+                    BrowserSessionService.getInstance().getCryptoToken().getDeviceName());
+        } else return signedMessageSubject;
+    }
+
+    public void saveWallet() {
+        PasswordDialog.showWithoutPasswordConfirm(TypeVS.WALLET_SAVE, this, ContextVS.getMessage("walletPinMsg"));
+    }
+
+    @Override
+    public void processPassword(TypeVS passwordType, char[] password) {
+        this.password = password;
+        try {
+            switch (passwordType) {
+                case WALLET_SAVE:
+                    if(password != null) {
+                        try {
+                            Wallet.getWallet(password);
+                            BrowserHost.sendMessageToBrowser(MessageDto.SIGNAL(ResponseVS.SC_OK, "vs-wallet-save"));
+                            InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
+                        } catch (WalletException wex) {
+                            Utils.showWalletNotFoundMessage();
+                        } catch (Exception ex) {
+                            log.log(Level.SEVERE, ex.getMessage(), ex);
+                            BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                        }
+                    }
+                    break;
+                case PUBLISH_EVENT:
+                    ProgressDialog.showDialog(new SendSMIMETask(this, jsonStr, password, "eventURL"), getOperationMessage());
+                    break;
+                case SEND_VOTE:
+                    ProgressDialog.showDialog(new VoteTask(this, password), getOperationMessage());
+                    break;
+                case CANCEL_VOTE:
+                    ProgressDialog.showDialog(new CancelVoteTask(this, password), getOperationMessage());
+                    break;
+                case CERT_USER_NEW:
+                    ProgressDialog.showDialog(new CertRequestTask(this, password), getOperationMessage());
+                    break;
+                case MESSAGEVS:
+                    processResult(WebSocketAuthenticatedService.getInstance().sendMessageVS(this));
+                    break;
+                case CURRENCY_REQUEST:
+                    ProgressDialog.showDialog(new CurrencyRequestTask(this, password), getOperationMessage());
+                    break;
+                case CURRENCY_DELETE:
+                    ProgressDialog.showDialog(new CurrencyDeleteTask(this, password), getOperationMessage());
+                    break;
+                case REPRESENTATIVE_SELECTION:
+                    RepresentativeDelegationDto delegationDto = getDocumentToSign(RepresentativeDelegationDto.class);
+                    delegationDto.setUUID(java.util.UUID.randomUUID().toString());
+                    ProgressDialog.showDialog(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(delegationDto),
+                            password), getOperationMessage());
+                    break;
+                case NEW_REPRESENTATIVE:
+                    ProgressDialog.showDialog(new SendSMIMETask(this, jsonStr, password), getOperationMessage());
+                    break;
+                case CURRENCY_GROUP_EDIT:
+                case CURRENCY_GROUP_NEW:
+                    /*
+                    ResponseVS responseVS = sendSMIME(operationVS.getJsonStr(), operationVS);
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        GroupVSDto dto = (GroupVSDto) responseVS.getMessage(GroupVSDto.class);
+                        String groupVSURL =  ContextVS.getInstance().getCurrencyServer().getGroupURL(dto.getId());
+                        BrowserHost.sendMessageToBrowser(MessageDto.NEW_TAB(groupVSURL));
+                        responseVS.setMessage(ContextVS.getMessage("groupVSDataSendOKMsg"));
+                    }
+                    return responseVS;
+                     */
+                    break;
+                case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                    ProgressDialog.showDialog(new AnonymousDelegationCancelTask(this, password), getOperationMessage());
+                    break;
+                case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
+                    ProgressDialog.showDialog(new AnonymousDelegationTask(this, password), getOperationMessage());
+                    break;
+                default:
+                    ProgressDialog.showDialog(new SendSMIMETask(this, jsonStr, password), getOperationMessage());
+            }
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+    }
+
+    public void initProcess() throws Exception {
+        log.info("initProcess - operation: " + operation);
+        executorService = Executors.newSingleThreadExecutor();
+        Future future = executorService.submit(() -> {
+            ResponseVS responseVS;
+            switch (operation) {
+                case SEND_VOTE:
+                    setTargetServer(ContextVS.getInstance().getAccessControl());
+                    String controlCenterURL = ContextVS.getInstance().getAccessControl().getControlCenter().getServerURL();
+                    responseVS = Utils.checkServer(controlCenterURL);
+                    if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        ContextVS.getInstance().setControlCenter((ControlCenterVS) responseVS.getData());
+                    }
+                    break;
+                case CURRENCY_DELETE:
+                    responseVS = new ResponseVS(ResponseVS.SC_OK);
+                    break;
+                default:
+                    responseVS = Utils.checkServer(serverURL.trim());
+                    if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        ContextVS.getInstance().setServer((ActorVS) responseVS.getData());
+                        setTargetServer((ActorVS) responseVS.getData());
+                    }
+            }
+            return responseVS;
+        });
+        ResponseVS responseVS = (ResponseVS) future.get();
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+            processResult(responseVS);
+            return;
+        }
+        switch (operation) {
+            case PUBLISH_EVENT:
+                processOperationWithPassword(signedMessageSubject);
+                break;
+            case CONNECT:
+                WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true);
+                break;
+            case DISCONNECT:
+                WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false);
+                break;
+            case FILE_FROM_URL:
+                executorService.submit(() -> {
+                    ResponseVS response = HttpHelper.getInstance().getData(documentURL, null);
+                    if(ResponseVS.SC_OK == response.getStatusCode()) {
+                        PlatformImpl.runLater(() -> {
+                            try {
+                                DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(null,
+                                        FileUtils.getFileFromBytes(response.getMessageBytes()));
+                                DialogVS dialogVS = new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption());
+                                dialogVS.addCloseListener(event -> {
+                                    BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE());
+                                });
+                                dialogVS.show();
+                            } catch (Exception ex) {
+                                log.log(Level.SEVERE, ex.getMessage(), ex);
+                            }
+                        });
+                    }
+                });
+                break;
+            case MESSAGEVS_TO_DEVICE:
+                WebSocketService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(this));
+                break;
+            case KEYSTORE_SELECT:
+                Utils.selectKeystoreFile(this);
+                break;
+            case SELECT_IMAGE:
+                Utils.selectImage(this);
+                break;
+            case OPEN_SMIME:
+                String smimeMessageStr = new String(Base64.getDecoder().decode(message.getBytes()), "UTF-8");
+                DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(smimeMessageStr, null);
+                new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption()).show();
+                break;
+            case CURRENCY_OPEN:
+                CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject((message).getBytes()),
+                        BrowserHost.getInstance().getScene().getWindow());
+                break;
+            case OPEN_SMIME_FROM_URL:
+                executorService = Executors.newSingleThreadExecutor();
+                executorService.submit(() -> {
+                    ResponseVS responseVS1 = null;
+                    if(BrowserHost.getInstance().getSMIME(serviceURL) != null) {
+                        responseVS1 = new ResponseVS(ResponseVS.SC_OK, BrowserHost.getInstance().getSMIME(serviceURL));
+                    } else {
+                        responseVS1 = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.TEXT);
+                        if (ResponseVS.SC_OK == responseVS1.getStatusCode()) {
+                            BrowserHost.getInstance().setSMIME(serviceURL, responseVS1.getMessage());
+                        }
+                    }
+                    if (ResponseVS.SC_OK == responseVS1.getStatusCode()) {
+                        responseVS1.setStatusCode(ResponseVS.SC_INITIALIZED);
+                        message = responseVS1.getMessage();
+                        PlatformImpl.runLater(() -> {
+                            DocumentVSBrowserPane browserPane = new DocumentVSBrowserPane(message, null);
+                            DialogVS dialogVS = new DialogVS(browserPane, null).setCaption(browserPane.getCaption());
+                            dialogVS.addCloseListener(event -> {
+                                BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE());
+                            });
+                            dialogVS.show();
+                        });
+                    }
+                });
+                break;
+            case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
+                RepresentativeAccreditationsDialog.show(this);
+                break;
+            case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
+                RepresentativeVotingHistoryDialog.show(this);
+                break;
+            case SAVE_SMIME:
+                Utils.saveReceipt(this);
+                break;
+            case SEND_ANONYMOUS_DELEGATION:
+                Utils.saveReceiptAnonymousDelegation(this);
+                break;
+            case CERT_USER_NEW:
+                processOperationWithPassword(ContextVS.getMessage("newCertPasswDialogMsg"));
+                break;
+            case WALLET_OPEN:
+                WalletPane.showDialog();
+                break;
+            case NEW_REPRESENTATIVE:
+            case EDIT_REPRESENTATIVE:
+                RepresentativeEditorDialog.show(this);
+                break;
+            case CURRENCY_GROUP_NEW:
+            case CURRENCY_GROUP_EDIT:
+                GroupVSEditorDialog.show(this);
+                break;
+            case WALLET_SAVE:
+                saveWallet();
+                break;
+            case MESSAGEVS:
+                if(getDocumentToSign() != null) processOperationWithPassword(null);
+                else {
+                    responseVS = WebSocketAuthenticatedService.getInstance().sendMessageVS(this);
+                    processResult(responseVS);
+                }
+                break;
+            case REPRESENTATIVE_STATE:
+                RepresentationStateDto dto = BrowserSessionService.getInstance().getRepresentationState();
+                responseVS = new ResponseVS(ResponseVS.SC_OK, JSON.getMapper().writeValueAsString(dto)).setContentType(ContentTypeVS.JSON);
+                processResult(responseVS);
+                break;
+            default:
+                processOperationWithPassword(null);
+        }
+    }
+
+    public void processResult(ResponseVS responseVS) {
+        try {
+            switch (operation) {
+                case PUBLISH_EVENT:
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        String eventURL = ((List<String>)responseVS.getData()).iterator().next() +"?menu=admin";
+                        log.info("publishSMIME - new event URL: " + eventURL);
+                        BrowserHost.sendMessageToBrowser(MessageDto.NEW_TAB(eventURL));
+                        //String receipt = responseVS.getMessage();
+                        responseVS.setMessage(ContextVS.getMessage("eventVSPublishedOKMsg"));
+                    }
+                    BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
+                    break;
+                case NEW_REPRESENTATIVE:
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        UserVSDto representativeDto = (UserVSDto) responseVS.getMessage(UserVSDto.class);
+                        String representativeURL =  ContextVS.getInstance().getAccessControl()
+                                .getRepresentativeByNifServiceURL(representativeDto.getNIF());
+                        BrowserHost.sendMessageToBrowser(MessageDto.NEW_TAB(representativeURL));
+                        BrowserHost.showMessage(responseVS.getStatusCode(), ContextVS.getMessage("representativeDataSendOKMsg"));
+                    }
+                    break;
+                default:
+                    if(callerCallback == null) BrowserHost.showMessage(responseVS);
+                    else {
+                        if(ContentTypeVS.JSON == responseVS.getContentType()) {
+                            BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
+                                    responseVS.getStatusCode(), responseVS.getMessage(), callerCallback));
+                        } else {
+                            String message = JSON.getMapper().writeValueAsString(new MessageDto(responseVS.getStatusCode(),
+                                    responseVS.getMessage()));
+                            BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
+                                    responseVS.getStatusCode(), message, callerCallback));
+                        }
+                    }
+            }
+            if(executorService != null) executorService.shutdown();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+        }
+    }
 }
 

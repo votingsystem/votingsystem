@@ -230,7 +230,7 @@ public class InboxService implements PasswordDialog.Listener {
         InboxDialog.showDialog();
     }
 
-    @Override public void setPassword(TypeVS passwordType, char[] password) {
+    @Override public void processPassword(TypeVS passwordType, char[] password) {
         switch (passwordType) {
             case MESSAGEVS:
                 if (password != null) {

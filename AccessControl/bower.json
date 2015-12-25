@@ -20,7 +20,7 @@
   ],
   "dependencies": {
     "jsoneditor": "jsoneditor#~4.2.1",
-    "polymer-tinymce": "polymer-tinymce",
+    "tinymce": "tinymce#~4.3.2",
     "d3": "d3#~3.5.8",
     "font-awesome": "font-awesome#~4.5.0",
     "polymer": "Polymer/polymer#^1.2.0",
@@ -30,7 +30,6 @@
     "visionmedia-page": "visionmedia/page.js#^1.6.4"
   },
   "resolutions": {
-    "polymer": "^1.2.3",
-    "tinymce": "tinymce#~4.3.2"
+    "polymer": "^1.2.3"
   }
 }

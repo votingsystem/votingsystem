@@ -383,7 +383,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
     }
 
     @Override
-    public void setPassword(TypeVS passwordType, char[] password) {
+    public void processPassword(TypeVS passwordType, char[] password) {
         switch (passwordType) {
             case CERT_USER_NEW:
                 try {

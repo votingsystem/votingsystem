@@ -81,7 +81,6 @@
       var eventvsEditor
       page('/publish_election', scrollToTop, function (ctx) {
           vs.route = 'publish_election';
-          //VotingSystemClient.setMessage(new OperationVS(Operation.VOTING_PUBLISHING));
           Polymer.Base.importHref('./eventVSElection/eventvs-editor.vsp', function () {
               if (!eventvsEditor) eventvsEditor = document.createElement('eventvs-editor');
               vs.loadMainContent(eventvsEditor, "${msg.publishVoteLbl}")

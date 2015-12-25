@@ -16,7 +16,6 @@
                     {{messageToUser}}
                 </div>
                 <div style="margin:20px 0px 10px 0px;">
-                    <label>${msg.cancelSubscriptionFormMsg}</label>
                     <textarea id="reason" rows="8" required="" style="width: 400px;"></textarea>
                 </div>
 
@@ -38,7 +37,7 @@
         ready: function() { },
         submitForm: function() {
             document.querySelector("#voting_system_page").dispatchEvent(
-                    new CustomEvent('vs-on-submit', {detail:this.$.reason.value}))
+                    new CustomEvent('on-submit-reason', {detail:this.$.reason.value}))
             this.close()
         },
         show: function(message) {

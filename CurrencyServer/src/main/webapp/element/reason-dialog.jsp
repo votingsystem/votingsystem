@@ -35,7 +35,7 @@
         ready: function() { },
         submitForm: function() {
             document.querySelector("#voting_system_page").dispatchEvent(
-                    new CustomEvent('vs-on-submit', {detail:this.$.reason.value}))
+                    new CustomEvent('on-submit-reason', {detail:this.$.reason.value}))
             this.close()
         },
         show: function(message) {

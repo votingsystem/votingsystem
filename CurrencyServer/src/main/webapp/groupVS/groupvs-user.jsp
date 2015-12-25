@@ -63,8 +63,8 @@
             ready:function(e) {
                 this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
 
-                document.querySelector("#voting_system_page").addEventListener('vs-on-submit',
-                        function() {
+                document.querySelector("#voting_system_page").addEventListener('on-submit-reason',
+                        function(e) {
                             console.log("deActivateUser")
                             var operationVS = new OperationVS(Operation.CURRENCY_GROUP_USER_DEACTIVATE)
                             operationVS.serviceURL = contextURL + "/rest/groupVS/deActivateUser"

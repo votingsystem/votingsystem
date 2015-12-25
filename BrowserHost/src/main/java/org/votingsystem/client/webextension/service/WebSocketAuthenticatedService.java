@@ -87,7 +87,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     }
 
     @Override
-    public void setPassword(TypeVS passwordType, char[] password) {
+    public void processPassword(TypeVS passwordType, char[] password) {
         switch (passwordType) {
             case WEB_SOCKET_INIT:
                 if(password == null) {

@@ -9,26 +9,19 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
-import org.votingsystem.client.webextension.dialog.*;
-import org.votingsystem.client.webextension.pane.DocumentVSBrowserPane;
-import org.votingsystem.client.webextension.pane.WalletPane;
-import org.votingsystem.client.webextension.service.*;
+import org.votingsystem.client.webextension.dialog.MessageDialog;
+import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.util.MsgUtils;
+import org.votingsystem.client.webextension.util.OperationVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.MessageDto;
-import org.votingsystem.client.webextension.util.OperationVS;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControlVS;
-import org.votingsystem.signature.util.CryptoTokenVS;
-import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.ObjectUtils;
-import org.votingsystem.util.TypeVS;
-import org.votingsystem.util.currency.Wallet;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -39,7 +32,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class BrowserHost extends Application implements PasswordDialog.Listener {
+public class BrowserHost extends Application {
 
     private static Logger log = Logger.getLogger(BrowserHost.class.getSimpleName());
 
@@ -53,18 +46,13 @@ public class BrowserHost extends Application implements PasswordDialog.Listener 
     private String currencyServerURL;
     private Stage primaryStage;
 
-    private OperationVS operationVS;
-    private OperationService operationService = new OperationService();
-
     public String getSMIME(String smimeMessageURL) {
         if(smimeMessageMap ==  null) return null;
         else return smimeMessageMap.get(smimeMessageURL);
     }
 
     public void setSMIME(String smimeMessageURL, String smimeMessageStr) {
-        if(smimeMessageMap ==  null) {
-            smimeMessageMap = new HashMap<>();
-        }
+        if(smimeMessageMap ==  null) smimeMessageMap = new HashMap<>();
         smimeMessageMap.put(smimeMessageURL, smimeMessageStr);
     }
 
@@ -90,10 +78,6 @@ public class BrowserHost extends Application implements PasswordDialog.Listener 
 
     public String getCurrencyServerURL() {
         return currencyServerURL;
-    }
-
-    public String getAccessControlServerURL() {
-        return accessControlServerURL;
     }
 
     public Scene getScene() {
@@ -202,124 +186,16 @@ public class BrowserHost extends Application implements PasswordDialog.Listener 
         PlatformImpl.runLater(() -> new MessageDialog(getInstance().getScene().getWindow()).showHtmlMessage(message, caption));
     }
 
-    public void processOperationWithPassword(OperationVS operationVS, final String passwordDialogMessage) {
-        this.operationVS = operationVS;
-        if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
-            PlatformImpl.runAndWait(() ->
-                    PasswordDialog.showWithoutPasswordConfirm(operationVS.getType(), this, passwordDialogMessage));
-        } else operationService.processOperationVS(null, operationVS);
-    }
-
-    public void saveWallet() {
-        PasswordDialog.showWithoutPasswordConfirm(TypeVS.WALLET_SAVE, this, ContextVS.getMessage("walletPinMsg"));
-    }
-
-    @Override public void setPassword(TypeVS passwordType, char[] password) {
-        switch (passwordType) {
-            case WALLET_SAVE:
-                if(password != null) {
-                    try {
-                        Wallet.getWallet(password);
-                        sendMessageToBrowser(MessageDto.SIGNAL(ResponseVS.SC_OK, "vs-wallet-save"));
-                        InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
-                    } catch (WalletException wex) {
-                        Utils.showWalletNotFoundMessage();
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                    }
-                }
-                break;
-            default:
-                operationService.processOperationVS(password, operationVS);
-        }
+    private void processMessageToHost(byte[] messageBytes) throws Exception {
+        log.info("processMessageToHost: " + new String(messageBytes));
+        OperationVS operationVS = JSON.getMapper().readValue(messageBytes, OperationVS.class);
+        operationVS.initProcess();
     }
 
     public static void main(String[] args) throws Exception {
         ContextVS.initSignatureClient("clientToolMessages", Locale.getDefault().getLanguage());
         if(args.length > 0) ContextVS.getInstance().initDirs(args[0]);
         launch(args);
-    }
-
-    private void processMessageToHost(byte[] messageBytes) throws Exception {
-        log.info("processMessageToHost: " + new String(messageBytes));
-        operationVS = JSON.getMapper().readValue(messageBytes, OperationVS.class);
-        switch (operationVS.getType()) {
-            case CONNECT:
-                WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true);
-                break;
-            case DISCONNECT:
-                WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false);
-                break;
-            case FILE_FROM_URL:
-                operationService.processOperationVS(null, operationVS);
-                break;
-            case MESSAGEVS_TO_DEVICE:
-                WebSocketService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(operationVS));
-                break;
-            case KEYSTORE_SELECT:
-                Utils.selectKeystoreFile(operationVS);
-                break;
-            case SELECT_IMAGE:
-                Utils.selectImage(operationVS);
-                break;
-            case OPEN_SMIME:
-                String smimeMessageStr = new String(Base64.getDecoder().decode(
-                        operationVS.getMessage().getBytes()), "UTF-8");
-                DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(smimeMessageStr, null);
-                new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption()).show();
-                break;
-            case CURRENCY_OPEN:
-                CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject((operationVS.getMessage()).getBytes()),
-                        BrowserHost.getInstance().getScene().getWindow());
-                break;
-            case OPEN_SMIME_FROM_URL:
-                operationService.processOperationVS(null, operationVS);
-                break;
-            case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
-                RepresentativeAccreditationsDialog.show(operationVS);
-                break;
-            case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
-                RepresentativeVotingHistoryDialog.show(operationVS);
-                break;
-            case SAVE_SMIME:
-                Utils.saveReceipt(operationVS);
-                break;
-            case SEND_ANONYMOUS_DELEGATION:
-                Utils.saveReceiptAnonymousDelegation(operationVS);
-                break;
-            case CERT_USER_NEW:
-                INSTANCE.processOperationWithPassword(operationVS, ContextVS.getMessage("newCertPasswDialogMsg"));
-                break;
-            case WALLET_OPEN:
-                WalletPane.showDialog();
-                break;
-            case VOTING_PUBLISHING:
-                ElectionEditorDialog.show(operationVS);
-                break;
-            case NEW_REPRESENTATIVE:
-            case EDIT_REPRESENTATIVE:
-                RepresentativeEditorDialog.show(operationVS);
-                break;
-            case CURRENCY_GROUP_NEW:
-            case CURRENCY_GROUP_EDIT:
-                GroupVSEditorDialog.show(operationVS);
-                break;
-            case WALLET_SAVE:
-                INSTANCE.saveWallet();
-                break;
-            case MESSAGEVS:
-                if(operationVS.getDocumentToSign() != null) INSTANCE.processOperationWithPassword(operationVS, null);
-                else operationService.processOperationVS(null, operationVS);
-                break;
-            case REPRESENTATIVE_STATE:
-                sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(ResponseVS.SC_OK,
-                        null, operationVS.getCallerCallback(),
-                        BrowserSessionService.getInstance().getRepresentationState()));
-                break;
-            default:
-                INSTANCE.processOperationWithPassword(operationVS, null);
-        }
     }
 
 }

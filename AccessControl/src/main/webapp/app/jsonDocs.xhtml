@@ -37,8 +37,8 @@
                 console.log("publishControlCenter")
                 var operationVS = validateCertEditor.get();
                 operationVS.statusCode = ResponseVS.SC_PROCESSING
-                operationVS.objectId = Math.random().toString(36).substring(7)
-                window[operationVS.objectId] = function(appMessage) {
+                operationVS.callerCallback = Math.random().toString(36).substring(7)
+                window[operationVS.callerCallback] = function(appMessage) {
                     console.log("publishControlCenter - message: " + appMessage);
                     var appMessageJSON = toJSON(appMessage)
                     alert(appMessageJSON.message, "validateCert - status: " + appMessageJSON.statusCode)

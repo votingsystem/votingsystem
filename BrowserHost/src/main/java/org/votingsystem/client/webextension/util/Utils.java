@@ -174,7 +174,7 @@ public class Utils {
                         UserVS userVS = UserVS.getUserVS((X509Certificate)
                                 userKeyStore.getCertificate("UserTestKeysStore"));
                         PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
-                            @Override public void setPassword(TypeVS passwordType, char[] password) {
+                            @Override public void processPassword(TypeVS passwordType, char[] password) {
                                 if(password == null) return;
                                 try {
                                     ContextVS.saveUserKeyStore(userKeyStore, password);
@@ -182,7 +182,8 @@ public class Utils {
                                             CryptoTokenVS.JKS_KEYSTORE.toString());
                                     BrowserSessionService.getInstance().setUserVS(userVS, false);
                                     if(operationVS != null) BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
-                                            ResponseVS.SC_OK, null, operationVS.getCallerCallback(), UserVSDto.COMPLETE(userVS)));
+                                            ResponseVS.SC_OK, JSON.getMapper().writeValueAsString(UserVSDto.COMPLETE(userVS)),
+                                            operationVS.getCallerCallback()));
                                 } catch (Exception ex) {
                                     BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                                 }
@@ -192,7 +193,7 @@ public class Utils {
                     } catch(Exception ex) {
                         log.log(Level.SEVERE,ex.getMessage(), ex);
                         if(operationVS != null) BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
-                                ResponseVS.SC_ERROR, ex.getMessage(), operationVS.getCallerCallback(), null));
+                                ResponseVS.SC_ERROR, ex.getMessage(), operationVS.getCallerCallback()));
                     }
 
                 }
@@ -251,15 +252,15 @@ public class Utils {
                         log.info(" - MAX_FILE_SIZE exceeded ");
                         BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK( ResponseVS.SC_ERROR,
                                 ContextVS.getMessage("fileSizeExceeded", ContextVS.IMAGE_MAX_FILE_SIZE_KB),
-                                operationVS.getCallerCallback(), null));
+                                operationVS.getCallerCallback()));
                     } else BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(ResponseVS.SC_OK,
-                            selectedImage.getAbsolutePath(), operationVS.getCallerCallback(), null));
+                            selectedImage.getAbsolutePath(), operationVS.getCallerCallback()));
                 } else BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(ResponseVS.SC_ERROR,
-                        null, operationVS.getCallerCallback(), null));
+                        null, operationVS.getCallerCallback()));
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(ResponseVS.SC_ERROR,
-                        ex.getMessage(), operationVS.getCallerCallback(), null));
+                        ex.getMessage(), operationVS.getCallerCallback()));
             }
         });
     }
@@ -276,9 +277,9 @@ public class Utils {
         if(file != null){
             FileUtils.copyStringToFile(operation.getMessage(), file);
             BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(ResponseVS.SC_OK,
-                    null, operation.getCallerCallback(), null));
+                    null, operation.getCallerCallback()));
         } else BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(ResponseVS.SC_ERROR,
-                null, operation.getCallerCallback(), null));
+                null, operation.getCallerCallback()));
     }
 
     public static void saveReceiptAnonymousDelegation(OperationVS operation) throws Exception{
@@ -289,7 +290,7 @@ public class Utils {
             if (responseVS == null) {
                 log.log(Level.SEVERE,"Missing receipt data for hash: " + operation.getMessage());
                 BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(ResponseVS.SC_ERROR,
-                        null, operation.getCallerCallback(), null));
+                        null, operation.getCallerCallback()));
             } else {
                 File fileToSave = null;
                 try {
@@ -304,9 +305,9 @@ public class Utils {
                     if (file != null) {
                         FileUtils.copyStreamToFile(new FileInputStream(fileToSave), file);
                         BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(ResponseVS.SC_OK,
-                                null, operation.getCallerCallback(), null));
+                                null, operation.getCallerCallback()));
                     } else BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(ResponseVS.SC_ERROR,
-                            null, operation.getCallerCallback(), null));
+                            null, operation.getCallerCallback()));
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
@@ -335,7 +336,7 @@ public class Utils {
     public static void createNewWallet() {
         PlatformImpl.runLater(() -> {
             PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
-                @Override public void setPassword(TypeVS passwordType, char[] password) {
+                @Override public void processPassword(TypeVS passwordType, char[] password) {
                     if(password != null) {
                         try {
                             Wallet.createWallet(new ArrayList<>(), password);

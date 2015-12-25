@@ -399,7 +399,8 @@ Or see the LICENSE file that comes with this code.
 
         ready: function () {
             this.messages = this.$.i18nVS.getMessages()
-            this.format = d3.time.format("%Y/%m/%d %H:%M")
+            if(this.timeEnabled === true) this.format = d3.time.format("%Y/%m/%d %H:%M")
+            else this.format = d3.time.format("%Y/%m/%d")
             var d = new Date();
             var list = [];
             this._currYear = d.getFullYear()

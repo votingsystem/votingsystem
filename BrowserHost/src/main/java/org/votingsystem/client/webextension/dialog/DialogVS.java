@@ -12,7 +12,6 @@ import javafx.stage.*;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.pane.DecoratedPane;
 import org.votingsystem.client.webextension.util.Utils;
-import org.votingsystem.dto.MessageDto;
 import org.votingsystem.util.ContextVS;
 
 import java.io.IOException;
@@ -85,9 +84,6 @@ public class DialogVS {
         decoratedPane.getStyleClass().add("glassBox");
         decoratedPane.getScene().setFill(Color.TRANSPARENT);
         stage.setAlwaysOnTop(true);
-        stage.addEventHandler(WindowEvent.WINDOW_HIDDEN, windowEvent -> {
-            BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE());
-        });
         Utils.addMouseDragSupport(stage);
     }
 

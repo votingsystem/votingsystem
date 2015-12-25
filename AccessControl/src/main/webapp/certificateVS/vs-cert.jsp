@@ -59,7 +59,7 @@
             ready: function() {
                 this.certsSelectedStack = []
                 if(menuType === "admin" || menuType === "superuser") this.$.cancelCertButton.style.display = "block"
-                document.querySelector("#voting_system_page").addEventListener('vs-on-submit',
+                document.querySelector("#voting_system_page").addEventListener('on-submit-reason',
                         function() {
                             var operationVS = new OperationVS(Operation.CERT_EDIT)
                             operationVS.serviceURL = contextURL + "/rest/certificateVS/editCert"

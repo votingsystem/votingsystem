@@ -30,7 +30,7 @@ public class PasswordDialog extends DialogVS {
     private static Logger log = Logger.getLogger(PasswordDialog.class.getSimpleName());
 
     public interface Listener {
-        public void setPassword(TypeVS passwordType, char[] password);
+        public void processPassword(TypeVS passwordType, char[] password);
     }
 
     private VBox dialogVBox;
@@ -118,7 +118,7 @@ public class PasswordDialog extends DialogVS {
     }
 
     private void closePasswordDialog() {
-        listener.setPassword(passwordType, password);
+        listener.processPassword(passwordType, password);
         hide();
     }
 

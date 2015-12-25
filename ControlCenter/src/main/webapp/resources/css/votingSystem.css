@@ -376,8 +376,7 @@ hr {
 .form-control {
     display: block;
     width: 100%;
-    height: 30px;
-    padding: 0px 7px;
+    height: 23px;
     font-size: 14px;
     line-height: 1.42857143;
     color: #555;
