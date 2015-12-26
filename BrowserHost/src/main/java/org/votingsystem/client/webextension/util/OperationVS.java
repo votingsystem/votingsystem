@@ -93,18 +93,6 @@ public class OperationVS implements PasswordDialog.Listener {
         return getOperation();
     }
 
-    public OperationVS updateUUID() throws IOException {
-        Map<String, Object> dataMap = JSON.getMapper().readValue(jsonStr, new TypeReference<HashMap<String, Object>>() {});
-        dataMap.put("uuid", java.util.UUID.randomUUID().toString());
-        jsonStr = JSON.getMapper().writeValueAsString(dataMap);
-        return this;
-    }
-
-    public String getFileName() {
-        if(operation == null) return "DEFAULT_OPERATION_NAME";
-        else return operation.toString();
-    }
-
     public String getCaption() {
         return ContextVS.getInstance().getMessage(operation.toString());
     }
@@ -152,7 +140,7 @@ public class OperationVS implements PasswordDialog.Listener {
     public Map getDocumentToSign() {
         Map documentToSignMap = null;
         try {
-            documentToSignMap = JSON.getMapper().readValue(jsonStr, new TypeReference<Map<String, String>>() {});
+            documentToSignMap = JSON.getMapper().readValue(jsonStr, new TypeReference<Map<String, Object>>() {});
             documentToSignMap.put("UUID", java.util.UUID.randomUUID().toString());
         } catch (IOException ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -290,17 +278,15 @@ public class OperationVS implements PasswordDialog.Listener {
         try {
             switch (passwordType) {
                 case WALLET_SAVE:
-                    if(password != null) {
-                        try {
-                            Wallet.getWallet(password);
-                            BrowserHost.sendMessageToBrowser(MessageDto.SIGNAL(ResponseVS.SC_OK, "vs-wallet-save"));
-                            InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
-                        } catch (WalletException wex) {
-                            Utils.showWalletNotFoundMessage();
-                        } catch (Exception ex) {
-                            log.log(Level.SEVERE, ex.getMessage(), ex);
-                            BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                        }
+                    try {
+                        Wallet.getWallet(password);
+                        BrowserHost.sendMessageToBrowser(MessageDto.SIGNAL(ResponseVS.SC_OK, "vs-wallet-save"));
+                        InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
+                    } catch (WalletException wex) {
+                        Utils.showWalletNotFoundMessage();
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                     break;
                 case PUBLISH_EVENT:
@@ -360,6 +346,12 @@ public class OperationVS implements PasswordDialog.Listener {
         }
     }
 
+    @Override
+    public void cancelPassword(TypeVS passwordType) {
+        processResult(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("operationCancelledMsg")));
+    }
+
+
     public void initProcess() throws Exception {
         log.info("initProcess - operation: " + operation);
         executorService = Executors.newSingleThreadExecutor();
@@ -392,9 +384,6 @@ public class OperationVS implements PasswordDialog.Listener {
             return;
         }
         switch (operation) {
-            case PUBLISH_EVENT:
-                processOperationWithPassword(signedMessageSubject);
-                break;
             case CONNECT:
                 WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true);
                 break;
@@ -483,10 +472,6 @@ public class OperationVS implements PasswordDialog.Listener {
             case WALLET_OPEN:
                 WalletPane.showDialog();
                 break;
-            case NEW_REPRESENTATIVE:
-            case EDIT_REPRESENTATIVE:
-                RepresentativeEditorDialog.show(this);
-                break;
             case CURRENCY_GROUP_NEW:
             case CURRENCY_GROUP_EDIT:
                 GroupVSEditorDialog.show(this);
@@ -495,7 +480,7 @@ public class OperationVS implements PasswordDialog.Listener {
                 saveWallet();
                 break;
             case MESSAGEVS:
-                if(getDocumentToSign() != null) processOperationWithPassword(null);
+                if(jsonStr != null) processOperationWithPassword(signedMessageSubject);
                 else {
                     responseVS = WebSocketAuthenticatedService.getInstance().sendMessageVS(this);
                     processResult(responseVS);
@@ -507,7 +492,7 @@ public class OperationVS implements PasswordDialog.Listener {
                 processResult(responseVS);
                 break;
             default:
-                processOperationWithPassword(null);
+                processOperationWithPassword(signedMessageSubject);
         }
     }
 
@@ -531,7 +516,7 @@ public class OperationVS implements PasswordDialog.Listener {
                                 .getRepresentativeByNifServiceURL(representativeDto.getNIF());
                         BrowserHost.sendMessageToBrowser(MessageDto.NEW_TAB(representativeURL));
                         BrowserHost.showMessage(responseVS.getStatusCode(), ContextVS.getMessage("representativeDataSendOKMsg"));
-                    }
+                    } else BrowserHost.showMessage(responseVS);
                     break;
                 default:
                     if(callerCallback == null) BrowserHost.showMessage(responseVS);

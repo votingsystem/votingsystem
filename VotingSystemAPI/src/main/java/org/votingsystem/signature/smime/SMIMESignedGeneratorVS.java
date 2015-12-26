@@ -67,7 +67,7 @@ public class SMIMESignedGeneratorVS {
         this.key = key;
         this.chain = chain;
         this.signMechanism = signMechanism;;
-        jcaCertStore = new JcaCertStore( Arrays.asList(chain));
+        jcaCertStore = new JcaCertStore(Arrays.asList(chain));
         ASN1EncodableVector signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector caps = new SMIMECapabilityVector();
         //create some smime capabilities in case someone wants to respond

@@ -119,7 +119,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
     public static void showDialog() {
         Platform.runLater(() -> {
             CryptoTokenVS  tokenType = CryptoTokenVS.valueOf(ContextVS.getInstance().getProperty(
-                    ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString()));
+                    ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString()));
             if(tokenType != CryptoTokenVS.JKS_KEYSTORE) {
                 BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("improperTokenMsg"));
                 return;

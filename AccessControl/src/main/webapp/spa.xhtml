@@ -100,10 +100,10 @@
                 d3.selectAll(".isAdminView").style("display", "none")
                 d3.selectAll(".isSuperUserView").style("display", "none")
                 if('admin' === menuType) {
-                    d3.select(".isAdminView").style("display", "block")
+                    d3.selectAll(".isAdminView").style("display", "block")
                     appTitle = "${msg.adminPageTitle}"
                 } else if('superuser' === menuType) {
-                    d3.select(".isSuperUserView").style("display", "block")
+                    d3.selectAll(".isSuperUserView").style("display", "block")
                     appTitle = "${msg.superUserTitle}"
                 }
                 d3.select("#pageTitle").text(appTitle)

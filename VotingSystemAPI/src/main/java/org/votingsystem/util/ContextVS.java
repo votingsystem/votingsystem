@@ -1,7 +1,6 @@
 package org.votingsystem.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import iaik.pkcs.pkcs11.Mechanism;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
@@ -29,8 +28,10 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -60,8 +61,6 @@ public class ContextVS {
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
     public static final String CURRENCY_OID = VOTING_SYSTEM_BASE_OID + CURRENCY_TAG;
     public static final String DEVICEVS_OID = VOTING_SYSTEM_BASE_OID + DEVICEVS_TAG;
-
-    public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.SHA1_RSA_PKCS;
 
     public static String APPDIR;
     public static String WEBVIEWDIR;
@@ -162,7 +161,7 @@ public class ContextVS {
 
     public ContextVS() {
         try {
-            initDirs(System.getProperty("user.home"));
+            initDirs(new File(".").getAbsolutePath());
             KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             try {
                 parentBundle = ResourceBundle.getBundle("votingSystemAPI", Locale.getDefault());
@@ -176,7 +175,7 @@ public class ContextVS {
     public ContextVS(String localizatedMessagesFileName, String localeParam) {
         log.info("localizatedMessagesFileName: " + localizatedMessagesFileName + " - locale: " + locale);
         try {
-            initDirs(System.getProperty("user.home"));
+            initDirs(new File(".").getAbsolutePath());
             KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
@@ -218,12 +217,13 @@ public class ContextVS {
         return votingSystemSSLTrustAnchors;
     }
 
-    public void initDirs(String baseDir) {
-        APPDIR =  baseDir + File.separator +  ".VotingSystem";
+    public void initDirs(String baseDir) throws IOException {
+        APPDIR = baseDir + File.separator +  ".VotingSystem";
         WEBVIEWDIR =  APPDIR + File.separator + "webview";
         APPTEMPDIR =  APPDIR + File.separator + "temp";
         new File(APPDIR).mkdir();
         new File(APPTEMPDIR).mkdir();
+        log.info("APPDIR: " + APPDIR);
     }
 
     public static void initSignatureClient (String messagesFileName, String locale){
@@ -231,8 +231,7 @@ public class ContextVS {
             log.info("------------- initSignatureClient ----------------- ");
             INSTANCE = new ContextVS(messagesFileName, locale);
             FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream(CERT_RAIZ_PATH),  new File(APPDIR + CERT_RAIZ_PATH));
-            OSValidator.initClassPath();
+                    .getResourceAsStream(CERT_RAIZ_PATH),  new File(APPDIR + "/" + CERT_RAIZ_PATH));
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(ContextVS.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -292,7 +291,7 @@ public class ContextVS {
                 }
                 input = new FileInputStream(settingsFile);
                 settings.load(input);
-                log.info("loading seetings: " + settingsFile.getAbsolutePath());
+                log.info("loading settings: " + settingsFile.getAbsolutePath());
             }
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

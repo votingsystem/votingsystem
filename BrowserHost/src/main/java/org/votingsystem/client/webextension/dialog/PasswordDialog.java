@@ -31,6 +31,7 @@ public class PasswordDialog extends DialogVS {
 
     public interface Listener {
         public void processPassword(TypeVS passwordType, char[] password);
+        public void cancelPassword(TypeVS passwordType);
     }
 
     private VBox dialogVBox;
@@ -118,7 +119,7 @@ public class PasswordDialog extends DialogVS {
     }
 
     private void closePasswordDialog() {
-        listener.processPassword(passwordType, password);
+        listener.cancelPassword(passwordType);
         hide();
     }
 

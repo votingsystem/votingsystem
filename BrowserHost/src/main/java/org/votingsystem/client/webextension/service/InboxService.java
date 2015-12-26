@@ -233,54 +233,59 @@ public class InboxService implements PasswordDialog.Listener {
     @Override public void processPassword(TypeVS passwordType, char[] password) {
         switch (passwordType) {
             case MESSAGEVS:
-                if (password != null) {
-                    try {
-                        KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password);
-                        PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
-                                password);
-                        ProgressDialog.showDialog(new InboxDecryptTask(privateKey, timeLimitedInboxMessage),
-                                ContextVS.getMessage("decryptingMessagesMsg"));
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
-                    }
-                } else InboxDialog.showDialog();
+                try {
+                    KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password);
+                    PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
+                            password);
+                    ProgressDialog.showDialog(new InboxDecryptTask(privateKey, timeLimitedInboxMessage),
+                            ContextVS.getMessage("decryptingMessagesMsg"));
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                    BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
+                }
                 timeLimitedInboxMessage = null;
                 isPasswordVisible.set(false);
                 break;
             case CURRENCY_IMPORT:
-                if(password != null) {
-                    try {
-                        Wallet.getWallet(password);
-                        removeMessage(currentMessage);
-                    } catch (WalletException wex) {
-                        Utils.showWalletNotFoundMessage();
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                    }
+                try {
+                    Wallet.getWallet(password);
+                    removeMessage(currentMessage);
+                } catch (WalletException wex) {
+                    Utils.showWalletNotFoundMessage();
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                    BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                 }
                 break;
             case CURRENCY_WALLET_CHANGE:
-                if(password != null) {
-                    try {
-                        Wallet.saveToWallet(currentMessage.getWebSocketMessage().getCurrencySet(), password);
-                        EventBusService.getInstance().post(currentMessage.setState(InboxMessage.State.PROCESSED));
-                        removeMessage(currentMessage);
-                        SocketMessageDto messageDto = currentMessage.getWebSocketMessage();
-                        Long deviceFromId = BrowserSessionService.getInstance().getConnectedDevice().getId();
-                        String socketMsgStr = JSON.getMapper().writeValueAsString(messageDto.
-                                getResponse(ResponseVS.SC_OK, null, deviceFromId, messageDto.getOperation()));
-                        WebSocketAuthenticatedService.getInstance().sendMessage(socketMsgStr);
-                    } catch (WalletException wex) {
-                        Utils.showWalletNotFoundMessage();
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                    }
+                try {
+                    Wallet.saveToWallet(currentMessage.getWebSocketMessage().getCurrencySet(), password);
+                    EventBusService.getInstance().post(currentMessage.setState(InboxMessage.State.PROCESSED));
+                    removeMessage(currentMessage);
+                    SocketMessageDto messageDto = currentMessage.getWebSocketMessage();
+                    Long deviceFromId = BrowserSessionService.getInstance().getConnectedDevice().getId();
+                    String socketMsgStr = JSON.getMapper().writeValueAsString(messageDto.
+                            getResponse(ResponseVS.SC_OK, null, deviceFromId, messageDto.getOperation()));
+                    WebSocketAuthenticatedService.getInstance().sendMessage(socketMsgStr);
+                } catch (WalletException wex) {
+                    Utils.showWalletNotFoundMessage();
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                    BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                 }
                 break;
             default:log.info("unknown passwordType: " + passwordType);
+        }
+    }
+
+    @Override
+    public void cancelPassword(TypeVS passwordType) {
+        switch (passwordType) {
+            case MESSAGEVS:
+                InboxDialog.showDialog();
+                timeLimitedInboxMessage = null;
+                isPasswordVisible.set(false);
+                break;
         }
     }
 }

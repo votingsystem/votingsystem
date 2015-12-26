@@ -175,7 +175,6 @@ public class Utils {
                                 userKeyStore.getCertificate("UserTestKeysStore"));
                         PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
                             @Override public void processPassword(TypeVS passwordType, char[] password) {
-                                if(password == null) return;
                                 try {
                                     ContextVS.saveUserKeyStore(userKeyStore, password);
                                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
@@ -188,6 +187,7 @@ public class Utils {
                                     BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                                 }
                             }
+                            @Override public void cancelPassword(TypeVS passwordType) { }
                         };
                         PasswordDialog.showWithPasswordConfirm(null, passwordListener, ContextVS.getMessage("newKeyStorePasswordMsg"));
                     } catch(Exception ex) {
@@ -337,12 +337,12 @@ public class Utils {
         PlatformImpl.runLater(() -> {
             PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
                 @Override public void processPassword(TypeVS passwordType, char[] password) {
-                    if(password != null) {
-                        try {
-                            Wallet.createWallet(new ArrayList<>(), password);
-                        } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
-                    }
+                    try {
+                        Wallet.createWallet(new ArrayList<>(), password);
+                    } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
                 }
+
+                @Override public void cancelPassword(TypeVS passwordType) { }
             };
             PasswordDialog.showWithPasswordConfirm(null, passwordListener, ContextVS.getMessage("newWalletPinMsg"));
         });

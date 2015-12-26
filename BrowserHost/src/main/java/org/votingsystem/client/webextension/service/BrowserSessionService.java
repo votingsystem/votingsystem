@@ -15,7 +15,6 @@ import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.RepresentationState;
-import org.votingsystem.signature.dnie.DNIeContentSigner;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.signature.util.*;
@@ -214,7 +213,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
     }
 
     public static CryptoTokenVS getCryptoTokenType () {
-        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
+        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString());
         return CryptoTokenVS.valueOf(tokenType);
     }
 
@@ -308,7 +307,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
 
     public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
             char[] password, String subject) throws Exception {
-        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.DNIe.toString());
+        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString());
         log.info("getSMIME - tokenType: " + tokenType);
         switch(CryptoTokenVS.valueOf(tokenType)) {
             case JKS_KEYSTORE:
@@ -324,8 +323,6 @@ public class BrowserSessionService implements PasswordDialog.Listener {
                         ContextVS.getInstance().getDefaultServer().getTimeStampServiceURL());
                 timeStamper.call();
                 return timeStamper.getSMIME();
-            case DNIe:
-                return DNIeContentSigner.getSMIME(fromUser, toUser, textToSign, password, subject);
             case MOBILE:
                 countDownLatch = new CountDownLatch(1);
                 DeviceVS deviceVS = getInstance().getCryptoToken().getDeviceVS();
@@ -387,13 +384,6 @@ public class BrowserSessionService implements PasswordDialog.Listener {
         switch (passwordType) {
             case CERT_USER_NEW:
                 try {
-                    if(password == null) {
-                        Button optionButton = new Button(ContextVS.getMessage("deletePendingCsrMsg"));
-                        optionButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-                        optionButton.setOnAction(event -> deleteCSR());
-                        showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"), optionButton);
-                        return;
-                    }
                     File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
                     EncryptedBundleDto bundleDto = JSON.getMapper().readValue(csrFile, EncryptedBundleDto.class);
                     Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
@@ -425,6 +415,18 @@ public class BrowserSessionService implements PasswordDialog.Listener {
                 } catch (Exception ex) {
                     showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                 }
+                break;
+        }
+    }
+
+    @Override
+    public void cancelPassword(TypeVS passwordType) {
+        switch (passwordType) {
+            case CERT_USER_NEW:
+                Button optionButton = new Button(ContextVS.getMessage("deletePendingCsrMsg"));
+                optionButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
+                optionButton.setOnAction(event -> deleteCSR());
+                showMessage(ContextVS.getMessage("certPendingMissingPasswdMsg"), optionButton);
                 break;
         }
     }

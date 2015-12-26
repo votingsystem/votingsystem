@@ -23,7 +23,7 @@ localization ->https://www.tinymce.com/docs/configure/localization/
                 baseUrl: { type: String, value: '' }
             },
             ready: function() {
-                console.log(this.tagName + "ready")
+                console.log(this.tagName + " - ready")
             },
             attached: function(){
                 this.async(function () {

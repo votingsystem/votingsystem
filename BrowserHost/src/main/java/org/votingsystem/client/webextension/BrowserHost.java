@@ -23,14 +23,15 @@ import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 public class BrowserHost extends Application {
 
@@ -88,8 +89,9 @@ public class BrowserHost extends Application {
         INSTANCE = this;
         INSTANCE.primaryStage = primaryStage;
         //dummy initilization of the stage in order to be available to other UI component
-        primaryStage.initStyle(StageStyle.TRANSPARENT);
-        primaryStage.setScene(new Scene(new Group(), 1, 1));
+        //primaryStage.initStyle(StageStyle.TRANSPARENT);
+        //primaryStage.setScene(new Scene(new Group(), 1, 1));
+        primaryStage.setScene(new Scene(new Group(), 100, 100));
         primaryStage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
         primaryStage.show();
 
@@ -139,7 +141,6 @@ public class BrowserHost extends Application {
                 log.log(Level.SEVERE,ex.getMessage(), ex);
             }
         });
-
         //processMessageToHost(ContextVS.getInstance().getResourceBytes("test.json"));
     }
 
@@ -186,14 +187,24 @@ public class BrowserHost extends Application {
         PlatformImpl.runLater(() -> new MessageDialog(getInstance().getScene().getWindow()).showHtmlMessage(message, caption));
     }
 
-    private void processMessageToHost(byte[] messageBytes) throws Exception {
+    private void processMessageToHost(byte[] messageBytes) {
         log.info("processMessageToHost: " + new String(messageBytes));
-        OperationVS operationVS = JSON.getMapper().readValue(messageBytes, OperationVS.class);
-        operationVS.initProcess();
+        try {
+            OperationVS operationVS = JSON.getMapper().readValue(messageBytes, OperationVS.class);
+            operationVS.initProcess();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+        }
     }
 
     public static void main(String[] args) throws Exception {
         ContextVS.initSignatureClient("clientToolMessages", Locale.getDefault().getLanguage());
+
+        FileHandler fileHandler = new FileHandler(new File(ContextVS.APPDIR + "/app.log").getAbsolutePath());
+        fileHandler.setFormatter(new SimpleFormatter());
+        Logger.getLogger("").addHandler(fileHandler);
+
         if(args.length > 0) ContextVS.getInstance().initDirs(args[0]);
         launch(args);
     }

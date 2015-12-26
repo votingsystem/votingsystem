@@ -45,7 +45,6 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
     private Label mobileDeviceLbl;
     private VBox keyStoreVBox;
     private GridPane gridPane;
-    private RadioButton signWithDNIeRb;
     private RadioButton signWithMobileRb;
     private RadioButton signWithKeystoreRb;
     private DeviceVSDto deviceVSDto;
@@ -56,9 +55,6 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         gridPane = (GridPane) getContentPane();
         gridPane.setVgap(15);
         ToggleGroup tg = new ToggleGroup();
-        signWithDNIeRb = new RadioButton(ContextVS.getMessage("setDNIeSignatureMechanismMsg"));
-        signWithDNIeRb.setToggleGroup(tg);
-        signWithDNIeRb.setOnAction(event -> changeCryptoToken(event));
         signWithMobileRb = new RadioButton(ContextVS.getMessage("setMobileSignatureMechanismMsg"));
         signWithMobileRb.setToggleGroup(tg);
         signWithMobileRb.setOnAction(event -> changeCryptoToken(event));
@@ -111,7 +107,6 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         gridPane.setMargin(requestCertButton, new Insets(10, 20, 20, 20));
         gridPane.add(signWithMobileRb, 0, 1);
         gridPane.setMargin(mobileDeviceInfo, new Insets(0, 0, 0, 20));
-        gridPane.add(signWithDNIeRb, 0, 3);
         gridPane.add(signWithKeystoreRb,0,5);
         gridPane.add(footerButtonsBox,0,7);
         gridPane.getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
@@ -142,10 +137,6 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         selectedKeyStore = null;
         gridPane.getChildren().remove(keyStoreVBox);
         switch(BrowserSessionService.getCryptoTokenType()) {
-            case DNIe:
-                signWithDNIeRb.setSelected(true);
-                deviceVSDto = null;
-                break;
             case JKS_KEYSTORE:
                 signWithKeystoreRb.setSelected(true);
                 deviceVSDto = BrowserSessionService.getInstance().getCryptoToken();
@@ -212,9 +203,7 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
     }
 
     private void close() {
-        if(signWithDNIeRb.isSelected()) {
-            deviceVSDto = new DeviceVSDto(CryptoTokenVS.DNIe);
-        } else if(signWithMobileRb.isSelected()) {
+        if(signWithMobileRb.isSelected()) {
             if(deviceVSDto == null) {
                 BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("deviceDataMissingErrorMsg"));
                 return;
@@ -250,5 +239,7 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
                 break;
         }
     }
+
+    @Override public void cancelPassword(TypeVS passwordType) {  }
 
 }

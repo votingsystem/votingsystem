@@ -31,7 +31,7 @@ public class VoteTask extends Task<Void> {
 
     public VoteTask(OperationVS operationVS, char[] password) throws Exception {
         this.operationVS = operationVS;
-        this.operationVS = operationVS;
+        this.password = password;
     }
 
     @Override protected Void call() throws Exception {

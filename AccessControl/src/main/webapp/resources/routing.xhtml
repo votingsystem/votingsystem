@@ -73,9 +73,13 @@
           });
       });
 
+      var representativeEditor
       page('/new_representative', scrollToTop, function (ctx) {
           vs.route = 'new_representative';
-          VotingSystemClient.setMessage(new OperationVS(Operation.NEW_REPRESENTATIVE));
+          Polymer.Base.importHref('./representative/representative-editor.vsp', function () {
+              if (!representativeEditor) representativeEditor = document.createElement('representative-editor');
+              vs.loadMainContent(representativeEditor, "${msg.publishVoteLbl}")
+          });
       });
 
       var eventvsEditor

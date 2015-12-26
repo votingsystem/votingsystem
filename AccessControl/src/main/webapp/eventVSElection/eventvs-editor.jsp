@@ -44,7 +44,7 @@
 
             },
             ready: function() {
-                console.log(this.tagName + "ready")
+                console.log(this.tagName + " - ready")
                 this.tomorrow = new Date().getTime() + 24 * 60 * 60 * 1000;
                 this.$.datePicker.setDate(new Date(this.tomorrow))
                 this.optionList = []
@@ -78,7 +78,8 @@
                     fieldsEventVS.push({content:option})
                 })
                 operationVS.jsonStr = JSON.stringify({subject:this.$.subject.value, content:content,
-                    fieldsEventVS:fieldsEventVS, dateBegin:this.$.datePicker.getDate().getTime()})
+                    fieldsEventVS:fieldsEventVS, dateBegin:this.$.datePicker.getDate().getTime(),
+                    UUID: Math.random().toString(36).substring(7)})
                 console.log(JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
             },

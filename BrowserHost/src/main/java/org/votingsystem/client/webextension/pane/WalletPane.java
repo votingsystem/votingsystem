@@ -126,26 +126,6 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
     public void processPassword(TypeVS passwordType, char[] password) {
         switch(passwordType) {
             case CURRENCY_OPEN:
-                if(password != null) {
-                    try {
-                        Set<Currency> currencySet = Wallet.getWallet(password);
-                        if(DIALOG_INSTANCE == null) DIALOG_INSTANCE = new WalletDialog();
-                        DIALOG_INSTANCE.show(currencySet);
-                    } catch (WalletException wex) {
-                        Utils.showWalletNotFoundMessage();
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                    }
-                }
-                break;
-        }
-
-    }
-
-    private static PasswordDialog.Listener passwordListener = new PasswordDialog.Listener(){
-        @Override public void processPassword(TypeVS passwordType, char[] password) {
-            if(password != null) {
                 try {
                     Set<Currency> currencySet = Wallet.getWallet(password);
                     if(DIALOG_INSTANCE == null) DIALOG_INSTANCE = new WalletDialog();
@@ -156,8 +136,28 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                     showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                 }
+                break;
+        }
+
+    }
+
+    @Override public void cancelPassword(TypeVS passwordType) { }
+
+    private static PasswordDialog.Listener passwordListener = new PasswordDialog.Listener(){
+        @Override public void processPassword(TypeVS passwordType, char[] password) {
+            try {
+                Set<Currency> currencySet = Wallet.getWallet(password);
+                if(DIALOG_INSTANCE == null) DIALOG_INSTANCE = new WalletDialog();
+                DIALOG_INSTANCE.show(currencySet);
+            } catch (WalletException wex) {
+                Utils.showWalletNotFoundMessage();
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+                showMessage(ResponseVS.SC_ERROR, ex.getMessage());
             }
         }
+
+        @Override public void cancelPassword(TypeVS passwordType) { }
     };
 
     @Override
