@@ -278,8 +278,9 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         return contentType;
     }
 
-    public void setContentType(ContentTypeVS contentType) {
+    public ResponseVS setContentType(ContentTypeVS contentType) {
         this.contentType = contentType;
+        return this;
     }
 
     public String getReason() {

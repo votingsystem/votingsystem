@@ -6,11 +6,11 @@
         this.operation = operation
         this.receiverName = "${config.serverName}";
         this.serverURL = contextURL;
-        this.objectId = Math.random().toString(36).substring(7);
+        this.callerCallback = Math.random().toString(36).substring(7);
     }
 
     OperationVS.prototype.setCallback = function(callbackFunction) {
-        window[this.objectId] = callbackFunction;
+        window[this.callerCallback] = callbackFunction;
     }
 
     function EventVS() {}

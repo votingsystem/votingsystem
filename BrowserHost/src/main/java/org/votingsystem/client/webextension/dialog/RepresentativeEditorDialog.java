@@ -129,7 +129,7 @@ public class RepresentativeEditorDialog extends DialogVS {
             operationVS.setSignedMessageSubject(ContextVS.getMessage("publishRepresentativeLbl"));
             operationVS.setServiceURL(ContextVS.getInstance().getAccessControl().getRepresentativeServiceURL());
             operationVS.setCallerCallback(null);
-            BrowserHost.getInstance().processOperationWithPassword(operationVS, null);
+            operationVS.processOperationWithPassword(ContextVS.getMessage("publishRepresentativeLbl"));
             hide();
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

@@ -11,8 +11,8 @@ import javafx.scene.web.HTMLEditor;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.service.EventBusService;
-import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.client.webextension.util.OperationVS;
+import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
@@ -157,7 +157,7 @@ public class GroupVSEditorDialog extends DialogVS implements AddTagVSDialog.List
             operationVS.setSignedMessageSubject(ContextVS.getMessage("newGroupVSLbl"));
             operationVS.setServiceURL(ContextVS.getInstance().getCurrencyServer().getSaveGroupVSServiceURL());
             operationVS.setCallerCallback(null);
-            BrowserHost.getInstance().processOperationWithPassword(operationVS, null);
+            operationVS.processOperationWithPassword(ContextVS.getMessage("newGroupVSLbl"));
             hide();
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

@@ -1,7 +1,9 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.JSON;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -72,10 +74,9 @@ public class MessageDto<T> {
         return dto;
     }
 
-    public static <T> MessageDto<T> OPERATION_CALLBACK(int statusCode, String message, String callerCallback, T data) {
+    public static MessageDto OPERATION_CALLBACK(int statusCode, String message, String callerCallback) {
         MessageDto dto = new MessageDto(statusCode, message);
         dto.setCallerCallback(callerCallback);
-        dto.setData(data);
         return dto;
     }
 

@@ -87,7 +87,7 @@ public class RepresentativeVotingHistoryDialog extends DialogVS {
         mapToSign.put("email", emailText.getText());
         mapToSign.put("UUID", UUID.randomUUID().toString());
         operationVS.setCallerCallback(null);
-        BrowserHost.getInstance().processOperationWithPassword(operationVS, null);
+        operationVS.processOperationWithPassword(ContextVS.getMessage("requestVotingHistoryLbl"));
         hide();
     }
 

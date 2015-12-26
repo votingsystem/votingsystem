@@ -69,7 +69,7 @@ public class RepresentativeAccreditationsDialog extends DialogVS {
         mapToSign.put("email", emailText.getText());
         mapToSign.put("UUID", UUID.randomUUID().toString());
         operationVS.setCallerCallback(null);
-        BrowserHost.getInstance().processOperationWithPassword(operationVS, null);
+        operationVS.processOperationWithPassword(ContextVS.getMessage("requestAccreditationsLbl"));
         hide();
     }
 

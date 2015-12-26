@@ -14,6 +14,7 @@ import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.webextension.service.EventBusService;
 import org.votingsystem.client.webextension.util.MsgUtils;
+import org.votingsystem.client.webextension.util.OperationVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
@@ -73,7 +74,7 @@ public class QRDialog extends DialogVS {
                                 saveWalletButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.MONEY));
                                 saveWalletButton.setText(ContextVS.getMessage("saveToSecureWalletMsg"));
                                 saveWalletButton.setOnAction(event -> {
-                                    BrowserHost.getInstance().saveWallet();
+                                    new OperationVS().saveWallet();
                                 });
                                 VBox buttonsVBox = new VBox(10);
                                 buttonsVBox.getChildren().addAll(openReceiptButton, saveWalletButton);
