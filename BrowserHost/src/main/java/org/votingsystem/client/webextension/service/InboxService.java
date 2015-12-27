@@ -107,8 +107,8 @@ public class InboxService implements PasswordDialog.Listener {
                 Integer visibilityInSeconds = null;
                 if(isTimeLimited) visibilityInSeconds = TIME_LIMITED_MESSAGE_LIVE;
                 PasswordDialog.showWithoutPasswordConfirm(TypeVS.MESSAGEVS, this, dialogMessage, visibilityInSeconds);
-            } else BrowserHost.showMessage(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("messageToDeviceService") +
-                    " - " + ContextVS.getMessage("jksRequiredMsg")));
+            } else BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("messageToDeviceService") +
+                    " - " + ContextVS.getMessage("jksRequiredMsg"));
         });
     }
 

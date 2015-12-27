@@ -193,7 +193,7 @@ public class GroupVSEditorDialog extends DialogVS implements AddTagVSDialog.List
             ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.JSON);
             updateProgress(8, 10);
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                BrowserHost.showMessage(responseVS);
+                BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
             } else {
                 GroupVSDto dto = (GroupVSDto) responseVS.getMessage(GroupVSDto.class);
                 groupId = dto.getId();

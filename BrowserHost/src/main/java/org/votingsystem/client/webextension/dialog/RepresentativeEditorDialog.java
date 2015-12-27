@@ -205,7 +205,7 @@ public class RepresentativeEditorDialog extends DialogVS {
             ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.JSON);
             updateProgress(8, 10);
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                BrowserHost.showMessage(responseVS);
+                BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
             } else {
                 UserVSDto representativeDto = (UserVSDto) responseVS.getMessage(UserVSDto.class);
                 String description = new String(Base64.getDecoder().decode(representativeDto.getDescription()),

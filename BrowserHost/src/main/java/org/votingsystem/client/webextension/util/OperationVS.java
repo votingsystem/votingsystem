@@ -22,7 +22,6 @@ import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.*;
@@ -31,7 +30,6 @@ import org.votingsystem.util.currency.Wallet;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -57,6 +55,7 @@ public class OperationVS implements PasswordDialog.Listener {
     private String serviceURL;
     private String receiverName;
     private String email;
+    private String tabId;
     private File file;
     private String signedMessageSubject;
     private String jsonStr;
@@ -72,18 +71,6 @@ public class OperationVS implements PasswordDialog.Listener {
 
     public OperationVS() {}
 
-    public OperationVS(int statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public OperationVS(TypeVS operation) {
-        this.setOperation(operation);
-    }
-
-    public OperationVS(int statusCode, String message) {
-        this.statusCode = statusCode;
-        this.message = message;
-    }
 
     public String getServerURL() {
         return serverURL;
@@ -423,18 +410,18 @@ public class OperationVS implements PasswordDialog.Listener {
             case OPEN_SMIME_FROM_URL:
                 executorService = Executors.newSingleThreadExecutor();
                 executorService.submit(() -> {
-                    ResponseVS responseVS1 = null;
+                    ResponseVS response = null;
                     if(BrowserHost.getInstance().getSMIME(serviceURL) != null) {
-                        responseVS1 = new ResponseVS(ResponseVS.SC_OK, BrowserHost.getInstance().getSMIME(serviceURL));
+                        response = new ResponseVS(ResponseVS.SC_OK, BrowserHost.getInstance().getSMIME(serviceURL));
                     } else {
-                        responseVS1 = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.TEXT);
-                        if (ResponseVS.SC_OK == responseVS1.getStatusCode()) {
-                            BrowserHost.getInstance().setSMIME(serviceURL, responseVS1.getMessage());
+                        response = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.TEXT);
+                        if (ResponseVS.SC_OK == response.getStatusCode()) {
+                            BrowserHost.getInstance().setSMIME(serviceURL, response.getMessage());
                         }
                     }
-                    if (ResponseVS.SC_OK == responseVS1.getStatusCode()) {
-                        responseVS1.setStatusCode(ResponseVS.SC_INITIALIZED);
-                        message = responseVS1.getMessage();
+                    if (ResponseVS.SC_OK == response.getStatusCode()) {
+                        response.setStatusCode(ResponseVS.SC_INITIALIZED);
+                        message = response.getMessage();
                         PlatformImpl.runLater(() -> {
                             DocumentVSBrowserPane browserPane = new DocumentVSBrowserPane(message, null);
                             DialogVS dialogVS = new DialogVS(browserPane, null).setCaption(browserPane.getCaption());
@@ -489,6 +476,8 @@ public class OperationVS implements PasswordDialog.Listener {
     }
 
     public void processResult(ResponseVS responseVS) {
+        log.log(Level.INFO, "processResult - statusCode: " + responseVS.getStatusCode());
+        if(responseVS.getStatusCode() == ResponseVS.SC_CANCELED) return;
         try {
             switch (operation) {
                 case PUBLISH_EVENT:
@@ -508,19 +497,17 @@ public class OperationVS implements PasswordDialog.Listener {
                                 .getRepresentativeByNifServiceURL(representativeDto.getNIF());
                         BrowserHost.sendMessageToBrowser(MessageDto.NEW_TAB(representativeURL));
                         BrowserHost.showMessage(responseVS.getStatusCode(), ContextVS.getMessage("representativeDataSendOKMsg"));
-                    } else BrowserHost.showMessage(responseVS);
+                    } else BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
                     break;
                 default:
-                    if(callerCallback == null) BrowserHost.showMessage(responseVS);
+                    if(callerCallback == null) BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
                     else {
                         if(ContentTypeVS.JSON == responseVS.getContentType()) {
                             BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
-                                    responseVS.getStatusCode(), responseVS.getMessage(), callerCallback));
+                                    responseVS.getStatusCode(), responseVS.getMessage(), tabId, callerCallback));
                         } else {
-                            String message = JSON.getMapper().writeValueAsString(new MessageDto(responseVS.getStatusCode(),
-                                    responseVS.getMessage()));
                             BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
-                                    responseVS.getStatusCode(), message, callerCallback));
+                                    responseVS.getStatusCode(), responseVS.getMessage(), tabId, callerCallback));
                         }
                     }
             }
@@ -529,6 +516,14 @@ public class OperationVS implements PasswordDialog.Listener {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
         }
+    }
+
+    public String getTabId() {
+        return tabId;
+    }
+
+    public void setTabId(String tabId) {
+        this.tabId = tabId;
     }
 }
 

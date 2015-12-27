@@ -119,7 +119,7 @@ public class PasswordDialog extends DialogVS {
     }
 
     private void closePasswordDialog() {
-        listener.cancelPassword(passwordType);
+        if(password == null) listener.cancelPassword(passwordType);
         hide();
     }
 
@@ -133,6 +133,7 @@ public class PasswordDialog extends DialogVS {
         else {
             if (password1.equals(password2)) {
                 password = password1.toCharArray();
+                listener.processPassword(passwordType, password);
                 getStage().close();
             } else {
                 setMessage(ContextVS.getMessage("passwordError"));

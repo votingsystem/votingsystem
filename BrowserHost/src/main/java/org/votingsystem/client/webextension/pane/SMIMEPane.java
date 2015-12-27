@@ -22,7 +22,6 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.util.*;
 
-import java.io.File;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -173,7 +172,7 @@ public class SMIMEPane extends GridPane implements DocumentVS {
                 sb.append("<br/><br/><b>" + ContextVS.getMessage("optionSelectedLbl") + "</b>: " +
                         voteVSDto.getOptionSelected().getContent());
                 BrowserHost.showMessage(sb.toString(), ContextVS.getMessage("checkVoteLbl"));
-            } else BrowserHost.showMessage(responseVS);
+            } else BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
             return responseVS;
         }
     }

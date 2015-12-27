@@ -399,7 +399,7 @@ public class ContextVS {
         KeyStore keyStore = null;
         try {
             keyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
-            if(keyStoreFile.createNewFile()) throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"));
+            if(!keyStoreFile.exists()) throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"));
         } catch(Exception ex) {
             throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
         }

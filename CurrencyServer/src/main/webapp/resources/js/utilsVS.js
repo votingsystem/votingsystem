@@ -172,7 +172,6 @@ function toJSON(message){
 
 var ResponseVS = {
 		SC_OK : 200,
-        SC_OK_WITHOUT_BODY:204,
 		SC_ERROR_REQUEST : 400,
 		SC_ERROR_REQUEST_REPEATED : 409,
         SC_PRECONDITION_FAILED:412,
@@ -308,5 +307,5 @@ function checkIfClientToolIsConnected() {
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8
 function setClientToolMessage(callerId, message) {
     var b64_to_utf8 = decodeURIComponent(escape(window.atob(message)))
-    window[callerId](b64_to_utf8)
+    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent(callerId, {detail:b64_to_utf8}))
 }

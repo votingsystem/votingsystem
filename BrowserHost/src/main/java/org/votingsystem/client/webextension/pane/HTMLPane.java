@@ -4,9 +4,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import org.votingsystem.client.webextension.util.Utils;
-import org.votingsystem.util.ContextVS;
 
-import java.io.File;
 import java.util.logging.Logger;
 
 /**

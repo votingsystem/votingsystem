@@ -10,7 +10,7 @@
     }
 
     OperationVS.prototype.setCallback = function(callbackFunction) {
-        window[this.callerCallback] = callbackFunction;
+        document.querySelector("#voting_system_page").addEventListener(this.callerCallback, function(e) { callbackFunction(e.detail) });
     }
 
     function EventVS() {}

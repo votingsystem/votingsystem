@@ -37,7 +37,6 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     }
     
     public static final int SC_OK                       = 200;
-    public static final int SC_OK_WITHOUT_BODY          = 204;
     public static final int SC_OK_CANCEL_ACCESS_REQUEST = 270;
     public static final int SC_MESSAGE_FROM_VS          = 277;
     public static final int SC_REQUEST_TIMEOUT          = 408;

@@ -1,10 +1,12 @@
 package org.votingsystem.client.webextension.task;
 
 import javafx.concurrent.Task;
+import org.votingsystem.client.webextension.dialog.CertNotFoundDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.util.OperationVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
 
@@ -37,6 +39,9 @@ public class SendSMIMETask extends Task<ResponseVS> {
             responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     operationVS.getServiceURL(), headers);
             updateProgress(10, 10);
+        }catch (KeyStoreExceptionVS ex) {
+            responseVS = new ResponseVS(ResponseVS.SC_CANCELED);
+            CertNotFoundDialog.showDialog();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             responseVS = ResponseVS.ERROR(ex.getMessage());

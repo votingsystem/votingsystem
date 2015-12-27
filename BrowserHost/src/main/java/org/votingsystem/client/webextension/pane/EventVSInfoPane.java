@@ -16,7 +16,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.TypeVS;
 
-import java.io.File;
 import java.util.logging.Logger;
 
 /**

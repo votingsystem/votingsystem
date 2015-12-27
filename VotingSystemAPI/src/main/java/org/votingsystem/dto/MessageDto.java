@@ -1,9 +1,7 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.JSON;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -15,6 +13,7 @@ public class MessageDto<T> {
     private String operation;
     private String message_type;
     private String message;
+    private String tabId;
     private String callerCallback;
     private T data;
     private String URL;
@@ -74,9 +73,10 @@ public class MessageDto<T> {
         return dto;
     }
 
-    public static MessageDto OPERATION_CALLBACK(int statusCode, String message, String callerCallback) {
+    public static MessageDto OPERATION_CALLBACK(int statusCode, String message, String tabId, String callerCallback) {
         MessageDto dto = new MessageDto(statusCode, message);
         dto.setCallerCallback(callerCallback);
+        dto.setTabId(tabId);
         return dto;
     }
 
@@ -137,5 +137,13 @@ public class MessageDto<T> {
 
     public void setCallerCallback(String callerCallback) {
         this.callerCallback = callerCallback;
+    }
+
+    public String getTabId() {
+        return tabId;
+    }
+
+    public void setTabId(String tabId) {
+        this.tabId = tabId;
     }
 }

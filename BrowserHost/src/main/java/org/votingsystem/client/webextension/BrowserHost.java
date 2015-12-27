@@ -1,5 +1,6 @@
 package org.votingsystem.client.webextension;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -7,10 +8,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import org.votingsystem.client.webextension.dialog.MessageDialog;
-import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.OperationVS;
 import org.votingsystem.client.webextension.util.Utils;
@@ -18,21 +17,17 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BrowserHost extends Application {
 
@@ -40,21 +35,100 @@ public class BrowserHost extends Application {
 
     private static final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
+    public static final int MAX_MESSAGE_SIZE = 1024000;
+
     private static BrowserHost INSTANCE;
-    private Map<String, String> smimeMessageMap;
+    private Map<String, String> smimeMessageMap = new HashMap<>();
     private Map<String, org.votingsystem.model.currency.Currency.State> currencyStateMap = new HashMap<>();
     private static final Map<String, QRMessageDto> qrMessagesMap = new HashMap<>();
-    private String accessControlServerURL;
-    private String currencyServerURL;
     private Stage primaryStage;
 
+    @Override public void start(final Stage primaryStage) throws Exception {
+        INSTANCE = this;
+        INSTANCE.primaryStage = primaryStage;
+        //dummy initilization of the stage in order to be available to other UI component
+        //primaryStage.initStyle(StageStyle.TRANSPARENT);
+        primaryStage.setScene(new Scene(new Group(), 220, 100));
+        primaryStage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
+        primaryStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
+        primaryStage.show();
+
+        //this is the part the receives the messages from the browser extension
+        executorService.execute(() -> {
+            log.info("waiting for browser messages");
+            try {
+                byte[] messagePart = null;
+                while(true) {
+                    ByteBuffer buf = ByteBuffer.allocate(MAX_MESSAGE_SIZE);
+                    ReadableByteChannel channel = Channels.newChannel(System.in);
+                    channel.read(buf);
+                    buf.flip();
+                    byte[] bytes = null;
+                    if(messagePart != null) {
+                        bytes = new byte[messagePart.length + buf.limit()];
+                        System.arraycopy(messagePart, 0, bytes, 0, messagePart.length);
+                        System.arraycopy(buf.array(), 0, bytes, messagePart.length, buf.limit());
+                    } else {
+                        bytes = Arrays.copyOfRange(buf.array(), 4, buf.limit());
+                    }
+                    try {
+                        JSON.getMapper().readValue(bytes, OperationVS.class).initProcess();
+                        messagePart = null;
+                    } catch (JsonMappingException ex) {
+                        log.info("--- message broken waiting for part---");
+                        if(messagePart == null) messagePart = Arrays.copyOfRange(buf.array(), 4, buf.limit());
+                        else {
+                            byte[] messageSumParts = new byte[messagePart.length  +  buf.limit()];
+                            System.arraycopy(messagePart, 0, messageSumParts, 0, messagePart.length);
+                            System.arraycopy(buf.array(), 0, messageSumParts, messagePart.length, buf.limit());
+                            messagePart = messageSumParts;
+                        }
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                    }
+                }
+            }catch (Exception ex) {
+                log.log(Level.SEVERE,ex.getMessage(), ex);
+            }
+        });
+
+        /*try {
+            JSON.getMapper().readValue(ContextVS.getInstance().getResourceBytes("test.json"),
+                    OperationVS.class).initProcess();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE,ex.getMessage(), ex);
+            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+        }*/
+    }
+
+
+    public static void sendMessageToBrowser(MessageDto messageDto) {
+        try {
+            String base64msg = Base64.getEncoder().encodeToString(JSON.getMapper().writeValueAsBytes(messageDto) );
+            Map<String,String> map = new HashMap<>();
+            map.put("native_message", base64msg);
+            byte[] messageBytes = JSON.getMapper().writeValueAsBytes(map);
+            System.out.write(MsgUtils.getWebExtensionMessagePrefix(messageBytes.length));
+            System.out.write(messageBytes);
+            System.out.flush();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            showMessage(ex.getMessage(), ContextVS.getMessage("errorLbl"));
+        }
+    }
+
+    @Override public void stop() {
+        log.info("stop");
+        executorService.shutdownNow();
+        System.exit(0);//Platform.exit();
+    }
+
     public String getSMIME(String smimeMessageURL) {
-        if(smimeMessageMap ==  null) return null;
-        else return smimeMessageMap.get(smimeMessageURL);
+        return smimeMessageMap.get(smimeMessageURL);
     }
 
     public void setSMIME(String smimeMessageURL, String smimeMessageStr) {
-        if(smimeMessageMap ==  null) smimeMessageMap = new HashMap<>();
         smimeMessageMap.put(smimeMessageURL, smimeMessageStr);
     }
 
@@ -78,73 +152,8 @@ public class BrowserHost extends Application {
         return INSTANCE;
     }
 
-    public String getCurrencyServerURL() {
-        return currencyServerURL;
-    }
-
     public Scene getScene() {
         return primaryStage.getScene();
-    }
-
-    @Override public void start(final Stage primaryStage) throws Exception {
-        INSTANCE = this;
-        INSTANCE.primaryStage = primaryStage;
-        //dummy initilization of the stage in order to be available to other UI component
-        primaryStage.initStyle(StageStyle.TRANSPARENT);
-        primaryStage.setScene(new Scene(new Group(), 1, 1));
-        primaryStage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
-        primaryStage.show();
-
-        //this is the part the receives the messages from the browser extension
-        executorService.execute(() -> {
-            log.info("waiting for browser messages");
-            try {
-                while(true) {
-                    ByteBuffer buf = ByteBuffer.allocate(100000);
-                    ReadableByteChannel channel = Channels.newChannel(System.in);
-                    channel.read(buf);
-                    buf.flip();
-                    byte[] bytes = Arrays.copyOfRange(buf.array(), 4, buf.limit());
-                    processMessageToHost(bytes);
-                }
-            }catch (Exception ex) {
-                log.log(Level.SEVERE,ex.getMessage(), ex);
-            }
-        });
-
-        try {
-            processMessageToHost(ContextVS.getInstance().getResourceBytes("test.json"));
-        } catch (Exception ex) {
-            log.log(Level.SEVERE,ex.getMessage(), ex);
-            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-        }
-    }
-
-    @Override public void stop() {
-        log.info("stop");
-        executorService.shutdownNow();
-        System.exit(0);//Platform.exit();
-    }
-
-    public static void sendMessageToBrowser(MessageDto messageDto) {
-        log.info("sendMessageToBrowser");
-        try {
-            String base64msg = Base64.getEncoder().encodeToString(JSON.getMapper().writeValueAsBytes(messageDto) );
-            Map<String,String> map = new HashMap<>();
-            map.put("native_message", base64msg);
-            byte[] messageBytes = JSON.getMapper().writeValueAsBytes(map);
-            System.out.write(MsgUtils.getWebExtensionMessagePrefix(messageBytes.length));
-            System.out.write(messageBytes);
-            System.out.flush();
-        } catch (Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-            showMessage(ex.getMessage(), ContextVS.getMessage("errorLbl"));
-        }
-    }
-
-    public static void showMessage(ResponseVS responseVS) {
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) showMessage(responseVS.getStatusCode(), responseVS.getMessage());
-        else showMessage(responseVS.getStatusCode(), responseVS.getMessage());
     }
 
     public static void showMessage(Integer statusCode, String message) {
@@ -161,17 +170,6 @@ public class BrowserHost extends Application {
 
     public static void showMessage(final String message, final String caption) {
         PlatformImpl.runLater(() -> new MessageDialog(getInstance().getScene().getWindow()).showHtmlMessage(message, caption));
-    }
-
-    private void processMessageToHost(byte[] messageBytes) {
-        log.info("processMessageToHost: " + new String(messageBytes));
-        try {
-            OperationVS operationVS = JSON.getMapper().readValue(messageBytes, OperationVS.class);
-            operationVS.initProcess();
-        } catch (Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-        }
     }
 
     public static void main(String[] args) throws Exception {

@@ -5,6 +5,7 @@
     </ui:define>
     <ui:define name="content">
         <div id="voting_system_page">
+            <button onclick="testCallback()">testCallback</button>
             <button onclick="sendExternalMessageToExtension()">sendMessageToExtension</button>
             <button onclick="sendMessageToExtensionWithContentScript()">sendMessageToExtensionWithContentScript</button>
         </div>
@@ -15,6 +16,9 @@
             debugger; // this is to allow logging from extension content scripts
             // The ID of the extension we want to talk to.
             var editorExtensionId = "knldjmfmopnpolahpmmgbagdohdnhkik";
+            vs = {}
+            vs.webextension_available = true
+
 
             document.querySelector("#voting_system_page").addEventListener('message_from_extension',
                     function(event) {
@@ -58,6 +62,13 @@
                     console.log("webExtensionMsgTest - Content script received: " + JSON.stringify(event.data));
                 }
             }, false)
+
+
+            function testCallback() {
+                var operationVS = new OperationVS("ALERT")
+                operationVS.setCallback(function(appMessage) { console.log("hello from callback - appMessage: " + JSON.stringify(appMessage))})
+                VotingSystemClient.setMessage(operationVS);
+            }
             // ]]>
         </script>
     </ui:define>

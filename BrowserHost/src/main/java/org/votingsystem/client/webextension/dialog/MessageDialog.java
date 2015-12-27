@@ -14,7 +14,6 @@ import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 
-import java.io.File;
 import java.util.logging.Logger;
 
 /**

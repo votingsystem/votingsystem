@@ -15,7 +15,6 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 
-import java.io.File;
 import java.util.logging.Logger;
 
 /**

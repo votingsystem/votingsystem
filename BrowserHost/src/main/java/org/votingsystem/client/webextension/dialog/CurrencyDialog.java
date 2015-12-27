@@ -243,7 +243,7 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
             updateProgress(8, 10);
             log.info("transaction result: " + responseVS.getStatusCode());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                BrowserHost.showMessage(responseVS);
+                BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
             } else {
                 CurrencyBatchResponseDto responseDto = JSON.getMapper().readValue(responseVS.getMessage(),
                         CurrencyBatchResponseDto.class);

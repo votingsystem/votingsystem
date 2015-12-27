@@ -44,17 +44,16 @@
                 this.$.imageFile.addEventListener('change', this.handleFileSelect.bind(this), false);
             },
             submitForm: function() {
-                /*if(!this.selectedFileBase64) {
+                if(!this.selectedFileBase64) {
                     alert("${msg.selectRepresentativeImgLbl}", "${msg.errorLbl}")
                     return;
-                }*/
+                }
                 var msgTemplate = "${msg.enterFieldMsg}"
                 var operationVS = new OperationVS(Operation.NEW_REPRESENTATIVE)
                 operationVS.serviceURL = contextURL + "/rest/representative/save"
                 operationVS.signedMessageSubject = "${msg.newRepresentativeLbl}"
                 var description = window.btoa(encodeURIComponent( escape(this.$.editor.getContent())))
-                //operationVS.jsonStr = JSON.stringify({description:description, base64Image:this.selectedFileBase64,  UUID: Math.random().toString(36).substring(7)})
-                operationVS.jsonStr = JSON.stringify({description:description, UUID: Math.random().toString(36).substring(7)})
+                operationVS.jsonStr = JSON.stringify({description:description, base64Image:this.selectedFileBase64,  UUID: Math.random().toString(36).substring(7)})
                 console.log(JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
             },

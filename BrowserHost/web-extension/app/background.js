@@ -5,6 +5,7 @@ function processOperation(messageJSON) {
     switch(messageJSON.operation) {
         case "message-to-host":
             console.table("background.js - message-to-host - operation: " + messageJSON.content.operation)
+            messageJSON.content.tabId = messageJSON.tabId
             if(!hostPort) connectToHost(messageJSON.content)
             else hostPort.postMessage(messageJSON.content);
             break;
@@ -43,9 +44,7 @@ function messageFromHost(msg) {
                 return;
         }
     }
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
-        chrome.tabs.sendMessage(tabs[0].id, messageJSON, function(response) {});
-    });
+    chrome.tabs.sendMessage(parseInt(messageJSON.tabId), messageJSON, function(response) {});
 }
 
 chrome.runtime.onSuspend.addListener( function(request, sender, sendResponse) {
