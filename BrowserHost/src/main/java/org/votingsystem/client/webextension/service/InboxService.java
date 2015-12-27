@@ -64,7 +64,7 @@ public class InboxService implements PasswordDialog.Listener {
     private InboxService() {
         List<InboxMessageDto> messageListDto = null;
         try {
-            messagesFile = new File(ContextVS.APPDIR + File.separator + ContextVS.INBOX_FILE);
+            messagesFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.INBOX_FILE);
             if(messagesFile.createNewFile()) {
                 messageList = new ArrayList<>();
                 flush();

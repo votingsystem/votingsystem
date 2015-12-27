@@ -56,7 +56,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
 
     private BrowserSessionService() {
         try {
-            sessionFile = new File(ContextVS.APPDIR + File.separator + ContextVS.BROWSER_SESSION_FILE);
+            sessionFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.BROWSER_SESSION_FILE);
             if(sessionFile.createNewFile()) {
                 browserSessionDto = new BrowserSessionDto();
             } else {
@@ -83,7 +83,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
                     ContextVS.getInstance().getAccessControl().getRepresentationStateServiceURL(userVS.getNif()),
                     MediaTypeVS.JSON);
         }
-        representativeStateFile = new File(ContextVS.APPDIR + File.separator + ContextVS.REPRESENTATIVE_STATE_FILE);
+        representativeStateFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.REPRESENTATIVE_STATE_FILE);
         if(representativeStateFile.createNewFile()) {
             representativeStateDto = stateDto;
             flush();
@@ -257,7 +257,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
     }
 
     public UserVS getKeyStoreUserVS() {
-        return ContextVS.getKeyStoreUserVS();
+        return ContextVS.getInstance().getKeyStoreUserVS();
     }
 
     public BrowserSessionDto getBrowserSessionData() {
@@ -266,7 +266,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
 
     public void setCSRRequest(Long requestId, EncryptedBundle bundle) {
         try {
-            File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
+            File csrFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
             csrFile.createNewFile();
             EncryptedBundleDto bundleDto = new EncryptedBundleDto(bundle);
             bundleDto.setId(requestId);
@@ -282,12 +282,12 @@ public class BrowserSessionService implements PasswordDialog.Listener {
 
     private void deleteCSR() {
         log.info("deleteCSR");
-        File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
+        File csrFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
         if(csrFile.exists()) csrFile.delete();
     }
 
     private void checkCSR() {
-        File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
+        File csrFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
         if(csrFile.exists()) {
             log.info("csr request found");
             try {
@@ -384,7 +384,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
         switch (passwordType) {
             case CERT_USER_NEW:
                 try {
-                    File csrFile = new File(ContextVS.APPDIR + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
+                    File csrFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
                     EncryptedBundleDto bundleDto = JSON.getMapper().readValue(csrFile, EncryptedBundleDto.class);
                     Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
                             currentResponseVS.getMessage().getBytes());
@@ -407,7 +407,7 @@ public class BrowserSessionService implements PasswordDialog.Listener {
                     userKeyStore.load(null);
                     userKeyStore.setKeyEntry(ContextVS.KEYSTORE_USER_CERT_ALIAS, certificationRequest.getPrivateKey(),
                             password, certsArray);
-                    ContextVS.saveUserKeyStore(userKeyStore, password);
+                    ContextVS.getInstance().saveUserKeyStore(userKeyStore, password);
                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString());
                     showMessage(ResponseVS.SC_OK, ContextVS.getMessage("certInstallOKMsg"));
                     csrFile.delete();

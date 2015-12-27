@@ -55,7 +55,6 @@ public class SMIMEPane extends GridPane implements DocumentVS {
         getColumnConstraints().addAll(column1, column2);
         setHalignment(openSignatureInfoButton, HPos.RIGHT);
         WebView signatureContentWebView = new WebView();
-        signatureContentWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         if (signedFile.isValidSignature()) {
             openSignatureInfoButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CHECK));
             openSignatureInfoButton.setText(ContextVS.getMessage("signatureOKLbl"));

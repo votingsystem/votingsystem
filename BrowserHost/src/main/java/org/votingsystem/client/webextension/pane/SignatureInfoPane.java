@@ -56,7 +56,6 @@ public class SignatureInfoPane extends GridPane {
         Label signerLabel = new Label(ContextVS.getMessage("signerLbl") + ": ");
         signerLabel.setStyle("-fx-font-weight: bold;");
         WebView webView = new WebView();
-        webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         String finalHTML = "<html style='font-size:0.9em;background: #f9f9f9;'>" +
                 Formatter.getInfoCert(signer.getCertificate()) + "</html>";
         webView.getEngine().loadContent(finalHTML);

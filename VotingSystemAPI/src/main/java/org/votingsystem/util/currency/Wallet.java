@@ -30,7 +30,7 @@ public class Wallet {
     private static Set<Currency> wallet;
 
     public static List<CurrencyDto> getPlainWalletDto() throws Exception {
-        File walletFile = new File(ContextVS.APPDIR + File.separator + ContextVS.PLAIN_WALLET_FILE_NAME);
+        File walletFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.PLAIN_WALLET_FILE_NAME);
         if(!walletFile.exists()) return Collections.emptyList();
         return JSON.getMapper().readValue(walletFile, new TypeReference<List<CurrencyDto>>() { });
     }
@@ -40,7 +40,7 @@ public class Wallet {
     }
 
     public static void savePlainWalletDto(Collection<CurrencyDto> walletList) throws Exception {
-        File walletFile = new File(ContextVS.APPDIR + File.separator + ContextVS.PLAIN_WALLET_FILE_NAME);
+        File walletFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.PLAIN_WALLET_FILE_NAME);
         walletFile.createNewFile();
         JSON.getMapper().writeValue(walletFile, walletList);
     }
@@ -88,7 +88,7 @@ public class Wallet {
     public static void createWallet(List<CurrencyDto> walletDto, char[] pin) throws Exception {
         String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST));
         String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + pinHashHex + ContextVS.WALLET_FILE_EXTENSION;
-        File walletFile = new File(ContextVS.APPDIR + File.separator + walletFileName);
+        File walletFile = new File(ContextVS.getInstance().getAppDir() + File.separator + walletFileName);
         walletFile.getParentFile().mkdirs();
         EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(pin, JSON.getMapper().writeValueAsBytes(walletDto));
         JSON.getMapper().writeValue(walletFile, new EncryptedBundleDto(bundle));
@@ -102,7 +102,7 @@ public class Wallet {
     public static Set<Currency> getWallet(char[] pin) throws Exception {
         String pinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(pin), ContextVS.VOTING_DATA_DIGEST));
         String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + pinHashHex + ContextVS.WALLET_FILE_EXTENSION;
-        File walletFile = new File(ContextVS.APPDIR + File.separator + walletFileName);
+        File walletFile = new File(ContextVS.getInstance().getAppDir() + File.separator + walletFileName);
         if(!walletFile.exists()) {
             EncryptedWalletList encryptedWalletList = getEncryptedWalletList();
             if(encryptedWalletList.size() > 0) throw new ExceptionVS(ContextVS.getMessage("walletNotFoundErrorMsg"));
@@ -128,17 +128,17 @@ public class Wallet {
         String oldPinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(oldPin), ContextVS.VOTING_DATA_DIGEST));
         String newPinHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(newPin), ContextVS.VOTING_DATA_DIGEST));
         String newWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + newPinHashHex + ContextVS.WALLET_FILE_EXTENSION;
-        File newWalletFile = new File(ContextVS.APPDIR + File.separator + newWalletFileName);
+        File newWalletFile = new File(ContextVS.getInstance().getAppDir() + File.separator + newWalletFileName);
         if(!newWalletFile.createNewFile()) throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));
         EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(newPin, JSON.getMapper().writeValueAsBytes(walletDto));
         JSON.getMapper().writeValue(newWalletFile, new EncryptedBundleDto(bundle));
         String oldWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + oldPinHashHex + ContextVS.WALLET_FILE_EXTENSION;
-        File oldWalletFile = new File(ContextVS.APPDIR + File.separator + oldWalletFileName);
+        File oldWalletFile = new File(ContextVS.getInstance().getAppDir() + File.separator + oldWalletFileName);
         oldWalletFile.delete();
     }
 
     public static EncryptedWalletList getEncryptedWalletList() {
-        File directory = new File(ContextVS.APPDIR);
+        File directory = new File(ContextVS.getInstance().getAppDir());
         String[] resultFiles = directory.list(new FilenameFilter() {
             public boolean accept(File directory, String fileName) {
                 return fileName.startsWith(ContextVS.WALLET_FILE_NAME);

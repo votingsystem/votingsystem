@@ -36,7 +36,6 @@ public class TimeStampCertPane extends GridPane {
         showPEMcertButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
         add(showPEMcertButton, 0, 1);
         WebView certInfoWebView = new WebView();
-        certInfoWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         certInfoWebView.setPrefHeight(400);
         add(certInfoWebView, 0, 2);
     }

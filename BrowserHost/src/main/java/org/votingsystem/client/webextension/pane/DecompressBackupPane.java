@@ -76,7 +76,7 @@ public class DecompressBackupPane extends VBox {
     }
 
     public static void showDialog(final Listener listener, final File fileToOpen) {
-        final String outputFolder = ContextVS.APPTEMPDIR + File.separator + UUID.randomUUID();
+        final String outputFolder = ContextVS.getInstance().getTempDir() + File.separator + UUID.randomUUID();
         log.info("validateBackup - outputFolder: " + outputFolder);
         Platform.runLater(() -> {
             Stage stage = new Stage(StageStyle.TRANSPARENT);

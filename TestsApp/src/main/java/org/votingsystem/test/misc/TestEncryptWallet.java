@@ -24,7 +24,7 @@ public class TestEncryptWallet {
         //Map<String, Object> dataMap = JSON.getMapper().readValue(fileToEncrypt, new TypeReference<HashMap<String, Object>>() {});
         byte[] encryptedBytes = signatureService.encryptToCMS(FileUtils.getBytesFromFile(fileToEncrypt),
                 signatureService.getCertSigner());
-        File encryptedFile = new File (ContextVS.APPDIR + File.separator + ContextVS.WALLET_FILE_NAME);
+        File encryptedFile = new File (ContextVS.getInstance().getAppDir() + File.separator + ContextVS.WALLET_FILE_NAME);
         encryptedFile.createNewFile();
         FileUtils.copyStreamToFile(new ByteArrayInputStream(encryptedBytes), encryptedFile);
         byte[] decryptedBytes = signatureService.decryptCMS(FileUtils.getBytesFromFile(encryptedFile));

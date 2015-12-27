@@ -20,7 +20,6 @@ public class HTMLPane extends VBox{
 
     public HTMLPane(String paneContent) {
         webView = new WebView();
-        webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         webView.getEngine().loadContent(paneContent);
         Utils.browserVSLinkListener(webView);
         VBox.setVgrow(webView, Priority.ALWAYS);

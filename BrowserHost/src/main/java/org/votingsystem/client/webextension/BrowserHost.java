@@ -21,6 +21,7 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
 
 import java.io.File;
@@ -37,7 +38,7 @@ public class BrowserHost extends Application {
 
     private static Logger log = Logger.getLogger(BrowserHost.class.getSimpleName());
 
-    private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     private static BrowserHost INSTANCE;
     private Map<String, String> smimeMessageMap;
@@ -89,42 +90,11 @@ public class BrowserHost extends Application {
         INSTANCE = this;
         INSTANCE.primaryStage = primaryStage;
         //dummy initilization of the stage in order to be available to other UI component
-        //primaryStage.initStyle(StageStyle.TRANSPARENT);
-        //primaryStage.setScene(new Scene(new Group(), 1, 1));
-        primaryStage.setScene(new Scene(new Group(), 100, 100));
+        primaryStage.initStyle(StageStyle.TRANSPARENT);
+        primaryStage.setScene(new Scene(new Group(), 1, 1));
         primaryStage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
         primaryStage.show();
 
-        new Thread(() -> {
-            boolean loadedFromJar = false;
-            if(BrowserHost.class.getResource(BrowserHost.this.getClass().getSimpleName() + ".class").
-                    toString().contains("jar:file")) {
-                loadedFromJar = true;
-            }
-            log.info("start - loadedFromJar: " + loadedFromJar + " - JavaFX version: " +
-                    com.sun.javafx.runtime.VersionInfo.getRuntimeVersion());
-            if(loadedFromJar) {
-                accessControlServerURL = ContextVS.getMessage("prodAccessControlServerURL");
-                currencyServerURL = ContextVS.getMessage("prodCurrencyServerURL");
-            } else {
-                accessControlServerURL = ContextVS.getMessage("devAccessControlServerURL");
-                currencyServerURL = ContextVS.getMessage("devCurrencyServerURL");
-            }
-            ResponseVS responseVS = null;
-            try {
-                responseVS = Utils.checkServer(accessControlServerURL);
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    ContextVS.getInstance().setAccessControl((AccessControlVS) responseVS.getData());
-                    BrowserSessionService.getInstance().checkCSRRequest();
-                }
-            } catch(Exception ex) {log.log(Level.SEVERE,ex.getMessage(), ex);}
-            try {
-                responseVS = Utils.checkServer(currencyServerURL);
-                ContextVS.getInstance().setCurrencyServer((CurrencyServer) responseVS.getData());
-            } catch(Exception ex) {
-                log.log(Level.SEVERE,ex.getMessage());
-            }
-        }).start();
         //this is the part the receives the messages from the browser extension
         executorService.execute(() -> {
             log.info("waiting for browser messages");
@@ -141,7 +111,13 @@ public class BrowserHost extends Application {
                 log.log(Level.SEVERE,ex.getMessage(), ex);
             }
         });
-        //processMessageToHost(ContextVS.getInstance().getResourceBytes("test.json"));
+
+        try {
+            processMessageToHost(ContextVS.getInstance().getResourceBytes("test.json"));
+        } catch (Exception ex) {
+            log.log(Level.SEVERE,ex.getMessage(), ex);
+            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+        }
     }
 
     @Override public void stop() {
@@ -199,13 +175,7 @@ public class BrowserHost extends Application {
     }
 
     public static void main(String[] args) throws Exception {
-        ContextVS.initSignatureClient("clientToolMessages", Locale.getDefault().getLanguage());
-
-        FileHandler fileHandler = new FileHandler(new File(ContextVS.APPDIR + "/app.log").getAbsolutePath());
-        fileHandler.setFormatter(new SimpleFormatter());
-        Logger.getLogger("").addHandler(fileHandler);
-
-        if(args.length > 0) ContextVS.getInstance().initDirs(args[0]);
+        new ContextVS("clientToolMessages", Locale.getDefault().getLanguage()).initDirs(System.getProperty("user.home"));
         launch(args);
     }
 

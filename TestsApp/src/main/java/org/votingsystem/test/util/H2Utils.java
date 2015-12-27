@@ -16,7 +16,7 @@ public class H2Utils {
     private static Logger log = Logger.getLogger(H2Utils.class.getSimpleName());
 
     public static void testBlob() throws Exception {
-        String url = ContextVS.APPDIR + "/testH2Blob";
+        String url = ContextVS.getInstance().getAppDir() + "/testH2Blob";
         log.info("url: " + url);
         Class.forName("org.h2.Driver");
         Connection conn = DriverManager.getConnection("jdbc:h2:" + url);
@@ -38,7 +38,7 @@ public class H2Utils {
     }
 
     public static void testPlainText() throws Exception {
-        String url = ContextVS.APPDIR + "/testH2PlainText";
+        String url = ContextVS.getInstance().getAppDir() + "/testH2PlainText";
         log.info("url: " + url);
         DeleteDbFiles.execute("~", url, true);
         Class.forName("org.h2.Driver");

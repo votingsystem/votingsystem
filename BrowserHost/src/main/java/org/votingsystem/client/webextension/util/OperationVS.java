@@ -359,22 +359,14 @@ public class OperationVS implements PasswordDialog.Listener {
             ResponseVS responseVS;
             switch (operation) {
                 case SEND_VOTE:
-                    setTargetServer(ContextVS.getInstance().getAccessControl());
-                    String controlCenterURL = ContextVS.getInstance().getAccessControl().getControlCenter().getServerURL();
-                    responseVS = Utils.checkServer(controlCenterURL);
-                    if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        ContextVS.getInstance().setControlCenter((ControlCenterVS) responseVS.getData());
-                    }
+                    responseVS = Utils.checkServer(serverURL.trim());
+                    responseVS = Utils.checkServer(ContextVS.getInstance().getAccessControl().getControlCenter().getServerURL());
                     break;
                 case CURRENCY_DELETE:
                     responseVS = new ResponseVS(ResponseVS.SC_OK);
                     break;
                 default:
                     responseVS = Utils.checkServer(serverURL.trim());
-                    if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        ContextVS.getInstance().setServer((ActorVS) responseVS.getData());
-                        setTargetServer((ActorVS) responseVS.getData());
-                    }
             }
             return responseVS;
         });

@@ -225,7 +225,7 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         switch (passwordType) {
             case KEYSTORE_SELECT:
                 try {
-                    UserVS userVS = ContextVS.saveUserKeyStore(selectedKeyStore, password);
+                    UserVS userVS = ContextVS.getInstance().saveUserKeyStore(selectedKeyStore, password);
                     CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
                             userVS.getCertificate(), ContextVS.DEVICEVS_OID);
                     deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);

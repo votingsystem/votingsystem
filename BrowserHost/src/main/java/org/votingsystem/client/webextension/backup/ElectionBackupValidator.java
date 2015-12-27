@@ -47,7 +47,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
     
     public ElectionBackupValidator(String backupPath, ValidatorListener validatorListener) throws Exception {
         if(ContextVS.getInstance() == null) {
-            ContextVS.initSignatureClient("clientToolMessages.properties", "es");
+            new ContextVS("clientToolMessages", Locale.getDefault().getLanguage()).initDirs(System.getProperty("user.home"));
         }
         backupDir = new File(backupPath);
         this.validatorListener =  validatorListener;

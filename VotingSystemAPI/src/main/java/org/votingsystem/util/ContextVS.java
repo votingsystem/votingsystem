@@ -62,9 +62,8 @@ public class ContextVS {
     public static final String CURRENCY_OID = VOTING_SYSTEM_BASE_OID + CURRENCY_TAG;
     public static final String DEVICEVS_OID = VOTING_SYSTEM_BASE_OID + DEVICEVS_TAG;
 
-    public static String APPDIR;
-    public static String WEBVIEWDIR;
-    public static String APPTEMPDIR;
+    private String appDir;
+    private String tempDir;
 
     public static String SETTINGS_FILE_NAME = "settings.properties";
     public static String USER_KEYSTORE_FILE_NAME = "userks.jks";
@@ -159,23 +158,9 @@ public class ContextVS {
     private DeviceVSDto connectedDevice;
     private static ContextVS INSTANCE;
 
-    public ContextVS() {
-        try {
-            initDirs(new File(".").getAbsolutePath());
-            KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
-            try {
-                parentBundle = ResourceBundle.getBundle("votingSystemAPI", Locale.getDefault());
-            } catch (Exception ex) {
-                log.info("loading default parent bundle - locale: " + locale);
-                parentBundle = ResourceBundle.getBundle("votingSystemAPI");
-            }
-        } catch (Exception ex) { ex.printStackTrace();}
-    }
-
     public ContextVS(String localizatedMessagesFileName, String localeParam) {
         log.info("localizatedMessagesFileName: " + localizatedMessagesFileName + " - locale: " + locale);
         try {
-            initDirs(new File(".").getAbsolutePath());
             KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
@@ -192,6 +177,7 @@ public class ContextVS {
             if(localizatedMessagesFileName != null) {
                 resBundle = ResourceBundle.getBundle(localizatedMessagesFileName, locale);
             }
+            INSTANCE = this;
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage() + " - localizatedMessagesFileName: " +
                     localizatedMessagesFileName, ex);
@@ -217,24 +203,24 @@ public class ContextVS {
         return votingSystemSSLTrustAnchors;
     }
 
-    public void initDirs(String baseDir) throws IOException {
-        APPDIR = baseDir + File.separator +  ".VotingSystem";
-        WEBVIEWDIR =  APPDIR + File.separator + "webview";
-        APPTEMPDIR =  APPDIR + File.separator + "temp";
-        new File(APPDIR).mkdir();
-        new File(APPTEMPDIR).mkdir();
-        log.info("APPDIR: " + APPDIR);
+    public void initDirs(String baseDir) throws Exception {
+        appDir = baseDir + File.separator +  ".VotingSystem";
+        tempDir = appDir + File.separator + "temp";
+        new File(appDir).mkdir();
+        new File(tempDir).mkdir();
+        FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(CERT_RAIZ_PATH),  new File(INSTANCE.appDir + "/" + CERT_RAIZ_PATH));
+        FileHandler fileHandler = new FileHandler(new File(appDir + "/app.log").getAbsolutePath());
+        fileHandler.setFormatter(new SimpleFormatter());
+        Logger.getLogger("").addHandler(fileHandler);
     }
 
-    public static void initSignatureClient (String messagesFileName, String locale){
-        try {
-            log.info("------------- initSignatureClient ----------------- ");
-            INSTANCE = new ContextVS(messagesFileName, locale);
-            FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream(CERT_RAIZ_PATH),  new File(APPDIR + "/" + CERT_RAIZ_PATH));
-        } catch (Exception ex) {
-            java.util.logging.Logger.getLogger(ContextVS.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public String getAppDir() {
+        return appDir;
+    }
+
+    public String getTempDir() {
+        return tempDir;
     }
 
     public Locale getLocale() {
@@ -242,14 +228,13 @@ public class ContextVS {
     }
 
     public static ContextVS getInstance() {
-        if(INSTANCE == null)  INSTANCE = new ContextVS();
         return INSTANCE; 
     }
 
     public void shutdown() {
         try {
             log.info("------------------ shutdown --------------------");
-            FileUtils.deleteRecursively(new File(APPTEMPDIR));
+            FileUtils.deleteRecursively(new File(tempDir));
             log.info("------------------------------------------------");
         } catch (IOException ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -258,7 +243,7 @@ public class ContextVS {
 
     public void initTestEnvironment(InputStream configPropertiesStream, String appDir) throws Exception {
         log.info("initTestEnvironment - appDir: " + appDir);
-        if(appDir != null) initDirs(appDir);
+        initDirs(appDir);
         try {
             settings = getSettings();
             settings.load(configPropertiesStream);
@@ -284,7 +269,7 @@ public class ContextVS {
         try {
             if(settings == null) {
                 settings = new Properties();
-                File settingsFile = new File(APPDIR + File.separator + SETTINGS_FILE_NAME);
+                File settingsFile = new File(appDir + File.separator + SETTINGS_FILE_NAME);
                 if(!settingsFile.exists()) {
                     settingsFile.getParentFile().mkdirs();
                     settingsFile.createNewFile();
@@ -363,7 +348,7 @@ public class ContextVS {
         Properties settings = getSettings();
         OutputStream output = null;
         try {
-            output = new FileOutputStream(APPDIR + File.separator + SETTINGS_FILE_NAME);
+            output = new FileOutputStream(appDir + File.separator + SETTINGS_FILE_NAME);
             settings.setProperty(propertyName, propertyValue);
             settings.store(output, null);
         } catch (IOException ex) {
@@ -379,13 +364,13 @@ public class ContextVS {
         }
     }
 
-    public static UserVS saveUserKeyStore(KeyStore keyStore, char[] password) throws Exception{
+    public UserVS saveUserKeyStore(KeyStore keyStore, char[] password) throws Exception{
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password);
-        File mainKeyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
+        File mainKeyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
         mainKeyStoreFile.createNewFile();
         Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
         UserVS userVS = UserVS.getUserVS((X509Certificate)chain[0]);
-        File userVSKeyStoreFile = new File(APPDIR + File.separator + userVS.getNif() + "_" + USER_KEYSTORE_FILE_NAME);
+        File userVSKeyStoreFile = new File(appDir + File.separator + userVS.getNif() + "_" + USER_KEYSTORE_FILE_NAME);
         userVSKeyStoreFile.createNewFile();
         Map keyStoreMap = new HashMap<>();
         keyStoreMap.put("certPEM", new String(CertUtils.getPEMEncoded((X509Certificate) chain[0])));
@@ -395,9 +380,9 @@ public class ContextVS {
         return userVS;
     }
 
-    public static UserVS getKeyStoreUserVS() {
+    public UserVS getKeyStoreUserVS() {
         try {
-            File keyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
+            File keyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
             if(keyStoreFile.createNewFile()) return null;
             Map keyStoreMap = JSON.getMapper().readValue(keyStoreFile, new TypeReference<Map<String, String>>() { });
             Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(
@@ -413,7 +398,7 @@ public class ContextVS {
         File keyStoreFile = null;
         KeyStore keyStore = null;
         try {
-            keyStoreFile = new File(APPDIR + File.separator + USER_KEYSTORE_FILE_NAME);
+            keyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
             if(keyStoreFile.createNewFile()) throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"));
         } catch(Exception ex) {
             throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
@@ -434,7 +419,7 @@ public class ContextVS {
         File keyStoreFile = null;
         KeyStore keyStore = null;
         try {
-            keyStoreFile = new File(APPDIR + File.separator + nif + "_" + USER_KEYSTORE_FILE_NAME);
+            keyStoreFile = new File(appDir + File.separator + nif + "_" + USER_KEYSTORE_FILE_NAME);
         } catch(Exception ex) {
             throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
         }
@@ -474,7 +459,7 @@ public class ContextVS {
     }
 
     public void copyFile(byte[] fileToCopy, String subPath, String fileName) throws Exception {
-        File newFileDir = new File(APPDIR + subPath);
+        File newFileDir = new File(appDir + subPath);
         newFileDir.mkdirs();
         File newFile = new File(newFileDir.getAbsolutePath() + "/" + fileName);
         log.info("copyFile - path: " + newFile.getAbsolutePath());

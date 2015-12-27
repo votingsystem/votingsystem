@@ -48,7 +48,6 @@ public class EventVSInfoPane extends VBox {
         VBox.setMargin(dateBeginHBox, new Insets(10, 15, 10, 15));
 
         WebView webView = new WebView();
-        webView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         webView.getEngine().loadContent(metaInf.getFormattedInfo());
         Utils.browserVSLinkListener(webView);
 

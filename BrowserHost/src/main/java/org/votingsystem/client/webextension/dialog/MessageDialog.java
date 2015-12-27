@@ -38,7 +38,6 @@ public class MessageDialog extends DialogVS {
         messageLabel = new Label();
         messageLabel.setWrapText(true);
         messageWebView = new WebView();
-        messageWebView.getEngine().setUserDataDirectory(new File(ContextVS.WEBVIEWDIR));
         messageWebView.setPrefHeight(150);
         HBox.setHgrow(messageWebView, Priority.ALWAYS);
         VBox.setVgrow(messageWebView, Priority.ALWAYS);

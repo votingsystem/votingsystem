@@ -176,7 +176,7 @@ public class Utils {
                         PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
                             @Override public void processPassword(TypeVS passwordType, char[] password) {
                                 try {
-                                    ContextVS.saveUserKeyStore(userKeyStore, password);
+                                    ContextVS.getInstance().saveUserKeyStore(userKeyStore, password);
                                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
                                             CryptoTokenVS.JKS_KEYSTORE.toString());
                                     BrowserSessionService.getInstance().setUserVS(userVS, false);
