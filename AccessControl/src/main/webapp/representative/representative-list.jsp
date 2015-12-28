@@ -24,8 +24,8 @@
             <div class="layout flex horizontal wrap around-justified">
                 <template is="dom-repeat" items="{{representativeListDto.resultList}}">
                     <div on-tap="showRepresentativeDetails" class='representativeDiv horizontal layout center center center-justified'>
-                        <div style=' max-width: 90px;'>
-                            <img src='{{item.imageURL}}'/>
+                        <div>
+                            <img  style=' max-width: 90px;' src='{{item.imageURL}}'/>
                         </div>
                         <div class='flex vertical layout center center center-justified'>
                             <p style="text-overflow: ellipsis; font-weight: bold;"><span>{{item.name}}</span></p>

@@ -11,5 +11,11 @@
     <div id="voting_system_page">
         <ui:insert name="content"/>
     </div>
+    <script>
+        document.querySelector("#voting_system_page").addEventListener('message_from_extension',
+                function(event) { vs.webextension_available = true
+                    var isClientToolConnected = ((clientTool !== undefined)) || vs.webextension_available
+                })
+    </script>
 </h:body>
 </html>

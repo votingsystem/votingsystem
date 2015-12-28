@@ -73,7 +73,7 @@ public class RepresentativeBean {
             dao.merge(imageVS.setType(ImageVS.Type.REPRESENTATIVE_CANCELED));
         }
         byte[] imageBytes = Base64.getDecoder().decode(request.getBase64Image().getBytes());
-        ImageVS newImage = dao.persist(new ImageVS(signer,messageSMIME, ImageVS.Type.REPRESENTATIVE, imageBytes));
+        dao.persist(new ImageVS(signer,messageSMIME, ImageVS.Type.REPRESENTATIVE, imageBytes));
         query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS " +
                 "and r.state =:state").setParameter("userVS", signer).setParameter("state", RepresentativeDocument.State.OK);
         RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);

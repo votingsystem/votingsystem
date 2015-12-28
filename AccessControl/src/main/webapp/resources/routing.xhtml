@@ -78,7 +78,7 @@
           vs.route = 'new_representative';
           Polymer.Base.importHref('./representative/representative-editor.vsp', function () {
               if (!representativeEditor) representativeEditor = document.createElement('representative-editor');
-              vs.loadMainContent(representativeEditor, "${msg.publishVoteLbl}")
+              vs.loadMainContent(representativeEditor, "${msg.newRepresentativeLbl}")
           });
       });
 

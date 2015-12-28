@@ -26,6 +26,8 @@ var Operation = {
 
 function DateUtils(){}
 
+vs = {}
+
 //parse dates with format "2010-08-30 01:02:03"
 DateUtils.parse = function (dateStr) {
 		var reggie = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;

@@ -304,7 +304,12 @@ public class OperationVS implements PasswordDialog.Listener {
                             password), getOperationMessage());
                     break;
                 case NEW_REPRESENTATIVE:
-                    ProgressDialog.showDialog(new SendSMIMETask(this, jsonStr, password), getOperationMessage());
+                    Map documentMap = getDocumentToSign();
+                    //remove the 'image/jpeg;base64' part from the string
+                    String representativeImage = ((String)documentMap.get("base64Image")).split(",")[1];
+                    documentMap.put("base64Image", representativeImage);
+                    ProgressDialog.showDialog(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(documentMap),
+                            password), getOperationMessage());
                     break;
                 case CURRENCY_GROUP_EDIT:
                 case CURRENCY_GROUP_NEW:

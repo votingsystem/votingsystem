@@ -93,13 +93,13 @@ public class BrowserHost extends Application {
             }
         });
 
-        /*try {
+        try {
             JSON.getMapper().readValue(ContextVS.getInstance().getResourceBytes("test.json"),
                     OperationVS.class).initProcess();
         } catch (Exception ex) {
             log.log(Level.SEVERE,ex.getMessage(), ex);
             showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-        }*/
+        }
     }
 
 

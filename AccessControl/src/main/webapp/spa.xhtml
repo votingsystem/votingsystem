@@ -71,13 +71,6 @@
             <div id="mainContent" class="mainContent"></div>
         </div>
         <script>
-            vs = {}
-
-            document.querySelector("#voting_system_page").addEventListener('message_from_extension',
-                    function(event) { vs.webextension_available = true
-                        var isClientToolConnected = ((clientTool !== undefined)) || vs.webextension_available
-                    })
-
             vs.back = function() {
                 history.back()
                 //there's a delay until location.href is updated with history.back()

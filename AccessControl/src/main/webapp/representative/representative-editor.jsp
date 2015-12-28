@@ -11,7 +11,9 @@
                 <div style="margin: 0 10px 10px 0;">${msg.newRepresentativeAdviceMsg1}</div>
                 <div style="margin: 0 10px 10px 0;">${msg.newRepresentativeAdviceMsg2}</div>
                 <div style="margin: 0 10px 10px 0;">${msg.newRepresentativeAdviceMsg3}</div>
-                <vs-editor id="editor"></vs-editor>
+                <div>
+                    <vs-editor id="editor"></vs-editor>
+                </div>
                 <div class="horizontal layout center">
                     <div>
                         <div style="font-size: 0.8em;">${msg.selectRepresentativeImgLbl}</div>
@@ -30,7 +32,7 @@
         Polymer({
             is:'representative-editor',
             properties:{
-                representativeImageMaxSize: { type: Number, value: 102400 }
+                representativeImageMaxSize: { type: Number, value: 102400 },
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
@@ -43,6 +45,9 @@
                 }
                 this.$.imageFile.addEventListener('change', this.handleFileSelect.bind(this), false);
             },
+            attached: function() {
+
+            },
             submitForm: function() {
                 if(!this.selectedFileBase64) {
                     alert("${msg.selectRepresentativeImgLbl}", "${msg.errorLbl}")
@@ -52,7 +57,7 @@
                 var operationVS = new OperationVS(Operation.NEW_REPRESENTATIVE)
                 operationVS.serviceURL = contextURL + "/rest/representative/save"
                 operationVS.signedMessageSubject = "${msg.newRepresentativeLbl}"
-                var description = window.btoa(encodeURIComponent( escape(this.$.editor.getContent())))
+                var description = window.btoa(this.$.editor.getContent())
                 operationVS.jsonStr = JSON.stringify({description:description, base64Image:this.selectedFileBase64,  UUID: Math.random().toString(36).substring(7)})
                 console.log(JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);

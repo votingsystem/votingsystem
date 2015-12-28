@@ -10,7 +10,7 @@ localization ->https://www.tinymce.com/docs/configure/localization/
 
 <dom-module name="vs-editor">
     <template>
-        <textarea id="polymerTinymceTextarea" name="content" style="width:100%" class="te"></textarea>
+        <div id="editorContainer"></div>
     </template>
     <script>
         Polymer({
@@ -20,12 +20,20 @@ localization ->https://www.tinymce.com/docs/configure/localization/
                 tinyplugins:{ type:Array, value:["advlist autolink lists link image charmap preview anchor fullscreen"] },
                 templates: { type: Array, value: function () { return [] } },
                 height: { type: Number, value: 168 },
-                baseUrl: { type: String, value: '' }
+                baseUrl: { type: String, value: '' },
+                contentMap: { type: Object, value: {} }
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
+                this.textareaId = this.id + Math.random().toString(36).substring(7);
+            },
+            detached: function(){
+                this.$.editorContainer.style.display = 'none'
+                this.contentMap[this.textareaId] = this.getContent()
+                tinymce.EditorManager.execCommand('mceRemoveEditor',true, this.textareaId);
             },
             attached: function(){
+                this.$.editorContainer.innerHTML = '<textarea id="' + this.textareaId + '" name="content" style="width:100%" class="te"></textarea>'
                 this.async(function () {
                     this.initEditor();
                 }.bind(this),100);
@@ -35,7 +43,7 @@ localization ->https://www.tinymce.com/docs/configure/localization/
                     tinymce.baseURL = this.baseUrl;
                 }
                 tinymce.init({
-                    selector: "#polymerTinymceTextarea",
+                    selector: "#" + this.textareaId,
                     language: '${spa.language()}',
                     templates: this.templates,
                     plugins: this.tinyplugins,
@@ -53,6 +61,7 @@ localization ->https://www.tinymce.com/docs/configure/localization/
                         });
                     }
                 });
+                this.setContent(this.contentMap[this.textareaId] || "")
             },
             execCommand:function(command){
                 tinyMCE.activeEditor.execCommand(command);
@@ -60,9 +69,17 @@ localization ->https://www.tinymce.com/docs/configure/localization/
             getContent:function(){
                 return tinyMCE.activeEditor.getContent();
             },
+            setContentText:function(content){
+                tinyMCE.activeEditor.setContent(content);
+                this.$.editorContainer.style.display = 'block'
+            },
             setContent:function(content){
                 if (tinyMCE && tinyMCE.activeEditor){
-                    tinyMCE.activeEditor.setContent(content);
+                    this.setContentText(content)
+                } else {
+                    this.async(function () {
+                        this.setContentText(content)
+                    }.bind(this),100);
                 }
             }
         });

@@ -116,7 +116,7 @@
             },
             decodeBase64:function(base64EncodedString) {
                 if(base64EncodedString == null) return null
-                return decodeURIComponent(escape(window.atob(base64EncodedString)))
+                return window.atob(base64EncodedString)
             },
             selectRepresentative:function() {
                 console.log("selectRepresentative")
