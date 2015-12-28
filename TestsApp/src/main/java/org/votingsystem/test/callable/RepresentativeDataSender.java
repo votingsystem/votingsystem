@@ -41,7 +41,7 @@ public class RepresentativeDataSender implements Callable<ResponseVS> {
     
     private UserVSDto getRequest(String representativeNIF, byte[] imageBytes) {
         UserVSDto dto = new UserVSDto();
-        dto.setOperation(TypeVS.NEW_REPRESENTATIVE);
+        dto.setOperation(TypeVS.EDIT_REPRESENTATIVE);
         String representativeDescription = " --- data about the representative -" + representativeNIF;
         dto.setDescription(Base64.getEncoder().encodeToString(representativeDescription.getBytes()));
         dto.setBase64Image(Base64.getEncoder().encodeToString(imageBytes));

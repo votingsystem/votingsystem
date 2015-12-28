@@ -22,10 +22,6 @@
                 <div class="textDialog" style="padding:10px 20px 10px 20px; display:block;word-wrap:break-word;">
                     <p style="text-align: center;">${msg.removeRepresentativeMsg}</p>
                 </div>
-                <div  class="textDialog" layout vertical center center-justified style="margin:0px auto 0px auto;">
-                    <label style="margin:0px 0px 20px 0px">${msg.representativeNIFLbl}</label>
-                    <input type="text" id="representativeNif" style="width:150px; margin:0px auto 0px auto;" class="form-control"/>
-                </div>
                 <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
                     <div class="flex"></div>
                     <div>
@@ -42,22 +38,13 @@
             is:'representative-cancel-dialog',
             ready: function() {
                 console.log(this.tagName + " - ready")
-                this.$.representativeNif.onkeypress = function(event){
-                    if (event.keyCode == 13) this.accept()
-                }.bind(this)
             },
             show: function() {
                 this.$.modalDialog.style.opacity = 1
                 this.$.modalDialog.style['pointer-events'] = 'auto'
-                this.$.representativeNif.value = ""
             },
             accept: function() {
                 console.log(this.tagName + " - removeRepresentative")
-                var validatedNif = validateNIF(this.$.representativeNif.value)
-                if(validatedNif == null) {
-                    alert('${msg.nifERRORMsg}','${msg.errorLbl}')
-                    return;
-                }
                 var operationVS = new OperationVS(Operation.REPRESENTATIVE_REVOKE)
                 operationVS.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_REVOKE, nif:validatedNif})
                 operationVS.serviceURL = contextURL + "/rest/representative/revoke"
@@ -78,7 +65,6 @@
                     caption = "${msg.operationCANCELEDLbl}"
                 }
                 alert(msg, caption)
-                this.click() //hack to refresh screen
             },
             close: function() {
                 this.$.modalDialog.style.opacity = 0

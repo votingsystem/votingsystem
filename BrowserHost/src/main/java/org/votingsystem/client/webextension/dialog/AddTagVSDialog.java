@@ -66,7 +66,7 @@ public class AddTagVSDialog extends DialogVS {
                 return;
             }
             try {
-                ProgressDialog.showDialog(new TagVSLoader(textField.getText()), ContextVS.getMessage("sendingMoneyLbl"));
+                ProgressDialog.show(new TagVSLoader(textField.getText()), ContextVS.getMessage("sendingMoneyLbl"));
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }

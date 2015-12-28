@@ -28,15 +28,6 @@
           loadFrameVS(contextURL + "/app/tools.xhtml", "${msg.toolsPageTitle}")
       });
 
-      var editRepresentative
-      page('/representative/edit', scrollToTop, function (ctx) {
-          vs.route = 'edit_representative';
-          Polymer.Base.importHref('./representative/representative-edit.vsp', function () {
-              if (!editRepresentative) editRepresentative = document.createElement('representative-edit');
-              vs.loadMainContent(editRepresentative, "${msg.editRepresentativeLbl}")
-          });
-      });
-
       page('/resources/certificationCenters', scrollToTop, function (ctx) {
           loadFrameVS(contextURL + "/resources/certificationCenters.html")
       });
@@ -74,8 +65,8 @@
       });
 
       var representativeEditor
-      page('/new_representative', scrollToTop, function (ctx) {
-          vs.route = 'new_representative';
+      page('/representative/edit', scrollToTop, function (ctx) {
+          vs.route = 'edit_representative';
           Polymer.Base.importHref('./representative/representative-editor.vsp', function () {
               if (!representativeEditor) representativeEditor = document.createElement('representative-editor');
               vs.loadMainContent(representativeEditor, "${msg.newRepresentativeLbl}")

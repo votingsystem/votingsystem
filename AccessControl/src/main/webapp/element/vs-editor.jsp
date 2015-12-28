@@ -74,11 +74,12 @@ localization ->https://www.tinymce.com/docs/configure/localization/
                 this.$.editorContainer.style.display = 'block'
             },
             setContent:function(content){
+                this.contentMap[this.textareaId] = content
                 if (tinyMCE && tinyMCE.activeEditor){
                     this.setContentText(content)
                 } else {
                     this.async(function () {
-                        this.setContentText(content)
+                        this.setContent(content)
                     }.bind(this),100);
                 }
             }

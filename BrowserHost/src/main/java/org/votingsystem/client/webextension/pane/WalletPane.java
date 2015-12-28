@@ -104,7 +104,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
 
 
 
-    public static void showDialog() {
+    public static void show() {
         Platform.runLater(() -> {
             if(DIALOG_INSTANCE == null) DIALOG_INSTANCE = new WalletDialog();
             Set<Currency> currencySet = Wallet.getWallet();
@@ -187,7 +187,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
             if(currencySet.isEmpty()) menuButton.setVisible(false);
             else menuButton.setVisible(true);
             checkCurrencyMenuItem.setOnAction(actionEvent -> {
-                ProgressDialog.showDialog(new CurrencyCheckerTask(currencySet, walletPane));
+                ProgressDialog.show(new CurrencyCheckerTask(currencySet, walletPane));
             });
             walletPane.load(currencySet);
             show();

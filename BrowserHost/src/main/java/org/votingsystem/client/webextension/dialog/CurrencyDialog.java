@@ -183,7 +183,7 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
     @Override public void setSelectedDevice(DeviceVSDto device) {
         log.info("setSelectedDevice - device: " + device.getDeviceName());
         walletChangeTask = new WalletChangeTask(device);
-        ProgressDialog.showDialog(walletChangeTask, ContextVS.getMessage("changeWalletLbl"));
+        ProgressDialog.show(walletChangeTask, ContextVS.getMessage("changeWalletLbl"));
     }
 
     public  class WalletChangeTask extends Task<ResponseVS> {

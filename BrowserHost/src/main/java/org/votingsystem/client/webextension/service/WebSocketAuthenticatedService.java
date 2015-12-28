@@ -159,7 +159,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     }
 
     private void connect(char[] password) {
-        ProgressDialog.showDialog(new InitValidatedSessionTask(password, targetServer), null);
+        ProgressDialog.show(new InitValidatedSessionTask(password, targetServer), null);
     }
 
     public void setConnectionEnabled(boolean isConnectionEnabled){

@@ -56,12 +56,12 @@ public class ProgressDialog extends DialogVS {
         new Thread(progressTask).start();
     }
 
-    public static void showDialog(Task progressTask) {
+    public static void show(Task progressTask) {
         log.info("showDialog");
-        showDialog(progressTask, null);
+        show(progressTask, null);
     }
 
-    public static void showDialog(Task progressTask, String caption) {
+    public static void show(Task progressTask, String caption) {
         log.info("showDialog");
         Platform.runLater(() -> {
             ProgressDialog progressDialog = new ProgressDialog(progressTask);

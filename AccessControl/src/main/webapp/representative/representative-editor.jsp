@@ -4,6 +4,7 @@
 
 <dom-module name="representative-editor">
     <style>
+        .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px; text-align: center;}
     </style>
     <template>
         <div class="horizontal layout center center-justified">
@@ -11,6 +12,9 @@
                 <div style="margin: 0 10px 10px 0;">${msg.newRepresentativeAdviceMsg1}</div>
                 <div style="margin: 0 10px 10px 0;">${msg.newRepresentativeAdviceMsg2}</div>
                 <div style="margin: 0 10px 10px 0;">${msg.newRepresentativeAdviceMsg3}</div>
+                <div class="flex representativeNameHeader">
+                    <div>{{representativeFullName}}</div>
+                </div>
                 <div>
                     <vs-editor id="editor"></vs-editor>
                 </div>
@@ -46,7 +50,17 @@
                 this.$.imageFile.addEventListener('change', this.handleFileSelect.bind(this), false);
             },
             attached: function() {
-
+                if(vs.representative) {
+                    this.representative = toJSON(JSON.stringify(vs.representative))
+                    vs.representative = null
+                    this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
+                    sendSignalVS({caption:"${msg.editRepresentativeLbl}"})
+                    this.$.editor.setContent(window.atob(this.representative.description))
+                } else {
+                    this.representativeFullName = null;
+                    this.$.editor.setContent("")
+                    sendSignalVS({caption:"${msg.newRepresentativeLbl}"})
+                }
             },
             submitForm: function() {
                 if(!this.selectedFileBase64) {
@@ -54,7 +68,7 @@
                     return;
                 }
                 var msgTemplate = "${msg.enterFieldMsg}"
-                var operationVS = new OperationVS(Operation.NEW_REPRESENTATIVE)
+                var operationVS = new OperationVS(Operation.EDIT_REPRESENTATIVE)
                 operationVS.serviceURL = contextURL + "/rest/representative/save"
                 operationVS.signedMessageSubject = "${msg.newRepresentativeLbl}"
                 var description = window.btoa(this.$.editor.getContent())

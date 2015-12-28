@@ -88,12 +88,12 @@
             }
 
             vs.loadMainContent = function(newContentNode, caption, searchVisible) {
+                if(caption) sendSignalVS({caption:caption})
                 var mainContentNode = document.getElementById("mainContent")
                 if(mainContentNode.childNodes[0]) mainContentNode.removeChild(mainContentNode.childNodes[0])
                 mainContentNode.appendChild(newContentNode)
                 if('admin' === menuType) caption = caption + ' - ${msg.adminLbl}'
                 if('superuser' === menuType) caption = caption + ' - ${msg.superUserLbl}'
-                if(caption) sendSignalVS({caption:caption})
                 if(searchVisible === true) d3.select("#searchDiv").style("display", "block")
                 else d3.select("#searchDiv").style("display", "none")
                 d3.selectAll("#drawer .menuItem").each( function(d) {

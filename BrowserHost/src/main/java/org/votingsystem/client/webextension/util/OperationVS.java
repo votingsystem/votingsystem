@@ -241,6 +241,14 @@ public class OperationVS implements PasswordDialog.Listener {
         this.UUID = UUID;
     }
 
+    public String getTabId() {
+        return tabId;
+    }
+
+    public void setTabId(String tabId) {
+        this.tabId = tabId;
+    }
+    
     public void processOperationWithPassword(final String passwordDialogMessage) {
         if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
             PlatformImpl.runAndWait(() ->
@@ -277,38 +285,38 @@ public class OperationVS implements PasswordDialog.Listener {
                     }
                     break;
                 case PUBLISH_EVENT:
-                    ProgressDialog.showDialog(new SendSMIMETask(this, jsonStr, password, "eventURL"), getOperationMessage());
+                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, password, "eventURL"), getOperationMessage());
                     break;
                 case SEND_VOTE:
-                    ProgressDialog.showDialog(new VoteTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new VoteTask(this, password), getOperationMessage());
                     break;
                 case CANCEL_VOTE:
-                    ProgressDialog.showDialog(new CancelVoteTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new CancelVoteTask(this, password), getOperationMessage());
                     break;
                 case CERT_USER_NEW:
-                    ProgressDialog.showDialog(new CertRequestTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new CertRequestTask(this, password), getOperationMessage());
                     break;
                 case MESSAGEVS:
                     processResult(WebSocketAuthenticatedService.getInstance().sendMessageVS(this));
                     break;
                 case CURRENCY_REQUEST:
-                    ProgressDialog.showDialog(new CurrencyRequestTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new CurrencyRequestTask(this, password), getOperationMessage());
                     break;
                 case CURRENCY_DELETE:
-                    ProgressDialog.showDialog(new CurrencyDeleteTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new CurrencyDeleteTask(this, password), getOperationMessage());
                     break;
                 case REPRESENTATIVE_SELECTION:
                     RepresentativeDelegationDto delegationDto = getDocumentToSign(RepresentativeDelegationDto.class);
                     delegationDto.setUUID(java.util.UUID.randomUUID().toString());
-                    ProgressDialog.showDialog(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(delegationDto),
+                    ProgressDialog.show(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(delegationDto),
                             password), getOperationMessage());
                     break;
-                case NEW_REPRESENTATIVE:
+                case EDIT_REPRESENTATIVE:
                     Map documentMap = getDocumentToSign();
                     //remove the 'image/jpeg;base64' part from the string
                     String representativeImage = ((String)documentMap.get("base64Image")).split(",")[1];
                     documentMap.put("base64Image", representativeImage);
-                    ProgressDialog.showDialog(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(documentMap),
+                    ProgressDialog.show(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(documentMap),
                             password), getOperationMessage());
                     break;
                 case CURRENCY_GROUP_EDIT:
@@ -325,13 +333,13 @@ public class OperationVS implements PasswordDialog.Listener {
                      */
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                    ProgressDialog.showDialog(new AnonymousDelegationCancelTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new AnonymousDelegationCancelTask(this, password), getOperationMessage());
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
-                    ProgressDialog.showDialog(new AnonymousDelegationTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new AnonymousDelegationTask(this, password), getOperationMessage());
                     break;
                 default:
-                    ProgressDialog.showDialog(new SendSMIMETask(this, jsonStr, password), getOperationMessage());
+                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, password), getOperationMessage());
             }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -438,12 +446,6 @@ public class OperationVS implements PasswordDialog.Listener {
                     }
                 });
                 break;
-            case REPRESENTATIVE_ACCREDITATIONS_REQUEST:
-                RepresentativeAccreditationsDialog.show(this);
-                break;
-            case REPRESENTATIVE_VOTING_HISTORY_REQUEST:
-                RepresentativeVotingHistoryDialog.show(this);
-                break;
             case SAVE_SMIME:
                 Utils.saveReceipt(this);
                 break;
@@ -454,7 +456,7 @@ public class OperationVS implements PasswordDialog.Listener {
                 processOperationWithPassword(ContextVS.getMessage("newCertPasswDialogMsg"));
                 break;
             case WALLET_OPEN:
-                WalletPane.showDialog();
+                WalletPane.show();
                 break;
             case CURRENCY_GROUP_NEW:
             case CURRENCY_GROUP_EDIT:
@@ -495,7 +497,7 @@ public class OperationVS implements PasswordDialog.Listener {
                     }
                     BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
                     break;
-                case NEW_REPRESENTATIVE:
+                case EDIT_REPRESENTATIVE:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         UserVSDto representativeDto = (UserVSDto) responseVS.getMessage(UserVSDto.class);
                         String representativeURL =  ContextVS.getInstance().getAccessControl()
@@ -523,12 +525,5 @@ public class OperationVS implements PasswordDialog.Listener {
         }
     }
 
-    public String getTabId() {
-        return tabId;
-    }
-
-    public void setTabId(String tabId) {
-        this.tabId = tabId;
-    }
 }
 

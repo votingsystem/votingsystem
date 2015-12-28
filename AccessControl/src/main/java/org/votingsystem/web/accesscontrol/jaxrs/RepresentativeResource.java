@@ -119,13 +119,12 @@ public class RepresentativeResource {
             return Response.status(Response.Status.NOT_FOUND).entity(
                     "ERROR - UserVS is not a representative - id: " + id).build();
         }
-        UserVSDto representativeDto = representativeBean.getRepresentativeDto(representative);
         if(contentType.contains("json")) {
+            UserVSDto representativeDto = representativeBean.getRepresentativeDto(representative);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
                     .type(MediaTypeVS.JSON).build();
         } else {
-            req.getSession().setAttribute("representativeMap", JSON.getMapper().writeValueAsString(representativeDto));
-            return Response.temporaryRedirect(new URI("../representative/representative.xhtml")).build();
+            return Response.temporaryRedirect(new URI("../spa.xhtml#!/rest/representative/id/" + representative.getId())).build();
         }
     }
 
@@ -140,13 +139,12 @@ public class RepresentativeResource {
         UserVS representative = dao.getSingleResult(UserVS.class, query);
         if(representative == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - UserVS is not a representative - nif: " + nif).build();
-        UserVSDto representativeDto = representativeBean.getRepresentativeDto(representative);
         if(contentType.contains("json")) {
+            UserVSDto representativeDto = representativeBean.getRepresentativeDto(representative);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
                     .type(MediaTypeVS.JSON).build();
         } else {
-            req.getSession().setAttribute("representativeMap", JSON.getMapper().writeValueAsString(representativeDto));
-            return Response.temporaryRedirect(new URI("../representative/representative.xhtml")).build();
+            return Response.temporaryRedirect(new URI("../spa.xhtml#!/rest/representative/id/" + representative.getId())).build();
         }
     }
 

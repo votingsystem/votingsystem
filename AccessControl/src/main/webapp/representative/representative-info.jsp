@@ -4,6 +4,7 @@
 <link href="representative-select-dialog.vsp" rel="import"/>
 <link href="representative-request-accreditations-dialog.vsp" rel="import"/>
 <link href="representative-request-votinghistory-dialog.vsp" rel="import"/>
+<link href="representative-cancel-dialog.vsp" rel="import"/>
 
 <dom-module name="representative-info">
     <template>
@@ -13,10 +14,22 @@
             .representativeNumRepHeader { text-overflow: ellipsis; color:#888;}
         </style>
         <div>
-            <div hidden="{{'user' !== menuType}}" class="horizontal layout center-justified" style="font-size: 0.9em;">
-                <button on-click="selectRepresentative">
-                    <i class="fa fa-hand-o-right"></i> ${msg.saveAsRepresentativeLbl}
-                </button>
+            <div class="horizontal layout center-justified" style="font-size: 0.9em;">
+                <div  class="layout horizontal center" style="margin:0 20px 0 0;">
+                    <button on-click="selectRepresentative">
+                        <i class="fa fa-hand-o-right"></i> ${msg.saveAsRepresentativeLbl}
+                    </button>
+                </div>
+                <div hidden="{{!isAdmin}}" class="layout horizontal center center-justified">
+                    <button type="button" on-click="revokeRepresentative"
+                            style="margin:15px 20px 15px 0px;">
+                        <i class="fa fa-times"></i> ${msg.removeRepresentativeLbl}
+                    </button>
+                    <button type="button" on-click="editRepresentative"
+                            style="margin:15px 20px 15px 0px;">
+                        <i class="fa fa-pencil-square-o"></i> ${msg.editRepresentativeLbl}
+                    </button>
+                </div>
             </div>
             <div class="text-center" style="margin:20px auto 15px 15px;">
                 <div class="layout vertical center center-justified" style="width:100%;">
@@ -71,6 +84,7 @@
             </div>
         </div>
         <image-viewer-dialog id="representativeImage" url="{{representative.imageURL}}" description="{{representativeFullName}}"></image-viewer-dialog>
+        <representative-cancel-dialog id="representativeRevokeDialog"></representative-cancel-dialog>
         <representative-select-dialog id="selectRepresentativeDialog"></representative-select-dialog>
         <representative-request-accreditations-dialog id="accreditationsDialog"></representative-request-accreditations-dialog>
         <representative-request-votinghistory-dialog id="votingHistoryDialog"></representative-request-votinghistory-dialog>
@@ -81,16 +95,19 @@
             properties: {
                 url:{type:String, observer:'getHTTP'},
                 representative:{type:Object, value:{}, observer:'representativeChanged'},
-                isAdmin:{computed:'_checkIfAdmin(representative)'}
+            },
+            revokeRepresentative:function(){
+                this.$.representativeRevokeDialog.show()
+            },
+            editRepresentative:function(){
+                vs.representative = this.representative
+                page("/representative/edit")
             },
             requestAccreditations:function(){
                 this.$.accreditationsDialog.show(this.representative)
             },
             requestVotingHistory:function() {
                 this.$.votingHistoryDialog.show(this.representative)
-            },
-            _checkIfAdmin:function(representative) {
-                return 'admin' === menuType
             },
             setProfileView:function() {
                 this.modeProfile = true
@@ -114,10 +131,6 @@
                     this.$.votingHistoryDiv.style['border-bottom'] = "3px orange solid"
                 }
             },
-            decodeBase64:function(base64EncodedString) {
-                if(base64EncodedString == null) return null
-                return window.atob(base64EncodedString)
-            },
             selectRepresentative:function() {
                 console.log("selectRepresentative")
                 this.$.selectRepresentativeDialog.show(this.representative)
@@ -127,10 +140,13 @@
                 " - img: " + this.representative.imageURL)
                 this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
                 if(this.representative.imageURL != null) this.$.representativeImg.src = this.representative.imageURL
-                d3.select(this).select("#representativeDescription").html(this.decodeBase64(this.representative.description))
+                try {
+                    this.$.representativeDescription.innerHTML = window.atob(this.representative.description)
+                } catch (e) {console.log(e)}
             },
             ready: function() {
-                console.log(this.tagName + " - ready")
+                this.isAdmin = ('admin' === menuType)
+                console.log(this.tagName + " - ready - isAdmin " + this.isAdmin)
             },
             showImage:function() {
                 console.log(this.tagName + " - showImage")

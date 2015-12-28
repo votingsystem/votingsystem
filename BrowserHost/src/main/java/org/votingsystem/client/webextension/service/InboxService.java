@@ -237,7 +237,7 @@ public class InboxService implements PasswordDialog.Listener {
                     KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password);
                     PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
                             password);
-                    ProgressDialog.showDialog(new InboxDecryptTask(privateKey, timeLimitedInboxMessage),
+                    ProgressDialog.show(new InboxDecryptTask(privateKey, timeLimitedInboxMessage),
                             ContextVS.getMessage("decryptingMessagesMsg"));
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);

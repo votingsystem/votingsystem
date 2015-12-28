@@ -6,10 +6,10 @@
         this.operation = operation
         this.receiverName = "${config.serverName}";
         this.serverURL = contextURL;
-        this.callerCallback = Math.random().toString(36).substring(7);
     }
 
     OperationVS.prototype.setCallback = function(callbackFunction) {
+        this.callerCallback = Math.random().toString(36).substring(7);
         document.querySelector("#voting_system_page").addEventListener(this.callerCallback, function(e) { callbackFunction(e.detail) });
     }
 
