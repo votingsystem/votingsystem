@@ -18,8 +18,11 @@ import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
 
+import java.io.File;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -42,6 +45,7 @@ public class BrowserHost extends Application {
     private Map<String, org.votingsystem.model.currency.Currency.State> currencyStateMap = new HashMap<>();
     private static final Map<String, QRMessageDto> qrMessagesMap = new HashMap<>();
     private Stage primaryStage;
+    private String chromeExtensionId;
 
     @Override public void start(final Stage primaryStage) throws Exception {
         INSTANCE = this;
@@ -93,13 +97,27 @@ public class BrowserHost extends Application {
             }
         });
 
-        /*try {
-            JSON.getMapper().readValue(ContextVS.getInstance().getResourceBytes("test.json"),
-                    OperationVS.class).initProcess();
-        } catch (Exception ex) {
-            log.log(Level.SEVERE,ex.getMessage(), ex);
-            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-        }*/
+        for(String param : getParameters().getRaw()) {
+            if(param.startsWith("vs:")) {
+                URI uri = new URI(param);
+                switch(uri.getScheme().toLowerCase()) {
+                    case "vs":
+                        try {
+                            JSON.getMapper().readValue(FileUtils.getBytesFromFile(new File(uri.getPath())),
+                                    OperationVS.class).initProcess();
+                        } catch (Exception ex) {
+                            log.log(Level.SEVERE,ex.getMessage(), ex);
+                            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                        }
+                        break;
+                    case "chrome-extension":
+                        chromeExtensionId = uri.getHost();
+                        break;
+                    default:
+                        log.info("unknown schema: " + uri.getScheme());
+                }
+            }
+        }
     }
 
 
