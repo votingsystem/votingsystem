@@ -5,7 +5,7 @@
     <title>${msg.signedDocumentLbl}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link rel="shortcut icon" href="../resources/images/icon_16/fa-bolt.png" type="image/x-icon"/>
+    <link rel="shortcut icon" href="../resources/images/icon_16/fa-credit-card.png" type="image/x-icon"/>
     <script src="../resources/bower_components/webcomponentsjs/webcomponents-lite.min.js" type="text/javascript"></script>
     <link href="../resources/bower_components/polymer/polymer.html" rel="import"/>
     <link href="../resources/bower_components/layout/layout.html" rel="import"/>
@@ -16,6 +16,9 @@
     <link href="../resources/bower_components/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
 </h:head>
 <h:body>
+    <div class="horizontal layout" style="margin:1px 0 0 0;">
+        <div style="font-size: 1.3em;margin:0 0 0 50px; color: #888;text-decoration: underline;" id="selectedPageTitle"></div>
+    </div>
 
     <div id="voting_system_page" class="layout horizontal center center-justified"></div>
     <div id="smimeMessage" style="display:none;">${smimeMessage}</div>

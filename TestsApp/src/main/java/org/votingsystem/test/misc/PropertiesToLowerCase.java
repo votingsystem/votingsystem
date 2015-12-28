@@ -22,7 +22,7 @@ class PropertiesToLowerCase {
 
 
     public static void main(String[] args) throws Exception {
-        ContextVS.getInstance().initTestEnvironment(
+        new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         Properties props = new Properties();
         byte[] propertBytes = FileUtils.getBytesFromStream(

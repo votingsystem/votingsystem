@@ -107,11 +107,11 @@ public class ConfigVSImpl implements ConfigVS {
         if(systemUser == null) {
             dao.persist(new UserVS(systemNIF, serverName, UserVS.Type.SYSTEM));
         }
+        new ContextVS(null, null);
         executorService.submit(() -> {
             try {
                 timeStampBean.init();
                 signatureBean.init();
-                ContextVS.getInstance();
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }

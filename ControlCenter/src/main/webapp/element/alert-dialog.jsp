@@ -29,31 +29,27 @@
     <script>
         Polymer({
             is:'alert-dialog',
-            ready: function() {
-                this.isConfirmMessage = this.isConfirmMessage || false
-            },
-            setMessage: function(message, caption, callerId, isConfirmMessage) {
+            ready: function() { },
+            setMessage: function(message, caption, callbackFunction) {
                 this.reset()
                 d3.select(this).select("#messageDiv").html(message)
                 this.caption = caption
-                this.callerId = callerId
-                this.isConfirmMessage = isConfirmMessage
+                this.callbackFunction = callbackFunction
+                if(this.callbackFunction) this.isConfirmMessage = true
                 this.$.modalDialog.style.opacity = 1
                 this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             reset: function() {
-                this.callerId = null
+                this.callbackFunction = null
                 this.caption = null
                 this.isConfirmMessage = false
             },
             accept: function() {
                 this.close()
-                document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('messagedialog-accept', {detail:this.callerId}))
             },
             close: function() {
                 this.$.modalDialog.style.opacity = 0
                 this.$.modalDialog.style['pointer-events'] = 'none'
-                document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('messagedialog-closed', {detail:this.callerId}))
             }
         });
     </script>

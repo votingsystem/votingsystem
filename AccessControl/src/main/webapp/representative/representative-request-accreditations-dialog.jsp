@@ -39,6 +39,9 @@
             is:'representative-request-accreditations-dialog',
             ready: function() {
                 console.log(this.tagName + " - ready")
+                this.$.email.onkeypress = function(event){
+                    if (event.keyCode == 13) this.submitForm()
+                }.bind(this)
             },
             show: function(representative) {
                 this.representative = representative
@@ -66,9 +69,6 @@
                     UUID:Math.random().toString(36).substring(7)})
                 operationVS.serviceURL = contextURL + "/rest/representative/accreditations"
                 operationVS.signedMessageSubject = '${msg.requestRepresentativeAcreditationsLbl}'
-
-                console.log(JSON.stringify(operationVS))
-
                 VotingSystemClient.setMessage(operationVS);
                 this.close()
             },

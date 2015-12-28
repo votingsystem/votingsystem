@@ -146,8 +146,6 @@
                 this.isAdminView = false
                 this.isUserView = false
             }
-            document.querySelector("#voting_system_page").addEventListener('messagedialog-accept',
-                    function(e) { this.messagedialogAccepted(e) }.bind(this))
             document.querySelector("#voting_system_page").addEventListener('uservs-selected',
                     function(e) { this.showUserDetails(e) }.bind(this))
         },
@@ -185,7 +183,7 @@
                 caption = "${msg.groupCancelOKLbl}"
                 page.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id)
             }
-            alert(this.appMessageJSON.message, caption, this.tagName)
+            alert(this.appMessageJSON.message, caption)
             this.click()
         },
         goToWeekBalance:function() {
@@ -270,8 +268,7 @@
             this.$.configDialog.style['pointer-events'] = 'auto'
         },
         cancelGroup:function() {
-            alert("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name),
-                    "${msg.confirmOperationMsg}", 'cancel_group', true)
+            alert("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name), "${msg.confirmOperationMsg}", this.messagedialogAccepted)
         },
         editGroup:function() {
             var operationVS = new OperationVS(Operation.CURRENCY_GROUP_EDIT)

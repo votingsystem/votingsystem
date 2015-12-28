@@ -19,7 +19,7 @@ public class CheckBundle {
     private static Logger log =  Logger.getLogger(CheckBundle.class.getName());
 
     public static void main(String[] args) throws Exception {
-        ContextVS.getInstance().initTestEnvironment(
+        new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         Set<String> hashCertSet = new HashSet<>(Arrays.asList("2dZCSiH8prnd731kyUEGzhoPF0OwA23vFvG+RYOcR5o="));

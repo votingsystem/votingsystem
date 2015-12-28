@@ -21,7 +21,7 @@ public class CurrencySendFromWallet {
     private static Logger log =  Logger.getLogger(CurrencySendFromWallet.class.getName());
 
     public static void main(String[] args) throws Exception {
-        ContextVS.getInstance().initTestEnvironment(
+        new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         ContextVS.getInstance().setDefaultServer(currencyServer);

@@ -126,7 +126,7 @@ public class ConfigVSImpl implements ConfigVS {
                     createtagVS(tag);
                 }
             }
-            ContextVS.getInstance();
+            new ContextVS(null, null);
             executorService.submit(() -> {
                 try {
                     LoggerVS.init(serverDir + "/logs");

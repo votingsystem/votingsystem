@@ -20,7 +20,7 @@ public class ResetRepresentatives {
     private static final Logger log = Logger.getLogger(ResetRepresentatives.class.getSimpleName());
 
     public static void main(String[] args) throws Exception {
-        ContextVS.getInstance().initTestEnvironment(
+        new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         ActorVSDto actorVSDto = HttpHelper.getInstance().getData(ActorVSDto.class,
                 ActorVS.getServerInfoURL("http://currency:8080/AccessControl"), MediaTypeVS.JSON);

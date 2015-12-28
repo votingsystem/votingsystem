@@ -65,6 +65,7 @@
                 operationVS.setCallback(function(appMessage) {
                     console.log("saveReceiptCallback - message: " + appMessage)
                 }.bind(this))
+                console.log(JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
             }
         });

@@ -27,7 +27,7 @@ public class SendAndReadMail {
     private static ExecutorCompletionService completionService;
     
     public static void main(String[] args) throws Exception {
-        ContextVS.getInstance().initTestEnvironment(
+        new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         simulationData = new POP3SimulationData();
         simulationData.setSmtpHostName("localhost");

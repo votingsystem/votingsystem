@@ -71,7 +71,6 @@ public class OperationVS implements PasswordDialog.Listener {
 
     public OperationVS() {}
 
-
     public String getServerURL() {
         return serverURL;
     }
@@ -508,15 +507,8 @@ public class OperationVS implements PasswordDialog.Listener {
                     break;
                 default:
                     if(callerCallback == null) BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
-                    else {
-                        if(ContentTypeVS.JSON == responseVS.getContentType()) {
-                            BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
-                                    responseVS.getStatusCode(), responseVS.getMessage(), tabId, callerCallback));
-                        } else {
-                            BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
-                                    responseVS.getStatusCode(), responseVS.getMessage(), tabId, callerCallback));
-                        }
-                    }
+                    else BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
+                                responseVS.getStatusCode(), responseVS.getMessage(), tabId, callerCallback));
             }
             if(executorService != null) executorService.shutdown();
         } catch (Exception ex) {

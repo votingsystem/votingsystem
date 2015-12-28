@@ -20,7 +20,7 @@ public class Multisign {
     private static ExecutorCompletionService completionService;
 
     public static void main(String[] args) throws Exception {
-        ContextVS.getInstance().initTestEnvironment(
+        new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SimulationData simulationData = new SimulationData();
         simulationData.setServerURL("http://sistemavotacion.org/AccessControl");

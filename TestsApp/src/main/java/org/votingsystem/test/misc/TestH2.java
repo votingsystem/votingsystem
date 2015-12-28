@@ -13,7 +13,7 @@ public class TestH2 {
     private static Logger log =  Logger.getLogger(TestH2.class.getName());
 
     public static void main(String[] args) throws Exception {
-        ContextVS.getInstance().initTestEnvironment(
+        new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         H2Utils.testBlob();
         //H2Utils.testPlainText()

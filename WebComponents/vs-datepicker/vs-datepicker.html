@@ -673,7 +673,6 @@ Or see the LICENSE file that comes with this code.
         close: function () {
             this.$.modalDialog.style.opacity = 0
             this.$.modalDialog.style['pointer-events'] = 'none'
-            document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('messagedialog-closed', {detail: this.callerId}))
         }
     });
 </script>

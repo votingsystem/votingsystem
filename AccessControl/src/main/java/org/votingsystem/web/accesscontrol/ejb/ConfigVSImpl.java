@@ -124,11 +124,11 @@ public class ConfigVSImpl implements ConfigVS {
             actorVS.setState(ActorVS.State.OK).setName(serverName);
             dao.persist(actorVS);
         }
+        new ContextVS(null, null);
         executorService.submit(() -> {
             try {
                 timeStampBean.init();
                 signatureBean.init();
-                ContextVS.getInstance();
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }

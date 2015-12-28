@@ -12,14 +12,14 @@
                 color: #888;
             }
         </style>
-        <div>
+        <div class="vertical layout center center-justified">
             <div hidden="{{adminMenuHidden}}" style="text-align: center;">
                 <button type="submit" on-click="showAdminDialog" style="margin:15px 20px 15px 0px;">
                     ${msg.adminDocumentLinkLbl} <i class="fa fa fa-check"></i>
                 </button>
             </div>
 
-            <div style="margin: 0px 30px;">
+            <div class="vertical layout center center-justified" style="margin: 0px 30px;">
                 <div class="layout horizontal center center-justified" style="width:100%;">
                     <div class="flex horizontal layout center center-justified">
                         <div hidden="{{!isActive}}" style='color: #888;font-size: 0.9em;'>{{getElapsedTime(eventvs.dateFinish)}}</div>
@@ -38,11 +38,11 @@
                         <div hidden="{{!isTerminated}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSFinishedLbl}</div>
                         <div hidden="{{!isCanceled}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSCancelledLbl}</div>
                     </div>
-                    <div hidden="{{isActive}}" style="margin:0px 30px 0px 30px; color: #888;"><b>${msg.dateLbl}: </b>
+                    <div hidden="{{isActive}}" style="margin:0px 30px 0px 30px; color: #ccc;"><b>${msg.dateLbl}: </b>
                         {{getDate(eventvs.dateBegin)}}</div>
                 </div>
-                <div>
-                    <div id="eventContentDiv"></div>
+                <div style="width: 100%;">
+                    <div id="eventContentDiv" style="border: 1px solid #888;"></div>
 
                     <div class="horizontal layout center center-justified">
                         <div hidden="{{!isTerminated}}" style="margin: 10px 0 0 0;">
@@ -101,13 +101,7 @@
             },
             ready: function() {
                 console.log(this.tagName + "- ready")
-                sendSignalVS({caption:"${msg.pollLbl}"})
-                document.querySelector("#voting_system_page").addEventListener('messagedialog-accept',
-                        function(e) { this.messagedialogConfirmed(e) }.bind(this))
-            },
-            decodeBase64:function(base64EncodedString) {
-                if(base64EncodedString == null) return null
-                return decodeURIComponent(escape(window.atob(base64EncodedString)))
+                this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
@@ -120,17 +114,10 @@
                 this.optionVSSelected = null
                 this.dateFinish = new Date(this.eventvs.dateFinish)
                 this.votevsResul = null;
-                this.isActive = false
-                this.isPending = false
-                this.isTerminated = false
-                this.isCanceled = false
-                if('PENDING' == this.eventvs.state) {
-                    this.isPending = true
-                } else if ('TERMINATED' == this.eventvs.state) {
-                    this.isTerminated = true
-                } else if ('CANCELED' == this.eventvs.state) {
-                    this.isCanceled = true
-                } else this.isActive = true
+                this.isPending = ('PENDING' === this.eventvs.state)? true : false
+                this.isTerminated = ('TERMINATED' === this.eventvs.state)? true : false
+                this.isCanceled = ('CANCELED' === this.eventvs.state)? true : false
+                this.isActive = ('ACTIVE' === this.eventvs.state)? true : false
                 this.adminMenuHidden = true
                 if('admin' === menuType) {
                     if(this.eventvs.state === 'ACTIVE' || this.eventvs.state === 'PENDING') this.adminMenuHidden = false
@@ -138,35 +125,29 @@
                 this.fieldsEventVS = this.eventvs.fieldsEventVS
                 d3.xhr(contextURL + "/rest/eventVSElection/id/" + this.eventvs.id + "/stats")
                         .header("Content-Type", "application/json").get(function(err, rawData){
-                        if('TERMINATED' == this.eventvs.state) {
+                        if(this.isTerminated == true) {
                             this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
                             this.async(function () { d3.select(this).selectAll(".numVotesClass").style("display", "block")}.bind(this))
                         }
                     }.bind(this));
-                d3.select(this).select("#eventContentDiv").html(this.decodeBase64(this.eventvs.content))
+                d3.select(this).select("#eventContentDiv").html(decodeURIComponent(escape(window.atob(this.eventvs.content))))
             },
             showAdminDialog:function() {
                 this.$.eventVSAdminDialog.show()
             },
             showConfirmDialog: function(e) {
                 console.log(this.tagName + " showConfirmDialog")
-                if((clientTool === undefined)) {
+                if(!this.isClientToolConnected) {
                     alert("${msg.clientToolRequiredErrorMsg}", "${msg.errorLbl}");
                 } else {
                     this.optionVSSelected = e.model.item
-                    //alert(message, caption, callerId, isConfirmMessage)
-                    alert(this.optionVSSelected.content, "${msg.confirmOptionDialogCaption}", this.tagName, true);
-                }
-            },
-            messagedialogConfirmed:function(e) {
-                if(this.tagName === e.detail) {
-                    this.submitVote()
+                    alert(this.optionVSSelected.content, "${msg.confirmOptionDialogCaption}", this.submitVote.bind(this));
                 }
             },
             getResults:function() {
                 console.log("getResults")
                 var fileURL = "${contextURL}/static/backup/" + this.dateFinish.urlFormat() + "/VOTING_EVENT_" + this.eventvs.id + ".zip"
-                if(clientTool !== undefined) {
+                if(this.isClientToolConnected) {
                     var operationVS = new OperationVS(Operation.FILE_FROM_URL)
                     operationVS.subject = '${msg.downloadingFileMsg}'
                     operationVS.documentURL = fileURL
@@ -200,7 +181,7 @@
                 appMessageJSON.optionSelected = this.optionVSSelected.content
                 this.votevsResul = appMessageJSON
                 this.$.votevsResultDialog.show(appMessageJSON)
-                this.click(); //hack to refresh screen
+                //this.click(); //hack to refresh screen
             },
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url

@@ -23,7 +23,7 @@ public class Test {
     private static final Logger log = Logger.getLogger(Test.class.getName());
 
     private static void sendSMIME() throws Exception {
-        ContextVS.getInstance().initTestEnvironment(
+        new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
                 "http://currency:8080/CurrencyServer"), ContentTypeVS.JSON);

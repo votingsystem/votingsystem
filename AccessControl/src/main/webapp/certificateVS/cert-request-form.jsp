@@ -45,8 +45,6 @@
         },
         ready: function() {
             console.log(this.tagName + " - ready")
-            document.querySelector("#voting_system_page").addEventListener('messagedialog-accept',
-                    function(e) { this.messagedialogAccept(e) }.bind(this))
         },
         submitForm: function () {
             console.log("submitForm")
@@ -82,7 +80,7 @@
                     "<br/><b>${msg.surnameLbl}:</b> " + this.$.surname.value.toUpperCase() +
                     "<br/><b>${msg.phoneLbl}:</b> " + this.$.phone.value +
                     "<br/><b>${msg.emailLbl}:</b> " + this.$.email.value,
-                    "${msg.checkInputMsg}", this.tagName, true)
+                    "${msg.checkInputMsg}", this.messagedialogAccept)
         },
         messagedialogAccept: function (e) {
             console.log("messagedialogAccept - callerId:" + e.detail)

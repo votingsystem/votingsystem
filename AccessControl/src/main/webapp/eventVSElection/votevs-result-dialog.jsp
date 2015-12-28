@@ -68,10 +68,6 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
-                document.querySelector("#voting_system_page").addEventListener('messagedialog-accept',
-                        function(e) { this.cancellationConfirmed(e) }.bind(this))
-                document.querySelector("#voting_system_page").addEventListener('messagedialog-closed',
-                        function(e) { this.confirmDialogClosed(e) }.bind(this))
             },
             show: function(appMessageJSON) {
                 console.log(this.tagName + " - show - appMessageJSON: " + appMessageJSON)
@@ -91,17 +87,17 @@
                     this.hashCertVSBase64 = appMessageJSON.hashCertVSBase64
                     this.checkSignatureButtonMsg = '${msg.checkVoteLbl}'
                 } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == appMessageJSON.statusCode) {
-                    this.caption = '${msg.voteERRORCaption}'
+                    this.caption = '${msg.errorLbl}'
                     var msgTemplate =  "${msg.accessRequestRepeatedMsg}"
                     this.message = msgTemplate.format(appMessageJSON.eventVS.subject, appMessageJSON.url);
                 } else {
-                    this.caption = '${msg.voteERRORCaption}'
+                    this.caption = '${msg.errorLbl}'
                     this.message = appMessageJSON.message
                 }
                 this.messageType = "VOTE_RESULT"
                 this.$.modalDialog.style.opacity = 1
                 this.$.modalDialog.style['pointer-events'] = 'auto'
-                d3.select("#voteResultMessageDiv").html(message)
+                d3.select("#voteResultMessageDiv").html(this.message)
             },
             messageTypeChanged: function() {
                 this.isVoteResult = false
@@ -113,13 +109,9 @@
             cancelVote: function() {
                 this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
                 this.callerCallback = Math.random().toString(36).substring(7)
-                alert('${msg.cancelVoteConfirmMsg}', '${msg.cancelVoteLbl}', this.callerCallback, true)
+                alert('${msg.cancelVoteConfirmMsg}', '${msg.cancelVoteLbl}', this.cancellationConfirmed)
                 this.$.modalDialog.style.opacity = 0
                 this.$.modalDialog.style['pointer-events'] = 'none'
-            },
-            confirmDialogClosed: function(e) {
-                console.log("confirmDialogClosed - detail: " + e.detail)
-                if(e.detail == this.callerCallback) this.show(this.appMessageJSON)
             },
             close: function() {
                 this.$.modalDialog.style.opacity = 0
@@ -134,7 +126,7 @@
                 }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             },
-            cancellationConfirmed: function(e) {
+            cancellationConfirmed: function() {
                 var operationVS = new OperationVS(Operation.CANCEL_VOTE)
                 operationVS.message = this.hashCertVSBase64
                 operationVS.serviceURL = contextURL + "/rest/voteVS/cancel"

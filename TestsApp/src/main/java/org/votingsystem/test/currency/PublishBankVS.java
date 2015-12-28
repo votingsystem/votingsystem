@@ -17,7 +17,7 @@ public class PublishBankVS {
     private static Logger log =  Logger.getLogger(PublishBankVS.class.getName());
 
     public static void main(String[] args) throws Exception {
-        ContextVS.getInstance().initTestEnvironment(
+        new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         String info = "Voting System Test Bank - " + DateUtils.getDayWeekDateStr(new Date());
         String certChainPEM = new String(ContextVS.getInstance().getResourceBytes(

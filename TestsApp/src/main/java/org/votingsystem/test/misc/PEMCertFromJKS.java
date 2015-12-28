@@ -19,7 +19,7 @@ public class PEMCertFromJKS {
     private static Logger log =  Logger.getLogger(PEMCertFromJKS.class.getName());
 
     public static void main(String[] args) throws Exception {
-        ContextVS.getInstance().initTestEnvironment(
+        new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         String keyStorePath="./certs/Cert_BANKVS_03455543T.jks";
         String keyAlias="UserTestKeysStore";

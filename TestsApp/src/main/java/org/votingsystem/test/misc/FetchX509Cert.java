@@ -25,7 +25,7 @@ public class FetchX509Cert {
     private static Logger log =  Logger.getLogger(FetchX509Cert.class.getName());
 
     public static void main(String[] args) throws Exception {
-        ContextVS.getInstance().initTestEnvironment(
+        new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         String serverURL = "http://currency:8080/AccessControl";
         String serverInfoURL = ActorVS.getServerInfoURL(serverURL);

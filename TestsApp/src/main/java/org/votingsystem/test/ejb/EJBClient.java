@@ -33,7 +33,7 @@ public class EJBClient {
     public static void main(String[] args) throws Exception {
         log.getLogger("org.jboss").setLevel(Level.SEVERE);
         log.getLogger("org.votingsystem").setLevel(Level.FINE);
-        ContextVS.getInstance().initTestEnvironment(
+        new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         new EJBClient().run();
     }

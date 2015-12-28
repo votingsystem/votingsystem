@@ -73,7 +73,6 @@
                 operationVS.signedMessageSubject = "${msg.newRepresentativeLbl}"
                 var description = window.btoa(this.$.editor.getContent())
                 operationVS.jsonStr = JSON.stringify({description:description, base64Image:this.selectedFileBase64,  UUID: Math.random().toString(36).substring(7)})
-                console.log(JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
             },
             loadFile:function(file) {
@@ -109,12 +108,6 @@
                         this.selectedFileBase64 = event.target.result
                     }.bind(this);
                     reader.readAsDataURL(this.selectedFile);
-                    /*reader.onload = function(readerEvt) {
-                        var binaryString = readerEvt.target.result;
-                        this.selectedFileBase64 = btoa(binaryString);
-                        console.log("++++" + this.selectedFileBase64);
-                    };
-                    reader.readAsBinaryString(this.selectedFile);*/
                 }
             }
         });
