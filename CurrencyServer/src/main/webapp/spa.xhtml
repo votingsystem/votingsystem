@@ -79,11 +79,6 @@
         <script>
             debugger; // this is to allow logging from extension content scripts
 
-            vs = {}
-
-            document.querySelector("#voting_system_page").addEventListener('message_from_extension',
-                    function(event) { vs.webextension_available = true })
-
             vs.back = function() {
                 history.back()
                 //there's a delay until location.href is updated with history.back()
