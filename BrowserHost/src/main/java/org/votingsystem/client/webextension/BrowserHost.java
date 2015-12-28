@@ -98,24 +98,22 @@ public class BrowserHost extends Application {
         });
 
         for(String param : getParameters().getRaw()) {
-            if(param.startsWith("vs:")) {
-                URI uri = new URI(param);
-                switch(uri.getScheme().toLowerCase()) {
-                    case "vs":
-                        try {
-                            JSON.getMapper().readValue(FileUtils.getBytesFromFile(new File(uri.getPath())),
-                                    OperationVS.class).initProcess();
-                        } catch (Exception ex) {
-                            log.log(Level.SEVERE,ex.getMessage(), ex);
-                            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                        }
-                        break;
-                    case "chrome-extension":
-                        chromeExtensionId = uri.getHost();
-                        break;
-                    default:
-                        log.info("unknown schema: " + uri.getScheme());
-                }
+            URI uri = new URI(param);
+            switch(uri.getScheme().toLowerCase()) {
+                case "vs":
+                    try {
+                        JSON.getMapper().readValue(FileUtils.getBytesFromFile(new File(uri.getPath())),
+                                OperationVS.class).initProcess();
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE,ex.getMessage(), ex);
+                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                    }
+                    break;
+                case "chrome-extension":
+                    chromeExtensionId = uri.getHost();
+                    break;
+                default:
+                    log.info("unknown schema: " + uri.getScheme());
             }
         }
     }
