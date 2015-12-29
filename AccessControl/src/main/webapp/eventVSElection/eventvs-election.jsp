@@ -181,6 +181,10 @@
                     resultJSON.optionSelected = this.optionVSSelected.content
                     this.votevsResul = resultJSON
                     this.$.votevsResultDialog.show(resultJSON)
+                } else if (appMessageJSON.statusCode === ResponseVS.SC_ERROR_REQUEST_REPEATED) {
+                    var msgJSON = toJSON(appMessageJSON.message)
+                    var msgTemplate =  "${msg.accessRequestRepeatedMsg}"
+                    alert(msgTemplate.format(this.eventvs.subject, msgJSON.url), "${msg.errorLbl}")
                 } else if (appMessageJSON.statusCode !== ResponseVS.SC_CANCELED) {
                     alert(appMessageJSON.message, "${msg.errorLbl}")
                 }

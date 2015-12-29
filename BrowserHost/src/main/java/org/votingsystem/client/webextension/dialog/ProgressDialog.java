@@ -23,12 +23,13 @@ public class ProgressDialog extends DialogVS {
 
     private static Logger log = Logger.getLogger(ProgressDialog.class.getSimpleName());
 
-    public ProgressDialog(Task<ResponseVS> progressTask) {
+
+    public ProgressDialog(Task<ResponseVS> progressTask, String msg) {
         super(new VBox(10));
         VBox mainDialog = (VBox) getContentPane();
         mainDialog.getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         mainDialog.getStyleClass().add("modal-dialog");
-        Label progressMessageLbl = new Label();
+        Label progressMessageLbl = new Label(msg);
         progressMessageLbl.setStyle("-fx-font-size: 16;-fx-font-weight: bold;-fx-text-fill: #888;-fx-wrap-text: true;");
         progressMessageLbl.setWrapText(true);
         VBox.setVgrow(progressMessageLbl, Priority.ALWAYS);
@@ -58,14 +59,15 @@ public class ProgressDialog extends DialogVS {
 
     public static void show(Task progressTask) {
         log.info("showDialog");
-        show(progressTask, null);
+        show(progressTask, null, null);
     }
 
-    public static void show(Task progressTask, String caption) {
+    public static void show(Task progressTask, String caption, String msg) {
         log.info("showDialog");
         Platform.runLater(() -> {
-            ProgressDialog progressDialog = new ProgressDialog(progressTask);
-            progressDialog.show(caption);
+            ProgressDialog progressDialog = new ProgressDialog(progressTask, msg);
+            progressDialog.setCaption(caption);
+            progressDialog.show();
         });
     }
 }

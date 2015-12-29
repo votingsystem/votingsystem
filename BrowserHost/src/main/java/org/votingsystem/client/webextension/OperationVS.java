@@ -286,31 +286,31 @@ public class OperationVS implements PasswordDialog.Listener {
                     }
                     break;
                 case PUBLISH_EVENT:
-                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, password, "eventURL"), getOperationMessage());
+                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, password, "eventURL"), null, getOperationMessage());
                     break;
                 case SEND_VOTE:
-                    ProgressDialog.show(new VoteTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new VoteTask(this, password), null, getOperationMessage());
                     break;
                 case CANCEL_VOTE:
-                    ProgressDialog.show(new CancelVoteTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new CancelVoteTask(this, password), null, getOperationMessage());
                     break;
                 case CERT_USER_NEW:
-                    ProgressDialog.show(new CertRequestTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new CertRequestTask(this, password), null, getOperationMessage());
                     break;
                 case MESSAGEVS:
                     processResult(WebSocketAuthenticatedService.getInstance().sendMessageVS(this));
                     break;
                 case CURRENCY_REQUEST:
-                    ProgressDialog.show(new CurrencyRequestTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new CurrencyRequestTask(this, password), null, getOperationMessage());
                     break;
                 case CURRENCY_DELETE:
-                    ProgressDialog.show(new CurrencyDeleteTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new CurrencyDeleteTask(this, password), null, getOperationMessage());
                     break;
                 case REPRESENTATIVE_SELECTION:
                     RepresentativeDelegationDto delegationDto = getDocumentToSign(RepresentativeDelegationDto.class);
                     delegationDto.setUUID(java.util.UUID.randomUUID().toString());
                     ProgressDialog.show(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(delegationDto),
-                            password), getOperationMessage());
+                            password), null, getOperationMessage());
                     break;
                 case EDIT_REPRESENTATIVE:
                     Map documentMap = getDocumentToSign();
@@ -318,7 +318,7 @@ public class OperationVS implements PasswordDialog.Listener {
                     String representativeImage = ((String)documentMap.get("base64Image")).split(",")[1];
                     documentMap.put("base64Image", representativeImage);
                     ProgressDialog.show(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(documentMap),
-                            password), getOperationMessage());
+                            password), null, getOperationMessage());
                     break;
                 case CURRENCY_GROUP_EDIT:
                 case CURRENCY_GROUP_NEW:
@@ -334,13 +334,13 @@ public class OperationVS implements PasswordDialog.Listener {
                      */
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                    ProgressDialog.show(new AnonymousDelegationCancelTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new AnonymousDelegationCancelTask(this, password), null, getOperationMessage());
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
-                    ProgressDialog.show(new AnonymousDelegationTask(this, password), getOperationMessage());
+                    ProgressDialog.show(new AnonymousDelegationTask(this, password), null, getOperationMessage());
                     break;
                 default:
-                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, password), getOperationMessage());
+                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, password), null, getOperationMessage());
             }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

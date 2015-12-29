@@ -8,11 +8,11 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
 import org.votingsystem.client.webextension.BrowserHost;
+import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.dialog.CertNotFoundDialog;
 import org.votingsystem.client.webextension.dialog.PasswordDialog;
 import org.votingsystem.client.webextension.dialog.ProgressDialog;
 import org.votingsystem.client.webextension.util.InboxMessage;
-import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.dto.*;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.*;
@@ -159,7 +159,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     }
 
     private void connect(char[] password) {
-        ProgressDialog.show(new InitValidatedSessionTask(password, targetServer), null);
+        ProgressDialog.show(new InitValidatedSessionTask(password, targetServer), null, null);
     }
 
     public void setConnectionEnabled(boolean isConnectionEnabled){

@@ -10,8 +10,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.web.HTMLEditor;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
-import org.votingsystem.client.webextension.service.EventBusService;
 import org.votingsystem.client.webextension.OperationVS;
+import org.votingsystem.client.webextension.service.EventBusService;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.ResponseVS;
@@ -110,7 +110,7 @@ public class GroupVSEditorDialog extends DialogVS implements AddTagVSDialog.List
         switch (operationVS.getType()) {
             case CURRENCY_GROUP_EDIT:
                 ProgressDialog.show(new FetchGroupVSDataTask(operationVS.getMessage()),
-                        ContextVS.getMessage("editGroupVSLbl"));
+                        ContextVS.getMessage("editGroupVSLbl"), null);
                 setCaption(ContextVS.getMessage("editGroupVSLbl"));
                 addTagVSButton.setVisible(false);
                 tagVSButton.setDisable(true);
@@ -118,7 +118,7 @@ public class GroupVSEditorDialog extends DialogVS implements AddTagVSDialog.List
                 break;
             case CURRENCY_GROUP_NEW:
                 ProgressDialog.show(new FetchGroupVSDataTask(operationVS.getNif()),
-                        ContextVS.getMessage("newGroupVSLbl"));
+                        ContextVS.getMessage("newGroupVSLbl"), null);
                 setCaption(ContextVS.getMessage("newGroupVSLbl"));
                 addTagVSButton.setVisible(true);
                 tagVSButton.setVisible(false);

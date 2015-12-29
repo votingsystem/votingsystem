@@ -8,7 +8,7 @@
         Polymer({
             is:'vs-block-screen',
             block(isBlocked) {
-                console.log(this.tagName + " --- screenBlocked: " + isBlocked)
+                console.log(this.tagName + " - screenBlocked: " + isBlocked)
                 if(isBlocked) {
                     this.$.modalDialog.style.opacity = 1
                     this.$.modalDialog.style['pointer-events'] = 'auto'

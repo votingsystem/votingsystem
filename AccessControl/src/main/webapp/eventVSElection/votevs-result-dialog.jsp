@@ -83,13 +83,6 @@
                     this.votevsReceipt = appMessageJSON.voteVSReceipt
                     this.hashCertVSBase64 = appMessageJSON.hashCertVSBase64
                     this.checkSignatureButtonMsg = '${msg.checkVoteLbl}'
-                } else if(ResponseVS.SC_ERROR_REQUEST_REPEATED == appMessageJSON.statusCode) {
-                    this.caption = '${msg.errorLbl}'
-                    var msgTemplate =  "${msg.accessRequestRepeatedMsg}"
-                    this.message = msgTemplate.format(appMessageJSON.eventVS.subject, appMessageJSON.url);
-                } else {
-                    this.caption = '${msg.errorLbl}'
-                    this.message = appMessageJSON.message
                 }
                 this.messageType = "VOTE_RESULT"
                 this.$.modalDialog.style.opacity = 1
