@@ -19,7 +19,7 @@
                 </button>
             </div>
 
-            <div class="vertical layout center center-justified" style="margin: 0px 30px;">
+            <div class="vertical layout center center-justified" style="margin: 0px 30px;width: 100%; max-width: 1000px;">
                 <div class="layout horizontal center center-justified" style="width:100%;">
                     <div class="flex horizontal layout center center-justified">
                         <div hidden="{{!isActive}}" style='color: #888;font-size: 0.9em;'>{{getElapsedTime(eventvs.dateFinish)}}</div>
@@ -38,11 +38,11 @@
                         <div hidden="{{!isTerminated}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSFinishedLbl}</div>
                         <div hidden="{{!isCanceled}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSCancelledLbl}</div>
                     </div>
-                    <div hidden="{{isActive}}" style="margin:0px 30px 0px 30px; color: #ccc;"><b>${msg.dateLbl}: </b>
+                    <div hidden="{{isActive}}" style="margin:0px 30px 0px 30px; color: #888"><b>${msg.dateLbl}: </b>
                         {{getDate(eventvs.dateBegin)}}</div>
                 </div>
                 <div style="width: 100%;">
-                    <div id="eventContentDiv" style="border: 1px solid #888;"></div>
+                    <div id="eventContentDiv" style="border: 1px solid #ccc;padding: 0 7px;"></div>
 
                     <div class="horizontal layout center center-justified">
                         <div hidden="{{!isTerminated}}" style="margin: 10px 0 0 0;">

@@ -44,7 +44,7 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
     private List<String> fileList = new ArrayList<String>();
     private String caption;
 
-    public DocumentVSBrowserPane(final String signedDocumentStr, File fileParam) {
+    public DocumentVSBrowserPane(final byte[] smimeMessageBytes, File fileParam) {
         this.backup = fileParam;
         buttonsHBox = new HBox();
         saveButton = new Button(ContextVS.getMessage("saveLbl"));
@@ -55,7 +55,7 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
         getChildren().addAll(buttonsHBox);
         saveButton.setVisible(false);
         if(backup == null) {
-            if(signedDocumentStr == null) {
+            if(smimeMessageBytes == null) {
                 FileChooser fileChooser = new FileChooser();
                     /*FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
                             ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
@@ -63,7 +63,7 @@ public class DocumentVSBrowserPane extends VBox implements DecompressBackupPane.
                 fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
                 //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
                 backup = fileChooser.showOpenDialog(new Stage());
-            } else backup = FileUtils.getFileFromString(signedDocumentStr);
+            } else backup = FileUtils.getFileFromBytes(smimeMessageBytes);
         }
         if(backup != null) {
             try {

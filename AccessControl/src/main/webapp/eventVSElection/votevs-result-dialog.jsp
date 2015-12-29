@@ -121,9 +121,6 @@
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)
                 if(this.messageType == 'VOTE_RESULT') operationVS.message = this.votevsReceipt
                 else if(this.messageType == 'VOTE_CANCELLATION_RESULT') operationVS.message = this.voteVSCancellationReceipt
-                operationVS.setCallback(function(appMessage) {
-                    console.log("saveReceiptCallback - message: " + appMessage)
-                }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             },
             cancellationConfirmed: function() {

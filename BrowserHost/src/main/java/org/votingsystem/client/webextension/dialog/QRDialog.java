@@ -61,7 +61,7 @@ public class QRDialog extends DialogVS {
                             openReceiptButton.setOnAction(event -> {
                                 try {
                                     DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(
-                                            new String(smimeMessage.getBytes(), StandardCharsets.UTF_8), null);
+                                            smimeMessage.getBytes(), null);
                                     Platform.runLater(() -> {
                                         new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption()).show(); });
                                 } catch (Exception ex) {

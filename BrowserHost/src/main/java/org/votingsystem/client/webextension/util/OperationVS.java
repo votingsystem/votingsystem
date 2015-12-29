@@ -411,9 +411,11 @@ public class OperationVS implements PasswordDialog.Listener {
                 Utils.selectImage(this);
                 break;
             case OPEN_SMIME:
-                String smimeMessageStr = new String(Base64.getDecoder().decode(message.getBytes()), "UTF-8");
-                DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(smimeMessageStr, null);
-                new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption()).show();
+                byte[] smimeMessageBytes = Base64.getDecoder().decode(message.getBytes());
+                PlatformImpl.runLater(() -> {
+                    DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(smimeMessageBytes, null);
+                    new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption()).show();
+                });
                 break;
             case CURRENCY_OPEN:
                 CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject((message).getBytes()),
@@ -422,26 +424,31 @@ public class OperationVS implements PasswordDialog.Listener {
             case OPEN_SMIME_FROM_URL:
                 executorService = Executors.newSingleThreadExecutor();
                 executorService.submit(() -> {
-                    ResponseVS response = null;
-                    if(BrowserHost.getInstance().getSMIME(serviceURL) != null) {
-                        response = new ResponseVS(ResponseVS.SC_OK, BrowserHost.getInstance().getSMIME(serviceURL));
-                    } else {
-                        response = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.TEXT);
-                        if (ResponseVS.SC_OK == response.getStatusCode()) {
-                            BrowserHost.getInstance().setSMIME(serviceURL, response.getMessage());
+                    try {
+                        ResponseVS response = null;
+                        if(BrowserHost.getInstance().getSMIME(serviceURL) != null) {
+                            response = new ResponseVS(ResponseVS.SC_OK, BrowserHost.getInstance().getSMIME(serviceURL));
+                        } else {
+                            response = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.TEXT);
+                            if (ResponseVS.SC_OK == response.getStatusCode()) {
+                                BrowserHost.getInstance().setSMIME(serviceURL, response.getMessage());
+                            }
                         }
-                    }
-                    if (ResponseVS.SC_OK == response.getStatusCode()) {
-                        response.setStatusCode(ResponseVS.SC_INITIALIZED);
-                        message = response.getMessage();
-                        PlatformImpl.runLater(() -> {
-                            DocumentVSBrowserPane browserPane = new DocumentVSBrowserPane(message, null);
-                            DialogVS dialogVS = new DialogVS(browserPane, null).setCaption(browserPane.getCaption());
-                            dialogVS.addCloseListener(event -> {
-                                BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE());
+                        if (ResponseVS.SC_OK == response.getStatusCode()) {
+                            response.setStatusCode(ResponseVS.SC_INITIALIZED);
+                            byte[] messageBytes = response.getMessageBytes();
+                            PlatformImpl.runLater(() -> {
+                                DocumentVSBrowserPane browserPane = new DocumentVSBrowserPane(messageBytes, null);
+                                DialogVS dialogVS = new DialogVS(browserPane, null).setCaption(browserPane.getCaption());
+                                dialogVS.addCloseListener(event -> {
+                                    BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE());
+                                });
+                                dialogVS.show();
                             });
-                            dialogVS.show();
-                        });
+                        }
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                 });
                 break;

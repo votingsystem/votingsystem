@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
+import org.votingsystem.client.webextension.dialog.DialogVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
@@ -40,7 +41,6 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
 
     private static Logger log = Logger.getLogger(SignDocumentFormPane.class.getSimpleName());
 
-    private Stage stage;
     private TextArea textArea;
     private Button signButton;
     private SMIMEMessage smimeMessage;
@@ -122,14 +122,8 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         setMargin(buttonsBox, new Insets(20, 20, 0, 20));
         add(buttonsBox, 0, 4);
         textArea.requestFocus();
-        stage = new Stage();
-        stage.initModality(Modality.WINDOW_MODAL);
-        //stage.initOwner(window);
-        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
         documentSignerHelper = new SignDocumentFormStackPane(this);
         documentSignerHelper.getChildren().add(0, this);
-        stage.setScene(new Scene(documentSignerHelper, javafx.scene.paint.Color.TRANSPARENT));
-        stage.setTitle(ContextVS.getMessage("signDocumentButtonLbl"));
     }
 
     private void sendDocumentToService() {
@@ -163,18 +157,10 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         }
     }
 
-    private void show() {
-        stage.centerOnScreen();
-        stage.show();
-    }
-
     public static void showDialog() {
-        log.info("validateBackup");
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                SignDocumentFormPane signDocumentFormPane = new SignDocumentFormPane();
-                signDocumentFormPane.show();
-            }
+        Platform.runLater(() -> {
+            SignDocumentFormPane signersPane = new SignDocumentFormPane();
+            new DialogVS(signersPane).setCaption(ContextVS.getMessage("signDocumentButtonLbl")).show();
         });
     }
 

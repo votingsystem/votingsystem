@@ -116,9 +116,6 @@
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)
                 if(this.smimeMessageDto.smimeMessage) operationVS.message = this.smimeMessageDto.smimeMessage
                 else operationVS.message = this.smimeMessage
-                operationVS.setCallback(function(appMessage) {
-                    console.log("saveReceiptCallback - message: " + appMessage);
-                }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             }
         });

@@ -58,9 +58,6 @@
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)
                 operationVS.message = this.smimeMessage
-                operationVS.setCallback(function(appMessage) {
-                    console.log("saveReceiptCallback - message: " + appMessage)
-                }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             }
         });

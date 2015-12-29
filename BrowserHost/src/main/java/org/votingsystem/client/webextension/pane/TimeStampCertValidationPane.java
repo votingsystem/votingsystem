@@ -15,6 +15,7 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
+import org.votingsystem.client.webextension.dialog.DialogVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -90,19 +91,9 @@ public class TimeStampCertValidationPane extends GridPane {
     }
 
     public static void showDialog(final TimeStampToken timeStampToken) {
-        log.info("validateBackup");
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                Stage stage = new Stage();
-                stage.initModality(Modality.WINDOW_MODAL);
-                //stage.initOwner(window);
-                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
-                TimeStampCertValidationPane timeStampCertValidationPane = new TimeStampCertValidationPane(timeStampToken);
-                stage.setScene(new Scene(timeStampCertValidationPane, javafx.scene.paint.Color.TRANSPARENT));
-                stage.setTitle(ContextVS.getMessage("validateTimeStampDialogCaption"));
-                stage.centerOnScreen();
-                stage.show();
-            }
+        Platform.runLater(() -> {
+            TimeStampCertValidationPane timeStampCertValidationPane = new TimeStampCertValidationPane(timeStampToken);
+            new DialogVS(timeStampCertValidationPane).setCaption(ContextVS.getMessage("validateTimeStampDialogCaption")).show();
         });
     }
 

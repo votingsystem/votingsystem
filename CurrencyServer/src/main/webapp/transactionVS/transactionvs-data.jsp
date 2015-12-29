@@ -188,9 +188,6 @@
                     operationVS.serviceURL = this.transactionvs.messageSMIMEURL
                     operationVS.operation = Operation.OPEN_SMIME_FROM_URL
                 } else operationVS.message = this.smimeMessage
-                operationVS.setCallback(function(appMessage) {
-                    console.log("saveReceiptCallback - message: " + appMessage);
-                }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             },
             show: function(transactionvs) {

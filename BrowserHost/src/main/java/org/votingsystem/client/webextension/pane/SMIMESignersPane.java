@@ -12,6 +12,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.webextension.dialog.DialogVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.SignedFile;
@@ -62,18 +63,9 @@ public class SMIMESignersPane extends GridPane {
 
 
     public static void showDialog(final SignedFile signedFile) {
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                Stage stage = new Stage();
-                stage.initModality(Modality.WINDOW_MODAL);
-                //stage.initOwner(window);
-                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
-                SMIMESignersPane SMIMESignersPane = new SMIMESignersPane(signedFile);
-                stage.setScene(new Scene(SMIMESignersPane));
-                stage.setTitle(ContextVS.getMessage("signersLbl"));
-                stage.centerOnScreen();
-                stage.show();
-            }
+        Platform.runLater(() -> {
+            SMIMESignersPane signersPane = new SMIMESignersPane(signedFile);
+            new DialogVS(signersPane).show();
         });
     }
 

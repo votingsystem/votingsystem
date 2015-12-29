@@ -20,6 +20,7 @@ import org.votingsystem.client.webextension.backup.BackupValidator;
 import org.votingsystem.client.webextension.backup.ElectionBackupValidator;
 import org.votingsystem.client.webextension.backup.ValidationEvent;
 import org.votingsystem.client.webextension.backup.ValidatorListener;
+import org.votingsystem.client.webextension.dialog.DialogVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.voting.MetaInf;
 import org.votingsystem.model.ResponseVS;
@@ -149,19 +150,10 @@ public class BackupValidatorPane extends VBox implements ValidatorListener<Valid
 
     public static void validateBackup(String decompressedBackupBaseDir, MetaInf metaInf, Window parentWindow) {
         log.info("validateBackup - decompressedBackupBaseDir: " + decompressedBackupBaseDir);
-        final BackupValidatorPane validatorPane = new BackupValidatorPane(decompressedBackupBaseDir, metaInf);
-        validatorPane.init();
         Platform.runLater(() -> {
-            Stage stage = new Stage();
-            stage.initOwner(parentWindow);
-            stage.initModality(Modality.WINDOW_MODAL);
-            //stage.initOwner(window);
-            stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
-            stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
-            stage.setScene(new Scene(validatorPane));
-            stage.setTitle(ContextVS.getMessage("checkBackupCaption"));
-            stage.centerOnScreen();
-            stage.show();
+            BackupValidatorPane validatorPane = new BackupValidatorPane(decompressedBackupBaseDir, metaInf);
+            validatorPane.init();
+            new DialogVS(validatorPane).setCaption(ContextVS.getMessage("checkBackupCaption")).show();
         });
     }
 

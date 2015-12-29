@@ -3,10 +3,12 @@ package org.votingsystem.client.webextension;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.votingsystem.client.webextension.dialog.MessageDialog;
@@ -55,6 +57,10 @@ public class BrowserHost extends Application {
         primaryStage.setScene(new Scene(new Group(), 220, 100));
         primaryStage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
         primaryStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
+        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+        //set Stage boundaries to the top right corner of the visible bounds of the main screen
+        primaryStage.setX(primaryScreenBounds.getMinX() + primaryScreenBounds.getWidth() - 240);
+        primaryStage.setY(primaryScreenBounds.getMinY() + 20);
         primaryStage.show();
 
         //this is the part the receives the messages from the browser extension

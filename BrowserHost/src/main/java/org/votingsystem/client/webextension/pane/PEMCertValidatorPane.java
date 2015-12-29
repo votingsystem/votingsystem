@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
+import org.votingsystem.client.webextension.dialog.DialogVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -89,19 +90,9 @@ public class PEMCertValidatorPane extends GridPane {
     }
 
     public static void showDialog() {
-        log.info("validateBackup");
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                Stage stage = new Stage();
-                stage.centerOnScreen();
-                stage.initModality(Modality.WINDOW_MODAL);
-                //stage.initOwner(window);
-                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
-                PEMCertValidatorPane validatorPane = new PEMCertValidatorPane();
-                stage.setScene(new Scene(validatorPane, javafx.scene.paint.Color.TRANSPARENT));
-                stage.setTitle(ContextVS.getMessage("validateTimeStampDialogCaption"));
-                stage.showAndWait();
-            }
+        Platform.runLater(() -> {
+            PEMCertValidatorPane validatorPane = new PEMCertValidatorPane();
+            new DialogVS(validatorPane).show();
         });
     }
 

@@ -21,6 +21,7 @@ import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle.util.CollectionStore;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
+import org.votingsystem.client.webextension.dialog.DialogVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
@@ -156,23 +157,11 @@ public class TimeStampPane extends GridPane {
         }
     }
 
-
     public static void showDialog(final TimeStampToken timeStampToken) {
-        log.info("validateBackup");
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                Stage stage = new Stage();
-                stage.initModality(Modality.WINDOW_MODAL);
-                //stage.initOwner(window);
-                stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
-                TimeStampPane timeStampPane = new TimeStampPane(timeStampToken);
-                stage.setScene(new Scene(timeStampPane));
-                stage.setTitle(ContextVS.getMessage("timeStampInfoDialogCaption"));
-                stage.centerOnScreen();
-                stage.show();
-            }
+        Platform.runLater(() -> {
+            TimeStampPane timeStampPane = new TimeStampPane(timeStampToken);
+            new DialogVS(timeStampPane).setCaption(ContextVS.getMessage("timeStampInfoDialogCaption")).show();
         });
     }
-
 
 }

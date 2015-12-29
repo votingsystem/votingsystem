@@ -12,6 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.*;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.webextension.dialog.DialogVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -77,33 +78,13 @@ public class DecompressBackupPane extends VBox {
 
     public static void showDialog(final Listener listener, final File fileToOpen) {
         final String outputFolder = ContextVS.getInstance().getTempDir() + File.separator + UUID.randomUUID();
-        log.info("validateBackup - outputFolder: " + outputFolder);
+        log.info("showDialog - outputFolder: " + outputFolder);
         Platform.runLater(() -> {
-            Stage stage = new Stage(StageStyle.TRANSPARENT);
-            stage.initModality(Modality.WINDOW_MODAL);
-            //stage.initOwner(window);
-            stage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent -> { });
-            stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
-            File file = fileToOpen;
-            if(file == null) {
-                FileChooser fileChooser = new FileChooser();
-                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                        ContextVS.getMessage("backupFileFilterMsg"), "*" + ContentTypeVS.ZIP.getExtension());
-                fileChooser.getExtensionFilters().add(extFilter);
-                fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-                //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
-                file = fileChooser.showOpenDialog(stage);
-            } else {
-                log.info("validateBackup - zipFilePath: " + file.getAbsolutePath() + " - outputFolder: " + outputFolder);
-                DecompressBackupPane decompressBackupPane = new DecompressBackupPane(listener,
-                        file.getAbsolutePath(), outputFolder);
-                decompressBackupPane.getStyleClass().add("modal-dialog");
-                decompressBackupPane.init();
-                stage.setScene(new Scene(decompressBackupPane));
-                stage.getScene().getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
-                stage.setTitle(ContextVS.getMessage("decompressBackupCaption"));
-                stage.show();
-            }
+            DecompressBackupPane decompressBackupPane = new DecompressBackupPane(listener,
+                    fileToOpen.getAbsolutePath(), outputFolder);
+            decompressBackupPane.getStyleClass().add("modal-dialog");
+            decompressBackupPane.init();
+            new DialogVS(decompressBackupPane).show();
         });
     }
 
