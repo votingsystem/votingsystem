@@ -15,7 +15,6 @@ import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;
