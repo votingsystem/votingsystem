@@ -29,7 +29,7 @@
                 <a class="menuItem menuItemSelected" data-route="groupVS" href="#{contextURL}/spa.xhtml#!/groupVS">
                     <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupvsLbl}
                 </a>
-                <a class="menuItem menuItemSelected" data-route="userVSDashboard" href="#{contextURL}/spa.xhtml#!/app/userVSDashboard">
+                <a class="menuItem menuItemSelected" data-route="transactionsDashboard" href="#{contextURL}/spa.xhtml#!/transactionsDashboard">
                     <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
                 </a>
                 <a class="menuItem menuItemSelected" data-route="userVS" href="#{contextURL}/spa.xhtml#!/userVS/search">
@@ -41,7 +41,7 @@
                 <a class="menuItem menuItemSelected isAdminView" data-route="newGroupVS" href="#{contextURL}/spa.xhtml#!/newGroupVS">
                     <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupVSLbl}
                 </a>
-                <a class="menuItem menuItemSelected isSuperUserView" data-route="newGroupVS" href="#{contextURL}/spa.xhtml#!/userVS/newBankVS">
+                <a class="menuItem menuItemSelected isSuperUserView" data-route="newBankVS" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/userVS/newBankVS.xhtml&amp;caption=${msg.newBankVSLbl}&amp;data_route=newBankVS">
                     <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankVSLbl}
                 </a>
                 <a class="menuItem menuItemSelected isSuperUserView" data-route="certificateVS" href="#{contextURL}/spa.xhtml#!/certificateVS/certs">
@@ -50,7 +50,7 @@
                 <a class="menuItem menuItemSelected" data-route="reports" href="#{contextURL}/spa.xhtml#!/reports">
                     <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> ${msg.reportsPageTitle}
                 </a>
-                <a class="menuItem menuItemSelected" data-route="docs" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/app/index.xhtml&amp;caption=${msg.docsLbl}">
+                <a class="menuItem menuItemSelected" data-route="docs" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/app/index.xhtml&amp;caption=${msg.docsLbl}&amp;data_route=docs">
                     <i class="fa fa-info" style="margin:0px 10px 0px 0px;"></i> ${msg.docsLbl}
                 </a>
                 <a class="menuItem menuItemSelected" data-route="contact" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/app/contact.xhtml&amp;caption=${msg.contactLbl}">
@@ -60,7 +60,7 @@
         </div>
         <div id='main'>
             <div class="horizontal layout" style="margin:1px 0 0 0;">
-                <div style="margin:0 30px 0 30px;">
+                <div onclick="openDrawer()" style="margin:0 30px 0 30px;">
                     <i id="drawerButton" class="fa fa-navicon" style="font-size: 1.7em; color: #ba0011; cursor: pointer;"></i>
                 </div>
                 <div id="searchDiv" style="display: none;">
@@ -77,7 +77,7 @@
             <div id="mainContent" class="mainContent"></div>
         </div>
         <script>
-            debugger; // this is to allow logging from extension content scripts
+            //debugger; // this is to allow logging from extension content scripts
 
             vs.back = function() {
                 history.back()
@@ -87,7 +87,7 @@
                 }, 50);
             }
 
-            d3.select("#drawerButton").on("click", function() {
+            d3.select("#drawerButton").on("click", function(e) {
                 d3.select("#drawer").style({display:'block'});
                 d3.event.stopPropagation();
             })

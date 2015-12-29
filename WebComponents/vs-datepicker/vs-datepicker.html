@@ -574,6 +574,7 @@ Or see the LICENSE file that comes with this code.
             this.$.dateInput.value = this.format(date)
             this.$.hours.value = this._validateTime(date.getHours(), 23);
             this.$.minutes.value = this._validateTime(date.getMinutes(), 59);
+            this.dateSelected = true
         },
         getDate: function () {
             if (this.dateSelected === true) return new Date(this.date.year, this.date.month - 1, this.date.day,

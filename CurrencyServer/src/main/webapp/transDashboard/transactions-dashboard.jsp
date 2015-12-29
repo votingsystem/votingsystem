@@ -17,7 +17,6 @@
         }
     </style>
     <template>
-        <div id="fullScreenDiv" style="display: none;"></div>
         <div class="horizontal layout center center-justified">
             <div id="selectorDiv" class="vertical layout center" style="border: 1px solid #ccc; margin: 5px;border-radius: 3px;">
                 <div style="color: #888;font-weight: bold;text-decoration: underline;">${msg.filtersLbl}</div>

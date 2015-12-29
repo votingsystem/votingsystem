@@ -1,12 +1,11 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
         xmlns:ui="http://java.sun.com/jsf/facelets"
-        template="/WEB-INF/templates/basic.xhtml">
+        template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
-        <link href="../resources/bower_components/paper-input/paper-input.html" rel="import"/>
     </ui:define>
     <ui:define name="content">
-        <div style="min-height: 1000px; margin:0px auto 0px auto;">
-            <div style="margin:0px 30px 0px 30px;">
+        <div>
+            <div style="margin:0px auto;width: 100%; max-width: 1000px;">
                 <h3>
                     <div class="pageHeader text-center">
                         ${msg.newBankVSLbl}
@@ -23,18 +22,18 @@
                 </div>
 
                 <form onsubmit="return submitForm()">
-                    <paper-input id="bankVSIBAN" floatinglabel="" style="width:400px; margin:0px 0px 0px 20px;"
-                             label="${msg.IBANLbl}" validate="" error="${msg.requiredLbl}" required="">
-                    </paper-input>
+                    <input type="text" id="bankVSIBAN" style="width:400px; margin:0px 0px 0px 20px;"
+                           title="${msg.IBANLbl}" placeholder="${msg.IBANLbl}" required="">
+                    </input>
 
                     <div style="margin:15px 0px 0px 0px;">
-                        <label>${msg.descriptionLbl}</label>
-                        <textarea id="description" rows="8" required=""></textarea>
+                        <div>${msg.descriptionLbl}</div>
+                        <textarea id="description" rows="8" required="" style="width: 100%;"></textarea>
                     </div>
 
                     <div style="margin:15px 0px 0px 0px;">
-                        <label>${msg.pemCertLbl}</label>
-                        <textarea id="pemCert" rows="8" required=""></textarea>
+                        <div>${msg.pemCertLbl}</div>
+                        <textarea id="pemCert" rows="8" required="" style="width: 100%;"></textarea>
                     </div>
 
                     <div style="position:relative; margin:10px 10px 60px 0px;height:20px;">
@@ -81,8 +80,6 @@
                             var msgTemplate = '${msg.accessLinkMsg}';
                         }
                         alert(msg, caption)
-                        window.scrollTo(0,0);
-                        document.querySelector("#bankVSIBAN").click() // haco to refresh screen
                     })
                     VotingSystemClient.setMessage(operationVS);
                     appMessageJSON = null

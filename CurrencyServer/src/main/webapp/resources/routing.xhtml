@@ -10,7 +10,8 @@
 
       var pageMap = {}
       page('*/innerVSPage*', scrollToTop, function(ctx) {
-          if(!vs.route) vs.route = 'docs'
+          var route = getQueryParam('data_route', ctx.querystring)
+          if(route) vs.route = route
           var url = contextURL + getQueryParam('url', ctx.querystring)
           var pageCaption = getQueryParam('caption', ctx.querystring)
           console.log("innerVSPage - url: " + url + " - caption: " + pageCaption)
@@ -23,12 +24,12 @@
           }
       });
 
-      var userVSDashboard
-      page('*/app/userVSDashboard*', scrollToTop, function() {
-          vs.route = 'userVSDashboard';
-          Polymer.Base.importHref('./app/uservs-dashboard.vsp', function(e) {
-              if(!userVSDashboard) userVSDashboard = document.createElement('uservs-dashboard');
-              vs.loadMainContent(userVSDashboard, "${msg.dashBoardLbl}")
+      var transactionsDashboard
+      page('*/transactionsDashboard*', scrollToTop, function() {
+          vs.route = 'transactionsDashboard';
+          Polymer.Base.importHref('./transDashboard/transactions-dashboard.vsp', function(e) {
+              if(!transactionsDashboard) transactionsDashboard = document.createElement('transactions-dashboard');
+              vs.loadMainContent(transactionsDashboard, "${msg.dashBoardLbl}")
           });
       });
 
@@ -128,7 +129,6 @@
               vs.loadMainContent(weekReports)
           });
       });
-
 
       var userVS
       page('*/rest/userVS/id/*', scrollToTop, function(data) {
