@@ -122,7 +122,6 @@
                             "${msg.downloadReceiptMsg}".format(appMessageJSON.URL)
                 }
                 alert(msg, caption)
-                this.click() //hack to refresh screen
             },
             cancel: function() {
                 if(this.infoRequestStep) this.close()

@@ -69,7 +69,6 @@
                             "${msg.downloadReceiptMsg}".format(appMessageJSON.URL)
                 }
                 alert(msg, caption)
-                this.click() //hack to refresh screen
             },
             close: function() {
                 this.$.modalDialog.style.opacity = 0

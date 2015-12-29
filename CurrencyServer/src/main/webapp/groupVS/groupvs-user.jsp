@@ -88,7 +88,6 @@
                     this.close()
                 }
                 alert(appMessageJSON.message, caption)
-                this.click() //hack to refresh screen
             },
             getDate:function(timStamp) {
                 return new Date(timStamp).getDayWeekAndHourFormat()

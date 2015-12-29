@@ -80,10 +80,11 @@ public class MessageDto<T> {
         return dto;
     }
 
-    public static MessageDto DIALOG_CLOSE() {
+    public static MessageDto DIALOG_CLOSE(String tabId) {
         MessageDto dto = new MessageDto();
         dto.setOperation("dialog_closed");
         dto.setMessage_type("message_to_webextension");
+        dto.setTabId(tabId);
         return dto;
     }
 

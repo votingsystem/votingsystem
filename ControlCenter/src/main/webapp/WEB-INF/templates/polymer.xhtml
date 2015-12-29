@@ -20,8 +20,16 @@
     </div>
     <script>
         document.querySelector("#voting_system_page").addEventListener('message_from_extension',
-                function(event) { vs.webextension_available = true
-                    var isClientToolConnected = ((clientTool !== undefined)) || vs.webextension_available
+                function(event) {
+                    vs.webextension_available = true
+                    Polymer.Base.importHref(contextURL + '/element/block-screen.vsp', function(e) {
+                        var blockScreen = document.createElement('block-screen');
+                        document.querySelector("body").appendChild(blockScreen)
+                        vs.blockScreen = blockScreen.block.bind(blockScreen)
+                    });
+                    document.querySelector("#voting_system_page").addEventListener("message_from_webextension:dialog_closed", function(e) {
+                        vs.blockScreen(false)
+                    });
                 })
     </script>
 </h:body>

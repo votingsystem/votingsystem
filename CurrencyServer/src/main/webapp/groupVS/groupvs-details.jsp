@@ -184,7 +184,6 @@
                 page.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id)
             }
             alert(this.appMessageJSON.message, caption)
-            this.click()
         },
         goToWeekBalance:function() {
             page.show(contextURL + "/rest/balance/userVS/id/" + this.groupvs.id)
@@ -209,7 +208,6 @@
                 page.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id)
             } else caption = '${msg.groupSubscriptionERRORLbl}'
             alert(appMessageJSON.message, caption)
-            this.click() //hack to refresh screen
         },
         groupvsChanged:function() {
             console.log(this.tagName + " - groupvsChanged - menuType: " + menuType)

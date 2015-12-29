@@ -11,7 +11,7 @@ document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('mes
 chrome.extension.onMessage.addListener(function(msg, sender, sendResponse) {
     if(msg.message_type === "message_to_webextension") {
         if(msg.operation === "dialog_closed") {
-            console.log("content.js ---------- dialog_closed")
+            document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message_from_webextension:dialog_closed'))
         }
     } else if(msg.callerCallback) {
         document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent(msg.callerCallback, {detail:msg}))

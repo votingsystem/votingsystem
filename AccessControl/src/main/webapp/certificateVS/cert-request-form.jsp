@@ -100,7 +100,6 @@
                 message = "${msg.certRequestOKMsg}"
                 alert(message, '${msg.certRequestLbl}', 'resultMessage',true)
             } else alert(message, '${msg.certRequestLbl}')
-            this.click()
         },
         removeErrorStyle: function (element) {
             var formElements = element.children

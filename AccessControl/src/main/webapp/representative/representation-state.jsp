@@ -89,7 +89,6 @@
                     caption = "${msg.operationOKCaption}"
                 }
                 alert(appMessageJSON.message, caption)
-                this.click() //hack to refresh
             },
             close: function() {
                 this.$.modalDialog.style.opacity = 0

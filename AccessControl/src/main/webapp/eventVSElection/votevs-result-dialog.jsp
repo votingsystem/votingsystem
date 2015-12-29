@@ -61,23 +61,20 @@
                 hashCertVSBase64:{type:String},
                 statusCode:{type:Number},
                 messageType:{type:String, observer:'messageTypeChanged'},
-                callerCallback:{type:String},
                 voteVSCancellationReceipt:{type:String},
-                checkSignatureButtonMsg:{type:String, value:'${msg.checkVoteLbl}'},
-                appMessageJSON:{type:Object}
+                checkSignatureButtonMsg:{type:String, value:'${msg.checkVoteLbl}'}
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
             },
             show: function(appMessageJSON) {
-                console.log(this.tagName + " - show - appMessageJSON: " + appMessageJSON)
+                console.log(this.tagName + " - show")
                 this.message = null
                 this.caption = null
                 this.optionSelected = null
                 this.votevsReceipt = null
-                this.appMessageJSON = appMessageJSON
                 this.statusCode = appMessageJSON.statusCode
-                this.isOK = (this.statusCode == 200)
+                this.isOK = (this.statusCode === 200)
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     this.caption = "${msg.voteOKCaption}"
                     this.message = "${msg.voteResultOKMsg}"
@@ -108,8 +105,7 @@
             },
             cancelVote: function() {
                 this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
-                this.callerCallback = Math.random().toString(36).substring(7)
-                alert('${msg.cancelVoteConfirmMsg}', '${msg.cancelVoteLbl}', this.cancellationConfirmed)
+                alert('${msg.cancelVoteConfirmMsg}', '${msg.cancelVoteLbl}', this.cancellationConfirmed.bind(this))
                 this.$.modalDialog.style.opacity = 0
                 this.$.modalDialog.style['pointer-events'] = 'none'
             },
@@ -129,11 +125,13 @@
                 operationVS.serviceURL = contextURL + "/rest/voteVS/cancel"
                 operationVS.signedMessageSubject = "${msg.cancelVoteLbl}"
                 operationVS.setCallback(function(appMessage) { this.cancellationResponse(appMessage) }.bind(this))
+
+                console.log("!!!!!!!!!!!!!!!: " + JSON.stringify(operationVS))
+
                 VotingSystemClient.setMessage(operationVS);
             },
-            cancellationResponse: function(appMessage) {
-                console.log(this.tagName + " - cancellationResponse: " + appMessage);
-                var appMessageJSON = toJSON(appMessage)
+            cancellationResponse: function(appMessageJSON) {
+                console.log(this.tagName + " - cancellationResponse");
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     this.messageType = "VOTE_CANCELLATION_RESULT"
                     this.voteVSCancellationReceipt = appMessageJSON.message;
@@ -143,7 +141,6 @@
                     this.$.modalDialog.style.opacity = 1
                     this.$.modalDialog.style['pointer-events'] = 'auto'
                 } else alert(appMessageJSON.message, '${msg.voteVSCancellationErrorCaption}')
-                this.click()
             }
         });
     </script>

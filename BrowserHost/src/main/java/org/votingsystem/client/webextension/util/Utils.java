@@ -20,6 +20,7 @@ import org.controlsfx.glyphfont.Glyph;
 import org.controlsfx.glyphfont.GlyphFont;
 import org.controlsfx.glyphfont.GlyphFontRegistry;
 import org.votingsystem.client.webextension.BrowserHost;
+import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.dialog.PasswordDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.dto.ActorVSDto;

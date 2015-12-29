@@ -3,7 +3,7 @@ package org.votingsystem.client.webextension.task;
 import javafx.concurrent.Task;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
-import org.votingsystem.client.webextension.util.OperationVS;
+import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;

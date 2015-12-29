@@ -2,7 +2,7 @@ package org.votingsystem.client.webextension.task;
 
 import javafx.concurrent.Task;
 import org.votingsystem.client.webextension.service.EventBusService;
-import org.votingsystem.client.webextension.util.OperationVS;
+import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;

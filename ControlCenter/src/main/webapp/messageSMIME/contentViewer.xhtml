@@ -1,55 +1,44 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html">
-<h:head>
-    <title>${msg.signedDocumentLbl}</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link rel="shortcut icon" href="../resources/images/icon_16/fa-bolt.png" type="image/x-icon"/>
-    <script src="../resources/bower_components/webcomponentsjs/webcomponents-lite.min.js" type="text/javascript"></script>
-    <link href="../resources/bower_components/polymer/polymer.html" rel="import"/>
-    <link href="../resources/bower_components/layout/layout.html" rel="import"/>
-    <script src="../resources/js/utilsVS.js" type="text/javascript"/>
-    <script src="../resources/js/utils_js.vsp" type="text/javascript"/>
-    <link href="${viewer}.vsp" rel="import"/>
-    <link href="../resources/css/votingSystem.css" media="all" rel="stylesheet" />
-    <link href="../resources/bower_components/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-</h:head>
-<h:body>
-    <div class="horizontal layout" style="margin:1px 0 0 0;">
-        <div style="font-size: 1.3em;margin:0 0 0 50px; color: #888;text-decoration: underline;" id="selectedPageTitle"></div>
-    </div>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/polymer.xhtml">
+    <ui:define name="head">
+        <title>${msg.signedDocumentLbl}</title>
+        <link href="${viewer}.vsp" rel="import"/>
+    </ui:define>
+    <ui:define name="content">
+        <div class="horizontal layout" style="margin:1px 0 0 0;">
+            <div style="font-size: 1.3em;margin:0 0 0 50px; color: #888;text-decoration: underline;" id="selectedPageTitle"></div>
+        </div>
 
-    <div id="voting_system_page" class="layout vertical center center-justified"> </div>
-    <div id="smimeMessage" style="display:none;">${smimeMessage}</div>
+        <div id="smimeMessage" style="display:none;">${smimeMessage}</div>
 
-    <script>
-        var timeStampDate = new Date(${timeStampDate}).getDayWeekAndHourFormat()
-        var viewer = null
-        var smimeMessageContent = toJSON('${signedContentMap}')
+        <script>
+            var timeStampDate = new Date(${timeStampDate}).getDayWeekAndHourFormat()
+            var viewer = null
+            var smimeMessageContent = toJSON('${signedContentMap}')
 
-        document.addEventListener('WebComponentsReady', function() {
-            console.log("receiptViewer - WebComponentsReady - viewer: ${viewer}")
-            viewer = document.createElement('${viewer}');
-            sendSignalVS({caption:"${msg.signedDocumentLbl}"})
-            document.querySelector("#voting_system_page").appendChild(viewer)
-            loadContent()
-        });
+            document.addEventListener('WebComponentsReady', function() {
+                console.log("receiptViewer - WebComponentsReady - viewer: ${viewer}")
+                viewer = document.createElement('${viewer}');
+                sendSignalVS({caption:"${msg.signedDocumentLbl}"})
+                document.querySelector("#voting_system_page").appendChild(viewer)
+                loadContent()
+            });
 
-        function showContent(contentStr, timeStampDateStr) {
-            var b64_to_utf8 = decodeURIComponent(escape(window.atob(contentStr)))
-            smimeMessageContent = JSON.parse(b64_to_utf8)
-            timeStampDate = timeStampDateStr
-            if(viewer != null) loadContent()
-        }
+            function showContent(contentStr, timeStampDateStr) {
+                var b64_to_utf8 = decodeURIComponent(escape(window.atob(contentStr)))
+                smimeMessageContent = JSON.parse(b64_to_utf8)
+                timeStampDate = timeStampDateStr
+                if(viewer != null) loadContent()
+            }
 
-        function loadContent() {
-            viewer.smimeMessage = document.querySelector("#smimeMessage").innerHTML;
-            viewer.smimeMessageContent = smimeMessageContent
-            viewer.timeStampDate = timeStampDate
-            smimeMessageContent = null
-            timeStampDate = null
-        }
-    </script>
-</h:body>
-</html>
+            function loadContent() {
+                viewer.smimeMessage = document.querySelector("#smimeMessage").innerHTML;
+                viewer.smimeMessageContent = smimeMessageContent
+                viewer.timeStampDate = timeStampDate
+                smimeMessageContent = null
+                timeStampDate = null
+            }
+        </script>
+    </ui:define>
+</ui:composition>

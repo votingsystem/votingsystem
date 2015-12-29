@@ -4,6 +4,7 @@ import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
@@ -166,13 +167,14 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
         EventBusService.getInstance().register(new EventBusCurrencyListener());
     }
 
-    public static void show(final Currency currency, final Window parentWindow) {
+    public static void show(final Currency currency, final Window parentWindow, EventHandler closeListener) {
         Platform.runLater(new Runnable() {
             @Override public void run() {
                 try {
                     CurrencyDialog currencyDialog = new CurrencyDialog();
                     currencyDialog.initOwner(parentWindow);
                     currencyDialog.showDialog(currency);
+                    currencyDialog.addCloseListener(closeListener);
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }

@@ -11,7 +11,7 @@ import javafx.scene.web.HTMLEditor;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.service.EventBusService;
-import org.votingsystem.client.webextension.util.OperationVS;
+import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.ResponseVS;

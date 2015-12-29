@@ -2,7 +2,7 @@ package org.votingsystem.client.webextension.task;
 
 import javafx.concurrent.Task;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
-import org.votingsystem.client.webextension.util.OperationVS;
+import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;

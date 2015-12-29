@@ -1,10 +1,10 @@
-package org.votingsystem.client.webextension.util;
+package org.votingsystem.client.webextension;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
-import org.votingsystem.client.webextension.BrowserHost;
+import javafx.event.EventHandler;
 import org.votingsystem.client.webextension.dialog.*;
 import org.votingsystem.client.webextension.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.webextension.pane.WalletPane;
@@ -13,6 +13,7 @@ import org.votingsystem.client.webextension.service.InboxService;
 import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.webextension.service.WebSocketService;
 import org.votingsystem.client.webextension.task.*;
+import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.EventVSDto;
@@ -65,6 +66,7 @@ public class OperationVS implements PasswordDialog.Listener {
     private String UUID;
     private char[] password;
     private String callerCallback;
+    private EventHandler closeListener;
     @JsonIgnore private ActorVS targetServer;
 
     private ExecutorService executorService;
@@ -347,9 +349,16 @@ public class OperationVS implements PasswordDialog.Listener {
 
     @Override
     public void cancelPassword(TypeVS passwordType) {
-        processResult(new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("operationCancelledMsg")));
+        processResult(new ResponseVS(ResponseVS.SC_CANCELED, ContextVS.getMessage("operationCancelledMsg")));
+        BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
     }
 
+    public EventHandler getCloseListener() {
+        if(closeListener == null) closeListener = event -> {
+            BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
+        };
+        return closeListener;
+    }
 
     public void initProcess() throws Exception {
         log.info("initProcess - operation: " + operation);
@@ -389,11 +398,8 @@ public class OperationVS implements PasswordDialog.Listener {
                             try {
                                 DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(null,
                                         FileUtils.getFileFromBytes(response.getMessageBytes()));
-                                DialogVS dialogVS = new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption());
-                                dialogVS.addCloseListener(event -> {
-                                    BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE());
-                                });
-                                dialogVS.show();
+                                new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption())
+                                        .addCloseListener(getCloseListener()).show();
                             } catch (Exception ex) {
                                 log.log(Level.SEVERE, ex.getMessage(), ex);
                             }
@@ -404,25 +410,19 @@ public class OperationVS implements PasswordDialog.Listener {
             case MESSAGEVS_TO_DEVICE:
                 WebSocketService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(this));
                 break;
-            case KEYSTORE_SELECT:
-                Utils.selectKeystoreFile(this);
-                break;
-            case SELECT_IMAGE:
-                Utils.selectImage(this);
-                break;
             case OPEN_SMIME:
                 byte[] smimeMessageBytes = Base64.getDecoder().decode(message.getBytes());
                 PlatformImpl.runLater(() -> {
                     DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(smimeMessageBytes, null);
-                    new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption()).show();
+                    new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption())
+                            .addCloseListener(getCloseListener()).show();
                 });
                 break;
             case CURRENCY_OPEN:
                 CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject((message).getBytes()),
-                        BrowserHost.getInstance().getScene().getWindow());
+                        BrowserHost.getInstance().getScene().getWindow(), getCloseListener());
                 break;
             case OPEN_SMIME_FROM_URL:
-                executorService = Executors.newSingleThreadExecutor();
                 executorService.submit(() -> {
                     try {
                         ResponseVS response = null;
@@ -441,7 +441,7 @@ public class OperationVS implements PasswordDialog.Listener {
                                 DocumentVSBrowserPane browserPane = new DocumentVSBrowserPane(messageBytes, null);
                                 DialogVS dialogVS = new DialogVS(browserPane, null).setCaption(browserPane.getCaption());
                                 dialogVS.addCloseListener(event -> {
-                                    BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE());
+                                    BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
                                 });
                                 dialogVS.show();
                             });
@@ -451,9 +451,6 @@ public class OperationVS implements PasswordDialog.Listener {
                         BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                 });
-                break;
-            case SAVE_SMIME:
-                Utils.saveReceipt(this);
                 break;
             case SEND_ANONYMOUS_DELEGATION:
                 Utils.saveReceiptAnonymousDelegation(this);
@@ -490,7 +487,6 @@ public class OperationVS implements PasswordDialog.Listener {
 
     public void processResult(ResponseVS responseVS) {
         log.log(Level.INFO, "processResult - statusCode: " + responseVS.getStatusCode());
-        if(responseVS.getStatusCode() == ResponseVS.SC_CANCELED) return;
         try {
             switch (operation) {
                 case PUBLISH_EVENT:
@@ -515,8 +511,11 @@ public class OperationVS implements PasswordDialog.Listener {
                     break;
                 default:
                     if(callerCallback == null) BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
-                    else BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
+                    else {
+                        BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
                                 responseVS.getStatusCode(), responseVS.getMessage(), tabId, callerCallback));
+                        BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
+                    }
             }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

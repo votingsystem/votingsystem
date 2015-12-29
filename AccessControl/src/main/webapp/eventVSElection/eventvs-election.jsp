@@ -12,13 +12,12 @@
                 color: #888;
             }
         </style>
-        <div class="vertical layout center center-justified">
+        <div hidden="{{mainDivHidden}}" class="vertical layout center center-justified">
             <div hidden="{{adminMenuHidden}}" style="text-align: center;">
                 <button type="submit" on-click="showAdminDialog" style="margin:15px 20px 15px 0px;">
                     ${msg.adminDocumentLinkLbl} <i class="fa fa fa-check"></i>
                 </button>
             </div>
-
             <div class="vertical layout center center-justified" style="margin: 0px 30px;width: 100%; max-width: 1000px;">
                 <div class="layout horizontal center center-justified" style="width:100%;">
                     <div class="flex horizontal layout center center-justified">
@@ -87,8 +86,7 @@
             </div>
         </div>
 
-        <eventvs-election-vote-confirm-dialog id="confirmOptionDialog" on-option-confirmed="submitVote">
-            </eventvs-election-vote-confirm-dialog>
+        <eventvs-election-vote-confirm-dialog id="confirmOptionDialog" on-option-confirmed="submitVote"></eventvs-election-vote-confirm-dialog>
         <eventvs-admin-dialog id="eventVSAdminDialog" eventvs="{{eventvs}}"></eventvs-admin-dialog>
         <votevs-result-dialog id="votevsResultDialog"></votevs-result-dialog>
     </template>
@@ -98,6 +96,7 @@
             properties: {
                 url:{type:String, observer:'getHTTP'},
                 eventvs:{type:Object, observer:'eventvsChanged'},
+                mainDivHidden:{type:Boolean, value:true},
             },
             ready: function() {
                 console.log(this.tagName + "- ready")
@@ -131,6 +130,7 @@
                         }
                     }.bind(this));
                 d3.select(this).select("#eventContentDiv").html(decodeURIComponent(escape(window.atob(this.eventvs.content))))
+                this.mainDivHidden = false
             },
             showAdminDialog:function() {
                 this.$.eventVSAdminDialog.show()
@@ -158,30 +158,32 @@
             showGetResultsResponse:function(appMessage) {
                 var appMessageJSON = toJSON(appMessage)
                 if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message, "${msg.errorLbl}")
-                this.click()//hack to refresh screen
             },
             showVoteResul:function() {
                 this.$.votevsResultDialog.show(this.votevsResul)
             },
             submitVote:function() {
                 console.log("submitVote - eventvs.url: " + this.eventvs.url)
-                var voteVS = {optionSelected:this.optionVSSelected, eventVSId:this.eventvs.id, eventURL:this.eventvs.url}
                 var operationVS = new OperationVS(Operation.SEND_VOTE)
-                this.eventvs.voteVS = voteVS
-                operationVS.voteVS = voteVS
-                operationVS.signedMessageSubject = '${msg.sendVoteMsgSubject}'
-                operationVS.setCallback(function(appMessage) { this.submitVoteResponse(appMessage)}.bind(this))
+                this.eventvs.voteVS = {optionSelected:this.optionVSSelected, eventVSId:this.eventvs.id, eventURL:this.eventvs.url}
+                operationVS.voteVS = this.eventvs.voteVS
+                operationVS.signedMessageSubject = '${msg.sendVoteMsgSubject} - ' + this.eventvs.subject
+                operationVS.setCallback(function(appMessage) {
+                    this.voteResponse(appMessage)}.bind(this))
                 console.log(" - operationVS: " +  JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
             },
-            submitVoteResponse:function(appMessage) {
-                console.log(this.tagName + " - vote callback - message: " + appMessage);
-                var appMessageJSON = toJSON(appMessage)
-                appMessageJSON.eventVS = this.eventvs
-                appMessageJSON.optionSelected = this.optionVSSelected.content
-                this.votevsResul = appMessageJSON
-                this.$.votevsResultDialog.show(appMessageJSON)
-                //this.click(); //hack to refresh screen
+            voteResponse:function(appMessageJSON) {
+                console.log(this.tagName + " - voteResponse: " + JSON.stringify(appMessageJSON));
+                if(appMessageJSON.statusCode == ResponseVS.SC_OK) {
+                    var resultJSON = toJSON(appMessageJSON.message)
+                    resultJSON.eventVS = this.eventvs
+                    resultJSON.optionSelected = this.optionVSSelected.content
+                    this.votevsResul = resultJSON
+                    this.$.votevsResultDialog.show(resultJSON)
+                } else if (appMessageJSON.statusCode !== ResponseVS.SC_CANCELED) {
+                    alert(appMessageJSON.message, "${msg.errorLbl}")
+                }
             },
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url

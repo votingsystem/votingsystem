@@ -140,7 +140,6 @@
                     caption = '${msg.currencyRequestERRORCaption}'
                     alert(appMessageJSON.message, caption)
                 }
-                this.click() //hack to refresh screen
             }
         });
     </script>

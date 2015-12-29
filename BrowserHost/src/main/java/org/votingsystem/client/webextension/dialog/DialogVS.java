@@ -3,10 +3,13 @@ package org.votingsystem.client.webextension.dialog;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.MenuButton;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.*;
 import org.votingsystem.client.webextension.BrowserHost;
@@ -76,6 +79,7 @@ public class DialogVS {
         decoratedPane = new DecoratedPane(null, null, pane, stage);
         stage.setScene(new Scene(decoratedPane));
         stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle(ContextVS.getMessage("mainDialogCaption"));
         if(parentWindow == null) stage.initOwner(BrowserHost.getInstance().getScene().getWindow());
         else stage.initOwner(parentWindow);
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
@@ -87,10 +91,11 @@ public class DialogVS {
         Utils.addMouseDragSupport(stage);
     }
 
-    public void addCloseListener(EventHandler eventHandler) {
+    public DialogVS addCloseListener(EventHandler eventHandler) {
         stage.addEventHandler(WindowEvent.WINDOW_HIDDEN, windowEvent -> {
             eventHandler.handle(windowEvent);
         });
+        return this;
     }
 
     public Parent getParent() {

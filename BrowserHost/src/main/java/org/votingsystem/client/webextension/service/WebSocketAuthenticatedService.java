@@ -12,7 +12,7 @@ import org.votingsystem.client.webextension.dialog.CertNotFoundDialog;
 import org.votingsystem.client.webextension.dialog.PasswordDialog;
 import org.votingsystem.client.webextension.dialog.ProgressDialog;
 import org.votingsystem.client.webextension.util.InboxMessage;
-import org.votingsystem.client.webextension.util.OperationVS;
+import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.dto.*;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.*;

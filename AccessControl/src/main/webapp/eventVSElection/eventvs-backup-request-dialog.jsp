@@ -79,7 +79,6 @@
                     this.close()
                 }
                 alert(appMessageJSON.message, caption)
-                this.click()
             },
             close: function() {
                 this.$.modalDialog.style.opacity = 0

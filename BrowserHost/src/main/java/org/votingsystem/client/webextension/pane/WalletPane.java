@@ -88,7 +88,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
                 tagFlowPane.setAlignment(Pos.CENTER);
                 for(Currency currency : currencyTagSet) {
                     HBox currencyHBox = new HBox();
-                    currencyHBox.setOnMouseClicked(mouseEvent -> CurrencyDialog.show(currency, this.getScene().getWindow()));
+                    currencyHBox.setOnMouseClicked(mouseEvent -> CurrencyDialog.show(currency, this.getScene().getWindow(), null));
                     currencyHBox.getStyleClass().add("currencyPane");
                     Label currencyValueLbl = new Label();
                     currencyValueLbl.getStyleClass().add("currencyValue");

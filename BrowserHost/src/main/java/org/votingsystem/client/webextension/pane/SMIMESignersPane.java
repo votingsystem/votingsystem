@@ -2,15 +2,11 @@ package org.votingsystem.client.webextension.pane;
 
 import javafx.application.Platform;
 import javafx.geometry.Side;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.dialog.DialogVS;
 import org.votingsystem.client.webextension.util.Utils;

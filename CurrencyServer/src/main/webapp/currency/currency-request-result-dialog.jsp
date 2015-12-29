@@ -50,7 +50,6 @@
                     var caption = '${msg.errorLbl}'
                     alert(appMessageJSON.message, caption)
                 }
-                this.click()
             },
             showMessage:function(caption, message) {
                 this.caption = caption;

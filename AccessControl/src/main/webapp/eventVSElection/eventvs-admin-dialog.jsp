@@ -102,7 +102,6 @@
                     msg = appMessageJSON.message
                 }
                 alert(msg, caption)
-                this.click() //hack to refresh screen
             },
             show: function() {
                 this.$.modalDialog.style.opacity = 1

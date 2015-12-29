@@ -14,7 +14,7 @@ import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.webextension.service.EventBusService;
 import org.votingsystem.client.webextension.util.MsgUtils;
-import org.votingsystem.client.webextension.util.OperationVS;
+import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
@@ -27,7 +27,6 @@ import org.votingsystem.util.TypeVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

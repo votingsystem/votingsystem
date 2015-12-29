@@ -7,12 +7,10 @@ var Operation = {
     CONNECT:"CONNECT",
     DISCONNECT:"DISCONNECT",
     FILE_FROM_URL:"FILE_FROM_URL",
-    KEYSTORE_SELECT:"KEYSTORE_SELECT",
     LISTEN_TRANSACTIONS: "LISTEN_TRANSACTIONS",
     MESSAGEVS:"MESSAGEVS",
     OPEN_SMIME: "OPEN_SMIME",
     OPEN_SMIME_FROM_URL: "OPEN_SMIME_FROM_URL",
-    SAVE_SMIME: "SAVE_SMIME",
     CURRENCY_OPEN: "CURRENCY_OPEN",
     FROM_GROUP_TO_MEMBER_GROUP:"FROM_GROUP_TO_MEMBER_GROUP",
     FROM_GROUP_TO_ALL_MEMBERS:"FROM_GROUP_TO_ALL_MEMBERS",
@@ -287,6 +285,7 @@ VotingSystemClient.setMessage = function (messageJSON) {
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
     } else if(isChrome() && vs.webextension_available) {
+        vs.blockScreen(true)
         document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message-to-host', {detail:messageJSON}))
     } else console.log("clientTool undefined - operation: " + messageJSON.operation)
 }

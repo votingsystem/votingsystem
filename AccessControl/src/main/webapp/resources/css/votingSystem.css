@@ -460,6 +460,23 @@ textarea.form-control {
     overflow-y:auto;
 }
 
+.browserHostDialog {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 99999;
+    opacity:1;
+    pointer-events: auto;
+    -webkit-transition: opacity 200ms ease-in;
+    -moz-transition: opacity 200ms ease-in;
+    transition: opacity 200ms ease-in;
+    pointer-events: none;
+    overflow-y:auto;
+}
+
 .modalDialog > div {
     width: 400px;
     max-height: 700px;

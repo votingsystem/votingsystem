@@ -219,7 +219,6 @@
                 caption = "${msg.transactionvsOKLbl}"
             } else caption = '${msg.transactionvsERRORLbl}'
             alert(appMessageJSON.message, caption)
-            this.click() //hack to refresh screen
         },
         transactionFromUser:function(tagList) {
             var operationVS = new OperationVS(this.operation)
