@@ -268,7 +268,7 @@
             this.$.configDialog.style['pointer-events'] = 'auto'
         },
         cancelGroup:function() {
-            alert("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name), "${msg.confirmOperationMsg}", this.messagedialogAccepted)
+            alert("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name), "${msg.confirmOperationMsg}", this.messagedialogAccepted.bind(this))
         },
         editGroup:function() {
             var operationVS = new OperationVS(Operation.CURRENCY_GROUP_EDIT)

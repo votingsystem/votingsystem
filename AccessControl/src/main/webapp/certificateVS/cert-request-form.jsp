@@ -80,7 +80,7 @@
                     "<br/><b>${msg.surnameLbl}:</b> " + this.$.surname.value.toUpperCase() +
                     "<br/><b>${msg.phoneLbl}:</b> " + this.$.phone.value +
                     "<br/><b>${msg.emailLbl}:</b> " + this.$.email.value,
-                    "${msg.checkInputMsg}", this.messagedialogAccept)
+                    "${msg.checkInputMsg}", this.messagedialogAccept.bind(this))
         },
         messagedialogAccept: function (e) {
             console.log("messagedialogAccept - callerId:" + e.detail)

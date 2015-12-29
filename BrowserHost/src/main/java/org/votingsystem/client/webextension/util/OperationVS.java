@@ -502,18 +502,20 @@ public class OperationVS implements PasswordDialog.Listener {
                         String representativeURL =  ContextVS.getInstance().getAccessControl()
                                 .getRepresentativeByNifServiceURL(representativeDto.getNIF());
                         BrowserHost.sendMessageToBrowser(MessageDto.NEW_TAB(representativeURL));
-                        BrowserHost.showMessage(responseVS.getStatusCode(), ContextVS.getMessage("representativeDataSendOKMsg"));
-                    } else BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
+                        responseVS.setMessage(ContextVS.getMessage("representativeDataSendOKMsg"));
+                    }
+                    BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
                     break;
                 default:
                     if(callerCallback == null) BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
                     else BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
                                 responseVS.getStatusCode(), responseVS.getMessage(), tabId, callerCallback));
             }
-            if(executorService != null) executorService.shutdown();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+        } finally {
+            if(executorService != null) executorService.shutdown();
         }
     }
 
