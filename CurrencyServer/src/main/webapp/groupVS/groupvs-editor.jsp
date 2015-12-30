@@ -83,7 +83,6 @@
                     this.tagButtonHidden = false
                 }
                 sendSignalVS({caption:this.signedMessageSubject})
-                vs.groupvs = null
             },
             showTagDialog: function() {
                 this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
@@ -93,7 +92,6 @@
                 this.tagButtonHidden = (this.selectedTags.length > 0)
             },
             removeTag: function(e) {
-                if(this.groupvs) return
                 var tagToDelete = e.model.tag
                 for (tagIdx in this.selectedTags) {
                     if (tagToDelete.id == this.selectedTags[tagIdx].id) {

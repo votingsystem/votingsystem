@@ -43,10 +43,11 @@
       });
 
       var currencyIssued
-      page('*/currency/issued/currencyCode/*', scrollToTop, function(data) {
+      page('*/currencyIssued*', scrollToTop, function(ctx) {
+          vs.route = 'reports';
           Polymer.Base.importHref('./currency/currency-issued.vsp', function(e) {
               if(!currencyIssued) currencyIssued = document.createElement('currency-issued');
-              currencyIssued.url = data.path
+              currencyIssued.currencyCode = getQueryParam('currencyCode', ctx.querystring)
               vs.loadMainContent(currencyIssued, "${msg.currencyIssued}")
           });
       });
@@ -62,6 +63,7 @@
 
       var currencyAccountSystem
       page('*/currencyAccount/system', scrollToTop, function(data) {
+          vs.route = 'reports';
           Polymer.Base.importHref('./currencyAccount/system-accounts.vsp', function(e) {
               if(!currencyAccountSystem) currencyAccountSystem = document.createElement('system-accounts');
               vs.loadMainContent(currencyAccountSystem, "${msg.systemBalanceLbl}")

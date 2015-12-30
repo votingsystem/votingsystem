@@ -10,22 +10,22 @@
                     </a>
                 </div>
                 <div style="margin:20px 0px;">
-                    <a href="#" onclick="javascript:page.show(contextURL + '/rest/currency/issued/currencyCode/EUR'); return false;">
+                    <a href="${contextURL}/spa.xhtml#!/currencyIssued?currencyCode=EUR">
                         ${msg.currencyIssued}
                     </a>
                 </div>
                 <div style="margin:20px 0px;">
-                    <a href="#" onclick="javascript:page.show('/currencyAccount/system'); return false;">
+                    <a href="${contextURL}/spa.xhtml#!/currencyAccount/system">
                         ${msg.systemBalanceLbl}
                     </a>
                 </div>
 
                 <div style="margin:20px 0px;">
-                    <a href="#"  onclick="javascript:page.show(contextURL + '/rest/reports${spa.now()}/week'); return false;">
+                    <a href="${contextURL}/spa.xhtml#!/rest/reports${spa.now()}/week">
                         ${msg.currentWeekLbl}
                     </a>
                 </div>
-                <div><b>${msg.historyLbl}:</b></div>
+                <div hidden="{{historyMsgHidden}}"><b>${msg.historyLbl}:</b></div>
                 <template is="dom-repeat" items="{{reportsInfoDto}}" as="timePeriod">
                     <div>
                         <a href="{{getPeriodReportURL(timePeriod)}}">{{getPeriodDescription(timePeriod)}}</a>
@@ -54,6 +54,7 @@
             console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
             d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
                 this.reportsInfoDto = toJSON(rawData.response)
+                this.historyMsgHidden = (this.reportsInfoDto.length === 0)
             }.bind(this));
         }
     });

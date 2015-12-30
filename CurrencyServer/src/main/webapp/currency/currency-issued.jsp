@@ -68,10 +68,14 @@
             is:'currency-issued',
             properties: {
                 url:{type:String, observer:'getHTTP'},
+                currencyCode:{type:String, observer:'currencyCodeChanged'},
                 currencyIssuedDto:{type:Object, observer:'currencyIssuedDtoChanged'}
             },
             ready: function() {
                 console.log(this.tagName + " - ready - ")
+            },
+            currencyCodeChanged: function() {
+                this.getHTTP(contextURL + "/rest/currency/issued/currencyCode/" + this.currencyCode)
             },
             currencyIssuedDtoChanged: function() {
                 console.log(this.tagName + " - currencyIssuedDto: " + this.currencyIssuedDto)
