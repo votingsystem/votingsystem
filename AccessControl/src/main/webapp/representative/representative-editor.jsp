@@ -72,7 +72,7 @@
                 operationVS.serviceURL = contextURL + "/rest/representative/save"
                 operationVS.signedMessageSubject = "${msg.newRepresentativeLbl}"
                 var description = window.btoa(this.$.editor.getContent())
-                operationVS.jsonStr = JSON.stringify({description:description, base64Image:this.selectedFileBase64,  UUID: Math.random().toString(36).substring(7)})
+                operationVS.jsonStr = JSON.stringify({description:description, base64Image:this.selectedFileBase64,  UUID: "#{spa.getUUID()}"})
                 VotingSystemClient.setMessage(operationVS);
             },
             loadFile:function(file) {

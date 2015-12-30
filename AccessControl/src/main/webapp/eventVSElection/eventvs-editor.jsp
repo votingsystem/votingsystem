@@ -79,7 +79,7 @@
                 })
                 operationVS.jsonStr = JSON.stringify({subject:this.$.subject.value, content:content,
                     fieldsEventVS:fieldsEventVS, dateBegin:this.$.datePicker.getDate().getTime(),
-                    UUID: Math.random().toString(36).substring(7)})
+                    UUID: "#{spa.getUUID()}"})
                 console.log(JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
             },

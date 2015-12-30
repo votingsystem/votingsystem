@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -22,6 +23,10 @@ public class SPABean implements Serializable {
     private static final Logger log = Logger.getLogger(SPABean.class.getSimpleName());
 
     private static final List<String> availableLocales = Arrays.asList("es");
+
+    public String getUUID() {
+        return UUID.randomUUID().toString();
+    }
 
     public String formatDate(Date date) {
         if(date == null) return "";

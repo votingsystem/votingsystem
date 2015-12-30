@@ -77,7 +77,7 @@
                     email:this.$.email.value,
                     dateFrom:this.$.dateFromPicker.getDate().getTime(),
                     dateTo:this.$.dateToPicker.getDate().getTime(),
-                    UUID:Math.random().toString(36).substring(7)})
+                    UUID:"#{spa.getUUID()}"})
                 operationVS.serviceURL = contextURL + "/rest/representative/history"
                 operationVS.signedMessageSubject = '${msg.requestVotingHistoryLbl}'
                 VotingSystemClient.setMessage(operationVS);

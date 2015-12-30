@@ -66,7 +66,7 @@
                     representativeNif:this.representative.nif, representativeName:this.representativeFullName,
                     email:this.$.email.value,
                     selectedDate:this.$.datePicker.getDate().getTime(),
-                    UUID:Math.random().toString(36).substring(7)})
+                    UUID:"#{spa.getUUID()}"})
                 operationVS.serviceURL = contextURL + "/rest/representative/accreditations"
                 operationVS.signedMessageSubject = '${msg.requestRepresentativeAcreditationsLbl}'
                 VotingSystemClient.setMessage(operationVS);
