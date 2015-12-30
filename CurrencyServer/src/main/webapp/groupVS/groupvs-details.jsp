@@ -89,13 +89,12 @@
                 </div>
             </div>
         </div>
-        <div class="contentDiv"></div>
+        <div id="contentDiv" class="contentDiv"></div>
         <div class="layout horizontal">
             <div style="margin: 5px 30px 0 0;">
                 <button on-click="goToWeekBalance"><i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}</button>
             </div>
-            <div hidden="{{tagsHidden}}" class="layout horizontal center center-justified"
-                    style="margin: 5px 0 0 0;">
+            <div hidden="{{tagsHidden}}" class="layout horizontal center center-justified" style="margin: 5px 0 0 0;">
                 <template is="dom-repeat" items="{{groupvs.tags}}">
                     <a class="btn btn-default" style="font-size: 0.7em;margin:0px 5px 0px 0px;padding:3px;">
                         <i class="fa fa-tag" style="color:#888; margin: 0 5px 0 0;"></i><span>{{item.name}}</span></a>
@@ -231,7 +230,7 @@
             if(this.groupvs.tags) this.tagsHidden = (this.groupvs.tags.length === 0)
             this.$.userList.url = contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/listUsers"
             if(this.groupvs.id) this.$.userList.loadGroupUsers(this.groupvs.id)
-            d3.select(this).select("#contentDiv").html(decodeURIComponent(escape(window.atob(this.groupvs.description))))
+            this.$.contentDiv.innerHTML = window.atob(this.groupvs.description)
             console.log("this.isUserView: " + this.isUserView + " - groupvs.state: " + this.groupvs.state +
                 " - menuType: " + menuType)
         },

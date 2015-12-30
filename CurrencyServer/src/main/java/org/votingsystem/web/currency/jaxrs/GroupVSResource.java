@@ -35,6 +35,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.URI;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -112,11 +113,16 @@ public class GroupVSResource {
     @GET @Transactional @Produces(MediaType.APPLICATION_JSON)
     public Response getById(@PathParam("id") long id, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        String contentType = req.getContentType() != null ? req.getContentType():"";
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
         GroupVSDto groupVSDto = groupVSBean.getGroupVSDto(groupVS);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(groupVSDto)).type(MediaTypeVS.JSON).build();
+        if(contentType.contains("json")) {
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(groupVSDto)).type(MediaTypeVS.JSON).build();
+        } else {
+            return Response.temporaryRedirect(new URI("../spa.xhtml#!/CurrencyServer/rest/groupVS/id/" + groupVS.getId())).build();
+        }
     }
 
     @Path("/id/{id}/searchUsers")

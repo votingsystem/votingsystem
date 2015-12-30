@@ -5,7 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.event.EventHandler;
-import org.votingsystem.client.webextension.dialog.*;
+import org.votingsystem.client.webextension.dialog.CurrencyDialog;
+import org.votingsystem.client.webextension.dialog.DialogVS;
+import org.votingsystem.client.webextension.dialog.PasswordDialog;
+import org.votingsystem.client.webextension.dialog.ProgressDialog;
 import org.votingsystem.client.webextension.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.webextension.pane.WalletPane;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
@@ -505,17 +508,17 @@ public class OperationVS implements PasswordDialog.Listener {
                     break;
                 default:
                     if(callerCallback == null) BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
-                    else {
-                        BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
+                    else BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
                                 responseVS.getStatusCode(), responseVS.getMessage(), tabId, callerCallback));
-                        BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
-                    }
+
+
             }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
         } finally {
             if(executorService != null) executorService.shutdown();
+            BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
         }
     }
 

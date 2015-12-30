@@ -67,7 +67,6 @@
                     alert("${msg.selectRepresentativeImgLbl}", "${msg.errorLbl}")
                     return;
                 }
-                var msgTemplate = "${msg.enterFieldMsg}"
                 var operationVS = new OperationVS(Operation.EDIT_REPRESENTATIVE)
                 operationVS.serviceURL = contextURL + "/rest/representative/save"
                 operationVS.signedMessageSubject = "${msg.newRepresentativeLbl}"

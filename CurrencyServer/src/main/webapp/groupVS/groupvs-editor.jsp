@@ -16,16 +16,19 @@
                 </div>
                 <div class="horizontal layout">
                     <template is="dom-repeat" items="{{selectedTags}}" as="tag">
-                        <div>
-                            <div style="color: #888;">
+                        <div hidden="{{tagDivHidden}}" class="horizontal layout center center-justified">
+                            <div style="color: #888; margin: 0 15px;">
                                 <i class="fa fa-tag"></i> ${msg.tagLbl}
                             </div>
-                            <a class="btn btn-default" data-tag-id$='{{tag.id}}' on-click="removeTag"
-                               style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px; cursor: pointer;">
-                                <i class="fa fa-minus" style="color: #6c0404;"></i> <span>{{tag.name}}</span></a>
+                            <div class="horizontal layout" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                                <div hidden="{{removeTagIconHidden}}"  data-tag-id$='{{tag.id}}' on-click="removeTag">
+                                    <i class="fa fa-minus" style="color: #6c0404; cursor: pointer;"></i>
+                                </div>
+                                <div>{{tag.name}}</div>
+                            </div>
                         </div>
                     </template>
-                    <div hidden="{{!selectedTagsHidden}}" style="margin:10px 0px 10px 10px;">
+                    <div hidden="{{tagButtonHidden}}" style="margin:10px 0px 10px 10px;">
                         <button on-click="showTagDialog">
                             <i class="fa fa-tag"></i> ${msg.addTagLbl}
                         </button>
@@ -44,7 +47,7 @@
             is:'groupvs-editor',
             properties: {
                 selectedTags: {object:Array, value:[], observer:'selectedTagsChanged'},
-                selectedTagsHidden: {object:Boolean, value:true}
+                tagButtonHidden: {object:Boolean, value:false}
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
@@ -56,14 +59,30 @@
             },
             attached:function() {
                 if(vs.groupvs) {
+                    this.$.subject.readOnly = true;
                     this.operationVS = Operation.CURRENCY_GROUP_EDIT
                     this.groupvs = toJSON(JSON.stringify(vs.groupvs))
+                    this.groupvsId = this.groupvs.id
                     this.$.subject.value = this.groupvs.name
-                    this.$.editor.setContent(decodeURIComponent(escape(window.atob(this.groupvs.description))))
-                    this.selectedTags.push(this.groupvs.tags[0])
+                    this.$.editor.setContent(window.atob(this.groupvs.description))
+                    this.signedMessageSubject = "${msg.editGroupVSLbl}"
+                    if(this.groupvs.tags.length > 0) {
+                        this.selectedTags = [this.groupvs.tags[0]]
+                        this.removeTagIconHidden = true;
+                        this.tagDivHidden = false;
+                    } else this.tagDivHidden = true;
+                    this.tagButtonHidden = true
                 } else {
+                    this.$.subject.readOnly = false;
+                    this.removeTagIconHidden = false;
+                    this.signedMessageSubject = "${msg.newGroupVSLbl}"
+                    this.selectedTags = []
+                    this.tagDivHidden = false;
+                    this.groupvs = null
                     this.operationVS = Operation.CURRENCY_GROUP_NEW
+                    this.tagButtonHidden = false
                 }
+                sendSignalVS({caption:this.signedMessageSubject})
                 vs.groupvs = null
             },
             showTagDialog: function() {
@@ -71,9 +90,10 @@
             },
             selectedTagsChanged: function(e) {
                 console.log(this.tagName + " - selectedTagsChanged - num. tags: " + this.selectedTags.length)
-                this.selectedTagsHidden = (this.selectedTags.length === 0)
+                this.tagButtonHidden = (this.selectedTags.length > 0)
             },
             removeTag: function(e) {
+                if(this.groupvs) return
                 var tagToDelete = e.model.tag
                 for (tagIdx in this.selectedTags) {
                     if (tagToDelete.id == this.selectedTags[tagIdx].id) {
@@ -90,10 +110,9 @@
                 }
                 var operationVS = new OperationVS(this.operationVS)
                 operationVS.serviceURL = contextURL + "/rest/groupVS/saveGroup"
-                operationVS.signedMessageSubject = "${msg.newGroupVSLbl}"
-                var description = window.btoa(encodeURIComponent( escape(this.$.editor.getContent())))
-                //dto.setId(groupId);
-                operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_NEW ,
+                operationVS.signedMessageSubject = this.signedMessageSubject
+                var description = window.btoa(this.$.editor.getContent())
+                operationVS.jsonStr = JSON.stringify({operation:this.operationVS , id:this.groupvsId,
                     name:this.$.subject.value, description:description, tags: this.selectedTags,
                     UUID: "${spa.getUUID()}"})
                 console.log(JSON.stringify(operationVS))

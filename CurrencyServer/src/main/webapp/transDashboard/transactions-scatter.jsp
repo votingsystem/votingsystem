@@ -194,7 +194,7 @@
                             .attr("height", this.height)
                     var chartBody = svg.append("g").attr("clip-path", "url(#clip)");
 
-                    resetButton.onclick= function(){
+                    this.$.resetButton.onclick= function(){
                         zoom.translate([0, 0]).scale(1)
                         zoomed()
                         hostElement.$.resetButtonDiv.style.display = 'none'
