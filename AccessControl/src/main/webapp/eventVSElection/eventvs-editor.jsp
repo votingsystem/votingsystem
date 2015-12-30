@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="../element/vs-editor.vsp" rel="import"/>
+<link href="../resources/bower_components/vs-editor/vs-editor.html" rel="import"/>
 <link href="../resources/bower_components/vs-datepicker/vs-datepicker.html" rel="import"/>
 <link href="../element/reason-dialog.vsp" rel="import"/>
 
@@ -79,7 +79,7 @@
                 })
                 operationVS.jsonStr = JSON.stringify({subject:this.$.subject.value, content:content,
                     fieldsEventVS:fieldsEventVS, dateBegin:this.$.datePicker.getDate().getTime(),
-                    UUID: "#{spa.getUUID()}"})
+                    UUID: "${spa.getUUID()}"})
                 console.log(JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
             },

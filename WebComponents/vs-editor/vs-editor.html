@@ -1,12 +1,10 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-
 <!--
 based on https://github.com/JaySunSyn/polymer-tinymce
 
 localization ->https://www.tinymce.com/docs/configure/localization/
 -->
 
-<link href="../resources/tinymce.html" rel="import"/>
+<script src="../tinymce/tinymce.min.js"></script>
 
 <dom-module name="vs-editor">
     <template>
@@ -21,11 +19,14 @@ localization ->https://www.tinymce.com/docs/configure/localization/
                 templates: { type: Array, value: function () { return [] } },
                 height: { type: Number, value: 168 },
                 baseUrl: { type: String, value: '' },
-                contentMap: { type: Object, value: {} }
+                contentMap: { type: Object, value: {} },
+                availableLocales: { type: Array, value: ["es"] }
             },
             ready: function() {
-                console.log(this.tagName + " - ready")
+                console.log(this.tagName + " - ready - availableLocales: " + this.availableLocales)
                 this.textareaId = this.id + Math.random().toString(36).substring(7);
+                this.locale = window.navigator.userLanguage || window.navigator.language;
+                if(this.availableLocales.indexOf(this.locale) < 0) this.locale = "es"
             },
             detached: function(){
                 this.$.editorContainer.style.display = 'none'
@@ -44,7 +45,7 @@ localization ->https://www.tinymce.com/docs/configure/localization/
                 }
                 tinymce.init({
                     selector: "#" + this.textareaId,
-                    language: '${spa.language()}',
+                    language: this.locale,
                     templates: this.templates,
                     plugins: this.tinyplugins,
                     toolbar: this.tinytoolbar,

@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="../element/vs-editor.vsp" rel="import"/>
+<link href="../resources/bower_components/vs-editor/vs-editor.html" rel="import"/>
 
 <dom-module name="representative-editor">
     <style>
@@ -72,7 +72,7 @@
                 operationVS.serviceURL = contextURL + "/rest/representative/save"
                 operationVS.signedMessageSubject = "${msg.newRepresentativeLbl}"
                 var description = window.btoa(this.$.editor.getContent())
-                operationVS.jsonStr = JSON.stringify({description:description, base64Image:this.selectedFileBase64,  UUID: "#{spa.getUUID()}"})
+                operationVS.jsonStr = JSON.stringify({description:description, base64Image:this.selectedFileBase64,  UUID: "${spa.getUUID()}"})
                 VotingSystemClient.setMessage(operationVS);
             },
             loadFile:function(file) {

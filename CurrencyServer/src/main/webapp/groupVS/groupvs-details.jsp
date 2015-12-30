@@ -149,10 +149,6 @@
             document.querySelector("#voting_system_page").addEventListener('uservs-selected',
                     function(e) { this.showUserDetails(e) }.bind(this))
         },
-        decodeBase64:function(base64EncodedString) {
-            if(base64EncodedString == null) return null
-            return decodeURIComponent(escape(window.atob(base64EncodedString)))
-        },
         closeDialog:function() {
             this.$.certDetailsDialog.style.opacity = 0
             this.$.certDetailsDialog.style['pointer-events'] = 'none'
@@ -235,7 +231,7 @@
             if(this.groupvs.tags) this.tagsHidden = (this.groupvs.tags.length === 0)
             this.$.userList.url = contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/listUsers"
             if(this.groupvs.id) this.$.userList.loadGroupUsers(this.groupvs.id)
-            d3.select(this).select("#contentDiv").html(this.decodeBase64(this.groupvs.description))
+            d3.select(this).select("#contentDiv").html(decodeURIComponent(escape(window.atob(this.groupvs.description))))
             console.log("this.isUserView: " + this.isUserView + " - groupvs.state: " + this.groupvs.state +
                 " - menuType: " + menuType)
         },
@@ -269,9 +265,8 @@
             alert("${msg.cancelGroupVSDialogMsg}".format(this.groupvs.name), "${msg.confirmOperationMsg}", this.messagedialogAccepted.bind(this))
         },
         editGroup:function() {
-            var operationVS = new OperationVS(Operation.CURRENCY_GROUP_EDIT)
-            operationVS.message = this.groupvs.id
-            VotingSystemClient.setMessage(operationVS);
+            vs.groupvs = this.groupvs
+            page.show("/groupvs_editor")
         },
         showUserDetails:function(e) {
             console.log(this.tagName + " - showUserDetails - user id: " + e.detail)

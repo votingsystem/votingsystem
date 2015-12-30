@@ -16,6 +16,7 @@ import org.votingsystem.client.webextension.task.*;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
@@ -286,31 +287,31 @@ public class OperationVS implements PasswordDialog.Listener {
                     }
                     break;
                 case PUBLISH_EVENT:
-                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, password, "eventURL"), null, getOperationMessage());
+                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, getOperationMessage(), password, "eventURL"), null);
                     break;
                 case SEND_VOTE:
-                    ProgressDialog.show(new VoteTask(this, password), null, getOperationMessage());
+                    ProgressDialog.show(new VoteTask(this, getOperationMessage(), password), null);
                     break;
                 case CANCEL_VOTE:
-                    ProgressDialog.show(new CancelVoteTask(this, password), null, getOperationMessage());
+                    ProgressDialog.show(new CancelVoteTask(this, getOperationMessage(), password), null);
                     break;
                 case CERT_USER_NEW:
-                    ProgressDialog.show(new CertRequestTask(this, password), null, getOperationMessage());
+                    ProgressDialog.show(new CertRequestTask(this, getOperationMessage(), password), null);
                     break;
                 case MESSAGEVS:
                     processResult(WebSocketAuthenticatedService.getInstance().sendMessageVS(this));
                     break;
                 case CURRENCY_REQUEST:
-                    ProgressDialog.show(new CurrencyRequestTask(this, password), null, getOperationMessage());
+                    ProgressDialog.show(new CurrencyRequestTask(this, getOperationMessage(), password), null);
                     break;
                 case CURRENCY_DELETE:
-                    ProgressDialog.show(new CurrencyDeleteTask(this, password), null, getOperationMessage());
+                    ProgressDialog.show(new CurrencyDeleteTask(this, getOperationMessage(), password), null);
                     break;
                 case REPRESENTATIVE_SELECTION:
                     RepresentativeDelegationDto delegationDto = getDocumentToSign(RepresentativeDelegationDto.class);
                     delegationDto.setUUID(java.util.UUID.randomUUID().toString());
                     ProgressDialog.show(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(delegationDto),
-                            password), null, getOperationMessage());
+                            getOperationMessage(), password), null);
                     break;
                 case EDIT_REPRESENTATIVE:
                     Map documentMap = getDocumentToSign();
@@ -318,29 +319,16 @@ public class OperationVS implements PasswordDialog.Listener {
                     String representativeImage = ((String)documentMap.get("base64Image")).split(",")[1];
                     documentMap.put("base64Image", representativeImage);
                     ProgressDialog.show(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(documentMap),
-                            password), null, getOperationMessage());
-                    break;
-                case CURRENCY_GROUP_EDIT:
-                case CURRENCY_GROUP_NEW:
-                    /*
-                    ResponseVS responseVS = sendSMIME(operationVS.getJsonStr(), operationVS);
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        GroupVSDto dto = (GroupVSDto) responseVS.getMessage(GroupVSDto.class);
-                        String groupVSURL =  ContextVS.getInstance().getCurrencyServer().getGroupURL(dto.getId());
-                        BrowserHost.sendMessageToBrowser(MessageDto.NEW_TAB(groupVSURL));
-                        responseVS.setMessage(ContextVS.getMessage("groupVSDataSendOKMsg"));
-                    }
-                    return responseVS;
-                     */
+                            getOperationMessage(), password), null);
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                    ProgressDialog.show(new AnonymousDelegationCancelTask(this, password), null, getOperationMessage());
+                    ProgressDialog.show(new AnonymousDelegationCancelTask(this, getOperationMessage(), password), null);
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
-                    ProgressDialog.show(new AnonymousDelegationTask(this, password), null, getOperationMessage());
+                    ProgressDialog.show(new AnonymousDelegationTask(this, getOperationMessage(), password), null);
                     break;
                 default:
-                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, password), null, getOperationMessage());
+                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, getOperationMessage(), password), null);
             }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -461,10 +449,6 @@ public class OperationVS implements PasswordDialog.Listener {
             case WALLET_OPEN:
                 WalletPane.show();
                 break;
-            case CURRENCY_GROUP_NEW:
-            case CURRENCY_GROUP_EDIT:
-                GroupVSEditorDialog.show(this);
-                break;
             case WALLET_SAVE:
                 saveWallet();
                 break;
@@ -506,6 +490,16 @@ public class OperationVS implements PasswordDialog.Listener {
                                 .getRepresentativeByNifServiceURL(representativeDto.getNIF());
                         BrowserHost.sendMessageToBrowser(MessageDto.NEW_TAB(representativeURL));
                         responseVS.setMessage(ContextVS.getMessage("representativeDataSendOKMsg"));
+                    }
+                    BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
+                    break;
+                case CURRENCY_GROUP_EDIT:
+                case CURRENCY_GROUP_NEW:
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        GroupVSDto dto = (GroupVSDto) responseVS.getMessage(GroupVSDto.class);
+                        String groupVSURL =  ContextVS.getInstance().getCurrencyServer().getGroupURL(dto.getId());
+                        BrowserHost.sendMessageToBrowser(MessageDto.NEW_TAB(groupVSURL));
+                        responseVS.setMessage(ContextVS.getMessage("groupVSDataSendOKMsg"));
                     }
                     BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
                     break;

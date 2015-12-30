@@ -20,19 +20,23 @@ public class CancelVoteTask extends Task<Void> {
 
     private char[] password;
     private OperationVS operationVS;
+    private String message;
 
-    public CancelVoteTask(OperationVS operationVS, char[] password) throws Exception {
+    public CancelVoteTask(OperationVS operationVS, String message, char[] password) throws Exception {
         this.operationVS = operationVS;
         this.password = password;
+        this.message = message;
     }
 
     @Override protected Void call() throws Exception {
         log.info("cancelVote");
+        updateMessage(message);
         ResponseVS voteResponse = ContextVS.getInstance().getHashCertVSData(operationVS.getMessage());
         VoteVSHelper voteVSHelper = (VoteVSHelper) voteResponse.getData();
         VoteVSCancelerDto cancelerDto = voteVSHelper.getVoteCanceler();
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future future = executor.submit(new SendSMIMETask(operationVS, JSON.getMapper().writeValueAsString(cancelerDto), password));
+        Future future = executor.submit(new SendSMIMETask(operationVS, JSON.getMapper().writeValueAsString(cancelerDto),
+                message, password));
         ResponseVS responseVS = (ResponseVS) future.get();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             responseVS.setMessage(Base64.getEncoder().encodeToString(responseVS.getSMIME().getBytes()));

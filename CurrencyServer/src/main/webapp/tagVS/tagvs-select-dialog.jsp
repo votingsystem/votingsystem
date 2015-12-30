@@ -21,7 +21,7 @@
                 <div style="font-weight: bold; margin:0px 0px 5px 0px;"><span>{{messages.selectedTagsLbl}}</span></div>
                 <div class="flex horizontal wrap layout">
                     <template is="dom-repeat" items="{{selectedTagList}}">
-                        <div><a class="btn btn-default" on-click="removeTag" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                        <div><a class="btn btn-default" on-click="removeTag" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;cursor: pointer;">
                             <i class="fa fa-minus"></i> <span>{{item.name}}</span></a></div>
                     </template>
                 </div>
@@ -45,7 +45,7 @@
             <div>
                 <div class="flex horizontal wrap layout center center-justified">
                     <template is="dom-repeat" items="[[resultListDto.resultList]]">
-                        <a class="btn btn-default" on-click="selectTag" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;">
+                        <a class="btn btn-default" on-click="selectTag" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;cursor: pointer;">
                             <i class="fa fa-plus" style="color: #6c0404;"></i> <span>{{item.name}}</span></a>
                     </template>
                 </div>

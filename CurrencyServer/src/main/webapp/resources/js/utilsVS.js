@@ -155,6 +155,13 @@ function pad(n, width, z) {
     return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
+function FormUtils(){}
+
+FormUtils.checkIfEmpty = function (param) {
+    if((param == undefined) || (param == null) || '' == param.trim()) return true;
+    else return false
+}
+
 String.prototype.getElapsedTime = function() {
 	  return this.getDate().getElapsedTime()
 };

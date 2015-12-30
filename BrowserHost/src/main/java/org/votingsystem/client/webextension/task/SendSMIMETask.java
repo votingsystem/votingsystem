@@ -21,17 +21,21 @@ public class SendSMIMETask extends Task<ResponseVS> {
     private char[] password;
     private OperationVS operationVS;
     private String documentToSign;
+    private String message;
 
-    public SendSMIMETask(OperationVS operationVS, String documentToSign, char[] password, String... headers) throws Exception {
+    public SendSMIMETask(OperationVS operationVS, String documentToSign, String message, char[] password,
+                         String... headers) throws Exception {
         this.operationVS = operationVS;
         this.headers = headers;
         this.password = password;
         this.documentToSign = documentToSign;
+        this.message = message;
     }
 
     @Override protected ResponseVS call() throws Exception {
         ResponseVS responseVS = null;
         try {
+            updateMessage(message);
             updateProgress(1, 10);
             SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, operationVS.getReceiverName(),
                     documentToSign, password, operationVS.getSignedMessageSubject());

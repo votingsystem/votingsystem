@@ -23,13 +23,16 @@ public class AnonymousDelegationCancelTask extends Task<ResponseVS> {
 
     private char[] password;
     private OperationVS operationVS;
+    private String message;
 
-    public AnonymousDelegationCancelTask(OperationVS operationVS, char[] password) throws Exception {
+    public AnonymousDelegationCancelTask(OperationVS operationVS, String message, char[] password) throws Exception {
         this.operationVS = operationVS;
         this.password = password;
+        this.message = message;
     }
 
     @Override protected ResponseVS call() throws Exception {
+        updateMessage(message);
         RepresentativeDelegationDto delegation = BrowserSessionService.getInstance().getAnonymousDelegationDto();
         if(delegation == null) return new ResponseVS(ResponseVS.SC_ERROR,
                 ContextVS.getMessage("anonymousDelegationDataMissingMsg"));

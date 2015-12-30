@@ -238,7 +238,7 @@ public class InboxService implements PasswordDialog.Listener {
                     PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
                             password);
                     ProgressDialog.show(new InboxDecryptTask(privateKey, timeLimitedInboxMessage),
-                            ContextVS.getMessage("decryptingMessagesMsg"), null);
+                            ContextVS.getMessage("decryptingMessagesMsg"));
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                     BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));

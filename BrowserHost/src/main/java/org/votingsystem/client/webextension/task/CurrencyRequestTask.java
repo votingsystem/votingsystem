@@ -31,14 +31,17 @@ public class CurrencyRequestTask extends Task<ResponseVS> {
 
     private char[] password;
     private OperationVS operationVS;
+    private String message;
 
-    public CurrencyRequestTask(OperationVS operationVS, char[] password) throws Exception {
+    public CurrencyRequestTask(OperationVS operationVS, String message, char[] password) throws Exception {
         this.operationVS = operationVS;
         this.password = password;
+        this.message = message;
     }
 
     @Override protected ResponseVS call() throws Exception {
         log.info("sendCurrencyRequest");
+        updateMessage(message);
         TransactionVSDto transactionVSDto = operationVS.getDocumentToSign(TransactionVSDto.class);
         CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionVSDto,
                 transactionVSDto.getAmount(), operationVS.getTargetServer().getServerURL());

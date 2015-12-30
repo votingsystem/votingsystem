@@ -20,14 +20,17 @@ public class CurrencyDeleteTask extends Task<ResponseVS> {
 
     private char[] password;
     private OperationVS operationVS;
+    private String message;
 
-    public CurrencyDeleteTask(OperationVS operationVS, char[] password) throws Exception {
+    public CurrencyDeleteTask(OperationVS operationVS, String message, char[] password) throws Exception {
         this.operationVS = operationVS;
         this.password = password;
+        this.message = message;
     }
 
     @Override protected ResponseVS call() throws Exception {
         log.info("deleteCurrency");
+        updateMessage(message);
         Set<Currency> wallet = Wallet.getWallet(password);
         wallet = wallet.stream().filter(currency -> {
             if (currency.getHashCertVS().equals(operationVS.getMessage())) {

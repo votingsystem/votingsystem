@@ -22,8 +22,6 @@ public class SPABean implements Serializable {
 
     private static final Logger log = Logger.getLogger(SPABean.class.getSimpleName());
 
-    private static final List<String> availableLocales = Arrays.asList("es");
-
     public String getUUID() {
         return UUID.randomUUID().toString();
     }
@@ -34,10 +32,9 @@ public class SPABean implements Serializable {
         return formatter.format(date);
     }
 
-    public String language() {
+    public String locale() {
         HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-        if(availableLocales.contains(request.getLocale().getCountry().toLowerCase())) return request.getLocale().getCountry().toLowerCase();
-        else return "";
+        return request.getLocale().toString();
     }
 
     public String now() {

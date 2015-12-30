@@ -31,16 +31,19 @@ public class VoteTask extends Task<Void> {
 
     private char[] password;
     private OperationVS operationVS;
+    private String message;
 
-    public VoteTask(OperationVS operationVS, char[] password) throws Exception {
+    public VoteTask(OperationVS operationVS, String message, char[] password) throws Exception {
         this.operationVS = operationVS;
         this.password = password;
+        this.message = message;
     }
 
     @Override protected Void call() throws Exception {
         log.info("sendVote");
         ResponseVS responseVS = null;
         try {
+            updateMessage(message);
             String fromUser = ContextVS.getInstance().getMessage("electorLbl");
             VoteVSHelper voteVSHelper = VoteVSHelper.load(operationVS.getVoteVS());
             VoteVSDto voteVS = voteVSHelper.getVote();

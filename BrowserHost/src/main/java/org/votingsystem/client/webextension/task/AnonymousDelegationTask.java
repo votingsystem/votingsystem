@@ -23,13 +23,16 @@ public class AnonymousDelegationTask extends Task<ResponseVS> {
 
     private char[] password;
     private OperationVS operationVS;
+    private String message;
 
-    public AnonymousDelegationTask(OperationVS operationVS, char[] password) throws Exception {
+    public AnonymousDelegationTask(OperationVS operationVS, String message, char[] password) throws Exception {
         this.operationVS = operationVS;
         this.password = password;
+        this.message = message;
     }
 
     @Override protected ResponseVS call() throws Exception {
+        updateMessage(message);
         ResponseVS responseVS = null;
         String caption = operationVS.getCaption();
         if(caption.length() > 50) caption = caption.substring(0, 50) + "...";

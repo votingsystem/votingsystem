@@ -25,13 +25,16 @@ public class CertRequestTask extends Task<ResponseVS> {
 
     private char[] password;
     private OperationVS operationVS;
+    private String message;
 
-    public CertRequestTask(OperationVS operationVS, char[] password) throws Exception {
+    public CertRequestTask(OperationVS operationVS, String message, char[] password) throws Exception {
         this.operationVS = operationVS;
         this.password = password;
+        this.message = message;
     }
 
     @Override protected ResponseVS call() throws Exception {
+        updateMessage(message);
         CertExtensionDto certExtensionDto = operationVS.getData(CertExtensionDto.class);
         certExtensionDto.setDeviceId(HttpHelper.getMAC());
         certExtensionDto.setDeviceType(DeviceVS.Type.PC);

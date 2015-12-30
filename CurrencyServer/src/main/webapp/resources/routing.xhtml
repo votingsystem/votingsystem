@@ -68,6 +68,15 @@
           });
       });
 
+      var groupvsEditor
+      page('/groupvs_editor', scrollToTop, function (ctx) {
+          vs.route = 'groupvs_editor';
+          Polymer.Base.importHref('./groupVS/groupvs-editor.vsp', function () {
+              if (!groupvsEditor) groupvsEditor = document.createElement('groupvs-editor');
+              vs.loadMainContent(groupvsEditor, "${msg.newGroupVSLbl}")
+          });
+      });
+
       var groupvsList
       page('*/groupVS', scrollToTop, function() {
           vs.route = 'groupVS';
