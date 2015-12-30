@@ -14,7 +14,7 @@ import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
@@ -25,7 +25,6 @@ public class ProgressDialog extends DialogVS {
 
     private static Logger log = Logger.getLogger(ProgressDialog.class.getSimpleName());
 
-    private static final Executor executorService = Executors.newSingleThreadExecutor();
 
     public ProgressDialog(Task<ResponseVS> progressTask) {
         super(new VBox(10));
@@ -57,7 +56,11 @@ public class ProgressDialog extends DialogVS {
         progressTask.setOnSucceeded(workerStateEvent -> hide());
         progressTask.setOnCancelled(workerStateEvent -> hide());
         progressTask.setOnFailed(workerStateEvent -> hide());
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(progressTask);
+        addCloseListener(event -> {
+            if(!executorService.isShutdown()) executorService.shutdown();
+        });
     }
 
     public static void show(Task progressTask) {

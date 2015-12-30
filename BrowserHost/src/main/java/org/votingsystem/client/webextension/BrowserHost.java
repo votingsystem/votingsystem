@@ -48,12 +48,7 @@ public class BrowserHost extends Application {
     @Override public void start(final Stage primaryStage) throws Exception {
         INSTANCE = this;
         INSTANCE.primaryStage = primaryStage;
-
-        try {
-            new MainDialog(primaryStage).show();
-        } catch (Exception ex) { ex.printStackTrace();}
-
-
+        new MainDialog(primaryStage).show();
         //this is the part the receives the messages from the browser extension
         executorService.execute(() -> {
             log.info("waiting for browser messages");

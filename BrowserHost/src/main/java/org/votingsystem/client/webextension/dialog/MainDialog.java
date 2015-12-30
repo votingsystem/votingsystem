@@ -76,7 +76,6 @@ public class MainDialog {
         decoratedPane.setCaption(ContextVS.getMessage("mainDialogCaption"));
         primaryStage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
         decoratedPane.getScene().setFill(Color.TRANSPARENT);
-        primaryStage.getScene().setFill(Color.TRANSPARENT);
         primaryStage.setAlwaysOnTop(true);
         primaryStage.setResizable(false);
         Utils.addMouseDragSupport(primaryStage);
@@ -135,9 +134,6 @@ public class MainDialog {
     }
 
     public void setCurrencyServerAvailable(boolean available) {
-        PlatformImpl.runLater(() -> {
-            walletButton.setVisible(available);
-            qrCodeButton.setVisible(available);
-        });
+        PlatformImpl.runLater(() -> { });
     }
 }
