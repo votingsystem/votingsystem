@@ -1,7 +1,9 @@
-package org.votingsystem.client.webextension.util;
+package org.votingsystem.client.webextension.task;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.concurrent.Task;
+import org.votingsystem.client.webextension.util.CurrencyCheckResponse;
+import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
@@ -19,9 +21,9 @@ import static java.util.stream.Collectors.toSet;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CurrencyCheckerTask extends Task<CurrencyCheckResponse> {
+public class CurrencyValidatorTask extends Task<CurrencyCheckResponse> {
 
-    private static Logger log = Logger.getLogger(CurrencyCheckerTask.class.getSimpleName());
+    private static Logger log = Logger.getLogger(CurrencyValidatorTask.class.getSimpleName());
 
     public interface Listener {
         public void processCurrencyStatus(CurrencyCheckResponse response);
@@ -30,7 +32,7 @@ public class CurrencyCheckerTask extends Task<CurrencyCheckResponse> {
     private Set<Currency> currencySet;
     private Listener listener;
 
-    public CurrencyCheckerTask(Set<Currency> currencySet, Listener listener) {
+    public CurrencyValidatorTask(Set<Currency> currencySet, Listener listener) {
         this.currencySet = currencySet;
         this.listener = listener;
     }

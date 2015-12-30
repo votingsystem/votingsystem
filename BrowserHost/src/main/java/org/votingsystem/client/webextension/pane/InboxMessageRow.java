@@ -10,7 +10,11 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.service.InboxService;
-import org.votingsystem.client.webextension.util.*;
+import org.votingsystem.client.webextension.task.CurrencyValidatorTask;
+import org.votingsystem.client.webextension.util.CurrencyCheckResponse;
+import org.votingsystem.client.webextension.util.InboxMessage;
+import org.votingsystem.client.webextension.util.MsgUtils;
+import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
@@ -23,7 +27,7 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class InboxMessageRow implements CurrencyCheckerTask.Listener {
+public class InboxMessageRow implements CurrencyValidatorTask.Listener {
 
     private static Logger log = Logger.getLogger(InboxMessageRow.class.getSimpleName());
 
@@ -68,7 +72,7 @@ public class InboxMessageRow implements CurrencyCheckerTask.Listener {
             case CURRENCY_WALLET_CHANGE:
                 messageButton.setText(ContextVS.getMessage("currency_wallet_change_button"));
                 descriptionLbl.setText(MsgUtils.getCurrencyChangeWalletMsg(inboxMessage.getWebSocketMessage()));
-                new Thread(new CurrencyCheckerTask(inboxMessage.getWebSocketMessage().getCurrencySet(), this)).start();
+                new Thread(new CurrencyValidatorTask(inboxMessage.getWebSocketMessage().getCurrencySet(), this)).start();
                 break;
             case MESSAGEVS:
                 messageButton.setText(ContextVS.getMessage("messageLbl"));

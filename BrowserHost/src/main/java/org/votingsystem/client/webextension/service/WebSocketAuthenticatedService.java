@@ -22,6 +22,7 @@ import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.util.currency.Wallet;
 
@@ -77,7 +78,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
 
     public static WebSocketAuthenticatedService getInstance() {
         try {
-            if(ContextVS.getInstance().getCurrencyServer() == null) {
+            if(ContextVS.getInstance().getCurrencyServer() != null) {
                 if(instance == null) instance =  new WebSocketAuthenticatedService(ContextVS.getInstance().
                         getVotingSystemSSLCerts(), ContextVS.getInstance().getCurrencyServer());
             } else BrowserHost.showMessage(ResponseVS.SC_ERROR, "SOCKETS - " +
@@ -145,6 +146,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     @Override protected Task<ResponseVS> createTask() {
         return new WebSocketTask();
     }
+
     class WebSocketTask extends Task<ResponseVS> {
 
         @Override protected ResponseVS call() throws Exception {
@@ -163,17 +165,19 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     }
 
     public void setConnectionEnabled(boolean isConnectionEnabled){
-        if(BrowserSessionService.getInstance().getCryptoToken() == null) {
+        /*if(BrowserSessionService.getInstance().getCryptoToken() == null) {
             CertNotFoundDialog.showDialog();
             return;
-        }
+        }*/
         if(isConnectionEnabled) {
-            if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
+            PasswordDialog.showWithoutPasswordConfirm(TypeVS.WEB_SOCKET_INIT, this,
+                    ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
+            /*if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
                 PasswordDialog.showWithoutPasswordConfirm(TypeVS.WEB_SOCKET_INIT, this,
                         ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
             } else if(CryptoTokenVS.MOBILE == BrowserSessionService.getCryptoTokenType()) {
                 connect(null);
-            }
+            }*/
         } else  {
             if(session != null && session.isOpen()) {
                 try {session.close();}
@@ -352,7 +356,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
         }
     }
 
-    private void broadcastConnectionStatus(SocketMessageDto.ConnectionStatus status) {
+    public void broadcastConnectionStatus(SocketMessageDto.ConnectionStatus status) {
         if(session == null) log.info("broadcastConnectionStatus - status: " + status.toString());
         else log.info("broadcastConnectionStatus - status: " + status.toString() + " - session: " + session.getId());
         switch (status) {
@@ -375,14 +379,14 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
             this.targetServer = targetServer;
         }
 
-        @Override protected ResponseVS call() throws Exception {
+        @Override public ResponseVS call() throws Exception {
             SocketMessageDto dto = SocketMessageDto.INIT_SESSION_REQUEST(
                     BrowserSessionService.getInstance().getCryptoToken().getDeviceId());
             ResponseVS responseVS = null;
             try {
-                if(BrowserSessionService.getCryptoTokenType() == CryptoTokenVS.MOBILE) {
+                /*if(BrowserSessionService.getCryptoTokenType() == CryptoTokenVS.MOBILE) {
                     updateMessage(ContextVS.getMessage("checkDeviceVSCryptoTokenMsg"));
-                } else updateMessage(ContextVS.getMessage("connectionMsg"));
+                } else updateMessage(ContextVS.getMessage("connectionMsg"));*/
                 SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, targetServer.getName(),
                         JSON.getMapper().writeValueAsString(dto), password,
                         ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));
@@ -391,6 +395,8 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                 PlatformImpl.runLater(() -> WebSocketAuthenticatedService.this.restart());
                 responseVS = ResponseVS.OK().setSMIME(smimeMessage);
 
+            } catch (KeyStoreExceptionVS ex) {
+                CertNotFoundDialog.showDialog();
             } catch(InterruptedException ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);

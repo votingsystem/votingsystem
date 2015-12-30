@@ -12,8 +12,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.dialog.*;
+import org.votingsystem.client.webextension.task.CurrencyValidatorTask;
 import org.votingsystem.client.webextension.util.CurrencyCheckResponse;
-import org.votingsystem.client.webextension.util.CurrencyCheckerTask;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
@@ -34,7 +34,7 @@ import static org.votingsystem.client.webextension.BrowserHost.showMessage;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listener, CurrencyCheckerTask.Listener,
+public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listener, CurrencyValidatorTask.Listener,
         PasswordDialog.Listener {
 
     private static Logger log = Logger.getLogger(WalletPane.class.getSimpleName());
@@ -187,7 +187,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
             if(currencySet.isEmpty()) menuButton.setVisible(false);
             else menuButton.setVisible(true);
             checkCurrencyMenuItem.setOnAction(actionEvent -> {
-                ProgressDialog.show(new CurrencyCheckerTask(currencySet, walletPane));
+                ProgressDialog.show(new CurrencyValidatorTask(currencySet, walletPane));
             });
             walletPane.load(currencySet);
             show();

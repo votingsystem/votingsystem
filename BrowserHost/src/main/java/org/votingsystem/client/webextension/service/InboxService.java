@@ -8,7 +8,7 @@ import org.votingsystem.client.webextension.dialog.InboxDialog;
 import org.votingsystem.client.webextension.dialog.PasswordDialog;
 import org.votingsystem.client.webextension.dialog.ProgressDialog;
 import org.votingsystem.client.webextension.dto.InboxMessageDto;
-import org.votingsystem.client.webextension.util.InboxDecryptTask;
+import org.votingsystem.client.webextension.task.InboxDecryptTask;
 import org.votingsystem.client.webextension.util.InboxMessage;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;

@@ -44,8 +44,6 @@ public class DialogVS {
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
         stage.centerOnScreen();
         stage.setTitle(ContextVS.getMessage("mainDialogCaption"));
-        decoratedPane.getScene().getStylesheets().add(Utils.getResource("/css/dialogvs.css"));
-        decoratedPane.getStyleClass().add("glassBox");
         decoratedPane.getScene().setFill(Color.TRANSPARENT);
         Utils.addMouseDragSupport(stage);
     }
@@ -81,8 +79,6 @@ public class DialogVS {
         else stage.initOwner(parentWindow);
         stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
         stage.centerOnScreen();
-        decoratedPane.getScene().getStylesheets().add(Utils.getResource("/css/dialogvs.css"));
-        decoratedPane.getStyleClass().add("glassBox");
         decoratedPane.getScene().setFill(Color.TRANSPARENT);
         stage.setAlwaysOnTop(true);
         Utils.addMouseDragSupport(stage);

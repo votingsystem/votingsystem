@@ -3,17 +3,14 @@ package org.votingsystem.client.webextension;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.votingsystem.client.webextension.dialog.MainDialog;
 import org.votingsystem.client.webextension.dialog.MessageDialog;
 import org.votingsystem.client.webextension.util.MsgUtils;
-import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.model.ResponseVS;
@@ -51,16 +48,11 @@ public class BrowserHost extends Application {
     @Override public void start(final Stage primaryStage) throws Exception {
         INSTANCE = this;
         INSTANCE.primaryStage = primaryStage;
-        //dummy initilization of the stage in order to be available to other UI component
-        //primaryStage.initStyle(StageStyle.TRANSPARENT);
-        primaryStage.setScene(new Scene(new Group(), 220, 110));
-        primaryStage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
-        primaryStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
-        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-        //set Stage boundaries to the top right corner of the visible bounds of the main screen
-        primaryStage.setX(primaryScreenBounds.getMinX() + primaryScreenBounds.getWidth() - 240);
-        primaryStage.setY(primaryScreenBounds.getMinY() + 70);
-        primaryStage.show();
+
+        try {
+            new MainDialog(primaryStage).show();
+        } catch (Exception ex) { ex.printStackTrace();}
+
 
         //this is the part the receives the messages from the browser extension
         executorService.execute(() -> {

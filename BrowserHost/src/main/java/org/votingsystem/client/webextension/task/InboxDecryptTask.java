@@ -1,7 +1,8 @@
-package org.votingsystem.client.webextension.util;
+package org.votingsystem.client.webextension.task;
 
 import javafx.concurrent.Task;
 import org.votingsystem.client.webextension.service.InboxService;
+import org.votingsystem.client.webextension.util.InboxMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 
@@ -20,7 +21,7 @@ public class InboxDecryptTask extends Task<ResponseVS> {
 
     private static Logger log = Logger.getLogger(InboxDecryptTask.class.getSimpleName());
 
-    PrivateKey privateKey;
+    private PrivateKey privateKey;
     private InboxMessage timeLimitedInboxMessage;
 
     public InboxDecryptTask(PrivateKey privateKey, InboxMessage timeLimitedInboxMessage) {
