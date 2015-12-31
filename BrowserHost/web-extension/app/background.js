@@ -9,6 +9,9 @@ function processOperation(messageJSON) {
             if(!hostPort) connectToHost(messageJSON.content)
             else hostPort.postMessage(messageJSON.content);
             break;
+        case "message-to-webextension":
+            console.table("background.js - message-to-webextension - operation: " + messageJSON.content.operation)
+            break;
         default:
             console.log("unknown operation: " + messageJSON.operation)
     }
@@ -37,7 +40,7 @@ function messageFromHost(msg) {
     var b64_to_utf8 = decodeURIComponent(escape(window.atob(msg.native_message)))
     console.log("background.js - messageFromHost: " + b64_to_utf8)
     var messageJSON = JSON.parse(b64_to_utf8)
-    if(messageJSON.message_type === "message_to_webextension") {
+    if(messageJSON.message_type === "message-to-webextension") {
         switch (messageJSON.operation) {
             case "url_tab":
                 chrome.tabs.create({ url: messageJSON.url });

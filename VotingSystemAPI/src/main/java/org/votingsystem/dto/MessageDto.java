@@ -68,7 +68,7 @@ public class MessageDto<T> {
     public static MessageDto NEW_TAB(String url) {
         MessageDto dto = new MessageDto();
         dto.setOperation("url_tab");
-        dto.setMessage_type("message_to_webextension");
+        dto.setMessage_type("message-to-webextension");
         dto.setURL(url);
         return dto;
     }
@@ -83,7 +83,7 @@ public class MessageDto<T> {
     public static MessageDto DIALOG_CLOSE(String tabId) {
         MessageDto dto = new MessageDto();
         dto.setOperation("dialog_closed");
-        dto.setMessage_type("message_to_webextension");
+        dto.setMessage_type("message-to-webextension");
         dto.setTabId(tabId);
         return dto;
     }

@@ -25,7 +25,8 @@
 
       page('*/app/tools', scrollToTop, function (ctx) {
           vs.route = 'tools';
-          loadFrameVS(contextURL + "/app/tools.xhtml", "${msg.toolsPageTitle}")
+          if(vs.webextension_available === true) VotingSystemClient.setMessage(new OperationVS(Operation.TOOL_VS))
+          else loadFrameVS(contextURL + "/app/tools.xhtml", "${msg.toolsPageTitle}")
       });
 
       page('/resources/certificationCenters', scrollToTop, function (ctx) {

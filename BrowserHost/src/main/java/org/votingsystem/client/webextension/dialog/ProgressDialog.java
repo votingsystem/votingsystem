@@ -71,9 +71,11 @@ public class ProgressDialog extends DialogVS {
     public static void show(Task progressTask, String caption) {
         log.info("showDialog");
         Platform.runLater(() -> {
-            ProgressDialog progressDialog = new ProgressDialog(progressTask);
-            progressDialog.setCaption(caption);
-            progressDialog.show();
+            try {
+                ProgressDialog progressDialog = new ProgressDialog(progressTask);
+                progressDialog.setCaption(caption);
+                progressDialog.show();
+            } catch (Exception ex) { ex.printStackTrace();}
         });
     }
 }

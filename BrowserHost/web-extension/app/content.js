@@ -1,15 +1,24 @@
 document.querySelector("#voting_system_page").addEventListener('message-to-host',
     function(event) {
         chrome.runtime.sendMessage({operation:'message-to-host', content:event.detail}, function(response) {
-            console.log("message-from-host");
+            console.log("content.js - message-from-host");
         });
     })
+
+document.querySelector("#voting_system_page").addEventListener('message-to-webextension',
+    function(event) {
+        event.detail.from = "browser"
+        chrome.runtime.sendMessage({operation:'message-to-webextension', content:event.detail}, function(response) {
+            console.log("content.js - message-to-webextension - response");
+        });
+    })
+
 
 document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message_from_extension'))
 
 
 chrome.extension.onMessage.addListener(function(msg, sender, sendResponse) {
-    if(msg.message_type === "message_to_webextension") {
+    if(msg.message_type === "message-to-webextension") {
         if(msg.operation === "dialog_closed") {
             document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message_from_webextension:dialog_closed'))
         }

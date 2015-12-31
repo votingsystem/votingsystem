@@ -107,11 +107,11 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         gridPane.setMargin(requestCertButton, new Insets(10, 20, 20, 20));
         gridPane.add(signWithMobileRb, 0, 1);
         gridPane.setMargin(mobileDeviceInfo, new Insets(0, 0, 0, 20));
-        gridPane.add(signWithKeystoreRb,0,5);
+        gridPane.add(signWithKeystoreRb,0,3);
         gridPane.add(footerButtonsBox,0,7);
         gridPane.getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
         gridPane.getStyleClass().add("modal-dialog");
-        gridPane.setMinWidth(600);
+        gridPane.setMinWidth(550);
     }
 
     private void changeCryptoToken(ActionEvent evt) {
@@ -119,7 +119,7 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         if(gridPane.getChildren().contains(keyStoreVBox)) gridPane.getChildren().remove(keyStoreVBox);
         if(gridPane.getChildren().contains(mobileDeviceInfo)) gridPane.getChildren().remove(mobileDeviceInfo);
         if(evt.getSource() == signWithKeystoreRb) {
-            gridPane.add(keyStoreVBox, 0, 6);
+            gridPane.add(keyStoreVBox, 0, 4);
             if(BrowserSessionService.getInstance().getKeyStoreUserVS() != null)
                 keyStoreLbl.setText(BrowserSessionService.getInstance().getKeyStoreUserVS().getName());
         }

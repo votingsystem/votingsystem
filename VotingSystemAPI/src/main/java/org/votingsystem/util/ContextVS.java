@@ -367,7 +367,11 @@ public class ContextVS {
     public UserVS saveUserKeyStore(KeyStore keyStore, char[] password) throws Exception{
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password);
         File mainKeyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
-        mainKeyStoreFile.createNewFile();
+        if(mainKeyStoreFile.exists()) {
+            File oldFile = new File(appDir + File.separator + ".old_" + USER_KEYSTORE_FILE_NAME);
+            mainKeyStoreFile.renameTo(oldFile);
+            mainKeyStoreFile.createNewFile();
+        } else mainKeyStoreFile.createNewFile();
         Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
         UserVS userVS = UserVS.getUserVS((X509Certificate)chain[0]);
         File userVSKeyStoreFile = new File(appDir + File.separator + userVS.getNif() + "_" + USER_KEYSTORE_FILE_NAME);

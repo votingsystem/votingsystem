@@ -23,6 +23,7 @@ var Operation = {
     CURRENCY_GROUP_USER_DEPOSIT: "CURRENCY_GROUP_USER_DEPOSIT",
     CURRENCY_GROUP_SUBSCRIBE: "CURRENCY_GROUP_SUBSCRIBE",
     CURRENCY_REQUEST: "CURRENCY_REQUEST",
+    TAB_CLOSED: "TAB_CLOSED",
     WALLET_OPEN: "WALLET_OPEN",
     WALLET_SAVE: "WALLET_SAVE"
 }
@@ -317,3 +318,9 @@ function setClientToolMessage(callerId, message) {
     var b64_to_utf8 = decodeURIComponent(escape(window.atob(message)))
     document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent(callerId, {detail:b64_to_utf8}))
 }
+
+window.onbeforeunload = function(e) {
+    console.log("!!!!!!!!!!!!!!11 utilsVS.js - onbeforeunload");
+    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message-to-webextension',
+        {detail:{operation:"TAB_CLOSED"}}))
+};

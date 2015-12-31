@@ -373,8 +373,12 @@ public class OperationVS implements PasswordDialog.Listener {
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
             processResult(responseVS);
             return;
-        }
+        } else if(responseVS.getData() != null && responseVS.getData() instanceof ActorVS) setTargetServer((ActorVS) responseVS.getData());
         switch (operation) {
+            case TOOL_VS://we only want to show the main dialog
+                BrowserHost.getInstance().toFront();
+                executorService.shutdown();
+                break;
             case CONNECT:
                 WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true);
                 break;

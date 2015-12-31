@@ -90,7 +90,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     public void processPassword(TypeVS passwordType, char[] password) {
         switch (passwordType) {
             case WEB_SOCKET_INIT:
-                connect(password);
+                ProgressDialog.show(new InitSessionTask(password, targetServer), null);
                 break;
         }
     }
@@ -157,10 +157,6 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
             }
             return null;
         }
-    }
-
-    private void connect(char[] password) {
-        ProgressDialog.show(new InitValidatedSessionTask(password, targetServer), null);
     }
 
     public void setConnectionEnabled(boolean isConnectionEnabled){
@@ -368,21 +364,22 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
         }
     }
 
-    public class InitValidatedSessionTask extends Task<ResponseVS> {
+    public class InitSessionTask extends Task<ResponseVS> {
 
         private char[] password;
         private ActorVS targetServer;
 
-        public InitValidatedSessionTask (char[] password, ActorVS targetServer) {
+        public InitSessionTask (char[] password, ActorVS targetServer) {
             this.password = password;
             this.targetServer = targetServer;
         }
 
-        @Override public ResponseVS call() throws Exception {
-            SocketMessageDto dto = SocketMessageDto.INIT_SESSION_REQUEST(
-                    BrowserSessionService.getInstance().getCryptoToken().getDeviceId());
+        @Override public ResponseVS call()  {
             ResponseVS responseVS = null;
             try {
+                SocketMessageDto dto = SocketMessageDto.INIT_SESSION_REQUEST(
+                        BrowserSessionService.getInstance().getCryptoToken().getDeviceId());
+
                 /*if(BrowserSessionService.getCryptoTokenType() == CryptoTokenVS.MOBILE) {
                     updateMessage(ContextVS.getMessage("checkDeviceVSCryptoTokenMsg"));
                 } else updateMessage(ContextVS.getMessage("connectionMsg"));*/
@@ -403,8 +400,9 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
                 BrowserHost.showMessage(ResponseVS.SC_ERROR_REQUEST, ex.getMessage());
+            } finally {
+                return responseVS;
             }
-            return responseVS;
         }
     }
 

@@ -32,7 +32,7 @@
             ready: function() { },
             setMessage: function(message, caption, callbackFunction) {
                 this.reset()
-                d3.select(this).select("#messageDiv").html(message)
+                document.querySelector("#messageDiv").innerHTML = message
                 this.caption = caption
                 this.callbackFunction = callbackFunction
                 if(this.callbackFunction) this.isConfirmMessage = true

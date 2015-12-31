@@ -1,6 +1,7 @@
 package org.votingsystem.client.webextension.task;
 
 import javafx.concurrent.Task;
+import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.dto.CertExtensionDto;
@@ -14,6 +15,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.ObjectUtils;
 
 import java.net.InetAddress;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.votingsystem.util.ContextVS.PROVIDER;
@@ -33,24 +35,30 @@ public class CertRequestTask extends Task<ResponseVS> {
         this.message = message;
     }
 
-    @Override protected ResponseVS call() throws Exception {
-        updateMessage(message);
-        CertExtensionDto certExtensionDto = operationVS.getData(CertExtensionDto.class);
-        certExtensionDto.setDeviceId(HttpHelper.getMAC());
-        certExtensionDto.setDeviceType(DeviceVS.Type.PC);
-        certExtensionDto.setDeviceName(InetAddress.getLocalHost().getHostName());
-        CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
-                SIGN_MECHANISM, PROVIDER, certExtensionDto);
-        byte[] csrBytes = certificationRequest.getCsrPEM();
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(csrBytes, null,
-                ((AccessControlVS) operationVS.getTargetServer()).getUserCSRServiceURL());
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            Long requestId = Long.valueOf(responseVS.getMessage());
-            byte[] serializedCertificationRequest = ObjectUtils.serializeObject(certificationRequest);
-            EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, serializedCertificationRequest);
-            BrowserSessionService.getInstance().setCSRRequest(requestId, bundle);
+    @Override protected ResponseVS call() {
+        ResponseVS responseVS = null;
+        try {
+            updateMessage(message);
+            CertExtensionDto certExtensionDto = operationVS.getData(CertExtensionDto.class);
+            certExtensionDto.setDeviceId(HttpHelper.getMAC());
+            certExtensionDto.setDeviceType(DeviceVS.Type.PC);
+            certExtensionDto.setDeviceName(InetAddress.getLocalHost().getHostName());
+            CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
+                    SIGN_MECHANISM, PROVIDER, certExtensionDto);
+            byte[] csrBytes = certificationRequest.getCsrPEM();
+            responseVS = HttpHelper.getInstance().sendData(csrBytes, null,
+                    ((AccessControlVS) operationVS.getTargetServer()).getUserCSRServiceURL());
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                Long requestId = Long.valueOf(responseVS.getMessage());
+                byte[] serializedCertificationRequest = ObjectUtils.serializeObject(certificationRequest);
+                EncryptedBundle bundle = Encryptor.pbeAES_Encrypt(password, serializedCertificationRequest);
+                BrowserSessionService.getInstance().setCSRRequest(requestId, bundle);
+            }
+            operationVS.processResult(responseVS);
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
         }
-        operationVS.processResult(responseVS);
         return responseVS;
     }
 }

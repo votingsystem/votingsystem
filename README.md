@@ -1,4 +1,9 @@
 ## Voting System
+The project needs Java 8 and JavaFX. In Debian you can install then with this commands:
+
+        sudo apt-get install openjdk-8-jdk
+        sudo apt-get install openjfx
+        update-java-alternatives -s java-1.8.0-openjdk-amd64
 
 In order to run the applications you must set appropiated values in '*_DEVELOPMENT.properties' and '*_PRODUCTION.properties' files
 
@@ -16,7 +21,7 @@ and another machine on the same intranet that has its IP associated with de doma
 
 
 
-All the applications need access to an instance of the https://github.com/votingsystem/votingsystem/tree/master/TimeStampServer to add timestamps to the signatures
+All the applications need access to an instance of the [timestamp server](https://github.com/votingsystem/votingsystem/tree/master/TimeStampServer) to add timestamps to the signatures
 
 
 [Wiki](https://github.com/votingsystem/votingsystem/wiki)

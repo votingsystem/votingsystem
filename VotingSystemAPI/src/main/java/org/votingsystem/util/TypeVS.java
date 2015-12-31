@@ -93,6 +93,9 @@ public enum TypeVS {
     DELIVERY_WITH_PAYMENT,
     REQUEST_FORM,
 
+    TOOL_VS,
+    TAB_CLOSED,
+
     WEB_SOCKET_INIT,
     WEB_SOCKET_BAN_SESSION,
 

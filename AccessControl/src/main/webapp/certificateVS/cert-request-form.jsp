@@ -82,14 +82,17 @@
                     "<br/><b>${msg.emailLbl}:</b> " + this.$.email.value,
                     "${msg.checkInputMsg}", this.messagedialogAccept.bind(this))
         },
-        messagedialogAccept: function (e) {
-            console.log("messagedialogAccept - callerId:" + e.detail)
+        messagedialogAccept: function () {
+            console.log("messagedialogAccept")
             var operationVS = new OperationVS(Operation.CERT_USER_NEW)
             operationVS.serviceURL = contextURL + "/rest/csr/request"
             operationVS.signedMessageSubject = "${msg.certRequestLbl}"
             operationVS.jsonStr = JSON.stringify({nif:validateNIF(this.$.nif.value), givenname:this.$.givenname.value.toUpperCase(),
-                surname:this.$.surname.value.toUpperCase(), mobilePhone:this.$.phone.value, email:this.$.email.value})
+                surname:this.$.surname.value.toUpperCase(), mobilePhone:this.$.phone.value, email:this.$.email.value,
+                UUID:"${spa.getUUID()}"})
             operationVS.setCallback(function(appMessage) { this.showResponse(appMessage) }.bind(this))
+
+            console.log("====== " + JSON.stringify(operationVS))
             VotingSystemClient.setMessage(operationVS);
         },
         showResponse :function(appMessage) {

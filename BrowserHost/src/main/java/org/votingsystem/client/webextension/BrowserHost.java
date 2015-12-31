@@ -164,6 +164,10 @@ public class BrowserHost extends Application {
         return primaryStage.getScene();
     }
 
+    public void toFront() {
+        PlatformImpl.runLater(() -> primaryStage.toFront());
+    }
+
     public static void showMessage(Integer statusCode, String message) {
         PlatformImpl.runLater(() ->  new MessageDialog(getInstance().getScene().getWindow()).showMessage(statusCode, message));
     }
