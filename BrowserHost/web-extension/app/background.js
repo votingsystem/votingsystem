@@ -47,7 +47,15 @@ function messageFromHost(msg) {
                 return;
         }
     }
-    chrome.tabs.sendMessage(parseInt(messageJSON.tabId), messageJSON, function(response) {});
+    if(messageJSON.tabId) chrome.tabs.sendMessage(parseInt(messageJSON.tabId), messageJSON, function(response) {});
+    else  {
+        chrome.tabs.query({},function(tabs){
+            tabs.forEach(function(tab){
+                console.log("tab.url: " + tab.url + " - tab.id:" + tab.id);
+                chrome.tabs.sendMessage(tab.id, messageJSON, function(response) {});
+            });
+        });
+    }
 }
 
 chrome.runtime.onSuspend.addListener( function(request, sender, sendResponse) {

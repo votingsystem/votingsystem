@@ -47,6 +47,9 @@
                 <a class="menuItem menuItemSelected isSuperUserView" data-route="certificateVS" href="#{contextURL}/spa.xhtml#!/certificateVS/certs">
                     <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
                 </a>
+                <a class="menuItem menuItemSelected clientToolConnected" data-route="tools" href="#{contextURL}/spa.xhtml#!/app/tools">
+                    <i class="fa fa-cogs"></i> ${msg.toolsLbl}
+                </a>
                 <a class="menuItem menuItemSelected" data-route="reports" href="#{contextURL}/spa.xhtml#!/reports">
                     <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> ${msg.reportsPageTitle}
                 </a>
@@ -77,7 +80,7 @@
             <div id="mainContent" class="mainContent"></div>
         </div>
         <script>
-            //debugger; // this is to allow logging from extension content scripts
+            debugger; // this is to allow logging from extension content scripts
 
             vs.back = function() {
                 history.back()

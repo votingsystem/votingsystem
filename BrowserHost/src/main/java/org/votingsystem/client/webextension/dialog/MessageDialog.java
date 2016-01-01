@@ -2,7 +2,9 @@ package org.votingsystem.client.webextension.dialog;
 
 import javafx.application.Platform;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -72,7 +74,10 @@ public class MessageDialog extends DialogVS {
     }
 
     public void showHtmlMessage(String htmlMessage, Parent parent) {
-        if(parent != null) {
+        if(parent != null ) {
+            if(parent instanceof Button) {
+                ((Button) parent).addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { hide(); } );
+            }
             footerButtonsBox.getChildren().add(0, parent);
         }
         messageWebView.getEngine().loadContent(String.format(webViewContent, htmlMessage));
