@@ -91,8 +91,6 @@
                 surname:this.$.surname.value.toUpperCase(), mobilePhone:this.$.phone.value, email:this.$.email.value,
                 UUID:"${spa.getUUID()}"})
             operationVS.setCallback(function(appMessage) { this.showResponse(appMessage) }.bind(this))
-
-            console.log("====== " + JSON.stringify(operationVS))
             VotingSystemClient.setMessage(operationVS);
         },
         showResponse :function(appMessage) {

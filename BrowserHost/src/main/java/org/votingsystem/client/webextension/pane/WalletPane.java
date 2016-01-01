@@ -186,8 +186,8 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
         private void show(Set<Currency> currencySet) {
             if(currencySet.isEmpty()) menuButton.setVisible(false);
             else menuButton.setVisible(true);
-            checkCurrencyMenuItem.setOnAction(actionEvent -> {
-                ProgressDialog.show(new CurrencyValidatorTask(currencySet, walletPane));
+            checkCurrencyMenuItem.setOnAction(event -> {
+                ProgressDialog.show(new CurrencyValidatorTask(currencySet, walletPane), ContextVS.getMessage("walletLbl"));
             });
             walletPane.load(currencySet);
             show();

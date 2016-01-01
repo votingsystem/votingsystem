@@ -16,6 +16,7 @@ import org.votingsystem.util.ContextVS;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -63,19 +64,15 @@ public class ProgressDialog extends DialogVS {
         });
     }
 
-    public static void show(Task progressTask) {
-        log.info("showDialog");
-        show(progressTask, null);
-    }
-
     public static void show(Task progressTask, String caption) {
         log.info("showDialog");
         Platform.runLater(() -> {
             try {
                 ProgressDialog progressDialog = new ProgressDialog(progressTask);
-                progressDialog.setCaption(caption);
-                progressDialog.show();
-            } catch (Exception ex) { ex.printStackTrace();}
+                progressDialog.setCaption(caption).show();
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+            }
         });
     }
 }

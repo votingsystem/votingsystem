@@ -28,7 +28,6 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

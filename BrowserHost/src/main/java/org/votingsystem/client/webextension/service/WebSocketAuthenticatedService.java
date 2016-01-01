@@ -19,6 +19,7 @@ import org.votingsystem.model.*;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
@@ -160,19 +161,19 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     }
 
     public void setConnectionEnabled(boolean isConnectionEnabled){
-        /*if(BrowserSessionService.getInstance().getCryptoToken() == null) {
+        if(BrowserSessionService.getInstance().getCryptoToken() == null) {
             CertNotFoundDialog.showDialog();
             return;
-        }*/
+        }
         if(isConnectionEnabled) {
             PasswordDialog.showWithoutPasswordConfirm(TypeVS.WEB_SOCKET_INIT, this,
                     ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
-            /*if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
+            if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
                 PasswordDialog.showWithoutPasswordConfirm(TypeVS.WEB_SOCKET_INIT, this,
                         ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
             } else if(CryptoTokenVS.MOBILE == BrowserSessionService.getCryptoTokenType()) {
-                connect(null);
-            }*/
+                ProgressDialog.show(new InitSessionTask(null, targetServer), null);
+            }
         } else  {
             if(session != null && session.isOpen()) {
                 try {session.close();}
@@ -380,9 +381,9 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                 SocketMessageDto dto = SocketMessageDto.INIT_SESSION_REQUEST(
                         BrowserSessionService.getInstance().getCryptoToken().getDeviceId());
 
-                /*if(BrowserSessionService.getCryptoTokenType() == CryptoTokenVS.MOBILE) {
+                if(BrowserSessionService.getCryptoTokenType() == CryptoTokenVS.MOBILE) {
                     updateMessage(ContextVS.getMessage("checkDeviceVSCryptoTokenMsg"));
-                } else updateMessage(ContextVS.getMessage("connectionMsg"));*/
+                } else updateMessage(ContextVS.getMessage("connectionMsg"));
                 SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, targetServer.getName(),
                         JSON.getMapper().writeValueAsString(dto), password,
                         ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));

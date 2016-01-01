@@ -14,15 +14,19 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
+import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.pane.DecoratedPane;
 import org.votingsystem.client.webextension.pane.WalletPane;
+import org.votingsystem.client.webextension.service.EventBusService;
 import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.SocketMessageDto;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -56,9 +60,11 @@ public class MainDialog {
                     if (isConnected.get()) {
                         connectionButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.FLASH));
                         connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("disconnectLbl")));
+                        connectionButton.setText(ContextVS.getMessage("disconnectLbl"));
                     } else {
-                        connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
                         connectionButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CLOUD_UPLOAD));
+                        connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
+                        connectionButton.setText(ContextVS.getMessage("connectLbl"));
                     }
                 });
             }
@@ -96,7 +102,13 @@ public class MainDialog {
                 optionButton.setOnAction(event1 -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false));
                 BrowserHost.showMessage(ContextVS.getMessage("disconnectMsg"), optionButton);
             } else {
-                WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true);
+                OperationVS operationVS = new OperationVS();
+                try {
+                    operationVS.setOperation(TypeVS.CONNECT).initProcess();
+                } catch(Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                    BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                }
             }
         });
 
@@ -123,6 +135,7 @@ public class MainDialog {
         mainPane.getChildren().addAll(firsRowButtonsBox, secondRowButtonsBox);
         mainPane.setStyle("-fx-max-width: 600px;-fx-padding: 3 20 20 20;-fx-spacing: 10;-fx-alignment: center;" +
                 "-fx-font-size: 16;-fx-font-weight: bold;-fx-pref-width: 430px;");
+        EventBusService.getInstance().register(new EventBusConnectionListener());
     }
 
     public void show() {

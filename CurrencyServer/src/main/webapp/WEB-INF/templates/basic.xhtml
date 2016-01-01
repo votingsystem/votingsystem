@@ -19,6 +19,9 @@
                         var blockScreen = document.createElement('vs-block-screen');
                         document.querySelector("body").appendChild(blockScreen)
                         vs.blockScreen = blockScreen.block.bind(blockScreen)
+                        var operationVS = new OperationVS(Operation.INIT_SERVER)
+                        operationVS.serverURL = contextURL
+                        VotingSystemClient.setMessage(operationVS);
                     });
                     document.querySelector("#voting_system_page").addEventListener("message_from_webextension:dialog_closed", function(e) {
                         vs.blockScreen(false)

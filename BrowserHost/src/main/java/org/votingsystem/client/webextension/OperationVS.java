@@ -214,8 +214,9 @@ public class OperationVS implements PasswordDialog.Listener {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public OperationVS setOperation(TypeVS operation) {
         this.operation = operation;
+        return this;
     }
 
     public <T> T getData(Class<T> type) throws IOException {
@@ -364,6 +365,15 @@ public class OperationVS implements PasswordDialog.Listener {
                 case CURRENCY_DELETE:
                     responseVS = new ResponseVS(ResponseVS.SC_OK);
                     break;
+                case CONNECT:
+                    if(ContextVS.getInstance().getCurrencyServer() == null) {
+                        if(serverURL == null) serverURL = ContextVS.getMessage("defaultCurrencyServer");
+                        responseVS = Utils.checkServer(serverURL.trim());
+                    } else responseVS = new ResponseVS(ResponseVS.SC_OK);
+                    break;
+                case INIT_SERVER:
+                    responseVS = Utils.checkServer(serverURL.trim());
+                    break;
                 default:
                     responseVS = Utils.checkServer(serverURL.trim());
             }
@@ -378,6 +388,8 @@ public class OperationVS implements PasswordDialog.Listener {
             case TOOL_VS://we only want to show the main dialog
                 BrowserHost.getInstance().toFront();
                 executorService.shutdown();
+                break;
+            case INIT_SERVER:
                 break;
             case CONNECT:
                 WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true);

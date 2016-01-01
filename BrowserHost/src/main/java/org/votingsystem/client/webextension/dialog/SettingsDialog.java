@@ -141,8 +141,7 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
                 signWithKeystoreRb.setSelected(true);
                 deviceVSDto = BrowserSessionService.getInstance().getCryptoToken();
                 gridPane.add(keyStoreVBox, 0, 6);
-                if(BrowserSessionService.getInstance().getKeyStoreUserVS() != null)
-                    keyStoreLbl.setText(BrowserSessionService.getInstance().getKeyStoreUserVS().getName());
+                keyStoreLbl.setText(deviceVSDto.getFirstName() + " " + deviceVSDto.getLastName());
                 break;
             case MOBILE:
                 signWithMobileRb.setSelected(true);
@@ -152,7 +151,7 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
                 break;
         }
         getStage().show();
-        BrowserSessionService.getInstance().checkCSRRequest();
+        BrowserSessionService.getInstance().checkCSR();
     }
 
     public static void showDialog() {
@@ -219,6 +218,12 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         if(!gridPane.getChildren().contains(mobileDeviceInfo)) gridPane.add(mobileDeviceInfo, 0, 2);
         mobileDeviceLbl.setText(deviceVSDto.getDeviceName());
         getStage().sizeToScene();
+    }
+
+    @Override
+    public void cancelSelection() {
+        signWithKeystoreRb.setSelected(true);
+        signWithMobileRb.setSelected(false);
     }
 
     @Override public void processPassword(TypeVS passwordType, char[] password) {

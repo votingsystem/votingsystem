@@ -53,7 +53,7 @@
             },
             showMessage:function(caption, message) {
                 this.caption = caption;
-                document.querySelector("#messageDiv").innerHTML = message
+                this.$.messageDiv.innerHTML = message
                 this.isStoredInWallet = false
                 this.$.modalDialog.style.opacity = 1
                 this.$.modalDialog.style['pointer-events'] = 'auto'

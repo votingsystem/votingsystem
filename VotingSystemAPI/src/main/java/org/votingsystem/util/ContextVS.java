@@ -505,29 +505,6 @@ public class ContextVS {
         }
     }
 
-    public static Icon getIcon(Object baseObject, String key) {
-        String iconPath = null;
-        String iconName = null;
-        Icon icon = null;
-        if(key.endsWith("_16")) {
-            iconName = key.substring(0, key.indexOf("_16"));
-            iconPath = "/resources/icon_16/" + iconName + ".png";
-        } else if(key.endsWith("_32")) {
-            iconName = key.substring(0, key.indexOf("_32"));
-            iconPath = "/resources/icon_32/" + iconName + ".png";
-        } else {//defaults to 16x16 icons
-             iconPath = "/resources/icon_16/" + key + ".png";
-        }
-        try {
-            icon = new ImageIcon(baseObject.getClass().getResource(iconPath));
-        } catch(Exception ex) {
-            log.log(Level.SEVERE, " ### iconPath: " + iconPath + " not found");
-            icon = new ImageIcon(baseObject.getClass().getResource("/resources/icon_32/button_default.png"));
-        }
-        return icon;
-    }
-
-
     public CurrencyServer getCurrencyServer() {
         return currencyServer;
     }

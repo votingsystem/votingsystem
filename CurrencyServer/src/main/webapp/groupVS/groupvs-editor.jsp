@@ -113,7 +113,6 @@
                 operationVS.jsonStr = JSON.stringify({operation:this.operationVS , id:this.groupvsId,
                     name:this.$.subject.value, description:description, tags: this.selectedTags,
                     UUID: "${spa.getUUID()}"})
-                console.log(JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
             }
         })

@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.votingsystem.client.webextension.dialog.MainDialog;
 import org.votingsystem.client.webextension.dialog.MessageDialog;
+import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.QRMessageDto;
@@ -108,6 +109,7 @@ public class BrowserHost extends Application {
                     log.info("unknown schema: " + uri.getScheme());
             }
         }
+        BrowserSessionService.getInstance().checkCSR();
     }
 
 

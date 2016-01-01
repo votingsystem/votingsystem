@@ -4,6 +4,8 @@ var Operation = {
     SEND_ANONYMOUS_DELEGATION:"SEND_ANONYMOUS_DELEGATION",
     OPEN_SMIME: "OPEN_SMIME",
     FILE_FROM_URL:"FILE_FROM_URL",
+    INIT_SERVER:"INIT_SERVER",
+    TOOL_VS:"TOOL_VS",
     BACKUP_REQUEST: "BACKUP_REQUEST",
     SEND_VOTE: "SEND_VOTE",
     CANCEL_VOTE:"CANCEL_VOTE",
@@ -17,7 +19,6 @@ var Operation = {
     REPRESENTATIVE_ACCREDITATIONS_REQUEST: "REPRESENTATIVE_ACCREDITATIONS_REQUEST",
     REPRESENTATIVE_REVOKE: "REPRESENTATIVE_REVOKE",
     REPRESENTATIVE_DATA:"REPRESENTATIVE_DATA",
-    TOOL_VS:"TOOL_VS",
     ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:"ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION",
     REPRESENTATIVE_STATE:"REPRESENTATIVE_STATE"
 }
@@ -210,13 +211,14 @@ function setURLParameter(baseURL, name, value){
 function VotingSystemClient () { }
 
 var clientTool
+var nonBlockingOperations = [Operation.TOOL_VS, Operation.INIT_SERVER]
 VotingSystemClient.setMessage = function (messageJSON) {
     if(clientTool !== undefined) {
         var messageToSignatureClient = JSON.stringify(messageJSON);
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
     } else if(isChrome() && vs.webextension_available) {
-        if(messageJSON.operation !== Operation.TOOL_VS) vs.blockScreen(true)
+        if(nonBlockingOperations.indexOf(messageJSON.operation) < 0) vs.blockScreen(true)
         document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message-to-host', {detail:messageJSON}))
     }  else console.log("clientTool undefined - operation: " + messageJSON.operation)
 }

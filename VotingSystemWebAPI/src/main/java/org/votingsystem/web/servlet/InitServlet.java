@@ -9,7 +9,6 @@ import org.votingsystem.web.util.ConfigVS;
 import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,11 +46,6 @@ public class InitServlet extends HttpServlet{
             }
             signatureBean.initCertAuthorities(fileSystemX509TrustedCerts);
             signatureBean.initAdmins(admins);
-
-            URL res = getServletContext().getResource("/resources/bower_components/polymer/polymer.html");
-            if(res == null) {
-                log.log(Level.SEVERE, "Have you executed 'bower install' from web-app dir ???");
-            }
             config.mainServletInitialized();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

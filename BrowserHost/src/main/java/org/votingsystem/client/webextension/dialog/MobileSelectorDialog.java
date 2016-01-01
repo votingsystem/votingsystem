@@ -35,6 +35,7 @@ public class MobileSelectorDialog extends DialogVS {
 
     public interface Listener {
         public void setSelectedDevice(DeviceVSDto device);
+        public void cancelSelection();
     }
 
     private static Logger log = Logger.getLogger(MobileSelectorDialog.class.getSimpleName());
@@ -64,6 +65,9 @@ public class MobileSelectorDialog extends DialogVS {
         searchDeviceButton.setText(ContextVS.getMessage("searchDevicesLbl"));
         searchDeviceButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.SEARCH));
         footerBox.getChildren().remove(acceptButton);
+        addCloseListener(event -> {
+            listener.cancelSelection();
+        });
     }
 
     public void searchButton(ActionEvent actionEvent) {

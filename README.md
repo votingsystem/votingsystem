@@ -1,5 +1,5 @@
 ## Voting System
-The project needs Java 8 and JavaFX. In Debian you can install then with this commands:
+The project needs Java 8 and JavaFX. In Debian you can install them with this commands:
 
         sudo apt-get install openjdk-8-jdk
         sudo apt-get install openjfx

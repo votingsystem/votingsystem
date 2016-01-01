@@ -276,33 +276,31 @@ public class BrowserSessionService implements PasswordDialog.Listener {
         }
     }
 
-    public void checkCSRRequest() {
-        PlatformImpl.runLater(() -> checkCSR());
-    }
-
     private void deleteCSR() {
         log.info("deleteCSR");
         File csrFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
         if(csrFile.exists()) csrFile.delete();
     }
 
-    private void checkCSR() {
-        File csrFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
-        if(csrFile.exists()) {
-            log.info("csr request found");
-            try {
-                EncryptedBundleDto bundleDto = JSON.getMapper().readValue(csrFile, EncryptedBundleDto.class);
-                String serviceURL = ContextVS.getInstance().getAccessControl().getUserCSRServiceURL(bundleDto.getId());
-                ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, null);
-                if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    currentResponseVS = responseVS;
-                    PasswordDialog.showWithPasswordConfirm(TypeVS.CERT_USER_NEW, this, ContextVS.getMessage("csrPasswMsg"));
-                } else showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("certPendingMsg"));
-            } catch (Exception ex) {
-                log.log(Level.SEVERE,ex.getMessage(), ex);
-                showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("errorStoringKeyStoreMsg"));
+    public void checkCSR() {
+        PlatformImpl.runLater(() -> {
+            File csrFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
+            if(csrFile.exists()) {
+                log.info("csr request found");
+                try {
+                    EncryptedBundleDto bundleDto = JSON.getMapper().readValue(csrFile, EncryptedBundleDto.class);
+                    String serviceURL = ContextVS.getInstance().getAccessControl().getUserCSRServiceURL(bundleDto.getId());
+                    ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, null);
+                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                        currentResponseVS = responseVS;
+                        PasswordDialog.showWithPasswordConfirm(TypeVS.CERT_USER_NEW, this, ContextVS.getMessage("csrPasswMsg"));
+                    } else showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("certPendingMsg"));
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE,ex.getMessage(), ex);
+                    showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("errorStoringKeyStoreMsg"));
+                }
             }
-        }
+        });
     }
 
     public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
@@ -398,20 +396,26 @@ public class BrowserSessionService implements PasswordDialog.Listener {
                     EncryptedBundle bundle = bundleDto.getEncryptedBundle();
                     try {
                         serializedCertificationRequest = Encryptor.pbeAES_Decrypt(password, bundle);
+                        CertificationRequestVS certificationRequest =
+                                (CertificationRequestVS) ObjectUtils.deSerializeObject(serializedCertificationRequest);
+                        KeyStore userKeyStore = KeyStore.getInstance("JKS");
+                        userKeyStore.load(null);
+                        userKeyStore.setKeyEntry(ContextVS.KEYSTORE_USER_CERT_ALIAS, certificationRequest.getPrivateKey(),
+                                password, certsArray);
+                        ContextVS.getInstance().saveUserKeyStore(userKeyStore, password);
+                        ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString());
+                        showMessage(ResponseVS.SC_OK, ContextVS.getMessage("certInstallOKMsg"));
+                        csrFile.delete();
+                        CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
+                                user.getCertificate(), ContextVS.DEVICEVS_OID);
+                        DeviceVSDto deviceVSDto = new DeviceVSDto(user, certExtensionDto);
+                        deviceVSDto.setType(CryptoTokenVS.JKS_KEYSTORE);
+                        deviceVSDto.setDeviceName(user.getNif() + " - " + user.getName());
+                        setCryptoToken(deviceVSDto);
+                        currentResponseVS = null;
                     } catch (Exception ex) {
                         showMessage(ContextVS.getMessage("cryptoTokenPasswdErrorMsg"), ContextVS.getMessage("errorLbl"));
                     }
-                    CertificationRequestVS certificationRequest =
-                            (CertificationRequestVS) ObjectUtils.deSerializeObject(serializedCertificationRequest);
-                    KeyStore userKeyStore = KeyStore.getInstance("JKS");
-                    userKeyStore.load(null);
-                    userKeyStore.setKeyEntry(ContextVS.KEYSTORE_USER_CERT_ALIAS, certificationRequest.getPrivateKey(),
-                            password, certsArray);
-                    ContextVS.getInstance().saveUserKeyStore(userKeyStore, password);
-                    ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString());
-                    showMessage(ResponseVS.SC_OK, ContextVS.getMessage("certInstallOKMsg"));
-                    csrFile.delete();
-                    currentResponseVS = null;
                 } catch (Exception ex) {
                     showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                 }

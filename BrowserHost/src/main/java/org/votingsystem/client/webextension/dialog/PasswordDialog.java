@@ -75,14 +75,11 @@ public class PasswordDialog extends DialogVS {
         acceptButton.setOnAction(event -> checkPasswords());
         acceptButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CHECK));
 
-        password1Field.addEventHandler(KeyEvent.KEY_PRESSED,
-                new EventHandler<KeyEvent>() {
-                    public void handle(KeyEvent event) {
-                        if ((event.getCode() == KeyCode.ENTER)) {
-                            acceptButton.fire();
-                        }
-                        setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
+        password1Field.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+                    if ((event.getCode() == KeyCode.ENTER)) {
+                        acceptButton.fire();
                     }
+                    setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
                 }
         );
 
@@ -156,8 +153,16 @@ public class PasswordDialog extends DialogVS {
             INSTANCE.mainMessage = mainMessage;
             INSTANCE.isWithPasswordConfirm = true;
             INSTANCE.setMessage(mainMessage);
-            INSTANCE.show();
+            INSTANCE.showWithPasswordConfirm();
         });
+    }
+
+    private void showWithPasswordConfirm() {
+        if(!dialogVBox.getChildren().contains(password2Text)) {
+            dialogVBox.getChildren().add(4, password2Text);
+            dialogVBox.getChildren().add(5, password2Field);
+        }
+        show();
     }
 
     public static void showWithoutPasswordConfirm(TypeVS passwordType, Listener listener, String mainMessage) {
