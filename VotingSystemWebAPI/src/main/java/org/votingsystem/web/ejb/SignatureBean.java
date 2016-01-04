@@ -331,9 +331,8 @@ public class SignatureBean {
                     smimeMessage.getContentDigestStr()));
             SMIMEDto smimeDto = validateSignersCerts(smimeMessage);
             TypeVS typeVS = TypeVS.OK;
-            if(contenType != null && ContentTypeVS.CURRENCY == contenType) typeVS = TypeVS.CURRENCY;
+            if(ContentTypeVS.CURRENCY == contenType) typeVS = TypeVS.CURRENCY;
             messageSMIME = dao.persist(new MessageSMIME(smimeMessage, smimeDto, typeVS));
-            MessageSMIME.setCurrentInstance(messageSMIME);
             smimeDto.setMessageSMIME(messageSMIME);
             return smimeDto;
         } else throw new ValidationExceptionVS("invalid SMIMEMessage");

@@ -91,7 +91,9 @@ public class SubscriptionVSBean {
             }
             log.log(Level.FINE, "new certificate with id:" + certificate.getId());
         } else if(deviceData != null && deviceData.containsKey("deviceId")) {
-            query = dao.getEM().createNamedQuery("findDeviceByDeviceId").setParameter("deviceId", deviceData.get("deviceId"));
+            query = dao.getEM().createQuery("SELECT d FROM DeviceVS d WHERE d.deviceId =:deviceId and d.certificateVS =:certificate")
+                    .setParameter("deviceId", deviceData.get("deviceId"))
+                    .setParameter("certificate", certificate);
             deviceVS = dao.getSingleResult(DeviceVS.class, query);
             if(deviceVS == null) {
                 deviceVS = (DeviceVS) dao.persist(new DeviceVS(userVS, deviceData.get("deviceId"), deviceData.get("email"),

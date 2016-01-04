@@ -63,8 +63,12 @@ public class CSRBean {
         query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId and d.userVS.nif =:nif " +
                 "and d.state =:state").setParameter("state", DeviceVS.State.OK)
                 .setParameter("deviceId", certValidationDto.getDeviceId()).setParameter("nif", validatedNif);
-        DeviceVS oldDevice = dao.getSingleResult(DeviceVS.class, query);
-        if(oldDevice != null) dao.merge(oldDevice.setState(DeviceVS.State.CANCELED));
+        List<DeviceVS> oldDeviceList = dao.findAll(DeviceVS.class);
+        if(!oldDeviceList.isEmpty()) {
+            for(DeviceVS device :  oldDeviceList) {
+                dao.merge(device.setState(DeviceVS.State.CANCELED));
+            }
+        }
         X509Certificate issuedCert = signCertUserVS(csrRequest);
         CertificateVS certificate = dao.persist(CertificateVS.USER(deviceVS.getUserVS(), issuedCert));
         dao.merge(deviceVS.getUserVS().updateCertInfo(issuedCert));

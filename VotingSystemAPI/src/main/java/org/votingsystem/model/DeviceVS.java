@@ -21,7 +21,6 @@ import static javax.persistence.GenerationType.IDENTITY;
 @NamedQueries({
         @NamedQuery(name = "findDeviceByUserAndDeviceId", query =
                 "SELECT d FROM DeviceVS d WHERE d.userVS =:userVS and d.deviceId =:deviceId"),
-        @NamedQuery(name = "findDeviceByDeviceId", query = "SELECT d FROM DeviceVS d WHERE d.deviceId =:deviceId"),
         @NamedQuery(name = "findByDeviceIdAndUserVS", query = "SELECT d FROM DeviceVS d WHERE d.deviceId =:deviceId " +
                 "and d.userVS =:userVS")
 })

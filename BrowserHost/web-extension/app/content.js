@@ -17,6 +17,7 @@ if(document.querySelector("#voting_system_page")) {
 
     document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message_from_extension'))
 
+    console.log("content.js - ready - chrome.runtime.id: " + chrome.runtime.id);
 }
 
 chrome.extension.onMessage.addListener(function(msg, sender, sendResponse) {
@@ -31,5 +32,3 @@ chrome.extension.onMessage.addListener(function(msg, sender, sendResponse) {
         document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message_from_extension', {detail:msg}))
     }
 });
-
-console.log("content.js - ready - chrome.runtime.id: " + chrome.runtime.id);

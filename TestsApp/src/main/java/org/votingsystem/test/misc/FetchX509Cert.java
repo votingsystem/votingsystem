@@ -1,6 +1,7 @@
 package org.votingsystem.test.misc;
 
 import org.votingsystem.dto.ActorVSDto;
+import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.util.CertUtils;
@@ -27,6 +28,11 @@ public class FetchX509Cert {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
+        getDeviceVSDto();
+        System.exit(0);
+    }
+
+    public static void getServer() throws Exception {
         String serverURL = "http://currency:8080/AccessControl";
         String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
         ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
@@ -50,7 +56,15 @@ public class FetchX509Cert {
                 throw new ExceptionVS(serverInfoURL + " signing cert is lapsed");
             }
         } else throw new ExceptionVS(format("Expected server URL {0} found {1}", serverURL, actorVS.getServerURL()));
-        System.exit(0);
+    }
+
+    public static void getDeviceVSDto() throws Exception {
+        String serverURL = "http://currency:8080/CurrencyServer/rest/deviceVS/id/2";
+        ResponseVS responseVS = HttpHelper.getInstance().getData(serverURL, ContentTypeVS.JSON);
+        if(ResponseVS.SC_OK != responseVS.getStatusCode())
+            throw new ExceptionVS("serverInfoURL - error: " + responseVS.getMessage());
+        DeviceVSDto dto = (DeviceVSDto) responseVS.getMessage(DeviceVSDto.class);
+        log.info(CertUtils.fromPEMToX509Cert(dto.getCertPEM().getBytes()).toString());
     }
 }
 
