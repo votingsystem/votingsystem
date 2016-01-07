@@ -62,7 +62,7 @@ public class GroupVSResource {
     public Response index(@DefaultValue("0") @QueryParam("offset") int offset,
                         @DefaultValue("100") @QueryParam("max") int max,
                         @QueryParam("state") String stateStr,
-                        @QueryParam("searchText") String searchText,
+                        @DefaultValue("") @QueryParam("searchText") String searchText,
                         @Context ServletContext context, @Context HttpServletRequest req,
                         @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
@@ -83,12 +83,12 @@ public class GroupVSResource {
         long totalCount = 0L;
         if(dateFrom != null && dateTo != null) {
             query = dao.getEM().createQuery("select g from GroupVS g where g.dateCreated between :dateFrom and :dateTo " +
-                    "and (g.name =:searchText or g.state =:state or g.description =:description)")
-                    .setParameter("searchText",  "%" + searchText + "%").setParameter("state", state)
+                    "and g.state =:state and (lower(g.name) like :searchText or lower(g.description) like :searchText)")
+                    .setParameter("searchText",  "%" + searchText.toLowerCase() + "%").setParameter("state", state)
                     .setParameter("dateTo", dateTo).setParameter("dateFrom", dateFrom)
                     .setFirstResult(offset).setMaxResults(max);
-        } else query = dao.getEM().createQuery("select g from GroupVS g where g.name =:searchText or g.state =:state " +
-                "or g.description =:searchText").setParameter("searchText", "%" + searchText + "%")
+        } else query = dao.getEM().createQuery("select g from GroupVS g where (lower(g.name) like :searchText " +
+                "or lower(g.description) like :searchText) and g.state =:state").setParameter("searchText", "%" + searchText.toLowerCase() + "%")
                 .setParameter("state", state).setFirstResult(offset).setMaxResults(max);
         List<GroupVS> groupVSList = query.getResultList();
         List<GroupVSDto> resultList = new ArrayList<>();
@@ -97,11 +97,11 @@ public class GroupVSResource {
         }
         if(dateFrom != null && dateTo != null) {
             query = dao.getEM().createQuery("select COUNT(g) from GroupVS g where g.dateCreated between :dateFrom and :dateTo " +
-                    "and (g.name =:searchText or g.state =:state or g.description =:description)")
-                    .setParameter("searchText",  "%" + searchText + "%").setParameter("state", state)
+                    "and g.state =:state  and (lower(g.name) like :searchText or lower(g.description) like :searchText)")
+                    .setParameter("searchText",  "%" + searchText.toLowerCase() + "%").setParameter("state", state)
                     .setParameter("dateTo", dateTo).setParameter("dateFrom", dateFrom);
-        } else query = dao.getEM().createQuery("select COUNT(g) from GroupVS g where g.name =:searchText or g.state =:state " +
-                "or g.description =:searchText").setParameter("searchText", "%" + searchText + "%")
+        } else query = dao.getEM().createQuery("select COUNT(g) from GroupVS g where g.state =:state and (lower(g.name) like :searchText " +
+                "or lower(g.description) like :searchText)").setParameter("searchText", "%" + searchText.toLowerCase() + "%")
                 .setParameter("state", state);
         totalCount = (long) query.getSingleResult();
         ResultListDto resultListDto = ResultListDto.GROUPVS(resultList, state, offset, max, totalCount);

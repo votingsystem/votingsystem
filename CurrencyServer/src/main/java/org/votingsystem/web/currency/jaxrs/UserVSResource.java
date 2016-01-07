@@ -84,17 +84,17 @@ public class UserVSResource {
                     req.getParameter("searchTo"));} catch(Exception ex) {dateTo = timePeriod.getDateTo();}
             String queryListPrefix = "select u from UserVS u";
             String querySufix = " where u.dateCreated between :dateFrom " +
-                    "and :dateTo and u.type =:type and u.state =:state and (u.name like :searchText " +
-                    "or u.firstName like :searchText or u.lastName like :searchText  or u.nif like :searchText " +
-                    "or u.IBAN like :searchText)";
+                    "and :dateTo and u.type =:type and u.state =:state and (LOWER(u.name) like :searchText " +
+                    "or LOWER(u.firstName) like :searchText or LOWER(u.lastName) like :searchText  or LOWER(u.nif) like :searchText " +
+                    "or LOWER(u.IBAN) like :searchText)";
             Query query = dao.getEM().createQuery(queryListPrefix + querySufix)
-                    .setParameter("searchText", "%" + req.getParameter("searchText") + "%")
+                    .setParameter("searchText", "%" + req.getParameter("searchText").toLowerCase() + "%")
                     .setParameter("state", userState).setParameter("type", userType).setParameter("dateFrom", dateFrom)
                     .setParameter("dateTo", dateTo);
             userList = query.setFirstResult(offset).setMaxResults(max).getResultList();
             String queryCountPrefix = "select COUNT(u) from UserVS u";
             query = dao.getEM().createQuery(queryCountPrefix + querySufix)
-                    .setParameter("searchText", "%" + req.getParameter("searchText") + "%")
+                    .setParameter("searchText", "%" + req.getParameter("searchText").toLowerCase() + "%")
                     .setParameter("state", userState).setParameter("type", userType).setParameter("dateFrom", dateFrom)
                     .setParameter("dateTo", dateTo);
             totalCount = (long)query.getSingleResult();
@@ -174,18 +174,6 @@ public class UserVSResource {
         } else return Response.temporaryRedirect(new URI("../userVS/search.xhtml")).build();
     }
 
-    @Path("/search")
-    @POST @Produces(MediaType.APPLICATION_JSON)
-    @Consumes({"application/json"})
-    public Response search(Map requestMap, @Context ServletContext context, @Context HttpServletRequest req,
-                        @Context HttpServletResponse resp) throws Exception {
-        if(requestMap.containsKey("searchText")) {
-            int offset = ((Number)requestMap.get("offset")).intValue();
-            int max = ((Number)requestMap.get("max")).intValue();
-            return processSearch((String) requestMap.get("searchText"), offset, max);
-        } else return Response.status(Response.Status.BAD_REQUEST).entity("missing 'searchText'").build();
-    }
-
     private Response processSearch(String searchText, int offset, int max) throws Exception {
         Query query = dao.getEM().createQuery("select u from UserVS u where u.state =:state and u.type =:type " +
                 "and (lower(u.name) like :searchText or lower(u.firstName) like :searchText or lower(u.lastName) like :searchText " +
@@ -211,29 +199,30 @@ public class UserVSResource {
     @Path("/search/group/{groupId}")
     @POST @Produces(MediaType.APPLICATION_JSON)
     @Consumes({"application/json"})
-    public Response searchGroup(Map requestMap, @PathParam("groupId") long groupId, @Context ServletContext context,
+    public Response searchGroup(@DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("100") @QueryParam("max") int max, @QueryParam("searchText") String searchText,
+            @QueryParam("groupVSState") String groupVSState,
+            @PathParam("groupId") long groupId, @Context ServletContext context,
             @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         GroupVS groupVS = dao.find(GroupVS.class, groupId);
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - groupId: " + groupId).build();
-        if(requestMap.containsKey("searchText")) {
-            int offset = ((Number)requestMap.get("offset")).intValue();
-            int max = ((Number)requestMap.get("max")).intValue();
+        if(searchText != null) {
             SubscriptionVS.State state = SubscriptionVS.State.ACTIVE;
-            try {state = SubscriptionVS.State.valueOf((String) requestMap.get("groupVSState"));} catch(Exception ex) {}
+            try {state = SubscriptionVS.State.valueOf(groupVSState);} catch(Exception ex) {}
             String queryListPrefix = "select s from SubscriptionVS s ";
             String querySufix = "where s.groupVS =:groupVS " +
-                    "and s.state =: state and s.userVS.state = :userState and (s.userVS.name like :searchText " +
-                    "or s.userVS.firstName like :searchText or s.userVS.lastName like :searchText or s.userVS.nif like :searchText)";
+                    "and s.state =: state and s.userVS.state = :userState and (lower(s.userVS.name) like :searchText " +
+                    "or lower(s.userVS.firstName) like :searchText or lower(s.userVS.lastName) like :searchText or lower(s.userVS.nif) like :searchText)";
             Query query = dao.getEM().createQuery(queryListPrefix + querySufix)
-                    .setFirstResult(offset).setMaxResults(max).setParameter("param", "s").setParameter("state", state)
+                    .setFirstResult(offset).setMaxResults(max).setParameter("state", state)
                     .setParameter("userState", UserVS.State.ACTIVE).setParameter("groupVS", groupVS)
-                    .setParameter("searchText", "%" + requestMap.get("searchText") + "%");
+                    .setParameter("searchText", "%" + searchText + "%");
             List<SubscriptionVS> subscriptionList = query.setFirstResult(offset).setMaxResults(max).getResultList();
             String queryCountPrefix = "select COUNT(s) from SubscriptionVS s ";
             query = dao.getEM().createQuery(queryCountPrefix + querySufix)
-                    .setFirstResult(offset).setMaxResults(max).setParameter("param", "s").setParameter("state", state)
+                    .setFirstResult(offset).setMaxResults(max).setParameter("state", state)
                     .setParameter("userState", UserVS.State.ACTIVE).setParameter("groupVS", groupVS)
-                    .setParameter("searchText", "%" + requestMap.get("searchText") + "%");
+                    .setParameter("searchText", "%" + searchText + "%");
             List<UserVSDto> resultList = new ArrayList<>();
             for(SubscriptionVS subscriptionVS : subscriptionList) {
                 resultList.add(userVSBean.getUserVSDto(subscriptionVS.getUserVS(), false));
@@ -242,7 +231,6 @@ public class UserVSResource {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         } else return Response.status(Response.Status.BAD_REQUEST).entity("missing 'searchText'").build();
     }
-
 
     @Path("/nif/{nif}/{year}/{month}/{day}")
     @GET @Produces(MediaType.APPLICATION_JSON)

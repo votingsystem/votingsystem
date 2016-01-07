@@ -16,6 +16,7 @@
                     <option value="CANCELED" style="color:#cc1606;"> ${msg.selectClosedGroupvsLbl} </option>
                 </select>
             </div>
+            <div hidden="{{searchMsgHidden}}" class="horizontal layout center center-justified" style="margin: 0 auto">${msg.searchResultLbl}</div>
             <div class="layout flex horizontal center wrap around-justified">
                 <template is="dom-repeat" items="{{groupListDto.resultList}}" as="groupvs">
                     <groupvs-card groupvs="[[groupvs]]"></groupvs-card>
@@ -38,6 +39,7 @@
                 console.log(this.tagName + " - groupListDtoChanged ")
             },
             ready :  function(e) {
+                this.searchMsgHidden = true
                 this.state = getURLParam("state")
                 console.log(this.tagName + " - ready - state: " + this.state + " - groupListDto: " + this.groupListDto)
                 if(!("admin" == menuType || "superuser" == menuType)) this.$.groupStateSelector.style.display = 'none'
@@ -45,14 +47,15 @@
                     this.$.groupvsTypeSelect.value = this.state
                     this.url = contextURL + "/rest/groupVS?state=" + this.state
                 } else this.url = contextURL + "/rest/groupVS"
+                document.querySelector('#voting_system_page').addEventListener('search-request', function (e) {
+                    this.url = contextURL + "/rest/groupVS?menu=" + menuType + "&searchText=" + e.detail.query
+                    this.searchMsgHidden = false
+                }.bind(this))
             },
             pagerChange:function(e) {
                 var optionSelected = this.$.groupvsTypeSelect.value
-                targetURL = contextURL + "/rest/groupVS?menu=" + menuType + "&state=" +
+                this.url = contextURL + "/rest/groupVS?menu=" + menuType + "&state=" +
                         optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
-                console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
-                history.pushState(null, null, targetURL);
-                this.url = targetURL
             },
             groupvsTypeSelect: function() {
                 var optionSelected = this.$.groupvsTypeSelect.value
@@ -70,6 +73,7 @@
             },
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
+                //history.pushState(null, null, targetURL);
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
                 d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
                     this.groupListDto = toJSON(rawData.response)

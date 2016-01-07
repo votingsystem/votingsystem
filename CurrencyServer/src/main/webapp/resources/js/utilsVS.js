@@ -308,7 +308,7 @@ function querySelector(selector) {
 
 function sendSignalVS(signalData) {
     var div = document.querySelector("#selectedPageTitle")
-    div.innerText = signalData.caption
+    if(div) div.innerText = signalData.caption
 }
 
 function checkIfClientToolIsConnected() {
