@@ -1,6 +1,11 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
@@ -113,37 +118,20 @@ public class TransactionVSResource {
                 transactionType = TransactionVS.Type.valueOf(transactionvsType);
             else transactionType = TransactionVS.Type.valueOf(searchText);} catch(Exception ex) {}
         try {amount = new BigDecimal(searchText);} catch(Exception ex) {}
-        String queryListPrefix = "select t from TransactionVS t ";
-        String queryCountPrefix = "select COUNT(t) from TransactionVS t ";
-        String querySufix = null;
-        if(transactionType == null && amount == null && searchText == null) {
-            querySufix = "where t.transactionParent is null " +
-                    "and t.dateCreated between :dateFrom and :dateTo";
-        } else querySufix = "where t.transactionParent is null " +
-                "and t.dateCreated between :dateFrom and :dateTo and (t.type =:type or t.amount =:amount " +
-                "or t.subject like :searchText or t.currencyCode like :searchText)";
-
-        Query query = null;
-        if(transactionType == null && amount == null && searchText == null) {
-            query = dao.getEM().createQuery(queryListPrefix + querySufix).setParameter("dateFrom", dateFrom)
-                    .setParameter("dateTo", dateTo).setFirstResult(offset).setMaxResults(max);
-        } else {
-            query = dao.getEM().createQuery(queryListPrefix + querySufix).setParameter("dateFrom", dateFrom)
-                    .setParameter("dateTo", dateTo).setParameter("type", transactionType).setParameter("amount", amount)
-                    .setParameter("searchText", "%" + searchText + "%").setFirstResult(offset).setMaxResults(max);
+        Session session = dao.getEM().unwrap(Session.class);
+        Criteria criteria = session.createCriteria(TransactionVS.class);
+        criteria.add(Restrictions.between("dateCreated", dateFrom, dateTo));
+        criteria.add(Restrictions.isNull("transactionParent"));
+        Disjunction orDisjunction = Restrictions.or();
+        if(transactionType != null) orDisjunction.add(Restrictions.eq("type", transactionType));
+        if(amount != null) orDisjunction.add(Restrictions.eq("amount", amount));
+        if(searchText != null) {
+            orDisjunction.add(Restrictions.ilike("subject", "%" + searchText + "%"));
+            orDisjunction.add(Restrictions.ilike("currencyCode", "%" + searchText + "%"));
         }
-        if(transactionType != null) query.setParameter("type", transactionType);
-        List<TransactionVS> transactionList = query.getResultList();
-        if(transactionType == null && amount == null && searchText == null) {
-            query = dao.getEM().createQuery(queryCountPrefix + querySufix).setParameter("dateFrom", dateFrom)
-                    .setParameter("dateTo", dateTo);
-        } else {
-            query = dao.getEM().createQuery(queryCountPrefix + querySufix).setParameter("dateFrom", dateFrom)
-                    .setParameter("dateTo", dateTo).setParameter("type", transactionType).setParameter("amount", amount)
-                    .setParameter("searchText", "%" + searchText + "%");
-        }
-        if(transactionType != null) query.setParameter("type", transactionType);
-        long totalCount = (long) query.getSingleResult();
+        criteria.add(orDisjunction);
+        List<TransactionVS> transactionList = criteria.setFirstResult(offset).setMaxResults(max).list();
+        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         List<TransactionVSDto> resultList = new ArrayList<>();
         for(TransactionVS transactionVS :  transactionList) {
             resultList.add(transactionVSBean.getTransactionDto(transactionVS));

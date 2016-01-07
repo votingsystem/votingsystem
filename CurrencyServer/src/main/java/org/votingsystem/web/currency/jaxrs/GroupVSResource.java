@@ -1,6 +1,11 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserVSDto;
@@ -79,31 +84,23 @@ public class GroupVSResource {
                 try {dateTo = DateUtils.getDateFromString(requestMap.get("searchTo"));} catch(Exception ex) {}
             } catch (Exception ex) { log.log(Level.FINE, "without json data");}
         }
-        Query query = null;
-        long totalCount = 0L;
+        Session session = dao.getEM().unwrap(Session.class);
+        Criteria criteria = session.createCriteria(GroupVS.class);
+        criteria.add(Restrictions.eq("state", state));
+        if(searchText != null) {
+            Criterion rest1= Restrictions.ilike("name", "%" + searchText + "%");
+            Criterion rest2= Restrictions.ilike("description", "%" + searchText + "%");
+            criteria.add(Restrictions.or(rest1, rest2));
+        }
         if(dateFrom != null && dateTo != null) {
-            query = dao.getEM().createQuery("select g from GroupVS g where g.dateCreated between :dateFrom and :dateTo " +
-                    "and g.state =:state and (lower(g.name) like :searchText or lower(g.description) like :searchText)")
-                    .setParameter("searchText",  "%" + searchText.toLowerCase() + "%").setParameter("state", state)
-                    .setParameter("dateTo", dateTo).setParameter("dateFrom", dateFrom)
-                    .setFirstResult(offset).setMaxResults(max);
-        } else query = dao.getEM().createQuery("select g from GroupVS g where (lower(g.name) like :searchText " +
-                "or lower(g.description) like :searchText) and g.state =:state").setParameter("searchText", "%" + searchText.toLowerCase() + "%")
-                .setParameter("state", state).setFirstResult(offset).setMaxResults(max);
-        List<GroupVS> groupVSList = query.getResultList();
+            criteria.add(Restrictions.between("dateCreated", dateFrom, dateTo));
+        }
+        List<GroupVS> groupVSList = criteria.setFirstResult(offset).setMaxResults(max).list();
         List<GroupVSDto> resultList = new ArrayList<>();
         for(GroupVS groupVS : groupVSList) {
             resultList.add(groupVSBean.getGroupVSDto(groupVS));
         }
-        if(dateFrom != null && dateTo != null) {
-            query = dao.getEM().createQuery("select COUNT(g) from GroupVS g where g.dateCreated between :dateFrom and :dateTo " +
-                    "and g.state =:state  and (lower(g.name) like :searchText or lower(g.description) like :searchText)")
-                    .setParameter("searchText",  "%" + searchText.toLowerCase() + "%").setParameter("state", state)
-                    .setParameter("dateTo", dateTo).setParameter("dateFrom", dateFrom);
-        } else query = dao.getEM().createQuery("select COUNT(g) from GroupVS g where g.state =:state and (lower(g.name) like :searchText " +
-                "or lower(g.description) like :searchText)").setParameter("searchText", "%" + searchText.toLowerCase() + "%")
-                .setParameter("state", state);
-        totalCount = (long) query.getSingleResult();
+        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         ResultListDto resultListDto = ResultListDto.GROUPVS(resultList, state, offset, max, totalCount);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
                 .type(MediaTypeVS.JSON).build();
@@ -130,7 +127,7 @@ public class GroupVSResource {
     public Response searchUsers(@PathParam("id") long id,
             @DefaultValue("0") @QueryParam("offset") int offset,
             @DefaultValue("100") @QueryParam("max") int max,
-            @DefaultValue("") @QueryParam("searchText") String searchText,
+            @QueryParam("searchText") String searchText,
             @QueryParam("subscriptionState") String subscriptionStateStr,
             @QueryParam("userVSState") String userVSStateStr,
             @Context ServletContext context,
@@ -145,29 +142,25 @@ public class GroupVSResource {
                 subscriptionStateStr);} catch(Exception ex) {}
         UserVS.State userState = UserVS.State.ACTIVE;
         try {userState = UserVS.State.valueOf(userVSStateStr);} catch(Exception ex) {}
-        long totalCount = 0L;
-        String queryListPrefix = "select s ";
-        String querySufix = "from SubscriptionVS s where s.state =:subscriptionState " +
-                "and s.userVS.state =:userState and s.groupVS=:groupVS and (lower(s.userVS.name) like :searchText " +
-                "or lower(s.userVS.firstName) like :searchText or lower(s.userVS.lastName) like :searchText " +
-                "or lower(s.userVS.nif) like :searchText)";
-        String queryCountPrefix = "select COUNT(s) ";
-        Query query = dao.getEM().createQuery(queryListPrefix + querySufix)
-                .setParameter("groupVS", groupVS)
-                .setParameter("subscriptionState", subscriptionState)
-                .setParameter("userState", userState).setParameter("searchText", "%" + searchText.toLowerCase() + "%")
-                .setFirstResult(offset).setMaxResults(max);
-
-        List<SubscriptionVS> userList = query.getResultList();
+        Session session = dao.getEM().unwrap(Session.class);
+        Criteria criteria = session.createCriteria(SubscriptionVS.class)
+                .createAlias("userVS", "user");
+        criteria.add(Restrictions.eq("state", subscriptionState));
+        criteria.add(Restrictions.eq("groupVS", groupVS));
+        criteria.add(Restrictions.eq("user.state", userState));
+        if(searchText != null) {
+            Criterion rest1= Restrictions.ilike("user.name", "%" + searchText + "%");
+            Criterion rest2= Restrictions.ilike("user.firstName", "%" + searchText + "%");
+            Criterion rest3= Restrictions.ilike("user.lastName", "%" + searchText + "%");
+            Criterion rest4= Restrictions.ilike("user.nif", "%" + searchText + "%");
+            criteria.add(Restrictions.or(rest1, rest2, rest3, rest4));
+        }
+        List<SubscriptionVS> userList = criteria.setFirstResult(offset).setMaxResults(max).list();
         List<UserVSDto> resultList = new ArrayList<>();
         for(SubscriptionVS subscriptionVS : userList) {
             resultList.add(UserVSDto.COMPLETE(subscriptionVS.getUserVS()));
         }
-        query = dao.getEM().createQuery(queryCountPrefix + querySufix)
-                .setParameter("groupVS", groupVS)
-                .setParameter("subscriptionState", subscriptionState)
-                .setParameter("userState", userState).setParameter("searchText", "%" + searchText.toLowerCase() + "%");
-        totalCount = (long) query.getSingleResult();
+        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         ResultListDto resultListDto = new ResultListDto(resultList, offset, resultList.size(), totalCount);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }
