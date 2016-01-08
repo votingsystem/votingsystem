@@ -95,12 +95,12 @@ public class GroupVSResource {
         if(dateFrom != null && dateTo != null) {
             criteria.add(Restrictions.between("dateCreated", dateFrom, dateTo));
         }
+        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         List<GroupVS> groupVSList = criteria.setFirstResult(offset).setMaxResults(max).list();
         List<GroupVSDto> resultList = new ArrayList<>();
         for(GroupVS groupVS : groupVSList) {
             resultList.add(groupVSBean.getGroupVSDto(groupVS));
         }
-        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         ResultListDto resultListDto = ResultListDto.GROUPVS(resultList, state, offset, max, totalCount);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
                 .type(MediaTypeVS.JSON).build();
@@ -155,12 +155,12 @@ public class GroupVSResource {
             Criterion rest4= Restrictions.ilike("user.nif", "%" + searchText + "%");
             criteria.add(Restrictions.or(rest1, rest2, rest3, rest4));
         }
+        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         List<SubscriptionVS> userList = criteria.setFirstResult(offset).setMaxResults(max).list();
         List<UserVSDto> resultList = new ArrayList<>();
         for(SubscriptionVS subscriptionVS : userList) {
             resultList.add(UserVSDto.COMPLETE(subscriptionVS.getUserVS()));
         }
-        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         ResultListDto resultListDto = new ResultListDto(resultList, offset, resultList.size(), totalCount);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }

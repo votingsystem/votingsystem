@@ -95,8 +95,8 @@ public class UserVSResource {
         if(dateFrom != null && dateTo != null) {
             criteria.add(Restrictions.between("dateCreated", dateFrom, dateTo));
         }
-        List<UserVS> userList = criteria.setFirstResult(offset).setMaxResults(max).list();
         long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
+        List<UserVS> userList = criteria.setFirstResult(offset).setMaxResults(max).list();
         List<UserVSDto> resultList = new ArrayList<>();
         for(UserVS userVS :  userList) {
             resultList.add(userVSBean.getUserVSDto(userVS, false));
@@ -211,8 +211,8 @@ public class UserVSResource {
                 Criterion rest4= Restrictions.ilike("user.nif", "%" + searchText + "%");
                 criteria.add(Restrictions.or(rest1, rest2, rest3, rest4));
             }
-            List<SubscriptionVS> subscriptionList = criteria.setFirstResult(offset).setMaxResults(max).list();
             long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
+            List<SubscriptionVS> subscriptionList = criteria.setFirstResult(offset).setMaxResults(max).list();
             List<UserVSDto> resultList = new ArrayList<>();
             for(SubscriptionVS subscriptionVS : subscriptionList) {
                 resultList.add(userVSBean.getUserVSDto(subscriptionVS.getUserVS(), false));

@@ -168,16 +168,14 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
     }
 
     public static void show(final Currency currency, final Window parentWindow, EventHandler closeListener) {
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                try {
-                    CurrencyDialog currencyDialog = new CurrencyDialog();
-                    currencyDialog.initOwner(parentWindow);
-                    currencyDialog.showDialog(currency);
-                    currencyDialog.addCloseListener(closeListener);
-                } catch (Exception ex) {
-                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                }
+        Platform.runLater(() -> {
+            try {
+                CurrencyDialog currencyDialog = new CurrencyDialog();
+                currencyDialog.initOwner(parentWindow);
+                currencyDialog.showDialog(currency);
+                currencyDialog.addCloseListener(closeListener);
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
             }
         });
     }

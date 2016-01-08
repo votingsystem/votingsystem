@@ -130,8 +130,8 @@ public class TransactionVSResource {
             orDisjunction.add(Restrictions.ilike("currencyCode", "%" + searchText + "%"));
         }
         criteria.add(orDisjunction);
-        List<TransactionVS> transactionList = criteria.setFirstResult(offset).setMaxResults(max).list();
         long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
+        List<TransactionVS> transactionList = criteria.setFirstResult(offset).setMaxResults(max).list();
         List<TransactionVSDto> resultList = new ArrayList<>();
         for(TransactionVS transactionVS :  transactionList) {
             resultList.add(transactionVSBean.getTransactionDto(transactionVS));

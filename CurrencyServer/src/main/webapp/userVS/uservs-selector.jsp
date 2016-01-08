@@ -72,7 +72,7 @@
                 this.modeSearch = !this.contactSelector
                 console.log(this.tagName + " - contactSelector: " + this.contactSelector)
                 if(typeof(Storage) === "undefined") {
-                    alert("Browser withou localStorage support")
+                    alert("Browser without localStorage support")
                 } else {
                     this.contacts = localStorage.contacts
                 }
