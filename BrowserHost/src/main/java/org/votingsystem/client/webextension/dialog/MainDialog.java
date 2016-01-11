@@ -16,7 +16,6 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.pane.DecoratedPane;
-import org.votingsystem.client.webextension.pane.WalletPane;
 import org.votingsystem.client.webextension.service.EventBusService;
 import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.webextension.util.Utils;
@@ -114,7 +113,7 @@ public class MainDialog {
 
         walletButton = new Button(ContextVS.getMessage("walletLbl"));
         walletButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.MONEY));
-        walletButton.setOnAction(event -> WalletPane.show());
+        walletButton.setOnAction(event -> WalletDialog.showDialog());
         
         qrCodeButton = new Button(ContextVS.getMessage("createQRLbl"));
         qrCodeButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.QRCODE));

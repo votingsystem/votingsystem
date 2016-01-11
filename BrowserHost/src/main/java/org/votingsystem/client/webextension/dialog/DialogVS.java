@@ -86,7 +86,7 @@ public class DialogVS {
 
     public DialogVS addCloseListener(EventHandler eventHandler) {
         stage.addEventHandler(WindowEvent.WINDOW_HIDDEN, windowEvent -> {
-            eventHandler.handle(windowEvent);
+            if(eventHandler != null) eventHandler.handle(windowEvent);
         });
         return this;
     }

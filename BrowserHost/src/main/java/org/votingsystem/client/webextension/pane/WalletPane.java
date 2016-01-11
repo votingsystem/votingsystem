@@ -1,17 +1,15 @@
 package org.votingsystem.client.webextension.pane;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.webextension.dialog.*;
+import org.votingsystem.client.webextension.dialog.CurrencyDialog;
+import org.votingsystem.client.webextension.dialog.UserDeviceSelectorDialog;
 import org.votingsystem.client.webextension.task.CurrencyValidatorTask;
 import org.votingsystem.client.webextension.util.CurrencyCheckResponse;
 import org.votingsystem.client.webextension.util.MsgUtils;
@@ -19,13 +17,9 @@ import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.TypeVS;
-import org.votingsystem.util.currency.Wallet;
 
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.votingsystem.client.webextension.BrowserHost.showMessage;
@@ -34,21 +28,18 @@ import static org.votingsystem.client.webextension.BrowserHost.showMessage;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listener, CurrencyValidatorTask.Listener,
-        PasswordDialog.Listener {
+public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listener, CurrencyValidatorTask.Listener {
 
     private static Logger log = Logger.getLogger(WalletPane.class.getSimpleName());
-
-    private static WalletDialog DIALOG_INSTANCE;
 
     public WalletPane() {
         super(new VBox(10));
         getStylesheets().add(Utils.getResource("/css/wallet-pane.css"));
-        getStyleClass().add("main-pane");
         VBox.setVgrow(this, Priority.ALWAYS);
+        getStyleClass().add("main-pane");
     }
 
-    private void load(Set<Currency> wallet) {
+    public void load(Set<Currency> wallet) {
         Map<String, Set<Currency>> currencyMap = new HashMap<>();
         getChildren().remove(0, getChildren().size());
         for(Currency currency : wallet) {
@@ -98,23 +89,13 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
                 }
                 currencyPane.getChildren().addAll(tagInfoBox, tagFlowPane);
             }
-            getChildren().add(currencyPane);
+            ScrollPane scrollPane = new ScrollPane();
+            scrollPane.setContent(currencyPane);
+            VBox.setVgrow(currencyPane, Priority.ALWAYS);
+            scrollPane.getStyleClass().add("scroll-pane");
+            getChildren().add(scrollPane);
         }
     }
-
-
-
-    public static void show() {
-        Platform.runLater(() -> {
-            if(DIALOG_INSTANCE == null) DIALOG_INSTANCE = new WalletDialog();
-            Set<Currency> currencySet = Wallet.getWallet();
-            if(currencySet == null) {
-                PasswordDialog.showWithoutPasswordConfirm(TypeVS.CURRENCY_OPEN, passwordListener,
-                        ContextVS.getMessage("walletPinMsg"));
-            } else DIALOG_INSTANCE.show(currencySet);
-        });
-    }
-
 
     @Override public void processCurrencyStatus(CurrencyCheckResponse response) {
         if(ResponseVS.SC_OK == response.getStatusCode()) {
@@ -123,74 +104,8 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
     }
 
     @Override
-    public void processPassword(TypeVS passwordType, char[] password) {
-        switch(passwordType) {
-            case CURRENCY_OPEN:
-                try {
-                    Set<Currency> currencySet = Wallet.getWallet(password);
-                    if(DIALOG_INSTANCE == null) DIALOG_INSTANCE = new WalletDialog();
-                    DIALOG_INSTANCE.show(currencySet);
-                } catch (WalletException wex) {
-                    Utils.showWalletNotFoundMessage();
-                } catch (Exception ex) {
-                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                    showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                }
-                break;
-        }
-
-    }
-
-    @Override public void cancelPassword(TypeVS passwordType) { }
-
-    private static PasswordDialog.Listener passwordListener = new PasswordDialog.Listener(){
-        @Override public void processPassword(TypeVS passwordType, char[] password) {
-            try {
-                Set<Currency> currencySet = Wallet.getWallet(password);
-                if(DIALOG_INSTANCE == null) DIALOG_INSTANCE = new WalletDialog();
-                DIALOG_INSTANCE.show(currencySet);
-            } catch (WalletException wex) {
-                Utils.showWalletNotFoundMessage();
-            } catch (Exception ex) {
-                log.log(Level.SEVERE, ex.getMessage(), ex);
-                showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-            }
-        }
-
-        @Override public void cancelPassword(TypeVS passwordType) { }
-    };
-
-    @Override
     public void setSelectedDevice(DeviceVSDto device) {
         log.info("setSelectedDevice");
     }
 
-
-    private static class WalletDialog extends DialogVS {
-
-        private WalletPane walletPane;
-        private MenuButton menuButton;
-        private MenuItem checkCurrencyMenuItem;
-
-        public WalletDialog() {
-            super(new WalletPane());
-            walletPane = (WalletPane) getContentPane();
-            checkCurrencyMenuItem =  new MenuItem(ContextVS.getMessage("checkCurrencyMenuItemLbl"));
-            menuButton = new MenuButton();
-            menuButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.BARS));
-            menuButton.getItems().addAll(checkCurrencyMenuItem);
-            addMenuButton(menuButton);
-            setCaption(ContextVS.getMessage("walletLbl"));
-        }
-
-        private void show(Set<Currency> currencySet) {
-            if(currencySet.isEmpty()) menuButton.setVisible(false);
-            else menuButton.setVisible(true);
-            checkCurrencyMenuItem.setOnAction(event -> {
-                ProgressDialog.show(new CurrencyValidatorTask(currencySet, walletPane), ContextVS.getMessage("walletLbl"));
-            });
-            walletPane.load(currencySet);
-            show();
-        }
-    }
 }

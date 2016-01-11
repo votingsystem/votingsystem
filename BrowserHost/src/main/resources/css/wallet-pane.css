@@ -1,8 +1,13 @@
+.scroll-pane {
+    -fx-fit-to-width: true;
+    -fx-background: #fff;
+    -fx-border-color:#fff;
+}
+
 .main-pane {
     -fx-pref-width: 600px;
     -fx-min-height: 300px;
     -fx-background-color: #fff;
-    -fx-padding: 10;
 }
 
 .currency {
@@ -11,10 +16,8 @@
 }
 
 .currency-pane {
-    -fx-border-color: #888;
-    -fx-border-width: 1;
-    -fx-border-radius: 4;
     -fx-padding: 10;
+    -fx-background-color: #fff;
 }
 
 .tag {

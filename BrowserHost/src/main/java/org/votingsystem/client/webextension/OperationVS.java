@@ -5,12 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.event.EventHandler;
-import org.votingsystem.client.webextension.dialog.CurrencyDialog;
-import org.votingsystem.client.webextension.dialog.DialogVS;
-import org.votingsystem.client.webextension.dialog.PasswordDialog;
-import org.votingsystem.client.webextension.dialog.ProgressDialog;
+import org.votingsystem.client.webextension.dialog.*;
 import org.votingsystem.client.webextension.pane.DocumentVSBrowserPane;
-import org.votingsystem.client.webextension.pane.WalletPane;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.service.InboxService;
 import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
@@ -466,7 +462,7 @@ public class OperationVS implements PasswordDialog.Listener {
                 processOperationWithPassword(ContextVS.getMessage("newCertPasswDialogMsg"));
                 break;
             case WALLET_OPEN:
-                WalletPane.show();
+                WalletDialog.showDialog();
                 break;
             case WALLET_SAVE:
                 saveWallet();
