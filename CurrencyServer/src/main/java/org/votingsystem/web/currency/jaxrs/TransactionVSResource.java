@@ -25,7 +25,6 @@ import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
-import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -80,15 +79,15 @@ public class TransactionVSResource {
         try {
             if(transactionvsType != null) transactionTypeList = Arrays.asList(TransactionVS.Type.valueOf(transactionvsType));
         } catch(Exception ex) {}
-        Query query = dao.getEM().createQuery("select t from TransactionVS t where t.transactionParent is null and t.type in :inList")
-                .setParameter("inList", transactionTypeList).setMaxResults(max).setFirstResult(offset);
-        List<TransactionVS> transactionList = query.getResultList();
-        query = dao.getEM().createQuery("select COUNT(t) from TransactionVS t where t.transactionParent is null");
-        long totalCount = (long) query.getSingleResult();
+        Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(TransactionVS.class);
+        criteria.add(Restrictions.isNull("transactionParent"));
+        criteria.add(Restrictions.in("type", transactionTypeList));
+        List<TransactionVS> transactionList = criteria.setFirstResult(offset).setMaxResults(max).list();
         List<TransactionVSDto> resultList = new ArrayList<>();
         for(TransactionVS transactionVS : transactionList) {
             resultList.add(transactionVSBean.getTransactionDto(transactionVS));
         }
+        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }
@@ -118,8 +117,7 @@ public class TransactionVSResource {
                 transactionType = TransactionVS.Type.valueOf(transactionvsType);
             else transactionType = TransactionVS.Type.valueOf(searchText);} catch(Exception ex) {}
         try {amount = new BigDecimal(searchText);} catch(Exception ex) {}
-        Session session = dao.getEM().unwrap(Session.class);
-        Criteria criteria = session.createCriteria(TransactionVS.class);
+        Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(TransactionVS.class);
         criteria.add(Restrictions.between("dateCreated", dateFrom, dateTo));
         criteria.add(Restrictions.isNull("transactionParent"));
         Disjunction orDisjunction = Restrictions.or();
@@ -130,12 +128,12 @@ public class TransactionVSResource {
             orDisjunction.add(Restrictions.ilike("currencyCode", "%" + searchText + "%"));
         }
         criteria.add(orDisjunction);
-        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         List<TransactionVS> transactionList = criteria.setFirstResult(offset).setMaxResults(max).list();
         List<TransactionVSDto> resultList = new ArrayList<>();
         for(TransactionVS transactionVS :  transactionList) {
             resultList.add(transactionVSBean.getTransactionDto(transactionVS));
         }
+        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }

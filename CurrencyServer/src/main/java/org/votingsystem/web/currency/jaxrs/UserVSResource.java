@@ -79,9 +79,7 @@ public class UserVSResource {
                 req.getParameter("searchFrom"));} catch(Exception ex) { dateFrom = timePeriod.getDateFrom();}
         if(req.getParameter("searchTo") != null) try {dateTo = DateUtils.getDateFromString(
                 req.getParameter("searchTo"));} catch(Exception ex) {dateTo = timePeriod.getDateTo();}
-
-        Session session = dao.getEM().unwrap(Session.class);
-        Criteria criteria = session.createCriteria(UserVS.class);
+        Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(UserVS.class);
         criteria.add(Restrictions.eq("type", userType));
         criteria.add(Restrictions.eq("state", userState));
         if(searchText != null) {
@@ -95,12 +93,12 @@ public class UserVSResource {
         if(dateFrom != null && dateTo != null) {
             criteria.add(Restrictions.between("dateCreated", dateFrom, dateTo));
         }
-        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         List<UserVS> userList = criteria.setFirstResult(offset).setMaxResults(max).list();
         List<UserVSDto> resultList = new ArrayList<>();
         for(UserVS userVS :  userList) {
             resultList.add(userVSBean.getUserVSDto(userVS, false));
         }
+        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaTypeVS.JSON).build();
     }
@@ -199,8 +197,7 @@ public class UserVSResource {
         if(searchText != null) {
             SubscriptionVS.State state = SubscriptionVS.State.ACTIVE;
             try {state = SubscriptionVS.State.valueOf(groupVSState);} catch(Exception ex) {}
-            Session session = dao.getEM().unwrap(Session.class);
-            Criteria criteria = session.createCriteria(SubscriptionVS.class).createAlias("userVS", "user");;
+            Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(SubscriptionVS.class).createAlias("userVS", "user");;
             criteria.add(Restrictions.eq("groupVS", groupVS));
             criteria.add(Restrictions.eq("state", state));
             criteria.add(Restrictions.eq("user.state", UserVS.State.ACTIVE));
@@ -211,12 +208,12 @@ public class UserVSResource {
                 Criterion rest4= Restrictions.ilike("user.nif", "%" + searchText + "%");
                 criteria.add(Restrictions.or(rest1, rest2, rest3, rest4));
             }
-            long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
             List<SubscriptionVS> subscriptionList = criteria.setFirstResult(offset).setMaxResults(max).list();
             List<UserVSDto> resultList = new ArrayList<>();
             for(SubscriptionVS subscriptionVS : subscriptionList) {
                 resultList.add(userVSBean.getUserVSDto(subscriptionVS.getUserVS(), false));
             }
+            long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
             ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         } else return Response.status(Response.Status.BAD_REQUEST).entity("missing 'searchText'").build();

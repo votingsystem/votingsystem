@@ -1,5 +1,10 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.votingsystem.dto.CertificateVSDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.model.CertificateVS;
@@ -97,30 +102,20 @@ public class CertificateVSResource {
         String contentType = req.getContentType() != null ? req.getContentType(): "";
         CertificateVS.Type type = CertificateVS.Type.valueOf(typeStr);
         CertificateVS.State state = CertificateVS.State.valueOf(stateStr);
-        Query query;
-        Long totalCount = null;
-        if(searchText == null) {
-            query = dao.getEM().createQuery("select count(c) from CertificateVS c where c.type =:type and c.state =:state")
-                    .setParameter("type", type).setParameter("state", state);
-            totalCount = (long) query.getSingleResult();
-            query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type and c.state =:state")
-                    .setParameter("type", type).setParameter("state", state)
-                    .setFirstResult(offset).setMaxResults(max);;
-        } else {
-            query = dao.getEM().createQuery("select count (c) from CertificateVS c where c.type =:type and c.state =:state " +
-                    "and (c.userVS.name like :searchText or c.userVS.nif like :searchText " +
-                    "or c.userVS.firstName like :searchText or c.userVS.lastName like :searchText " +
-                    "or c.userVS.description like :searchText)").setParameter("type", type)
-                    .setParameter("state", state).setParameter("searchText", "%" + searchText + "%");
-            totalCount = (long) query.getSingleResult();
-            query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type and c.state =:state " +
-                    "and (c.userVS.name like :searchText or c.userVS.nif like :searchText " +
-                    "or c.userVS.firstName like :searchText or c.userVS.lastName like :searchText " +
-                    "or c.userVS.description like :searchText)").setParameter("type", type)
-                    .setParameter("state", state).setParameter("searchText", "%" + searchText + "%")
-                    .setFirstResult(offset).setMaxResults(max);;
+        Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(CertificateVS.class)
+                .createAlias("userVS", "user");
+        criteria.add(Restrictions.eq("state", state));
+        criteria.add(Restrictions.eq("type", type));
+        if(searchText != null) {
+            Criterion rest1= Restrictions.ilike("user.name", "%" + searchText + "%");
+            Criterion rest2= Restrictions.ilike("user.firstName", "%" + searchText + "%");
+            Criterion rest3= Restrictions.ilike("user.lastName", "%" + searchText + "%");
+            Criterion rest4= Restrictions.ilike("user.description", "%" + searchText + "%");
+            Criterion rest5= Restrictions.ilike("user.nif", "%" + searchText + "%");
+            criteria.add(Restrictions.or(rest1, rest2, rest3, rest4, rest5));
         }
-        List<CertificateVS> certificates = query.getResultList();
+        List<CertificateVS> certificates = criteria.setFirstResult(offset).setMaxResults(max).list();
+        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         if(contentType.contains("pem")) {
             List<X509Certificate> resultList = new ArrayList<>();
             for(CertificateVS certificateVS : certificates) {
