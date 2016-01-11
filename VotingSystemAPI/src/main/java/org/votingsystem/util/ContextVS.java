@@ -228,6 +228,7 @@ public class ContextVS {
     }
 
     public static ContextVS getInstance() {
+        if(INSTANCE == null) INSTANCE = new ContextVS(null, null);
         return INSTANCE; 
     }
 
