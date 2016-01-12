@@ -55,29 +55,31 @@ public class BrowserHost extends Application {
             log.info("waiting for browser messages");
             try {
                 byte[] messagePart = null;
+                ByteBuffer buffer = null;
+                ReadableByteChannel channel = null;
                 while(true) {
-                    ByteBuffer buf = ByteBuffer.allocate(MAX_MESSAGE_SIZE);
-                    ReadableByteChannel channel = Channels.newChannel(System.in);
-                    channel.read(buf);
-                    buf.flip();
+                    buffer = ByteBuffer.allocate(MAX_MESSAGE_SIZE);
+                    channel = Channels.newChannel(System.in);
+                    channel.read(buffer);
+                    buffer.flip();
                     byte[] bytes = null;
                     if(messagePart != null) {
-                        bytes = new byte[messagePart.length + buf.limit()];
+                        bytes = new byte[messagePart.length + buffer.limit()];
                         System.arraycopy(messagePart, 0, bytes, 0, messagePart.length);
-                        System.arraycopy(buf.array(), 0, bytes, messagePart.length, buf.limit());
+                        System.arraycopy(buffer.array(), 0, bytes, messagePart.length, buffer.limit());
                     } else {
-                        bytes = Arrays.copyOfRange(buf.array(), 4, buf.limit());
+                        bytes = Arrays.copyOfRange(buffer.array(), 4, buffer.limit());
                     }
                     try {
                         JSON.getMapper().readValue(bytes, OperationVS.class).initProcess();
                         messagePart = null;
                     } catch (JsonMappingException ex) {
                         log.info("--- message broken waiting for part---");
-                        if(messagePart == null) messagePart = Arrays.copyOfRange(buf.array(), 4, buf.limit());
+                        if(messagePart == null) messagePart = Arrays.copyOfRange(buffer.array(), 4, buffer.limit());
                         else {
-                            byte[] messageSumParts = new byte[messagePart.length  +  buf.limit()];
+                            byte[] messageSumParts = new byte[messagePart.length  +  buffer.limit()];
                             System.arraycopy(messagePart, 0, messageSumParts, 0, messagePart.length);
-                            System.arraycopy(buf.array(), 0, messageSumParts, messagePart.length, buf.limit());
+                            System.arraycopy(buffer.array(), 0, messageSumParts, messagePart.length, buffer.limit());
                             messagePart = messageSumParts;
                         }
                     } catch (Exception ex) {

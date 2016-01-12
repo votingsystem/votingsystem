@@ -202,10 +202,10 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
             try {
                 countDownLatch = new CountDownLatch(1);
                 DeviceVS deviceVS = device.getDeviceVS();
-                WebSocketAuthenticatedService.getInstance().sendMessage(SocketMessageDto.getCurrencyWalletChangeRequest(
-                        deviceVS, Arrays.asList(currency)).toString());
+                SocketMessageDto dto = SocketMessageDto.getCurrencyWalletChangeRequest(
+                        deviceVS, Arrays.asList(currency));
+                WebSocketAuthenticatedService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(dto));
                 countDownLatch.await();
-                WebSocketSession webSocketSession = ContextVS.getInstance().getWSSession(deviceVS.getId());
             } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
             return null;
         }

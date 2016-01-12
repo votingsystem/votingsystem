@@ -2,8 +2,8 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
@@ -19,6 +19,7 @@ import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
+import org.votingsystem.web.util.DAOUtils;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -93,9 +94,9 @@ public class EventVSElectionResource {
         }
         Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(EventVSElection.class);
         criteria.add(Restrictions.in("state", inList));
-        criteria.addOrder(Property.forName("dateBegin").desc());
+        criteria.addOrder(Order.desc("dateBegin"));
         List<EventVSElection> resultList = criteria.setFirstResult(offset).setMaxResults(max).list();
-        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
+        long totalCount = ((Number)DAOUtils.cleanOrderings(criteria).setProjection(Projections.rowCount()).uniqueResult()).longValue();
         List<EventVSDto> eventVSListDto = new ArrayList<>();
         for(EventVSElection eventVSElection : resultList) {
             eventVSBean.checkEventVSDates(eventVSElection);
