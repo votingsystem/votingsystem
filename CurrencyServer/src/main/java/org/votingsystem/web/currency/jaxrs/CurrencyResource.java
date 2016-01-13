@@ -33,6 +33,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -88,8 +89,8 @@ public class CurrencyResource {
 
     @Path("/bundleState")
     @POST @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
-    public Response bundleState(List<String> hashCertVSList) throws Exception {
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyBean.checkBundleState(hashCertVSList))).build();
+    public Response bundleState(Set<String> hashSet) throws Exception {
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyBean.checkBundleState(hashSet))).build();
     }
 
     @GET @Produces(MediaType.APPLICATION_JSON)

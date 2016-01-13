@@ -26,6 +26,11 @@ public class CurrencyStateDto {
 
     public CurrencyStateDto() {}
 
+    public CurrencyStateDto(String hashCertVS, Currency.State state) {
+        this.hashCertVS = hashCertVS;
+        this.state = state;
+    }
+
     public CurrencyStateDto(Currency currency) throws Exception {
         hashCertVS = currency.getHashCertVS();
         if(currency.getCurrencyBatch() != null) batchId = currency.getCurrencyBatch().getId();
@@ -38,12 +43,6 @@ public class CurrencyStateDto {
         state = currency.getState();
         type = currency.getType();
         this.dateCreated = currency.getDateCreated();
-    }
-
-    public static CurrencyStateDto UNKNOWN() {
-        CurrencyStateDto currencyStateDto = new CurrencyStateDto();
-        currencyStateDto.state = Currency.State.UNKNOWN;
-        return currencyStateDto;
     }
 
     @JsonIgnore

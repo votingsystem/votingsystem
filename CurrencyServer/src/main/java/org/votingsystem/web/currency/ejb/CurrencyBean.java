@@ -175,10 +175,10 @@ public class CurrencyBean {
         return resultListDto;
     }
 
-    public Map<String, CurrencyStateDto> checkBundleState(List<String> hashCertVSList) throws Exception {
-        Map<String, CurrencyStateDto> result = new HashMap<>();
+    public Set<CurrencyStateDto> checkBundleState(Set<String> hashSet) throws Exception {
+        Set<CurrencyStateDto> result = new HashSet<>();
         Query query = dao.getEM().createQuery("SELECT c FROM Currency c WHERE c.hashCertVS =:hashCertVS");
-        for(String hashCertVS : hashCertVSList) {
+        for(String hashCertVS : hashSet) {
             query.setParameter("hashCertVS", hashCertVS);
             Currency currency = dao.getSingleResult(Currency.class, query);
             if(currency != null) {
@@ -192,8 +192,8 @@ public class CurrencyBean {
                         log.log(Level.SEVERE, ex.getMessage(), ex);
                     }
                 }
-                result.put(hashCertVS, currencyStateDto);
-            } else result.put(hashCertVS, CurrencyStateDto.UNKNOWN());
+                result.add(currencyStateDto);
+            } else result.add(new CurrencyStateDto(hashCertVS, Currency.State.UNKNOWN));
         }
         return result;
     }
