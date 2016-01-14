@@ -416,8 +416,7 @@ public class Encryptor {
         if(recipientInfo.getRID() != null) {
             fileRecipientId = recipientInfo.getRID();
         }
-        byte[] result = recipientInfo.getContent(recipient);
-        return result;
+        return recipientInfo.getContent(recipient);
     }
 
     public static EncryptedBundle pbeAES_Encrypt(char[] password, byte[] bytesToEncrypt) throws NoSuchAlgorithmException,

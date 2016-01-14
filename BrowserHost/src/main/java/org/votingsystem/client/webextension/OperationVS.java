@@ -26,7 +26,6 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.*;
-import org.votingsystem.util.currency.Wallet;
 
 import java.io.File;
 import java.io.IOException;
@@ -254,8 +253,8 @@ public class OperationVS implements PasswordDialog.Listener {
     public void processOperationWithPassword(final String passwordDialogMessage) {
         if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
             PlatformImpl.runAndWait(() ->
-                    PasswordDialog.showWithoutPasswordConfirm(operation, this, passwordDialogMessage));
-        } else processPassword(operation, null);
+                    PasswordDialog.showWithoutPasswordConfirm(this, passwordDialogMessage));
+        } else processPassword(null);
     }
 
     private String getOperationMessage() {
@@ -266,17 +265,17 @@ public class OperationVS implements PasswordDialog.Listener {
     }
 
     public void saveWallet() {
-        PasswordDialog.showWithoutPasswordConfirm(TypeVS.WALLET_SAVE, this, ContextVS.getMessage("walletPinMsg"));
+        PasswordDialog.showWithoutPasswordConfirm(this, ContextVS.getMessage("walletPinMsg"));
     }
 
     @Override
-    public void processPassword(TypeVS passwordType, char[] password) {
+    public void processPassword(char[] password) {
         this.password = password;
         try {
-            switch (passwordType) {
+            switch (operation) {
                 case WALLET_SAVE:
                     try {
-                        Wallet.getWallet(password);
+                        BrowserHost.getInstance().loadWallet(password);
                         BrowserHost.sendMessageToBrowser(MessageDto.SIGNAL(ResponseVS.SC_OK, "vs-wallet-save"));
                         InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
                     } catch (WalletException wex) {
@@ -303,9 +302,6 @@ public class OperationVS implements PasswordDialog.Listener {
                     break;
                 case CURRENCY_REQUEST:
                     ProgressDialog.show(new CurrencyRequestTask(this, getOperationMessage(), password), null);
-                    break;
-                case CURRENCY_DELETE:
-                    ProgressDialog.show(new CurrencyDeleteTask(this, getOperationMessage(), password), null);
                     break;
                 case REPRESENTATIVE_SELECTION:
                     RepresentativeDelegationDto delegationDto = getDocumentToSign(RepresentativeDelegationDto.class);
@@ -336,7 +332,7 @@ public class OperationVS implements PasswordDialog.Listener {
     }
 
     @Override
-    public void cancelPassword(TypeVS passwordType) {
+    public void cancelPassword() {
         processResult(new ResponseVS(ResponseVS.SC_CANCELED, ContextVS.getMessage("operationCancelledMsg")));
         BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
     }
@@ -355,23 +351,20 @@ public class OperationVS implements PasswordDialog.Listener {
             ResponseVS responseVS;
             switch (operation) {
                 case SEND_VOTE:
-                    responseVS = Utils.checkServer(serverURL.trim());
-                    responseVS = Utils.checkServer(ContextVS.getInstance().getAccessControl().getControlCenter().getServerURL());
-                    break;
-                case CURRENCY_DELETE:
-                    responseVS = new ResponseVS(ResponseVS.SC_OK);
+                    responseVS = ContextVS.getInstance().checkServer(serverURL.trim());
+                    responseVS = ContextVS.getInstance().checkServer(ContextVS.getInstance().getAccessControl().getControlCenter().getServerURL());
                     break;
                 case CONNECT:
                     if(ContextVS.getInstance().getCurrencyServer() == null) {
                         if(serverURL == null) serverURL = ContextVS.getMessage("defaultCurrencyServer");
-                        responseVS = Utils.checkServer(serverURL.trim());
+                        responseVS = ContextVS.getInstance().checkServer(serverURL.trim());
                     } else responseVS = new ResponseVS(ResponseVS.SC_OK);
                     break;
                 case INIT_SERVER:
-                    responseVS = Utils.checkServer(serverURL.trim());
+                    responseVS = ContextVS.getInstance().checkServer(serverURL.trim());
                     break;
                 default:
-                    responseVS = Utils.checkServer(serverURL.trim());
+                    responseVS = ContextVS.getInstance().checkServer(serverURL.trim());
             }
             return responseVS;
         });

@@ -14,7 +14,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Window;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
-import org.votingsystem.client.webextension.service.EventBusService;
 import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
@@ -27,6 +26,7 @@ import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.*;
 
@@ -75,7 +75,7 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
     private Runnable statusChecker = new Runnable() {
         @Override public void run() {
             try {
-                ResponseVS responseVS = Utils.checkServer(currency.getCurrencyServerURL());
+                ResponseVS responseVS = ContextVS.getInstance().checkServer(currency.getCurrencyServerURL());
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     currencyServer = (CurrencyServer) responseVS.getData();
                     responseVS = HttpHelper.getInstance().getData(

@@ -23,7 +23,6 @@ import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.TypeVS;
 
 import java.io.File;
 import java.security.KeyStore;
@@ -34,7 +33,7 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Listener, PasswordDialog.Listener {
+public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Listener {
 
     private static Logger log = Logger.getLogger(SettingsDialog.class.getSimpleName());
 
@@ -189,8 +188,25 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         log.info("validateForm");
         if(signWithKeystoreRb.isSelected()) {
             if(selectedKeyStore != null) {
-                PasswordDialog.showWithPasswordConfirm(TypeVS.KEYSTORE_SELECT, this,
-                        ContextVS.getMessage("newKeyStorePasswordMsg"));
+                PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
+                    @Override public void processPassword(char[] password) {
+                        try {
+                            UserVS userVS = ContextVS.getInstance().saveUserKeyStore(selectedKeyStore, password);
+                            CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
+                                    userVS.getCertificate(), ContextVS.DEVICEVS_OID);
+                            deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
+                            deviceVSDto.setType(CryptoTokenVS.JKS_KEYSTORE);
+                            deviceVSDto.setDeviceName(userVS.getNif() + " - " + userVS.getName());
+                            close();
+                        } catch (Exception ex) {
+                            log.log(Level.SEVERE, ex.getMessage(), ex);
+                            BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                        }
+                    }
+                    @Override public void cancelPassword() { }
+                };
+
+                PasswordDialog.showWithPasswordConfirm(passwordListener, ContextVS.getMessage("newKeyStorePasswordMsg"));
                 return;
             }
             if(selectedKeyStore == null && BrowserSessionService.getInstance().getKeyStoreUserVS() == null) {
@@ -225,26 +241,5 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         signWithKeystoreRb.setSelected(true);
         signWithMobileRb.setSelected(false);
     }
-
-    @Override public void processPassword(TypeVS passwordType, char[] password) {
-        switch (passwordType) {
-            case KEYSTORE_SELECT:
-                try {
-                    UserVS userVS = ContextVS.getInstance().saveUserKeyStore(selectedKeyStore, password);
-                    CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
-                            userVS.getCertificate(), ContextVS.DEVICEVS_OID);
-                    deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
-                    deviceVSDto.setType(CryptoTokenVS.JKS_KEYSTORE);
-                    deviceVSDto.setDeviceName(userVS.getNif() + " - " + userVS.getName());
-                    close();
-                } catch (Exception ex) {
-                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                    BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                }
-                break;
-        }
-    }
-
-    @Override public void cancelPassword(TypeVS passwordType) {  }
 
 }

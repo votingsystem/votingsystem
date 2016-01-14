@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
+import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
@@ -19,7 +20,6 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
 
 import javax.mail.Session;
-import javax.swing.*;
 import java.io.*;
 import java.security.KeyStore;
 import java.security.Security;
@@ -326,6 +326,44 @@ public class ContextVS {
     }
 
 
+    public ResponseVS<ActorVS> checkServer(String serverURL) throws Exception {
+        log.info(" - checkServer: " + serverURL);
+        ActorVS actorVS = null;
+        if(currencyServer != null && currencyServer.getServerURL().equals(serverURL)) actorVS = currencyServer;
+        if(accessControl != null && accessControl.getServerURL().equals(serverURL)) actorVS = accessControl;
+        if(controlCenter != null && controlCenter.getServerURL().equals(serverURL)) actorVS = controlCenter;
+        if (actorVS == null) {
+            String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
+            ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
+            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                actorVS = ((ActorVSDto) responseVS.getMessage(ActorVSDto.class)).getActorVS();
+                responseVS.setData(actorVS);
+                log.log(Level.INFO,"checkServer - adding " + serverURL.trim() + " to sever map");
+                switch (actorVS.getType()) {
+                    case ACCESS_CONTROL:
+                        ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
+                        break;
+                    case CURRENCY:
+                        ContextVS.getInstance().setCurrencyServer((CurrencyServer) actorVS);
+                        ContextVS.getInstance().setTimeStampServerCert(actorVS.getTimeStampCert());
+                        break;
+                    case CONTROL_CENTER:
+                        ContextVS.getInstance().setControlCenter((ControlCenterVS) actorVS);
+                        break;
+                    default:
+                        log.info("Unprocessed actor:" + actorVS.getType());
+                }
+            } else if (ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
+                responseVS.setMessage(ContextVS.getMessage("serverNotFoundMsg", serverURL.trim()));
+            }
+            return responseVS;
+        } else {
+            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
+            responseVS.setData(actorVS);
+            return responseVS;
+        }
+    }
+
     public void putWSSession(String UUID, WebSocketSession session) {
         sessionMap.put(UUID, session.setUUID(UUID));
     }
@@ -519,14 +557,6 @@ public class ContextVS {
         else if(server instanceof AccessControlVS) setAccessControl((AccessControlVS) server);
         else if(server instanceof ControlCenterVS) setControlCenter((ControlCenterVS) server);
         else log.log(Level.SEVERE, "setServer - unknown server type: " + server.getType() + " - class: " + server.getClass().getSimpleName());
-    }
-
-    public ActorVS checkServer(String serverURL) {
-        if(currencyServer != null && currencyServer.getServerURL().equals(serverURL)) return currencyServer;
-        if(accessControl != null && accessControl.getServerURL().equals(serverURL)) return accessControl;
-        if(controlCenter != null && controlCenter.getServerURL().equals(serverURL)) return controlCenter;
-        log.info("checkServer - serverURL: '" + serverURL + "' not found");
-        return null;
     }
 
     public void setDefaultServer(ActorVS server) {

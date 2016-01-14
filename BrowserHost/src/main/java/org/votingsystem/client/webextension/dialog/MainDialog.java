@@ -16,11 +16,11 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.pane.DecoratedPane;
-import org.votingsystem.client.webextension.service.EventBusService;
 import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 
@@ -99,7 +99,7 @@ public class MainDialog {
             if(isConnected.get()) {
                 Button optionButton = new Button(ContextVS.getMessage("disconnectLbl"));
                 optionButton.setOnAction(event1 -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false));
-                BrowserHost.showMessage(ContextVS.getMessage("disconnectMsg"), optionButton);
+                BrowserHost.showMessage(null, ContextVS.getMessage("disconnectMsg"), optionButton, null);
             } else {
                 OperationVS operationVS = new OperationVS();
                 try {

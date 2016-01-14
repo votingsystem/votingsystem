@@ -1,4 +1,4 @@
-package org.votingsystem.client.webextension.service;
+package org.votingsystem.service;
 
 import com.google.common.eventbus.EventBus;
 

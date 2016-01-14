@@ -15,6 +15,7 @@ import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.ContextVS;
@@ -41,7 +42,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class InboxService implements PasswordDialog.Listener {
+public class InboxService {
 
     private static Logger log = Logger.getLogger(InboxService.class.getSimpleName());
 
@@ -56,6 +57,27 @@ public class InboxService implements PasswordDialog.Listener {
     private Button inboxButton;
     private PasswordDialog passwordDialog;
     private AtomicBoolean isPasswordVisible = new AtomicBoolean(false);
+
+    private PasswordDialog.Listener currencyWalletChangePasswordListener = new PasswordDialog.Listener() {
+        @Override public void processPassword(char[] password) {
+            try {
+                BrowserHost.getInstance().saveToWallet(currentMessage.getWebSocketMessage().getCurrencySet(), password);
+                EventBusService.getInstance().post(currentMessage.setState(InboxMessage.State.PROCESSED));
+                removeMessage(currentMessage);
+                SocketMessageDto messageDto = currentMessage.getWebSocketMessage();
+                Long deviceFromId = BrowserSessionService.getInstance().getConnectedDevice().getId();
+                String socketMsgStr = JSON.getMapper().writeValueAsString(messageDto.
+                        getResponse(ResponseVS.SC_OK, null, deviceFromId, messageDto.getOperation()));
+                WebSocketAuthenticatedService.getInstance().sendMessage(socketMsgStr);
+            } catch (WalletException wex) {
+                Utils.showWalletNotFoundMessage();
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+                BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+            }
+        }
+        @Override public void cancelPassword() { }
+    };
 
     public static InboxService getInstance() {
         return INSTANCE;
@@ -106,7 +128,28 @@ public class InboxService implements PasswordDialog.Listener {
                 if (pinDialogMessage == null) dialogMessage = ContextVS.getMessage("messageToDevicePasswordMsg");
                 Integer visibilityInSeconds = null;
                 if(isTimeLimited) visibilityInSeconds = TIME_LIMITED_MESSAGE_LIVE;
-                PasswordDialog.showWithoutPasswordConfirm(TypeVS.MESSAGEVS, this, dialogMessage, visibilityInSeconds);
+                PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
+                    @Override public void processPassword(char[] password) {
+                        try {
+                            KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password);
+                            PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
+                                    password);
+                            ProgressDialog.show(new InboxDecryptTask(privateKey, timeLimitedInboxMessage),
+                                    ContextVS.getMessage("decryptingMessagesMsg"));
+                        } catch (Exception ex) {
+                            log.log(Level.SEVERE, ex.getMessage(), ex);
+                            BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
+                        }
+                        timeLimitedInboxMessage = null;
+                        isPasswordVisible.set(false);
+                    }
+                    @Override public void cancelPassword() {
+                        InboxDialog.showDialog();
+                        timeLimitedInboxMessage = null;
+                        isPasswordVisible.set(false);
+                    }
+                };
+                PasswordDialog.showWithoutPasswordConfirm(passwordListener, dialogMessage, visibilityInSeconds);
             } else BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("messageToDeviceService") +
                     " - " + ContextVS.getMessage("jksRequiredMsg"));
         });
@@ -136,8 +179,7 @@ public class InboxService implements PasswordDialog.Listener {
                 break;
             case CURRENCY_WALLET_CHANGE:
                 currentMessage = inboxMessage;
-                PasswordDialog.showWithoutPasswordConfirm(TypeVS.CURRENCY_WALLET_CHANGE, this,
-                        ContextVS.getMessage("walletPinMsg"));
+                PasswordDialog.showWithoutPasswordConfirm(currencyWalletChangePasswordListener, ContextVS.getMessage("walletPinMsg"));
                 break;
             default:
                 log.log(Level.SEVERE, "newMessage - unprocessed message: " + inboxMessage.getTypeVS());
@@ -179,15 +221,28 @@ public class InboxService implements PasswordDialog.Listener {
         currentMessage = inboxMessage;
         switch(inboxMessage.getTypeVS()) {
             case CURRENCY_WALLET_CHANGE:
-                PasswordDialog.showWithoutPasswordConfirm(TypeVS.CURRENCY_WALLET_CHANGE, this,
-                        ContextVS.getMessage("walletPinMsg"));
+                PasswordDialog.showWithoutPasswordConfirm(currencyWalletChangePasswordListener, ContextVS.getMessage("walletPinMsg"));
                 break;
             case MESSAGEVS:
                 String msg = MsgUtils.getWebSocketFormattedMessage(inboxMessage);
                 BrowserHost.showMessage(msg, ContextVS.getMessage("messageLbl"));
                 break;
             case CURRENCY_IMPORT:
-                PasswordDialog.showWithoutPasswordConfirm(TypeVS.CURRENCY_IMPORT, this, ContextVS.getMessage("walletPinMsg"));
+                PasswordDialog.Listener listener = new PasswordDialog.Listener() {
+                    @Override public void processPassword(char[] password) {
+                        try {
+                            BrowserHost.getInstance().loadWallet(password);
+                            removeMessage(currentMessage);
+                        } catch (WalletException wex) {
+                            Utils.showWalletNotFoundMessage();
+                        } catch (Exception ex) {
+                            log.log(Level.SEVERE, ex.getMessage(), ex);
+                            BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                        }
+                    }
+                    @Override public void cancelPassword() { }
+                };
+                PasswordDialog.showWithoutPasswordConfirm(listener, ContextVS.getMessage("walletPinMsg"));
                 break;
             case MESSAGEVS_TO_DEVICE:
                 showPasswordDialog(ContextVS.getMessage("decryptMsgLbl"), inboxMessage.isTimeLimited());
@@ -230,62 +285,4 @@ public class InboxService implements PasswordDialog.Listener {
         InboxDialog.showDialog();
     }
 
-    @Override public void processPassword(TypeVS passwordType, char[] password) {
-        switch (passwordType) {
-            case MESSAGEVS:
-                try {
-                    KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password);
-                    PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
-                            password);
-                    ProgressDialog.show(new InboxDecryptTask(privateKey, timeLimitedInboxMessage),
-                            ContextVS.getMessage("decryptingMessagesMsg"));
-                } catch (Exception ex) {
-                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                    BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("cryptoTokenPasswdErrorMsg"));
-                }
-                timeLimitedInboxMessage = null;
-                isPasswordVisible.set(false);
-                break;
-            case CURRENCY_IMPORT:
-                try {
-                    Wallet.getWallet(password);
-                    removeMessage(currentMessage);
-                } catch (WalletException wex) {
-                    Utils.showWalletNotFoundMessage();
-                } catch (Exception ex) {
-                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                    BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                }
-                break;
-            case CURRENCY_WALLET_CHANGE:
-                try {
-                    Wallet.saveToWallet(currentMessage.getWebSocketMessage().getCurrencySet(), password);
-                    EventBusService.getInstance().post(currentMessage.setState(InboxMessage.State.PROCESSED));
-                    removeMessage(currentMessage);
-                    SocketMessageDto messageDto = currentMessage.getWebSocketMessage();
-                    Long deviceFromId = BrowserSessionService.getInstance().getConnectedDevice().getId();
-                    String socketMsgStr = JSON.getMapper().writeValueAsString(messageDto.
-                            getResponse(ResponseVS.SC_OK, null, deviceFromId, messageDto.getOperation()));
-                    WebSocketAuthenticatedService.getInstance().sendMessage(socketMsgStr);
-                } catch (WalletException wex) {
-                    Utils.showWalletNotFoundMessage();
-                } catch (Exception ex) {
-                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                    BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                }
-                break;
-            default:log.info("unknown passwordType: " + passwordType);
-        }
-    }
-
-    @Override
-    public void cancelPassword(TypeVS passwordType) {
-        switch (passwordType) {
-            case MESSAGEVS:
-                InboxDialog.showDialog();
-                timeLimitedInboxMessage = null;
-                isPasswordVisible.set(false);
-                break;
-        }
-    }
 }

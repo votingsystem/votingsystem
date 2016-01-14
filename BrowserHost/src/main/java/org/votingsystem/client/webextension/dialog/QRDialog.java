@@ -13,12 +13,12 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.pane.DocumentVSBrowserPane;
-import org.votingsystem.client.webextension.service.EventBusService;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
@@ -54,9 +54,8 @@ public class QRDialog extends DialogVS {
                             TransactionVSDto transactionDto = qrDto.getData();
                             SMIMEMessage smimeMessage = socketMsg.getSMIME();
                             String result = transactionDto.validateReceipt(smimeMessage, true);
-                            Button openReceiptButton = new Button();
-                            openReceiptButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
-                            openReceiptButton.setText(ContextVS.getMessage("openReceiptLbl"));
+                            Button openReceiptButton = Utils.createButton(ContextVS.getMessage("openReceiptLbl"),
+                                    Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
                             openReceiptButton.setOnAction(event -> {
                                 try {
                                     DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(
@@ -69,17 +68,16 @@ public class QRDialog extends DialogVS {
                             });
                             Platform.runLater(() -> { hide(); });
                             if(qrDto.getTypeVS() == TypeVS.CURRENCY_CHANGE) {
-                                Button saveWalletButton = new Button();
-                                saveWalletButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.MONEY));
-                                saveWalletButton.setText(ContextVS.getMessage("saveToSecureWalletMsg"));
-                                saveWalletButton.setOnAction(event -> {
-                                    new OperationVS().saveWallet();
-                                });
+                                Button saveWalletButton = Utils.createButton(ContextVS.getMessage("saveToSecureWalletMsg"),
+                                        Utils.getIcon(FontAwesome.Glyph.MONEY));
+                                saveWalletButton.setOnAction(event -> new OperationVS().saveWallet());
                                 VBox buttonsVBox = new VBox(10);
                                 buttonsVBox.getChildren().addAll(openReceiptButton, saveWalletButton);
-                                BrowserHost.showMessage(result, buttonsVBox, mainPane.getScene().getWindow());
+                                BrowserHost.showMessage(ContextVS.getMessage("currencyChangeSubject"), result,
+                                        buttonsVBox, mainPane.getScene().getWindow());
                             } else {
-                                BrowserHost.showMessage(result, openReceiptButton, mainPane.getScene().getWindow());
+                                BrowserHost.showMessage(socketMsg.getOperation().toString().toLowerCase(), result,
+                                        openReceiptButton, mainPane.getScene().getWindow());
                             }
                         }
                     } catch (Exception ex) {

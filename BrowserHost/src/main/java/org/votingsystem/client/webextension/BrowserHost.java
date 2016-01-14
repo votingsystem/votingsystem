@@ -3,15 +3,18 @@ package org.votingsystem.client.webextension;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.dialog.MainDialog;
 import org.votingsystem.client.webextension.dialog.MessageDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.util.MsgUtils;
+import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.model.ResponseVS;
@@ -19,6 +22,8 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.currency.CurrencyCheckResponse;
+import org.votingsystem.util.currency.Wallet;
 
 import java.io.File;
 import java.net.URI;
@@ -26,10 +31,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.util.stream.Collectors.toSet;
 
 public class BrowserHost extends Application {
 
@@ -43,6 +50,7 @@ public class BrowserHost extends Application {
     private Map<String, String> smimeMessageMap = new HashMap<>();
     private Map<String, org.votingsystem.model.currency.Currency.State> currencyStateMap = new HashMap<>();
     private static final Map<String, QRMessageDto> qrMessagesMap = new HashMap<>();
+    private Wallet wallet;
     private Stage primaryStage;
     private String chromeExtensionId;
 
@@ -176,12 +184,10 @@ public class BrowserHost extends Application {
         PlatformImpl.runLater(() ->  new MessageDialog(getInstance().getScene().getWindow()).showMessage(statusCode, message));
     }
 
-    public static void showMessage(final String message, final Button optionButton) {
-        PlatformImpl.runLater(() -> new MessageDialog(getInstance().getScene().getWindow()).showHtmlMessage(message, optionButton));
-    }
-
-    public static void showMessage(final String message, final Parent parent, Window parentWindow) {
-        PlatformImpl.runLater(() -> new MessageDialog(parentWindow).showHtmlMessage(message, parent));
+    public static MessageDialog showMessage(final String caption, final String message, final Parent parent, final Window parentWindow) {
+        MessageDialog messageDialog = new MessageDialog(parentWindow != null ? parentWindow : getInstance().getScene().getWindow());
+        PlatformImpl.runLater(() -> messageDialog.showHtmlMessage(caption, message, parent));
+        return messageDialog;
     }
 
     public static void showMessage(final String message, final String caption) {
@@ -193,4 +199,61 @@ public class BrowserHost extends Application {
         launch(args);
     }
 
+    public Set<Currency> getWalletCurrencySet() {
+        return wallet.getCurrencySet();
+    }
+
+    public boolean isWalletLoaded() {
+        return (wallet!= null);
+    }
+
+    public void saveToWallet (Set<Currency> currencyToAddSet, char[] password) throws Exception {
+        loadWallet(password);
+        wallet.saveToWallet(currencyToAddSet, password);
+    }
+
+    public void createEmptyWallet (char[] password) {
+        try {
+            Wallet wallet = new Wallet();
+            wallet.createWallet(Collections.emptySet(), password);
+        } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
+    }
+
+    public Set<Currency> loadWallet(char[] password) throws Exception {
+        try {
+            wallet = wallet.load(password);
+            Set<Currency> currencySet = wallet.getCurrencySet();
+            Future<CurrencyCheckResponse> future = executorService.submit(() -> Wallet.validateCertVSHashSet(currencySet));
+            CurrencyCheckResponse response = future.get();
+            if(ResponseVS.SC_OK == response.getStatusCode()) {
+                return currencySet;
+            } else {
+                AtomicBoolean walletRestored = new AtomicBoolean(false);
+                if(!response.getCurrencyWithErrorSet().isEmpty()) {
+                    Button deleteButton = Utils.createButton(ContextVS.getMessage("deleteCurrencyWithErrorsLbl"),
+                            Utils.getIcon(FontAwesome.Glyph.TIMES));
+                    deleteButton.setOnAction(event -> {
+                        Set<String> hashCertToRemoveSet = response.getCurrencyWithErrorSet().stream().map(
+                                currency -> {return currency.getHashCertVS();}).collect(toSet());
+                        try {
+                            wallet.removeSet(hashCertToRemoveSet, password);
+                            walletRestored.set(true);
+                        } catch (Exception ex) {
+                            log.log(Level.SEVERE, ex.getMessage(), ex);
+                            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                        }
+                    });
+                    MessageDialog messageDialog = showMessage(ContextVS.getMessage("currencyValidationErrorlbl"),
+                            response.getErrorMessage(), deleteButton, null);
+                    messageDialog.addCloseListener(event -> {if(!walletRestored.get()) wallet = null;});
+                }
+                return null;
+            }
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            wallet = null;
+            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+            return Collections.emptySet();
+        }
+    }
 }

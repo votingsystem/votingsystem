@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CertUtils;
 
+import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
@@ -20,7 +21,10 @@ public class CurrencyStateDto {
     private Currency.State state;
     private Currency.Type type;
     private String currencyCert;
+    private String currencyCode;
     private String leftOverCert;
+    private String tag;
+    private BigDecimal amount;
     private String currencyChangeCert;
     private Date dateCreated;
 
@@ -40,8 +44,11 @@ public class CurrencyStateDto {
         } else if(currency.getX509AnonymousCert() != null) {
             currencyCert = new String(CertUtils.getPEMEncoded (currency.getX509AnonymousCert()));
         }
+        setAmount(currency.getAmount());
+        currencyCode = currency.getCurrencyCode();
         state = currency.getState();
         type = currency.getType();
+        tag = currency.getTagVS().getName();
         this.dateCreated = currency.getDateCreated();
     }
 
@@ -70,8 +77,9 @@ public class CurrencyStateDto {
         return state;
     }
 
-    public void setState(Currency.State state) {
+    public CurrencyStateDto setState(Currency.State state) {
         this.state = state;
+        return this;
     }
 
     public Currency.Type getType() {
@@ -122,4 +130,27 @@ public class CurrencyStateDto {
         this.currencyCert = currencyCert;
     }
 
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
 }

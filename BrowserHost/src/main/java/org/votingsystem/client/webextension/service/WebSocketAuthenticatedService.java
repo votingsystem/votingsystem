@@ -18,6 +18,7 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
@@ -38,7 +39,7 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WebSocketAuthenticatedService extends Service<ResponseVS> implements PasswordDialog.Listener {
+public class WebSocketAuthenticatedService extends Service<ResponseVS> {
 
     private static Logger log = Logger.getLogger(WebSocketAuthenticatedService.class.getSimpleName());
 
@@ -51,6 +52,14 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
     private Session session;
     private UserVS userVS;
     private String connectionMessage = null;
+    private PasswordDialog.Listener websocketInitPasswordListener = new PasswordDialog.Listener() {
+        @Override public void processPassword(char[] password) {
+            ProgressDialog.show(new InitSessionTask(password, targetServer), null);
+        }
+        @Override public void cancelPassword() {
+            broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
+        }
+    };
 
     private WebSocketAuthenticatedService(Collection<X509Certificate> sslServerCertCollection, ActorVS targetServer) {
         this.targetServer = targetServer;
@@ -85,24 +94,6 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                     ContextVS.getInstance().getMessage("connectionErrorMsg"));
         } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
         return instance;
-    }
-
-    @Override
-    public void processPassword(TypeVS passwordType, char[] password) {
-        switch (passwordType) {
-            case WEB_SOCKET_INIT:
-                ProgressDialog.show(new InitSessionTask(password, targetServer), null);
-                break;
-        }
-    }
-
-    @Override
-    public void cancelPassword(TypeVS passwordType) {
-        switch (passwordType) {
-            case WEB_SOCKET_INIT:
-                broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
-                break;
-        }
     }
 
     public static class EndpointConfigurator extends ClientEndpointConfig.Configurator {
@@ -166,10 +157,10 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
             return;
         }
         if(isConnectionEnabled) {
-            PasswordDialog.showWithoutPasswordConfirm(TypeVS.WEB_SOCKET_INIT, this,
+            PasswordDialog.showWithoutPasswordConfirm(websocketInitPasswordListener,
                     ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
             if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
-                PasswordDialog.showWithoutPasswordConfirm(TypeVS.WEB_SOCKET_INIT, this,
+                PasswordDialog.showWithoutPasswordConfirm(websocketInitPasswordListener,
                         ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
             } else if(CryptoTokenVS.MOBILE == BrowserSessionService.getCryptoTokenType()) {
                 ProgressDialog.show(new InitSessionTask(null, targetServer), null);
@@ -325,7 +316,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> implement
                                 currency.initSigner(socketMsg.getMessage().getBytes());
                                 qrDto.setCurrency(currency);
                                 qrDto.setTypeVS(TypeVS.CURRENCY_CHANGE);
-                                Wallet.saveToPlainWallet(Arrays.asList(currency));
+                                Wallet.saveToPlainWallet(new HashSet<>(Arrays.asList(currency)));
                             }
                             SocketMessageDto response = socketMsg.getResponse(ResponseVS.SC_OK, null,
                                     BrowserSessionService.getInstance().getConnectedDevice().getId(),

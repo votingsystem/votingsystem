@@ -22,6 +22,7 @@ import org.votingsystem.util.currency.Wallet;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -59,7 +60,7 @@ public class CurrencyRequestTask extends Task<ResponseVS> {
             ResultListDto<String> resultListDto = (ResultListDto<String>) responseVS.getMessage(
                     new TypeReference<ResultListDto<String>>(){});
             requestDto.loadCurrencyCerts(resultListDto.getResultList());
-            Wallet.saveToPlainWallet(requestDto.getCurrencyMap().values());
+            Wallet.saveToPlainWallet(new HashSet<>(requestDto.getCurrencyMap().values()));
             responseVS = new ResponseVS(responseVS.getStatusCode(), resultListDto.getMessage());
             InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"), new Date());
             inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(MapUtils.getCurrencyMap(

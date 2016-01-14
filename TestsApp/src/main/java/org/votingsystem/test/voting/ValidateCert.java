@@ -33,7 +33,7 @@ public class ValidateCert {
                 actorVS.getType().toString());
         AccessControlVS accessControlVS = (AccessControlVS)actorVS;
         ContextVS.getInstance().setAccessControl((AccessControlVS)actorVS);
-        CertValidationDto certValidationDto = CertValidationDto.validationRequest("7553172H", "C8-0A-A9-AB-47-BE");
+        CertValidationDto certValidationDto = CertValidationDto.validationRequest("7553172H", "000000000000000");
         SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService(
                 "07553172H", UserVS.Type.USER);
         UserVS fromUserVS = superUserSignatureService.getUserVS();

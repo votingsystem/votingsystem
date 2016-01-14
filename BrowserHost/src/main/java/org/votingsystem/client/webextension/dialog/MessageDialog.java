@@ -73,7 +73,7 @@ public class MessageDialog extends DialogVS {
         show();
     }
 
-    public void showHtmlMessage(String htmlMessage, Parent parent) {
+    public void showHtmlMessage(String caption, String htmlMessage, Parent parent) {
         if(parent != null ) {
             if(parent instanceof Button) {
                 ((Button) parent).addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { hide(); } );
@@ -82,9 +82,9 @@ public class MessageDialog extends DialogVS {
         }
         messageWebView.getEngine().loadContent(String.format(webViewContent, htmlMessage));
         isHTMLView(true);
+        if(caption != null) setCaption(caption);
         show();
     }
-
 
     public void showMessage(Integer statusCode, String message) {
         messageLabel.setText(message);
@@ -105,21 +105,16 @@ public class MessageDialog extends DialogVS {
 
     //http://java-no-makanaikata.blogspot.com.es/2012/10/javafx-webview-size-trick.html
     private void adjustWebViewHeight() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Object result = messageWebView.getEngine().executeScript(
-                            "document.getElementById('msgDiv').offsetHeight");
-                    if (result instanceof Integer) {
-                        double height = new Double((Integer) result) + 40;
-                        messageWebView.setPrefHeight(height);
-                    }
-                    mainPane.getScene().getWindow().sizeToScene();
-                } catch (JSException e) {
-                    // not important
+        Platform.runLater(() -> {
+            try {
+                Object result = messageWebView.getEngine().executeScript(
+                        "document.getElementById('msgDiv').offsetHeight");
+                if (result instanceof Integer) {
+                    double height = new Double((Integer) result) + 40;
+                    messageWebView.setPrefHeight(height);
                 }
-            }
+                mainPane.getScene().getWindow().sizeToScene();
+            } catch (JSException e) {/* not important */}
         });
     }
 }

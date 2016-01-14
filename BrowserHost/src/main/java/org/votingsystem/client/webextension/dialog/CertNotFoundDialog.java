@@ -29,19 +29,17 @@ public class CertNotFoundDialog extends DialogVS {
         Label messageLabel = new Label(ContextVS.getMessage("newUserMsg"));
         messageLabel.setStyle("-fx-font-size: 16;-fx-text-fill: #888;");
         messageLabel.setWrapText(true);
-        Button importCertButton = new Button(ContextVS.getMessage("importCertLbl"));
+        Button importCertButton = Utils.createButton(ContextVS.getMessage("importCertLbl"), Utils.getIcon(FontAwesome.Glyph.CHECK));
         importCertButton.setOnAction(actionEvent -> {
             Utils.selectKeystoreFile(null);
             hide();
         });
-        importCertButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CHECK));
-        Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"));
+        Button requestCertButton = Utils.createButton(ContextVS.getMessage("requestCertLbl"), Utils.getIcon(FontAwesome.Glyph.TIMES));
         requestCertButton.setOnAction(actionEvent -> {
                 BrowserHost.sendMessageToBrowser(MessageDto.NEW_TAB(
                         ContextVS.getInstance().getAccessControl().getCertRequestServiceURL()));
                 hide();
             } );
-        requestCertButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES));
         HBox footerButtonsBox = new HBox(10);
         footerButtonsBox.getChildren().addAll(Utils.getSpacer(), importCertButton, requestCertButton);
         mainDialog.getChildren().addAll(messageLabel, footerButtonsBox);

@@ -330,7 +330,53 @@ public class HttpHelper {
             return responseVS;
         }
     }
-    
+
+    public <T> T sendData(TypeReference type, byte[] data, String serverURL, ContentTypeVS contentType) throws Exception {
+        return sendData(null, type, data, contentType, serverURL);
+    }
+
+    public <T> T sendData(Class<T> type, byte[] data, String serverURL, ContentTypeVS contentType) throws Exception {
+        return sendData(type, null, data, contentType, serverURL);
+    }
+
+    public <T> T sendData(Class<T> type, TypeReference typeReference, byte[] byteArray,
+                                 ContentTypeVS contentType, String serverURL, String... headerNames) throws IOException, ExceptionVS {
+        log.info("sendData - contentType: " + contentType + " - serverURL: " + serverURL);
+        HttpPost httpPost = null;
+        CloseableHttpResponse response = null;
+        httpPost = new HttpPost(serverURL);
+        ByteArrayEntity entity = null;
+        if(contentType != null) entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType.getName()));
+        else entity = new ByteArrayEntity(byteArray);
+        httpPost.setEntity(entity);
+        response = httpClient.execute(httpPost);
+        String responseContentType = "";
+        Header header = response.getFirstHeader("Content-Type");
+        if(header != null) responseContentType = header.getValue();
+        log.info("------------------------------------------------");
+        log.info(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType +
+                " - connManager stats: " + connManager.getTotalStats().toString());
+        log.info("------------------------------------------------");
+        byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
+        if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
+            if(type != null) return JSON.getMapper().readValue(responseBytes, type);
+            else return JSON.getMapper().readValue(responseBytes, typeReference);
+        } else {
+            MessageDto messageDto = null;
+            String responseStr = null;
+            if(responseContentType.contains(MediaTypeVS.JSON)) messageDto =
+                    JSON.getMapper().readValue(responseBytes, MessageDto.class);
+            else responseStr = new String(responseBytes, "UTF-8");
+            switch (response.getStatusLine().getStatusCode()) {
+                case ResponseVS.SC_NOT_FOUND: throw new NotFoundExceptionVS(responseStr, messageDto);
+                case ResponseVS.SC_ERROR_REQUEST_REPEATED: throw new RequestRepeatedExceptionVS(responseStr, messageDto);
+                case ResponseVS.SC_ERROR_REQUEST: throw new BadRequestExceptionVS(responseStr, messageDto);
+                case ResponseVS.SC_ERROR: throw new ServerExceptionVS(EntityUtils.toString(response.getEntity()), messageDto);
+                default:throw new ExceptionVS(responseStr, messageDto);
+            }
+        }
+    }
+
     public ResponseVS sendData(byte[] byteArray, ContentTypeVS contentType,
             String serverURL, String... headerNames) throws IOException {
         log.info("sendData - contentType: " + contentType + " - serverURL: " + serverURL);

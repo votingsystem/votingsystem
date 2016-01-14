@@ -10,30 +10,26 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.votingsystem.client.webextension.dialog.CurrencyDialog;
 import org.votingsystem.client.webextension.dialog.UserDeviceSelectorDialog;
-import org.votingsystem.client.webextension.task.CurrencyValidatorTask;
-import org.votingsystem.client.webextension.util.CurrencyCheckResponse;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
-import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.ContextVS;
 
 import java.util.*;
 import java.util.logging.Logger;
 
-import static org.votingsystem.client.webextension.BrowserHost.showMessage;
-
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listener, CurrencyValidatorTask.Listener {
+public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listener {
 
     private static Logger log = Logger.getLogger(WalletPane.class.getSimpleName());
 
     public WalletPane() {
         super(new VBox(10));
+        setAlignment(Pos.CENTER);
         getStylesheets().add(Utils.getResource("/css/wallet-pane.css"));
         VBox.setVgrow(this, Priority.ALWAYS);
         getStyleClass().add("main-pane");
@@ -42,6 +38,11 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
     public void load(Set<Currency> wallet) {
         Map<String, Set<Currency>> currencyMap = new HashMap<>();
         getChildren().remove(0, getChildren().size());
+        if(wallet.isEmpty()) {
+            Label msgLbl = new Label(ContextVS.getMessage("emptyWalletMsg"));
+            msgLbl.getStyleClass().add("currency");
+            getChildren().add(msgLbl);
+        }
         for(Currency currency : wallet) {
             if(currencyMap.containsKey(currency.getCurrencyCode())) currencyMap.get(currency.getCurrencyCode()).add(currency);
             else currencyMap.put(currency.getCurrencyCode(), new HashSet<>(Arrays.asList(currency)));
@@ -95,12 +96,6 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
             scrollPane.getStyleClass().add("scroll-pane");
             getChildren().add(scrollPane);
         }
-    }
-
-    @Override public void processCurrencyStatus(CurrencyCheckResponse response) {
-        if(ResponseVS.SC_OK == response.getStatusCode()) {
-            showMessage(ResponseVS.SC_OK, ContextVS.getMessage("walletCheckResultOKMsg"));
-        } else showMessage(ResponseVS.SC_ERROR, response.getMessage());
     }
 
     @Override

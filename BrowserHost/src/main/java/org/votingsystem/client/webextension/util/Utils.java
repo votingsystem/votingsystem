@@ -23,19 +23,16 @@ import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.dialog.PasswordDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
-import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.model.voting.AccessControlVS;
-import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.util.*;
-import org.votingsystem.util.currency.Wallet;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.JSON;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -49,6 +46,7 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -105,41 +103,6 @@ public class Utils {
         return BrowserHost.class.getResource(path).toExternalForm();
     }
 
-    public static ResponseVS<ActorVS> checkServer(String serverURL) throws Exception {
-        log.info(" - checkServer: " + serverURL);
-        ActorVS actorVS = ContextVS.getInstance().checkServer(serverURL.trim());
-        if (actorVS == null) {
-            String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
-            ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
-            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                actorVS = ((ActorVSDto) responseVS.getMessage(ActorVSDto.class)).getActorVS();
-                responseVS.setData(actorVS);
-                log.log(Level.INFO,"checkServer - adding " + serverURL.trim() + " to sever map");
-                switch (actorVS.getType()) {
-                    case ACCESS_CONTROL:
-                        ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
-                        break;
-                    case CURRENCY:
-                        ContextVS.getInstance().setCurrencyServer((CurrencyServer) actorVS);
-                        ContextVS.getInstance().setTimeStampServerCert(actorVS.getTimeStampCert());
-                        break;
-                    case CONTROL_CENTER:
-                        ContextVS.getInstance().setControlCenter((ControlCenterVS) actorVS);
-                        break;
-                    default:
-                        log.info("Unprocessed actor:" + actorVS.getType());
-                }
-            } else if (ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
-                responseVS.setMessage(ContextVS.getMessage("serverNotFoundMsg", serverURL.trim()));
-            }
-            return responseVS;
-        } else {
-            ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
-            responseVS.setData(actorVS);
-            return responseVS;
-        }
-    }
-
     public static Region getSpacer(){
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -175,7 +138,7 @@ public class Utils {
                         UserVS userVS = UserVS.getUserVS((X509Certificate)
                                 userKeyStore.getCertificate("UserTestKeysStore"));
                         PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
-                            @Override public void processPassword(TypeVS passwordType, char[] password) {
+                            @Override public void processPassword(char[] password) {
                                 try {
                                     ContextVS.getInstance().saveUserKeyStore(userKeyStore, password);
                                     ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
@@ -189,9 +152,9 @@ public class Utils {
                                     BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                                 }
                             }
-                            @Override public void cancelPassword(TypeVS passwordType) { }
+                            @Override public void cancelPassword() { }
                         };
-                        PasswordDialog.showWithPasswordConfirm(null, passwordListener, ContextVS.getMessage("newKeyStorePasswordMsg"));
+                        PasswordDialog.showWithPasswordConfirm(passwordListener, ContextVS.getMessage("newKeyStorePasswordMsg"));
                     } catch(Exception ex) {
                         log.log(Level.SEVERE,ex.getMessage(), ex);
                         if(operationVS != null) BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
@@ -335,26 +298,27 @@ public class Utils {
         return outputZip;
     }
 
-    public static void createNewWallet() {
-        PlatformImpl.runLater(() -> {
-            PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
-                @Override public void processPassword(TypeVS passwordType, char[] password) {
-                    try {
-                        Wallet.createWallet(new ArrayList<>(), password);
-                    } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
-                }
-
-                @Override public void cancelPassword(TypeVS passwordType) { }
-            };
-            PasswordDialog.showWithPasswordConfirm(null, passwordListener, ContextVS.getMessage("newWalletPinMsg"));
-        });
-
+    public static Button createButton(String text, Glyph icon) {
+        Button newButton = new Button(text);
+        newButton.setGraphic(icon);
+        return newButton;
     }
 
     public static void showWalletNotFoundMessage() {
         Button optionButton = new Button(ContextVS.getMessage("newWalletButton"));
-        optionButton.setOnAction(event -> createNewWallet());
-        BrowserHost.showMessage(ContextVS.getMessage("walletNotFoundMessage"), optionButton);
+        optionButton.setOnAction(event -> {
+            PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
+                @Override public void processPassword(char[] password) {
+                    BrowserHost.getInstance().createEmptyWallet(password);
+                }
+                @Override public void cancelPassword() { }
+            };
+            PlatformImpl.runLater(() -> {
+                PasswordDialog.showWithPasswordConfirm(passwordListener, ContextVS.getMessage("newWalletPinMsg"));
+            });
+        });
+        BrowserHost.showMessage(ContextVS.getMessage("errorLbl"), ContextVS.getMessage("walletNotFoundMessage"),
+                optionButton, null);
     }
 
     static class Delta { double x, y; }

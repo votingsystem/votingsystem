@@ -33,7 +33,7 @@ public class FetchX509Cert {
     }
 
     public static void getServer() throws Exception {
-        String serverURL = "http://currency:8080/AccessControl";
+        String serverURL = "http://currency:8080/CurrencyServer";
         String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
         ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
