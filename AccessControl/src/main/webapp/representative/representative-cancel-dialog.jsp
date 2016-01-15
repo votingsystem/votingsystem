@@ -53,9 +53,8 @@
                 VotingSystemClient.setMessage(operationVS);
                 this.close()
             },
-            revokeResponse: function(appMessage) {
-                console.log(this.tagName + "revokeResponse - message: " + appMessage);
-                var appMessageJSON = toJSON(appMessage)
+            revokeResponse: function(appMessageJSON) {
+                console.log(this.tagName + "revokeResponse");
                 var caption = '${msg.operationERRORCaption}'
                 var msg = appMessageJSON.message
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {

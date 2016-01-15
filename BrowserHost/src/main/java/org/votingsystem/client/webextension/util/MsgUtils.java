@@ -42,8 +42,8 @@ public class MsgUtils {
 
 
     public static String getTagDescription(String tagName) {
-        if(TagVS.WILDTAG.equals(tagName)) return ContextVS.getMessage("wildTagLbl");
-        else return tagName;
+        if(TagVS.WILDTAG.equals(tagName)) return ContextVS.getMessage("wildTagLbl").toLowerCase();
+        else return tagName.toLowerCase();
 
     }
 

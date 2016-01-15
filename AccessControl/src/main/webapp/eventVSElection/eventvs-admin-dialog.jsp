@@ -87,9 +87,8 @@
                     VotingSystemClient.setMessage(operationVS);
                 }
             },
-            cancelationResponse: function(appMessage) {
-                console.log("eventvs-admin-dialog callback - message: " + appMessage);
-                var appMessageJSON = toJSON(appMessage)
+            cancelationResponse:function(appMessageJSON) {
+                console.log("cancelationResponse");
                 var caption
                 var msg
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {

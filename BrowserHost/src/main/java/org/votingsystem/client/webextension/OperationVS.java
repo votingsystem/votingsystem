@@ -18,6 +18,7 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.GroupVSDto;
+import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
@@ -266,9 +267,10 @@ public class OperationVS implements PasswordDialog.Listener {
         switch (operation) {
             case CURRENCY_REQUEST:
                 try {
-                    CurrencyRequestDto requestDto = JSON.getMapper().readValue(jsonStr.getBytes(), CurrencyRequestDto.class);
-                    msgPrefix = signedMessageSubject + "\n" + ContextVS.getMessage("messageToDeviceProgressMsg",
-                            MsgUtils.getTagDescription(requestDto.getTagVS().getName()));
+                    TransactionVSDto requestDto = JSON.getMapper().readValue(jsonStr.getBytes(), TransactionVSDto.class);
+                    msgPrefix = signedMessageSubject + "\n\n" + ContextVS.getMessage("currencyRequestMsg",
+                            requestDto.getAmount(), requestDto.getCurrencyCode(),
+                            MsgUtils.getTagDescription(requestDto.getTagName()));
                 } catch (IOException ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }

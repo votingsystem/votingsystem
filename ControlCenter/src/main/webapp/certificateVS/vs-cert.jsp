@@ -68,8 +68,8 @@
                             var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                                 changeCertToState:"${CertificateVS.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
                             operationVS.jsonStr = JSON.stringify(signedContent)
-                            operationVS.setCallback(function(appMessage) {
-                                this.url = contextURL + "/rest/certificateVS/serialNumber/" + certMap.serialNumber + "?menu=" + menuType
+                            operationVS.setCallback(function() {
+                                this.url = contextURL + "/rest/certificateVS/serialNumber/${certMap.serialNumber}?menu=" + menuType
                             })
                             VotingSystemClient.setMessage(operationVS);
                         }.bind(this))

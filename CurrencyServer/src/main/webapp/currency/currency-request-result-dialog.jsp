@@ -42,8 +42,7 @@
                 operationVS.setCallback(function(appMessage) { this.saveResponse(appMessage)}.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             },
-            saveResponse:function(appMessage) {
-                var appMessageJSON = JSON.parse(appMessage)
+            saveResponse:function(appMessageJSON) {
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     this.loadWallet(appMessageJSON.message)
                 } else {

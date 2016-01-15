@@ -118,9 +118,6 @@
                 operationVS.serviceURL = contextURL + "/rest/voteVS/cancel"
                 operationVS.signedMessageSubject = "${msg.cancelVoteLbl}"
                 operationVS.setCallback(function(appMessage) { this.cancellationResponse(appMessage) }.bind(this))
-
-                console.log("!!!!!!!!!!!!!!!: " + JSON.stringify(operationVS))
-
                 VotingSystemClient.setMessage(operationVS);
             },
             cancellationResponse: function(appMessageJSON) {

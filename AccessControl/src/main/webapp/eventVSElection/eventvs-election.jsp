@@ -155,8 +155,7 @@
                     VotingSystemClient.setMessage(operationVS)
                 } else window.location.href  = fileURL
             },
-            showGetResultsResponse:function(appMessage) {
-                var appMessageJSON = toJSON(appMessage)
+            showGetResultsResponse:function(appMessageJSON) {
                 if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message, "${msg.errorLbl}")
             },
             showVoteResul:function() {

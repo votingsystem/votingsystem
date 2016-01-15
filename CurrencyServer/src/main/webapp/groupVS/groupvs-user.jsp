@@ -73,14 +73,13 @@
                                 groupvsName:this.subscriptionDto.groupvs.name, userVSName:this.subscriptionDto.uservs.name,
                                 userVSNIF:this.subscriptionDto.uservs.nif, reason:e.detail})
                             operationVS.setCallback(function(appMessage) {
-
+                                this.deActivateResponse(appMessage)
                             }.bind(this))
                             VotingSystemClient.setMessage(operationVS);
                         }.bind(this))
             },
-            deActivateResponse:function(appMessage) {
-                console.log(this.tagName + " - deActivateResponse - message: " + appMessage);
-                var appMessageJSON = toJSON(appMessage)
+            deActivateResponse:function(appMessageJSON) {
+                console.log(this.tagName + " - deActivateResponse");
                 var caption = '${msg.deActivateUserERRORLbl}'
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     caption = "${msg.deActivateUserOKLbl}"
@@ -136,9 +135,8 @@
                 operationVS.setCallback(function(appMessage) { this.activateResponse(appMessage)}.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             },
-            activateResponse: function(appMessage) {
-                console.log(this.tagName + " - activateResponse - message: " + appMessage)
-                var appMessageJSON = toJSON(appMessage)
+            activateResponse: function(appMessageJSON) {
+                console.log(this.tagName + " - activateResponse")
                 if(appMessageJSON != null) {
                     var caption = '${msg.activateUserERRORLbl}'
                     if (ResponseVS.SC_OK == appMessageJSON.statusCode) {

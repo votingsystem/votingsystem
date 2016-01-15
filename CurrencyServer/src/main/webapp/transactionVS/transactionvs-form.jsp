@@ -212,8 +212,7 @@
             operationVS.setCallback(function(appMessage) { this.transactionResponse(appMessage)}.bind(this))
             VotingSystemClient.setMessage(operationVS);
         },
-        transactionResponse:function(appMessage) {
-            var appMessageJSON = JSON.parse(appMessage)
+        transactionResponse:function(appMessageJSON) {
             var caption
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "${msg.transactionvsOKLbl}"

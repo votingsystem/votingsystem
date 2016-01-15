@@ -54,9 +54,8 @@
                 operationVS.setCallback(function(appMessage) { this.delegationResponse(appMessage) }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             },
-            delegationResponse:function(appMessage) {
-                console.log(this.tagName + " - delegationResponse - message: " + appMessage);
-                var appMessageJSON = toJSON(appMessage)
+            delegationResponse:function(appMessageJSON) {
+                console.log(this.tagName + " - delegationResponse");
                 var caption = '${msg.operationERRORCaption}'
                 var msg = appMessageJSON.message
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {

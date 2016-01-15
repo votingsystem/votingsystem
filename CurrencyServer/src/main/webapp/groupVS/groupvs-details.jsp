@@ -172,7 +172,7 @@
             }
         },
         cancelResponse:function(appMessage) {
-            this.appMessageJSON = JSON.parse(appMessage)
+            this.appMessageJSON = appMessage
             var caption = '${msg.groupCancelERRORLbl}'
             if(ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
                 caption = "${msg.groupCancelOKLbl}"
@@ -194,9 +194,8 @@
             operationVS.setCallback(function(appMessage) { this.subscribeResponse(appMessage)}.bind(this))
             VotingSystemClient.setMessage(operationVS);
         },
-        subscribeResponse:function(appMessage) {
-            console.log(this.tagName + " - subscribeResponse - message: " + appMessage);
-            var appMessageJSON = JSON.parse(appMessage)
+        subscribeResponse:function(appMessageJSON) {
+            console.log(this.tagName + " - subscribeResponse");
             var caption
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "${msg.groupSubscriptionOKLbl}"

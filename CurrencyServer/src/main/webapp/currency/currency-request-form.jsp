@@ -106,7 +106,7 @@
                 this.selectedTagsHidden = (this.selectedTags.length === 0)
             },
             submit:function() {
-                console.log("submit --- amountValue: " + this.$.inputAmount.value + " " +
+                console.log("submit - amountValue: " + this.$.inputAmount.value + " " +
                         this.$.currencySelector.getSelected())
                 if(!this.$.inputAmount.validity.valid || !(this.$.inputAmount.value > 0)) {
                     alert("${msg.enterValidAmountMsg}", "${msg.errorLbl}")
@@ -131,8 +131,7 @@
                 console.log(JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
             },
-            showResponse:function(appMessage) {
-                var appMessageJSON = JSON.parse(appMessage)
+            showResponse:function(appMessageJSON) {
                 var caption
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     caption = "${msg.currencyRequestOKCaption}"

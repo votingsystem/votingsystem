@@ -69,9 +69,8 @@
                     operationVS.jsonStr = JSON.stringify({info:document.querySelector("#description").value,
                             certChainPEM:document.querySelector("#pemCert").value,
                             iban:document.querySelector("#bankVSIBAN").value, operation:Operation.BANKVS_NEW})
-                    operationVS.setCallback(function(appMessage) {
-                        console.log("newBankVSCallback - message: " + appMessage);
-                        appMessageJSON = toJSON(appMessage)
+                    operationVS.setCallback(function(appMessageJSON) {
+                        console.log("newBankVSCallback");
                         var caption = '${msg.newBankVSERRORCaption}'
                         var msg = appMessageJSON.message
                         statusCode = appMessageJSON.statusCode

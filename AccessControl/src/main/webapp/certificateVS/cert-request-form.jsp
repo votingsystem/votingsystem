@@ -93,8 +93,7 @@
             operationVS.setCallback(function(appMessage) { this.showResponse(appMessage) }.bind(this))
             VotingSystemClient.setMessage(operationVS);
         },
-        showResponse :function(appMessage) {
-            var appMessageJSON = JSON.parse(appMessage)
+        showResponse :function(appMessageJSON) {
             var message = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 page.show("/resources/certificationCenters")

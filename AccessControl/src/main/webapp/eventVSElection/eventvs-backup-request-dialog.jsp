@@ -70,9 +70,8 @@
                 operationVS.setCallback(function(appMessage) { this.showResponse(appMessage)}.bind(this))
                 VotingSystemClient.setMessage(operationVS)
             },
-            showResponse: function(appMessage) {
-                console.log("activateUserCallback - message: " + appMessage);
-                var appMessageJSON = toJSON(appMessage)
+            showResponse: function(appMessageJSON) {
+                console.log("showResponse");
                 var caption = '${msg.operationERRORCaption}'
                 if(ResponseVS.SC_OK ==  appMessageJSON.statusCode) {
                     caption = '${msg.operationOKCaption}'

@@ -50,7 +50,7 @@
                     this.timeInfoHidden = true
                     var operationVS = new OperationVS(Operation.REPRESENTATIVE_STATE)
                     operationVS.setCallback(function(appMessage) {
-                        this.representationState = toJSON(appMessage);
+                        this.representationState = appMessage;
                         if(this.representationState.representative != null) {
                             this.representativeFullName = this.representationState.representative.firstName + " " +
                                     this.representationState.representative.lastName
@@ -81,9 +81,8 @@
                 operationVS.setCallback(function(appMessage) { this.cancelationResponse(appMessage)}.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             },
-            cancelationResponse: function(appMessage) {
-                console.log(this.tagName + "cancelationResponse - message: " + appMessage);
-                var appMessageJSON = toJSON(appMessage)
+            cancelationResponse: function(appMessageJSON) {
+                console.log(this.tagName + "cancelationResponse");
                 var caption = '${msg.operationERRORCaption}'
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     caption = "${msg.operationOKCaption}"

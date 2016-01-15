@@ -65,10 +65,9 @@
                 operationVS.message = this.messageVS
                 operationVS.nif = this.uservs.nif
                 operationVS.setCallback(function(appMessage) {
-                    console.log(this.tagName + " - " + this.id + " - sendMessageVS callback: " + appMessage);
+                    console.log(this.tagName + " - " + this.id + " - sendMessageVS callback");
                     this.fire('message-response', appMessage)
                 }.bind(this))
-                //alert(JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
                 this.close()
                 this.$.toast.show()
