@@ -3,7 +3,6 @@ package org.votingsystem.client.webextension;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
-import javafx.concurrent.Task;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -31,7 +30,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -230,7 +231,7 @@ public class BrowserHost extends Application {
             } else {
                 AtomicBoolean walletRestored = new AtomicBoolean(false);
                 if(!response.getCurrencyWithErrorSet().isEmpty()) {
-                    Button deleteButton = Utils.createButton(ContextVS.getMessage("deleteCurrencyWithErrorsLbl"),
+                    Button deleteButton = new Button(ContextVS.getMessage("deleteCurrencyWithErrorsLbl"),
                             Utils.getIcon(FontAwesome.Glyph.TIMES));
                     deleteButton.setOnAction(event -> {
                         Set<String> hashCertToRemoveSet = response.getCurrencyWithErrorSet().stream().map(

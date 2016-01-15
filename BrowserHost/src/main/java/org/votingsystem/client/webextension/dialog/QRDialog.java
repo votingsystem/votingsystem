@@ -54,7 +54,7 @@ public class QRDialog extends DialogVS {
                             TransactionVSDto transactionDto = qrDto.getData();
                             SMIMEMessage smimeMessage = socketMsg.getSMIME();
                             String result = transactionDto.validateReceipt(smimeMessage, true);
-                            Button openReceiptButton = Utils.createButton(ContextVS.getMessage("openReceiptLbl"),
+                            Button openReceiptButton = new Button(ContextVS.getMessage("openReceiptLbl"),
                                     Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
                             openReceiptButton.setOnAction(event -> {
                                 try {
@@ -68,7 +68,7 @@ public class QRDialog extends DialogVS {
                             });
                             Platform.runLater(() -> { hide(); });
                             if(qrDto.getTypeVS() == TypeVS.CURRENCY_CHANGE) {
-                                Button saveWalletButton = Utils.createButton(ContextVS.getMessage("saveToSecureWalletMsg"),
+                                Button saveWalletButton = new Button(ContextVS.getMessage("saveToSecureWalletMsg"),
                                         Utils.getIcon(FontAwesome.Glyph.MONEY));
                                 saveWalletButton.setOnAction(event -> new OperationVS().saveWallet());
                                 VBox buttonsVBox = new VBox(10);

@@ -60,6 +60,7 @@ public class InboxService {
 
     private PasswordDialog.Listener currencyWalletChangePasswordListener = new PasswordDialog.Listener() {
         @Override public void processPassword(char[] password) {
+            if(password == null) return;
             try {
                 BrowserHost.getInstance().saveToWallet(currentMessage.getWebSocketMessage().getCurrencySet(), password);
                 EventBusService.getInstance().post(currentMessage.setState(InboxMessage.State.PROCESSED));
@@ -76,7 +77,6 @@ public class InboxService {
                 BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
             }
         }
-        @Override public void cancelPassword() { }
     };
 
     public static InboxService getInstance() {
@@ -128,8 +128,12 @@ public class InboxService {
                 if (pinDialogMessage == null) dialogMessage = ContextVS.getMessage("messageToDevicePasswordMsg");
                 Integer visibilityInSeconds = null;
                 if(isTimeLimited) visibilityInSeconds = TIME_LIMITED_MESSAGE_LIVE;
-                PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
-                    @Override public void processPassword(char[] password) {
+                PasswordDialog.showWithoutPasswordConfirm(password -> {
+                    if(password == null) {
+                        InboxDialog.showDialog();
+                        timeLimitedInboxMessage = null;
+                        isPasswordVisible.set(false);
+                    } else {
                         try {
                             KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password);
                             PrivateKey privateKey = (PrivateKey) keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS,
@@ -143,13 +147,7 @@ public class InboxService {
                         timeLimitedInboxMessage = null;
                         isPasswordVisible.set(false);
                     }
-                    @Override public void cancelPassword() {
-                        InboxDialog.showDialog();
-                        timeLimitedInboxMessage = null;
-                        isPasswordVisible.set(false);
-                    }
-                };
-                PasswordDialog.showWithoutPasswordConfirm(passwordListener, dialogMessage, visibilityInSeconds);
+                }, dialogMessage, visibilityInSeconds);
             } else BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("messageToDeviceService") +
                     " - " + ContextVS.getMessage("jksRequiredMsg"));
         });
@@ -228,21 +226,18 @@ public class InboxService {
                 BrowserHost.showMessage(msg, ContextVS.getMessage("messageLbl"));
                 break;
             case CURRENCY_IMPORT:
-                PasswordDialog.Listener listener = new PasswordDialog.Listener() {
-                    @Override public void processPassword(char[] password) {
-                        try {
-                            BrowserHost.getInstance().loadWallet(password);
-                            removeMessage(currentMessage);
-                        } catch (WalletException wex) {
-                            Utils.showWalletNotFoundMessage();
-                        } catch (Exception ex) {
-                            log.log(Level.SEVERE, ex.getMessage(), ex);
-                            BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                        }
+                PasswordDialog.showWithoutPasswordConfirm(passw -> {
+                    if(passw == null) return;
+                    try {
+                        BrowserHost.getInstance().loadWallet(passw);
+                        removeMessage(currentMessage);
+                    } catch (WalletException wex) {
+                        Utils.showWalletNotFoundMessage();
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                     }
-                    @Override public void cancelPassword() { }
-                };
-                PasswordDialog.showWithoutPasswordConfirm(listener, ContextVS.getMessage("walletPinMsg"));
+                }, ContextVS.getMessage("walletPinMsg"));
                 break;
             case MESSAGEVS_TO_DEVICE:
                 showPasswordDialog(ContextVS.getMessage("decryptMsgLbl"), inboxMessage.isTimeLimited());

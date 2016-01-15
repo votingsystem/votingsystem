@@ -29,12 +29,12 @@ public class CertNotFoundDialog extends DialogVS {
         Label messageLabel = new Label(ContextVS.getMessage("newUserMsg"));
         messageLabel.setStyle("-fx-font-size: 16;-fx-text-fill: #888;");
         messageLabel.setWrapText(true);
-        Button importCertButton = Utils.createButton(ContextVS.getMessage("importCertLbl"), Utils.getIcon(FontAwesome.Glyph.CHECK));
+        Button importCertButton = new Button(ContextVS.getMessage("importCertLbl"), Utils.getIcon(FontAwesome.Glyph.CHECK));
         importCertButton.setOnAction(actionEvent -> {
             Utils.selectKeystoreFile(null);
             hide();
         });
-        Button requestCertButton = Utils.createButton(ContextVS.getMessage("requestCertLbl"), Utils.getIcon(FontAwesome.Glyph.TIMES));
+        Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"), Utils.getIcon(FontAwesome.Glyph.TIMES));
         requestCertButton.setOnAction(actionEvent -> {
                 BrowserHost.sendMessageToBrowser(MessageDto.NEW_TAB(
                         ContextVS.getInstance().getAccessControl().getCertRequestServiceURL()));

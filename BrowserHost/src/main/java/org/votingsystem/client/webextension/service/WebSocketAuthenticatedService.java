@@ -54,10 +54,8 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
     private String connectionMessage = null;
     private PasswordDialog.Listener websocketInitPasswordListener = new PasswordDialog.Listener() {
         @Override public void processPassword(char[] password) {
-            ProgressDialog.show(new InitSessionTask(password, targetServer), null);
-        }
-        @Override public void cancelPassword() {
-            broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
+            if(password == null) broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
+            else ProgressDialog.show(new InitSessionTask(password, targetServer), null);
         }
     };
 

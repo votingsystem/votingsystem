@@ -58,7 +58,7 @@ public class AddTagVSDialog extends DialogVS {
         textField = new TextField();
         textField.setPromptText(ContextVS.getMessage("searchTextLbl"));
         HBox.setHgrow(textField, Priority.ALWAYS);
-        Button acceptButton = Utils.createButton(ContextVS.getMessage("acceptLbl"),Utils.getIcon(FontAwesome.Glyph.CHECK));
+        Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"),Utils.getIcon(FontAwesome.Glyph.CHECK));
         acceptButton.setOnAction(actionEvent -> {
             if ("".equals(textField.getText().trim())) {
                 BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("emptyFieldErrorMsg",

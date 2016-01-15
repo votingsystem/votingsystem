@@ -188,25 +188,21 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         log.info("validateForm");
         if(signWithKeystoreRb.isSelected()) {
             if(selectedKeyStore != null) {
-                PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
-                    @Override public void processPassword(char[] password) {
-                        try {
-                            UserVS userVS = ContextVS.getInstance().saveUserKeyStore(selectedKeyStore, password);
-                            CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
-                                    userVS.getCertificate(), ContextVS.DEVICEVS_OID);
-                            deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
-                            deviceVSDto.setType(CryptoTokenVS.JKS_KEYSTORE);
-                            deviceVSDto.setDeviceName(userVS.getNif() + " - " + userVS.getName());
-                            close();
-                        } catch (Exception ex) {
-                            log.log(Level.SEVERE, ex.getMessage(), ex);
-                            BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                        }
+                PasswordDialog.showWithPasswordConfirm(password -> {
+                    if(password == null) return;
+                    try {
+                        UserVS userVS = ContextVS.getInstance().saveUserKeyStore(selectedKeyStore, password);
+                        CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
+                                userVS.getCertificate(), ContextVS.DEVICEVS_OID);
+                        deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
+                        deviceVSDto.setType(CryptoTokenVS.JKS_KEYSTORE);
+                        deviceVSDto.setDeviceName(userVS.getNif() + " - " + userVS.getName());
+                        close();
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                     }
-                    @Override public void cancelPassword() { }
-                };
-
-                PasswordDialog.showWithPasswordConfirm(passwordListener, ContextVS.getMessage("newKeyStorePasswordMsg"));
+                }, ContextVS.getMessage("newKeyStorePasswordMsg"));
                 return;
             }
             if(selectedKeyStore == null && BrowserSessionService.getInstance().getKeyStoreUserVS() == null) {

@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.util.stream.Collectors.toSet;
 import static org.votingsystem.client.webextension.BrowserHost.showMessage;
 
 /**
@@ -63,22 +62,18 @@ public class WalletDialog extends DialogVS {
         Platform.runLater(() -> {
             if(INSTANCE == null) INSTANCE = new WalletDialog();
             if(!BrowserHost.getInstance().isWalletLoaded()) {
-                PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
-                    @Override public void processPassword(char[] password) {
-                        try {
-                            Set<Currency> currencySet = BrowserHost.getInstance().loadWallet(password);
-                            if(currencySet != null) INSTANCE.show(currencySet);
-                        } catch (WalletException wex) {
-                            Utils.showWalletNotFoundMessage();
-                        } catch (Exception ex) {
-                            log.log(Level.SEVERE, ex.getMessage(), ex);
-                            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                        }
+                PasswordDialog.showWithoutPasswordConfirm(password -> {
+                    if(password == null) return;
+                    try {
+                        Set<Currency> currencySet = BrowserHost.getInstance().loadWallet(password);
+                        if(currencySet != null) INSTANCE.show(currencySet);
+                    } catch (WalletException wex) {
+                        Utils.showWalletNotFoundMessage();
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                     }
-                    @Override public void cancelPassword() { }
-                };
-
-                PasswordDialog.showWithoutPasswordConfirm(passwordListener, ContextVS.getMessage("walletPinMsg"));
+                }, ContextVS.getMessage("walletPinMsg"));
             }
             else INSTANCE.show(BrowserHost.getInstance().getWalletCurrencySet());
         });

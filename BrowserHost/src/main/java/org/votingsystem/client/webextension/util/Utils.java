@@ -46,7 +46,6 @@ import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -137,24 +136,21 @@ public class Utils {
                         KeyStore userKeyStore = KeyStoreUtil.getKeyStoreFromBytes(keystoreBytes, null);
                         UserVS userVS = UserVS.getUserVS((X509Certificate)
                                 userKeyStore.getCertificate("UserTestKeysStore"));
-                        PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
-                            @Override public void processPassword(char[] password) {
-                                try {
-                                    ContextVS.getInstance().saveUserKeyStore(userKeyStore, password);
-                                    ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                                            CryptoTokenVS.JKS_KEYSTORE.toString());
-                                    BrowserSessionService.getInstance().setUserVS(userVS, false);
-                                    if(operationVS != null) BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
-                                            ResponseVS.SC_OK, JSON.getMapper().writeValueAsString(UserVSDto.COMPLETE(userVS)),
-                                            operationVS.getTabId(),
-                                            operationVS.getCallerCallback()));
-                                } catch (Exception ex) {
-                                    BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                                }
+                        PasswordDialog.showWithPasswordConfirm(password -> {
+                            if(password == null) return;
+                            try {
+                                ContextVS.getInstance().saveUserKeyStore(userKeyStore, password);
+                                ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
+                                        CryptoTokenVS.JKS_KEYSTORE.toString());
+                                BrowserSessionService.getInstance().setUserVS(userVS, false);
+                                if(operationVS != null) BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
+                                        ResponseVS.SC_OK, JSON.getMapper().writeValueAsString(UserVSDto.COMPLETE(userVS)),
+                                        operationVS.getTabId(),
+                                        operationVS.getCallerCallback()));
+                            } catch (Exception ex) {
+                                BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                             }
-                            @Override public void cancelPassword() { }
-                        };
-                        PasswordDialog.showWithPasswordConfirm(passwordListener, ContextVS.getMessage("newKeyStorePasswordMsg"));
+                        }, ContextVS.getMessage("newKeyStorePasswordMsg"));
                     } catch(Exception ex) {
                         log.log(Level.SEVERE,ex.getMessage(), ex);
                         if(operationVS != null) BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
@@ -298,23 +294,13 @@ public class Utils {
         return outputZip;
     }
 
-    public static Button createButton(String text, Glyph icon) {
-        Button newButton = new Button(text);
-        newButton.setGraphic(icon);
-        return newButton;
-    }
-
     public static void showWalletNotFoundMessage() {
         Button optionButton = new Button(ContextVS.getMessage("newWalletButton"));
         optionButton.setOnAction(event -> {
-            PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
-                @Override public void processPassword(char[] password) {
-                    BrowserHost.getInstance().createEmptyWallet(password);
-                }
-                @Override public void cancelPassword() { }
-            };
             PlatformImpl.runLater(() -> {
-                PasswordDialog.showWithPasswordConfirm(passwordListener, ContextVS.getMessage("newWalletPinMsg"));
+                PasswordDialog.showWithPasswordConfirm(password -> {
+                    if(password != null) BrowserHost.getInstance().createEmptyWallet(password);
+                }, ContextVS.getMessage("newWalletPinMsg"));
             });
         });
         BrowserHost.showMessage(ContextVS.getMessage("errorLbl"), ContextVS.getMessage("walletNotFoundMessage"),
