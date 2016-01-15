@@ -8,6 +8,15 @@
           next();
       }
 
+      var iframeVS
+      function loadFrameVS(url, pageCaption) {
+          Polymer.Base.importHref('./resources/bower_components/vs-iframe/vs-iframe.html', function(e) {
+              if(!iframeVS) iframeVS = document.createElement('vs-iframe');
+              iframeVS.url = url
+              vs.loadMainContent(iframeVS, pageCaption)
+          });
+      }
+
       var pageMap = {}
       page('*/innerVSPage*', scrollToTop, function(ctx) {
           var route = getQueryParam('data_route', ctx.querystring)

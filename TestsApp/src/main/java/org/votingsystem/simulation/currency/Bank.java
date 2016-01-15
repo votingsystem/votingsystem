@@ -3,8 +3,6 @@ package org.votingsystem.simulation.currency;
 import desmoj.core.simulator.Model;
 import desmoj.core.simulator.SimProcess;
 
-import java.math.BigDecimal;
-
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */

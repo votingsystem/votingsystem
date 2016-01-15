@@ -106,7 +106,7 @@
                 this.selectedTagsHidden = (this.selectedTags.length === 0)
             },
             submit:function() {
-                console.log("submit - amountValue: " + this.$.inputAmount.value + " " +
+                console.log("submit --- amountValue: " + this.$.inputAmount.value + " " +
                         this.$.currencySelector.getSelected())
                 if(!this.$.inputAmount.validity.valid || !(this.$.inputAmount.value > 0)) {
                     alert("${msg.enterValidAmountMsg}", "${msg.errorLbl}")
@@ -121,13 +121,14 @@
                 } else tagList.push('WILDTAG'); //No tags, receptor can expend money with any tag
 
                 var operationVS = new OperationVS(Operation.CURRENCY_REQUEST)
-                operationVS.serviceURL = contextURL + "/rest/currency/processRequest"
+                operationVS.serviceURL = contextURL + "/currency/request"
                 operationVS.signedMessageSubject = "${msg.currencyRequestLbl}"
                 var signedContent = {operation:Operation.CURRENCY_REQUEST, amount:this.$.inputAmount.value,
                     timeLimited:this.$.timeLimitedButton.checked, currencyCode:this.$.currencySelector.getSelected(),
                     tags:tagList}
                 operationVS.jsonStr = JSON.stringify(signedContent)
                 operationVS.setCallback(function(appMessage) { this.showResponse(appMessage)}.bind(this))
+                console.log(JSON.stringify(operationVS))
                 VotingSystemClient.setMessage(operationVS);
             },
             showResponse:function(appMessage) {

@@ -1,9 +1,9 @@
 package org.votingsystem.test.currency;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Sets;
 import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContentTypeVS;
@@ -11,7 +11,8 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class CheckBundle {
@@ -22,7 +23,7 @@ public class CheckBundle {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
-        Set<String> hashCertSet = new HashSet<>(Arrays.asList("2dZCSiH8prnd731kyUEGzhoPF0OwA23vFvG+RYOcR5o="));
+        Set<String> hashCertSet = Sets.newHashSet("2dZCSiH8prnd731kyUEGzhoPF0OwA23vFvG+RYOcR5o=");
         ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsBytes(hashCertSet),
                 ContentTypeVS.JSON, currencyServer.getCurrencyBundleStateServiceURL());
         log.info("mayBeJSON: " + responseVS.getMessage().trim());

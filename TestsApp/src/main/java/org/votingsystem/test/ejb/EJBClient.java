@@ -13,7 +13,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.util.*;
 import java.util.concurrent.ExecutionException;

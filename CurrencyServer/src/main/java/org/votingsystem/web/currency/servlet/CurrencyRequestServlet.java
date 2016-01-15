@@ -49,7 +49,7 @@ public class CurrencyRequestServlet extends HttpServlet {
                     requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
             CurrencyRequestDto requestDto = CurrencyRequestDto.validateRequest(requestVS.getCSRBytes(),
                     messageSMIME, config.getContextURL());
-            requestDto.setTagVSDB(config.getTag(requestDto.getTagVS().getName()));
+            requestDto.setTagVS(config.getTag(requestDto.getTagVS().getName()));
             ResultListDto<String> dto = currencyBean.processCurrencyRequest(requestDto);
             resp.setContentType(MediaTypeVS.JSON);
             resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(dto));

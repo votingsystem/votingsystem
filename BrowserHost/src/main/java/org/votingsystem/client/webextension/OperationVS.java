@@ -12,9 +12,11 @@ import org.votingsystem.client.webextension.service.InboxService;
 import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.webextension.service.WebSocketService;
 import org.votingsystem.client.webextension.task.*;
+import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
@@ -257,10 +259,24 @@ public class OperationVS implements PasswordDialog.Listener {
     }
 
     private String getOperationMessage() {
-        if(CryptoTokenVS.MOBILE == BrowserSessionService.getCryptoTokenType()) {
-            return signedMessageSubject + " - " + ContextVS.getMessage("messageToDeviceProgressMsg",
-                    BrowserSessionService.getInstance().getCryptoToken().getDeviceName());
-        } else return signedMessageSubject;
+        String msgSuffix = "";
+        String msgPrefix = "";
+        if(CryptoTokenVS.MOBILE == BrowserSessionService.getCryptoTokenType()) msgSuffix = " - " + ContextVS.getMessage("messageToDeviceProgressMsg",
+                BrowserSessionService.getInstance().getCryptoToken().getDeviceName());
+        switch (operation) {
+            case CURRENCY_REQUEST:
+                try {
+                    CurrencyRequestDto requestDto = JSON.getMapper().readValue(jsonStr.getBytes(), CurrencyRequestDto.class);
+                    msgPrefix = signedMessageSubject + "\n" + ContextVS.getMessage("messageToDeviceProgressMsg",
+                            MsgUtils.getTagDescription(requestDto.getTagVS().getName()));
+                } catch (IOException ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                }
+                break;
+            default:
+                msgPrefix = signedMessageSubject;
+        }
+        return msgPrefix + msgSuffix;
     }
 
     public void saveWallet() {
@@ -464,6 +480,9 @@ public class OperationVS implements PasswordDialog.Listener {
                 RepresentationStateDto dto = BrowserSessionService.getInstance().getRepresentationState();
                 responseVS = new ResponseVS(ResponseVS.SC_OK, JSON.getMapper().writeValueAsString(dto)).setContentType(ContentTypeVS.JSON);
                 processResult(responseVS);
+                break;
+            case CURRENCY_REQUEST:
+                processOperationWithPassword(getOperationMessage());
                 break;
             default:
                 processOperationWithPassword(signedMessageSubject);

@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.websocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Sets;
 import org.votingsystem.dto.ConnectedUsersDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.SocketMessageDto;
@@ -50,7 +51,7 @@ public class SessionVSManager {
         deviceSessionMap.put(userVS.getDeviceVS().getId(), session);
         if(userVSDeviceMap.containsKey(userVS.getId())) {
             userVSDeviceMap.get(userVS.getId()).add(userVS.getDeviceVS());
-        } else userVSDeviceMap.put(userVS.getId(), new HashSet<>(Arrays.asList(userVS.getDeviceVS())));
+        } else userVSDeviceMap.put(userVS.getId(), Sets.newHashSet(userVS.getDeviceVS()));
         session.getUserProperties().put("userVS", userVS);
         session.getUserProperties().put("deviceVS", userVS.getDeviceVS());
     }

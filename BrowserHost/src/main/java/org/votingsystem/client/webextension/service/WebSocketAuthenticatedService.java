@@ -1,6 +1,7 @@
 package org.votingsystem.client.webextension.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Sets;
 import javafx.concurrent.Task;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
@@ -294,7 +295,7 @@ public class WebSocketAuthenticatedService {
                                 currency.initSigner(socketMsg.getMessage().getBytes());
                                 qrDto.setCurrency(currency);
                                 qrDto.setTypeVS(TypeVS.CURRENCY_CHANGE);
-                                Wallet.saveToPlainWallet(new HashSet<>(Arrays.asList(currency)));
+                                Wallet.saveToPlainWallet(Sets.newHashSet(currency));
                             }
                             SocketMessageDto response = socketMsg.getResponse(ResponseVS.SC_OK, null,
                                     BrowserSessionService.getInstance().getConnectedDevice().getId(),

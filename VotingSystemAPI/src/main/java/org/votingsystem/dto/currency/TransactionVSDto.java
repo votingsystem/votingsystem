@@ -2,6 +2,7 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.collect.Sets;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.MessageSMIME;
 import org.votingsystem.model.TagVS;
@@ -98,8 +99,8 @@ public class TransactionVSDto {
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);
         dto.setSubject(subject);
-        dto.setToUserIBAN(new HashSet<>(Arrays.asList(toUserIBAN)));
-        dto.setTags(new HashSet<>(Arrays.asList(tag)));
+        dto.setToUserIBAN(Sets.newHashSet(toUserIBAN));
+        dto.setTags(Sets.newHashSet(tag));
         dto.setDateCreated(new Date());
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
@@ -112,8 +113,8 @@ public class TransactionVSDto {
         dto.setSubject(subject);
         dto.setToUser(toUser);
         dto.setAmount(amount);
-        dto.setToUserIBAN(new HashSet<>(Arrays.asList(toUserIBAN)));
-        dto.setTags(new HashSet<>(Arrays.asList(tag)));
+        dto.setToUserIBAN(Sets.newHashSet(toUserIBAN));
+        dto.setTags(Sets.newHashSet(tag));
         dto.setCurrencyCode(currencyCode);
         dto.setTimeLimited(isTimeLimited);
         dto.setUUID(java.util.UUID.randomUUID().toString());
@@ -128,8 +129,8 @@ public class TransactionVSDto {
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);
         dto.setSubject(subject);
-        dto.setToUserIBAN(new HashSet<>(Arrays.asList(toUserIBAN)));
-        dto.setTags(new HashSet<>(Arrays.asList(tag)));
+        dto.setToUserIBAN(Sets.newHashSet(toUserIBAN));
+        dto.setTags(Sets.newHashSet(tag));
         dto.setUUID(java.util.UUID.randomUUID().toString());
         return dto;
     }
@@ -399,7 +400,7 @@ public class TransactionVSDto {
     public void loadBankVSTransaction(String UUID) {
         setUUID(UUID);
         if((toUserIBAN == null || toUserIBAN.isEmpty()) && toUserVS != null) {
-            toUserIBAN = new HashSet<>(Arrays.asList(toUserVS.getIBAN()));
+            toUserIBAN = Sets.newHashSet(toUserVS.getIBAN());
             toUserVS = null;
         }
     }
@@ -488,7 +489,7 @@ public class TransactionVSDto {
             if(!paymentOptions.contains(TransactionVS.Type.CURRENCY_SEND)) throw new ValidationExceptionVS(
                     "unexpected type: " + receiptDto.getOperation());
         }
-        Set<String> receptorsSet = new HashSet<>(Arrays.asList(receiptDto.getToUserIBAN()));
+        Set<String> receptorsSet = Sets.newHashSet(receiptDto.getToUserIBAN());
         if(!toUserIBAN.equals(receptorsSet)) throw new ValidationExceptionVS(
                 "expected toUserIBAN " + toUserIBAN + " found " + receiptDto.getToUserIBAN());
         if(amount.compareTo(receiptDto.getBatchAmount()) != 0) throw new ValidationExceptionVS(

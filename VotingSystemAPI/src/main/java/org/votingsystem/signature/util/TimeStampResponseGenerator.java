@@ -1,5 +1,6 @@
 package org.votingsystem.signature.util;
 
+import com.google.common.collect.ImmutableSet;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cmp.PKIFreeText;
 import org.bouncycastle.asn1.cmp.PKIStatusInfo;
@@ -20,7 +21,6 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateEncodingException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,9 +33,9 @@ public class TimeStampResponseGenerator {
 
     private static Logger log = Logger.getLogger(TimeStampResponseGenerator.class.getSimpleName());
 
-    private static Set acceptedAlgorithms = new HashSet<>(Arrays.asList(TSPAlgorithms.SHA1, TSPAlgorithms.SHA256,
-            TSPAlgorithms.SHA512));
-    private static Set acceptedPolicies = new HashSet<>(Arrays.asList("1.2.3", "1.2.4"));
+    private static Set acceptedAlgorithms = ImmutableSet.<String> of(TSPAlgorithms.SHA1, TSPAlgorithms.SHA256,
+            TSPAlgorithms.SHA512);
+    private static Set acceptedPolicies = ImmutableSet.<String> of("1.2.3", "1.2.4");
     private static Set acceptedExtensions = new HashSet<>();
 
     public static final String SIGNATURE_ALGORITHM = "SHA256withRSA";

@@ -1,5 +1,6 @@
 package org.votingsystem.client.webextension.pane;
 
+import com.google.common.collect.Sets;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -16,7 +17,9 @@ import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.ContextVS;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 
@@ -45,7 +48,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
         }
         for(Currency currency : wallet) {
             if(currencyMap.containsKey(currency.getCurrencyCode())) currencyMap.get(currency.getCurrencyCode()).add(currency);
-            else currencyMap.put(currency.getCurrencyCode(), new HashSet<>(Arrays.asList(currency)));
+            else currencyMap.put(currency.getCurrencyCode(), Sets.newHashSet(currency));
         }
         for(String currencyCode : currencyMap.keySet()) {
             Set<Currency> currencySet = currencyMap.get(currencyCode);
@@ -57,7 +60,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
             Map<String, Set<Currency>> tagMap = new HashMap<>();
             for(Currency currency : currencySet) {
                 if(tagMap.containsKey(currency.getTagVS().getName())) tagMap.get(currency.getTagVS().getName()).add(currency);
-                else tagMap.put(currency.getTagVS().getName(), new HashSet<>(Arrays.asList(currency)));
+                else tagMap.put(currency.getTagVS().getName(), Sets.newHashSet(currency));
             }
             currencyPane.getChildren().add(currencyLbl);
             for(String tag: tagMap.keySet()) {

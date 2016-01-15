@@ -16,8 +16,8 @@ import org.votingsystem.test.util.TransactionVSCounter;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.Interval;
+import org.votingsystem.util.JSON;
 
 import java.math.BigDecimal;
 import java.util.*;

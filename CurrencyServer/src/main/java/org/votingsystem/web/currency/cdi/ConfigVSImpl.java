@@ -123,7 +123,7 @@ public class ConfigVSImpl implements ConfigVS {
                 URL res = res = Thread.currentThread().getContextClassLoader().getResource("defaultTags.txt");
                 String[] defaultTags = FileUtils.getStringFromInputStream(res.openStream()).split(",");
                 for(String tag: defaultTags) {
-                    createtagVS(tag);
+                    createtagVS(tag.trim());
                 }
             }
             new ContextVS(null, null);

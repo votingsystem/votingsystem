@@ -1,6 +1,7 @@
 package org.votingsystem.test.currency;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Sets;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
@@ -19,7 +20,9 @@ import org.votingsystem.util.StringUtils;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,7 +41,7 @@ public class CurrencyRequest {
         TransactionVSDto transactionVSDto = new TransactionVSDto();
         transactionVSDto.setAmount(totalAmount);
         transactionVSDto.setCurrencyCode(curencyCode);
-        transactionVSDto.setTags(new HashSet<>(Arrays.asList("HIDROGENO")));
+        transactionVSDto.setTags(Sets.newHashSet("ENERGY"));
         transactionVSDto.setTimeLimited(true);
         CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionVSDto, totalAmount,
                 ContextVS.getInstance().getCurrencyServer().getServerURL());

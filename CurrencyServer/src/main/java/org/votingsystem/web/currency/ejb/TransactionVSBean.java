@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
+import com.google.common.collect.Sets;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -224,7 +225,7 @@ public class TransactionVSBean {
         if(transactionVS.getTag() != null) {
             String tagName = TagVS.WILDTAG.equals(transactionVS.getTag().getName())? messages.get("wildTagLbl")
                     .toUpperCase():transactionVS.getTag().getName();
-            dto.setTags(new HashSet<>(Arrays.asList(tagName)));
+            dto.setTags(Sets.newHashSet(tagName));
         }
         return dto;
     }

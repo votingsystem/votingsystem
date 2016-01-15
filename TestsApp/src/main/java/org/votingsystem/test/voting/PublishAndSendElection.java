@@ -1,5 +1,6 @@
 package org.votingsystem.test.voting;
 
+import com.google.common.collect.Sets;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.voting.EventVSChangeDto;
@@ -47,7 +48,7 @@ public class PublishAndSendElection {
         eventVS.setSubject("voting subject");
         eventVS.setContent(Base64.getEncoder().encodeToString("<p>election content</p>".getBytes()));
         eventVS.setDateBegin(new Date());
-        eventVS.setFieldsEventVS(new HashSet<>(Arrays.asList(new FieldEventVS("field1", null), new FieldEventVS("field2", null))));
+        eventVS.setFieldsEventVS(Sets.newHashSet(new FieldEventVS("field1", null), new FieldEventVS("field2", null)));
 
         UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
         userBaseSimulationData.setUserIndex(100);

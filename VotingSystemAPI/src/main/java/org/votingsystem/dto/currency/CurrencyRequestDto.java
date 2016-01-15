@@ -126,11 +126,6 @@ public class CurrencyRequestDto {
         return requestDto;
     }
 
-
-    public void setTagVSDB(TagVS tagVS) {
-        this.tagVS = tagVS;
-    }
-
     public TypeVS getOperation() {
         return operation;
     }
