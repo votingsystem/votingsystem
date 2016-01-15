@@ -38,7 +38,7 @@ public class Wallet {
 
     private static Set<CurrencyDto> getPlainWalletDto() throws Exception {
         File walletFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.PLAIN_WALLET_FILE_NAME);
-        if(!walletFile.exists()) return Collections.emptySet();
+        if(!walletFile.exists()) return new HashSet<>();
         return JSON.getMapper().readValue(walletFile, new TypeReference<Set<CurrencyDto>>() { });
     }
 

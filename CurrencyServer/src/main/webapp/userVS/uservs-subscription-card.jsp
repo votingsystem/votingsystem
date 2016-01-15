@@ -26,7 +26,7 @@
             <!--<div style="width:200px;">{{subscription.uservs.iban}}</div>-->
             <div class="horizontal layout center-justified userVSname flex">{{subscription.uservs.name}}</div>
             <div class="horizontal layout center center-justified">
-                <div class="flex" class="stateInfo">{{userState(subscription.state)}}</div>
+                <div class="flex stateInfo">{{userState(subscription.state)}}</div>
                 <div class="date">{{getDate(subscription.dateCreated)}}</div>
             </div>
         </div>

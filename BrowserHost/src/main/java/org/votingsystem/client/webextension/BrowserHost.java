@@ -217,7 +217,7 @@ public class BrowserHost extends Application {
     public void createEmptyWallet (char[] password) {
         try {
             Wallet wallet = new Wallet();
-            wallet.createWallet(Collections.emptySet(), password);
+            wallet.createWallet(new HashSet<>(), password);
         } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
     }
 

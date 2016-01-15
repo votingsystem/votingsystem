@@ -85,12 +85,15 @@ public class VoteTask extends Task<Void> {
                 responseMap.put("voteVSReceipt", Base64.getEncoder().encodeToString(voteVSHelper.getValidatedVote().getBytes()));
                 responseVS.setMessage(JSON.getMapper().writeValueAsString(responseMap));
             }
-            operationVS.processResult(responseVS);
+
         } catch (KeyStoreExceptionVS ex) {
-            CertNotFoundDialog.showDialog(ex.getMessage());
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            responseVS = ResponseVS.ERROR(ex.getMessage());
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
-            operationVS.processResult(ResponseVS.ERROR(ex.getMessage()));
+            responseVS = ResponseVS.ERROR(ex.getMessage());
+        } finally {
+            operationVS.processResult(responseVS);
         }
         return null;
     }

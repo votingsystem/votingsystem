@@ -15,6 +15,8 @@ public class AddUserVSToGroupVS {
 
     private static Logger log =  Logger.getLogger(AddUserVSToGroupVS.class.getName());
 
+    private static boolean subscribeNewUserList = false;
+
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
@@ -38,12 +40,14 @@ public class AddUserVSToGroupVS {
         String groupVSURL = currencyServer.getGroupURL(simulationData.getGroupId());
         GroupVSDto groupVSDto = HttpHelper.getInstance().getData(GroupVSDto.class, groupVSURL, MediaTypeVS.JSON);
         groupVSDto.setOperation(TypeVS.CURRENCY_GROUP_SUBSCRIBE);
-        log.info("subscribeUsers");
-        List<DNIBundle> userList = authoritySignatureService.subscribeUsers(groupVSDto, simulationData, currencyServer);
-        if(!isWithUserValidation) simulationData.finishAndExit(ResponseVS.SC_OK, null);
+        if(subscribeNewUserList) {
+            log.info("subscribeUsers");
+            List<DNIBundle> userList = authoritySignatureService.subscribeUsers(groupVSDto, simulationData, currencyServer);
+            if(!isWithUserValidation) simulationData.finishAndExit(ResponseVS.SC_OK, null);
+        }
         log.info("activateUsers");
         SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER);
-        representativeSignatureService.validateUserVSSubscriptions(simulationData.getGroupId(), currencyServer, userList);
+        representativeSignatureService.validateUserVSSubscriptions(simulationData.getGroupId(), currencyServer);
         simulationData.finishAndExit(ResponseVS.SC_OK, null);
     }
 

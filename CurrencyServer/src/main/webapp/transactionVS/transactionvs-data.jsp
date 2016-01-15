@@ -7,7 +7,7 @@
         .IBANLink{ text-decoration: underline; color: #0000ee; cursor: pointer; }
         </style>
         <div id="modalDialog" class="modalDialog">
-            <div>
+            <div style="width: 450px;">
                 <div class="layout horizontal center center-justified" style="margin: 0px auto; max-width:800px; color:#667;">
                     <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">{{caption}}</div>
@@ -30,7 +30,7 @@
                     <div class="horizontal layout">
                         <div><b>${msg.dateLbl}: </b>{{getDate(transactionvs.dateCreated)}}</div>
                         <div hidden="{{!transactionvs.validTo}}" style="margin: 0 0 0 15px;"><b>${msg.validToLbl}: </b>
-                            <span>{{transactionvs.validTo}}</span></div>
+                            <span>{{getDate(transactionvs.validTo)}}</span></div>
                     </div>
                     <div hidden="{{!isSenderVisible}}" style="margin-left: 20px;">
                         <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">

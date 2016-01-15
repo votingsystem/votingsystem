@@ -1,8 +1,10 @@
 package org.votingsystem.client.webextension.task;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Sets;
 import javafx.concurrent.Task;
 import org.votingsystem.client.webextension.OperationVS;
+import org.votingsystem.client.webextension.dialog.CertNotFoundDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.service.InboxService;
 import org.votingsystem.client.webextension.util.InboxMessage;
@@ -13,6 +15,7 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
@@ -24,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CurrencyRequestTask extends Task<ResponseVS> {
@@ -42,32 +46,43 @@ public class CurrencyRequestTask extends Task<ResponseVS> {
 
     @Override protected ResponseVS call() throws Exception {
         log.info("sendCurrencyRequest");
-        updateMessage(message);
-        TransactionVSDto transactionVSDto = operationVS.getDocumentToSign(TransactionVSDto.class);
-        CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionVSDto,
-                transactionVSDto.getAmount(), operationVS.getTargetServer().getServerURL());
-        Map<String, Object> mapToSend = new HashMap<>();
-        byte[] requestBytes = JSON.getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());
-        mapToSend.put(ContextVS.CSR_FILE_NAME, requestBytes);
-        String textToSign =  JSON.getMapper().writeValueAsString(requestDto);
-        SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, operationVS.getReceiverName(), textToSign,
-                password, operationVS.getSignedMessageSubject());
-        updateMessage(operationVS.getSignedMessageSubject());
-        mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, smimeMessage.getBytes());
-        ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
-                ((CurrencyServer)operationVS.getTargetServer()).getCurrencyRequestServiceURL());
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            ResultListDto<String> resultListDto = (ResultListDto<String>) responseVS.getMessage(
-                    new TypeReference<ResultListDto<String>>(){});
-            requestDto.loadCurrencyCerts(resultListDto.getResultList());
-            Wallet.saveToPlainWallet(new HashSet<>(requestDto.getCurrencyMap().values()));
-            responseVS = new ResponseVS(responseVS.getStatusCode(), resultListDto.getMessage());
-            InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"), new Date());
-            inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(MapUtils.getCurrencyMap(
-                    requestDto.getCurrencyMap().values()))).setTypeVS(TypeVS.CURRENCY_IMPORT);
-            InboxService.getInstance().newMessage(inboxMessage, false);
+        ResponseVS responseVS = null;
+        try {
+            updateMessage(message);
+            TransactionVSDto transactionVSDto = operationVS.getDocumentToSign(TransactionVSDto.class);
+            CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionVSDto,
+                    transactionVSDto.getAmount(), operationVS.getTargetServer().getServerURL());
+            Map<String, Object> mapToSend = new HashMap<>();
+            byte[] requestBytes = JSON.getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());
+            mapToSend.put(ContextVS.CSR_FILE_NAME, requestBytes);
+            String textToSign =  JSON.getMapper().writeValueAsString(requestDto);
+            SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, operationVS.getReceiverName(), textToSign,
+                    password, operationVS.getSignedMessageSubject());
+            updateMessage(operationVS.getSignedMessageSubject());
+            mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, smimeMessage.getBytes());
+            responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
+                    ((CurrencyServer)operationVS.getTargetServer()).getCurrencyRequestServiceURL());
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                ResultListDto<String> resultListDto = (ResultListDto<String>) responseVS.getMessage(
+                        new TypeReference<ResultListDto<String>>(){});
+                requestDto.loadCurrencyCerts(resultListDto.getResultList());
+                Wallet.saveToPlainWallet(Sets.newHashSet(requestDto.getCurrencyMap().values()));
+                responseVS = new ResponseVS(responseVS.getStatusCode(), resultListDto.getMessage());
+                InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"), new Date());
+                inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(MapUtils.getCurrencyMap(
+                        requestDto.getCurrencyMap().values()))).setTypeVS(TypeVS.CURRENCY_IMPORT);
+                InboxService.getInstance().newMessage(inboxMessage, false);
+            }
+        } catch (KeyStoreExceptionVS ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            responseVS = ResponseVS.ERROR(ex.getMessage());
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            responseVS = ResponseVS.ERROR(ex.getMessage());
+        } finally {
+            operationVS.processResult(responseVS);
         }
-        operationVS.processResult(responseVS);
         return responseVS;
     }
+
 }

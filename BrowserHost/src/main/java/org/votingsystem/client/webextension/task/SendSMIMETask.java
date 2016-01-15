@@ -43,12 +43,14 @@ public class SendSMIMETask extends Task<ResponseVS> {
             responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
                     operationVS.getServiceURL(), headers);
             updateProgress(10, 10);
-            operationVS.processResult(responseVS);
         } catch (KeyStoreExceptionVS ex) {
-            CertNotFoundDialog.showDialog(ex.getMessage());
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            responseVS = ResponseVS.ERROR(ex.getMessage());
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
-            operationVS.processResult(ResponseVS.ERROR(ex.getMessage()));
+            responseVS = ResponseVS.ERROR(ex.getMessage());
+        } finally {
+            operationVS.processResult(responseVS);
         }
         return responseVS;
     }

@@ -18,8 +18,8 @@ public class CurrencyCheckResponse {
 
     private Integer statusCode;
     private String message;
-    private Set<CurrencyStateDto> currencyOKSet = Collections.emptySet();
-    private Set<CurrencyStateDto> currencyWithErrorSet = Collections.emptySet();
+    private Set<CurrencyStateDto> currencyOKSet = new HashSet<>();
+    private Set<CurrencyStateDto> currencyWithErrorSet = new HashSet<>();
 
     public CurrencyCheckResponse(Integer statusCode, String message, Set<CurrencyStateDto> OKSet, Set<CurrencyStateDto> errorSet){
         this.statusCode = statusCode;

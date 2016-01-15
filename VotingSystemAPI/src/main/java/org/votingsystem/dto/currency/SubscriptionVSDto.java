@@ -24,6 +24,7 @@ public class SubscriptionVSDto {
     private String activationSMIME_URL;
     private String cancellationSMIME_URL;
     private String reason;
+    private String UUID;
     private TypeVS operation;
     private GroupVSDto groupvs;
     private UserVSDto uservs;
@@ -72,6 +73,7 @@ public class SubscriptionVSDto {
         groupvsName = groupvs.getName();
         userVSName = uservs.getName();
         userVSNIF = uservs.getNIF();
+        UUID = java.util.UUID.randomUUID().toString();
     }
 
     public void validateDeActivationRequest() throws ValidationExceptionVS {
@@ -214,5 +216,13 @@ public class SubscriptionVSDto {
 
     public void setGroupvsId(Long groupvsId) {
         this.groupvsId = groupvsId;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
     }
 }

@@ -6,7 +6,6 @@
     <template>
         <div id="modalDialog" class="modalDialog">
             <div style="height: 400px;">
-
                 <div class="layout horizontal center center-justified">
                     <div class="flex" style="font-size: 1.5em; font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">{{subscriptionDto.uservs.name}}</div>
@@ -43,10 +42,10 @@
                 </div>
                 <div id="receipt" style="display:none;"> </div>
             </div>
-            <div style="position: absolute; width: 100%; top:0px;left:0px;">
-                <div class="layout horizontal center center-justified" style="padding:0px 0px 0px 0px;margin:0px auto 0px auto;">
-                    <reason-dialog id="reasonDialog" caption="${msg.cancelSubscriptionFormCaption}" ></reason-dialog>
-                </div>
+        </div>
+        <div style="position: absolute; width: 100%; top:0px;left:0px;">
+            <div class="layout horizontal center center-justified" style="padding:0px 0px 0px 0px;margin:0px auto 0px auto;">
+                <reason-dialog id="reasonDialog" caption="${msg.cancelSubscriptionFormCaption}" ></reason-dialog>
             </div>
         </div>
     </template>

@@ -84,6 +84,7 @@ public class InboxService {
         try {
             messagesFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.INBOX_FILE);
             if(messagesFile.createNewFile()) {
+                messageListDto = new ArrayList<>();
                 messageList = new ArrayList<>();
                 flush();
             } else messageListDto =  JSON.getMapper().readValue(messagesFile, new TypeReference<List<InboxMessageDto>>() {
@@ -153,15 +154,11 @@ public class InboxService {
         switch(inboxMessage.getTypeVS()) {
             case CURRENCY_IMPORT:
                 messageList.add(inboxMessage);
-                PlatformImpl.runLater(() -> {
-                    if(openInboxDialog) InboxDialog.showDialog();
-                });
+                if(openInboxDialog) InboxDialog.showDialog();
                 break;
             case MESSAGEVS://message comes decrypted with session keys
                 messageList.add(inboxMessage);
-                PlatformImpl.runLater(() -> {
-                    if(openInboxDialog) InboxDialog.showDialog();
-                });
+                if(openInboxDialog) InboxDialog.showDialog();
                 flush();
                 break;
             case MESSAGEVS_TO_DEVICE:

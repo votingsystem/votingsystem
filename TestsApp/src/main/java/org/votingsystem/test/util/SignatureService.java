@@ -238,13 +238,9 @@ public class SignatureService {
         return userList;
     }
 
-    public Collection<SubscriptionVSDto> validateUserVSSubscriptions(Long groupVSId, CurrencyServer currencyServer,
-                           List<DNIBundle> userList) throws Exception {
+    public Collection<SubscriptionVSDto> validateUserVSSubscriptions(Long groupVSId, CurrencyServer currencyServer)
+            throws Exception {
         log.info("validateUserVSSubscriptions");
-        Map<String, DNIBundle> userVSMap = new HashMap<>();
-        for(DNIBundle mockDNI:userList) {
-            userVSMap.put(mockDNI.getNif(), mockDNI);
-        }
         ResultListDto<SubscriptionVSDto> subscriptionVSDtoList = HttpHelper.getInstance().getData(new TypeReference<ResultListDto<SubscriptionVSDto>>(){},
                 currencyServer.getGroupVSUsersServiceURL( groupVSId, 1000, 0, SubscriptionVS.State.PENDING, UserVS.State.ACTIVE),
                 MediaTypeVS.JSON);
