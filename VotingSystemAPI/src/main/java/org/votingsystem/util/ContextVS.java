@@ -325,30 +325,28 @@ public class ContextVS {
         }
     }
 
-
     public ResponseVS<ActorVS> checkServer(String serverURL) throws Exception {
         log.info(" - checkServer: " + serverURL);
         ActorVS actorVS = null;
         if(currencyServer != null && currencyServer.getServerURL().equals(serverURL)) actorVS = currencyServer;
-        if(accessControl != null && accessControl.getServerURL().equals(serverURL)) actorVS = accessControl;
-        if(controlCenter != null && controlCenter.getServerURL().equals(serverURL)) actorVS = controlCenter;
+        else if(accessControl != null && accessControl.getServerURL().equals(serverURL)) actorVS = accessControl;
+        else if(controlCenter != null && controlCenter.getServerURL().equals(serverURL)) actorVS = controlCenter;
         if (actorVS == null) {
-            String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
-            ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
+            ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 actorVS = ((ActorVSDto) responseVS.getMessage(ActorVSDto.class)).getActorVS();
                 responseVS.setData(actorVS);
                 log.log(Level.INFO,"checkServer - adding " + serverURL.trim() + " to sever map");
                 switch (actorVS.getType()) {
                     case ACCESS_CONTROL:
-                        ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
+                        setAccessControl((AccessControlVS) actorVS);
                         break;
                     case CURRENCY:
-                        ContextVS.getInstance().setCurrencyServer((CurrencyServer) actorVS);
-                        ContextVS.getInstance().setTimeStampServerCert(actorVS.getTimeStampCert());
+                        setCurrencyServer((CurrencyServer) actorVS);
+                        setTimeStampServerCert(actorVS.getTimeStampCert());
                         break;
                     case CONTROL_CENTER:
-                        ContextVS.getInstance().setControlCenter((ControlCenterVS) actorVS);
+                        setControlCenter((ControlCenterVS) actorVS);
                         break;
                     default:
                         log.info("Unprocessed actor:" + actorVS.getType());

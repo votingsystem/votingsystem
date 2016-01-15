@@ -1,6 +1,8 @@
 package org.votingsystem.client.webextension.pane;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,27 +17,35 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.dialog.DialogVS;
+import org.votingsystem.client.webextension.dialog.PasswordDialog;
+import org.votingsystem.client.webextension.dialog.ProgressDialog;
+import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.util.Utils;
+import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SignDocumentFormPane extends GridPane implements SignDocumentFormStackPane.OperationListener {
+public class SignDocumentFormPane extends GridPane {
 
     private static Logger log = Logger.getLogger(SignDocumentFormPane.class.getSimpleName());
+
+    public enum Operation {SEND_SMIME, SIGN_SMIME}
 
     private TextArea textArea;
     private Button signButton;
@@ -44,7 +54,6 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
     private TextField serviceURLTextField;
     private TextField messageSubjectTextField;
     private TextField toUserTextField;
-    private SignDocumentFormStackPane documentSignerHelper;
 
     public SignDocumentFormPane() {
         setPadding(new Insets(10, 10 , 10, 10));
@@ -62,9 +71,12 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
 
         signButton = new Button(ContextVS.getMessage("signLbl"));
         signButton.setGraphic((Utils.getIcon(FontAwesome.Glyph.PENCIL)));
-        signButton.setOnAction(actionEvent -> documentSignerHelper.processOperation(
-                SignDocumentFormStackPane.Operation.SIGN_SMIME, toUserTextField.getText(),
-                textArea.getText(), messageSubjectTextField.getText(), smimeMessage, null));
+        signButton.setOnAction(actionEvent -> {
+            PasswordDialog.showWithoutPasswordConfirm(password -> {
+                    if(password == null) return;
+                    ProgressDialog.show(new OperationHandlerTask(Operation.SIGN_SMIME, password, null), null);
+                }, null);
+        });
         Button saveButton = new Button(ContextVS.getMessage("saveLbl"));
         saveButton.setGraphic((Utils.getIcon(FontAwesome.Glyph.SAVE)));
         saveButton.setOnAction(actionEvent -> saveMessage(smimeMessage));
@@ -118,8 +130,6 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         setMargin(buttonsBox, new Insets(20, 20, 0, 20));
         add(buttonsBox, 0, 4);
         textArea.requestFocus();
-        documentSignerHelper = new SignDocumentFormStackPane(this);
-        documentSignerHelper.getChildren().add(0, this);
     }
 
     private void sendDocumentToService() {
@@ -130,12 +140,14 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
         if(smimeMessage == null) {
             BrowserHost.showMessage(ResponseVS.SC_ERROR, "Missing signed document");
         } else {
-            String targetURL = null;
+            final StringBuilder serviceURL = new StringBuilder("");
             if(serviceURLTextField.getText().startsWith("http://") || serviceURLTextField.getText().startsWith("https://")) {
-                targetURL = serviceURLTextField.getText().trim();
-            } else targetURL = "http://" + serviceURLTextField.getText().trim();
-            documentSignerHelper.processOperation(SignDocumentFormStackPane.Operation.SEND_SMIME, null, null,
-                    messageSubjectTextField.getText(), smimeMessage, targetURL);
+                serviceURL.append(serviceURLTextField.getText().trim());
+            } else serviceURL.append("http://" + serviceURLTextField.getText().trim());
+            PasswordDialog.showWithoutPasswordConfirm(password -> {
+                if(password == null) return;
+                ProgressDialog.show(new OperationHandlerTask(Operation.SEND_SMIME, password, serviceURL.toString()), null);
+            }, null);
         }
     }
 
@@ -161,7 +173,73 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
     }
 
 
-    @Override public void processResult(SignDocumentFormStackPane.Operation operation, ResponseVS responseVS) {
+    public class OperationHandlerTask extends Task<ResponseVS> {
+
+        private Operation operation;
+        private String serviceURL;
+        private String toUser;
+        private String messageSubject;
+        private String textToSign;
+        private char[] password;
+
+        OperationHandlerTask(Operation operation, char[] password, String serviceURL) {
+            this.operation = operation;
+            this.serviceURL = serviceURL;
+            this.password = password;
+            this.toUser = toUserTextField.getText();
+            this.messageSubject = messageSubjectTextField.getText();
+            this.textToSign = textArea.getText();
+        }
+
+        @Override protected ResponseVS call() throws Exception {
+            ResponseVS responseVS = null;
+            switch(operation) {
+                case SEND_SMIME:
+                    try {
+                        updateMessage(ContextVS.getMessage("sendingDocumentMsg"));
+                        updateProgress(20, 100);
+                        responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                                serviceURL);
+                        updateProgress(80, 100);
+                    } catch(Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+                    }
+                    break;
+                case SIGN_SMIME:
+                    try {
+                        Map<String, Object> textToSignMap = null;
+                        try {
+                            textToSignMap = JSON.getMapper().readValue(
+                                    textToSign.replaceAll("(\\r|\\n)", "\\\\n"), new TypeReference<HashMap<String, Object>>() {});
+                        } catch (Exception ex) {
+                            textToSignMap = new HashMap<>();
+                            textToSignMap.put("message", textToSign);
+                        }
+                        textToSignMap.put("UUID", UUID.randomUUID().toString());
+                        toUser = StringUtils.getNormalized(toUser);
+                        String timeStampService = ActorVS.getTimeStampServiceURL(ContextVS.getMessage("defaultTimeStampServer"));
+                        log.info("toUser: " + toUser + " - timeStampService: " + timeStampService);
+                        smimeMessage = BrowserSessionService.getSMIME(null, toUser,
+                                textToSignMap.toString(), password, messageSubject);
+                        updateMessage(ContextVS.getMessage("gettingTimeStampMsg"));
+                        updateProgress(40, 100);
+                        MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampService);
+                        smimeMessage = timeStamper.call();
+                        responseVS = ResponseVS.OK(null).setSMIME(smimeMessage);
+                    } catch(Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage() + " - " + textToSign.replaceAll("(\\r|\\n)", "\\\\n"), ex);
+                        responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
+                    }
+                    break;
+            }
+            processResult(operation, responseVS);
+            return responseVS;
+        }
+
+    }
+
+    public void processResult(Operation operation, ResponseVS responseVS) {
         log.info("processResult - operation: " + operation + " - result: " + responseVS.getStatusCode());
         switch(operation) {
             case SIGN_SMIME:
@@ -185,4 +263,5 @@ public class SignDocumentFormPane extends GridPane implements SignDocumentFormSt
                 break;
         }
     }
+
 }

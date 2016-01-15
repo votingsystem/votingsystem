@@ -221,7 +221,7 @@ public class Wallet {
         }
     }
 
-    public static CurrencyCheckResponse validateCertVSHashSet(Set<Currency> currencySet) throws Exception {
+    public static CurrencyCheckResponse validateWithServer(Set<Currency> currencySet) throws Exception {
         CurrencyCheckResponse response = null;
         try {
             Map<String, Currency> currencyMap = new HashMap<>();

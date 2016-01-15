@@ -140,7 +140,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
 
         @Override protected ResponseVS call() throws Exception {
             try {
-                log.info("WebSocketTask - Connecting to " + targetServer.getWebSocketURL() + " ...");
+                log.info("Connecting to " + targetServer.getWebSocketURL());
                 client.connectToServer(new WSEndpoint(), URI.create(targetServer.getWebSocketURL()));
             }catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);

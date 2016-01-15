@@ -3,7 +3,6 @@ package org.votingsystem.client.webextension.dialog;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -72,22 +71,19 @@ public class PasswordDialog extends DialogVS {
         acceptButton.setOnAction(event -> checkPasswords());
         acceptButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CHECK));
 
-        password1Field.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-                    if ((event.getCode() == KeyCode.ENTER)) {
+        password1Field.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+                    if ((keyEvent.getCode() == KeyCode.ENTER)) {
                         acceptButton.fire();
                     }
                     setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
                 }
         );
 
-        password2Field.addEventHandler(KeyEvent.KEY_PRESSED,
-                new EventHandler<KeyEvent>() {
-                    public void handle(KeyEvent event) {
-                        if ((event.getCode() == KeyCode.ENTER)) {
-                            acceptButton.fire();
-                        }
-                        setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
+        password2Field.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+                    if ((keyEvent.getCode() == KeyCode.ENTER)) {
+                        acceptButton.fire();
                     }
+                    setCapsLockState(Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK));
                 }
         );
 
@@ -123,7 +119,7 @@ public class PasswordDialog extends DialogVS {
         String password2 = null;
         if(!isWithPasswordConfirm) password2 = password1;
         else password2 = new String(password2Field.getText());
-        if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("passwordMissing"));
+        if(password1.trim().isEmpty() && password2.trim().isEmpty()) setMessage(ContextVS.getMessage("password1Lbl"));
         else {
             if (password1.equals(password2)) {
                 password = password1.toCharArray();

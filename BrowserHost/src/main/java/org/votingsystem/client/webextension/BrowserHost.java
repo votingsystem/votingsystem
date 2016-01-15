@@ -224,7 +224,7 @@ public class BrowserHost extends Application {
         try {
             wallet = wallet.load(password);
             Set<Currency> currencySet = wallet.getCurrencySet();
-            Future<CurrencyCheckResponse> future = executorService.submit(() -> Wallet.validateCertVSHashSet(currencySet));
+            Future<CurrencyCheckResponse> future = executorService.submit(() -> Wallet.validateWithServer(currencySet));
             CurrencyCheckResponse response = future.get();
             if(ResponseVS.SC_OK == response.getStatusCode()) {
                 return currencySet;

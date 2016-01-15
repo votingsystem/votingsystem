@@ -50,7 +50,7 @@ public class WalletDialog extends DialogVS {
         checkCurrencyMenuItem.setOnAction(event -> {
             ProgressDialog.show(new Task() {
                 @Override protected Object call() throws Exception {
-                    return Wallet.validateCertVSHashSet(currencySet);
+                    return Wallet.validateWithServer(currencySet);
                 }
             }, ContextVS.getMessage("walletLbl"));
         });
