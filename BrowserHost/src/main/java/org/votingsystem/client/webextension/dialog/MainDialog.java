@@ -92,9 +92,8 @@ public class MainDialog {
         HBox firsRowButtonsBox = new HBox(10);
         HBox secondRowButtonsBox = new HBox(10);
         
-        connectionButton = new Button(ContextVS.getMessage("connectLbl"));
+        connectionButton = new Button(ContextVS.getMessage("connectLbl"), Utils.getIcon(FontAwesome.Glyph.CLOUD_UPLOAD, Utils.COLOR_RED_DARK));
         connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
-        connectionButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CLOUD_UPLOAD, Utils.COLOR_RED_DARK));
         connectionButton.setOnAction(event -> {
             if(isConnected.get()) {
                 Button optionButton = new Button(ContextVS.getMessage("disconnectLbl"));
@@ -111,16 +110,13 @@ public class MainDialog {
             }
         });
 
-        walletButton = new Button(ContextVS.getMessage("walletLbl"));
-        walletButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.MONEY));
+        walletButton = new Button(ContextVS.getMessage("walletLbl"), Utils.getIcon(FontAwesome.Glyph.MONEY));
         walletButton.setOnAction(event -> WalletDialog.showDialog());
         
-        qrCodeButton = new Button(ContextVS.getMessage("createQRLbl"));
-        qrCodeButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.QRCODE));
+        qrCodeButton = new Button(ContextVS.getMessage("createQRLbl"), Utils.getIcon(FontAwesome.Glyph.QRCODE));
         qrCodeButton.setOnAction(event -> QRTransactionFormDialog.showDialog());
 
-        Button settingsButton = new Button(ContextVS.getMessage("settingsLbl"));
-        settingsButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.COG));
+        Button settingsButton = new Button(ContextVS.getMessage("settingsLbl"), Utils.getIcon(FontAwesome.Glyph.COG));
         settingsButton.setOnAction(actionEvent -> SettingsDialog.showDialog());
 
 

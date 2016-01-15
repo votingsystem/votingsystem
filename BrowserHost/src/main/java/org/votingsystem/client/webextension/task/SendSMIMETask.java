@@ -45,7 +45,7 @@ public class SendSMIMETask extends Task<ResponseVS> {
             updateProgress(10, 10);
             operationVS.processResult(responseVS);
         } catch (KeyStoreExceptionVS ex) {
-            CertNotFoundDialog.showDialog();
+            CertNotFoundDialog.showDialog(ex.getMessage());
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             operationVS.processResult(ResponseVS.ERROR(ex.getMessage()));

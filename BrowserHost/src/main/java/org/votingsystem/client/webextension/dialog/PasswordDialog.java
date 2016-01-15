@@ -109,7 +109,7 @@ public class PasswordDialog extends DialogVS {
     }
 
     private void closePasswordDialog() {
-        listener.processPassword(password);
+        if(password == null) listener.processPassword(password);
         hide();
     }
 

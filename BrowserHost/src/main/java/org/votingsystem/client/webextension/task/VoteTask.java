@@ -87,7 +87,7 @@ public class VoteTask extends Task<Void> {
             }
             operationVS.processResult(responseVS);
         } catch (KeyStoreExceptionVS ex) {
-            CertNotFoundDialog.showDialog();
+            CertNotFoundDialog.showDialog(ex.getMessage());
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             operationVS.processResult(ResponseVS.ERROR(ex.getMessage()));

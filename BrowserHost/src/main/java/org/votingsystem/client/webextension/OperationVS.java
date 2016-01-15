@@ -24,7 +24,6 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.signature.util.CryptoTokenVS;
-import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.*;
 
 import java.io.File;
@@ -278,15 +277,10 @@ public class OperationVS implements PasswordDialog.Listener {
             try {
                 switch (operation) {
                     case WALLET_SAVE:
-                        try {
+                        if(BrowserHost.getInstance().loadWallet(password) != null) {
                             BrowserHost.getInstance().loadWallet(password);
                             BrowserHost.sendMessageToBrowser(MessageDto.SIGNAL(ResponseVS.SC_OK, "vs-wallet-save"));
                             InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
-                        } catch (WalletException wex) {
-                            Utils.showWalletNotFoundMessage();
-                        } catch (Exception ex) {
-                            log.log(Level.SEVERE, ex.getMessage(), ex);
-                            BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                         }
                         break;
                     case PUBLISH_EVENT:

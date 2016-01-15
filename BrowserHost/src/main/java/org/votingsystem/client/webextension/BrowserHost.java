@@ -18,6 +18,7 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
+import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
@@ -220,7 +221,7 @@ public class BrowserHost extends Application {
         } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
     }
 
-    public Set<Currency> loadWallet(char[] password) throws Exception {
+    public Set<Currency> loadWallet(char[] password) {
         try {
             wallet = wallet.load(password);
             Set<Currency> currencySet = wallet.getCurrencySet();
@@ -250,11 +251,14 @@ public class BrowserHost extends Application {
                 }
                 return null;
             }
-        } catch (Exception ex) {
+        } catch (WalletException wex) {
+            Utils.showWalletNotFoundMessage();
+            return null;
+        }  catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
-            wallet = null;
             showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-            return Collections.emptySet();
+            wallet = null;
+            return null;
         }
     }
 }

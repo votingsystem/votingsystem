@@ -11,13 +11,11 @@ import org.votingsystem.client.webextension.dto.InboxMessageDto;
 import org.votingsystem.client.webextension.task.InboxDecryptTask;
 import org.votingsystem.client.webextension.util.InboxMessage;
 import org.votingsystem.client.webextension.util.MsgUtils;
-import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.util.CryptoTokenVS;
-import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
@@ -70,8 +68,6 @@ public class InboxService {
                 String socketMsgStr = JSON.getMapper().writeValueAsString(messageDto.
                         getResponse(ResponseVS.SC_OK, null, deviceFromId, messageDto.getOperation()));
                 WebSocketAuthenticatedService.getInstance().sendMessage(socketMsgStr);
-            } catch (WalletException wex) {
-                Utils.showWalletNotFoundMessage();
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
@@ -228,15 +224,7 @@ public class InboxService {
             case CURRENCY_IMPORT:
                 PasswordDialog.showWithoutPasswordConfirm(passw -> {
                     if(passw == null) return;
-                    try {
-                        BrowserHost.getInstance().loadWallet(passw);
-                        removeMessage(currentMessage);
-                    } catch (WalletException wex) {
-                        Utils.showWalletNotFoundMessage();
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                    }
+                    if(BrowserHost.getInstance().loadWallet(passw) != null) removeMessage(currentMessage);
                 }, ContextVS.getMessage("walletPinMsg"));
                 break;
             case MESSAGEVS_TO_DEVICE:

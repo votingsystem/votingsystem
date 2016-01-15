@@ -133,7 +133,7 @@ public class WebSocketAuthenticatedService {
 
     public void setConnectionEnabled(boolean isConnectionEnabled){
         if(BrowserSessionService.getInstance().getCryptoToken() == null) {
-            CertNotFoundDialog.showDialog();
+            CertNotFoundDialog.showDialog(ContextVS.getMessage("cryptoTokenNotFoundErrorMsg"));
             return;
         }
         if(isConnectionEnabled) {
@@ -362,7 +362,7 @@ public class WebSocketAuthenticatedService {
                 client.connectToServer(new WSEndpoint(connectionMessage), URI.create(targetServer.getWebSocketURL()));
                 responseVS = ResponseVS.OK().setSMIME(smimeMessage);
             } catch (KeyStoreExceptionVS ex) {
-                CertNotFoundDialog.showDialog();
+                CertNotFoundDialog.showDialog(ex.getMessage());
             } catch(InterruptedException ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
