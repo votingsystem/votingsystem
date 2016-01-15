@@ -166,8 +166,9 @@ public class SocketMessageDto {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
+    public SocketMessageDto setOperation(TypeVS operation) {
         this.operation = operation;
+        return this;
     }
 
     public String getRemoteAddress() {

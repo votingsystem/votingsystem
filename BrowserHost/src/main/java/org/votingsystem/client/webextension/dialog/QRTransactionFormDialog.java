@@ -124,7 +124,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                 BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("improperTokenMsg"));
                 return;
             }
-            if(!BrowserSessionService.getInstance().isConnected()) {
+            if(!WebSocketAuthenticatedService.getInstance().isConnected()) {
                 Button connectionButton = new Button(ContextVS.getMessage("connectLbl"),
                         Utils.getIcon(FontAwesome.Glyph.CLOUD_UPLOAD));
                 connectionButton.setOnAction(event -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true));

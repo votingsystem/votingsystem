@@ -1,5 +1,6 @@
 package org.votingsystem.client.webextension.service;
 
+import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Button;
 import org.controlsfx.glyphfont.FontAwesome;
@@ -15,6 +16,7 @@ import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.RepresentationState;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 import org.votingsystem.signature.util.*;
@@ -54,6 +56,21 @@ public class BrowserSessionService {
     private static ResponseVS<SMIMEMessage> messageToDeviceResponse;
     private static final BrowserSessionService INSTANCE = new BrowserSessionService();
 
+    class EventBusWebSocketListener {
+        @Subscribe public void call(SocketMessageDto socketMessage) {
+            switch(socketMessage.getOperation()) {
+                case DISCONNECT:
+                    browserSessionDto.setIsConnected(false);
+                    flush();
+                    break;
+                case CONNECT:
+                    browserSessionDto.setIsConnected(true);
+                    flush();
+                    break;
+            }
+        }
+    }
+
     private BrowserSessionService() {
         try {
             sessionFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.BROWSER_SESSION_FILE);
@@ -69,6 +86,7 @@ public class BrowserSessionService {
             }
             browserSessionDto.setIsConnected(false);
             flush();
+            EventBusService.getInstance().register(new EventBusWebSocketListener());
         } catch (Exception ex) {
             log.log(Level.SEVERE,ex.getMessage(), ex);
         }
@@ -157,15 +175,6 @@ public class BrowserSessionService {
 
     public static BrowserSessionService getInstance() {
         return INSTANCE;
-    }
-
-    public void setIsConnected(boolean isConnected) {
-        browserSessionDto.setIsConnected(isConnected);
-        flush();
-    }
-
-    public boolean isConnected() {
-        return browserSessionDto.isConnected();
     }
 
     public SocketMessageDto initAuthenticatedSession(SocketMessageDto socketMsg, UserVS userVS) {

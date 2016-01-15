@@ -11,9 +11,11 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.WebSocketSession;
 
 import javax.websocket.*;
@@ -106,7 +108,6 @@ public class WebSocketService extends Service<ResponseVS> {
 
         @OnClose public void onClose(Session session, CloseReason closeReason) {
             broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
-            BrowserSessionService.getInstance().setIsConnected(false);
         }
 
         @OnMessage public void onMessage(String message) {
@@ -199,9 +200,11 @@ public class WebSocketService extends Service<ResponseVS> {
         switch (status) {
             case CLOSED:
                 BrowserHost.sendMessageToBrowser(MessageDto.WEB_SOCKET(ResponseVS.SC_CANCELED, null));
+                EventBusService.getInstance().post(new SocketMessageDto().setOperation(TypeVS.DISCONNECT));
                 break;
             case OPEN:
                 BrowserHost.sendMessageToBrowser(MessageDto.WEB_SOCKET(ResponseVS.SC_OK, null));
+                EventBusService.getInstance().post(new SocketMessageDto().setOperation(TypeVS.CONNECT));
                 break;
         }
     }

@@ -1,8 +1,6 @@
 package org.votingsystem.client.webextension.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.sun.javafx.application.PlatformImpl;
-import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
@@ -39,7 +37,7 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class WebSocketAuthenticatedService extends Service<ResponseVS> {
+public class WebSocketAuthenticatedService {
 
     private static Logger log = Logger.getLogger(WebSocketAuthenticatedService.class.getSimpleName());
 
@@ -51,7 +49,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
     private ActorVS targetServer;
     private Session session;
     private UserVS userVS;
-    private String connectionMessage = null;
+
     private PasswordDialog.Listener websocketInitPasswordListener = new PasswordDialog.Listener() {
         @Override public void processPassword(char[] password) {
             if(password == null) broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
@@ -80,7 +78,7 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
             } catch(Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }
-        } else log.info("settings for INSECURE connection");
+        } else log.info("settings for WebSocket - INSECURE - connection");
     }
 
     public static WebSocketAuthenticatedService getInstance() {
@@ -109,6 +107,12 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
     @ClientEndpoint(configurator = EndpointConfigurator.class)
     public class WSEndpoint {
 
+        private String connectionMessage;
+
+        public WSEndpoint(String connectionMessage) {
+            this.connectionMessage = connectionMessage;
+        }
+
         @OnOpen public void onOpen(Session session) throws IOException {
             session.getBasicRemote().sendText(connectionMessage);
             WebSocketAuthenticatedService.this.session = session;
@@ -116,10 +120,6 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
 
         @OnClose public void onClose(Session session, CloseReason closeReason) {
             broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
-            BrowserSessionService.getInstance().setIsConnected(false);
-            SocketMessageDto socketMessageDto = new SocketMessageDto();
-            socketMessageDto.setOperation(TypeVS.DISCONNECT);
-            EventBusService.getInstance().post(socketMessageDto);
         }
 
         @OnMessage public void onMessage(String message) {
@@ -131,32 +131,12 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         }
     }
 
-
-    @Override protected Task<ResponseVS> createTask() {
-        return new WebSocketTask();
-    }
-
-    class WebSocketTask extends Task<ResponseVS> {
-
-        @Override protected ResponseVS call() throws Exception {
-            try {
-                log.info("Connecting to " + targetServer.getWebSocketURL());
-                client.connectToServer(new WSEndpoint(), URI.create(targetServer.getWebSocketURL()));
-            }catch (Exception ex) {
-                log.log(Level.SEVERE, ex.getMessage(), ex);
-            }
-            return null;
-        }
-    }
-
     public void setConnectionEnabled(boolean isConnectionEnabled){
         if(BrowserSessionService.getInstance().getCryptoToken() == null) {
             CertNotFoundDialog.showDialog();
             return;
         }
         if(isConnectionEnabled) {
-            PasswordDialog.showWithoutPasswordConfirm(websocketInitPasswordListener,
-                    ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
             if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
                 PasswordDialog.showWithoutPasswordConfirm(websocketInitPasswordListener,
                         ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
@@ -347,9 +327,11 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
         switch (status) {
             case CLOSED:
                 BrowserHost.sendMessageToBrowser(MessageDto.WEB_SOCKET(ResponseVS.SC_CANCELED, null));
+                EventBusService.getInstance().post(new SocketMessageDto().setOperation(TypeVS.DISCONNECT));
                 break;
             case OPEN:
                 BrowserHost.sendMessageToBrowser(MessageDto.WEB_SOCKET(ResponseVS.SC_OK, null));
+                EventBusService.getInstance().post(new SocketMessageDto().setOperation(TypeVS.CONNECT));
                 break;
         }
     }
@@ -369,7 +351,6 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
             try {
                 SocketMessageDto dto = SocketMessageDto.INIT_SESSION_REQUEST(
                         BrowserSessionService.getInstance().getCryptoToken().getDeviceId());
-
                 if(BrowserSessionService.getCryptoTokenType() == CryptoTokenVS.MOBILE) {
                     updateMessage(ContextVS.getMessage("checkDeviceVSCryptoTokenMsg"));
                 } else updateMessage(ContextVS.getMessage("connectionMsg"));
@@ -377,10 +358,9 @@ public class WebSocketAuthenticatedService extends Service<ResponseVS> {
                         JSON.getMapper().writeValueAsString(dto), password,
                         ContextVS.getMessage("initAuthenticatedSessionMsgSubject"));
                 userVS = smimeMessage.getSigner();
-                connectionMessage = JSON.getMapper().writeValueAsString(dto.setSMIME(smimeMessage));
-                PlatformImpl.runLater(() -> WebSocketAuthenticatedService.this.restart());
+                String connectionMessage = JSON.getMapper().writeValueAsString(dto.setSMIME(smimeMessage));
+                client.connectToServer(new WSEndpoint(connectionMessage), URI.create(targetServer.getWebSocketURL()));
                 responseVS = ResponseVS.OK().setSMIME(smimeMessage);
-
             } catch (KeyStoreExceptionVS ex) {
                 CertNotFoundDialog.showDialog();
             } catch(InterruptedException ex) {
