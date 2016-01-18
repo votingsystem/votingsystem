@@ -32,7 +32,7 @@ public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listene
 
     public WalletPane() {
         super(new VBox(10));
-        setAlignment(Pos.CENTER);
+        setAlignment(Pos.TOP_CENTER);
         getStylesheets().add(Utils.getResource("/css/wallet-pane.css"));
         VBox.setVgrow(this, Priority.ALWAYS);
         getStyleClass().add("main-pane");

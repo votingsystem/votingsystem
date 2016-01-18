@@ -10,17 +10,18 @@ import java.util.Map;
  */
 public class CurrencyCodeChoiceBox extends ChoiceBox {
 
-    public static final Map currencyMap = new HashMap<>();
+    public static final Map<String, String> currencyMap = new HashMap(){{
+        put("Euro", "EUR");
+        put("Dollar", "USD");
+        put("Yuan", "CNY");
+        put("Yen", "JPY");
+    }};
 
 
     public CurrencyCodeChoiceBox() {
         super();
-        currencyMap.put("Euro", "EUR");
-        currencyMap.put("Dollar", "USD");
-        currencyMap.put("Yuan", "CNY");
-        currencyMap.put("Yen", "JPY");
-        getItems().addAll(currencyMap.keySet());
         setWidth(100);
+        getItems().addAll(currencyMap.keySet());
         getSelectionModel().select("Euro");
     }
 

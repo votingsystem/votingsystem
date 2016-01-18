@@ -26,17 +26,7 @@
     <script>
         Polymer({
             is:'currency-request-result-dialog',
-            isStoredInWallet:false,
-            ready: function() {
-                window.addEventListener("message", function(event) {
-                    if (event.data.operation === "vs-wallet-save") {
-                        this.walletSaved();
-                    }
-                }.bind(this), false)
-            },
-            walletSaved: function() {
-                this.isStoredInWallet = true;
-            },
+            ready: function() { },
             saveToSecureWallet: function() {
                 var operationVS = new OperationVS(Operation.WALLET_SAVE)
                 operationVS.setCallback(function(appMessage) { this.saveResponse(appMessage)}.bind(this))
@@ -44,10 +34,9 @@
             },
             saveResponse:function(appMessageJSON) {
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                    this.loadWallet(appMessageJSON.message)
+                    this.isStoredInWallet = true;
                 } else {
-                    var caption = '${msg.errorLbl}'
-                    alert(appMessageJSON.message, caption)
+                    alert(appMessageJSON.message, '${msg.errorLbl}')
                 }
             },
             showMessage:function(caption, message) {
