@@ -17,8 +17,6 @@ import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -31,7 +29,6 @@ import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 import static java.text.MessageFormat.format;
@@ -51,7 +48,7 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
     @Override
     public void generateBackup(Long eventId) throws Exception {
         log.info("generateBackup: " + eventId);
-        prepareRequest();
+        MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         EventVSElection eventVSElection = dao.find(EventVSElection.class, eventId);
         if(eventVSElection == null) throw new ValidationExceptionVS("ERROR - EventVSElection not found - eventId: " + eventId);
         eventVSElectionBean.generateBackup(eventVSElection);
@@ -59,7 +56,7 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
 
     @Override
     public byte[] generateUserKeyStore(String givenName, String surname, String nif, char[] password) throws Exception {
-        prepareRequest();
+        MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         KeyStore keyStore = signatureBean.generateKeysStore(givenName, surname, nif, password);
         return KeyStoreUtil.getBytes(keyStore, password);
     }
@@ -68,7 +65,7 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
     public byte[] generateServerKeyStore(ActorVS.Type type, String givenName, String keyAlias, String nif,
                char[] password,  KeyStoreVS keyStoreVS) throws Exception {
         log.info("generateKeyStore - type: " + type + " - nif: " + nif);
-        prepareRequest();
+        MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         KeyStore keyStore = null;
         switch(type) {
             case SERVER:
@@ -83,7 +80,7 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
     public KeyStore generateServerKeyStore(String givenName, String keyAlias, String nif, char[] password,
                   KeyStoreVS rootKeyStoreVS) throws Exception {
         log.info("generateServerKeyStore - nif: " + nif);
-        prepareRequest();
+        MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         Date validFrom = Calendar.getInstance().getTime();
         Calendar today_plus_year = Calendar.getInstance();
         today_plus_year.add(Calendar.YEAR, 1);
@@ -106,7 +103,7 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
     public KeyStore generateTimeStampKeyStore(String givenName, String keyAlias, String nif, char[] password,
                           KeyStoreVS rootKeyStoreVS) throws Exception {
         log.info("generateTimeStampKeyStore - nif: " + nif);
-        prepareRequest();
+        MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         Date validFrom = Calendar.getInstance().getTime();
         Calendar today_plus_year = Calendar.getInstance();
         today_plus_year.add(Calendar.YEAR, 1);
@@ -129,7 +126,7 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
     @Override
     public String validateCSR(String nif, String deviceId) throws Exception {
         log.info("validateCSR - nif: " + nif + " - deviceId: " + deviceId);
-        prepareRequest();
+        MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         if(config.getMode() != EnvironmentVS.DEVELOPMENT) {
             throw new ExceptionVS("service available only in mode DEVELOPMENT - actual mode: " + config.getMode());
         }
@@ -150,8 +147,4 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
         return "issued cert:" + issuedCert.getSerialNumber().longValue() + "- subjectDN: " + issuedCert.getSubjectDN();
     }
 
-    private void prepareRequest() {
-        String bundleBaseName = config.getProperty("vs.bundleBaseName");
-        MessagesVS.setCurrentInstance(Locale.getDefault(), bundleBaseName);
-    }
 }

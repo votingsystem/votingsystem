@@ -29,18 +29,13 @@ public class RemoteAdminBean implements EJBRemoteAdminCurrencyServer {
     @Override
     public Future<ResponseVS> initWeekPeriod(Calendar requestDate) throws IOException {
         log.info("initWeekPeriod - requestDate: " + requestDate.getTime());
-        prepareRequest();
+        MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         try {
             auditBean.initWeekPeriod(requestDate);
             return new AsyncResult<>(ResponseVS.OK());
         } catch (Exception e) {
             return new AsyncResult<>(ResponseVS.ERROR(e.getMessage()));
         }
-    }
-
-    private void prepareRequest() {
-        String bundleBaseName = config.getProperty("vs.bundleBaseName");
-        MessagesVS.setCurrentInstance(Locale.getDefault(), bundleBaseName);
     }
 
 }
