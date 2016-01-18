@@ -26,7 +26,6 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;

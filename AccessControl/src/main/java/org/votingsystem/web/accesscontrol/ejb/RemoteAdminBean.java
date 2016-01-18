@@ -6,7 +6,7 @@ import org.votingsystem.model.KeyStoreVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.model.voting.UserRequestCsrVS;
-import org.votingsystem.service.EJBRemote;
+import org.votingsystem.service.EJBRemoteAdminAccessControl;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -15,6 +15,7 @@ import org.votingsystem.util.NifUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
@@ -29,16 +30,17 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 import static java.text.MessageFormat.format;
 
 @Stateless
-@Remote(EJBRemote.class)
-public class RemoteTestBean implements EJBRemote {
+@Remote(EJBRemoteAdminAccessControl.class)
+public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
 
-    private static final Logger log = Logger.getLogger(RemoteTestBean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(RemoteAdminBean.class.getSimpleName());
 
     @Inject EventVSElectionBean eventVSElectionBean;
     @Inject DAOBean dao;
@@ -49,6 +51,7 @@ public class RemoteTestBean implements EJBRemote {
     @Override
     public void generateBackup(Long eventId) throws Exception {
         log.info("generateBackup: " + eventId);
+        prepareRequest();
         EventVSElection eventVSElection = dao.find(EventVSElection.class, eventId);
         if(eventVSElection == null) throw new ValidationExceptionVS("ERROR - EventVSElection not found - eventId: " + eventId);
         eventVSElectionBean.generateBackup(eventVSElection);
@@ -56,6 +59,7 @@ public class RemoteTestBean implements EJBRemote {
 
     @Override
     public byte[] generateUserKeyStore(String givenName, String surname, String nif, char[] password) throws Exception {
+        prepareRequest();
         KeyStore keyStore = signatureBean.generateKeysStore(givenName, surname, nif, password);
         return KeyStoreUtil.getBytes(keyStore, password);
     }
@@ -64,6 +68,7 @@ public class RemoteTestBean implements EJBRemote {
     public byte[] generateServerKeyStore(ActorVS.Type type, String givenName, String keyAlias, String nif,
                char[] password,  KeyStoreVS keyStoreVS) throws Exception {
         log.info("generateKeyStore - type: " + type + " - nif: " + nif);
+        prepareRequest();
         KeyStore keyStore = null;
         switch(type) {
             case SERVER:
@@ -78,6 +83,7 @@ public class RemoteTestBean implements EJBRemote {
     public KeyStore generateServerKeyStore(String givenName, String keyAlias, String nif, char[] password,
                   KeyStoreVS rootKeyStoreVS) throws Exception {
         log.info("generateServerKeyStore - nif: " + nif);
+        prepareRequest();
         Date validFrom = Calendar.getInstance().getTime();
         Calendar today_plus_year = Calendar.getInstance();
         today_plus_year.add(Calendar.YEAR, 1);
@@ -100,6 +106,7 @@ public class RemoteTestBean implements EJBRemote {
     public KeyStore generateTimeStampKeyStore(String givenName, String keyAlias, String nif, char[] password,
                           KeyStoreVS rootKeyStoreVS) throws Exception {
         log.info("generateTimeStampKeyStore - nif: " + nif);
+        prepareRequest();
         Date validFrom = Calendar.getInstance().getTime();
         Calendar today_plus_year = Calendar.getInstance();
         today_plus_year.add(Calendar.YEAR, 1);
@@ -119,19 +126,10 @@ public class RemoteTestBean implements EJBRemote {
                 (validTo.getTime() - validFrom.getTime()), password, keyAlias, rootCAPrivateCredential, testUserDN);
     }
 
-    @Asynchronous @Override
-    public Future<String> testAsync(String message) {
-        try {
-            Thread.sleep(10000);
-            return new AsyncResult<>("testAsync response - to message: " + message);
-        } catch (InterruptedException e) {
-            return new AsyncResult<>(e.getMessage());
-        }
-    }
-
     @Override
     public String validateCSR(String nif, String deviceId) throws Exception {
         log.info("validateCSR - nif: " + nif + " - deviceId: " + deviceId);
+        prepareRequest();
         if(config.getMode() != EnvironmentVS.DEVELOPMENT) {
             throw new ExceptionVS("service available only in mode DEVELOPMENT - actual mode: " + config.getMode());
         }
@@ -152,8 +150,8 @@ public class RemoteTestBean implements EJBRemote {
         return "issued cert:" + issuedCert.getSerialNumber().longValue() + "- subjectDN: " + issuedCert.getSubjectDN();
     }
 
-    public void logTest(UserVS userVS) {
-        log.info("========= logTest: " + userVS.getNif());
+    private void prepareRequest() {
+        String bundleBaseName = config.getProperty("vs.bundleBaseName");
+        MessagesVS.setCurrentInstance(Locale.getDefault(), bundleBaseName);
     }
-
 }

@@ -2,7 +2,9 @@ package org.votingsystem.test.ejb;
 
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.KeyStoreVS;
-import org.votingsystem.service.EJBRemote;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.service.EJBRemoteAdminAccessControl;
+import org.votingsystem.service.EJBRemoteAdminCurrencyServer;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.test.util.IOUtils;
 import org.votingsystem.util.ContextVS;
@@ -16,6 +18,8 @@ import java.io.File;
 import java.security.KeyStore;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,6 +32,7 @@ public class EJBClient {
     private static final String ROOT_KEY_PASSW     = "PemPass";
     private static final String ROOT_KEYSTORE_PATH = "./TestsApp/RootTest.jks";
 
+    private ExecutorService requestExecutor = Executors.newFixedThreadPool(5);
 
     public static void main(String[] args) throws Exception {
         log.getLogger("org.jboss").setLevel(Level.SEVERE);
@@ -38,8 +43,9 @@ public class EJBClient {
     }
 
     private final Context context;
-    private final List<Future<String>> lastCommands = new ArrayList<>();
-    private EJBRemote votingSystemRemote;
+    private final List<CommandRunning> lastCommands = new ArrayList<>();
+    private EJBRemoteAdminAccessControl votingSystemRemote;
+    private EJBRemoteAdminCurrencyServer currencyServerAdmin;
 
     public EJBClient() throws NamingException {
         final Properties jndiProperties = new Properties();
@@ -49,41 +55,61 @@ public class EJBClient {
     }
 
     private enum Command {
-        VALIDATE_CSR, TEST_ASYNC, GET_MESSAGES, KEYSTORE_NEW, QUIT, INVALID;
+        INIT_CURRENCY_PERIOD, VALIDATE_CSR, GET_MESSAGES, KEYSTORE_NEW, QUIT;
 
         public static Command parseCommand(String stringCommand) {
             try {
                 return valueOf(stringCommand.trim().toUpperCase());
             } catch (IllegalArgumentException iae) {
-                return INVALID;
+                log.warning("Unknown command " + stringCommand);
+                throw iae;
             }
         }
     }
 
+    private static class CommandRunning {
+        private Command command;
+        private Future<ResponseVS> future;
+        public CommandRunning(Command command, Future<ResponseVS> future) {
+            this.command = command;
+            this.future = future;
+        }
+    }
+
     private void run() throws Exception {
-        this.votingSystemRemote = lookupVotingSystemRemoteEJB();
+        lookupRemoteBeans();
         showWelcomeMessage();
+        requestExecutor.submit(() -> {
+            while (true) {
+                getMessages();
+                Thread.sleep(1000);
+            }
+        });
         while (true) {
             final String stringCommand = IOUtils.readLine("> ");
-            final Command command = Command.parseCommand(stringCommand);
-            switch (command) {
-                case VALIDATE_CSR:
-                    validateCSR();
-                    break;
-                case TEST_ASYNC:
-                    testAsync();
-                    break;
-                case GET_MESSAGES:
-                    getMessages();
-                    break;
-                case KEYSTORE_NEW:
-                    newKeyStore();
-                    break;
-                case QUIT:
-                    handleQuit();
-                    break;
-                default:
-                    log.warning("Unknown command " + stringCommand);
+            try {
+                final Command command = Command.parseCommand(stringCommand);
+                switch (command) {
+                    case VALIDATE_CSR:
+                        validateCSR();
+                        break;
+                    case GET_MESSAGES:
+                        getMessages();
+                        break;
+                    case KEYSTORE_NEW:
+                        newKeyStore();
+                        break;
+                    case QUIT:
+                        handleQuit();
+                        break;
+                    case INIT_CURRENCY_PERIOD:
+                        initWeekPeriod();
+                        break;
+                    default:
+                        log.warning("Unknown command " + stringCommand);
+                }
+            } catch (Exception ex) {
+                log.warning(ex.getMessage());
             }
         }
     }
@@ -178,20 +204,24 @@ public class EJBClient {
         }
     }
 
-    private void testAsync() {
-        String asyncMessage = IOUtils.readLine("Enter async message: ");
-        lastCommands.add(votingSystemRemote.testAsync(asyncMessage));
-        log.info("async message - wait for response");
+    private void initWeekPeriod() {
+        try {
+            Future<ResponseVS> future = currencyServerAdmin.initWeekPeriod(Calendar.getInstance());
+            lastCommands.add(new CommandRunning(Command.INIT_CURRENCY_PERIOD, future));
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
     private void getMessages() {
         boolean displayed = false;
-        final List<Future<String>> notFinished = new ArrayList<>();
-        for (Future<String> command : lastCommands) {
-            if (command.isDone()) {
+        final List<CommandRunning> notFinished = new ArrayList<>();
+        for (CommandRunning command : lastCommands) {
+            if (command.future.isDone()) {
                 try {
-                    final String result = command.get();
-                    log.info("message received: " + result);
+                    final ResponseVS result = command.future.get();
+                    log.info(String.format("command: %s - statusCode: %S - message: %s", command.command.toString(),
+                            result.getStatusCode(), result.getMessage()));
                     displayed = true;
                 } catch (InterruptedException | ExecutionException e) {
                     log.warning(e.getMessage());
@@ -202,23 +232,28 @@ public class EJBClient {
         }
         lastCommands.retainAll(notFinished);
         if (!displayed) {
-            log.info("no message received!");
+            //log.info("no message received!");
         }
     }
 
     private void handleQuit() {
         log.info("handleQuit");
+        requestExecutor.shutdownNow();
         System.exit(0);
     }
 
-    private EJBRemote lookupVotingSystemRemoteEJB() throws NamingException {
-        return (EJBRemote) context.lookup("ejb:/AccessControl/RemoteTestBean!" + EJBRemote.class.getName());
-
+    private void lookupRemoteBeans() throws NamingException {
+        votingSystemRemote =  (EJBRemoteAdminAccessControl) context.lookup(
+                "ejb:/AccessControl/RemoteAdminBean!" + EJBRemoteAdminAccessControl.class.getName());
+        currencyServerAdmin = (EJBRemoteAdminCurrencyServer)context.lookup(
+                "ejb:/CurrencyServer/RemoteAdminBean!" + EJBRemoteAdminCurrencyServer.class.getName());
     }
 
     private void showWelcomeMessage() {
-        System.out.println("voting system remote EJB client");
+        System.out.println("voting system remote EJB admin");
         System.out.println("------------------------------------------------------");
-        System.out.println("Commands: validate_csr, test_async, get_messages, keystore_new, quit");
+        String commands = Arrays.asList(Command.values()).stream().map(c -> c.toString().toLowerCase()).reduce(
+                (t, u) -> t + ", " + u).get();
+        System.out.println("Commands:" + commands);
     }
 }
