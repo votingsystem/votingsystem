@@ -16,7 +16,6 @@ import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.EventVSDto;

@@ -2,7 +2,6 @@ package org.votingsystem.client.webextension.task;
 
 import javafx.concurrent.Task;
 import org.votingsystem.client.webextension.OperationVS;
-import org.votingsystem.client.webextension.dialog.CertNotFoundDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.signature.smime.SMIMEMessage;

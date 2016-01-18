@@ -6,6 +6,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -16,6 +17,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.pane.DecoratedPane;
+import org.votingsystem.client.webextension.service.InboxService;
 import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.SocketMessageDto;
@@ -35,7 +37,7 @@ public class MainDialog {
 
     private static Logger log = Logger.getLogger(MainDialog.class.getSimpleName());
 
-    private VBox mainPane;
+    private FlowPane mainPane;
     private Button connectionButton;
     private Button walletButton;
     private Button qrCodeButton;
@@ -74,7 +76,10 @@ public class MainDialog {
         this.primaryStage = primaryStage;
         primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.initStyle(StageStyle.TRANSPARENT);
-        mainPane = new VBox(10);
+        mainPane = new FlowPane();
+        mainPane.setVgap(10);
+        mainPane.setHgap(10);
+        mainPane.setPrefWrapLength(300);
         DecoratedPane decoratedPane = new DecoratedPane(null, null, mainPane, primaryStage);
         primaryStage.setScene(new Scene(decoratedPane));
         primaryStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
@@ -88,9 +93,6 @@ public class MainDialog {
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
         primaryStage.setX(primaryScreenBounds.getMinX() + primaryScreenBounds.getWidth() - 240);
         primaryStage.setY(primaryScreenBounds.getMinY() + 70);
-
-        HBox firsRowButtonsBox = new HBox(10);
-        HBox secondRowButtonsBox = new HBox(10);
         
         connectionButton = new Button(ContextVS.getMessage("connectLbl"), Utils.getIcon(FontAwesome.Glyph.CLOUD_UPLOAD, Utils.COLOR_RED_DARK));
         connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
@@ -119,15 +121,18 @@ public class MainDialog {
         Button settingsButton = new Button(ContextVS.getMessage("settingsLbl"), Utils.getIcon(FontAwesome.Glyph.COG));
         settingsButton.setOnAction(actionEvent -> SettingsDialog.showDialog());
 
+        Button inboxButton = new Button(ContextVS.getMessage("messageInboxLbl"), Utils.getIcon(FontAwesome.Glyph.ENVELOPE));
+        inboxButton.setOnAction(actionEvent -> SettingsDialog.showDialog());
+        InboxService.getInstance().setInboxButton(inboxButton);
+
 
         connectionButton.setStyle("-fx-pref-width: 190px;");
-        settingsButton.setStyle("-fx-pref-width: 190px;");
+        inboxButton.setStyle("-fx-pref-width: 190px;");
         walletButton.setStyle("-fx-pref-width: 190px;");
         qrCodeButton.setStyle("-fx-pref-width: 190px;");
-        firsRowButtonsBox.getChildren().addAll(connectionButton, settingsButton);
-        secondRowButtonsBox.getChildren().addAll(walletButton, qrCodeButton);
+        settingsButton.setStyle("-fx-pref-width: 190px;");
 
-        mainPane.getChildren().addAll(firsRowButtonsBox, secondRowButtonsBox);
+        mainPane.getChildren().addAll(connectionButton, inboxButton, walletButton, qrCodeButton, settingsButton);
         mainPane.setStyle("-fx-max-width: 600px;-fx-padding: 3 20 20 20;-fx-spacing: 10;-fx-alignment: center;" +
                 "-fx-font-size: 16;-fx-font-weight: bold;-fx-pref-width: 430px;");
         EventBusService.getInstance().register(new EventBusConnectionListener());

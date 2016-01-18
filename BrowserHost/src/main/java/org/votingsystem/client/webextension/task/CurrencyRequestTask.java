@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
 import javafx.concurrent.Task;
 import org.votingsystem.client.webextension.OperationVS;
-import org.votingsystem.client.webextension.dialog.CertNotFoundDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.service.InboxService;
 import org.votingsystem.client.webextension.util.InboxMessage;
@@ -25,7 +24,6 @@ import org.votingsystem.util.currency.Wallet;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,8 +66,8 @@ public class CurrencyRequestTask extends Task<ResponseVS> {
                 requestDto.loadCurrencyCerts(resultListDto.getResultList());
                 Wallet.saveToPlainWallet(Sets.newHashSet(requestDto.getCurrencyMap().values()));
                 responseVS = new ResponseVS(responseVS.getStatusCode(), resultListDto.getMessage());
-                InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"), new Date());
-                inboxMessage.setMessage(MsgUtils.getPlainWalletNotEmptyMsg(MapUtils.getCurrencyMap(
+                InboxMessage inboxMessage = new InboxMessage(ContextVS.getMessage("systemLbl"), new Date()).setMessage(
+                        MsgUtils.getPlainWalletNotEmptyMsg(MapUtils.getCurrencyMap(
                         requestDto.getCurrencyMap().values()))).setTypeVS(TypeVS.CURRENCY_IMPORT);
                 InboxService.getInstance().newMessage(inboxMessage, false);
             }

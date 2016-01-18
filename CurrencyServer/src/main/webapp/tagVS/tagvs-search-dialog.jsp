@@ -2,7 +2,7 @@
 
 <link href="../resources/bower_components/vs-i18n/vs-i18n.html" rel="import">
 
-<dom-module name="tagvs-select-dialog">
+<dom-module name="tagvs-search-dialog">
 <template>
     <div id="modalDialog" class="modalDialog">
         <vs-i18n id="i18nVS"></vs-i18n>
@@ -16,22 +16,37 @@
                 </div>
             </div>
 
-            <div hidden="[[tagBoxHidden]]" class="layout vertical wrap" style="border: 1px solid #ccc;
+            <div hidden="{{tagBoxHidden}}" class="layout vertical wrap" style="border: 1px solid #ccc;
                     padding:10px; margin:0px 0px 10px 0px; display: block;">
-                <div style="font-weight: bold; margin:0px 0px 5px 0px;"><span>[[messages.selectedTagsLbl]]</span></div>
+                <div style="font-weight: bold; margin:0px 0px 5px 0px;"><span>{{messages.selectedTagsLbl}}</span></div>
                 <div class="flex horizontal wrap layout">
-                    <template is="dom-repeat" items="[[selectedTagList]]">
+                    <template is="dom-repeat" items="{{selectedTagList}}">
                         <div><a class="btn btn-default" on-click="removeTag" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;cursor: pointer;">
-                            <i class="fa fa-minus"></i> <span>[[item.name]]</span></a></div>
+                            <i class="fa fa-minus"></i> <span>{{item.name}}</span></a></div>
                     </template>
                 </div>
             </div>
 
+            <div class="vertical layout flex">
+                <div class="layout horizontal center center-justified flex">
+                    <input id="tagSearchInput" class="form-control" required autofocus
+                           title="{{messages.tagLbl}}" placeholder="{{messages.tagLbl}}"/>
+                    <button on-click="searchTag" style="font-size: 1.1em;margin: 0px 0px 0px 5px; width: 160px;">
+                        <i class="fa fa-search"></i> <span>{{messages.tagSearchLbl}}</span>
+                    </button>
+                </div>
+            </div>
+
+            <div hidden="{{!searchString}}">
+                <div style="text-align:center;margin:10px 0 0 10px; font-size: 1.1em;">
+                    <span>{{messages.searchResultLbl}}</span> <b><span>{{searchString}}</span></b>
+                </div>
+            </div>
             <div>
                 <div class="flex horizontal wrap layout center center-justified">
                     <template is="dom-repeat" items="[[resultListDto.resultList]]">
                         <a class="btn btn-default" on-click="selectTag" style="font-size: 0.9em; margin:5px 5px 0px 0px;padding:3px;cursor: pointer;">
-                            <i class="fa fa-plus" style="color: #6c0404;"></i> <span>[[item.name]]</span></a>
+                            <i class="fa fa-plus" style="color: #6c0404;"></i> <span>{{item.name}}</span></a>
                     </template>
                 </div>
             </div>
@@ -39,7 +54,7 @@
             <div class="layout horizontal" style="margin:20px 0 0 0;">
                 <div class="flex"></div>
                 <button on-click="processTags" style="font-size: 1.1em;">
-                    <i class="fa fa-check" style="color: #388746;"></i> <span>[[messages.acceptLbl]]</span>
+                    <i class="fa fa-check" style="color: #388746;"></i> <span>{{messages.acceptLbl}}</span>
                 </button>
             </div>
         </div>
@@ -47,25 +62,37 @@
 </template>
 <script>
     Polymer({
-        is:'tagvs-select-dialog',
+        is:'tagvs-search-dialog',
         properties: {
             url:{type:String, observer:'getHTTP'},
+            searchString:{type:String, value:null},
             numTags:{type:Number, value:1},
             caption:{type:String, value:null},
             tagBoxHidden:{type:Boolean, value:true},
+            serviceUrl:{type:String, value:contextURL + "/rest/tagVS"},
             resultListDto:{type:Object},
             messages:{type:Object},
-            tagList:{type:Array, value:[]}
+            searchResultTagList:{type:Array, value:[]}
         },
         ready: function() {
             this.messages = this.$.i18nVS.getMessages()
             console.log(this.tagName + " - ready")
+            this.$.tagSearchInput.onkeypress = function(event){
+                if (event.keyCode == 13) this.searchTag()
+            }.bind(this)
         },
         close:function() {
             this.$.modalDialog.style.opacity = 0
             this.$.modalDialog.style['pointer-events'] = 'none'
+            this.$.tagSearchInput.value = ''
             this.selectedTagList = []
             this.searchString = null
+        },
+        searchTag: function() {
+            if(this.$.tagSearchInput.validity.valid) {
+                this.url = this.serviceUrl + "?tag=" + this.$.tagSearchInput.value
+                this.searchString = this.$.tagSearchInput.value
+            }
         },
         selectTag: function(e) {
             var selectedTag = e.model.item
@@ -77,12 +104,12 @@
                     " - num. tags selected: " + this.selectedTagList.length + " - selectedTagList: " + this.selectedTagList)
             if(isNewTag) {
                 if(this.selectedTagList.length == this.numTags ) {
-                    this.tagList.push(this.selectedTagList[0])
+                    this.searchResultTagList.push(this.selectedTagList[0])
                     this.selectedTagList.splice(0, 1)
                 }
                 this.selectedTagList.push(selectedTag)
-                for(tagIdx in this.tagList) {
-                    if(selectedTag.id == this.tagList[tagIdx].id) this.tagList.splice(tagIdx, 1)
+                for(tagIdx in this.searchResultTagList) {
+                    if(selectedTag.id == this.searchResultTagList[tagIdx].id) this.searchResultTagList.splice(tagIdx, 1)
                 }
             }
             this.selectedTagList = this.selectedTagList.slice(0) //to make changes visible to template
@@ -91,25 +118,24 @@
         removeTag: function(e) {
             var selectedTag = e.model.item
             for(tagIdx in this.selectedTagList) {
-                if(selectedTag.id === this.selectedTagList[tagIdx].id) {
+                if(selectedTag.id == this.selectedTagList[tagIdx].id) {
                     this.selectedTagList.splice(tagIdx, 1)
-                    this.tagList.push(selectedTag)
+                    this.searchResultTagList.push(selectedTag)
                 }
             }
             this.selectedTagList = this.selectedTagList.slice(0); //hack to notify array changes
-            this.tagList = this.tagList.slice(0); //hack to notify array changes
+            this.searchResultTagList = this.searchResultTagList.slice(0); //hack to notify array changes
             this.tagBoxHidden = (this.selectedTagList.length === 0)
         },
         reset: function() {
             this.selectedTagList = []
-            this.tagList = []
+            this.searchResultTagList = []
         },
         show: function (numTags, selectedTags) {
             if(numTags != null) this.numTags = numTags
             if(selectedTags == null) this.selectedTagList = []
             else this.selectedTagList = selectedTags
             this.tagBoxHidden = (this.selectedTagList.length === 0)
-            this.url = contextURL + "/rest/tagVS/list"
             this.$.modalDialog.style.opacity = 1
             this.$.modalDialog.style['pointer-events'] = 'auto'
         },

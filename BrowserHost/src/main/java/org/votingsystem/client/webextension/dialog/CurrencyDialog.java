@@ -130,6 +130,7 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
                 DateUtils.getDateStr(currency.getValidFrom(), "dd MMM yyyy' 'HH:mm"));
         validToLbl.setText(ContextVS.getMessage("expiresLbl") + ": " +
                 DateUtils.getDateStr(currency.getValidTo(), "dd MMM yyyy' 'HH:mm"));
+        if(currency.getTimeLimited()) validToLbl.setStyle("-fx-text-fill:rgba(186,0,17, 0.45);");
         try {
             CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
                     ContextVS.getInstance().getCurrencyServer().getTrustAnchors(), false, Arrays.asList(

@@ -35,7 +35,7 @@ public class InboxDialog extends DialogVS {
     private static InboxDialog dialog;
 
     private InboxDialog() throws IOException {
-        super("/fxml/Inbox.fxml", ContextVS.getMessage("messageVSInboxCaption"));
+        super("/fxml/Inbox.fxml", ContextVS.getMessage("messageInboxLbl"));
     }
 
     @FXML void initialize() {// This method is called by the FXMLLoader when initialization is complete

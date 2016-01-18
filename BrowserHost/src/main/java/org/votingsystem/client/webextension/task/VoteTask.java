@@ -5,7 +5,6 @@ import org.bouncycastle.util.encoders.Hex;
 import org.votingsystem.callable.AccessRequestDataSender;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.webextension.OperationVS;
-import org.votingsystem.client.webextension.dialog.CertNotFoundDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.VoteVSDto;
