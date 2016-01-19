@@ -50,7 +50,7 @@
         Polymer({
             is:'message-smime-transactionvs-currency-request',
             properties: {
-                smimeMessageContent: {type:Object, observer:'smimeMessageContentChanged'},
+                smimeMessageContent: {type:Object},
                 isClientToolConnected: {type:Boolean, value: false},
                 tagsHidden: {type:Boolean, value: true},
                 isReceptorVisible: {type:Boolean, value: true},
@@ -62,9 +62,6 @@
                 console.log(this.tagName + " - ready")
                 this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
                 sendSignalVS({caption:"${msg.transactionVSCurrencyRequest}"})
-            },
-            smimeMessageContentChanged:function() {
-                console.log(this.tagName + " - smimeMessageContentChanged: " + JSON.stringify(this.smimeMessageContent))
             },
             showFromUserVSByIBAN:function(e) {
                 page.show(contextURL + "/rest/userVS/IBAN/" + this.smimeMessageContent.bankIBAN)

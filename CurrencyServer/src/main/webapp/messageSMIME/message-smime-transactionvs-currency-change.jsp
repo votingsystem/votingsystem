@@ -44,7 +44,7 @@
         Polymer({
             is:'message-smime-transactionvs-currency-change',
             properties: {
-                smimeMessageContent: {type:Object,observer:'smimeMessageContentChanged'},
+                smimeMessageContent: {type:Object},
                 isClientToolConnected: {type:Boolean, value: false},
                 tagsHidden: {type:Boolean, value: true},
                 isReceptorVisible: {type:Boolean, value: true},
@@ -56,9 +56,6 @@
                 console.log(this.tagName + " - ready")
                 this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
                 sendSignalVS({caption:"${msg.transactionVSCurrencyChange}"})
-            },
-            smimeMessageContentChanged:function() {
-                console.log(this.tagName + " - smimeMessageContentChanged: " + JSON.stringify(this.smimeMessageContent))
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

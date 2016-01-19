@@ -3,34 +3,18 @@
 <dom-module name="message-smime-transactionvs-from-bankvs">
     <template>
         <style>
-        .messageToUser {
-            font-weight: bold;
-            margin:10px auto 10px auto;
-            background: #f9f9f9;
-            padding:10px 20px 10px 20px;
-        }
         .actorLbl {font-size: 1.2em; text-decoration: underline;font-weight: bold; color: #621; }
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic; }
         .iban-link {text-decoration: underline; color: #0000ee; cursor: pointer;}
         </style>
         <div class="layout vertical center center-justified" style="margin: 0px auto; max-width:800px;">
-            <div class="layout vertical center center-justified" style="margin: 0px auto; color: #667;">
-                <div class="horizontal layout" style="margin: 0 0 20px 0;">
-                    <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">
-                        ${msg.transactionVSFromBankVS}
-                    </div>
+            <div class="" style="margin: 0px auto; color: #667;">
+                <div class="pageHeader" style="margin:0 0 0 20px;font-size: 1.5em;text-align: center;">
+                    ${msg.transactionVSFromBankVS}
                 </div>
-
                 <div hidden="{{!timeStampDate}}" class="timeStampMsg">
                     <b>${msg.dateLbl}: </b> <span>{{timeStampDate}}</span>
                 </div>
-
-                <div hidden="{{!messageToUser}}">
-                    <div  layout horizontal center center-justified  class="messageToUser">
-                        <div id="messageToUser">{{messageToUser}}</div>
-                    </div>
-                </div>
-
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
                 <div><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
                 <div class="horizontal layout">
@@ -42,12 +26,10 @@
                 <div style="margin-left: 20px;">
                     <div class="actorLbl" style=" margin:10px 0px 0px 0px;">${msg.senderLbl}</div>
                     <div>
-                        <div><b>${msg.nameLbl}: </b><span>{{smimeMessageContent.fromUserVS.name}}</span></div>
+                        <div><b>${msg.bankVSLbl}: </b><span>{{smimeMessageContent.fromUserVS.name}}</span> -
+                            <span class="iban-link" on-click="showFromUserVSByIBAN">{{smimeMessageContent.fromUserVS.iban}}</span></div>
+                        <div><b>${msg.nameLbl}: </b><span>{{smimeMessageContent.fromUser}}</span></div>
                         <div><b>${msg.IBANLbl}: </b><span>{{smimeMessageContent.fromUserIBAN}}</span></div>
-                        <div on-click="showFromUserVSByIBAN">
-                            <b>${msg.bankVSIBANLbl}: </b>
-                            <span class="iban-link">{{smimeMessageContent.fromUserIBAN}}</span>
-                        </div>
                     </div>
                 </div>
                 <div hidden="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
@@ -61,7 +43,7 @@
                         </div>
                     </div>
                 </div >
-                <div  layout horizontal center center-justified style="margin: 15px 0 0 0;">
+                <div class="horizontal layout" style="margin: 15px 0 0 0; width: 100%;">
                     <div hidden="{{tagsHidden}}" layout horizontal center center-justified>
                         <template is="dom-repeat" items="{{signedDocument.tags}}" as="tag">
                             <a class="btn btn-default" style="font-size: 0.7em;">
@@ -83,12 +65,10 @@
         Polymer({
             is:'message-smime-transactionvs-from-bankvs',
             properties: {
-                smimeMessageDto:{type:Object, observer:'smimeMessageChanged'},
                 smimeMessageContent: {type:Object},
                 isClientToolConnected: {type:Boolean, value: false},
                 tagsHidden: {type:Boolean, value: true},
                 isReceptorVisible: {type:Boolean, value: true},
-                messageToUser: {type:String},
                 smimeMessage: {type:String},
                 timeStampDate: {type:String},
                 caption: {type:String}
@@ -98,24 +78,16 @@
                 this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
                 sendSignalVS({caption:"${msg.transactionVSFromBankVS}"})
             },
-            smimeMessageChanged:function() {
-                this.smimeMessageContent = this.smimeMessageDto.signedContentMap
-                this.timeStampDate = this.smimeMessageDto.timeStampDate
-                this.messageToUser = null
-                console.log(this.tagName + " - smimeMessageChanged: " + JSON.stringify(this.smimeMessageDto) )
-                this.tagsHidden = (!this.smimeMessageContent || !this.smimeMessageContent.tags || this.smimeMessageContent.tags.length === 0)
-            },
             showFromUserVSByIBAN:function(e) {
-                page.show(contextURL + "/rest/userVS/IBAN/" + this.smimeMessageContent.fromUserIBAN, '_blank')
+                window.open(contextURL + "/#!" + contextURL + "/rest/userVS/IBAN/" + this.smimeMessageContent.fromUserIBAN, "_blank")
             },
             showToUserVSByIBAN:function(e) {
                 console.log(this.tagName + " - showUserVSByIBAN:" + e)
-                page.show(contextURL + "/rest/userVS/IBAN/" + e.model.IBAN)
+                window.open(contextURL + "/#!" + contextURL + "/rest/userVS/IBAN/" + e.model.IBAN, "_blank")
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)
-                if(this.smimeMessageDto.smimeMessage) operationVS.message = this.smimeMessageDto.smimeMessage
-                else operationVS.message = this.smimeMessage
+                operationVS.message = this.smimeMessage
                 VotingSystemClient.setMessage(operationVS);
             }
         });
