@@ -467,7 +467,7 @@
                                 .attr("class", "childText")
                                 .style({'font-size': '0.6em'})
                                 .text(function (d) { return d.description || d.name })
-                        childTextList.call(childText)
+                        //childTextList.call(childText)
 
                         var transitioning
                         function transition(d) {

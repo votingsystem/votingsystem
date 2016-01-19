@@ -55,7 +55,7 @@ public class EJBClient {
     }
 
     private enum Command {
-        INIT_CURRENCY_PERIOD, VALIDATE_CSR, GET_MESSAGES, KEYSTORE_NEW, QUIT;
+        INIT_CURRENCY_PERIOD, VALIDATE_CSR, KEYSTORE_NEW, QUIT;
 
         public static Command parseCommand(String stringCommand) {
             try {
@@ -92,9 +92,6 @@ public class EJBClient {
                 switch (command) {
                     case VALIDATE_CSR:
                         validateCSR();
-                        break;
-                    case GET_MESSAGES:
-                        getMessages();
                         break;
                     case KEYSTORE_NEW:
                         newKeyStore();
