@@ -3,14 +3,25 @@
 <dom-module name="transactions-counter">
     <template>
         <div style="border-bottom: 1px solid #888;color:#888;">
-            <div style="">${msg.movementsLbl}</div>
+            <div style="">${msg.numMovementsLbl}</div>
             <div style="font-size: 0.6em; margin:0 0 0 0;">{{orderByLbl}}</div>
         </div>
         <template is="dom-repeat" items="[[transactionsMap.children]]" as="currencyNode">
-            <div on-click="nodeClick" style$="[[_getCurrencyStyle(currencyNode.name)]]">[[currencyNode.name]] - [[currencyNode.numTotalTransactions]]</div>
-            <template is="dom-repeat" items="[[currencyNode._children]]" as="secondLevelNode">
-                <div on-click="nodeClick" style$="[[_getNodeStyle(secondLevelNode.name)]]">[[_getsSecondLevelNodeName(secondLevelNode)]] - [[secondLevelNode.numTotalTransactions]]</div>
-            </template>
+            <div on-click="nodeClick" style$="[[_getCurrencyStyle(currencyNode.name)]]">
+                <div class="horizontal layout" style="border-bottom: 1px dotted #888;color:#888;">
+                    <div on-click="nodeClick" style$="[[_getCurrencyStyle(currencyNode.name)]]">[[currencyNode.name]] - [[currencyNode.numTotalTransactions]] ${msg.movementsLbl}</div>
+                </div>
+                <table>
+                    <template is="dom-repeat" items="[[currencyNode._children]]" as="secondLevelNode">
+                        <tr>
+                            <td style="width: 50px;text-align: right;">[[secondLevelNode.numTotalTransactions]]</td>
+                            <td on-click="nodeClick" style$="[[_getNodeStyle(secondLevelNode.name)]]">
+                                [[_getsSecondLevelNodeName(secondLevelNode)]]
+                            </td>
+                        </tr>
+                    </template>
+                </table>
+            </div>
         </template>
     </template>
     <script>

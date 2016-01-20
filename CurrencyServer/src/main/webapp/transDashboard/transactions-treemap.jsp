@@ -461,13 +461,12 @@
                                     return hostElement._getDescriptionWithPercentage(d); })
                                 .call(text);
 
-                        var childTextList = g.selectAll(".childText")
-                                .data(function (d) { return d._children || [] })
+                        var childTextList = g.selectAll(".childText").data(function (d) { return d._children || [] })
                         childTextList.enter().append("text")
                                 .attr("class", "childText")
                                 .style({'font-size': '0.6em'})
                                 .text(function (d) { return d.description || d.name })
-                        //childTextList.call(childText)
+                        childTextList.call(childText)
 
                         var transitioning
                         function transition(d) {
