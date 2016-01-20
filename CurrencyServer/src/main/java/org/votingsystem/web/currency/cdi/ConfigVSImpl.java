@@ -17,6 +17,7 @@ import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -33,6 +34,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -136,6 +138,20 @@ public class ConfigVSImpl implements ConfigVS {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
             });
+            executorService.submit(() -> {
+                while(true) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.add(Calendar.HOUR_OF_DAY, -1);
+                    Date oneHourAgo = calendar.getTime();
+                    File tempDir = new File(getServerDir().getAbsolutePath() + ConfigVSImpl.getTempPath());
+                    tempDir.mkdirs();
+                    for (File file : tempDir.listFiles()) {
+                        if(new Date(file.lastModified()).compareTo(oneHourAgo) < 0) FileUtils.deleteRecursively(file);
+                    }
+                    Thread.sleep(3600000);
+                }
+            });
+
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -164,6 +180,7 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Override
     public TagVS getTag(String tagName) throws ValidationExceptionVS {
+        if(tagName.toLowerCase().equals(MessagesVS.getCurrentInstance().get("wildTagLbl"))) tagName = TagVS.WILDTAG;
         Query query = dao.getEM().createNamedQuery("findTagByName").setParameter("name", tagName.toUpperCase());
         return dao.getSingleResult(TagVS.class, query);
     }
@@ -202,6 +219,10 @@ public class ConfigVSImpl implements ConfigVS {
     public String validateIBAN(String IBAN) throws IbanFormatException, InvalidCheckDigitException, UnsupportedCountryException {
         IbanUtil.validate(IBAN);
         return IBAN;
+    }
+
+    public static String getTempPath() {
+        return File.separator + "temp";
     }
 
     public UserVS getSystemUser() {

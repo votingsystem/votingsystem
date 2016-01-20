@@ -18,6 +18,7 @@
                             <td on-click="nodeClick" on-mouseover="_nodeHovered" style$="[[_getNodeStyle(secondLevelNode.name)]]">
                                 [[_getsSecondLevelNodeName(secondLevelNode)]]
                             </td>
+                            <td><i style="color: #ccc;" on-click="_downloadZip" class="fa fa-file-archive-o"></i></td>
                         </tr>
                     </template>
                 </table>
@@ -37,12 +38,18 @@
                     return "cursor:pointer;font-size: 0.9em;font-weight: bold;color:" + TransactionsStats.getColorScale(currencyCode) + ";"
                 },
                 nodeClick: function(e) {
+                    if(e.downloadZip === true) return;
                     var selectedNode = e.model.secondLevelNode ? e.model.secondLevelNode : e.model.currencyNode
                     this.fire("node-click", {node: selectedNode})
                 },
                 _nodeHovered: function(e) {
                     var selectedNode = e.model.secondLevelNode ? e.model.secondLevelNode : e.model.currencyNode
                     this.fire("node-hover", {node: selectedNode})
+                },
+                _downloadZip: function(e) {
+                    e['downloadZip'] = true
+                    document.querySelector("#voting_system_page").dispatchEvent(
+                            new CustomEvent('download-zipped-transactions',{detail:e.model.secondLevelNode.name}))
                 },
                 _getNodeStyle: function(nodeName) {
                     return "cursor:pointer;font-size: 0.9em;margin:0 0 0 7px;color:" + TransactionsStats.getColorScale(nodeName) + ";"

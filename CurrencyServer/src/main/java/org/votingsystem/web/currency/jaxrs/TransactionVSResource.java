@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.commons.io.IOUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Disjunction;
@@ -11,11 +12,12 @@ import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.Interval;
-import org.votingsystem.util.JSON;
+import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.*;
+import org.votingsystem.web.currency.cdi.ConfigVSImpl;
 import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
@@ -34,6 +36,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -41,6 +45,8 @@ import java.net.URI;
 import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Logger;
+
+import static java.text.MessageFormat.format;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -104,10 +110,12 @@ public class TransactionVSResource {
     public Response search(@DefaultValue("0") @QueryParam("offset") int offset,
                        @DefaultValue("100") @QueryParam("max") int max,
                        @QueryParam("transactionvsType") String transactionvsType,
+                       @QueryParam("tag") String tag,
                        @QueryParam("searchText") String searchText,
+                       @QueryParam("contentType") String contentType,
                        @PathParam("dateFrom") String dateFromStr, @PathParam("dateTo") String dateToStr,
                        @Context ServletContext context, @Context HttpServletRequest req,
-                       @Context HttpServletResponse resp) throws IOException, ParseException, ServletException {
+                       @Context HttpServletResponse resp) throws IOException, ParseException, ServletException, ValidationExceptionVS {
         TransactionVS.Type transactionType = null;
         BigDecimal amount = null;
         Date dateFrom = DateUtils.getURLPart(dateFromStr);
@@ -123,19 +131,37 @@ public class TransactionVSResource {
         Disjunction orDisjunction = Restrictions.or();
         if(transactionType != null) orDisjunction.add(Restrictions.eq("type", transactionType));
         if(amount != null) orDisjunction.add(Restrictions.eq("amount", amount));
+        if(tag != null) {
+            criteria.add(Restrictions.eq("tag", config.getTag(tag)));
+        }
         if(searchText != null) {
             orDisjunction.add(Restrictions.ilike("subject", "%" + searchText + "%"));
             orDisjunction.add(Restrictions.ilike("currencyCode", "%" + searchText + "%"));
         }
         criteria.add(orDisjunction);
         List<TransactionVS> transactionList = criteria.setFirstResult(offset).setMaxResults(max).list();
-        List<TransactionVSDto> resultList = new ArrayList<>();
-        for(TransactionVS transactionVS :  transactionList) {
-            resultList.add(transactionVSBean.getTransactionDto(transactionVS));
+        if("zip".equals(contentType)) {
+            String tempPath = ConfigVSImpl.getTempPath() + File.separator + UUID.randomUUID().toString();
+            File tempDir = new File(config.getServerDir().getAbsolutePath() + tempPath);
+            tempDir.mkdirs();
+            String desc = (transactionType == null? "":transactionvsType) + (tag == null? "":tag);
+            File zipFile = new File (tempDir, "transaction_" + desc + "_" + transactionList.size() +  ".zip");
+            for(TransactionVS transactionVS :  transactionList) {
+                File smimeFile = new File(format("{0}/transaction_{1}.p7m", tempDir.getAbsolutePath(), transactionVS.getId()));
+                IOUtils.write(transactionVS.getMessageSMIME().getContent(), new FileOutputStream(smimeFile));
+            }
+            new ZipUtils(tempDir).zipIt(zipFile);
+            resp.sendRedirect(config.getStaticResURL() + tempPath + File.separator + zipFile.getName());
+            return Response.ok().build();
+        } else {
+            List<TransactionVSDto> resultList = new ArrayList<>();
+            for(TransactionVS transactionVS :  transactionList) {
+                resultList.add(transactionVSBean.getTransactionDto(transactionVS));
+            }
+            long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
+            ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
         }
-        long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
-        ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
     @Path("/userVS/id/{userId}/{timePeriod}") @Transactional

@@ -93,10 +93,15 @@
                 //this.$.dateFromDatepicker.setDate(new Date().getMonday())
                 this.$.dateFromDatepicker.setDate(DateUtils.parseInputType("2015-11-01"))
                 this.$.dateToDatepicker.setDate(new Date())
-
                 this.formatDate = d3.time.format("%Y%m%d_%M%S");
-
                 this.getHTTP()
+                document.querySelector("#voting_system_page").addEventListener('download-zipped-transactions',
+                        function(e) {
+                            console.log(this.tagName + " - download-zip - detail: " + e.detail + " - orderBy: " + this.orderBy)
+                            if(this.orderBy === "orderByType") targetURL = this.getTargetURL("zip") + "&transactionvsType=" + e.detail
+                            else if(this.orderBy === "orderByTag") targetURL = this.getTargetURL("zip") + "&tag=" + e.detail
+                            window.open(targetURL, "_blank")
+                        }.bind(this))
             },
             timeCheckboxSelected:function (e) {
                 console.log("timeCheckboxSelected: " + e.target.value + " - checked: " + e.target.checked)
@@ -153,12 +158,20 @@
             _getTransactionTypesDescription:function(transactionType) {
                 return transactionsMap[transactionType].lbl
             },
-            getHTTP:function() {
+            getTargetURL:function(contentType) {
                 var targetURL = "/CurrencyServer/rest/transactionVS/from/" + this.formatDate(this.$.dateFromDatepicker.getDate()) +
-                                "/to/" + this.formatDate(this.$.dateToDatepicker.getDate())
+                        "/to/" + this.formatDate(this.$.dateToDatepicker.getDate())
                 if(this.$.searchInput.value != null && this.$.searchInput.value.trim() !== "") {
                     targetURL = targetURL + "?searchText=" + this.$.searchInput.value.trim()
                 }
+                if(contentType != undefined) {
+                    if(targetURL.indexOf("?searchText=") > -1) targetURL = targetURL + "&contentType=" + contentType
+                    else targetURL = targetURL + "?contentType=" + contentType
+                }
+                return targetURL;
+            },
+            getHTTP:function() {
+                targetURL = this.getTargetURL()
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
                 d3.json(targetURL, function (json) {
                     this.chartData = json.resultList
