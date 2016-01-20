@@ -9,13 +9,13 @@
         <template is="dom-repeat" items="[[transactionsMap.children]]" as="currencyNode">
             <div on-click="nodeClick" style$="[[_getCurrencyStyle(currencyNode.name)]]">
                 <div class="horizontal layout" style="border-bottom: 1px dotted #888;color:#888;">
-                    <div on-click="nodeClick" style$="[[_getCurrencyStyle(currencyNode.name)]]">[[currencyNode.name]] - [[currencyNode.numTotalTransactions]] ${msg.movementsLbl}</div>
+                    <div on-click="nodeClick" on-mouseover="_nodeHovered" style$="[[_getCurrencyStyle(currencyNode.name)]]">[[currencyNode.name]] - [[currencyNode.numTotalTransactions]] ${msg.movementsLbl}</div>
                 </div>
                 <table>
                     <template is="dom-repeat" items="[[currencyNode._children]]" as="secondLevelNode">
                         <tr>
                             <td style="width: 50px;text-align: right;">[[secondLevelNode.numTotalTransactions]]</td>
-                            <td on-click="nodeClick" style$="[[_getNodeStyle(secondLevelNode.name)]]">
+                            <td on-click="nodeClick" on-mouseover="_nodeHovered" style$="[[_getNodeStyle(secondLevelNode.name)]]">
                                 [[_getsSecondLevelNodeName(secondLevelNode)]]
                             </td>
                         </tr>
@@ -39,6 +39,10 @@
                 nodeClick: function(e) {
                     var selectedNode = e.model.secondLevelNode ? e.model.secondLevelNode : e.model.currencyNode
                     this.fire("node-click", {node: selectedNode})
+                },
+                _nodeHovered: function(e) {
+                    var selectedNode = e.model.secondLevelNode ? e.model.secondLevelNode : e.model.currencyNode
+                    this.fire("node-hover", {node: selectedNode})
                 },
                 _getNodeStyle: function(nodeName) {
                     return "cursor:pointer;font-size: 0.9em;margin:0 0 0 7px;color:" + TransactionsStats.getColorScale(nodeName) + ";"

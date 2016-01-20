@@ -120,7 +120,8 @@
                     </div>
                     <div id="chart" style="padding: 0px; margin: 0px;"></div>
                 </div>
-                <transactions-counter id="transactionsCounter" on-node-click="transactionsCounterNodeClick"></transactions-counter>
+                <transactions-counter id="transactionsCounter" on-node-click="transactionsCounterNodeClick"
+                                      on-node-hover="transactionsCounterNodeHover"></transactions-counter>
             </div>
             <div id="tooltip" class="tooltip" style="display: none;">
                 <div style$="[[_getSelectedNodeTooltipHeaderStyle(mouseOverNode)]]">[[_getDescriptionWithPercentage(mouseOverNode)]]</div>
@@ -204,6 +205,9 @@
                     if(localStorage.treemapRoot && this.fullScreen) {
                         this.chart(toJSON(localStorage.treemapRoot))
                     } else localStorage.treemapRoot = null
+                },
+                transactionsCounterNodeHover: function(e) {
+                    this.handleMouseOver(e.detail.node)
                 },
                 transactionsCounterNodeClick: function(e) {
                     this.transition(e.detail.node)
@@ -563,6 +567,7 @@
                         hostElement.$.tooltip.style.top = hostElementOffsets.top + "px"
                         hostElement.$.tooltip.style.left = (hostElementOffsets.width / 2 - tooltipOffsets.width/2)  + "px"
                     }
+                    hostElement.handleMouseOver = handleMouseOver;
 
                 }
             });
