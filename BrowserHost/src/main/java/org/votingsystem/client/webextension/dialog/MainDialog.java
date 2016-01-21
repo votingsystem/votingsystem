@@ -7,8 +7,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -125,16 +123,19 @@ public class MainDialog {
         inboxButton.setOnAction(actionEvent -> SettingsDialog.showDialog());
         InboxService.getInstance().setInboxButton(inboxButton);
 
+        Button openFileButton = new Button(ContextVS.getMessage("openFileButtonLbl"), Utils.getIcon(FontAwesome.Glyph.FOLDER_OPEN_ALT));
+        openFileButton.setOnAction(actionEvent -> DocumentBrowserDialog.showDialog());
 
-        connectionButton.setStyle("-fx-pref-width: 190px;");
-        inboxButton.setStyle("-fx-pref-width: 190px;");
-        walletButton.setStyle("-fx-pref-width: 190px;");
-        qrCodeButton.setStyle("-fx-pref-width: 190px;");
-        settingsButton.setStyle("-fx-pref-width: 190px;");
+        connectionButton.setStyle("-fx-pref-width: 200px;");
+        inboxButton.setStyle("-fx-pref-width: 200px;");
+        walletButton.setStyle("-fx-pref-width: 200px;");
+        qrCodeButton.setStyle("-fx-pref-width: 200px;");
+        openFileButton.setStyle("-fx-pref-width: 200px;");
+        settingsButton.setStyle("-fx-pref-width: 200px;");
 
-        mainPane.getChildren().addAll(connectionButton, inboxButton, walletButton, qrCodeButton, settingsButton);
+        mainPane.getChildren().addAll(connectionButton, inboxButton, walletButton, qrCodeButton, settingsButton, openFileButton);
         mainPane.setStyle("-fx-max-width: 600px;-fx-padding: 3 20 20 20;-fx-spacing: 10;-fx-alignment: center;" +
-                "-fx-font-size: 16;-fx-font-weight: bold;-fx-pref-width: 430px;");
+                "-fx-font-size: 16;-fx-font-weight: bold;-fx-pref-width: 450px;");
         EventBusService.getInstance().register(new EventBusConnectionListener());
     }
 

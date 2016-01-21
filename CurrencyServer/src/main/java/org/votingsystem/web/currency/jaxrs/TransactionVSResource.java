@@ -11,8 +11,8 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.voting.MetaInf;
 import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -144,6 +144,9 @@ public class TransactionVSResource {
             String tempPath = ConfigVSImpl.getTempPath() + File.separator + UUID.randomUUID().toString();
             File tempDir = new File(config.getServerDir().getAbsolutePath() + tempPath);
             tempDir.mkdirs();
+            File metaInfFile = new File(config.getServerDir().getAbsolutePath() + tempPath + File.separator + "meta.inf");
+            MetaInf metaInf = new MetaInf().setType(TypeVS.TRANSACTIONVS_INFO);
+            JSON.getMapper().writeValue(new FileOutputStream(metaInfFile), metaInf);
             String desc = (transactionType == null? "":transactionvsType) + (tag == null? "":tag);
             File zipFile = new File (tempDir, "transaction_" + desc + "_" + transactionList.size() +  ".zip");
             for(TransactionVS transactionVS :  transactionList) {

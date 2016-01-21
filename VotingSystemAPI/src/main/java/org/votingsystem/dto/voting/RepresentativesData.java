@@ -1,5 +1,7 @@
 package org.votingsystem.dto.voting;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Map;
 
 /**
@@ -13,8 +15,8 @@ public class RepresentativesData {
     private Long numRepresentedWithAccessRequest = null;
     private Long numRepresented = null;
     private Long numVotesRepresentedByRepresentatives = null;
-    private Map<String, RepresentativeData> representativeMap = null;
-    
+    @JsonIgnore private Map<String, RepresentativeData> representativeMap = null;
+
     /**
      * @return the numRepresentatives
      */

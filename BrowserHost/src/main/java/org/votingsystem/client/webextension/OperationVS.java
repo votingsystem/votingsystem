@@ -6,7 +6,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.event.EventHandler;
 import org.votingsystem.client.webextension.dialog.*;
-import org.votingsystem.client.webextension.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.service.InboxService;
 import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
@@ -400,16 +399,13 @@ public class OperationVS implements PasswordDialog.Listener {
                 executorService.submit(() -> {
                     ResponseVS response = HttpHelper.getInstance().getData(documentURL, null);
                     if(ResponseVS.SC_OK == response.getStatusCode()) {
-                        PlatformImpl.runLater(() -> {
-                            try {
-                                DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(null,
-                                        FileUtils.getFileFromBytes(response.getMessageBytes()));
-                                new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption())
-                                        .addCloseListener(getCloseListener()).show();
-                            } catch (Exception ex) {
-                                log.log(Level.SEVERE, ex.getMessage(), ex);
-                            }
-                        });
+                        try {
+                            DocumentBrowserDialog.showDialog(response.getMessageBytes()).addCloseListener(event -> {
+                                BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
+                            });;
+                        } catch (Exception ex) {
+                            log.log(Level.SEVERE, ex.getMessage(), ex);
+                        }
                     }
                 });
                 break;
@@ -417,12 +413,13 @@ public class OperationVS implements PasswordDialog.Listener {
                 WebSocketService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(this));
                 break;
             case OPEN_SMIME:
-                byte[] smimeMessageBytes = Base64.getDecoder().decode(message.getBytes());
-                PlatformImpl.runLater(() -> {
-                    DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(smimeMessageBytes, null);
-                    new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption())
-                            .addCloseListener(getCloseListener()).show();
-                });
+                try {
+                    DocumentBrowserDialog.showDialog(Base64.getDecoder().decode(message.getBytes())).addCloseListener(event -> {
+                        BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
+                    });;
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                }
                 break;
             case CURRENCY_OPEN:
                 CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject((message).getBytes()),
@@ -442,15 +439,13 @@ public class OperationVS implements PasswordDialog.Listener {
                         }
                         if (ResponseVS.SC_OK == response.getStatusCode()) {
                             response.setStatusCode(ResponseVS.SC_INITIALIZED);
-                            byte[] messageBytes = response.getMessageBytes();
-                            PlatformImpl.runLater(() -> {
-                                DocumentVSBrowserPane browserPane = new DocumentVSBrowserPane(messageBytes, null);
-                                DialogVS dialogVS = new DialogVS(browserPane, null).setCaption(browserPane.getCaption());
-                                dialogVS.addCloseListener(event -> {
+                            try {
+                                DocumentBrowserDialog.showDialog(response.getMessageBytes()).addCloseListener(event -> {
                                     BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
-                                });
-                                dialogVS.show();
-                            });
+                                });;
+                            } catch (Exception ex) {
+                                log.log(Level.SEVERE, ex.getMessage(), ex);
+                            }
                         }
                     } catch (Exception ex) {
                         log.log(Level.SEVERE, ex.getMessage(), ex);

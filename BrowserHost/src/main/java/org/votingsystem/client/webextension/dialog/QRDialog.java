@@ -12,7 +12,6 @@ import javafx.scene.layout.VBox;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
-import org.votingsystem.client.webextension.pane.DocumentVSBrowserPane;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.QRMessageDto;
@@ -56,16 +55,7 @@ public class QRDialog extends DialogVS {
                             String result = transactionDto.validateReceipt(smimeMessage, true);
                             Button openReceiptButton = new Button(ContextVS.getMessage("openReceiptLbl"),
                                     Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
-                            openReceiptButton.setOnAction(event -> {
-                                try {
-                                    DocumentVSBrowserPane documentVSBrowserPane = new DocumentVSBrowserPane(
-                                            smimeMessage.getBytes(), null);
-                                    Platform.runLater(() -> {
-                                        new DialogVS(documentVSBrowserPane, null).setCaption(documentVSBrowserPane.getCaption()).show(); });
-                                } catch (Exception ex) {
-                                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                                }
-                            });
+                            openReceiptButton.setOnAction(event -> DocumentBrowserDialog.showDialog(smimeMessage));
                             Platform.runLater(() -> { hide(); });
                             if(qrDto.getTypeVS() == TypeVS.CURRENCY_CHANGE) {
                                 Button saveWalletButton = new Button(ContextVS.getMessage("saveToSecureWalletMsg"),

@@ -29,12 +29,9 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.persistence.Query;
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.security.cert.X509Certificate;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -138,19 +135,6 @@ public class ConfigVSImpl implements ConfigVS {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
             });
-            executorService.submit(() -> {
-                while(true) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.add(Calendar.HOUR_OF_DAY, -1);
-                    Date oneHourAgo = calendar.getTime();
-                    File tempDir = new File(getServerDir().getAbsolutePath() + ConfigVSImpl.getTempPath());
-                    tempDir.mkdirs();
-                    for (File file : tempDir.listFiles()) {
-                        if(new Date(file.lastModified()).compareTo(oneHourAgo) < 0) FileUtils.deleteRecursively(file);
-                    }
-                    Thread.sleep(3600000);
-                }
-            });
 
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -158,12 +142,6 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @PreDestroy private void shutdown() { log.info(" --------- shutdown ---------");}
-
-    //@Schedule(dayOfWeek = "Mon", hour="0")
-    public void initWeekPeriod() throws IOException {
-        auditBean.checkCurrencyCanceled();
-        auditBean.initWeekPeriod(Calendar.getInstance());
-    }
 
     public String getProperty(String key) {
         return props.getProperty(key);

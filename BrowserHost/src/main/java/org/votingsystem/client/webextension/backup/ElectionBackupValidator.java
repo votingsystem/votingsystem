@@ -100,10 +100,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
         if(!metaInfFile.exists()) {
             log.log(Level.SEVERE, " - metaInfFile: " + metaInfFile.getAbsolutePath() + " not found");
         } else {
-            Map<String, Object> metaInfMap = JSON.getMapper().readValue(
-                    metaInfFile, new TypeReference<HashMap<String, Object>>() {
-            });
-            metaInf = MetaInf.parse(metaInfMap);
+            metaInf = JSON.getMapper().readValue(metaInfFile, MetaInf.class);
             Map<String, Object> representativeDataMap = JSON.getMapper().readValue(
                     representativeMetaInfFile, new TypeReference<HashMap<String, Object>>() {
             });

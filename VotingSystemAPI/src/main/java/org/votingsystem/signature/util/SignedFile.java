@@ -24,9 +24,9 @@ public class SignedFile {
 
     private byte[] signedFileBytes = null;
     private String name = null;
+    private File file = null;
     private SMIMEMessage smimeMessage = null;
     private boolean signatureVerified = false;
-
 
     public SignedFile(byte[] signedFileBytes, String name) throws Exception {
         smimeMessage = new SMIMEMessage(signedFileBytes);

@@ -57,7 +57,7 @@ public class SMIMEMessage extends MimeMessage {
 
     public static final String CONTENT_TYPE_VS = "CONTENT_TYPE_VS";
 
-    //"application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName + ".p7m";
+    //"application/x-pkcs7-mime; smime-type=signed-data; name=" + fileName + ".p7s";
     private ContentTypeVS contentTypeVS;
     private SMIMESigned smimeSigned;
     private String signedContent;

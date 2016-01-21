@@ -10,10 +10,8 @@ import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.Interval;
-import org.votingsystem.util.JSON;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.*;
+import org.votingsystem.web.currency.cdi.ConfigVSImpl;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.currency.util.ReportFiles;
 import org.votingsystem.web.ejb.DAOBean;
@@ -21,6 +19,7 @@ import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
+import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -286,6 +285,28 @@ public class AuditBean {
             dao.merge(currency.setState(org.votingsystem.model.currency.Currency.State.LAPSED));
             log.log(Level.FINE, "LAPSED currency id: " + currency.getId() + " - value: " + currency.getAmount());
         }
+    }
+
+
+    @Schedule(hour = "*", minute = "0", second = "0", persistent = false)
+    public void cleanTempDir() throws IOException {
+        log.info("cleanTempDir");
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.HOUR_OF_DAY, -1);
+            Date oneHourAgo = calendar.getTime();
+            File tempDir = new File(config.getServerDir().getAbsolutePath() + ConfigVSImpl.getTempPath());
+            tempDir.mkdirs();
+            for (File file : tempDir.listFiles()) {
+                if(new Date(file.lastModified()).compareTo(oneHourAgo) < 0) FileUtils.deleteRecursively(file);
+            }
+        } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex); }
+    }
+
+    //@Schedule(dayOfWeek = "Mon", hour="0", minute = "0", second = "0")
+    public void initWeekPeriod() throws IOException {
+        checkCurrencyCanceled();
+        initWeekPeriod(Calendar.getInstance());
     }
 
 }

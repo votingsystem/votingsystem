@@ -14,7 +14,7 @@ public enum ContentTypeVS {
     JAVASCRIPT("application/javascript", "js"),
 
     JSON(MediaTypeVS.JSON, "json"),
-    JSON_SIGNED(MediaTypeVS.JSON_SIGNED,"p7s"),
+    JSON_SIGNED(MediaTypeVS.JSON_SIGNED,"p7m"),
     JSON_ENCRYPTED("application/json;application/pkcs7-mime","p7m"),//.p7c
     JSON_SIGNED_AND_ENCRYPTED("application/json;application/pkcs7-signature;application/pkcs7-mime", "p7m"),
 
@@ -38,8 +38,6 @@ public enum ContentTypeVS {
     OCSP_RESPONSE("application/ocsp-response", null),
 
     CMS_SIGNED("signed-data", null),
-    //smime.p7m -> Email message encrypted
-    //smime.p7s -> Email message that includes a digital signature
     SIGNED("application/pkcs7-signature","p7s"),
     ENCRYPTED(MediaTypeVS.ENCRYPTED, "p7m"),//.p7c
     SIGNED_AND_ENCRYPTED("application/pkcs7-signature;application/pkcs7-mime", "p7m"),

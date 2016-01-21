@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.FieldEventVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 
@@ -28,15 +27,10 @@ public class MetaInf {
     private String subject;
     private String serverURL;
     private RepresentativesData representativesData;
+    private BackupData BACKUP;
 
-    private Long numSignatures;
-    private Long numAccessRequest;    
-    private Long numVotes;
-    private Long numRepresentativesWithAccessRequest;
-    
     private List<String> errorsList;
     private List<FieldEventVS> optionList;
-    
 
     @JsonIgnore
     public String getFormattedInfo() {
@@ -49,9 +43,9 @@ public class MetaInf {
         switch (type) {
             case VOTING_EVENT:
                 result.append("<b>" + ContextVS.getMessage("accessRequestLbl") +": </b>");
-                result.append( numAccessRequest + "<br/>");
+                result.append( BACKUP.getNumAccessRequest() + "<br/>");
                 result.append("<b>" + ContextVS.getMessage("numVotesVSLbl") +": </b>" +
-                        String.valueOf(numVotes) + "<br/>");
+                        String.valueOf(BACKUP.getNumVotes()) + "<br/>");
                 if(representativesData != null) {
                     result.append("<b>" + ContextVS.getMessage("numRepresentativesLbl") +": </b>" +
                             representativesData.getNumRepresentatives() + "<br/>");
@@ -147,33 +141,7 @@ public class MetaInf {
         setRepresentativesData(representativesData);
     }
 
-    public static MetaInf parse(Map metaInfMap) throws ParseException {
-        log.info("parse");
-        MetaInf metaInf = new MetaInf();
-        if (metaInfMap.containsKey("id")) metaInf.setId(((Number)metaInfMap.get("id")).longValue());
-        if (metaInfMap.containsKey("subject")) metaInf.setSubject((String) metaInfMap.get("subject"));
-        if (metaInfMap.containsKey("type")) metaInf.setType(TypeVS.valueOf((String) metaInfMap.get("type")));
-        if(metaInfMap.containsKey("serverURL")) metaInf.setServerURL((String) metaInfMap.get("serverURL"));
-        if(metaInfMap.containsKey("BACKUP")) {
-            Map backupMap = (Map) metaInfMap.get("BACKUP");
-            if(backupMap.containsKey("numSignatures")) {
-                 metaInf.setNumSignatures(((Number)backupMap.get("numSignatures")).longValue());
-            }
-            if (backupMap.containsKey("numVotes")) {
-                metaInf.setNumVotes(((Number)backupMap.get("numVotes")).longValue());
-            } 
-            if (backupMap.containsKey("numAccessRequest")) 
-                metaInf.setNumAccessRequest(((Number)backupMap.get("numAccessRequest")).longValue());
-        }
-        if(metaInfMap.containsKey("dateFinish")) {
-            metaInf.setDateFinish(DateUtils.getDateFromString((String) metaInfMap.get("dateFinish")));
-        }
-        if(metaInfMap.containsKey("dateBegin")) {
-            metaInf.setDateBegin(DateUtils.getDateFromString((String) metaInfMap.get("dateBegin")));
-        }
-        return metaInf;
-    }
-        
+    @JsonIgnore
     public String getOptionsHTML() {
         StringBuilder result = new StringBuilder("<html>");
         if(TypeVS.VOTING_EVENT == type) {
@@ -193,15 +161,36 @@ public class MetaInf {
         return result.toString();
     }
 
+    @JsonIgnore
     public Long getNumFilesToProcess() {
-        return numAccessRequest + numVotes + representativesData.getNumRepresented() +
+        return BACKUP.getNumAccessRequest() + BACKUP.getNumVotes() + representativesData.getNumRepresented() +
                 representativesData.getNumRepresentedWithAccessRequest();
     }
 
+    @JsonIgnore
+    public int getNumVotes() {
+        return BACKUP.getNumVotes().intValue();
+    }
+
+    @JsonIgnore
+    public int getNumAccessRequest() {
+        return BACKUP.getNumAccessRequest().intValue();
+    }
+
+    public BackupData getBACKUP() {
+        return BACKUP;
+    }
+
+    public void setBACKUP(BackupData BACKUP) {
+        this.BACKUP = BACKUP;
+    }
+
     public String getEventURL() {
+        if(serverURL == null) return null;
         return EventVS.getURL(type, serverURL, id);
     }
-        
+
+    @JsonIgnore
     public String getRepresentativesHTML() {
         StringBuilder result = new StringBuilder("<HTML style='font-family: arial, helvetica, sans-serif; color: #555; margin:10px 0 0 0;'>");
         if(TypeVS.VOTING_EVENT == type) {
@@ -253,36 +242,13 @@ public class MetaInf {
         return null;
     }
 
-    public Long getNumSignatures() {
-        return numSignatures;
-    }
-
-    public void setNumSignatures(Long numSignatures) {
-        this.numSignatures = numSignatures;
-    }
-
-    public Long getNumVotes() {
-        return numVotes;
-    }
-
-    public void setNumVotes(Long numVotes) {
-        this.numVotes = numVotes;
-    }
-
-    public Long getNumAccessRequest() {
-        return numAccessRequest;
-    }
-
-    public void setNumAccessRequest(Long numAccessRequest) {
-        this.numAccessRequest = numAccessRequest;
-    }
-
     public TypeVS getType() {
         return type;
     }
 
-    public void setType(TypeVS type) {
+    public MetaInf setType(TypeVS type) {
         this.type = type;
+        return this;
     }
 
     public String getSubject() {
@@ -329,14 +295,6 @@ public class MetaInf {
         this.serverURL = StringUtils.checkURL(serverURL);
     }
 
-    public Long getNumRepresentativesWithAccessRequest() {
-        return numRepresentativesWithAccessRequest;
-    }
-
-    public void setNumRepresentativesWithAccessRequest(Long numRepresentativesWithAccessRequest) {
-        this.numRepresentativesWithAccessRequest = numRepresentativesWithAccessRequest;
-    }
-
     public List<FieldEventVS> getOptionList() {
         return optionList;
     }
@@ -363,4 +321,47 @@ public class MetaInf {
     public Date getDateBegin() {
         return dateBegin;
     }
+
+
+    public static class BackupData {
+        private Long numSignatures;
+        private Long numAccessRequest;
+        private Long numVotes;
+        private Long numRepresentativesWithAccessRequest;
+
+        public BackupData() {}
+
+        public Long getNumSignatures() {
+            return numSignatures;
+        }
+
+        public void setNumSignatures(Long numSignatures) {
+            this.numSignatures = numSignatures;
+        }
+
+        public Long getNumAccessRequest() {
+            return numAccessRequest;
+        }
+
+        public void setNumAccessRequest(Long numAccessRequest) {
+            this.numAccessRequest = numAccessRequest;
+        }
+
+        public Long getNumVotes() {
+            return numVotes;
+        }
+
+        public void setNumVotes(Long numVotes) {
+            this.numVotes = numVotes;
+        }
+
+        public Long getNumRepresentativesWithAccessRequest() {
+            return numRepresentativesWithAccessRequest;
+        }
+
+        public void setNumRepresentativesWithAccessRequest(Long numRepresentativesWithAccessRequest) {
+            this.numRepresentativesWithAccessRequest = numRepresentativesWithAccessRequest;
+        }
+    }
+
 }
