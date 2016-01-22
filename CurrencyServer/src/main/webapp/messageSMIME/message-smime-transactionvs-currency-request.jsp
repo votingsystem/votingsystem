@@ -31,6 +31,8 @@
                     <div>
                         <div><b>${msg.nameLbl}:</b> <span>{{smimeMessageContent.fromUserVS.name}}</span></div>
                     </div>
+                    <div> <b>${msg.IBANLbl}:</b>
+                        <span on-click="showByUserIBAN" class="iban-link">{{smimeMessageContent.fromUserIBAN}}</span></div>
                 </div>
                 <div class="horizontal layout" style="margin:10px 0px 10px 0px; ">
                     <div class="flex">
@@ -63,12 +65,9 @@
                 this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
                 sendSignalVS({caption:"${msg.transactionVSCurrencyRequest}"})
             },
-            showFromUserVSByIBAN:function(e) {
-                page.show(contextURL + "/rest/userVS/IBAN/" + this.smimeMessageContent.bankIBAN)
-            },
-            showToUserVSByIBAN:function(e) {
-                console.log(this.tagName + " - showUserVSByIBAN - " + e)
-                page.show(contextURL + "/rest/userVS/IBAN/" + e.model.item)
+            showByUserIBAN:function(e) {
+                console.log(this.tagName + " - showByUserIBAN - " + e)
+                window.open(contextURL + "/#!" + contextURL + "/rest/userVS/IBAN/" + e.target.innerText, "_blank")
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

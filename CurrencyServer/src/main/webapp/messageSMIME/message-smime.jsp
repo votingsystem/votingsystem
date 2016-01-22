@@ -2,14 +2,9 @@
 <dom-module name="message-smime">
     <template>
         <style>
-        .messageToUser {
-            font-weight: bold;
-            margin:10px auto 10px auto;
-            background: #f9f9f9;
-            padding:10px 20px 10px 20px;
-        }
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
         .systemLbl { color:#6c0404; font-size:1.1em;  }
+        .iban-link {text-decoration: underline; color: #0000ee; cursor: pointer;}
         </style>
         <div class="layout vertical center center-justified" style="margin: 0px auto; max-width:800px;">
             <div>
@@ -19,13 +14,10 @@
                 <div hidden="{{!timeStampDate}}" class="timeStampMsg">
                     <b>${msg.dateLbl}: </b> {{timeStampDate}}
                 </div>
-                <div hidden="{{!messageToUser}}" layout horizontal center center-justified  class="messageToUser">
-                    <div id="messageToUser">{{messageToUser}}</div>
-                </div>
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-                <div><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
-                <div class="horizontal layout center center-justified">
-                    <div><b>${msg.amountLbl}: </b> {{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
+                <div style="font-size: 1.1em;"><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
+                <div class="horizontal layout">
+                    <div style="font-size: 1.1em;"><b>${msg.amountLbl}: </b> {{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
                     <div hidden="{{!smimeMessageContent.timeLimited}}" class="pageHeader" style="margin: 0 0 0 20px;"><b>
                         ${msg.timeLimitedLbl}</b>
                     </div>
@@ -36,7 +28,8 @@
                         ${msg.senderLbl}</div>
                     <div id="fromUserDiv">
                         <div><b>${msg.nameLbl}:</b> <span>{{smimeMessageContent.fromUserVS.name}}</span></div>
-                        <div><b>${msg.IBANLbl}:</b> <span>{{smimeMessageContent.fromUserIBAN}}</span></div>
+                        <div> <b>${msg.IBANLbl}:</b>
+                            <span on-click="showByUserIBAN" class="iban-link">{{smimeMessageContent.fromUserIBAN}}</span></div>
                     </div>
                 </div>
                 <div hidden="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
@@ -45,20 +38,11 @@
                         <div><b>${msg.IBANLbl}: </b></div>
                         <div>
                             <template is="dom-repeat" items="{{smimeMessageContent.toUserIBAN}}" as="IBAN">
-                                <div on-click="showToUserIBAN" style="text-decoration: underline; color: #0000ee; cursor: pointer;">{{IBAN}}</div>
+                                <div on-click="showByUserIBAN" class="iban-link">{{IBAN}}</div>
                             </template>
                         </div>
                     </div>
                 </div >
-
-                <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;margin:5px 0 0 0;color: #621">
-                    {{receptorLbl}}
-                </div>
-                <div><b>{{toUserName}}</b></div>
-                <div class="layout horizontal">
-                    <div><b>${msg.IBANLbl}: </b>{{IBAN}}</div>
-                </div>
-
                 <div class="layout horizontal center center-justified" style="margin: 15px 0 0 0;">
                     <template is="dom-repeat" items="{{signedDocument.tags}}" as="tag">
                         <a class="btn btn-default" style="font-size: 0.7em; margin:0px 5px 5px 0px;padding:3px;">{{tag.name}}</a>
@@ -90,7 +74,6 @@
                 return new Date(dateStamp).getDayWeekFormat()
             },
             smimeMessageContentChanged:function() {
-                this.messageToUser = null
                 this.isReceptorVisible = true
                 if(this.smimeMessageContent.toUserIBAN != null && this.smimeMessageContent.toUserIBAN.length > 1) {
                     this.receptorLbl = '${msg.receptorsLbl}'
@@ -124,6 +107,9 @@
                         this.toUserName = this.smimeMessageContent.toUserName
                         this.receptorLbl = '${msg.receptorLbl}'
                         break;
+                    case 'FROM_USERVS':
+                        this.caption = "${msg.transactionVSFromUserVS}"
+                        break;
                     default:
                         this.caption = this.smimeMessageContent.operation
 
@@ -141,9 +127,11 @@
                 var fromUserIBANInfoURL = contextURL + "/rest/IBAN/from/" + e.model.item.fromUserVS.sender.fromUserIBAN
                 console.log(this.tagName + " - showInfoIBAN - fromUserIBANInfoURL: " + fromUserIBANInfoURL)
             },
-            showToUserIBAN:function(e) {
-                console.log(this.tagName + " - showToUserIBAN - " + e)
-                page.show(contextURL + "/rest/userVS/IBAN/",  e.model.item, '_blank')
+            showByUserIBAN:function(e) {
+                console.log(this.tagName + " - showByUserIBAN - " + e)
+                if(e.model) IBAN = e.model.IBAN
+                else IBAN = e.target.innerText
+                window.open(contextURL + "/#!" + contextURL + "/rest/userVS/IBAN/" + IBAN, "_blank")
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

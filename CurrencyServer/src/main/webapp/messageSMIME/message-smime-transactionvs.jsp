@@ -42,9 +42,9 @@
                     <div class="actorLbl" style=" margin:10px 0px 0px 0px;">${msg.senderLbl}</div>
                     <div>
                         <div><b>${msg.nameLbl}:  </b>{{smimeMessageContent.fromUserVS.name}}</div>
-                        <div class="horizontal layout" on-click="showFromUserVSByIBAN">
+                        <div class="horizontal layout">
                             <div><b>${msg.IBANLbl}: </b></div>
-                            <div class="iban-link">{{smimeMessageContent.fromUserIBAN}}</div>
+                            <div class="iban-link" on-click="showByUserIBAN">{{smimeMessageContent.fromUserIBAN}}</div>
                         </div>
                     </div>
                 </div>
@@ -54,7 +54,7 @@
                         <div><b>${msg.IBANLbl}: </b></div>
                         <div>
                             <template is="dom-repeat" items="{{smimeMessageContent.toUserIBAN}}" as="IBAN">
-                                <div on-click="showToUserVSByIBAN" class="iban-link">{{IBAN}}</div>
+                                <div on-click="showByUserIBAN" class="iban-link">{{IBAN}}</div>
                             </template>
                         </div>
                     </div>
@@ -107,11 +107,14 @@
                 }
                 sendSignalVS({caption:this.messageType})
             },
-            showFromUserVSByIBAN:function(e) {
+            showByUserIBAN:function(e) {
                 page.show(contextURL + "/rest/userVS/IBAN/" + this.fromUserIBAN, '_blank')
             },
-            showToUserVSByIBAN:function(e) {
-                page.show(contextURL + "/rest/userVS/IBAN/" + this.toUserIBAN, '_blank')
+            showByUserIBAN:function(e) {
+                console.log(this.tagName + " - showByUserIBAN - " + e)
+                if(e.model) IBAN = e.model.IBAN
+                else IBAN = e.target.innerText
+                window.open(contextURL + "/#!" + contextURL + "/rest/userVS/IBAN/" + IBAN, "_blank")
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_SMIME)

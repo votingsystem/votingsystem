@@ -8,12 +8,12 @@ Change what follows to the standalone / domain  server configurationt:
         <http-listener name="default" socket-binding="http"/>
         <host name="default-host" alias="localhost">
             <location name="/" handler="welcome-content"/>
-            <location name="/CurrencyServer/static" handler="currencyServerStatic"/>
+            <location name="/AccessControl/static" handler="accessControlStatic"/>
         </host>
     </server>
     <handlers>
         <file name="welcome-content" path="${jboss.home.dir}/welcome-content" directory-listing="true"/>
-        <file name="currencyServerStatic" path="/var/local/voting_system/currency_server" directory-listing="true"/>
+        <file name="accessControlStatic" path="/var/local/voting_system/access_control" directory-listing="true"/>
     </handlers>
 
 The value of the variables 'vs.staticResourcesURL' and 'vs.staticResourcesPath' must be set according to the values configured.

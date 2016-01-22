@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.jaxrs;
 
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.*;
@@ -57,7 +58,7 @@ public class MessageSMIMEResource {
     }
 
     private Response processRequest(MessageSMIME messageSMIME, @Context ServletContext context,
-                                  @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+                                    @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         String smimeMessageStr = Base64.getEncoder().encodeToString(messageSMIME.getContent());
         SMIMEMessage smimeMessage = messageSMIME.getSMIME();
@@ -76,6 +77,8 @@ public class MessageSMIMEResource {
         if(!anonymousTransaction.contains(operation)) {
             signedContentMap.put("fromUserVS", UserVSDto.BASIC(messageSMIME.getUserVS()));
         }
+        if(messageSMIME.getUserVS() != null)
+            signedContentMap.put("fromUserIBAN", messageSMIME.getUserVS().getIBAN());
         switch(operation) {
             case FROM_BANKVS:
                 viewer = "message-smime-transactionvs-from-bankvs";

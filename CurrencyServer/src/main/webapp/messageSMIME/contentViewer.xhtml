@@ -3,24 +3,24 @@
                 template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
         <title>${msg.signedDocumentLbl}</title>
-        <link href="${viewer}.vsp" rel="import"/>
+        <link href="#{viewer}.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
         <div class="horizontal layout" style="margin:1px 0 0 0;">
             <div style="font-size: 1.3em;margin:0 0 0 50px; color: #888;text-decoration: underline;" id="selectedPageTitle"></div>
         </div>
 
-        <div id="smimeMessage" style="display:none;">${smimeMessage}</div>
+        <div id="smimeMessage" style="display:none;">#{smimeMessage}</div>
 
         <script>
             document.addEventListener('WebComponentsReady', function() {
                 console.log("receiptViewer - WebComponentsReady")
-                var viewer = document.createElement('${viewer}');
-                sendSignalVS({caption:"${msg.signedDocumentLbl}"})
+                var viewer = document.createElement('#{viewer}');
+                sendSignalVS({caption:"#{msg.signedDocumentLbl}"})
                 document.querySelector("#voting_system_page").appendChild(viewer)
                 viewer.smimeMessage = document.querySelector("#smimeMessage").innerHTML;
-                viewer.timeStampDate = new Date(${timeStampDate}).getDayWeekAndHourFormat()
-                viewer.smimeMessageContent = toJSON('${signedContentMap}')
+                viewer.timeStampDate = new Date(#{timeStampDate}).getDayWeekAndHourFormat()
+                viewer.smimeMessageContent = toJSON('#{signedContentMap}')
             });
         </script>
     </ui:define>
