@@ -3,18 +3,16 @@ package org.votingsystem.client.webextension.dialog;
 import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
-import org.votingsystem.client.webextension.pane.DecoratedPane;
 import org.votingsystem.client.webextension.service.InboxService;
 import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.webextension.util.Utils;
@@ -24,6 +22,7 @@ import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,15 +30,11 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class MainDialog {
+public class MainDialog extends DialogVS {
 
     private static Logger log = Logger.getLogger(MainDialog.class.getSimpleName());
 
-    private FlowPane mainPane;
     private Button connectionButton;
-    private Button walletButton;
-    private Button qrCodeButton;
-    private Stage primaryStage;
     private AtomicBoolean isConnected = new AtomicBoolean(false);
 
     class EventBusConnectionListener {
@@ -70,28 +65,16 @@ public class MainDialog {
         }
     }
 
-    public MainDialog(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-        primaryStage.initStyle(StageStyle.UNDECORATED);
-        primaryStage.initStyle(StageStyle.TRANSPARENT);
-        mainPane = new FlowPane();
-        mainPane.setVgap(10);
-        mainPane.setHgap(10);
-        mainPane.setPrefWrapLength(300);
-        DecoratedPane decoratedPane = new DecoratedPane(null, null, mainPane, primaryStage);
-        primaryStage.setScene(new Scene(decoratedPane));
-        primaryStage.setTitle(ContextVS.getMessage("mainDialogCaption"));
-        decoratedPane.setCaption(ContextVS.getMessage("mainDialogCaption"));
-        primaryStage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
-        decoratedPane.getScene().setFill(Color.TRANSPARENT);
-        primaryStage.setAlwaysOnTop(true);
-        primaryStage.setResizable(false);
-        Utils.addMouseDragSupport(primaryStage);
+    public MainDialog(Stage primaryStage) throws IOException {
+        super(primaryStage);
+        FlowPane mainPane = new FlowPane(10, 10);
+        setPane(mainPane);
+        setCaption(ContextVS.getMessage("mainDialogCaption"));
         //set Stage boundaries to the top right corner of the visible bounds of the main screen
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
         primaryStage.setX(primaryScreenBounds.getMinX() + primaryScreenBounds.getWidth() - 240);
         primaryStage.setY(primaryScreenBounds.getMinY() + 70);
-        
+
         connectionButton = new Button(ContextVS.getMessage("connectLbl"), Utils.getIcon(FontAwesome.Glyph.CLOUD_UPLOAD, Utils.COLOR_RED_DARK));
         connectionButton.setTooltip(new Tooltip(ContextVS.getMessage("connectLbl")));
         connectionButton.setOnAction(event -> {
@@ -110,14 +93,11 @@ public class MainDialog {
             }
         });
 
-        walletButton = new Button(ContextVS.getMessage("walletLbl"), Utils.getIcon(FontAwesome.Glyph.MONEY));
+        Button walletButton = new Button(ContextVS.getMessage("walletLbl"), Utils.getIcon(FontAwesome.Glyph.MONEY));
         walletButton.setOnAction(event -> WalletDialog.showDialog());
-        
-        qrCodeButton = new Button(ContextVS.getMessage("createQRLbl"), Utils.getIcon(FontAwesome.Glyph.QRCODE));
-        qrCodeButton.setOnAction(event -> QRTransactionFormDialog.showDialog());
 
-        Button settingsButton = new Button(ContextVS.getMessage("settingsLbl"), Utils.getIcon(FontAwesome.Glyph.COG));
-        settingsButton.setOnAction(actionEvent -> SettingsDialog.showDialog());
+        Button qrCodeButton = new Button(ContextVS.getMessage("createQRLbl"), Utils.getIcon(FontAwesome.Glyph.QRCODE));
+        qrCodeButton.setOnAction(event -> QRTransactionFormDialog.showDialog());
 
         Button inboxButton = new Button(ContextVS.getMessage("messageInboxLbl"), Utils.getIcon(FontAwesome.Glyph.ENVELOPE));
         inboxButton.setOnAction(actionEvent -> SettingsDialog.showDialog());
@@ -131,17 +111,19 @@ public class MainDialog {
         walletButton.setStyle("-fx-pref-width: 200px;");
         qrCodeButton.setStyle("-fx-pref-width: 200px;");
         openFileButton.setStyle("-fx-pref-width: 200px;");
-        settingsButton.setStyle("-fx-pref-width: 200px;");
 
-        mainPane.getChildren().addAll(connectionButton, inboxButton, walletButton, qrCodeButton, settingsButton, openFileButton);
+        MenuItem settingsMenuItem =  new MenuItem(ContextVS.getMessage("settingsLbl"), Utils.getIcon(FontAwesome.Glyph.COG));
+        settingsMenuItem.setOnAction(actionEvent -> SettingsDialog.showDialog() );
+        MenuButton menuButton = new MenuButton(null, Utils.getIcon(FontAwesome.Glyph.BARS));
+        menuButton.getItems().addAll(settingsMenuItem);
+        addMenuButton(menuButton);
+
+        mainPane.getChildren().addAll(connectionButton, inboxButton, walletButton, qrCodeButton, openFileButton);
         mainPane.setStyle("-fx-max-width: 600px;-fx-padding: 3 20 20 20;-fx-spacing: 10;-fx-alignment: center;" +
                 "-fx-font-size: 16;-fx-font-weight: bold;-fx-pref-width: 450px;");
         EventBusService.getInstance().register(new EventBusConnectionListener());
     }
-
-    public void show() {
-        primaryStage.show();
-    }
+    
 
     public void setVotingSystemAvailable(boolean available) {
         PlatformImpl.runLater(() -> { });

@@ -24,6 +24,15 @@ public class DialogVS {
     private Stage stage;
     private DecoratedPane decoratedPane;
 
+    public DialogVS(Stage stage) throws IOException {
+        stage.initStyle(StageStyle.UNDECORATED);
+        stage.initStyle(StageStyle.TRANSPARENT);
+        stage.setResizable(false);
+        stage.getIcons().add(Utils.getIconFromResources(Utils.APPLICATION_ICON));
+        stage.setAlwaysOnTop(true);
+        this.stage = stage;
+    }
+
     public DialogVS(String fxmlFilePath) throws IOException {
         this(fxmlFilePath, StageStyle.TRANSPARENT);
     }
@@ -51,6 +60,13 @@ public class DialogVS {
     public DialogVS initOwner(Window window) {
         stage.initOwner(window);
         return this;
+    }
+
+    public void setPane(Pane pane) {
+        decoratedPane = new DecoratedPane(null, null, pane, stage);
+        stage.setScene(new Scene(decoratedPane));
+        decoratedPane.getScene().setFill(Color.TRANSPARENT);
+        Utils.addMouseDragSupport(stage);
     }
 
     public DialogVS setCaption(String caption) {
