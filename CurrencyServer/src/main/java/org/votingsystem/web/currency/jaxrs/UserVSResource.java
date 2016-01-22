@@ -249,6 +249,7 @@ public class UserVSResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
+    @Transactional
     @Path("/searchByDevice")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Object searchByDevice(@QueryParam("phone") String phone, @QueryParam("email") String email,
@@ -262,7 +263,10 @@ public class UserVSResource {
         if(deviceVS == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("device not found - email: " + email +
                     " - phone: " + phone).build();
-        } else return userVSBean.getUserVSDto(deviceVS.getUserVS(), false);
+        } else {
+            UserVSDto dto = userVSBean.getUserVSDto(deviceVS.getUserVS(), false);
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
+        }
     }
 
     @Path("/bankVSList")
