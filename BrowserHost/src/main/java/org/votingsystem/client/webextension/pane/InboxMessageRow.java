@@ -46,6 +46,7 @@ public class InboxMessageRow {
 
     @FXML void initialize() throws Exception { // This method is called by the FXMLLoader when initialization is complete
         messageButton.setWrapText(true);
+        messageButton.setOnAction(event -> InboxService.getInstance().processMessage(inboxMessage));
         removeButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         removeButton.setOnAction((event) ->
                 InboxService.getInstance().processMessage(inboxMessage.setState(InboxMessage.State.REMOVED)));
@@ -64,7 +65,7 @@ public class InboxMessageRow {
                 }
             };
             new Thread(task).start();
-        } else dateLbl.setText(DateUtils.getDayWeekDateStr(inboxMessage.getDate(), "HH:mm") + " - " + inboxMessage.getFrom());
+        } else dateLbl.setText(DateUtils.getDayWeekDateStr(inboxMessage.getDate(), "HH:mm:ss") + " - " + inboxMessage.getFrom());
         switch(inboxMessage.getTypeVS()) {
             case CURRENCY_WALLET_CHANGE:
                 messageButton.setText(ContextVS.getMessage("currency_wallet_change_button"));
@@ -89,10 +90,6 @@ public class InboxMessageRow {
                 messageButton.setText(inboxMessage.getTypeVS().toString());
         }
 
-    }
-
-    public void onClickMessageButton(ActionEvent actionEvent) {
-        InboxService.getInstance().processMessage(inboxMessage);
     }
 
     public HBox getMainPane() {

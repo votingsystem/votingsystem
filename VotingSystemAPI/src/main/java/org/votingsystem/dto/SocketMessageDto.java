@@ -462,6 +462,22 @@ public class SocketMessageDto {
         return socketMessageDto;
     }
 
+    //method to response a message previosly received
+    public SocketMessageDto getMessageVSResponse(UserVS userVS, String textToEncrypt) throws Exception {
+        SocketMessageDto socketMessageDto = new SocketMessageDto();
+        socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
+        socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
+        WebSocketSession socketSession = ContextVS.getInstance().getWSSession(UUID);
+        socketMessageDto.setDeviceToId(deviceFromId);
+        socketMessageDto.setDeviceToName(from);
+        socketMessageDto.setUUID(socketSession.getUUID());
+
+        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getMessageVSToDevice(userVS, from, textToEncrypt);
+        socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(
+                JSON.getMapper().writeValueAsString(messageContentDto), socketSession.getAESParams()));
+        return socketMessageDto;
+    }
+
     public void decryptMessage(PrivateKey privateKey) throws Exception {
         byte[] decryptedBytes = Encryptor.decryptCMS(aesParams.getBytes(), privateKey);
         decryptMessage(AESParams.load(JSON.getMapper().readValue(new String(decryptedBytes), AESParamsDto.class)));

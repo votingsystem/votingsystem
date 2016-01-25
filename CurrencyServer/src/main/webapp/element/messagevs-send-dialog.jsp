@@ -20,7 +20,7 @@
                     <div class="vertical flex layout" style="padding: 10px 10px 10px 10px; min-height:260px; ">
                         <span>[[messageToUser]]</span>
                         <div class="flex" style="font-size: 1.3em; color:#6c0404; text-align: center;display: block;">
-                            <textarea rows="12" cols="40" maxlength="300" value="{{messageVS::input}}"></textarea>
+                            <textarea rows="12" cols="60" maxlength="300" value="{{messageVS::input}}" style="max-width: 100%; "></textarea>
                         </div>
                         <div class="layout horizontal" style="padding:20px 20px 0 20px;">
                             <div class="flex"></div>

@@ -1,16 +1,20 @@
 package org.votingsystem.client.webextension.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Button;
+import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.dialog.InboxDialog;
+import org.votingsystem.client.webextension.dialog.MessageVSDialog;
 import org.votingsystem.client.webextension.dialog.PasswordDialog;
 import org.votingsystem.client.webextension.dialog.ProgressDialog;
 import org.votingsystem.client.webextension.dto.InboxMessageDto;
 import org.votingsystem.client.webextension.task.InboxDecryptTask;
 import org.votingsystem.client.webextension.util.InboxMessage;
 import org.votingsystem.client.webextension.util.MsgUtils;
+import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
@@ -199,8 +203,6 @@ public class InboxService {
 
     public void processMessage(InboxMessage inboxMessage) {
         log.info("processMessage - type: " + inboxMessage.getTypeVS() + " - state: " + inboxMessage.getState());
-        PasswordDialog passwordDialog = null;
-        String password = null;
         switch(inboxMessage.getState()) {
             case LAPSED:
                 log.info("discarding LAPSED message");
@@ -216,7 +218,18 @@ public class InboxService {
                 break;
             case MESSAGEVS:
                 String msg = MsgUtils.getWebSocketFormattedMessage(inboxMessage);
-                BrowserHost.showMessage(msg, ContextVS.getMessage("messageLbl"));
+                Button responseButton = new Button(ContextVS.getMessage("answerLbl"), Utils.getIcon(FontAwesome.Glyph.MAIL_REPLY));
+                responseButton.setOnAction(actionEvent -> MessageVSDialog.show(inboxMessage.getWebSocketMessage(), (response) -> {
+                    try {
+                        SocketMessageDto messageDto = inboxMessage.getWebSocketMessage().getMessageVSResponse(
+                                BrowserSessionService.getInstance().getUserVS(), response);
+                        WebSocketAuthenticatedService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(messageDto));
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                    }
+                }));
+                BrowserHost.showMessage(msg, ContextVS.getMessage("messageLbl"), responseButton, null);
                 break;
             case CURRENCY_IMPORT:
                 PasswordDialog.showWithoutPasswordConfirm(passw -> {

@@ -195,14 +195,11 @@ public class WebSocketAuthenticatedService {
                     sendMessage(JSON.getMapper().writeValueAsString(messageDto));
                     isMessageDelivered = true;
                 }
-                SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(BrowserSessionService.getInstance().getUserVS(),
-                        deviceVS, operationVS.getNif(), operationVS.getMessage());
-                sendMessage(JSON.getMapper().writeValueAsString(messageDto));
             }
             if(isMessageDelivered) return new ResponseVS(ResponseVS.SC_OK);
             else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage(
                     "uservsWithoutDevicesConnectedMsg", operationVS.getNif()));
-        } throw new ExceptionVS(ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"));
+        } return ResponseVS.ERROR(ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"));
     }
 
     private void consumeMessage(final SocketMessageDto socketMsg) {
