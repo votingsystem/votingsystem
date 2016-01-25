@@ -371,6 +371,7 @@ public class SocketMessageDto {
 
     public void setWebSocketSession(WebSocketSession webSocketSession) {
         this.webSocketSession = webSocketSession;
+        this.UUID = webSocketSession.getUUID();
     }
 
     public String getEncryptedMessage() {
@@ -508,7 +509,7 @@ public class SocketMessageDto {
         this.encryptedMessage = null;
     }
 
-    private static <T> WebSocketSession checkWebSocketSession (DeviceVS deviceVS, T data, TypeVS typeVS)
+    public static <T> WebSocketSession checkWebSocketSession (DeviceVS deviceVS, T data, TypeVS typeVS)
             throws NoSuchAlgorithmException {
         WebSocketSession webSocketSession = null;
         if(deviceVS != null) webSocketSession = ContextVS.getInstance().getWSSession(deviceVS.getId());

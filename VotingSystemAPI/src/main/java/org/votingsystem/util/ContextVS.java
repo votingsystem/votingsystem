@@ -127,6 +127,8 @@ public class ContextVS {
     public static final int SIGNED_MAX_FILE_SIZE_KB = 512;
     public static final int SIGNED_MAX_FILE_SIZE = SIGNED_MAX_FILE_SIZE_KB * 1024;
 
+    public static final int MAX_MSG_LENGTH = 300;
+
     public static final String MULTISIGNED_FILE_NAME = "MultiSign";
     public static final String HASH_CERTVS_KEY        = "hashCertVSBase64";
     public static final String ORIGIN_HASH_CERTVS_KEY = "originHashCertVS";

@@ -1,9 +1,8 @@
 package org.votingsystem.client.webextension.dialog;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sun.javafx.application.PlatformImpl;
+import javafx.concurrent.Task;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -11,14 +10,17 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.webextension.BrowserHost;
+import org.votingsystem.client.webextension.service.BrowserSessionService;
+import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.webextension.util.Utils;
+import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.JSON;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.*;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,58 +31,91 @@ public class MessageVSDialog extends DialogVS {
 
     private static Logger log = Logger.getLogger(MessageVSDialog.class.getSimpleName());
 
-    public interface Listener {
-        public void process(String msg);
-    }
-
     private TextArea textArea;
-    private Listener listener;
     private Label messageLabel;
+    private Label footerMessageLabel;
+    private Button acceptButton;
+    private SocketMessageDto webSocketMessage;
     private static MessageVSDialog dialog;
+    private static final ExecutorService executorService = Executors.newSingleThreadExecutor();;
 
     public MessageVSDialog() {
         super(new VBox(10));
         VBox mainDialog = (VBox) getContentPane();
-        //mainDialog.getStylesheets().add(Utils.getResource("/css/modal-dialog.css"));
-        //mainDialog.getStyleClass().add("modal-dialog");
+        mainDialog.setStyle("-fx-max-width: 600px; -fx-padding: 0 20 20 20; -fx-spacing: 20; -fx-alignment: center;" +
+                "-fx-font-size: 16; -fx-font-weight: bold; -fx-color: #f9f9f9; -fx-text-fill:#434343;");
         messageLabel = new Label();
+        footerMessageLabel = new Label(ContextVS.getMessage("checkingReceptorMsg"));
         messageLabel.setWrapText(true);
         textArea = new TextArea();
-        textArea.setPrefHeight(300);
-        textArea.setPrefWidth(600);
+        textArea.setPrefHeight(190);
+        textArea.setPrefWidth(490);
+        textArea.setWrapText(true);
         HBox.setHgrow(textArea, Priority.ALWAYS);
         VBox.setVgrow(textArea, Priority.ALWAYS);
         textArea.setStyle("-fx-word-wrap:break-word;");
 
-        Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
+        acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         acceptButton.setOnAction(actionEvent -> {
-            listener.process(textArea.getText());
+            if(textArea.getText().trim().equals("")) return;
+            try {
+                SocketMessageDto messageDto = webSocketMessage.getMessageVSResponse(
+                        BrowserSessionService.getInstance().getUserVS(), textArea.getText());
+                WebSocketAuthenticatedService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(messageDto));
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+                BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+            }
             hide();
         });
         acceptButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CHECK));
-        Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
-        cancelButton.setOnAction(actionEvent -> hide());
-        cancelButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         HBox footerButtonsBox = new HBox(10);
-        footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);
+        footerButtonsBox.getChildren().addAll(footerMessageLabel, Utils.getSpacer(), acceptButton);
         mainDialog.getChildren().addAll(messageLabel, textArea, footerButtonsBox);
+        Utils.addTextLimiter(textArea, ContextVS.MAX_MSG_LENGTH);
     }
 
-    public void showMessage(String msgToUser, Listener listener) throws JsonProcessingException {
-        this.listener = listener;
-        messageLabel.setText(msgToUser);
+    public void showMessage(SocketMessageDto webSocketMessage) {
+        acceptButton.setVisible(false);
+        footerMessageLabel.setVisible(true);
+        executorService.execute(new CheckReceptorTask(webSocketMessage));
+        this.webSocketMessage = webSocketMessage;
+        messageLabel.setText(ContextVS.getMessage("messageToLbl", webSocketMessage.getFrom()));
+        textArea.setText("");
         show();
     }
 
-    public static void show(SocketMessageDto webSocketMessage, Listener listener) {
+    public static void show(SocketMessageDto webSocketMessage) {
         PlatformImpl.runLater(() -> {
-            try {
-                if(dialog == null) dialog = new MessageVSDialog();
-                dialog.showMessage(ContextVS.getMessage("messageToLbl", webSocketMessage.getFrom()), listener);
-            } catch (JsonProcessingException ex) {
-               log.log(Level.SEVERE, ex.getMessage(), ex);
-            }
+            if(dialog == null) dialog = new MessageVSDialog();
+            dialog.showMessage(webSocketMessage);
         });
+    }
+
+    public  class CheckReceptorTask extends Task<Void> {
+
+        private SocketMessageDto webSocketMessage;
+
+        public CheckReceptorTask(SocketMessageDto webSocketMessage) {
+            this.webSocketMessage = webSocketMessage;
+        }
+
+        @Override protected Void call() throws Exception {
+            WebSocketSession socketSession = ContextVS.getInstance().getWSSession(webSocketMessage.getUUID());
+            if(socketSession == null) {
+                String serviceURL = ContextVS.getInstance().getCurrencyServer().getDeviceVSByIdServiceURL(webSocketMessage.getDeviceFromId());
+                ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.JSON);
+                if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
+                    BrowserHost.showMessage(ResponseVS.SC_ERROR, responseVS.getMessage());
+                    return null;
+                }
+                DeviceVSDto dto = (DeviceVSDto) responseVS.getMessage(DeviceVSDto.class);
+                webSocketMessage.setWebSocketSession(SocketMessageDto.checkWebSocketSession(dto.getDeviceVS(), null, TypeVS.MESSAGEVS));
+            }
+            footerMessageLabel.setVisible(false);
+            acceptButton.setVisible(true);
+            return null;
+        }
     }
 
 }

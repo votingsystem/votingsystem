@@ -7,6 +7,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -23,6 +24,7 @@ import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.dialog.PasswordDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
+import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.ResponseVS;
@@ -305,6 +307,29 @@ public class Utils {
         });
         BrowserHost.showMessage(ContextVS.getMessage("errorLbl"), ContextVS.getMessage("walletNotFoundMessage"),
                 optionButton, null);
+    }
+
+    public static void addTextLimiter(final TextInputControl tf, final int maxLength) {
+        tf.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(final ObservableValue<? extends String> ov, final String oldValue, final String newValue) {
+                if (tf.getText().length() > maxLength) {
+                    String s = tf.getText().substring(0, maxLength);
+                    tf.setText(s);
+                }
+            }
+        });
+    }
+
+    public static boolean checkConnection() {
+        if(!WebSocketAuthenticatedService.getInstance().isConnected()) {
+            Button connectionButton = new Button(ContextVS.getMessage("connectLbl"),
+                    Utils.getIcon(FontAwesome.Glyph.CLOUD_UPLOAD));
+            connectionButton.setOnAction(event -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true));
+            BrowserHost.showMessage(null, ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"),
+                    connectionButton, null);
+            return false;
+        } else return true;
     }
 
     static class Delta { double x, y; }

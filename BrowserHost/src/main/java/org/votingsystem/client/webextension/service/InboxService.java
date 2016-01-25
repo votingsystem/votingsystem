@@ -219,17 +219,11 @@ public class InboxService {
             case MESSAGEVS:
                 String msg = MsgUtils.getWebSocketFormattedMessage(inboxMessage);
                 Button responseButton = new Button(ContextVS.getMessage("answerLbl"), Utils.getIcon(FontAwesome.Glyph.MAIL_REPLY));
-                responseButton.setOnAction(actionEvent -> MessageVSDialog.show(inboxMessage.getWebSocketMessage(), (response) -> {
-                    try {
-                        SocketMessageDto messageDto = inboxMessage.getWebSocketMessage().getMessageVSResponse(
-                                BrowserSessionService.getInstance().getUserVS(), response);
-                        WebSocketAuthenticatedService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(messageDto));
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                    }
-                }));
-                BrowserHost.showMessage(msg, ContextVS.getMessage("messageLbl"), responseButton, null);
+                responseButton.setOnAction(actionEvent -> {
+                    if(!Utils.checkConnection()) return;
+                    MessageVSDialog.show(inboxMessage.getWebSocketMessage());
+                });
+                BrowserHost.showMessage(ContextVS.getMessage("messageLbl"), msg,  responseButton, null);
                 break;
             case CURRENCY_IMPORT:
                 PasswordDialog.showWithoutPasswordConfirm(passw -> {
