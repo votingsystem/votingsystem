@@ -400,9 +400,9 @@ public class OperationVS implements PasswordDialog.Listener {
                     ResponseVS response = HttpHelper.getInstance().getData(documentURL, null);
                     if(ResponseVS.SC_OK == response.getStatusCode()) {
                         try {
-                            DocumentBrowserDialog.showDialog(response.getMessageBytes()).addCloseListener(event -> {
+                            DocumentBrowserDialog.showDialog(response.getMessageBytes(), event -> {
                                 BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
-                            });;
+                            });
                         } catch (Exception ex) {
                             log.log(Level.SEVERE, ex.getMessage(), ex);
                         }
@@ -414,9 +414,9 @@ public class OperationVS implements PasswordDialog.Listener {
                 break;
             case OPEN_SMIME:
                 try {
-                    DocumentBrowserDialog.showDialog(Base64.getDecoder().decode(message.getBytes())).addCloseListener(event -> {
+                    DocumentBrowserDialog.showDialog(Base64.getDecoder().decode(message.getBytes()), event -> {
                         BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
-                    });;
+                    });
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
@@ -440,9 +440,9 @@ public class OperationVS implements PasswordDialog.Listener {
                         if (ResponseVS.SC_OK == response.getStatusCode()) {
                             response.setStatusCode(ResponseVS.SC_INITIALIZED);
                             try {
-                                DocumentBrowserDialog.showDialog(response.getMessageBytes()).addCloseListener(event -> {
+                                DocumentBrowserDialog.showDialog(response.getMessageBytes(), event -> {
                                     BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
-                                });;
+                                });
                             } catch (Exception ex) {
                                 log.log(Level.SEVERE, ex.getMessage(), ex);
                             }

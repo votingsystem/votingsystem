@@ -2,6 +2,7 @@ package org.votingsystem.client.webextension.dialog;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.votingsystem.client.webextension.pane.DocumentBrowserPane;
@@ -74,7 +75,7 @@ public class DocumentBrowserDialog extends DialogVS {
         return INSTANCE;
     }
 
-    public static DocumentBrowserDialog showDialog( ) {
+    public static void showDialog( ) {
         if(INSTANCE == null) INSTANCE = new DocumentBrowserDialog(new DocumentBrowserPane());
         Platform.runLater(() -> {
             FileChooser fileChooser = new FileChooser();
@@ -85,24 +86,23 @@ public class DocumentBrowserDialog extends DialogVS {
             //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));
             showDialog(fileChooser.showOpenDialog(new Stage()));
         });
-        return INSTANCE;
     }
 
-    public static DocumentBrowserDialog showDialog(SMIMEMessage smimeMessage) {
-        if(INSTANCE == null) INSTANCE = new DocumentBrowserDialog(new DocumentBrowserPane());
+    public static void showDialog(SMIMEMessage smimeMessage, EventHandler closeDialogHandler) {
         try {
-            showDialog(smimeMessage.getBytes());
+            showDialog(smimeMessage.getBytes(), closeDialogHandler);
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
-        return INSTANCE;
     }
 
-    public static DocumentBrowserDialog showDialog(byte[] smimeMessageBytes) {
-        if(INSTANCE == null) INSTANCE = new DocumentBrowserDialog(new DocumentBrowserPane());
-        File selectedFile = FileUtils.getFileFromBytes(smimeMessageBytes);
-        INSTANCE.showFile(selectedFile);
-        return INSTANCE;
+    public static void showDialog(byte[] smimeMessageBytes, EventHandler closeDialogHandler) {
+        Platform.runLater(() -> {
+            if(INSTANCE == null) INSTANCE = new DocumentBrowserDialog(new DocumentBrowserPane());
+            File selectedFile = FileUtils.getFileFromBytes(smimeMessageBytes);
+            if(closeDialogHandler != null) INSTANCE.addCloseListener(closeDialogHandler);
+            INSTANCE.showFile(selectedFile);
+        });
     }
 
     public static class DecompressBackupTask extends Task<ResponseVS> {

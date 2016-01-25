@@ -55,7 +55,7 @@ public class QRDialog extends DialogVS {
                             String result = transactionDto.validateReceipt(smimeMessage, true);
                             Button openReceiptButton = new Button(ContextVS.getMessage("openReceiptLbl"),
                                     Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
-                            openReceiptButton.setOnAction(event -> DocumentBrowserDialog.showDialog(smimeMessage));
+                            openReceiptButton.setOnAction(event -> DocumentBrowserDialog.showDialog(smimeMessage, null));
                             Platform.runLater(() -> { hide(); });
                             if(qrDto.getTypeVS() == TypeVS.CURRENCY_CHANGE) {
                                 Button saveWalletButton = new Button(ContextVS.getMessage("saveToSecureWalletMsg"),
