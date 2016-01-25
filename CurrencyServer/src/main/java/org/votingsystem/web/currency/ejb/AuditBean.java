@@ -121,7 +121,7 @@ public class AuditBean {
         long beginCalc = System.currentTimeMillis();
         //we know this is launch every Monday after 00:00 so we just make sure to select a day from last week
         Interval timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(requestDate));
-        String transactionSubject =  messages.get("initWeekMsg", DateUtils.getDayWeekDateStr(timePeriod.getDateTo()));
+        String transactionSubject =  messages.get("initWeekMsg", DateUtils.getDayWeekDateStr(timePeriod.getDateTo(), "HH:mm"));
         List<UserVS.State> notActiveList = Arrays.asList(UserVS.State.SUSPENDED, UserVS.State.CANCELED);
         List<UserVS.Type> userVSTypeList = Arrays.asList(UserVS.Type.GROUP, UserVS.Type.USER);
         Query query = dao.getEM().createQuery("SELECT COUNT(u) FROM UserVS u WHERE u.type in :typeList and(" +

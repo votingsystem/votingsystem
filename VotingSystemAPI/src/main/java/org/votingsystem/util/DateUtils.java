@@ -334,20 +334,12 @@ public class DateUtils {
         return urlDateFormatter.parse(dateStr);
     }
 
-    public static String getDayWeekDateStr (Date date) {
+    public static String getDayWeekDateStr (Date date, String hourFormat) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         if(Calendar.getInstance().get(Calendar.YEAR) != calendar.get(Calendar.YEAR))
-            return getDateStr(date, "dd MMM yyyy' 'HH:mm");
-        else return getDateStr(date, "EEE dd MMM' 'HH:mm");
-    }
-
-    public static String getDayWeekDateWithSecsStr (Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        if(Calendar.getInstance().get(Calendar.YEAR) != calendar.get(Calendar.YEAR))
-            return getDateStr(date, "dd MMM yyyy' 'HH:mm:ss");
-        else return getDateStr(date, "EEE dd MMM' 'HH:mm:ss");
+            return getDateStr(date, "dd MMM yyyy' '" + hourFormat);
+        else return getDateStr(date, "EEE dd MMM' '" + hourFormat);
     }
 
     public static Date getDayWeekDate (String dateStr) throws ParseException {

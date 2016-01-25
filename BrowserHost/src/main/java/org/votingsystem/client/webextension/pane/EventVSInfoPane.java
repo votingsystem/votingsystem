@@ -42,7 +42,7 @@ public class EventVSInfoPane extends VBox {
         HBox dateBeginHBox = new HBox();
         Label dateBeginLabel = new Label(ContextVS.getMessage("dateBeginLbl") + ": ");
         dateBeginLabel.setStyle("-fx-font-weight: bold;");
-        Label dateBeginValueLabel = new Label(DateUtils.getDayWeekDateStr(metaInf.getDateBegin()));
+        Label dateBeginValueLabel = new Label(DateUtils.getDayWeekDateStr(metaInf.getDateBegin(), "HH:mm"));
         dateBeginHBox.getChildren().addAll(dateBeginLabel, dateBeginValueLabel);
         VBox.setMargin(dateBeginHBox, new Insets(10, 15, 10, 15));
 

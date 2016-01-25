@@ -37,8 +37,8 @@ public class Formatter {
                 certificate.getSubjectDN().toString(),
                 certificate.getIssuerDN().toString(),
                 certificate.getSerialNumber().toString(),
-                DateUtils.getDayWeekDateStr(certificate.getNotBefore()),
-                DateUtils.getDayWeekDateStr(certificate.getNotAfter()));
+                DateUtils.getDayWeekDateStr(certificate.getNotBefore(), "HH:mm:ss"),
+                DateUtils.getDayWeekDateStr(certificate.getNotAfter(), "HH:mm:ss"));
     }
 
     public static String format(Map dataMap) {

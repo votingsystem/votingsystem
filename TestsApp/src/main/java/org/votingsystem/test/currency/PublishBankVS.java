@@ -19,7 +19,7 @@ public class PublishBankVS {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        String info = "Voting System Test Bank - " + DateUtils.getDayWeekDateStr(new Date());
+        String info = "Voting System Test Bank - " + DateUtils.getDayWeekDateStr(new Date(), "HH:mm:ss");
         String certChainPEM = new String(ContextVS.getInstance().getResourceBytes(
                 "./certs/Cert_BANKVS_03455543T.pem"),"UTF-8");
         BankVSDto bankVSDto = BankVSDto.NEW("ES1877777777450000000050", info, certChainPEM);

@@ -164,7 +164,7 @@ public class PublishAndSendElection {
     private static EventVS publishEvent(EventVS eventVS, String publisherNIF, String smimeMessageSubject) throws Exception {
         log.info("publishEvent");
         eventVS.setDateBegin(new Date());
-        eventVS.setSubject(eventVS.getSubject()+ " -> " + DateUtils.getDayWeekDateStr(new Date()));
+        eventVS.setSubject(eventVS.getSubject()+ " -> " + DateUtils.getDayWeekDateStr(new Date(), "HH:mm:ss"));
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
         SMIMEMessage smimeMessage = signatureService.getSMIME(publisherNIF,
                 ContextVS.getInstance().getAccessControl().getName(), JSON.getMapper().writeValueAsString(

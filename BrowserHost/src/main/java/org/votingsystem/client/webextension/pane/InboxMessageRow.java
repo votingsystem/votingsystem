@@ -64,7 +64,7 @@ public class InboxMessageRow {
                 }
             };
             new Thread(task).start();
-        } else dateLbl.setText(DateUtils.getDayWeekDateStr(inboxMessage.getDate()) + " - " + inboxMessage.getFrom());
+        } else dateLbl.setText(DateUtils.getDayWeekDateStr(inboxMessage.getDate(), "HH:mm") + " - " + inboxMessage.getFrom());
         switch(inboxMessage.getTypeVS()) {
             case CURRENCY_WALLET_CHANGE:
                 messageButton.setText(ContextVS.getMessage("currency_wallet_change_button"));
@@ -80,7 +80,7 @@ public class InboxMessageRow {
                 removeButton.setVisible(false);
                 break;
             case MESSAGEVS_TO_DEVICE:
-                dateLbl.setText(DateUtils.getDayWeekDateStr(inboxMessage.getDate()));
+                dateLbl.setText(DateUtils.getDayWeekDateStr(inboxMessage.getDate(), "HH:mm"));
                 messageButton.setText(ContextVS.getMessage("decryptMsgLbl"));
                 descriptionLbl.setVisible(false);
                 break;

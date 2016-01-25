@@ -153,7 +153,7 @@ public class BrowserSessionService {
         }
         result.setStateMsg(stateMsg);
         result.setLastCheckedDateMsg(ContextVS.getMessage("lastCheckedDateMsg",
-                DateUtils.getDayWeekDateStr(result.getLastCheckedDate())));
+                DateUtils.getDayWeekDateStr(result.getLastCheckedDate(), "HH:mm")));
         return result;
     }
 

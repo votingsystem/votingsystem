@@ -407,7 +407,7 @@ public class RepresentativeBean {
             String requestURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId();
             String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
             String content = MessageFormat.format(messageTemplate, userVS.getName(), requestURL, representative.getName(),
-                    DateUtils.getDayWeekDateStr(request.getDateFrom()), DateUtils.getDayWeekDateStr(request.getDateTo()),
+                    DateUtils.getDayWeekDateStr(request.getDateFrom(), "HH:mm"), DateUtils.getDayWeekDateStr(request.getDateTo(), "HH:mm"),
                     downloadURL);
             mailBean.send(request.getEmail(), subject, content);
         } catch (Exception ex) {
@@ -434,7 +434,7 @@ public class RepresentativeBean {
             String requestURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId();
             String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
             String content = MessageFormat.format(messageTemplate, userVS.getName(), requestURL, representative.getName(),
-                    DateUtils.getDayWeekDateStr(request.getSelectedDate()), downloadURL);
+                    DateUtils.getDayWeekDateStr(request.getSelectedDate(), "HH:mm"), downloadURL);
             mailBean.send(request.getEmail(), subject, content);
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

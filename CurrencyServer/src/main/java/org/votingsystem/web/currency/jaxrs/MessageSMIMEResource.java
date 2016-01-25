@@ -71,7 +71,7 @@ public class MessageSMIMEResource {
         signedContentMap = messageSMIME.getSignedContentMap();
         if(signedContentMap.containsKey("timeLimited")) {
             signedContentMap.put("validTo", DateUtils.getDayWeekDateStr(
-                    DateUtils.getNexMonday(DateUtils.getCalendar(timeStampDate)).getTime()));
+                    DateUtils.getNexMonday(DateUtils.getCalendar(timeStampDate)).getTime(), "HH:mm"));
         }
         TypeVS operation = TypeVS.valueOf((String) signedContentMap.get("operation"));
         if(!anonymousTransaction.contains(operation)) {

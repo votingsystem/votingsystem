@@ -48,7 +48,7 @@ public class MsgUtils {
     }
 
     public static String getWebSocketFormattedMessage(InboxMessage msg) {
-        return "<html><span style='font-style: italic;color:#888;'>" + DateUtils.getDayWeekDateWithSecsStr(msg.getDate()) +
+        return "<html><span style='font-style: italic;color:#888;'>" + DateUtils.getDayWeekDateStr(msg.getDate(), "HH:mm:ss") +
                 " - <b>" + msg.getFrom() + "</b></span><br/><br/>" + msg.getMessage() + "</html>";
     }
 

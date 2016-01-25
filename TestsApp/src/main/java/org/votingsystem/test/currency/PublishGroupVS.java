@@ -24,10 +24,10 @@ public class PublishGroupVS {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         GroupVSDto groupVSDto = new GroupVSDto();
-        String description = "GroupVS From TESTS Description - " + DateUtils.getDayWeekDateStr(new Date());
+        String description = "GroupVS From TESTS Description - " + DateUtils.getDayWeekDateStr(new Date(), "HH:mm:ss");
         groupVSDto.setDescription(Base64.getEncoder().encodeToString(description.getBytes()));
         groupVSDto.setTags(new HashSet<>());
-        groupVSDto.setName("GroupVS From TESTS - " + DateUtils.getDayWeekDateStr(new Date()));
+        groupVSDto.setName("GroupVS From TESTS - " + DateUtils.getDayWeekDateStr(new Date(), "HH:mm:ss"));
         groupVSDto.setOperation(TypeVS.CURRENCY_GROUP_NEW);
         groupVSDto.setUUID(UUID.randomUUID().toString());
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));

@@ -67,9 +67,7 @@
                     console.log(this.tagName + " - " + this.id + " - sendMessageVS callback");
                 }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
-                console.log("========= " + JSON.stringify(operationVS))
                 this.close()
-
             }
         });
     </script>
