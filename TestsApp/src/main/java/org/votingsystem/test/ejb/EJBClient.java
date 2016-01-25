@@ -193,7 +193,7 @@ public class EJBClient {
                             return ResponseVS.ERROR(e.getMessage());
                         }
                     }).thenApply(result -> {
-                        log.info(String.format("++command: INIT_CURRENCY_PERIOD - statusCode: %S - message: %s",
+                        log.info(String.format("command: INIT_CURRENCY_PERIOD - statusCode: %S - message: %s",
                                 result.getStatusCode(), result.getMessage()));
                         return result;
                     });

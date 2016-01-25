@@ -184,10 +184,10 @@ public class AuditBean {
             for(Map.Entry<String, BigDecimal> tagVSEntry:  currencyMap.get(currencyCode).entrySet()) {
                 TagVS currentTagVS = config.getTag(tagVSEntry.getKey());
                 query = dao.getEM().createQuery("SELECT count (t) FROM TransactionVS t WHERE t.toUserVS =:toUserVS and " +
-                        "t.state =:state and t.type =:type and t.tag =:tag and t.dateCreated >=:dateFrom")
+                        "t.state =:state and t.type =:type and t.tag =:tag and t.dateCreated >=:dateTo")
                         .setParameter("toUserVS", userVS).setParameter("state", TransactionVS.State.OK)
                         .setParameter("type", TransactionVS.Type.CURRENCY_PERIOD_INIT)
-                        .setParameter("tag", currentTagVS).setParameter("dateFrom", timePeriod.getDateFrom());
+                        .setParameter("tag", currentTagVS).setParameter("dateTo", timePeriod.getDateTo());
 
                 long numInitPeriodTransaction = (long) query.getSingleResult();
                 if(numInitPeriodTransaction > 0) throw new ExceptionVS("REPEATED CURRENCY_PERIOD_INIT TransactionVS for " +
