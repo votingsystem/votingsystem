@@ -15,12 +15,10 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.io.File;
+import java.io.IOException;
 import java.security.KeyStore;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,8 +30,6 @@ public class EJBClient {
     private static final String ROOT_KEY_PASSW     = "PemPass";
     private static final String ROOT_KEYSTORE_PATH = "./TestsApp/RootTest.jks";
 
-    private ExecutorService requestExecutor = Executors.newFixedThreadPool(5);
-
     public static void main(String[] args) throws Exception {
         log.getLogger("org.jboss").setLevel(Level.SEVERE);
         log.getLogger("org.votingsystem").setLevel(Level.FINE);
@@ -43,7 +39,6 @@ public class EJBClient {
     }
 
     private final Context context;
-    private final List<CommandRunning> lastCommands = new ArrayList<>();
     private EJBRemoteAdminAccessControl votingSystemRemote;
     private EJBRemoteAdminCurrencyServer currencyServerAdmin;
 
@@ -67,24 +62,9 @@ public class EJBClient {
         }
     }
 
-    private static class CommandRunning {
-        private Command command;
-        private Future<ResponseVS> future;
-        public CommandRunning(Command command, Future<ResponseVS> future) {
-            this.command = command;
-            this.future = future;
-        }
-    }
-
     private void run() throws Exception {
         lookupRemoteBeans();
         showWelcomeMessage();
-        requestExecutor.submit(() -> {
-            while (true) {
-                getMessages();
-                Thread.sleep(1000);
-            }
-        });
         while (true) {
             final String stringCommand = IOUtils.readLine("> ");
             try {
@@ -203,39 +183,27 @@ public class EJBClient {
 
     private void initWeekPeriod() {
         try {
-            Future<ResponseVS> future = currencyServerAdmin.initWeekPeriod(Calendar.getInstance());
-            lastCommands.add(new CommandRunning(Command.INIT_CURRENCY_PERIOD, future));
+            CompletableFuture<ResponseVS> future = CompletableFuture
+                    .supplyAsync(() -> {
+                        try {
+                            Future<ResponseVS> resp = currencyServerAdmin.initWeekPeriod(Calendar.getInstance());
+                            return resp.get();
+                        } catch (Exception e) {
+                            log.log(Level.SEVERE, e.getMessage(), e);
+                            return ResponseVS.ERROR(e.getMessage());
+                        }
+                    }).thenApply(result -> {
+                        log.info(String.format("++command: INIT_CURRENCY_PERIOD - statusCode: %S - message: %s",
+                                result.getStatusCode(), result.getMessage()));
+                        return result;
+                    });
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
-    private void getMessages() {
-        boolean displayed = false;
-        final List<CommandRunning> notFinished = new ArrayList<>();
-        for (CommandRunning command : lastCommands) {
-            if (command.future.isDone()) {
-                try {
-                    final ResponseVS result = command.future.get();
-                    log.info(String.format("command: %s - statusCode: %S - message: %s", command.command.toString(),
-                            result.getStatusCode(), result.getMessage()));
-                    displayed = true;
-                } catch (InterruptedException | ExecutionException e) {
-                    log.warning(e.getMessage());
-                }
-            } else {
-                notFinished.add(command);
-            }
-        }
-        lastCommands.retainAll(notFinished);
-        if (!displayed) {
-            //log.info("no message received!");
-        }
-    }
-
     private void handleQuit() {
         log.info("handleQuit");
-        requestExecutor.shutdownNow();
         System.exit(0);
     }
 

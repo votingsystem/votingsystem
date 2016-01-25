@@ -50,7 +50,6 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
 
     public SettingsDialog() {
         super(new GridPane());
-        final Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"));
         gridPane = (GridPane) getContentPane();
         gridPane.setVgap(15);
         ToggleGroup tg = new ToggleGroup();
@@ -61,8 +60,7 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         mobileDeviceInfo.setAlignment(Pos.CENTER);
         mobileDeviceLbl = new Label();
         mobileDeviceLbl.setStyle("-fx-text-fill: #888;");
-        Button mobileDeviceButton = new Button(ContextVS.getMessage("changeMobileDeviceLbl"));
-        mobileDeviceButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.EXCHANGE));
+        Button mobileDeviceButton = new Button(ContextVS.getMessage("changeMobileDeviceLbl"), Utils.getIcon(FontAwesome.Glyph.EXCHANGE));
         mobileDeviceButton.setOnAction(actionEvent -> MobileSelectorDialog.show(ContextVS.getMessage(
                 "setMobileSignatureMechanismMsg"), ContextVS.getMessage("setMobileSignatureMechanismAdv"),
                 SettingsDialog.this));
@@ -71,16 +69,14 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         signWithKeystoreRb.setToggleGroup(tg);
         signWithKeystoreRb.setOnAction(actionEvent -> changeCryptoToken(actionEvent));
         keyStoreVBox = new VBox(10);
-        Button selectKeyStoreButton = new Button(ContextVS.getMessage("setKeyStoreLbl"));
-        selectKeyStoreButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.KEY));
+        Button selectKeyStoreButton = new Button(ContextVS.getMessage("setKeyStoreLbl"), Utils.getIcon(FontAwesome.Glyph.KEY));
         selectKeyStoreButton.setOnAction(actionEvent -> selectKeystoreFile());
         keyStoreLbl = new Label(ContextVS.getMessage("selectKeyStoreLbl"));
         keyStoreLbl.setContentDisplay(ContentDisplay.LEFT);
         keyStoreVBox.getChildren().addAll(selectKeyStoreButton, keyStoreLbl);
         VBox.setMargin(keyStoreVBox, new Insets(10, 10, 10, 10));
         keyStoreVBox.getStyleClass().add("pane-border");
-        Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"));
-        requestCertButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
+        Button requestCertButton = new Button(ContextVS.getMessage("requestCertLbl"), Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
         requestCertButton.setOnAction(actionEvent -> {
             if (ContextVS.getInstance().getAccessControl() != null) {
                 Platform.runLater(() -> {
@@ -95,12 +91,9 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         });
 
         HBox footerButtonsBox = new HBox(10);
-        Button cancelButton = new Button(ContextVS.getMessage("cancelLbl"));
-        cancelButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-        cancelButton.setOnAction(actionEvent -> getStage().close());
-        acceptButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.CHECK));
+        Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"), Utils.getIcon(FontAwesome.Glyph.CHECK));
         acceptButton.setOnAction(actionEvent -> validateForm());
-        footerButtonsBox.getChildren().addAll(Utils.getSpacer(), cancelButton, acceptButton);
+        footerButtonsBox.getChildren().addAll(Utils.getSpacer(), acceptButton);
         gridPane.setMargin(footerButtonsBox, new Insets(20, 20, 0, 20));
         gridPane.add(requestCertButton, 0, 0);
         gridPane.setMargin(requestCertButton, new Insets(10, 20, 20, 20));
