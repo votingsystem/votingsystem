@@ -342,6 +342,14 @@ public class DateUtils {
         else return getDateStr(date, "EEE dd MMM' 'HH:mm");
     }
 
+    public static String getDayWeekDateWithSecsStr (Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        if(Calendar.getInstance().get(Calendar.YEAR) != calendar.get(Calendar.YEAR))
+            return getDateStr(date, "dd MMM yyyy' 'HH:mm:ss");
+        else return getDateStr(date, "EEE dd MMM' 'HH:mm:ss");
+    }
+
     public static Date getDayWeekDate (String dateStr) throws ParseException {
         try {
             return getDateFromString (dateStr, "dd MMM yyyy' 'HH:mm");

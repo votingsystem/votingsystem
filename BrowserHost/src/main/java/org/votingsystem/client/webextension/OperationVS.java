@@ -62,6 +62,7 @@ public class OperationVS implements PasswordDialog.Listener {
     private String contentType;
     private EventVSDto eventVS;
     private VoteVSDto voteVS;
+    private UserVSDto userVS;
     private String UUID;
     private char[] password;
     private String callerCallback;
@@ -535,5 +536,12 @@ public class OperationVS implements PasswordDialog.Listener {
         }
     }
 
+    public UserVSDto getUserVS() {
+        return userVS;
+    }
+
+    public void setUserVS(UserVSDto userVS) {
+        this.userVS = userVS;
+    }
 }
 

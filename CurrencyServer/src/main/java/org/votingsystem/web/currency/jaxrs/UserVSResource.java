@@ -124,22 +124,26 @@ public class UserVSResource {
         }
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND)
                 .entity(messages.get("itemNotFoundByIBANMsg", IBAN)).build();
-        return processUserVSResult(userVS, msg, req, resp, context);
+        return processUserVSResult(userVS, msg);
     }
 
     @Path("/id/{id}")
     @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
-    public Response index(@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
-                        @Context HttpServletResponse resp) throws Exception {
+    public Response index(@PathParam("id") long id,
+                @DefaultValue("false") @QueryParam("connectedDevices") Boolean connectedDevices,
+                @Context ServletContext context, @Context HttpServletRequest req,
+                @Context HttpServletResponse resp) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS userVS = dao.find(UserVS.class, id);
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 messages.get("itemNotFoundMsg", Long.valueOf(id).toString())).build();
-        else return processUserVSResult(userVS, null, req, resp, context);
+        if(connectedDevices) {
+            UserVSDto resultDto = userVSBean.getUserVSDto(userVS, false);
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build() ;
+        } else return processUserVSResult(userVS, null);
     }
 
-    private Response processUserVSResult(UserVS userVS, String msg,
-               HttpServletRequest req,  HttpServletResponse resp, ServletContext context) throws Exception {
+    private Response processUserVSResult(UserVS userVS, String msg) throws Exception {
         Object resultDto = null;
         if(userVS instanceof GroupVS) {
             resultDto = groupVSBean.getGroupVSDto((GroupVS) userVS);

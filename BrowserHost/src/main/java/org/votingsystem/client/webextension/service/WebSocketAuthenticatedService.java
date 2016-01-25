@@ -177,11 +177,17 @@ public class WebSocketAuthenticatedService {
     public ResponseVS sendMessageVS(OperationVS operationVS) throws Exception {
         log.info("sendMessageVS");
         if(isConnected()) {
-            ResultListDto<DeviceVSDto> resultListDto = HttpHelper.getInstance().getData(
-                    new TypeReference<ResultListDto<DeviceVSDto>>(){}, ((CurrencyServer) operationVS.getTargetServer())
-                    .getDeviceVSConnectedServiceURL(operationVS.getNif()),  MediaTypeVS.JSON);
+            Collection<DeviceVSDto> userDevices = null;
+            if(operationVS.getUserVS() != null) {
+                userDevices = operationVS.getUserVS().getConnectedDevices();
+            } else {
+                ResultListDto<DeviceVSDto> resultListDto = HttpHelper.getInstance().getData(
+                        new TypeReference<ResultListDto<DeviceVSDto>>(){}, ((CurrencyServer) operationVS.getTargetServer())
+                                .getDeviceVSConnectedServiceURL(operationVS.getNif()),  MediaTypeVS.JSON);
+                userDevices = resultListDto.getResultList();
+            }
             boolean isMessageDelivered = false;
-            for (DeviceVSDto deviceVSDto : resultListDto.getResultList()) {
+            for (DeviceVSDto deviceVSDto : userDevices) {
                 DeviceVS deviceVS = deviceVSDto.getDeviceVS();
                 if(!BrowserSessionService.getInstance().getCryptoToken().getDeviceId().equals(deviceVS.getDeviceId())) {
                     SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(BrowserSessionService.getInstance().getUserVS(),
@@ -189,6 +195,9 @@ public class WebSocketAuthenticatedService {
                     sendMessage(JSON.getMapper().writeValueAsString(messageDto));
                     isMessageDelivered = true;
                 }
+                SocketMessageDto messageDto = SocketMessageDto.getMessageVSToDevice(BrowserSessionService.getInstance().getUserVS(),
+                        deviceVS, operationVS.getNif(), operationVS.getMessage());
+                sendMessage(JSON.getMapper().writeValueAsString(messageDto));
             }
             if(isMessageDelivered) return new ResponseVS(ResponseVS.SC_OK);
             else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage(

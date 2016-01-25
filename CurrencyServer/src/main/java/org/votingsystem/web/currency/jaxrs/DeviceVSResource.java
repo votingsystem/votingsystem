@@ -71,7 +71,7 @@ public class DeviceVSResource {
         for(DeviceVS deviceVS : deviceVSSet) {
             resultList.add(new DeviceVSDto(deviceVS));
         }
-        ResultListDto<DeviceVSDto> resultListDto = new ResultListDto<DeviceVSDto>(resultList, 0, resultList.size(),
+        ResultListDto<DeviceVSDto> resultListDto = new ResultListDto<>(resultList, 0, resultList.size(),
                 Long.valueOf(resultList.size()));
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }

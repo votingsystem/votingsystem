@@ -33,7 +33,7 @@
         <div hidden="{{!isActive}}" class="layout horizontal center center-justified" style="margin:0px 0px 10px 0px;">
             <div hidden="{{!isClientToolConnected}}" class="horizontal layout">
                 <div hidden="{{!isConnected}}" style="margin:0 20px 0 0;">
-                    <button on-click="alertDialog">
+                    <button on-click="showSendMessageDialog">
                         <i class="fa fa-envelope-o"></i> ${msg.sendMessageVSLbl}
                     </button>
                 </div>
@@ -73,7 +73,7 @@
     <div hidden="{{transactionFormHidden}}">
         <transactionvs-form id="transactionvsForm" fab-visible="true"></transactionvs-form>
     </div>
-    <messagevs-send-dialog id="sendMessageDialog" on-message-response="{{sendMessageDialogResponse}}"></messagevs-send-dialog>
+    <messagevs-send-dialog id="sendMessageDialog"></messagevs-send-dialog>
 </template>
 <script>
     Polymer({
@@ -131,17 +131,8 @@
         showByIBAN:function(IBAN) {
             this.url =  contextURL + "/rest/userVS/IBAN/" + IBAN
         },
-        alertDialog: function () {
+        showSendMessageDialog: function () {
             this.$.sendMessageDialog.show(this.uservs)
-        },
-        sendMessageDialogResponse:function(e) {
-            var appMessageJSON = JSON.parse(e.detail)
-            var caption = '${msg.sendMessageERRORCaption}'
-            var msg = appMessageJSON.message
-            if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                caption = '${msg.sendMessageOKCaption}'
-            }
-            alert(msg, caption)
         },
         getHTTP: function (targetURL) {
             if(!targetURL) targetURL = this.url

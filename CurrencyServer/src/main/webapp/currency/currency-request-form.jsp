@@ -132,13 +132,10 @@
                 VotingSystemClient.setMessage(operationVS);
             },
             showResponse:function(appMessageJSON) {
-                var caption
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                    caption = "${msg.currencyRequestOKCaption}"
-                    this.$.resultDialog.showMessage(caption, appMessageJSON.message)
+                    this.$.resultDialog.showMessage("${msg.currencyRequestOKCaption}", appMessageJSON.message)
                 } else {
-                    caption = '${msg.currencyRequestERRORCaption}'
-                    alert(appMessageJSON.message, caption)
+                    alert(appMessageJSON.message, '${msg.currencyRequestERRORCaption}')
                 }
             }
         });

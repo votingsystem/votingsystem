@@ -80,7 +80,7 @@
             <div id="mainContent" class="mainContent"></div>
         </div>
         <script>
-            debugger; // this is to allow logging from extension content scripts
+            //debugger;  this is to allow logging from extension content scripts
 
             vs.back = function() {
                 history.back()
@@ -146,7 +146,7 @@
 
             document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
                 console.log("spa.xhtml - user-clicked")
-                page.show(contextURL + "/rest/userVS/id/" + e.detail.id)
+                page.show(contextURL + "/rest/userVS/id/" + e.detail.id + "?connectedDevices=true")
             })
 
             vs.updateMenuView()
