@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.votingsystem.client.webextension.dialog.DebugDialog;
 import org.votingsystem.client.webextension.dialog.MainDialog;
 import org.votingsystem.client.webextension.dialog.MessageDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
@@ -102,24 +103,32 @@ public class BrowserHost extends Application {
             }
         });
 
-        for(String param : getParameters().getRaw()) {
-            URI uri = new URI(param);
-            switch(uri.getScheme().toLowerCase()) {
-                case "vs":
-                    try {
-                        JSON.getMapper().readValue(FileUtils.getBytesFromFile(new File(uri.getPath())),
-                                OperationVS.class).initProcess();
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE,ex.getMessage(), ex);
-                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+        try {
+            for(String param : getParameters().getRaw()) {
+                URI uri = new URI(param);
+                if(uri.getScheme() != null) {
+                    switch(uri.getScheme().toLowerCase()) {
+                        case "vs":
+                            try {
+                                JSON.getMapper().readValue(FileUtils.getBytesFromFile(new File(uri.getPath())),
+                                        OperationVS.class).initProcess();
+                            } catch (Exception ex) {
+                                log.log(Level.SEVERE,ex.getMessage(), ex);
+                                showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                            }
+                            break;
+                        case "chrome-extension":
+                            chromeExtensionId = uri.getHost();
+                            break;
+                        default:
+                            log.info("unknown schema: " + uri.getScheme());
                     }
-                    break;
-                case "chrome-extension":
-                    chromeExtensionId = uri.getHost();
-                    break;
-                default:
-                    log.info("unknown schema: " + uri.getScheme());
+                } else {
+                    if("debugSession".equals(param)) DebugDialog.showDialog();
+                }
             }
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
         BrowserSessionService.getInstance().checkCSR();
     }

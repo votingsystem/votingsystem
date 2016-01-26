@@ -62,6 +62,10 @@ public class DialogVS {
         return this;
     }
 
+    public void initModality(Modality modality) {
+        stage.initModality(modality);
+    }
+
     public void setPane(Pane pane) {
         decoratedPane = new DecoratedPane(null, null, pane, stage);
         stage.setScene(new Scene(decoratedPane));

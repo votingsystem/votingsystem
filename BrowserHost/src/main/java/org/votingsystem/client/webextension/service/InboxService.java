@@ -1,6 +1,5 @@
 package org.votingsystem.client.webextension.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.scene.control.Button;

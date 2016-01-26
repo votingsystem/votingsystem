@@ -13,7 +13,6 @@ import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.control.CurrencyCodeChoiceBox;
 import org.votingsystem.client.webextension.control.NumberTextField;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
-import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;

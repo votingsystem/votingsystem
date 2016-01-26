@@ -162,9 +162,9 @@ public class PasswordDialog extends DialogVS {
     }
 
     public static void showWithoutPasswordConfirm(Listener listener, String mainMessage, Integer visibilityInSeconds) {
-        if(INSTANCE == null) INSTANCE = new PasswordDialog();
-        INSTANCE.listener = listener;
         Platform.runLater(() -> {
+            if(INSTANCE == null) INSTANCE = new PasswordDialog();
+            INSTANCE.listener = listener;
             INSTANCE.showWithoutPasswordConfirm(mainMessage, visibilityInSeconds);
         });
     }

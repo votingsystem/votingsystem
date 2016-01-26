@@ -312,9 +312,6 @@ public class OperationVS implements PasswordDialog.Listener {
                     case CERT_USER_NEW:
                         ProgressDialog.show(new CertRequestTask(this, getOperationMessage(), password), null);
                         break;
-                    case MESSAGEVS:
-                        processResult(WebSocketAuthenticatedService.getInstance().sendMessageVS(this));
-                        break;
                     case CURRENCY_REQUEST:
                         ProgressDialog.show(new CurrencyRequestTask(this, getOperationMessage(), password), null);
                         break;
@@ -467,11 +464,7 @@ public class OperationVS implements PasswordDialog.Listener {
                 saveWallet();
                 break;
             case MESSAGEVS:
-                if(jsonStr != null) processOperationWithPassword(signedMessageSubject);
-                else {
-                    responseVS = WebSocketAuthenticatedService.getInstance().sendMessageVS(this);
-                    processResult(responseVS);
-                }
+                processResult(WebSocketAuthenticatedService.getInstance().sendMessageVS(this));
                 break;
             case REPRESENTATIVE_STATE:
                 RepresentationStateDto dto = BrowserSessionService.getInstance().getRepresentationState();

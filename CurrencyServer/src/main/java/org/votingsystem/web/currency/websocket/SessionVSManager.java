@@ -50,7 +50,11 @@ public class SessionVSManager {
         authenticatedSessionMap.put(session.getId(), session);
         deviceSessionMap.put(userVS.getDeviceVS().getId(), session);
         if(userVSDeviceMap.containsKey(userVS.getId())) {
-            userVSDeviceMap.get(userVS.getId()).add(userVS.getDeviceVS());
+            Set<DeviceVS> deviceSet = userVSDeviceMap.get(userVS.getId()).stream().filter(device ->
+                !device.getDeviceId().equals(userVS.getDeviceVS().getDeviceId())
+            ).collect(Collectors.toSet());
+            deviceSet.add(userVS.getDeviceVS());
+            userVSDeviceMap.put(userVS.getId(), deviceSet);
         } else userVSDeviceMap.put(userVS.getId(), Sets.newHashSet(userVS.getDeviceVS()));
         session.getUserProperties().put("userVS", userVS);
         session.getUserProperties().put("deviceVS", userVS.getDeviceVS());

@@ -13,61 +13,63 @@
         }
     </style>
     <div>
-        <div hidden="{{isBankVS}}" class="layout horizontal center center-justified" style="margin: 0 0 15px 0;">
-            <div class="flex" style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
-                <div data-user-id$="{{uservs.id}}" style="text-align: center;"><span>{{uservs.firstName}}</span> <span>{{uservs.lastName}}</span></div>
-            </div>
-            <div style="margin: 0 0 0 0; font-size: 0.8em;vertical-align: bottom;">
-                <b>IBAN: </b><span>{{uservs.iban}}</span>
-            </div>
-        </div>
-        <div hidden="{{!isBankVS}}" class="layout horizontal center center-justified" style="margin: 0 0 15px 0;">
-            <div class="flex" style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
-                <div data-user-id$="{{uservs.id}}" style="text-align: center;">{{uservs.name}}</div>
-            </div>
-            <div style="margin: 0 0 0 0; font-size: 0.8em;vertical-align: bottom;">
-                <b>IBAN: </b><span>{{uservs.iban}}</span>
-            </div>
-        </div>
-        <div hidden="{{isActive}}" class="uservsCancelled">{{uservs.state}}</div>
-        <div hidden="{{!isActive}}" class="layout horizontal center center-justified" style="margin:0px 0px 10px 0px;">
-            <div hidden="{{!isClientToolConnected}}" class="horizontal layout">
-                <div hidden="{{!isConnected}}" style="margin:0 20px 0 0;">
-                    <button on-click="showSendMessageDialog">
-                        <i class="fa fa-envelope-o"></i> ${msg.sendMessageVSLbl}
-                    </button>
+        <div style="max-width: 1200px; margin: 0 auto">
+            <div hidden="{{isBankVS}}" class="layout horizontal center center-justified" style="margin: 0 0 15px 0;">
+                <div class="flex" style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
+                    <div data-user-id$="{{uservs.id}}" style="text-align: center;"><span>{{uservs.firstName}}</span> <span>{{uservs.lastName}}</span></div>
                 </div>
-                <div hidden="{{isBankVS}}" style="margin:0 20px 0 0;">
-                    <button on-click="makeTransactionVS">
-                        <i class="fa fa-money"></i> ${msg.sendTransactionVSLbl}
-                    </button>
+                <div style="margin: 0 0 0 0; font-size: 0.8em;vertical-align: bottom;">
+                    <b>IBAN: </b><span>{{uservs.iban}}</span>
                 </div>
             </div>
-            <div style="margin:0 20px 0 0;">
-                <button on-click="goToWeekBalance">
-                    <i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}
-                </button>
-            </div>
-            <div hidden="{{!isConnected}}">
-                <div hidden="{{!isAdmin}}" style="margin:0 20px 0 0;">
-                    <button on-click="blockUser">
-                        <i class="fa fa fa-thumbs-o-down"></i> ${msg.blockUserVSLbl}
-                    </button>
+            <div hidden="{{!isBankVS}}" class="layout horizontal center center-justified" style="margin: 0 0 15px 0;">
+                <div class="flex" style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
+                    <div data-user-id$="{{uservs.id}}" style="text-align: center;">{{uservs.name}}</div>
+                </div>
+                <div style="margin: 0 0 0 0; font-size: 0.8em;vertical-align: bottom;">
+                    <b>IBAN: </b><span>{{uservs.iban}}</span>
                 </div>
             </div>
-        </div>
-        <div hidden="{{!uservs.description}}" style="margin:0 0 20px 0;">
-            <div id="userDescriptionDiv" class="contentDiv" style=" border: 1px solid #c0c0c0;padding:10px;"></div>
-        </div>
-        <div hidden="{{subscriptionsHidden}}"
-             layout flex horizontal wrap style="border:1px solid #eee; padding: 5px;">
-            <div style="font-size: 0.9em;font-weight: bold; color: #888; margin:0 15px 0 0;">
-                - ${msg.groupsLbl} -
+            <div hidden="{{isActive}}" class="uservsCancelled">{{uservs.state}}</div>
+            <div hidden="{{!isActive}}" class="layout horizontal center center-justified" style="margin:0px 0px 10px 0px;">
+                <div hidden="{{!isClientToolConnected}}" class="horizontal layout">
+                    <div hidden="{{!isConnected}}" style="margin:0 20px 0 0;">
+                        <button on-click="showSendMessageDialog">
+                            <i class="fa fa-envelope-o"></i> ${msg.sendMessageVSLbl}
+                        </button>
+                    </div>
+                    <div hidden="{{isBankVS}}" style="margin:0 20px 0 0;">
+                        <button on-click="makeTransactionVS">
+                            <i class="fa fa-money"></i> ${msg.sendTransactionVSLbl}
+                        </button>
+                    </div>
+                </div>
+                <div style="margin:0 20px 0 0;">
+                    <button on-click="goToWeekBalance">
+                        <i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}
+                    </button>
+                </div>
+                <div hidden="{{!isConnected}}">
+                    <div hidden="{{!isAdmin}}" style="margin:0 20px 0 0;">
+                        <button on-click="blockUser">
+                            <i class="fa fa fa-thumbs-o-down"></i> ${msg.blockUserVSLbl}
+                        </button>
+                    </div>
+                </div>
             </div>
-            <template is="dom-repeat" items="{{uservs.subscriptionVSList}}" as="subscriptionVS">
-                <a href="{{getUserVSURL(subscriptionVS.groupVS.id)}}"
-                   style="margin: 0 10px 10px 0;">{{subscriptionVS.groupVS.name}}</a>
-            </template>
+            <div hidden="{{!uservs.description}}" style="margin:0 0 20px 0;">
+                <div id="userDescriptionDiv" class="contentDiv" style=" border: 1px solid #c0c0c0;padding:10px;"></div>
+            </div>
+            <div hidden="{{subscriptionsHidden}}"
+                 layout flex horizontal wrap style="border:1px solid #eee; padding: 5px;">
+                <div style="font-size: 0.9em;font-weight: bold; color: #888; margin:0 15px 0 0;">
+                    - ${msg.groupsLbl} -
+                </div>
+                <template is="dom-repeat" items="{{uservs.subscriptionVSList}}" as="subscriptionVS">
+                    <a href="{{getUserVSURL(subscriptionVS.groupVS.id)}}"
+                       style="margin: 0 10px 10px 0;">{{subscriptionVS.groupVS.name}}</a>
+                </template>
+            </div>
         </div>
     </div>
     <div hidden="{{transactionFormHidden}}">

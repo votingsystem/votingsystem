@@ -2,7 +2,6 @@ package org.votingsystem.client.webextension.pane;
 
 import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -33,7 +32,6 @@ public class InboxMessageRow {
     @FXML private HBox mainPane;
     @FXML private Label descriptionLbl;
     @FXML private Label dateLbl;
-    @FXML private Button messageButton;
     @FXML private Button removeButton;
     private InboxMessage inboxMessage;
 
@@ -45,8 +43,15 @@ public class InboxMessageRow {
     }
 
     @FXML void initialize() throws Exception { // This method is called by the FXMLLoader when initialization is complete
-        messageButton.setWrapText(true);
-        messageButton.setOnAction(event -> InboxService.getInstance().processMessage(inboxMessage));
+        mainPane.setOnMousePressed((e) ->{
+                    switch(e.getClickCount()){
+                        case 2:
+                            InboxService.getInstance().processMessage(inboxMessage);
+                            break;
+                    }
+                });
+        dateLbl.setStyle("-fx-padding: 0 0 0 20px;");
+        descriptionLbl.setStyle("-fx-padding: 0 0 0 30px;");
         removeButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
         removeButton.setOnAction((event) ->
                 InboxService.getInstance().processMessage(inboxMessage.setState(InboxMessage.State.REMOVED)));
@@ -68,26 +73,26 @@ public class InboxMessageRow {
         } else dateLbl.setText(DateUtils.getDayWeekDateStr(inboxMessage.getDate(), "HH:mm:ss") + " - " + inboxMessage.getFrom());
         switch(inboxMessage.getTypeVS()) {
             case CURRENCY_WALLET_CHANGE:
-                messageButton.setText(ContextVS.getMessage("currency_wallet_change_button"));
                 descriptionLbl.setText(MsgUtils.getCurrencyChangeWalletMsg(inboxMessage.getWebSocketMessage()));
+                dateLbl.setText(ContextVS.getMessage("currency_wallet_change_button") + " - " + dateLbl.getText());
                 break;
             case MESSAGEVS:
-                messageButton.setText(ContextVS.getMessage("messageLbl"));
                 descriptionLbl.setText(StringUtils.truncateMessage(inboxMessage.getMessage(), TRUNCATED_MSG_SIZE));
+                dateLbl.setText(ContextVS.getMessage("messageLbl") + " - " + dateLbl.getText());
                 break;
             case CURRENCY_IMPORT:
-                messageButton.setText(ContextVS.getMessage("importToWalletLbl"));
                 descriptionLbl.setText(inboxMessage.getMessage());
+                dateLbl.setText(ContextVS.getMessage("importToWalletLbl") + " - " + dateLbl.getText());
                 removeButton.setVisible(false);
                 break;
             case MESSAGEVS_TO_DEVICE:
-                dateLbl.setText(DateUtils.getDayWeekDateStr(inboxMessage.getDate(), "HH:mm"));
-                messageButton.setText(ContextVS.getMessage("decryptMsgLbl"));
-                descriptionLbl.setVisible(false);
+                dateLbl.setText(ContextVS.getMessage("decryptMsgLbl") + " - " +
+                        DateUtils.getDayWeekDateStr(inboxMessage.getDate(), "HH:mm"));
+                descriptionLbl.setText("");
                 break;
             default:
-                descriptionLbl.setText(inboxMessage.getTypeVS().toString());
-                messageButton.setText(inboxMessage.getTypeVS().toString());
+                dateLbl.setText(inboxMessage.getTypeVS().toString() + " - " + dateLbl.getText());
+                descriptionLbl.setText("");
         }
 
     }

@@ -1,6 +1,5 @@
 package org.votingsystem.client.webextension.dialog;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.concurrent.Task;
 import javafx.scene.control.Button;
