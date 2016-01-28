@@ -266,12 +266,17 @@ public class WebSocketAuthenticatedService {
                                     socketMsg.getMessage());
                             qrDto.setHashCertVS(socketMsg.getContent().getHashCertVS());
                             TransactionVSDto transactionDto = qrDto.getData();
+                            //we send the csr of the currency in order to allow anonymous transactions. If the payer wants
+                            //to make the transaction anonymous, he will send us the signed CSR
                             Currency currency =  new  Currency(
                                     ContextVS.getInstance().getCurrencyServer().getServerURL(),
                                     transactionDto.getAmount(), transactionDto.getCurrencyCode(),
                                     transactionDto.isTimeLimited(), qrDto.getHashCertVS(),
                                     new TagVS(transactionDto.getTagName()));
                             qrDto.setCurrency(currency);
+                            //we sign the CSR in order to provide the payer a proof that we asked for the payment.
+                            //If the payer decides to make the payment anonymous and request the currency from the server
+                            //he can't spend it without the private key.
                             SMIMEMessage simeMessage = BrowserSessionService.getSMIME(null, targetServer.getName(),
                                     new String(currency.getCertificationRequest().getCsrPEM()), null,
                                     ContextVS.getMessage("currencyChangeSubject"));

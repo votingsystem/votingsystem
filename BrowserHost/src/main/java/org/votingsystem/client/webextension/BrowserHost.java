@@ -14,11 +14,13 @@ import org.votingsystem.client.webextension.dialog.MainDialog;
 import org.votingsystem.client.webextension.dialog.MessageDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.util.MsgUtils;
+import org.votingsystem.client.webextension.util.EventBusTransactionResponseListener;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
+import org.votingsystem.service.EventBusService;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
@@ -109,13 +111,8 @@ public class BrowserHost extends Application {
                 if(uri.getScheme() != null) {
                     switch(uri.getScheme().toLowerCase()) {
                         case "vs":
-                            try {
-                                JSON.getMapper().readValue(FileUtils.getBytesFromFile(new File(uri.getPath())),
-                                        OperationVS.class).initProcess();
-                            } catch (Exception ex) {
-                                log.log(Level.SEVERE,ex.getMessage(), ex);
-                                showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                            }
+                            JSON.getMapper().readValue(FileUtils.getBytesFromFile(new File(uri.getPath())),
+                                    OperationVS.class).initProcess();
                             break;
                         case "chrome-extension":
                             chromeExtensionId = uri.getHost();
@@ -129,8 +126,10 @@ public class BrowserHost extends Application {
             }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
+            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
         }
         BrowserSessionService.getInstance().checkCSR();
+        EventBusService.getInstance().register(new EventBusTransactionResponseListener());
     }
 
 
@@ -196,9 +195,13 @@ public class BrowserHost extends Application {
     }
 
     public static MessageDialog showMessage(final String caption, final String message, final Parent parent, final Window parentWindow) {
-        MessageDialog messageDialog = new MessageDialog(parentWindow != null ? parentWindow : getInstance().getScene().getWindow());
-        PlatformImpl.runLater(() -> messageDialog.showHtmlMessage(caption, message, parent));
-        return messageDialog;
+        final ResponseVS<MessageDialog> responseVS = ResponseVS.OK();
+        PlatformImpl.runAndWait(() -> {
+            MessageDialog messageDialog = new MessageDialog(parentWindow != null ? parentWindow : getInstance().getScene().getWindow());
+            messageDialog.showHtmlMessage(caption, message, parent);
+            responseVS.setData(messageDialog);
+        });
+        return responseVS.getData();
     }
 
     public static void showMessage(final String message, final String caption) {

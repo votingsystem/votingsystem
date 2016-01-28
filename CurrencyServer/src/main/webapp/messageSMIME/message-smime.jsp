@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <dom-module name="message-smime">
-    <template>
+    <template id="mainTemplate">
         <style>
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
         .systemLbl { color:#6c0404; font-size:1.1em;  }
@@ -15,10 +15,10 @@
                     <b>${msg.dateLbl}: </b> {{timeStampDate}}
                 </div>
                 <div id="transactionTypeMsg" style="font-size: 1.5em; font-weight: bold;"></div>
-                <div style="font-size: 1.1em;"><b>${msg.subjectLbl}: </b>{{smimeMessageContent.subject}}</div>
+                <div style="font-size: 1.1em;"><b>${msg.subjectLbl}: </b>{{messageContent.subject}}</div>
                 <div class="horizontal layout">
-                    <div style="font-size: 1.1em;"><b>${msg.amountLbl}: </b> {{smimeMessageContent.amount}} {{smimeMessageContent.currencyCode}}</div>
-                    <div hidden="{{!smimeMessageContent.timeLimited}}" class="pageHeader" style="margin: 0 0 0 20px;"><b>
+                    <div style="font-size: 1.1em;"><b>${msg.amountLbl}: </b> {{messageContent.amount}} {{messageContent.currencyCode}}</div>
+                    <div hidden="{{!messageContent.timeLimited}}" class="pageHeader" style="margin: 0 0 0 20px;"><b>
                         ${msg.timeLimitedLbl}</b>
                     </div>
                 </div>
@@ -27,9 +27,9 @@
                     <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
                         ${msg.senderLbl}</div>
                     <div id="fromUserDiv">
-                        <div><b>${msg.nameLbl}:</b> <span>{{smimeMessageContent.fromUserVS.name}}</span></div>
+                        <div><b>${msg.nameLbl}:</b> <span>{{messageContent.fromUserVS.name}}</span></div>
                         <div> <b>${msg.IBANLbl}:</b>
-                            <span on-click="showByUserIBAN" class="iban-link">{{smimeMessageContent.fromUserIBAN}}</span></div>
+                            <span on-click="showByUserIBAN" class="iban-link">{{messageContent.fromUserIBAN}}</span></div>
                     </div>
                 </div>
                 <div hidden="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
@@ -37,7 +37,7 @@
                     <div class="layout horizontal">
                         <div><b>${msg.IBANLbl}: </b></div>
                         <div>
-                            <template is="dom-repeat" items="{{smimeMessageContent.toUserIBAN}}" as="IBAN">
+                            <template is="dom-repeat" items="{{messageContent.toUserIBAN}}" as="IBAN">
                                 <div on-click="showByUserIBAN" class="iban-link">{{IBAN}}</div>
                             </template>
                         </div>
@@ -66,6 +66,9 @@
                 smimeMessageContent:{type:Object, value:{}, observer:'smimeMessageContentChanged'},
                 isClientToolConnected: {type:Boolean, value: false}
             },
+            observers: [
+                'subjectChanged(smimeMessageContent.subject)'
+            ],
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
@@ -93,10 +96,10 @@
                         this.caption = "${msg.currencyPeriodInitLbl}"
                         this.$.fromUserDiv.innerHTML = "${msg.systemLbl}"
                         this.$.fromUserDiv.classList.add("systemLbl");
-                        var receptor = []
-                        receptor.push(this.smimeMessageContent.toUser.iban)
-                        this.smimeMessageContent.toUserIBAN = receptor
+                        this.smimeMessageContent.toUserIBAN  = []
+                        this.smimeMessageContent.toUserIBAN .push(this.smimeMessageContent.toUser.iban)
                         this.smimeMessageContent.subject = this.smimeMessageContent.tag
+                        this.smimeMessageContent = this.smimeMessageContent
                         break;
                     case 'CURRENCY':
                     case 'CURRENCY_SEND':
@@ -114,6 +117,7 @@
                         this.caption = this.smimeMessageContent.operation
 
                 }
+                this.messageContent = this.smimeMessageContent
             },
             showToUserInfo:function(e) {
                 var groupURL = contextURL + "/rest/groupVS/" + e.model.item.toUserVS.id

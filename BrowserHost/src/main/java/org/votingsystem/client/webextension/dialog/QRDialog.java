@@ -46,33 +46,7 @@ public class QRDialog extends DialogVS {
         @Subscribe public void call(SocketMessageDto socketMsg) {
             switch(socketMsg.getOperation()) {
                 case TRANSACTIONVS_RESPONSE:
-                    try {
-                        if(socketMsg.getWebSocketSession().getData() != null) {
-                            QRMessageDto<TransactionVSDto> qrDto = (QRMessageDto<TransactionVSDto>) socketMsg
-                                    .getWebSocketSession().getData();
-                            TransactionVSDto transactionDto = qrDto.getData();
-                            SMIMEMessage smimeMessage = socketMsg.getSMIME();
-                            String result = transactionDto.validateReceipt(smimeMessage, true);
-                            Button openReceiptButton = new Button(ContextVS.getMessage("openReceiptLbl"),
-                                    Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
-                            openReceiptButton.setOnAction(event -> DocumentBrowserDialog.showDialog(smimeMessage, null));
-                            Platform.runLater(() -> { hide(); });
-                            if(qrDto.getTypeVS() == TypeVS.CURRENCY_CHANGE) {
-                                Button saveWalletButton = new Button(ContextVS.getMessage("saveToSecureWalletMsg"),
-                                        Utils.getIcon(FontAwesome.Glyph.MONEY));
-                                saveWalletButton.setOnAction(event -> new OperationVS().saveWallet());
-                                VBox buttonsVBox = new VBox(10);
-                                buttonsVBox.getChildren().addAll(openReceiptButton, saveWalletButton);
-                                BrowserHost.showMessage(ContextVS.getMessage("currencyChangeSubject"), result,
-                                        buttonsVBox, mainPane.getScene().getWindow());
-                            } else {
-                                BrowserHost.showMessage(socketMsg.getOperation().toString().toLowerCase(), result,
-                                        openReceiptButton, mainPane.getScene().getWindow());
-                            }
-                        }
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                    }
+                    Platform.runLater(() -> { hide(); });
                     break;
                 default:log.info("EventBusSocketMsgListener - unprocessed operation: " + socketMsg.getOperation());
             }
