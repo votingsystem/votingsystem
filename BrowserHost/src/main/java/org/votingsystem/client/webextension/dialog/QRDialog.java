@@ -62,27 +62,23 @@ public class QRDialog extends DialogVS {
         mainPane.setStyle("-fx-font-size: 15; -fx-font-weight: bold;-fx-wrap-text: true; -fx-text-fill:#434343;");
     }
 
-    public static QRDialog getInstance() {
+    public static void showImage(QRMessageDto qrDto) {
         try {
             if (INSTANCE == null) INSTANCE = new QRDialog();
+            Image qrCodeImage = new Image(new ByteArrayInputStream(QRUtils.encodeAsPNG(
+                    JSON.getMapper().writeValueAsString(qrDto), 500, 500)));
+            Platform.runLater(() -> {
+                INSTANCE.imageView.setImage(qrCodeImage);
+                TransactionVSDto dto = qrDto.getData() != null ? (TransactionVSDto) qrDto.getData() : null;
+                if(dto != null) {
+                    INSTANCE.show(dto.getSubject());
+                    INSTANCE.infoLbl.setText(dto.getAmount() + " " + dto.getCurrencyCode() + " - " +
+                            MsgUtils.getTagDescription(dto.getTagName()));
+                }
+            });
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
-        return INSTANCE;
-    }
-
-    public void showImage(QRMessageDto qrDto) throws IOException, WriterException {
-        Image qrCodeImage = new Image(new ByteArrayInputStream(QRUtils.encodeAsPNG(
-                JSON.getMapper().writeValueAsString(qrDto), 500, 500)));
-        Platform.runLater(() -> {
-            imageView.setImage(qrCodeImage);
-            TransactionVSDto dto = qrDto.getData() != null ? (TransactionVSDto) qrDto.getData() : null;
-            if(dto != null) {
-                show(dto.getSubject());
-                infoLbl.setText(dto.getAmount() + " " + dto.getCurrencyCode() + " - " +
-                        MsgUtils.getTagDescription(dto.getTagName()));
-            }
-        });
     }
 
 }

@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <dom-module name="message-smime">
-    <template id="mainTemplate">
+    <template>
         <style>
         .timeStampMsg { color:#aaaaaa; font-size:1em; margin:0 0 15px 0;font-style:italic;  }
         .systemLbl { color:#6c0404; font-size:1.1em;  }
@@ -66,9 +66,6 @@
                 smimeMessageContent:{type:Object, value:{}, observer:'smimeMessageContentChanged'},
                 isClientToolConnected: {type:Boolean, value: false}
             },
-            observers: [
-                'subjectChanged(smimeMessageContent.subject)'
-            ],
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
@@ -99,7 +96,6 @@
                         this.smimeMessageContent.toUserIBAN  = []
                         this.smimeMessageContent.toUserIBAN .push(this.smimeMessageContent.toUser.iban)
                         this.smimeMessageContent.subject = this.smimeMessageContent.tag
-                        this.smimeMessageContent = this.smimeMessageContent
                         break;
                     case 'CURRENCY':
                     case 'CURRENCY_SEND':

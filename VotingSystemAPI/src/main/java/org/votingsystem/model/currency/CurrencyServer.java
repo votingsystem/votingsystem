@@ -78,6 +78,10 @@ public class CurrencyServer extends ActorVS implements Serializable {
         return getServerURL() + "/rest/tagVS?tag=" + searchParam;
     }
 
+    public String getTagVSServiceURL() {
+        return getServerURL() + "/rest/tagVS/list";
+    }
+
     public String getGroupVSUsersServiceURL(Long groupId, Integer max, Integer offset,
                 SubscriptionVS.State subscriptionState, UserVS.State userVSState) {
         return getServerURL() + "/rest/groupVS/id/" + String.valueOf(groupId) + "/listUsers" +

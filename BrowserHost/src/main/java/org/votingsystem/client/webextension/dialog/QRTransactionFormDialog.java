@@ -68,7 +68,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
         addTagButton.setText(ContextVS.getMessage("addTagVSLbl"));
         addTagButton.setOnAction(actionEvent -> {
             if (selectedTag == null) {
-                AddTagVSDialog.show(ContextVS.getMessage("addTagVSLbl"), this);
+                AddTagVSDialog.show(this);
             } else {
                 selectedTag = null;
                 formVBox.getChildren().remove(timeLimitedCheckBox);
@@ -104,7 +104,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                         TypeVS.TRANSACTIONVS_INFO);
                 qrDto.setData(dto);
                 BrowserHost.getInstance().putQRMessage(qrDto);
-                QRDialog.getInstance().showImage(qrDto);
+                QRDialog.showImage(qrDto);
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }
@@ -121,17 +121,15 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                     ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString()));
             if(tokenType != CryptoTokenVS.JKS_KEYSTORE) {
                 BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("improperTokenMsg"));
-                return;
-            }
-            if(!Utils.checkConnection()) return;
-            try {
-                if (INSTANCE == null) {
-                    INSTANCE = new QRTransactionFormDialog();
+            } else {
+                if(!Utils.checkConnection()) return;
+                try {
+                    if (INSTANCE == null)INSTANCE = new QRTransactionFormDialog();
+                    INSTANCE.addTagVS(null);
+                    INSTANCE.show(ContextVS.getMessage("createQRLbl"));
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
-                INSTANCE.selectedTag = null;
-                INSTANCE.show(ContextVS.getMessage("createQRLbl"));
-            } catch (Exception ex) {
-                log.log(Level.SEVERE, ex.getMessage(), ex);
             }
         });
     }
@@ -139,9 +137,15 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
     @Override public void addTagVS(String tagName) {
         log.info("addTagVS: " + tagName);
         this.selectedTag = tagName;
-        addTagButton.setText(ContextVS.getMessage("removeTagLbl"));
-        tagLbl.setText(tagName);
-        formVBox.getChildren().add(3, timeLimitedCheckBox);
+        if(tagName == null) {
+            addTagButton.setText(ContextVS.getMessage("addTagVSLbl"));
+            tagLbl.setText(ContextVS.getMessage("addTagMsg"));
+            formVBox.getChildren().remove(timeLimitedCheckBox);
+        } else {
+            addTagButton.setText(ContextVS.getMessage("removeTagLbl"));
+            tagLbl.setText(tagName);
+            formVBox.getChildren().add(3, timeLimitedCheckBox);
+        }
         formVBox.getScene().getWindow().sizeToScene();
     }
 
