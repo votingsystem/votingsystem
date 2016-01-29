@@ -9,7 +9,6 @@ import org.votingsystem.client.webextension.dialog.*;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.service.InboxService;
 import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
-import org.votingsystem.client.webextension.service.WebSocketService;
 import org.votingsystem.client.webextension.task.*;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
@@ -406,9 +405,6 @@ public class OperationVS implements PasswordDialog.Listener {
                         }
                     }
                 });
-                break;
-            case MESSAGEVS_TO_DEVICE:
-                WebSocketService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(this));
                 break;
             case OPEN_SMIME:
                 try {

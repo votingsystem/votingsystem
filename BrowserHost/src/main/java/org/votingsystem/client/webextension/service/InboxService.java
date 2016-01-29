@@ -69,7 +69,7 @@ public class InboxService {
                 SocketMessageDto messageDto = currentMessage.getWebSocketMessage();
                 Long deviceFromId = BrowserSessionService.getInstance().getConnectedDevice().getId();
                 String socketMsgStr = JSON.getMapper().writeValueAsString(messageDto.
-                        getResponse(ResponseVS.SC_OK, null, deviceFromId, messageDto.getOperation()));
+                        getResponse(ResponseVS.SC_OK, null, deviceFromId, null, messageDto.getOperation()));
                 WebSocketAuthenticatedService.getInstance().sendMessage(socketMsgStr);
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);

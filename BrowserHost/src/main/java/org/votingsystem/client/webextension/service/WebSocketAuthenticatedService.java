@@ -209,6 +209,32 @@ public class WebSocketAuthenticatedService {
                 BrowserHost.showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
                 return;
             }
+            switch(socketMsg.getOperation()) { //Messages from system
+                case MESSAGEVS_FROM_VS:
+                    if(socketSession != null) {
+                        log.info("MESSAGEVS_FROM_VS - pong - TypeVS: " + socketSession.getTypeVS());
+                        socketMsg.setOperation( socketSession.getTypeVS());
+                        switch(socketSession.getTypeVS()) {
+                            case INIT_SIGNED_SESSION:
+                                BrowserSessionService.getInstance().initAuthenticatedSession(socketMsg, userVS);
+                                break;
+                        }
+                    } else {
+                        log.info("MESSAGEVS_FROM_VS - MessageType: " + socketMsg.getMessageType());
+                        switch (socketMsg.getMessageType()) {
+                            case TRANSACTIONVS_INFO:
+                                break;
+                            default: log.info("MESSAGEVS_FROM_VS - UNPROCESSED - MessageType: " + socketMsg.getMessageType());
+
+                        }
+                    }
+                    if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode() ||
+                            ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+                        BrowserHost.showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
+                    }
+                    EventBusService.getInstance().post(socketMsg);
+                    return;
+            }
             if(socketSession == null) {
                 BrowserSessionService.decryptMessage(socketMsg);
                 socketSession = new WebSocketSession(socketMsg);
@@ -222,18 +248,6 @@ public class WebSocketAuthenticatedService {
                 case MESSAGEVS:
                 case MESSAGEVS_TO_DEVICE:
                     InboxService.getInstance().newMessage(new InboxMessage(socketMsg));
-                    break;
-                case MESSAGEVS_FROM_VS:
-                    if(socketSession != null) {
-                        socketMsg.setOperation(socketSession.getTypeVS());
-                        switch(socketSession.getTypeVS()) {
-                            case INIT_SIGNED_SESSION:
-                                BrowserSessionService.getInstance().initAuthenticatedSession(socketMsg, userVS);
-                                break;
-                            default:
-                                log.log(Level.SEVERE, "MESSAGEVS_FROM_VS - pong - TypeVS: " + socketSession.getTypeVS());
-                        }
-                    }
                     break;
                 case MESSAGEVS_FROM_DEVICE:
                     break;
@@ -285,7 +299,7 @@ public class WebSocketAuthenticatedService {
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             msgDto = socketMsg.getResponse(ResponseVS.SC_ERROR,
-                                    ex.getMessage(), deviceFromId, TypeVS.QR_MESSAGE_INFO);
+                                    ex.getMessage(), deviceFromId, null, TypeVS.QR_MESSAGE_INFO);
                         } finally {
                             session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(msgDto));
                         }
@@ -306,21 +320,12 @@ public class WebSocketAuthenticatedService {
                                 qrDto.setTypeVS(TypeVS.CURRENCY_CHANGE);
                                 Wallet.saveToPlainWallet(Sets.newHashSet(currency));
                             }
-                            SocketMessageDto response = socketMsg.getResponse(ResponseVS.SC_OK, null,
-                                    BrowserSessionService.getInstance().getConnectedDevice().getId(),
-                                    TypeVS.OPERATION_FINISHED);
-                            sendMessage(JSON.getMapper().writeValueAsString(response));
                             BrowserHost.getInstance().removeQRMessage(qrDto.getUUID());
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                         }
                     } else BrowserHost.showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
-                    break;
-                case OPERATION_CANCELED:
-                    socketMsg.setOperation(socketSession.getTypeVS());
-                    socketMsg.setStatusCode(ResponseVS.SC_CANCELED);
-                    consumeMessage(socketMsg);
                     break;
                 default:
                     log.info("unprocessed socketMsg: " + socketMsg.getOperation());

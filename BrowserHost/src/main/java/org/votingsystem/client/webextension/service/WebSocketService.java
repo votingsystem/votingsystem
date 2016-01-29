@@ -150,44 +150,21 @@ public class WebSocketService extends Service<ResponseVS> {
     private void consumeMessage(final SocketMessageDto messageDto){
         try {
             log.info("consumeMessage - type: " + messageDto.getOperation() + " - status: " + messageDto.getStatusCode());
-            WebSocketSession socketSession = ContextVS.getInstance().getWSSession(messageDto.getUUID());
             if(ResponseVS.SC_ERROR == messageDto.getStatusCode()) {
                 showMessage(messageDto.getStatusCode(), messageDto.getMessage());
                 return;
             }
+            WebSocketSession socketSession = ContextVS.getInstance().getWSSession(messageDto.getUUID());
             if(messageDto.isEncrypted() && socketSession != null) {
                 messageDto.decryptMessage(socketSession.getAESParams());
                 log.info("consumeMessage - type: " + messageDto.getOperation() + " - status: " + messageDto.getStatusCode());
             }
             switch(messageDto.getOperation()) {
-                case INIT_SIGNED_SESSION:
-                    BrowserHost.sendMessageToBrowser(MessageDto.WEB_SOCKET(ResponseVS.SC_OK, null));
-                    break;
                 case MESSAGEVS_TO_DEVICE:
                     InboxService.getInstance().newMessage(new InboxMessage(messageDto));
                     break;
-                case MESSAGEVS_SIGN:
-                    if(ResponseVS.SC_CANCELED == messageDto.getStatusCode()){
-                        messageDto.setStatusCode(ResponseVS.SC_ERROR);
-                        BrowserSessionService.setSignResponse(messageDto);
-                    }
-                    break;
                 case MESSAGEVS_SIGN_RESPONSE:
                     BrowserSessionService.setSignResponse(messageDto);
-                    break;
-                case MESSAGEVS_FROM_VS:
-                    if(socketSession != null && socketSession.getTypeVS() != null) {
-                        switch(socketSession.getTypeVS()) {
-                            case MESSAGEVS_SIGN:
-                                BrowserSessionService.setSignResponse(messageDto);
-                                return;
-                        }
-                    }
-                    break;
-                case OPERATION_CANCELED:
-                    messageDto.setOperation(socketSession.getTypeVS());
-                    messageDto.setStatusCode(ResponseVS.SC_CANCELED);
-                    consumeMessage(messageDto);
                     break;
                 default: log.info("unprocessed messageDto - operation: " +  messageDto.getOperation());
             }

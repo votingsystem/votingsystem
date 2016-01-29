@@ -78,11 +78,6 @@ public class SocketMessageDto {
         return responseDto;
     }
 
-    public SocketMessageDto getResponse(Integer statusCode, String message, Long deviceFromId, TypeVS operation)
-            throws Exception {
-        return getResponse(statusCode, message, deviceFromId, null, operation);
-    }
-
     public SocketMessageDto getResponse(Integer statusCode, String message, Long deviceFromId,
             SMIMEMessage smimeMessage, TypeVS operation) throws Exception {
         SocketMessageDto messageDto = new SocketMessageDto();
@@ -456,7 +451,7 @@ public class SocketMessageDto {
         return socketMessageDto;
     }
 
-    //method to response a message previosly received
+    //method to response a message previously received
     public SocketMessageDto getMessageVSResponse(UserVS userVS, String textToEncrypt) throws Exception {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
