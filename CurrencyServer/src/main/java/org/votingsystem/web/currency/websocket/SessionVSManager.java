@@ -71,7 +71,7 @@ public class SessionVSManager {
     public Set<DeviceVSDto> connectedDeviceMap(Long userId) {
         if(!userVSDeviceMap.containsKey(userId)) return new HashSet<>();
         else {
-            Set<DeviceVSDto> userVSConnectedDevices = userVSDeviceMap.get(userId).stream().map(d -> {
+            Set<DeviceVSDto> userVSConnectedDevices = userVSDeviceMap.get(userId).stream().map(     d -> {
                 try {
                     return new DeviceVSDto(d);
                 } catch (Exception ex) {

@@ -209,13 +209,11 @@ public class WebSocketAuthenticatedService {
                 BrowserHost.showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
                 return;
             }
-            if(socketSession == null && socketMsg.isEncrypted()) {
+            if(socketSession == null) {
                 BrowserSessionService.decryptMessage(socketMsg);
                 socketSession = new WebSocketSession(socketMsg);
                 ContextVS.getInstance().putWSSession(socketMsg.getUUID(), socketSession);
-            } else if(socketSession != null && socketMsg.isEncrypted()) {
-                socketMsg.decryptMessage(socketSession.getAESParams());
-            }
+            } else socketMsg.decryptMessage(socketSession.getAESParams());
             socketMsg.setWebSocketSession(socketSession);
             log.info("consumeMessage - type: " + socketMsg.getOperation() + " - MessageType: " +
                     socketMsg.getMessageType() + " - status: " + socketMsg.getStatusCode());
