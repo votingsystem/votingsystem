@@ -11,16 +11,14 @@ import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import javax.websocket.Session;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -76,5 +74,36 @@ public class DeviceVSResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
+    @Path("/id/{deviceId}/connected")
+    @GET @Produces(MediaType.APPLICATION_JSON)
+    public Response connectedDevice(@PathParam("deviceId") Long deviceId,
+            @DefaultValue("false") @QueryParam("getAllDevicesFromOwner") boolean getAllDevicesFromOwner) throws Exception {
+        List<DeviceVSDto> resultList = new ArrayList<>();
+        String sessionId = SessionVSManager.getInstance().getDeviceSessionId(deviceId);
+        UserVS userVS = null;
+        DeviceVS deviceVS = null;
+        if(sessionId != null) {
+            Session session = SessionVSManager.getInstance().getAuthenticatedSession(sessionId);
+            userVS = (UserVS) session.getUserProperties().get("userVS");
+            deviceVS = (DeviceVS) session.getUserProperties().get("deviceVS");
+            if(deviceVS != null) resultList.add(new DeviceVSDto(deviceVS));
+        }
+        if(getAllDevicesFromOwner) {
+            if(userVS == null) {
+                Query query = dao.getEM().createQuery("select d.userVS from DeviceVS d where d.id =:id").setParameter("id", deviceId);
+                userVS = dao.getSingleResult(UserVS.class, query);
+            }
+            if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                    "ERROR - User not found for device with id:" + deviceId).build();
+            Set<DeviceVS> deviceVSSet = SessionVSManager.getInstance().getUserVSDeviceVSSet(userVS.getId());
+            for(DeviceVS device : deviceVSSet) {
+                if(deviceVS == null) resultList.add(new DeviceVSDto(device));
+                else if (!deviceVS.getId().equals(device.getId())) resultList.add(new DeviceVSDto(deviceVS));
+            }
+        }
+        ResultListDto<DeviceVSDto> resultListDto = new ResultListDto<>(resultList, 0, resultList.size(),
+                Long.valueOf(resultList.size()));
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
+    }
 
 }
