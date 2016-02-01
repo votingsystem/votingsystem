@@ -469,7 +469,7 @@ public class SocketMessageDto {
 
     public void decryptMessage(PrivateKey privateKey) throws Exception {
         byte[] decryptedBytes = Encryptor.decryptCMS(aesParams.getBytes(), privateKey);
-        decryptMessage(AESParams.load(JSON.getMapper().readValue(new String(decryptedBytes), AESParamsDto.class)));
+        decryptMessage(AESParams.fromDto(JSON.getMapper().readValue(new String(decryptedBytes), AESParamsDto.class)));
     }
 
     public void decryptMessage(AESParams aesParams) throws Exception {

@@ -28,6 +28,11 @@ public class AESParams {
         key = kg.generateKey();
     }
 
+    public AESParams(Key key, IvParameterSpec iv) {
+        this.key = key;
+        this.iv = iv;
+    }
+
     public Key getKey() {
         return key;
     }
@@ -41,13 +46,12 @@ public class AESParams {
                 new String(Base64.encode(iv.getIV()), "UTF-8"));
     }
 
-    public static AESParams load(AESParamsDto dto) throws NoSuchAlgorithmException {
-        AESParams aesParams = new AESParams();
+    public static AESParams fromDto(AESParamsDto dto) throws NoSuchAlgorithmException {
         byte[] decodeKeyBytes = Base64.decode(dto.getKey().getBytes());
-        aesParams.key = new SecretKeySpec(decodeKeyBytes, 0, decodeKeyBytes.length, "AES");
+        Key key = new SecretKeySpec(decodeKeyBytes, 0, decodeKeyBytes.length, "AES");
         byte[] iv = Base64.decode(dto.getIv().getBytes());
-        aesParams.iv = new IvParameterSpec(iv);
-        return aesParams;
+        IvParameterSpec ivParamSpec = new IvParameterSpec(iv);
+        return new AESParams(key, ivParamSpec);
     }
 
 }

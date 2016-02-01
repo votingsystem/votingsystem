@@ -203,17 +203,17 @@ public class WebSocketAuthenticatedService {
     }
 
     private void consumeMessage(final SocketMessageDto socketMsg) {
+        if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+            BrowserHost.showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
+            return;
+        }
         try {
             WebSocketSession socketSession = ContextVS.getInstance().getWSSession(socketMsg.getUUID());
-            if(ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
-                BrowserHost.showMessage(socketMsg.getStatusCode(), socketMsg.getMessage());
-                return;
-            }
-            switch(socketMsg.getOperation()) { //Messages from system
+            switch(socketMsg.getOperation()) { //check messages from system
                 case MESSAGEVS_FROM_VS:
                     if(socketSession != null) {
-                        log.info("MESSAGEVS_FROM_VS - pong - TypeVS: " + socketSession.getTypeVS());
-                        socketMsg.setOperation( socketSession.getTypeVS());
+                        log.info("MESSAGEVS_FROM_VS - TypeVS: " + socketSession.getTypeVS());
+                        socketMsg.setOperation(socketSession.getTypeVS());
                         switch(socketSession.getTypeVS()) {
                             case INIT_SIGNED_SESSION:
                                 BrowserSessionService.getInstance().initAuthenticatedSession(socketMsg, userVS);
@@ -228,8 +228,7 @@ public class WebSocketAuthenticatedService {
 
                         }
                     }
-                    if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode() ||
-                            ResponseVS.SC_ERROR == socketMsg.getStatusCode()) {
+                    if(ResponseVS.SC_WS_CONNECTION_NOT_FOUND == socketMsg.getStatusCode()) {
                         BrowserHost.showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
                     }
                     EventBusService.getInstance().post(socketMsg);

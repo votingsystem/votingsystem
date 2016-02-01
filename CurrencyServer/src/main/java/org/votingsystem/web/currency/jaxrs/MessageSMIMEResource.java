@@ -2,7 +2,6 @@ package org.votingsystem.web.currency.jaxrs;
 
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.*;
