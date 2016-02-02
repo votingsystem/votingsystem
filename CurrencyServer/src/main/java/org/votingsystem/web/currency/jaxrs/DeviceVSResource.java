@@ -67,13 +67,11 @@ public class DeviceVSResource {
         if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - UserVS not found - nif:" + nif).build();
         Set<DeviceVS> deviceVSSet = SessionVSManager.getInstance().getUserVSDeviceVSSet(userVS.getId());
-        List<DeviceVSDto> resultList = new ArrayList<>();
+        Set<DeviceVSDto> deviceSetDto = new HashSet<>();
         for(DeviceVS deviceVS : deviceVSSet) {
-            resultList.add(new DeviceVSDto(deviceVS));
+            deviceSetDto.add(new DeviceVSDto(deviceVS));
         }
-        ResultListDto<DeviceVSDto> resultListDto = new ResultListDto<>(resultList, 0, resultList.size(),
-                Long.valueOf(resultList.size()));
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(UserVSDto.DEVICES(userVS, deviceSetDto, null))).build();
     }
 
     @Path("/id/{deviceId}/connected")

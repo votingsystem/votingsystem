@@ -181,10 +181,10 @@ public class WebSocketAuthenticatedService {
             if(operationVS.getUserVS() != null) {
                 userDevices = operationVS.getUserVS().getConnectedDevices();
             } else {
-                ResultListDto<DeviceVSDto> resultListDto = HttpHelper.getInstance().getData(
-                        new TypeReference<ResultListDto<DeviceVSDto>>(){}, ((CurrencyServer) operationVS.getTargetServer())
-                                .getDeviceVSConnectedServiceURL(operationVS.getNif()),  MediaTypeVS.JSON);
-                userDevices = resultListDto.getResultList();
+                UserVSDto userVSDto = HttpHelper.getInstance().getData(UserVSDto.class,
+                        ContextVS.getInstance().getCurrencyServer().getDeviceVSConnectedServiceURL(
+                                BrowserSessionService.getInstance().getUserVS().getNif()), MediaTypeVS.JSON);
+                userDevices = userVSDto.getConnectedDevices();
             }
             boolean isMessageDelivered = false;
             for (DeviceVSDto deviceVSDto : userDevices) {

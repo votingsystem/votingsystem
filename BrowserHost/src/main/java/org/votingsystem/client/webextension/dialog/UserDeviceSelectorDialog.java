@@ -15,6 +15,7 @@ import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MediaTypeVS;
@@ -50,11 +51,10 @@ public class UserDeviceSelectorDialog extends DialogVS {
         messageLbl.setText(message);
         new Thread(() -> {
             try {
-                ResultListDto<DeviceVSDto> deviceList = HttpHelper.getInstance().getData(
-                        new TypeReference<ResultListDto<DeviceVSDto>>(){},
-                        ContextVS.getInstance().getCurrencyServer().getConnectedDeviceListByNifServiceURL(
+                UserVSDto userVSDto = HttpHelper.getInstance().getData(UserVSDto.class,
+                        ContextVS.getInstance().getCurrencyServer().getDeviceVSConnectedServiceURL(
                                 BrowserSessionService.getInstance().getUserVS().getNif()), MediaTypeVS.JSON);
-                updateDeviceList(deviceList.getResultList());
+                updateDeviceList(userVSDto.getConnectedDevices());
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }

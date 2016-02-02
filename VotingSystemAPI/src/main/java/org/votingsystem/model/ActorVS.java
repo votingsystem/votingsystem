@@ -309,10 +309,6 @@ public class ActorVS extends EntityVS implements Serializable {
         return getServerURL() + "/rest/deviceVS/nif/" + nif + "/list";
     }
 
-    public String getConnectedDeviceListByNifServiceURL(String nif) {
-        return getServerURL() + "/rest/deviceVS/nif/" + nif + "/connected";
-    }
-
     public String getDashBoardURL(String menu, String locale) {
         String sufix = (menu != null || locale != null)? "?menu=" + menu + "&locale=" + locale : "";
         return getServerURL() + "/app/admin.xhtml" + sufix;
