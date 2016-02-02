@@ -97,8 +97,7 @@ public class DeviceVSResource {
                     "ERROR - User not found for device with id:" + deviceId).build();
             Set<DeviceVS> deviceVSSet = SessionVSManager.getInstance().getUserVSDeviceVSSet(userVS.getId());
             for(DeviceVS device : deviceVSSet) {
-                if(deviceVS == null) resultList.add(new DeviceVSDto(device));
-                else if (!deviceVS.getId().equals(device.getId())) resultList.add(new DeviceVSDto(deviceVS));
+                if(deviceVS == null || !deviceVS.getId().equals(device.getId())) resultList.add(new DeviceVSDto(device));
             }
         }
         ResultListDto<DeviceVSDto> resultListDto = new ResultListDto<>(resultList, 0, resultList.size(),

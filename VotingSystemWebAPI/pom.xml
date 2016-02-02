@@ -10,36 +10,13 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- JBoss distributes a complete set of Java EE 7 APIs including
-                a Bill of Materials (BOM). A BOM specifies the versions of a "stack" (or
-                a collection) of artifacts. We use this here so that we always get the correct
-                versions of artifacts. Here we use the jboss-javaee-7.0-with-tools stack
-                (you can read this as the JBoss stack of the Java EE 7 APIs, with some extras
-                tools for your project, such as Arquillian for testing) and the jboss-javaee-7.0-with-hibernate
-                stack you can read this as the JBoss stack of the Java EE 7 APIs, with extras
-                from the Hibernate family of projects) -->
             <dependency>
                 <groupId>org.wildfly.bom</groupId>
-                <artifactId>jboss-javaee-7.0-with-tools</artifactId>
-                <version>${version.jboss.bom}</version>
-                <type>pom</type>
+                <artifactId>wildfly-javaee7</artifactId>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.wildfly.bom</groupId>
-                <artifactId>jboss-javaee-7.0-with-hibernate</artifactId>
-                <version>${version.jboss.bom}</version>
                 <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.wildfly.bom</groupId>
-                <artifactId>jboss-javaee-7.0-with-logging</artifactId>
                 <version>${version.jboss.bom}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -68,8 +45,8 @@
         </dependency>
         <!-- Import the JAX-RS API, we use provided scope as the API is included in JBoss WildFly -->
         <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>jaxrs-api</artifactId>
+            <groupId>org.jboss.spec.javax.ws.rs</groupId>
+            <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -104,7 +81,7 @@
     <properties>
         <votingsystem.version>0.7.0-SNAPSHOT</votingsystem.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.jboss.bom>9.0.0.Beta2</version.jboss.bom>
+        <version.jboss.bom>10.0.0.Final</version.jboss.bom>
         <version.ejb.plugin>2.3</version.ejb.plugin>
     </properties>
 </project>
