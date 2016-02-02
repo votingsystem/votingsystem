@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.jaxrs;
 
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.ResultListDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.JSON;
@@ -15,6 +16,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -78,7 +80,7 @@ public class DeviceVSResource {
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response connectedDevice(@PathParam("deviceId") Long deviceId,
             @DefaultValue("false") @QueryParam("getAllDevicesFromOwner") boolean getAllDevicesFromOwner) throws Exception {
-        List<DeviceVSDto> resultList = new ArrayList<>();
+        Set<DeviceVSDto> deviceSetDto = new HashSet<>();
         String sessionId = SessionVSManager.getInstance().getDeviceSessionId(deviceId);
         UserVS userVS = null;
         DeviceVS deviceVS = null;
@@ -86,7 +88,7 @@ public class DeviceVSResource {
             Session session = SessionVSManager.getInstance().getAuthenticatedSession(sessionId);
             userVS = (UserVS) session.getUserProperties().get("userVS");
             deviceVS = (DeviceVS) session.getUserProperties().get("deviceVS");
-            if(deviceVS != null) resultList.add(new DeviceVSDto(deviceVS));
+            if(deviceVS != null) deviceSetDto.add(new DeviceVSDto(deviceVS));
         }
         if(getAllDevicesFromOwner) {
             if(userVS == null) {
@@ -97,12 +99,10 @@ public class DeviceVSResource {
                     "ERROR - User not found for device with id:" + deviceId).build();
             Set<DeviceVS> deviceVSSet = SessionVSManager.getInstance().getUserVSDeviceVSSet(userVS.getId());
             for(DeviceVS device : deviceVSSet) {
-                if(deviceVS == null || !deviceVS.getId().equals(device.getId())) resultList.add(new DeviceVSDto(device));
+                if(deviceVS == null || !deviceVS.getId().equals(device.getId())) deviceSetDto.add(new DeviceVSDto(device));
             }
         }
-        ResultListDto<DeviceVSDto> resultListDto = new ResultListDto<>(resultList, 0, resultList.size(),
-                Long.valueOf(resultList.size()));
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(UserVSDto.DEVICES(userVS, deviceSetDto, null))).build();
     }
 
 }
