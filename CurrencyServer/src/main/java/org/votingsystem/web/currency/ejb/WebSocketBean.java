@@ -71,7 +71,7 @@ public class WebSocketBean {
                 MessageSMIME messageSMIME = signatureBean.validateSMIME(messageDto.getSMIME(), null).getMessageSMIME();
                 UserVS signer = messageSMIME.getUserVS();
                 if(signer.getDeviceVS() != null) {
-                    //check if accessing from one device and signing from another
+                    //check if accessing from one device and signing from another (a mobile token)
                     if(!signer.getDeviceVS().getDeviceId().equals(messageDto.getDeviceId())) signer.setDeviceVS(null);
                 }
                 if(signer.getDeviceVS() == null && messageDto.getDeviceId() != null){

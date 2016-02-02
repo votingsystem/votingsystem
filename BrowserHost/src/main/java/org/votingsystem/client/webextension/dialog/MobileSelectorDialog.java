@@ -66,7 +66,8 @@ public class MobileSelectorDialog extends DialogVS {
         searchDeviceButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.SEARCH));
         footerBox.getChildren().remove(acceptButton);
         addCloseListener(event -> {
-            listener.cancelSelection();
+            if(deviceToggleGroup == null || deviceToggleGroup.getSelectedToggle() == null)
+                    listener.cancelSelection();
         });
     }
 

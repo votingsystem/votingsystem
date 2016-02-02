@@ -114,7 +114,7 @@ public class SocketMessageDto {
         this.currencyDtoList = currencyDtoList;
     }
 
-    public boolean isEncrypted() {
+    @JsonIgnore public boolean isEncrypted() {
         return encryptedMessage != null;
     }
 
@@ -403,8 +403,7 @@ public class SocketMessageDto {
         socketMessageDto.setDeviceToId(deviceTo.getId());
         socketMessageDto.setDeviceToName(deviceTo.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
-        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getSignRequest(deviceTo, toUser, textToSign,
-                subject);
+        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getSignRequest(toUser, textToSign, subject);
         String aesParams = JSON.getMapper().writeValueAsString(socketSession.getAESParams().getDto());
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(), deviceTo.getX509Certificate());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
@@ -423,7 +422,6 @@ public class SocketMessageDto {
         socketMessageDto.setDeviceToId(deviceTo.getId());
         socketMessageDto.setDeviceToName(deviceTo.getDeviceName());
         SocketMessageContentDto messageContentDto = SocketMessageContentDto.getCurrencyWalletChangeRequest(currencyList);
-
         String aesParams = JSON.getMapper().writeValueAsString(socketSession.getAESParams().getDto());
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(), deviceTo.getX509Certificate());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));

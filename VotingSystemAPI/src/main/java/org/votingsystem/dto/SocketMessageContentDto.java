@@ -44,8 +44,7 @@ public class SocketMessageContentDto {
         this.URL = URL;
     }
 
-    public static SocketMessageContentDto getSignRequest(DeviceVS deviceVS, String toUser, String textToSign,
-            String subject) throws Exception {
+    public static SocketMessageContentDto getSignRequest(String toUser, String textToSign, String subject) throws Exception {
         SocketMessageContentDto messageContentDto =  new SocketMessageContentDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());

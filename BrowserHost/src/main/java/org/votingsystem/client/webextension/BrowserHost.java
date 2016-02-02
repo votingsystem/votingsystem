@@ -13,14 +13,15 @@ import org.votingsystem.client.webextension.dialog.DebugDialog;
 import org.votingsystem.client.webextension.dialog.MainDialog;
 import org.votingsystem.client.webextension.dialog.MessageDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
-import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.EventBusTransactionResponseListener;
+import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.service.EventBusService;
+import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
@@ -33,6 +34,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.security.KeyStore;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -60,76 +62,78 @@ public class BrowserHost extends Application {
     private String chromeExtensionId;
 
     @Override public void start(final Stage primaryStage) throws Exception {
-        INSTANCE = this;
-        INSTANCE.primaryStage = primaryStage;
-        new MainDialog(primaryStage).show();
-        //this is the part the receives the messages from the browser extension
-        executorService.execute(() -> {
-            log.info("waiting for browser messages");
-            try {
-                byte[] messagePart = null;
-                ByteBuffer buffer = null;
-                ReadableByteChannel channel = null;
-                while(true) {
-                    buffer = ByteBuffer.allocate(MAX_MESSAGE_SIZE);
-                    channel = Channels.newChannel(System.in);
-                    channel.read(buffer);
-                    buffer.flip();
-                    byte[] bytes = null;
-                    if(messagePart != null) {
-                        bytes = new byte[messagePart.length + buffer.limit()];
-                        System.arraycopy(messagePart, 0, bytes, 0, messagePart.length);
-                        System.arraycopy(buffer.array(), 0, bytes, messagePart.length, buffer.limit());
-                    } else {
-                        bytes = Arrays.copyOfRange(buffer.array(), 4, buffer.limit());
-                    }
-                    try {
-                        JSON.getMapper().readValue(bytes, OperationVS.class).initProcess();
-                        messagePart = null;
-                    } catch (JsonMappingException ex) {
-                        log.info("--- message broken waiting for part---");
-                        if(messagePart == null) messagePart = Arrays.copyOfRange(buffer.array(), 4, buffer.limit());
-                        else {
-                            byte[] messageSumParts = new byte[messagePart.length  +  buffer.limit()];
-                            System.arraycopy(messagePart, 0, messageSumParts, 0, messagePart.length);
-                            System.arraycopy(buffer.array(), 0, messageSumParts, messagePart.length, buffer.limit());
-                            messagePart = messageSumParts;
-                        }
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                    }
-                }
-            }catch (Exception ex) {
-                log.log(Level.SEVERE,ex.getMessage(), ex);
-            }
-        });
-
         try {
-            for(String param : getParameters().getRaw()) {
-                URI uri = new URI(param);
-                if(uri.getScheme() != null) {
-                    switch(uri.getScheme().toLowerCase()) {
-                        case "vs":
-                            JSON.getMapper().readValue(FileUtils.getBytesFromFile(new File(uri.getPath())),
-                                    OperationVS.class).initProcess();
-                            break;
-                        case "chrome-extension":
-                            chromeExtensionId = uri.getHost();
-                            break;
-                        default:
-                            log.info("unknown schema: " + uri.getScheme());
+            INSTANCE = this;
+            INSTANCE.primaryStage = primaryStage;
+            new MainDialog(primaryStage).show();
+            //this is the part the receives the messages from the browser extension
+            executorService.execute(() -> {
+                log.info("waiting for browser messages");
+                try {
+                    byte[] messagePart = null;
+                    ByteBuffer buffer = null;
+                    ReadableByteChannel channel = null;
+                    while(true) {
+                        buffer = ByteBuffer.allocate(MAX_MESSAGE_SIZE);
+                        channel = Channels.newChannel(System.in);
+                        channel.read(buffer);
+                        buffer.flip();
+                        byte[] bytes = null;
+                        if(messagePart != null) {
+                            bytes = new byte[messagePart.length + buffer.limit()];
+                            System.arraycopy(messagePart, 0, bytes, 0, messagePart.length);
+                            System.arraycopy(buffer.array(), 0, bytes, messagePart.length, buffer.limit());
+                        } else {
+                            bytes = Arrays.copyOfRange(buffer.array(), 4, buffer.limit());
+                        }
+                        try {
+                            JSON.getMapper().readValue(bytes, OperationVS.class).initProcess();
+                            messagePart = null;
+                        } catch (JsonMappingException ex) {
+                            log.info("--- message broken waiting for part---");
+                            if(messagePart == null) messagePart = Arrays.copyOfRange(buffer.array(), 4, buffer.limit());
+                            else {
+                                byte[] messageSumParts = new byte[messagePart.length  +  buffer.limit()];
+                                System.arraycopy(messagePart, 0, messageSumParts, 0, messagePart.length);
+                                System.arraycopy(buffer.array(), 0, messageSumParts, messagePart.length, buffer.limit());
+                                messagePart = messageSumParts;
+                            }
+                        } catch (Exception ex) {
+                            log.log(Level.SEVERE, ex.getMessage(), ex);
+                            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
+                        }
                     }
-                } else {
-                    if("debugSession".equals(param)) DebugDialog.showDialog();
+                }catch (Exception ex) {
+                    log.log(Level.SEVERE,ex.getMessage(), ex);
                 }
+            });
+
+            try {
+                for(String param : getParameters().getRaw()) {
+                    URI uri = new URI(param);
+                    if(uri.getScheme() != null) {
+                        switch(uri.getScheme().toLowerCase()) {
+                            case "vs":
+                                JSON.getMapper().readValue(FileUtils.getBytesFromFile(new File(uri.getPath())),
+                                        OperationVS.class).initProcess();
+                                break;
+                            case "chrome-extension":
+                                chromeExtensionId = uri.getHost();
+                                break;
+                            default:
+                                log.info("unknown schema: " + uri.getScheme());
+                        }
+                    } else {
+                        if("debugSession".equals(param)) DebugDialog.showDialog();
+                    }
+                }
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
+                showMessage(ResponseVS.SC_ERROR, ex.getMessage());
             }
-        } catch (Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-            showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-        }
-        BrowserSessionService.getInstance().checkCSR();
-        EventBusService.getInstance().register(new EventBusTransactionResponseListener());
+            BrowserSessionService.getInstance().checkCSR();
+            EventBusService.getInstance().register(new EventBusTransactionResponseListener());
+        } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
     }
 
 

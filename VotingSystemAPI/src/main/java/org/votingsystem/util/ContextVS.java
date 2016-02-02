@@ -5,6 +5,7 @@ import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.votingsystem.dto.ActorVSDto;
+import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
@@ -12,10 +13,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.voting.ControlCenterVS;
-import org.votingsystem.signature.util.AESParams;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.KeyGeneratorVS;
-import org.votingsystem.signature.util.KeyStoreUtil;
+import org.votingsystem.signature.util.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
 
@@ -413,14 +411,36 @@ public class ContextVS {
         } else mainKeyStoreFile.createNewFile();
         Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
         UserVS userVS = UserVS.getUserVS((X509Certificate)chain[0]);
+
+        CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
+                userVS.getCertificate(), ContextVS.DEVICEVS_OID);
+        DeviceVSDto deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
+        deviceVSDto.setType(CryptoTokenVS.JKS_KEYSTORE);
+        deviceVSDto.setDeviceName(userVS.getNif() + " - " + userVS.getName());
+
         File userVSKeyStoreFile = new File(appDir + File.separator + userVS.getNif() + "_" + USER_KEYSTORE_FILE_NAME);
         userVSKeyStoreFile.createNewFile();
         Map keyStoreMap = new HashMap<>();
-        keyStoreMap.put("certPEM", new String(CertUtils.getPEMEncoded((X509Certificate) chain[0])));
+        keyStoreMap.put("deviceVSDto", JSON.getMapper().writeValueAsString(deviceVSDto));
+        keyStoreMap.put("certPEM", new String(CertUtils.getPEMEncoded(chain[0])));
         keyStoreMap.put("keyStore", Base64.getEncoder().encodeToString(keyStoreBytes));
         JSON.getMapper().writeValue(mainKeyStoreFile, keyStoreMap);
         JSON.getMapper().writeValue(userVSKeyStoreFile, keyStoreMap);
         return userVS;
+    }
+
+    public DeviceVSDto getKeyStoreDevice() {
+        DeviceVSDto result = null;
+        try {
+            File keyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
+            if(keyStoreFile.createNewFile()) return null;
+            Map keyStoreMap = JSON.getMapper().readValue(keyStoreFile, new TypeReference<Map<String, String>>() { });
+            result = JSON.getMapper().readValue((String) keyStoreMap.get("deviceVSDto"), DeviceVSDto.class);
+        } catch(Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        } finally {
+            return result;
+        }
     }
 
     public UserVS getKeyStoreUserVS() {

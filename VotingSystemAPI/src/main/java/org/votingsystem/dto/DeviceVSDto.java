@@ -197,4 +197,5 @@ public class DeviceVSDto implements Serializable {
     public void setIBAN(String IBAN) {
         this.IBAN = IBAN;
     }
+
 }

@@ -63,7 +63,8 @@ public class SocketEndpointVS {
 
 
     @OnClose public void onClose(Session session, CloseReason closeReason) {
-        log.info(String.format("Session %s closed because of %s", session.getId(), closeReason));
+        log.info(String.format("Session %s closed because of %s", session.getId(), closeReason.getCloseCode() + " - " +
+            closeReason.getReasonPhrase()));
         try {
             SessionVSManager.getInstance().remove(session);
         } catch (Exception ex) {

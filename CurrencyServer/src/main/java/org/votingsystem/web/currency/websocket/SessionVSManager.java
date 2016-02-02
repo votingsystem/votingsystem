@@ -97,7 +97,7 @@ public class SessionVSManager {
             UserVS userVS = (UserVS) deviceSession.getUserProperties().get("userVS");
             DeviceVSDto deviceVSDto = new DeviceVSDto(deviceVS.getId(), deviceVS.getDeviceId(), deviceSession.getId());
             if(usersAuthenticated.containsKey(userVS.getId())) usersAuthenticated.get(userVS.getId()).add(deviceVSDto);
-            else usersAuthenticated.put(userVS.getId(), new HashSet<DeviceVSDto>(Arrays.asList(deviceVSDto)));
+            else usersAuthenticated.put(userVS.getId(), new HashSet<>(Arrays.asList(deviceVSDto)));
         }
         connectedUsersDto.setUsersAuthenticated(usersAuthenticated);
         return connectedUsersDto;

@@ -160,6 +160,13 @@ public class WebSocketService extends Service<ResponseVS> {
                 log.info("consumeMessage - type: " + messageDto.getOperation() + " - status: " + messageDto.getStatusCode());
             }
             switch(messageDto.getOperation()) {
+                case MESSAGEVS_FROM_VS:
+                    switch (socketSession.getTypeVS()) {
+                        case MESSAGEVS_SIGN:
+                            BrowserSessionService.setSignResponse(messageDto);
+                            break;
+                    }
+                    break;
                 case MESSAGEVS_TO_DEVICE:
                     InboxService.getInstance().newMessage(new InboxMessage(messageDto));
                     break;

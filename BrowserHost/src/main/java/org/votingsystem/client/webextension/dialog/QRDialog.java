@@ -1,28 +1,19 @@
 package org.votingsystem.client.webextension.dialog;
 
 import com.google.common.eventbus.Subscribe;
-import com.google.zxing.WriterException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
-import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.webextension.BrowserHost;
-import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.util.MsgUtils;
-import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.service.EventBusService;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.QRUtils;
-import org.votingsystem.util.TypeVS;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

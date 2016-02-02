@@ -5,6 +5,7 @@ import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.dto.CertExtensionDto;
+import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.AccessControlVS;
@@ -40,9 +41,10 @@ public class CertRequestTask extends Task<ResponseVS> {
         try {
             updateMessage(message);
             CertExtensionDto certExtensionDto = operationVS.getData(CertExtensionDto.class);
-            certExtensionDto.setDeviceId(HttpHelper.getMAC());
-            certExtensionDto.setDeviceType(DeviceVS.Type.PC);
-            certExtensionDto.setDeviceName(InetAddress.getLocalHost().getHostName());
+            DeviceVSDto device = BrowserSessionService.getInstance().getDevice();
+            certExtensionDto.setDeviceId(device.getDeviceId());
+            certExtensionDto.setDeviceType(device.getDeviceType());
+            certExtensionDto.setDeviceName(device.getDeviceName());
             CertificationRequestVS certificationRequest = CertificationRequestVS.getUserRequest(
                     SIGN_MECHANISM, PROVIDER, certExtensionDto);
             byte[] csrBytes = certificationRequest.getCsrPEM();
@@ -61,4 +63,5 @@ public class CertRequestTask extends Task<ResponseVS> {
         }
         return responseVS;
     }
+
 }

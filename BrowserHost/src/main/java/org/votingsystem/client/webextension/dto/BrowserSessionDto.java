@@ -13,21 +13,10 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BrowserSessionDto {
 
-
-    private Long csrRequestId;
     private Boolean isConnected = Boolean.FALSE;
     private UserVSDto userVS;
     private DeviceVSDto cryptoToken;
-    private List<UserVSDto> userVSList = new ArrayList<>();
-
-
-    public Long getCsrRequestId() {
-        return csrRequestId;
-    }
-
-    public void setCsrRequestId(Long csrRequestId) {
-        this.csrRequestId = csrRequestId;
-    }
+    private DeviceVSDto device;
 
     public Boolean isConnected() {
         return isConnected;
@@ -45,20 +34,20 @@ public class BrowserSessionDto {
         this.userVS = userVS;
     }
 
-    public List<UserVSDto> getUserVSList() {
-        return userVSList;
-    }
-
-    public void setUserVSList(List<UserVSDto> userVSList) {
-        this.userVSList = userVSList;
-    }
-
     public DeviceVSDto getCryptoToken() {
         return cryptoToken;
     }
 
     public void setCryptoToken(DeviceVSDto cryptoToken) {
         this.cryptoToken = cryptoToken;
+    }
+
+    public DeviceVSDto getDevice() {
+        return device;
+    }
+
+    public void setDevice(DeviceVSDto device) {
+        this.device = device;
     }
 
 }

@@ -89,7 +89,6 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
                 BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("connectionErrorMsg"));
             }
         });
-
         HBox footerButtonsBox = new HBox(10);
         Button acceptButton = new Button(ContextVS.getMessage("acceptLbl"), Utils.getIcon(FontAwesome.Glyph.CHECK));
         acceptButton.setOnAction(actionEvent -> validateForm());
@@ -112,15 +111,16 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         if(gridPane.getChildren().contains(mobileDeviceInfo)) gridPane.getChildren().remove(mobileDeviceInfo);
         if(evt.getSource() == signWithKeystoreRb) {
             gridPane.add(keyStoreVBox, 0, 4);
-            if(BrowserSessionService.getInstance().getKeyStoreUserVS() != null)
+            if(BrowserSessionService.getInstance().getKeyStoreUserVS() != null) {
                 keyStoreLbl.setText(BrowserSessionService.getInstance().getKeyStoreUserVS().getName());
+                deviceVSDto = ContextVS.getInstance().getKeyStoreDevice();
+            }
         }
         if(evt.getSource() == signWithMobileRb && deviceVSDto != null) {
             gridPane.add(mobileDeviceInfo, 0, 2);
         }
         if(evt.getSource() == signWithMobileRb) MobileSelectorDialog.show(ContextVS.getMessage(
-                "setMobileSignatureMechanismMsg"), ContextVS.getMessage("setMobileSignatureMechanismAdv"),
-                SettingsDialog.this);
+                "setMobileSignatureMechanismMsg"), ContextVS.getMessage("setMobileSignatureMechanismAdv"), this);
         getStage().sizeToScene();
     }
 
@@ -128,19 +128,26 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         log.info("show");
         selectedKeyStore = null;
         gridPane.getChildren().remove(keyStoreVBox);
-        switch(BrowserSessionService.getCryptoTokenType()) {
-            case JKS_KEYSTORE:
-                signWithKeystoreRb.setSelected(true);
-                deviceVSDto = BrowserSessionService.getInstance().getCryptoToken();
-                gridPane.add(keyStoreVBox, 0, 6);
-                keyStoreLbl.setText(deviceVSDto.getFirstName() + " " + deviceVSDto.getLastName());
-                break;
-            case MOBILE:
-                signWithMobileRb.setSelected(true);
-                deviceVSDto = BrowserSessionService.getInstance().getCryptoToken();
-                mobileDeviceLbl.setText(deviceVSDto.getDeviceName());
-                gridPane.add(mobileDeviceInfo, 0, 2);
-                break;
+        CryptoTokenVS cryptoToken = BrowserSessionService.getCryptoTokenType();
+        if(cryptoToken != null) {
+            switch(BrowserSessionService.getCryptoTokenType()) {
+                case JKS_KEYSTORE:
+                    signWithKeystoreRb.setSelected(true);
+                    deviceVSDto = BrowserSessionService.getInstance().getCryptoToken();
+                    gridPane.add(keyStoreVBox, 0, 6);
+                    keyStoreLbl.setText(deviceVSDto.getFirstName() + " " + deviceVSDto.getLastName());
+                    break;
+                case MOBILE:
+                    signWithMobileRb.setSelected(true);
+                    deviceVSDto = BrowserSessionService.getInstance().getCryptoToken();
+                    if(deviceVSDto != null) {
+                        mobileDeviceLbl.setText(deviceVSDto.getDeviceName());
+                        gridPane.add(mobileDeviceInfo, 0, 2);
+                    } else {
+
+                    }
+                    break;
+            }
         }
         getStage().show();
         BrowserSessionService.getInstance().checkCSR();
@@ -162,13 +169,23 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
             if (file != null) {
                 File selectedKeystore = new File(file.getAbsolutePath());
                 byte[] keystoreBytes = FileUtils.getBytesFromFile(selectedKeystore);
-                try {
-                    selectedKeyStore = KeyStoreUtil.getKeyStoreFromBytes(keystoreBytes, null);
-                } catch(Exception ex) {
-                    BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("keyStoreNotValidErrorMsg"));
-                }
-                X509Certificate certSigner = (X509Certificate) selectedKeyStore.getCertificate("UserTestKeysStore");
-                keyStoreLbl.setText(certSigner.getSubjectDN().toString());
+                PasswordDialog.showWithPasswordConfirm(password -> {
+                    if(password == null) return;
+                    try {
+                        selectedKeyStore = KeyStoreUtil.getKeyStoreFromBytes(keystoreBytes, password);
+                        UserVS userVS = ContextVS.getInstance().saveUserKeyStore(selectedKeyStore, password);
+                        CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
+                                userVS.getCertificate(), ContextVS.DEVICEVS_OID);
+                        deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
+                        deviceVSDto.setType(CryptoTokenVS.JKS_KEYSTORE);
+                        deviceVSDto.setDeviceName(userVS.getNif() + " - " + userVS.getName());
+                        X509Certificate certSigner = (X509Certificate) selectedKeyStore.getCertificate("UserTestKeysStore");
+                        keyStoreLbl.setText(certSigner.getSubjectDN().toString());
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
+                        BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("keyStoreNotValidErrorMsg"));
+                    }
+                }, ContextVS.getMessage("newKeyStorePasswordMsg"));
             } else {
                 keyStoreLbl.setText(ContextVS.getMessage("selectKeyStoreLbl"));
             }
@@ -180,24 +197,6 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
     private void validateForm() {
         log.info("validateForm");
         if(signWithKeystoreRb.isSelected()) {
-            if(selectedKeyStore != null) {
-                PasswordDialog.showWithPasswordConfirm(password -> {
-                    if(password == null) return;
-                    try {
-                        UserVS userVS = ContextVS.getInstance().saveUserKeyStore(selectedKeyStore, password);
-                        CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
-                                userVS.getCertificate(), ContextVS.DEVICEVS_OID);
-                        deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
-                        deviceVSDto.setType(CryptoTokenVS.JKS_KEYSTORE);
-                        deviceVSDto.setDeviceName(userVS.getNif() + " - " + userVS.getName());
-                        close();
-                    } catch (Exception ex) {
-                        log.log(Level.SEVERE, ex.getMessage(), ex);
-                        BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                    }
-                }, ContextVS.getMessage("newKeyStorePasswordMsg"));
-                return;
-            }
             if(selectedKeyStore == null && BrowserSessionService.getInstance().getKeyStoreUserVS() == null) {
                 BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("keyStoreNotSelectedErrorLbl"));
                 return;
@@ -225,8 +224,8 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         getStage().sizeToScene();
     }
 
-    @Override
-    public void cancelSelection() {
+    @Override public void cancelSelection() {
+        log.info("cancelSelection");
         signWithKeystoreRb.setSelected(true);
         signWithMobileRb.setSelected(false);
     }

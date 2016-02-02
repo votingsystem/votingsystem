@@ -24,6 +24,9 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -76,6 +79,7 @@ public class BrowserSessionService {
             sessionFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.BROWSER_SESSION_FILE);
             if(sessionFile.createNewFile()) {
                 browserSessionDto = new BrowserSessionDto();
+                getDevice();
             } else {
                 try {
                     browserSessionDto = JSON.getMapper().readValue(sessionFile, BrowserSessionDto.class);
@@ -205,11 +209,6 @@ public class BrowserSessionService {
         }
     }
 
-    public void setCSRRequestId(Long id) {
-        browserSessionDto.setCsrRequestId(id);
-        flush();
-    }
-
     public void setCryptoToken(DeviceVSDto cryptoToken) {
         log.info("setCryptoToken - type: " + cryptoToken.getType());
         ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, cryptoToken.getType().toString());
@@ -221,13 +220,22 @@ public class BrowserSessionService {
         return browserSessionDto.getCryptoToken();
     }
 
-    public static CryptoTokenVS getCryptoTokenType () {
-        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString());
-        return CryptoTokenVS.valueOf(tokenType);
+    public DeviceVSDto getDevice() throws SocketException, UnknownHostException {
+        DeviceVSDto deviceVSDto = browserSessionDto.getDevice();
+        if(deviceVSDto == null) {
+            deviceVSDto = new DeviceVSDto();
+            deviceVSDto.setDeviceId(HttpHelper.getMAC());
+            deviceVSDto.setDeviceType(DeviceVS.Type.PC);
+            deviceVSDto.setDeviceName(InetAddress.getLocalHost().getHostName());
+            browserSessionDto.setDevice(deviceVSDto);
+        }
+        return browserSessionDto.getDevice();
     }
 
-    public Long getCSRRequestId() {
-        return browserSessionDto.getCsrRequestId();
+    public static CryptoTokenVS getCryptoTokenType () {
+        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN);
+        if(tokenType == null) return null;
+        else return CryptoTokenVS.valueOf(tokenType);
     }
 
     public UserVS getUserVS()  {
@@ -250,27 +258,12 @@ public class BrowserSessionService {
 
     public void setUserVS(UserVS userVS, boolean isConnected) throws Exception {
         browserSessionDto.setUserVS(UserVSDto.COMPLETE(userVS));
-        List<UserVSDto> userVSList = browserSessionDto.getUserVSList();
-        boolean updated = false;
-        for(int i = 0; i < userVSList.size(); i++) {
-            UserVSDto user = userVSList.get(i);
-            if(user.getNIF().equals(userVS.getNif())) {
-                userVSList.remove(i);
-                userVSList.add(browserSessionDto.getUserVS());
-                updated = true;
-            }
-        }
-        if(!updated) userVSList.add(browserSessionDto.getUserVS());
         browserSessionDto.setIsConnected(isConnected);
         flush();
     }
 
     public UserVS getKeyStoreUserVS() {
         return ContextVS.getInstance().getKeyStoreUserVS();
-    }
-
-    public BrowserSessionDto getBrowserSessionData() {
-        return browserSessionDto;
     }
 
     public void setCSRRequest(Long requestId, EncryptedBundle bundle) {

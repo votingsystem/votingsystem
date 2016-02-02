@@ -1,6 +1,5 @@
 package org.votingsystem.client.webextension.dialog;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.javafx.application.PlatformImpl;
 import javafx.beans.value.ChangeListener;
@@ -8,16 +7,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import org.controlsfx.glyphfont.FontAwesome;
-import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.TagVSDto;
@@ -27,7 +18,6 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**

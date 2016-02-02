@@ -1,6 +1,5 @@
 package org.votingsystem.client.webextension.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
 import javafx.concurrent.Task;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
@@ -16,7 +15,6 @@ import org.votingsystem.dto.*;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.CryptoTokenVS;
@@ -364,7 +362,7 @@ public class WebSocketAuthenticatedService {
             ResponseVS responseVS = null;
             try {
                 SocketMessageDto dto = SocketMessageDto.INIT_SESSION_REQUEST(
-                        BrowserSessionService.getInstance().getCryptoToken().getDeviceId());
+                        BrowserSessionService.getInstance().getDevice().getDeviceId());
                 if(BrowserSessionService.getCryptoTokenType() == CryptoTokenVS.MOBILE) {
                     updateMessage(ContextVS.getMessage("checkDeviceVSCryptoTokenMsg"));
                 } else updateMessage(ContextVS.getMessage("connectionMsg"));
