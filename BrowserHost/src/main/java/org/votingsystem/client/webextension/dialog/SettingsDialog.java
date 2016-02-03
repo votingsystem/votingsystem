@@ -143,8 +143,6 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
                     if(deviceVSDto != null) {
                         mobileDeviceLbl.setText(deviceVSDto.getDeviceName());
                         gridPane.add(mobileDeviceInfo, 0, 2);
-                    } else {
-
                     }
                     break;
             }

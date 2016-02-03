@@ -252,7 +252,8 @@ public class SMIMEMessage extends MimeMessage {
         return voteVS;
     }
 
-    public Set<UserVS> getSigners() {
+    public Set<UserVS> getSigners() throws Exception {
+        if(smimeSigned == null) isValidSignature();
         return signers;
     }
 
