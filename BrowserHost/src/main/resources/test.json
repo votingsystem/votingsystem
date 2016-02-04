@@ -1,37 +1,9 @@
 {
   "statusCode": 700,
-  "operation": "MESSAGEVS",
+  "operation": "CURRENCY_REQUEST",
   "receiverName": "Voting System Currency Server",
   "serverURL": "http://currency:8080/CurrencyServer",
-  "message": "test 123456",
-  "nif": "07553172H",
-  "userVS": {
-    "id": 2,
-    "state": "ACTIVE",
-    "type": "USER",
-    "name": "JOSE-EXT",
-    "connectedDevices": [
-      {
-        "id": 2,
-        "deviceId": "355136056990149",
-        "deviceName": "LGE Nexus 4",
-        "email": "NEXUS4@MAIL.ES",
-        "phone": "609459580",
-        "certPEM": "-----BEGIN CERTIFICATE-----\nMIIDODCCAqGgAwIBAgIILDJcjHsZalMwDQYJKoZIhvcNAQEFBQAwOzESMBAGA1UE\nBRMJNTAwMDAwMDBSMSUwIwYDVQQqExxWb3RpbmcgU3lzdGVtIEFjY2VzcyBDb250\ncm9sMB4XDTE1MTAyOTEwMzMxN1oXDTE2MTAyODA5MzMxN1owNDEPMA0GA1UEBAwG\nR0FSQ0lBMQ0wCwYDVQQqDARKT1NFMRIwEAYDVQQFEwkwNzU1MzE3MkgwgZ8wDQYJ\nKoZIhvcNAQEBBQADgY0AMIGJAoGBAM773XSpqSFI3ndqlrm0sjenajZAINme2zuV\nHxPeFOIDE8zksq87mGuaRoSqubMVmI0DlQyx4b2Ae9Uw+Kit/bHQ73bbzWe8bqXX\nQVps3d4ut6ptMoR6IfuR5Z0U56hcqC9qUfJF+XLAni6LY3zdwHfMO0YH+RmRP09Q\n8eY3rHqRAgMBAAGjggFKMIIBRjBrBgNVHSMEZDBigBQ2bXwb/p5m+tX09Kw6YuyE\nJwN0L6FCpEAwPjEsMCoGA1UEAwwjVm90aW5nIFN5c3RlbSBDZXJ0aWZpY2F0ZSBB\ndXRob3JpdHkxDjAMBgNVBAsMBUNlcnRzggYBUBTLpSowHQYDVR0OBBYEFNZVpXIt\nz8Cl84x1LnfuivzvPWWNMAwGA1UdEwEB/wQCMAAwDgYDVR0PAQH/BAQDAgWgMIGZ\nBgkAAAAAAAAAAAQBAf8EgYikgYUMgYJ7ImRldmljZUlkIjoiMzU1MTM2MDU2OTkw\nMTQ5IiwiZGV2aWNlTmFtZSI6IkxHRSBOZXh1cyA0IiwiZGV2aWNlVHlwZSI6Ik1P\nQklMRSIsImVtYWlsIjoiTkVYVVM0QE1BSUwuRVMiLCJtb2JpbGVQaG9uZSI6IjYw\nOTQ1OTU4MCJ9MA0GCSqGSIb3DQEBBQUAA4GBADrYr9biW24CrAV1PZrI4w5Df9JJ\n9mLGz/nlXRwZsBuXA4n+IqS2YsnJe98dA32E66rvhp39bGF+ZnrR8Qzes1kPhQ/I\noTlhRAxBTDEaxTd89kMHeiEYzai7KTBHY5ZQI+NhhNEm+Kk6exs+R7zuO6/DB7uc\nzfTVUjll8WtwVcyM\n-----END CERTIFICATE-----\n"
-      },
-      {
-        "id": 1,
-        "deviceId": "C8-0A-A9-AB-47-BE",
-        "deviceName": "acer-jessie",
-        "email": "mail-ext@gmail.es",
-        "phone": "55555",
-        "certPEM": "-----BEGIN CERTIFICATE-----\nMIIDfTCCAuagAwIBAgIIeLhDXzqfuK4wDQYJKoZIhvcNAQEFBQAwOzESMBAGA1UE\nBRMJNTAwMDAwMDBSMSUwIwYDVQQqExxWb3RpbmcgU3lzdGVtIEFjY2VzcyBDb250\ncm9sMB4XDTE2MDEwMTA5Mzk0MFoXDTE2MTIzMTA5Mzk0MFowPDETMBEGA1UEBAwK\nR0FSQ0lBLUVYVDERMA8GA1UEKgwISk9TRS1FWFQxEjAQBgNVBAUTCTA3NTUzMTcy\nSDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA2uew6RsZvsGoYsXSroM/W1N7\nT7U2xamMNaCsS1fuhuUMl11tztqzSUqOl1MrR3jqcnLEZ709uooVdz7EHb+G+cP4\nXJqBDqDsKFdd+2twPkjtweBwlIdy3yLmYqneYfKihxd8Sn3nOrKuGGQ6Dy7RXkGA\nopi+kBdLiMdf4AI3p/ECAwEAAaOCAYcwggGDMGsGA1UdIwRkMGKAFDZtfBv+nmb6\n1fT0rDpi7IQnA3QvoUKkQDA+MSwwKgYDVQQDDCNWb3RpbmcgU3lzdGVtIENlcnRp\nZmljYXRlIEF1dGhvcml0eTEOMAwGA1UECwwFQ2VydHOCBgFQFMulKjAdBgNVHQ4E\nFgQUoJya1Wd2DoKmBhpDoXbhnBfr6DcwDAYDVR0TAQH/BAIwADAOBgNVHQ8BAf8E\nBAMCBaAwgdYGCQAAAAAAAAAABAEB/wSBxaSBwgyBv3siZGV2aWNlSWQiOiJDOC0w\nQS1BOS1BQi00Ny1CRSIsImRldmljZU5hbWUiOiJhY2VyLWplc3NpZSIsImVtYWls\nIjoibWFpbC1leHRAZ21haWwuZXMiLCJtb2JpbGVQaG9uZSI6IjU1NTU1Iiwibmlm\nIjoiMDc1NTMxNzJIIiwiZ2l2ZW5uYW1lIjoiSk9TRS1FWFQiLCJzdXJuYW1lIjoi\nR0FSQ0lBLUVYVCIsImRldmljZVR5cGUiOiJQQyJ9MA0GCSqGSIb3DQEBBQUAA4GB\nADnqkphtDcpUiOWtk5m86Hk6/d8AhB+mpilBVQLctlAh6sKN4DH5PHDel+9vW/lo\nzvZ9JJD/gAPo2HSecwwqTtFAOGLCxdiMLJxSJSC+KiWIRwfHS+ZsqoAp4nDpae80\n5zXDaUsq5dOWNrqAGLL4AxBk3ncdVx6lI8esXSh6d8p8\n-----END CERTIFICATE-----\n"
-      }
-    ],
-    "certCollection": [],
-    "firstName": "JOSE-EXT",
-    "lastName": "GARCIA-EXT",
-    "nif": "07553172H",
-    "iban": "ES4678788989450000000002"
-  }
+  "serviceURL": "http://currency:8080/CurrencyServer/currency/request",
+  "signedMessageSubject": "retirada de efectivo",
+  "jsonStr": "{\"operation\":\"CURRENCY_REQUEST\",\"amount\":\"123\",\"timeLimited\":false,\"currencyCode\":\"EUR\",\"tags\":[\"WILDTAG\"]}"
 }

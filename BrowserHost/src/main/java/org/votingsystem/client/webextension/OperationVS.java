@@ -286,7 +286,7 @@ public class OperationVS implements PasswordDialog.Listener {
     @Override
     public void processPassword(char[] password) {
         this.password = password;
-        if(password == null) {
+        if(password == null && CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
             processResult(new ResponseVS(ResponseVS.SC_CANCELED, ContextVS.getMessage("operationCancelledMsg")));
             BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
         } else {

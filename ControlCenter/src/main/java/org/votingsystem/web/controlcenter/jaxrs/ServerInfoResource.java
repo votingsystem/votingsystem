@@ -4,7 +4,6 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
-import org.votingsystem.web.util.MessagesVS;
 
 import javax.ejb.EJB;
 import javax.inject.Inject;
@@ -26,10 +25,9 @@ import java.util.logging.Logger;
 @Path("/serverInfo")
 public class ServerInfoResource {
 
+    private static final Logger log = Logger.getLogger(ServerInfoResource.class.getSimpleName());
 
     @Inject ConfigVS config;
-    @Inject Logger log;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
     @EJB SignatureBean signatureBean;
     @EJB TimeStampBean timeStampBean;
 
