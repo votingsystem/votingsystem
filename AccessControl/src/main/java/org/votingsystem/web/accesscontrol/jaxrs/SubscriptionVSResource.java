@@ -27,7 +27,7 @@ import static java.text.MessageFormat.format;
 @Path("/subscriptionVS")
 public class SubscriptionVSResource {
 
-    private static final Logger log = Logger.getLogger(SubscriptionVSResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(SubscriptionVSResource.class.getName());
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;

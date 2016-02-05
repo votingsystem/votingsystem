@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  */
 public class MultipartRequestVS {
 
-    private final static Logger log = Logger.getLogger(MultipartRequestVS.class.getSimpleName());
+    private final static Logger log = Logger.getLogger(MultipartRequestVS.class.getName());
 
     public enum Type {CURRENCY_REQUEST, ACCESS_REQUEST, ANONYMOUS_DELEGATION, ANONYMOUS_DELEGATION_CANCELATION}
     private SMIMEMessage smime;

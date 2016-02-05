@@ -54,7 +54,7 @@ import static java.text.MessageFormat.format;
 @Path("/transactionVS")
 public class TransactionVSResource {
 
-    private static final Logger log = Logger.getLogger(TransactionVSResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(TransactionVSResource.class.getName());
 
     @Inject UserVSBean serVSBean;
     @Inject TransactionVSBean transactionVSBean;

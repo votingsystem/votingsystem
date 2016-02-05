@@ -40,7 +40,7 @@ import static java.text.MessageFormat.format;
 @Stateless
 public class RepresentativeDelegationBean {
 
-    private static final Logger log = Logger.getLogger(RepresentativeDelegationBean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(RepresentativeDelegationBean.class.getName());
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;

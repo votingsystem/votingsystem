@@ -49,7 +49,7 @@ import static java.text.MessageFormat.format;
 @Singleton
 public class SignatureBean {
 
-    private static Logger log = Logger.getLogger(SignatureBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SignatureBean.class.getName());
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;

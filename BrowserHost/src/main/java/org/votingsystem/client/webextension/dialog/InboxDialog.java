@@ -28,7 +28,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class InboxDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(InboxDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(InboxDialog.class.getName());
 
     @FXML private VBox mainPane;
     @FXML private ListView<InboxMessage> messageListView;

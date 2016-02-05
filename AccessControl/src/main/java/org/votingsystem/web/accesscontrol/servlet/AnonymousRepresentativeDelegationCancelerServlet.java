@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 @MultipartConfig(location="/tmp", fileSizeThreshold=1024*1024, maxFileSize=1024*1024*50, maxRequestSize=1024*1024*5*50)
 public class AnonymousRepresentativeDelegationCancelerServlet extends HttpServlet {
 
-    private final static Logger log = Logger.getLogger(AnonymousRepresentativeDelegationCancelerServlet.class.getSimpleName());
+    private final static Logger log = Logger.getLogger(AnonymousRepresentativeDelegationCancelerServlet.class.getName());
 
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;

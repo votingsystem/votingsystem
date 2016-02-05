@@ -37,7 +37,7 @@ import static org.votingsystem.client.webextension.BrowserHost.showMessage;
  */
 public class WebSocketService extends Service<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(WebSocketService.class.getSimpleName());
+    private static Logger log = Logger.getLogger(WebSocketService.class.getName());
 
     public static final String SSL_ENGINE_CONFIGURATOR = "org.glassfish.tyrus.client.sslEngineConfigurator";
 

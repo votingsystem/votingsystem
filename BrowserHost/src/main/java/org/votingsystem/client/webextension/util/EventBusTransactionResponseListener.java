@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  */
 public class EventBusTransactionResponseListener {
 
-    private static Logger log = Logger.getLogger(EventBusTransactionResponseListener.class.getSimpleName());
+    private static Logger log = Logger.getLogger(EventBusTransactionResponseListener.class.getName());
 
     @Subscribe
     public void call(SocketMessageDto socketMsg) {

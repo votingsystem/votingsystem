@@ -29,7 +29,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 })
 public class MessageSMIME extends EntityVS implements Serializable {
 
-    private static Logger log = Logger.getLogger(MessageSMIME.class.getSimpleName());
+    private static Logger log = Logger.getLogger(MessageSMIME.class.getName());
 
     private static final long serialVersionUID = 1L;
 

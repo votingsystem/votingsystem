@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class ProgressDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(ProgressDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(ProgressDialog.class.getName());
 
 
     public ProgressDialog(Task<ResponseVS> progressTask) {

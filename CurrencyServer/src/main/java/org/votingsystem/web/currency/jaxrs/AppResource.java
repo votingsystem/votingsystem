@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 @Path("/app")
 public class AppResource {
 
-    private static final Logger log = Logger.getLogger(AppResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(AppResource.class.getName());
 
     @Inject DashBoardBean dashBoardBean;
 

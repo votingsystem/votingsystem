@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 @Stateless
 public class TagVSBean {
 
-    private static final Logger log = Logger.getLogger(TagVSBean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(TagVSBean.class.getName());
 
     @Inject DAOBean dao;
 

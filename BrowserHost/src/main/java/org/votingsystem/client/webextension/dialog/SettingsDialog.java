@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  */
 public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Listener {
 
-    private static Logger log = Logger.getLogger(SettingsDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SettingsDialog.class.getName());
 
 
     private KeyStore selectedKeyStore;

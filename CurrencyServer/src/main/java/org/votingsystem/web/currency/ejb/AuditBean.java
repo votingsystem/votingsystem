@@ -42,7 +42,7 @@ import static java.text.MessageFormat.format;
 @Stateless
 public class AuditBean {
 
-    private static Logger log = Logger.getLogger(AuditBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(AuditBean.class.getName());
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;

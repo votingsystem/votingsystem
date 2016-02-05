@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 */
 public class Formatter {
     
-    private static Logger log = Logger.getLogger(Formatter.class.getSimpleName());
+    private static Logger log = Logger.getLogger(Formatter.class.getName());
 
     private static final int INDENT_FACTOR = 7;
 

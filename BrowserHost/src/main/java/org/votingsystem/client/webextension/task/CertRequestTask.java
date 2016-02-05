@@ -24,7 +24,7 @@ import static org.votingsystem.util.ContextVS.SIGN_MECHANISM;
 
 public class CertRequestTask extends Task<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(CertRequestTask.class.getSimpleName());
+    private static Logger log = Logger.getLogger(CertRequestTask.class.getName());
 
     private char[] password;
     private OperationVS operationVS;

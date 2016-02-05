@@ -9,5 +9,5 @@ import java.util.logging.Logger;
 @Path("/subscriptionVS")
 public class SubscriptionVSResource {
 
-    private static final Logger log = Logger.getLogger(SubscriptionVSResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(SubscriptionVSResource.class.getName());
 }

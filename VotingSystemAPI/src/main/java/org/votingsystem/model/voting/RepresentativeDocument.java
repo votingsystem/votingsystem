@@ -18,7 +18,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Table(name="RepresentativeDocument")
 public class RepresentativeDocument  extends EntityVS implements Serializable {
 
-    private static Logger log = Logger.getLogger(RepresentativeDocument.class.getSimpleName());
+    private static Logger log = Logger.getLogger(RepresentativeDocument.class.getName());
 
     private static final long serialVersionUID = 1L;
 

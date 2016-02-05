@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 @Path("/representative")
 public class RepresentativeResource {
 
-    private static final Logger log = Logger.getLogger(RepresentativeResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(RepresentativeResource.class.getName());
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;

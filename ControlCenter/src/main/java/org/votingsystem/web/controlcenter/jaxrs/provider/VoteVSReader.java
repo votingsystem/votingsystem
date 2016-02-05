@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 @Consumes(MediaTypeVS.VOTE)
 public class VoteVSReader implements MessageBodyReader<SMIMEDto> {
 
-    private static final Logger log = Logger.getLogger(VoteVSReader.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(VoteVSReader.class.getName());
 
     @Inject SignatureBean signatureBean;
 

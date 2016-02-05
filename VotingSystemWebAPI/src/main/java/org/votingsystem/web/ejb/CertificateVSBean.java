@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 @Stateless
 public class CertificateVSBean {
 
-    private static final Logger log = Logger.getLogger(CertificateVSBean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(CertificateVSBean.class.getName());
 
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;

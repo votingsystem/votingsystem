@@ -51,7 +51,7 @@ import java.util.logging.Logger;
 @Path("/groupVS")
 public class GroupVSResource {
 
-    private static final Logger log = Logger.getLogger(GroupVSResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(GroupVSResource.class.getName());
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;

@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 @Path("/currencyAccount")
 public class CurrencyAccountResource {
 
-    private static final Logger log = Logger.getLogger(CurrencyAccountResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(CurrencyAccountResource.class.getName());
 
     @Inject ConfigVS app;
     @Inject DAOBean dao;

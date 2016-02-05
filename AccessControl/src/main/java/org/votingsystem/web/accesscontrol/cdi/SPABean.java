@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 @AccessTimeout(value = 10, unit = TimeUnit.MINUTES)
 public class SPABean implements Serializable {
 
-    private static final Logger log = Logger.getLogger(SPABean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(SPABean.class.getName());
 
     public String getUUID() {
         return UUID.randomUUID().toString();

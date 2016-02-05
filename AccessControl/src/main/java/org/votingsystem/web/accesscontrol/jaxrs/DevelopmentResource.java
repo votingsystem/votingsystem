@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 @SessionScoped
 public class DevelopmentResource implements Serializable {
 
-    private static final Logger log = Logger.getLogger(DevelopmentResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(DevelopmentResource.class.getName());
 
     @EJB ConfigVS config;
     @EJB SubscriptionVSBean subscriptionVSBean;

@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 @Path("/serverInfo")
 public class ServerInfoResource {
 
-    private static final Logger log = Logger.getLogger(ServerInfoResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(ServerInfoResource.class.getName());
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;

@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class BackupValidatorPane extends VBox implements ValidatorListener<ValidationEvent> {
 
-    private static Logger log = Logger.getLogger(BackupValidatorPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(BackupValidatorPane.class.getName());
 
     private java.util.List<String> errorList;
     private MetaInf metaInf;

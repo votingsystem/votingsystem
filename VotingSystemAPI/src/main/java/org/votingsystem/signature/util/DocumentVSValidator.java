@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  */
 public class DocumentVSValidator {
 
-    private static Logger log = Logger.getLogger(DocumentVSValidator.class.getSimpleName());
+    private static Logger log = Logger.getLogger(DocumentVSValidator.class.getName());
 
     //{"operation":"SEND_VOTE","optionSelectedId":2,"UUID":"cfbeec4a-f87c-4e4f-b442-4b127259fbd5",
     //"optionSelectedContent":"option A","eventURL":"http://sistemavotacion.org/AccessControl/eventVSElection/1"}

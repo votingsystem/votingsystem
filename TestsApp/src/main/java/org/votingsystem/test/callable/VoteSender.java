@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 */
 public class VoteSender implements Callable<ResponseVS> {
     
-    private static Logger log = Logger.getLogger(VoteSender.class.getSimpleName());
+    private static Logger log = Logger.getLogger(VoteSender.class.getName());
    
     private VoteVSHelper voteVSHelper;
         

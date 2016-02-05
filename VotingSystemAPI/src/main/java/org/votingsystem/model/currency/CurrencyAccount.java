@@ -36,7 +36,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 })
 public class CurrencyAccount extends EntityVS implements Serializable {
 
-    private static Logger log = Logger.getLogger(CurrencyAccount.class.getSimpleName());
+    private static Logger log = Logger.getLogger(CurrencyAccount.class.getName());
 
     public enum State {ACTIVE, SUSPENDED, CANCELED}
 

@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 public class SendSMIMETask extends Task<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(SendSMIMETask.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SendSMIMETask.class.getName());
 
     private String[] headers;
     private char[] password;

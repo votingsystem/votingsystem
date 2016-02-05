@@ -35,7 +35,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 	tokenizer =  @TokenizerDef(factory = StandardTokenizerFactory.class))*/
 public class EventVS extends EntityVS implements Serializable {
 
-    private static Logger log = Logger.getLogger(EventVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(EventVS.class.getName());
 
     private static final long serialVersionUID = 1L;
 

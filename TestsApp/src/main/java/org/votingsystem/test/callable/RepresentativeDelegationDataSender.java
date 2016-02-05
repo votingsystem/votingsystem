@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 */
 public class RepresentativeDelegationDataSender implements Callable<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(RepresentativeDelegationDataSender.class.getSimpleName());
+    private static Logger log = Logger.getLogger(RepresentativeDelegationDataSender.class.getName());
     
     private String userNIF;
     private String representativeNIF;

@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  */
 public class HTMLPane extends VBox{
 
-    private static Logger log = Logger.getLogger(HTMLPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(HTMLPane.class.getName());
 
     private WebView webView;
 

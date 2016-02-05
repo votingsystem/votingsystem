@@ -33,7 +33,7 @@ import static java.text.MessageFormat.format;
 @Path("/encryptor")
 public class EncryptorResource {
 
-    private static final Logger log = Logger.getLogger(EncryptorResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(EncryptorResource.class.getName());
 
     @Inject ConfigVS config;
     @Inject SignatureBean signatureBean;

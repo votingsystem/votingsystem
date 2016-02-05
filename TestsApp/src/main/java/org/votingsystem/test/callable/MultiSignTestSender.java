@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class MultiSignTestSender implements Callable<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(MultiSignTestSender.class.getSimpleName());
+    private static Logger log = Logger.getLogger(MultiSignTestSender.class.getName());
 
     private String nif;
     private String serverURL = null;

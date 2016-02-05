@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 public class SimulationDataTask extends Task {
 
-    Logger log =  Logger.getLogger(SimulationDataTask.class.getSimpleName());
+    Logger log =  Logger.getLogger(SimulationDataTask.class.getName());
 
     SimulationData simulationData;
 

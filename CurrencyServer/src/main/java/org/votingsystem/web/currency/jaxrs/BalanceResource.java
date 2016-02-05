@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 @Path("/balance")
 public class BalanceResource {
 
-    private static Logger log = Logger.getLogger(BalanceResource.class.getSimpleName());
+    private static Logger log = Logger.getLogger(BalanceResource.class.getName());
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;

@@ -46,7 +46,7 @@ import static java.text.MessageFormat.format;
 @Stateless
 public class CurrencyBean {
 
-    private static Logger log = Logger.getLogger(CurrencyBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(CurrencyBean.class.getName());
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;

@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 @Path("/csr")
 public class CSRResource {
 
-    private static final Logger log = Logger.getLogger(CSRResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(CSRResource.class.getName());
 
     @Inject CSRBean csrBean;
     @Inject DAOBean dao;

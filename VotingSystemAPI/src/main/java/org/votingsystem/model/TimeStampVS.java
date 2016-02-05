@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 @Table(name="TimeStampVS")
 public class TimeStampVS extends EntityVS implements Serializable {
 
-    private static Logger log = Logger.getLogger(TimeStampVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TimeStampVS.class.getName());
 	
 	private static final long serialVersionUID = 1L;
 	

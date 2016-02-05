@@ -32,7 +32,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Table(name="VoteVS")
 public class VoteVS extends EntityVS implements Serializable {
 
-    private static Logger log = Logger.getLogger(VoteVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(VoteVS.class.getName());
 
     public enum State{OK, CANCELED, ERROR}
 

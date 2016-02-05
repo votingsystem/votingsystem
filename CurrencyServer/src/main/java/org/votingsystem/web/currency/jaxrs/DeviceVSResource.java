@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 @Path("/deviceVS")
 public class DeviceVSResource {
 
-    private static final Logger log = Logger.getLogger(DeviceVSResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(DeviceVSResource.class.getName());
 
     @Inject DAOBean dao;
 

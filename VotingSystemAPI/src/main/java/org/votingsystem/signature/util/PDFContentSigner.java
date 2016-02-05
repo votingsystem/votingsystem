@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 */
 public class PDFContentSigner extends CMSSignedGenerator implements ContentSignerVS {
    
-    private static Logger log = Logger.getLogger(PDFContentSigner.class.getSimpleName());
+    private static Logger log = Logger.getLogger(PDFContentSigner.class.getName());
 
     public static String CERT_STORE_TYPE = "Collection";
             

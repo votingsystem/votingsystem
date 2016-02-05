@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 public class RenameFileExtensions {
 
-    private static Logger log = Logger.getLogger(RenameFileExtensions.class.getSimpleName());
+    private static Logger log = Logger.getLogger(RenameFileExtensions.class.getName());
 
     private static final String basePath = "/home/jgzornoza/github/votingsystem/ControlCenter/src/main/webapp";
     private static final String old_extension = ".vsp";

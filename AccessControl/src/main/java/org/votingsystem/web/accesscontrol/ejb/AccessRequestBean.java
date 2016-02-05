@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 @Stateless
 public class AccessRequestBean {
 
-    private static Logger log = Logger.getLogger(AccessRequestBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(AccessRequestBean.class.getName());
 
     @Inject DAOBean dao;
     @Inject CSRBean csrBean;

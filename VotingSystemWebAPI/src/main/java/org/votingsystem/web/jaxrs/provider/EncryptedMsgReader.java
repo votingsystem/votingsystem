@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 @Consumes(MediaTypeVS.ENCRYPTED)
 public class EncryptedMsgReader implements MessageBodyReader<EncryptedMsgDto> {
 
-    private static final Logger log = Logger.getLogger(EncryptedMsgReader.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(EncryptedMsgReader.class.getName());
 
     @Inject SignatureBean signatureBean;
 

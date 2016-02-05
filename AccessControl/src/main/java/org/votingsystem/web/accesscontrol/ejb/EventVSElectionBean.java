@@ -34,7 +34,7 @@ import static java.text.MessageFormat.format;
 @Stateless
 public class EventVSElectionBean {
 
-    private static final Logger log = Logger.getLogger(EventVSElectionBean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(EventVSElectionBean.class.getName());
 
     @Inject EventVSBean eventVSBean;
     @Inject ConfigVS config;

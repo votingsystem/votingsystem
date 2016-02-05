@@ -34,7 +34,7 @@ import static java.text.MessageFormat.format;
 
 public class SignatureService {
 
-    private static Logger log = Logger.getLogger(SignatureService.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SignatureService.class.getName());
 
     private static ConcurrentHashMap<String, SignatureService> signatureServices	= new ConcurrentHashMap<>();
 

@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 */
 public class CertUtils {
 
-    private static Logger log = java.util.logging.Logger.getLogger(CertUtils.class.getSimpleName());
+    private static Logger log = java.util.logging.Logger.getLogger(CertUtils.class.getName());
 
 
     /**

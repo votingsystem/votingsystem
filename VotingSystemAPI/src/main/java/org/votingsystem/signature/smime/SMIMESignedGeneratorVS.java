@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 */
 public class SMIMESignedGeneratorVS {
 
-    private static Logger log = Logger.getLogger(SMIMESignedGeneratorVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SMIMESignedGeneratorVS.class.getName());
     
     private SMIMESignedGenerator smimeSignedGenerator = null;
     private PrivateKey key;

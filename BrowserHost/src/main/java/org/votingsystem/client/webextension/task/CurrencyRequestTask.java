@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 public class CurrencyRequestTask extends Task<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(CurrencyRequestTask.class.getSimpleName());
+    private static Logger log = Logger.getLogger(CurrencyRequestTask.class.getName());
 
     private char[] password;
     private OperationVS operationVS;

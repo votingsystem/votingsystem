@@ -34,7 +34,7 @@ public class UserDeviceSelectorDialog extends DialogVS {
         public void setSelectedDevice(DeviceVSDto device);
     }
 
-    private static Logger log = Logger.getLogger(UserDeviceSelectorDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(UserDeviceSelectorDialog.class.getName());
 
     @FXML private VBox mainPane;
     @FXML private Button acceptButton;

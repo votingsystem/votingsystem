@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 @Provider
 public class ExceptionMapperVS implements ExceptionMapper<Exception> {
 
-    private static final Logger log = Logger.getLogger(ExceptionMapperVS.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(ExceptionMapperVS.class.getName());
 
     @Inject DAOBean dao;
 

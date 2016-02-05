@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class SignDocumentFormPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(SignDocumentFormPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SignDocumentFormPane.class.getName());
 
     public enum Operation {SEND_SMIME, SIGN_SMIME}
 

@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  */
 public class TestUtils {
 
-    private static Logger log =  Logger.getLogger(TestUtils.class.getSimpleName());
+    private static Logger log =  Logger.getLogger(TestUtils.class.getName());
 
     private static ConcurrentHashMap<Long, UserVSDto> userVSMap = new ConcurrentHashMap<>();
 

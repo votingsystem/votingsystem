@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  */
 public class WebSocketAuthenticatedService {
 
-    private static Logger log = Logger.getLogger(WebSocketAuthenticatedService.class.getSimpleName());
+    private static Logger log = Logger.getLogger(WebSocketAuthenticatedService.class.getName());
 
     public static final String SSL_ENGINE_CONFIGURATOR = "org.glassfish.tyrus.client.sslEngineConfigurator";
 

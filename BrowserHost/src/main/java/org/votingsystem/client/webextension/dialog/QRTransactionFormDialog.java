@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  */
 public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.Listener {
 
-    private static Logger log = Logger.getLogger(QRTransactionFormDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(QRTransactionFormDialog.class.getName());
 
     @FXML private Label tagLbl;
     @FXML private Label userNameLbl;

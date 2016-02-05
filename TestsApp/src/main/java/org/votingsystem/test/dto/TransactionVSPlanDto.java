@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TransactionVSPlanDto {
 
-    private static Logger log = Logger.getLogger(TransactionVSPlanDto.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TransactionVSPlanDto.class.getName());
 
 
     private Interval timePeriod;

@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 @Provider
 public class RestFilterVS implements ContainerRequestFilter {
 
-    private static final Logger log = Logger.getLogger(RestFilterVS.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(RestFilterVS.class.getName());
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {

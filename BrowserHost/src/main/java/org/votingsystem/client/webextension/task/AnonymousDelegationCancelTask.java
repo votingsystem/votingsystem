@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 
 public class AnonymousDelegationCancelTask extends Task<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(AnonymousDelegationCancelTask.class.getSimpleName());
+    private static Logger log = Logger.getLogger(AnonymousDelegationCancelTask.class.getName());
 
     private char[] password;
     private OperationVS operationVS;

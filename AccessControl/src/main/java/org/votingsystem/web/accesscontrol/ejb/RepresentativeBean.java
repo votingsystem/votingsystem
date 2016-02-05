@@ -40,7 +40,7 @@ import static java.text.MessageFormat.format;
 @Stateless
 public class RepresentativeBean {
 
-    private static final Logger log = Logger.getLogger(RepresentativeBean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(RepresentativeBean.class.getName());
 
     enum State {WITHOUT_ACCESS_REQUEST, WITH_ACCESS_REQUEST, WITH_VOTE}
 

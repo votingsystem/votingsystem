@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 @Stateless
 public class TransactionVSGroupVSBean {
 
-    private static Logger log = Logger.getLogger(TransactionVSGroupVSBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TransactionVSGroupVSBean.class.getName());
 
     @Inject SignatureBean signatureBean;
     @Inject WalletBean walletBean;

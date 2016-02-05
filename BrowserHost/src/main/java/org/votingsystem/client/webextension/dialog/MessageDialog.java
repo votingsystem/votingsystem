@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  */
 public class MessageDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(MessageDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(MessageDialog.class.getName());
 
     private static String webViewContent = "<html style='font-size:1.1em; font-weight: bold; background: #f9f9f9;" +
             "font-family:arial, helvetica, sans-serif;border-radius: 5px;padding: 5px;'>%s</html>";

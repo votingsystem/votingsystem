@@ -34,7 +34,7 @@ import static java.text.MessageFormat.format;
 @Stateless
 public class VoteVSBean {
 
-    private static Logger log = Logger.getLogger(VoteVSBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(VoteVSBean.class.getName());
 
     private final Queue<MessageSMIME> pendingVotes = new ConcurrentLinkedQueue<>();
 

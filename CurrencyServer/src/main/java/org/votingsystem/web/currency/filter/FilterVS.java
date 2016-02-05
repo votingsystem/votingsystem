@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 @WebFilter(urlPatterns = {"/*"}, asyncSupported=true)
 public class FilterVS implements Filter {
 
-    private static final Logger log = Logger.getLogger(FilterVS.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(FilterVS.class.getName());
 
     private ServletContext servletContext;
     @Inject ConfigVS config;

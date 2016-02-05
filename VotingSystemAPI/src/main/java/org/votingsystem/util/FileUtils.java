@@ -23,7 +23,7 @@ import java.util.zip.ZipOutputStream;
  */
 public class FileUtils {
 
-    private static Logger log = Logger.getLogger(FileUtils.class.getSimpleName());
+    private static Logger log = Logger.getLogger(FileUtils.class.getName());
 
     private static final int  BUFFER_SIZE = 4096;
 

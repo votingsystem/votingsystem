@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MetaInf {
     
-    private static Logger log = Logger.getLogger(MetaInf.class.getSimpleName());
+    private static Logger log = Logger.getLogger(MetaInf.class.getName());
 
     private Long id;
     private Date dateFinish;

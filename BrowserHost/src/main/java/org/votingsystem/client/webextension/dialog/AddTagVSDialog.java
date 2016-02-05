@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  */
 public class AddTagVSDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(AddTagVSDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(AddTagVSDialog.class.getName());
 
     public interface Listener {
         public void addTagVS(String tagName);

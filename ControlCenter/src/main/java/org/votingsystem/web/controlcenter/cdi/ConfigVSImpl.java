@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 @Startup
 public class ConfigVSImpl implements ConfigVS {
 
-    private static final Logger log = Logger.getLogger(ConfigVSImpl.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(ConfigVSImpl.class.getName());
 
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;

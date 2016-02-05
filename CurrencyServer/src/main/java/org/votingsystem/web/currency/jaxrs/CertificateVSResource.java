@@ -41,7 +41,7 @@ import java.util.logging.Logger;
 @Path("/certificateVS")
 public class CertificateVSResource {
 
-    private static final Logger log = Logger.getLogger(CertificateVSResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(CertificateVSResource.class.getName());
 
     @Inject ConfigVS app;
     @Inject DAOBean dao;

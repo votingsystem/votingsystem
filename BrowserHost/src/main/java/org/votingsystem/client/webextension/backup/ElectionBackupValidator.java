@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 */
 public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
     
-    private static Logger log = Logger.getLogger(ElectionBackupValidator.class.getSimpleName());
+    private static Logger log = Logger.getLogger(ElectionBackupValidator.class.getName());
 
     private ValidatorListener validatorListener = null;
     private File backupDir = null;

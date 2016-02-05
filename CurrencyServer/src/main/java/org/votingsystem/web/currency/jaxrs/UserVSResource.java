@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 @Path("/userVS")
 public class UserVSResource {
 
-    private static final Logger log = Logger.getLogger(UserVSResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(UserVSResource.class.getName());
 
     @Inject TransactionVSBean transactionVSBean;
     @Inject GroupVSBean groupVSBean;

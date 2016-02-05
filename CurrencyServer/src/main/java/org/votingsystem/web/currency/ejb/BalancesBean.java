@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 @Stateless
 public class BalancesBean {
 
-    private static Logger log = Logger.getLogger(BalancesBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(BalancesBean.class.getName());
 
     @Inject ConfigVS config;
     @Inject GroupVSBean groupVSBean;

@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 */
 public class StringUtils {
 	
-    private static Logger log = Logger.getLogger(StringUtils.class.getSimpleName());
+    private static Logger log = Logger.getLogger(StringUtils.class.getName());
 
     private static final String ALPHA_NUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 

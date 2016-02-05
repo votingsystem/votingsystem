@@ -53,7 +53,7 @@ import java.util.logging.Logger;
  */
 public class SMIMEMessage extends MimeMessage {
 
-    private static Logger log = Logger.getLogger(SMIMEMessage.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SMIMEMessage.class.getName());
 
     public static final String CONTENT_TYPE_VS = "CONTENT_TYPE_VS";
 

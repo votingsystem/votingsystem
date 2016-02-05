@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  */
 public class WalletDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(WalletDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(WalletDialog.class.getName());
 
     private static WalletDialog INSTANCE;
     private WalletPane walletPane;

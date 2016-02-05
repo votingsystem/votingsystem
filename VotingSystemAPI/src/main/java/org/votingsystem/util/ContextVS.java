@@ -40,7 +40,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class ContextVS {
 
-    private static Logger log = Logger.getLogger(ContextVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(ContextVS.class.getName());
 
     public static Session MAIL_SESSION = Session.getDefaultInstance(System.getProperties(), null);
 

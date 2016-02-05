@@ -38,7 +38,7 @@ public class MobileSelectorDialog extends DialogVS {
         public void cancelSelection();
     }
 
-    private static Logger log = Logger.getLogger(MobileSelectorDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(MobileSelectorDialog.class.getName());
 
     @FXML private VBox mainPane;
     @FXML private Button acceptButton;

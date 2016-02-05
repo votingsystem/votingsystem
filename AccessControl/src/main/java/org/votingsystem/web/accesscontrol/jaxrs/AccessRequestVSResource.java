@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 @Path("/accessRequestVS")
 public class AccessRequestVSResource {
 
-    private static Logger log = Logger.getLogger(AccessRequestVSResource.class.getSimpleName());
+    private static Logger log = Logger.getLogger(AccessRequestVSResource.class.getName());
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;

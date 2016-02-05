@@ -40,7 +40,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Table(name="Currency")
 public class Currency extends EntityVS implements Serializable  {
 
-    private static Logger log = Logger.getLogger(Currency.class.getSimpleName());
+    private static Logger log = Logger.getLogger(Currency.class.getName());
 
     public static final long serialVersionUID = 1L;
 

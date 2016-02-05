@@ -30,7 +30,7 @@ import java.util.zip.ZipInputStream;
  */
 public class DocumentBrowserDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(DocumentBrowserDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(DocumentBrowserDialog.class.getName());
 
     private static DocumentBrowserDialog INSTANCE;
     private static DocumentBrowserPane documentBrowserPane;

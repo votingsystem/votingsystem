@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 
 public class VoteTask extends Task<Void> {
 
-    private static Logger log = Logger.getLogger(VoteTask.class.getSimpleName());
+    private static Logger log = Logger.getLogger(VoteTask.class.getName());
 
     private char[] password;
     private OperationVS operationVS;

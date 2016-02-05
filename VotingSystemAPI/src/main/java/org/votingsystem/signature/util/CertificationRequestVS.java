@@ -41,7 +41,7 @@ public class CertificationRequestVS implements java.io.Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    private static Logger log = Logger.getLogger(CertificationRequestVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(CertificationRequestVS.class.getName());
 
     private transient PKCS10CertificationRequest csr;
     private transient SMIMESignedGeneratorVS SMIMESignedGeneratorVS;

@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class SMIMESignedValidator { 
     
-    private static Logger log = Logger.getLogger(SMIMESignedValidator.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SMIMESignedValidator.class.getName());
     
     /**
      * verify that the sig is correct and that it was generated when the 

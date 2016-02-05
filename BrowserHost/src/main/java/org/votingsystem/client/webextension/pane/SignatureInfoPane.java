@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  */
 public class SignatureInfoPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(SignatureInfoPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SignatureInfoPane.class.getName());
 
     private UserVS signer;
     private String signatureAlgorithmValue = null;

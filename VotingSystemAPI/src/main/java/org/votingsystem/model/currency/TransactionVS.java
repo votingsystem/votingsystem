@@ -50,7 +50,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 })
 public class TransactionVS implements Serializable {
 
-    private static Logger log = Logger.getLogger(TransactionVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TransactionVS.class.getName());
     
     public static final long serialVersionUID = 1L;
 

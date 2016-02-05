@@ -32,7 +32,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 })
 public class ActorVS extends EntityVS implements Serializable {
 
-    private static Logger log = Logger.getLogger(ActorVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(ActorVS.class.getName());
 
     public static final long serialVersionUID = 1L;
 

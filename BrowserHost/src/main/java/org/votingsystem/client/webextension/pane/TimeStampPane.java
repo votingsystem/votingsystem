@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  */
 public class TimeStampPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(TimeStampPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TimeStampPane.class.getName());
 
     public TimeStampPane(final TimeStampToken timeStampToken) {
         setPadding(new Insets(10, 10 , 10, 10));

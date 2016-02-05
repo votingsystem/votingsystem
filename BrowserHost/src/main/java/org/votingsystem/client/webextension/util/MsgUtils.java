@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  */
 public class MsgUtils {
 
-    private static Logger log = Logger.getLogger(MsgUtils.class.getSimpleName());
+    private static Logger log = Logger.getLogger(MsgUtils.class.getName());
 
     public static String getCurrencyChangeWalletMsg(SocketMessageDto messageDto) throws Exception {
         Map<String, BigDecimal> currencyMap = MapUtils.getCurrencyMap(messageDto.getCurrencySet());

@@ -9,7 +9,7 @@ import java.util.logging.Logger;
  */
 public class SocketConfigurator extends ServerEndpointConfig.Configurator {
 
-    private static Logger log = Logger.getLogger(SocketConfigurator.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SocketConfigurator.class.getName());
 
     @Override public boolean checkOrigin(String originHeaderValue) {
         return true;

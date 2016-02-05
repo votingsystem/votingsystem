@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  */
 public class InboxMessageRow {
 
-    private static Logger log = Logger.getLogger(InboxMessageRow.class.getSimpleName());
+    private static Logger log = Logger.getLogger(InboxMessageRow.class.getName());
 
     public static final int TRUNCATED_MSG_SIZE = 80; //chars
 

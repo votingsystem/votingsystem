@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class DecoratedPane extends VBox {
 
-    private static Logger log = Logger.getLogger(DecoratedPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(DecoratedPane.class.getName());
 
     private FullScreenHelper fullScreenHelper;
     private Label captionLbl;

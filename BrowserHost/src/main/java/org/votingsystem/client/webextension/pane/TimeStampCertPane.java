@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  */
 public class TimeStampCertPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(TimeStampCertPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TimeStampCertPane.class.getName());
 
     private X509Certificate certificate;
 

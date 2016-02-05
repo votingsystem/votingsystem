@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 */
 public class MessageTimeStamper implements Callable<SMIMEMessage> {
     
-    private static Logger log = Logger.getLogger(MessageTimeStamper.class.getSimpleName());
+    private static Logger log = Logger.getLogger(MessageTimeStamper.class.getName());
     
     private SMIMEMessage smimeMessage;
     private TimeStampToken timeStampToken;

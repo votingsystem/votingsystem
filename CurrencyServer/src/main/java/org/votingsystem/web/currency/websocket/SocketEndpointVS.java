@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 @ServerEndpoint(value = "/websocket/service", configurator = SocketConfigurator.class)
 public class SocketEndpointVS {
 
-    private static Logger log = Logger.getLogger(SocketEndpointVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SocketEndpointVS.class.getName());
 
     private MessagesVS messages = null;
     @Inject WebSocketBean webSocketBean;

@@ -21,7 +21,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @DiscriminatorValue("BatchVS")
 public class BatchVS extends EntityVS implements Serializable  {
 
-    private static Logger log = Logger.getLogger(BatchVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(BatchVS.class.getName());
 
     public static final long serialVersionUID = 1L;
 

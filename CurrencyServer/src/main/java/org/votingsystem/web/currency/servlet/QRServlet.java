@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 @WebServlet("/qr")
 public class QRServlet extends HttpServlet {
 
-    private final static Logger log = Logger.getLogger(QRServlet.class.getSimpleName());
+    private final static Logger log = Logger.getLogger(QRServlet.class.getName());
 
 
     @Override

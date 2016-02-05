@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CurrencyRequestDto {
 
-    private static Logger log = Logger.getLogger(CurrencyRequestDto.class.getSimpleName());
+    private static Logger log = Logger.getLogger(CurrencyRequestDto.class.getName());
 
     private TypeVS operation = TypeVS.CURRENCY_REQUEST;
     private String subject;

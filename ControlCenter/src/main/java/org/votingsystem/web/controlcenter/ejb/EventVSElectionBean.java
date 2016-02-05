@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 @Stateless
 public class EventVSElectionBean {
 
-    private static final Logger log = Logger.getLogger(EventVSElectionBean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(EventVSElectionBean.class.getName());
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;

@@ -58,7 +58,7 @@ import java.util.logging.Logger;
  */
 public class Utils {
 
-    private static Logger log = Logger.getLogger(Utils.class.getSimpleName());
+    private static Logger log = Logger.getLogger(Utils.class.getName());
 
     public static final String APPLICATION_ICON = "mail-mark-unread.png";
 

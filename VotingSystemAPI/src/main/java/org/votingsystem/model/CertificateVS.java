@@ -35,7 +35,7 @@ public class CertificateVS extends EntityVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static Logger log = Logger.getLogger(CertificateVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(CertificateVS.class.getName());
 
     public enum State {OK, ERROR, CANCELED, USED, LAPSED, UNKNOWN}
 

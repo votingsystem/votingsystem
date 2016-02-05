@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 @Stateless
 public class MailBean {
 
-    private static Logger log = Logger.getLogger(MailBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(MailBean.class.getName());
 
     @Resource(name = "java:jboss/mail/gmail")
     private Session session;

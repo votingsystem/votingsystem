@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  */
 public class PasswordDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(PasswordDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(PasswordDialog.class.getName());
 
     public interface Listener {
         public void processPassword(char[] password);

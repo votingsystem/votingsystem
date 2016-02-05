@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 @Path("/messageSMIME")
 public class MessageSMIMEResource {
 
-    private static final Logger log = Logger.getLogger(MessageSMIMEResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(MessageSMIMEResource.class.getName());
 
     private static final List<TypeVS> anonymousTransaction = Arrays.asList(TypeVS.CURRENCY_SEND, TypeVS.CURRENCY_CHANGE);
 

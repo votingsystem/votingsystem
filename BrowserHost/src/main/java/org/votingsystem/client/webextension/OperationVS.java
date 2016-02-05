@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationVS implements PasswordDialog.Listener {
 
-    private static Logger log = Logger.getLogger(OperationVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(OperationVS.class.getName());
 
     private TypeVS operation;
     private Integer statusCode;

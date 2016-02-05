@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 
 public class TestsApp extends Application {
 
-    Logger log =  Logger.getLogger(TestsApp.class.getSimpleName());
+    Logger log =  Logger.getLogger(TestsApp.class.getName());
 
     private static final TestsApp INSTANCE = new TestsApp();
     private static SimulationData simulationData;

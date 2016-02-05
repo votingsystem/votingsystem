@@ -19,7 +19,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity @Table(name="MessageVS")
 public class MessageVS extends EntityVS implements Serializable {
 
-    private static Logger log = Logger.getLogger(MessageVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(MessageVS.class.getName());
 
     private static final long serialVersionUID = 1L;
 

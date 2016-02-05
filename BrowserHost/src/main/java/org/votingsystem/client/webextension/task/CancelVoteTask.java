@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 public class CancelVoteTask extends Task<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(CancelVoteTask.class.getSimpleName());
+    private static Logger log = Logger.getLogger(CancelVoteTask.class.getName());
 
     private char[] password;
     private OperationVS operationVS;

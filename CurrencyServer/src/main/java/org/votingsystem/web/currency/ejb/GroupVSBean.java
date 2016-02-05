@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 @Stateless
 public class GroupVSBean {
 
-    private static Logger log = Logger.getLogger(GroupVSBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(GroupVSBean.class.getName());
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;

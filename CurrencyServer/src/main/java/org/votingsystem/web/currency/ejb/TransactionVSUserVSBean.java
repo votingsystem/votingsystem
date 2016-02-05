@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 @Stateless
 public class TransactionVSUserVSBean {
 
-    private static Logger log = Logger.getLogger(TransactionVSUserVSBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TransactionVSUserVSBean.class.getName());
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;

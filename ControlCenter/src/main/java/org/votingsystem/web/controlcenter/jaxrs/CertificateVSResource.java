@@ -41,7 +41,7 @@ import static java.text.MessageFormat.format;
 @Path("/certificateVS")
 public class CertificateVSResource {
 
-    private static final Logger log = Logger.getLogger(CertificateVSResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(CertificateVSResource.class.getName());
 
 
     @Inject ConfigVS app;

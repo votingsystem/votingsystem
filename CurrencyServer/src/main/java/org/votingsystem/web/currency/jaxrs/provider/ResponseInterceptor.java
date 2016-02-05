@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 @Provider
 public class ResponseInterceptor implements WriterInterceptor{
 
-    private static final Logger log = Logger.getLogger(ResponseInterceptor.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(ResponseInterceptor.class.getName());
 
     @Override
     public void aroundWriteTo(WriterInterceptorContext context) throws IOException, WebApplicationException {

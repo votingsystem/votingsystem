@@ -26,7 +26,7 @@ import java.util.logging.Level;
 @WebServlet("/timestamp")
 public class TimeStampServlet extends HttpServlet {
 
-    private java.util.logging.Logger log = java.util.logging.Logger.getLogger(TimeStampServlet.class.getSimpleName());
+    private java.util.logging.Logger log = java.util.logging.Logger.getLogger(TimeStampServlet.class.getName());
 
     @Inject TimeStampService timeStampService;
     @Inject DAOBean dao;

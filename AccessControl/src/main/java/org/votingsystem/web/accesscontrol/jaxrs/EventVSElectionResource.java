@@ -47,7 +47,7 @@ import static java.text.MessageFormat.format;
 @Path("/eventVSElection")
 public class EventVSElectionResource {
 
-    private static Logger log = Logger.getLogger(EventVSElectionResource.class.getSimpleName());
+    private static Logger log = Logger.getLogger(EventVSElectionResource.class.getName());
 
     @Inject DAOBean dao;
     @Inject EventVSBean eventVSBean;

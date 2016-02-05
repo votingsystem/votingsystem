@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 @Singleton
 public class TimeStampBean {
 
-    private static Logger log = Logger.getLogger(TimeStampBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TimeStampBean.class.getName());
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;

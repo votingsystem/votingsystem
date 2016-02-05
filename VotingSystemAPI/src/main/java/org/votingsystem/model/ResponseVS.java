@@ -30,7 +30,7 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
-    private static Logger log = java.util.logging.Logger.getLogger(ResponseVS.class.getSimpleName());
+    private static Logger log = java.util.logging.Logger.getLogger(ResponseVS.class.getName());
 
     public enum Status {
         OK, ERROR

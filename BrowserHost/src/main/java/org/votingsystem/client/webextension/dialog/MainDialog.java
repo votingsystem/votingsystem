@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  */
 public class MainDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(MainDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(MainDialog.class.getName());
 
     private Button connectionButton;
     private AtomicBoolean isConnected = new AtomicBoolean(false);

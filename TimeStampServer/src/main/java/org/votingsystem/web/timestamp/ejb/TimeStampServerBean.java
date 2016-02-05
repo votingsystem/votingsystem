@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 @Named(value="timeStampService")
 public class TimeStampServerBean implements TimeStampService {
 
-    private static final Logger log = Logger.getLogger(TimeStampServerBean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(TimeStampServerBean.class.getName());
 
     private TimeStampServiceImpl timeStampService = null;
     @Inject ConfigVS config;

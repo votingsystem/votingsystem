@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class WalletPane extends VBox implements UserDeviceSelectorDialog.Listener {
 
-    private static Logger log = Logger.getLogger(WalletPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(WalletPane.class.getName());
 
     public WalletPane() {
         super(new VBox(10));

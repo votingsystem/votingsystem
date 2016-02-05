@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 @Stateless
 public class DashBoardBean {
 
-    private static Logger log = Logger.getLogger(DashBoardBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(DashBoardBean.class.getName());
 
     @PersistenceContext private EntityManager em;
 

@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  */
 public class EncryptionTestSender implements Callable<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(EncryptionTestSender.class.getSimpleName());
+    private static Logger log = Logger.getLogger(EncryptionTestSender.class.getName());
 
     private String requestNIF;
     private String serverURL = null;

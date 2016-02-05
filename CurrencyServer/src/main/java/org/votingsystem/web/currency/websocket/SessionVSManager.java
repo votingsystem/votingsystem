@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 public class SessionVSManager {
 
-    private static Logger log = Logger.getLogger(SessionVSManager.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SessionVSManager.class.getName());
 
     private ConcurrentHashMap<String, Session> sessionMap = null;
     private ConcurrentHashMap<String, Session> authenticatedSessionMap = null;

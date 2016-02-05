@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  */
 public class JSON {
 
-    private static Logger log = Logger.getLogger(JSON.class.getSimpleName());
+    private static Logger log = Logger.getLogger(JSON.class.getName());
 
     public static class HTMLCharacterEscapes extends CharacterEscapes {
         private final int[] asciiEscapes;

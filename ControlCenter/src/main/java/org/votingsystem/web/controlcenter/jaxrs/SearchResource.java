@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 @Path("/search")
 public class SearchResource {
 
-    private static final Logger log = Logger.getLogger(SearchResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(SearchResource.class.getName());
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;

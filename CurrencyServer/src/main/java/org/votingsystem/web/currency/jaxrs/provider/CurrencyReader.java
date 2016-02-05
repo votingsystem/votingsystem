@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 @Consumes(MediaTypeVS.CURRENCY)
 public class CurrencyReader implements MessageBodyReader<MessageSMIME> {
 
-    private static final Logger log = Logger.getLogger(CurrencyReader.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(CurrencyReader.class.getName());
 
     @Inject SignatureBean signatureBean;
 

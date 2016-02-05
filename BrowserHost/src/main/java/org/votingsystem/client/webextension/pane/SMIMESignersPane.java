@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  */
 public class SMIMESignersPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(SMIMESignersPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SMIMESignersPane.class.getName());
     private TabPane tabPane;
 
     public SMIMESignersPane(SignedFile signedFile) {

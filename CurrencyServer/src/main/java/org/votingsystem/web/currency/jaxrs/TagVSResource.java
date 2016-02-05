@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 @Path("/tagVS")
 public class TagVSResource {
 
-    private static final Logger log = Logger.getLogger(TagVSResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(TagVSResource.class.getName());
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;

@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  */
 public class SMIMEPane extends GridPane implements DocumentVS {
 
-    private static Logger log = Logger.getLogger(SMIMEPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SMIMEPane.class.getName());
 
     private SignedFile signedFile;
     

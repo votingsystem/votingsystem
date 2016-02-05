@@ -16,7 +16,7 @@ import java.util.zip.ZipOutputStream;
  */
 public class ZipUtils {
 
-    private static Logger log = Logger.getLogger(ZipUtils.class.getSimpleName());
+    private static Logger log = Logger.getLogger(ZipUtils.class.getName());
 
     private List<String> fileList;
     private String sourceFolder;

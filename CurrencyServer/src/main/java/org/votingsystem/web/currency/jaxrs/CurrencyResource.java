@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 @Path("/currency")
 public class CurrencyResource {
 
-    private static final Logger log = Logger.getLogger(CurrencyResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(CurrencyResource.class.getName());
 
     @Inject DAOBean dao;
     @Inject UserVSBean userVSBean;

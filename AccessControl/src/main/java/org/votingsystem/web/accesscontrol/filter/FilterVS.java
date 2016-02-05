@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 @WebFilter("/*")
 public class FilterVS implements Filter {
 
-    private static final Logger log = Logger.getLogger(FilterVS.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(FilterVS.class.getName());
 
     @EJB ConfigVS config;
     private ServletContext servletContext;

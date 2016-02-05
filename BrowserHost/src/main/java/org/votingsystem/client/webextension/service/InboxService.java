@@ -45,7 +45,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class InboxService {
 
-    private static Logger log = Logger.getLogger(InboxService.class.getSimpleName());
+    private static Logger log = Logger.getLogger(InboxService.class.getName());
 
     public static final int TIME_LIMITED_MESSAGE_LIVE = 30; //seconds
 

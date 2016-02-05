@@ -43,7 +43,7 @@ public class UserVS extends EntityVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static Logger log = Logger.getLogger(UserVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(UserVS.class.getName());
 
     public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANKVS}
 

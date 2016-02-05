@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 
 public class AnonymousDelegationTask extends Task<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(AnonymousDelegationTask.class.getSimpleName());
+    private static Logger log = Logger.getLogger(AnonymousDelegationTask.class.getName());
 
     private char[] password;
     private OperationVS operationVS;

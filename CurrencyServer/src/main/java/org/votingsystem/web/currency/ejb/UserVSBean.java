@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 @Stateless
 public class UserVSBean {
 
-    private static Logger log = Logger.getLogger(UserVSBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(UserVSBean.class.getName());
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;

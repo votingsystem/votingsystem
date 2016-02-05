@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  */
 public class SignedFile {
 
-    private static Logger log = Logger.getLogger(SignedFile.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SignedFile.class.getName());
 
     private byte[] signedFileBytes = null;
     private String name = null;

@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 @Stateless
 public class CSRBean {
 
-    private static Logger log = Logger.getLogger(CSRBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(CSRBean.class.getName());
 
     private BigDecimal currencyMinValue = BigDecimal.ONE;
 

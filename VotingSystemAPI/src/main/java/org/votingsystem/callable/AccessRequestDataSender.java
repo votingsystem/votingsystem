@@ -26,7 +26,7 @@ import static org.votingsystem.util.ContextVS.VOTE_SIGN_MECHANISM;
 */
 public class AccessRequestDataSender implements Callable<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(AccessRequestDataSender.class.getSimpleName());
+    private static Logger log = Logger.getLogger(AccessRequestDataSender.class.getName());
 
     private SMIMEMessage smimeMessage;
     private CertificationRequestVS certificationRequest;

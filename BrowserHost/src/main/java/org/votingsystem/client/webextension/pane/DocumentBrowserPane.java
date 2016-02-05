@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class DocumentBrowserPane extends VBox {
 
-    private static Logger log = Logger.getLogger(DocumentBrowserPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(DocumentBrowserPane.class.getName());
 
     private HBox buttonsHBox;
     private HBox navigateButtonsHBox;

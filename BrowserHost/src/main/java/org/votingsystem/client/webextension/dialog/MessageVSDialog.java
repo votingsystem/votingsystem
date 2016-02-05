@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class MessageVSDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(MessageVSDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(MessageVSDialog.class.getName());
 
     private TextArea textArea;
     private Label messageLabel;

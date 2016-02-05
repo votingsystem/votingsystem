@@ -16,7 +16,7 @@ import java.util.*;
 @WebFilter("/*")
 public class FilterVS implements Filter {
 
-    private java.util.logging.Logger log = java.util.logging.Logger.getLogger(FilterVS.class.getSimpleName());
+    private java.util.logging.Logger log = java.util.logging.Logger.getLogger(FilterVS.class.getName());
 
     @Inject ConfigVS config;
     private String bundleBaseName;

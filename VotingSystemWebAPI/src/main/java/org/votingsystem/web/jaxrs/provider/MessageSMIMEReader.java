@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 @Consumes(MediaTypeVS.JSON_SIGNED)
 public class MessageSMIMEReader implements MessageBodyReader<MessageSMIME> {
 
-    private static final Logger log = Logger.getLogger(MessageSMIMEReader.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(MessageSMIMEReader.class.getName());
 
     @Inject
     SignatureBean signatureBean;

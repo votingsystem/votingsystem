@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  */
 public class CurrencyDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(CurrencyDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(CurrencyDialog.class.getName());
 
     class EventBusCurrencyListener {
         @Subscribe public void call(SocketMessageDto socketMessage) {

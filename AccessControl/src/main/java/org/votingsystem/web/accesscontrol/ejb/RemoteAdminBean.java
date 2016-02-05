@@ -37,7 +37,7 @@ import static java.text.MessageFormat.format;
 @Remote(EJBRemoteAdminAccessControl.class)
 public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
 
-    private static final Logger log = Logger.getLogger(RemoteAdminBean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(RemoteAdminBean.class.getName());
 
     @Inject EventVSElectionBean eventVSElectionBean;
     @Inject DAOBean dao;

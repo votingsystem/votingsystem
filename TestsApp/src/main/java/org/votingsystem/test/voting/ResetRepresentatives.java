@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 
 public class ResetRepresentatives {
 
-    private static final Logger log = Logger.getLogger(ResetRepresentatives.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(ResetRepresentatives.class.getName());
 
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(

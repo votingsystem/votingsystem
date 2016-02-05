@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 */
 public class TimeStamperTestSender implements Callable<ResponseVS> {
     
-    private static Logger log = Logger.getLogger(TimeStamperTestSender.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TimeStamperTestSender.class.getName());
 
     private String nif;
     private String serverURL;

@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  */
 public class JSONFormDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(JSONFormDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(JSONFormDialog.class.getName());
 
     public interface Listener {
         public void processJSONForm(Map jsonForm);

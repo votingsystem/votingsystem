@@ -44,7 +44,7 @@ import static org.votingsystem.client.webextension.BrowserHost.showMessage;
  */
 public class BrowserSessionService {
 
-    private static Logger log = Logger.getLogger(BrowserSessionService.class.getSimpleName());
+    private static Logger log = Logger.getLogger(BrowserSessionService.class.getName());
 
     private ResponseVS currentResponseVS;
     private File sessionFile;

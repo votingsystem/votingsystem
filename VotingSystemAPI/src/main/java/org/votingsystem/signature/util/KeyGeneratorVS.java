@@ -13,7 +13,7 @@ public enum KeyGeneratorVS {
     
     INSTANCE;   
     
-    private static Logger log = Logger.getLogger(KeyGeneratorVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(KeyGeneratorVS.class.getName());
     
     private KeyPairGenerator keyPairGenerator;
     private SecureRandom random;

@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  */
 public class H2Utils {
 
-    private static Logger log = Logger.getLogger(H2Utils.class.getSimpleName());
+    private static Logger log = Logger.getLogger(H2Utils.class.getName());
 
     public static void testBlob() throws Exception {
         String url = ContextVS.getInstance().getAppDir() + "/testH2Blob";

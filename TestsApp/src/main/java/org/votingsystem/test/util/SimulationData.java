@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SimulationData {
 
-    private static Logger log = Logger.getLogger(SimulationData.class.getSimpleName());
+    private static Logger log = Logger.getLogger(SimulationData.class.getName());
 
     private Integer statusCode = ResponseVS.SC_PAUSED;
     private String message = null;

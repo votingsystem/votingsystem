@@ -19,7 +19,7 @@ import static org.votingsystem.client.webextension.BrowserHost.showMessage;
  */
 public class InboxDecryptTask extends Task<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(InboxDecryptTask.class.getSimpleName());
+    private static Logger log = Logger.getLogger(InboxDecryptTask.class.getName());
 
     private PrivateKey privateKey;
     private InboxMessage timeLimitedInboxMessage;

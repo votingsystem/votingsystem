@@ -52,7 +52,7 @@ import java.util.logging.Logger;
  */
 public class Encryptor {
  
-    private static Logger log = Logger.getLogger(Encryptor.class.getSimpleName());
+    private static Logger log = Logger.getLogger(Encryptor.class.getName());
 
     private static final int ITERATION_COUNT = 1024;
     private static final int KEY_LENGTH = 128; // 192 and 256 bits may not be available

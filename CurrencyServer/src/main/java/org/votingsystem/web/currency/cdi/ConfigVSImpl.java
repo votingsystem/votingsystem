@@ -45,7 +45,7 @@ import java.util.logging.Logger;
 @Startup
 public class ConfigVSImpl implements ConfigVS {
 
-    private static final Logger log = Logger.getLogger(ConfigVS.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(ConfigVS.class.getName());
 
     @Inject DAOBean dao;
     @Inject SignatureBean signatureBean;
@@ -73,8 +73,8 @@ public class ConfigVSImpl implements ConfigVS {
 
     public ConfigVSImpl() {
         try {
-            URL res = Thread.currentThread().getContextClassLoader().getResource("META-INF/logging.properties");
-            LogManager.getLogManager().readConfiguration(res.openStream());
+            //URL res = Thread.currentThread().getContextClassLoader().getResource("META-INF/logging.properties");
+            //LogManager.getLogManager().readConfiguration(res.openStream());
             String resourceFile = null;
             log.info("environment: " + System.getProperty("vs.environment"));
             if(System.getProperty("vs.environment") != null) {
@@ -89,7 +89,7 @@ public class ConfigVSImpl implements ConfigVS {
                     break;
             }
             props = new Properties();
-            res = Thread.currentThread().getContextClassLoader().getResource(resourceFile);
+            URL res = Thread.currentThread().getContextClassLoader().getResource(resourceFile);
             props.load(res.openStream());
             systemNIF = (String) props.get("vs.systemNIF");
             contextURL = (String) props.get("vs.contextURL");

@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  */
 public class EventVSInfoPane extends VBox {
 
-    private static Logger log = Logger.getLogger(EventVSInfoPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(EventVSInfoPane.class.getName());
 
     private MetaInf metaInf = null;
     private Button validateBackupButton;

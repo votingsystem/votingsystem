@@ -29,7 +29,7 @@ import static java.util.stream.Collectors.toSet;
  */
 public class Wallet {
 
-    private static Logger log = Logger.getLogger(Wallet.class.getSimpleName());
+    private static Logger log = Logger.getLogger(Wallet.class.getName());
 
     private Set<Currency> currencySet;
     private char[] password;

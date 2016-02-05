@@ -47,7 +47,7 @@ import static java.util.stream.Collectors.toSet;
 
 public class BrowserHost extends Application {
 
-    private static Logger log = Logger.getLogger(BrowserHost.class.getSimpleName());
+    private static Logger log = Logger.getLogger(BrowserHost.class.getName());
 
     private static final ExecutorService executorService = Executors.newFixedThreadPool(10);
 

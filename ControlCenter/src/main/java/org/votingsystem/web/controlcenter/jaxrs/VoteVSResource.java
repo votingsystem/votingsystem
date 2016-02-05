@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 @Path("/voteVS")
 public class VoteVSResource {
 
-    private static final Logger log = Logger.getLogger(VoteVSResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(VoteVSResource.class.getName());
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;

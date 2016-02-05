@@ -18,7 +18,7 @@ public class FieldEventVS extends EntityVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static Logger log = Logger.getLogger(FieldEventVS.class.getSimpleName());
+    private static Logger log = Logger.getLogger(FieldEventVS.class.getName());
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;

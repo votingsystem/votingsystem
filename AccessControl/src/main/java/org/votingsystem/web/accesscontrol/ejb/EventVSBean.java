@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 @Stateless
 public class EventVSBean {
 
-    private static Logger log = Logger.getLogger(EventVSBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(EventVSBean.class.getName());
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;

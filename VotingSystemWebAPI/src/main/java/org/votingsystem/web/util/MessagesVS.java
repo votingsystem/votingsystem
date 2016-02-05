@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 public class MessagesVS {
 
-    private static final Logger log = Logger.getLogger(MessagesVS.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(MessagesVS.class.getName());
 
     private ResourceBundle bundle;
     private Locale locale;

@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 @Path("/messageSMIME")
 public class MessageSMIMEResource {
 
-    private static final Logger log = Logger.getLogger(MessageSMIMEResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(MessageSMIMEResource.class.getName());
 
     @Inject DAOBean dao;
 

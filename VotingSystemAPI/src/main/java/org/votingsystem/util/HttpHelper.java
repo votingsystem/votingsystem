@@ -65,7 +65,7 @@ import java.util.logging.Logger;
 */
 public class HttpHelper {
     
-    private static Logger log = Logger.getLogger(HttpHelper.class.getSimpleName());
+    private static Logger log = Logger.getLogger(HttpHelper.class.getName());
 
     private static final int REQUEST_TIME_OUT = 60000; //60 seconds
 

@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  */
 public class PEMCertValidatorPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(PEMCertValidatorPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(PEMCertValidatorPane.class.getName());
 
     private TextArea textArea;
     private Button acceptButton;

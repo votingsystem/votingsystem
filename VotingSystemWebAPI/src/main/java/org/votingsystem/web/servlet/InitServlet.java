@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  */
 public class InitServlet extends HttpServlet{
 
-    private static Logger log = Logger.getLogger(InitServlet.class.getSimpleName());
+    private static Logger log = Logger.getLogger(InitServlet.class.getName());
 
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;

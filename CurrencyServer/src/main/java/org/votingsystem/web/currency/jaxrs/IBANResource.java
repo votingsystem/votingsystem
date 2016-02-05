@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 @Path("/IBAN")
 public class IBANResource {
 
-    private static final Logger log = Logger.getLogger(IBANResource.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(IBANResource.class.getName());
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;

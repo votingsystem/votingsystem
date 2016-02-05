@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  */
 public class TimeStampCertValidationPane extends GridPane {
 
-    private static Logger log = Logger.getLogger(TimeStampCertValidationPane.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TimeStampCertValidationPane.class.getName());
 
     private TimeStampToken timeStampToken;
     private TextArea textArea;

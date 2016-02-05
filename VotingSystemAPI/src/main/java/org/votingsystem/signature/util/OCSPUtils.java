@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 */
 public class OCSPUtils {
 
-    private static Logger log = Logger.getLogger(OCSPUtils.class.getSimpleName());
+    private static Logger log = Logger.getLogger(OCSPUtils.class.getName());
 
     public static CertificateVS.State validateCert(X509Certificate intermediateCert, BigInteger serialNumber,
                     Date dateCheck) throws Exception {

@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 @Stateless
 public class TransactionVSBankVSBean {
 
-    private static Logger log = Logger.getLogger(TransactionVSBankVSBean.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TransactionVSBankVSBean.class.getName());
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;

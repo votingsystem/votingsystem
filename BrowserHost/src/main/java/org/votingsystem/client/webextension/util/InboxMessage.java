@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  */
 public class InboxMessage<T> {
 
-    private static Logger log = Logger.getLogger(InboxMessage.class.getSimpleName());
+    private static Logger log = Logger.getLogger(InboxMessage.class.getName());
 
     public enum State {LAPSED, PENDING, PROCESSED, REMOVED}
 

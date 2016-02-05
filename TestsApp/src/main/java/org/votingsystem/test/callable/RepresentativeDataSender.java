@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 */
 public class RepresentativeDataSender implements Callable<ResponseVS> {
 
-    private static Logger log = Logger.getLogger(RepresentativeDataSender.class.getSimpleName());
+    private static Logger log = Logger.getLogger(RepresentativeDataSender.class.getName());
 
     private String representativeNIF;
     private byte[] imageBytes;

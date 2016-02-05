@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class TimeStampResponseGenerator {
 
-    private static Logger log = Logger.getLogger(TimeStampResponseGenerator.class.getSimpleName());
+    private static Logger log = Logger.getLogger(TimeStampResponseGenerator.class.getName());
 
     private static Set acceptedAlgorithms = ImmutableSet.<String> of(TSPAlgorithms.SHA1, TSPAlgorithms.SHA256,
             TSPAlgorithms.SHA512);

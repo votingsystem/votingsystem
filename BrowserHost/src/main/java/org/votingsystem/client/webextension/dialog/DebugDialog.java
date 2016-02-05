@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  */
 public class DebugDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(DebugDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(DebugDialog.class.getName());
 
     private Button testButton;
     private static DebugDialog dialog;

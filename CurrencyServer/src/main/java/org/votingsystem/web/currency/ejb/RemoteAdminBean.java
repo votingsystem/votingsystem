@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 @Remote(EJBRemoteAdminCurrencyServer.class)
 public class RemoteAdminBean implements EJBRemoteAdminCurrencyServer {
 
-    private static final Logger log = Logger.getLogger(RemoteAdminBean.class.getSimpleName());
+    private static final Logger log = Logger.getLogger(RemoteAdminBean.class.getName());
 
     @Inject AuditBean auditBean;
     @Inject ConfigVS config;

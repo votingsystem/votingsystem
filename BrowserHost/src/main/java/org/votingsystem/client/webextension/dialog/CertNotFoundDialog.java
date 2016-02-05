@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  */
 public class CertNotFoundDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(CertNotFoundDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(CertNotFoundDialog.class.getName());
 
 
     public CertNotFoundDialog(String msg) {

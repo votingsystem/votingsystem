@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  */
 public class QRDialog extends DialogVS {
 
-    private static Logger log = Logger.getLogger(QRDialog.class.getSimpleName());
+    private static Logger log = Logger.getLogger(QRDialog.class.getName());
 
     @FXML private Label infoLbl;
     @FXML private VBox mainPane;

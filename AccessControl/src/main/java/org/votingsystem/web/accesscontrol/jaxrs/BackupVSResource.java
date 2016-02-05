@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 @Path("/backupVS")
 public class BackupVSResource {
 
-    private static Logger log = Logger.getLogger(BackupVSResource.class.getSimpleName());
+    private static Logger log = Logger.getLogger(BackupVSResource.class.getName());
 
     @Inject DAOBean dao;
     @Inject EventVSElectionBean eventVSElectionBean;
