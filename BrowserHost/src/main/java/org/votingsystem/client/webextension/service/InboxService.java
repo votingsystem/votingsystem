@@ -93,9 +93,13 @@ public class InboxService {
             } else messageListDto =  JSON.getMapper().readValue(messagesFile, new TypeReference<List<InboxMessageDto>>() {
             });
             for(InboxMessageDto dto : messageListDto) {
-                InboxMessage inboxMessage = new InboxMessage(dto);
-                if(inboxMessage.isEncrypted()) encryptedMessageList.add(inboxMessage);
-                else messageList.add(inboxMessage);
+                try {
+                    InboxMessage inboxMessage = new InboxMessage(dto);
+                    if(inboxMessage.isEncrypted()) encryptedMessageList.add(inboxMessage);
+                    else messageList.add(inboxMessage);
+                } catch (Exception ex) {
+                    log.log(Level.SEVERE, ex.getMessage(), ex);
+                }
             }
             Set<Currency> currencySet = Wallet.getPlainWallet();
             if(currencySet.size() > 0) {

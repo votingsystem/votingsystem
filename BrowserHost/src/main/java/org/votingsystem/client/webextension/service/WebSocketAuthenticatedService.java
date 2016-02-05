@@ -49,13 +49,6 @@ public class WebSocketAuthenticatedService {
     private Session session;
     private UserVS userVS;
 
-    private PasswordDialog.Listener websocketInitPasswordListener = new PasswordDialog.Listener() {
-        @Override public void processPassword(char[] password) {
-            if(password == null) broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
-            else ProgressDialog.show(new InitSessionTask(password, targetServer), null);
-        }
-    };
-
     private WebSocketAuthenticatedService(Collection<X509Certificate> sslServerCertCollection, ActorVS targetServer) {
         this.targetServer = targetServer;
         if(targetServer.getWebSocketURL().startsWith("wss")) {
@@ -137,8 +130,10 @@ public class WebSocketAuthenticatedService {
         }
         if(isConnectionEnabled) {
             if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
-                PasswordDialog.showWithoutPasswordConfirm(websocketInitPasswordListener,
-                        ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
+                PasswordDialog.showWithoutPasswordConfirm(password -> {
+                    if(password == null) broadcastConnectionStatus(SocketMessageDto.ConnectionStatus.CLOSED);
+                    else ProgressDialog.show(new InitSessionTask(password, targetServer), null);
+                }, ContextVS.getMessage("initAuthenticatedSessionPasswordMsg"));
             } else if(CryptoTokenVS.MOBILE == BrowserSessionService.getCryptoTokenType()) {
                 ProgressDialog.show(new InitSessionTask(null, targetServer), null);
             }

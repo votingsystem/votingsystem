@@ -3,13 +3,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.*?>
 <VBox fx:id="mainPane" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="550.0" styleClass="modal-dialog" stylesheets="@../css/mobile-selector-dialog.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
       <Label fx:id="messageLbl" text="messageLbl" textFill="#888888" wrapText="true" />
-      <ProgressBar fx:id="progressBar" prefWidth="200.0" />
       <VBox fx:id="deviceListBox" prefHeight="0.0" prefWidth="504.0" spacing="10.0" VBox.vgrow="ALWAYS">
          <VBox.margin>
             <Insets left="20.0" right="20.0" />

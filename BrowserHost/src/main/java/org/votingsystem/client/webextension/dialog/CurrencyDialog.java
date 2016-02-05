@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog.Listener {
+public class CurrencyDialog extends DialogVS {
 
     private static Logger log = Logger.getLogger(CurrencyDialog.class.getSimpleName());
 
@@ -95,10 +95,13 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
         changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
         changeWalletMenuItem.setOnAction(actionEvent -> {
             if(WebSocketAuthenticatedService.getInstance().isConnectedWithAlert()) {
-                UserDeviceSelectorDialog.show(ContextVS.getMessage("userVSDeviceConnected"),
-                        ContextVS.getMessage("selectDeviceToTransferCurrencyMsg"), CurrencyDialog.this);
-            }
-        });
+                    UserDeviceSelectorDialog.show(ContextVS.getMessage("userVSDeviceConnected"),
+                        ContextVS.getMessage("selectDeviceToTransferCurrencyMsg"), device -> {
+                            log.info("setSelectedDevice - device: " + device.getDeviceName());
+                            walletChangeTask = new WalletChangeTask(device);
+                            ProgressDialog.show(walletChangeTask, ContextVS.getMessage("changeWalletLbl"));
+                        });
+            }});
         MenuButton menuButton = new MenuButton();
         menuButton.setGraphic(Utils.getIcon(FontAwesome.Glyph.BARS));
         menuButton.getItems().addAll(changeWalletMenuItem);
@@ -181,12 +184,6 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
         });
     }
 
-    @Override public void setSelectedDevice(DeviceVSDto device) {
-        log.info("setSelectedDevice - device: " + device.getDeviceName());
-        walletChangeTask = new WalletChangeTask(device);
-        ProgressDialog.show(walletChangeTask, ContextVS.getMessage("changeWalletLbl"));
-    }
-
     public  class WalletChangeTask extends Task<ResponseVS> {
 
         private DeviceVSDto device;
@@ -217,41 +214,4 @@ public class CurrencyDialog extends DialogVS implements UserDeviceSelectorDialog
         }
     }
 
-    public static class ProcessFormTask extends Task<ResponseVS> {
-
-        private TransactionVSDto transactionVSDto;
-        private CurrencyBatchDto batchDto;
-        private Currency currency;
-        private CurrencyServer currencyServer;
-
-        public ProcessFormTask(TransactionVSDto transactionVSDto, Currency currency, CurrencyServer currencyServer)
-                throws Exception {
-            this.currency = currency;
-            this.currencyServer = currencyServer;
-            this.transactionVSDto = transactionVSDto;
-            this.batchDto = CurrencyBatchDto.NEW(transactionVSDto.getSubject(),
-                    transactionVSDto.getToUserIBAN().iterator().next(), currency.getAmount(),
-                    currency.getCurrencyCode(), currency.getTagVS().getName(), false, Arrays.asList(currency),
-                    currencyServer.getServerURL(),  currencyServer.getTimeStampServiceURL());
-        }
-
-        @Override protected ResponseVS call() throws Exception {
-            updateProgress(1, 10);
-            updateMessage(ContextVS.getMessage("transactionInProgressMsg"));
-            updateProgress(3, 10);
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsString(batchDto).getBytes(),
-                    ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
-            updateProgress(8, 10);
-            log.info("transaction result: " + responseVS.getStatusCode());
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
-            } else {
-                CurrencyBatchResponseDto responseDto = JSON.getMapper().readValue(responseVS.getMessage(),
-                        CurrencyBatchResponseDto.class);
-                batchDto.validateResponse(responseDto, currencyServer.getTrustAnchors());
-                BrowserHost.showMessage(ResponseVS.SC_OK, responseDto.getMessage());
-            }
-            return responseVS;
-        }
-    }
 }

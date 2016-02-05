@@ -63,7 +63,7 @@ public class InboxMessage<T> {
         typeVS = dto.getOperation();
         date = dto.getDate();
         messageID = dto.getMessageID();
-        load(dto.getWebSocketMessage());
+        if(dto.getWebSocketMessage() != null) load(dto.getWebSocketMessage());
         message = dto.getMessage();
         UUID = dto.getUUID();
     }

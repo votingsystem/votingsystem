@@ -34,6 +34,7 @@ import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -72,6 +73,8 @@ public class ConfigVSImpl implements ConfigVS {
 
     public ConfigVSImpl() {
         try {
+            URL res = Thread.currentThread().getContextClassLoader().getResource("META-INF/logging.properties");
+            LogManager.getLogManager().readConfiguration(res.openStream());
             String resourceFile = null;
             log.info("environment: " + System.getProperty("vs.environment"));
             if(System.getProperty("vs.environment") != null) {
@@ -86,7 +89,7 @@ public class ConfigVSImpl implements ConfigVS {
                     break;
             }
             props = new Properties();
-            URL res = Thread.currentThread().getContextClassLoader().getResource(resourceFile);
+            res = Thread.currentThread().getContextClassLoader().getResource(resourceFile);
             props.load(res.openStream());
             systemNIF = (String) props.get("vs.systemNIF");
             contextURL = (String) props.get("vs.contextURL");
