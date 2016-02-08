@@ -195,7 +195,6 @@ public class EJBClient {
                     }).thenApply(result -> {
                         log.info(String.format("command: INIT_CURRENCY_PERIOD - statusCode: %S - message: %s",
                                 result.getStatusCode(), result.getMessage()));
-                        IOUtils.readLine("> ");
                         return result;
                     });
         } catch (Exception ex) {

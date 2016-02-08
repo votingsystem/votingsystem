@@ -18,8 +18,8 @@ public class CurrencyCheckResponse {
 
     private Integer statusCode;
     private String message;
-    private Set<CurrencyStateDto> currencyOKSet = new HashSet<>();
-    private Set<CurrencyStateDto> currencyWithErrorSet = new HashSet<>();
+    private Set<CurrencyStateDto> currencyOKSet;
+    private Set<CurrencyStateDto> currencyWithErrorSet;
 
     public CurrencyCheckResponse(Integer statusCode, String message, Set<CurrencyStateDto> OKSet, Set<CurrencyStateDto> errorSet){
         this.statusCode = statusCode;
@@ -41,11 +41,11 @@ public class CurrencyCheckResponse {
     }
 
     public Set<String> getHashOKSet() {
-        return currencyOKSet.stream().map(currencyStateDto -> {return currencyStateDto.getHashCertVS();}).collect(Collectors.toSet());
+        return currencyOKSet.stream().map(currencyStateDto -> currencyStateDto.getHashCertVS()).collect(Collectors.toSet());
     }
 
     public Set<String> getHashWithErrorSet() {
-        return currencyWithErrorSet.stream().map(currencyStateDto -> {return currencyStateDto.getHashCertVS();}).collect(Collectors.toSet());
+        return currencyWithErrorSet.stream().map(currencyStateDto -> currencyStateDto.getHashCertVS()).collect(Collectors.toSet());
     }
 
     public String getMessage() {
