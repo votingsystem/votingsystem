@@ -119,14 +119,14 @@ public class ConfigVSImpl implements ConfigVS {
             systemUser = dao.getSingleResult(UserVS.class, query);
             if(systemUser == null) { //First time run
                 dao.persist(new TagVS(TagVS.WILDTAG));
-                UserVS userVS = new UserVS(systemNIF, UserVS.Type.SYSTEM, serverName);
-                systemUser = dao.persist(userVS);
-                createIBAN(systemUser);
-                URL res = res = Thread.currentThread().getContextClassLoader().getResource("defaultTags.txt");
+                URL res = Thread.currentThread().getContextClassLoader().getResource("defaultTags.txt");
                 String[] defaultTags = FileUtils.getStringFromInputStream(res.openStream()).split(",");
                 for(String tag: defaultTags) {
                     createtagVS(tag.trim());
                 }
+                UserVS userVS = new UserVS(systemNIF, UserVS.Type.SYSTEM, serverName);
+                systemUser = dao.persist(userVS);
+                createIBAN(systemUser);
             }
             new ContextVS(null, null);
             executorService.submit(() -> {

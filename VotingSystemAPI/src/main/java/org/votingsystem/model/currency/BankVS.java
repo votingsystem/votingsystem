@@ -11,7 +11,8 @@ import java.security.cert.X509Certificate;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Entity @Table(name="BankVS") @DiscriminatorValue("BankVS")
+@Entity
+@DiscriminatorValue("BankVS")
 public class BankVS extends UserVS implements Serializable {
 
     private static final long serialVersionUID = 1L;

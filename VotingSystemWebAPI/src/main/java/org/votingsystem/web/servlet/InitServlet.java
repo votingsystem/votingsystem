@@ -5,6 +5,7 @@ import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,6 +30,7 @@ public class InitServlet extends HttpServlet{
 
     @Override public void init() throws ServletException {
         try {
+            MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
             List<X509Certificate> fileSystemX509TrustedCerts = new ArrayList<>();
             List<UserVS> admins = new ArrayList<>();
             for (String res : getServletContext().getResourcePaths("WEB-INF/votingsystem/certs")) {
