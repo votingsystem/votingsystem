@@ -19,6 +19,7 @@ import org.votingsystem.model.currency.BankVSInfo;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Interval;
 import org.votingsystem.util.JSON;
@@ -41,6 +42,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -305,6 +307,13 @@ public class UserVSResource {
         MessageDto messageDto = MessageDto.OK(messages.get("certUserNewMsg", newUser.getNif()),
                 config.getContextURL() + "/rest/userVS/id/" + newUser.getId());
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).build();
+    }
+
+    @Path("/csrSignedWithIDCard")
+    @POST @Produces("text/plain")
+    public Response csr(MessageSMIME messageSMIME) throws Exception {
+        X509Certificate issuedCert = signatureBean.signCSRSignedWithIDCard(messageSMIME);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(CertUtils.getPEMEncoded(issuedCert))).build();
     }
 
     @Path("/newBankVS")

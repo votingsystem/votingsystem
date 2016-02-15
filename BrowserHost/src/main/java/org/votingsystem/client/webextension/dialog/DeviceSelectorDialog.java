@@ -31,14 +31,14 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class MobileSelectorDialog extends DialogVS {
+public class DeviceSelectorDialog extends DialogVS {
 
     public interface Listener {
         public void setSelectedDevice(DeviceVSDto device);
         public void cancelSelection();
     }
 
-    private static Logger log = Logger.getLogger(MobileSelectorDialog.class.getName());
+    private static Logger log = Logger.getLogger(DeviceSelectorDialog.class.getName());
 
     @FXML private VBox mainPane;
     @FXML private Button acceptButton;
@@ -51,8 +51,8 @@ public class MobileSelectorDialog extends DialogVS {
     private Listener listener;
     private ToggleGroup deviceToggleGroup;
 
-    private MobileSelectorDialog(String caption, String message, Listener listener) throws IOException {
-        super("/fxml/MobileSelectorDialog.fxml", caption);
+    private DeviceSelectorDialog(String caption, String message, Listener listener) throws IOException {
+        super("/fxml/DeviceSelectorDialog.fxml", caption);
         this.listener = listener;
         messageLbl.setText(message);
     }
@@ -108,12 +108,15 @@ public class MobileSelectorDialog extends DialogVS {
                 }
             });
             for(DeviceVSDto dto : deviceList) {
-                if(BrowserSessionService.getInstance().getCryptoToken() == null ||
-                        !BrowserSessionService.getInstance().getCryptoToken().getDeviceId().equals(dto.getDeviceId())) {
-                    RadioButton radioButton = new RadioButton(dto.getDeviceName());
-                    radioButton.setUserData(dto);
-                    radioButton.setToggleGroup(deviceToggleGroup);
-                    deviceListBox.getChildren().add(radioButton);
+                try {
+                    if(!BrowserSessionService.getInstance().getDevice().getDeviceId().equals(dto.getDeviceId())) {
+                        RadioButton radioButton = new RadioButton(dto.getDeviceName());
+                        radioButton.setUserData(dto);
+                        radioButton.setToggleGroup(deviceToggleGroup);
+                        deviceListBox.getChildren().add(radioButton);
+                    }
+                } catch (Exception ex) {
+                    BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
                 }
             }
             mainPane.getScene().getWindow().sizeToScene();
@@ -133,7 +136,7 @@ public class MobileSelectorDialog extends DialogVS {
     public static void show(String caption, String message, Listener listener) {
         Platform.runLater(() -> {
             try {
-                MobileSelectorDialog dialog = new MobileSelectorDialog(caption, message, listener);
+                DeviceSelectorDialog dialog = new DeviceSelectorDialog(caption, message, listener);
                 dialog.show();
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);

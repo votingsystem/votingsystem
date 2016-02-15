@@ -133,4 +133,12 @@ public class AddressVS extends EntityVS implements Serializable {
                 name, postalCode, province, city, country);
     }
 
+    public void update(AddressVS addressVS) {
+        this.name = addressVS.getName();
+        this.city = addressVS.getCity();
+        this.province = addressVS.getProvince();
+        this.postalCode = addressVS.getPostalCode();
+        this.country = addressVS.getCountry();
+    }
+
 }

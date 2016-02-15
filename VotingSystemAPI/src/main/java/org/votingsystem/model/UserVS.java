@@ -83,6 +83,8 @@ public class UserVS extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="representative") private UserVS representative;
 
+    @OneToOne private AddressVS addressVS;
+
     //Owning Entity side of the relationship
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinTable(name = "uservs_tagvs", joinColumns = {
@@ -449,6 +451,15 @@ public class UserVS extends EntityVS implements Serializable {
 
     public void setDeviceVS(DeviceVS deviceVS) {
         this.deviceVS = deviceVS;
+    }
+
+
+    public AddressVS getAddressVS() {
+        return addressVS;
+    }
+
+    public void setAddressVS(AddressVS addressVS) {
+        this.addressVS = addressVS;
     }
 
     public String getFullName() {

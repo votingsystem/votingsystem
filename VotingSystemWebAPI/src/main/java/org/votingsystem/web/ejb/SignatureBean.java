@@ -3,7 +3,9 @@ package org.votingsystem.web.ejb;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.SMIMEDto;
+import org.votingsystem.dto.UserCertificationRequestDto;
 import org.votingsystem.dto.voting.KeyStoreDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.EventVS;
@@ -17,10 +19,7 @@ import org.votingsystem.signature.util.KeyStoreInfo;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.*;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -58,6 +57,7 @@ public class SignatureBean {
     private SMIMESignedGeneratorVS signedMailGenerator;
     private Encryptor encryptor;
     private Set<TrustAnchor> trustAnchors;
+    private Set<TrustAnchor> idCardTrustAnchors;
     private Set<TrustAnchor> currencyAnchors;
     private Set<X509Certificate> trustedCerts;
     private PrivateKey serverPrivateKey;
@@ -66,7 +66,7 @@ public class SignatureBean {
     private List<X509Certificate> certChain;
     private byte[] keyStorePEMCerts;
     private Map<Long, CertificateVS> trustedCertsHashMap = new HashMap<>();
-    private static final HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsMap = new HashMap<Long, Set<TrustAnchor>>();
+    private static final HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsMap = new HashMap<>();
     private Set<String> admins;
     private UserVS systemUser;
     private String password;
@@ -158,6 +158,7 @@ public class SignatureBean {
         trustedCertsHashMap = new HashMap<>();
         trustedCerts = new HashSet<>();
         trustAnchors = new HashSet<>();
+        idCardTrustAnchors = new HashSet<>();
         for (CertificateVS certificateVS : trustedCertsList) {
             addCertAuthority(certificateVS);
         }
@@ -167,8 +168,12 @@ public class SignatureBean {
         X509Certificate x509Cert = certificateVS.getX509Cert();
         trustedCerts.add(x509Cert);
         trustedCertsHashMap.put(x509Cert.getSerialNumber().longValue(), certificateVS);
-        trustAnchors.add(new TrustAnchor(x509Cert, null));
-        log.info("certificateVS.id: " + certificateVS.getId() + " - " + x509Cert.getSubjectDN() +
+        TrustAnchor trustAnchor = new TrustAnchor(x509Cert, null);
+        trustAnchors.add(trustAnchor);
+        if(x509Cert.getSubjectDN().toString().contains("OU=DNIE, O=DIRECCION GENERAL DE LA POLICIA, C=ES")) {
+            idCardTrustAnchors.add(trustAnchor);
+        }
+        log.info("addCertAuthority - certificateVS.id: " + certificateVS.getId() + " - " + x509Cert.getSubjectDN() +
                 " - num. trustedCerts: " + trustedCerts.size());
     }
 
@@ -261,6 +266,10 @@ public class SignatureBean {
         return KeyStoreUtil.createUserKeyStore(validFrom.getTime(),
                 (validTo.getTime() - validFrom.getTime()), password, ContextVS.KEYSTORE_USER_CERT_ALIAS,
                 rootCAPrivateCredential, testUserDN);
+    }
+
+    public CertUtils.CertValidatorResultVS verifyIDCardCertificate(X509Certificate certToCheck) throws ExceptionVS {
+        return CertUtils.verifyCertificate(idCardTrustAnchors, false, Arrays.asList(certToCheck));
     }
 
     public X509Certificate getServerCert() {
@@ -428,6 +437,44 @@ public class SignatureBean {
         log.log(Level.FINE, "verifyCertificate - user:" + userVS.getNif() + " cert issuer: " + certCaResult.getSubjectDN() +
                 " - CA certificateVS.id : " + userVS.getCertificateCA().getId());
         return validatorResult;
+    }
+
+    //issues certificates if the request is signed with an Id card
+    public X509Certificate signCSRSignedWithIDCard(MessageSMIME messageSMIMEReq) throws Exception {
+        UserVS signer = messageSMIMEReq.getUserVS();
+        verifyIDCardCertificate(signer.getCertificate());
+        UserCertificationRequestDto requestDto = messageSMIMEReq.getSignedContent(UserCertificationRequestDto.class);
+        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(requestDto.getCsrRequest());
+        CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
+                CertExtensionDto.class, csr, ContextVS.DEVICEVS_TAG);
+        String validatedNif = NifUtils.validate(certExtensionDto.getNif());
+        AddressVS address = signer.getAddressVS();
+        if(address == null) {
+            address = dao.persist(requestDto.getAddressVS());
+            signer.setAddressVS(address);
+            dao.merge(signer);
+        } else {
+            address.update(requestDto.getAddressVS());
+            dao.merge(address);
+        }
+        Date validFrom = new Date();
+        Date validTo = DateUtils.addDays(validFrom, 365).getTime(); //one year
+        X509Certificate issuedCert = signCSR(csr, null, validFrom, validTo);
+        CertificateVS certificate = dao.persist(CertificateVS.USER(signer, issuedCert));
+        Query query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId and d.userVS.nif =:nif ")
+                .setParameter("deviceId", certExtensionDto.getDeviceId()).setParameter("nif", validatedNif);
+        DeviceVS deviceVS = dao.getSingleResult(DeviceVS.class, query);
+        if(deviceVS == null) {
+            deviceVS = new DeviceVS(signer, certExtensionDto.getDeviceId(), certExtensionDto.getEmail(),
+                    certExtensionDto.getMobilePhone(), certExtensionDto.getDeviceType()).setState(DeviceVS.State.OK);
+            dao.persist(deviceVS.setCertificateVS(certificate));
+        } else {
+            dao.merge(deviceVS.getCertificateVS().setState(CertificateVS.State.CANCELED));
+            deviceVS.setEmail(certExtensionDto.getEmail()).setPhone(certExtensionDto.getMobilePhone()).setCertificateVS(certificate);
+            dao.merge(deviceVS);
+        }
+        log.info("signCertUserVS - issued new CertificateVS id: " + certificate.getId() + " for device: " + deviceVS.getId());
+        return issuedCert;
     }
 
     public Set<TrustAnchor> getTrustAnchors() {

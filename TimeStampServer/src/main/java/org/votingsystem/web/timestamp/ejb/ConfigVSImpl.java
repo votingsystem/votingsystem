@@ -35,8 +35,6 @@ public class ConfigVSImpl implements ConfigVS {
 
     public ConfigVSImpl() {
         try {
-            URL res = Thread.currentThread().getContextClassLoader().getResource("META-INF/logging.properties");
-            LogManager.getLogManager().readConfiguration(res.openStream());
             String resourceFile = null;
             log.info("environment: " + System.getProperty("vs.environment"));
             if(System.getProperty("vs.environment") != null) {
@@ -48,10 +46,12 @@ public class ConfigVSImpl implements ConfigVS {
                     break;
                 case PRODUCTION:
                     resourceFile = "TimeStampServer_PRODUCTION.properties";
+                    LogManager.getLogManager().readConfiguration(Thread.currentThread().getContextClassLoader()
+                            .getResource("META-INF/logging.properties").openStream());
                     break;
             }
             props = new Properties();
-            res = Thread.currentThread().getContextClassLoader().getResource(resourceFile);
+            URL res = Thread.currentThread().getContextClassLoader().getResource(resourceFile);
             props.load(res.openStream());
             contextURL = (String) props.get("vs.contextURL");
             ContextVS.getInstance();

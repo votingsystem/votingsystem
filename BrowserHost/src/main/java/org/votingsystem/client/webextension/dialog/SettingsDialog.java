@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Listener {
+public class SettingsDialog extends DialogVS implements DeviceSelectorDialog.Listener {
 
     private static Logger log = Logger.getLogger(SettingsDialog.class.getName());
 
@@ -61,7 +61,7 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         mobileDeviceLbl = new Label();
         mobileDeviceLbl.setStyle("-fx-text-fill: #888;");
         Button mobileDeviceButton = new Button(ContextVS.getMessage("changeMobileDeviceLbl"), Utils.getIcon(FontAwesome.Glyph.EXCHANGE));
-        mobileDeviceButton.setOnAction(actionEvent -> MobileSelectorDialog.show(ContextVS.getMessage(
+        mobileDeviceButton.setOnAction(actionEvent -> DeviceSelectorDialog.show(ContextVS.getMessage(
                 "setMobileSignatureMechanismMsg"), ContextVS.getMessage("setMobileSignatureMechanismAdv"),
                 SettingsDialog.this));
         mobileDeviceInfo.getChildren().addAll(mobileDeviceLbl, mobileDeviceButton);
@@ -119,7 +119,7 @@ public class SettingsDialog extends DialogVS implements MobileSelectorDialog.Lis
         if(evt.getSource() == signWithMobileRb && deviceVSDto != null) {
             gridPane.add(mobileDeviceInfo, 0, 2);
         }
-        if(evt.getSource() == signWithMobileRb) MobileSelectorDialog.show(ContextVS.getMessage(
+        if(evt.getSource() == signWithMobileRb) DeviceSelectorDialog.show(ContextVS.getMessage(
                 "setMobileSignatureMechanismMsg"), ContextVS.getMessage("setMobileSignatureMechanismAdv"), this);
         getStage().sizeToScene();
     }
