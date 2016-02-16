@@ -104,7 +104,6 @@ public class DocumentVSValidator {
         return new ResponseVS(ResponseVS.SC_OK, null, signedFileOptionSelectedId).setSMIME(signedFile);
     }
 
-    //{"representativeNif":"00000002W","operation":"REPRESENTATIVE_SELECTION","UUID":"dcfacb17-a323-4853-b446-8e28d8f2d0a4"}
     public static ResponseVS validateRepresentationDocument(File signedFile, Set<TrustAnchor> trustAnchors, Date dateBegin,
             Date dateFinish, String representativeNif, X509Certificate timeStampServerCert) throws Exception {
         SMIMEMessage smimeMessage = new SMIMEMessage(FileUtils.getBytesFromFile(signedFile));
@@ -151,10 +150,9 @@ public class DocumentVSValidator {
 
         if(dataMap.containsKey("operation")) {
             TypeVS operationType = TypeVS.valueOf((String) dataMap.get("operation"));
-            if(TypeVS.REPRESENTATIVE_SELECTION != operationType &&
-                    TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != operationType) {
+            if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != operationType) {
                 return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().
-                        getMessage("operationErrorMsg", TypeVS.REPRESENTATIVE_SELECTION.toString(),
+                        getMessage("operationErrorMsg", TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION.toString(),
                                 operationType.toString(), signedFile.getName()));
             }
         } else return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("jsonErrorMsg") +

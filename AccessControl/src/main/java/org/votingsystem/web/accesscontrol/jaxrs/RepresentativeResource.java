@@ -58,12 +58,6 @@ public class RepresentativeResource {
         return Response.ok().entity(representativeDto).type(MediaTypeVS.JSON).build();
     }
 
-    @Path("/delegation") @POST
-    public Response delegation(MessageSMIME messageSMIME) throws Exception {
-        RepresentationDocument representationDocument = representativeDelegationBean.saveDelegation(messageSMIME);
-        return Response.ok().entity(messageSMIME.getContent()).type(MediaTypeVS.JSON_SIGNED).build();
-    }
-
     @Path("/history") @POST
     public Response history(MessageSMIME messageSMIME, @Context ServletContext context, @Context HttpServletRequest req,
                             @Context HttpServletResponse resp) throws Exception {

@@ -4,9 +4,8 @@
     <template>
         <div id="modalDialog" class="modalDialog">
             <div>
-                <div style="font-size: 1.1em;">
                 <div class="layout horizontal center center-justified">
-                    <div class="flex" style="font-size: 1.5em; margin:0px auto;font-weight: bold; color:#6c0404;">
+                    <div class="flex" style="font-size: 1.4em; margin:0px auto;font-weight: bold; color:#6c0404;">
                         <div style="text-align: center;">${msg.saveAsRepresentativeLbl}</div>
                     </div>
                     <div style="position: absolute; top: 0px; right: 0px;">
@@ -18,7 +17,6 @@
                     <input type="number" id="numWeeksAnonymousDelegation" min="1" value="" max="52" required
                            style="width:120px;margin:10px 20px 0px 7px;" class="form-control"
                            title="${msg.numWeeksAnonymousDelegationMsg}">
-                </div>
                 </div>
                 <div hidden="{{!confirmStep}}" vertical layout center center-justified>
                     <div id="delegationMsg" style="margin: 20px 0 10px 10px;"></div>
@@ -35,11 +33,6 @@
                 <div hidden="{{responseStep}}">
                     <div class="layout horizontal" style="margin:0px 20px 0px 0px;  font-size:1.2em;">
                         <div class="flex"></div>
-                        <div style="margin:10px 20px 10px 0px;">
-                            <button on-click="cancel" style="margin: 0px 0px 0px 5px;">
-                                <i class="fa fa-times"></i> ${msg.cancelLbl}
-                            </button>
-                        </div>
                         <div style="margin:10px 0px 10px 0px;">
                             <button on-click="accept" style="margin: 0px 0px 0px 5px;">
                                 <i class="fa fa-check"></i> ${msg.acceptLbl}
@@ -121,13 +114,6 @@
                             "${msg.downloadReceiptMsg}".format(appMessageJSON.URL)
                 }
                 alert(msg, caption)
-            },
-            cancel: function() {
-                if(this.infoRequestStep) this.close()
-                else if(this.confirmStep) {
-                    this.infoRequestStep = true
-                    this.confirmStep = false
-                }
             },
             close: function() {
                 this.$.modalDialog.style.opacity = 0

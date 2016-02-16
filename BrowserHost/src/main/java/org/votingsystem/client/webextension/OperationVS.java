@@ -314,12 +314,6 @@ public class OperationVS implements PasswordDialog.Listener {
                     case CURRENCY_REQUEST:
                         ProgressDialog.show(new CurrencyRequestTask(this, getOperationMessage(), password), null);
                         break;
-                    case REPRESENTATIVE_SELECTION:
-                        RepresentativeDelegationDto delegationDto = getDocumentToSign(RepresentativeDelegationDto.class);
-                        delegationDto.setUUID(java.util.UUID.randomUUID().toString());
-                        ProgressDialog.show(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(delegationDto),
-                                getOperationMessage(), password), null);
-                        break;
                     case EDIT_REPRESENTATIVE:
                         Map documentMap = getDocumentToSign();
                         //remove the 'image/jpeg;base64' part from the string
@@ -329,10 +323,10 @@ public class OperationVS implements PasswordDialog.Listener {
                                 getOperationMessage(), password), null);
                         break;
                     case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                        ProgressDialog.show(new AnonymousDelegationCancelTask(this, getOperationMessage(), password), null);
+                        ProgressDialog.show(new AnonymousDelegationTask(this, getOperationMessage(), password), null);
                         break;
                     case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
-                        ProgressDialog.show(new AnonymousDelegationTask(this, getOperationMessage(), password), null);
+                        ProgressDialog.show(new AnonymousDelegationCancelTask(this, getOperationMessage(), password), null);
                         break;
                     default:
                         ProgressDialog.show(new SendSMIMETask(this, jsonStr, getOperationMessage(), password), null);

@@ -47,57 +47,12 @@ public class RepresentativeDelegationBean {
     @Inject SignatureBean signatureBean;
     @Inject CSRBean csrBean;
 
-
-    public RepresentationDocument saveDelegation(MessageSMIME messageSMIME) throws Exception {
-        MessagesVS messages = MessagesVS.getCurrentInstance();
-        SMIMEMessage smimeMessage = messageSMIME.getSMIME();
-        UserVS userVS = messageSMIME.getUserVS();
-        checkUserDelegationStatus(userVS);
-        RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
-        if(TypeVS.REPRESENTATIVE_SELECTION != request.getOperation()) throw new ValidationExceptionVS(
-                format("ERROR - operation missmatch - expected: {0} - found: {1}",
-                        TypeVS.REPRESENTATIVE_SELECTION, request.getOperation()));
-        request.getRepresentative().setNIF(NifUtils.validate(request.getRepresentative().getNIF()));
-        Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
-                .setParameter("nif", request.getRepresentative().getNIF()).setParameter("type", UserVS.Type.REPRESENTATIVE);
-        UserVS representative = dao.getSingleResult(UserVS.class, query);
-        if(representative == null)  throw new ValidationExceptionVS(
-                "ERROR - representativeNifErrorMsg - representativeNif: " + request.getRepresentative().getNIF());
-        cancelPublicDelegation(messageSMIME);
-        userVS.setRepresentative(representative);
-        RepresentationDocument representationDocument = dao.persist(new RepresentationDocument(messageSMIME,
-                userVS, representative, RepresentationDocument.State.OK));
-        dao.merge(userVS);
-        String toUser = userVS.getNif();
-        String subject = messages.get("representativeSelectValidationSubject");
-        messageSMIME.setSMIME(signatureBean.getSMIMEMultiSigned(toUser, smimeMessage, subject));
-        dao.merge(messageSMIME);
-        log.info(format("user id: {0} - representationDocument id: {1}", userVS.getNif(), representationDocument.getId()));
-        return representationDocument;
-    }
-
-
-    private void cancelPublicDelegation(MessageSMIME messageSMIME) {
-        Query query = dao.getEM().createQuery("select r from RepresentationDocument r where r.userVS =:userVS and " +
-                "r.state =:state").setParameter("userVS", messageSMIME.getUserVS())
-                .setParameter("state", RepresentationDocument.State.OK);
-        RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
-        if(representationDocument != null) {
-            representationDocument.setDateCanceled(messageSMIME.getUserVS().getTimeStampToken().getTimeStampInfo().getGenTime());
-            representationDocument.setState(RepresentationDocument.State.CANCELED).setCancellationSMIME(
-                    messageSMIME);
-            dao.merge(representationDocument);
-            log.info("cancelPublicDelegation - cancelled representationDocument from user id: " + messageSMIME.getUserVS().getId());
-        }
-    }
-
     public X509Certificate validateAnonymousRequest(MessageSMIME messageSMIME, byte[] csrRequest) throws Exception {
         RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
         if(TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST != request.getOperation()) throw new ValidationExceptionVS(
                 "expected operation 'ANONYMOUS_SELECTION_CERT_REQUEST' but found '" + request.getOperation() + "'");
         UserVS userVS = messageSMIME.getUserVS();
         checkUserDelegationStatus(userVS);
-        cancelPublicDelegation(messageSMIME);
         SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(userVS.getNif(), messageSMIME.getSMIME(), null);
         messageSMIME.setType(request.getOperation()).setSMIME(smimeMessageResp);
         X509Certificate anonymousCert = csrBean.signAnonymousDelegationCert(csrRequest);

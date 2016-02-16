@@ -3,9 +3,7 @@ package org.votingsystem.test.misc;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.FileUtils;
 
-import java.io.File;
 import java.util.Base64;
 import java.util.logging.Logger;
 
