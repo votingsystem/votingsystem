@@ -311,9 +311,9 @@ public class UserVSResource {
 
     @Path("/csrSignedWithIDCard")
     @POST @Produces("text/plain")
-    public Response csr(MessageSMIME messageSMIME) throws Exception {
+    public Response csrSignedWithIDCard(MessageSMIME messageSMIME) throws Exception {
         X509Certificate issuedCert = signatureBean.signCSRSignedWithIDCard(messageSMIME);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(CertUtils.getPEMEncoded(issuedCert))).build();
+        return Response.ok().entity(CertUtils.getPEMEncoded(issuedCert)).build();
     }
 
     @Path("/newBankVS")

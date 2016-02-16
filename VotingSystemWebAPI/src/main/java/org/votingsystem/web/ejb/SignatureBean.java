@@ -442,7 +442,7 @@ public class SignatureBean {
     //issues certificates if the request is signed with an Id card
     public X509Certificate signCSRSignedWithIDCard(MessageSMIME messageSMIMEReq) throws Exception {
         UserVS signer = messageSMIMEReq.getUserVS();
-        verifyIDCardCertificate(signer.getCertificate());
+        CertUtils.verifyCertificate(idCardTrustAnchors, false, Arrays.asList(signer.getCertificate()));
         UserCertificationRequestDto requestDto = messageSMIMEReq.getSignedContent(UserCertificationRequestDto.class);
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(requestDto.getCsrRequest());
         CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
@@ -465,13 +465,13 @@ public class SignatureBean {
                 .setParameter("deviceId", certExtensionDto.getDeviceId()).setParameter("nif", validatedNif);
         DeviceVS deviceVS = dao.getSingleResult(DeviceVS.class, query);
         if(deviceVS == null) {
-            deviceVS = new DeviceVS(signer, certExtensionDto.getDeviceId(), certExtensionDto.getEmail(),
-                    certExtensionDto.getMobilePhone(), certExtensionDto.getDeviceType()).setState(DeviceVS.State.OK);
-            dao.persist(deviceVS.setCertificateVS(certificate));
+            deviceVS = dao.persist(new DeviceVS(signer, certExtensionDto.getDeviceId(), certExtensionDto.getEmail(),
+                    certExtensionDto.getMobilePhone(), certExtensionDto.getDeviceType()).setState(DeviceVS.State.OK)
+                    .setCertificateVS(certificate));
         } else {
             dao.merge(deviceVS.getCertificateVS().setState(CertificateVS.State.CANCELED));
-            deviceVS.setEmail(certExtensionDto.getEmail()).setPhone(certExtensionDto.getMobilePhone()).setCertificateVS(certificate);
-            dao.merge(deviceVS);
+            dao.merge(deviceVS.setEmail(certExtensionDto.getEmail()).setPhone(certExtensionDto.getMobilePhone())
+                    .setCertificateVS(certificate));
         }
         log.info("signCertUserVS - issued new CertificateVS id: " + certificate.getId() + " for device: " + deviceVS.getId());
         return issuedCert;

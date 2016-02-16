@@ -33,21 +33,12 @@ public class SMIMEValidator {
         Set<UserVS> signersVS = smimeMessage.getSigners();
         for(UserVS signer : signersVS) {
             log.log(Level.INFO, signer.getCertificate().getSubjectDN().toString());
-            UserVS userVS1 = signer.getUserVS(signer.getCertificate().getSubjectDN().toString());
-
-
-            final X509Principal principal = PrincipalUtil.getSubjectX509Principal(signer.getCertificate());
-            log.info("===== " + principal.toString());
-
-            final String nif = (String) principal.getValues(new DERObjectIdentifier("2.5.4.5")).get(0);
-            log.info("===== " + nif);
-            final String Surname = (String) principal.getValues(new DERObjectIdentifier("2.5.4.4")).get(0);
-            log.info("===== " + Surname);
-            final String name = (String) principal.getValues(new DERObjectIdentifier("2.5.4.42")).get(0);
-            log.info("===== " + name);
-
-
-            log.log(Level.INFO, signer.getCertificate().getSubjectDN().getName());
+            X509Principal principal = PrincipalUtil.getSubjectX509Principal(signer.getCertificate());
+            log.info("principal: " + principal.toString());
+            String name = (String) principal.getValues(new DERObjectIdentifier("2.5.4.42")).get(0);
+            String surname = (String) principal.getValues(new DERObjectIdentifier("2.5.4.4")).get(0);
+            String nif = (String) principal.getValues(X509Name.SN).get(0);
+            log.info("name: " + name + " - surname: " + surname + " - nif: " + nif);
         }
         Set<TrustAnchor> trustAnchors = new HashSet<>();
         InputStreamReader sReader = new InputStreamReader(
@@ -57,7 +48,8 @@ public class SMIMEValidator {
             try {
                 InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("./validationCerts/" + line);
                 TrustAnchor trustAnchor = new TrustAnchor(CertUtils.fromPEMToX509Cert(FileUtils.getBytesFromStream(input)), null);
-                log.info(trustAnchor.getTrustedCert().getIssuerDN().toString() + " - " + trustAnchor.getTrustedCert().getSerialNumber());
+                log.info(trustAnchor.getTrustedCert().getIssuerDN().toString() + " - serialNumber: " +
+                        trustAnchor.getTrustedCert().getSerialNumber());
                 trustAnchors.add(trustAnchor);
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
