@@ -2,6 +2,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -95,6 +96,7 @@ public class EventVSElectionResource {
         Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(EventVSElection.class);
         criteria.add(Restrictions.in("state", inList));
         criteria.addOrder(Order.desc("dateBegin"));
+        criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         List<EventVSElection> resultList = criteria.setFirstResult(offset).setMaxResults(max).list();
         long totalCount = ((Number)DAOUtils.cleanOrderings(criteria).setProjection(Projections.rowCount()).uniqueResult()).longValue();
         List<EventVSDto> eventVSListDto = new ArrayList<>();

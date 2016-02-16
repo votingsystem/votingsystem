@@ -46,8 +46,6 @@ public class ConfigVSImpl implements ConfigVS {
                     break;
                 case PRODUCTION:
                     resourceFile = "TimeStampServer_PRODUCTION.properties";
-                    LogManager.getLogManager().readConfiguration(Thread.currentThread().getContextClassLoader()
-                            .getResource("META-INF/logging.properties").openStream());
                     break;
             }
             props = new Properties();
