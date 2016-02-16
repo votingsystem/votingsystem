@@ -15,37 +15,18 @@
                 <div id="voteResultMessageDiv" style="font-size: 1.2em; color:#888; font-weight: bold; text-align: center; padding:10px 20px 10px 20px;
                         display:block;word-wrap:break-word;">
                 </div>
-                <div hidden="{{!isVoteResult}}">
-                    <div hidden="{{!optionSelected}}">
-                        <p style="text-align: center;">
-                            ${msg.confirmOptionDialogMsg}:</p>
-                        <div style="font-size: 1.2em; text-align: center;"><b>{{optionSelected}}</b></div>
-                    </div>
-                    <div hidden="{{!isOK}}">
-                        <div class="layout horizontal" style="margin:15px 0 0 0;">
-                            <div style="margin:10px 0px 10px 0px;">
-                                <button on-click="checkReceipt">
-                                    <i class="fa fa-certificate"></i><span>{{checkSignatureButtonMsg}}</span>
-                                </button>
-                            </div>
-                            <div class="flex"></div>
-                            <div style="margin:10px 0px 10px 0px;">
-                                <button on-click="cancelVote" style="margin: 0px 0px 0px 5px;">
-                                    <i class="fa fa-times"></i> ${msg.cancelVoteLbl}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                <div hidden="{{!optionSelected}}">
+                    <p style="text-align: center;">
+                        ${msg.confirmOptionDialogMsg}:</p>
+                    <div style="font-size: 1.2em; text-align: center;"><b>{{optionSelected}}</b></div>
                 </div>
-                <div hidden="{{!isCancelationResult}}">
-                    <div hidden="{{!isOK}}">
-                        <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
-                            <div style="margin:10px 0px 10px 0px;">
-                                <button on-click="checkReceipt" style="margin: 0px 0px 0px 5px;">
-                                    <i class="fa fa-certificate"></i>  <span>{{checkSignatureButtonMsg}}</span>
-                                </button>
-                            </div>
-                            <div class="flex"></div>
+                <div hidden="{{!isOK}}">
+                    <div class="layout horizontal" style="margin:15px 0 0 0;">
+                        <div class="flex"></div>
+                        <div style="margin:10px 0px 10px 0px;">
+                            <button on-click="checkReceipt">
+                                <i class="fa fa-certificate"></i><span>{{checkSignatureButtonMsg}}</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -90,17 +71,7 @@
                 d3.select("#voteResultMessageDiv").html(this.message)
             },
             messageTypeChanged: function() {
-                this.isVoteResult = false
-                this.isCancelationResult = false
                 this.isOK = (this.statusCode == 200)
-                if("VOTE_RESULT" === this.messageType) this.isVoteResult = true
-                if("VOTE_CANCELLATION_RESULT" === this.messageType) this.isCancelationResult = true
-            },
-            cancelVote: function() {
-                this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
-                alert('${msg.cancelVoteConfirmMsg}', '${msg.cancelVoteLbl}', this.cancellationConfirmed.bind(this))
-                this.$.modalDialog.style.opacity = 0
-                this.$.modalDialog.style['pointer-events'] = 'none'
             },
             close: function() {
                 this.$.modalDialog.style.opacity = 0
@@ -111,26 +82,6 @@
                 if(this.messageType == 'VOTE_RESULT') operationVS.message = this.votevsReceipt
                 else if(this.messageType == 'VOTE_CANCELLATION_RESULT') operationVS.message = this.voteVSCancellationReceipt
                 VotingSystemClient.setMessage(operationVS);
-            },
-            cancellationConfirmed: function() {
-                var operationVS = new OperationVS(Operation.CANCEL_VOTE)
-                operationVS.message = this.hashCertVSBase64
-                operationVS.serviceURL = contextURL + "/rest/voteVS/cancel"
-                operationVS.signedMessageSubject = "${msg.cancelVoteLbl}"
-                operationVS.setCallback(function(appMessage) { this.cancellationResponse(appMessage) }.bind(this))
-                VotingSystemClient.setMessage(operationVS);
-            },
-            cancellationResponse: function(appMessageJSON) {
-                console.log(this.tagName + " - cancellationResponse");
-                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                    this.messageType = "VOTE_CANCELLATION_RESULT"
-                    this.voteVSCancellationReceipt = appMessageJSON.message;
-                    this.message = "${msg.voteVSCancellationOKMsg}"
-                    this.caption =  "${msg.voteVSCancellationCaption}"
-                    this.checkSignatureButtonMsg = '${msg.checkReceiptLbl}'
-                    this.$.modalDialog.style.opacity = 1
-                    this.$.modalDialog.style['pointer-events'] = 'auto'
-                } else alert(appMessageJSON.message, '${msg.voteVSCancellationErrorCaption}')
             }
         });
     </script>
