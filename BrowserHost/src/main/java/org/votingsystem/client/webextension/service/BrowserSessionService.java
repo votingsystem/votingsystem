@@ -148,9 +148,6 @@ public class BrowserSessionService {
             case REPRESENTATIVE:
                 stateMsg = ContextVS.getMessage("userRepresentativeMsg");
                 break;
-            case WITH_PUBLIC_REPRESENTATION:
-                stateMsg = ContextVS.getMessage("withPublicRepresentationMsg");
-                break;
             case WITHOUT_REPRESENTATION:
                 stateMsg = ContextVS.getMessage("withoutRepresentationMsg");
                 break;

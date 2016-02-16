@@ -147,15 +147,6 @@ public class RepresentativeBean {
         if(userVS == null) throw new ValidationExceptionVS(messages.get("userVSNotFoundByNIF", nifToCheck));
         RepresentationStateDto result = new RepresentationStateDto();
         result.setLastCheckedDate(new Date());
-        if(userVS.getRepresentative() != null) {
-            query = dao.getEM().createQuery("select r from RepresentationDocument r where r.userVS =:userVS and " +
-                    "r.state =:state").setParameter("userVS", userVS).setParameter("state", RepresentationDocument.State.OK);
-            RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
-            result.setState(RepresentationState.WITH_PUBLIC_REPRESENTATION);
-            result.setBase64ContentDigest(representationDocument.getActivationSMIME().getBase64ContentDigest());
-            result.setRepresentative(org.votingsystem.dto.UserVSDto.BASIC(userVS.getRepresentative()));
-            return result;
-        }
         if(UserVS.Type.REPRESENTATIVE == userVS.getType()) {
             result.setState(RepresentationState.REPRESENTATIVE);
             result.setRepresentative(org.votingsystem.dto.UserVSDto.BASIC(userVS));
