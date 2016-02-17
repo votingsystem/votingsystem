@@ -63,8 +63,6 @@ public class ConfigVSImpl implements ConfigVS {
     private String emailAdmin = null;
     private String staticResURL = null;
     private File serverDir = null;
-    private TagVS wildTag;
-    private X509Certificate x509TimeStampServerCert;
     private ControlCenterVS controlCenter;
 
     public ConfigVSImpl() {
@@ -149,10 +147,6 @@ public class ConfigVSImpl implements ConfigVS {
         return dao.getSingleResult(TagVS.class, query);
     }
 
-    public void setX509TimeStampServerCert(X509Certificate x509TimeStampServerCert) {
-        this.x509TimeStampServerCert = x509TimeStampServerCert;
-    }
-
     public EnvironmentVS getMode() {
         return mode;
     }
@@ -185,10 +179,6 @@ public class ConfigVSImpl implements ConfigVS {
 
     public String getWebSocketURL() {
         return webSocketURL;
-    }
-
-    public TagVS getWildTag() {
-        return wildTag;
     }
 
     @Override

@@ -72,7 +72,6 @@ public class ContextVS {
     public static String BROWSER_SESSION_FILE = "browser.bvs";
     public static String INBOX_FILE = "inbox.mvs";
     public static String REPRESENTATIVE_STATE_FILE = "representative.bvs";
-    public static String USER_CSR_REQUEST_FILE_NAME = "user.csrvs";
     public static String RECEIPT_FILE_NAME = "receipt";
     public static String CANCEL_DATA_FILE_NAME = "cancellationDataVS";
     public static String CANCEL_BUNDLE_FILE_NAME = "cancellationBundleVS";

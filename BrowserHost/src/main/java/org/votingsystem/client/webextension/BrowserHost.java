@@ -12,7 +12,6 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.dialog.DebugDialog;
 import org.votingsystem.client.webextension.dialog.MainDialog;
 import org.votingsystem.client.webextension.dialog.MessageDialog;
-import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.util.EventBusTransactionResponseListener;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
@@ -21,7 +20,6 @@ import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.service.EventBusService;
-import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
@@ -34,7 +32,6 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.security.KeyStore;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -60,6 +57,7 @@ public class BrowserHost extends Application {
     private Wallet wallet;
     private Stage primaryStage;
     private String chromeExtensionId;
+    private boolean debugSession = false;
 
     @Override public void start(final Stage primaryStage) throws Exception {
         try {
@@ -124,14 +122,16 @@ public class BrowserHost extends Application {
                                 log.info("unknown schema: " + uri.getScheme());
                         }
                     } else {
-                        if("debugSession".equals(param)) DebugDialog.showDialog();
+                        if("debugSession".equals(param)) {
+                            this.debugSession = true;
+                            DebugDialog.showDialog();
+                        }
                     }
                 }
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 showMessage(ResponseVS.SC_ERROR, ex.getMessage());
             }
-            BrowserSessionService.getInstance().checkCSR();
             EventBusService.getInstance().register(new EventBusTransactionResponseListener());
         } catch (Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
     }
@@ -277,4 +277,9 @@ public class BrowserHost extends Application {
             return null;
         }
     }
+
+    public boolean isDebugSession() {
+        return debugSession;
+    }
+
 }

@@ -82,7 +82,6 @@ public class TimeStampBean {
                 }
             }
             if(x509TimeStampServerCert != null) {
-                config.setX509TimeStampServerCert(x509TimeStampServerCert);
                 timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                         ContextVS.PROVIDER).build(x509TimeStampServerCert);
                 X509CertificateHolder certHolder = timeStampSignerInfoVerifier.getAssociatedCertificate();

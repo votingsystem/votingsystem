@@ -2,14 +2,13 @@ package org.votingsystem.client.webextension.service;
 
 import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
-import javafx.scene.control.Button;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.webextension.BrowserHost;
-import org.votingsystem.client.webextension.dialog.PasswordDialog;
 import org.votingsystem.client.webextension.dto.BrowserSessionDto;
-import org.votingsystem.client.webextension.util.Utils;
-import org.votingsystem.dto.*;
+import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.SocketMessageDto;
+import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.DeviceVS;
@@ -19,7 +18,7 @@ import org.votingsystem.model.voting.RepresentationState;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
-import org.votingsystem.signature.util.*;
+import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
@@ -30,9 +29,6 @@ import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -261,94 +257,6 @@ public class BrowserSessionService {
 
     public UserVS getKeyStoreUserVS() {
         return ContextVS.getInstance().getKeyStoreUserVS();
-    }
-
-    public void setCSRRequest(Long requestId, EncryptedBundle bundle) {
-        try {
-            File csrFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
-            csrFile.createNewFile();
-            EncryptedBundleDto bundleDto = new EncryptedBundleDto(bundle);
-            bundleDto.setId(requestId);
-            JSON.getMapper().writeValue(csrFile, bundleDto);
-        } catch(Exception ex) {
-            log.log(Level.SEVERE,ex.getMessage(), ex);
-        }
-    }
-
-    private void deleteCSR() {
-        log.info("deleteCSR");
-        File csrFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
-        if(csrFile.exists()) csrFile.delete();
-    }
-
-    public void checkCSR() {
-        PlatformImpl.runLater(() -> {
-            File csrFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
-            if(csrFile.exists()) {
-                log.info("csr request found");
-                try {
-                    EncryptedBundleDto bundleDto = JSON.getMapper().readValue(csrFile, EncryptedBundleDto.class);
-                    String serviceURL = ContextVS.getInstance().getAccessControl().getUserCSRServiceURL(bundleDto.getId());
-                    ResponseVS responseVS = HttpHelper.getInstance().getData(serviceURL, null);
-                    if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                        currentResponseVS = responseVS;
-                        PasswordDialog.Listener passwordListener = new PasswordDialog.Listener() {
-                            @Override public void processPassword(char[] password) {
-                                if(password == null) {
-                                    Button optionButton = new Button(ContextVS.getMessage("deletePendingCsrMsg"),
-                                            Utils.getIcon(FontAwesome.Glyph.TIMES, Utils.COLOR_RED_DARK));
-                                    optionButton.setOnAction(event -> deleteCSR());
-                                    showMessage(null, ContextVS.getMessage("certPendingMissingPasswdMsg"), optionButton, null);
-                                } else {
-                                    try {
-                                        File csrFile = new File(ContextVS.getInstance().getAppDir() + File.separator + ContextVS.USER_CSR_REQUEST_FILE_NAME);
-                                        EncryptedBundleDto bundleDto = JSON.getMapper().readValue(csrFile, EncryptedBundleDto.class);
-                                        Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(
-                                                currentResponseVS.getMessage().getBytes());
-                                        X509Certificate userCert = certificates.iterator().next();
-                                        UserVS user = UserVS.getUserVS(userCert);
-                                        setUserVS(user, false);
-                                        log.info("user: " + user.getNif() + " - certificates.size(): " + certificates.size());
-                                        X509Certificate[] certsArray = new X509Certificate[certificates.size()];
-                                        certificates.toArray(certsArray);
-                                        byte[] serializedCertificationRequest = null;
-                                        EncryptedBundle bundle = bundleDto.getEncryptedBundle();
-                                        try {
-                                            serializedCertificationRequest = Encryptor.pbeAES_Decrypt(password, bundle);
-                                            CertificationRequestVS certificationRequest =
-                                                    (CertificationRequestVS) ObjectUtils.deSerializeObject(serializedCertificationRequest);
-                                            KeyStore userKeyStore = KeyStore.getInstance("JKS");
-                                            userKeyStore.load(null);
-                                            userKeyStore.setKeyEntry(ContextVS.KEYSTORE_USER_CERT_ALIAS, certificationRequest.getPrivateKey(),
-                                                    password, certsArray);
-                                            ContextVS.getInstance().saveUserKeyStore(userKeyStore, password);
-                                            ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString());
-                                            showMessage(ResponseVS.SC_OK, ContextVS.getMessage("certInstallOKMsg"));
-                                            csrFile.delete();
-                                            CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
-                                                    user.getCertificate(), ContextVS.DEVICEVS_OID);
-                                            DeviceVSDto deviceVSDto = new DeviceVSDto(user, certExtensionDto);
-                                            deviceVSDto.setType(CryptoTokenVS.JKS_KEYSTORE);
-                                            deviceVSDto.setDeviceName(user.getNif() + " - " + user.getName());
-                                            setCryptoToken(deviceVSDto);
-                                            currentResponseVS = null;
-                                        } catch (Exception ex) {
-                                            showMessage(ContextVS.getMessage("cryptoTokenPasswdErrorMsg"), ContextVS.getMessage("errorLbl"));
-                                        }
-                                    } catch (Exception ex) {
-                                        showMessage(ResponseVS.SC_ERROR, ex.getMessage());
-                                    }
-                                }
-                            }
-                        };
-                        PasswordDialog.showWithPasswordConfirm(passwordListener, ContextVS.getMessage("csrPasswMsg"));
-                    } else showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("certPendingMsg"));
-                } catch (Exception ex) {
-                    log.log(Level.SEVERE,ex.getMessage(), ex);
-                    showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("errorStoringKeyStoreMsg"));
-                }
-            }
-        });
     }
 
     public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,

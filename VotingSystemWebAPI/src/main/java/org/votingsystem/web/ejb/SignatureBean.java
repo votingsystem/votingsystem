@@ -132,8 +132,7 @@ public class SignatureBean {
     }
 
     public void initAdmins(List<UserVS> admins) throws Exception {
-        Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
-        systemUser = dao.getSingleResult(UserVS.class, query);
+        systemUser = config.getSystemUser();
         Set<String> adminsNIF = new HashSet<>();
         for(UserVS userVS:admins) {
             verifyUserCertificate(userVS);

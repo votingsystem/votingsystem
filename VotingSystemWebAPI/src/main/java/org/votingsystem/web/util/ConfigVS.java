@@ -25,8 +25,6 @@ public interface ConfigVS  {
 
     public TagVS getTag(String tagName) throws ValidationExceptionVS;
 
-    public void setX509TimeStampServerCert(X509Certificate x509Cert);
-
     public void mainServletInitialized() throws Exception;
 
     public String getServerName();

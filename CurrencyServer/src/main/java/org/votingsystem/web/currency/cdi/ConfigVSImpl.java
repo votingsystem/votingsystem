@@ -32,6 +32,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -68,7 +69,6 @@ public class ConfigVSImpl implements ConfigVS {
     private String emailAdmin = null;
     private String staticResURL = null;
     private File serverDir = null;
-    private X509Certificate x509TimeStampServerCert;
     private UserVS systemUser;
 
     public ConfigVSImpl() {
@@ -113,18 +113,18 @@ public class ConfigVSImpl implements ConfigVS {
     public void initialize() {
         log.info("initialize");
         try {
+            MessagesVS.setCurrentInstance(Locale.getDefault(), getProperty("vs.bundleBaseName"));
             Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
             systemUser = dao.getSingleResult(UserVS.class, query);
             if(systemUser == null) { //First time run
                 dao.persist(new TagVS(TagVS.WILDTAG));
+                systemUser = dao.persist(new UserVS(systemNIF, UserVS.Type.SYSTEM, serverName));
+                createIBAN(systemUser);
                 URL res = Thread.currentThread().getContextClassLoader().getResource("defaultTags.txt");
                 String[] defaultTags = FileUtils.getStringFromInputStream(res.openStream()).split(",");
                 for(String tag: defaultTags) {
                     createtagVS(tag.trim());
                 }
-                UserVS userVS = new UserVS(systemNIF, UserVS.Type.SYSTEM, serverName);
-                systemUser = dao.persist(userVS);
-                createIBAN(systemUser);
             }
             new ContextVS(null, null);
             executorService.submit(() -> {
@@ -170,10 +170,6 @@ public class ConfigVSImpl implements ConfigVS {
         dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO,
                 java.util.Currency.getInstance("EUR").getCurrencyCode(), tagVS));
         return tagVS;
-    }
-
-    public void setX509TimeStampServerCert(X509Certificate x509TimeStampServerCert) {
-        this.x509TimeStampServerCert = x509TimeStampServerCert;
     }
 
     @Override

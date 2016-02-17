@@ -15,7 +15,6 @@ import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.MediaTypeVS;

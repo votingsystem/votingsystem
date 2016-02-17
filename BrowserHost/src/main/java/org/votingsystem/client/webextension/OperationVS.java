@@ -18,7 +18,6 @@ import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
-import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
@@ -307,9 +306,6 @@ public class OperationVS implements PasswordDialog.Listener {
                         break;
                     case CANCEL_VOTE:
                         ProgressDialog.show(new CancelVoteTask(this, getOperationMessage(), password), null);
-                        break;
-                    case CERT_USER_NEW:
-                        ProgressDialog.show(new CertRequestTask(this, getOperationMessage(), password), null);
                         break;
                     case CURRENCY_REQUEST:
                         ProgressDialog.show(new CurrencyRequestTask(this, getOperationMessage(), password), null);

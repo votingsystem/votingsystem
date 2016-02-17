@@ -83,9 +83,6 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public void setX509TimeStampServerCert(X509Certificate x509Cert) { }
-
-    @Override
     public String getServerName() {
         return null;
     }
