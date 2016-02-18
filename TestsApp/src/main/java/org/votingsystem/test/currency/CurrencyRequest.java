@@ -33,7 +33,8 @@ public class CurrencyRequest {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        SignatureService signatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER);
+        SignatureService signatureService = SignatureService.getUserVSSignatureService(
+                "Currency_07553172H", UserVS.Type.USER);
         UserVS fromUserVS = signatureService.getUserVS();
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         BigDecimal totalAmount = new BigDecimal(10);

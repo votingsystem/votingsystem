@@ -25,7 +25,8 @@ public class PublishBankVS {
         BankVSDto bankVSDto = BankVSDto.NEW("ES1877777777450000000050", info, certChainPEM);
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         ContextVS.getInstance().setDefaultServer(currencyServer);
-        SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER);
+        SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService(
+                "Currency_07553172H", UserVS.Type.USER);
         UserVS fromUserVS = superUserSignatureService.getUserVS();
         String messageSubject = "TEST_ADD_BANKVS";
         SMIMEMessage smimeMessage = superUserSignatureService.getSMIMETimeStamped(fromUserVS.getNif(),

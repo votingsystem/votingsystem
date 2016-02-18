@@ -46,7 +46,8 @@ public class AddUserVSToGroupVS {
             if(!isWithUserValidation) simulationData.finishAndExit(ResponseVS.SC_OK, null);
         }
         log.info("activateUsers");
-        SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER);
+        SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService(
+                "Currency_07553172H", UserVS.Type.USER);
         representativeSignatureService.validateUserVSSubscriptions(simulationData.getGroupId(), currencyServer);
         simulationData.finishAndExit(ResponseVS.SC_OK, null);
     }

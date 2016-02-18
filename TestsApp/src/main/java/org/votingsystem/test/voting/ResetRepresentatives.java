@@ -26,7 +26,7 @@ public class ResetRepresentatives {
                 ActorVS.getServerInfoURL("http://currency:8080/AccessControl"), MediaTypeVS.JSON);
         AccessControlVS accessControlVS = (AccessControlVS) actorVSDto.getActorVS();
         ContextVS.getInstance().setAccessControl(accessControlVS);
-        SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService("07553172H", UserVS.Type.USER);
+        SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService("AccessControl_07553172H", UserVS.Type.USER);
         UserVS fromUserVS = superUserSignatureService.getUserVS();
         String messageSubject = "TEST_RESET_REPRESENTATIVES";
         Map dataMap = new HashMap<>();

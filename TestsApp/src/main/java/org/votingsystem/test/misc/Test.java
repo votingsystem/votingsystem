@@ -32,7 +32,7 @@ public class Test {
         ContextVS.getInstance().setDefaultServer(actorVS);
         CertValidationDto certValidationDto = CertValidationDto.validationRequest("7553172H", "C8-0A-A9-AB-47-BE");
         SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService(
-                "07553172H", UserVS.Type.USER);
+                "Currency_07553172H", UserVS.Type.USER);
         UserVS fromUserVS = superUserSignatureService.getUserVS();
         String messageSubject = "ValidateCert test " + certValidationDto.getUUID();
         SMIMEMessage smimeMessage = superUserSignatureService.getSMIMETimeStamped(fromUserVS.getNif(),

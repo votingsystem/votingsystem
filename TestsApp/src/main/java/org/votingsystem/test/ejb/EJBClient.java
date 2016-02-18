@@ -140,7 +140,8 @@ public class EJBClient {
                         new File(ROOT_KEYSTORE_PATH)).getAbsolutePath());
             }
         } else {
-            keyStoreBytes = votingSystemRemote.generateUserKeyStore(givenName, surname, nif, password);
+            //keyStoreBytes = votingSystemRemote.generateUserKeyStore(givenName, surname, nif, password);
+            keyStoreBytes = currencyServerAdmin.generateUserKeyStore(givenName, surname, nif, password);
         }
         File outputFile = FileUtils.copyBytesToFile(keyStoreBytes, new File(System.getProperty("user.home") +
                 "/" + givenName.replace(" ", "") + ".jks"));

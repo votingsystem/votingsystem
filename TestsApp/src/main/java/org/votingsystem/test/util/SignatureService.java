@@ -82,17 +82,15 @@ public class SignatureService {
     }
 
     public static SignatureService getUserVSSignatureService(String nif, UserVS.Type userType) throws Exception {
-        if(signatureServices.get(nif) != null) {
-            SignatureService sv = signatureServices.get(nif);
-            return sv;
-        }
+        SignatureService signatureService = signatureServices.get(nif);
+        if(signatureService != null)
+                return signatureService;
         String keyStorePath = format("./certs/Cert_{0}_{1}.jks", userType.toString(), nif);
         log.info("loading keystore: " + keyStorePath);
         String keyAlias = ContextVS.getInstance().getProperty("userVSKeyAlias", "userVSKeyAlias");
         String password = ContextVS.getInstance().getProperty("userVSKeyPassword", "userVSKeyPassword");
         KeyStore keyStore = loadKeyStore(keyStorePath, password);
-
-        SignatureService signatureService = new SignatureService(keyStore, keyAlias, password);
+        signatureService = new SignatureService(keyStore, keyAlias, password);
         signatureServices.put(nif, signatureService);
         return signatureService;
     }

@@ -10,5 +10,6 @@ import java.util.concurrent.Future;
 public interface EJBRemoteAdminCurrencyServer {
 
     public Future<ResponseVS> initWeekPeriod(Calendar requestDate) throws IOException;
+    public byte[] generateUserKeyStore(String givenName, String surname, String nif, char[] password) throws Exception;
 
 }

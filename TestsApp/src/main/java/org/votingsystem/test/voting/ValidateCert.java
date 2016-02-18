@@ -35,7 +35,7 @@ public class ValidateCert {
         ContextVS.getInstance().setAccessControl((AccessControlVS)actorVS);
         CertValidationDto certValidationDto = CertValidationDto.validationRequest("1234s", "015d3c26550c160e");
         SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService(
-                "07553172H", UserVS.Type.USER);
+                "AccessControl_07553172H", UserVS.Type.USER);
         UserVS fromUserVS = superUserSignatureService.getUserVS();
         String messageSubject = "ValidateCert test " + certValidationDto.getUUID();
         SMIMEMessage smimeMessage = superUserSignatureService.getSMIMETimeStamped(fromUserVS.getNif(),
