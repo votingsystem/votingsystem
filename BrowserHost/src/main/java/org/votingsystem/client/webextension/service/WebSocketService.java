@@ -167,7 +167,7 @@ public class WebSocketService extends Service<ResponseVS> {
                             break;
                     }
                     break;
-                case MESSAGEVS_TO_DEVICE:
+                case MSG_TO_DEVICE_BY_TARGET_DEVICE_ID:
                     InboxService.getInstance().newMessage(new InboxMessage(messageDto));
                     break;
                 case MESSAGEVS_SIGN_RESPONSE:

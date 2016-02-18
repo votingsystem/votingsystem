@@ -39,14 +39,16 @@ public class WebSocketBean {
     public void processRequest(SocketMessageDto messageDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         switch(messageDto.getOperation()) {
-            case MESSAGEVS_TO_DEVICE:
+            //Device (authenticated or not) sends message knowing target device id. Target device must be authenticated.
+            case MSG_TO_DEVICE_BY_TARGET_DEVICE_ID:
                 if(SessionVSManager.getInstance().sendMessageToDevice(messageDto)) {//message send OK
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                             messageDto.getServerResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null)));
                 } else messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                         messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND, null)));
                 break;
-            case MESSAGEVS_FROM_DEVICE:
+            //Authenticated device sends message knowing target device session id. Target device can be authenticated or not.
+            case MSG_TO_DEVICE_BY_TARGET_SESSION_ID:
                 if(messageDto.getSession().getUserProperties().get("userVS") == null) {
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                             messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,

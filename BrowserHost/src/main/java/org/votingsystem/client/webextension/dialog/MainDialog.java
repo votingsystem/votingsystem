@@ -100,11 +100,6 @@ public class MainDialog extends DialogVS {
         qrCodeButton.setOnAction(event -> QRTransactionFormDialog.showDialog());
 
         Button inboxButton = new Button(ContextVS.getMessage("messageInboxLbl"), Utils.getIcon(FontAwesome.Glyph.ENVELOPE));
-        inboxButton.setOnAction(actionEvent -> {
-            if(!BrowserHost.getInstance().isDebugSession()) SettingsDialogDebug.showDialog();
-            else SettingsDialog.showDialog();
-        });
-
         InboxService.getInstance().setInboxButton(inboxButton);
 
         Button openFileButton = new Button(ContextVS.getMessage("openFileButtonLbl"), Utils.getIcon(FontAwesome.Glyph.FOLDER_OPEN_ALT));
@@ -117,7 +112,10 @@ public class MainDialog extends DialogVS {
         openFileButton.setStyle("-fx-pref-width: 200px;");
 
         MenuItem settingsMenuItem =  new MenuItem(ContextVS.getMessage("settingsLbl"), Utils.getIcon(FontAwesome.Glyph.COG));
-        settingsMenuItem.setOnAction(actionEvent -> SettingsDialogDebug.showDialog() );
+        settingsMenuItem.setOnAction(actionEvent -> {
+            if(!BrowserHost.getInstance().isDebugSession()) SettingsDialogDebug.showDialog();
+            else SettingsDialog.showDialog();
+        } );
         MenuButton menuButton = new MenuButton(null, Utils.getIcon(FontAwesome.Glyph.BARS));
         menuButton.getItems().addAll(settingsMenuItem);
         addMenuButton(menuButton);

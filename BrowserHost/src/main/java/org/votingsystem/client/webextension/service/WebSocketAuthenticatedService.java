@@ -238,10 +238,10 @@ public class WebSocketAuthenticatedService {
             switch(socketMsg.getOperation()) {
                 case CURRENCY_WALLET_CHANGE:
                 case MESSAGEVS:
-                case MESSAGEVS_TO_DEVICE:
+                case MSG_TO_DEVICE_BY_TARGET_DEVICE_ID:
                     InboxService.getInstance().newMessage(new InboxMessage(socketMsg));
                     break;
-                case MESSAGEVS_FROM_DEVICE:
+                case MSG_TO_DEVICE_BY_TARGET_SESSION_ID:
                     break;
                 case MESSAGEVS_SIGN:
                     if(ResponseVS.SC_CANCELED == socketMsg.getStatusCode()){

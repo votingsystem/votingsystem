@@ -168,7 +168,7 @@ public class InboxService {
                 if(openInboxDialog) InboxDialog.showDialog();
                 flush();
                 break;
-            case MESSAGEVS_TO_DEVICE:
+            case MSG_TO_DEVICE_BY_TARGET_DEVICE_ID:
                 if(!inboxMessage.isTimeLimited()) {
                     encryptedMessageList.add(inboxMessage);
                     flush();
@@ -234,7 +234,7 @@ public class InboxService {
                     if(BrowserHost.getInstance().loadWallet(passw) != null) removeMessage(currentMessage);
                 }, ContextVS.getMessage("walletPinMsg"));
                 break;
-            case MESSAGEVS_TO_DEVICE:
+            case MSG_TO_DEVICE_BY_TARGET_DEVICE_ID:
                 showPasswordDialog(ContextVS.getMessage("decryptMsgLbl"), inboxMessage.isTimeLimited());
                 break;
             default:log.info(inboxMessage.getTypeVS() + " not processed");

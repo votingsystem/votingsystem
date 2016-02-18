@@ -141,6 +141,12 @@ public class DeviceVSDto implements Serializable {
         this.certPEM = certPEM;
     }
 
+    public X509Certificate getX509Cert() throws Exception {
+        if(certPEM == null) return null;
+        else return CertUtils.fromPEMToX509Cert(certPEM.getBytes());
+    }
+
+
     public String getSessionId() {
         return sessionId;
     }

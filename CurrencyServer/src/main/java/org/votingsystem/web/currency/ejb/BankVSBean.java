@@ -40,10 +40,10 @@ public class BankVSBean {
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;
 
-    public BankVS saveBankVS(MessageSMIME messageSMIMEReq) throws Exception {
-        UserVS signer = messageSMIMEReq.getUserVS();
+    public BankVS saveBankVS(MessageSMIME smimeReq) throws Exception {
+        UserVS signer = smimeReq.getUserVS();
         log.log(Level.FINE, "signer:" + signer.getNif());
-        BankVSDto request = messageSMIMEReq.getSignedContent(BankVSDto.class);
+        BankVSDto request = smimeReq.getSignedContent(BankVSDto.class);
         request.validatePublishRequest();
         Iban IBAN = Iban.valueOf(request.getIBAN());
         if(!signatureBean.isAdmin(signer.getNif())) {

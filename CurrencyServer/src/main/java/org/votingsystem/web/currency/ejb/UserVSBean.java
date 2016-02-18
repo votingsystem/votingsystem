@@ -41,12 +41,12 @@ public class UserVSBean {
     @Inject TransactionVSBean transactionVSBean;
     
     
-    public UserVS saveUser(MessageSMIME messageSMIMEReq) throws Exception {
+    public UserVS saveUser(MessageSMIME smimeReq) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS signer = messageSMIMEReq.getUserVS();
+        UserVS signer = smimeReq.getUserVS();
         if(!signatureBean.isAdmin(signer.getNif())) throw new ExceptionVS(messages.get("userWithoutPrivilegesErrorMsg",
                 signer.getNif(), TypeVS.CERT_CA_NEW.toString()));
-        ObjectNode dataJSON =(ObjectNode)  JSON.getMapper().readTree(messageSMIMEReq.getSMIME().getSignedContent());
+        ObjectNode dataJSON =(ObjectNode)  JSON.getMapper().readTree(smimeReq.getSMIME().getSignedContent());
         if (dataJSON.get("info") == null || dataJSON.get("certChainPEM") == null || dataJSON.get("operation") == null ||
                 (TypeVS.CERT_USER_NEW != TypeVS.valueOf(dataJSON.get("operation").asText()))) {
             throw new ExceptionVS(messages.get("paramsErrorMsg"));

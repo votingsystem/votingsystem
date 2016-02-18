@@ -3,9 +3,11 @@ package org.votingsystem.client.webextension.dialog;
 import com.google.common.eventbus.Subscribe;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.dto.QRMessageDto;
@@ -45,7 +47,12 @@ public class QRDialog extends DialogVS {
     }
 
     public QRDialog() throws IOException {
-        super("/fxml/QRPane.fxml");
+        super(new VBox(15));
+        mainPane = (VBox) getContentPane();
+        HBox headerBox = new HBox(10);
+        headerBox.setAlignment(Pos.CENTER);
+        headerBox.getChildren().addAll(infoLbl);
+        mainPane.getChildren().addAll(headerBox, imageView);
         EventBusService.getInstance().register(new EventBusSocketMsgListener());
     }
 
@@ -53,7 +60,7 @@ public class QRDialog extends DialogVS {
         mainPane.setStyle("-fx-font-size: 15; -fx-font-weight: bold;-fx-wrap-text: true; -fx-text-fill:#434343;");
     }
 
-    public static void showImage(QRMessageDto qrDto) {
+    public static void showImage(QRMessageDto qrDto, String msg) {
         try {
             if (INSTANCE == null) INSTANCE = new QRDialog();
             Image qrCodeImage = new Image(new ByteArrayInputStream(QRUtils.encodeAsPNG(
@@ -63,8 +70,7 @@ public class QRDialog extends DialogVS {
                 TransactionVSDto dto = qrDto.getData() != null ? (TransactionVSDto) qrDto.getData() : null;
                 if(dto != null) {
                     INSTANCE.show(dto.getSubject());
-                    INSTANCE.infoLbl.setText(dto.getAmount() + " " + dto.getCurrencyCode() + " - " +
-                            MsgUtils.getTagDescription(dto.getTagName()));
+                    INSTANCE.infoLbl.setText(msg);
                 }
             });
         } catch (Exception ex) {

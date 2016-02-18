@@ -426,11 +426,11 @@ public class SignatureBean {
     }
 
     //issues certificates if the request is signed with an Id card
-    public X509Certificate signCSRSignedWithIDCard(MessageSMIME messageSMIMEReq) throws Exception {
-        UserVS signer = messageSMIMEReq.getUserVS();
+    public X509Certificate signCSRSignedWithIDCard(MessageSMIME smimeReq) throws Exception {
+        UserVS signer = smimeReq.getUserVS();
         if(signer.getCertificateVS().getType() != CertificateVS.Type.USER_ID_CARD)
                 throw new Exception("Service available only for ID CARD signed requests");
-        UserCertificationRequestDto requestDto = messageSMIMEReq.getSignedContent(UserCertificationRequestDto.class);
+        UserCertificationRequestDto requestDto = smimeReq.getSignedContent(UserCertificationRequestDto.class);
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(requestDto.getCsrRequest());
         CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
                 CertExtensionDto.class, csr, ContextVS.DEVICEVS_TAG);
@@ -456,7 +456,7 @@ public class SignatureBean {
                     certExtensionDto.getMobilePhone(), certExtensionDto.getDeviceType()).setState(DeviceVS.State.OK)
                     .setCertificateVS(certificate));
         } else {
-            dao.merge(deviceVS.getCertificateVS().setState(CertificateVS.State.CANCELED));
+            dao.merge(deviceVS.getCertificateVS().setState(CertificateVS.State.CANCELED).setMessageSMIME(smimeReq));
             dao.merge(deviceVS.setEmail(certExtensionDto.getEmail()).setPhone(certExtensionDto.getMobilePhone())
                     .setCertificateVS(certificate));
         }

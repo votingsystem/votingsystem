@@ -85,7 +85,7 @@ public class InboxMessageRow {
                 dateLbl.setText(ContextVS.getMessage("importToWalletLbl") + " - " + dateLbl.getText());
                 removeButton.setVisible(false);
                 break;
-            case MESSAGEVS_TO_DEVICE:
+            case MSG_TO_DEVICE_BY_TARGET_DEVICE_ID:
                 dateLbl.setText(ContextVS.getMessage("decryptMsgLbl") + " - " +
                         DateUtils.getDayWeekDateStr(inboxMessage.getDate(), "HH:mm"));
                 descriptionLbl.setText("");

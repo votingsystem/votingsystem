@@ -81,7 +81,7 @@ public class SocketMessageDto {
     public SocketMessageDto getResponse(Integer statusCode, String message, Long deviceFromId,
             SMIMEMessage smimeMessage, TypeVS operation) throws Exception {
         SocketMessageDto messageDto = new SocketMessageDto();
-        messageDto.setOperation(TypeVS.MESSAGEVS_FROM_DEVICE);
+        messageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_SESSION_ID);
         messageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         messageDto.setSessionId(sessionId);
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
@@ -200,7 +200,7 @@ public class SocketMessageDto {
         /*this.remoteAddress = ((String)((AbstractServletOutputStream)((WsRemoteEndpointImplServer)((WsRemoteEndpointAsync)
                 ((WsSession)session).remoteEndpointAsync).base).sos).socketWrapper.getRemoteAddr());*/
         this.session = session;
-        //if sessionId isn't null is because it's a MESSAGEVS_FROM_DEVICE
+        //if sessionId isn't null is because it's a MSG_TO_DEVICE_BY_TARGET_SESSION_ID
         if(sessionId == null) this.sessionId = session.getId();
     }
 
@@ -398,7 +398,7 @@ public class SocketMessageDto {
             throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceTo, null, TypeVS.MESSAGEVS_SIGN);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setDeviceToId(deviceTo.getId());
         socketMessageDto.setDeviceToName(deviceTo.getDeviceName());
@@ -415,7 +415,7 @@ public class SocketMessageDto {
     public static SocketMessageDto getCurrencyWalletChangeRequest(DeviceVS deviceTo, List<Currency> currencyList) throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceTo, currencyList, TypeVS.CURRENCY_WALLET_CHANGE);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setTimeLimited(true);
         socketMessageDto.setUUID(socketSession.getUUID());
@@ -434,7 +434,7 @@ public class SocketMessageDto {
                             String textToEncrypt) throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceTo, null, TypeVS.MESSAGEVS);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setDeviceToId(deviceTo.getId());
         socketMessageDto.setDeviceToName(deviceTo.getDeviceName());
@@ -452,7 +452,7 @@ public class SocketMessageDto {
     //method to response a message previously received
     public SocketMessageDto getMessageVSResponse(UserVS userVS, String textToEncrypt) throws Exception {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MESSAGEVS_TO_DEVICE);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         WebSocketSession socketSession = ContextVS.getInstance().getWSSession(UUID);
         socketMessageDto.setDeviceToId(deviceFromId);

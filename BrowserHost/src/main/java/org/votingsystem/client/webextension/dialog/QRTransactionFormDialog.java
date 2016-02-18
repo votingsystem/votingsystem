@@ -13,6 +13,7 @@ import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.control.CurrencyCodeChoiceBox;
 import org.votingsystem.client.webextension.control.NumberTextField;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
+import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -104,7 +105,8 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                         TypeVS.TRANSACTIONVS_INFO);
                 qrDto.setData(dto);
                 BrowserHost.getInstance().putQRMessage(qrDto);
-                QRDialog.showImage(qrDto);
+                QRDialog.showImage(qrDto, dto.getAmount() + " " + dto.getCurrencyCode() + " - " +
+                        MsgUtils.getTagDescription(dto.getTagName()));
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }
@@ -124,7 +126,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
             } else {
                 if(!Utils.checkConnection()) return;
                 try {
-                    if (INSTANCE == null)INSTANCE = new QRTransactionFormDialog();
+                    if(INSTANCE == null) INSTANCE = new QRTransactionFormDialog();
                     INSTANCE.addTagVS(null);
                     INSTANCE.show(ContextVS.getMessage("createQRLbl"));
                 } catch (Exception ex) {
