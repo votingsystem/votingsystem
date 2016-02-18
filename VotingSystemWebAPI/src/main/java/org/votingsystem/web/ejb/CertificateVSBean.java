@@ -53,14 +53,6 @@ public class CertificateVSBean {
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if(certificateVS == null) {
             certificateVS = dao.persist(CertificateVS.AUTHORITY(x509NewCACert, request.info));
-        } else {
-            if(certificateVS.getType() != CertificateVS.Type.CERTIFICATE_AUTHORITY) {
-                certificateVS.setType(CertificateVS.Type.CERTIFICATE_AUTHORITY);
-                certificateVS.setDescription(certificateVS.getDescription() + " ### " + request.info);
-                dao.merge(certificateVS);
-            } else throw new ValidationExceptionVS("newCACertRepeatedErrorMsg - serialNumber:" +
-                        x509NewCACert.getSerialNumber().toString());
-
         }
         log.info("addCertificateAuthority - new CA - id:" + certificateVS.getId());
         signatureBean.addCertAuthority(certificateVS);

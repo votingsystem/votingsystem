@@ -57,7 +57,6 @@ public class SignatureBean {
     private SMIMESignedGeneratorVS signedMailGenerator;
     private Encryptor encryptor;
     private Set<TrustAnchor> trustAnchors;
-    private Set<TrustAnchor> idCardTrustAnchors;
     private Set<TrustAnchor> currencyAnchors;
     private Set<X509Certificate> trustedCerts;
     private PrivateKey serverPrivateKey;
@@ -150,14 +149,14 @@ public class SignatureBean {
         for(X509Certificate fileSystemX509TrustedCert:resourceCerts) {
             checkAuthorityCertDB(fileSystemX509TrustedCert);
         }
-        Query query = dao.getEM().createNamedQuery("findCertByStateAndType")
-                .setParameter("type", CertificateVS.Type.CERTIFICATE_AUTHORITY)
+        Query query = dao.getEM().createQuery("SELECT c FROM CertificateVS c WHERE c.type in :typeList and c.state =:state")
+                .setParameter("typeList", Arrays.asList(CertificateVS.Type.CERTIFICATE_AUTHORITY,
+                        CertificateVS.Type.CERTIFICATE_AUTHORITY_ID_CARD))
                 .setParameter("state", CertificateVS.State.OK);
         List<CertificateVS>  trustedCertsList = query.getResultList();
         trustedCertsHashMap = new HashMap<>();
         trustedCerts = new HashSet<>();
         trustAnchors = new HashSet<>();
-        idCardTrustAnchors = new HashSet<>();
         for (CertificateVS certificateVS : trustedCertsList) {
             addCertAuthority(certificateVS);
         }
@@ -169,9 +168,6 @@ public class SignatureBean {
         trustedCertsHashMap.put(x509Cert.getSerialNumber().longValue(), certificateVS);
         TrustAnchor trustAnchor = new TrustAnchor(x509Cert, null);
         trustAnchors.add(trustAnchor);
-        if(x509Cert.getSubjectDN().toString().contains("OU=DNIE, O=DIRECCION GENERAL DE LA POLICIA, C=ES")) {
-            idCardTrustAnchors.add(trustAnchor);
-        }
         log.info("addCertAuthority - certificateVS.id: " + certificateVS.getId() + " - " + x509Cert.getSubjectDN() +
                 " - num. trustedCerts: " + trustedCerts.size());
     }
@@ -179,21 +175,16 @@ public class SignatureBean {
     private CertificateVS checkAuthorityCertDB(X509Certificate x509AuthorityCert) throws CertificateException,
             NoSuchAlgorithmException, NoSuchProviderException, ExceptionVS {
         log.info(x509AuthorityCert.getSubjectDN().toString());
-        Query query = dao.getEM().createNamedQuery("findCertBySerialNumberAndType")
-                .setParameter("type", CertificateVS.Type.CERTIFICATE_AUTHORITY)
+        Query query = dao.getEM().createQuery("SELECT c FROM CertificateVS c WHERE c.serialNumber =:serialNumber")
                 .setParameter("serialNumber", x509AuthorityCert.getSerialNumber().longValue());
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if(certificateVS == null) {
             certificateVS = dao.persist(CertificateVS.AUTHORITY(x509AuthorityCert, null));
-            log.info("ADDED NEW FILE SYSTEM CA CERT - certificateVS.id:" + certificateVS.getId());
+            log.info("ADDED NEW FILE SYSTEM CA CERT - certificateVS.id:" + certificateVS.getId() + " - type: " +
+                    certificateVS.getType());
         } else if (CertificateVS.State.OK != certificateVS.getState()) {
             throw new ExceptionVS("File system athority cert: " + x509AuthorityCert.getSubjectDN() + " }' " +
                     " - certificateVS.id: " + certificateVS.getId() + " - state:" + certificateVS.getState());
-        } else if(certificateVS.getType() != CertificateVS.Type.CERTIFICATE_AUTHORITY) {
-            String msg = "Updated from type " + certificateVS.getType() + " to type 'CERTIFICATE_AUTHORITY'";
-            certificateVS.setDescription(certificateVS.getDescription() + "###" + msg);
-            certificateVS.setType(CertificateVS.Type.CERTIFICATE_AUTHORITY);
-            dao.merge(certificateVS);
         }
         return certificateVS;
     }
@@ -214,7 +205,7 @@ public class SignatureBean {
         if(eventTrustedAnchors == null) {
             CertificateVS eventCACert = eventVS.getCertificateVS();
             X509Certificate certCAEventVS = eventCACert.getX509Cert();
-            eventTrustedAnchors = new HashSet<TrustAnchor>();
+            eventTrustedAnchors = new HashSet<>();
             eventTrustedAnchors.add(new TrustAnchor(certCAEventVS, null));
             eventTrustedAnchors.addAll(getTrustAnchors());
             eventTrustedAnchorsMap.put(eventVS.getId(), eventTrustedAnchors);
@@ -265,10 +256,6 @@ public class SignatureBean {
         return KeyStoreUtil.createUserKeyStore(validFrom.getTime(),
                 (validTo.getTime() - validFrom.getTime()), password, ContextVS.KEYSTORE_USER_CERT_ALIAS,
                 rootCAPrivateCredential, testUserDN);
-    }
-
-    public CertUtils.CertValidatorResultVS verifyIDCardCertificate(X509Certificate certToCheck) throws ExceptionVS {
-        return CertUtils.verifyCertificate(idCardTrustAnchors, false, Arrays.asList(certToCheck));
     }
 
     public X509Certificate getServerCert() {
@@ -441,7 +428,8 @@ public class SignatureBean {
     //issues certificates if the request is signed with an Id card
     public X509Certificate signCSRSignedWithIDCard(MessageSMIME messageSMIMEReq) throws Exception {
         UserVS signer = messageSMIMEReq.getUserVS();
-        CertUtils.verifyCertificate(idCardTrustAnchors, false, Arrays.asList(signer.getCertificate()));
+        if(signer.getCertificateVS().getType() != CertificateVS.Type.USER_ID_CARD)
+                throw new Exception("Service available only for ID CARD signed requests");
         UserCertificationRequestDto requestDto = messageSMIMEReq.getSignedContent(UserCertificationRequestDto.class);
         PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(requestDto.getCsrRequest());
         CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
@@ -459,7 +447,7 @@ public class SignatureBean {
         Date validFrom = new Date();
         Date validTo = DateUtils.addDays(validFrom, 365).getTime(); //one year
         X509Certificate issuedCert = signCSR(csr, null, validFrom, validTo);
-        CertificateVS certificate = dao.persist(CertificateVS.USER(signer, issuedCert));
+        CertificateVS certificate = dao.persist(CertificateVS.ISSUED_USER_CERT(signer, issuedCert, serverCertificateVS));
         Query query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId and d.userVS.nif =:nif ")
                 .setParameter("deviceId", certExtensionDto.getDeviceId()).setParameter("nif", validatedNif);
         DeviceVS deviceVS = dao.getSingleResult(DeviceVS.class, query);

@@ -22,10 +22,6 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity
 @Table(name="CertificateVS")
 @NamedQueries({
-        @NamedQuery(name = "findCertBySerialNumberAndType", query =
-                "SELECT c FROM CertificateVS c WHERE c.type =:type and c.serialNumber =:serialNumber"),
-        @NamedQuery(name = "findCertByStateAndType", query =
-                "SELECT c FROM CertificateVS c WHERE c.type =:type and c.state =:state"),
         @NamedQuery(name = "findCertBySerialNumber", query =
                 "SELECT c FROM CertificateVS c WHERE c.serialNumber =:serialNumber"),
         @NamedQuery(name = "findCertByActorVSAndStateAndType", query =
@@ -39,8 +35,8 @@ public class CertificateVS extends EntityVS implements Serializable {
 
     public enum State {OK, ERROR, CANCELED, USED, LAPSED, UNKNOWN}
 
-    public enum Type {VOTEVS_ROOT, VOTEVS, USER, CERTIFICATE_AUTHORITY, ACTOR_VS,
-        ANONYMOUS_REPRESENTATIVE_DELEGATION, CURRENCY, TIMESTAMP_SERVER}
+    public enum Type {VOTEVS_ROOT, VOTEVS, USER, USER_ID_CARD, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD,
+        ACTOR_VS, ANONYMOUS_REPRESENTATIVE_DELEGATION, CURRENCY, TIMESTAMP_SERVER}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
@@ -60,6 +56,8 @@ public class CertificateVS extends EntityVS implements Serializable {
     @Column(name="metaInf", columnDefinition="TEXT")  private String metaInf;
 
     @Column(name="description", columnDefinition="TEXT")  private String description = "";
+
+    @Column(name="subjectDN")  private String subjectDN;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="authorityCertificateVS") private CertificateVS authorityCertificateVS;
@@ -104,6 +102,7 @@ public class CertificateVS extends EntityVS implements Serializable {
         result.setState(State.OK).setType(Type.VOTEVS);
         result.setHashCertVSBase64(hashCertVSBase64);
         result.setUserVS(userVS);
+        result.subjectDN = x509Cert.getSubjectDN().toString();
         return result;
     }
 
@@ -111,6 +110,7 @@ public class CertificateVS extends EntityVS implements Serializable {
         CertificateVS result = new CertificateVS(x509Cert);
         result.type = CertificateVS.Type.VOTEVS_ROOT;
         result.state = CertificateVS.State.OK;
+        result.subjectDN = x509Cert.getSubjectDN().toString();
         return result;
     }
 
@@ -119,6 +119,7 @@ public class CertificateVS extends EntityVS implements Serializable {
         CertificateVS result = new CertificateVS(x509Cert);
         result.type = CertificateVS.Type.ACTOR_VS;
         result.state = CertificateVS.State.OK;
+        result.subjectDN = x509Cert.getSubjectDN().toString();
         result.actorVS = actorVS;
         return result;
     }
@@ -128,6 +129,7 @@ public class CertificateVS extends EntityVS implements Serializable {
         CertificateVS result = new CertificateVS(x509Cert);
         result.type = CertificateVS.Type.ANONYMOUS_REPRESENTATIVE_DELEGATION;
         result.state = CertificateVS.State.OK;
+        result.subjectDN = x509Cert.getSubjectDN().toString();
         result.hashCertVSBase64 = hashCertVSBase64;
         return result;
     }
@@ -136,7 +138,11 @@ public class CertificateVS extends EntityVS implements Serializable {
             NoSuchAlgorithmException,  NoSuchProviderException {
         CertificateVS result = new CertificateVS(x509Cert);
         result.isRoot = CertUtils.isSelfSigned(x509Cert);
-        result.type = CertificateVS.Type.CERTIFICATE_AUTHORITY;
+        result.subjectDN = x509Cert.getSubjectDN().toString();
+        //TODO
+        if(result.subjectDN.contains("C=ES,O=DIRECCION GENERAL DE LA POLICIA,OU=DNIE,CN=AC"))
+            result.type = Type.CERTIFICATE_AUTHORITY_ID_CARD;
+        else result.type = CertificateVS.Type.CERTIFICATE_AUTHORITY;
         result.state = CertificateVS.State.OK;
         result.description = description;
         return result;
@@ -145,10 +151,24 @@ public class CertificateVS extends EntityVS implements Serializable {
     public static CertificateVS USER(UserVS userVS, X509Certificate x509Cert)
             throws CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
         CertificateVS result = new CertificateVS(x509Cert);
-        result.type = CertificateVS.Type.USER;
+        if(Type.CERTIFICATE_AUTHORITY_ID_CARD == userVS.getCertificateCA().getType()) result.type = Type.USER_ID_CARD;
+        else result.type = Type.USER;
         result.state = CertificateVS.State.OK;
         result.userVS = userVS;
+        result.subjectDN = x509Cert.getSubjectDN().toString();
         result.authorityCertificateVS = userVS.getCertificateCA();
+        return result;
+    }
+
+    public static CertificateVS ISSUED_USER_CERT(UserVS userVS, X509Certificate x509Cert, CertificateVS authorityCertificate)
+            throws CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
+        CertificateVS result = new CertificateVS(x509Cert);
+        if(Type.CERTIFICATE_AUTHORITY_ID_CARD == authorityCertificate.getType()) result.type = Type.USER_ID_CARD;
+        else result.type = Type.USER;
+        result.state = CertificateVS.State.OK;
+        result.userVS = userVS;
+        result.subjectDN = x509Cert.getSubjectDN().toString();
+        result.authorityCertificateVS = authorityCertificate;
         return result;
     }
 
@@ -262,6 +282,14 @@ public class CertificateVS extends EntityVS implements Serializable {
 
     public void setAuthorityCertificateVS(CertificateVS authorityCertificate) {
         this.authorityCertificateVS = authorityCertificate;
+    }
+
+    public String getSubjectDN() {
+        return subjectDN;
+    }
+
+    public void setSubjectDN(String subjectDN) {
+        this.subjectDN = subjectDN;
     }
 
     public Date getValidFrom() {
