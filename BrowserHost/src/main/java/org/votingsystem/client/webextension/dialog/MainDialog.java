@@ -14,7 +14,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.service.InboxService;
-import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
+import org.votingsystem.client.webextension.service.WebSocketService;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ResponseVS;
@@ -42,12 +42,15 @@ public class MainDialog extends DialogVS {
     @Subscribe public void call(SocketMessageDto socketMessage) {
             log.info("EventBusConnectionListener - response type: " + socketMessage.getOperation());
             boolean uiUpdated = false;
-            if(TypeVS.INIT_SIGNED_SESSION == socketMessage.getOperation()) {
-                isConnected.set(true);
-                uiUpdated = true;
-            } else if(TypeVS.DISCONNECT == socketMessage.getOperation()) {
-                isConnected.set(false);
-                uiUpdated = true;
+            switch (socketMessage.getOperation()) {
+                case INIT_REMOTE_SIGNED_SESSION:
+                    isConnected.set(true);
+                    uiUpdated = true;
+                    break;
+                case DISCONNECT:
+                    isConnected.set(false);
+                    uiUpdated = true;
+                    break;
             }
             if(uiUpdated) {
                 PlatformImpl.runLater(() -> {
@@ -80,12 +83,11 @@ public class MainDialog extends DialogVS {
         connectionButton.setOnAction(event -> {
             if(isConnected.get()) {
                 Button optionButton = new Button(ContextVS.getMessage("disconnectLbl"));
-                optionButton.setOnAction(event1 -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false));
+                optionButton.setOnAction(event1 -> WebSocketService.getInstance().setConnectionEnabled(false));
                 BrowserHost.showMessage(null, ContextVS.getMessage("disconnectMsg"), optionButton, null);
             } else {
-                OperationVS operationVS = new OperationVS();
                 try {
-                    operationVS.setOperation(TypeVS.CONNECT).initProcess();
+                    new OperationVS().setOperation(TypeVS.CONNECT).initProcess();
                 } catch(Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                     BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
@@ -112,10 +114,7 @@ public class MainDialog extends DialogVS {
         openFileButton.setStyle("-fx-pref-width: 200px;");
 
         MenuItem settingsMenuItem =  new MenuItem(ContextVS.getMessage("settingsLbl"), Utils.getIcon(FontAwesome.Glyph.COG));
-        settingsMenuItem.setOnAction(actionEvent -> {
-            if(!BrowserHost.getInstance().isDebugSession()) SettingsDialogDebug.showDialog();
-            else SettingsDialog.showDialog();
-        } );
+        settingsMenuItem.setOnAction(actionEvent -> SettingsDialog.showDialog());
         MenuButton menuButton = new MenuButton(null, Utils.getIcon(FontAwesome.Glyph.BARS));
         menuButton.getItems().addAll(settingsMenuItem);
         addMenuButton(menuButton);

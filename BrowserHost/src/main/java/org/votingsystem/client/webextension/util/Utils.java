@@ -24,12 +24,11 @@ import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.dialog.PasswordDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
-import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
+import org.votingsystem.client.webextension.service.WebSocketService;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
@@ -136,14 +135,12 @@ public class Utils {
                     byte[] keystoreBytes = FileUtils.getBytesFromFile(selectedKeystore);
                     try {
                         KeyStore userKeyStore = KeyStoreUtil.getKeyStoreFromBytes(keystoreBytes, null);
-                        UserVS userVS = UserVS.getUserVS((X509Certificate)
+                        UserVS userVS = UserVS.FROM_X509_CERT((X509Certificate)
                                 userKeyStore.getCertificate("UserTestKeysStore"));
                         PasswordDialog.showWithPasswordConfirm(password -> {
                             if(password == null) return;
                             try {
                                 ContextVS.getInstance().saveUserKeyStore(userKeyStore, password);
-                                ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN,
-                                        CryptoTokenVS.JKS_KEYSTORE.toString());
                                 BrowserSessionService.getInstance().setUserVS(userVS, false);
                                 if(operationVS != null) BrowserHost.sendMessageToBrowser(MessageDto.OPERATION_CALLBACK(
                                         ResponseVS.SC_OK, JSON.getMapper().writeValueAsString(UserVSDto.COMPLETE(userVS)),
@@ -322,10 +319,10 @@ public class Utils {
     }
 
     public static boolean checkConnection() {
-        if(!WebSocketAuthenticatedService.getInstance().isConnected()) {
+        if(!WebSocketService.getInstance().isConnected()) {
             Button connectionButton = new Button(ContextVS.getMessage("connectLbl"),
                     Utils.getIcon(FontAwesome.Glyph.CLOUD_UPLOAD));
-            connectionButton.setOnAction(event -> WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true));
+            connectionButton.setOnAction(event -> WebSocketService.getInstance().setConnectionEnabled(true));
             BrowserHost.showMessage(null, ContextVS.getMessage("authenticatedWebSocketConnectionRequiredMsg"),
                     connectionButton, null);
             return false;

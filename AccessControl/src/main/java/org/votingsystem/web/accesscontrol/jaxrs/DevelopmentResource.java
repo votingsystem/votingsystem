@@ -57,7 +57,7 @@ public class DevelopmentResource implements Serializable {
         Collection<X509Certificate> userCertCollection = CertUtils.fromPEMToX509CertCollection(requestBytes);
         X509Certificate userCert = userCertCollection.iterator().next();
         if(userCert != null) {
-            UserVS userVS = UserVS.getUserVS(userCert);
+            UserVS userVS = UserVS.FROM_X509_CERT(userCert);
             userVS = subscriptionVSBean.checkUser(userVS);
             userVS.setType(UserVS.Type.USER);
             userVS.setRepresentative(null);

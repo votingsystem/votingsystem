@@ -38,6 +38,10 @@ public class WebSocketBean {
     @Transactional
     public void processRequest(SocketMessageDto messageDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
+        MessageSMIME messageSMIME = null;
+        SocketMessageDto signedMessageDto = null;
+        UserVS signer = null;
+        SocketMessageDto responseDto = null;
         switch(messageDto.getOperation()) {
             //Device (authenticated or not) sends message knowing target device id. Target device must be authenticated.
             case MSG_TO_DEVICE_BY_TARGET_DEVICE_ID:
@@ -69,23 +73,27 @@ public class WebSocketBean {
                     }
                 }
                 break;
+            case INIT_REMOTE_SIGNED_SESSION:
+                messageSMIME = signatureBean.validateSMIME(messageDto.getSMIME(), null).getMessageSMIME();
+                signer = messageSMIME.getUserVS();
+                signedMessageDto = messageSMIME.getSignedContent(SocketMessageDto.class);
+                Session remoteSession = SessionVSManager.getInstance().getNotAuthenticatedSession(signedMessageDto.getSessionId());
+                SessionVSManager.getInstance().putAuthenticatedDevice(remoteSession, signer);
+                remoteSession.getUserProperties().put("remote", true);
+                responseDto = messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK, null)
+                        .setSessionId(remoteSession.getId()).setMessageType(TypeVS.INIT_REMOTE_SIGNED_SESSION);
+                responseDto.setConnectedDevice(DeviceVSDto.INIT_AUTHENTICATED_SESSION(signer));
+                remoteSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
+                dao.getEM().merge(messageSMIME.setType(TypeVS.WEB_SOCKET_INIT));
+                break;
             case INIT_SIGNED_SESSION:
-                MessageSMIME messageSMIME = signatureBean.validateSMIME(messageDto.getSMIME(), null).getMessageSMIME();
-                UserVS signer = messageSMIME.getUserVS();
+                messageSMIME = signatureBean.validateSMIME(messageDto.getSMIME(), null).getMessageSMIME();
+                signer = messageSMIME.getUserVS();
                 if(signer.getDeviceVS() != null) {
-                    //check if accessing from one device and signing from another (a mobile token)
-                    if(!signer.getDeviceVS().getDeviceId().equals(messageDto.getDeviceId())) signer.setDeviceVS(null);
-                }
-                if(signer.getDeviceVS() == null && messageDto.getDeviceId() != null){
-                    Query query = dao.getEM().createNamedQuery("findDeviceByUserAndDeviceId")
-                            .setParameter("deviceId", messageDto.getDeviceId()).setParameter("userVS", signer);
-                    DeviceVS deviceVS = dao.getSingleResult(DeviceVS.class, query);
-                    signer.setDeviceVS(deviceVS);
-                }
-                if(signer.getDeviceVS() != null) {
+                    messageDto.getSession().getUserProperties().put("remote", false);
                     SessionVSManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer);
-                    SocketMessageDto responseDto = messageDto.getServerResponse(
-                            ResponseVS.SC_WS_CONNECTION_INIT_OK, null);
+                    responseDto = messageDto.getServerResponse(
+                            ResponseVS.SC_WS_CONNECTION_INIT_OK, null).setMessageType(TypeVS.INIT_SIGNED_SESSION);
                     responseDto.setConnectedDevice(DeviceVSDto.INIT_AUTHENTICATED_SESSION(signer));
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
                     dao.getEM().merge(messageSMIME.setType(TypeVS.WEB_SOCKET_INIT));

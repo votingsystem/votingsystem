@@ -11,7 +11,7 @@ import javafx.scene.layout.VBox;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
-import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
+import org.votingsystem.client.webextension.service.WebSocketService;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.SocketMessageDto;
@@ -60,7 +60,7 @@ public class MessageVSDialog extends DialogVS {
             try {
                 SocketMessageDto messageDto = webSocketMessage.getMessageVSResponse(
                         BrowserSessionService.getInstance().getUserVS(), textArea.getText());
-                WebSocketAuthenticatedService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(messageDto));
+                WebSocketService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(messageDto));
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());

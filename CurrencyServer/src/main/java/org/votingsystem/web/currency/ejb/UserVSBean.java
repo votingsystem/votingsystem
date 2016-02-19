@@ -53,7 +53,7 @@ public class UserVSBean {
         }
         Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(
                 dataJSON.get("certChainPEM").asText().getBytes());
-        UserVS newUser = UserVS.getUserVS(certChain.iterator().next());
+        UserVS newUser = UserVS.FROM_X509_CERT(certChain.iterator().next());
         signatureBean.verifyUserCertificate(newUser);
         newUser = subscriptionVSBean.checkUser(newUser);
         dao.merge(newUser.setState(UserVS.State.ACTIVE).setReason(dataJSON.get("info").asText()));

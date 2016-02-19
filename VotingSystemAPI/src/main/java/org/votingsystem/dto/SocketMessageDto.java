@@ -98,11 +98,20 @@ public class SocketMessageDto {
     }
 
     public static SocketMessageDto INIT_SESSION_REQUEST(String deviceId) throws NoSuchAlgorithmException {
-        WebSocketSession socketSession = checkWebSocketSession(null, null, TypeVS.INIT_SIGNED_SESSION);
         SocketMessageDto messageDto = new SocketMessageDto();
-        messageDto.setOperation(socketSession.getTypeVS());
+        messageDto.setOperation(TypeVS.INIT_SIGNED_SESSION);
         messageDto.setDeviceId(deviceId);
-        messageDto.setUUID(socketSession.getUUID());
+        messageDto.setUUID(java.util.UUID.randomUUID().toString());
+        return messageDto;
+    }
+
+    public static SocketMessageDto INIT_SESSION_RESPONSE(String sessionId) {
+        SocketMessageDto messageDto = new SocketMessageDto();
+        messageDto.setStatusCode(ResponseVS.SC_PROCESSING);
+        messageDto.setOperation(TypeVS.MESSAGEVS_FROM_VS);
+        messageDto.setMessageType(TypeVS.INIT_SESSION);
+        messageDto.setSessionId(sessionId);
+        messageDto.setUUID(java.util.UUID.randomUUID().toString());
         return messageDto;
     }
 
@@ -122,8 +131,9 @@ public class SocketMessageDto {
         return messageType;
     }
 
-    public void setMessageType(TypeVS messageType) {
+    public SocketMessageDto setMessageType(TypeVS messageType) {
         this.messageType = messageType;
+        return this;
     }
 
     public Long getDeviceFromId() {
@@ -146,8 +156,9 @@ public class SocketMessageDto {
         return sessionId;
     }
 
-    public void setSessionId(String sessionId) {
+    public SocketMessageDto setSessionId(String sessionId) {
         this.sessionId = sessionId;
+        return this;
     }
 
     public TypeVS getOperation() {

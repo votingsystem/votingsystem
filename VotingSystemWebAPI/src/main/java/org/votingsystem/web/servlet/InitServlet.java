@@ -43,7 +43,7 @@ public class InitServlet extends HttpServlet{
                 } else if(resFileName.startsWith("ADMIN_") && resFileName.endsWith(".pem")) {
                     X509Certificate adminCert = CertUtils.fromPEMToX509Cert(FileUtils.getBytesFromStream(
                             getServletContext().getResourceAsStream(res)));
-                    UserVS userVS = UserVS.getUserVS(adminCert);
+                    UserVS userVS = UserVS.FROM_X509_CERT(adminCert);
                     admins.add(userVS);
                 }
             }

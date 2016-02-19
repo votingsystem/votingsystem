@@ -47,7 +47,7 @@ public class EventVSElectionBean {
         EventVSDto request = messageSMIME.getSignedContent(EventVSDto.class);request.validate(config.getContextURL());
         X509Certificate certCAVotacion = CertUtils.fromPEMToX509Cert(request.getCertCAVotacion().getBytes());
         X509Certificate userCert = CertUtils.fromPEMToX509Cert(request.getUserVS().getBytes());
-        UserVS user = subscriptionVSBean.checkUser(UserVS.getUserVS(userCert));
+        UserVS user = subscriptionVSBean.checkUser(UserVS.FROM_X509_CERT(userCert));
         EventVSElection eventVS = request.getEventVSElection();
         eventVS.setAccessControlVS(accessControl);
         eventVS.setUserVS(user);

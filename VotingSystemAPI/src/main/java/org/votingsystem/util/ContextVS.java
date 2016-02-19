@@ -127,9 +127,6 @@ public class ContextVS {
     public static final int MAX_MSG_LENGTH = 300;
 
     public static final String MULTISIGNED_FILE_NAME = "MultiSign";
-    public static final String HASH_CERTVS_KEY        = "hashCertVSBase64";
-    public static final String ORIGIN_HASH_CERTVS_KEY = "originHashCertVS";
-    public static final String CRYPTO_TOKEN = "CRYPTO_TOKEN";
     public static final String BASE64_ENCODED_CONTENT_TYPE = "Base64Encoded";
     public static final String KEYSTORE_USER_CERT_ALIAS = "UserTestKeysStore";
 
@@ -409,12 +406,11 @@ public class ContextVS {
             mainKeyStoreFile.createNewFile();
         } else mainKeyStoreFile.createNewFile();
         Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
-        UserVS userVS = UserVS.getUserVS((X509Certificate)chain[0]);
+        UserVS userVS = UserVS.FROM_X509_CERT((X509Certificate)chain[0]);
 
         CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
                 userVS.getCertificate(), ContextVS.DEVICEVS_OID);
         DeviceVSDto deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
-        deviceVSDto.setType(CryptoTokenVS.JKS_KEYSTORE);
         deviceVSDto.setDeviceName(userVS.getNif() + " - " + userVS.getName());
 
         File userVSKeyStoreFile = new File(appDir + File.separator + userVS.getNif() + "_" + USER_KEYSTORE_FILE_NAME);
@@ -449,7 +445,7 @@ public class ContextVS {
             Map keyStoreMap = JSON.getMapper().readValue(keyStoreFile, new TypeReference<Map<String, String>>() { });
             Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(
                     ((String) keyStoreMap.get("certPEM")).getBytes());
-            return UserVS.getUserVS(certChain.iterator().next());
+            return UserVS.FROM_X509_CERT(certChain.iterator().next());
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

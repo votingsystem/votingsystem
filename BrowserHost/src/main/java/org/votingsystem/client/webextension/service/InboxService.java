@@ -8,9 +8,7 @@ import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.dialog.InboxDialog;
 import org.votingsystem.client.webextension.dialog.MessageVSDialog;
 import org.votingsystem.client.webextension.dialog.PasswordDialog;
-import org.votingsystem.client.webextension.dialog.ProgressDialog;
 import org.votingsystem.client.webextension.dto.InboxMessageDto;
-import org.votingsystem.client.webextension.task.InboxDecryptTask;
 import org.votingsystem.client.webextension.util.InboxMessage;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
@@ -18,7 +16,6 @@ import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.service.EventBusService;
-import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
@@ -28,8 +25,6 @@ import org.votingsystem.util.currency.Wallet;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -70,7 +65,7 @@ public class InboxService {
                 Long deviceFromId = BrowserSessionService.getInstance().getConnectedDevice().getId();
                 String socketMsgStr = JSON.getMapper().writeValueAsString(messageDto.
                         getResponse(ResponseVS.SC_OK, null, deviceFromId, null, messageDto.getOperation()));
-                WebSocketAuthenticatedService.getInstance().sendMessage(socketMsgStr);
+                WebSocketService.getInstance().sendMessage(socketMsgStr);
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 BrowserHost.showMessage(ResponseVS.SC_ERROR, ex.getMessage());
@@ -127,7 +122,7 @@ public class InboxService {
     private void showPasswordDialog(final String pinDialogMessage, final boolean isTimeLimited) {
         if(isPasswordVisible.getAndSet(true)) return;
         PlatformImpl.runLater(() -> {
-            if (BrowserSessionService.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
+            /*if (BrowserSessionService.getCryptoTokenType() != CryptoTokenVS.MOBILE) {
                 String dialogMessage = pinDialogMessage;
                 if (pinDialogMessage == null) dialogMessage = ContextVS.getMessage("messageToDevicePasswordMsg");
                 Integer visibilityInSeconds = null;
@@ -153,7 +148,7 @@ public class InboxService {
                     }
                 }, dialogMessage, visibilityInSeconds);
             } else BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("messageToDeviceService") +
-                    " - " + ContextVS.getMessage("jksRequiredMsg"));
+                    " - " + ContextVS.getMessage("jksRequiredMsg"));*/
         });
     }
 

@@ -3,12 +3,11 @@ package org.votingsystem.client.webextension;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.sun.javafx.application.PlatformImpl;
 import javafx.event.EventHandler;
 import org.votingsystem.client.webextension.dialog.*;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.service.InboxService;
-import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
+import org.votingsystem.client.webextension.service.WebSocketService;
 import org.votingsystem.client.webextension.task.*;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
@@ -22,9 +21,7 @@ import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.util.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
@@ -248,19 +245,12 @@ public class OperationVS implements PasswordDialog.Listener {
     public void setTabId(String tabId) {
         this.tabId = tabId;
     }
-    
-    public void processOperationWithPassword(final String passwordDialogMessage) {
-        if(CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
-            PlatformImpl.runAndWait(() ->
-                    PasswordDialog.showWithoutPasswordConfirm(this, passwordDialogMessage));
-        } else processPassword(null);
-    }
+
 
     private String getOperationMessage() {
-        String msgSuffix = "";
         String msgPrefix = "";
-        if(CryptoTokenVS.MOBILE == BrowserSessionService.getCryptoTokenType()) msgSuffix = " - " + ContextVS.getMessage("messageToDeviceProgressMsg",
-                BrowserSessionService.getInstance().getCryptoToken().getDeviceName());
+        String msgSuffix = " - " + ContextVS.getMessage("messageToDeviceProgressMsg",
+                ContextVS.getInstance().getConnectedDevice().getDeviceName());
         switch (operation) {
             case CURRENCY_REQUEST:
                 try {
@@ -284,52 +274,46 @@ public class OperationVS implements PasswordDialog.Listener {
 
     @Override
     public void processPassword(char[] password) {
-        this.password = password;
-        if(password == null && CryptoTokenVS.MOBILE != BrowserSessionService.getCryptoTokenType()) {
-            processResult(new ResponseVS(ResponseVS.SC_CANCELED, ContextVS.getMessage("operationCancelledMsg")));
-            BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
-        } else {
-            try {
-                switch (operation) {
-                    case WALLET_SAVE:
-                        if(BrowserHost.getInstance().loadWallet(password) != null) {
-                            BrowserHost.getInstance().loadWallet(password);
-                            processResult(ResponseVS.OK());
-                            InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
-                        }
-                        break;
-                    case PUBLISH_EVENT:
-                        ProgressDialog.show(new SendSMIMETask(this, jsonStr, getOperationMessage(), password, "eventURL"), null);
-                        break;
-                    case SEND_VOTE:
-                        ProgressDialog.show(new VoteTask(this, getOperationMessage(), password), null);
-                        break;
-                    case CANCEL_VOTE:
-                        ProgressDialog.show(new CancelVoteTask(this, getOperationMessage(), password), null);
-                        break;
-                    case CURRENCY_REQUEST:
-                        ProgressDialog.show(new CurrencyRequestTask(this, getOperationMessage(), password), null);
-                        break;
-                    case EDIT_REPRESENTATIVE:
-                        Map documentMap = getDocumentToSign();
-                        //remove the 'image/jpeg;base64' part from the string
-                        String representativeImage = ((String)documentMap.get("base64Image")).split(",")[1];
-                        documentMap.put("base64Image", representativeImage);
-                        ProgressDialog.show(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(documentMap),
-                                getOperationMessage(), password), null);
-                        break;
-                    case ANONYMOUS_REPRESENTATIVE_SELECTION:
-                        ProgressDialog.show(new AnonymousDelegationTask(this, getOperationMessage(), password), null);
-                        break;
-                    case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
-                        ProgressDialog.show(new AnonymousDelegationCancelTask(this, getOperationMessage(), password), null);
-                        break;
-                    default:
-                        ProgressDialog.show(new SendSMIMETask(this, jsonStr, getOperationMessage(), password), null);
-                }
-            } catch (Exception ex) {
-                log.log(Level.SEVERE, ex.getMessage(), ex);
+        try {
+            switch (operation) {
+                case WALLET_SAVE:
+                    if(BrowserHost.getInstance().loadWallet(password) != null) {
+                        BrowserHost.getInstance().loadWallet(password);
+                        processResult(ResponseVS.OK());
+                        InboxService.getInstance().removeMessagesByType(TypeVS.CURRENCY_IMPORT);
+                    }
+                    break;
+                case PUBLISH_EVENT:
+                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, getOperationMessage(), password, "eventURL"), null);
+                    break;
+                case SEND_VOTE:
+                    ProgressDialog.show(new VoteTask(this, getOperationMessage(), password), null);
+                    break;
+                case CANCEL_VOTE:
+                    ProgressDialog.show(new CancelVoteTask(this, getOperationMessage(), password), null);
+                    break;
+                case CURRENCY_REQUEST:
+                    ProgressDialog.show(new CurrencyRequestTask(this, getOperationMessage(), password), null);
+                    break;
+                case EDIT_REPRESENTATIVE:
+                    Map documentMap = getDocumentToSign();
+                    //remove the 'image/jpeg;base64' part from the string
+                    String representativeImage = ((String)documentMap.get("base64Image")).split(",")[1];
+                    documentMap.put("base64Image", representativeImage);
+                    ProgressDialog.show(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(documentMap),
+                            getOperationMessage(), password), null);
+                    break;
+                case ANONYMOUS_REPRESENTATIVE_SELECTION:
+                    ProgressDialog.show(new AnonymousDelegationTask(this, getOperationMessage(), password), null);
+                    break;
+                case ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION:
+                    ProgressDialog.show(new AnonymousDelegationCancelTask(this, getOperationMessage(), password), null);
+                    break;
+                default:
+                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, getOperationMessage(), password), null);
             }
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
@@ -377,10 +361,10 @@ public class OperationVS implements PasswordDialog.Listener {
             case INIT_SERVER:
                 break;
             case CONNECT:
-                WebSocketAuthenticatedService.getInstance().setConnectionEnabled(true);
+                WebSocketService.getInstance().setConnectionEnabled(true);
                 break;
             case DISCONNECT:
-                WebSocketAuthenticatedService.getInstance().setConnectionEnabled(false);
+                WebSocketService.getInstance().setConnectionEnabled(false);
                 break;
             case FILE_FROM_URL:
                 executorService.submit(() -> {
@@ -440,9 +424,6 @@ public class OperationVS implements PasswordDialog.Listener {
             case SEND_ANONYMOUS_DELEGATION:
                 Utils.saveReceiptAnonymousDelegation(this);
                 break;
-            case CERT_USER_NEW:
-                processOperationWithPassword(ContextVS.getMessage("newCertPasswDialogMsg"));
-                break;
             case WALLET_OPEN:
                 WalletDialog.showDialog();
                 break;
@@ -450,7 +431,7 @@ public class OperationVS implements PasswordDialog.Listener {
                 saveWallet();
                 break;
             case MESSAGEVS:
-                processResult(WebSocketAuthenticatedService.getInstance().sendMessageVS(this));
+                processResult(WebSocketService.getInstance().sendMessageVS(this));
                 break;
             case REPRESENTATIVE_STATE:
                 RepresentationStateDto dto = BrowserSessionService.getInstance().getRepresentationState();
@@ -458,10 +439,10 @@ public class OperationVS implements PasswordDialog.Listener {
                 processResult(responseVS);
                 break;
             case CURRENCY_REQUEST:
-                processOperationWithPassword(getOperationMessage());
+                processPassword(null);
                 break;
             default:
-                processOperationWithPassword(signedMessageSubject);
+                processPassword(null);
         }
     }
 

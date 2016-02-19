@@ -390,7 +390,7 @@ public class SMIMEMessage extends MimeMessage {
                 } catch (Exception ex) {
                     throw ex;
                 }
-                UserVS userVS = UserVS.getUserVS(cert);
+                UserVS userVS = UserVS.FROM_X509_CERT(cert);
                 userVS.setSignerInformation(signer);
                 TimeStampToken tsToken = checkTimeStampToken(signer);
                 userVS.setTimeStampToken(tsToken);

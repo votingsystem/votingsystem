@@ -263,8 +263,9 @@ public class UserVSDto implements Serializable {
         return deviceVS;
     }
 
-    public void setDeviceVS(DeviceVSDto deviceVS) {
+    public UserVSDto setDeviceVS(DeviceVSDto deviceVS) {
         this.deviceVS = deviceVS;
+        return this;
     }
 
     public UserVSDto getRepresentative() {

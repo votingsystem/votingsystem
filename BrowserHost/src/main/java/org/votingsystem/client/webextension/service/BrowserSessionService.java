@@ -2,11 +2,8 @@ package org.votingsystem.client.webextension.service;
 
 import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
-import org.votingsystem.callable.MessageTimeStamper;
-import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.dto.BrowserSessionDto;
 import org.votingsystem.dto.DeviceVSDto;
-import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
@@ -17,16 +14,11 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.RepresentationState;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
-import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
 import java.io.File;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.concurrent.CountDownLatch;
@@ -174,16 +166,13 @@ public class BrowserSessionService {
         return INSTANCE;
     }
 
-    public SocketMessageDto initAuthenticatedSession(SocketMessageDto socketMsg, UserVS userVS) {
+    public SocketMessageDto initAuthenticatedSession(SocketMessageDto socketMsg) {
         try {
             if(ResponseVS.SC_WS_CONNECTION_INIT_OK == socketMsg.getStatusCode()) {
-                socketMsg.setUserVS(userVS);
-                browserSessionDto.setUserVS(UserVSDto.COMPLETE(userVS));
+                browserSessionDto.setDevice(socketMsg.getConnectedDevice());
                 browserSessionDto.setIsConnected(true);
-                browserSessionDto.getUserVS().setDeviceVS(socketMsg.getConnectedDevice());
+                ContextVS.getInstance().setConnectedDevice(browserSessionDto.getDevice());
                 flush();
-                ContextVS.getInstance().setConnectedDevice(socketMsg.getConnectedDevice());
-                BrowserHost.sendMessageToBrowser(MessageDto.WEB_SOCKET(ResponseVS.SC_WS_CONNECTION_INIT_OK, null));
             } else {
                 showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
                 log.log(Level.SEVERE,"ERROR - initAuthenticatedSession - statusCode: " + socketMsg.getStatusCode());
@@ -202,18 +191,7 @@ public class BrowserSessionService {
         }
     }
 
-    public void setCryptoToken(DeviceVSDto cryptoToken) {
-        log.info("setCryptoToken - type: " + cryptoToken.getType());
-        ContextVS.getInstance().setProperty(ContextVS.CRYPTO_TOKEN, cryptoToken.getType().toString());
-        browserSessionDto.setCryptoToken(cryptoToken);
-        flush();
-    }
-
-    public DeviceVSDto getCryptoToken() {
-        return browserSessionDto.getCryptoToken();
-    }
-
-    public DeviceVSDto getDevice() throws SocketException, UnknownHostException {
+    public DeviceVSDto getDevice() throws Exception {
         DeviceVSDto deviceVSDto = browserSessionDto.getDevice();
         if(deviceVSDto == null) {
             deviceVSDto = new DeviceVSDto();
@@ -223,12 +201,6 @@ public class BrowserSessionService {
             browserSessionDto.setDevice(deviceVSDto);
         }
         return browserSessionDto.getDevice();
-    }
-
-    public static CryptoTokenVS getCryptoTokenType () {
-        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN);
-        if(tokenType == null) return null;
-        else return CryptoTokenVS.valueOf(tokenType);
     }
 
     public UserVS getUserVS()  {
@@ -261,37 +233,19 @@ public class BrowserSessionService {
 
     public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
             char[] password, String subject) throws Exception {
-        String  tokenType = ContextVS.getInstance().getProperty(ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString());
-        log.info("getSMIME - tokenType: " + tokenType);
-        switch(CryptoTokenVS.valueOf(tokenType)) {
-            case JKS_KEYSTORE:
-                if(password != null) {
-                    KeyStore keyStore = ContextVS.getInstance().getUserKeyStore(password);
-                    privateKey = (PrivateKey)keyStore.getKey(ContextVS.KEYSTORE_USER_CERT_ALIAS, password);
-                    chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
-                }
-                SMIMESignedGeneratorVS signedGenerator = new SMIMESignedGeneratorVS(
-                        privateKey, chain, ContextVS.DNIe_SIGN_MECHANISM);
-                SMIMEMessage smime = signedGenerator.getSMIME(fromUser, toUser, textToSign, subject);
-                MessageTimeStamper timeStamper = new MessageTimeStamper(smime,
-                        ContextVS.getInstance().getDefaultServer().getTimeStampServiceURL());
-                timeStamper.call();
-                return timeStamper.getSMIME();
-            case MOBILE:
-                countDownLatch = new CountDownLatch(1);
-                DeviceVS deviceVS = getInstance().getCryptoToken().getDeviceVS();
-                SocketMessageDto messageDto = SocketMessageDto.getSignRequest(deviceVS, toUser, textToSign, subject);
-                PlatformImpl.runLater(() -> {//Service must only be used from the FX Application Thread
-                    try {
-                        WebSocketService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(messageDto));
-                    } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
-                });
-                countDownLatch.await();
-                ResponseVS<SMIMEMessage> responseVS = getMessageToDeviceResponse();
-                if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-                else return responseVS.getData();
-            default: return null;
-        }
+        log.info("getSMIME");
+        countDownLatch = new CountDownLatch(1);
+        SocketMessageDto messageDto = SocketMessageDto.getSignRequest(ContextVS.getInstance().getConnectedDevice().getDeviceVS(),
+                toUser, textToSign, subject);
+        PlatformImpl.runLater(() -> {//Service must only be used from the FX Application Thread
+            try {
+                WebSocketService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(messageDto));
+            } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
+        });
+        countDownLatch.await();
+        ResponseVS<SMIMEMessage> responseVS = getMessageToDeviceResponse();
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
+        else return responseVS.getData();
     }
 
     public static void setSignResponse(SocketMessageDto socketMsg) {

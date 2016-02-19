@@ -103,7 +103,7 @@ public class SignatureService {
     }
 
     public UserVS getUserVS() {
-        if(userVS == null) userVS = UserVS.getUserVS(certSigner);
+        if(userVS == null) userVS = UserVS.FROM_X509_CERT(certSigner);
         return userVS;
     }
 
@@ -248,7 +248,7 @@ public class SignatureService {
             }
         }
         String messageSubject = "TEST_ACTIVATE_GROUPVS_USERS";
-        UserVS userVS = UserVS.getUserVS(certSigner);
+        UserVS userVS = UserVS.FROM_X509_CERT(certSigner);
         for (SubscriptionVSDto subscriptionVSDto : subscriptionVSDtoList.getResultList()) {
             SMIMEMessage smimeMessage = getSMIMETimeStamped(userVS.getNif(), currencyServer.getName(),
                     JSON.getMapper().writeValueAsString(subscriptionVSDto), messageSubject);

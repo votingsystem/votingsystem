@@ -439,7 +439,7 @@ public class UserVS extends EntityVS implements Serializable {
         return this;
     }
 
-    public static UserVS getUserVS (X509Certificate certificate) {
+    public static UserVS FROM_X509_CERT(X509Certificate certificate) {
         UserVS userVS = getUserVS(certificate.getSubjectDN().getName());
         userVS.setCertificate(certificate);
         return userVS;

@@ -21,10 +21,8 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.signature.util.CryptoTokenVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -105,7 +103,7 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
                         TypeVS.TRANSACTIONVS_INFO);
                 qrDto.setData(dto);
                 BrowserHost.getInstance().putQRMessage(qrDto);
-                QRDialog.showImage(qrDto, dto.getAmount() + " " + dto.getCurrencyCode() + " - " +
+                QRDialog.showDialog(qrDto, ContextVS.getMessage("qrTransactionCaption"), dto.getAmount() + " " + dto.getCurrencyCode() + " - " +
                         MsgUtils.getTagDescription(dto.getTagName()));
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -119,19 +117,13 @@ public class QRTransactionFormDialog extends DialogVS implements AddTagVSDialog.
 
     public static void showDialog() {
         Platform.runLater(() -> {
-            CryptoTokenVS  tokenType = CryptoTokenVS.valueOf(ContextVS.getInstance().getProperty(
-                    ContextVS.CRYPTO_TOKEN, CryptoTokenVS.JKS_KEYSTORE.toString()));
-            if(tokenType != CryptoTokenVS.JKS_KEYSTORE) {
-                BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("improperTokenMsg"));
-            } else {
-                if(!Utils.checkConnection()) return;
-                try {
-                    if(INSTANCE == null) INSTANCE = new QRTransactionFormDialog();
-                    INSTANCE.addTagVS(null);
-                    INSTANCE.show(ContextVS.getMessage("createQRLbl"));
-                } catch (Exception ex) {
-                    log.log(Level.SEVERE, ex.getMessage(), ex);
-                }
+            if(!Utils.checkConnection()) return;
+            try {
+                if(INSTANCE == null) INSTANCE = new QRTransactionFormDialog();
+                INSTANCE.addTagVS(null);
+                INSTANCE.show(ContextVS.getMessage("createQRLbl"));
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, ex.getMessage(), ex);
             }
         });
     }

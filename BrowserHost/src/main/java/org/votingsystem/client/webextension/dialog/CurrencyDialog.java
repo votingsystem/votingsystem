@@ -14,7 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Window;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
-import org.votingsystem.client.webextension.service.WebSocketAuthenticatedService;
+import org.votingsystem.client.webextension.service.WebSocketService;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.DeviceVSDto;
@@ -94,7 +94,7 @@ public class CurrencyDialog extends DialogVS {
         super("/fxml/Currency.fxml");
         changeWalletMenuItem =  new MenuItem(ContextVS.getMessage("changeWalletLbl"));
         changeWalletMenuItem.setOnAction(actionEvent -> {
-            if(WebSocketAuthenticatedService.getInstance().isConnectedWithAlert()) {
+            if(WebSocketService.getInstance().isConnectedWithAlert()) {
                     UserDeviceSelectorDialog.show(ContextVS.getMessage("userVSDeviceConnected"),
                         ContextVS.getMessage("selectDeviceToTransferCurrencyMsg"), device -> {
                             log.info("setSelectedDevice - device: " + device.getDeviceName());
@@ -202,7 +202,7 @@ public class CurrencyDialog extends DialogVS {
                 DeviceVS deviceVS = device.getDeviceVS();
                 SocketMessageDto dto = SocketMessageDto.getCurrencyWalletChangeRequest(
                         deviceVS, Arrays.asList(currency));
-                WebSocketAuthenticatedService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(dto));
+                WebSocketService.getInstance().sendMessage(JSON.getMapper().writeValueAsString(dto));
                 countDownLatch.await();
             } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
             return null;

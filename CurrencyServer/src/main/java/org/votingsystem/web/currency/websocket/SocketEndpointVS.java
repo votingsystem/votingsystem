@@ -59,6 +59,12 @@ public class SocketEndpointVS {
 
     @OnOpen public void onOpen(Session session, EndpointConfig config) {
         SessionVSManager.getInstance().put(session);
+        try {
+            session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                    SocketMessageDto.INIT_SESSION_RESPONSE(session.getId())));
+        }catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
 

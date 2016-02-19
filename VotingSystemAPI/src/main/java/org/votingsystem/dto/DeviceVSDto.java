@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.CryptoTokenVS;
-
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -31,13 +29,8 @@ public class DeviceVSDto implements Serializable {
     private String NIF;
     private String IBAN;
     private DeviceVS.Type deviceType;
-    private CryptoTokenVS type;
 
     public DeviceVSDto() {}
-
-    public DeviceVSDto(CryptoTokenVS type) {
-        this.type = type;
-    }
 
     public DeviceVSDto(UserVS userVS, CertExtensionDto certExtensionDto) {
         this.NIF = userVS.getNif();
@@ -88,7 +81,6 @@ public class DeviceVSDto implements Serializable {
             Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(getCertPEM().getBytes());
             deviceVS.setX509Certificate(certChain.iterator().next());
         }
-
         return deviceVS;
     }
 
@@ -141,11 +133,10 @@ public class DeviceVSDto implements Serializable {
         this.certPEM = certPEM;
     }
 
-    public X509Certificate getX509Cert() throws Exception {
+    @JsonIgnore public X509Certificate getX509Cert() throws Exception {
         if(certPEM == null) return null;
         else return CertUtils.fromPEMToX509Cert(certPEM.getBytes());
     }
-
 
     public String getSessionId() {
         return sessionId;
@@ -154,15 +145,6 @@ public class DeviceVSDto implements Serializable {
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
-
-    public CryptoTokenVS getType() {
-        return type;
-    }
-
-    public void setType(CryptoTokenVS type) {
-        this.type = type;
-    }
-
 
     public String getFirstName() {
         return firstName;

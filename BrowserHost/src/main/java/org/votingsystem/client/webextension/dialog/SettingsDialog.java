@@ -73,10 +73,6 @@ public class SettingsDialog extends DialogVS implements DeviceSelectorDialog.Lis
         mainPane.getStyleClass().add("modal-dialog");
         mainPane.setMinWidth(550);
 
-        DeviceVSDto cryptToken = BrowserSessionService.getInstance().getCryptoToken();
-        if(cryptToken != null) {
-
-        }
     }
 
 
