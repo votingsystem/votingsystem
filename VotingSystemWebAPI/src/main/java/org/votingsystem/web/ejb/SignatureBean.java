@@ -444,6 +444,7 @@ public class SignatureBean {
             address.update(requestDto.getAddressVS());
             dao.merge(address);
         }
+        dao.merge(signer);
         Date validFrom = new Date();
         Date validTo = DateUtils.addDays(validFrom, 365).getTime(); //one year
         X509Certificate issuedCert = signCSR(csr, null, validFrom, validTo);
@@ -460,6 +461,9 @@ public class SignatureBean {
             dao.merge(deviceVS.setEmail(certExtensionDto.getEmail()).setPhone(certExtensionDto.getMobilePhone())
                     .setCertificateVS(certificate));
         }
+        dao.getEM().createQuery("UPDATE UserVSToken SET state=:state WHERE userVS=:userVS").setParameter(
+                "state", UserVSToken.State.CANCELLED).setParameter("userVS", signer).executeUpdate();
+        dao.persist(new UserVSToken(signer, requestDto.getToken(), certificate, smimeReq));
         log.info("signCertUserVS - issued new CertificateVS id: " + certificate.getId() + " for device: " + deviceVS.getId());
         return issuedCert;
     }

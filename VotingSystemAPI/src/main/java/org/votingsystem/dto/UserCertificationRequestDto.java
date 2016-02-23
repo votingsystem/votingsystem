@@ -11,14 +11,14 @@ public class UserCertificationRequestDto {
 
     private AddressVS addressVS;
     private byte[] csrRequest;
-    private String UUID;
+    private byte[] token;
 
     public UserCertificationRequestDto(){}
 
-    public UserCertificationRequestDto(AddressVS addressVS, byte[] csrRequest) {
+    public UserCertificationRequestDto(AddressVS addressVS, byte[] csrRequest,  byte[] token) {
         this.addressVS = addressVS;
         this.csrRequest = csrRequest;
-        this.UUID = java.util.UUID.randomUUID().toString();
+        this.token = token;
     }
 
     public byte[] getCsrRequest() {
@@ -29,20 +29,20 @@ public class UserCertificationRequestDto {
         this.csrRequest = csrRequest;
     }
 
-    public String getUUID() {
-        return UUID;
-    }
-
-    public void setUUID(String UUID) {
-        this.UUID = UUID;
-    }
-
     public AddressVS getAddressVS() {
         return addressVS;
     }
 
     public void setAddressVS(AddressVS addressVS) {
         this.addressVS = addressVS;
+    }
+
+    public byte[] getToken() {
+        return token;
+    }
+
+    public void setToken(byte[] token) {
+        this.token = token;
     }
 
 }

@@ -22,6 +22,7 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;

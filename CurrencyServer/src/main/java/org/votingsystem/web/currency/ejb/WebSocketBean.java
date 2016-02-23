@@ -2,10 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
@@ -89,11 +86,25 @@ public class WebSocketBean {
             case INIT_SIGNED_SESSION:
                 messageSMIME = signatureBean.validateSMIME(messageDto.getSMIME(), null).getMessageSMIME();
                 signer = messageSMIME.getUserVS();
-                if(signer.getDeviceVS() != null) {
+                if(CertificateVS.Type.USER_ID_CARD != signer.getCertificateVS().getType())
+                    throw new ExceptionVS("ERROR - ID_CARD signature required");
+                SocketMessageDto dto = messageSMIME.getSignedContent(SocketMessageDto.class);
+                Query query = dao.getEM().createQuery("select d from DeviceVS d where d.userVS.nif =:nif and d.deviceId =:deviceId")
+                        .setParameter("nif", signer.getNif()).setParameter("deviceId", dto.getDeviceId());
+                DeviceVS deviceVS = dao.getSingleResult(DeviceVS.class, query);
+                if(deviceVS != null) {
+                    signer.setDeviceVS(deviceVS);
                     messageDto.getSession().getUserProperties().put("remote", false);
                     SessionVSManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer);
                     responseDto = messageDto.getServerResponse(
                             ResponseVS.SC_WS_CONNECTION_INIT_OK, null).setMessageType(TypeVS.INIT_SIGNED_SESSION);
+                    query = dao.getEM().createQuery("select t from UserVSToken t where t.userVS =:userVS and t.state =:state")
+                            .setParameter("userVS", signer).setParameter("state", UserVSToken.State.OK);
+                    UserVSToken token = dao.getSingleResult(UserVSToken.class, query);
+                    if(token != null) {
+                        byte[] userToken = signatureBean.decryptCMS(token.getToken());
+                        responseDto.setMessage(new String(userToken));
+                    }
                     responseDto.setConnectedDevice(DeviceVSDto.INIT_AUTHENTICATED_SESSION(signer));
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
                     dao.getEM().merge(messageSMIME.setType(TypeVS.WEB_SOCKET_INIT));

@@ -88,7 +88,7 @@ public class ContextVS {
     public static final int KEY_SIZE = 1024;
     public static final String SIG_NAME = "RSA";
     /** Random Number Generator algorithm. */
-    private static final String ALGORITHM_RNG = "SHA1PRNG";
+    public static final String ALGORITHM_RNG = "SHA1PRNG";
     public static final String CERT_GENERATION_SIG_ALGORITHM = "SHA1WithRSAEncryption";
     public static final String PROVIDER = BouncyCastleProvider.PROVIDER_NAME;
 

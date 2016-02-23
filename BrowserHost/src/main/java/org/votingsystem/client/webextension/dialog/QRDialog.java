@@ -10,7 +10,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.QRUtils;

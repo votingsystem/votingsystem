@@ -227,8 +227,9 @@ public class SocketMessageDto {
         return message;
     }
 
-    public void setMessage(String message) {
+    public SocketMessageDto setMessage(String message) {
         this.message = message;
+        return this;
     }
 
     public <S> S getMessage(Class<S> type) throws Exception {

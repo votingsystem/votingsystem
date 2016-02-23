@@ -15,6 +15,7 @@
         <class>org.votingsystem.model.ResponseVS</class>
         <class>org.votingsystem.model.TagVS</class>
         <class>org.votingsystem.model.UserVS</class>
+        <class>org.votingsystem.model.UserVSToken</class>
         <class>org.votingsystem.model.currency.BankVS</class>
         <class>org.votingsystem.model.currency.Currency</class>
         <class>org.votingsystem.model.currency.CurrencyAccount</class>

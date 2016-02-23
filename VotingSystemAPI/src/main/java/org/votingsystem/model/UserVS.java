@@ -78,6 +78,8 @@ public class UserVS extends EntityVS implements Serializable {
 
     @Column(name="reason") private String reason;
 
+
+
     @Column(name="state") @Enumerated(EnumType.STRING) private State state = State.ACTIVE;
     
     @ManyToOne(fetch=FetchType.EAGER)

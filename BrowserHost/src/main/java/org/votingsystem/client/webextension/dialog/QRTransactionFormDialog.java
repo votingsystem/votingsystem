@@ -23,6 +23,7 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
