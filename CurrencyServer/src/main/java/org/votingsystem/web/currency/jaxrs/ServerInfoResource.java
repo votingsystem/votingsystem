@@ -9,9 +9,11 @@ import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Date;
@@ -32,7 +34,7 @@ public class ServerInfoResource {
 
     @GET @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response serverInfo() throws Exception {
+    public Response serverInfo(@Context HttpServletRequest req) throws Exception {
         ActorVSDto actorVS = new ActorVSDto();
         actorVS.setServerType(ActorVS.Type.CURRENCY);
         actorVS.setName(config.getServerName());
@@ -54,4 +56,5 @@ public class ServerInfoResource {
     public Response cert() throws Exception {
         return Response.ok().entity(timeStampBean.getSigningCertPEMBytes()).build() ;
     }
+
 }

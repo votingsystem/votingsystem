@@ -90,6 +90,17 @@
             <version>7.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-servlet</artifactId>
+            <version>1.3.17.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wildfly</groupId>
+            <artifactId>wildfly-undertow</artifactId>
+            <version>10.0.0.Final</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <finalName>CurrencyServer</finalName>

@@ -1,4 +1,4 @@
-package org.votingsystem.web.currency.servlet;
+package org.votingsystem.web.currency.util;
 
 import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSession;
@@ -12,7 +12,7 @@ public class SessionListenerVS  implements HttpSessionListener {
 
     private static Logger log = Logger.getLogger(SessionListenerVS.class.getName());
 
-    private ConcurrentHashMap<String, HttpSession> sessionMap = null;
+    private static final ConcurrentHashMap<String, HttpSession> sessionMap = new ConcurrentHashMap();
     private static SessionListenerVS INSTANCE;
 
     public SessionListenerVS() {
