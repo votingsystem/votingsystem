@@ -30,8 +30,9 @@ public class ServerInfoResource {
     @Inject SignatureBean signatureBean;
     @Inject TimeStampBean timeStampBean;
 
-    @GET @Produces(MediaType.APPLICATION_JSON)
-    public Response doGet() throws Exception {
+    @GET @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response serverInfo() throws Exception {
         ActorVSDto actorVS = new ActorVSDto();
         actorVS.setServerType(ActorVS.Type.CURRENCY);
         actorVS.setName(config.getServerName());
@@ -48,4 +49,9 @@ public class ServerInfoResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(actorVS)).build() ;
     }
 
+    @GET @Path("/certChain")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response cert() throws Exception {
+        return Response.ok().entity(timeStampBean.getSigningCertPEMBytes()).build() ;
+    }
 }

@@ -31,11 +31,9 @@ import javax.persistence.Query;
 import java.io.File;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.security.cert.X509Certificate;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
