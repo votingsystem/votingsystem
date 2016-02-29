@@ -8,6 +8,7 @@ import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.util.Locale;
@@ -60,6 +61,8 @@ public class SocketEndpointVS {
     @OnOpen public void onOpen(Session session, EndpointConfig config) {
         SessionVSManager.getInstance().put(session);
         try {
+            ((HttpSession)session.getUserProperties().get(HttpSession.class.getName())).setAttribute(
+                    Session.class.getName(), session);
             session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                     SocketMessageDto.INIT_SESSION_RESPONSE(session.getId())));
         }catch (Exception ex) {

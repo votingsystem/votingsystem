@@ -1,0 +1,67 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/polymer.xhtml">
+    <ui:define name="head">
+        <style> </style>
+    </ui:define>
+    <ui:define name="content">
+        <div><b>document.cookie:</b><div id="documentCookie"></div></div>
+        <div><b>Session ID:</b><div id="sessionDiv"></div></div>
+
+        <div id="qrCodeImgDiv" class="vertical layout center center-justified">
+            <div style="margin: 25px 0 0 0;font-size: 1.2em;"><b>${msg.accessLbl}</b></div>
+            <img id="qrImg"  src="" alt="read it with your mobile"/>
+            <div id="websocketSessionDiv"></div>
+        </div>
+
+        <script>
+            //<![CDATA[
+                var socketServiceURL = "ws://currency:8080/CurrencyServer/websocket/service"
+                var JSESSIONID =  getCookie("JSESSIONID")
+
+                document.addEventListener('WebComponentsReady', function() {
+                    console.log("polymer.xhtml - WebComponentsReady")
+                });
+
+                document.querySelector("#documentCookie").innerHTML=document.cookie;
+                document.querySelector("#sessionDiv").innerHTML = JSESSIONID
+
+                function getCookie(name) {
+                    var value = "; " + document.cookie;
+                    var parts = value.split("; " + name + "=");
+                    if (parts.length == 2) result = parts.pop().split(";").shift();
+                    return result.split(".")[0];
+                }
+
+                var websocket
+                if ('WebSocket' in window) {
+                    websocket = new WebSocket(socketServiceURL);
+                } else {
+                    alert('WebSocket is not supported by this browser.');
+                }
+                websocket.onopen = function () {
+                    console.log('Info: WebSocket connection opened.');
+                };
+                websocket.onmessage = function (event) {
+                    console.log('Received: ' + event.data);
+                    var messageJSON = toJSON(event.data)
+                    if("MESSAGEVS_FROM_VS" ===  messageJSON.operation) {
+                        messageJSON.operation = messageJSON.messageType
+                        switch(messageJSON.operation) {
+                            case "INIT_SESSION":
+                                console.log(" ---- sessionId: " + messageJSON.sessionId)
+                                document.querySelector("#qrImg").setAttribute("src", "${contextURL}/qr?cht=qr&chs=100x100&chl=" +
+                                        messageJSON.sessionId)
+                                document.querySelector("#websocketSessionDiv").innerHTML = messageJSON.sessionId.substring(0, 4);
+                                break;
+                        }
+
+                    }
+                };
+                websocket.onclose = function (event) {
+                    console.log('Info: WebSocket connection closed, Code: ' + event.code + (event.reason == "" ? "" : ", Reason: " + event.reason));
+                };
+            //]]>
+        </script>
+    </ui:define>
+</ui:composition>

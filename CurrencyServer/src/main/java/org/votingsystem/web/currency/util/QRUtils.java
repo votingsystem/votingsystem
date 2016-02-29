@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class QRUtils {
 
-    public static final Integer MARGIN = 10;
+    public static final Integer MARGIN = 0;
     private static final int MAX_DIMENSION = 4096;
     private static final Collection<Charset> SUPPORTED_OUTPUT_ENCODINGS;
 
