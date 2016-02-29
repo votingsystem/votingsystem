@@ -251,14 +251,6 @@ public class WebSocketService {
                 case MESSAGEVS_SIGN_RESPONSE:
                     BrowserSessionService.setSignResponse(socketMsg);
                     break;
-                case TRANSACTIONVS_INFO:
-                    //response after asking for the details of a QR code
-                    if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
-                        TransactionVSDto dto = socketMsg.getMessage(TransactionVSDto.class);
-                        //dto.setSocketMessageDto(socketMsg);
-                        throw new ExceptionVS("TODO - missing payment form");
-                    } else BrowserHost.showMessage(ResponseVS.SC_ERROR, socketMsg.getMessage());
-                    break;
                 case QR_MESSAGE_INFO:
                     //the payer has read our QR code and ask for details
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {

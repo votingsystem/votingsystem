@@ -512,10 +512,10 @@ public class SocketMessageDto {
         WebSocketSession webSocketSession = null;
         if(deviceTo != null) webSocketSession = ContextVS.getInstance().getWSSession(deviceTo.getId());
         if(webSocketSession == null) {
-            String randomUUID = java.util.UUID.randomUUID().toString();
             AESParams aesParams = new AESParams();
-            webSocketSession = new WebSocketSession(aesParams, deviceTo, null, null);
-            ContextVS.getInstance().putWSSession(randomUUID, webSocketSession);
+            webSocketSession = new WebSocketSession(aesParams, deviceTo, null, null).setUUID(
+                    java.util.UUID.randomUUID().toString());
+            ContextVS.getInstance().putWSSession(webSocketSession.getUUID(), webSocketSession);
         }
         webSocketSession.setData(data);
         webSocketSession.setTypeVS(typeVS);

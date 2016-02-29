@@ -14,6 +14,8 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class QRMessageDto<T> implements Serializable {
 
+    public static final String WEB_SOCKET_SESSION_KEY = "ws_sid";
+
     @JsonIgnore private TypeVS typeVS;
     @JsonIgnore private T data;
     @JsonIgnore private String origingHashCertVS;

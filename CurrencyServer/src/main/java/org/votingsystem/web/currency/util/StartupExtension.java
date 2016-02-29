@@ -3,7 +3,6 @@ package org.votingsystem.web.currency.util;
 import io.undertow.security.api.AuthenticationMechanismFactory;
 import io.undertow.servlet.ServletExtension;
 import io.undertow.servlet.api.DeploymentInfo;
-import org.votingsystem.web.currency.util.CurrencyServerLoginAuthenticationMechanism;
 
 import javax.servlet.ServletContext;
 import java.util.Map;

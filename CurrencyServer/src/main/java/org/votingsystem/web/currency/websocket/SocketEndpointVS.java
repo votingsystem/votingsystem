@@ -11,7 +11,9 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,8 +63,13 @@ public class SocketEndpointVS {
     @OnOpen public void onOpen(Session session, EndpointConfig config) {
         SessionVSManager.getInstance().put(session);
         try {
-            ((HttpSession)session.getUserProperties().get(HttpSession.class.getName())).setAttribute(
-                    Session.class.getName(), session);
+            HttpSession httpSession = ((HttpSession)session.getUserProperties().get(HttpSession.class.getName()));
+            Set<Session> sessionSet = (Set<Session>) httpSession.getAttribute(Session.class.getName());
+            if(sessionSet == null) {
+                sessionSet = new HashSet<>();
+                httpSession.setAttribute(Session.class.getName(), sessionSet);
+            }
+            sessionSet.add(session);
             session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                     SocketMessageDto.INIT_SESSION_RESPONSE(session.getId())));
         }catch (Exception ex) {

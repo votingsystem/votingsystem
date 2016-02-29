@@ -362,12 +362,6 @@ public class ContextVS {
         sessionMap.put(UUID, session.setUUID(UUID));
     }
 
-    public AESParams getWSSessionKeys(String UUID) {
-        WebSocketSession webSocketSession = null;
-        if((webSocketSession = sessionMap.get(UUID)) != null) return webSocketSession.getAESParams();
-        return null;
-    }
-
     public WebSocketSession getWSSession(String UUID) {
         return sessionMap.get(UUID);
     }

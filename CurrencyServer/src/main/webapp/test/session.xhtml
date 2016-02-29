@@ -50,7 +50,7 @@
                         switch(messageJSON.operation) {
                             case "INIT_SESSION":
                                 console.log(" ---- sessionId: " + messageJSON.sessionId)
-                                document.querySelector("#qrImg").setAttribute("src", "${contextURL}/qr?cht=qr&chs=100x100&chl=" +
+                                document.querySelector("#qrImg").setAttribute("src", "${contextURL}/qr?cht=qr&chs=100x100&chl=ws_sid:" +
                                         messageJSON.sessionId)
                                 document.querySelector("#websocketSessionDiv").innerHTML = messageJSON.sessionId.substring(0, 4);
                                 break;
