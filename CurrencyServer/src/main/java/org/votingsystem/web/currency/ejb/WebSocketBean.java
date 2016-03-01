@@ -42,11 +42,12 @@ public class WebSocketBean {
         switch(messageDto.getOperation()) {
             //Device (authenticated or not) sends message knowing target device id. Target device must be authenticated.
             case MSG_TO_DEVICE_BY_TARGET_DEVICE_ID:
-                if(SessionVSManager.getInstance().sendMessageToDevice(messageDto)) {//message send OK
+                if(SessionVSManager.getInstance().sendMessageByTargetDeviceId(messageDto)) {//message send OK
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                             messageDto.getServerResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null)));
                 } else messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
-                        messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND, null)));
+                        messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
+                                messages.get("webSocketDeviceSessionNotFoundErrorMsg", messageDto.getDeviceToId()))));
                 break;
             //Authenticated device sends message knowing target device session id. Target device can be authenticated or not.
             case MSG_TO_DEVICE_BY_TARGET_SESSION_ID:
@@ -69,6 +70,17 @@ public class WebSocketBean {
                                 messageDto.getServerResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null)));
                     }
                 }
+                break;
+            case INIT_BROWSER_SESSION:
+                DeviceVS browserDevice = new DeviceVS(SessionVSManager.getInstance().getAndIncrementBrowserDeviceId())
+                        .setType(DeviceVS.Type.BROWSER);
+                messageDto.getSession().getUserProperties().put("deviceVS", browserDevice);
+                SessionVSManager.getInstance().putBrowserDevice(messageDto.getSession());
+                SocketMessageDto response = messageDto.getServerResponse(ResponseVS.SC_OK, null)
+                        .setDeviceId(browserDevice.getId().toString()).setMessageType(TypeVS.INIT_BROWSER_SESSION);
+                messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(response));
+                break;
+            case INIT_REMOTE_SIGNED_BROWSER_SESSION:
                 break;
             case INIT_REMOTE_SIGNED_SESSION:
                 messageSMIME = signatureBean.validateSMIME(messageDto.getSMIME(), null).getMessageSMIME();

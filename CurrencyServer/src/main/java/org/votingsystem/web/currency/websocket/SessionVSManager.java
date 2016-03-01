@@ -13,6 +13,7 @@ import org.votingsystem.util.JSON;
 import javax.websocket.Session;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -31,11 +32,17 @@ public class SessionVSManager {
 
     private static final SessionVSManager instance = new SessionVSManager();
 
+    public static AtomicLong browserDeviceId = new AtomicLong(1000000000);
+
     private SessionVSManager() {
         sessionMap = new ConcurrentHashMap<>();
         authenticatedSessionMap = new ConcurrentHashMap<>();
         deviceSessionMap = new ConcurrentHashMap<>();
         userVSDeviceMap = new ConcurrentHashMap<>();
+    }
+
+    public Long getAndIncrementBrowserDeviceId() {
+        return browserDeviceId.getAndIncrement();
     }
 
     public void put(Session session) {
@@ -58,6 +65,11 @@ public class SessionVSManager {
         } else userVSDeviceMap.put(userVS.getId(), Sets.newHashSet(userVS.getDeviceVS()));
         session.getUserProperties().put("userVS", userVS);
         session.getUserProperties().put("deviceVS", userVS.getDeviceVS());
+    }
+
+    public void putBrowserDevice(Session session){
+        DeviceVS deviceVS = (DeviceVS) session.getUserProperties().get("deviceVS");
+        deviceSessionMap.put(deviceVS.getId(), session);
     }
 
     public Collection<Long> getAuthenticatedDevices() {
@@ -218,7 +230,7 @@ public class SessionVSManager {
         }
     }
 
-    public boolean sendMessageToDevice(SocketMessageDto messageDto) throws ExceptionVS, JsonProcessingException {
+    public boolean sendMessageByTargetDeviceId(SocketMessageDto messageDto) throws ExceptionVS, JsonProcessingException {
         Session deviceSession = deviceSessionMap.get(messageDto.getDeviceToId());
         if(deviceSession == null) return false;
         else return sendMessage(messageDto, deviceSession.getId());

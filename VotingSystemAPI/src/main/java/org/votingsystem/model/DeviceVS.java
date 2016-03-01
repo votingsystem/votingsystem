@@ -28,7 +28,7 @@ public class DeviceVS extends EntityVS implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-    public enum Type {MOBILE, PC}
+    public enum Type {MOBILE, PC, BROWSER}
 
     public enum State {CANCELED, OK, PENDING, RENEWED}
 

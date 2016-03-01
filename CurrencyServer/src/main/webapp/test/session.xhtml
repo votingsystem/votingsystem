@@ -16,6 +16,26 @@
 
         <script>
             //<![CDATA[
+                var qrCodesMap = {}
+                var wsSessionId, wsDeviceId
+
+                var INIT_REMOTE_SIGNED_BROWSER_SESSION = 0;
+                var QR_MESSAGE_INFO                    = 1;
+
+                var WEB_SOCKET_SESSION_KEY = "ws_sid";
+                var DEVICE_ID_KEY          = "d_id";
+                var OPERATION_KEY          = "op";
+                var OPERATION_ID_KEY       = "op_id";
+
+                function getQRCodeURL(operation, operationId, deviceId, sessionId) {
+                    var result = "${contextURL}/qr?cht=qr&chs=100x100&chl="
+                    if(operation != null) result = result + OPERATION_KEY + "=" + operation + ";"
+                    if(operationId != null) result = result + OPERATION_ID_KEY + "=" + operationId + ";"
+                    if(deviceId != null) result = result + DEVICE_ID_KEY + "=" + deviceId + ";"
+                    if(sessionId != null) result = result + WEB_SOCKET_SESSION_KEY + "=" + sessionId + ";"
+                    return result;
+                }
+
                 var socketServiceURL = "ws://currency:8080/CurrencyServer/websocket/service"
                 var JSESSIONID =  getCookie("JSESSIONID")
 
@@ -49,15 +69,37 @@
                         messageJSON.operation = messageJSON.messageType
                         switch(messageJSON.operation) {
                             case "INIT_SESSION":
-                                console.log(" ---- sessionId: " + messageJSON.sessionId)
-                                document.querySelector("#qrImg").setAttribute("src", "${contextURL}/qr?cht=qr&chs=100x100&chl=ws_sid:" +
-                                        messageJSON.sessionId)
-                                document.querySelector("#websocketSessionDiv").innerHTML = messageJSON.sessionId.substring(0, 4);
+                                wsSessionId = messageJSON.sessionId
+                                websocket.send(JSON.stringify({"operation":"INIT_BROWSER_SESSION"}))
+                                break;
+                            case "INIT_BROWSER_SESSION":
+                                if(ResponseVS.SC_OK == messageJSON.statusCode) {
+                                    wsDeviceId = messageJSON.deviceId
+                                    var opCode = Math.random().toString(36).substring(3, 7);
+                                    qrCodesMap[opCode] = { "operation":"QR_MESSAGE_INFO_RESPONSE",
+                                        "messageType":"INIT_REMOTE_SIGNED_BROWSER_SESSION",
+                                        "sessionId": wsSessionId, "deviceId":wsDeviceId}
+                                    document.querySelector("#qrImg").setAttribute("src", getQRCodeURL(QR_MESSAGE_INFO, opCode, wsDeviceId, null))
+                                    //document.querySelector("#websocketSessionDiv").innerHTML = messageJSON.sessionId.substring(0, 4);
+                                    document.querySelector("#websocketSessionDiv").innerHTML = opCode;
+                                }
                                 break;
                         }
 
+                    } else {
+                        switch(messageJSON.operation) {
+                            case "QR_MESSAGE_INFO":
+                                var qrOperation = qrCodesMap[messageJSON.message]
+                                switch(qrOperation.operation) {
+                                    case "INIT_REMOTE_SIGNED_BROWSER_SESSION":
+                                        break;
+                                }
+                                break;
+                        }
                     }
                 };
+                console.log("---- Math.random().toString(36): " + Math.random().toString(36))
+                console.log("---- Math.random().toString(4): " + Math.random().toString(4))
                 websocket.onclose = function (event) {
                     console.log('Info: WebSocket connection closed, Code: ' + event.code + (event.reason == "" ? "" : ", Reason: " + event.reason));
                 };

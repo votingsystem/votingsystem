@@ -304,8 +304,9 @@ public class SocketMessageDto {
         return deviceId;
     }
 
-    public void setDeviceId(String deviceId) {
+    public SocketMessageDto setDeviceId(String deviceId) {
         this.deviceId = deviceId;
+        return this;
     }
 
     public boolean isTimeLimited() {
