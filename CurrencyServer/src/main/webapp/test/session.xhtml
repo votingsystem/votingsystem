@@ -5,6 +5,7 @@
         <style> </style>
     </ui:define>
     <ui:define name="content">
+        <div style="text-align: center;margin: 10px;"><a href="http://undertow.io/blog/2015/03/26/HTTP2-In-Wildfly.html">Wildfly  HTTP/2</a></div>
         <div><b>document.cookie:</b><div id="documentCookie"></div></div>
         <div><b>Session ID:</b><div id="sessionDiv"></div></div>
 
@@ -36,7 +37,8 @@
                     return result;
                 }
 
-                var socketServiceURL = "ws://currency:8080/CurrencyServer/websocket/service"
+                //var socketServiceURL = "ws://currency:8080/CurrencyServer/websocket/service"
+                var socketServiceURL = "wss://currency:8443/CurrencyServer/websocket/service"
                 var JSESSIONID =  getCookie("JSESSIONID")
 
                 document.addEventListener('WebComponentsReady', function() {
@@ -75,7 +77,7 @@
                             case "INIT_BROWSER_SESSION":
                                 if(ResponseVS.SC_OK == messageJSON.statusCode) {
                                     wsDeviceId = messageJSON.deviceId
-                                    var opCode = Math.random().toString(36).substring(3, 7);
+                                    var opCode = Math.random().toString(36).substring(2, 6);
                                     qrCodesMap[opCode] = { "operation":"QR_MESSAGE_INFO_RESPONSE",
                                         "messageType":"INIT_REMOTE_SIGNED_BROWSER_SESSION",
                                         "sessionId": wsSessionId, "deviceId":wsDeviceId}
@@ -98,8 +100,6 @@
                         }
                     }
                 };
-                console.log("---- Math.random().toString(36): " + Math.random().toString(36))
-                console.log("---- Math.random().toString(4): " + Math.random().toString(4))
                 websocket.onclose = function (event) {
                     console.log('Info: WebSocket connection closed, Code: ' + event.code + (event.reason == "" ? "" : ", Reason: " + event.reason));
                 };
