@@ -33,7 +33,7 @@ public class FetchX509Cert {
     }
 
     public static void getServer() throws Exception {
-        String serverURL = "http://currency:8080/CurrencyServer";
+        String serverURL = "https://192.168.1.5/CurrencyServer";
         String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
         ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
@@ -59,7 +59,7 @@ public class FetchX509Cert {
     }
 
     public static void getDeviceVSDto() throws Exception {
-        String serverURL = "http://currency:8080/CurrencyServer/rest/deviceVS/id/2";
+            String serverURL = "https://192.168.1.5/CurrencyServer/rest/deviceVS/id/2";
         ResponseVS responseVS = HttpHelper.getInstance().getData(serverURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
             throw new ExceptionVS("serverInfoURL - error: " + responseVS.getMessage());

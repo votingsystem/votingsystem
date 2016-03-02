@@ -20,7 +20,7 @@ public class QRMessageVS {
     private String qrMessage;
 
     //http://currency:8086/CurrencyServer/QR/test?cht=qr&chs=200x200&chl=qrMessage
-    //qrMessage -> operation=TRANSACTION;id=1;URL=https://currency:8086/CurrencyServer;amount=100_eur_WILDTAG;
+    //qrMessage -> operation=TRANSACTION;id=1;URL=https://192.168.1.5:8086/CurrencyServer;amount=100_eur_WILDTAG;
     public QRMessageVS(String qrMessage) throws ExceptionVS {
         this.qrMessage = qrMessage;
         String[] messageParts = qrMessage.split(";");

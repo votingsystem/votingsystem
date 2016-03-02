@@ -2,8 +2,8 @@
   "statusCode": 700,
   "operation": "CURRENCY_REQUEST",
   "receiverName": "Voting System Currency Server",
-  "serverURL": "http://currency:8080/CurrencyServer",
-  "serviceURL": "http://currency:8080/CurrencyServer/currency/request",
+  "serverURL": "https://192.168.1.5/CurrencyServer",
+  "serviceURL": "https://192.168.1.5/CurrencyServer/currency/request",
   "signedMessageSubject": "retirada de efectivo",
   "jsonStr": "{\"operation\":\"CURRENCY_REQUEST\",\"amount\":\"123\",\"timeLimited\":false,\"currencyCode\":\"EUR\",\"tags\":[\"WILDTAG\"]}"
 }

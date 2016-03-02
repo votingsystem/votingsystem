@@ -1,7 +1,7 @@
-# TimeStamp server application
+## TimeStamp server
 
 #### enable appplication filter
-To enable application filters change what follows to the standalone / domain  server configurationt 
+To enable application filters change what follows to the standalone / domain  server configuration 
 ([details] (https://docs.jboss.org/author/display/WFLY8/Undertow+subsystem+configuration)):
     
         <servlet-container name="default" allow-non-standard-wrappers="true">
@@ -15,7 +15,14 @@ server configuration just after the extensions section:
         </system-properties>
         
 2. Make sure you have  Wildfly server started.
-3. Add a datasource with the name 'java:jboss/datasources/TimeStampServer'
+3. Add the datasource in Wildfly through the management interface:
+
+        Name: TimeStampServer
+        JNDI Name: java:jboss/datasources/TimeStampServer
+        Connection URL: jdbc:postgresql://localhost:5432/TimeStampServer
+        username:userVS
+        password:userVS
+        
 4. Use this command to build and deploy the archive:
 
             mvn clean package wildfly:deploy

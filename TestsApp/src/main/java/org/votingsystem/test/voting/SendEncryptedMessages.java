@@ -28,7 +28,7 @@ public class SendEncryptedMessages {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         simulationData = new SimulationData();
-        simulationData.setServerURL("http://currency:8080/AccessControl");
+        simulationData.setServerURL("https://192.168.1.5/AccessControl");
         simulationData.setMaxPendingResponses(10);
         simulationData.setNumRequestsProjected(1);
         Map timerMap = new HashMap<>();

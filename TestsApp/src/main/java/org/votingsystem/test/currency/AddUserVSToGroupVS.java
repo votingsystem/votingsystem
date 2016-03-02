@@ -24,7 +24,7 @@ public class AddUserVSToGroupVS {
         userBaseSimulationData.setUserIndex(100L);
         SimulationData simulationData = new SimulationData();
         simulationData.setGroupId(5L);
-        simulationData.setServerURL("http://currency:8080/CurrencyServer");
+        simulationData.setServerURL("https://192.168.1.5/CurrencyServer");
         simulationData.setNumRequestsProjected(5);
         simulationData.setUserBaseSimulationData(userBaseSimulationData);
         Boolean isWithUserValidation = Boolean.TRUE;

@@ -26,7 +26,7 @@ public class Test {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
-                "http://currency:8080/CurrencyServer"), ContentTypeVS.JSON);
+                "https://192.168.1.5/CurrencyServer"), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
         ContextVS.getInstance().setDefaultServer(actorVS);
@@ -38,7 +38,7 @@ public class Test {
         SMIMEMessage smimeMessage = superUserSignatureService.getSMIMETimeStamped(fromUserVS.getNif(),
                 actorVS.getName(), JSON.getMapper().writeValueAsString(certValidationDto), messageSubject);
         responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                "http://currency:8080/CurrencyServer/rest/test/testSMIME");
+                "https://192.168.1.5/CurrencyServer/rest/test/testSMIME");
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage() +
                 " - ContentDigestStr: " + smimeMessage.getContentDigestStr());
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage());
