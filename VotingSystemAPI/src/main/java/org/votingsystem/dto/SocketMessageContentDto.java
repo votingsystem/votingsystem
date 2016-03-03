@@ -27,6 +27,7 @@ public class SocketMessageContentDto {
     private String deviceFromName;
     private String deviceToName;
     private Long deviceFromId;
+    private String sessionId;
     private String textToSign;
     private String toUser;
     private String hashCertVS;
@@ -202,5 +203,13 @@ public class SocketMessageContentDto {
 
     public void setHashCertVS(String hashCertVS) {
         this.hashCertVS = hashCertVS;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 }

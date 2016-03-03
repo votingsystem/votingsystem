@@ -3,6 +3,10 @@
                 template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
         <style> </style>
+        <script type="text/javascript" src="../resources/bower_components/crypto-js/crypto-js.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/crypto-js/aes.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/crypto-js/pbkdf2.js"></script>
+        <script type="text/javascript" src="./AesUtil.js"></script>
     </ui:define>
     <ui:define name="content">
         <div style="text-align: center;margin: 10px;"><a href="http://undertow.io/blog/2015/03/26/HTTP2-In-Wildfly.html">Wildfly  HTTP/2</a></div>
@@ -22,18 +26,24 @@
 
                 var INIT_REMOTE_SIGNED_BROWSER_SESSION = 0;
                 var QR_MESSAGE_INFO                    = 1;
+                var MATCH_WITH_MOBILE                  = 2;
 
-                var WEB_SOCKET_SESSION_KEY = "ws_sid";
-                var DEVICE_ID_KEY          = "d_id";
+                var WEB_SOCKET_SESSION_KEY = "wsid";
+                var DEVICE_ID_KEY          = "did";
                 var OPERATION_KEY          = "op";
-                var OPERATION_ID_KEY       = "op_id";
+                var OPERATION_ID_KEY       = "opid";
+                var AES_KEY_KEY            = "k";
+                var IV_KEY                 = "iv";
 
-                function getQRCodeURL(operation, operationId, deviceId, sessionId) {
+
+                function getQRCodeURL(operation, operationId, deviceId, sessionId, aesKey, iv) {
                     var result = "${contextURL}/qr?cht=qr&chs=100x100&chl="
                     if(operation != null) result = result + OPERATION_KEY + "=" + operation + ";"
                     if(operationId != null) result = result + OPERATION_ID_KEY + "=" + operationId + ";"
                     if(deviceId != null) result = result + DEVICE_ID_KEY + "=" + deviceId + ";"
                     if(sessionId != null) result = result + WEB_SOCKET_SESSION_KEY + "=" + sessionId + ";"
+                    if(aesKey != null) result = result + AES_KEY_KEY + "=" + aesKey + ";"
+                    if(iv != null) result = result + IV_KEY + "=" + iv + ";"
                     return result;
                 }
 
@@ -72,18 +82,16 @@
                         switch(messageJSON.operation) {
                             case "INIT_SESSION":
                                 wsSessionId = messageJSON.sessionId
-                                websocket.send(JSON.stringify({"operation":"INIT_BROWSER_SESSION"}))
+                                websocket.send(JSON.stringify({operation:"INIT_BROWSER_SESSION"}))
                                 break;
                             case "INIT_BROWSER_SESSION":
                                 if(ResponseVS.SC_OK == messageJSON.statusCode) {
                                     wsDeviceId = messageJSON.deviceId
-                                    var opCode = Math.random().toString(36).substring(2, 6);
-                                    qrCodesMap[opCode] = { "operation":"QR_MESSAGE_INFO_RESPONSE",
-                                        "messageType":"INIT_REMOTE_SIGNED_BROWSER_SESSION",
-                                        "sessionId": wsSessionId, "deviceId":wsDeviceId}
-                                    document.querySelector("#qrImg").setAttribute("src", getQRCodeURL(QR_MESSAGE_INFO, opCode, wsDeviceId, null))
+                                    var aesUtil = new AesUtil();
+                                    qrCodesMap[aesUtil.iv.substring(0, 4)] = {aesUtil:aesUtil}
+                                    document.querySelector("#qrImg").setAttribute("src", getQRCodeURL(null, null, wsDeviceId, null, aesUtil.keyBase64, aesUtil.iv))
                                     //document.querySelector("#websocketSessionDiv").innerHTML = messageJSON.sessionId.substring(0, 4);
-                                    document.querySelector("#websocketSessionDiv").innerHTML = opCode;
+                                    document.querySelector("#websocketSessionDiv").innerHTML = aesUtil.iv.substring(0, 4);
                                 }
                                 break;
                         }
@@ -93,10 +101,21 @@
                             case "QR_MESSAGE_INFO":
                                 var qrOperation = qrCodesMap[messageJSON.message]
                                 switch(qrOperation.operation) {
+                                    default: console.log("Unprocessed QR_MESSAGE_INFO: " + qrOperation.operation);
+                                }
+                                break;
+                            case "MSG_TO_DEVICE_BY_TARGET_DEVICE_ID":
+                                var qrOperation = qrCodesMap[messageJSON.message]
+                                qrOperation.aesUtil.decryptSocketMsg(messageJSON)
+                                switch(messageJSON.operation) {
                                     case "INIT_REMOTE_SIGNED_BROWSER_SESSION":
-                                        websocket.send(JSON.stringify({"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
-                                            "messageType":"QR_MESSAGE_INFO_RESPONSE",
-                                            "messageSubType":"INIT_REMOTE_SIGNED_BROWSER_SESSION"}))
+                                        var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
+                                            deviceToId:messageJSON.deviceFromId,
+                                            deviceId:wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
+                                        var messageContentDto = {operation:INIT_REMOTE_SIGNED_BROWSER_SESSION,
+                                            sessionId:wsSessionId, deviceFromId:wsDeviceId}
+                                        socketMessageDto.encryptedMessage = qrOperation.aesUtil.encrypt(JSON.stringify(socketMessageDto))
+                                        websocket.send(JSON.stringify(socketMessageDto))
                                         break;
                                 }
                                 break;
