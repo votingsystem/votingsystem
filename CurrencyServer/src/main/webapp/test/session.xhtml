@@ -94,6 +94,9 @@
                                 var qrOperation = qrCodesMap[messageJSON.message]
                                 switch(qrOperation.operation) {
                                     case "INIT_REMOTE_SIGNED_BROWSER_SESSION":
+                                        websocket.send(JSON.stringify({"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
+                                            "messageType":"QR_MESSAGE_INFO_RESPONSE",
+                                            "messageSubType":"INIT_REMOTE_SIGNED_BROWSER_SESSION"}))
                                         break;
                                 }
                                 break;

@@ -2,9 +2,10 @@ package org.votingsystem.client.webextension.service;
 
 import com.google.common.collect.Sets;
 import javafx.concurrent.Task;
-import org.glassfish.grizzly.ssl.SSLContextConfigurator;
-import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.tyrus.client.ClientManager;
+import org.glassfish.tyrus.client.ClientProperties;
+import org.glassfish.tyrus.client.SslContextConfigurator;
+import org.glassfish.tyrus.client.SslEngineConfigurator;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.dialog.CertNotFoundDialog;
@@ -20,11 +21,12 @@ import org.votingsystem.model.currency.Currency;
 import org.votingsystem.service.EventBusService;
 import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.util.currency.Wallet;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
@@ -62,13 +64,19 @@ public class WebSocketService {
                     p12Store.setCertificateEntry(serverCert.getSubjectDN().toString(), serverCert);
                 }
                 byte[] p12KeyStoreBytes = KeyStoreUtil.getBytes(p12Store, keyStorePassw.toCharArray());
-                // Grizzly ssl configuration
-                SSLContextConfigurator sslContext = new SSLContextConfigurator();
+                SslContextConfigurator sslContext = new SslContextConfigurator();
                 sslContext.setTrustStoreType("PKCS12");
                 sslContext.setTrustStoreBytes(p12KeyStoreBytes);
-                sslContext.setTrustStorePass(keyStorePassw);
-                SSLEngineConfigurator sslEngineConfigurator = new SSLEngineConfigurator(sslContext, true, false, false);
-                client.getProperties().put(SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
+                sslContext.setTrustStorePassword(keyStorePassw);
+
+                SslEngineConfigurator sslEngineConfigurator = new SslEngineConfigurator(sslContext);
+                sslEngineConfigurator.setHostnameVerifier(new HostnameVerifier() {
+                    @Override public boolean verify(String hostname, SSLSession sslSession) {
+                        log.log(Level.SEVERE, "HostnameVerifier - DEVELOPMENT - bypassing normal validation!!! - hostname: " + hostname);
+                        return true;
+                    }
+                });
+                client.getProperties().put(ClientProperties.SSL_ENGINE_CONFIGURATOR, sslEngineConfigurator);
             } catch(Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }

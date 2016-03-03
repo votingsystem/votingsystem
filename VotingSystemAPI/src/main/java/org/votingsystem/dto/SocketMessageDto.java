@@ -33,6 +33,7 @@ public class SocketMessageDto {
 
     private TypeVS operation;
     private TypeVS messageType;
+    private TypeVS messageSubType;
     private State state = State.PENDING;
     private Integer statusCode;
     private Long deviceFromId;
@@ -133,6 +134,15 @@ public class SocketMessageDto {
 
     public SocketMessageDto setMessageType(TypeVS messageType) {
         this.messageType = messageType;
+        return this;
+    }
+
+    public TypeVS getMessageSubType() {
+        return messageSubType;
+    }
+
+    public SocketMessageDto setMessageSubType(TypeVS messageSubType) {
+        this.messageSubType = messageSubType;
         return this;
     }
 

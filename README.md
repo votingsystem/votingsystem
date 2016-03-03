@@ -10,7 +10,7 @@ Application environment default is set to DEVELOPMENT, to change that add what f
                 <property name="vs.environment" value="PRODUCTION"/>
         </system-properties>
 
-In order to run the applications you must set appropiated values in '/src/main/resources/*_DEVELOPMENT.properties' and '/src/main/resources/*_PRODUCTION.properties' files
+In order to run the applications you must set appropiated values in '/src/main/resources/\*_DEVELOPMENT.properties' and '/src/main/resources/\*_PRODUCTION.properties' files
 
 To run the applications you need to:
 
