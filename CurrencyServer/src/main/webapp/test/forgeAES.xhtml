@@ -1,0 +1,30 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/polymer.xhtml">
+    <ui:define name="head">
+        <script type="text/javascript" src="../resources/bower_components/forge/js/util.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/sha256.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/cipher.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/cipherModes.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/aes.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/prng.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/random.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/pem.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/forge.js" rel="import"/>
+
+        <script type="text/javascript" src="./ForgeUtils.js"></script>
+
+        <style></style>
+    </ui:define>
+    <ui:define name="content">
+        <script>
+            var aesUtil = new AESUtil().init();
+            console.log("ivBase64: " + aesUtil.ivBase64)
+            console.log("keyBase64: " + aesUtil.keyBase64)
+
+            var encryptedBase64 = aesUtil.encrypt("hello");
+            console.log("encryptedBase64: " + encryptedBase64);
+            console.log("decrypted: " + aesUtil.decrypt(encryptedBase64));
+        </script>
+    </ui:define>
+</ui:composition>

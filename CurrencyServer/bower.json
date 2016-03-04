@@ -29,7 +29,7 @@
     "iron-elements": "PolymerElements/iron-elements#^1.0.4",
     "layout": "Polymer/layout",
     "visionmedia-page":"visionmedia/page.js#^1.6.4",
-    "crypto-js":"crypto-js#~3.1.6 "
+    "forge":"forge#~0.6.39"
   },
   "resolutions": {
     "polymer": "^1.2.3"

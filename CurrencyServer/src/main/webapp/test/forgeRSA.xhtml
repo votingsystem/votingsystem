@@ -1,0 +1,39 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/polymer.xhtml">
+    <ui:define name="head">
+        <script type="text/javascript" src="../resources/bower_components/forge/js/util.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/oids.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/asn1.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/pki.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/sha256.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/pkcs1.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/sha1.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/jsbn.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/rsa.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/x509.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/cipher.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/cipherModes.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/aes.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/prng.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/random.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/pem.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/forge.js" rel="import"/>
+
+        <script type="text/javascript" src="./ForgeUtils.js"></script>
+
+        <style></style>
+    </ui:define>
+    <ui:define name="content">
+        <script>
+            var RSAUtil = new RSAUtil();
+            console.log(RSAUtil.pemPrivate)
+            console.log(RSAUtil.pemPublic)
+            console.log("publicKeyBase64: " + RSAUtil.publicKeyBase64)
+
+            var encrypted = RSAUtil.encrypt("texto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto")
+            console.log("encryptRSA - encryptedBase64: " + encrypted)
+            console.log("encryptRSA - decrypted: " + RSAUtil.decrypt(encrypted))
+        </script>
+    </ui:define>
+</ui:composition>

@@ -2,11 +2,28 @@
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
-        <style> </style>
-        <script type="text/javascript" src="../resources/bower_components/crypto-js/crypto-js.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/crypto-js/aes.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/crypto-js/pbkdf2.js"></script>
-        <script type="text/javascript" src="./AesUtil.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/util.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/oids.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/asn1.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/pki.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/sha256.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/pkcs1.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/sha1.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/jsbn.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/rsa.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/x509.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/cipher.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/cipherModes.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/aes.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/prng.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/random.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/pem.js"></script>
+        <script type="text/javascript" src="../resources/bower_components/forge/js/forge.js" rel="import"/>
+
+
+        <script type="text/javascript" src="../resources/bower_components/forge/js/util.js"></script>
+
+        <script type="text/javascript" src="./ForgeUtils.js"></script>
     </ui:define>
     <ui:define name="content">
         <div style="text-align: center;margin: 10px;"><a href="http://undertow.io/blog/2015/03/26/HTTP2-In-Wildfly.html">Wildfly  HTTP/2</a></div>
@@ -21,34 +38,31 @@
 
         <script>
             //<![CDATA[
-                var qrCodesMap = {}
+                var qrCodes_OperationsMap = {}
                 var wsSessionId, wsDeviceId
 
                 var INIT_REMOTE_SIGNED_BROWSER_SESSION = 0;
                 var QR_MESSAGE_INFO                    = 1;
-                var MATCH_WITH_MOBILE                  = 2;
+                var CURRENCY_SEND                      = 2;
 
                 var WEB_SOCKET_SESSION_KEY = "wsid";
                 var DEVICE_ID_KEY          = "did";
                 var OPERATION_KEY          = "op";
                 var OPERATION_ID_KEY       = "opid";
-                var AES_KEY_KEY            = "k";
-                var IV_KEY                 = "iv";
+                var PUBLIC_KEY_KEY         = "pk";
 
 
-                function getQRCodeURL(operation, operationId, deviceId, sessionId, aesKey, iv) {
-                    var result = "${contextURL}/qr?cht=qr&chs=100x100&chl="
+                function getQRCodeURL(operation, operationId, deviceId, sessionId, key) {
+                    var result = "${contextURL}/qr?cht=qr&chs=150x150&chl="
                     if(operation != null) result = result + OPERATION_KEY + "=" + operation + ";"
                     if(operationId != null) result = result + OPERATION_ID_KEY + "=" + operationId + ";"
                     if(deviceId != null) result = result + DEVICE_ID_KEY + "=" + deviceId + ";"
                     if(sessionId != null) result = result + WEB_SOCKET_SESSION_KEY + "=" + sessionId + ";"
-                    if(aesKey != null) result = result + AES_KEY_KEY + "=" + aesKey + ";"
-                    if(iv != null) result = result + IV_KEY + "=" + iv + ";"
+                    if(key != null) result = result + PUBLIC_KEY_KEY + "=" + key + ";"
                     return result;
                 }
 
-                //var socketServiceURL = "ws://currency:8080/CurrencyServer/websocket/service"
-                var socketServiceURL = "wss://currency:8443/CurrencyServer/websocket/service"
+                var socketServiceURL = "${webSocketURL}"
                 var JSESSIONID =  getCookie("JSESSIONID")
 
                 document.addEventListener('WebComponentsReady', function() {
@@ -74,6 +88,10 @@
                 websocket.onopen = function () {
                     console.log('Info: WebSocket connection opened.');
                 };
+
+                var rsaUtil = new RSAUtil();
+                console.log("publicKeyBase64: " + rsaUtil.publicKeyBase64)
+
                 websocket.onmessage = function (event) {
                     console.log('Received: ' + event.data);
                     var messageJSON = toJSON(event.data)
@@ -87,37 +105,41 @@
                             case "INIT_BROWSER_SESSION":
                                 if(ResponseVS.SC_OK == messageJSON.statusCode) {
                                     wsDeviceId = messageJSON.deviceId
-                                    var aesUtil = new AesUtil();
-                                    qrCodesMap[aesUtil.iv.substring(0, 4)] = {aesUtil:aesUtil}
-                                    document.querySelector("#qrImg").setAttribute("src", getQRCodeURL(null, null, wsDeviceId, null, aesUtil.keyBase64, aesUtil.iv))
-                                    //document.querySelector("#websocketSessionDiv").innerHTML = messageJSON.sessionId.substring(0, 4);
-                                    document.querySelector("#websocketSessionDiv").innerHTML = aesUtil.iv.substring(0, 4);
+                                    var opCode = Math.random().toString(36).substring(2, 6);
+                                    qrCodes_OperationsMap[opCode] = { "operation":"CURRENCY_SEND",
+                                        "sessionId": wsSessionId, "deviceId":wsDeviceId}
+                                    document.querySelector("#qrImg").setAttribute(
+                                            "src", getQRCodeURL(QR_MESSAGE_INFO, opCode,
+                                                    wsDeviceId, null, rsaUtil.publicKeyBase64))
+                                    document.querySelector("#websocketSessionDiv").innerHTML = rsaUtil.publicKeyBase64.substring(0, 4);
                                 }
                                 break;
                         }
 
                     } else {
+                        if(messageJSON.encryptedMessage != null) {
+                            var AESParamsDto = toJSON(rsaUtil.decrypt(messageJSON.aesParams));
+                            console.log("AESParamsDto: " + JSON.stringify(AESParamsDto))
+                            var aesUtil =  new AESUtil().loadData(AESParamsDto.key, AESParamsDto.iv)
+                            aesUtil.decryptSocketMsg(messageJSON)
+                        }
                         switch(messageJSON.operation) {
                             case "QR_MESSAGE_INFO":
-                                var qrOperation = qrCodesMap[messageJSON.message]
-                                switch(qrOperation.operation) {
-                                    default: console.log("Unprocessed QR_MESSAGE_INFO: " + qrOperation.operation);
-                                }
+                                var qrOperation = qrCodes_OperationsMap[messageJSON.message]
+                                var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
+                                    deviceToId:messageJSON.deviceFromId,
+                                    deviceId:wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
+                                socketMessageDto.encryptedMessage = aesUtil.encrypt(JSON.stringify(qrOperation))
+                                websocket.send(JSON.stringify(socketMessageDto))
                                 break;
-                            case "MSG_TO_DEVICE_BY_TARGET_DEVICE_ID":
-                                var qrOperation = qrCodesMap[messageJSON.message]
-                                qrOperation.aesUtil.decryptSocketMsg(messageJSON)
-                                switch(messageJSON.operation) {
-                                    case "INIT_REMOTE_SIGNED_BROWSER_SESSION":
-                                        var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
-                                            deviceToId:messageJSON.deviceFromId,
-                                            deviceId:wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
-                                        var messageContentDto = {operation:INIT_REMOTE_SIGNED_BROWSER_SESSION,
-                                            sessionId:wsSessionId, deviceFromId:wsDeviceId}
-                                        socketMessageDto.encryptedMessage = qrOperation.aesUtil.encrypt(JSON.stringify(socketMessageDto))
-                                        websocket.send(JSON.stringify(socketMessageDto))
-                                        break;
-                                }
+                            case "INIT_REMOTE_SIGNED_BROWSER_SESSION":
+                                var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
+                                    deviceToId:messageJSON.deviceFromId,
+                                    deviceId:wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
+                                var messageContentDto = {operation:INIT_REMOTE_SIGNED_BROWSER_SESSION,
+                                    sessionId:wsSessionId, deviceFromId:wsDeviceId}
+                                socketMessageDto.encryptedMessage = AESUtil.encrypt(JSON.stringify(socketMessageDto))
+                                websocket.send(JSON.stringify(socketMessageDto))
                                 break;
                         }
                     }

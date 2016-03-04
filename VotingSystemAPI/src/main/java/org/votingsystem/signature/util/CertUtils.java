@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.JCERSAPublicKey;
 import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.PasswordFinder;
@@ -29,6 +30,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.*;
 import java.security.cert.*;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -244,6 +247,20 @@ public class CertUtils {
         KeyPair kp = (KeyPair) new PEMReader(br, pFinder).readObject();
         br.close();
         return kp.getPrivate();
+    }
+
+    public static PrivateKey fromPEMToRSAPrivateKey(String pemPrivateKey) throws Exception {
+        KeyPair kp = (KeyPair) new PEMReader(new InputStreamReader(new ByteArrayInputStream(pemPrivateKey.getBytes()))).readObject();
+        return kp.getPrivate();
+    }
+
+    public static PublicKey fromPEMToRSAPublicKey(String pemPublicKey) throws Exception {
+        KeyFactory factory = KeyFactory.getInstance("RSA", "BC");
+        PEMReader pemReader = new PEMReader(new InputStreamReader(new ByteArrayInputStream(pemPublicKey.getBytes())));
+        RSAPublicKey jcerSAPublicKey = (RSAPublicKey) pemReader.readObject();
+        X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(jcerSAPublicKey.getEncoded());
+        PublicKey publicKey = factory.generatePublic(pubKeySpec);
+        return publicKey;
     }
 
     public static Collection<X509Certificate> fromPEMToX509CertCollection (byte[] pemChainFileBytes) throws Exception {

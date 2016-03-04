@@ -35,6 +35,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
@@ -497,6 +498,20 @@ public class Encryptor {
         int i = output.length - 1; //remove padding
         while (i >= 0 && output[i] == 0) { --i; }
         return new String(Arrays.copyOf(output, i + 1), "UTF-8");
+    }
+
+    public static String encryptRSA(String plainText, PublicKey publicKey) throws Exception {
+        Cipher rsaCipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
+        rsaCipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        byte[] cipherText = rsaCipher.doFinal(plainText.getBytes());
+        return Base64.getEncoder().encodeToString(cipherText);
+    }
+
+    public static String decryptRSA(String encryptedTextBase64, PrivateKey privateKey) throws Exception {
+        Cipher rsaCipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
+        rsaCipher.init(Cipher.DECRYPT_MODE, privateKey);
+        byte[] plainText = rsaCipher.doFinal(Base64.getDecoder().decode(encryptedTextBase64));
+        return new String(plainText, "UTF-8");
     }
 
 }
