@@ -26,14 +26,14 @@
     </ui:define>
     <ui:define name="content">
         <script>
-            var RSAUtil = new RSAUtil();
-            console.log(RSAUtil.pemPrivate)
-            console.log(RSAUtil.pemPublic)
-            console.log("publicKeyBase64: " + RSAUtil.publicKeyBase64)
+            var rsaUtil = new RSAUtil();
+            console.log(rsaUtil.pemPrivate)
+            console.log(rsaUtil.pemPublic)
+            console.log("publicKeyBase64: " + rsaUtil.publicKeyBase64)
 
-            var encrypted = RSAUtil.encrypt("texto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto")
+            var encrypted = rsaUtil.encrypt("texto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto")
             console.log("encryptRSA - encryptedBase64: " + encrypted)
-            console.log("encryptRSA - decrypted: " + RSAUtil.decrypt(encrypted))
+            console.log("encryptRSA - decrypted: " + rsaUtil.decrypt(encrypted))
         </script>
     </ui:define>
 </ui:composition>
