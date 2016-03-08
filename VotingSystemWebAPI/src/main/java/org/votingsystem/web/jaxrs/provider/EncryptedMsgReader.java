@@ -40,7 +40,7 @@ public class EncryptedMsgReader implements MessageBodyReader<EncryptedMsgDto> {
     public EncryptedMsgDto readFrom(Class<EncryptedMsgDto> aClass, Type type, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
         try {
-            byte[] decryptedBytes = signatureBean.decryptMessage(IOUtils.toByteArray(inputStream));
+            byte[] decryptedBytes = signatureBean.decryptCMS(IOUtils.toByteArray(inputStream));
             return JSON.getMapper().readValue(decryptedBytes, EncryptedMsgDto.class);
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

@@ -1,9 +1,7 @@
 package org.votingsystem.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.tsp.TSPAlgorithms;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.DeviceVSDto;
@@ -13,11 +11,13 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.voting.ControlCenterVS;
-import org.votingsystem.signature.util.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.KeyGeneratorVS;
+import org.votingsystem.util.crypto.KeyStoreUtil;
+import org.votingsystem.util.crypto.PEMUtils;
 
-import javax.mail.Session;
 import java.io.*;
 import java.security.KeyStore;
 import java.security.Security;
@@ -42,15 +42,14 @@ public class ContextVS {
 
     private static Logger log = Logger.getLogger(ContextVS.class.getName());
 
-    public static Session MAIL_SESSION = Session.getDefaultInstance(System.getProperties(), null);
-
     static { Security.addProvider(new BouncyCastleProvider()); }
 
     public static final int VOTE_TAG                                = 0;
     public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
     public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
-    public static final int CURRENCY_TAG                               = 3;
+    public static final int CURRENCY_TAG                            = 3;
     public static final int DEVICEVS_TAG                            = 4;
+    public static final int ANONYMOUS_CERT_TAG                      = 5;
 
     public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
     public static final String REPRESENTATIVE_VOTE_OID = VOTING_SYSTEM_BASE_OID + REPRESENTATIVE_VOTE_TAG;
@@ -59,6 +58,7 @@ public class ContextVS {
     public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
     public static final String CURRENCY_OID = VOTING_SYSTEM_BASE_OID + CURRENCY_TAG;
     public static final String DEVICEVS_OID = VOTING_SYSTEM_BASE_OID + DEVICEVS_TAG;
+    public static final String ANONYMOUS_CERT_OID = VOTING_SYSTEM_BASE_OID + ANONYMOUS_CERT_TAG;
 
     private String appDir;
     private String tempDir;
@@ -81,8 +81,8 @@ public class ContextVS {
     public static final String REPRESENTATIVE_DATA_FILE_NAME = "representativeData";
     public static final String CURRENCY_REQUEST_DATA_FILE_NAME = "currencyRequestData" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String SMIME_FILE_NAME   = "smime" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String SMIME_ANONYMOUS_FILE_NAME   = "smimeAnonymous" + ":" + MediaTypeVS.JSON_SIGNED;
+    public static final String CMS_FILE_NAME   = "cms" + ":" + MediaTypeVS.JSON_SIGNED;
+    public static final String CMS_ANONYMOUS_FILE_NAME   = "cmsAnonymous" + ":" + MediaTypeVS.JSON_SIGNED;
 
     public static final String CERT_RAIZ_PATH = "AC_RAIZ_DNIE_SHA1.pem";
     public static final int KEY_SIZE = 1024;
@@ -100,21 +100,12 @@ public class ContextVS {
 
     // public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.RSA_X_509;
     public static final String DNIe_SIGN_MECHANISM = "SHA1withRSA";
-    public static final String TIMESTAMP_DNIe_HASH = TSPAlgorithms.SHA1;
 
     public static final String SIGN_MECHANISM = "SHA256withRSA";
-
-    public static final String TIMESTAMP_VOTE_HASH = TSPAlgorithms.SHA512;
     public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
     public static final String VOTING_DATA_DIGEST = "SHA256";
 
-    public static final String PDF_SIGNATURE_DIGEST = "SHA1";
-    public static final String PDF_SIGNATURE_MECHANISM = "SHA1withRSA";
-    public static final String TIMESTAMP_PDF_HASH = TSPAlgorithms.SHA1;
-    public static final String PDF_DIGEST_OID = CMSSignedDataGenerator.DIGEST_SHA1;
-
-
-    public static final String DEFAULT_SIGNED_FILE_NAME = "smimeMessage.p7m";
+    public static final String DEFAULT_SIGNED_FILE_NAME = "cmsMessage.p7m";
     public static String CERT_STORE_TYPE = "Collection";
 
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
@@ -157,6 +148,7 @@ public class ContextVS {
     public ContextVS(String localizatedMessagesFileName, String localeParam) {
         log.info("localizatedMessagesFileName: " + localizatedMessagesFileName + " - locale: " + locale);
         try {
+            Security.addProvider(new BouncyCastleProvider());
             KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
@@ -182,7 +174,7 @@ public class ContextVS {
 
     public Collection<X509Certificate> getVotingSystemSSLCerts() throws Exception {
         if(votingSystemSSLCerts == null) {
-            votingSystemSSLCerts =  CertUtils.fromPEMToX509CertCollection(
+            votingSystemSSLCerts =  PEMUtils.fromPEMToX509CertCollection(
                     FileUtils.getBytesFromStream(Thread.currentThread().
                             getContextClassLoader().getResourceAsStream("VotingSystemSSLCert.pem")));
             votingSystemSSLTrustAnchors = new HashSet<TrustAnchor>();
@@ -202,8 +194,8 @@ public class ContextVS {
     public void initDirs(String baseDir) throws Exception {
         appDir = baseDir + File.separator +  ".VotingSystem";
         tempDir = appDir + File.separator + "temp";
-        new File(appDir).mkdir();
-        new File(tempDir).mkdir();
+        new File(appDir).mkdirs();
+        new File(tempDir).mkdirs();
         FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream(CERT_RAIZ_PATH),  new File(INSTANCE.appDir + "/" + CERT_RAIZ_PATH));
         FileHandler fileHandler = new FileHandler(new File(appDir + "/app.log").getAbsolutePath());
@@ -411,7 +403,7 @@ public class ContextVS {
         userVSKeyStoreFile.createNewFile();
         Map keyStoreMap = new HashMap<>();
         keyStoreMap.put("deviceVSDto", JSON.getMapper().writeValueAsString(deviceVSDto));
-        keyStoreMap.put("certPEM", new String(CertUtils.getPEMEncoded(chain[0])));
+        keyStoreMap.put("certPEM", new String(PEMUtils.getPEMEncoded(chain[0])));
         keyStoreMap.put("keyStore", Base64.getEncoder().encodeToString(keyStoreBytes));
         JSON.getMapper().writeValue(mainKeyStoreFile, keyStoreMap);
         JSON.getMapper().writeValue(userVSKeyStoreFile, keyStoreMap);
@@ -437,7 +429,7 @@ public class ContextVS {
             File keyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
             if(keyStoreFile.createNewFile()) return null;
             Map keyStoreMap = JSON.getMapper().readValue(keyStoreFile, new TypeReference<Map<String, String>>() { });
-            Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(
+            Collection<X509Certificate> certChain = PEMUtils.fromPEMToX509CertCollection(
                     ((String) keyStoreMap.get("certPEM")).getBytes());
             return UserVS.FROM_X509_CERT(certChain.iterator().next());
         } catch(Exception ex) {

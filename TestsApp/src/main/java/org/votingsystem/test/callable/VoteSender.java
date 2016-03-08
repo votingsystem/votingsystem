@@ -2,13 +2,16 @@ package org.votingsystem.test.callable;
 
 import org.votingsystem.callable.AccessRequestDataSender;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.test.util.SignatureService;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.VoteVSHelper;
 
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -27,26 +30,20 @@ public class VoteSender implements Callable<ResponseVS> {
     }
     
     @Override public ResponseVS<VoteVSHelper> call() throws Exception {
-        String smimeMessageSubject = "VoteSender Test - accessRequestMsgSubject";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(voteVSHelper.getNIF());
-        String toUser = StringUtils.getNormalized(ContextVS.getInstance().getAccessControl().getName());
         AccessRequestDto accessRequestDto = voteVSHelper.getAccessRequest();
-        String contentStr = JSON.getMapper().writeValueAsString(accessRequestDto);
-        SMIMEMessage smimeMessage = signatureService.getSMIME(voteVSHelper.getNIF(), toUser, contentStr, smimeMessageSubject);
-
-        ResponseVS responseVS = new AccessRequestDataSender(smimeMessage,
+        CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsString(accessRequestDto));
+        ResponseVS responseVS = new AccessRequestDataSender(cmsMessage,
                 accessRequestDto, voteVSHelper.getHashCertVSBase64()).call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
-            String voteDataStr = JSON.getMapper().writeValueAsString(voteVSHelper.getVote());
-            smimeMessage = certificationRequest.getSMIME(voteVSHelper.getHashCertVSBase64(), toUser, voteDataStr,
-                    "voteVSMsgSubject", null);
-            smimeMessage = new MessageTimeStamper(smimeMessage,
+            cmsMessage = certificationRequest.signData(JSON.getMapper().writeValueAsString(voteVSHelper.getVote()));
+            cmsMessage = new MessageTimeStamper(cmsMessage,
                     ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
-            responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.VOTE,
+            responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.VOTE,
                     ContextVS.getInstance().getControlCenter().getVoteServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SMIMEMessage voteReceipt = responseVS.getSMIME();
+                CMSSignedMessage voteReceipt = responseVS.getCMS();
                 voteVSHelper.setValidatedVote(voteReceipt);
                 //_ TODO _ validate receipt
             }

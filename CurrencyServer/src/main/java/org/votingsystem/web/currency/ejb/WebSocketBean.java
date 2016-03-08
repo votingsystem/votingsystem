@@ -35,7 +35,7 @@ public class WebSocketBean {
     @Transactional
     public void processRequest(SocketMessageDto messageDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        MessageSMIME messageSMIME = null;
+        MessageCMS messageCMS = null;
         SocketMessageDto signedMessageDto = null;
         UserVS signer = null;
         SocketMessageDto responseDto = null;
@@ -83,9 +83,9 @@ public class WebSocketBean {
             case INIT_REMOTE_SIGNED_BROWSER_SESSION:
                 break;
             case INIT_REMOTE_SIGNED_SESSION:
-                messageSMIME = signatureBean.validateSMIME(messageDto.getSMIME(), null).getMessageSMIME();
-                signer = messageSMIME.getUserVS();
-                signedMessageDto = messageSMIME.getSignedContent(SocketMessageDto.class);
+                messageCMS = signatureBean.validateCMS(messageDto.getCMS(), null).getMessageCMS();
+                signer = messageCMS.getUserVS();
+                signedMessageDto = messageCMS.getSignedContent(SocketMessageDto.class);
                 Session remoteSession = SessionVSManager.getInstance().getNotAuthenticatedSession(signedMessageDto.getSessionId());
                 SessionVSManager.getInstance().putAuthenticatedDevice(remoteSession, signer);
                 remoteSession.getUserProperties().put("remote", true);
@@ -93,14 +93,14 @@ public class WebSocketBean {
                         .setSessionId(remoteSession.getId()).setMessageType(TypeVS.INIT_REMOTE_SIGNED_SESSION);
                 responseDto.setConnectedDevice(DeviceVSDto.INIT_AUTHENTICATED_SESSION(signer));
                 remoteSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
-                dao.getEM().merge(messageSMIME.setType(TypeVS.WEB_SOCKET_INIT));
+                dao.getEM().merge(messageCMS.setType(TypeVS.WEB_SOCKET_INIT));
                 break;
             case INIT_SIGNED_SESSION:
-                messageSMIME = signatureBean.validateSMIME(messageDto.getSMIME(), null).getMessageSMIME();
-                signer = messageSMIME.getUserVS();
+                messageCMS = signatureBean.validateCMS(messageDto.getCMS(), null).getMessageCMS();
+                signer = messageCMS.getUserVS();
                 if(CertificateVS.Type.USER_ID_CARD != signer.getCertificateVS().getType())
                     throw new ExceptionVS("ERROR - ID_CARD signature required");
-                SocketMessageDto dto = messageSMIME.getSignedContent(SocketMessageDto.class);
+                SocketMessageDto dto = messageCMS.getSignedContent(SocketMessageDto.class);
                 Query query = dao.getEM().createQuery("select d from DeviceVS d where d.userVS.nif =:nif and d.deviceId =:deviceId")
                         .setParameter("nif", signer.getNif()).setParameter("deviceId", dto.getDeviceId());
                 DeviceVS deviceVS = dao.getSingleResult(DeviceVS.class, query);
@@ -119,7 +119,7 @@ public class WebSocketBean {
                     }
                     responseDto.setConnectedDevice(DeviceVSDto.INIT_AUTHENTICATED_SESSION(signer));
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
-                    dao.getEM().merge(messageSMIME.setType(TypeVS.WEB_SOCKET_INIT));
+                    dao.getEM().merge(messageCMS.setType(TypeVS.WEB_SOCKET_INIT));
                 } else {
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                             messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,

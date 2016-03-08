@@ -5,11 +5,11 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.JSON;
@@ -40,7 +40,7 @@ public class VoteVS extends EntityVS implements Serializable {
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
-    @OneToOne private MessageSMIME messageSMIME;
+    @OneToOne private MessageCMS cmsMessage;
     @OneToOne private CertificateVS certificateVS;
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="optionSelected") private FieldEventVS optionSelected;
@@ -63,7 +63,7 @@ public class VoteVS extends EntityVS implements Serializable {
     @Transient private X509Certificate x509Certificate;
     @Transient private TimeStampToken timeStampToken;
     @Transient private Set<X509Certificate> serverCerts = new HashSet<>();
-    @Transient private SMIMEMessage receipt;
+    @Transient private CMSSignedMessage receipt;
     @Transient private boolean isValid = false;
 
     public VoteVS () {}
@@ -91,12 +91,12 @@ public class VoteVS extends EntityVS implements Serializable {
     }
 
     public VoteVS (FieldEventVS optionSelected, EventVSElection eventVS, State state, CertificateVS certificateVS,
-                    MessageSMIME messageSMIME) {
+                    MessageCMS cmsMessage) {
         this.optionSelected = optionSelected;
         this.eventVS = eventVS;
         this.state = state;
         this.certificateVS = certificateVS;
-        this.messageSMIME = messageSMIME;
+        this.cmsMessage = cmsMessage;
     }
 
     public String getHashAccessRequestBase64() {
@@ -163,12 +163,12 @@ public class VoteVS extends EntityVS implements Serializable {
 		return getOptionSelected();
 	}
 
-	public MessageSMIME getMessageSMIME() {
-		return messageSMIME;
+	public MessageCMS getCMSMessage() {
+		return cmsMessage;
 	}
 
-	public void setMessageSMIME(MessageSMIME messageSMIME) {
-		this.messageSMIME = messageSMIME;
+	public void setCmsMessage(MessageCMS messageCMS) {
+		this.cmsMessage = messageCMS;
 	}
 
 	public State getState() {
@@ -220,9 +220,9 @@ public class VoteVS extends EntityVS implements Serializable {
 
     public void setValid(boolean isValid) { this.isValid = isValid; }
 
-    public SMIMEMessage getReceipt() { return receipt; }
+    public CMSSignedMessage getReceipt() { return receipt; }
 
-    public void setReceipt(SMIMEMessage receipt) { this.receipt = receipt; }
+    public void setReceipt(CMSSignedMessage receipt) { this.receipt = receipt; }
 
     public void setServerCerts(Set<X509Certificate> serverCerts) { this.serverCerts = serverCerts; }
 

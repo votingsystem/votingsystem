@@ -122,13 +122,13 @@
           });
       });
 
-      var messageSMIMEViewer
-      page('*/messageSMIME/id*', scrollToTop, function(data) {
+      var messageCMSViewer
+      page('*/cmsMessagePEM/id*', scrollToTop, function(data) {
           vs.route = 'userVSDashboard';
-          Polymer.Base.importHref('./messageSMIME/message-smime-viewer.vsp', function(e) {
-              if(!messageSMIMEViewer) messageSMIMEViewer = document.createElement('message-smime-viewer');
-              messageSMIMEViewer.url = data.path
-              vs.loadMainContent(messageSMIMEViewer)
+          Polymer.Base.importHref('./cmsMessagePEM/message-cms-viewer.vsp', function(e) {
+              if(!messageCMSViewer) messageCMSViewer = document.createElement('message-cms-viewer');
+              messageCMSViewer.url = data.path
+              vs.loadMainContent(messageCMSViewer)
           });
       });
 

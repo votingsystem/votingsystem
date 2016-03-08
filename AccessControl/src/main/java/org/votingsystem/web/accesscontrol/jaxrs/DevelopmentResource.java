@@ -1,13 +1,13 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.apache.commons.io.IOUtils;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.RepresentationDocument;
 import org.votingsystem.model.voting.RepresentativeDocument;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EnvironmentVS;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
@@ -54,7 +54,7 @@ public class DevelopmentResource implements Serializable {
             throw new ValidationExceptionVS("SERVICE AVAILABLE ONLY IN DEVELOPMENT MODE");
         }
         byte[] requestBytes = IOUtils.toByteArray(req.getInputStream());
-        Collection<X509Certificate> userCertCollection = CertUtils.fromPEMToX509CertCollection(requestBytes);
+        Collection<X509Certificate> userCertCollection = PEMUtils.fromPEMToX509CertCollection(requestBytes);
         X509Certificate userCert = userCertCollection.iterator().next();
         if(userCert != null) {
             UserVS userVS = UserVS.FROM_X509_CERT(userCert);
@@ -75,12 +75,12 @@ public class DevelopmentResource implements Serializable {
 
     @Transactional
     @Path("/resetRepresentatives") @POST
-    public Response resetRepresentatives(MessageSMIME messageSMIME, @Context ServletContext context,
-             @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+    public Response resetRepresentatives(MessageCMS messageCMS, @Context ServletContext context,
+                                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         if(config.getMode() != EnvironmentVS.DEVELOPMENT) {
             throw new ValidationExceptionVS("SERVICE AVAILABLE ONLY IN DEVELOPMENT MODE");
         }
-        if(!signatureBean.isAdmin(messageSMIME.getUserVS().getNif()))
+        if(!signatureBean.isAdmin(messageCMS.getUserVS().getNif()))
             throw new ValidationExceptionVS("user without privileges");
         log.severe(" ===== VOTING SIMULATION - RESETING REPRESENTATIVES ===== ");
         List<RepresentativeDocument.State> inList = Arrays.asList(RepresentativeDocument.State.OK,

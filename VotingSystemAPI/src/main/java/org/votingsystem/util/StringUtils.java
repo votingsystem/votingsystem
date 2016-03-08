@@ -1,12 +1,11 @@
 package org.votingsystem.util;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -14,6 +13,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.text.Normalizer;
@@ -91,17 +92,6 @@ public class StringUtils {
             }
             return result.toString();
         }
-    }
-
-    public static boolean validateMail(String email) {
-        boolean result = true;
-        try {
-            InternetAddress emailAddr = new InternetAddress(email);
-            emailAddr.validate();
-        } catch (AddressException ex) {
-            result = false;
-        }
-        return result;
     }
 
     public static String getUserDirPath (String userNIF) {
@@ -191,6 +181,12 @@ public class StringUtils {
         if(message != null && message.length() > TRUNCATED_MSG_SIZE)
             return message.substring(0, TRUNCATED_MSG_SIZE) + "...";
         else return message;
+    }
+
+    public static String getHashBase64 (String origStr, String digestAlgorithm) throws NoSuchAlgorithmException {
+        MessageDigest sha = MessageDigest.getInstance(digestAlgorithm);
+        byte[] resultDigest =  sha.digest( origStr.getBytes() );
+        return DatatypeConverter.printBase64Binary(resultDigest);
     }
 
 }

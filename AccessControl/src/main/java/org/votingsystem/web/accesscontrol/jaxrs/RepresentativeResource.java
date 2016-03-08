@@ -5,7 +5,7 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentativeAccreditationsDto;
 import org.votingsystem.dto.voting.RepresentativeVotingHistoryDto;
 import org.votingsystem.model.ImageVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.model.voting.RepresentationDocument;
@@ -52,38 +52,38 @@ public class RepresentativeResource {
     private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/save") @POST
-    public Response save(MessageSMIME messageSMIME) throws Exception {
-        RepresentativeDocument representativeDocument = representativeBean.saveRepresentative(messageSMIME);
+    public Response save(MessageCMS messageCMS) throws Exception {
+        RepresentativeDocument representativeDocument = representativeBean.saveRepresentative(messageCMS);
         UserVSDto representativeDto = representativeBean.getRepresentativeDto(representativeDocument.getUserVS());
         return Response.ok().entity(representativeDto).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/history") @POST
-    public Response history(MessageSMIME messageSMIME, @Context ServletContext context, @Context HttpServletRequest req,
+    public Response history(MessageCMS messageCMS, @Context ServletContext context, @Context HttpServletRequest req,
                             @Context HttpServletResponse resp) throws Exception {
         EmailTemplateWrapper responseWrapper = new EmailTemplateWrapper(resp);
         context.getRequestDispatcher("/mail/RepresentativeVotingHistoryDownloadInstructions.vsp").forward(req, responseWrapper);
         String mailTemplate = responseWrapper.toString();
-        representativeBean.processVotingHistoryRequest(messageSMIME, mailTemplate);
-        RepresentativeVotingHistoryDto request = messageSMIME.getSignedContent(RepresentativeVotingHistoryDto.class);
+        representativeBean.processVotingHistoryRequest(messageCMS, mailTemplate);
+        RepresentativeVotingHistoryDto request = messageCMS.getSignedContent(RepresentativeVotingHistoryDto.class);
         return Response.ok().entity(messages.get("backupRequestOKMsg", request.getEmail())).build();
     }
 
     @Path("/accreditations") @POST
-    public Response accreditations(MessageSMIME messageSMIME,
+    public Response accreditations(MessageCMS messageCMS,
                    @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         EmailTemplateWrapper responseWrapper = new EmailTemplateWrapper(resp);
         req.setAttribute("pageTitle", messages.get("representativeAccreditationsLbl"));
         context.getRequestDispatcher("/mail/RepresentativeAccreditationRequestDownloadInstructions.vsp").forward(req, responseWrapper);
         String mailTemplate = responseWrapper.toString();
-        RepresentativeAccreditationsDto request = messageSMIME.getSignedContent(RepresentativeAccreditationsDto.class);
-        representativeBean.processAccreditationsRequest(messageSMIME, mailTemplate);
+        RepresentativeAccreditationsDto request = messageCMS.getSignedContent(RepresentativeAccreditationsDto.class);
+        representativeBean.processAccreditationsRequest(messageCMS, mailTemplate);
         return Response.ok().entity(messages.get("backupRequestOKMsg", request.getEmail())).build();
     }
 
     @Path("/revoke") @POST
-    public Response revoke(MessageSMIME messageSMIME) throws Exception {
-        MessageSMIME response = representativeBean.processRevoke(messageSMIME);
+    public Response revoke(MessageCMS messageCMS) throws Exception {
+        MessageCMS response = representativeBean.processRevoke(messageCMS);
         return Response.ok().entity(response.getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
@@ -177,9 +177,9 @@ public class RepresentativeResource {
     }
 
     @Path("/anonymousDelegation") @POST
-    public Response anonymousDelegation(MessageSMIME messageSMIME) throws Exception {
-        RepresentationDocument response = representativeDelegationBean.saveAnonymousDelegation(messageSMIME);
-        return Response.ok().entity(response.getActivationSMIME().getContent()).type(
+    public Response anonymousDelegation(MessageCMS messageCMS) throws Exception {
+        RepresentationDocument response = representativeDelegationBean.saveAnonymousDelegation(messageCMS);
+        return Response.ok().entity(response.getActivationCMS().getContent()).type(
                 MediaTypeVS.JSON_SIGNED).build();
     }
 

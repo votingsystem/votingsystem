@@ -1,17 +1,15 @@
 package org.votingsystem.web.timestamp.filter;
 
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
-import java.util.*;
+import java.util.Locale;
 
 @WebFilter("/*")
 public class FilterVS implements Filter {

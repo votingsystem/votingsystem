@@ -1,10 +1,10 @@
 package org.votingsystem.test.misc;
 
 import org.bouncycastle.util.encoders.Base64;
-import org.votingsystem.signature.util.AESParams;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.crypto.AESParams;
+import org.votingsystem.util.crypto.Encryptor;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -54,20 +54,20 @@ public class TestForge {
     }
 
     private static PublicKey generatePublicKey() throws Exception {
-        PublicKey publicKey = CertUtils.fromPEMToRSAPublicKey(publicKeyPEM);
+        PublicKey publicKey = PEMUtils.fromPEMToRSAPublicKey(publicKeyPEM);
         log.info(publicKey.toString());
         return publicKey;
     }
 
     private static PublicKey generatePublicKeyFromBase64() throws Exception {
         String pemKey = new String(Base64.decode(publicKeyBase64.getBytes()));
-        PublicKey publicKey = CertUtils.fromPEMToRSAPublicKey(pemKey);
+        PublicKey publicKey = PEMUtils.fromPEMToRSAPublicKey(pemKey);
         log.info(publicKey.toString());
         return publicKey;
     }
 
     private static final void testRSAForgeData()  throws Exception {
-        PrivateKey privateKey = CertUtils.fromPEMToRSAPrivateKey(privateKeyPEM);
+        PrivateKey privateKey = PEMUtils.fromPEMToRSAPrivateKey(privateKeyPEM);
         String plainText = Encryptor.decryptRSA(rsaCipherText, privateKey);
         log.info("plainText: " + plainText);
     }

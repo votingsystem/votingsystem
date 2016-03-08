@@ -3,15 +3,16 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
@@ -37,7 +38,7 @@ public class CurrencyRequestDto {
     private BigDecimal totalAmount;
     private Boolean timeLimited;
 
-    @JsonIgnore private MessageSMIME messageSMIME;
+    @JsonIgnore private MessageCMS messageCMS;
     @JsonIgnore private Map<String, CurrencyDto> currencyDtoMap;
     @JsonIgnore private Map<String, Currency> currencyMap;
     @JsonIgnore private Set<String> requestCSRSet;
@@ -87,7 +88,7 @@ public class CurrencyRequestDto {
     }
 
     public Currency loadCurrencyCert(String pemCert) throws Exception {
-        Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(pemCert.getBytes());
+        Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(pemCert.getBytes());
         if(certificates.isEmpty()) throw new ExceptionVS("Unable to init Currency. Certs not found on signed CSR");
         X509Certificate x509Certificate = certificates.iterator().next();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
@@ -97,10 +98,10 @@ public class CurrencyRequestDto {
         return currency;
     }
 
-    public static CurrencyRequestDto validateRequest(byte[] currencyBatchRequest, MessageSMIME messageSMIME,
+    public static CurrencyRequestDto validateRequest(byte[] currencyBatchRequest, MessageCMS messageCMS,
                            String contextURL) throws Exception {
-        CurrencyRequestDto requestDto = messageSMIME.getSignedContent(CurrencyRequestDto.class);
-        requestDto.messageSMIME = messageSMIME;
+        CurrencyRequestDto requestDto = messageCMS.getSignedContent(CurrencyRequestDto.class);
+        requestDto.messageCMS = messageCMS;
         if(TypeVS.CURRENCY_REQUEST != requestDto.getOperation()) throw new ExceptionVS(
                 "Expected operation 'CURRENCY_REQUEST' found: " + requestDto.getOperation());
         if(!contextURL.equals(requestDto.getServerURL())) throw new ExceptionVS("Expected serverURL '" + contextURL +
@@ -109,7 +110,7 @@ public class CurrencyRequestDto {
         BigDecimal csrRequestAmount = BigDecimal.ZERO;
         Map<String, CurrencyDto> currencyDtoMap = new HashMap<>();
         for(String currencyCSR : requestDto.requestCSRSet) {
-            CurrencyDto currencyDto = new CurrencyDto(CertUtils.fromPEMToPKCS10CertificationRequest(currencyCSR.getBytes()));
+            CurrencyDto currencyDto = new CurrencyDto(PEMUtils.fromPEMToPKCS10CertificationRequest(currencyCSR.getBytes()));
             if(!currencyDto.getCurrencyCode().equals(requestDto.getCurrencyCode())) throw new ValidationExceptionVS(
                     "currency error - CurrencyCSRDto currencyCode: " + currencyDto.getCurrencyCode() +
                             " - csr currencyCode: " + currencyDto.getCurrencyCode());
@@ -206,12 +207,12 @@ public class CurrencyRequestDto {
         this.currencyDtoMap = currencyDtoMap;
     }
 
-    public MessageSMIME getMessageSMIME() {
-        return messageSMIME;
+    public MessageCMS getMessageCMS() {
+        return messageCMS;
     }
 
-    public void setMessageSMIME(MessageSMIME messageSMIME) {
-        this.messageSMIME = messageSMIME;
+    public void setMessageCMS(MessageCMS messageCMS) {
+        this.messageCMS = messageCMS;
     }
 
     public void setCurrencyMap(Map<String, Currency> currencyMap) {

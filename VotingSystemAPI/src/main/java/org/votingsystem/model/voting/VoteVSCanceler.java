@@ -1,6 +1,6 @@
 package org.votingsystem.model.voting;
 
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;
@@ -25,7 +25,7 @@ public class VoteVSCanceler extends EntityVS implements Serializable {
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false)
     private Long id;
-    @OneToOne private MessageSMIME messageSMIME;
+    @OneToOne private MessageCMS messageCMS;
     @OneToOne private AccessRequestVS accessRequestVS;
     @OneToOne private VoteVS voteVS;
     @Enumerated(EnumType.STRING)
@@ -43,10 +43,10 @@ public class VoteVSCanceler extends EntityVS implements Serializable {
 
     public VoteVSCanceler() {}
 
-    public VoteVSCanceler(MessageSMIME messageSMIME, AccessRequestVS accessRequestVS, State state,
-                          String originHashAccessRequestBase64, String hashAccessRequestBase64, String originHashCertVSBase64,
-                          String hashCertVSBase64, VoteVS voteVS) {
-        this.messageSMIME = messageSMIME;
+    public VoteVSCanceler(MessageCMS messageCMS, AccessRequestVS accessRequestVS, State state,
+						  String originHashAccessRequestBase64, String hashAccessRequestBase64, String originHashCertVSBase64,
+						  String hashCertVSBase64, VoteVS voteVS) {
+        this.messageCMS = messageCMS;
         this.accessRequestVS = accessRequestVS;
         this.state = state;
         this.originHashAccessRequestBase64 = originHashAccessRequestBase64;
@@ -65,12 +65,12 @@ public class VoteVSCanceler extends EntityVS implements Serializable {
         this.dateCreated = dateCreated;
     }
 
-	public void setMessageSMIME(MessageSMIME messageSMIME) {
-		this.messageSMIME = messageSMIME;
+	public void setMessageCMS(MessageCMS messageCMS) {
+		this.messageCMS = messageCMS;
 	}
 
-	public MessageSMIME getMessageSMIME() {
-		return messageSMIME;
+	public MessageCMS getMessageCMS() {
+		return messageCMS;
 	}
 
 	public void setId(Long id) {

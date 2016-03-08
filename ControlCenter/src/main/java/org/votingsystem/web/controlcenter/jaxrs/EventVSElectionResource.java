@@ -8,7 +8,7 @@ import org.hibernate.criterion.Restrictions;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.EventVSStatsDto;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -104,16 +104,16 @@ public class EventVSElectionResource {
     }
 
     @Path("/") @POST
-    public Response save(MessageSMIME messageSMIME, @Context ServletContext context,
+    public Response save(MessageCMS messageCMS, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        EventVSElection eventVSElection = eventVSBean.saveEvent(messageSMIME);
+        EventVSElection eventVSElection = eventVSBean.saveEvent(messageCMS);
         return Response.ok().entity(eventVSElection.getId()).type(MediaType.TEXT_PLAIN).build();
     }
 
     @Path("/cancel") @POST
-    public Response cancel(MessageSMIME messageSMIME, @Context ServletContext context,
-                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        MessageSMIME responseMessage = eventVSBean.cancelEvent(messageSMIME);
+    public Response cancel(MessageCMS messageCMS, @Context ServletContext context,
+                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        MessageCMS responseMessage = eventVSBean.cancelEvent(messageCMS);
         return Response.ok().entity(responseMessage.getContent()).type(MediaType.TEXT_PLAIN).build();
     }
 
@@ -140,7 +140,7 @@ public class EventVSElectionResource {
         EventVSElection eventVS = dao.find(EventVSElection.class, id);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection not found - " +
                 "eventId: " + id).build();
-        return Response.ok().entity(eventVS.getPublishRequestSMIME().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(eventVS.getPublishRequestCMS().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
 }

@@ -1,6 +1,6 @@
 package org.votingsystem.model.voting;
 
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 
@@ -27,7 +27,7 @@ public class AccessRequestVS extends EntityVS implements Serializable {
     @JoinColumn(name="eventVS") private EventVS eventVS;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
-    @OneToOne private MessageSMIME messageSMIME;
+    @OneToOne private MessageCMS messageCMS;
     @OneToOne(mappedBy="accessRequestVS") private VoteVSCanceler voteVSCanceler;
     @Column(name="hashAccessRequestBase64") private String hashAccessRequestBase64;
     @Column(name="metainf") private String metaInf;
@@ -36,10 +36,10 @@ public class AccessRequestVS extends EntityVS implements Serializable {
 
     public AccessRequestVS() {}
 
-    public AccessRequestVS(UserVS userVS, MessageSMIME messageSMIME, State state, String hashAccessRequestBase64,
+    public AccessRequestVS(UserVS userVS, MessageCMS messageCMS, State state, String hashAccessRequestBase64,
                            EventVS eventVS) {
         this.userVS = userVS;
-        this.messageSMIME = messageSMIME;
+        this.messageCMS = messageCMS;
         this.state = state;
         this.hashAccessRequestBase64 = hashAccessRequestBase64;
         this.eventVS = eventVS;
@@ -66,9 +66,9 @@ public class AccessRequestVS extends EntityVS implements Serializable {
         this.hashAccessRequestBase64 = hashAccessRequestBase64;
     }
 
-    public MessageSMIME getMessageSMIME() { return messageSMIME;  }
+    public MessageCMS getMessageCMS() { return messageCMS;  }
 
-    public void setMessageSMIME(MessageSMIME messageSMIME) { this.messageSMIME = messageSMIME; }
+    public void setMessageCMS(MessageCMS messageCMS) { this.messageCMS = messageCMS; }
 
     public UserVS getUserVS() { return userVS; }
 

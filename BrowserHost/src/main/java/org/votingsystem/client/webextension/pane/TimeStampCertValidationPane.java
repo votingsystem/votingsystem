@@ -14,8 +14,8 @@ import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.dialog.DialogVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -62,7 +62,7 @@ public class TimeStampCertValidationPane extends GridPane {
         Collection<X509Certificate> certs = null;
         try {
             String pemCert = textArea.getText();
-            certs = CertUtils.fromPEMToX509CertCollection(pemCert.getBytes());
+            certs = PEMUtils.fromPEMToX509CertCollection(pemCert.getBytes());
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("pemCertsErrorMsg"));

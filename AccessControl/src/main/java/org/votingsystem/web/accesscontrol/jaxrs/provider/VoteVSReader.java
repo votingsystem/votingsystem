@@ -1,7 +1,7 @@
 package org.votingsystem.web.accesscontrol.jaxrs.provider;
 
-import org.votingsystem.dto.SMIMEDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.cms.CMSSignedMessage;
+import org.votingsystem.dto.CMSDto;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.ejb.SignatureBean;
 
@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  */
 @Provider
 @Consumes(MediaTypeVS.VOTE)
-public class VoteVSReader implements MessageBodyReader<SMIMEDto> {
+public class VoteVSReader implements MessageBodyReader<CMSDto> {
 
     private static final Logger log = Logger.getLogger(VoteVSReader.class.getName());
 
@@ -32,14 +32,14 @@ public class VoteVSReader implements MessageBodyReader<SMIMEDto> {
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-        return SMIMEDto.class.isAssignableFrom(aClass);
+        return CMSDto.class.isAssignableFrom(aClass);
     }
 
     @Override
-    public SMIMEDto readFrom(Class<SMIMEDto> aClass, Type type, Annotation[] annotations, MediaType mediaType,
-                 MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
+    public CMSDto readFrom(Class<CMSDto> aClass, Type type, Annotation[] annotations, MediaType mediaType,
+                           MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
         try {
-            return signatureBean.validatedVoteFromControlCenter(new SMIMEMessage(inputStream));
+            return signatureBean.validatedVoteFromControlCenter(CMSSignedMessage.FROM_PEM(inputStream));
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             throw new WebApplicationException(ex);

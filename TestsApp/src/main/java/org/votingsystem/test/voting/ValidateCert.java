@@ -1,13 +1,13 @@
 package org.votingsystem.test.voting;
 
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.CertValidationDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.AccessControlVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -36,11 +36,9 @@ public class ValidateCert {
         CertValidationDto certValidationDto = CertValidationDto.validationRequest("1234s", "015d3c26550c160e");
         SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService(
                 "AccessControl_07553172H", UserVS.Type.USER);
-        UserVS fromUserVS = superUserSignatureService.getUserVS();
-        String messageSubject = "ValidateCert test " + certValidationDto.getUUID();
-        SMIMEMessage smimeMessage = superUserSignatureService.getSMIMETimeStamped(fromUserVS.getNif(),
-                accessControlVS.getName(), JSON.getMapper().writeValueAsString(certValidationDto), messageSubject);
-        responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+        CMSSignedMessage cmsMessage = superUserSignatureService.addSignatureWithTimeStamp(
+                JSON.getMapper().writeValueAsString(certValidationDto));
+        responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 accessControlVS.getUserCSRValidationServiceURL());
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage());
         System.exit(0);

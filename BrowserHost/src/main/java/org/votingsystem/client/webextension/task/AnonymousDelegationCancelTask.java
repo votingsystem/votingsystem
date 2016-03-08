@@ -4,9 +4,9 @@ import javafx.concurrent.Task;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.ContextVS;
@@ -43,29 +43,27 @@ public class AnonymousDelegationCancelTask extends Task<ResponseVS> {
             RepresentativeDelegationDto anonymousCancelationRequest = delegation.getAnonymousCancelationRequest();
             RepresentativeDelegationDto anonymousRepresentationDocumentCancelationRequest =
                     delegation.getAnonymousRepresentationDocumentCancelationRequest();
-            SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null,
+            CMSSignedMessage cmsMessage = BrowserSessionService.getCMS(null,
                     operationVS.getReceiverName(), JSON.getMapper().writeValueAsString(anonymousCancelationRequest),
                     password, operationVS.getSignedMessageSubject());
-            SMIMEMessage anonymousSmimeMessage = delegation.getCertificationRequest().getSMIME(delegation.getHashCertVSBase64(),
-                    ContextVS.getInstance().getAccessControl().getName(),
-                    JSON.getMapper().writeValueAsString(anonymousRepresentationDocumentCancelationRequest),
-                    operationVS.getSignedMessageSubject(), null);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(anonymousSmimeMessage,
+            CMSSignedMessage anonymousCMSMessage = delegation.getCertificationRequest().signData(
+                    JSON.getMapper().writeValueAsString(anonymousRepresentationDocumentCancelationRequest));
+            MessageTimeStamper timeStamper = new MessageTimeStamper(anonymousCMSMessage,
                     ContextVS.getInstance().getDefaultServer().getTimeStampServiceURL());
-            anonymousSmimeMessage = timeStamper.call();
+            anonymousCMSMessage = timeStamper.call();
 
             Map<String, Object> mapToSend = new HashMap<>();
-            mapToSend.put(ContextVS.SMIME_FILE_NAME, smimeMessage.getBytes());
-            mapToSend.put(ContextVS.SMIME_ANONYMOUS_FILE_NAME, anonymousSmimeMessage.getBytes());
+            mapToSend.put(ContextVS.CMS_FILE_NAME, cmsMessage.toPEM());
+            mapToSend.put(ContextVS.CMS_ANONYMOUS_FILE_NAME, anonymousCMSMessage.toPEM());
             updateMessage(operationVS.getSignedMessageSubject());
             responseVS =  HttpHelper.getInstance().sendObjectMap(mapToSend,
                     ContextVS.getInstance().getAccessControl().getAnonymousDelegationCancelerServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                SMIMEMessage delegationReceipt = responseVS.getSMIME();
+                CMSSignedMessage delegationReceipt = responseVS.getCMS();
                 Collection matches = delegationReceipt.checkSignerCert(
                         ContextVS.getInstance().getAccessControl().getX509Certificate());
                 if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
-                responseVS.setSMIME(delegationReceipt);
+                responseVS.setCMS(delegationReceipt);
                 responseVS.setMessage(ContextVS.getMessage("cancelAnonymousRepresentationOkMsg"));
             } else responseVS = new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getMessage("errorLbl"));
         } catch (KeyStoreExceptionVS ex) {

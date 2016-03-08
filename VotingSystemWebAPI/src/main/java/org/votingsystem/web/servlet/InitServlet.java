@@ -1,8 +1,8 @@
 package org.votingsystem.web.servlet;
 
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -37,11 +37,11 @@ public class InitServlet extends HttpServlet{
                 String resFileName = res.split("WEB-INF/votingsystem/certs/")[1];
                 log.info("checking resource: " + res + " - resFileName: " + resFileName);
                 if(resFileName.startsWith("AC_") && resFileName.endsWith(".pem")) {
-                    X509Certificate fileSystemX509TrustedCert = CertUtils.fromPEMToX509Cert(FileUtils.getBytesFromStream(
+                    X509Certificate fileSystemX509TrustedCert = PEMUtils.fromPEMToX509Cert(FileUtils.getBytesFromStream(
                             getServletContext().getResourceAsStream(res)));
                     fileSystemX509TrustedCerts.add(fileSystemX509TrustedCert);
                 } else if(resFileName.startsWith("ADMIN_") && resFileName.endsWith(".pem")) {
-                    X509Certificate adminCert = CertUtils.fromPEMToX509Cert(FileUtils.getBytesFromStream(
+                    X509Certificate adminCert = PEMUtils.fromPEMToX509Cert(FileUtils.getBytesFromStream(
                             getServletContext().getResourceAsStream(res)));
                     UserVS userVS = UserVS.FROM_X509_CERT(adminCert);
                     admins.add(userVS);

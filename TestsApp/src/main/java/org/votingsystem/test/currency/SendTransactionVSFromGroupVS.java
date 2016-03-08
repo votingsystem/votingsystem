@@ -32,7 +32,7 @@ public class SendTransactionVSFromGroupVS {
         transactionVSPlanDto.setGroupVSDto(groupVSDto);
 
 
-        transactionVSPlanDto.runGroupVSTransactions("TEST_GROUPVS_SEND_TRANSACTIONVS");
+        transactionVSPlanDto.runGroupVSTransactions();
         simulationData.finishAndExit(ResponseVS.SC_OK, "currencyResultMap: " + transactionVSPlanDto.getGroupVSBalance());
     }
 

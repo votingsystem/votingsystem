@@ -1,17 +1,18 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.currency.util.AsyncRequestShopBundle;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -72,12 +73,12 @@ public class ShopExampleBean {
 
     public void sendResponse(String sessionId, TransactionResponseDto responseDto) throws Exception{
         log.info("sendResponse - sessionId: " + sessionId);
-        SMIMEMessage smimeMessage = responseDto.getSmime();
+        CMSSignedMessage cmsMessage = responseDto.getCMS();
         AsyncRequestShopBundle requestBundle = transactionRequestMap.remove(sessionId);
         if(requestBundle != null) {
             try {
                 if(responseDto.getCurrencyChangeCert() != null) {
-                    X509Certificate currencyCert = CertUtils.fromPEMToX509Cert(responseDto.getCurrencyChangeCert().getBytes());
+                    X509Certificate currencyCert = PEMUtils.fromPEMToX509Cert(responseDto.getCurrencyChangeCert().getBytes());
                     CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                             currencyCert, ContextVS.CURRENCY_OID);
                     Currency currency = requestBundle.getCurrency(certExtensionDto.getHashCertVS());
@@ -85,7 +86,7 @@ public class ShopExampleBean {
                     log.info("TODO - currency OK save to wallet: " + currency.getAmount() + " " +
                             currency.getCurrencyCode() + " - " + currency.getTagVS().getName());
                 }
-                requestBundle.getTransactionDto().validateReceipt(smimeMessage, true);
+                requestBundle.getTransactionDto().validateReceipt(cmsMessage, true);
                 MessageDto<TransactionVSDto> messageDto = MessageDto.OK("OK");
                 messageDto.setData(requestBundle.getTransactionDto());
                 requestBundle.getAsyncResponse().resume(Response.ok().entity(JSON.getMapper()

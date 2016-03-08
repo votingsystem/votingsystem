@@ -2,9 +2,9 @@ package org.votingsystem.model;
 
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.crypto.CMSUtils;
 
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
@@ -45,6 +45,14 @@ public class UserVS extends EntityVS implements Serializable {
 
     private static Logger log = Logger.getLogger(UserVS.class.getName());
 
+    public boolean isAnonymousUser() {
+        return isAnonymousUser;
+    }
+
+    public void setAnonymousUser(boolean anonymousUser) {
+        isAnonymousUser = anonymousUser;
+    }
+
     public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANKVS}
 
     public enum State {ACTIVE, PENDING, SUSPENDED, CANCELED}
@@ -53,40 +61,22 @@ public class UserVS extends EntityVS implements Serializable {
     @Column(name="id", unique=true, nullable=false) private Long id;
 	@Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type = Type.USER;
     @Column(name="nif", unique=true) private String nif;
-
     @Column(name="IBAN") private String IBAN;
-
     @Column(name="name") private String name;
-
     @Column(name="url") private String url;
-    
     @Column(name="metaInf", columnDefinition="TEXT") private String metaInf = "{\"numRepresentations\":1}";
-    
     @Column(name="firstName" ) private String firstName;
-
     @Column(name="lastName" ) private String lastName;
-
     @Column(name="description", columnDefinition="TEXT" ) private String description;
-    
     @Column(name="country" ) private String country;
-    
     @Column(name="phone" ) private String phone;
-    
     @Column(name="email" ) private String email;
-
     @Column(name="cn") private String cn;
-
     @Column(name="reason") private String reason;
-
-
-
     @Column(name="state") @Enumerated(EnumType.STRING) private State state = State.ACTIVE;
-    
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="representative") private UserVS representative;
-
     @OneToOne private AddressVS addressVS;
-
     //Owning Entity side of the relationship
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinTable(name = "uservs_tagvs", joinColumns = {
@@ -110,6 +100,7 @@ public class UserVS extends EntityVS implements Serializable {
     @Transient private transient SignerInformation signerInformation;
     @Transient private transient DeviceVS deviceVS;
     @Transient private KeyStore keyStore;
+    @Transient private boolean isAnonymousUser;
 
     public UserVS() {}
 

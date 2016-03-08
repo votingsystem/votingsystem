@@ -1,6 +1,6 @@
 From: Voting_System_Currency_Server
 To: 07553172H
-Message-ID: /messageSMIME/183
+Message-ID: /cmsMessagePEM/183
 Subject: ingreso de usuario
 MIME-Version: 1.0
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha256; 
@@ -11,7 +11,7 @@ TypeVS: FROM_USERVS
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: quoted-printable
 
-{"amount":10,"currencyCode":"EUR","dateCreated":1453976692313,"messageSMIME=
+{"amount":10,"currencyCode":"EUR","dateCreated":1453976692313,"cmsMessagePEM=
 ":"VG86IFZvdGluZ19TeXN0ZW1fQ3VycmVuY3lfU2VydmVyDQpNZXNzYWdlLUlEOiA8MTY2MTUx=
 MDI3NC45LjE0NTM5NzY3MDk0MjIuSmF2YU1haWwuamd6b3Jub3phQGFjZXItamVzc2llPg0KU3V=
 iamVjdDogPT9VVEYtOD9RP2ludGVyY2FtYmlvX2RlX21vbmVkYV9hbj1DMz1CM25pbW8/PQ0KTU=
@@ -113,7 +113,7 @@ imited":false,"toUser":"JOSE-EXT","toUserIBAN":["ES4678788989450000000002"]=
 ,"type":"FROM_USERVS","userToType":"USER","uuid":"0dfdcc6a-6c9a-48f3-a44b-5=
 27f0d99614d"}
 ------=_Part_4_1934525704.1453976715062
-Content-Type: application/pkcs7-signature; name=smime.p7s; smime-type=signed-data
+Content-Type: application/pkcs7-signature; name=cms.p7s; cms-type=signed-data
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="MultiSign"
 Content-Description: S/MIME Cryptographic Signature

@@ -1,9 +1,9 @@
 package org.votingsystem.test.callable;
 
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.*;
 
@@ -28,12 +28,10 @@ public class RepresentativeDataSender implements Callable<ResponseVS> {
     }
     
     @Override  public ResponseVS call() throws Exception {
-        String subject = "Message from RepresentativeTestDataSender";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(representativeNIF);
-        SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(representativeNIF,
-                ContextVS.getInstance().getAccessControl().getName(), JSON.getMapper().writeValueAsString(
-                        getRequest(representativeNIF, imageBytes)), subject);
-        ResponseVS responseVS =  HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+        CMSSignedMessage cmsMessage = signatureService.addSignatureWithTimeStamp(JSON.getMapper().writeValueAsString(
+                getRequest(representativeNIF, imageBytes)));
+        ResponseVS responseVS =  HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 ContextVS.getInstance().getAccessControl().getRepresentativeServiceURL());
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) responseVS.setMessage(representativeNIF);
         return responseVS;

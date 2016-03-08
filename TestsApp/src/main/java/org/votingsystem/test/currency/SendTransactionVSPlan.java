@@ -22,8 +22,8 @@ public class SendTransactionVSPlan {
         File transactionPlan = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("transactionPlan.json"));
         TransactionVSPlanDto transactionVSPlanDto = JSON.getMapper().readValue(transactionPlan, TransactionVSPlanDto.class);
         transactionVSPlanDto.setCurrencyServer(currencyServer);
-        transactionVSPlanDto.runBankVSTransactions("TEST_BANKVS_SEND_TRANSACTIONVS");
-        transactionVSPlanDto.runGroupVSTransactions("TEST_GROUPVS_SEND_TRANSACTIONVS");
+        transactionVSPlanDto.runBankVSTransactions();
+        transactionVSPlanDto.runGroupVSTransactions();
         log.info("bankVSCurrencyResultMap: " + transactionVSPlanDto.getBankVSBalance() + "\n groupVSCurrencyResultMap: " +
                 transactionVSPlanDto.getGroupVSBalance());
     }

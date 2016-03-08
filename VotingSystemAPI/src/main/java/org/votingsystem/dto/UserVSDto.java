@@ -109,13 +109,13 @@ public class UserVSDto implements Serializable {
         return userVSDto;
     }
 
-    public static UserVSDto REPRESENTATIVE(UserVS userVS, Long smimeActivationId, Long numRepresentations,
+    public static UserVSDto REPRESENTATIVE(UserVS userVS, Long cmsActivationId, Long numRepresentations,
                                            String contextURL) {
         UserVSDto userVSDto = BASIC(userVS);
         userVSDto.type = UserVS.Type.REPRESENTATIVE;
         userVSDto.numRepresentations = numRepresentations;
         userVSDto.URL = format("{0}/rest/representative/id/{1}", contextURL, userVS.getId());
-        userVSDto.representativeMessageURL = format("{0}/rest/messageSMIME/id/{1}", contextURL, smimeActivationId);
+        userVSDto.representativeMessageURL = format("{0}/rest/messageCMS/id/{1}", contextURL, cmsActivationId);
         userVSDto.imageURL = format("{0}/rest/representative/id/{1}/image", contextURL, userVS.getId());
         userVSDto.description = userVS.getDescription();
         return userVSDto;

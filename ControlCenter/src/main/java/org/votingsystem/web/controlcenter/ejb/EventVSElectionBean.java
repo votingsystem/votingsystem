@@ -1,17 +1,17 @@
 package org.votingsystem.web.controlcenter.ejb;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.EventVSStatsDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.*;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
@@ -40,25 +40,25 @@ public class EventVSElectionBean {
     @Inject TimeStampBean timeStampBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
 
-    public EventVSElection saveEvent(MessageSMIME messageSMIME) throws Exception {
-        SMIMEMessage smimeReq = messageSMIME.getSMIME();
-        String serverURL = smimeReq.getHeader("serverURL")[0];
-        AccessControlVS accessControl = checkAccessControl(serverURL);
-        EventVSDto request = messageSMIME.getSignedContent(EventVSDto.class);request.validate(config.getContextURL());
-        X509Certificate certCAVotacion = CertUtils.fromPEMToX509Cert(request.getCertCAVotacion().getBytes());
-        X509Certificate userCert = CertUtils.fromPEMToX509Cert(request.getUserVS().getBytes());
+    public EventVSElection saveEvent(MessageCMS messageCMS) throws Exception {
+        CMSSignedMessage cmsReq = messageCMS.getCMS();
+        EventVSDto request = cmsReq.getSignedContent(EventVSDto.class);
+        request.validate(config.getContextURL());
+        AccessControlVS accessControl = checkAccessControl(request.getAccessControlURL());
+        X509Certificate certCAVotacion = PEMUtils.fromPEMToX509Cert(request.getCertCAVotacion().getBytes());
+        X509Certificate userCert = PEMUtils.fromPEMToX509Cert(request.getUserVS().getBytes());
         UserVS user = subscriptionVSBean.checkUser(UserVS.FROM_X509_CERT(userCert));
         EventVSElection eventVS = request.getEventVSElection();
         eventVS.setAccessControlVS(accessControl);
         eventVS.setUserVS(user);
-        eventVS.setPublishRequestSMIME(messageSMIME);
+        eventVS.setPublishRequestCMS(messageCMS);
         setEventDatesState(eventVS);
         eventVS.updateAccessControlIds();
         dao.persist(eventVS);
         X509Certificate controlCenterX509Cert = signatureBean.getServerCert();
         CertificateVS eventVSControlCenterCertificate =  CertificateVS.ACTORVS(null, controlCenterX509Cert);
         dao.persist(eventVSControlCenterCertificate);
-        Collection<X509Certificate> accessControlCerts = CertUtils.fromPEMToX509CertCollection(request.getCertChain().getBytes());
+        Collection<X509Certificate> accessControlCerts = PEMUtils.fromPEMToX509CertCollection(request.getCertChain().getBytes());
         X509Certificate accessControlX509Cert = accessControlCerts.iterator().next();
         CertificateVS eventVSAccessControlCertificate = CertificateVS.ACTORVS(accessControl, accessControlX509Cert);
         dao.persist(eventVSAccessControlCertificate);
@@ -70,10 +70,10 @@ public class EventVSElectionBean {
         return dao.merge(eventVS);
     }
 
-    public MessageSMIME cancelEvent(MessageSMIME messageSMIME) throws Exception {
+    public MessageCMS cancelEvent(MessageCMS messageCMS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS signer = messageSMIME.getUserVS();
-        EventVSDto request = messageSMIME.getSignedContent(EventVSDto.class);
+        UserVS signer = messageCMS.getUserVS();
+        EventVSDto request = messageCMS.getSignedContent(EventVSDto.class);
         Query query = dao.getEM().createQuery("select e from EventVSElection e where e.accessControlEventVSId =:eventId")
                 .setParameter("eventId", request.getEventId());
         EventVSElection eventVS = dao.getSingleResult(EventVSElection.class, query);
@@ -84,15 +84,12 @@ public class EventVSElectionBean {
         if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
         request.validateCancelation(eventVS.getAccessControlVS().getServerURL());
-        String fromUser = config.getServerName();
-        String toUser = eventVS.getAccessControlVS().getName();
-        String subject = messages.get("eventCancelationMsgSubject");
-        SMIMEMessage smimeResp = signatureBean.getSMIMEMultiSigned(fromUser, toUser, messageSMIME.getSMIME(), subject);
-        dao.merge(messageSMIME.setSMIME(smimeResp));
+        CMSSignedMessage cmsResp = signatureBean.addSignature(messageCMS.getCMS());
+        dao.merge(messageCMS.setCMS(cmsResp));
         eventVS.setState(request.getState()).setDateCanceled(new Date());
         dao.merge(eventVS);
         log.info("cancelEvent - canceled EventVSElection  id:" + eventVS.getId());
-        return messageSMIME;
+        return messageCMS;
     }
 
     private AccessControlVS checkAccessControl(String serverURL) {

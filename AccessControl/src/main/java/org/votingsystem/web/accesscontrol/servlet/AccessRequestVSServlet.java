@@ -2,13 +2,13 @@ package org.votingsystem.web.accesscontrol.servlet;
 
 
 import org.votingsystem.dto.MessageDto;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CsrResponse;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.crypto.CsrResponse;
 import org.votingsystem.web.accesscontrol.ejb.AccessRequestBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -48,9 +48,9 @@ public class AccessRequestVSServlet extends HttpServlet {
             throws ServletException, IOException, IOException {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ACCESS_REQUEST);
-            MessageSMIME messageSMIME = signatureBean.validateSMIME(
-                    requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
-            CsrResponse csrResponse = accessRequestBean.saveRequest(messageSMIME, requestVS.getCSRBytes());
+            MessageCMS messageCMS = signatureBean.validateCMS(
+                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
+            CsrResponse csrResponse = accessRequestBean.saveRequest(messageCMS, requestVS.getCSRBytes());
             resp.setContentType(ContentTypeVS.TEXT_STREAM.getName());
             resp.setContentLength(csrResponse.getIssuedCert().length);
             resp.getOutputStream().write(csrResponse.getIssuedCert());

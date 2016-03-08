@@ -17,8 +17,8 @@ import org.votingsystem.client.webextension.util.DocumentVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.voting.MetaInf;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.util.*;
+import org.votingsystem.util.crypto.SignedFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -94,11 +94,11 @@ public class DocumentBrowserPane extends VBox {
             String fileName = file.getName().endsWith("temp") ? "":file.getName();
             SignedFile signedFile = new SignedFile(FileUtils.getBytesFromFile(file), fileName);
             if(mainPane != null) getChildren().remove(mainPane);
-            mainPane = new SMIMEPane(signedFile);
+            mainPane = new CMSPane(signedFile);
             getChildren().add(mainPane);
             VBox.setVgrow(mainPane, Priority.ALWAYS);
             saveButton.setVisible(true);
-            this.caption = ((SMIMEPane)mainPane).getCaption();
+            this.caption = ((CMSPane)mainPane).getCaption();
             getScene().getWindow().sizeToScene();
         } catch (Exception ex) {
             BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("openFileErrorMsg", file.getAbsolutePath()));

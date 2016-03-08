@@ -29,11 +29,11 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.crypto.KeyStoreUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -278,15 +278,15 @@ public class Utils {
     public static File getReceiptBundle(ResponseVS responseVS) throws Exception {
         Map delegationDataMap = (Map) responseVS.getData();
         java.util.List<File> fileList = new ArrayList<File>();
-        File smimeTempFile = File.createTempFile(ContextVS.RECEIPT_FILE_NAME, ContentTypeVS.SIGNED.getExtension());
-        smimeTempFile.deleteOnExit();
-        FileUtils.copyStreamToFile(new ByteArrayInputStream(responseVS.getSMIME().getBytes()), smimeTempFile);
+        File cmsTempFile = File.createTempFile(ContextVS.RECEIPT_FILE_NAME, ContentTypeVS.SIGNED.getExtension());
+        cmsTempFile.deleteOnExit();
+        FileUtils.copyStreamToFile(new ByteArrayInputStream(responseVS.getCMS().toPEM()), cmsTempFile);
         File certVSDataFile = File.createTempFile(ContextVS.CANCEL_DATA_FILE_NAME, "");
         certVSDataFile.deleteOnExit();
         FileUtils.copyStreamToFile(new ByteArrayInputStream(
                 JSON.getMapper().writeValueAsString(delegationDataMap).getBytes("UTF-8")), certVSDataFile);
         fileList.add(certVSDataFile);
-        fileList.add(smimeTempFile);
+        fileList.add(cmsTempFile);
         File outputZip = File.createTempFile(ContextVS.CANCEL_BUNDLE_FILE_NAME, ".zip");
         outputZip.deleteOnExit();
         FileUtils.packZip(outputZip, fileList);

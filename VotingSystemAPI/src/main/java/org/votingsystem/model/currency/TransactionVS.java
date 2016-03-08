@@ -1,7 +1,7 @@
 package org.votingsystem.model.currency;
 
 import org.votingsystem.dto.currency.CurrencyRequestDto;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 
@@ -73,9 +73,9 @@ public class TransactionVS implements Serializable {
     @JoinColumn(name="tag", nullable=false) private TagVS tag;
 
     @Column(name="amount") private BigDecimal amount = null;
-    @OneToOne private MessageSMIME messageSMIME;
+    @OneToOne private MessageCMS messageCMS;
 
-    @OneToOne private MessageSMIME cancellationSMIME;
+    @OneToOne private MessageCMS cancellationCMS;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="transactionParent") private TransactionVS transactionParent;
@@ -105,13 +105,13 @@ public class TransactionVS implements Serializable {
     public TransactionVS() {}
 
     public TransactionVS(UserVS fromUserVS, UserVS toUserVS, BigDecimal amount, String currencyCode, String subject,
-                         MessageSMIME messageSMIME, Type type, State state, TagVS tag) {
+                         MessageCMS messageCMS, Type type, State state, TagVS tag) {
         this.amount = amount;
         this.fromUserVS = fromUserVS;
         this.fromUserIBAN = fromUserVS.getIBAN();
         this.toUserVS = toUserVS;
         this.toUserIBAN = toUserVS.getIBAN();
-        this.messageSMIME = messageSMIME;
+        this.messageCMS = messageCMS;
         this.subject = subject;
         this.currencyCode = currencyCode;
         this.type = type;
@@ -120,9 +120,9 @@ public class TransactionVS implements Serializable {
     }
 
     public static TransactionVS CURRENCY_SEND(CurrencyBatch batch, UserVS toUserVS, Date validTo,
-               MessageSMIME messageSMIME, TagVS tagVS) {
+                                              MessageCMS messageCMS, TagVS tagVS) {
         TransactionVS transactionVS = BASIC(toUserVS, TransactionVS.Type.CURRENCY_SEND, null, batch.getBatchAmount(),
-                batch.getCurrencyCode(), batch.getSubject(), validTo, messageSMIME, batch.getTagVS());
+                batch.getCurrencyCode(), batch.getSubject(), validTo, messageCMS, batch.getTagVS());
         transactionVS.setToUserIBAN(batch.getToUserVS().getIBAN());
         transactionVS.setCurrencyBatch(batch);
         transactionVS.setState(TransactionVS.State.OK);
@@ -131,14 +131,14 @@ public class TransactionVS implements Serializable {
         return transactionVS;
     }
 
-    public static TransactionVS CURRENCY_CHANGE(CurrencyBatch batch, Date validTo, MessageSMIME messageSMIME, TagVS tagVS) {
+    public static TransactionVS CURRENCY_CHANGE(CurrencyBatch batch, Date validTo, MessageCMS messageCMS, TagVS tagVS) {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setType(Type.CURRENCY_CHANGE);
         transactionVS.setAmount(batch.getBatchAmount());
         transactionVS.setCurrencyCode(batch.getCurrencyCode());
         transactionVS.setSubject(batch.getSubject());
         transactionVS.setValidTo(validTo);
-        transactionVS.setMessageSMIME(messageSMIME);
+        transactionVS.setMessageCMS(messageCMS);
         transactionVS.setTag(tagVS);
         transactionVS.setCurrencyBatch(batch);
         transactionVS.setState(TransactionVS.State.OK);
@@ -147,16 +147,16 @@ public class TransactionVS implements Serializable {
     }
 
     public static TransactionVS USERVS(UserVS userVS, UserVS toUserVS, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
-               BigDecimal amount, String currencyCode, String subject, Date validTo, MessageSMIME messageSMIME, TagVS tag) {
+                                       BigDecimal amount, String currencyCode, String subject, Date validTo, MessageCMS messageCMS, TagVS tag) {
         TransactionVS transactionVS = BASIC(toUserVS, type, accountFromMovements, amount, currencyCode, subject,
-                validTo, messageSMIME, tag);
+                validTo, messageCMS, tag);
         transactionVS.setFromUserVS(userVS);
         transactionVS.setFromUserIBAN(userVS.getIBAN());
         return transactionVS;
     }
 
     public static TransactionVS BASIC(UserVS toUserVS, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
-               BigDecimal amount, String currencyCode, String subject, Date validTo, MessageSMIME messageSMIME, TagVS tag) {
+                                      BigDecimal amount, String currencyCode, String subject, Date validTo, MessageCMS messageCMS, TagVS tag) {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setToUserVS(toUserVS);
         transactionVS.setToUserIBAN(toUserVS.getIBAN());
@@ -166,14 +166,14 @@ public class TransactionVS implements Serializable {
         transactionVS.setCurrencyCode(currencyCode);
         transactionVS.setSubject(subject);
         transactionVS.setValidTo(validTo);
-        transactionVS.setMessageSMIME(messageSMIME);
+        transactionVS.setMessageCMS(messageCMS);
         transactionVS.setTag(tag);
         transactionVS.setState(TransactionVS.State.OK);
         return transactionVS;
     }
 
-    public static TransactionVS FROM_BANKVS(BankVS bankVS, String bankClientIBAN, String bankClientName,  UserVS toUser,
-          BigDecimal amount, String currencyCode, String subject, Date validTo, MessageSMIME messageSMIME, TagVS tag) {
+    public static TransactionVS FROM_BANKVS(BankVS bankVS, String bankClientIBAN, String bankClientName, UserVS toUser,
+                                            BigDecimal amount, String currencyCode, String subject, Date validTo, MessageCMS messageCMS, TagVS tag) {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setFromUserVS(bankVS);
         transactionVS.setFromUserIBAN(bankClientIBAN);
@@ -184,7 +184,7 @@ public class TransactionVS implements Serializable {
         transactionVS.setCurrencyCode(currencyCode);
         transactionVS.setSubject(subject);
         transactionVS.setValidTo(validTo);
-        transactionVS.setMessageSMIME(messageSMIME);
+        transactionVS.setMessageCMS(messageCMS);
         transactionVS.setTag(tag);
         transactionVS.setState(TransactionVS.State.OK);
         transactionVS.setType(TransactionVS.Type.FROM_BANKVS);
@@ -200,8 +200,8 @@ public class TransactionVS implements Serializable {
         transaction.setCurrencyCode(requestDto.getCurrencyCode());
         transaction.setTag(requestDto.getTagVS());
         transaction.setSubject(subject);
-        transaction.setMessageSMIME(requestDto.getMessageSMIME());
-        transaction.setFromUserVS(requestDto.getMessageSMIME().getUserVS());
+        transaction.setMessageCMS(requestDto.getMessageCMS());
+        transaction.setFromUserVS(requestDto.getMessageCMS().getUserVS());
         transaction.setAccountFromMovements(accountFromMovements);
         return transaction;
     }
@@ -214,20 +214,20 @@ public class TransactionVS implements Serializable {
         this.id = id;
     }
 
-    public MessageSMIME getMessageSMIME() {
-        return messageSMIME;
+    public MessageCMS getMessageCMS() {
+        return messageCMS;
     }
 
-    public void setMessageSMIME(MessageSMIME messageSMIME) {
-        this.messageSMIME = messageSMIME;
+    public void setMessageCMS(MessageCMS messageCMS) {
+        this.messageCMS = messageCMS;
     }
 
-    public MessageSMIME getCancellationSMIME() {
-        return cancellationSMIME;
+    public MessageCMS getCancellationCMS() {
+        return cancellationCMS;
     }
 
-    public void setCancellationSMIME(MessageSMIME cancellationSMIME) {
-        this.cancellationSMIME = cancellationSMIME;
+    public void setCancellationCMS(MessageCMS cancellationCMS) {
+        this.cancellationCMS = cancellationCMS;
     }
 
     public UserVS getFromUserVS() {
@@ -393,7 +393,7 @@ public class TransactionVS implements Serializable {
              UserVS toUser, String toUserIBAN) {
         TransactionVS result = new TransactionVS();
         result.amount = amount;
-        result.messageSMIME = transactionParent.messageSMIME;
+        result.messageCMS = transactionParent.messageCMS;
         result.fromUserVS = transactionParent.fromUserVS;
         result.fromUser = transactionParent.fromUser;
         result.fromUserIBAN = transactionParent.fromUserIBAN;

@@ -1,12 +1,12 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.EventVSElection;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
@@ -58,11 +58,11 @@ public class EventVSBean {
         if (todayDate.before(eventVS.getDateBegin())) eventVS.setState(EventVS.State.PENDING);
     }
 
-    public MessageSMIME cancelEvent(MessageSMIME messageSMIME) throws Exception {
+    public MessageCMS cancelEvent(MessageCMS messageCMS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        SMIMEMessage smimeMessageReq = messageSMIME.getSMIME();
-        UserVS signer = messageSMIME.getUserVS();
-        EventVSDto request = messageSMIME.getSignedContent(EventVSDto.class);
+        CMSSignedMessage cmsMessageReq = messageCMS.getCMS();
+        UserVS signer = messageCMS.getUserVS();
+        EventVSDto request = messageCMS.getSignedContent(EventVSDto.class);
         EventVS eventVS = dao.find(EventVS.class, request.getEventId());
         if (eventVS == null) throw new ValidationExceptionVS("ERROR - EventVS not found - eventId: " + request.getId());
         if(eventVS.getState() != EventVS.State.ACTIVE && eventVS.getState() != EventVS.State.PENDING)
@@ -70,22 +70,20 @@ public class EventVSBean {
         request.validateCancelation(config.getContextURL());
         if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
-        SMIMEMessage smimeMessageResp = null;
+        CMSSignedMessage cmsMessageResp = null;
         String fromUser = config.getServerName();
-        String subject = messages.get("eventCancelationMsgSubject");
         if(eventVS instanceof EventVSElection) {
-            String toUser = ((EventVSElection)eventVS).getControlCenterVS().getName();
-                    smimeMessageResp = signatureBean.getSMIMEMultiSigned(fromUser, toUser, smimeMessageReq, subject);
+            cmsMessageResp = signatureBean.addSignature(cmsMessageReq);
             String controlCenterUrl = ((EventVSElection)eventVS).getControlCenterVS().getServerURL();
-            ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageResp.getBytes(),
+            ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(cmsMessageResp.toPEM(),
                     ContentTypeVS.JSON_SIGNED, controlCenterUrl + "/rest/eventVSElection/cancel");
             if(ResponseVS.SC_OK != responseVSControlCenter.getStatusCode() &&
                     ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVSControlCenter.getStatusCode()) {
                 throw new ValidationExceptionVS(
                         "ERROR - controlCenterCommunicationErrorMsg -  controlCenterUrl: " + controlCenterUrl);
             }
-        } else smimeMessageResp = signatureBean.getSMIMEMultiSigned(fromUser, signer.getNif(), smimeMessageReq, subject);
-        messageSMIME.setSMIME(smimeMessageResp);
+        } else cmsMessageResp = signatureBean.addSignature(cmsMessageReq);
+        messageCMS.setCMS(cmsMessageResp);
         eventVS.setState(request.getState());
         eventVS.setDateCanceled(new Date());
         if(eventVS.getKeyStoreVS() != null) {
@@ -94,7 +92,7 @@ public class EventVSBean {
         }
         dao.merge(eventVS);
         log.info("EventVS with id:" + eventVS.getId() + " changed to state: " + request.getState().toString());
-        return messageSMIME;
+        return messageCMS;
     }
 
 }

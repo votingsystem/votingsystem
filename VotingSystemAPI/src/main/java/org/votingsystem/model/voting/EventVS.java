@@ -3,11 +3,11 @@ package org.votingsystem.model.voting;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.KeyStoreVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -84,7 +84,7 @@ public class EventVS extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS")
     private UserVS userVS;
-    @OneToOne private MessageSMIME publishRequestSMIME;
+    @OneToOne private MessageCMS publishRequestCMS;
     @OneToOne private KeyStoreVS keyStoreVS;
     @Column(name="backupAvailable") private Boolean backupAvailable = Boolean.TRUE;
     @ElementCollection
@@ -144,12 +144,12 @@ public class EventVS extends EntityVS implements Serializable {
         return this;
     }
 
-    public MessageSMIME getPublishRequestSMIME() {
-        return publishRequestSMIME;
+    public MessageCMS getPublishRequestCMS() {
+        return publishRequestCMS;
     }
 
-    public EventVS setPublishRequestSMIME(MessageSMIME publishRequestSMIME) {
-        this.publishRequestSMIME = publishRequestSMIME;
+    public EventVS setPublishRequestCMS(MessageCMS publishRequestCMS) {
+        this.publishRequestCMS = publishRequestCMS;
         return this;
     }
 

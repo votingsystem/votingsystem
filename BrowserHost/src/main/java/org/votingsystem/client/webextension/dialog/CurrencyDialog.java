@@ -24,13 +24,14 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.service.EventBusService;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.crypto.CertUtils;
 
 import java.io.IOException;
+import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Date;
@@ -135,10 +136,10 @@ public class CurrencyDialog extends DialogVS {
                 DateUtils.getDateStr(currency.getValidTo(), "dd MMM yyyy' 'HH:mm"));
         if(currency.getTimeLimited()) validToLbl.setStyle("-fx-text-fill:rgba(186,0,17, 0.45);");
         try {
-            CertUtils.CertValidatorResultVS validatorResult = CertUtils.verifyCertificate(
+            PKIXCertPathValidatorResult validatorResult = CertUtils.verifyCertificate(
                     ContextVS.getInstance().getCurrencyServer().getTrustAnchors(), false, Arrays.asList(
                             currency.getCertificationRequest().getCertificate()));
-            X509Certificate certCaResult = validatorResult.getResult().getTrustAnchor().getTrustedCert();
+            X509Certificate certCaResult = validatorResult.getTrustAnchor().getTrustedCert();
             PlatformImpl.runLater(statusChecker);
             log.info("currency issuer: " + certCaResult.getSubjectDN().toString());
         } catch(Exception ex) {

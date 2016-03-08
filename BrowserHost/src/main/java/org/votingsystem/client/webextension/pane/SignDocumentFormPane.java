@@ -24,13 +24,12 @@ import org.votingsystem.client.webextension.dialog.PasswordDialog;
 import org.votingsystem.client.webextension.dialog.ProgressDialog;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.util.Utils;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.*;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -45,11 +44,11 @@ public class SignDocumentFormPane extends GridPane {
 
     private static Logger log = Logger.getLogger(SignDocumentFormPane.class.getName());
 
-    public enum Operation {SEND_SMIME, SIGN_SMIME}
+    public enum Operation {SEND_CMS, SIGN_CMS}
 
     private TextArea textArea;
     private Button signButton;
-    private SMIMEMessage smimeMessage;
+    private CMSSignedMessage cmsMessage;
     private HBox signedDocumentButtonsBox;
     private TextField serviceURLTextField;
     private TextField messageSubjectTextField;
@@ -74,12 +73,12 @@ public class SignDocumentFormPane extends GridPane {
         signButton.setOnAction(actionEvent -> {
             PasswordDialog.showWithoutPasswordConfirm(password -> {
                     if(password == null) return;
-                    ProgressDialog.show(new OperationHandlerTask(Operation.SIGN_SMIME, password, null), null);
+                    ProgressDialog.show(new OperationHandlerTask(Operation.SIGN_CMS, password, null), null);
                 }, null);
         });
         Button saveButton = new Button(ContextVS.getMessage("saveLbl"));
         saveButton.setGraphic((Utils.getIcon(FontAwesome.Glyph.SAVE)));
-        saveButton.setOnAction(actionEvent -> saveMessage(smimeMessage));
+        saveButton.setOnAction(actionEvent -> saveMessage(cmsMessage));
         HBox.setMargin(saveButton, new Insets(0, 40, 0, 10));
 
         serviceURLTextField = new TextField();
@@ -137,7 +136,7 @@ public class SignDocumentFormPane extends GridPane {
             BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("enterServiceURLErrorMsg"));
             return;
         }
-        if(smimeMessage == null) {
+        if(cmsMessage == null) {
             BrowserHost.showMessage(ResponseVS.SC_ERROR, "Missing signed document");
         } else {
             final StringBuilder serviceURL = new StringBuilder("");
@@ -146,20 +145,18 @@ public class SignDocumentFormPane extends GridPane {
             } else serviceURL.append("http://" + serviceURLTextField.getText().trim());
             PasswordDialog.showWithoutPasswordConfirm(password -> {
                 if(password == null) return;
-                ProgressDialog.show(new OperationHandlerTask(Operation.SEND_SMIME, password, serviceURL.toString()), null);
+                ProgressDialog.show(new OperationHandlerTask(Operation.SEND_CMS, password, serviceURL.toString()), null);
             }, null);
         }
     }
 
-    public void saveMessage (SMIMEMessage smimeMessage) {
+    public void saveMessage (CMSSignedMessage cmsMessage) {
         try {
             FileChooser fileChooser = new FileChooser();
             File file = fileChooser.showSaveDialog(getScene().getWindow());
             String fileName = file.getAbsolutePath();
             if(!fileName.endsWith(ContentTypeVS.SIGNED.getExtension())) fileName = fileName + ContentTypeVS.SIGNED.getExtension();
-            FileOutputStream fos = new FileOutputStream(new File(fileName));
-            fos.write(smimeMessage.getBytes());
-            fos.close();
+            FileUtils.copyBytesToFile(cmsMessage.toPEM(), new File(fileName));
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -194,11 +191,11 @@ public class SignDocumentFormPane extends GridPane {
         @Override protected ResponseVS call() throws Exception {
             ResponseVS responseVS = null;
             switch(operation) {
-                case SEND_SMIME:
+                case SEND_CMS:
                     try {
                         updateMessage(ContextVS.getMessage("sendingDocumentMsg"));
                         updateProgress(20, 100);
-                        responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+                        responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                                 serviceURL);
                         updateProgress(80, 100);
                     } catch(Exception ex) {
@@ -206,7 +203,7 @@ public class SignDocumentFormPane extends GridPane {
                         responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
                     }
                     break;
-                case SIGN_SMIME:
+                case SIGN_CMS:
                     try {
                         Map<String, Object> textToSignMap = null;
                         try {
@@ -220,13 +217,13 @@ public class SignDocumentFormPane extends GridPane {
                         toUser = StringUtils.getNormalized(toUser);
                         String timeStampService = ActorVS.getTimeStampServiceURL(ContextVS.getMessage("defaultTimeStampServer"));
                         log.info("toUser: " + toUser + " - timeStampService: " + timeStampService);
-                        smimeMessage = BrowserSessionService.getSMIME(null, toUser,
+                        cmsMessage = BrowserSessionService.getCMS(null, toUser,
                                 textToSignMap.toString(), password, messageSubject);
                         updateMessage(ContextVS.getMessage("gettingTimeStampMsg"));
                         updateProgress(40, 100);
-                        MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampService);
-                        smimeMessage = timeStamper.call();
-                        responseVS = ResponseVS.OK(null).setSMIME(smimeMessage);
+                        MessageTimeStamper timeStamper = new MessageTimeStamper(cmsMessage, timeStampService);
+                        cmsMessage = timeStamper.call();
+                        responseVS = ResponseVS.OK(null).setCMS(cmsMessage);
                     } catch(Exception ex) {
                         log.log(Level.SEVERE, ex.getMessage() + " - " + textToSign.replaceAll("(\\r|\\n)", "\\\\n"), ex);
                         responseVS = new ResponseVS(ResponseVS.SC_ERROR, ex.getMessage());
@@ -242,7 +239,7 @@ public class SignDocumentFormPane extends GridPane {
     public void processResult(Operation operation, ResponseVS responseVS) {
         log.info("processResult - operation: " + operation + " - result: " + responseVS.getStatusCode());
         switch(operation) {
-            case SIGN_SMIME:
+            case SIGN_CMS:
                 if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     if(!getChildren().contains(signedDocumentButtonsBox)) {
                         Platform.runLater(new Runnable() {
@@ -252,13 +249,13 @@ public class SignDocumentFormPane extends GridPane {
                         });
                     }
                     try {
-                        smimeMessage = responseVS.getSMIME();
+                        cmsMessage = responseVS.getCMS();
                     } catch (Exception ex) {
                         log.log(Level.SEVERE, ex.getMessage(), ex);
                     }
                 } else BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
                 break;
-            case SEND_SMIME:
+            case SEND_CMS:
                 BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
                 break;
         }

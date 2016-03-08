@@ -7,7 +7,6 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EnvironmentVS;
 
 import java.io.File;
-import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 /**

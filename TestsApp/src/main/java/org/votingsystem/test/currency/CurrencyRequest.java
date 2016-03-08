@@ -2,6 +2,7 @@ package org.votingsystem.test.currency;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
@@ -10,7 +11,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContextVS;
@@ -46,14 +46,12 @@ public class CurrencyRequest {
         transactionVSDto.setTimeLimited(true);
         CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionVSDto, totalAmount,
                 ContextVS.getInstance().getCurrencyServer().getServerURL());
-        String messageSubject = "TEST_CURRENCY_REQUEST_DATA_MSG_SUBJECT";
         Map<String, Object> mapToSend = new HashMap<>();
         byte[] requestBytes = JSON.getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());
         mapToSend.put(ContextVS.CSR_FILE_NAME, requestBytes);
         String textToSign =  JSON.getMapper().writeValueAsString(requestDto);
-        SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(fromUserVS.getNif(),
-                currencyServer.getName(), textToSign, messageSubject);
-        mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, smimeMessage.getBytes());
+        CMSSignedMessage cmsMessage = signatureService.addSignatureWithTimeStamp(textToSign);
+        mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, cmsMessage.toPEM());
         ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend, currencyServer.getCurrencyRequestServiceURL());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             ResultListDto<String> currencyCertsDto = (ResultListDto<String>) responseVS.getMessage(

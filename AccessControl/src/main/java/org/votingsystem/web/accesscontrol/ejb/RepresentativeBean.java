@@ -2,14 +2,14 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.io.IOUtils;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.*;
 import org.votingsystem.model.BackupRequestVS;
 import org.votingsystem.model.ImageVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.*;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
@@ -50,17 +50,17 @@ public class RepresentativeBean {
     @Inject SignatureBean signatureBean;
     @Inject RepresentativeDelegationBean representativeDelegationBean;
 
-    public RepresentativeDocument saveRepresentative(MessageSMIME messageSMIME) throws Exception {
+    public RepresentativeDocument saveRepresentative(MessageCMS messageCMS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS signer = messageSMIME.getUserVS();
+        UserVS signer = messageCMS.getUserVS();
         AnonymousDelegation anonymousDelegation = representativeDelegationBean.getAnonymousDelegation(signer);
         if(anonymousDelegation != null) throw new ValidationExceptionVS(messages.get(
                 "representativeRequestWithActiveAnonymousDelegation"));
-        UserVSDto request = messageSMIME.getSignedContent(UserVSDto.class);
+        UserVSDto request = messageCMS.getSignedContent(UserVSDto.class);
         String msg = null;
         signer.setDescription(request.getDescription());
         if(UserVS.Type.REPRESENTATIVE != signer.getType()) {
-            representativeDelegationBean.cancelRepresentationDocument(messageSMIME);
+            representativeDelegationBean.cancelRepresentationDocument(messageCMS);
             msg = messages.get("representativeDataCreatedOKMsg", signer.getFirstName(), signer.getLastName());
         } else {
             msg = messages.get("representativeDataUpdatedMsg", signer.getFirstName(), signer.getLastName());
@@ -73,32 +73,31 @@ public class RepresentativeBean {
             dao.merge(imageVS.setType(ImageVS.Type.REPRESENTATIVE_CANCELED));
         }
         byte[] imageBytes = Base64.getDecoder().decode(request.getBase64Image().getBytes());
-        dao.persist(new ImageVS(signer,messageSMIME, ImageVS.Type.REPRESENTATIVE, imageBytes));
+        dao.persist(new ImageVS(signer,messageCMS, ImageVS.Type.REPRESENTATIVE, imageBytes));
         query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS " +
                 "and r.state =:state").setParameter("userVS", signer).setParameter("state", RepresentativeDocument.State.OK);
         RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
         if(representativeDocument != null) {
-            representativeDocument.setState(RepresentativeDocument.State.RENEWED).setCancellationSMIME(messageSMIME);
+            representativeDocument.setState(RepresentativeDocument.State.RENEWED).setCancellationCMS(messageCMS);
             dao.merge(representativeDocument);
 
         }
-        messageSMIME.setSMIME(signatureBean.getSMIMEMultiSigned(signer.getNif(), messageSMIME.getSMIME(),
-                messageSMIME.getSMIME().getSubject()));
-        dao.merge(messageSMIME);
-        RepresentativeDocument repDocument = dao.persist(new RepresentativeDocument(signer, messageSMIME,
+        messageCMS.setCMS(signatureBean.addSignature(messageCMS.getCMS()));
+        dao.merge(messageCMS);
+        RepresentativeDocument repDocument = dao.persist(new RepresentativeDocument(signer, messageCMS,
                 request.getDescription()));
         log.info ("saveRepresentative - user id: " + signer.getId());
         return repDocument;
     }
 
 
-    public MessageSMIME processRevoke(MessageSMIME messageSMIME) throws Exception {
+    public MessageCMS processRevoke(MessageCMS messageCMS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        SMIMEMessage smimeMessage = messageSMIME.getSMIME();
-        UserVS signer = messageSMIME.getUserVS();
+        CMSSignedMessage cmsMessage = messageCMS.getCMS();
+        UserVS signer = messageCMS.getUserVS();
         UserVS representative = null;
         Query query = null;
-        UserVSDto request = messageSMIME.getSignedContent(UserVSDto.class);
+        UserVSDto request = messageCMS.getSignedContent(UserVSDto.class);
         if(TypeVS.REPRESENTATIVE_REVOKE != request.getOperation()) throw new ValidationExceptionVS(
                 "ERROR - operation missmatch - expected: 'TypeVS.REPRESENTATIVE_REVOKE' - found:" + request.getOperation());
         String representativeNIF = NifUtils.validate(request.getNIF());
@@ -124,19 +123,17 @@ public class RepresentativeBean {
                     "and r.representative =:representative and r.state =:state").setParameter("represented", represented)
                     .setParameter("representative", representative).setParameter("state", RepresentationDocument.State.OK);
             RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
-            representationDocument.setState(RepresentationDocument.State.CANCELED_BY_REPRESENTATIVE).setCancellationSMIME(
-                    messageSMIME).setDateCanceled(represented.getTimeStampToken().getTimeStampInfo().getGenTime());
+            representationDocument.setState(RepresentationDocument.State.CANCELED_BY_REPRESENTATIVE).setCancellationCMS(
+                    messageCMS).setDateCanceled(represented.getTimeStampToken().getTimeStampInfo().getGenTime());
             dao.merge(representationDocument);
             dao.merge(represented.setRepresentative(null));
         }
         dao.merge(representative.setType(UserVS.Type.USER));
-        String toUser = signer.getNif();
-        String subject = messages.get("unsubscribeRepresentativeValidationSubject");
-        SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(toUser, smimeMessage, subject);
-        dao.merge(messageSMIME.setSMIME(smimeMessageResp));
+        CMSSignedMessage cmsMessageResp = signatureBean.addSignature(cmsMessage);
+        dao.merge(messageCMS.setCMS(cmsMessageResp));
         dao.merge(representativeDocument.setState(RepresentativeDocument.State.CANCELED)
-                .setCancellationSMIME(messageSMIME).setDateCanceled(new Date()));
-        return messageSMIME;
+                .setCancellationCMS(messageCMS).setDateCanceled(new Date()));
+        return messageCMS;
     }
 
     public RepresentationStateDto checkRepresentationState(String nifToCheck) throws ExceptionVS {
@@ -153,13 +150,13 @@ public class RepresentativeBean {
             query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS and " +
                     "r.state =:state").setParameter("userVS", userVS).setParameter("state", RepresentativeDocument.State.OK);
             RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
-            result.setBase64ContentDigest(representativeDocument.getActivationSMIME().getBase64ContentDigest());
+            result.setBase64ContentDigest(representativeDocument.getActivationCMS().getBase64ContentDigest());
             return result;
         }
         AnonymousDelegation anonymousDelegation = representativeDelegationBean.getAnonymousDelegation(userVS);
         if(anonymousDelegation != null) {
             result.setState(RepresentationState.WITH_ANONYMOUS_REPRESENTATION);
-            result.setBase64ContentDigest(anonymousDelegation.getDelegationSMIME().getBase64ContentDigest());
+            result.setBase64ContentDigest(anonymousDelegation.getDelegationCMS().getBase64ContentDigest());
             result.setDateFrom(anonymousDelegation.getDateFrom());
             result.setDateTo(anonymousDelegation.getDateTo());
             return result;
@@ -255,7 +252,7 @@ public class RepresentativeBean {
                             repDocFileName = format("{0}/{1}_delegation_with_vote.p7m", representativeBaseDir, represented.getNif());
                         } else repDocFileName = format("{0}/{1}_delegation.p7m", representativeBaseDir, represented.getNif());
                         File representationDocFile = new File(repDocFileName);
-                        IOUtils.write(representationDoc.getActivationSMIME().getContent(), new FileOutputStream(representationDocFile));
+                        IOUtils.write(representationDoc.getActivationCMS().getContent(), new FileOutputStream(representationDocFile));
                         if((numRepresented  % 100) == 0) {
                             dao.getEM().flush();
                             dao.getEM().clear();
@@ -356,9 +353,9 @@ public class RepresentativeBean {
         while ((representationDocuments = query.setFirstResult(offset).getResultList()).size() > 0) {
             for(RepresentationDocument representationDocument : representationDocuments) {
                 ++numAccreditations;
-                MessageSMIME messageSMIME = representationDocument.getActivationSMIME();
-                File smimeFile = new File(format("{0}/accreditation_{1}", basedir, representationDocument.getId()));
-                IOUtils.write(messageSMIME.getContent(), new FileOutputStream(smimeFile));
+                MessageCMS messageCMS = representationDocument.getActivationCMS();
+                File cmsFile = new File(format("{0}/accreditation_{1}", basedir, representationDocument.getId()));
+                IOUtils.write(messageCMS.getContent(), new FileOutputStream(cmsFile));
                 if((numAccreditations % 100) == 0) {
                     dao.getEM().flush();
                     dao.getEM().clear();
@@ -377,12 +374,12 @@ public class RepresentativeBean {
     }
 
     @Asynchronous
-    public void processVotingHistoryRequest(MessageSMIME messageSMIME, String messageTemplate) throws Exception {
+    public void processVotingHistoryRequest(MessageCMS messageCMS, String messageTemplate) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         try {
-            SMIMEMessage smimeMessage = messageSMIME.getSMIME();
-            UserVS userVS = messageSMIME.getUserVS();
-            RepresentativeVotingHistoryDto request = messageSMIME.getSignedContent(RepresentativeVotingHistoryDto.class);
+            CMSSignedMessage cmsMessage = messageCMS.getCMS();
+            UserVS userVS = messageCMS.getUserVS();
+            RepresentativeVotingHistoryDto request = messageCMS.getSignedContent(RepresentativeVotingHistoryDto.class);
             request.validate();
             Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
                     .setParameter("nif", request.getRepresentativeNif()).setParameter("type", UserVS.Type.REPRESENTATIVE);
@@ -393,7 +390,7 @@ public class RepresentativeBean {
                     getVotingHistoryBackup(representative, request.getDateFrom(), request.getDateTo());
             BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getDownloadURL(),
                     TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
-                    representative, messageSMIME, request.getEmail()));
+                    representative, messageCMS, request.getEmail()));
             String downloadURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId() + "/download";
             String requestURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId();
             String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
@@ -407,11 +404,11 @@ public class RepresentativeBean {
     }
 
     @Asynchronous
-    public void processAccreditationsRequest(MessageSMIME messageSMIME, String messageTemplate) throws Exception {
+    public void processAccreditationsRequest(MessageCMS messageCMS, String messageTemplate) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         try {
-            UserVS userVS = messageSMIME.getUserVS();
-            RepresentativeAccreditationsDto request = messageSMIME.getSignedContent(RepresentativeAccreditationsDto.class);
+            UserVS userVS = messageCMS.getUserVS();
+            RepresentativeAccreditationsDto request = messageCMS.getSignedContent(RepresentativeAccreditationsDto.class);
             request.validate();
             Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
                     .setParameter("nif", request.getRepresentativeNif()).setParameter("type", UserVS.Type.REPRESENTATIVE);
@@ -420,7 +417,7 @@ public class RepresentativeBean {
                     request.getRepresentativeNif());
             RepresentativeAccreditationsMetaInf metaInf = getAccreditationsBackup(representative, request.getSelectedDate());
             BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getFilePath(),
-                    TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST, representative, messageSMIME, request.getEmail()));
+                    TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST, representative, messageCMS, request.getEmail()));
             String downloadURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId() + "/download";
             String requestURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId();
             String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
@@ -461,8 +458,8 @@ public class RepresentativeBean {
         long numVotes = representativeVotes.size();
         for (VoteVS voteVS : representativeVotes) {
             String voteId = String.format("%08d", voteVS.getId());
-            File smimeFile = new File(format("{0}/vote_{1}.p7m", basedir, voteId));
-            IOUtils.write(voteVS.getMessageSMIME().getContent(), new FileOutputStream(smimeFile));
+            File cmsFile = new File(format("{0}/vote_{1}.p7m", basedir, voteId));
+            IOUtils.write(voteVS.getCMSMessage().getContent(), new FileOutputStream(cmsFile));
         }
         log.info(format("representative: {0} - numVotes: {1}", representative.getNif(), numVotes));
         String representativeURL = format("{0}/rest/representative/id/{1}", config.getContextURL(), representative.getId());
@@ -486,6 +483,6 @@ public class RepresentativeBean {
         if (representativeDocument == null) throw new NotFoundException(
                 "ERROR - RepresentativeDocument not found - representativeId: " + representative.getId());
         return UserVSDto.REPRESENTATIVE(representative,
-                representativeDocument.getActivationSMIME().getId(), numRepresentations, config.getContextURL());
+                representativeDocument.getActivationCMS().getId(), numRepresentations, config.getContextURL());
     }
 }

@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
@@ -7,7 +8,6 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -48,17 +48,12 @@ public class TransactionVSUserVSBean {
         //Transactions from users doesn't need parent transaction
         TransactionVS transactionVS = dao.persist(TransactionVS.USERVS(request.getSigner(), request.getReceptor(),
                 request.getType(), accountFromMovements, request.getAmount(), request.getCurrencyCode(),
-                request.getSubject(), request.getValidTo(), request.getTransactionVSSMIME(), tagVS));
+                request.getSubject(), request.getValidTo(), request.getMessageCMS_DB(), tagVS));
         transactionVSBean.updateCurrencyAccounts(transactionVS);
-        String fromUser = config.getServerName();
-        String toUser = request.getSigner().getNif();
-        SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(fromUser, toUser,
-                request.getTransactionVSSMIME().getSMIME(), request.getTransactionVSSMIME().getSMIME().getSubject());
-        receipt.setHeader("TypeVS", request.getType().toString());
-        request.getTransactionVSSMIME().setSMIME(receipt);
-        dao.merge(request.getTransactionVSSMIME().refresh());
+        CMSSignedMessage receipt = signatureBean.addSignature(request.getMessageCMS_DB().getCMS());
+        dao.merge(request.getMessageCMS_DB().setCMS(receipt));
         TransactionVSDto dto = new TransactionVSDto(transactionVS);
-        dto.setMessageSMIME(Base64.getEncoder().encodeToString(request.getTransactionVSSMIME().getContent()));
+        dto.setCmsMessagePEM(Base64.getEncoder().encodeToString(request.getMessageCMS_DB().getContent()));
         List<TransactionVSDto> listDto = Arrays.asList(dto);
         ResultListDto<TransactionVSDto> resultListDto = new ResultListDto<>(listDto, request.getOperation());
         resultListDto.setStatusCode(ResponseVS.SC_OK);

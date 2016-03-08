@@ -5,11 +5,11 @@ import org.votingsystem.model.KeyStoreVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.service.EJBRemoteAdminAccessControl;
 import org.votingsystem.service.EJBRemoteAdminCurrencyServer;
-import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.test.util.IOUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.NifUtils;
+import org.votingsystem.util.crypto.KeyStoreUtil;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -140,8 +140,8 @@ public class EJBClient {
                         new File(ROOT_KEYSTORE_PATH)).getAbsolutePath());
             }
         } else {
-            //keyStoreBytes = votingSystemRemote.generateUserKeyStore(givenName, surname, nif, password);
-            keyStoreBytes = currencyServerAdmin.generateUserKeyStore(givenName, surname, nif, password);
+            keyStoreBytes = votingSystemRemote.generateUserKeyStore(givenName, surname, nif, password);
+            //keyStoreBytes = currencyServerAdmin.generateUserKeyStore(givenName, surname, nif, password);
         }
         File outputFile = FileUtils.copyBytesToFile(keyStoreBytes, new File(System.getProperty("user.home") +
                 "/" + givenName.replace(" ", "") + ".jks"));

@@ -1,11 +1,12 @@
 package org.votingsystem.test.callable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
-import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.JSON;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,18 +32,17 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
     @Override public ResponseVS call() throws Exception {
         String subject = "Message from MultiSignTestSender";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(this.nif);
-        SMIMEMessage smimeMessage = signatureService.getSMIME(nif,
-                StringUtils.getNormalized(serverURL), getRequestJSON(nif).toString(), subject);
-        MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, ActorVS.getTimeStampServiceURL(serverURL));
-        return ResponseVS.OK(null).setSMIME(timeStamper.call());
+        CMSSignedMessage cmsMessage = signatureService.signData(getRequest(nif));
+        MessageTimeStamper timeStamper = new MessageTimeStamper(cmsMessage, ActorVS.getTimeStampServiceURL(serverURL));
+        return ResponseVS.OK(null).setCMS(timeStamper.call());
     }
         
-    private Map getRequestJSON(String nif) {
+    private String getRequest(String nif) throws JsonProcessingException {
         Map map = new HashMap();
         map.put("operation", "TIMESTAMP_TEST");
         map.put("nif", nif);
         map.put("UUID", UUID.randomUUID().toString());
-        return map;
+        return JSON.getMapper().writeValueAsString(map);
     }
 
 }

@@ -1,12 +1,12 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
@@ -42,11 +42,9 @@ public class TransactionVSBankVSBean {
         if(bankVS == null) throw new ExceptionVS(messages.get("bankVSPrivilegesErrorMsg", request.getOperation().toString()));
         TransactionVS transactionVS = dao.persist(TransactionVS.FROM_BANKVS(bankVS, request.getFromUserIBAN(),
                 request.getFromUser(), request.getReceptor(), request.getAmount(), request.getCurrencyCode(),
-                request.getSubject(), request.getValidTo(), request.getTransactionVSSMIME(), tagVS));
-        SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(request.getTransactionVSSMIME().getUserVS().getNif(),
-                request.getTransactionVSSMIME().getSMIME(), messages.get("bankVSInputLbl"));
-        receipt.setHeader("TypeVS", TypeVS.FROM_BANKVS.toString());
-        dao.merge(request.getTransactionVSSMIME().setType(TypeVS.FROM_BANKVS).setSMIME(receipt));
+                request.getSubject(), request.getValidTo(), request.getMessageCMS_DB(), tagVS));
+        CMSSignedMessage receipt = signatureBean.addSignature(request.getMessageCMS_DB().getCMS());
+        dao.merge(request.getMessageCMS_DB().setType(TypeVS.FROM_BANKVS).setCMS(receipt));
         transactionVSBean.updateCurrencyAccounts(transactionVS);
         log.info("BankVS: " + bankVS.getId() + " - to user: " + request.getReceptor().getId());
         return new ResultListDto(Arrays.asList(new TransactionVSDto(transactionVS)), 0, 1, 1L);

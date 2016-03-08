@@ -46,23 +46,13 @@
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk16</artifactId>
-            <version>1.46</version>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.54</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcmail-jdk16</artifactId>
-            <version>1.46</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bctsp-jdk16</artifactId>
-            <version>1.46</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>1.4.1</version>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.54</version>
         </dependency>
         <dependency>
             <groupId>com.google.zxing</groupId>
@@ -90,7 +80,7 @@
         </plugins>
     </build>
     <properties>
-        <votingsystem.version>0.7.0-SNAPSHOT</votingsystem.version>
+        <votingsystem.version>0.8.0-SNAPSHOT</votingsystem.version>
         <hibernate.version>5.0.7.Final</hibernate.version>
         <jackson.version>2.6.2</jackson.version>
         <zxing.version>3.2.1</zxing.version>

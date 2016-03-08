@@ -12,7 +12,7 @@ import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.MetaInf;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -70,7 +70,7 @@ public class TransactionVSResource {
         TransactionVS transactionVS = dao.find(TransactionVS.class, id);
         if(transactionVS != null) {
             TransactionVSDto transactionDto = transactionVSBean.getTransactionDto(transactionVS);
-            transactionDto.setReceipt(new String(transactionVS.getMessageSMIME().getContent(), "UTF-8"));
+            transactionDto.setReceipt(new String(transactionVS.getMessageCMS().getContent(), "UTF-8"));
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(transactionDto)).build();
         } else return Response.status(Response.Status.NOT_FOUND).entity("ERROR - TransactionVS not found - id: " + id).build();
     }
@@ -99,8 +99,8 @@ public class TransactionVSResource {
     }
 
     @Path("/") @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response post(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
-        ResultListDto dto = transactionVSBean.processTransactionVS(messageSMIME);
+    public Response post(MessageCMS messageCMS, @Context HttpServletRequest req) throws Exception {
+        ResultListDto dto = transactionVSBean.processTransactionVS(messageCMS);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
@@ -150,8 +150,8 @@ public class TransactionVSResource {
             String desc = (transactionType == null? "":transactionvsType) + (tag == null? "":tag);
             File zipFile = new File (tempDir, "transaction_" + desc + "_" + transactionList.size() +  ".zip");
             for(TransactionVS transactionVS :  transactionList) {
-                File smimeFile = new File(format("{0}/transaction_{1}.p7m", tempDir.getAbsolutePath(), transactionVS.getId()));
-                IOUtils.write(transactionVS.getMessageSMIME().getContent(), new FileOutputStream(smimeFile));
+                File cmsFile = new File(format("{0}/transaction_{1}.p7m", tempDir.getAbsolutePath(), transactionVS.getId()));
+                IOUtils.write(transactionVS.getMessageCMS().getContent(), new FileOutputStream(cmsFile));
             }
             new ZipUtils(tempDir).zipIt(zipFile);
             resp.sendRedirect(config.getStaticResURL() + tempPath + File.separator + zipFile.getName());

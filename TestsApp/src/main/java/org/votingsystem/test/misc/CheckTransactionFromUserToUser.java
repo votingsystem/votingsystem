@@ -1,10 +1,9 @@
 package org.votingsystem.test.misc;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 
-import java.util.Base64;
 import java.util.logging.Logger;
 
 /**
@@ -17,9 +16,9 @@ public class CheckTransactionFromUserToUser {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        SMIMEMessage smimeMessage = new SMIMEMessage(ContextVS.getInstance().getResourceBytes("2222.p7s"));
-        TransactionVSDto dto = smimeMessage.getSignedContent(TransactionVSDto.class);
-        SMIMEMessage receipt = new SMIMEMessage(Base64.getDecoder().decode(dto.getMessageSMIME()));
+        CMSSignedMessage cmsMessage = new CMSSignedMessage(ContextVS.getInstance().getResourceBytes("2222.p7s"));
+        TransactionVSDto dto = cmsMessage.getSignedContent(TransactionVSDto.class);
+        CMSSignedMessage receipt = CMSSignedMessage.FROM_PEM(dto.getCMSMessagePEM());
         log.info("receipt.getSignedContent: " + receipt.getSignedContent());
         System.exit(0);
     }

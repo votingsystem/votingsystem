@@ -1,13 +1,17 @@
 package org.votingsystem.test.callable;
 
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.*;
+import org.votingsystem.util.crypto.PEMUtils;
 
+import java.io.File;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -31,42 +35,39 @@ public class RepresentativeDelegationDataSender implements Callable<ResponseVS> 
     }
     
     @Override public ResponseVS call() throws Exception {
-        String subject = "representativeDelegationMsgSubject";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(userNIF);
-        String toUser = ContextVS.getInstance().getAccessControl().getName();
-        String serviceURL = ContextVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL();
         RepresentativeDelegationDto anonymousDelegation = getDelegationDto(representativeNIF);
         RepresentativeDelegationDto anonymousCertRequest = anonymousDelegation.getAnonymousCertRequest();
         RepresentativeDelegationDto anonymousDelegationRequest = anonymousDelegation.getDelegation();
         ResponseVS responseVS = null;
         try {
-            SMIMEMessage smimeMessage = signatureService.getSMIME(userNIF, toUser, JSON.getMapper().writeValueAsString(
-                    anonymousCertRequest), subject);
-            smimeMessage = new MessageTimeStamper(smimeMessage,
+            CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsString(anonymousCertRequest));
+            cmsMessage = new MessageTimeStamper(cmsMessage,
                     ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
-            anonymousDelegation.setAnonymousDelegationRequestBase64ContentDigest(smimeMessage.getContentDigestStr());
-            //byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert);
-            //byte[] delegationEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
+            anonymousDelegation.setAnonymousDelegationRequestBase64ContentDigest(cmsMessage.getContentDigestStr());
+
             Map<String, Object> mapToSend = new HashMap<>();
             mapToSend.put(ContextVS.CSR_FILE_NAME, anonymousDelegation.getCertificationRequest().getCsrPEM());
-            mapToSend.put(ContextVS.SMIME_FILE_NAME, smimeMessage.getBytes());
+            mapToSend.put(ContextVS.CMS_FILE_NAME, cmsMessage.toPEM());
             responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                     ContextVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
             if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-            //byte[] decryptedData = Encryptor.decryptFile(responseVS.getMessageBytes(),
-            // certificationRequest.getPublicKey(), certificationRequest.getPrivateKey());
+
             anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
             //this is the delegation request signed with anonymous cert
-            smimeMessage = anonymousDelegation.getCertificationRequest().getSMIME(
-                    anonymousDelegation.getHashCertVSBase64(),
-                    ContextVS.getInstance().getAccessControl().getName(),
-                    JSON.getMapper().writeValueAsString(anonymousDelegationRequest), subject, null);
-            smimeMessage = new MessageTimeStamper(
-                    smimeMessage, ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
-            responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+
+            Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(responseVS.getMessageBytes());
+            FileUtils.copyBytesToFile(PEMUtils.getPEMEncoded(certificates.iterator().next())
+                    , new File("/home/jgzornoza/anonymouscert.pem"));
+
+            cmsMessage = anonymousDelegation.getCertificationRequest().signData(JSON.getMapper().writeValueAsString(
+                    anonymousDelegationRequest));
+            cmsMessage = new MessageTimeStamper(
+                    cmsMessage, ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
+            responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                     ContextVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                anonymousDelegation.setDelegationReceipt(responseVS.getSMIME(),
+                anonymousDelegation.setDelegationReceipt(responseVS.getCMS(),
                         ContextVS.getInstance().getAccessControl().getX509Certificate());
                 //BrowserSessionService.getInstance().setAnonymousDelegationDto(anonymousDelegation);
                 responseVS = ResponseVS.OK();
@@ -85,6 +86,7 @@ public class RepresentativeDelegationDataSender implements Callable<ResponseVS> 
         RepresentativeDelegationDto delegationDto = new RepresentativeDelegationDto();
         delegationDto.setServerURL(ContextVS.getInstance().getAccessControl().getServerURL());
         delegationDto.setRepresentative(representative);
+        delegationDto.setWeeksOperationActive(1);
         delegationDto.setOperation(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION);
         delegationDto.setUUID(UUID.randomUUID().toString());
         return delegationDto;

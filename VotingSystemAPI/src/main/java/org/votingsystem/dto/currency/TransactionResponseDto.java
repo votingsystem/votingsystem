@@ -2,7 +2,7 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.util.TypeVS;
 
 import java.util.Base64;
@@ -14,16 +14,16 @@ import java.util.Base64;
 public class TransactionResponseDto {
 
     private TypeVS operation;
-    private String smimeMessage;
+    private String cmsMessagePEM;
     private String currencyChangeCert;
 
-    @JsonIgnore private SMIMEMessage smime;
+    @JsonIgnore private CMSSignedMessage cms;
 
     public TransactionResponseDto() {}
 
-    public TransactionResponseDto(TypeVS operation, String currencyChangeCert, SMIMEMessage smimeMessage) throws Exception {
+    public TransactionResponseDto(TypeVS operation, String currencyChangeCert, CMSSignedMessage cmsMessage) throws Exception {
         this.operation = operation;
-        this.smimeMessage = Base64.getEncoder().encodeToString(smimeMessage.getBytes());
+        this.cmsMessagePEM = cmsMessage.toPEMStr();
         this.currencyChangeCert = currencyChangeCert;
     }
 
@@ -35,29 +35,25 @@ public class TransactionResponseDto {
         this.operation = operation;
     }
 
-    public String getSmimeMessage() {
-        return smimeMessage;
-    }
-
-    public void setSmimeMessage(String smimeMessage) {
-        this.smimeMessage = smimeMessage;
-    }
-
     public String getCurrencyChangeCert() {
         return currencyChangeCert;
     }
 
-    public void setCurrencyChangeCert(String currencyChangeCert) {
-        this.currencyChangeCert = currencyChangeCert;
-    }
-
     @JsonIgnore
-    public SMIMEMessage getSmime() throws Exception {
-        if(smime == null && smimeMessage != null) smime = new SMIMEMessage(Base64.getDecoder().decode(smimeMessage));
-        return smime;
+    public CMSSignedMessage getCMS() throws Exception {
+        if(cms == null && cmsMessagePEM != null) cms = CMSSignedMessage.FROM_PEM(cmsMessagePEM);
+        return cms;
     }
 
-    public void setSmime(SMIMEMessage smime) {
-        this.smime = smime;
+    public void setCMS(CMSSignedMessage cms) {
+        this.cms = cms;
+    }
+
+    public String getCmsMessagePEM() {
+        return cmsMessagePEM;
+    }
+
+    public void setCmsMessagePEM(String cmsMessagePEM) {
+        this.cmsMessagePEM = cmsMessagePEM;
     }
 }

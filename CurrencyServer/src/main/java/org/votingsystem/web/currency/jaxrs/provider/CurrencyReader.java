@@ -1,7 +1,7 @@
 package org.votingsystem.web.currency.jaxrs.provider;
 
-import org.votingsystem.model.MessageSMIME;
-import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.cms.CMSSignedMessage;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  */
 @Provider
 @Consumes(MediaTypeVS.CURRENCY)
-public class CurrencyReader implements MessageBodyReader<MessageSMIME> {
+public class CurrencyReader implements MessageBodyReader<MessageCMS> {
 
     private static final Logger log = Logger.getLogger(CurrencyReader.class.getName());
 
@@ -33,14 +33,14 @@ public class CurrencyReader implements MessageBodyReader<MessageSMIME> {
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-        return MessageSMIME.class.isAssignableFrom(aClass);
+        return MessageCMS.class.isAssignableFrom(aClass);
     }
 
     @Override
-    public MessageSMIME readFrom(Class<MessageSMIME> aClass, Type type, Annotation[] annotations, MediaType mediaType,
-                 MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
+    public MessageCMS readFrom(Class<MessageCMS> aClass, Type type, Annotation[] annotations, MediaType mediaType,
+                               MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
         try {
-            return signatureBean.validateSMIME(new SMIMEMessage(inputStream), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
+            return signatureBean.validateCMS(CMSSignedMessage.FROM_PEM(inputStream), ContentTypeVS.JSON_SIGNED).getMessageCMS();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

@@ -2,13 +2,14 @@ package org.votingsystem.test.voting;
 
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.File;
 import java.security.cert.TrustAnchor;
@@ -42,7 +43,7 @@ public class VoteValidation {
         byte[] voteBytes = FileUtils.getBytesFromFile(voteFile);
         File trustedCertsFile = FileUtils.getFileFromBytes(
                 ContextVS.getInstance().getResourceBytes("voting/systemTrustedCerts.pem"));
-        Collection<X509Certificate> trustedCerts = CertUtils.fromPEMToX509CertCollection(
+        Collection<X509Certificate> trustedCerts = PEMUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(trustedCertsFile));
         Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>(trustedCerts.size());
         for(X509Certificate certificate: trustedCerts) {
@@ -52,7 +53,7 @@ public class VoteValidation {
         File eventTrustedCertsFile = FileUtils.getFileFromBytes(
                 ContextVS.getInstance().getResourceBytes("voting/eventTrustedCerts.pem"));
 
-        Collection<X509Certificate> eventTrustedCerts = CertUtils.fromPEMToX509CertCollection(
+        Collection<X509Certificate> eventTrustedCerts = PEMUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(eventTrustedCertsFile));
         Set<TrustAnchor> eventTrustedAnchors = new HashSet<TrustAnchor>(eventTrustedCerts.size());
         for(X509Certificate certificate: eventTrustedCerts) {
@@ -62,11 +63,11 @@ public class VoteValidation {
 
         File timeStampCertFile = FileUtils.getFileFromBytes(
                 ContextVS.getInstance().getResourceBytes("voting/timeStampCert.pem"));
-        Collection<X509Certificate> timeStampCerts = CertUtils.fromPEMToX509CertCollection(
+        Collection<X509Certificate> timeStampCerts = PEMUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(timeStampCertFile));
         X509Certificate timeStampServerCert = timeStampCerts.iterator().next();
 
-        SMIMEMessage vote = new SMIMEMessage(voteBytes);
+        CMSSignedMessage vote = new CMSSignedMessage(voteBytes);
         Date tokenDate = vote.getSigner().getTimeStampToken().getTimeStampInfo().getGenTime();
 
         if(!vote.isValidSignature()) {

@@ -32,6 +32,6 @@
     </dependencyManagement>
 
     <properties>
-        <votingsystem.version>0.7.0-SNAPSHOT</votingsystem.version>
+        <votingsystem.version>0.8.0-SNAPSHOT</votingsystem.version>
     </properties>
 </project>

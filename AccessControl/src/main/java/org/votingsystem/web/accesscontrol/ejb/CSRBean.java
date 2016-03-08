@@ -1,9 +1,12 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.CertValidationDto;
 import org.votingsystem.dto.DeviceVSDto;
@@ -12,12 +15,13 @@ import org.votingsystem.dto.voting.VoteCertExtensionDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.model.voting.UserRequestCsrVS;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.CsrResponse;
-import org.votingsystem.signature.util.KeyStoreInfo;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.CsrResponse;
+import org.votingsystem.util.crypto.KeyStoreInfo;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
@@ -43,9 +47,9 @@ public class CSRBean {
     @Inject SignatureBean signatureBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
 
-    public DeviceVS signCertUserVS(MessageSMIME messageSMIME) throws Exception {
-        UserVS userVS = messageSMIME.getUserVS();
-        CertValidationDto certValidationDto = messageSMIME.getSignedContent(CertValidationDto.class);
+    public DeviceVS signCertUserVS(MessageCMS messageCMS) throws Exception {
+        UserVS userVS = messageCMS.getUserVS();
+        CertValidationDto certValidationDto = messageCMS.getSignedContent(CertValidationDto.class);
         if(!signatureBean.isAdmin(userVS.getNif()) && !userVS.getNif().equals(certValidationDto.getNif()))
             throw new ExceptionVS("operation: signCertUserVS - userWithoutPrivilegesERROR - userVS nif: " + userVS.getNif());
         String validatedNif = NifUtils.validate(certValidationDto.getNif());
@@ -73,14 +77,14 @@ public class CSRBean {
         CertificateVS certificate = dao.persist(CertificateVS.USER(deviceVS.getUserVS(), issuedCert));
         dao.merge(deviceVS.getUserVS().updateCertInfo(issuedCert));
         dao.merge(deviceVS.setCertificateVS(certificate).setState(DeviceVS.State.OK).updateCertInfo(issuedCert));
-        dao.merge(csrRequest.setCertificateVS(certificate).setActivationSMIME(messageSMIME));
+        dao.merge(csrRequest.setCertificateVS(certificate).setActivationCMS(messageCMS));
         return deviceVS;
     }
 
     public X509Certificate signCertUserVS(UserRequestCsrVS csrRequest) throws Exception {
         Date validFrom = new Date();
         Date validTo = DateUtils.addDays(validFrom, 365).getTime(); //one year
-        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getContent());
+        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getContent());
         X509Certificate issuedCert = signatureBean.signCSR(csr, null, validFrom, validTo);
         csrRequest.setSerialNumber(issuedCert.getSerialNumber().longValue());
         dao.persist(csrRequest.setState(UserRequestCsrVS.State.OK));
@@ -96,11 +100,11 @@ public class CSRBean {
         KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
         //TODO ==== vote keystore -- this is for developement
         KeyStoreInfo keyStoreInfo = signatureBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
-        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         X509Certificate issuedCert = CertUtils.signCSR(csr, null, keyStoreInfo.getPrivateKeySigner(),
                 keyStoreInfo.getCertSigner(), eventVS.getDateBegin(), eventVS.getDateFinish());
-        CertificateVS certificate = dao.persist(CertificateVS.VOTE(csrResponse.getHashCertVSBase64(), null, issuedCert));
-        csrResponse.setIssuedCert(CertUtils.getPEMEncoded(issuedCert));
+        dao.persist(CertificateVS.VOTE(csrResponse.getHashCertVSBase64(), null, issuedCert));
+        csrResponse.setIssuedCert(PEMUtils.getPEMEncoded(issuedCert));
         return csrResponse;
     }
 
@@ -111,33 +115,22 @@ public class CSRBean {
         //TODO ==== vote keystore -- this is for developement
         KeyStoreInfo keyStoreInfo = signatureBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
         String representativeURL = config.getContextURL() + "/rest/representative/id/" + representative.getId();
-        DERTaggedObject representativeExtension = new DERTaggedObject(
-                ContextVS.REPRESENTATIVE_VOTE_TAG, new DERUTF8String(representativeURL));
-        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        Attribute attribute = new Attribute(new ASN1ObjectIdentifier(ContextVS.REPRESENTATIVE_VOTE_OID),
+                new DERSet(new DERUTF8String(representativeURL)));
         X509Certificate issuedCert = CertUtils.signCSR(csr, null, keyStoreInfo.getPrivateKeySigner(),
-                keyStoreInfo.getCertSigner(), eventVS.getDateBegin(), eventVS.getDateFinish(), representativeExtension);
+                keyStoreInfo.getCertSigner(), eventVS.getDateBegin(), eventVS.getDateFinish(), attribute);
         CertificateVS certificate = CertificateVS.VOTE(csrResponse.getHashCertVSBase64(), representative, issuedCert);
         certificate.setUserVS(representative);
         dao.persist(certificate);
-        csrResponse.setIssuedCert(CertUtils.getPEMEncoded(issuedCert));
+        csrResponse.setIssuedCert(PEMUtils.getPEMEncoded(issuedCert));
         return csrResponse;
     }
 
-
     private CsrResponse validateCSRVote(byte[] csrPEMBytes, EventVSElection eventVS) throws Exception{
-        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
-        CertificationRequestInfo info = csr.getCertificationRequestInfo();
-        Enumeration csrAttributes = info.getAttributes().getObjects();
-        VoteCertExtensionDto certExtensionDto = null;
-        while(csrAttributes.hasMoreElements()) {
-            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
-            switch(attribute.getTagNo()) {
-                case ContextVS.VOTE_TAG:
-                    certExtensionDto = JSON.getMapper().readValue(
-                            ((DERUTF8String)attribute.getObject()).getString(), VoteCertExtensionDto.class);
-                    break;
-            }
-        }
+        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        VoteCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(VoteCertExtensionDto.class, csr,
+                ContextVS.VOTE_OID);
         if (certExtensionDto.getEventId().longValue() != eventVS.getId().longValue()) {
             throw new ExceptionVS("validateCSRVote - expected eventId: " + eventVS.getId() + " - found: " +
                     certExtensionDto.getEventId());
@@ -146,25 +139,15 @@ public class CSRBean {
             throw new ExceptionVS("accessControlURLError - expected: " + config.getContextURL() +
                     " - found: " + certExtensionDto.getAccessControlURL());
         }
-        return new CsrResponse(csr.getPublicKey(), null, certExtensionDto.getHashCertVS());
+        return new CsrResponse(CertUtils.getPublicKey(csr), null, certExtensionDto.getHashCertVS());
     }
 
 
     public X509Certificate signAnonymousDelegationCert (byte[] csrPEMBytes) throws Exception {
-        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
-        CertificationRequestInfo info = csr.getCertificationRequestInfo();
-        Enumeration csrAttributes = info.getAttributes().getObjects();
-        AnonymousDelegationCertExtensionDto certExtensionDto = null;
-        while(csrAttributes.hasMoreElements()) {
-            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
-            switch(attribute.getTagNo()) {
-                case ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG:
-                    String certAttributeMapStr = ((DERUTF8String)attribute.getObject()).getString();
-                    certExtensionDto = JSON.getMapper().readValue(certAttributeMapStr,
-                            AnonymousDelegationCertExtensionDto.class);
-                    break;
-            }
-        }
+        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        CertificationRequestInfo info = csr.toASN1Structure().getCertificationRequestInfo();
+        AnonymousDelegationCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(AnonymousDelegationCertExtensionDto.class,
+                csr, ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID );
         if(certExtensionDto == null) throw new ValidationExceptionVS("missing 'AnonymousDelegationCertExtensionDto'");
         String serverURL = config.getContextURL();
         String accessControlURL = StringUtils.checkURL(certExtensionDto.getAccessControlURL());
@@ -178,32 +161,17 @@ public class CSRBean {
                 certExtensionDto.getHashCertVS(), issuedCert);
         dao.persist(certificate);
         return issuedCert;
-        /*byte[] issuedCertPEMBytes = CertUtils.getPEMEncoded(issuedCert);
-        Map data = [requestPublicKey:csr.getPublicKey()]
-        return new ResponseVS(statusCode:ResponseVS.SC_OK, type:TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST,
-                contentType: ContentTypeVS.TEXT_STREAM, data:data, message:"certificateVS_${certificate.id}",
-                messageBytes:issuedCertPEMBytes)*/
     }
-
 
     /*  C=ES, ST=State or Province, L=locality name, O=organization name, OU=org unit, CN=common name,
     emailAddress=user@votingsystem.org, SERIALNUMBER=1234, SN=surname, GN=given name, GN=name given */
     public UserRequestCsrVS saveUserCSR(byte[] csrPEMBytes) throws Exception {
-        PKCS10CertificationRequest csr = CertUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
-        CertificationRequestInfo info = csr.getCertificationRequestInfo();
+        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
+        CertificationRequestInfo info = csr.toASN1Structure().getCertificationRequestInfo();
         String subjectDN = info.getSubject().toString();
         UserVS userVS = UserVS.getUserVS(subjectDN);
-        Enumeration csrAttributes = info.getAttributes().getObjects();
-        CertExtensionDto certExtensionDto = null;
-        while(csrAttributes.hasMoreElements()) {
-            DERTaggedObject attribute = (DERTaggedObject)csrAttributes.nextElement();
-            switch(attribute.getTagNo()) {
-                case ContextVS.DEVICEVS_TAG:
-                    String deviceData = ((DERUTF8String)attribute.getObject()).getString();
-                    certExtensionDto = JSON.getMapper().readValue(deviceData, CertExtensionDto.class);
-                    break;
-            }
-        }
+        CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
+                csr, ContextVS.DEVICEVS_OID);
         DeviceVSDto deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
         DeviceVS deviceVS = subscriptionVSBean.checkDeviceFromCSR(deviceVSDto);
         Query query = dao.getEM().createQuery("select r from UserRequestCsrVS r where r.deviceVS.deviceId =:device and " +
@@ -217,7 +185,6 @@ public class CSRBean {
                 deviceVS));
         log.info("requestCSR id:" + requestCSR.getId() + " - cert subject: " + subjectDN);
         return requestCSR;
-        //return new ResponseVS(statusCode:ResponseVS.SC_OK, message:requestCSR.id)
     }
 
 }

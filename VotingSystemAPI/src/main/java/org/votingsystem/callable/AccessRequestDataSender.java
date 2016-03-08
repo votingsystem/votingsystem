@@ -5,13 +5,15 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.crypto.CMSUtils;
+import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -28,13 +30,13 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
 
     private static Logger log = Logger.getLogger(AccessRequestDataSender.class.getName());
 
-    private SMIMEMessage smimeMessage;
+    private CMSSignedMessage cmsMessage;
     private CertificationRequestVS certificationRequest;
     private X509Certificate receiverCert;
 
-    public AccessRequestDataSender(SMIMEMessage smimeMessage, AccessRequestDto accessRequest,
-                       String hashCertVSBase64) throws Exception {
-        this.smimeMessage = smimeMessage;
+    public AccessRequestDataSender(CMSSignedMessage cmsMessage, AccessRequestDto accessRequest,
+                                   String hashCertVSBase64) throws Exception {
+        this.cmsMessage = cmsMessage;
         this.receiverCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
         this.certificationRequest = CertificationRequestVS.getVoteRequest(VOTE_SIGN_MECHANISM,
                 ContextVS.PROVIDER, ContextVS.getInstance().getAccessControl().getServerURL(),
@@ -43,7 +45,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
 
     @Override public ResponseVS call() throws Exception {
         log.info("doInBackground - accessServiceURL: " +  ContextVS.getInstance().getAccessControl().getAccessServiceURL());
-        TimeStampRequest timeStampRequest = smimeMessage.getTimeStampRequest();
+        TimeStampRequest timeStampRequest = cmsMessage.getTimeStampRequest();
         ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(),
                 ContentTypeVS.TIMESTAMP_QUERY, ContextVS.getInstance().getAccessControl().getTimeStampServiceURL());
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -53,18 +55,13 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
             SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
                     setProvider(ContextVS.PROVIDER).build(timeStampCert);
             timeStampToken.validate(timeStampSignerInfoVerifier);
-            smimeMessage.setTimeStampToken(timeStampToken);
-            //byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),receiverCert);
-            //byte[] accessRequestEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, receiverCert);
-            Map<String, Object> mapToSend = new HashMap<String, Object>();
+            CMSSignedData timeStampedSignedData = CMSUtils.addTimeStamp(cmsMessage, timeStampToken);
+            Map<String, Object> mapToSend = new HashMap<>();
             mapToSend.put(ContextVS.CSR_FILE_NAME, certificationRequest.getCsrPEM());
-            mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME, smimeMessage.getBytes());
+            mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME, PEMUtils.getPEMEncoded(timeStampedSignedData.toASN1Structure()));
             responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                     ContextVS.getInstance().getAccessControl().getAccessServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                /*byte[] encryptedData = responseVS.getMessageBytes();
-                byte[] decryptedData = Encryptor.decryptFile(encryptedData, certificationRequest.getPublicKey(),
-                        certificationRequest.getPrivateKey());*/
                 certificationRequest.initSigner(responseVS.getMessageBytes());
                 responseVS.setData(certificationRequest);
             } else {

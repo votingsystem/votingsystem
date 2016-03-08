@@ -1,24 +1,20 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.AnonymousDelegation;
 import org.votingsystem.model.voting.RepresentationDocument;
 import org.votingsystem.model.voting.RepresentativeDocument;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CMSUtils;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.NifUtils;
-import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.*;
+import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -47,26 +43,26 @@ public class RepresentativeDelegationBean {
     @Inject SignatureBean signatureBean;
     @Inject CSRBean csrBean;
 
-    public X509Certificate validateAnonymousRequest(MessageSMIME messageSMIME, byte[] csrRequest) throws Exception {
-        RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
+    public X509Certificate validateAnonymousRequest(MessageCMS messageCMS, byte[] csrRequest) throws Exception {
+        RepresentativeDelegationDto request = messageCMS.getSignedContent(RepresentativeDelegationDto.class);
         if(TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST != request.getOperation()) throw new ValidationExceptionVS(
                 "expected operation 'ANONYMOUS_SELECTION_CERT_REQUEST' but found '" + request.getOperation() + "'");
-        UserVS userVS = messageSMIME.getUserVS();
+        UserVS userVS = messageCMS.getUserVS();
         checkUserDelegationStatus(userVS);
-        SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(userVS.getNif(), messageSMIME.getSMIME(), null);
-        messageSMIME.setType(request.getOperation()).setSMIME(smimeMessageResp);
+        CMSSignedMessage cmsMessageResp = signatureBean.addSignature(messageCMS.getCMS());
+        messageCMS.setType(request.getOperation()).setCMS(cmsMessageResp);
         X509Certificate anonymousCert = csrBean.signAnonymousDelegationCert(csrRequest);
         dao.merge(userVS.setRepresentative(null));
-        AnonymousDelegation anonymousDelegation = new AnonymousDelegation(AnonymousDelegation.Status.OK, messageSMIME,
+        AnonymousDelegation anonymousDelegation = new AnonymousDelegation(AnonymousDelegation.Status.OK, messageCMS,
                 userVS, request.getDateFrom(), request.getDateTo());
         anonymousDelegation.setHashAnonymousDelegation(request.getHashAnonymousDelegation());
         dao.persist(anonymousDelegation);
         return anonymousCert;
     }
 
-    public RepresentationDocument saveAnonymousDelegation(MessageSMIME messageSMIME) throws Exception {
+    public RepresentationDocument saveAnonymousDelegation(MessageCMS messageCMS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        X509Certificate anonymousX509Cert =  messageSMIME.getAnonymousSigner().getCertificate();
+        X509Certificate anonymousX509Cert =  messageCMS.getAnonymousSigner().getCertificate();
         AnonymousDelegationCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
                 AnonymousDelegationCertExtensionDto.class, anonymousX509Cert,
                 ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID);
@@ -78,7 +74,7 @@ public class RepresentativeDelegationBean {
                 .setParameter("hashCertVS", certExtensionDto.getHashCertVS());
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if(certificateVS == null) throw new ValidationExceptionVS(messages.get("certificateVSUnknownErrorMsg"));
-        RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
+        RepresentativeDelegationDto request = messageCMS.getSignedContent(RepresentativeDelegationDto.class);
         if(request.getRepresentative() == null) throw new ValidationExceptionVS("missing param 'representative'");
         request.getRepresentative().setNIF(NifUtils.validate(request.getRepresentative().getNIF()));
         query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
@@ -100,14 +96,11 @@ public class RepresentativeDelegationBean {
         Date dateToCheck = DateUtils.addDays(dateFromCheck, request.getWeeksOperationActive() * 7).getTime();
         if(request.getDateTo().compareTo(dateToCheck) != 0) throw new ValidationExceptionVS(
                 format("dateTo expected '{0}' received '{1}'", dateToCheck, request.getDateTo()));
-
-        String toUser = certificateVS.getHashCertVSBase64();
-        String subject = messages.get("representativeSelectValidationSubject");
-        SMIMEMessage smimeMessage = signatureBean.getSMIMEMultiSigned(toUser, messageSMIME.getSMIME(), subject);
-        messageSMIME.setSMIME(smimeMessage);
-        dao.merge(messageSMIME);
-        dao.merge(certificateVS.setState(CertificateVS.State.USED).setMessageSMIME(messageSMIME));
-        RepresentationDocument representationDocument = new RepresentationDocument(messageSMIME, null,
+        CMSSignedMessage cmsMessage = signatureBean.addSignature(messageCMS.getCMS());
+        messageCMS.setCMS(cmsMessage);
+        dao.merge(messageCMS);
+        dao.merge(certificateVS.setState(CertificateVS.State.USED).setMessageCMS(messageCMS));
+        RepresentationDocument representationDocument = new RepresentationDocument(messageCMS, null,
                 representative, RepresentationDocument.State.OK);
         dao.persist(representationDocument);
         return representationDocument;
@@ -115,10 +108,10 @@ public class RepresentativeDelegationBean {
 
     @Transactional
     public AnonymousDelegation cancelAnonymousDelegation(
-            MessageSMIME messageSMIME, MessageSMIME anonymousMessageSMIME) throws Exception {
-        cancelAnonymousRepresentationDocument(anonymousMessageSMIME);
-        UserVS userVS = messageSMIME.getUserVS();
-        RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
+            MessageCMS messageCMS, MessageCMS anonymousMessageCMS) throws Exception {
+        cancelAnonymousRepresentationDocument(anonymousMessageCMS);
+        UserVS userVS = messageCMS.getUserVS();
+        RepresentativeDelegationDto request = messageCMS.getSignedContent(RepresentativeDelegationDto.class);
         if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION != request.getOperation()) throw new ValidationExceptionVS(
                 "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION' found '" + request.getOperation() + "'");
         if(request.getHashAnonymousDelegation() == null)
@@ -130,30 +123,30 @@ public class RepresentativeDelegationBean {
                 "ERROR - userWithoutAnonymousDelegationErrorMsg - userVS nif: " + userVS.getNif());
         if(!anonymousDelegation.getHashAnonymousDelegation().equals(request.getHashAnonymousDelegation()))
             throw new ValidationExceptionVS("ERROR - cancelation hash doesn't match active one");
-        String hashAnonymousDelegation = CMSUtils.getHashBase64(request.getOriginHashAnonymousDelegation(),
+        String hashAnonymousDelegation = StringUtils.getHashBase64(request.getOriginHashAnonymousDelegation(),
                 ContextVS.VOTING_DATA_DIGEST);
         if(!hashAnonymousDelegation.equals(anonymousDelegation.getHashAnonymousDelegation()))
             throw new ValidationExceptionVS("ERROR - AnonymousDelegation hash error - calculated hash doesn't match active one");
-        SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(userVS.getNif(), messageSMIME.getSMIME(), null);
-        dao.merge(messageSMIME.setSMIME(smimeMessageResp));
+        CMSSignedMessage cmsMessageResp = signatureBean.addSignature(messageCMS.getCMS());
+        dao.merge(messageCMS.setCMS(cmsMessageResp));
         anonymousDelegation.setOriginHashAnonymousDelegation(request.getOriginHashAnonymousDelegation()).setDateCancelled(new Date());
-        dao.merge(anonymousDelegation.setStatus(AnonymousDelegation.Status.CANCELED).setCancellationSMIME(messageSMIME));
+        dao.merge(anonymousDelegation.setStatus(AnonymousDelegation.Status.CANCELED).setCancellationCMS(messageCMS));
         log.info("cancelAnonymousDelegation -  AnonymousDelegation id: " + anonymousDelegation.getId());
         return anonymousDelegation;
     }
 
-    private RepresentationDocument cancelAnonymousRepresentationDocument(MessageSMIME messageSMIME) throws Exception {
+    private RepresentationDocument cancelAnonymousRepresentationDocument(MessageCMS messageCMS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        RepresentativeDelegationDto request = messageSMIME.getSignedContent(RepresentativeDelegationDto.class);
+        RepresentativeDelegationDto request = messageCMS.getSignedContent(RepresentativeDelegationDto.class);
         if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION != request.getOperation()) throw new ValidationExceptionVS(
                 "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION' found '" + request.getOperation() + "'");
         if(request.getHashCertVSBase64() == null) throw new ValidationExceptionVS("missing param 'hashCertVSBase64'");
         if(request.getOriginHashCertVS() == null) throw new ValidationExceptionVS("missing param 'originHashCertVSBase64'");
-        String hashCertVSBase64 = CMSUtils.getHashBase64(request.getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
+        String hashCertVSBase64 = StringUtils.getHashBase64(request.getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
         if(!request.getHashCertVSBase64().equals(hashCertVSBase64)) {
             throw new ValidationExceptionVS("calculated 'hashCertVSBase64' doesn't match request one");
         }
-        X509Certificate anonymousX509Cert =  messageSMIME.getAnonymousSigner().getCertificate();
+        X509Certificate anonymousX509Cert =  messageCMS.getAnonymousSigner().getCertificate();
         AnonymousDelegationCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
                 AnonymousDelegationCertExtensionDto.class, anonymousX509Cert, ContextVS.ANONYMOUS_REPRESENTATIVE_DELEGATION_OID);
         Query query = dao.getEM().createQuery("select c from  CertificateVS c where c.serialNumber=:serialNumber " +
@@ -164,25 +157,24 @@ public class RepresentativeDelegationBean {
                 .setParameter("hashCertVS", certExtensionDto.getHashCertVS());
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if(certificateVS == null) throw new ValidationExceptionVS(messages.get("certificateVSUnknownErrorMsg"));
-        query = dao.getEM().createQuery("select r from RepresentationDocument r where r.activationSMIME =:messageSMIME")
-                .setParameter("messageSMIME", certificateVS.getMessageSMIME());
+        query = dao.getEM().createQuery("select r from RepresentationDocument r where r.activationCMS =:messageCMS")
+                .setParameter("messageCMS", certificateVS.getMessageCMS());
         RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
         if(representationDocument == null) throw new ValidationExceptionVS(
                 "ERROR - RepresentationDocument for request not found");
-        SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(certificateVS.getHashCertVSBase64(),
-                messageSMIME.getSMIME(), null);
-        dao.merge(messageSMIME.setSMIME(smimeMessageResp));
-        dao.merge(representationDocument.setState(RepresentationDocument.State.CANCELED).setCancellationSMIME(messageSMIME));
+        CMSSignedMessage cmsMessageResp = signatureBean.addSignature(messageCMS.getCMS());
+        dao.merge(messageCMS.setCMS(cmsMessageResp));
+        dao.merge(representationDocument.setState(RepresentationDocument.State.CANCELED).setCancellationCMS(messageCMS));
         return representationDocument;
     }
 
-    public void cancelRepresentationDocument(MessageSMIME messageSMIME) {
-        UserVS userVS = messageSMIME.getUserVS();
+    public void cancelRepresentationDocument(MessageCMS messageCMS) {
+        UserVS userVS = messageCMS.getUserVS();
         Query query = dao.getEM().createQuery("select r from RepresentationDocument r where r.userVS =:userVS " +
                 "and r .state =:state").setParameter("userVS", userVS).setParameter("state", RepresentationDocument.State.OK);
         RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
         if(representationDocument != null) {
-            representationDocument.setState(RepresentationDocument.State.CANCELED).setCancellationSMIME(messageSMIME)
+            representationDocument.setState(RepresentationDocument.State.CANCELED).setCancellationCMS(messageCMS)
                     .setDateCanceled(userVS.getTimeStampToken().getTimeStampInfo().getGenTime());
             dao.merge(representationDocument);
             log.info(format("cancelRepresentationDocument - user '{0}' " +
@@ -196,8 +188,8 @@ public class RepresentativeDelegationBean {
                 messages.get("userIsRepresentativeErrorMsg", userVS.getNif()));
         AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS);
         if (anonymousDelegation != null) {
-            String delegationURL = format("{0}/rest/messageSMIME/id/{1}", config.getContextURL(),
-                    anonymousDelegation.getDelegationSMIME().getId());
+            String delegationURL = format("{0}/rest/messageCMS/id/{1}", config.getContextURL(),
+                    anonymousDelegation.getDelegationCMS().getId());
             throw new ExceptionVS(MessageDto.REQUEST_REPEATED(messages.get("userWithPreviousDelegationErrorMsg", userVS.getNif(),
                     DateUtils.getDateStr(anonymousDelegation.getDateTo())), delegationURL));
         }
@@ -221,7 +213,7 @@ public class RepresentativeDelegationBean {
                 "r.representative =:representative and r.state =:state").setParameter("representative", representative)
                 .setParameter("state", RepresentationDocument.State.OK);
         long numRepresentations = (long) query.getSingleResult() + 1;//plus the representative itself
-        return UserVSDto.REPRESENTATIVE(representative, representativeDocument.getActivationSMIME().getId(),
+        return UserVSDto.REPRESENTATIVE(representative, representativeDocument.getActivationCMS().getId(),
                 numRepresentations, config.getContextURL());
     }
 

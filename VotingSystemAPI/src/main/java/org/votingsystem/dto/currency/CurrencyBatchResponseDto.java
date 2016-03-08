@@ -1,9 +1,7 @@
 package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.signature.smime.SMIMEMessage;
-
-import java.util.Base64;
+import org.votingsystem.cms.CMSSignedMessage;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -18,12 +16,12 @@ public class CurrencyBatchResponseDto {
 
     public CurrencyBatchResponseDto() {};
 
-    public CurrencyBatchResponseDto(SMIMEMessage receipt, String leftOverCert) throws Exception {
-        this.receipt = Base64.getEncoder().encodeToString(receipt.getBytes());
+    public CurrencyBatchResponseDto(CMSSignedMessage receipt, String leftOverCert) throws Exception {
+        this.receipt = receipt.toPEMStr();
         this.leftOverCert = leftOverCert;
     }
 
-    public CurrencyBatchResponseDto(SMIMEMessage receipt, String leftOverCert,
+    public CurrencyBatchResponseDto(CMSSignedMessage receipt, String leftOverCert,
                                     String currencyChangeCert) throws Exception {
         this(receipt, leftOverCert);
         this.currencyChangeCert = currencyChangeCert;

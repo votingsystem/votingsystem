@@ -10,8 +10,8 @@ import javafx.scene.web.WebView;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.util.Formatter;
 import org.votingsystem.client.webextension.util.Utils;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 
@@ -27,7 +27,7 @@ public class SignatureInfoPane extends GridPane {
     private UserVS signer;
     private String signatureAlgorithmValue = null;
 
-    public SignatureInfoPane(UserVS signer, SMIMEMessage signedMessage) throws Exception {
+    public SignatureInfoPane(UserVS signer, CMSSignedMessage signedMessage) throws Exception {
         this.signer = signer;
         signatureAlgorithmValue = signer.getEncryptiontId() + " - " + signer.getDigestId();
         initComponents();

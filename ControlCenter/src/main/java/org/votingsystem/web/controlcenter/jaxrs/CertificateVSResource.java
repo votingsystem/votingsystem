@@ -3,12 +3,13 @@ package org.votingsystem.web.controlcenter.jaxrs;
 import org.votingsystem.dto.CertificateVSDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVSElection;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CertificateVSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -91,7 +92,7 @@ public class CertificateVSResource {
             for(CertificateVS certificateVS : certificates) {
                 resultList.add(certificateVS.getX509Cert());
             }
-            return Response.ok().entity(CertUtils.getPEMEncoded(resultList)).build();
+            return Response.ok().entity(PEMUtils.getPEMEncoded(resultList)).build();
         } else {
             List<CertificateVSDto> listDto = new ArrayList<>();
             for(CertificateVS certificateVS : certificates) {
@@ -120,7 +121,7 @@ public class CertificateVSResource {
         X509Certificate x509Cert = certificate.getX509Cert();
         if(contentType.contains("pem") || (format != null && "pem".equals(format.toLowerCase()))){
             resp.setHeader("Content-Disposition", format("inline; filename='trustedCert_{0}'", serialNumber));
-            return Response.ok().entity(CertUtils.getPEMEncoded (x509Cert)).build();
+            return Response.ok().entity(PEMUtils.getPEMEncoded (x509Cert)).build();
         } else {
             CertificateVSDto certDto = new CertificateVSDto(certificate);
             if(contentType.contains("json")) {
@@ -145,7 +146,7 @@ public class CertificateVSResource {
         CertificateVS certificate = dao.getSingleResult(CertificateVS.class, query);
         if (certificate != null) {
             X509Certificate certX509 = CertUtils.loadCertificate(certificate.getContent());
-            return Response.ok().entity(CertUtils.getPEMEncoded (certX509)).build();
+            return Response.ok().entity(PEMUtils.getPEMEncoded (certX509)).build();
         } else return Response.status(Response.Status.BAD_REQUEST).entity("ERROR - UserVS without active CertificateVS").build();
     }
 
@@ -157,7 +158,7 @@ public class CertificateVSResource {
                 "ERROR - EventVSElection not found - eventId: " + eventId).build();
         CertificateVS certificateCA = eventVSElection.getCertificateVS();
         X509Certificate certX509 = CertUtils.loadCertificate(certificateCA.getContent());
-        return Response.ok().entity(CertUtils.getPEMEncoded (certX509)).build();
+        return Response.ok().entity(PEMUtils.getPEMEncoded (certX509)).build();
     }
 
     @Path("/hashHex/{hashHex}")
@@ -171,7 +172,7 @@ public class CertificateVSResource {
         CertificateVS certificate = dao.getSingleResult(CertificateVS.class, query);
         if (certificate != null) {
             X509Certificate certX509 = CertUtils.loadCertificate(certificate.getContent());
-            return Response.ok().entity(CertUtils.getPEMEncoded (certX509)).build();
+            return Response.ok().entity(PEMUtils.getPEMEncoded (certX509)).build();
         } else return Response.status(Response.Status.NOT_FOUND).entity("hashHex: " + hashHex).build();
     }
 
@@ -179,7 +180,7 @@ public class CertificateVSResource {
     @GET  @Produces(MediaType.TEXT_PLAIN)
     public Response trustedCerts() throws Exception {
         Set<X509Certificate> trustedCerts = signatureBean.getTrustedCerts();
-        return Response.ok().entity(CertUtils.getPEMEncoded (trustedCerts)).build();
+        return Response.ok().entity(PEMUtils.getPEMEncoded (trustedCerts)).build();
     }
 
     @Path("/userVS/{userId}")
@@ -195,16 +196,16 @@ public class CertificateVSResource {
             CertificateVS certificate = dao.getSingleResult(CertificateVS.class, query);
             if (certificate != null) {
                 X509Certificate certX509 = CertUtils.loadCertificate (certificate.getContent());
-                return Response.ok().entity(CertUtils.getPEMEncoded (certX509)).build();
+                return Response.ok().entity(PEMUtils.getPEMEncoded (certX509)).build();
             } else return Response.status(Response.Status.NOT_FOUND).entity("userWithoutCert - userId: " + userId).build();
         }
     }
 
     @Path("/editCert")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response editCert(MessageSMIME messageSMIME, @Context HttpServletRequest req,
+    public Response editCert(MessageCMS messageCMS, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws Exception {
-        CertificateVS certificateVS = certificateVSBean.editCert(messageSMIME);
+        CertificateVS certificateVS = certificateVSBean.editCert(messageCMS);
         return Response.ok().entity("editCert - certificateVS id: " + certificateVS.getId()).build();
     }
 

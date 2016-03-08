@@ -2,7 +2,7 @@ package org.votingsystem.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.signature.util.EncryptedBundle;
+import org.votingsystem.util.crypto.EncryptedBundle;
 
 import java.util.Base64;
 

@@ -4,10 +4,10 @@ import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.AccessControlVS;
 import org.votingsystem.model.voting.ControlCenterVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
@@ -29,7 +29,6 @@ import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -60,9 +59,10 @@ public class ConfigVSImpl implements ConfigVS {
     private String timeStampServerURL;
     private EnvironmentVS mode;
     private Properties props;
-    private String emailAdmin = null;
-    private String staticResURL = null;
-    private File serverDir = null;
+    private String emailAdmin;
+    private String staticResURL;
+    private File serverDir;
+    private UserVS systemUser;
     private ControlCenterVS controlCenter;
 
     public ConfigVSImpl() {
@@ -105,9 +105,9 @@ public class ConfigVSImpl implements ConfigVS {
         log.info("initialize");
         Query query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
                 .setParameter("type", UserVS.Type.SYSTEM);
-        UserVS systemUser = dao.getSingleResult(UserVS.class, query);
+        systemUser = dao.getSingleResult(UserVS.class, query);
         if(systemUser == null) {
-            dao.persist(new UserVS(systemNIF, serverName, UserVS.Type.SYSTEM));
+            systemUser = dao.persist(new UserVS(systemNIF, serverName, UserVS.Type.SYSTEM));
         }
         query = dao.getEM().createQuery("select a from ActorVS a where a.serverURL =:serverURL")
                 .setParameter("serverURL", contextURL);
@@ -191,7 +191,7 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Override
     public UserVS getSystemUser() {
-        return null;
+        return systemUser;
     }
 
     @Override
@@ -243,7 +243,7 @@ public class ConfigVSImpl implements ConfigVS {
                         "ERROR - actorNotControlCenterMsg serverURL: " + serverURL);
                 if(!actorVS.getServerURL().equals(serverURL)) throw new ExceptionVS(
                         "ERROR - serverURLMismatch expected URL: " + serverURL + " - found: " + actorVS.getServerURL());
-                X509Certificate x509Cert = CertUtils.fromPEMToX509CertCollection(
+                X509Certificate x509Cert = PEMUtils.fromPEMToX509CertCollection(
                         actorVS.getCertChainPEM().getBytes()).iterator().next();
                 signatureBean.verifyCertificate(x509Cert);
                 if(controlCenterDB == null) {

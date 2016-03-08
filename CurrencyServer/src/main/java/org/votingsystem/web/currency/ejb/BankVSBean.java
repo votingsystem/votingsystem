@@ -2,13 +2,13 @@ package org.votingsystem.web.currency.ejb;
 
 import org.iban4j.Iban;
 import org.votingsystem.dto.currency.BankVSDto;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.BankVSInfo;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
@@ -40,17 +40,17 @@ public class BankVSBean {
     @Inject SignatureBean signatureBean;
     @Inject ConfigVS config;
 
-    public BankVS saveBankVS(MessageSMIME smimeReq) throws Exception {
-        UserVS signer = smimeReq.getUserVS();
+    public BankVS saveBankVS(MessageCMS cmsReq) throws Exception {
+        UserVS signer = cmsReq.getUserVS();
         log.log(Level.FINE, "signer:" + signer.getNif());
-        BankVSDto request = smimeReq.getSignedContent(BankVSDto.class);
+        BankVSDto request = cmsReq.getSignedContent(BankVSDto.class);
         request.validatePublishRequest();
         Iban IBAN = Iban.valueOf(request.getIBAN());
         if(!signatureBean.isAdmin(signer.getNif())) {
             throw new ValidationExceptionVS("operation: " + request.getOperation() +
                     " - userWithoutPrivilegesErrorMsg - nif: " + signer.getNif());
         }
-        Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(request.getCertChainPEM().getBytes());
+        Collection<X509Certificate> certChain = PEMUtils.fromPEMToX509CertCollection(request.getCertChainPEM().getBytes());
         X509Certificate x509Certificate = certChain.iterator().next();
         BankVS bankVS = BankVS.getUserVS(x509Certificate);
         signatureBean.verifyUserCertificate(bankVS);

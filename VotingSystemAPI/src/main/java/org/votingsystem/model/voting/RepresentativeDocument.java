@@ -1,6 +1,6 @@
 package org.votingsystem.model.voting;
 
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 
@@ -30,8 +30,8 @@ public class RepresentativeDocument  extends EntityVS implements Serializable {
     private Long id;
     @Enumerated(EnumType.STRING)
     @Column(name="state", nullable=false) private State state = State.OK;
-    @OneToOne private MessageSMIME activationSMIME;
-    @OneToOne private MessageSMIME cancellationSMIME;
+    @OneToOne private MessageCMS activationCMS;
+    @OneToOne private MessageCMS cancellationCMS;
 	@Column(name="description", columnDefinition="TEXT" ) private String description;
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
@@ -44,9 +44,9 @@ public class RepresentativeDocument  extends EntityVS implements Serializable {
 
     public RepresentativeDocument() {}
 
-    public RepresentativeDocument(UserVS userVS, MessageSMIME activationSMIME, String description) {
+    public RepresentativeDocument(UserVS userVS, MessageCMS activationCMS, String description) {
         this.userVS = userVS;
-        this.activationSMIME = activationSMIME;
+        this.activationCMS = activationCMS;
         this.description = description;
     }
 
@@ -83,20 +83,20 @@ public class RepresentativeDocument  extends EntityVS implements Serializable {
 		this.lastUpdated = lastUpdated;
 	}
 
-	public MessageSMIME getActivationSMIME() {
-		return activationSMIME;
+	public MessageCMS getActivationCMS() {
+		return activationCMS;
 	}
 
-	public void setActivationSMIME(MessageSMIME activationSMIME) {
-		this.activationSMIME = activationSMIME;
+	public void setActivationCMS(MessageCMS activationCMS) {
+		this.activationCMS = activationCMS;
 	}
 
-	public MessageSMIME getCancellationSMIME() {
-		return cancellationSMIME;
+	public MessageCMS getCancellationCMS() {
+		return cancellationCMS;
 	}
 
-	public RepresentativeDocument setCancellationSMIME(MessageSMIME cancellationSMIME) {
-		this.cancellationSMIME = cancellationSMIME;
+	public RepresentativeDocument setCancellationCMS(MessageCMS cancellationCMS) {
+		this.cancellationCMS = cancellationCMS;
         return this;
 	}
 

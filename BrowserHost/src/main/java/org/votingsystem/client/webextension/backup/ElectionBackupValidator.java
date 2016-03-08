@@ -1,18 +1,18 @@
 package org.votingsystem.client.webextension.backup;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.MetaInf;
 import org.votingsystem.dto.voting.RepresentativeData;
 import org.votingsystem.dto.voting.RepresentativesData;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.FieldEventVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.DocumentVSValidator;
-import org.votingsystem.signature.util.SignedFile;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
+import org.votingsystem.util.crypto.DocumentVSValidator;
+import org.votingsystem.util.crypto.PEMUtils;
+import org.votingsystem.util.crypto.SignedFile;
 
 import java.io.File;
 import java.security.cert.TrustAnchor;
@@ -74,7 +74,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
         String backupPath = backupDir.getAbsolutePath();
         String voteInfoPath = backupPath + File.separator + TypeVS.VOTING_EVENT.toString() + File.separator;
         File trustedCertsFile = new File(voteInfoPath + "systemTrustedCerts.pem");
-        Collection<X509Certificate> trustedCerts = CertUtils.fromPEMToX509CertCollection(
+        Collection<X509Certificate> trustedCerts = PEMUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(trustedCertsFile));
         trustAnchors = new HashSet<TrustAnchor>(trustedCerts.size());
         for(X509Certificate certificate: trustedCerts) {
@@ -82,7 +82,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
             trustAnchors.add(anchor);
         }
         File eventTrustedCertsFile = new File(voteInfoPath + "eventTrustedCerts.pem");
-        Collection<X509Certificate> eventTrustedCerts = CertUtils.fromPEMToX509CertCollection(
+        Collection<X509Certificate> eventTrustedCerts = PEMUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(eventTrustedCertsFile));
         eventTrustedAnchors = new HashSet<TrustAnchor>(eventTrustedCerts.size());
         for(X509Certificate certificate: eventTrustedCerts) {
@@ -90,7 +90,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
             eventTrustedAnchors.add(anchor);
         }
         File timeStampCertFile = new File(voteInfoPath + "timeStampCert.pem");
-        Collection<X509Certificate> timeStampCerts = CertUtils.fromPEMToX509CertCollection(
+        Collection<X509Certificate> timeStampCerts = PEMUtils.fromPEMToX509CertCollection(
                 FileUtils.getBytesFromFile(timeStampCertFile));   
         timeStampServerCert = timeStampCerts.iterator().next();
             
@@ -292,16 +292,16 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                     statusCode = validationResponse.getStatusCode();
                     if(ResponseVS.SC_OK == validationResponse.getStatusCode()) {
                         boolean repeatedAccessrequest = signersNifMap.containsKey(
-                                validationResponse.getSMIME().getSigner().getNif());
+                                validationResponse.getCMS().getSigner().getNif());
                         if(repeatedAccessrequest) {
                             numAccessRequestERROR++;
                             errorMessage = ContextVS.getInstance().getMessage("accessRequetsRepeatedErrorMsg",
-                                    validationResponse.getSMIME().getSigner().getNif()) + " - " +
+                                    validationResponse.getCMS().getSigner().getNif()) + " - " +
                                     accessRequest.getAbsolutePath() + " - " +
-                                    signersNifMap.get(validationResponse.getSMIME().getSigner().getNif());
+                                    signersNifMap.get(validationResponse.getCMS().getSigner().getNif());
                         } else {
                             numAccessRequestOK++;
-                            signersNifMap.put(validationResponse.getSMIME().getSigner().getNif(),
+                            signersNifMap.put(validationResponse.getCMS().getSigner().getNif(),
                                     accessRequest.getAbsolutePath());
                         } 
                     } else {
@@ -349,15 +349,15 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                             metaInf.getDateBegin(), metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();
                     if(ResponseVS.SC_OK == validationResponse.getStatusCode()) {
-                        SMIMEMessage smimeMessage = new SMIMEMessage(FileUtils.getBytesFromFile(vote));
-                        boolean repeatedVote = signerCertMap.containsKey(validationResponse.getSMIME().getVoteVS()
+                        CMSSignedMessage cmsMessage = new CMSSignedMessage(FileUtils.getBytesFromFile(vote));
+                        boolean repeatedVote = signerCertMap.containsKey(validationResponse.getCMS().getVoteVS()
                                 .getX509Certificate().getSerialNumber().longValue());
-                        Long certSerialNumber = smimeMessage.getVoteVS().getX509Certificate().getSerialNumber().longValue();
+                        Long certSerialNumber = cmsMessage.getVoteVS().getX509Certificate().getSerialNumber().longValue();
                         if(repeatedVote){
                             numVotesERROR++;
                             statusCode = ResponseVS.SC_ERROR;
                             String msg = ContextVS.getInstance().getMessage(
-                                    "voteRepeatedErrorMsg", smimeMessage.getVoteVS().getX509Certificate()
+                                    "voteRepeatedErrorMsg", cmsMessage.getVoteVS().getX509Certificate()
                                     .getSerialNumber().longValue()) + " - " + vote.getAbsolutePath() + " - " +
                                     signerCertMap.get(certSerialNumber);
                             errorList.add(msg);

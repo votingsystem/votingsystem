@@ -2,6 +2,8 @@ package org.votingsystem.test.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.cms.CMSGenerator;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.SubscriptionVSDto;
@@ -10,14 +12,11 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.currency.SubscriptionVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.Encryptor;
-import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.util.*;
+import org.votingsystem.util.crypto.Encryptor;
+import org.votingsystem.util.crypto.KeyStoreUtil;
+import org.votingsystem.util.crypto.PEMUtils;
 
-import javax.mail.Header;
 import javax.security.auth.x500.X500PrivateCredential;
 import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
@@ -38,7 +37,7 @@ public class SignatureService {
 
     private static ConcurrentHashMap<String, SignatureService> signatureServices	= new ConcurrentHashMap<>();
 
-    private SMIMESignedGeneratorVS signedMailGenerator;
+    private CMSGenerator cmsGenerator;
 	private X509Certificate certSigner;
     private Certificate[] certSignerChain;
     private X500PrivateCredential rootCAPrivateCredential;
@@ -57,12 +56,12 @@ public class SignatureService {
         log.info("init");
         this.keyStore = keyStore;
         certSignerChain = keyStore.getCertificateChain(keyAlias);
-        signedMailGenerator = new SMIMESignedGeneratorVS(keyStore, keyAlias, password.toCharArray(),ContextVS.SIGN_MECHANISM);
+        cmsGenerator = new CMSGenerator(keyStore, keyAlias, password.toCharArray(),ContextVS.SIGN_MECHANISM);
         byte[] pemCertsArray = null;
         for (int i = 0; i < certSignerChain.length; i++) {
             log.info("Adding local kesystore");
-            if(pemCertsArray == null) pemCertsArray = CertUtils.getPEMEncoded (certSignerChain[i]);
-            else pemCertsArray = FileUtils.concat(pemCertsArray, CertUtils.getPEMEncoded (certSignerChain[i]));
+            if(pemCertsArray == null) pemCertsArray = PEMUtils.getPEMEncoded (certSignerChain[i]);
+            else pemCertsArray = FileUtils.concat(pemCertsArray, PEMUtils.getPEMEncoded (certSignerChain[i]));
         }
         certSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
         privateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
@@ -133,64 +132,39 @@ public class SignatureService {
         return keyStore;
     }
 
-    public SMIMEMessage getSMIMETimeStamped (String fromUser,String toUser,String textToSign,String subject,
-                       Header... headers) throws Exception {
-        log.info(format("getSMIMETimeStamped - subject {0} - fromUser {1} to user {2}", subject,fromUser, toUser));
-        SMIMEMessage smimeMessage = getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, headers);
-        String timeStampServiceURL = ActorVS.getTimeStampServiceURL(ContextVS.getInstance().getProperty("timeStampServerURL"));
+    public CMSSignedMessage addSignatureWithTimeStamp (String textToSign) throws Exception {
+        CMSSignedMessage cmsMessage = cmsGenerator.signData(textToSign);
         MessageTimeStamper timeStamper = new MessageTimeStamper(
-                smimeMessage,  timeStampServiceURL);
+                cmsMessage,  ActorVS.getTimeStampServiceURL(ContextVS.getInstance().getProperty("timeStampServerURL")));
         return timeStamper.call();
     }
 		
-	public SMIMEMessage getSMIME (String fromUser,String toUser,String textToSign,String subject,
-                                  Header... headers) throws Exception {
-		log.info("getSMIME");
-		return getSignedMailGenerator().getSMIME(fromUser, toUser, textToSign, subject, headers);
+	public CMSSignedMessage signData(String textToSign) throws Exception {
+		return cmsGenerator.signData(textToSign);
 	}
 		
-	public synchronized SMIMEMessage getSMIMEMultiSigned (
-		String fromUser, String toUser,	final SMIMEMessage smimeMessage, String subject) throws Exception {
-		log.info(format("getSMIMEMultiSigned - subject {0} - fromUser {1} to user {2}",
+	public synchronized CMSSignedMessage addSignature (
+            String fromUser, String toUser, final CMSSignedMessage cmsMessage, String subject) throws Exception {
+		log.info(format("addSignature - subject {0} - fromUser {1} to user {2}",
                 subject,fromUser, toUser));
-		return getSignedMailGenerator().getSMIMEMultiSigned(fromUser, toUser, smimeMessage, subject);
+		return new CMSSignedMessage(cmsGenerator.addSignature(cmsMessage));
 	}
 
     public byte[] encryptToCMS(byte[] dataToEncrypt, X509Certificate receiverCert) throws Exception {
-        return getEncryptor().encryptToCMS(dataToEncrypt, receiverCert);
+        return encryptor.encryptToCMS(dataToEncrypt, receiverCert);
     }
 
     public byte[] encryptToCMS(byte[] dataToEncrypt) throws Exception {
-        return getEncryptor().encryptToCMS(dataToEncrypt, certSigner);
+        return encryptor.encryptToCMS(dataToEncrypt, certSigner);
     }
 
     public byte[] decryptCMS (byte[] encryptedFile) throws Exception {
-        return getEncryptor().decryptCMS(encryptedFile);
+        return encryptor.decryptCMS(encryptedFile);
     }
 
-    public byte[] encryptMessage(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
-        return getEncryptor().encryptMessage(bytesToEncrypt, publicKey);
+    public byte[] encryptToCMS(byte[] bytesToEncrypt, PublicKey publicKey) throws Exception {
+        return encryptor.encryptToCMS(bytesToEncrypt, publicKey);
     }
-
-    public byte[] decryptMessage (byte[] encryptedFile) throws Exception {
-        return getEncryptor().decryptMessage(encryptedFile);
-    }
-
-    ResponseVS encryptSMIME(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
-        return getEncryptor().encryptSMIME(bytesToEncrypt, receiverCert);
-    }
-
-    ResponseVS decryptSMIME(byte[] encryptedMessageBytes) throws Exception {
-        return getEncryptor().decryptSMIME(encryptedMessageBytes);
-    }
-
-    private Encryptor getEncryptor() {
-        return encryptor;
-    }
-
-	private SMIMESignedGeneratorVS getSignedMailGenerator() {
-		return signedMailGenerator;
-	}
 
     public KeyStore generateKeyStore(String userNIF) throws Exception {
         Date dateBegin = new Date();
@@ -207,7 +181,7 @@ public class SignatureService {
     public List<DNIBundle> subscribeUsers(GroupVSDto groupVSDto, SimulationData simulationData,
                             CurrencyServer currencyServer) throws Exception {
         log.info("subscribeUser - Num. Users:" + simulationData.getNumRequestsProjected());
-        List<DNIBundle> userList = new ArrayList<DNIBundle>();
+        List<DNIBundle> userList = new ArrayList<>();
         int fromFirstUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue();
         int toLastUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue() +
                 simulationData.getNumRequestsProjected();
@@ -215,16 +189,13 @@ public class SignatureService {
             int userIndex = new Long(simulationData.getUserBaseSimulationData().getAndIncrementUserIndex()).intValue();
             String userNif = NifUtils.getNif(userIndex);
             KeyStore mockDnie = generateKeyStore(userNif);
-            String toUser = currencyServer.getName();
-            String subject = "subscribeToGroupMsg - subscribeToGroupMsg";
             groupVSDto.setUUID(UUID.randomUUID().toString());
-            SMIMESignedGeneratorVS signedMailGenerator = new SMIMESignedGeneratorVS(mockDnie, ContextVS.END_ENTITY_ALIAS,
+            CMSGenerator cmsGenerator = new CMSGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
                     ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
-            userList.add(new DNIBundle(userNif, mockDnie, signedMailGenerator));
-            SMIMEMessage smimeMessage = signedMailGenerator.getSMIME(userNif, toUser,
-                    JSON.getMapper().writeValueAsString(groupVSDto), subject);
-            smimeMessage = new MessageTimeStamper(smimeMessage, currencyServer.getTimeStampServiceURL()).call();
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+            userList.add(new DNIBundle(userNif, mockDnie));
+            CMSSignedMessage cmsMessage = cmsGenerator.signData(JSON.getMapper().writeValueAsString(groupVSDto));
+            cmsMessage = new MessageTimeStamper(cmsMessage, currencyServer.getTimeStampServiceURL()).call();
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                     currencyServer.getGroupVSSubscriptionServiceURL(simulationData.getGroupId()));
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 throw new org.votingsystem.throwable.ExceptionVS("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
@@ -247,12 +218,10 @@ public class SignatureService {
                 subscriptionVSDto.loadActivationRequest();
             }
         }
-        String messageSubject = "TEST_ACTIVATE_GROUPVS_USERS";
         UserVS userVS = UserVS.FROM_X509_CERT(certSigner);
         for (SubscriptionVSDto subscriptionVSDto : subscriptionVSDtoList.getResultList()) {
-            SMIMEMessage smimeMessage = getSMIMETimeStamped(userVS.getNif(), currencyServer.getName(),
-                    JSON.getMapper().writeValueAsString(subscriptionVSDto), messageSubject);
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+            CMSSignedMessage cmsMessage = addSignatureWithTimeStamp(JSON.getMapper().writeValueAsString(subscriptionVSDto));
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                     currencyServer.getGroupVSUsersActivationServiceURL());
             if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(
                     responseVS.getMessage());

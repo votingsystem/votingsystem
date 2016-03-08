@@ -6,9 +6,9 @@ import javafx.event.EventHandler;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.votingsystem.client.webextension.pane.DocumentBrowserPane;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
@@ -47,9 +47,9 @@ public class DocumentBrowserDialog extends DialogVS {
         });
     }
 
-    private void showFile(final File smimeFile) {
+    private void showFile(final File cmsFile) {
         Platform.runLater(() -> {
-            documentBrowserPane.load(smimeFile);
+            documentBrowserPane.load(cmsFile);
             setCaption(documentBrowserPane.getCaption());
             show();
         });
@@ -88,18 +88,18 @@ public class DocumentBrowserDialog extends DialogVS {
         });
     }
 
-    public static void showDialog(SMIMEMessage smimeMessage, EventHandler closeDialogHandler) {
+    public static void showDialog(CMSSignedMessage cmsMessage, EventHandler closeDialogHandler) {
         try {
-            showDialog(smimeMessage.getBytes(), closeDialogHandler);
+            showDialog(cmsMessage.toPEM(), closeDialogHandler);
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
-    public static void showDialog(byte[] smimeMessageBytes, EventHandler closeDialogHandler) {
+    public static void showDialog(byte[] cmsMessageBytes, EventHandler closeDialogHandler) {
         Platform.runLater(() -> {
             if(INSTANCE == null) INSTANCE = new DocumentBrowserDialog(new DocumentBrowserPane());
-            File selectedFile = FileUtils.getFileFromBytes(smimeMessageBytes);
+            File selectedFile = FileUtils.getFileFromBytes(cmsMessageBytes);
             if(closeDialogHandler != null) INSTANCE.addCloseListener(closeDialogHandler);
             INSTANCE.showFile(selectedFile);
         });

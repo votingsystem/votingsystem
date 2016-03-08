@@ -3,8 +3,8 @@ package org.votingsystem.service;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.signature.util.TimeStampResponseGenerator;
 import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.crypto.TimeStampResponseGenerator;
 
 import java.io.IOException;
 import java.io.InputStream;

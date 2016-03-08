@@ -3,19 +3,19 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.AESParams;
-import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.WebSocketSession;
+import org.votingsystem.util.crypto.AESParams;
+import org.votingsystem.util.crypto.Encryptor;
 
 import javax.websocket.Session;
 import java.security.NoSuchAlgorithmException;
@@ -43,7 +43,7 @@ public class SocketMessageDto {
     private String encryptedMessage;
     private String UUID;
     private String remoteAddress;
-    private String smimeMessage;
+    private String cmsMessagePEM;
     private String aesParams;
     private String subject;
     private String toUser;
@@ -64,7 +64,7 @@ public class SocketMessageDto {
     @JsonIgnore private AESParams aesEncryptParams;
     @JsonIgnore private WebSocketSession webSocketSession;
     @JsonIgnore private Session session;
-    @JsonIgnore private SMIMEMessage smime;
+    @JsonIgnore private CMSSignedMessage cms;
     private String locale = ContextVS.getInstance().getLocale().getLanguage();
 
     public SocketMessageDto () {}
@@ -80,7 +80,7 @@ public class SocketMessageDto {
     }
 
     public SocketMessageDto getResponse(Integer statusCode, String message, Long deviceFromId,
-            SMIMEMessage smimeMessage, TypeVS operation) throws Exception {
+                                        CMSSignedMessage cmsMessage, TypeVS operation) throws Exception {
         SocketMessageDto messageDto = new SocketMessageDto();
         messageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_SESSION_ID);
         messageDto.setStatusCode(ResponseVS.SC_PROCESSING);
@@ -88,8 +88,7 @@ public class SocketMessageDto {
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
         messageContentDto.setStatusCode(statusCode);
         messageContentDto.setMessage(message);
-        if(smimeMessage != null) messageContentDto.setSmimeMessage(
-                Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
+        if(cmsMessage != null) messageContentDto.setCMSMessage(cmsMessage.toPEMStr());
         messageContentDto.setDeviceFromId(deviceFromId);
         messageContentDto.setOperation(operation);
         messageDto.setEncryptedMessage(Encryptor.encryptAES(
@@ -266,23 +265,23 @@ public class SocketMessageDto {
         this.locale = locale;
     }
 
-    public String getSmimeMessage() {
-        return smimeMessage;
+    public String getCMSMessage() {
+        return cmsMessagePEM;
     }
 
-    public void setSmimeMessage(String smimeMessage) {
-        this.smimeMessage = smimeMessage;
+    public void setCMSMessage(String cmsMessage) {
+        this.cmsMessagePEM = cmsMessage;
     }
 
     @JsonIgnore
-    public SMIMEMessage getSMIME() throws Exception {
-        if(smime == null) smime = new SMIMEMessage(Base64.getDecoder().decode(smimeMessage));
-        return smime;
+    public CMSSignedMessage getCMS() throws Exception {
+        if(cms == null) cms = CMSSignedMessage.FROM_PEM(cmsMessagePEM);
+        return cms;
     }
 
-    public SocketMessageDto setSMIME(SMIMEMessage smimeMessage) throws Exception {
-        this.smime = smimeMessage;
-        this.smimeMessage = Base64.getEncoder().encodeToString(smimeMessage.getBytes());
+    public SocketMessageDto setCMS(CMSSignedMessage cmsMessage) throws Exception {
+        this.cms = cmsMessage;
+        this.cmsMessagePEM = cmsMessage.toPEMStr();
         return this;
     }
 
@@ -505,7 +504,7 @@ public class SocketMessageDto {
         if(content.getDeviceFromName() != null) deviceFromName = content.getDeviceFromName();
         if(content.getFrom() != null) from = content.getFrom();
         if(content.getDeviceFromId() != null) deviceFromId = content.getDeviceFromId();
-        if(content.getSmimeMessage() != null) smime = content.getSMIME();
+        if(content.getCMSMessage() != null) cms = content.getCMS();
         if(content.getCurrencyList() != null) currencySet = CurrencyDto.deSerialize(
                 content.getCurrencyList());
         if(content.getSubject() != null) subject = content.getSubject();

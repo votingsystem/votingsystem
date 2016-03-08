@@ -8,17 +8,18 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TSPUtil;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.annotation.Resource;
@@ -70,7 +71,7 @@ public class TimeStampBean {
                 if(timeStampServerCert != null) {
                     x509TimeStampServerCert = CertUtils.loadCertificate(timeStampServerCert.getContent());
                     if(new Date().before(x509TimeStampServerCert.getNotAfter())) {
-                        signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert);
+                        signingCertPEMBytes = PEMUtils.getPEMEncoded(x509TimeStampServerCert);
                     } else {
                         log.info("timeStampServerCert lapsed - not valid after:" + x509TimeStampServerCert.getNotAfter());
                         dao.getEM().merge(timeStampServerCert.setState(CertificateVS.State.LAPSED));
@@ -97,7 +98,7 @@ public class TimeStampBean {
         if(timeStampServer.getId() == null) {
             dao.persist(timeStampServer);
         }
-        X509Certificate x509TimeStampServerCert = CertUtils.fromPEMToX509CertCollection(
+        X509Certificate x509TimeStampServerCert = PEMUtils.fromPEMToX509CertCollection(
                 timeStampServer.getCertChainPEM().getBytes()).iterator().next();
         if(new Date().after(x509TimeStampServerCert.getNotAfter())) {
             throw new ExceptionVS(timeStampServer.getServerURL() + " - signing cert is lapsed");
@@ -107,7 +108,7 @@ public class TimeStampBean {
         certificateVS.setCertChainPEM(timeStampServer.getCertChainPEM().getBytes());
         dao.persist(certificateVS);
         log.info("updateTimeStampServer - new CertificateVS - id: " + certificateVS.getId());
-        signingCertPEMBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert);
+        signingCertPEMBytes = PEMUtils.getPEMEncoded(x509TimeStampServerCert);
         timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                 ContextVS.PROVIDER).build(x509TimeStampServerCert);
         X509CertificateHolder certHolder = timeStampSignerInfoVerifier.getAssociatedCertificate();
@@ -157,8 +158,8 @@ public class TimeStampBean {
     }
 
 
-    public SMIMEMessage timeStampSMIME(SMIMEMessage smimeMessage) throws Exception {
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getTimeStampRequest().getEncoded(),
+    public CMSSignedMessage timeStampCMS(CMSSignedMessage cmsMessage) throws Exception {
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.getTimeStampRequest().getEncoded(),
                 ContentTypeVS.TIMESTAMP_QUERY, timeStampServiceURL);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();
@@ -166,8 +167,8 @@ public class TimeStampBean {
             SignerInformationVerifier timeStampSignerInfoVerifier = new
                     JcaSimpleSignerInfoVerifierBuilder().build(x509TimeStampServerCert);
             timeStampToken.validate(timeStampSignerInfoVerifier);
-            smimeMessage.setTimeStampToken(timeStampToken);
-            return smimeMessage;
+            CMSSignedMessage timeStampedSignedMessage = CMSSignedMessage.addTimeStamp(cmsMessage, timeStampToken);
+            return timeStampedSignedMessage;
         } else throw new ExceptionVS(responseVS.getMessage());
     }
 

@@ -1,9 +1,9 @@
 package org.votingsystem.test.misc;
 
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -21,7 +21,7 @@ public class PEMCertFromJKS {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        String file = "Cert_USER_Currency_07553172H";
+        String file = "Cert_USER_AccessControl_07553172H";
         String keyStorePath="./certs/" + file + ".jks";
         String keyAlias="UserTestKeysStore";
         String keyPassword="ABCDE";
@@ -36,7 +36,7 @@ public class PEMCertFromJKS {
     private static byte[] getPemCertFromKeyStore(String keyStorePath, String keyAlias, String keyPassword) throws Exception {
         KeyStore keyStore = SignatureService.loadKeyStore(keyStorePath, keyPassword);
         X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
-        return CertUtils.getPEMEncoded(certSigner);
+        return PEMUtils.getPEMEncoded(certSigner);
     }
 
 }

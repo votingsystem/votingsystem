@@ -2,14 +2,15 @@ package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CMSUtils;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertificationRequestVS;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -44,7 +45,7 @@ public class RepresentativeDelegationDto implements Serializable {
     private Date dateTo;
     private String UUID;
 
-    @JsonIgnore private transient SMIMEMessage receipt;
+    @JsonIgnore private transient CMSSignedMessage receipt;
     @JsonIgnore private CertificationRequestVS certificationRequest;
 
     public RepresentativeDelegationDto() {}
@@ -69,19 +70,6 @@ public class RepresentativeDelegationDto implements Serializable {
         this.dateTo = dateTo;
     }
 
-    @JsonIgnore
-    public String getMessageId() {
-        if(receipt == null) return null;
-        String result = null;
-        try {
-            String[] headers = receipt.getHeader("Message-ID");
-            if(headers != null && headers.length > 0) return headers[0];
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-        return result;
-    }
-
     public String getOriginHashCertVS() {
         return originHashCertVS;
     }
@@ -94,7 +82,7 @@ public class RepresentativeDelegationDto implements Serializable {
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         try {
-            if(receipt != null) s.writeObject(receipt.getBytes());
+            if(receipt != null) s.writeObject(receipt.toASN1Structure().getEncoded());
             else s.writeObject(null);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -104,10 +92,10 @@ public class RepresentativeDelegationDto implements Serializable {
     private void readObject(ObjectInputStream s) throws Exception {
         s.defaultReadObject();
         byte[] receiptBytes = (byte[]) s.readObject();
-        if(receiptBytes != null) receipt = new SMIMEMessage(receiptBytes);
+        if(receiptBytes != null) receipt = new CMSSignedMessage(receiptBytes);
     }
 
-    public void setDelegationReceipt(SMIMEMessage receipt, X509Certificate serverCert) throws Exception {
+    public void setDelegationReceipt(CMSSignedMessage receipt, X509Certificate serverCert) throws Exception {
         Collection matches = receipt.checkSignerCert(serverCert);
         if(!(matches.size() > 0)) throw new ExceptionVS("Response without server signature");
         this.receipt = receipt;
@@ -159,11 +147,11 @@ public class RepresentativeDelegationDto implements Serializable {
 
     @JsonIgnore
     public RepresentativeDelegationDto getAnonymousCertRequest() throws NoSuchAlgorithmException, IOException,
-            NoSuchProviderException, InvalidKeyException, SignatureException {
+            NoSuchProviderException, InvalidKeyException, SignatureException, OperatorCreationException {
         originHashCertVS = java.util.UUID.randomUUID().toString();
-        hashCertVSBase64 = CMSUtils.getHashBase64(originHashCertVS, ContextVS.VOTING_DATA_DIGEST);
+        hashCertVSBase64 = StringUtils.getHashBase64(originHashCertVS, ContextVS.VOTING_DATA_DIGEST);
         originHashAnonymousDelegation = java.util.UUID.randomUUID().toString();
-        hashAnonymousDelegation = CMSUtils.getHashBase64(originHashAnonymousDelegation, ContextVS.VOTING_DATA_DIGEST);
+        hashAnonymousDelegation = StringUtils.getHashBase64(originHashAnonymousDelegation, ContextVS.VOTING_DATA_DIGEST);
         dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
         dateTo = DateUtils.addDays(dateFrom, weeksOperationActive * 7).getTime();
         certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(ContextVS.VOTE_SIGN_MECHANISM,
@@ -220,11 +208,11 @@ public class RepresentativeDelegationDto implements Serializable {
     }
 
     @JsonIgnore
-    public SMIMEMessage getReceipt() {
+    public CMSSignedMessage getReceipt() {
         return receipt;
     }
 
-    public void setReceipt(SMIMEMessage receipt) {
+    public void setReceipt(CMSSignedMessage receipt) {
         this.receipt = receipt;
     }
 

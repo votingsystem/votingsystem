@@ -1,9 +1,10 @@
 package org.votingsystem.web.currency.ejb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
@@ -11,7 +12,6 @@ import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
@@ -67,13 +67,11 @@ public class TransactionVSGroupVSBean {
             for(UserVS toUser: request.getToUserVSList()) {
                 TransactionVS triggeredTransaction = TransactionVS.generateTriggeredTransaction(
                         transactionParent, userPart, toUser, toUser.getIBAN());
-                SMIMEMessage receipt = signatureBean.getSMIME(signatureBean.getSystemUser().getNif(),
-                        toUser.getNif(), mapper.writeValueAsString(new TransactionVSDto(triggeredTransaction)),
-                        request.getOperation().toString(), null);
-                receipt.setHeader("TypeVS", request.getType().toString());
-                MessageSMIME messageSMIMEReceipt = dao.persist(new MessageSMIME(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS,
-                        request.getTransactionVSSMIME()));
-                triggeredTransaction.setMessageSMIME(messageSMIMEReceipt);
+                CMSSignedMessage receipt = signatureBean.signData(mapper.writeValueAsString(
+                        new TransactionVSDto(triggeredTransaction)));
+                MessageCMS messageCMSReceipt = dao.persist(new MessageCMS(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS,
+                        request.getMessageCMS_DB()));
+                triggeredTransaction.setMessageCMS(messageCMSReceipt);
                 dao.persist(triggeredTransaction);
                 transactionVSBean.updateCurrencyAccounts(triggeredTransaction);
                 resultList.add(new TransactionVSDto(triggeredTransaction));
@@ -139,11 +137,8 @@ public class TransactionVSGroupVSBean {
             String toUserNIF = subscription.getUserVS().getNif();
             TransactionVSDto triggeredDto = request.getGroupVSChild(
                     toUserNIF, userPart, subscriptionList.size(), config.getContextURL());
-            SMIMEMessage receipt = signatureBean.getSMIME(signatureBean.getSystemUser().getNif(),
-                    toUserNIF, mapper.writeValueAsString(triggeredDto), request.getOperation().toString(), null);
-            receipt.setHeader("TypeVS", request.getType().toString());
-            MessageSMIME messageSMIMEReceipt = dao.persist(new MessageSMIME(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS,
-                    request.getTransactionVSSMIME()));
+            CMSSignedMessage receipt = signatureBean.signData(mapper.writeValueAsString(triggeredDto));
+            dao.persist(new MessageCMS(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS, request.getMessageCMS_DB()));
             TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(transactionParent,
                     userPart, subscription.getUserVS(), subscription.getUserVS().getIBAN()));
             resultList.add(new TransactionVSDto(triggeredTransaction));
@@ -151,11 +146,9 @@ public class TransactionVSGroupVSBean {
         }
         log.info("transactionVS: " + transactionParent.getId() + " - operation: " + request.getOperation().toString());
         ResultListDto<TransactionVSDto> resultDto = new ResultListDto(resultList);
-        MessageSMIME requestMessageSMIME = request.getTransactionVSSMIME();
-        SMIMEMessage parentReceipt = signatureBean.getSMIMEMultiSigned(request.getSigner().getNif(),
-                requestMessageSMIME.getSMIME(), messages.get("fromGroupVSToAllMembersLbl"));
-        parentReceipt.setHeader("TypeVS", request.getType().toString());
-        dao.merge(requestMessageSMIME.setSMIME(parentReceipt));
+        MessageCMS requestMessageCMS = request.getMessageCMS_DB();
+        CMSSignedMessage parentReceipt = signatureBean.addSignature(requestMessageCMS.getCMS());
+        dao.merge(requestMessageCMS.setCMS(parentReceipt));
         resultDto.setMessage(messages.get("transactionVSFromGroupToAllMembersGroupOKMsg",
                 request.getAmount().toString() + " " + request.getCurrencyCode()));
         return resultDto;

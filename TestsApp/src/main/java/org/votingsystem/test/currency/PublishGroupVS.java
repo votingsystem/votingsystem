@@ -1,10 +1,10 @@
 package org.votingsystem.test.currency;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.*;
@@ -32,12 +32,10 @@ public class PublishGroupVS {
         groupVSDto.setUUID(UUID.randomUUID().toString());
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         ContextVS.getInstance().setDefaultServer(currencyServer);
-        SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("00111222V", UserVS.Type.USER);
-        UserVS fromUserVS = representativeSignatureService.getUserVS();
-        String messageSubject = "TEST_ADD_GROUPVS";
-        SMIMEMessage smimeMessage = representativeSignatureService.getSMIMETimeStamped(fromUserVS.getNif(),
-                currencyServer.getName(), JSON.getMapper().writeValueAsString(groupVSDto), messageSubject);
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+        SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("Currency_07553172H", UserVS.Type.USER);
+        CMSSignedMessage cmsMessage = representativeSignatureService.addSignatureWithTimeStamp(JSON.getMapper().writeValueAsString(groupVSDto));
+        log.info(new String(cmsMessage.getEncoded()));
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 currencyServer.getSaveGroupVSServiceURL());
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage());
         System.exit(0);

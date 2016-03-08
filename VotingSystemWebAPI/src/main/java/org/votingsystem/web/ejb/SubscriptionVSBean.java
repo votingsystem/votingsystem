@@ -1,18 +1,19 @@
 package org.votingsystem.web.ejb;
 
+import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.currency.SubscriptionVSDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.SubscriptionVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.ejb.Stateless;
@@ -25,7 +26,6 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,8 +43,7 @@ public class SubscriptionVSBean {
     @Inject ConfigVS config;
     @Inject SignatureBean signatureBean;
 
-    public UserVS checkUser(UserVS userVS) throws ExceptionVS, IOException, CertificateException,
-            NoSuchAlgorithmException, NoSuchProviderException {
+    public UserVS checkUser(UserVS userVS) throws Exception {
         log.log(Level.FINE, "nif: " + userVS.getNif());
         if(userVS.getNif() == null) throw new ExceptionVS("ERROR - missing Nif");
         X509Certificate x509Cert = userVS.getCertificate();
@@ -52,7 +51,8 @@ public class SubscriptionVSBean {
         userVS.setNif(org.votingsystem.util.NifUtils.validate(userVS.getNif()));
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", userVS.getNif());
         UserVS userVSDB = dao.getSingleResult(UserVS.class, query);
-        Map<String, String> deviceData = CertUtils.getCertExtensionData(x509Cert, ContextVS.DEVICEVS_OID);
+        CertExtensionDto deviceData = CertUtils.getCertExtensionData(CertExtensionDto.class, x509Cert,
+                ContextVS.DEVICEVS_OID);
         if (userVSDB == null) {
             userVSDB = dao.persist(userVS);
             config.createIBAN(userVS);
@@ -66,7 +66,7 @@ public class SubscriptionVSBean {
         return userVSDB;
     }
 
-    public void setUserData(UserVS userVS, Map<String, String> deviceData) throws
+    public void setUserData(UserVS userVS, CertExtensionDto deviceData) throws
             CertificateException, IOException, NoSuchAlgorithmException, NoSuchProviderException {
         log.log(Level.FINE, " deviceData: " + deviceData);
         X509Certificate x509Cert = userVS.getCertificate();
@@ -81,23 +81,23 @@ public class SubscriptionVSBean {
             certificate = dao.persist(CertificateVS.USER(userVS, x509Cert));
             if(deviceData != null) {
                 query = dao.getEM().createNamedQuery("findDeviceByUserAndDeviceId").setParameter("userVS", userVS)
-                        .setParameter("deviceId", deviceData.get("deviceId"));
+                        .setParameter("deviceId", deviceData.getDeviceId());
                 deviceVS = dao.getSingleResult(DeviceVS.class, query);
                 if(deviceVS == null) {
-                    deviceVS = (DeviceVS) dao.persist(new DeviceVS(userVS, deviceData.get("deviceId"), deviceData.get("email"),
-                            deviceData.get("mobilePhone"), deviceData.get("deviceName"), certificate));
+                    deviceVS = (DeviceVS) dao.persist(new DeviceVS(userVS, deviceData.getDeviceId(), deviceData.getEmail(),
+                            deviceData.getMobilePhone(), deviceData.getDeviceName(), certificate));
                     log.log(Level.FINE, "new device with id: " + deviceVS.getId());
                 } else dao.getEM().merge(deviceVS.updateCertInfo(deviceData));
             }
             log.log(Level.FINE, "new certificate with id:" + certificate.getId());
-        } else if(deviceData != null && deviceData.containsKey("deviceId")) {
+        } else if(deviceData != null && deviceData.getDeviceId() != null) {
             query = dao.getEM().createQuery("SELECT d FROM DeviceVS d WHERE d.deviceId =:deviceId and d.certificateVS =:certificate")
-                    .setParameter("deviceId", deviceData.get("deviceId"))
+                    .setParameter("deviceId", deviceData.getDeviceId())
                     .setParameter("certificate", certificate);
             deviceVS = dao.getSingleResult(DeviceVS.class, query);
             if(deviceVS == null) {
-                deviceVS = (DeviceVS) dao.persist(new DeviceVS(userVS, deviceData.get("deviceId"), deviceData.get("email"),
-                        deviceData.get("mobilePhone"), deviceData.get("deviceName"), certificate));
+                deviceVS = dao.persist(new DeviceVS(userVS, deviceData.getDeviceId(), deviceData.getEmail(),
+                        deviceData.getMobilePhone(), deviceData.getDeviceName(), certificate));
                 log.log(Level.FINE, "new device with id: " + deviceVS.getId());
             }
         }
@@ -123,10 +123,10 @@ public class SubscriptionVSBean {
         return dao.persist(deviceVS);
     }
 
-    public SubscriptionVS deActivateUser(MessageSMIME messageSMIME) throws Exception {
-        UserVS signer = messageSMIME.getUserVS();
+    public SubscriptionVS deActivateUser(MessageCMS messageCMS) throws Exception {
+        UserVS signer = messageCMS.getUserVS();
         log.log(Level.FINE, "signer: " + signer.getNif());
-        SubscriptionVSDto request = messageSMIME.getSignedContent(SubscriptionVSDto.class);
+        SubscriptionVSDto request = messageCMS.getSignedContent(SubscriptionVSDto.class);
         GroupVS groupVS = dao.find(GroupVS.class, request.getGroupvsId());
         if(groupVS == null || !request.getGroupvsName().equals(groupVS.getName())) {
             throw new ExceptionVS("group with name: " + request.getGroupvsName() + " and id: " + request.getId() + " not found");
@@ -148,15 +148,15 @@ public class SubscriptionVSBean {
         subscription.setReason(request.getReason());
         subscription.setState(SubscriptionVS.State.CANCELED);
         subscription.setDateCancelled(new Date());
-        subscription.setCancellationSMIME(messageSMIME);
+        subscription.setCancellationCMS(messageCMS);
         log.info("deActivateUser OK - user nif: " + request.getUserVSNIF() + " - group: " + request.getGroupvsName());
         return subscription;
     }
 
-    public SubscriptionVS activateUser(MessageSMIME messageSMIME) throws Exception {
-        UserVS signer = messageSMIME.getUserVS();
+    public SubscriptionVS activateUser(MessageCMS messageCMS) throws Exception {
+        UserVS signer = messageCMS.getUserVS();
         log.info("signer: " + signer.getNif());
-        SubscriptionVSDto request = messageSMIME.getSignedContent(SubscriptionVSDto.class);
+        SubscriptionVSDto request = messageCMS.getSignedContent(SubscriptionVSDto.class);
         request.validateActivationRequest();
         GroupVS groupVS = dao.find(GroupVS.class, request.getGroupvsId());
         if(groupVS == null || !request.getGroupvsName().equals(groupVS.getName())) {
@@ -177,7 +177,7 @@ public class SubscriptionVSBean {
                 " has not pending subscription request");
         subscription.setState(SubscriptionVS.State.ACTIVE);
         subscription.setDateActivated(new Date());
-        subscription.setActivationSMIME(messageSMIME);
+        subscription.setActivationCMS(messageCMS);
         log.info("activateUser OK - user nif: " + request.getUserVSNIF() + " - group: " + request.getGroupvsName());
         return subscription;
     }

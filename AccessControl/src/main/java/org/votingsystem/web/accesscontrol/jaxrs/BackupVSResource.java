@@ -58,8 +58,8 @@ public class BackupVSResource {
         if(backupRequest == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - BackupRequestVS not found - id: " + requestId).build();
         if(contentType.contains(ContentTypeVS.TEXT.getName())) {
-            return Response.ok().entity(backupRequest.getMessageSMIME().getContent()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
-        } else return RequestUtils.processRequest(backupRequest.getMessageSMIME(), context, req, resp);
+            return Response.ok().entity(backupRequest.getMessageCMS().getContent()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
+        } else return RequestUtils.processRequest(backupRequest.getMessageCMS(), context, req, resp);
     }
 
     @Path("/") @GET

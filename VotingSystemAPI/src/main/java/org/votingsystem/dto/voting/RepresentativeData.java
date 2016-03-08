@@ -1,7 +1,7 @@
 package org.votingsystem.dto.voting;
 
 
-import org.votingsystem.signature.smime.SMIMEMessage;
+import org.votingsystem.cms.CMSSignedMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +16,9 @@ public class RepresentativeData {
     
     private String nif;
     private Long id;
-    private SMIMEMessage accessRequest;
-    private SMIMEMessage vote;
-    private List<SMIMEMessage> representationDocumentList = new ArrayList<SMIMEMessage>();
+    private CMSSignedMessage accessRequest;
+    private CMSSignedMessage vote;
+    private List<CMSSignedMessage> representationDocumentList = new ArrayList<CMSSignedMessage>();
     private byte[] representedReport;
 
     private Long optionSelectedId = null;
@@ -34,7 +34,7 @@ public class RepresentativeData {
         this.nif = nif;
     }
     
-    public void addRepresentationDoc(SMIMEMessage repDoc, String representationDocumentFileName) {
+    public void addRepresentationDoc(CMSSignedMessage repDoc, String representationDocumentFileName) {
         representationDocumentList.add(repDoc);
         this.representationDocumentFileName = representationDocumentFileName;
     }
@@ -47,7 +47,7 @@ public class RepresentativeData {
     
     public int getNumVotesOfRepresented () {
         int numVotesOfRepresented = 0;
-        for(SMIMEMessage repDoc:representationDocumentList) {
+        for(CMSSignedMessage repDoc:representationDocumentList) {
             if(representationDocumentFileName.contains("WithRequest_")) numVotesOfRepresented++;
         }      
         return numVotesOfRepresented;
@@ -56,28 +56,28 @@ public class RepresentativeData {
     /**
      * @return the accessRequest
      */
-    public SMIMEMessage getAccessRequest() {
+    public CMSSignedMessage getAccessRequest() {
         return accessRequest;
     }
 
     /**
      * @param accessRequest the accessRequest to set
      */
-    public void setAccessRequest(SMIMEMessage accessRequest) {
+    public void setAccessRequest(CMSSignedMessage accessRequest) {
         this.accessRequest = accessRequest;
     }
 
     /**
      * @return the vote
      */
-    public SMIMEMessage getVote() {
+    public CMSSignedMessage getVote() {
         return vote;
     }
 
     /**
      * @param vote the vote to set
      */
-    public void setVote(SMIMEMessage vote) {
+    public void setVote(CMSSignedMessage vote) {
         this.vote = vote;
     }
 
@@ -98,7 +98,7 @@ public class RepresentativeData {
     /**
      * @return the representationDocumentList
      */
-    public List<SMIMEMessage> getRepresentationDocumentList() {
+    public List<CMSSignedMessage> getRepresentationDocumentList() {
         return representationDocumentList;
     }
     
@@ -118,7 +118,7 @@ public class RepresentativeData {
      * @param representationDocumentList the representationDocumentList to set
      */
     public void setRepresentationDocument(
-            List<SMIMEMessage> representationDocumentList) {
+            List<CMSSignedMessage> representationDocumentList) {
         this.representationDocumentList = representationDocumentList;
     }
 

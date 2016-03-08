@@ -12,8 +12,8 @@ import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.dialog.DialogVS;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -60,7 +60,7 @@ public class PEMCertValidatorPane extends GridPane {
         Collection<X509Certificate> certs = null;
         try {
             certChainPEM = textArea.getText();
-            certs = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
+            certs = PEMUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             BrowserHost.showMessage(ResponseVS.SC_ERROR, ContextVS.getMessage("pemCertsErrorMsg"));

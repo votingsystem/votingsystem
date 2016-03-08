@@ -2,7 +2,7 @@ package org.votingsystem.util;
 
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.DeviceVS;
-import org.votingsystem.signature.util.AESParams;
+import org.votingsystem.util.crypto.AESParams;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

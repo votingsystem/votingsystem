@@ -4,15 +4,15 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.CertificationRequestVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.CertificationRequestVS;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -72,10 +72,10 @@ public class CurrencyDto implements Serializable {
 
     public CurrencyDto(PKCS10CertificationRequest csrPKCS10) throws Exception {
         this.csrPKCS10 = csrPKCS10;
-        CertificationRequestInfo info = csrPKCS10.getCertificationRequestInfo();
+        CertificationRequestInfo info = csrPKCS10.toASN1Structure().getCertificationRequestInfo();
         String subjectDN = info.getSubject().toString();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                csrPKCS10, ContextVS.CURRENCY_TAG);
+                csrPKCS10, ContextVS.CURRENCY_OID);
         if(certExtensionDto == null) throw new ValidationExceptionVS("error missing cert extension data");
         currencyServerURL = certExtensionDto.getCurrencyServerURL();
         hashCertVS = certExtensionDto.getHashCertVS();

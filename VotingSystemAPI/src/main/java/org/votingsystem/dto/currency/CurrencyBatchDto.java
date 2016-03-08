@@ -2,18 +2,19 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.callable.MessageTimeStamper;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyBatch;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -92,12 +93,11 @@ public class CurrencyBatchDto {
         }
         batchDto.currencySet = new HashSet<>();
         for (Currency currency : currencyList) {
-            SMIMEMessage smimeMessage = currency.getCertificationRequest().getSMIME(currency.getHashCertVS(),
-                    toUserIBAN, JSON.getMapper().writeValueAsString(CurrencyDto.BATCH_ITEM(batchDto, currency)),
-                    subject, null);
-            MessageTimeStamper timeStamper = new MessageTimeStamper(smimeMessage, timeStampServiceURL);
-            currency.setSMIME(timeStamper.call());
-            batchDto.currencySet.add(Base64.getEncoder().encodeToString(currency.getSMIME().getBytes()));
+            CMSSignedMessage cmsMessage = currency.getCertificationRequest().signData(JSON.getMapper().writeValueAsString(
+                    CurrencyDto.BATCH_ITEM(batchDto, currency)));
+            MessageTimeStamper timeStamper = new MessageTimeStamper(cmsMessage, timeStampServiceURL);
+            currency.setCMS(timeStamper.call());
+            batchDto.currencySet.add(currency.getCMS().toPEMStr());
         }
         return batchDto;
     }
@@ -109,7 +109,7 @@ public class CurrencyBatchDto {
         currencyList = null;
         for(String currencyItem : currencySet) {
             try {
-                Currency currency = new Currency(new SMIMEMessage(Base64.getDecoder().decode(currencyItem.getBytes())));
+                Currency currency = new Currency(CMSSignedMessage.FROM_PEM(currencyItem));
                 if(currencyList == null) {
                     currencyList = new ArrayList<>();
                 }
@@ -128,9 +128,9 @@ public class CurrencyBatchDto {
             throw new ValidationExceptionVS("CurrencyBatch without signed transactions");
         CurrencyCertExtensionDto certExtensionDto = null;
         if(leftOverCSR != null) {
-            leftOverPKCS10 = CertUtils.fromPEMToPKCS10CertificationRequest(leftOverCSR.getBytes());
+            leftOverPKCS10 = PEMUtils.fromPEMToPKCS10CertificationRequest(leftOverCSR.getBytes());
             certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                    leftOverPKCS10, ContextVS.CURRENCY_TAG);
+                    leftOverPKCS10, ContextVS.CURRENCY_OID);
             if(leftOver.compareTo(certExtensionDto.getAmount()) != 0) throw new ValidationExceptionVS(
                     "leftOver 'amount' mismatch - request: " + leftOver + " - csr: " + certExtensionDto.getAmount());
             if(!certExtensionDto.getCurrencyCode().equals(currencyCode)) throw new ValidationExceptionVS(
@@ -146,9 +146,9 @@ public class CurrencyBatchDto {
         } else if(leftOver.compareTo(BigDecimal.ZERO) != 0) throw new ValidationExceptionVS(
                 "leftOver request: " + leftOver + " without CSR");
         if(currencyChangeCSR != null) {
-            currencyChangePKCS10 = CertUtils.fromPEMToPKCS10CertificationRequest(currencyChangeCSR.getBytes());
+            currencyChangePKCS10 = PEMUtils.fromPEMToPKCS10CertificationRequest(currencyChangeCSR.getBytes());
             certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                    currencyChangePKCS10, ContextVS.CURRENCY_TAG);
+                    currencyChangePKCS10, ContextVS.CURRENCY_OID);
             if(certExtensionDto.getAmount().compareTo(this.batchAmount) != 0) throw new ValidationExceptionVS(
                     "currencyChange 'amount' mismatch - request: " + this.batchAmount +
                     " - csr: " + certExtensionDto.getAmount());
@@ -175,7 +175,7 @@ public class CurrencyBatchDto {
     @JsonIgnore
     public void validateResponse(CurrencyBatchResponseDto responseDto, Set<TrustAnchor> trustAnchor)
             throws Exception {
-        SMIMEMessage receipt = new SMIMEMessage(Base64.getDecoder().decode(responseDto.getReceipt().getBytes()));
+        CMSSignedMessage receipt = CMSSignedMessage.FROM_PEM(responseDto.getReceipt());
         receipt.isValidSignature();
         CertUtils.verifyCertificate(trustAnchor, false, new ArrayList<>(receipt.getSignersCerts()));
         if(responseDto.getLeftOverCert() != null) {

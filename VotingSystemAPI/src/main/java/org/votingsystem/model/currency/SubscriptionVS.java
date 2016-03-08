@@ -1,6 +1,6 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 
@@ -25,20 +25,20 @@ public class SubscriptionVS extends EntityVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public MessageSMIME getCancellationSMIME() {
-        return cancellationSMIME;
+    public MessageCMS getCancellationCMS() {
+        return cancellationCMS;
     }
 
-    public void setCancellationSMIME(MessageSMIME cancellationSMIME) {
-        this.cancellationSMIME = cancellationSMIME;
+    public void setCancellationCMS(MessageCMS cancellationCMS) {
+        this.cancellationCMS = cancellationCMS;
     }
 
-    public MessageSMIME getActivationSMIME() {
-        return activationSMIME;
+    public MessageCMS getActivationCMS() {
+        return activationCMS;
     }
 
-    public void setActivationSMIME(MessageSMIME activationSMIME) {
-        this.activationSMIME = activationSMIME;
+    public void setActivationCMS(MessageCMS activationCMS) {
+        this.activationCMS = activationCMS;
     }
 
     public enum State {ACTIVE, PENDING, CANCELED}
@@ -57,13 +57,13 @@ public class SubscriptionVS extends EntityVS implements Serializable {
     @Column(name="reason", columnDefinition="TEXT") private String reason;
 
     @OneToOne
-    @JoinColumn(name="subscriptionSMIME") private MessageSMIME subscriptionSMIME;
+    @JoinColumn(name="subscriptionCMS") private MessageCMS subscriptionCMS;
 
     @OneToOne
-    @JoinColumn(name="activationSMIME") private MessageSMIME activationSMIME;
+    @JoinColumn(name="activationCMS") private MessageCMS activationCMS;
 
     @OneToOne
-    @JoinColumn(name="cancellationSMIME") private MessageSMIME cancellationSMIME;
+    @JoinColumn(name="cancellationCMS") private MessageCMS cancellationCMS;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCancelled", length=23) private Date dateCancelled;
 
@@ -75,11 +75,11 @@ public class SubscriptionVS extends EntityVS implements Serializable {
 
     public SubscriptionVS() {}
 
-    public SubscriptionVS(UserVS userVS, GroupVS groupVS, State state, MessageSMIME messageSMIME) {
+    public SubscriptionVS(UserVS userVS, GroupVS groupVS, State state, MessageCMS messageCMS) {
         this.userVS = userVS;
         this.groupVS = groupVS;
         this.state = state;
-        this.subscriptionSMIME = messageSMIME;
+        this.subscriptionCMS = messageCMS;
     }
 
     public Long getId() {
@@ -122,12 +122,12 @@ public class SubscriptionVS extends EntityVS implements Serializable {
         this.reason = reason;
     }
 
-    public MessageSMIME getSubscriptionSMIME() {
-        return subscriptionSMIME;
+    public MessageCMS getSubscriptionCMS() {
+        return subscriptionCMS;
     }
 
-    public void setSubscriptionSMIME(MessageSMIME subscriptionSMIME) {
-        this.subscriptionSMIME = subscriptionSMIME;
+    public void setSubscriptionCMS(MessageCMS subscriptionCMS) {
+        this.subscriptionCMS = subscriptionCMS;
     }
 
     public Date getDateCancelled() {

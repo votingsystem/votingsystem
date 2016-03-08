@@ -20,9 +20,9 @@ public class SubscriptionVSDto {
     private String groupvsInfo;
     private String userVSName;
     private String userVSNIF;
-    private String subscriptionSMIME_URL;
-    private String activationSMIME_URL;
-    private String cancellationSMIME_URL;
+    private String subscriptionCMS_URL;
+    private String activationCMS_URL;
+    private String cancellationCMS_URL;
     private String reason;
     private String UUID;
     private TypeVS operation;
@@ -40,11 +40,11 @@ public class SubscriptionVSDto {
         SubscriptionVSDto result = new SubscriptionVSDto();
         result.setId(subscriptionVS.getId());
         result.setState(subscriptionVS.getState());
-        result.setSubscriptionSMIME_URL(contextURL + "/rest/messageSMIME/id/" + subscriptionVS.getSubscriptionSMIME().getId());
-        if(subscriptionVS.getActivationSMIME() != null) result.setActivationSMIME_URL(contextURL + "/rest/messageSMIME/id/" +
-                subscriptionVS.getActivationSMIME().getId());
-        if(subscriptionVS.getCancellationSMIME() != null) result.setActivationSMIME_URL(contextURL + "/rest/messageSMIME/id/" +
-                subscriptionVS.getCancellationSMIME().getId());
+        result.setSubscriptionCMS_URL(contextURL + "/rest/messageCMS/id/" + subscriptionVS.getSubscriptionCMS().getId());
+        if(subscriptionVS.getActivationCMS() != null) result.setActivationCMS_URL(contextURL + "/rest/messageCMS/id/" +
+                subscriptionVS.getActivationCMS().getId());
+        if(subscriptionVS.getCancellationCMS() != null) result.setActivationCMS_URL(contextURL + "/rest/messageCMS/id/" +
+                subscriptionVS.getCancellationCMS().getId());
         result.setDateActivated(subscriptionVS.getDateActivated());
         result.setDateCreated(subscriptionVS.getDateCreated());
         result.setDateCancelled(subscriptionVS.getDateCancelled());
@@ -146,28 +146,28 @@ public class SubscriptionVSDto {
         this.state = state;
     }
 
-    public String getSubscriptionSMIME_URL() {
-        return subscriptionSMIME_URL;
+    public String getSubscriptionCMS_URL() {
+        return subscriptionCMS_URL;
     }
 
-    public void setSubscriptionSMIME_URL(String subscriptionSMIME_URL) {
-        this.subscriptionSMIME_URL = subscriptionSMIME_URL;
+    public void setSubscriptionCMS_URL(String subscriptionCMS_URL) {
+        this.subscriptionCMS_URL = subscriptionCMS_URL;
     }
 
-    public String getActivationSMIME_URL() {
-        return activationSMIME_URL;
+    public String getActivationCMS_URL() {
+        return activationCMS_URL;
     }
 
-    public void setActivationSMIME_URL(String activationSMIME_URL) {
-        this.activationSMIME_URL = activationSMIME_URL;
+    public void setActivationCMS_URL(String activationCMS_URL) {
+        this.activationCMS_URL = activationCMS_URL;
     }
 
-    public String getCancellationSMIME_URL() {
-        return cancellationSMIME_URL;
+    public String getCancellationCMS_URL() {
+        return cancellationCMS_URL;
     }
 
-    public void setCancellationSMIME_URL(String cancellationSMIME_URL) {
-        this.cancellationSMIME_URL = cancellationSMIME_URL;
+    public void setCancellationCMS_URL(String cancellationCMS_URL) {
+        this.cancellationCMS_URL = cancellationCMS_URL;
     }
 
     public Date getDateCreated() {

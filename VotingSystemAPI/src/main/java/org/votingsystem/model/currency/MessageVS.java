@@ -1,6 +1,6 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.TypeVS;
@@ -40,7 +40,7 @@ public class MessageVS extends EntityVS implements Serializable {
 
     @Column(name="metaInf", columnDefinition="TEXT")  private String metaInf;
     @Column(name="reason", columnDefinition="TEXT") private String reason;
-    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="smimeParent") private MessageSMIME senderMessageSMIME;
+    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="cmsParent") private MessageCMS senderMessageCMS;
 
 
     public byte[] getContent() {
@@ -113,12 +113,12 @@ public class MessageVS extends EntityVS implements Serializable {
         this.toUserVS = toUserVS;
     }
 
-    public MessageSMIME getSenderMessageSMIME() {
-        return senderMessageSMIME;
+    public MessageCMS getSenderMessageCMS() {
+        return senderMessageCMS;
     }
 
-    public void setSenderMessageSMIME(MessageSMIME senderMessageSMIME) {
-        this.senderMessageSMIME = senderMessageSMIME;
+    public void setSenderMessageCMS(MessageCMS senderMessageCMS) {
+        this.senderMessageCMS = senderMessageCMS;
     }
 
     public State getState() {

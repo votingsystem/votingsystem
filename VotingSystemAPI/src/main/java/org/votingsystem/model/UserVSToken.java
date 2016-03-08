@@ -5,7 +5,6 @@ import org.votingsystem.util.EntityVS;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -28,7 +27,7 @@ public class UserVSToken extends EntityVS implements Serializable {
     @Column(name="token") private byte[] token;
     @OneToOne private CertificateVS certificateVS;
     @OneToOne private UserVS userVS;
-    @OneToOne private MessageSMIME messageSMIME;
+    @OneToOne private MessageCMS messageCMS;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP)
@@ -36,11 +35,11 @@ public class UserVSToken extends EntityVS implements Serializable {
 
     public UserVSToken() {}
 
-    public UserVSToken(UserVS userVS, byte[] token, CertificateVS certificateVS, MessageSMIME messageSMIME) {
+    public UserVSToken(UserVS userVS, byte[] token, CertificateVS certificateVS, MessageCMS messageCMS) {
         this.userVS = userVS;
         this.token = token;
         this.certificateVS = certificateVS;
-        this.messageSMIME = messageSMIME;
+        this.messageCMS = messageCMS;
     }
 
     public byte[] getToken() {
@@ -59,12 +58,12 @@ public class UserVSToken extends EntityVS implements Serializable {
         this.certificateVS = certificateVS;
     }
 
-    public MessageSMIME getMessageSMIME() {
-        return messageSMIME;
+    public MessageCMS getMessageCMS() {
+        return messageCMS;
     }
 
-    public void setMessageSMIME(MessageSMIME messageSMIME) {
-        this.messageSMIME = messageSMIME;
+    public void setMessageCMS(MessageCMS messageCMS) {
+        this.messageCMS = messageCMS;
     }
 
     public UserVS getUserVS() {

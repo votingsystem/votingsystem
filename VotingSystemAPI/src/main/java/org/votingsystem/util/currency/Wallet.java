@@ -8,12 +8,11 @@ import org.votingsystem.dto.currency.WalletDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.signature.util.CMSUtils;
-import org.votingsystem.signature.util.EncryptedBundle;
-import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.WalletException;
 import org.votingsystem.util.*;
+import org.votingsystem.util.crypto.EncryptedBundle;
+import org.votingsystem.util.crypto.Encryptor;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -82,7 +81,7 @@ public class Wallet {
     }
 
     public Set<Currency> saveWallet(Set<CurrencyDto> currencyToSave, char[] password) throws Exception {
-        String passwordHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(password), ContextVS.VOTING_DATA_DIGEST));
+        String passwordHashHex = StringUtils.toHex(StringUtils.getHashBase64(new String(password), ContextVS.VOTING_DATA_DIGEST));
         EncryptedWalletList encryptedWalletList = getEncryptedWalletList();
         WalletFile walletFile = encryptedWalletList.getWallet(passwordHashHex);
         if(walletFile == null || encryptedWalletList.size() == 0)
@@ -94,7 +93,7 @@ public class Wallet {
     }
 
     public void createWallet(Set<CurrencyDto> setDto, char[] password) throws Exception {
-        String passwordHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(password), ContextVS.VOTING_DATA_DIGEST));
+        String passwordHashHex = StringUtils.toHex(StringUtils.getHashBase64(new String(password), ContextVS.VOTING_DATA_DIGEST));
         String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + passwordHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File walletFile = new File(ContextVS.getInstance().getAppDir() + File.separator + walletFileName);
         walletFile.getParentFile().mkdirs();
@@ -108,7 +107,7 @@ public class Wallet {
     }
 
     public static Wallet load(char[] password) throws Exception {
-        String passwordHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(password), ContextVS.VOTING_DATA_DIGEST));
+        String passwordHashHex = StringUtils.toHex(StringUtils.getHashBase64(new String(password), ContextVS.VOTING_DATA_DIGEST));
         String walletFileName = ContextVS.WALLET_FILE_NAME + "_" + passwordHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File walletFile = new File(ContextVS.getInstance().getAppDir() + File.separator + walletFileName);
         if(!walletFile.exists()) {
@@ -147,8 +146,8 @@ public class Wallet {
     public void changePassword(char[] newpassword, char[] oldpassword) throws Exception {
         Set<Currency> currencySet = load(oldpassword).getCurrencySet();
         Set<CurrencyDto> walletDto = CurrencyDto.serializeCollection(currencySet);
-        String oldpasswordHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(oldpassword), ContextVS.VOTING_DATA_DIGEST));
-        String newpasswordHashHex = StringUtils.toHex(CMSUtils.getHashBase64(new String(newpassword), ContextVS.VOTING_DATA_DIGEST));
+        String oldpasswordHashHex = StringUtils.toHex(StringUtils.getHashBase64(new String(oldpassword), ContextVS.VOTING_DATA_DIGEST));
+        String newpasswordHashHex = StringUtils.toHex(StringUtils.getHashBase64(new String(newpassword), ContextVS.VOTING_DATA_DIGEST));
         String newWalletFileName = ContextVS.WALLET_FILE_NAME + "_" + newpasswordHashHex + ContextVS.WALLET_FILE_EXTENSION;
         File newWalletFile = new File(ContextVS.getInstance().getAppDir() + File.separator + newWalletFileName);
         if(!newWalletFile.createNewFile()) throw new ExceptionVS(ContextVS.getMessage("walletFoundErrorMsg"));

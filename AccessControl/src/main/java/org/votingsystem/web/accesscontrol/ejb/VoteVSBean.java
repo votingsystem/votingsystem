@@ -1,13 +1,13 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import org.votingsystem.dto.SMIMEDto;
+import org.votingsystem.cms.CMSSignedMessage;
+import org.votingsystem.dto.CMSDto;
 import org.votingsystem.dto.voting.VoteVSCancelerDto;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.*;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.DateUtils;
@@ -26,8 +26,6 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
-import static java.text.MessageFormat.format;
-
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
@@ -36,38 +34,34 @@ public class VoteVSBean {
 
     private static Logger log = Logger.getLogger(VoteVSBean.class.getName());
 
-    private final Queue<MessageSMIME> pendingVotes = new ConcurrentLinkedQueue<>();
+    private final Queue<MessageCMS> pendingVotes = new ConcurrentLinkedQueue<>();
 
     @Inject private ConfigVS config;
     @Inject private DAOBean dao;
     @Inject private SignatureBean signatureBean;
 
 
-    public VoteVS validateVote(SMIMEDto smimeDto) throws Exception {
+    public VoteVS validateVote(CMSDto CMSDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        MessageSMIME messageSMIME = smimeDto.getMessageSMIME();
-        EventVSElection eventVS = (EventVSElection) smimeDto.getEventVS();
+        MessageCMS messageCMS = CMSDto.getMessageCMS();
+        EventVSElection eventVS = (EventVSElection) CMSDto.getEventVS();
         eventVS = dao.merge(eventVS);
-        VoteVS voteVSRequest = messageSMIME.getSMIME().getVoteVS();
+        VoteVS voteVSRequest = messageCMS.getCMS().getVoteVS();
         CertificateVS voteVSCertificate = voteVSRequest.getCertificateVS();
         FieldEventVS optionSelected = eventVS.checkOptionId(voteVSRequest.getOptionSelected().getId());
         if (optionSelected == null) throw new ValidationExceptionVS(messages.get("voteOptionNotFoundErrorMsg",
                 voteVSRequest.getOptionSelected().getId().toString()));
-        String fromUser = config.getServerName();
-        String toUser = eventVS.getControlCenterVS().getName();
-        String subject = messages.get("voteValidatedByAccessControlMsg");
-        SMIMEMessage smimeMessageResp = signatureBean.getSMIMEMultiSigned(
-                fromUser, toUser, messageSMIME.getSMIME(), subject);
-        messageSMIME.setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE).setSMIME(smimeMessageResp);
+        CMSSignedMessage cmsMessageResp = signatureBean.addSignature(messageCMS.getCMS());
+        messageCMS.setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE).setCMS(cmsMessageResp);
         dao.merge(voteVSCertificate.setState(CertificateVS.State.USED));
-        return dao.persist(new VoteVS(optionSelected, eventVS, VoteVS.State.OK, voteVSCertificate,  messageSMIME));
+        return dao.persist(new VoteVS(optionSelected, eventVS, VoteVS.State.OK, voteVSCertificate,  messageCMS));
     }
 
-    public VoteVSCanceler processCancel (MessageSMIME messageSMIME) throws Exception {
+    public VoteVSCanceler processCancel (MessageCMS messageCMS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS signer = messageSMIME.getUserVS();
-        SMIMEMessage smimeMessage = messageSMIME.getSMIME();
-        VoteVSCancelerDto request = messageSMIME.getSignedContent(VoteVSCancelerDto.class);
+        UserVS signer = messageCMS.getUserVS();
+        CMSSignedMessage cmsMessage = messageCMS.getCMS();
+        VoteVSCancelerDto request = messageCMS.getSignedContent(VoteVSCancelerDto.class);
         request.validate();
         Query query = dao.getEM().createQuery("select a from AccessRequestVS a where a.hashAccessRequestBase64 =:hashAccessRequestBase64 and " +
                 "a.state =:state").setParameter("hashAccessRequestBase64", request.getHashAccessRequestBase64())
@@ -89,25 +83,22 @@ public class VoteVSBean {
                 "timestampDateErrorMsg", DateUtils.getDateStr(timeStampDate),
                 DateUtils.getDateStr(voteVS.getEventVS().getDateBegin()),
                 DateUtils.getDateStr(voteVS.getEventVS().getDateFinish())));
-        String toUser = voteVS.getEventVS().getControlCenterVS().getName();
-        String subject = messages.get("voteCancelationSubject");
-        smimeMessage.setMessageID(format("{0}/rest/messageSMIME/id/{1}", config.getContextURL(), messageSMIME.getId()));
-        SMIMEMessage smimeMessageReq = signatureBean.getSMIMEMultiSigned(toUser, smimeMessage, subject);
+        CMSSignedMessage cmsMessageReq = signatureBean.addSignature(cmsMessage);
         String cancelerServiceURL = voteVS.getEventVS().getControlCenterVS().getVoteVSCancelerURL();
-        ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(smimeMessageReq.getBytes(),
+        ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(cmsMessageReq.toPEM(),
                 ContentTypeVS.JSON_SIGNED, cancelerServiceURL);
         if (ResponseVS.SC_OK == responseVSControlCenter.getStatusCode()) {
-            SMIMEMessage smimeMessageResp = new SMIMEMessage(responseVSControlCenter.getMessageBytes());
-            if(!smimeMessage.getContentDigestStr().equals(smimeMessageResp.getContentDigestStr()))
-                    throw new ValidationExceptionVS("smimeContentMismatchError");
-            signatureBean.validateSignersCerts(smimeMessageResp);
-            dao.merge(messageSMIME.setType(TypeVS.CANCEL_VOTE).setSMIME(smimeMessageResp));
+            CMSSignedMessage cmsMessageResp = new CMSSignedMessage(responseVSControlCenter.getMessageBytes());
+            if(!cmsMessage.getContentDigestStr().equals(cmsMessageResp.getContentDigestStr()))
+                    throw new ValidationExceptionVS("cmsContentMismatchError");
+            signatureBean.validateSignersCerts(cmsMessageResp);
+            dao.merge(messageCMS.setType(TypeVS.CANCEL_VOTE).setCMS(cmsMessageResp));
         } else {
-            messageSMIME.setType(TypeVS.ERROR).setReason(responseVSControlCenter.getMessage());
-            dao.merge(messageSMIME);
+            messageCMS.setType(TypeVS.ERROR).setReason(responseVSControlCenter.getMessage());
+            dao.merge(messageCMS);
             throw new ValidationExceptionVS(responseVSControlCenter.getMessage());
         }
-        VoteVSCanceler voteCanceler = new VoteVSCanceler(messageSMIME, accessRequestVS, VoteVSCanceler.State.CANCELLATION_OK,
+        VoteVSCanceler voteCanceler = new VoteVSCanceler(messageCMS, accessRequestVS, VoteVSCanceler.State.CANCELLATION_OK,
                 request.getOriginHashAccessRequest(), request.getHashAccessRequestBase64(),
                 request.getOriginHashCertVote(), request.getHashCertVSBase64(), voteVS);
         dao.persist(voteCanceler);

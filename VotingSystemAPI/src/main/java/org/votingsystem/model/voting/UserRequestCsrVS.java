@@ -2,7 +2,7 @@ package org.votingsystem.model.voting;
 
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 
@@ -32,8 +32,8 @@ public class UserRequestCsrVS extends EntityVS implements Serializable {
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
-    @OneToOne private MessageSMIME cancelationSMIME;
-    @OneToOne private MessageSMIME activationSMIME;
+    @OneToOne private MessageCMS cancelationCMS;
+    @OneToOne private MessageCMS activationCMS;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23, insertable=true) private Date lastUpdated;
 
@@ -104,20 +104,20 @@ public class UserRequestCsrVS extends EntityVS implements Serializable {
         return this;
 	}
 
-    public MessageSMIME getCancelationSMIME() {
-        return cancelationSMIME;
+    public MessageCMS getCancelationCMS() {
+        return cancelationCMS;
     }
 
-    public void setCancelationSMIME(MessageSMIME cancelationSMIME) {
-        this.cancelationSMIME = cancelationSMIME;
+    public void setCancelationCMS(MessageCMS cancelationCMS) {
+        this.cancelationCMS = cancelationCMS;
     }
 
-    public MessageSMIME getActivationSMIME() {
-        return activationSMIME;
+    public MessageCMS getActivationCMS() {
+        return activationCMS;
     }
 
-    public UserRequestCsrVS setActivationSMIME(MessageSMIME activationSMIME) {
-        this.activationSMIME = activationSMIME;
+    public UserRequestCsrVS setActivationCMS(MessageCMS activationCMS) {
+        this.activationCMS = activationCMS;
         return this;
     }
 

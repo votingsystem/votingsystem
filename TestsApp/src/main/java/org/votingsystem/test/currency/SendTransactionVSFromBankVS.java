@@ -22,7 +22,7 @@ public class SendTransactionVSFromBankVS {
         File transactionsPlan = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("transactionsPlan/bankVS.json"));
         TransactionVSPlanDto transactionVSPlanDto = JSON.getMapper().readValue(transactionsPlan, TransactionVSPlanDto.class);
         transactionVSPlanDto.setCurrencyServer(currencyServer);
-        transactionVSPlanDto.runTransactionsVS("TEST_BANKVS_SEND_TRANSACTIONVS");
+        transactionVSPlanDto.runTransactionsVS();
         log.info("Transaction report:" + transactionVSPlanDto.getReport());
         log.info("currencyResultMap: " + transactionVSPlanDto.getBankVSBalance());
         System.exit(0);

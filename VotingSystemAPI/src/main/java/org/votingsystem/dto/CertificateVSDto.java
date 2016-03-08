@@ -3,7 +3,8 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -41,7 +42,7 @@ public class CertificateVSDto implements Serializable {
             NoSuchProviderException, IOException {
         serialNumber = x509Cert.getSerialNumber().toString();
         isRoot = CertUtils.isSelfSigned(x509Cert);
-        pemCert = new String(CertUtils.getPEMEncoded (x509Cert), "UTF-8");
+        pemCert = new String(PEMUtils.getPEMEncoded (x509Cert), "UTF-8");
         subjectDN = x509Cert.getSubjectDN().toString();
         issuerDN = x509Cert.getIssuerDN().toString();
         sigAlgName = x509Cert.getSigAlgName();
@@ -59,7 +60,7 @@ public class CertificateVSDto implements Serializable {
     }
 
     @JsonIgnore X509Certificate getX509Cert() throws Exception {
-        return CertUtils.fromPEMToX509CertCollection(pemCert.getBytes()).iterator().next();
+        return PEMUtils.fromPEMToX509CertCollection(pemCert.getBytes()).iterator().next();
     }
 
     public String getSerialNumber() {

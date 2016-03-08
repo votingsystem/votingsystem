@@ -1,10 +1,10 @@
 package org.votingsystem.model;
 
 import org.votingsystem.model.voting.ControlCenterVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -159,7 +159,7 @@ public class ActorVS extends EntityVS implements Serializable {
     public X509Certificate getX509Certificate() throws Exception {
         if(x509Certificate != null) return x509Certificate;
         if(certChainPEM == null) return null;
-        certChain = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
+        certChain = PEMUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
         x509Certificate = certChain.iterator().next();
         return x509Certificate;
     }
@@ -200,7 +200,7 @@ public class ActorVS extends EntityVS implements Serializable {
     public Set<TrustAnchor> getTrustAnchors() throws Exception {
         if(trustAnchors != null) return trustAnchors;
         if(certChainPEM == null) return null;
-        certChain = CertUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
+        certChain = PEMUtils.fromPEMToX509CertCollection(certChainPEM.getBytes());
         trustAnchors = new HashSet<>();
         for (X509Certificate cert:certChain) {
             trustAnchors.add(new TrustAnchor(cert, null));
@@ -221,7 +221,7 @@ public class ActorVS extends EntityVS implements Serializable {
             this.timeStampCert = null;
             return;
         }
-        timeStampCert = CertUtils.fromPEMToX509CertCollection(timeStampPEM.getBytes()).iterator().next();
+        timeStampCert = PEMUtils.fromPEMToX509CertCollection(timeStampPEM.getBytes()).iterator().next();
     }
 
     public String getWebSocketURL() {
@@ -281,7 +281,7 @@ public class ActorVS extends EntityVS implements Serializable {
     }
 
     public String getReceiptViewerURL() {
-        return getServerURL() + "/rest/messageSMIME/contentViewer";
+        return getServerURL() + "/rest/messageCMS/contentViewer";
     }
 
     public String getVoteVSCancelerURL() {
@@ -289,7 +289,7 @@ public class ActorVS extends EntityVS implements Serializable {
     }
 
     public static String getReceiptViewerURL(String serverURL) {
-        return serverURL + "/rest/messageSMIME/contentViewer";
+        return serverURL + "/rest/messageCMS/contentViewer";
     }
 
     public String getGroupURL(Long id) {

@@ -1,14 +1,14 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.*;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.web.currency.cdi.ConfigVSImpl;
@@ -24,7 +24,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -82,8 +81,8 @@ public class AuditBean {
                 balancesFromMap.put(transaction.getCurrencyCode(), tagMap);
             }
             TransactionVSDto dto = transactionVSBean.getTransactionDto(transaction);
-            MessageSMIME messageSMIME = transaction.getMessageSMIME();
-            dto.setMessageSMIME(Base64.getUrlEncoder().encodeToString(messageSMIME.getContent()));
+            MessageCMS messageCMS = transaction.getMessageCMS();
+            dto.setCmsMessagePEM(Base64.getUrlEncoder().encodeToString(messageCMS.getContent()));
             transactionFromList.add(dto);
         }
         BalancesDto balancesDto = BalancesDto.FROM(transactionFromList, balancesFromMap);
@@ -105,8 +104,8 @@ public class AuditBean {
                 balancesToMap.put(transaction.getCurrencyCode(), currencyMap);
             }
             TransactionVSDto transactionDto = transactionVSBean.getTransactionDto(transaction);
-            MessageSMIME messageSMIME = transaction.getMessageSMIME();
-            transactionDto.setMessageSMIME(Base64.getUrlEncoder().encodeToString(messageSMIME.getContent()));
+            MessageCMS messageCMS = transaction.getMessageCMS();
+            transactionDto.setCmsMessagePEM(Base64.getUrlEncoder().encodeToString(messageCMS.getContent()));
             transactionToList.add(transactionDto);
         }
         balancesDto.setTo(transactionToList, balancesToMap);
@@ -197,11 +196,10 @@ public class AuditBean {
                 String signedMessageSubject =  messages.get("tagInitPeriodMsg", tagVSEntry.getKey());
                 String signedContent = JSON.getMapper().writeValueAsString(new InitPeriodTransactionVSDto(amountResult,
                         timeLimitedNotExpended, currencyCode, tagVSEntry.getKey(), userVS));
-                SMIMEMessage smimeMessage = signatureBean.getSMIMETimeStamped (signatureBean.getSystemUser().getName(),
-                        userVS.getNif(), signedContent, transactionSubject + " - " + signedMessageSubject);
-                MessageSMIME messageSMIME = dao.persist(new MessageSMIME(smimeMessage, signatureBean.getSystemUser(),
+                CMSSignedMessage cmsMessage = signatureBean.signDataWithTimeStamp(signedContent);
+                MessageCMS messageCMS = dao.persist(new MessageCMS(cmsMessage, signatureBean.getSystemUser(),
                         TypeVS.CURRENCY_PERIOD_INIT));
-                dao.persist(new TransactionVS(userVS, userVS, amountResult, currencyCode, signedMessageSubject, messageSMIME,
+                dao.persist(new TransactionVS(userVS, userVS, amountResult, currencyCode, signedMessageSubject, messageCMS,
                         TransactionVS.Type.CURRENCY_PERIOD_INIT, TransactionVS.State.OK, currentTagVS));
                 if(timeLimitedNotExpended.compareTo(BigDecimal.ZERO) > 0) {
                     query = dao.getEM().createNamedQuery("findAccountByUserIBANAndStateAndCurrencyAndTag")
@@ -212,13 +210,13 @@ public class AuditBean {
                     accountFromMovements.put(account, timeLimitedNotExpended);
                     TransactionVS transactionVS = dao.persist(new TransactionVS(userVS, signatureBean.getSystemUser(),
                             timeLimitedNotExpended, currencyCode,
-                            signedMessageSubject, messageSMIME,TransactionVS.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED,
+                            signedMessageSubject, messageCMS,TransactionVS.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED,
                             TransactionVS.State.OK,currentTagVS ));
                     transactionVS.setAccountFromMovements(accountFromMovements);
                 }
                 File outputFile = reportFiles.getTagReceiptFile(tagVSEntry.getKey());
                 log.info(currencyCode + " - " + currentTagVS.getName() + " - result: " + outputFile.getAbsolutePath());
-                smimeMessage.writeTo(new FileOutputStream(outputFile));
+                FileUtils.copyBytesToFile(cmsMessage.toPEM(), outputFile);
             }
         }
         return true;
@@ -262,14 +260,12 @@ public class AuditBean {
             log.info("processed " + offset + " of " + numTotalUsers + " - elapsedTime: " + elapsedTime);
         }
         periodResultDto.setSystemBalance(balancesBean.getSystemBalancesDto(timePeriod));
-
         String resultBalanceStr = JSON.getMapper().writeValueAsString(periodResultDto);
         Files.write(Paths.get(reportFiles.getJsonFile().getAbsolutePath()), resultBalanceStr.getBytes());
-        String subjectSufix = "[" + DateUtils.getDateStr(timePeriod.getDateFrom()) + " - " + DateUtils.getDateStr(timePeriod.getDateTo()) + "]";
-        String subject =  messages.get("periodBalancesReportMsgSubject", subjectSufix);
-        SMIMEMessage receipt = signatureBean.getSMIMETimeStamped (signatureBean.getSystemUser().getName(), null,
-                resultBalanceStr, subject);
-        receipt.writeTo(new FileOutputStream(reportFiles.getReceiptFile()));
+        //String subjectSufix = "[" + DateUtils.getDateStr(timePeriod.getDateFrom()) + " - " +
+        //        DateUtils.getDateStr(timePeriod.getDateTo()) + "]";
+        CMSSignedMessage receipt = signatureBean.signDataWithTimeStamp(resultBalanceStr);
+        FileUtils.copyBytesToFile(receipt.toPEM(), reportFiles.getReceiptFile());
         String elapsedTime = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc);
         log.info("numTotalUsers:" + numTotalUsers + " - finished in: " + elapsedTime);
         return periodResultDto;

@@ -89,7 +89,7 @@
                 receptorLbl: {type:String},
                 caption: {type:String},
                 receptorMsg: {type:String},
-                smimeMessage: {type:String}
+                cmsMessage: {type:String}
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
@@ -124,8 +124,8 @@
                 if(this.transactionvs.toUserIBAN != null && this.transactionvs.toUserIBAN.length > 1) {
                     this.receptorLbl = '${msg.receptorsLbl}'
                 } else this.receptorLbl = '${msg.receptorLbl}'
-                console.log(this.tagName + " - transactionvsChanged - transactionvs.messageSMIMEURL: " +
-                        this.transactionvs.messageSMIMEURL)
+                console.log(this.tagName + " - transactionvsChanged - transactionvs.cmsMessageURL: " +
+                        this.transactionvs.cmsMessageURL)
                 switch (this.transactionvs.type) {
                     case 'FROM_USERVS':
                         this.caption = "${msg.transactionVSFromUserVS}"
@@ -182,11 +182,11 @@
                 window.open(serviceURL, '_blank');
             },
             checkReceipt: function() {
-                var operationVS = new OperationVS(Operation.OPEN_SMIME)
-                if(this.smimeMessage == null) {
-                    operationVS.serviceURL = this.transactionvs.messageSMIMEURL
-                    operationVS.operation = Operation.OPEN_SMIME_FROM_URL
-                } else operationVS.message = this.smimeMessage
+                var operationVS = new OperationVS(Operation.OPEN_CMS)
+                if(this.cmsMessage == null) {
+                    operationVS.serviceURL = this.transactionvs.cmsMessageURL
+                    operationVS.operation = Operation.OPEN_CMS_FROM_URL
+                } else operationVS.message = this.cmsMessage
                 VotingSystemClient.setMessage(operationVS);
             },
             show: function(transactionvs) {

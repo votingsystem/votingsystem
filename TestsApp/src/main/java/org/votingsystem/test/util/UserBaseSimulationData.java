@@ -2,7 +2,6 @@ package org.votingsystem.test.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.test.callable.RepresentativeDataSender;
 import org.votingsystem.test.callable.RepresentativeDelegationDataSender;
 import org.votingsystem.throwable.ExceptionVS;
@@ -10,6 +9,7 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.NifUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -291,7 +291,7 @@ public class UserBaseSimulationData extends SimulationData {
             String userNif = NifUtils.getNif(userIndex);
             SignatureService signatureService = SignatureService.genUserVSSignatureService(userNif);
             usersWithoutRepresentativeList.add(userNif);
-            byte[] usertCertPEMBytes = CertUtils.getPEMEncoded(signatureService.getCertSigner());
+            byte[] usertCertPEMBytes = PEMUtils.getPEMEncoded(signatureService.getCertSigner());
             String certServiceURL = ContextVS.getInstance().getAccessControl().getUserCertServiceURL();
             ResponseVS responseVS = HttpHelper.getInstance().sendData(
                     usertCertPEMBytes,ContentTypeVS.X509_USER,certServiceURL);

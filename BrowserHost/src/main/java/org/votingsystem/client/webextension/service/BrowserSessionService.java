@@ -3,6 +3,7 @@ package org.votingsystem.client.webextension.service;
 import com.google.common.eventbus.Subscribe;
 import com.sun.javafx.application.PlatformImpl;
 import org.votingsystem.client.webextension.dto.BrowserSessionDto;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.UserVSDto;
@@ -13,7 +14,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.RepresentationState;
 import org.votingsystem.service.EventBusService;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
@@ -43,8 +43,8 @@ public class BrowserSessionService {
     private static PrivateKey privateKey;
     private static Certificate[] chain;
     private static CountDownLatch countDownLatch;
-    private static SMIMEMessage smimeMessage;
-    private static ResponseVS<SMIMEMessage> messageToDeviceResponse;
+    private static CMSSignedMessage cmsMessage;
+    private static ResponseVS<CMSSignedMessage> messageToDeviceResponse;
     private static final BrowserSessionService INSTANCE = new BrowserSessionService();
 
     class EventBusWebSocketListener {
@@ -231,9 +231,9 @@ public class BrowserSessionService {
         return ContextVS.getInstance().getKeyStoreUserVS();
     }
 
-    public static SMIMEMessage getSMIME(String fromUser, String toUser, String textToSign,
-            char[] password, String subject) throws Exception {
-        log.info("getSMIME");
+    public static CMSSignedMessage getCMS(String fromUser, String toUser, String textToSign,
+                                            char[] password, String subject) throws Exception {
+        log.info("signData");
         countDownLatch = new CountDownLatch(1);
         SocketMessageDto messageDto = SocketMessageDto.getSignRequest(ContextVS.getInstance().getConnectedDevice().getDeviceVS(),
                 toUser, textToSign, subject);
@@ -243,7 +243,7 @@ public class BrowserSessionService {
             } catch (Exception ex) { log.log(Level.SEVERE,ex.getMessage(), ex); }
         });
         countDownLatch.await();
-        ResponseVS<SMIMEMessage> responseVS = getMessageToDeviceResponse();
+        ResponseVS<CMSSignedMessage> responseVS = getMessageToDeviceResponse();
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         else return responseVS.getData();
     }
@@ -263,8 +263,8 @@ public class BrowserSessionService {
                 break;
             default:
                 try {
-                    smimeMessage = socketMsg.getSMIME();
-                    messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_OK, null, smimeMessage);
+                    cmsMessage = socketMsg.getCMS();
+                    messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_OK, null, cmsMessage);
                 } catch(Exception ex) {
                     log.log(Level.SEVERE,ex.getMessage(), ex);
                     messageToDeviceResponse = new ResponseVS<>(ResponseVS.SC_ERROR, ex.getMessage());

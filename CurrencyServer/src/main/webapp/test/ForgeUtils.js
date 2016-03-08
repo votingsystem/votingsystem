@@ -64,7 +64,7 @@ AESUtil.prototype.decryptSocketMsg = function(messageJSON) {
     if(msgContentJSON.deviceFromName != null) messageJSON.deviceFromName = msgContentJSON.deviceFromName;
     if(msgContentJSON.from != null) messageJSON.from = msgContentJSON.from;
     if(msgContentJSON.deviceFromId != null) messageJSON.deviceFromId = msgContentJSON.deviceFromId;
-    if(msgContentJSON.smimeMessage != null) messageJSON.smime = msgContentJSON.smimeMessage;
+    if(msgContentJSON.cmsMessage != null) messageJSON.cms = msgContentJSON.cmsMessage;
     if(msgContentJSON.subject != null) messageJSON.subject = msgContentJSON.subject;
     if(msgContentJSON.message != null) messageJSON.message = msgContentJSON.message;
     if(msgContentJSON.toUser != null) messageJSON.toUser = msgContentJSON.toUser;

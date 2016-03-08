@@ -1,12 +1,11 @@
 package org.votingsystem.web.currency.util;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.signature.smime.SMIMEMessage;
 
 import javax.ws.rs.container.AsyncResponse;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,8 +49,8 @@ public class AsyncRequestShopBundle {
         return transactionDto;
     }
 
-    public TransactionVSDto getTransactionDto(SMIMEMessage smimeMessage) throws Exception {
-        transactionDto.setMessageSMIME(Base64.getEncoder().encodeToString(smimeMessage.getBytes()));
+    public TransactionVSDto getTransactionDto(CMSSignedMessage cmsMessage) throws Exception {
+        transactionDto.setCmsMessagePEM(cmsMessage.toPEMStr());
         return transactionDto;
     }
 

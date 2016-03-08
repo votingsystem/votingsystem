@@ -10,7 +10,7 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.EventVSStatsDto;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -110,16 +110,16 @@ public class EventVSElectionResource {
     }
 
     @Path("/") @POST
-    public Response save(MessageSMIME messageSMIME, @Context ServletContext context,
+    public Response save(MessageCMS messageCMS, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        EventVSElection response = eventVSElectionBean.saveEvent(messageSMIME);
+        EventVSElection response = eventVSElectionBean.saveEvent(messageCMS);
         resp.setHeader("eventURL", format("{0}/rest/eventVSElection/id/{1}", config.getContextURL(), response.getId()));
-        return Response.ok().entity(response.getPublishRequestSMIME().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(response.getPublishRequestCMS().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
     @Path("/cancel") @POST
-    public Response cancelled(MessageSMIME messageSMIME) throws Exception {
-        MessageSMIME response = eventVSBean.cancelEvent(messageSMIME);
+    public Response cancelled(MessageCMS messageCMS) throws Exception {
+        MessageCMS response = eventVSBean.cancelEvent(messageCMS);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(MessageDto.OK(null))).type(MediaTypeVS.JSON).build();
     }
 
@@ -157,7 +157,7 @@ public class EventVSElectionResource {
         EventVSElection eventVS = dao.find(EventVSElection.class, id);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection not found - " +
                 "eventId: " + id).build();
-        return Response.ok().entity(eventVS.getPublishRequestSMIME().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(eventVS.getPublishRequestCMS().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
 }

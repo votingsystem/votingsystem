@@ -8,12 +8,12 @@ import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.client.webextension.service.InboxService;
 import org.votingsystem.client.webextension.util.InboxMessage;
 import org.votingsystem.client.webextension.util.MsgUtils;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
@@ -54,10 +54,10 @@ public class CurrencyRequestTask extends Task<ResponseVS> {
             byte[] requestBytes = JSON.getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());
             mapToSend.put(ContextVS.CSR_FILE_NAME, requestBytes);
             String textToSign =  JSON.getMapper().writeValueAsString(requestDto);
-            SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, operationVS.getReceiverName(), textToSign,
+            CMSSignedMessage cmsMessage = BrowserSessionService.getCMS(null, operationVS.getReceiverName(), textToSign,
                     password, operationVS.getSignedMessageSubject());
             updateMessage(operationVS.getSignedMessageSubject());
-            mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, smimeMessage.getBytes());
+            mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, cmsMessage.toPEM());
             responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                     ((CurrencyServer)operationVS.getTargetServer()).getCurrencyRequestServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

@@ -11,6 +11,7 @@ import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.dialog.CertNotFoundDialog;
 import org.votingsystem.client.webextension.dialog.QRDialog;
 import org.votingsystem.client.webextension.util.InboxMessage;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
@@ -19,10 +20,9 @@ import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.service.EventBusService;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.KeyStoreUtil;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.*;
+import org.votingsystem.util.crypto.KeyStoreUtil;
 import org.votingsystem.util.currency.Wallet;
 
 import javax.net.ssl.HostnameVerifier;
@@ -32,7 +32,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -280,12 +283,12 @@ public class WebSocketService {
                             //we sign the CSR in order to provide the payer a proof that we asked for the payment.
                             //If the payer decides to make the payment anonymous and request the currency from the server
                             //he can't spend it without the private key.
-                            SMIMEMessage simeMessage = BrowserSessionService.getSMIME(null, targetServer.getName(),
+                            CMSSignedMessage cmsMessage = BrowserSessionService.getCMS(null, targetServer.getName(),
                                     new String(currency.getCertificationRequest().getCsrPEM()), null,
                                     ContextVS.getMessage("currencyChangeSubject"));
-                            transactionDto.setMessageSMIME(Base64.getEncoder().encodeToString(simeMessage.getBytes()));
+                            transactionDto.setCmsMessagePEM(cmsMessage.toPEMStr());
                             msgDto = socketMsg.getResponse(ResponseVS.SC_OK,JSON.getMapper().writeValueAsString(transactionDto),
-                                    deviceFromId, simeMessage, TypeVS.TRANSACTIONVS_INFO);
+                                    deviceFromId, cmsMessage, TypeVS.TRANSACTIONVS_INFO);
                             socketSession.setData(qrDto);
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -300,11 +303,11 @@ public class WebSocketService {
                     //the payer has completed the payment and send the details
                     if(ResponseVS.SC_ERROR != socketMsg.getStatusCode()) {
                         try {
-                            SMIMEMessage smimeMessage = socketMsg.getSMIME();
+                            CMSSignedMessage cmsMessage = socketMsg.getCMS();
                             QRMessageDto<TransactionVSDto> qrDto =
                                     (QRMessageDto<TransactionVSDto>) socketSession.getData();
-                            TypeVS typeVS = TypeVS.valueOf(smimeMessage.getHeader("TypeVS")[0]);
-                            if(TypeVS.CURRENCY_CHANGE == typeVS) {
+                            TransactionVSDto dto = cmsMessage.getSignedContent(TransactionVSDto.class);
+                            if(TypeVS.CURRENCY_CHANGE == dto.getOperation()) {
                                 Currency currency = qrDto.getCurrency();
                                 currency.initSigner(socketMsg.getMessage().getBytes());
                                 qrDto.setCurrency(currency);
@@ -344,13 +347,13 @@ public class WebSocketService {
                         BrowserSessionService.getInstance().getDevice().getDeviceId());
                 //updateMessage(ContextVS.getMessage("connectionMsg"));
                 updateMessage(ContextVS.getMessage("checkDeviceVSCryptoTokenMsg"));
-                SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, targetServer.getName(),
+                CMSSignedMessage cmsMessage = BrowserSessionService.getCMS(null, targetServer.getName(),
                         JSON.getMapper().writeValueAsString(dto), password,
                         ContextVS.getMessage("initAuthenticatedSessionMsg"));
-                userVS = smimeMessage.getSigner();
-                String connectionMessage = JSON.getMapper().writeValueAsString(dto.setSMIME(smimeMessage));
+                userVS = cmsMessage.getSigner();
+                String connectionMessage = JSON.getMapper().writeValueAsString(dto.setCMS(cmsMessage));
                 client.connectToServer(new WSEndpoint(connectionMessage), URI.create(targetServer.getWebSocketURL()));
-                responseVS = ResponseVS.OK().setSMIME(smimeMessage);
+                responseVS = ResponseVS.OK().setCMS(cmsMessage);
             } catch (KeyStoreExceptionVS ex) {
                 CertNotFoundDialog.showDialog(ex.getMessage());
             } catch(InterruptedException ex) {

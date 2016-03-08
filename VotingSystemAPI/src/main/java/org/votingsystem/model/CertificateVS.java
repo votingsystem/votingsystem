@@ -1,8 +1,8 @@
 package org.votingsystem.model;
 
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.EntityVS;
+import org.votingsystem.util.crypto.CertUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -51,7 +51,7 @@ public class CertificateVS extends EntityVS implements Serializable {
 
     @Column(name="hashCertVSBase64", unique=true) private String hashCertVSBase64;
 
-    @Column(name="messageSMIME" ) private MessageSMIME messageSMIME;
+    @Column(name="messageCMS" ) private MessageCMS messageCMS;
 
     @Column(name="metaInf", columnDefinition="TEXT")  private String metaInf;
 
@@ -151,7 +151,8 @@ public class CertificateVS extends EntityVS implements Serializable {
     public static CertificateVS USER(UserVS userVS, X509Certificate x509Cert)
             throws CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
         CertificateVS result = new CertificateVS(x509Cert);
-        if(Type.CERTIFICATE_AUTHORITY_ID_CARD == userVS.getCertificateCA().getType()) result.type = Type.USER_ID_CARD;
+        if(userVS.getCertificateCA() != null &&
+                Type.CERTIFICATE_AUTHORITY_ID_CARD == userVS.getCertificateCA().getType()) result.type = Type.USER_ID_CARD;
         else result.type = Type.USER;
         result.state = CertificateVS.State.OK;
         result.userVS = userVS;
@@ -172,12 +173,12 @@ public class CertificateVS extends EntityVS implements Serializable {
         return result;
     }
 
-    public MessageSMIME getMessageSMIME() {
-        return messageSMIME;
+    public MessageCMS getMessageCMS() {
+        return messageCMS;
     }
 
-    public CertificateVS setMessageSMIME(MessageSMIME messageSMIME) {
-        this.messageSMIME = messageSMIME;
+    public CertificateVS setMessageCMS(MessageCMS messageCMS) {
+        this.messageCMS = messageCMS;
         return this;
     }
 

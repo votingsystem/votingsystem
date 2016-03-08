@@ -2,7 +2,7 @@ package org.votingsystem.web.currency.servlet;
 
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -42,22 +42,22 @@ public class CurrencyRequestServlet extends HttpServlet {
     }
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        MessageSMIME messageSMIME = null;
+        MessageCMS messageCMS = null;
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.CURRENCY_REQUEST);
-            messageSMIME = signatureBean.validateSMIME(
-                    requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
+            messageCMS = signatureBean.validateCMS(
+                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
             CurrencyRequestDto requestDto = CurrencyRequestDto.validateRequest(requestVS.getCSRBytes(),
-                    messageSMIME, config.getContextURL());
+                    messageCMS, config.getContextURL());
             requestDto.setTagVS(config.getTag(requestDto.getTagVS().getName()));
             ResultListDto<String> dto = currencyBean.processCurrencyRequest(requestDto);
             resp.setContentType(MediaTypeVS.JSON);
             resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(dto));
         } catch (ExceptionVS ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
-            if(messageSMIME != null) {
-                messageSMIME.setType(TypeVS.EXCEPTION).setReason(ex.getMessage());
-                dao.merge(messageSMIME);
+            if(messageCMS != null) {
+                messageCMS.setType(TypeVS.EXCEPTION).setReason(ex.getMessage());
+                dao.merge(messageCMS);
             }
             if(ex.getMessageDto() != null) {
                 resp.setStatus(ex.getMessageDto().getStatusCode());

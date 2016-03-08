@@ -1,8 +1,8 @@
 package org.votingsystem.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.EntityVS;
@@ -71,12 +71,12 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
     @Column(name="messageBytes") private byte[] messageBytes;
-    @OneToOne private MessageSMIME messageSMIME;
+    @OneToOne private MessageCMS messageCMS;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23, insertable=true) private Date lastUpdated;
 
 
-    @Transient private SMIMEMessage smimeMessage;
+    @Transient private CMSSignedMessage cmsMessage;
     @Transient private EventVS eventVS;
     @Transient private T data;
     @Transient private ContentTypeVS contentType = ContentTypeVS.HTML;
@@ -228,8 +228,8 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     }
 
     public byte[] getMessageBytes() throws Exception {
-        if(contentType!= null && contentType.isSigned() && messageBytes == null && messageSMIME != null)
-            return messageSMIME.getSMIME().getBytes();
+        if(contentType!= null && contentType.isSigned() && messageBytes == null && messageCMS != null)
+            return messageCMS.getCMS().getEncoded();
         if(messageBytes == null && message != null) return message.getBytes();
         return messageBytes;
     }
@@ -238,13 +238,13 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         this.messageBytes = messageBytes;
     }
 
-    public SMIMEMessage getSMIME() throws Exception {
-        if(smimeMessage == null) smimeMessage = new SMIMEMessage(getMessageBytes());
-        return smimeMessage;
+    public CMSSignedMessage getCMS() throws Exception {
+        if(cmsMessage == null) cmsMessage = new CMSSignedMessage(getMessageBytes());
+        return cmsMessage;
     }
 
-    public ResponseVS setSMIME(SMIMEMessage smimeMessage) {
-        this.smimeMessage = smimeMessage;
+    public ResponseVS setCMS(CMSSignedMessage cmsMessage) {
+        this.cmsMessage = cmsMessage;
         return this;
     }
 
@@ -300,12 +300,12 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         return this;
     }
 
-    public MessageSMIME getMessageSMIME() {
-        return messageSMIME;
+    public MessageCMS getMessageCMS() {
+        return messageCMS;
     }
 
-    public ResponseVS setMessageSMIME(MessageSMIME messageSMIME) {
-        this.messageSMIME = messageSMIME;
+    public ResponseVS setMessageCMS(MessageCMS messageCMS) {
+        this.messageCMS = messageCMS;
         return this;
     }
 

@@ -1,8 +1,9 @@
 package org.votingsystem.model;
 
-import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
+import org.votingsystem.util.crypto.CertUtils;
 
 import javax.persistence.*;
 import java.io.IOException;
@@ -199,16 +200,18 @@ public class DeviceVS extends EntityVS implements Serializable {
         this.x509Certificate = x509Certificate;
     }
 
-    public DeviceVS updateCertInfo (X509Certificate certificate) throws IOException {
+    public DeviceVS updateCertInfo (X509Certificate certificate) throws Exception {
         this.x509Certificate = certificate;
-        return updateCertInfo(CertUtils.getCertExtensionData(certificate, ContextVS.DEVICEVS_OID));
+        CertExtensionDto extensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class, certificate,
+                ContextVS.DEVICEVS_OID);
+        return updateCertInfo(extensionDto);
     }
 
-    public DeviceVS updateCertInfo (Map<String, String> dataMap) throws IOException {
-        setPhone(dataMap.get("mobilePhone"));
-        setEmail(dataMap.get("email"));
-        setDeviceId(dataMap.get("deviceId"));
-        setType(Type.valueOf(dataMap.get("deviceType")));
+    public DeviceVS updateCertInfo (CertExtensionDto extensionDto) {
+        setPhone(extensionDto.getMobilePhone());
+        setEmail(extensionDto.getEmail());
+        setDeviceId(extensionDto.getDeviceId());
+        setType(extensionDto.getDeviceType());
         return this;
     }
 

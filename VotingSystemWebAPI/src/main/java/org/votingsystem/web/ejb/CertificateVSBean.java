@@ -2,12 +2,12 @@ package org.votingsystem.web.ejb;
 
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -36,14 +36,14 @@ public class CertificateVSBean {
      * El procedimiento para añadir una autoridad certificadora consiste en
      * añadir el certificado en formato pem en el directorio ./WEB-INF/votingsystem
      */
-    public MessageDto addCertificateAuthority(MessageSMIME messageSMIME) throws Exception {
+    public MessageDto addCertificateAuthority(MessageCMS messageCMS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        CertificateVSRequest request = messageSMIME.getSignedContent(CertificateVSRequest.class);
+        CertificateVSRequest request = messageCMS.getSignedContent(CertificateVSRequest.class);
         request.validateNewCARequest();
         if(!signatureBean.isAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
                 "userWithoutPrivilegesErrorMsg - operation: " + TypeVS.CERT_CA_NEW.toString() + " - user: " +
                 request.signer.getId());
-        Collection<X509Certificate> certX509CertCollection = CertUtils.fromPEMToX509CertCollection(
+        Collection<X509Certificate> certX509CertCollection = PEMUtils.fromPEMToX509CertCollection(
                 request.certChainPEM.getBytes());
         if(certX509CertCollection.isEmpty()) throw new ValidationExceptionVS(
                 "operation: CERT_CA_NEW - nullCertificateErrorMsg");
@@ -61,7 +61,7 @@ public class CertificateVSBean {
     }
 
     public X509Certificate getVoteCert(byte[] pemCertCollection) throws Exception {
-        Collection<X509Certificate> certificates = CertUtils.fromPEMToX509CertCollection(pemCertCollection);
+        Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(pemCertCollection);
         for (X509Certificate certificate : certificates) {
             if (certificate.getSubjectDN().toString().contains("SERIALNUMBER=hashCertVoteHex:")) {
                 return certificate;
@@ -97,8 +97,8 @@ public class CertificateVSBean {
         }
     }
 
-    public CertificateVS editCert(MessageSMIME messageSMIME) throws Exception {
-        CertificateVSRequest request = messageSMIME.getSignedContent(CertificateVSRequest.class);
+    public CertificateVS editCert(MessageCMS messageCMS) throws Exception {
+        CertificateVSRequest request = messageCMS.getSignedContent(CertificateVSRequest.class);
         request.validatEditCertRequest();
         if(!signatureBean.isAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
                 "userWithoutPrivilegesErrorMsg - operation: " + TypeVS.CERT_EDIT.toString() + " - user: " +
@@ -108,7 +108,7 @@ public class CertificateVSBean {
         if(certificateVS == null || CertificateVS.State.OK != certificateVS.getState()) throw new ValidationExceptionVS(
                 "activeCertificateNotFoundErrorMsg - serialNumber: " + request.serialNumber);
         certificateVS.updateDescription(request.description);
-        dao.merge(certificateVS.setMessageSMIME(messageSMIME).setState(request.changeCertToState));
+        dao.merge(certificateVS.setMessageCMS(messageCMS).setState(request.changeCertToState));
         return certificateVS;
     }
     

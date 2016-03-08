@@ -4,10 +4,10 @@ import javafx.concurrent.Task;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.dto.voting.VoteVSCancelerDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.crypto.VoteVSHelper;
 
 import java.util.Base64;
 import java.util.concurrent.ExecutorService;
@@ -39,11 +39,11 @@ public class CancelVoteTask extends Task<ResponseVS> {
             VoteVSHelper voteVSHelper = (VoteVSHelper) voteResponse.getData();
             VoteVSCancelerDto cancelerDto = voteVSHelper.getVoteCanceler();
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            Future future = executor.submit(new SendSMIMETask(operationVS, JSON.getMapper().writeValueAsString(cancelerDto),
+            Future future = executor.submit(new SendCMSTask(operationVS, JSON.getMapper().writeValueAsString(cancelerDto),
                     message, password));
             responseVS = (ResponseVS) future.get();
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                responseVS.setMessage(Base64.getEncoder().encodeToString(responseVS.getSMIME().getBytes()));
+                responseVS.setMessage(Base64.getEncoder().encodeToString(responseVS.getCMS().toPEM()));
             }
         } catch (KeyStoreExceptionVS ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

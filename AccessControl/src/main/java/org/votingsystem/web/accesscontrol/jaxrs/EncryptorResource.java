@@ -1,10 +1,10 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.EncryptedMsgDto;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -51,27 +51,23 @@ public class EncryptorResource {
         request.setMessage(format("Hello ''{0}'' from ''{1}''", request.getFrom(), config.getServerName()));
         byte[] responseBytes = JSON.getMapper().writeValueAsBytes(request);
         //if(requestMap.receiverCert) signatureBean.encryptToCMS(responseBytes, requestMap.receiverCert)
-        byte[] encryptedResponse = signatureBean.encryptMessage(responseBytes, receiverPublic);
-        return Response.ok().entity(encryptedResponse).type(MediaTypeVS.MULTIPART_ENCRYPTED).build();
+        return Response.ok().entity(signatureBean.encryptToCMS(responseBytes, receiverPublic)).type(
+                MediaTypeVS.MULTIPART_ENCRYPTED).build();
     }
 
     @Path("/getMultiSignedMessage") @POST
-    public Response getMultiSignedMessage(MessageSMIME messageSMIME, @Context ServletContext context,
-                            @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        String fromUser = "EncryptorController";
-        String toUser = "MultiSignatureTestClient";
-        String subject = "Multisigned response";
-        SMIMEMessage smimeMessage = signatureBean.getSMIMEMultiSigned(fromUser, toUser,
-                messageSMIME.getSMIME(), subject);
-        return  Response.ok().entity(smimeMessage.getBytes()).type(MediaTypeVS.JSON_SIGNED).build();
+    public Response getMultiSignedMessage(MessageCMS messageCMS, @Context ServletContext context,
+                                  @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        CMSSignedMessage cmsMessage = signatureBean.addSignature(messageCMS.getCMS());
+        return  Response.ok().entity(cmsMessage.toPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
     @Path("/validateTimeStamp") @POST
-    public Response validateTimeStamp(MessageSMIME messageSMIME, @Context ServletContext context,
-                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        UserVS userVS = messageSMIME.getUserVS();
+    public Response validateTimeStamp(MessageCMS messageCMS, @Context ServletContext context,
+                                      @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        UserVS userVS = messageCMS.getUserVS();
         //Date dateFinish = DateUtils.getDateFromString("2014-01-01 00:00:00")
-        Map requestMap = messageSMIME.getSignedContent(Map.class);
+        Map requestMap = messageCMS.getSignedContent(Map.class);
         EventVS eventVS = dao.find(EventVS.class, ((Number)requestMap.get("eventId")).longValue());
         Date signatureTime = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(!eventVS.isActive(signatureTime)) {

@@ -51,7 +51,7 @@ public class BrowserHost extends Application {
     public static final int MAX_MESSAGE_SIZE = 1024000;
 
     private static BrowserHost INSTANCE;
-    private Map<String, String> smimeMessageMap = new HashMap<>();
+    private Map<String, String> cmsMessageMap = new HashMap<>();
     private Map<String, org.votingsystem.model.currency.Currency.State> currencyStateMap = new HashMap<>();
     private static final Map<String, QRMessageDto> qrMessagesMap = new HashMap<>();
     private Wallet wallet;
@@ -158,12 +158,12 @@ public class BrowserHost extends Application {
         System.exit(0);//Platform.exit();
     }
 
-    public String getSMIME(String smimeMessageURL) {
-        return smimeMessageMap.get(smimeMessageURL);
+    public String getCMS(String cmsMessageURL) {
+        return cmsMessageMap.get(cmsMessageURL);
     }
 
-    public void setSMIME(String smimeMessageURL, String smimeMessageStr) {
-        smimeMessageMap.put(smimeMessageURL, smimeMessageStr);
+    public void setCMS(String cmsMessageURL, String cmsMessageStr) {
+        cmsMessageMap.put(cmsMessageURL, cmsMessageStr);
     }
 
     public void putQRMessage(QRMessageDto messageDto) {

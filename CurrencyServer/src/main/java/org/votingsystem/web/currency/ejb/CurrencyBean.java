@@ -1,24 +1,24 @@
 package org.votingsystem.web.currency.ejb;
 
 import org.apache.commons.io.IOUtils;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.*;
 import org.votingsystem.model.BatchVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertExtensionCheckerVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.CurrencyExpendedException;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Interval;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.currency.util.ReportFiles;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.logging.Level;
@@ -79,23 +80,20 @@ public class CurrencyBean {
             }
             Currency currencyChange = csrBean.signCurrencyRequest(batchDto.getCurrencyChangePKCS10(), Currency.Type.CHANGE,
                     currencyBatch);
-            SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
-                    currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(batchDto),
-                    currencyBatch.getSubject());
-            receipt.setHeader("TypeVS", batchDto.getOperation().toString());
-            MessageSMIME messageSMIME =  dao.persist(new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT));
+            CMSSignedMessage receipt = signatureBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsString(batchDto));
+            MessageCMS messageCMS =  dao.persist(new MessageCMS(receipt, TypeVS.BATCH_RECEIPT));
             currencyBatch.setLeftOver(leftOver);
             currencyBatch.setCurrencyChange(currencyChange);
             currencyBatch.setValidatedCurrencySet(validatedCurrencySet);
-            dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchVS.State.OK));
+            dao.persist(currencyBatch.setMessageCMS(messageCMS).setState(BatchVS.State.OK));
             TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_CHANGE(
-                    currencyBatch, validTo, messageSMIME, currencyBatch.getTagVS()));
+                    currencyBatch, validTo, messageCMS, currencyBatch.getTagVS()));
             transactionVSBean.updateCurrencyAccounts(transactionVS.setCurrencyBatch(currencyBatch));
             for(Currency currency : validatedCurrencySet) {
                 dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
             }
-            return new CurrencyBatchResponseDto(receipt, new String(CertUtils.getPEMEncoded(leftOver.getX509AnonymousCert())),
-                    new String(CertUtils.getPEMEncoded(currencyChange.getX509AnonymousCert())));
+            return new CurrencyBatchResponseDto(receipt, new String(PEMUtils.getPEMEncoded(leftOver.getX509AnonymousCert())),
+                    new String(PEMUtils.getPEMEncoded(currencyChange.getX509AnonymousCert())));
         } else {
             Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", batchDto.getToUserIBAN());
             UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
@@ -107,17 +105,14 @@ public class CurrencyBean {
                 Currency leftOver = csrBean.signCurrencyRequest(batchDto.getLeftOverPKCS10(), Currency.Type.LEFT_OVER,
                         currencyBatch);
                 currencyBatch.setLeftOver(leftOver);
-                leftOverCert = new String(CertUtils.getPEMEncoded(leftOver.getX509AnonymousCert()));
+                leftOverCert = new String(PEMUtils.getPEMEncoded(leftOver.getX509AnonymousCert()));
             }
-            SMIMEMessage receipt = signatureBean.getSMIMETimeStamped(signatureBean.getSystemUser().getName(),
-                    currencyBatch.getBatchUUID(), JSON.getMapper().writeValueAsString(batchDto),
-                    currencyBatch.getSubject());
-            receipt.setHeader("TypeVS", batchDto.getOperation().toString());
-            MessageSMIME messageSMIME =  dao.persist(new MessageSMIME(receipt, TypeVS.BATCH_RECEIPT));
-            dao.persist(currencyBatch.setMessageSMIME(messageSMIME).setState(BatchVS.State.OK));
-            log.info("currencyBatch:" + currencyBatch.getId() + " - messageSMIME:" + messageSMIME.getId());
+            CMSSignedMessage receipt = signatureBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsString(batchDto));
+            MessageCMS messageCMS =  dao.persist(new MessageCMS(receipt, TypeVS.BATCH_RECEIPT));
+            dao.persist(currencyBatch.setMessageCMS(messageCMS).setState(BatchVS.State.OK));
+            log.info("currencyBatch:" + currencyBatch.getId() + " - messageCMS:" + messageCMS.getId());
             TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_SEND(
-                    currencyBatch, toUserVS, validTo, messageSMIME, currencyBatch.getTagVS()));
+                    currencyBatch, toUserVS, validTo, messageCMS, currencyBatch.getTagVS()));
             currencyBatch.setValidatedCurrencySet(validatedCurrencySet);
             transactionVSBean.updateCurrencyAccounts(transactionVS.setCurrencyBatch(currencyBatch));
             for(Currency currency : validatedCurrencySet) {
@@ -132,7 +127,7 @@ public class CurrencyBean {
 
     public Currency validateBatchItem(Currency currency) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        SMIMEMessage smimeMessage = currency.getSMIME();
+        CMSSignedMessage cmsMessage = currency.getCMS();
         Query query = dao.getEM().createQuery("SELECT c FROM Currency c WHERE c.serialNumber =:serialNumber and c.hashCertVS =:hashCertVS")
                 .setParameter("serialNumber", currency.getX509AnonymousCert().getSerialNumber().longValue())
                 .setParameter("hashCertVS", currency.getHashCertVS());
@@ -143,13 +138,11 @@ public class CurrencyBean {
             throw new CurrencyExpendedException(currency.getHashCertVS());
         } else if(currencyDB.getState() == Currency.State.OK) {
             currency = currencyDB.checkRequestWithDB(currency);
-            UserVS userVS = smimeMessage.getSigner(); //anonymous signer
+            UserVS userVS = cmsMessage.getSigner(); //anonymous signer
             timeStampBean.validateToken(userVS.getTimeStampToken());
-            CertUtils.CertValidatorResultVS certValidatorResult = CertUtils.verifyCertificate(
+            PKIXCertPathValidatorResult certValidatorResult = CertUtils.verifyCertificate(
                     signatureBean.getCurrencyAnchors(), false, Arrays.asList(userVS.getCertificate()));
-            X509Certificate certCaResult = certValidatorResult.getResult().getTrustAnchor().getTrustedCert();
-            CertExtensionCheckerVS extensionChecker = certValidatorResult.getChecker();
-            //if (extensionChecker.isAnonymousSigner()) { }
+            X509Certificate certCaResult = certValidatorResult.getTrustAnchor().getTrustedCert();
         } else  throw new ExceptionVS(messages.get("currencyStateErrorMsg", currencyDB.getId().toString(),
                 currencyDB.getState().toString()));
         currency.setAuthorityCertificateVS(signatureBean.getServerCertificateVS());
@@ -158,7 +151,7 @@ public class CurrencyBean {
 
     public ResultListDto<String> processCurrencyRequest(CurrencyRequestDto requestDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS fromUserVS = requestDto.getMessageSMIME().getUserVS();
+        UserVS fromUserVS = requestDto.getMessageCMS().getUserVS();
         //check cash available for user
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 fromUserVS.getIBAN(), requestDto.getTagVS(), requestDto.getTotalAmount(), requestDto.getCurrencyCode());
@@ -169,9 +162,8 @@ public class CurrencyBean {
         ResultListDto resultListDto = new ResultListDto(currencyCertSet);
         resultListDto.setMessage(messages.get("withdrawalMsg", requestDto.getTotalAmount().toString(),
                 requestDto.getCurrencyCode()) + " " + messages.getTagMessage(requestDto.getTagVS().getName()));
-        SMIMEMessage receipt = signatureBean.getSMIMEMultiSigned(signatureBean.getSystemUser().getName(),
-                fromUserVS.getNif(), requestDto.getMessageSMIME().getSMIME(), null);
-        dao.merge(requestDto.getMessageSMIME().setType(TypeVS.CURRENCY_REQUEST).setSMIME(receipt).refresh());
+        CMSSignedMessage receipt = signatureBean.addSignature(requestDto.getMessageCMS().getCMS());
+        dao.merge(requestDto.getMessageCMS().setType(TypeVS.CURRENCY_REQUEST).setCMS(receipt));
         return resultListDto;
     }
 
@@ -213,29 +205,29 @@ public class CurrencyBean {
         File currencyRequestDir = new File(reportFiles.getBaseDir().getAbsolutePath() + "/request");
         File currencyBatchDir = new File(reportFiles.getBaseDir().getAbsolutePath() + "/batch");
 
-        Query query = dao.getEM().createQuery("SELECT m FROM MessageSMIME m WHERE m.type =:typeVS")
+        Query query = dao.getEM().createQuery("SELECT m FROM MessageCMS m WHERE m.type =:typeVS")
                 .setParameter("typeVS",  TypeVS.CURRENCY_REQUEST);
-        List<MessageSMIME> resultList = query.getResultList();
-        for(MessageSMIME messageSMIME : resultList) {
-            File smimeFile = new File(format("{0}/messageSMIME_{1}.p7m", currencyRequestDir.getAbsolutePath(), messageSMIME.getId()));
-            IOUtils.write(messageSMIME.getContent(), new FileOutputStream(smimeFile));
+        List<MessageCMS> resultList = query.getResultList();
+        for(MessageCMS messageCMS : resultList) {
+            File cmsFile = new File(format("{0}/messageCMS_{1}.p7m", currencyRequestDir.getAbsolutePath(), messageCMS.getId()));
+            IOUtils.write(messageCMS.getContent(), new FileOutputStream(cmsFile));
         }
         query = dao.getEM().createQuery("SELECT c FROM CurrencyBatch c WHERE c.state =:state and c.type =:typeVS")
                 .setParameter("typeVS",  TypeVS.CURRENCY_SEND).setParameter("state", BatchVS.State.OK);
         List<CurrencyBatch> currencyBatchList = query.getResultList();
         for(CurrencyBatch currencyBatch : currencyBatchList) {
-            File smimeFile = new File(format("{0}/CURRENCY_SEND_messageSMIME_{1}.p7m", currencyBatchDir.getAbsolutePath(),
-                    currencyBatch.getMessageSMIME().getId()));
-            IOUtils.write(currencyBatch.getMessageSMIME().getContent(), new FileOutputStream(smimeFile));
+            File cmsFile = new File(format("{0}/CURRENCY_SEND_messageCMS_{1}.p7m", currencyBatchDir.getAbsolutePath(),
+                    currencyBatch.getMessageCMS().getId()));
+            IOUtils.write(currencyBatch.getMessageCMS().getContent(), new FileOutputStream(cmsFile));
         }
 
         query = dao.getEM().createQuery("SELECT c FROM CurrencyBatch c WHERE c.state =:state and c.type =:typeVS")
                 .setParameter("typeVS",  TypeVS.CURRENCY_CHANGE).setParameter("state", BatchVS.State.OK);
         currencyBatchList = query.getResultList();
         for(CurrencyBatch currencyBatch : currencyBatchList) {
-            File smimeFile = new File(format("{0}/CURRENCY_CHANGE_messageSMIME_{1}.p7m", currencyBatchDir.getAbsolutePath(),
-                    currencyBatch.getMessageSMIME().getId()));
-            IOUtils.write(currencyBatch.getMessageSMIME().getContent(), new FileOutputStream(smimeFile));
+            File cmsFile = new File(format("{0}/CURRENCY_CHANGE_messageCMS_{1}.p7m", currencyBatchDir.getAbsolutePath(),
+                    currencyBatch.getMessageCMS().getId()));
+            IOUtils.write(currencyBatch.getMessageCMS().getContent(), new FileOutputStream(cmsFile));
         }
 
 
@@ -244,7 +236,7 @@ public class CurrencyBean {
 
         Set<X509Certificate> systemTrustedCerts = signatureBean.getTrustedCerts();
         File systemTrustedCertsFile = new File(format("{0}/systemTrustedCerts.pem", reportFiles.getBaseDir().getAbsolutePath()));
-        IOUtils.write(CertUtils.getPEMEncoded(systemTrustedCerts), new FileOutputStream(systemTrustedCertsFile));
+        IOUtils.write(PEMUtils.getPEMEncoded(systemTrustedCerts), new FileOutputStream(systemTrustedCertsFile));
 
 
         CurrencyPeriodResultDto currencyPeriodResultDto = new CurrencyPeriodResultDto();

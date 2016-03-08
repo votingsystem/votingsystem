@@ -1,6 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
-import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
@@ -8,11 +8,12 @@ import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyBatch;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Interval;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -61,7 +62,7 @@ public class CSRBean {
                 Currency currency = Currency.FROM_CERT(x509AnonymousCert, requestDto.getTagVS(), authorityCertificateVS);
                 currency.setType(Currency.Type.REQUEST);
                 issuedCurrencySet.add(dao.persist(currency));
-                issuedCertSet.add(new String(CertUtils.getPEMEncoded(x509AnonymousCert)));
+                issuedCertSet.add(new String(PEMUtils.getPEMEncoded(x509AnonymousCert)));
                 LoggerVS.logCurrencyIssued(currency);
             }
             return issuedCertSet;
@@ -79,7 +80,7 @@ public class CSRBean {
                                         CurrencyBatch currencyBatch) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
-                pkcs10Req, ContextVS.CURRENCY_TAG);
+                pkcs10Req, ContextVS.CURRENCY_OID);
         TagVS tagVS = config.getTag(certExtensionDto.getTag());
         if(currencyMinValue.compareTo(certExtensionDto.getAmount()) > 0) throw new ExceptionVS(messages.get("currencyMinValueError",
                 currencyMinValue.toString(), certExtensionDto.getAmount().toString()));

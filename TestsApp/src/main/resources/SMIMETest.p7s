@@ -1,5 +1,5 @@
 To: VotingSystemCooinServer
-Message-ID: http://currency:8086/Cooins/messageSMIME/21
+Message-ID: http://currency:8086/Cooins/cmsMessagePEM/21
 Subject: TransactionVS from BankVS
 MIME-Version: 1.0
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; 
@@ -13,7 +13,7 @@ Content-Transfer-Encoding: 7bit
 
 {"operation":"TRANSACTIONVS_FROM_BANKVS","bankIBAN":"ES1877777777450000000050","fromUser":"ClientBankVS App1 App2","currencyCode":"EUR","fromUserIBAN":"ES8477777777450000012345","toUserIBAN":["ES6278788989450000000005"],"amount":"1000","tags":[{"name":"HIDROGENO"}],"isTimeLimited":true,"subject":"BankVS - mie 18:27 - TimeLimited -Hidrogeno","UUID":"02395396-e83b-4cbe-99b0-0138bd60deae"}
 ------=_Part_46_643391342.1412785932056
-Content-Type: application/pkcs7-signature; name=smime.p7s; smime-type=signed-data
+Content-Type: application/pkcs7-signature; name=cms.p7s; cms-type=signed-data
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="null"
 Content-Description: S/MIME Cryptographic Signature

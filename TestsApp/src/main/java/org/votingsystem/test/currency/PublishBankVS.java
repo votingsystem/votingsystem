@@ -1,10 +1,10 @@
 package org.votingsystem.test.currency;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.BankVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.*;
@@ -27,11 +27,9 @@ public class PublishBankVS {
         ContextVS.getInstance().setDefaultServer(currencyServer);
         SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService(
                 "Currency_07553172H", UserVS.Type.USER);
-        UserVS fromUserVS = superUserSignatureService.getUserVS();
-        String messageSubject = "TEST_ADD_BANKVS";
-        SMIMEMessage smimeMessage = superUserSignatureService.getSMIMETimeStamped(fromUserVS.getNif(),
-                currencyServer.getName(), JSON.getMapper().writeValueAsString(bankVSDto), messageSubject);
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+        CMSSignedMessage cmsMessage = superUserSignatureService.addSignatureWithTimeStamp(
+                JSON.getMapper().writeValueAsString(bankVSDto));
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 currencyServer.getSaveBankServiceURL());
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage());
         System.exit(0);

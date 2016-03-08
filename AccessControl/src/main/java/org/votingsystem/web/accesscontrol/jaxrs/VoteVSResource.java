@@ -1,8 +1,8 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import org.votingsystem.dto.SMIMEDto;
+import org.votingsystem.dto.CMSDto;
 import org.votingsystem.dto.voting.VoteVSDto;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.model.voting.VoteVSCanceler;
 import org.votingsystem.util.ContentTypeVS;
@@ -41,10 +41,10 @@ public class VoteVSResource {
     @Transactional
     @Path("/")
     @POST
-    public Response save(SMIMEDto smimeDto,  @Context ServletContext context,
+    public Response save(CMSDto CMSDto, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        VoteVS voteVS = voteVSBean.validateVote(smimeDto);
-        return Response.ok().entity(voteVS.getMessageSMIME().getContent()).type(ContentTypeVS.VOTE.getName()).build();
+        VoteVS voteVS = voteVSBean.validateVote(CMSDto);
+        return Response.ok().entity(voteVS.getCMSMessage().getContent()).type(ContentTypeVS.VOTE.getName()).build();
     }
 
     @Transactional
@@ -89,7 +89,7 @@ public class VoteVSResource {
         VoteVSCanceler voteVSCanceler = dao.getSingleResult(VoteVSCanceler.class, query);
         if(voteVSCanceler == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - VoteVSCanceler not found - voteId: " + id).build();
-        return Response.ok().entity(voteVSCanceler.getMessageSMIME().getContent())
+        return Response.ok().entity(voteVSCanceler.getMessageCMS().getContent())
                 .type(MediaTypeVS.JSON_SIGNED).build();
     }
 
@@ -110,10 +110,10 @@ public class VoteVSResource {
     }
 
     @Path("/cancel") @POST
-    public Response post (MessageSMIME messageSMIME,  @Context ServletContext context,
+    public Response post (MessageCMS messageCMS, @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        VoteVSCanceler canceler = voteVSBean.processCancel(messageSMIME);
-        return Response.ok().entity(canceler.getMessageSMIME().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
+        VoteVSCanceler canceler = voteVSBean.processCancel(messageCMS);
+        return Response.ok().entity(canceler.getMessageCMS().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
 }

@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
+
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -66,7 +67,7 @@ public class DeviceVSDto implements Serializable {
         this.setPhone(deviceVS.getPhone());
         this.setEmail(deviceVS.getEmail());
         X509Certificate x509Cert = deviceVS.getX509Certificate();
-        if(x509Cert != null) certPEM = new String(CertUtils.getPEMEncoded(x509Cert));
+        if(x509Cert != null) certPEM = new String(PEMUtils.getPEMEncoded(x509Cert));
     }
 
     @JsonIgnore
@@ -78,7 +79,7 @@ public class DeviceVSDto implements Serializable {
         deviceVS.setEmail(getEmail());
         deviceVS.setPhone(getPhone());
         if(getCertPEM() != null) {
-            Collection<X509Certificate> certChain = CertUtils.fromPEMToX509CertCollection(getCertPEM().getBytes());
+            Collection<X509Certificate> certChain = PEMUtils.fromPEMToX509CertCollection(getCertPEM().getBytes());
             deviceVS.setX509Certificate(certChain.iterator().next());
         }
         return deviceVS;
@@ -135,7 +136,7 @@ public class DeviceVSDto implements Serializable {
 
     @JsonIgnore public X509Certificate getX509Cert() throws Exception {
         if(certPEM == null) return null;
-        else return CertUtils.fromPEMToX509Cert(certPEM.getBytes());
+        else return PEMUtils.fromPEMToX509Cert(certPEM.getBytes());
     }
 
     public String getSessionId() {

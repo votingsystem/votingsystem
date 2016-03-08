@@ -87,8 +87,8 @@
                 this.tag = this.transaction.tags[0]
             },
             showTransactionDetails: function(e) {
-                console.log("messageSMIMEURL: " + this.transaction.messageSMIMEURL)
-                page.show(this.transaction.messageSMIMEURL)
+                console.log("cmsMessageURL: " + this.transaction.cmsMessageURL)
+                page.show(this.transaction.cmsMessageURL)
             }
         });
     </script>

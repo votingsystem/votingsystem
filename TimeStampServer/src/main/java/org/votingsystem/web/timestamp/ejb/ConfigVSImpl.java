@@ -13,10 +13,8 @@ import javax.ejb.Startup;
 import javax.inject.Named;
 import java.io.File;
 import java.net.URL;
-import java.security.cert.X509Certificate;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**

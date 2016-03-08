@@ -1,7 +1,6 @@
 package org.votingsystem.web.util;
 
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Projections;
 import org.hibernate.internal.CriteriaImpl;
 
 import javax.persistence.Query;

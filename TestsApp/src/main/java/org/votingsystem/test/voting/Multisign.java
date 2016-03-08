@@ -1,7 +1,7 @@
 package org.votingsystem.test.voting;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.util.ContextVS;
@@ -36,15 +36,14 @@ public class Multisign {
         SignatureService signatureService = SignatureService.genUserVSSignatureService("08888888D");
         SignatureService signatureService1 = SignatureService.genUserVSSignatureService("00111222V");
         SignatureService signatureService2 = SignatureService.genUserVSSignatureService("03455543T");
-        SMIMEMessage smimeMessage = signatureService.getSMIME("08888888D", "00111222V",
-                JSON.getMapper().writeValueAsString(dataToSignMap), DateUtils.getDateStr(new Date()));
+        CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsString(dataToSignMap));
 
-        SMIMEMessage smimeSigned = signatureService1.getSMIMEMultiSigned("03455543T", "08888888D", smimeMessage,
+        CMSSignedMessage cmsSigned = signatureService1.addSignature("03455543T", "08888888D", cmsMessage,
                 DateUtils.getDateStr(new Date()));
-        //log.info(new String(smimeSigned.getBytes()))
+        //log.info(new String(cmsSigned.getBytes()))
         X509Certificate x509Cert = signatureService1.getCertSigner();
-        smimeSigned.isValidSignature();
-        Collection result = smimeSigned.checkSignerCert(x509Cert);
+        cmsSigned.isValidSignature();
+        Collection result = cmsSigned.checkSignerCert(x509Cert);
         log.info("cert matches: " + result.size());
         simulationData.finishAndExit(ResponseVS.SC_OK, null);
     }

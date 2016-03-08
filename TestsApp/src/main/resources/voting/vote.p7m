@@ -1,6 +1,6 @@
 From: Voting_System_Access_Control
 To: httpwwwsistemavotacionorgControlCenter
-Message-ID: /messageSMIME/4368
+Message-ID: /cmsMessagePEM/4368
 Subject: voto validado por el control de acceso
 MIME-Version: 1.0
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg="sha256,sha512"; 
@@ -12,7 +12,7 @@ Content-Transfer-Encoding: 7bit
 
 {"optionSelected":{"id":2,"content":"field1"},"UUID":"713a11bc-ed02-400e-bda1-5db80c18c442","operation":"SEND_VOTE","eventURL":"http://www.sistemavotacion.org/AccessControl/eventVSElection/1"}
 ------=_Part_6543_1261066581.1422892258884
-Content-Type: application/pkcs7-signature; name=smime.p7s; smime-type=signed-data
+Content-Type: application/pkcs7-signature; name=cms.p7s; cms-type=signed-data
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="MultiSign"
 Content-Description: S/MIME Cryptographic Signature

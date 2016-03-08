@@ -285,7 +285,7 @@ public class OperationVS implements PasswordDialog.Listener {
                     }
                     break;
                 case PUBLISH_EVENT:
-                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, getOperationMessage(), password, "eventURL"), null);
+                    ProgressDialog.show(new SendCMSTask(this, jsonStr, getOperationMessage(), password, "eventURL"), null);
                     break;
                 case SEND_VOTE:
                     ProgressDialog.show(new VoteTask(this, getOperationMessage(), password), null);
@@ -301,7 +301,7 @@ public class OperationVS implements PasswordDialog.Listener {
                     //remove the 'image/jpeg;base64' part from the string
                     String representativeImage = ((String)documentMap.get("base64Image")).split(",")[1];
                     documentMap.put("base64Image", representativeImage);
-                    ProgressDialog.show(new SendSMIMETask(this, JSON.getMapper().writeValueAsString(documentMap),
+                    ProgressDialog.show(new SendCMSTask(this, JSON.getMapper().writeValueAsString(documentMap),
                             getOperationMessage(), password), null);
                     break;
                 case ANONYMOUS_REPRESENTATIVE_SELECTION:
@@ -311,7 +311,7 @@ public class OperationVS implements PasswordDialog.Listener {
                     ProgressDialog.show(new AnonymousDelegationCancelTask(this, getOperationMessage(), password), null);
                     break;
                 default:
-                    ProgressDialog.show(new SendSMIMETask(this, jsonStr, getOperationMessage(), password), null);
+                    ProgressDialog.show(new SendCMSTask(this, jsonStr, getOperationMessage(), password), null);
             }
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -381,7 +381,7 @@ public class OperationVS implements PasswordDialog.Listener {
                     }
                 });
                 break;
-            case OPEN_SMIME:
+            case OPEN_CMS:
                 try {
                     DocumentBrowserDialog.showDialog(Base64.getDecoder().decode(message.getBytes()), event -> {
                         BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
@@ -394,16 +394,16 @@ public class OperationVS implements PasswordDialog.Listener {
                 CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject((message).getBytes()),
                         BrowserHost.getInstance().getScene().getWindow(), getCloseListener());
                 break;
-            case OPEN_SMIME_FROM_URL:
+            case OPEN_CMS_FROM_URL:
                 executorService.submit(() -> {
                     try {
                         ResponseVS response = null;
-                        if(BrowserHost.getInstance().getSMIME(serviceURL) != null) {
-                            response = new ResponseVS(ResponseVS.SC_OK, BrowserHost.getInstance().getSMIME(serviceURL));
+                        if(BrowserHost.getInstance().getCMS(serviceURL) != null) {
+                            response = new ResponseVS(ResponseVS.SC_OK, BrowserHost.getInstance().getCMS(serviceURL));
                         } else {
                             response = HttpHelper.getInstance().getData(serviceURL, ContentTypeVS.TEXT);
                             if (ResponseVS.SC_OK == response.getStatusCode()) {
-                                BrowserHost.getInstance().setSMIME(serviceURL, response.getMessage());
+                                BrowserHost.getInstance().setCMS(serviceURL, response.getMessage());
                             }
                         }
                         if (ResponseVS.SC_OK == response.getStatusCode()) {
@@ -454,7 +454,7 @@ public class OperationVS implements PasswordDialog.Listener {
                 case PUBLISH_EVENT:
                     if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                         String eventURL = ((List<String>)responseVS.getData()).iterator().next() +"?menu=admin";
-                        log.info("publishSMIME - new event URL: " + eventURL);
+                        log.info("publishCMS - new event URL: " + eventURL);
                         BrowserHost.sendMessageToBrowser(MessageDto.NEW_TAB(eventURL));
                         //String receipt = responseVS.getMessage();
                         responseVS.setMessage(ContextVS.getMessage("eventVSPublishedOKMsg"));

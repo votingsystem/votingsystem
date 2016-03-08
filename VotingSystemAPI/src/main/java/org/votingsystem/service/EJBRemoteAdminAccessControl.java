@@ -4,10 +4,6 @@ package org.votingsystem.service;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.KeyStoreVS;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.concurrent.Future;
-
 public interface EJBRemoteAdminAccessControl {
 
     public void generateBackup(Long eventId) throws Exception;

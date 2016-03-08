@@ -84,7 +84,7 @@ public class TimeStampPane extends GridPane {
         certIssuerLabel.setStyle("-fx-font-weight: bold;");
         add(certIssuerLabel, 0, 3);
         setMargin(certIssuerLabel, new Insets(10, 0 , 0, 0));
-        TextField certIssuerTextField = new TextField(signerId.getIssuerAsString());
+        TextField certIssuerTextField = new TextField(signerId.getIssuer().toString());
         certIssuerTextField.setEditable(false);
         add(certIssuerTextField, 0, 4, 2, 1);
 

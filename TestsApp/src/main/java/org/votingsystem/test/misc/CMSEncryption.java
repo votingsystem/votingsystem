@@ -1,10 +1,10 @@
 package org.votingsystem.test.misc;
 
 import org.votingsystem.dto.UserCertificationRequestDto;
-import org.votingsystem.signature.util.Encryptor;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.crypto.Encryptor;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;

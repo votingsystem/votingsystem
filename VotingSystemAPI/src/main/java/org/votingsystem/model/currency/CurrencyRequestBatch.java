@@ -1,7 +1,7 @@
 package org.votingsystem.model.currency;
 
 import org.votingsystem.model.BatchVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.TagVS;
 
 import javax.persistence.*;
@@ -16,19 +16,19 @@ public class CurrencyRequestBatch extends BatchVS implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 
-    @OneToOne private MessageSMIME messageSMIME;
+    @OneToOne private MessageCMS messageCMS;
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="tagVS", nullable=false) private TagVS tagVS;
     @Column(name="timeLimited", nullable=false) private Boolean timeLimited;
 
     public CurrencyRequestBatch() {}
 
-    public MessageSMIME getMessageSMIME() {
-        return messageSMIME;
+    public MessageCMS getMessageCMS() {
+        return messageCMS;
     }
 
-    public void setMessageSMIME(MessageSMIME messageSMIME) {
-        this.messageSMIME = messageSMIME;
+    public void setMessageCMS(MessageCMS messageCMS) {
+        this.messageCMS = messageCMS;
     }
 
     public Boolean getTimeLimited() {

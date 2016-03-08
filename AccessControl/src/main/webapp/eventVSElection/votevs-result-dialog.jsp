@@ -78,7 +78,7 @@
                 this.$.modalDialog.style['pointer-events'] = 'none'
             },
             checkReceipt: function() {
-                var operationVS = new OperationVS(Operation.OPEN_SMIME)
+                var operationVS = new OperationVS(Operation.OPEN_CMS)
                 if(this.messageType == 'VOTE_RESULT') operationVS.message = this.votevsReceipt
                 else if(this.messageType == 'VOTE_CANCELLATION_RESULT') operationVS.message = this.voteVSCancellationReceipt
                 VotingSystemClient.setMessage(operationVS);

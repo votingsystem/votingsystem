@@ -2,9 +2,10 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.apache.commons.io.IOUtils;
 import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.voting.UserRequestCsrVS;
-import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.accesscontrol.ejb.CSRBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
@@ -48,9 +49,9 @@ public class CSRResource {
     }
 
     @Path("/validate") @POST
-    public Object validate(MessageSMIME messageSMIME) throws Exception {
-        DeviceVS deviceVS = csrBean.signCertUserVS(messageSMIME);
-        return Response.ok().entity(CertUtils.getPEMEncoded(deviceVS.getX509Certificate())).build();
+    public Object validate(MessageCMS messageCMS) throws Exception {
+        DeviceVS deviceVS = csrBean.signCertUserVS(messageCMS);
+        return Response.ok().entity(PEMUtils.getPEMEncoded(deviceVS.getX509Certificate())).build();
     }
 
     @Path("/") @GET
@@ -63,7 +64,7 @@ public class CSRResource {
         }
         X509Certificate certX509 = CertUtils.loadCertificate(csrRequest.getCertificateVS().getContent());
         List<X509Certificate> certs = Arrays.asList(certX509, signatureBean.getServerCert());
-        return Response.ok().entity(CertUtils.getPEMEncoded (certs)).build();
+        return Response.ok().entity(PEMUtils.getPEMEncoded (certs)).build();
     }
 
 

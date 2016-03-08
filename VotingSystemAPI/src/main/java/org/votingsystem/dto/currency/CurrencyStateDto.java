@@ -3,7 +3,8 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.signature.util.CertUtils;
+import org.votingsystem.util.crypto.CertUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
@@ -40,9 +41,9 @@ public class CurrencyStateDto {
         if(currency.getCurrencyBatch() != null) batchId = currency.getCurrencyBatch().getId();
         if(currency.getContent() != null) {
             X509Certificate certX509 = CertUtils.loadCertificate(currency.getContent());
-            currencyCert = new String(CertUtils.getPEMEncoded (certX509));
+            currencyCert = new String(PEMUtils.getPEMEncoded (certX509));
         } else if(currency.getX509AnonymousCert() != null) {
-            currencyCert = new String(CertUtils.getPEMEncoded (currency.getX509AnonymousCert()));
+            currencyCert = new String(PEMUtils.getPEMEncoded (currency.getX509AnonymousCert()));
         }
         setAmount(currency.getAmount());
         currencyCode = currency.getCurrencyCode();
@@ -57,10 +58,10 @@ public class CurrencyStateDto {
         for(Currency currency : batchCurrencyList) {
             if(currency.getType() == Currency.Type.LEFT_OVER && currency.getDateCreated().after(dateCreated)) {
                 X509Certificate certX509 = CertUtils.loadCertificate(currency.getContent());
-                leftOverCert = new String(CertUtils.getPEMEncoded (certX509));
+                leftOverCert = new String(PEMUtils.getPEMEncoded (certX509));
             } else if(currency.getType() == Currency.Type.CHANGE && currency.getDateCreated().after(dateCreated)) {
                 X509Certificate certX509 = CertUtils.loadCertificate(currency.getContent());
-                currencyChangeCert = new String(CertUtils.getPEMEncoded (certX509));
+                currencyChangeCert = new String(PEMUtils.getPEMEncoded (certX509));
             }
         }
     }

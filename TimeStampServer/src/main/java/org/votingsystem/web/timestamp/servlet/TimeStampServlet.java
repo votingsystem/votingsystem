@@ -3,10 +3,9 @@ package org.votingsystem.web.timestamp.servlet;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TimeStampVS;
 import org.votingsystem.service.TimeStampService;
-import org.votingsystem.signature.util.TimeStampResponseGenerator;
+import org.votingsystem.util.crypto.TimeStampResponseGenerator;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.timestamp.filter.FilterVS;
 import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
@@ -41,7 +40,7 @@ public class TimeStampServlet extends HttpServlet {
                 TimeStampResponseGenerator responseGenerator = timeStampService.getResponseGenerator(
                         req.getInputStream());
                 byte[] tokenBytes = responseGenerator.getTimeStampToken().getEncoded();
-                TimeStampVS timeStampVS = dao.persist(new TimeStampVS(responseGenerator.getSerialNumber().longValue(),
+                dao.persist(new TimeStampVS(responseGenerator.getSerialNumber().longValue(),
                         tokenBytes, TimeStampVS.State.OK));
                 resp.setContentType(ContentTypeVS.TIMESTAMP_RESPONSE.getName());
                 final ServletOutputStream out = resp.getOutputStream();

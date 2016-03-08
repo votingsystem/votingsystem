@@ -35,8 +35,8 @@ public class TimeStampRequest {
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         simulationData = new SimulationData();
         simulationData.setServerURL("https://192.168.1.5/TimeStampServer");
-        simulationData.setMaxPendingResponses(1);
-        simulationData.setNumRequestsProjected(1);
+        simulationData.setMaxPendingResponses(10);
+        simulationData.setNumRequestsProjected(100);
         Map timerMap = new HashMap<>();
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");

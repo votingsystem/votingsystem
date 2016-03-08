@@ -55,7 +55,7 @@
     </build>
 
     <properties>
-        <votingsystem.version>0.7.0-SNAPSHOT</votingsystem.version>
+        <votingsystem.version>0.8.0-SNAPSHOT</votingsystem.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.ejb.plugin>2.3</version.ejb.plugin>
     </properties>

@@ -40,26 +40,6 @@
             <version>4.5.1</version>
         </dependency>
         <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk16</artifactId>
-            <version>1.46</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcmail-jdk16</artifactId>
-            <version>1.46</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpg-jdk16</artifactId>
-            <version>1.46</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bctsp-jdk16</artifactId>
-            <version>1.46</version>
-        </dependency>
-        <dependency>
             <groupId>org.iban4j</groupId>
             <artifactId>iban4j</artifactId>
             <version>3.1.0</version>
@@ -73,11 +53,6 @@
             <groupId>com.google.zxing</groupId>
             <artifactId>javase</artifactId>
             <version>${zxing.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>1.4.7</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -206,7 +181,7 @@
     </build>
 
     <properties>
-        <votingsystem.version>0.7.0-SNAPSHOT</votingsystem.version>
+        <votingsystem.version>0.8.0-SNAPSHOT</votingsystem.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.wildfly.maven.plugin>1.0.2.Final</version.wildfly.maven.plugin>
         <version.compiler.plugin>3.1</version.compiler.plugin>

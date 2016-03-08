@@ -28,7 +28,7 @@ public class ImageVS extends EntityVS implements Serializable {
      @Column(name="fileBytes")
      private byte[] fileBytes;
      @OneToOne
-     private MessageSMIME messageSMIME;
+     private MessageCMS messageCMS;
      @Temporal(TemporalType.TIMESTAMP)
      @Column(name="dateCreated", length=23)
      private Date dateCreated;
@@ -38,9 +38,9 @@ public class ImageVS extends EntityVS implements Serializable {
      
      public ImageVS() { }
 
-    public ImageVS(UserVS userVS, MessageSMIME messageSMIME, Type type, byte[] fileBytes) {
+    public ImageVS(UserVS userVS, MessageCMS messageCMS, Type type, byte[] fileBytes) {
         this.userVS = userVS;
-        this.messageSMIME = messageSMIME;
+        this.messageCMS = messageCMS;
         this.type = type;
         this.fileBytes = fileBytes;
     }
@@ -102,12 +102,12 @@ public class ImageVS extends EntityVS implements Serializable {
 		this.fileBytes = fileBytes;
 	}
 
-     public MessageSMIME getMessageSMIME() {
-		return messageSMIME;
+     public MessageCMS getMessageCMS() {
+		return messageCMS;
 	}
 
-	 public void setMessageSMIME(MessageSMIME messageSMIME) {
-		this.messageSMIME = messageSMIME;
+	 public void setMessageCMS(MessageCMS messageCMS) {
+		this.messageCMS = messageCMS;
 	}
 
 }

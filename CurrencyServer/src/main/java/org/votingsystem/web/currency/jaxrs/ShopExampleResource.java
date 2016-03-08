@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -8,7 +9,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
@@ -108,11 +108,10 @@ public class ShopExampleResource {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         AsyncRequestShopBundle requestBundle = shopExampleBean.getRequestBundle(uuid);
         String currencyCSR = requestBundle.addHashCertVS(config.getContextURL(), hashCertVS);
-        SMIMEMessage smimeMessage = signatureBean.getSMIME(config.getServerName(), hashCertVS, currencyCSR,
-                messages.get("currencyChangeSubject"));
+        CMSSignedMessage cmsMessage = signatureBean.signData(currencyCSR);
         if(requestBundle.getTransactionDto() != null) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(requestBundle.getTransactionDto(
-                    smimeMessage))).type(MediaTypeVS.JSON).build();
+                    cmsMessage))).type(MediaTypeVS.JSON).build();
         } else {
             return Response.status(Response.Status.NOT_FOUND).entity(messages.get("sessionExpiredMsg"))
                     .type(MediaType.TEXT_PLAIN + ";charset=utf-8").build();

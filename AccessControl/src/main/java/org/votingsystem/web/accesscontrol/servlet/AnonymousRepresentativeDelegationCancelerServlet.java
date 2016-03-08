@@ -1,7 +1,7 @@
 package org.votingsystem.web.accesscontrol.servlet;
 
 
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.AnonymousDelegation;
 import org.votingsystem.throwable.ExceptionVS;
@@ -48,14 +48,14 @@ public class AnonymousRepresentativeDelegationCancelerServlet extends HttpServle
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(),
                     MultipartRequestVS.Type.ANONYMOUS_DELEGATION_CANCELATION);
-            MessageSMIME messageSMIME = signatureBean.validateSMIME(
-                    requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
-            MessageSMIME anonymousMessageSMIME = signatureBean.validateSMIME(
-                    requestVS.getAnonymousSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
+            MessageCMS messageCMS = signatureBean.validateCMS(
+                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
+            MessageCMS anonymousMessageCMS = signatureBean.validateCMS(
+                    requestVS.getAnonymousCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
             AnonymousDelegation anonymousDelegation = representativeDelegationBean.cancelAnonymousDelegation(
-                    messageSMIME, anonymousMessageSMIME);
+                    messageCMS, anonymousMessageCMS);
 
-            byte[] receiptBytes = anonymousDelegation.getCancellationSMIME().getContent();
+            byte[] receiptBytes = anonymousDelegation.getCancellationCMS().getContent();
             resp.setContentType(MediaTypeVS.JSON_SIGNED);
             resp.setContentLength(receiptBytes.length);
             resp.getOutputStream().write(receiptBytes);

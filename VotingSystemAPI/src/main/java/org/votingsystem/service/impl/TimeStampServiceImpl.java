@@ -8,12 +8,12 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.*;
 import org.bouncycastle.util.Store;
 import org.votingsystem.service.TimeStampService;
-import org.votingsystem.signature.util.CertUtils;
-import org.votingsystem.signature.util.KeyStoreUtil;
-import org.votingsystem.signature.util.SignatureData;
-import org.votingsystem.signature.util.TimeStampResponseGenerator;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.crypto.KeyStoreUtil;
+import org.votingsystem.util.crypto.PEMUtils;
+import org.votingsystem.util.crypto.SignatureData;
+import org.votingsystem.util.crypto.TimeStampResponseGenerator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,13 +46,13 @@ public class TimeStampServiceImpl implements TimeStampService {
             KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password.toCharArray());
             PrivateKey signingKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
             X509Certificate signingCert = (X509Certificate) keyStore.getCertificate(keyAlias);
-            signingCertPEMBytes = CertUtils.getPEMEncoded(signingCert);
+            signingCertPEMBytes = PEMUtils.getPEMEncoded(signingCert);
             timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                     ContextVS.PROVIDER).build(signingCert);
             X509CertificateHolder certHolder = timeStampSignerInfoVerifier.getAssociatedCertificate();
             TSPUtil.validateCertificate(certHolder);
             Certificate[] chain = keyStore.getCertificateChain(keyAlias);
-            signingCertChainPEMBytes = CertUtils.getPEMEncoded (Arrays.asList(chain));
+            signingCertChainPEMBytes = PEMUtils.getPEMEncoded (Arrays.asList(chain));
             Store certs = new JcaCertStore(Arrays.asList(chain));
             signingData = new SignatureData(signingCert, signingKey, certs);
         } catch(Exception ex) {
@@ -90,8 +90,8 @@ public class TimeStampServiceImpl implements TimeStampService {
 
     public byte[] getTimeStampResponse(InputStream inputStream) throws OperatorCreationException,
             CertificateEncodingException, ExceptionVS, TSPException, IOException {
-        org.votingsystem.signature.util.TimeStampResponseGenerator responseGenerator =
-                new org.votingsystem.signature.util.TimeStampResponseGenerator(inputStream, signingData, new Date());
+        TimeStampResponseGenerator responseGenerator =
+                new TimeStampResponseGenerator(inputStream, signingData, new Date());
         return responseGenerator.getTimeStampToken().getEncoded();
     }
 

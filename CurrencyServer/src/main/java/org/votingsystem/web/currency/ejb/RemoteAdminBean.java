@@ -2,7 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.service.EJBRemoteAdminCurrencyServer;
-import org.votingsystem.signature.util.KeyStoreUtil;
+import org.votingsystem.util.crypto.KeyStoreUtil;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;

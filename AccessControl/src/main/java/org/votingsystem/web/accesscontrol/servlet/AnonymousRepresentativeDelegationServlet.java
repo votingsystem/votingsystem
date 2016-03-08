@@ -1,12 +1,12 @@
 package org.votingsystem.web.accesscontrol.servlet;
 
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -49,11 +49,11 @@ public class AnonymousRepresentativeDelegationServlet extends HttpServlet {
             throws ServletException, IOException, IOException {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ANONYMOUS_DELEGATION);
-            MessageSMIME messageSMIME = signatureBean.validateSMIME(
-                    requestVS.getSMIME(), ContentTypeVS.JSON_SIGNED).getMessageSMIME();
+            MessageCMS messageCMS = signatureBean.validateCMS(
+                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
             X509Certificate anonymousIssuedCert = representativeDelegationBean.validateAnonymousRequest(
-                    messageSMIME, requestVS.getCSRBytes());
-            byte[] issuedCertPEMBytes = CertUtils.getPEMEncoded(anonymousIssuedCert);
+                    messageCMS, requestVS.getCSRBytes());
+            byte[] issuedCertPEMBytes = PEMUtils.getPEMEncoded(anonymousIssuedCert);
             resp.setContentType(MediaTypeVS.PEM);
             resp.setContentLength(issuedCertPEMBytes.length);
             resp.getOutputStream().write(issuedCertPEMBytes);

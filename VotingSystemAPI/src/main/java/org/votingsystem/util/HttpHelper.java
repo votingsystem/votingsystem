@@ -39,8 +39,8 @@ import org.apache.http.util.CharArrayBuffer;
 import org.apache.http.util.EntityUtils;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.*;
+import org.votingsystem.util.crypto.CertUtils;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;

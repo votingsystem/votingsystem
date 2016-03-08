@@ -6,19 +6,18 @@ import org.votingsystem.callable.AccessRequestDataSender;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.VoteVSDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertificationRequestVS;
-import org.votingsystem.signature.util.VoteVSHelper;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
+import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.VoteVSHelper;
 
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -49,9 +48,9 @@ public class VoteTask extends Task<Void> {
             String toUser = voteVS.getEventURL();
             String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + voteVS.getEventVSId();
             AccessRequestDto accessRequestDto = voteVSHelper.getAccessRequest();
-            SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(fromUser, toUser,
+            CMSSignedMessage cmsMessage = BrowserSessionService.getCMS(fromUser, toUser,
                     JSON.getMapper().writeValueAsString(accessRequestDto), password, msgSubject);
-            responseVS = new AccessRequestDataSender(smimeMessage,
+            responseVS = new AccessRequestDataSender(cmsMessage,
                     accessRequestDto, voteVS.getHashCertVSBase64()).call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
 
@@ -61,17 +60,15 @@ public class VoteTask extends Task<Void> {
             updateProgress(60, 100);
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
             String textToSign = JSON.getMapper().writeValueAsString(voteVS); ;
-            fromUser = voteVS.getHashCertVSBase64();
-            msgSubject = ContextVS.getInstance().getMessage("voteVSSubject");
-            smimeMessage = certificationRequest.getSMIME(fromUser, toUser, textToSign, msgSubject, null);
+            cmsMessage = certificationRequest.signData(textToSign);
             updateProgress(70, 100);
-            smimeMessage = new MessageTimeStamper(smimeMessage,
+            cmsMessage = new MessageTimeStamper(cmsMessage,
                     ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
-            responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.VOTE,
+            responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.VOTE,
                     ContextVS.getInstance().getControlCenter().getVoteServiceURL());
             updateProgress(90, 100);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                voteVSHelper.setValidatedVote(responseVS.getSMIME());
+                voteVSHelper.setValidatedVote(responseVS.getCMS());
                 ResponseVS voteResponse = new ResponseVS(ResponseVS.SC_OK);
                 voteResponse.setData(voteVSHelper);
                 ContextVS.getInstance().addHashCertVSData(voteVS.getHashCertVSBase64(), voteResponse);
@@ -81,7 +78,7 @@ public class VoteTask extends Task<Void> {
                 responseMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
                 responseMap.put("hashCertVSHex", hashCertVSHex);
                 responseMap.put("voteURL", ContextVS.getInstance().getAccessControl().getVoteStateServiceURL(hashCertVSHex));
-                responseMap.put("voteVSReceipt", Base64.getEncoder().encodeToString(voteVSHelper.getValidatedVote().getBytes()));
+                responseMap.put("voteVSReceipt", voteVSHelper.getValidatedVote().toPEMStr());
                 responseVS.setMessage(JSON.getMapper().writeValueAsString(responseMap));
             }
 

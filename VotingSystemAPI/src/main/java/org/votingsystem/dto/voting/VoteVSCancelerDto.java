@@ -1,9 +1,9 @@
 package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.signature.util.CMSUtils;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 
 import java.security.NoSuchAlgorithmException;
@@ -32,9 +32,9 @@ public class VoteVSCancelerDto {
         if(hashAccessRequestBase64 == null) throw new ValidationExceptionVS("ERROR - missing param 'hashAccessRequestBase64'");
         if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
         if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
-        if(!hashAccessRequestBase64.equals(CMSUtils.getHashBase64(originHashAccessRequest,
+        if(!hashAccessRequestBase64.equals(StringUtils.getHashBase64(originHashAccessRequest,
                 ContextVS.VOTING_DATA_DIGEST))) throw new ValidationExceptionVS("voteCancellationAccessRequestHashError");
-        if(!hashCertVSBase64.equals(CMSUtils.getHashBase64(originHashCertVote,
+        if(!hashCertVSBase64.equals(StringUtils.getHashBase64(originHashCertVote,
                 ContextVS.VOTING_DATA_DIGEST))) throw new ValidationExceptionVS("voteCancellationHashCertificateError");
     }
 

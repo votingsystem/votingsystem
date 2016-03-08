@@ -7,10 +7,10 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.BrowserHost;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.dialog.DocumentBrowserDialog;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 
@@ -33,11 +33,11 @@ public class EventBusTransactionResponseListener {
                         QRMessageDto<TransactionVSDto> qrDto = (QRMessageDto<TransactionVSDto>) socketMsg
                                 .getWebSocketSession().getData();
                         TransactionVSDto transactionDto = qrDto.getData();
-                        SMIMEMessage smimeMessage = socketMsg.getSMIME();
-                        String result = transactionDto.validateReceipt(smimeMessage, true);
+                        CMSSignedMessage cmsMessage = socketMsg.getCMS();
+                        String result = transactionDto.validateReceipt(cmsMessage, true);
                         Button openReceiptButton = new Button(ContextVS.getMessage("openReceiptLbl"),
                                 Utils.getIcon(FontAwesome.Glyph.CERTIFICATE));
-                        openReceiptButton.setOnAction(event -> DocumentBrowserDialog.showDialog(smimeMessage, null));
+                        openReceiptButton.setOnAction(event -> DocumentBrowserDialog.showDialog(cmsMessage, null));
                         if(qrDto.getTypeVS() == TypeVS.CURRENCY_CHANGE) {
                             Button saveWalletButton = new Button(ContextVS.getMessage("saveToSecureWalletMsg"),
                                     Utils.getIcon(FontAwesome.Glyph.MONEY));

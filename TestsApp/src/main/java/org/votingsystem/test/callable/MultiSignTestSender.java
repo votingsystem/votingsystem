@@ -1,12 +1,13 @@
 package org.votingsystem.test.callable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.JSON;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,24 +31,22 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
     }
     
     @Override public ResponseVS call() throws Exception {
-        String subject = "Message from MultiSignTestSender";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(this.nif);
-        SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(nif,
-                StringUtils.getNormalized(serverURL), getRequestJSON(nif).toString(), subject);
+        CMSSignedMessage cmsMessage = signatureService.addSignatureWithTimeStamp(getRequest(nif));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(
-                smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED, serverURL);
+                cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED, serverURL);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            SMIMEMessage smimeResponse = new SMIMEMessage(responseVS.getMessageBytes());
-            log.info("- smimeResponse.isValidSignature(): " + smimeResponse.isValidSignature());
+            CMSSignedMessage cmsResponse = new CMSSignedMessage(responseVS.getMessageBytes());
+            log.info("- cmsResponse.isValidSignature(): " + cmsResponse.isValidSignature());
         } else throw new ExceptionVS(responseVS.getMessage());
         return responseVS;
     }
 
-    private Map getRequestJSON(String from) {
+    private String getRequest(String from) throws JsonProcessingException {
         Map map = new HashMap();
         map.put("from", from);
         map.put("UUID", UUID.randomUUID().toString());
-        return map;
+        return JSON.getMapper().writeValueAsString(map);
     }
 
 }

@@ -1,6 +1,6 @@
 package org.votingsystem.model.voting;
 
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 
@@ -33,9 +33,9 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
     @Column(name="hashAnonymousDelegation", unique=true) private String hashAnonymousDelegation;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
-    @OneToOne private MessageSMIME delegationSMIME;
+    @OneToOne private MessageCMS delegationCMS;
 
-    @OneToOne private MessageSMIME cancellationSMIME;
+    @OneToOne private MessageCMS cancellationCMS;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateFrom", length=23, nullable=false)
@@ -58,10 +58,10 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
 
     public AnonymousDelegation() {}
 
-    public AnonymousDelegation(Status status, MessageSMIME delegationSMIME, UserVS userVS, Date dateFrom,
+    public AnonymousDelegation(Status status, MessageCMS delegationCMS, UserVS userVS, Date dateFrom,
                                Date dateTo) {
         this.status = status;
-        this.delegationSMIME = delegationSMIME;
+        this.delegationCMS = delegationCMS;
         this.userVS = userVS;
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
@@ -99,20 +99,20 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
-    public MessageSMIME getDelegationSMIME() {
-        return delegationSMIME;
+    public MessageCMS getDelegationCMS() {
+        return delegationCMS;
     }
 
-    public void setDelegationSMIME(MessageSMIME delegationSMIME) {
-        this.delegationSMIME = delegationSMIME;
+    public void setDelegationCMS(MessageCMS delegationCMS) {
+        this.delegationCMS = delegationCMS;
     }
 
-    public MessageSMIME getCancellationSMIME() {
-        return cancellationSMIME;
+    public MessageCMS getCancellationCMS() {
+        return cancellationCMS;
     }
 
-    public AnonymousDelegation setCancellationSMIME(MessageSMIME cancellationSMIME) {
-        this.cancellationSMIME = cancellationSMIME;
+    public AnonymousDelegation setCancellationCMS(MessageCMS cancellationCMS) {
+        this.cancellationCMS = cancellationCMS;
         return this;
     }
 

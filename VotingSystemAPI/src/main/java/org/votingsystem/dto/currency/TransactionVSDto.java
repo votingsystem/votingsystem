@@ -3,17 +3,16 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Sets;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 
 import java.math.BigDecimal;
@@ -40,9 +39,9 @@ public class TransactionVSDto {
     private String fromUserIBAN;
     private String receipt;
     private String bankIBAN;
-    private String messageSMIME;
-    private String messageSMIMEURL;
-    private String messageSMIMEParentURL;
+    private String cmsMessagePEM;
+    private String cmsMessageURL;
+    private String cmsMessageParentURL;
     private String UUID;
     private BigDecimal amount;
     private Boolean timeLimited = Boolean.FALSE;
@@ -59,7 +58,7 @@ public class TransactionVSDto {
     @JsonIgnore private List<UserVS> toUserVSList;
     @JsonIgnore private UserVS signer;
     @JsonIgnore private UserVS receptor;
-    @JsonIgnore private MessageSMIME transactionVSSMIME;
+    @JsonIgnore private MessageCMS messageCMS_DB;
 
 
     public TransactionVSDto() {}
@@ -85,8 +84,8 @@ public class TransactionVSDto {
 
     public TransactionVSDto(TransactionVS transactionVS, String contextURL) {
         this(transactionVS);
-        if(transactionVS.getMessageSMIME() != null) {
-            setMessageSMIMEURL(contextURL + "/rest/messageSMIME/id/" + transactionVS.getMessageSMIME().getId());
+        if(transactionVS.getMessageCMS() != null) {
+            setCmsMessageURL(contextURL + "/rest/cmsMessagePEM/id/" + transactionVS.getMessageCMS().getId());
         }
     }
 
@@ -185,7 +184,7 @@ public class TransactionVSDto {
         transactionVS.setCurrencyCode(currencyCode);
         transactionVS.setSubject(subject);
         transactionVS.setValidTo(validTo);
-        transactionVS.setMessageSMIME(transactionVSSMIME);
+        transactionVS.setMessageCMS(messageCMS_DB);
         transactionVS.setState(TransactionVS.State.OK);
         transactionVS.setTag(tagVS);
         return transactionVS;
@@ -248,12 +247,12 @@ public class TransactionVSDto {
     }
 
 
-    public String getMessageSMIMEURL() {
-        return messageSMIMEURL;
+    public String getCMSMessageURL() {
+        return cmsMessageURL;
     }
 
-    public void setMessageSMIMEURL(String messageSMIMEURL) {
-        this.messageSMIMEURL = messageSMIMEURL;
+    public void setCmsMessageURL(String cmsMessageURL) {
+        this.cmsMessageURL = cmsMessageURL;
     }
 
     public BigDecimal getAmount() {
@@ -289,12 +288,12 @@ public class TransactionVSDto {
         this.numChildTransactions = numChildTransactions;
     }
 
-    public String getMessageSMIME() {
-        return messageSMIME;
+    public String getCMSMessagePEM() {
+        return cmsMessagePEM;
     }
 
-    public void setMessageSMIME(String messageSMIME) {
-        this.messageSMIME = messageSMIME;
+    public void setCmsMessagePEM(String cmsMessagePEM) {
+        this.cmsMessagePEM = cmsMessagePEM;
     }
 
     public String getReceipt() {
@@ -384,13 +383,13 @@ public class TransactionVSDto {
         this.receptor = receptor;
     }
 
-    public MessageSMIME getTransactionVSSMIME() {
-        return transactionVSSMIME;
+    public MessageCMS getMessageCMS_DB() {
+        return messageCMS_DB;
     }
 
-    public void setTransactionVSSMIME(MessageSMIME transactionVSSMIME) {
-        this.transactionVSSMIME = transactionVSSMIME;
-        this.signer = transactionVSSMIME.getUserVS();
+    public void setMessageCMS_DB(MessageCMS messageCMS_DB) {
+        this.messageCMS_DB = messageCMS_DB;
+        this.signer = messageCMS_DB.getUserVS();
     }
 
     public String getUUID() {
@@ -411,7 +410,7 @@ public class TransactionVSDto {
         dto.setOperation(operation);
         dto.setToUser(receptorNIF);
         dto.setAmount(receptorPart);
-        dto.setMessageSMIMEParentURL(contextURL + "/rest/messageSMIME/id/" + transactionVSSMIME.getId());
+        dto.setCmsMessageParentURL(contextURL + "/rest/cmsMessagePEM/id/" + messageCMS_DB.getId());
         dto.setNumReceptors(numReceptors);
         return dto;
     }
@@ -444,12 +443,12 @@ public class TransactionVSDto {
         this.toUser = toUser;
     }
 
-    public String getMessageSMIMEParentURL() {
-        return messageSMIMEParentURL;
+    public String getCMSMessageParentURL() {
+        return cmsMessageParentURL;
     }
 
-    public void setMessageSMIMEParentURL(String messageSMIMEParentURL) {
-        this.messageSMIMEParentURL = messageSMIMEParentURL;
+    public void setCmsMessageParentURL(String cmsMessageParentURL) {
+        this.cmsMessageParentURL = cmsMessageParentURL;
     }
 
     public UserVS.Type getUserToType() {
@@ -468,21 +467,21 @@ public class TransactionVSDto {
         this.paymentOptions = paymentOptions;
     }
 
-    public String validateReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
-        TypeVS typeVS = TypeVS.valueOf(smimeMessage.getHeader("TypeVS")[0]);
-        switch(typeVS) {
+    public String validateReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
+        TransactionVSDto dto = cmsMessage.getSignedContent(TransactionVSDto.class);
+        switch(dto.getOperation()) {
             case FROM_USERVS:
-                return validateFromUserVSReceipt(smimeMessage, isIncome);
+                return validateFromUserVSReceipt(cmsMessage, isIncome);
             case CURRENCY_SEND:
-                return validateCurrencySendReceipt(smimeMessage, isIncome);
+                return validateCurrencySendReceipt(cmsMessage, isIncome);
             case CURRENCY_CHANGE:
-                return validateCurrencyChangeReceipt(smimeMessage, isIncome);
-            default: throw new ValidationExceptionVS("unknown operation: " + typeVS);
+                return validateCurrencyChangeReceipt(cmsMessage, isIncome);
+            default: throw new ValidationExceptionVS("unknown operation: " + dto.getOperation());
         }
     }
 
-    private String validateCurrencySendReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
-        CurrencyBatchDto receiptDto = smimeMessage.getSignedContent(CurrencyBatchDto.class);
+    private String validateCurrencySendReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
+        CurrencyBatchDto receiptDto = cmsMessage.getSignedContent(CurrencyBatchDto.class);
         if(TypeVS.CURRENCY_SEND != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
                 TypeVS.CURRENCY_SEND + " - found: " + receiptDto.getOperation());
         if(type == TransactionVS.Type.TRANSACTIONVS_INFO) {
@@ -503,8 +502,8 @@ public class TransactionVSDto {
                 receiptDto.getCurrencyCode(), receiptDto.getTag());
     }
 
-    private String validateFromUserVSReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
-        TransactionVSDto receiptDto = JSON.getMapper().readValue(smimeMessage.getSignedContent(), TransactionVSDto.class);
+    private String validateFromUserVSReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
+        TransactionVSDto receiptDto = cmsMessage.getSignedContent(TransactionVSDto.class);
         if(type == TransactionVS.Type.TRANSACTIONVS_INFO) {
             if(!paymentOptions.contains(receiptDto.getType())) throw new ValidationExceptionVS("unexpected type " +
                     receiptDto.getType());
@@ -532,8 +531,8 @@ public class TransactionVSDto {
                 receiptDto.getCurrencyCode(), receiptDto.getTagName());
     }
 
-    private String validateCurrencyChangeReceipt(SMIMEMessage smimeMessage, boolean isIncome) throws Exception {
-        CurrencyBatchDto receiptDto = smimeMessage.getSignedContent(CurrencyBatchDto.class);
+    private String validateCurrencyChangeReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
+        CurrencyBatchDto receiptDto = cmsMessage.getSignedContent(CurrencyBatchDto.class);
         if(TypeVS.CURRENCY_CHANGE != receiptDto.getOperation()) throw new ValidationExceptionVS("ERROR - expected type: " +
                 TypeVS.CURRENCY_CHANGE + " - found: " + receiptDto.getOperation());
         if(type == TransactionVS.Type.TRANSACTIONVS_INFO) {

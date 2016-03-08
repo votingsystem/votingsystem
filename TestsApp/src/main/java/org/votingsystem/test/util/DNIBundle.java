@@ -1,6 +1,5 @@
 package org.votingsystem.test.util;
 
-import org.votingsystem.signature.smime.SMIMESignedGeneratorVS;
 
 import java.security.KeyStore;
 
@@ -11,12 +10,10 @@ public class DNIBundle {
 
     private String nif;
     private KeyStore keyStore;
-    private SMIMESignedGeneratorVS messageSigner;
 
-    public DNIBundle(String nif, KeyStore keyStore, SMIMESignedGeneratorVS messageSigner) {
+    public DNIBundle(String nif, KeyStore keyStore) {
         this.nif = nif;
         this.keyStore = keyStore;
-        this.messageSigner = messageSigner;
     }
 
     public String getNif() {
@@ -27,7 +24,4 @@ public class DNIBundle {
         return keyStore;
     }
 
-    public SMIMESignedGeneratorVS getMessageSigner() {
-        return messageSigner;
-    }
 }

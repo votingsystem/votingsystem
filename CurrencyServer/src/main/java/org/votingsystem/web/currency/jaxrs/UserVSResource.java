@@ -1,29 +1,30 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.iban4j.Iban;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.BankVSInfo;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.SubscriptionVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Interval;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.currency.ejb.*;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
@@ -289,21 +290,21 @@ public class UserVSResource {
 
     @Path("/userInfoTest")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response userInfoTest(MessageSMIME messageSMIME, @Context HttpServletRequest req, @Context
+    public Response userInfoTest(MessageCMS messageCMS, @Context HttpServletRequest req, @Context
         HttpServletResponse resp) throws Exception {
-        SMIMEMessage smimeMessage = messageSMIME.getSMIME();
-        Map<String, Object> dataMap = JSON.getMapper().readValue(smimeMessage.getSignedContent(), Map.class);
+        CMSSignedMessage cmsMessage = messageCMS.getCMS();
+        Map<String, String> dataMap = cmsMessage.getSignedContent(new TypeReference<Map<String, String>>() {});
         //TODO check operation
         Interval timePeriod = DateUtils.getCurrentWeekPeriod();
-        BalancesDto dto = balancesBean.getBalancesDto(messageSMIME.getUserVS(), timePeriod);
+        BalancesDto dto = balancesBean.getBalancesDto(messageCMS.getUserVS(), timePeriod);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
     @Path("/save")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response save(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
+    public Response save(MessageCMS messageCMS, @Context HttpServletRequest req) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS newUser = userVSBean.saveUser(messageSMIME);
+        UserVS newUser = userVSBean.saveUser(messageCMS);
         MessageDto messageDto = MessageDto.OK(messages.get("certUserNewMsg", newUser.getNif()),
                 config.getContextURL() + "/rest/userVS/id/" + newUser.getId());
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).build();
@@ -311,16 +312,16 @@ public class UserVSResource {
 
     @Path("/csrSignedWithIDCard")
     @POST @Produces("text/plain")
-    public Response csrSignedWithIDCard(MessageSMIME messageSMIME) throws Exception {
-        X509Certificate issuedCert = signatureBean.signCSRSignedWithIDCard(messageSMIME);
-        return Response.ok().entity(CertUtils.getPEMEncoded(issuedCert)).build();
+    public Response csrSignedWithIDCard(MessageCMS messageCMS) throws Exception {
+        X509Certificate issuedCert = signatureBean.signCSRSignedWithIDCard(messageCMS);
+        return Response.ok().entity(PEMUtils.getPEMEncoded(issuedCert)).build();
     }
 
     @Path("/newBankVS")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response newBankVS(MessageSMIME messageSMIME, @Context HttpServletRequest req) throws Exception {
+    public Response newBankVS(MessageCMS messageCMS, @Context HttpServletRequest req) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        BankVS newBankVS = bankVSBean.saveBankVS(messageSMIME);
+        BankVS newBankVS = bankVSBean.saveBankVS(messageCMS);
         MessageDto messageDto = new MessageDto(ResponseVS.SC_OK,
                 messages.get("newBankVSOKMsg", newBankVS.getCertificate().getSubjectDN().toString()),
                 config.getContextURL() + "/rest/userVS/id/" + newBankVS.getId());

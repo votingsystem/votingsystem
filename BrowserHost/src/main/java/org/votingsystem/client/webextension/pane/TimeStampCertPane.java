@@ -7,9 +7,9 @@ import javafx.scene.web.WebView;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.dialog.MessageDialog;
 import org.votingsystem.client.webextension.util.Utils;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
@@ -41,7 +41,7 @@ public class TimeStampCertPane extends GridPane {
 
     private void showPEMCert() {
         try {
-            String message = new String(CertUtils.getPEMEncoded(certificate));
+            String message = new String(PEMUtils.getPEMEncoded(certificate));
             MessageDialog messageDialog = new MessageDialog(getScene().getWindow());
             messageDialog.showMessage(null, certificate.getSubjectDN().toString() + " - " + message);
         } catch(Exception ex) {

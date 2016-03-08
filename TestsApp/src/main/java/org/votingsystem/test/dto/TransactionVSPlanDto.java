@@ -2,6 +2,7 @@ package org.votingsystem.test.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
@@ -9,7 +10,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.test.util.TransactionVSCounter;
@@ -44,7 +44,7 @@ public class TransactionVSPlanDto {
 
     public TransactionVSPlanDto() {  }
 
-    public Map<String, Map<String, BigDecimal>> runBankVSTransactions(String smimeMessageSubject) throws Exception {
+    public Map<String, Map<String, BigDecimal>> runBankVSTransactions() throws Exception {
         setBankVSBalance(new HashMap<>());
         for(TransactionVSDto transactionVS : getBankVSList()) {
             transactionVS.setType(TransactionVS.Type.FROM_BANKVS);
@@ -59,9 +59,8 @@ public class TransactionVSPlanDto {
 
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
                         transactionVS.getFromUserVS().getNIF(), UserVS.Type.BANKVS);
-            SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(transactionVS.getFromUserVS().getNIF(),
-                    getCurrencyServer().getName(), JSON.getMapper().writeValueAsString(transactionVS), smimeMessageSubject);
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+            CMSSignedMessage cmsMessage = signatureService.addSignatureWithTimeStamp(JSON.getMapper().writeValueAsString(transactionVS));
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                     getCurrencyServer().getTransactionVSServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
             updateCurrencyMap(bankVSBalance, transactionVS);
@@ -69,7 +68,7 @@ public class TransactionVSPlanDto {
         return bankVSBalance;
     }
 
-    public Map<String, Map<String, BigDecimal>> runGroupVSTransactions(String smimeMessageSubject) throws Exception {
+    public Map<String, Map<String, BigDecimal>> runGroupVSTransactions() throws Exception {
         groupVSBalance = new HashMap<>();
         for(TransactionVSDto transactionVS : getGroupVSList()) {
             transactionVS.setFromUserIBAN(groupVSDto.getIBAN());
@@ -77,9 +76,8 @@ public class TransactionVSPlanDto {
             UserVSDto representative = groupVSDto.getRepresentative();
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
                     representative.getNIF(), UserVS.Type.USER);
-            SMIMEMessage smimeMessage = signatureService.getSMIMETimeStamped(representative.getNIF(),
-                    getCurrencyServer().getName(), JSON.getMapper().writeValueAsString(transactionVS), smimeMessageSubject);
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+            CMSSignedMessage cmsMessage = signatureService.addSignatureWithTimeStamp(JSON.getMapper().writeValueAsString(transactionVS));
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                     getCurrencyServer().getTransactionVSServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
             updateCurrencyMap(groupVSBalance, transactionVS);
@@ -87,9 +85,9 @@ public class TransactionVSPlanDto {
         return groupVSBalance;
     }
 
-    public void runTransactionsVS(String smimeMessageSubject) throws Exception {
-        runBankVSTransactions(smimeMessageSubject);
-        runGroupVSTransactions(smimeMessageSubject);
+    public void runTransactionsVS() throws Exception {
+        runBankVSTransactions();
+        runGroupVSTransactions();
     }
 
     public static Map<String, Map<String, BigDecimal>> updateCurrencyMap(

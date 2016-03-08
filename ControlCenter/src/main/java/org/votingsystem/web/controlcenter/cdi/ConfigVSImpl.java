@@ -22,10 +22,8 @@ import javax.inject.Singleton;
 import javax.persistence.Query;
 import java.io.File;
 import java.net.URL;
-import java.security.cert.X509Certificate;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -54,9 +52,10 @@ public class ConfigVSImpl implements ConfigVS {
     private String timeStampServerURL;
     private EnvironmentVS mode;
     private Properties props;
-    private String emailAdmin = null;
-    private String staticResURL = null;
-    private File serverDir = null;
+    private String emailAdmin;
+    private String staticResURL;
+    private File serverDir;
+    private UserVS systemUser;
 
     public ConfigVSImpl() {
         try {
@@ -98,9 +97,9 @@ public class ConfigVSImpl implements ConfigVS {
         log.info("initialize");
         Query query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
                 .setParameter("type", UserVS.Type.SYSTEM);
-        UserVS systemUser = dao.getSingleResult(UserVS.class, query);
+        systemUser = dao.getSingleResult(UserVS.class, query);
         if(systemUser == null) {
-            dao.persist(new UserVS(systemNIF, serverName, UserVS.Type.SYSTEM));
+            systemUser = dao.persist(new UserVS(systemNIF, serverName, UserVS.Type.SYSTEM));
         }
         new ContextVS(null, null);
         executorService.submit(() -> {
@@ -166,7 +165,7 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Override
     public UserVS getSystemUser() {
-        return null;
+        return systemUser;
     }
 
     @Override

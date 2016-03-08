@@ -2,13 +2,13 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.voting.AccessRequestDto;
-import org.votingsystem.model.MessageSMIME;
+import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.AccessRequestVS;
 import org.votingsystem.model.voting.EventVSElection;
-import org.votingsystem.signature.util.CsrResponse;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.util.crypto.CsrResponse;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -29,19 +29,19 @@ public class AccessRequestBean {
     @Inject ConfigVS config;
 
     @Transactional
-    public CsrResponse saveRequest(MessageSMIME messageSMIME, byte[] csr) throws Exception {
-        UserVS signer = messageSMIME.getUserVS();
-        AccessRequestDto request =  messageSMIME.getSignedContent(AccessRequestDto.class);
+    public CsrResponse saveRequest(MessageCMS messageCMS, byte[] csr) throws Exception {
+        UserVS signer = messageCMS.getUserVS();
+        AccessRequestDto request =  messageCMS.getSignedContent(AccessRequestDto.class);
         validateAccessRequest(request, signer.getTimeStampToken().getTimeStampInfo().getGenTime());
         Query query = dao.getEM().createQuery("select a from AccessRequestVS a where a.userVS =:userVS and " +
                 "a.eventVS =:eventVS and a.state =:state").setParameter("userVS", signer)
                 .setParameter("eventVS", request.getEventVS()).setParameter("state", AccessRequestVS.State.OK);
         AccessRequestVS accessRequestVS = dao.getSingleResult(AccessRequestVS.class, query);
         if (accessRequestVS != null){
-            throw new ExceptionVS(MessageDto.REQUEST_REPEATED(null, config.getContextURL() + "/rest/messageSMIME/id/" +
-                    accessRequestVS.getMessageSMIME().getId()));
+            throw new ExceptionVS(MessageDto.REQUEST_REPEATED(null, config.getContextURL() + "/rest/messageCMS/id/" +
+                    accessRequestVS.getMessageCMS().getId()));
         } else {
-            accessRequestVS = dao.persist(new AccessRequestVS(signer, messageSMIME, AccessRequestVS.State.OK,
+            accessRequestVS = dao.persist(new AccessRequestVS(signer, messageCMS, AccessRequestVS.State.OK,
                     request.getHashAccessRequestBase64(), request.getEventVS()));
             request.setAccessRequestVS(accessRequestVS);
             CsrResponse csrResponse = null;

@@ -72,7 +72,7 @@
                     <div class="flex horizontal layout center center-justified">
                         <div id="tooltip" class="tooltip" style="display: none;">
                             <div style$="[[selectedTransactionTypeStyle]]">[[getTransactionDescription(selectedTransaction.type)]]</div>
-                            <div style="font-size: 0.9em;margin: 0 0 2px 0;"><a href="[[selectedTransaction.messageSMIMEURL]]" target="_blank">
+                            <div style="font-size: 0.9em;margin: 0 0 2px 0;"><a href="[[selectedTransaction.cmsMessageURL]]" target="_blank">
                                 [[getDate(selectedTransaction.dateCreated)]]</a></div>
                             <div style$="[[selectedTransactionTagStyle]]">
                                 [[selectedTransaction.amount]] [[selectedTransaction.currencyCode]] - [[selectedTransactionTag]]

@@ -1,11 +1,11 @@
 package org.votingsystem.test.misc;
 
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.CertValidationDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -22,7 +22,7 @@ public class Test {
 
     private static final Logger log = Logger.getLogger(Test.class.getName());
 
-    private static void sendSMIME() throws Exception {
+    private static void sendCMS() throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
@@ -33,14 +33,12 @@ public class Test {
         CertValidationDto certValidationDto = CertValidationDto.validationRequest("7553172H", "C8-0A-A9-AB-47-BE");
         SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService(
                 "Currency_07553172H", UserVS.Type.USER);
-        UserVS fromUserVS = superUserSignatureService.getUserVS();
-        String messageSubject = "ValidateCert test " + certValidationDto.getUUID();
-        SMIMEMessage smimeMessage = superUserSignatureService.getSMIMETimeStamped(fromUserVS.getNif(),
-                actorVS.getName(), JSON.getMapper().writeValueAsString(certValidationDto), messageSubject);
-        responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
-                "https://192.168.1.5/CurrencyServer/rest/test/testSMIME");
+        CMSSignedMessage cmsMessage = superUserSignatureService.addSignatureWithTimeStamp(
+                JSON.getMapper().writeValueAsString(certValidationDto));
+        responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+                "https://192.168.1.5/CurrencyServer/rest/test/testCMS");
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage() +
-                " - ContentDigestStr: " + smimeMessage.getContentDigestStr());
+                " - ContentDigestStr: " + cmsMessage.getContentDigestStr());
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage());
         //System.exit(0);
     }

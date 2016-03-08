@@ -4,9 +4,9 @@ import javafx.concurrent.Task;
 import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.smime.SMIMEMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
@@ -41,35 +41,28 @@ public class AnonymousDelegationTask extends Task<ResponseVS> {
         RepresentativeDelegationDto anonymousCertRequest = anonymousDelegation.getAnonymousCertRequest();
         RepresentativeDelegationDto anonymousDelegationRequest = anonymousDelegation.getDelegation();
         try {
-            SMIMEMessage smimeMessage = BrowserSessionService.getSMIME(null, ContextVS.getInstance().getAccessControl().
+            CMSSignedMessage cmsMessage = BrowserSessionService.getCMS(null, ContextVS.getInstance().getAccessControl().
                             getName(), JSON.getMapper().writeValueAsString(anonymousCertRequest), password,
                     operationVS.getSignedMessageSubject());
-            anonymousDelegation.setAnonymousDelegationRequestBase64ContentDigest(smimeMessage.getContentDigestStr());
+            anonymousDelegation.setAnonymousDelegationRequestBase64ContentDigest(cmsMessage.getContentDigestStr());
             updateMessage(operationVS.getSignedMessageSubject());
-            //byte[] encryptedCSRBytes = Encryptor.encryptMessage(certificationRequest.getCsrPEM(),destinationCert);
-            //byte[] delegationEncryptedBytes = Encryptor.encryptSMIME(smimeMessage, destinationCert);
             Map<String, Object> mapToSend = new HashMap<>();
             mapToSend.put(ContextVS.CSR_FILE_NAME, anonymousDelegation.getCertificationRequest().getCsrPEM());
-            mapToSend.put(ContextVS.SMIME_FILE_NAME, smimeMessage.getBytes());
+            mapToSend.put(ContextVS.CMS_FILE_NAME, cmsMessage.toPEM());
             responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
                     ContextVS.getInstance().getAccessControl().getAnonymousDelegationRequestServiceURL());
             if (ResponseVS.SC_OK != responseVS.getStatusCode()) return responseVS;
-            //byte[] decryptedData = Encryptor.decryptFile(responseVS.getMessageBytes(),
-            // certificationRequest.getPublicKey(), certificationRequest.getPrivateKey());
             anonymousDelegation.getCertificationRequest().initSigner(responseVS.getMessageBytes());
             updateProgress(60, 100);
             //this is the delegation request signed with anonymous cert
-            smimeMessage = anonymousDelegation.getCertificationRequest().getSMIME(
-                    anonymousDelegation.getHashCertVSBase64(),
-                    ContextVS.getInstance().getAccessControl().getName(),
-                    JSON.getMapper().writeValueAsString(anonymousDelegationRequest),
-                    operationVS.getSignedMessageSubject(), null);
-            smimeMessage = new MessageTimeStamper(
-                    smimeMessage, ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
-            responseVS = HttpHelper.getInstance().sendData(smimeMessage.getBytes(), ContentTypeVS.JSON_SIGNED,
+            cmsMessage = anonymousDelegation.getCertificationRequest().signData(
+                    JSON.getMapper().writeValueAsString(anonymousDelegationRequest));
+            cmsMessage = new MessageTimeStamper(
+                    cmsMessage, ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
+            responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                     ContextVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                anonymousDelegation.setDelegationReceipt(responseVS.getSMIME(),
+                anonymousDelegation.setDelegationReceipt(responseVS.getCMS(),
                         ContextVS.getInstance().getAccessControl().getX509Certificate());
                 BrowserSessionService.getInstance().setAnonymousDelegationDto(anonymousDelegation);
                 responseVS = ResponseVS.OK();

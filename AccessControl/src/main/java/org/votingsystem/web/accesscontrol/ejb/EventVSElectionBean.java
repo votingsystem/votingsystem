@@ -1,14 +1,14 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
 import org.apache.commons.io.IOUtils;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.*;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.*;
-import org.votingsystem.signature.smime.SMIMEMessage;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.TimeStampBean;
@@ -18,7 +18,6 @@ import org.votingsystem.web.util.MessagesVS;
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.mail.Header;
 import javax.persistence.Query;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,10 +42,10 @@ public class EventVSElectionBean {
     @Inject RepresentativeBean representativeBean;
     @Inject TimeStampBean timeStampBean;
 
-    public EventVSElection saveEvent(MessageSMIME messageSMIME) throws Exception {
+    public EventVSElection saveEvent(MessageCMS messageCMS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS userSigner = messageSMIME.getUserVS();
-        EventVSDto request  = messageSMIME.getSignedContent(EventVSDto.class);
+        UserVS userSigner = messageCMS.getUserVS();
+        EventVSDto request  = messageCMS.getSignedContent(EventVSDto.class);
         request.setDateFinish(DateUtils.resetDay(DateUtils.addDays(request.getDateBegin(), 1).getTime()).getTime());
         ControlCenterVS controlCenterVS = config.getControlCenter();
         Query query = dao.getEM().createQuery("select a from ActorVS a where a.serverURL =:serverURL")
@@ -65,6 +64,7 @@ public class EventVSElectionBean {
         request.setFieldsEventVS(eventVS.getFieldsEventVS());
         request.setId(eventVS.getId());
         request.setAccessControlEventVSId(eventVS.getId());
+        request.setAccessControlURL(config.getContextURL());
         request.setURL(config.getContextURL() + "/rest/eventVSElection/id/" + eventVS.getId());
         request.setDateCreated(eventVS.getDateCreated());
         request.setType(EventVS.Type.ELECTION);
@@ -76,17 +76,12 @@ public class EventVSElectionBean {
         KeyStoreVS keyStoreVS = dao.persist(keyStoreDto.getKeyStoreVS());
         eventVS.setKeyStoreVS(keyStoreVS);
 
-        request.setCertCAVotacion( new String(CertUtils.getPEMEncoded (keyStoreVS.getCertificateVS().getX509Cert())));
-        request.setCertChain(new String(CertUtils.getPEMEncoded (signatureBean.getCertChain())));
+        request.setCertCAVotacion( new String(PEMUtils.getPEMEncoded (keyStoreVS.getCertificateVS().getX509Cert())));
+        request.setCertChain(new String(PEMUtils.getPEMEncoded (signatureBean.getCertChain())));
         X509Certificate certUsuX509 = userSigner.getCertificate();
-        request.setUserVS(new String(CertUtils.getPEMEncoded(certUsuX509)));
-        Header header = new Header ("serverURL", config.getContextURL());
-        String fromUser = config.getServerName();
-        String toUser = controlCenterVS.getName();
-        String subject = messages.get("votingEventMsgSubject");
-        SMIMEMessage smime = signatureBean.getSMIMETimeStamped(fromUser, toUser, JSON.getMapper().writeValueAsString(
-                request), subject, header);
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(smime.getBytes(),
+        request.setUserVS(new String(PEMUtils.getPEMEncoded(certUsuX509)));
+        CMSSignedMessage cms = signatureBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsString(request));
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(cms.toPEM(),
                 ContentTypeVS.JSON_SIGNED, controlCenterVS.getServerURL() + "/rest/eventVSElection");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
             throw new ExceptionVS(messages.get("controlCenterCommunicationErrorMsg", controlCenterVS.getServerURL()));
@@ -99,9 +94,9 @@ public class EventVSElectionBean {
                 CertificateVS.ACTORVS(controlCenterVS, controlCenterCert.getX509Cert()));
         CertificateVS accessControlCertEventVS = dao.persist(
                 CertificateVS.ACTORVS(null, signatureBean.getServerCert()));
-        dao.merge(messageSMIME.setType(TypeVS.VOTING_EVENT).setSMIME(smime));
+        dao.merge(messageCMS.setType(TypeVS.VOTING_EVENT).setCMS(cms));
         dao.merge(eventVS.setControlCenterCert(controlCenterCertEventVS).setAccessControlCert(accessControlCertEventVS)
-                .setState(EventVS.State.ACTIVE).setPublishRequestSMIME(messageSMIME));
+                .setState(EventVS.State.ACTIVE).setPublishRequestCMS(messageCMS));
         return eventVS;
     }
 
@@ -137,13 +132,13 @@ public class EventVSElectionBean {
         Set<X509Certificate> eventTrustedCerts = eventVS.getTrustedCerts();
         Set<X509Certificate> systemTrustedCerts = signatureBean.getTrustedCerts();
         File systemTrustedCertsFile = new File(format("{0}/systemTrustedCerts.pem", filesDir.getAbsolutePath()));
-        IOUtils.write(CertUtils.getPEMEncoded(systemTrustedCerts), new FileOutputStream(systemTrustedCertsFile));
+        IOUtils.write(PEMUtils.getPEMEncoded(systemTrustedCerts), new FileOutputStream(systemTrustedCertsFile));
 
         File eventTrustedCertsFile = new File(format("{0}/eventTrustedCerts.pem", filesDir.getAbsolutePath()));
-        IOUtils.write(CertUtils.getPEMEncoded(eventTrustedCerts), new FileOutputStream(eventTrustedCertsFile));
+        IOUtils.write(PEMUtils.getPEMEncoded(eventTrustedCerts), new FileOutputStream(eventTrustedCertsFile));
 
         File timeStampCertFile = new File(format("{0}/timeStampCert.pem", filesDir.getAbsolutePath()));
-        IOUtils.write(CertUtils.getPEMEncoded(timeStampBean.getSigningCertPEMBytes()), new FileOutputStream(timeStampCertFile));
+        IOUtils.write(PEMUtils.getPEMEncoded(timeStampBean.getSigningCertPEMBytes()), new FileOutputStream(timeStampCertFile));
 
         Query query = dao.getEM().createQuery("select count(v) from VoteVS v where v.state =:state and v.eventVS=:eventVS")
                 .setParameter("state", VoteVS.State.OK).setParameter("eventVS", eventVS);
@@ -169,13 +164,13 @@ public class EventVSElectionBean {
         List<VoteVS> votes = query.getResultList();
         for (VoteVS voteVS : votes) {
             UserVS representative = voteVS.getCertificateVS().getUserVS();
-            File smimeFile = null;
+            File cmsFile = null;
             if(representative != null) {//not anonymous, representative vote
-                smimeFile = new File(format("{0}/representativeVote_{1}.p7m", votesBaseDir, representative.getNif()));
+                cmsFile = new File(format("{0}/representativeVote_{1}.p7m", votesBaseDir, representative.getNif()));
             } else {//anonymous, user vote
-                smimeFile = new File(format("{0}/vote_{1}.p7m", votesBaseDir, formatted.format(voteVS.getId())));
+                cmsFile = new File(format("{0}/vote_{1}.p7m", votesBaseDir, formatted.format(voteVS.getId())));
             }
-            IOUtils.write(voteVS.getMessageSMIME().getContent(), new FileOutputStream(smimeFile));
+            IOUtils.write(voteVS.getCMSMessage().getCMS().toPEM(), new FileOutputStream(cmsFile));
             /*if(((votes.getRowNumber() + 1) % 2000) == 0) {
                 votesBaseDir="${filesDir.absolutePath}/votes/batch_${formatted.format(++votesBatch)}"
                 new File(votesBaseDir).mkdirs()
@@ -186,8 +181,8 @@ public class EventVSElectionBean {
                 .setParameter("state", AccessRequestVS.State.OK).setParameter("eventVS", eventVS);
         List<AccessRequestVS> accessRequestList = query.getResultList();
         for(AccessRequestVS accessRequest : accessRequestList) {
-            File smimeFile = new File(format("{0}/accessRequest_{1}.p7m", accessRequestBaseDir, accessRequest.getUserVS().getNif()));
-            IOUtils.write(accessRequest.getMessageSMIME().getContent(), new FileOutputStream(smimeFile));
+            File cmsFile = new File(format("{0}/accessRequest_{1}.p7m", accessRequestBaseDir, accessRequest.getUserVS().getNif()));
+            IOUtils.write(accessRequest.getMessageCMS().getContent(), new FileOutputStream(cmsFile));
             /*if((accessRequests.getRowNumber() % 100) == 0) {
                 String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillis(
                         System.currentTimeMillis() - begin)

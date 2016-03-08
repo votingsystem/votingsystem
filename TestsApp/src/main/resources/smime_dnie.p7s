@@ -12,9 +12,9 @@ Content-Transfer-Encoding: 7bit
 
 {"operation":"INIT_SIGNED_SESSION","state":"PENDING","deviceId":"C8-0A-A9-AB-47-BE","timeLimited":false,"locale":"es","uuid":"25bd07e8-7430-4009-a633-b6b726b03068"}
 ------=_Part_8_3496473.1454533443005
-Content-Type: application/pkcs7-signature; name=smime.p7s; smime-type=signed-data
+Content-Type: application/pkcs7-signature; name=cms.p7s; cms-type=signed-data
 Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
+Content-Disposition: attachment; filename="cms.p7s"
 Content-Description: S/MIME Cryptographic Signature
 
 MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIAwggXkMIIE

@@ -4,11 +4,11 @@ import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.signature.util.CertUtils;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -40,7 +40,7 @@ public class FetchX509Cert {
             throw new ExceptionVS("serverInfoURL - error: " + responseVS.getMessage());
         ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
         if(serverURL.equals(actorVS.getServerURL())) {
-            Collection<X509Certificate> certCollection = CertUtils.fromPEMToX509CertCollection(
+            Collection<X509Certificate> certCollection = PEMUtils.fromPEMToX509CertCollection(
                     actorVS.getCertChainPEM().getBytes());
             for(X509Certificate cert: certCollection) {
                 log.info(format("cert {0} - not valid after {1}", cert.getSubjectDN(), cert.getNotAfter()));
@@ -48,7 +48,7 @@ public class FetchX509Cert {
             X509Certificate x509TimeStampServerCert = certCollection.iterator().next();
             log.info("subjectDN " + x509TimeStampServerCert.getSubjectDN().toString() + " - not valid after:" +
                     x509TimeStampServerCert.getNotAfter());
-            byte[] pemBytes = CertUtils.getPEMEncoded(x509TimeStampServerCert);
+            byte[] pemBytes = PEMUtils.getPEMEncoded(x509TimeStampServerCert);
             log.info("PEM cert: " + new String(pemBytes));
             if(new Date().after(x509TimeStampServerCert.getNotAfter())) {
                 log.log(Level.SEVERE, format("{0} signing cert is lapsed - cert not valid after: {1}",
@@ -64,7 +64,7 @@ public class FetchX509Cert {
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
             throw new ExceptionVS("serverInfoURL - error: " + responseVS.getMessage());
         DeviceVSDto dto = (DeviceVSDto) responseVS.getMessage(DeviceVSDto.class);
-        log.info(CertUtils.fromPEMToX509Cert(dto.getCertPEM().getBytes()).toString());
+        log.info(PEMUtils.fromPEMToX509Cert(dto.getCertPEM().getBytes()).toString());
     }
 }
 
