@@ -75,7 +75,7 @@ public class MailBean {
         /*(view:"/mail/backupRequestMessage.jsp", model:[fromUser:fromUser, requestURL:requestURL,
         subject:subject, downloadURL:downloadURL])*/
         log.log(Level.FINE, "sendBackupMsg - email:" + request.getEmail() + " - request:"+ request.getId());
-        UserVS toUser = request.getMessageCMS().getUserVS();
+        UserVS toUser = request.getCmsMessage().getUserVS();
         String downloadURL = config.getContextURL() + "/rest/backupVS/request/id/" + request.getId() + "/download";
         String requestURL = config.getContextURL() + "/rest/backupVS/request/id/" + request.getId();
         //String subject = messages.get("downloadBackupMailSubject");

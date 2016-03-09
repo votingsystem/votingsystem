@@ -2,7 +2,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.apache.commons.io.IOUtils;
 import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.voting.UserRequestCsrVS;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
@@ -49,8 +49,8 @@ public class CSRResource {
     }
 
     @Path("/validate") @POST
-    public Object validate(MessageCMS messageCMS) throws Exception {
-        DeviceVS deviceVS = csrBean.signCertUserVS(messageCMS);
+    public Object validate(CMSMessage cmsMessage) throws Exception {
+        DeviceVS deviceVS = csrBean.signCertUserVS(cmsMessage);
         return Response.ok().entity(PEMUtils.getPEMEncoded(deviceVS.getX509Certificate())).build();
     }
 

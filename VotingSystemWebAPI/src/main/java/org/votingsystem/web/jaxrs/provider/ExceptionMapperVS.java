@@ -1,7 +1,7 @@
 package org.votingsystem.web.jaxrs.provider;
 
 import org.votingsystem.dto.MessageDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
@@ -28,10 +28,10 @@ public class ExceptionMapperVS implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception exception) {
         try {
-            if(MessageCMS.getCurrentMessageCMS() != null) {
-                MessageCMS messageCMS = MessageCMS.getCurrentMessageCMS();
-                messageCMS.setType(TypeVS.EXCEPTION).setReason(exception.getMessage());
-                dao.merge(messageCMS);
+            if(CMSMessage.getCurrent() != null) {
+                CMSMessage cmsMessage = CMSMessage.getCurrent();
+                cmsMessage.setType(TypeVS.EXCEPTION).setReason(exception.getMessage());
+                dao.merge(cmsMessage);
             }
             if(exception instanceof NotFoundException) {
                 log.log(Level.SEVERE, "--- NotFoundException --- " + exception.getMessage());

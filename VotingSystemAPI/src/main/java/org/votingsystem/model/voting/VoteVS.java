@@ -4,8 +4,8 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
 import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageCMS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.crypto.CertUtils;
@@ -35,7 +35,7 @@ public class VoteVS extends EntityVS implements Serializable {
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
-    @OneToOne private MessageCMS cmsMessage;
+    @OneToOne private CMSMessage cmsMessage;
     @OneToOne private CertificateVS certificateVS;
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="optionSelected") private FieldEventVS optionSelected;
@@ -86,7 +86,7 @@ public class VoteVS extends EntityVS implements Serializable {
     }
 
     public VoteVS (FieldEventVS optionSelected, EventVSElection eventVS, State state, CertificateVS certificateVS,
-                    MessageCMS cmsMessage) {
+                    CMSMessage cmsMessage) {
         this.optionSelected = optionSelected;
         this.eventVS = eventVS;
         this.state = state;
@@ -158,12 +158,12 @@ public class VoteVS extends EntityVS implements Serializable {
 		return getOptionSelected();
 	}
 
-	public MessageCMS getCMSMessage() {
+	public CMSMessage getCMSMessage() {
 		return cmsMessage;
 	}
 
-	public void setCmsMessage(MessageCMS messageCMS) {
-		this.cmsMessage = messageCMS;
+	public void setCmsMessage(CMSMessage cmsMessage) {
+		this.cmsMessage = cmsMessage;
 	}
 
 	public State getState() {

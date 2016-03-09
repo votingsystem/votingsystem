@@ -18,7 +18,7 @@ public class CheckTransactionFromUserToUser {
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         CMSSignedMessage cmsMessage = new CMSSignedMessage(ContextVS.getInstance().getResourceBytes("2222.p7s"));
         TransactionVSDto dto = cmsMessage.getSignedContent(TransactionVSDto.class);
-        CMSSignedMessage receipt = CMSSignedMessage.FROM_PEM(dto.getCMSMessagePEM());
+        CMSSignedMessage receipt = CMSSignedMessage.FROM_PEM(dto.getCmsMessagePEM());
         log.info("receipt.getSignedContent: " + receipt.getSignedContent());
         System.exit(0);
     }

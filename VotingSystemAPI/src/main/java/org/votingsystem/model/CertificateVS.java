@@ -51,7 +51,7 @@ public class CertificateVS extends EntityVS implements Serializable {
 
     @Column(name="hashCertVSBase64", unique=true) private String hashCertVSBase64;
 
-    @Column(name="messageCMS" ) private MessageCMS messageCMS;
+    @Column(name="cmsMessage" ) private CMSMessage cmsMessage;
 
     @Column(name="metaInf", columnDefinition="TEXT")  private String metaInf;
 
@@ -173,12 +173,12 @@ public class CertificateVS extends EntityVS implements Serializable {
         return result;
     }
 
-    public MessageCMS getMessageCMS() {
-        return messageCMS;
+    public CMSMessage getCmsMessage() {
+        return cmsMessage;
     }
 
-    public CertificateVS setMessageCMS(MessageCMS messageCMS) {
-        this.messageCMS = messageCMS;
+    public CertificateVS setCmsMessage(CMSMessage cmsMessage) {
+        this.cmsMessage = cmsMessage;
         return this;
     }
 

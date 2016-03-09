@@ -12,7 +12,7 @@ import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.SubscriptionVSDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.GroupVS;
@@ -205,9 +205,9 @@ public class GroupVSResource {
     @Transactional
     @Path("/saveGroup")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Object saveGroup(MessageCMS messageCMS, @Context ServletContext context,
+    public Object saveGroup(CMSMessage cmsMessage, @Context ServletContext context,
                             @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        GroupVS groupVS = groupVSBean.saveGroup(messageCMS);
+        GroupVS groupVS = groupVSBean.saveGroup(cmsMessage);
         GroupVSDto dto = GroupVSDto.DETAILS(groupVS, null);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
     }
@@ -215,13 +215,13 @@ public class GroupVSResource {
 
     @Path("/id/{id}/cancel")
     @POST @Transactional
-    public Response cancel(MessageCMS messageCMS, @PathParam("id") long id, @Context ServletContext context,
+    public Response cancel(CMSMessage cmsMessage, @PathParam("id") long id, @Context ServletContext context,
                            @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
-        groupVS = groupVSBean.cancelGroup(groupVS, messageCMS);
+        groupVS = groupVSBean.cancelGroup(groupVS, cmsMessage);
         String URL = config.getContextURL() + "/rest/groupVS/id/" + groupVS.getId();
         String message =  messages.get("currencyGroupCancelledOKMsg", groupVS.getName());
         MessageDto messageDto = new MessageDto(ResponseVS.SC_OK, message, URL);
@@ -230,14 +230,14 @@ public class GroupVSResource {
 
     @Path("/id/{id}/subscribe")
     @POST
-    public Object subscribe(MessageCMS messageCMS, @PathParam("id") long id, @Context ServletContext context,
+    public Object subscribe(CMSMessage cmsMessage, @PathParam("id") long id, @Context ServletContext context,
                             @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         GroupVS groupVS = dao.find(GroupVS.class, id);
         if(groupVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "GroupVS not found - groupId: " + id).build();
-        UserVS signer = messageCMS.getUserVS();
-        SubscriptionVS subscriptionVS = groupVSBean.subscribe(messageCMS);
+        UserVS signer = cmsMessage.getUserVS();
+        SubscriptionVS subscriptionVS = groupVSBean.subscribe(cmsMessage);
         return Response.ok().entity(messages.get("groupvsSubscriptionOKMsg", signer.getNif(), signer.getName())).build();
     }
 
@@ -258,10 +258,10 @@ public class GroupVSResource {
 
     @Path("/activateUser")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response activateUser(MessageCMS messageCMS, @Context ServletContext context,
+    public Response activateUser(CMSMessage cmsMessage, @Context ServletContext context,
                                  @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        SubscriptionVS subscriptionVS = subscriptionVSBean.activateUser(messageCMS);
+        SubscriptionVS subscriptionVS = subscriptionVSBean.activateUser(cmsMessage);
         currencyAccountBean.checkUserVSAccount(subscriptionVS.getUserVS());
         MessageDto dto = MessageDto.OK(messages.get("currencyGroupUserActivatedMsg", subscriptionVS.getUserVS().getNif(),
                 subscriptionVS.getGroupVS().getName()), null);
@@ -270,10 +270,10 @@ public class GroupVSResource {
 
     @Path("/deActivateUser")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response deActivateUser(MessageCMS messageCMS, @Context ServletContext context,
+    public Response deActivateUser(CMSMessage cmsMessage, @Context ServletContext context,
                                    @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        SubscriptionVS subscriptionVS = subscriptionVSBean.deActivateUser(messageCMS);
+        SubscriptionVS subscriptionVS = subscriptionVSBean.deActivateUser(cmsMessage);
         MessageDto dto = MessageDto.OK(messages.get("currencyGroupUserdeActivatedMsg", subscriptionVS.getUserVS().getNif(),
                 subscriptionVS.getGroupVS().getName()), null);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();

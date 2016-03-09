@@ -303,32 +303,32 @@ public class CMSBean {
         return new CMSSignedMessage(cmsGenerator.addSignature(cmsMessage));
     }
 
-    public CMSDto validateCMS(CMSSignedMessage cmsMessage, ContentTypeVS contenType) throws Exception {
-        if (cmsMessage.isValidSignature()) {
+    public CMSDto validateCMS(CMSSignedMessage cmsSignedMessage, ContentTypeVS contenType) throws Exception {
+        if (cmsSignedMessage.isValidSignature()) {
             MessagesVS messages = MessagesVS.getCurrentInstance();
             Query query = dao.getEM().createNamedQuery("findMessageCMSByBase64ContentDigest")
-                    .setParameter("base64ContentDigest", cmsMessage.getContentDigestStr());
-            MessageCMS messageCMS = dao.getSingleResult(MessageCMS.class, query);
-            if(messageCMS != null) throw new ExceptionVS(messages.get("cmsDigestRepeatedErrorMsg",
-                    cmsMessage.getContentDigestStr()));
-            CMSDto cmsDto = validateSignersCerts(cmsMessage);
+                    .setParameter("base64ContentDigest", cmsSignedMessage.getContentDigestStr());
+            CMSMessage cmsMessage = dao.getSingleResult(CMSMessage.class, query);
+            if(cmsMessage != null) throw new ExceptionVS(messages.get("cmsDigestRepeatedErrorMsg",
+                    cmsSignedMessage.getContentDigestStr()));
+            CMSDto cmsDto = validateSignersCerts(cmsSignedMessage);
             TypeVS typeVS = TypeVS.OK;
             if(ContentTypeVS.CURRENCY == contenType) typeVS = TypeVS.CURRENCY;
-            messageCMS = dao.persist(new MessageCMS(cmsMessage, cmsDto, typeVS));
-            MessageCMS.setCurrentInstance(messageCMS);
-            cmsDto.setMessageCMS(messageCMS);
+            cmsMessage = dao.persist(new CMSMessage(cmsSignedMessage, cmsDto, typeVS));
+            CMSMessage.setCurrentInstance(cmsMessage);
+            cmsDto.setCmsMessage(cmsMessage);
             return cmsDto;
         } else throw new ValidationExceptionVS("invalid CMSMessage");
     }
 
-    public CMSDto validatedVote(CMSSignedMessage cmsMessage) throws Exception {
+    public CMSDto validatedVote(CMSSignedMessage cmsSignedMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         Query query = dao.getEM().createNamedQuery("findMessageCMSByBase64ContentDigest")
-                .setParameter("base64ContentDigest", cmsMessage.getContentDigestStr());
-        MessageCMS messageCMS = dao.getSingleResult(MessageCMS.class, query);
-        if(messageCMS != null) throw new ExceptionVS(messages.get("cmsDigestRepeatedErrorMsg",
-                    cmsMessage.getContentDigestStr()));
-        VoteVS voteVS = cmsMessage.getVoteVS();
+                .setParameter("base64ContentDigest", cmsSignedMessage.getContentDigestStr());
+        CMSMessage cmsMessage = dao.getSingleResult(CMSMessage.class, query);
+        if(cmsMessage != null) throw new ExceptionVS(messages.get("cmsDigestRepeatedErrorMsg",
+                    cmsSignedMessage.getContentDigestStr()));
+        VoteVS voteVS = cmsSignedMessage.getVoteVS();
         CMSDto cmsDto = new CMSDto(voteVS);
         if(voteVS == null || voteVS.getX509Certificate() == null) throw new ExceptionVS(
                 messages.get("documentWithoutSignersErrorMsg"));
@@ -354,21 +354,21 @@ public class CMSBean {
         PKIXCertPathValidatorResult validatorResult = CertUtils.verifyCertificate(
                 eventTrustedAnchors, false, Arrays.asList(checkedCert));
         validatorResult.getTrustAnchor().getTrustedCert();
-        cmsDto.setMessageCMS(dao.persist(new MessageCMS(cmsMessage, cmsDto, TypeVS.SEND_VOTE)));
+        cmsDto.setCmsMessage(dao.persist(new CMSMessage(cmsSignedMessage, cmsDto, TypeVS.SEND_VOTE)));
         return cmsDto;
     }
 
-    public CMSDto validatedVoteFromControlCenter(CMSSignedMessage cmsMessage) throws Exception {
-        CMSDto cmsDto = validatedVote(cmsMessage);
+    public CMSDto validatedVoteFromControlCenter(CMSSignedMessage cmsSignedMessage) throws Exception {
+        CMSDto cmsDto = validatedVote(cmsSignedMessage);
         Query query = dao.getEM().createQuery("select c from CertificateVS c where c.hashCertVSBase64 =:hashCertVS and c.state =:state")
                 .setParameter("hashCertVS", cmsDto.getVoteVS().getHashCertVSBase64()).setParameter("state", CertificateVS.State.OK);
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if (certificateVS == null) {
-            cmsDto.getMessageCMS().setType(TypeVS.ERROR).setReason("missing VoteVS CertificateVS");
-            dao.merge(cmsDto.getMessageCMS());
+            cmsDto.getCmsMessage().setType(TypeVS.ERROR).setReason("missing VoteVS CertificateVS");
+            dao.merge(cmsDto.getCmsMessage());
             throw new ValidationExceptionVS("missing VoteVS CertificateVS");
         }
-        cmsDto.getMessageCMS().getCMS().getVoteVS().setCertificateVS(certificateVS);
+        cmsDto.getCmsMessage().getCMS().getVoteVS().setCertificateVS(certificateVS);
         return cmsDto;
     }
     
@@ -378,12 +378,12 @@ public class CMSBean {
         //X509Certificate certCaResult = validationResponse.data.pkixResult.getTrustAnchor().getTrustedCert();
     }
 
-    public CMSDto validateSignersCerts(CMSSignedMessage cmsMessage) throws Exception {
-        Set<UserVS> signersVS = cmsMessage.getSigners();
+    public CMSDto validateSignersCerts(CMSSignedMessage cmsSignedMessage) throws Exception {
+        Set<UserVS> signersVS = cmsSignedMessage.getSigners();
         if(signersVS.isEmpty()) throw new ExceptionVS("documentWithoutSignersErrorMsg");
         String signerNIF = null;
-        if(cmsMessage.getSigner().getNif() != null) signerNIF =
-                org.votingsystem.util.NifUtils.validate(cmsMessage.getSigner().getNif());
+        if(cmsSignedMessage.getSigner().getNif() != null) signerNIF =
+                org.votingsystem.util.NifUtils.validate(cmsSignedMessage.getSigner().getNif());
         CMSDto cmsDto = new CMSDto();
         for(UserVS userVS: signersVS) {
             if(userVS.getTimeStampToken() != null) timeStampBean.validateToken(userVS.getTimeStampToken());
@@ -416,7 +416,7 @@ public class CMSBean {
     }
 
     //issues certificates if the request is signed with an Id card
-    public X509Certificate signCSRSignedWithIDCard(MessageCMS cmsReq) throws Exception {
+    public X509Certificate signCSRSignedWithIDCard(CMSMessage cmsReq) throws Exception {
         UserVS signer = cmsReq.getUserVS();
         if(signer.getCertificateVS().getType() != CertificateVS.Type.USER_ID_CARD)
                 throw new Exception("Service available only for ID CARD signed requests");
@@ -447,7 +447,7 @@ public class CMSBean {
                     certExtensionDto.getMobilePhone(), certExtensionDto.getDeviceType()).setState(DeviceVS.State.OK)
                     .setCertificateVS(certificate));
         } else {
-            dao.merge(deviceVS.getCertificateVS().setState(CertificateVS.State.CANCELED).setMessageCMS(cmsReq));
+            dao.merge(deviceVS.getCertificateVS().setState(CertificateVS.State.CANCELED).setCmsMessage(cmsReq));
             dao.merge(deviceVS.setEmail(certExtensionDto.getEmail()).setPhone(certExtensionDto.getMobilePhone())
                     .setCertificateVS(certificate));
         }

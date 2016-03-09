@@ -71,12 +71,12 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
     @Column(name="messageBytes") private byte[] messageBytes;
-    @OneToOne private MessageCMS messageCMS;
+    @OneToOne private CMSMessage cmsMessage;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23, insertable=true) private Date lastUpdated;
 
 
-    @Transient private CMSSignedMessage cmsMessage;
+    @Transient private CMSSignedMessage cmsSignedMessage;
     @Transient private EventVS eventVS;
     @Transient private T data;
     @Transient private ContentTypeVS contentType = ContentTypeVS.HTML;
@@ -228,8 +228,8 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     }
 
     public byte[] getMessageBytes() throws Exception {
-        if(contentType!= null && contentType.isSigned() && messageBytes == null && messageCMS != null)
-            return messageCMS.getCMS().toPEM();
+        if(contentType!= null && contentType.isSigned() && messageBytes == null && cmsMessage != null)
+            return cmsMessage.getCMS().toPEM();
         if(messageBytes == null && message != null) return message.getBytes();
         return messageBytes;
     }
@@ -239,12 +239,12 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     }
 
     public CMSSignedMessage getCMS() throws Exception {
-        if(cmsMessage == null) cmsMessage = CMSSignedMessage.FROM_PEM(getMessageBytes());
-        return cmsMessage;
+        if(cmsSignedMessage == null) cmsSignedMessage = CMSSignedMessage.FROM_PEM(getMessageBytes());
+        return cmsSignedMessage;
     }
 
-    public ResponseVS setCMS(CMSSignedMessage cmsMessage) {
-        this.cmsMessage = cmsMessage;
+    public ResponseVS setCMS(CMSSignedMessage cmsSignedMessage) {
+        this.cmsSignedMessage = cmsSignedMessage;
         return this;
     }
 
@@ -300,12 +300,12 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         return this;
     }
 
-    public MessageCMS getMessageCMS() {
-        return messageCMS;
+    public CMSMessage getCmsMessage() {
+        return cmsMessage;
     }
 
-    public ResponseVS setMessageCMS(MessageCMS messageCMS) {
-        this.messageCMS = messageCMS;
+    public ResponseVS setCmsMessage(CMSMessage cmsMessage) {
+        this.cmsMessage = cmsMessage;
         return this;
     }
 

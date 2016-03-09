@@ -10,7 +10,7 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.EventVSStatsDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -110,16 +110,16 @@ public class EventVSElectionResource {
     }
 
     @Path("/") @POST
-    public Response save(MessageCMS messageCMS, @Context ServletContext context,
+    public Response save(CMSMessage cmsMessage, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        EventVSElection response = eventVSElectionBean.saveEvent(messageCMS);
+        EventVSElection response = eventVSElectionBean.saveEvent(cmsMessage);
         resp.setHeader("eventURL", format("{0}/rest/eventVSElection/id/{1}", config.getContextURL(), response.getId()));
         return Response.ok().entity(response.getPublishRequestCMS().getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
     @Path("/cancel") @POST
-    public Response cancelled(MessageCMS messageCMS) throws Exception {
-        MessageCMS response = eventVSBean.cancelEvent(messageCMS);
+    public Response cancelled(CMSMessage cmsMessage) throws Exception {
+        CMSMessage response = eventVSBean.cancelEvent(cmsMessage);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(MessageDto.OK(null))).type(MediaTypeVS.JSON).build();
     }
 

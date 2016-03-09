@@ -2,7 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.GroupVSDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.GroupVS;
@@ -38,28 +38,28 @@ public class GroupVSBean {
     @Inject TransactionVSBean transactionVSBean;
 
 
-    public GroupVS cancelGroup(GroupVS groupVS, MessageCMS messageCMS) throws Exception {
-        UserVS signer = messageCMS.getUserVS();
+    public GroupVS cancelGroup(GroupVS groupVS, CMSMessage cmsMessage) throws Exception {
+        UserVS signer = cmsMessage.getUserVS();
         log.info("signer:" + signer.getNif());
         if(!groupVS.getRepresentative().getNif().equals(signer.getNif()) && !cmsBean.isAdmin(signer.getNif())) {
             throw new ExceptionVS("operation: " +  TypeVS.CURRENCY_GROUP_CANCEL.toString() +
                     " - userWithoutGroupPrivilegesErrorMsg - user: " + signer.getNif() + " - group: " + groupVS.getName());
         }
-        GroupVSDto request = messageCMS.getSignedContent(GroupVSDto.class);
+        GroupVSDto request = cmsMessage.getSignedContent(GroupVSDto.class);
         request.validateCancelRequest();
         dao.merge(groupVS.setState(UserVS.State.CANCELED));
         return groupVS;
     }
 
-    public GroupVS editGroup(GroupVS groupVS, MessageCMS messageCMS) throws Exception {
-        UserVS signer = messageCMS.getUserVS();
+    public GroupVS editGroup(GroupVS groupVS, CMSMessage cmsMessage) throws Exception {
+        UserVS signer = cmsMessage.getUserVS();
         log.info("signer:" + signer.getNif());
-        if(!groupVS.getRepresentative().getNif().equals(messageCMS.getUserVS().getNif()) &&
-                !cmsBean.isAdmin(messageCMS.getUserVS().getNif())) {
+        if(!groupVS.getRepresentative().getNif().equals(cmsMessage.getUserVS().getNif()) &&
+                !cmsBean.isAdmin(cmsMessage.getUserVS().getNif())) {
             throw new ExceptionVS("operation: " +  TypeVS.CURRENCY_GROUP_EDIT.toString() +
                     " - userWithoutGroupPrivilegesErrorMsg - user: " + signer.getNif() + " - group: " + groupVS.getName());
         }
-        GroupVSDto request = messageCMS.getSignedContent(GroupVSDto.class);
+        GroupVSDto request = cmsMessage.getSignedContent(GroupVSDto.class);
         request.validateEditRequest();
         if(request.getId().longValue() != groupVS.getId().longValue()) {
             throw new ExceptionVS("group id error - expected: " + groupVS.getId() + " - found: " + request.getId());
@@ -68,14 +68,14 @@ public class GroupVSBean {
         return groupVS;
     }
 
-    public GroupVS saveGroup(MessageCMS messageCMS) throws Exception {
+    public GroupVS saveGroup(CMSMessage cmsMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS signer = messageCMS.getUserVS();
-        GroupVSDto request = messageCMS.getSignedContent(GroupVSDto.class);
+        UserVS signer = cmsMessage.getUserVS();
+        GroupVSDto request = cmsMessage.getSignedContent(GroupVSDto.class);
         if (TypeVS.CURRENCY_GROUP_EDIT == request.getOperation()) {
             GroupVS groupVS = dao.find(GroupVS.class, request.getId());
             if(groupVS == null) throw new ValidationExceptionVS("ERROR - GroupVS not found - id: " + request.getId());
-            return editGroup(groupVS, messageCMS);
+            return editGroup(groupVS, cmsMessage);
         } else if(TypeVS.CURRENCY_GROUP_NEW == request.getOperation()) {
             validateNewGroupRequest(request);
         } else throw new ValidationExceptionVS("ERROR - operation expected CURRENCY_GROUP_EDIT, CURRENCY_GROUP_NEW - " +
@@ -90,8 +90,8 @@ public class GroupVSBean {
         groupVS = dao.persist(new GroupVS(request.getName().trim(), UserVS.State.ACTIVE, signer,
                 request.getDescription(), request.getTags()));
         config.createIBAN(groupVS);
-        CMSSignedMessage receipt = cmsBean.addSignature(messageCMS.getCMS());
-        messageCMS.setCMS(receipt);
+        CMSSignedMessage receipt = cmsBean.addSignature(cmsMessage.getCMS());
+        cmsMessage.setCMS(receipt);
         log.info("saveGroup - GroupVS id:" + groupVS.getId());
         return groupVS;
     }
@@ -108,12 +108,12 @@ public class GroupVSBean {
         return groupVSDto;
     }
 
-    public SubscriptionVS subscribe(MessageCMS messageCMS) throws Exception {
+    public SubscriptionVS subscribe(CMSMessage cmsMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         SubscriptionVS subscriptionVS = null;
-        UserVS signer = messageCMS.getUserVS();
+        UserVS signer = cmsMessage.getUserVS();
         log.info("signer: " + signer.getNif());
-        GroupVSDto request = messageCMS.getSignedContent(GroupVSDto.class);
+        GroupVSDto request = cmsMessage.getSignedContent(GroupVSDto.class);
         request.validateSubscriptionRequest();
         GroupVS groupVS = dao.find(GroupVS.class, request.getId());
         if(groupVS.getRepresentative().getNif().equals(signer.getNif())) {
@@ -126,7 +126,7 @@ public class GroupVSBean {
         if(subscriptionVS != null) {
             throw new ExceptionVS(messages.get("userAlreadySubscribedErrorMsg", signer.getNif(), groupVS.getName()));
         }
-        subscriptionVS = dao.persist(new SubscriptionVS(signer, groupVS, SubscriptionVS.State.PENDING, messageCMS));
+        subscriptionVS = dao.persist(new SubscriptionVS(signer, groupVS, SubscriptionVS.State.PENDING, cmsMessage));
         return subscriptionVS;
     }
 

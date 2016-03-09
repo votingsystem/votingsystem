@@ -1,8 +1,8 @@
 package org.votingsystem.web.ejb;
 
 import org.votingsystem.dto.MessageDto;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -36,9 +36,9 @@ public class CertificateVSBean {
      * El procedimiento para añadir una autoridad certificadora consiste en
      * añadir el certificado en formato pem en el directorio ./WEB-INF/votingsystem
      */
-    public MessageDto addCertificateAuthority(MessageCMS messageCMS) throws Exception {
+    public MessageDto addCertificateAuthority(CMSMessage cmsMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        CertificateVSRequest request = messageCMS.getSignedContent(CertificateVSRequest.class);
+        CertificateVSRequest request = cmsMessage.getSignedContent(CertificateVSRequest.class);
         request.validateNewCARequest();
         if(!cmsBean.isAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
                 "userWithoutPrivilegesErrorMsg - operation: " + TypeVS.CERT_CA_NEW.toString() + " - user: " +
@@ -97,8 +97,8 @@ public class CertificateVSBean {
         }
     }
 
-    public CertificateVS editCert(MessageCMS messageCMS) throws Exception {
-        CertificateVSRequest request = messageCMS.getSignedContent(CertificateVSRequest.class);
+    public CertificateVS editCert(CMSMessage cmsMessage) throws Exception {
+        CertificateVSRequest request = cmsMessage.getSignedContent(CertificateVSRequest.class);
         request.validatEditCertRequest();
         if(!cmsBean.isAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
                 "userWithoutPrivilegesErrorMsg - operation: " + TypeVS.CERT_EDIT.toString() + " - user: " +
@@ -108,7 +108,7 @@ public class CertificateVSBean {
         if(certificateVS == null || CertificateVS.State.OK != certificateVS.getState()) throw new ValidationExceptionVS(
                 "activeCertificateNotFoundErrorMsg - serialNumber: " + request.serialNumber);
         certificateVS.updateDescription(request.description);
-        dao.merge(certificateVS.setMessageCMS(messageCMS).setState(request.changeCertToState));
+        dao.merge(certificateVS.setCmsMessage(cmsMessage).setState(request.changeCertToState));
         return certificateVS;
     }
     

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.TypeVS;
@@ -38,7 +38,7 @@ public class UserVSBean {
     @Inject TransactionVSBean transactionVSBean;
     
     
-    public UserVS saveUser(MessageCMS cmsReq) throws Exception {
+    public UserVS saveUser(CMSMessage cmsReq) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS signer = cmsReq.getUserVS();
         if(!cmsBean.isAdmin(signer.getNif())) throw new ExceptionVS(messages.get("userWithoutPrivilegesErrorMsg",

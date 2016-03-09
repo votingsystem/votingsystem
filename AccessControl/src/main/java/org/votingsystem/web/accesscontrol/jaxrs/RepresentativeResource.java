@@ -4,8 +4,8 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentativeAccreditationsDto;
 import org.votingsystem.dto.voting.RepresentativeVotingHistoryDto;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ImageVS;
-import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.model.voting.RepresentationDocument;
@@ -52,38 +52,38 @@ public class RepresentativeResource {
     private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/save") @POST
-    public Response save(MessageCMS messageCMS) throws Exception {
-        RepresentativeDocument representativeDocument = representativeBean.saveRepresentative(messageCMS);
+    public Response save(CMSMessage cmsMessage) throws Exception {
+        RepresentativeDocument representativeDocument = representativeBean.saveRepresentative(cmsMessage);
         UserVSDto representativeDto = representativeBean.getRepresentativeDto(representativeDocument.getUserVS());
         return Response.ok().entity(representativeDto).type(MediaTypeVS.JSON).build();
     }
 
     @Path("/history") @POST
-    public Response history(MessageCMS messageCMS, @Context ServletContext context, @Context HttpServletRequest req,
+    public Response history(CMSMessage cmsMessage, @Context ServletContext context, @Context HttpServletRequest req,
                             @Context HttpServletResponse resp) throws Exception {
         EmailTemplateWrapper responseWrapper = new EmailTemplateWrapper(resp);
         context.getRequestDispatcher("/mail/RepresentativeVotingHistoryDownloadInstructions.vsp").forward(req, responseWrapper);
         String mailTemplate = responseWrapper.toString();
-        representativeBean.processVotingHistoryRequest(messageCMS, mailTemplate);
-        RepresentativeVotingHistoryDto request = messageCMS.getSignedContent(RepresentativeVotingHistoryDto.class);
+        representativeBean.processVotingHistoryRequest(cmsMessage, mailTemplate);
+        RepresentativeVotingHistoryDto request = cmsMessage.getSignedContent(RepresentativeVotingHistoryDto.class);
         return Response.ok().entity(messages.get("backupRequestOKMsg", request.getEmail())).build();
     }
 
     @Path("/accreditations") @POST
-    public Response accreditations(MessageCMS messageCMS,
+    public Response accreditations(CMSMessage cmsMessage,
                    @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         EmailTemplateWrapper responseWrapper = new EmailTemplateWrapper(resp);
         req.setAttribute("pageTitle", messages.get("representativeAccreditationsLbl"));
         context.getRequestDispatcher("/mail/RepresentativeAccreditationRequestDownloadInstructions.vsp").forward(req, responseWrapper);
         String mailTemplate = responseWrapper.toString();
-        RepresentativeAccreditationsDto request = messageCMS.getSignedContent(RepresentativeAccreditationsDto.class);
-        representativeBean.processAccreditationsRequest(messageCMS, mailTemplate);
+        RepresentativeAccreditationsDto request = cmsMessage.getSignedContent(RepresentativeAccreditationsDto.class);
+        representativeBean.processAccreditationsRequest(cmsMessage, mailTemplate);
         return Response.ok().entity(messages.get("backupRequestOKMsg", request.getEmail())).build();
     }
 
     @Path("/revoke") @POST
-    public Response revoke(MessageCMS messageCMS) throws Exception {
-        MessageCMS response = representativeBean.processRevoke(messageCMS);
+    public Response revoke(CMSMessage cmsMessage) throws Exception {
+        CMSMessage response = representativeBean.processRevoke(cmsMessage);
         return Response.ok().entity(response.getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
@@ -177,8 +177,8 @@ public class RepresentativeResource {
     }
 
     @Path("/anonymousDelegation") @POST
-    public Response anonymousDelegation(MessageCMS messageCMS) throws Exception {
-        RepresentationDocument response = representativeDelegationBean.saveAnonymousDelegation(messageCMS);
+    public Response anonymousDelegation(CMSMessage cmsMessage) throws Exception {
+        RepresentationDocument response = representativeDelegationBean.saveAnonymousDelegation(cmsMessage);
         return Response.ok().entity(response.getActivationCMS().getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 

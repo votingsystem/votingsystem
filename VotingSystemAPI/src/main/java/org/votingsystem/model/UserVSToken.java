@@ -27,7 +27,7 @@ public class UserVSToken extends EntityVS implements Serializable {
     @Column(name="token") private byte[] token;
     @OneToOne private CertificateVS certificateVS;
     @OneToOne private UserVS userVS;
-    @OneToOne private MessageCMS messageCMS;
+    @OneToOne private CMSMessage cmsMessage;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP)
@@ -35,11 +35,11 @@ public class UserVSToken extends EntityVS implements Serializable {
 
     public UserVSToken() {}
 
-    public UserVSToken(UserVS userVS, byte[] token, CertificateVS certificateVS, MessageCMS messageCMS) {
+    public UserVSToken(UserVS userVS, byte[] token, CertificateVS certificateVS, CMSMessage cmsMessage) {
         this.userVS = userVS;
         this.token = token;
         this.certificateVS = certificateVS;
-        this.messageCMS = messageCMS;
+        this.cmsMessage = cmsMessage;
     }
 
     public byte[] getToken() {
@@ -58,12 +58,12 @@ public class UserVSToken extends EntityVS implements Serializable {
         this.certificateVS = certificateVS;
     }
 
-    public MessageCMS getMessageCMS() {
-        return messageCMS;
+    public CMSMessage getCmsMessage() {
+        return cmsMessage;
     }
 
-    public void setMessageCMS(MessageCMS messageCMS) {
-        this.messageCMS = messageCMS;
+    public void setCmsMessage(CMSMessage cmsMessage) {
+        this.cmsMessage = cmsMessage;
     }
 
     public UserVS getUserVS() {

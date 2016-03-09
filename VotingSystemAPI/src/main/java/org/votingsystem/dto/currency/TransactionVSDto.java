@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Sets;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.CurrencyAccount;
@@ -58,7 +58,7 @@ public class TransactionVSDto {
     @JsonIgnore private List<UserVS> toUserVSList;
     @JsonIgnore private UserVS signer;
     @JsonIgnore private UserVS receptor;
-    @JsonIgnore private MessageCMS messageCMS_DB;
+    @JsonIgnore private CMSMessage cmsMessage_DB;
 
 
     public TransactionVSDto() {}
@@ -84,8 +84,8 @@ public class TransactionVSDto {
 
     public TransactionVSDto(TransactionVS transactionVS, String contextURL) {
         this(transactionVS);
-        if(transactionVS.getMessageCMS() != null) {
-            setCmsMessageURL(contextURL + "/rest/cmsMessagePEM/id/" + transactionVS.getMessageCMS().getId());
+        if(transactionVS.getCmsMessage() != null) {
+            setCmsMessageURL(contextURL + "/rest/cmsMessage/id/" + transactionVS.getCmsMessage().getId());
         }
     }
 
@@ -184,7 +184,7 @@ public class TransactionVSDto {
         transactionVS.setCurrencyCode(currencyCode);
         transactionVS.setSubject(subject);
         transactionVS.setValidTo(validTo);
-        transactionVS.setMessageCMS(messageCMS_DB);
+        transactionVS.setCmsMessage(cmsMessage_DB);
         transactionVS.setState(TransactionVS.State.OK);
         transactionVS.setTag(tagVS);
         return transactionVS;
@@ -247,7 +247,7 @@ public class TransactionVSDto {
     }
 
 
-    public String getCMSMessageURL() {
+    public String getCmsMessageURL() {
         return cmsMessageURL;
     }
 
@@ -288,7 +288,7 @@ public class TransactionVSDto {
         this.numChildTransactions = numChildTransactions;
     }
 
-    public String getCMSMessagePEM() {
+    public String getCmsMessagePEM() {
         return cmsMessagePEM;
     }
 
@@ -383,13 +383,13 @@ public class TransactionVSDto {
         this.receptor = receptor;
     }
 
-    public MessageCMS getMessageCMS_DB() {
-        return messageCMS_DB;
+    public CMSMessage getCmsMessage_DB() {
+        return cmsMessage_DB;
     }
 
-    public void setMessageCMS_DB(MessageCMS messageCMS_DB) {
-        this.messageCMS_DB = messageCMS_DB;
-        this.signer = messageCMS_DB.getUserVS();
+    public void setCmsMessage_DB(CMSMessage cmsMessage_DB) {
+        this.cmsMessage_DB = cmsMessage_DB;
+        this.signer = cmsMessage_DB.getUserVS();
     }
 
     public String getUUID() {
@@ -410,7 +410,7 @@ public class TransactionVSDto {
         dto.setOperation(operation);
         dto.setToUser(receptorNIF);
         dto.setAmount(receptorPart);
-        dto.setCmsMessageParentURL(contextURL + "/rest/cmsMessagePEM/id/" + messageCMS_DB.getId());
+        dto.setCmsMessageParentURL(contextURL + "/rest/cmsMessage/id/" + cmsMessage_DB.getId());
         dto.setNumReceptors(numReceptors);
         return dto;
     }
@@ -443,7 +443,7 @@ public class TransactionVSDto {
         this.toUser = toUser;
     }
 
-    public String getCMSMessageParentURL() {
+    public String getCmsMessageParentURL() {
         return cmsMessageParentURL;
     }
 

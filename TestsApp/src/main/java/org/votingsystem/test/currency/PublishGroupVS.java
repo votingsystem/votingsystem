@@ -34,7 +34,6 @@ public class PublishGroupVS {
         ContextVS.getInstance().setDefaultServer(currencyServer);
         SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("Currency_07553172H", UserVS.Type.USER);
         CMSSignedMessage cmsMessage = representativeSignatureService.addSignatureWithTimeStamp(JSON.getMapper().writeValueAsString(groupVSDto));
-        log.info(new String(cmsMessage.getEncoded()));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 currencyServer.getSaveGroupVSServiceURL());
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage());

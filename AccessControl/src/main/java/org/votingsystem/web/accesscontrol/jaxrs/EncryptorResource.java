@@ -2,7 +2,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.EncryptedMsgDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.JSON;
@@ -56,18 +56,18 @@ public class EncryptorResource {
     }
 
     @Path("/getMultiSignedMessage") @POST
-    public Response getMultiSignedMessage(MessageCMS messageCMS, @Context ServletContext context,
-                                  @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        CMSSignedMessage cmsMessage = cmsBean.addSignature(messageCMS.getCMS());
-        return  Response.ok().entity(cmsMessage.toPEM()).type(MediaTypeVS.JSON_SIGNED).build();
+    public Response getMultiSignedMessage(CMSMessage cmsMessage, @Context ServletContext context,
+                                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        CMSSignedMessage cmsSignedMessage = cmsBean.addSignature(cmsMessage.getCMS());
+        return  Response.ok().entity(cmsSignedMessage.toPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
     @Path("/validateTimeStamp") @POST
-    public Response validateTimeStamp(MessageCMS messageCMS, @Context ServletContext context,
+    public Response validateTimeStamp(CMSMessage cmsMessage, @Context ServletContext context,
                                       @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        UserVS userVS = messageCMS.getUserVS();
+        UserVS userVS = cmsMessage.getUserVS();
         //Date dateFinish = DateUtils.getDateFromString("2014-01-01 00:00:00")
-        Map requestMap = messageCMS.getSignedContent(Map.class);
+        Map requestMap = cmsMessage.getSignedContent(Map.class);
         EventVS eventVS = dao.find(EventVS.class, ((Number)requestMap.get("eventId")).longValue());
         Date signatureTime = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(!eventVS.isActive(signatureTime)) {

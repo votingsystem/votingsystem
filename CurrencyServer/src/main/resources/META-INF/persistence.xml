@@ -11,7 +11,7 @@
         <class>org.votingsystem.model.DeviceVS</class>
         <class>org.votingsystem.model.ImageVS</class>
         <class>org.votingsystem.model.KeyStoreVS</class>
-        <class>org.votingsystem.model.MessageCMS</class>
+        <class>org.votingsystem.model.CMSMessage</class>
         <class>org.votingsystem.model.ResponseVS</class>
         <class>org.votingsystem.model.TagVS</class>
         <class>org.votingsystem.model.UserVS</class>

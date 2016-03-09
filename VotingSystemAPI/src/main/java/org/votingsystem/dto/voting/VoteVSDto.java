@@ -22,8 +22,8 @@ public class VoteVSDto {
     private String certificateURL;
     private String hashCertVSBase64;
     private String hashCertVoteHex;
-    private String messageCMSURL;
-    private String cancelationMessageCMSURL;
+    private String cmsMessageURL;
+    private String cmsCancelationMessageURL;
     private String eventURL;
     private VoteVS.State state;
     private FieldEventVS optionSelected;
@@ -37,7 +37,7 @@ public class VoteVSDto {
         this.setId(canceler.getVoteVS().getId());
         this.setCancelerId(canceler.getId());
         this.setState(canceler.getVoteVS().getState());
-        this.setCancelationMessageCMSURL(contextURL + "/rest/voteVS/id/" + canceler.getVoteVS().getId() + "/cancelation");
+        this.setCmsCancelationMessageURL(contextURL + "/rest/voteVS/id/" + canceler.getVoteVS().getId() + "/cancelation");
     }
 
     public VoteVSDto(VoteVS voteVS, String contextURL) {
@@ -45,7 +45,7 @@ public class VoteVSDto {
         setId(voteVS.getId());
         setState(voteVS.getState());
         if(VoteVS.State.CANCELED == getState()) {
-            setCancelationMessageCMSURL(contextURL + "/rest/voteVS/id/" + voteVS.getId() + "/cancelation");
+            setCmsCancelationMessageURL(contextURL + "/rest/voteVS/id/" + voteVS.getId() + "/cancelation");
         }
         setEventVSId(voteVS.getEventVS().getId());
         setEventURL(contextURL + "/rest/eventVSElection/id/" + getEventVSId());
@@ -54,7 +54,7 @@ public class VoteVSDto {
         if(getHashCertVSBase64() != null) setHashCertVoteHex(StringUtils.toHex(getHashCertVSBase64()));
         String hashHex = hexConverter.marshal(voteVS.getCertificateVS().getHashCertVSBase64().getBytes());
         setCertificateURL(contextURL + "/rest/certificateVS/hashHex/" + hashHex);
-        setMessageCMSURL(contextURL + "/rest/messageCMS/id/" + voteVS.getCMSMessage().getId());
+        setCmsMessageURL(contextURL + "/rest/messageCMS/id/" + voteVS.getCMSMessage().getId());
     }
 
 
@@ -106,20 +106,20 @@ public class VoteVSDto {
         this.hashCertVoteHex = hashCertVoteHex;
     }
 
-    public String getMessageCMSURL() {
-        return messageCMSURL;
+    public String getCmsMessageURL() {
+        return cmsMessageURL;
     }
 
-    public void setMessageCMSURL(String messageCMSURL) {
-        this.messageCMSURL = messageCMSURL;
+    public void setCmsMessageURL(String cmsMessageURL) {
+        this.cmsMessageURL = cmsMessageURL;
     }
 
-    public String getCancelationMessageCMSURL() {
-        return cancelationMessageCMSURL;
+    public String getCmsCancelationMessageURL() {
+        return cmsCancelationMessageURL;
     }
 
-    public void setCancelationMessageCMSURL(String cancelationMessageCMSURL) {
-        this.cancelationMessageCMSURL = cancelationMessageCMSURL;
+    public void setCmsCancelationMessageURL(String cmsCancelationMessageURL) {
+        this.cmsCancelationMessageURL = cmsCancelationMessageURL;
     }
 
     public String getEventURL() {

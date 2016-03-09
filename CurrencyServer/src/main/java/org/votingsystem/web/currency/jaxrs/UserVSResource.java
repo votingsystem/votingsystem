@@ -13,7 +13,7 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
@@ -290,21 +290,21 @@ public class UserVSResource {
 
     @Path("/userInfoTest")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response userInfoTest(MessageCMS messageCMS, @Context HttpServletRequest req, @Context
+    public Response userInfoTest(CMSMessage cmsMessage, @Context HttpServletRequest req, @Context
         HttpServletResponse resp) throws Exception {
-        CMSSignedMessage cmsMessage = messageCMS.getCMS();
-        Map<String, String> dataMap = cmsMessage.getSignedContent(new TypeReference<Map<String, String>>() {});
+        CMSSignedMessage cmsSignedMessage = cmsMessage.getCMS();
+        Map<String, String> dataMap = cmsSignedMessage.getSignedContent(new TypeReference<Map<String, String>>() {});
         //TODO check operation
         Interval timePeriod = DateUtils.getCurrentWeekPeriod();
-        BalancesDto dto = balancesBean.getBalancesDto(messageCMS.getUserVS(), timePeriod);
+        BalancesDto dto = balancesBean.getBalancesDto(cmsMessage.getUserVS(), timePeriod);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
     @Path("/save")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response save(MessageCMS messageCMS, @Context HttpServletRequest req) throws Exception {
+    public Response save(CMSMessage cmsMessage, @Context HttpServletRequest req) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS newUser = userVSBean.saveUser(messageCMS);
+        UserVS newUser = userVSBean.saveUser(cmsMessage);
         MessageDto messageDto = MessageDto.OK(messages.get("certUserNewMsg", newUser.getNif()),
                 config.getContextURL() + "/rest/userVS/id/" + newUser.getId());
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).build();
@@ -312,16 +312,16 @@ public class UserVSResource {
 
     @Path("/csrSignedWithIDCard")
     @POST @Produces("text/plain")
-    public Response csrSignedWithIDCard(MessageCMS messageCMS) throws Exception {
-        X509Certificate issuedCert = cmsBean.signCSRSignedWithIDCard(messageCMS);
+    public Response csrSignedWithIDCard(CMSMessage cmsMessage) throws Exception {
+        X509Certificate issuedCert = cmsBean.signCSRSignedWithIDCard(cmsMessage);
         return Response.ok().entity(PEMUtils.getPEMEncoded(issuedCert)).build();
     }
 
     @Path("/newBankVS")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response newBankVS(MessageCMS messageCMS, @Context HttpServletRequest req) throws Exception {
+    public Response newBankVS(CMSMessage cmsMessage, @Context HttpServletRequest req) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        BankVS newBankVS = bankVSBean.saveBankVS(messageCMS);
+        BankVS newBankVS = bankVSBean.saveBankVS(cmsMessage);
         MessageDto messageDto = new MessageDto(ResponseVS.SC_OK,
                 messages.get("newBankVSOKMsg", newBankVS.getCertificate().getSubjectDN().toString()),
                 config.getContextURL() + "/rest/userVS/id/" + newBankVS.getId());

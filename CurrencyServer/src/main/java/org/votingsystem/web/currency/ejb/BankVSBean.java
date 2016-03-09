@@ -2,7 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 import org.iban4j.Iban;
 import org.votingsystem.dto.currency.BankVSDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
 import org.votingsystem.model.currency.BankVSInfo;
@@ -40,7 +40,7 @@ public class BankVSBean {
     @Inject CMSBean cmsBean;
     @Inject ConfigVS config;
 
-    public BankVS saveBankVS(MessageCMS cmsReq) throws Exception {
+    public BankVS saveBankVS(CMSMessage cmsReq) throws Exception {
         UserVS signer = cmsReq.getUserVS();
         log.log(Level.FINE, "signer:" + signer.getNif());
         BankVSDto request = cmsReq.getSignedContent(BankVSDto.class);

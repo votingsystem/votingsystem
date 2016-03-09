@@ -1,7 +1,7 @@
 package org.votingsystem.model.currency;
 
 import org.votingsystem.model.BatchVS;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 
@@ -28,7 +28,7 @@ public class CurrencyBatch extends BatchVS implements Serializable {
     @ManyToOne(fetch= FetchType.EAGER)
     @JoinColumn(name="tagVS", nullable=false) private TagVS tagVS;
     @Column(name="timeLimited") private Boolean timeLimited = Boolean.FALSE;
-    @OneToOne private MessageCMS messageCMS;
+    @OneToOne private CMSMessage cmsMessage;
     @Column(name="batchUUID") private String batchUUID;
     @Column(name="subject") private String subject;
 
@@ -81,12 +81,12 @@ public class CurrencyBatch extends BatchVS implements Serializable {
         this.currencyCode = currencyCode;
     }
 
-    public MessageCMS getMessageCMS() {
-        return messageCMS;
+    public CMSMessage getCmsMessage() {
+        return cmsMessage;
     }
 
-    public CurrencyBatch setMessageCMS(MessageCMS messageCMS) {
-        this.messageCMS = messageCMS;
+    public CurrencyBatch setCmsMessage(CMSMessage cmsMessage) {
+        this.cmsMessage = cmsMessage;
         return this;
     }
 

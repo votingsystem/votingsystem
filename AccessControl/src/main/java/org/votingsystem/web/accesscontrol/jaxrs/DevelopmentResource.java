@@ -1,7 +1,7 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.apache.commons.io.IOUtils;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.RepresentationDocument;
 import org.votingsystem.model.voting.RepresentativeDocument;
@@ -75,12 +75,12 @@ public class DevelopmentResource implements Serializable {
 
     @Transactional
     @Path("/resetRepresentatives") @POST
-    public Response resetRepresentatives(MessageCMS messageCMS, @Context ServletContext context,
+    public Response resetRepresentatives(CMSMessage cmsMessage, @Context ServletContext context,
                                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         if(config.getMode() != EnvironmentVS.DEVELOPMENT) {
             throw new ValidationExceptionVS("SERVICE AVAILABLE ONLY IN DEVELOPMENT MODE");
         }
-        if(!cmsBean.isAdmin(messageCMS.getUserVS().getNif()))
+        if(!cmsBean.isAdmin(cmsMessage.getUserVS().getNif()))
             throw new ValidationExceptionVS("user without privileges");
         log.severe(" ===== VOTING SIMULATION - RESETING REPRESENTATIVES ===== ");
         List<RepresentativeDocument.State> inList = Arrays.asList(RepresentativeDocument.State.OK,

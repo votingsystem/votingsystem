@@ -1,6 +1,6 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 
@@ -25,19 +25,19 @@ public class SubscriptionVS extends EntityVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public MessageCMS getCancellationCMS() {
+    public CMSMessage getCancellationCMS() {
         return cancellationCMS;
     }
 
-    public void setCancellationCMS(MessageCMS cancellationCMS) {
+    public void setCancellationCMS(CMSMessage cancellationCMS) {
         this.cancellationCMS = cancellationCMS;
     }
 
-    public MessageCMS getActivationCMS() {
+    public CMSMessage getActivationCMS() {
         return activationCMS;
     }
 
-    public void setActivationCMS(MessageCMS activationCMS) {
+    public void setActivationCMS(CMSMessage activationCMS) {
         this.activationCMS = activationCMS;
     }
 
@@ -57,13 +57,13 @@ public class SubscriptionVS extends EntityVS implements Serializable {
     @Column(name="reason", columnDefinition="TEXT") private String reason;
 
     @OneToOne
-    @JoinColumn(name="subscriptionCMS") private MessageCMS subscriptionCMS;
+    @JoinColumn(name="subscriptionCMS") private CMSMessage subscriptionCMS;
 
     @OneToOne
-    @JoinColumn(name="activationCMS") private MessageCMS activationCMS;
+    @JoinColumn(name="activationCMS") private CMSMessage activationCMS;
 
     @OneToOne
-    @JoinColumn(name="cancellationCMS") private MessageCMS cancellationCMS;
+    @JoinColumn(name="cancellationCMS") private CMSMessage cancellationCMS;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCancelled", length=23) private Date dateCancelled;
 
@@ -75,11 +75,11 @@ public class SubscriptionVS extends EntityVS implements Serializable {
 
     public SubscriptionVS() {}
 
-    public SubscriptionVS(UserVS userVS, GroupVS groupVS, State state, MessageCMS messageCMS) {
+    public SubscriptionVS(UserVS userVS, GroupVS groupVS, State state, CMSMessage cmsMessage) {
         this.userVS = userVS;
         this.groupVS = groupVS;
         this.state = state;
-        this.subscriptionCMS = messageCMS;
+        this.subscriptionCMS = cmsMessage;
     }
 
     public Long getId() {
@@ -122,11 +122,11 @@ public class SubscriptionVS extends EntityVS implements Serializable {
         this.reason = reason;
     }
 
-    public MessageCMS getSubscriptionCMS() {
+    public CMSMessage getSubscriptionCMS() {
         return subscriptionCMS;
     }
 
-    public void setSubscriptionCMS(MessageCMS subscriptionCMS) {
+    public void setSubscriptionCMS(CMSMessage subscriptionCMS) {
         this.subscriptionCMS = subscriptionCMS;
     }
 

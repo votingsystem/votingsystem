@@ -2,7 +2,7 @@ package org.votingsystem.web.currency.servlet;
 
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -42,22 +42,22 @@ public class CurrencyRequestServlet extends HttpServlet {
     }
 
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        MessageCMS messageCMS = null;
+        CMSMessage cmsMessage = null;
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.CURRENCY_REQUEST);
-            messageCMS = cmsBean.validateCMS(
-                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
+            cmsMessage = cmsBean.validateCMS(
+                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getCmsMessage();
             CurrencyRequestDto requestDto = CurrencyRequestDto.validateRequest(requestVS.getCSRBytes(),
-                    messageCMS, config.getContextURL());
+                    cmsMessage, config.getContextURL());
             requestDto.setTagVS(config.getTag(requestDto.getTagVS().getName()));
             ResultListDto<String> dto = currencyBean.processCurrencyRequest(requestDto);
             resp.setContentType(MediaTypeVS.JSON);
             resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(dto));
         } catch (ExceptionVS ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
-            if(messageCMS != null) {
-                messageCMS.setType(TypeVS.EXCEPTION).setReason(ex.getMessage());
-                dao.merge(messageCMS);
+            if(cmsMessage != null) {
+                cmsMessage.setType(TypeVS.EXCEPTION).setReason(ex.getMessage());
+                dao.merge(cmsMessage);
             }
             if(ex.getMessageDto() != null) {
                 resp.setStatus(ex.getMessageDto().getStatusCode());

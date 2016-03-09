@@ -49,6 +49,7 @@ public class DocumentBrowserDialog extends DialogVS {
 
     private void showFile(final File cmsFile) {
         Platform.runLater(() -> {
+            log.info("showFile: " + cmsFile.getAbsolutePath());
             documentBrowserPane.load(cmsFile);
             setCaption(documentBrowserPane.getCaption());
             show();

@@ -1,6 +1,6 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.TypeVS;
@@ -40,7 +40,7 @@ public class MessageVS extends EntityVS implements Serializable {
 
     @Column(name="metaInf", columnDefinition="TEXT")  private String metaInf;
     @Column(name="reason", columnDefinition="TEXT") private String reason;
-    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="cmsParent") private MessageCMS senderMessageCMS;
+    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="cmsParent") private CMSMessage senderCMSMessage;
 
 
     public byte[] getContent() {
@@ -113,12 +113,12 @@ public class MessageVS extends EntityVS implements Serializable {
         this.toUserVS = toUserVS;
     }
 
-    public MessageCMS getSenderMessageCMS() {
-        return senderMessageCMS;
+    public CMSMessage getSenderCMSMessage() {
+        return senderCMSMessage;
     }
 
-    public void setSenderMessageCMS(MessageCMS senderMessageCMS) {
-        this.senderMessageCMS = senderMessageCMS;
+    public void setSenderCMSMessage(CMSMessage senderCMSMessage) {
+        this.senderCMSMessage = senderCMSMessage;
     }
 
     public State getState() {

@@ -264,7 +264,7 @@ public class SocketMessageDto {
         this.locale = locale;
     }
 
-    public String getCMSMessage() {
+    public String getCmsMessage() {
         return cmsMessagePEM;
     }
 
@@ -503,7 +503,7 @@ public class SocketMessageDto {
         if(content.getDeviceFromName() != null) deviceFromName = content.getDeviceFromName();
         if(content.getFrom() != null) from = content.getFrom();
         if(content.getDeviceFromId() != null) deviceFromId = content.getDeviceFromId();
-        if(content.getCMSMessage() != null) cms = content.getCMS();
+        if(content.getCmsMessage() != null) cms = content.getCMS();
         if(content.getCurrencyList() != null) currencySet = CurrencyDto.deSerialize(
                 content.getCurrencyList());
         if(content.getSubject() != null) subject = content.getSubject();

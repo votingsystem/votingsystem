@@ -42,9 +42,9 @@ public class TransactionVSBankVSBean {
         if(bankVS == null) throw new ExceptionVS(messages.get("bankVSPrivilegesErrorMsg", request.getOperation().toString()));
         TransactionVS transactionVS = dao.persist(TransactionVS.FROM_BANKVS(bankVS, request.getFromUserIBAN(),
                 request.getFromUser(), request.getReceptor(), request.getAmount(), request.getCurrencyCode(),
-                request.getSubject(), request.getValidTo(), request.getMessageCMS_DB(), tagVS));
-        CMSSignedMessage receipt = cmsBean.addSignature(request.getMessageCMS_DB().getCMS());
-        dao.merge(request.getMessageCMS_DB().setType(TypeVS.FROM_BANKVS).setCMS(receipt));
+                request.getSubject(), request.getValidTo(), request.getCmsMessage_DB(), tagVS));
+        CMSSignedMessage receipt = cmsBean.addSignature(request.getCmsMessage_DB().getCMS());
+        dao.merge(request.getCmsMessage_DB().setType(TypeVS.FROM_BANKVS).setCMS(receipt));
         transactionVSBean.updateCurrencyAccounts(transactionVS);
         log.info("BankVS: " + bankVS.getId() + " - to user: " + request.getReceptor().getId());
         return new ResultListDto(Arrays.asList(new TransactionVSDto(transactionVS)), 0, 1, 1L);

@@ -187,6 +187,8 @@
                     operationVS.serviceURL = this.transactionvs.cmsMessageURL
                     operationVS.operation = Operation.OPEN_CMS_FROM_URL
                 } else operationVS.message = this.cmsMessage
+                console.log(operationVS)
+                console.log(this.transactionvs)
                 VotingSystemClient.setMessage(operationVS);
             },
             show: function(transactionvs) {

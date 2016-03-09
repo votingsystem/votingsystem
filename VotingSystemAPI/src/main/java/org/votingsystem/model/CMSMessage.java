@@ -22,14 +22,14 @@ import static javax.persistence.GenerationType.IDENTITY;
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-@Entity @Table(name="MessageCMS")
+@Entity @Table(name="CMSMessage")
 @NamedQueries({
         @NamedQuery(name = "findMessageCMSByBase64ContentDigest", query =
-                "SELECT m FROM MessageCMS m WHERE m.base64ContentDigest =:base64ContentDigest")
+                "SELECT m FROM CMSMessage m WHERE m.base64ContentDigest =:base64ContentDigest")
 })
-public class MessageCMS extends EntityVS implements Serializable {
+public class CMSMessage extends EntityVS implements Serializable {
 
-    private static Logger log = Logger.getLogger(MessageCMS.class.getName());
+    private static Logger log = Logger.getLogger(CMSMessage.class.getName());
 
     private static final long serialVersionUID = 1L;
 
@@ -43,7 +43,7 @@ public class MessageCMS extends EntityVS implements Serializable {
     @JoinColumn(name="userVS") private UserVS userVS;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="cmsParent") private MessageCMS cmsParent;
+    @JoinColumn(name="cmsParent") private CMSMessage cmsParent;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
     
@@ -60,21 +60,21 @@ public class MessageCMS extends EntityVS implements Serializable {
     @Column(name="lastUpdated", length=23, insertable=true)
     private Date lastUpdated;
 
-    private static ThreadLocal<MessageCMS> instance = new ThreadLocal() {
-        protected MessageCMS initialValue() {
+    private static ThreadLocal<CMSMessage> instance = new ThreadLocal() {
+        protected CMSMessage initialValue() {
             return null;
         }
     };
 
-    public static MessageCMS getCurrentMessageCMS() {
-        return (MessageCMS)instance.get();
+    public static CMSMessage getCurrent() {
+        return (CMSMessage)instance.get();
     }
 
-    public static void setCurrentInstance(MessageCMS messageCMS) {
-        if(messageCMS == null) {
+    public static void setCurrentInstance(CMSMessage cmsMessage) {
+        if(cmsMessage == null) {
             instance.remove();
         } else {
-            instance.set(messageCMS);
+            instance.set(cmsMessage);
         }
     }
 
@@ -86,16 +86,16 @@ public class MessageCMS extends EntityVS implements Serializable {
         return contentPEM;
     }
 
-    public MessageCMS() {}
+    public CMSMessage() {}
 
-    public MessageCMS(String reason, TypeVS typeVS, String metaInf, byte[] contentPEM) throws Exception {
+    public CMSMessage(String reason, TypeVS typeVS, String metaInf, byte[] contentPEM) throws Exception {
         this.reason = reason;
         this.type = typeVS;
         this.metaInf = metaInf;
         setCMS(CMSSignedMessage.FROM_PEM(contentPEM));
     }
 
-    public MessageCMS(CMSSignedMessage cms, CMSDto dto, TypeVS type) throws Exception {
+    public CMSMessage(CMSSignedMessage cms, CMSDto dto, TypeVS type) throws Exception {
         this.type = type;
         this.userVS = dto.getSigner();
         this.anonymousSigner = dto.getAnonymousSigner();
@@ -103,25 +103,25 @@ public class MessageCMS extends EntityVS implements Serializable {
         setCMS(cms);
     }
 
-    public MessageCMS(CMSSignedMessage cms, UserVS userVS, TypeVS type) throws Exception {
+    public CMSMessage(CMSSignedMessage cms, UserVS userVS, TypeVS type) throws Exception {
         this.userVS = userVS;
         this.type = type;
         setCMS(cms);
     }
 
-    public MessageCMS(CMSSignedMessage cms, TypeVS typeVS, MessageCMS cmsParent) throws Exception {
+    public CMSMessage(CMSSignedMessage cms, TypeVS typeVS, CMSMessage cmsParent) throws Exception {
         this.type = typeVS;
         this.cmsParent = cmsParent;
         setCMS(cms);
     }
 
 
-    public MessageCMS(CMSSignedMessage cms, TypeVS typeVS) throws Exception {
+    public CMSMessage(CMSSignedMessage cms, TypeVS typeVS) throws Exception {
         this.type = typeVS;
         setCMS(cms);
     }
 
-    public MessageCMS setContentPEM(byte[] content) {
+    public CMSMessage setContentPEM(byte[] content) {
         this.contentPEM = content;
         return this;
     }
@@ -158,7 +158,7 @@ public class MessageCMS extends EntityVS implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
-	public MessageCMS setType(TypeVS type) {
+	public CMSMessage setType(TypeVS type) {
 		this.type = type;
         return this;
 	}
@@ -167,11 +167,11 @@ public class MessageCMS extends EntityVS implements Serializable {
 		return type;
 	}
 
-	public MessageCMS getCMSParent() {
+	public CMSMessage getCMSParent() {
 		return cmsParent;
 	}
 
-	public void setCMSParent(MessageCMS cmsParent) {
+	public void setCMSParent(CMSMessage cmsParent) {
 		this.cmsParent = cmsParent;
 	}
 
@@ -195,7 +195,7 @@ public class MessageCMS extends EntityVS implements Serializable {
 		return cmsMessage;
 	}
 
-	public MessageCMS setCMS(CMSSignedMessage cmsMessage) throws Exception {
+	public CMSMessage setCMS(CMSSignedMessage cmsMessage) throws Exception {
 		this.cmsMessage = cmsMessage;
         this.contentPEM = cmsMessage.toPEM();
         this.base64ContentDigest = cmsMessage.getContentDigestStr();
@@ -239,7 +239,7 @@ public class MessageCMS extends EntityVS implements Serializable {
         return JSON.getMapper().readValue(signedContent, type);
     }
 
-    public MessageCMS setSignedContent(String signedContent) {
+    public CMSMessage setSignedContent(String signedContent) {
         this.signedContent = signedContent;
         return this;
     }

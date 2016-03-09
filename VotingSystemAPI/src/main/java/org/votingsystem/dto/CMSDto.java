@@ -1,6 +1,6 @@
 package org.votingsystem.dto;
 
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.VoteVS;
@@ -18,7 +18,7 @@ public class CMSDto {
     private EventVS eventVS;
     private UserVS anonymousSigner;
     private Set<UserVS> signers;
-    private MessageCMS messageCMS;
+    private CMSMessage cmsMessage;
 
     public CMSDto() {}
 
@@ -73,11 +73,11 @@ public class CMSDto {
         this.eventVS = eventVS;
     }
 
-    public MessageCMS getMessageCMS() {
-        return messageCMS;
+    public CMSMessage getCmsMessage() {
+        return cmsMessage;
     }
 
-    public void setMessageCMS(MessageCMS messageCMS) {
-        this.messageCMS = messageCMS;
+    public void setCmsMessage(CMSMessage cmsMessage) {
+        this.cmsMessage = cmsMessage;
     }
 }

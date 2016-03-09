@@ -1,6 +1,6 @@
 package org.votingsystem.model.voting;
 
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 
@@ -33,9 +33,9 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
     @Column(name="hashAnonymousDelegation", unique=true) private String hashAnonymousDelegation;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
-    @OneToOne private MessageCMS delegationCMS;
+    @OneToOne private CMSMessage delegationCMS;
 
-    @OneToOne private MessageCMS cancellationCMS;
+    @OneToOne private CMSMessage cancellationCMS;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateFrom", length=23, nullable=false)
@@ -58,7 +58,7 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
 
     public AnonymousDelegation() {}
 
-    public AnonymousDelegation(Status status, MessageCMS delegationCMS, UserVS userVS, Date dateFrom,
+    public AnonymousDelegation(Status status, CMSMessage delegationCMS, UserVS userVS, Date dateFrom,
                                Date dateTo) {
         this.status = status;
         this.delegationCMS = delegationCMS;
@@ -99,19 +99,19 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
-    public MessageCMS getDelegationCMS() {
+    public CMSMessage getDelegationCMS() {
         return delegationCMS;
     }
 
-    public void setDelegationCMS(MessageCMS delegationCMS) {
+    public void setDelegationCMS(CMSMessage delegationCMS) {
         this.delegationCMS = delegationCMS;
     }
 
-    public MessageCMS getCancellationCMS() {
+    public CMSMessage getCancellationCMS() {
         return cancellationCMS;
     }
 
-    public AnonymousDelegation setCancellationCMS(MessageCMS cancellationCMS) {
+    public AnonymousDelegation setCancellationCMS(CMSMessage cancellationCMS) {
         this.cancellationCMS = cancellationCMS;
         return this;
     }

@@ -1,7 +1,7 @@
 package org.votingsystem.web.util;
 
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TypeVS;
@@ -20,18 +20,18 @@ import java.util.Map;
 
 public class RequestUtils {
 
-    public static Object processRequest(MessageCMS messageCMS, @Context ServletContext context,
+    public static Object processRequest(CMSMessage cmsMessage, @Context ServletContext context,
                                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        String cmsMessageStr = Base64.getEncoder().encodeToString(messageCMS.getContentPEM());
-        CMSSignedMessage cmsMessage = messageCMS.getCMS();
+        String cmsSignedMessageStr = new String(cmsMessage.getContentPEM());
+        CMSSignedMessage cmsSignedMessage = cmsMessage.getCMS();
         Date timeStampDate = null;
         Map signedContentMap;
         String viewer = "message-cms";
-        if(cmsMessage.getTimeStampToken() != null) {
-            timeStampDate = cmsMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
+        if(cmsSignedMessage.getTimeStampToken() != null) {
+            timeStampDate = cmsSignedMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
         }
-        signedContentMap = messageCMS.getSignedContentMap();
+        signedContentMap = cmsMessage.getSignedContentMap();
         TypeVS operation = TypeVS.valueOf((String) signedContentMap.get("operation"));
         switch(operation) {
             case SEND_VOTE:
@@ -50,18 +50,18 @@ public class RequestUtils {
         if(contentType.contains("json")) {
             Map resultMap = new HashMap<>();
             resultMap.put("operation", operation);
-            resultMap.put("cmsMessage", cmsMessageStr);
+            resultMap.put("cmsMessage", cmsSignedMessageStr);
             resultMap.put("signedContentMap", signedContentMap);
             resultMap.put("timeStampDate", timeStampDate.getTime());
             resultMap.put("viewer", viewer);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
         } else {
             req.getSession().setAttribute("operation", operation);
-            req.getSession().setAttribute("cmsMessage", cmsMessageStr);
+            req.getSession().setAttribute("cmsMessage", cmsSignedMessageStr);
             req.getSession().setAttribute("signedContentMap", JSON.getMapper().writeValueAsString(signedContentMap));
             req.getSession().setAttribute("timeStampDate", timeStampDate.getTime());
             req.getSession().setAttribute("viewer", viewer);
-            return Response.temporaryRedirect(new URI("../messageCMS/contentViewer.xhtml")).build();
+            return Response.temporaryRedirect(new URI("../cmsMessage/contentViewer.xhtml")).build();
         }
     }
 

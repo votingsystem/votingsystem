@@ -3,9 +3,9 @@ package org.votingsystem.web.ejb;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.currency.SubscriptionVSDto;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.GroupVS;
 import org.votingsystem.model.currency.SubscriptionVS;
@@ -123,10 +123,10 @@ public class SubscriptionVSBean {
         return dao.persist(deviceVS);
     }
 
-    public SubscriptionVS deActivateUser(MessageCMS messageCMS) throws Exception {
-        UserVS signer = messageCMS.getUserVS();
+    public SubscriptionVS deActivateUser(CMSMessage cmsMessage) throws Exception {
+        UserVS signer = cmsMessage.getUserVS();
         log.log(Level.FINE, "signer: " + signer.getNif());
-        SubscriptionVSDto request = messageCMS.getSignedContent(SubscriptionVSDto.class);
+        SubscriptionVSDto request = cmsMessage.getSignedContent(SubscriptionVSDto.class);
         GroupVS groupVS = dao.find(GroupVS.class, request.getGroupvsId());
         if(groupVS == null || !request.getGroupvsName().equals(groupVS.getName())) {
             throw new ExceptionVS("group with name: " + request.getGroupvsName() + " and id: " + request.getId() + " not found");
@@ -148,15 +148,15 @@ public class SubscriptionVSBean {
         subscription.setReason(request.getReason());
         subscription.setState(SubscriptionVS.State.CANCELED);
         subscription.setDateCancelled(new Date());
-        subscription.setCancellationCMS(messageCMS);
+        subscription.setCancellationCMS(cmsMessage);
         log.info("deActivateUser OK - user nif: " + request.getUserVSNIF() + " - group: " + request.getGroupvsName());
         return subscription;
     }
 
-    public SubscriptionVS activateUser(MessageCMS messageCMS) throws Exception {
-        UserVS signer = messageCMS.getUserVS();
+    public SubscriptionVS activateUser(CMSMessage cmsMessage) throws Exception {
+        UserVS signer = cmsMessage.getUserVS();
         log.info("signer: " + signer.getNif());
-        SubscriptionVSDto request = messageCMS.getSignedContent(SubscriptionVSDto.class);
+        SubscriptionVSDto request = cmsMessage.getSignedContent(SubscriptionVSDto.class);
         request.validateActivationRequest();
         GroupVS groupVS = dao.find(GroupVS.class, request.getGroupvsId());
         if(groupVS == null || !request.getGroupvsName().equals(groupVS.getName())) {
@@ -177,7 +177,7 @@ public class SubscriptionVSBean {
                 " has not pending subscription request");
         subscription.setState(SubscriptionVS.State.ACTIVE);
         subscription.setDateActivated(new Date());
-        subscription.setActivationCMS(messageCMS);
+        subscription.setActivationCMS(cmsMessage);
         log.info("activateUser OK - user nif: " + request.getUserVSNIF() + " - group: " + request.getGroupvsName());
         return subscription;
     }

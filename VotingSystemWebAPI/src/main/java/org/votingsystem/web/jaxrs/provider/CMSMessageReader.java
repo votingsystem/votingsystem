@@ -1,7 +1,7 @@
 package org.votingsystem.web.jaxrs.provider;
 
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.ejb.CMSBean;
@@ -25,22 +25,22 @@ import java.util.logging.Logger;
  */
 @Provider
 @Consumes(MediaTypeVS.JSON_SIGNED)
-public class MessageCMSReader implements MessageBodyReader<MessageCMS> {
+public class CMSMessageReader implements MessageBodyReader<CMSMessage> {
 
-    private static final Logger log = Logger.getLogger(MessageCMSReader.class.getName());
+    private static final Logger log = Logger.getLogger(CMSMessageReader.class.getName());
 
     @Inject CMSBean cmsBean;
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
-        return MessageCMS.class.isAssignableFrom(aClass);
+        return CMSMessage.class.isAssignableFrom(aClass);
     }
 
     @Override
-    public MessageCMS readFrom(Class<MessageCMS> aClass, Type type, Annotation[] annotations, MediaType mediaType,
+    public CMSMessage readFrom(Class<CMSMessage> aClass, Type type, Annotation[] annotations, MediaType mediaType,
                                MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
         try {
-            return cmsBean.validateCMS(CMSSignedMessage.FROM_PEM(inputStream), ContentTypeVS.JSON_SIGNED).getMessageCMS();
+            return cmsBean.validateCMS(CMSSignedMessage.FROM_PEM(inputStream), ContentTypeVS.JSON_SIGNED).getCmsMessage();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             throw new WebApplicationException(ex);

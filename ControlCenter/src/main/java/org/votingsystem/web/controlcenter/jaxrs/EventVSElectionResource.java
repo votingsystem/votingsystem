@@ -8,7 +8,7 @@ import org.hibernate.criterion.Restrictions;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.EventVSStatsDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -104,16 +104,16 @@ public class EventVSElectionResource {
     }
 
     @Path("/") @POST
-    public Response save(MessageCMS messageCMS, @Context ServletContext context,
+    public Response save(CMSMessage cmsMessage, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        EventVSElection eventVSElection = eventVSBean.saveEvent(messageCMS);
+        EventVSElection eventVSElection = eventVSBean.saveEvent(cmsMessage);
         return Response.ok().entity(eventVSElection.getId()).type(MediaType.TEXT_PLAIN).build();
     }
 
     @Path("/cancel") @POST
-    public Response cancel(MessageCMS messageCMS, @Context ServletContext context,
+    public Response cancel(CMSMessage cmsMessage, @Context ServletContext context,
                            @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        MessageCMS responseMessage = eventVSBean.cancelEvent(messageCMS);
+        CMSMessage responseMessage = eventVSBean.cancelEvent(cmsMessage);
         return Response.ok().entity(responseMessage.getContentPEM()).type(MediaType.TEXT_PLAIN).build();
     }
 

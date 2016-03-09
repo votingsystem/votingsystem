@@ -2,7 +2,7 @@ package org.votingsystem.web.controlcenter.jaxrs;
 
 import org.votingsystem.dto.CMSDto;
 import org.votingsystem.dto.voting.VoteVSDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.model.voting.VoteVSCanceler;
 import org.votingsystem.util.ContentTypeVS;
@@ -41,8 +41,8 @@ public class VoteVSResource {
     public Response save(CMSDto CMSDto, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         VoteVS voteVS = voteVSBean.validateVote(CMSDto);
-        MessageCMS messageCMS = CMSDto.getMessageCMS();
-        if(messageCMS.getUserVS() != null) resp.setHeader("representativeNIF", messageCMS.getUserVS().getNif());
+        CMSMessage cmsMessage = CMSDto.getCmsMessage();
+        if(cmsMessage.getUserVS() != null) resp.setHeader("representativeNIF", cmsMessage.getUserVS().getNif());
         return Response.ok().entity(voteVS.getCMSMessage().getContentPEM()).type(ContentTypeVS.VOTE.getName()).build();
     }
 
@@ -83,7 +83,7 @@ public class VoteVSResource {
         VoteVSCanceler voteVSCanceler = dao.getSingleResult(VoteVSCanceler.class, query);
         if(voteVSCanceler == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - VoteVSCanceler not found - voteId: " + id).build();
-        return Response.ok().entity(voteVSCanceler.getMessageCMS().getContentPEM())
+        return Response.ok().entity(voteVSCanceler.getCmsMessage().getContentPEM())
                 .type(MediaTypeVS.JSON_SIGNED).build();
     }
 
@@ -102,10 +102,10 @@ public class VoteVSResource {
     }
 
     @Path("/cancel") @POST
-    public Response post (MessageCMS messageCMS, @Context ServletContext context,
+    public Response post (CMSMessage cmsMessage, @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        VoteVSCanceler canceler = voteVSBean.processCancel(messageCMS);
-        return Response.ok().entity(canceler.getMessageCMS().getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
+        VoteVSCanceler canceler = voteVSBean.processCancel(cmsMessage);
+        return Response.ok().entity(canceler.getCmsMessage().getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
 }

@@ -21,7 +21,7 @@ public class PEMCertFromJKS {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        String file = "Cert_USER_AccessControl_07553172H";
+        String file = "Cert_BANKVS_03455543T";
         String keyStorePath="./certs/" + file + ".jks";
         String keyAlias="UserTestKeysStore";
         String keyPassword="ABCDE";

@@ -1,7 +1,7 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
@@ -26,10 +26,10 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Path("/messageCMS")
-public class MessageCMSResource {
+@Path("/cmsMessage")
+public class CMSMessageResource {
 
-    private static final Logger log = Logger.getLogger(MessageCMSResource.class.getName());
+    private static final Logger log = Logger.getLogger(CMSMessageResource.class.getName());
 
     @Inject DAOBean dao;
 
@@ -37,27 +37,27 @@ public class MessageCMSResource {
     public Object index(@PathParam("id") long id, @Context ServletContext context,
                                 @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        MessageCMS messageCMS = dao.find(MessageCMS.class, id);
-        if(messageCMS == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "MessageCMS not found - id: " + id).build();
+        CMSMessage cmsMessage = dao.find(CMSMessage.class, id);
+        if(cmsMessage == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "CMSMessage not found - id: " + id).build();
         if(contentType.contains(ContentTypeVS.TEXT.getName())) {
-            return Response.ok().entity(messageCMS.getContentPEM()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
-        } else return processRequest(messageCMS, context, req, resp);
+            return Response.ok().entity(cmsMessage.getContentPEM()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
+        } else return processRequest(cmsMessage, context, req, resp);
     }
 
 
-    private Object processRequest(MessageCMS messageCMS, @Context ServletContext context,
+    private Object processRequest(CMSMessage cmsMessage, @Context ServletContext context,
                                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        CMSSignedMessage cmsMessage = messageCMS.getCMS();
-        String cmsMessageStr = cmsMessage.toPEMStr();
+        CMSSignedMessage cmsSignedMessage = cmsMessage.getCMS();
+        String cmsMessageStr = cmsSignedMessage.toPEMStr();
         Date timeStampDate = null;
         Map signedContentMap;
         String viewer = "message-cms";
-        if(cmsMessage.getTimeStampToken() != null) {
-            timeStampDate = cmsMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
+        if(cmsSignedMessage.getTimeStampToken() != null) {
+            timeStampDate = cmsSignedMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
         }
-        signedContentMap = messageCMS.getSignedContentMap();
+        signedContentMap = cmsMessage.getSignedContentMap();
         TypeVS operation = TypeVS.valueOf((String) signedContentMap.get("operation"));
         switch(operation) {
             case SEND_VOTE:
@@ -81,7 +81,7 @@ public class MessageCMSResource {
             req.getSession().setAttribute("signedContentMap", JSON.getMapper().writeValueAsString(signedContentMap));
             req.getSession().setAttribute("timeStampDate", timeStampDate.getTime());
             req.getSession().setAttribute("viewer", viewer);
-            return Response.temporaryRedirect(new URI("../messageCMS/contentViewer.xhtml")).build();
+            return Response.temporaryRedirect(new URI("../cmsMessage/contentViewer.xhtml")).build();
 
         }
     }

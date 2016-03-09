@@ -8,7 +8,7 @@ import org.hibernate.criterion.Restrictions;
 import org.votingsystem.dto.CertificateVSDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.util.JSON;
@@ -197,9 +197,9 @@ public class CertificateVSResource {
 
     @Path("/editCert")
     @POST @Produces(MediaType.APPLICATION_JSON)
-    public Response editCert(MessageCMS messageCMS, @Context HttpServletRequest req,
+    public Response editCert(CMSMessage cmsMessage, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws Exception {
-        CertificateVS certificateVS = certificateVSBean.editCert(messageCMS);
+        CertificateVS certificateVS = certificateVSBean.editCert(cmsMessage);
         return Response.ok().entity("editCert - certificateVS id: " + certificateVS.getId()).build();
     }
 

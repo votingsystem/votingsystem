@@ -4,8 +4,8 @@ package org.votingsystem.model.currency;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.throwable.ExceptionVS;
@@ -79,7 +79,7 @@ public class Currency extends EntityVS implements Serializable  {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="transactionvs") private TransactionVS transactionVS;
 
-    @OneToOne @JoinColumn(name="messageCMS") private MessageCMS messageCMS;
+    @OneToOne @JoinColumn(name="cmsMessage") private CMSMessage cmsMessage;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="validFrom", length=23) private Date validFrom;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="validTo", length=23) private Date validTo;
@@ -89,7 +89,7 @@ public class Currency extends EntityVS implements Serializable  {
 
     @Transient private CertificationRequestVS certificationRequest;
     @Transient private X509Certificate x509AnonymousCert;
-    @Transient private transient CMSSignedMessage cmsMessage;
+    @Transient private transient CMSSignedMessage cmsSignedMessage;
     @Transient private String toUserIBAN;
     @Transient private String toUserName;
     @Transient private CurrencyDto batchItemDto;
@@ -97,11 +97,11 @@ public class Currency extends EntityVS implements Serializable  {
 
     public Currency() {}
 
-    public Currency(CMSSignedMessage cmsMessage) throws Exception {
-        cmsMessage.isValidSignature();
-        this.cmsMessage = cmsMessage;
-        initCertData(cmsMessage.getCurrencyCert());
-        batchItemDto = cmsMessage.getSignedContent(CurrencyDto.class);
+    public Currency(CMSSignedMessage cmsSignedMessage) throws Exception {
+        cmsSignedMessage.isValidSignature();
+        this.cmsSignedMessage = cmsSignedMessage;
+        initCertData(cmsSignedMessage.getCurrencyCert());
+        batchItemDto = cmsSignedMessage.getSignedContent(CurrencyDto.class);
         if(!this.currencyCode.equals(batchItemDto.getCurrencyCode())) {
             throw new ExceptionVS(getErrorPrefix() +
                     "expected currencyCode '" + currencyCode + "' - found: '" + batchItemDto.getCurrencyCode());
@@ -109,7 +109,7 @@ public class Currency extends EntityVS implements Serializable  {
         if(!TagVS.WILDTAG.equals(certExtensionDto.getTag()) && !certExtensionDto.getTag().equals(batchItemDto.getTag()))
             throw new ExceptionVS("expected tag '" + certExtensionDto.getTag() + "' - found: '" +
                     batchItemDto.getTag());
-        Date signatureTime = cmsMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
+        Date signatureTime = cmsSignedMessage.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(signatureTime.after(x509AnonymousCert.getNotAfter())) throw new ExceptionVS(getErrorPrefix() + "valid to '" +
                 x509AnonymousCert.getNotAfter().toString() + "' has signature date '" + signatureTime.toString() + "'");
         this.subject = batchItemDto.getSubject();
@@ -202,7 +202,7 @@ public class Currency extends EntityVS implements Serializable  {
         if (!currencyRequest.getCertExtensionDto().getTag().equals(tagVS.getName()))
             throw new ExceptionVS("checkRequestWithDB_TagVS");
         if(currencyRequest.getAmount().compareTo(amount) != 0)  throw new ExceptionVS("checkRequestWithDB_amount");
-        this.cmsMessage = currencyRequest.getCMS();
+        this.cmsSignedMessage = currencyRequest.getCMS();
         this.x509AnonymousCert = currencyRequest.getX509AnonymousCert();
         this.toUserVS = currencyRequest.getToUserVS();
         this.toUserIBAN = currencyRequest.getToUserIBAN();
@@ -288,11 +288,11 @@ public class Currency extends EntityVS implements Serializable  {
     }
 
     public CMSSignedMessage getCMS() {
-        return cmsMessage;
+        return cmsSignedMessage;
     }
 
-    public void setCMS(CMSSignedMessage cmsMessage) {
-        this.cmsMessage = cmsMessage;
+    public void setCMS(CMSSignedMessage cmsSignedMessage) {
+        this.cmsSignedMessage = cmsSignedMessage;
     }
 
     public X509Certificate getX509AnonymousCert() {
@@ -347,12 +347,12 @@ public class Currency extends EntityVS implements Serializable  {
         this.originHashCertVS = originHashCertVS;
     }
 
-    public MessageCMS getMessageCMS() {
-        return messageCMS;
+    public CMSMessage getCmsMessage() {
+        return cmsMessage;
     }
 
-    public void setMessageCMS(MessageCMS messageCMS) {
-        this.messageCMS = messageCMS;
+    public void setCmsMessage(CMSMessage cmsMessage) {
+        this.cmsMessage = cmsMessage;
     }
 
     public Date getValidFrom() {
@@ -463,18 +463,18 @@ public class Currency extends EntityVS implements Serializable  {
     }
 
     public void validateReceipt(CMSSignedMessage cmsReceipt, Set<TrustAnchor> trustAnchor) throws Exception {
-        if(!cmsMessage.getSigner().getSignedContentDigestBase64().equals(
+        if(!cmsSignedMessage.getSigner().getSignedContentDigestBase64().equals(
                 cmsReceipt.getSigner().getSignedContentDigestBase64())){
             throw new ExceptionVS("Signer content digest mismatch");
         }
         CertUtils.verifyCertificate(trustAnchor, false, new ArrayList<>(cmsReceipt.getSignersCerts()));
-        this.cmsMessage = cmsReceipt;
+        this.cmsSignedMessage = cmsReceipt;
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         try {
-            if(cmsMessage != null) s.writeObject(cmsMessage.toASN1Structure().getEncoded());
+            if(cmsSignedMessage != null) s.writeObject(cmsSignedMessage.toASN1Structure().getEncoded());
             else s.writeObject(null);
         } catch(Exception ex) {
             ex.printStackTrace();
@@ -485,7 +485,7 @@ public class Currency extends EntityVS implements Serializable  {
         s.defaultReadObject();
         byte[] cmsMessageBytes = (byte[]) s.readObject();
         if(cmsMessageBytes != null) {
-            cmsMessage = new CMSSignedMessage(cmsMessageBytes);
+            cmsSignedMessage = new CMSSignedMessage(cmsMessageBytes);
         }
         if(x509AnonymousCert != null) {
             validFrom = x509AnonymousCert.getNotBefore();

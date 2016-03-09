@@ -3,7 +3,7 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.ExceptionVS;
@@ -38,7 +38,7 @@ public class CurrencyRequestDto {
     private BigDecimal totalAmount;
     private Boolean timeLimited;
 
-    @JsonIgnore private MessageCMS messageCMS;
+    @JsonIgnore private CMSMessage cmsMessage;
     @JsonIgnore private Map<String, CurrencyDto> currencyDtoMap;
     @JsonIgnore private Map<String, Currency> currencyMap;
     @JsonIgnore private Set<String> requestCSRSet;
@@ -98,10 +98,10 @@ public class CurrencyRequestDto {
         return currency;
     }
 
-    public static CurrencyRequestDto validateRequest(byte[] currencyBatchRequest, MessageCMS messageCMS,
+    public static CurrencyRequestDto validateRequest(byte[] currencyBatchRequest, CMSMessage cmsMessage,
                            String contextURL) throws Exception {
-        CurrencyRequestDto requestDto = messageCMS.getSignedContent(CurrencyRequestDto.class);
-        requestDto.messageCMS = messageCMS;
+        CurrencyRequestDto requestDto = cmsMessage.getSignedContent(CurrencyRequestDto.class);
+        requestDto.cmsMessage = cmsMessage;
         if(TypeVS.CURRENCY_REQUEST != requestDto.getOperation()) throw new ExceptionVS(
                 "Expected operation 'CURRENCY_REQUEST' found: " + requestDto.getOperation());
         if(!contextURL.equals(requestDto.getServerURL())) throw new ExceptionVS("Expected serverURL '" + contextURL +
@@ -207,12 +207,12 @@ public class CurrencyRequestDto {
         this.currencyDtoMap = currencyDtoMap;
     }
 
-    public MessageCMS getMessageCMS() {
-        return messageCMS;
+    public CMSMessage getCmsMessage() {
+        return cmsMessage;
     }
 
-    public void setMessageCMS(MessageCMS messageCMS) {
-        this.messageCMS = messageCMS;
+    public void setCmsMessage(CMSMessage cmsMessage) {
+        this.cmsMessage = cmsMessage;
     }
 
     public void setCurrencyMap(Map<String, Currency> currencyMap) {

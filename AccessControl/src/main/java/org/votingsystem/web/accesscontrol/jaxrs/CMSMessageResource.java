@@ -1,6 +1,6 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.voting.VoteVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.MediaTypeVS;
@@ -26,10 +26,10 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Path("/messageCMS")
-public class MessageCMSResource {
+@Path("/cmsMessage")
+public class CMSMessageResource {
 
-    private static final Logger log = Logger.getLogger(MessageCMSResource.class.getName());
+    private static final Logger log = Logger.getLogger(CMSMessageResource.class.getName());
 
     @Inject DAOBean dao;
 
@@ -37,12 +37,12 @@ public class MessageCMSResource {
     public Object index(@PathParam("id") long id, @Context ServletContext context,
                                 @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        MessageCMS messageCMS = dao.find(MessageCMS.class, id);
-        if(messageCMS == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "MessageCMS not found - id: " + id).build();
+        CMSMessage cmsMessage = dao.find(CMSMessage.class, id);
+        if(cmsMessage == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "CMSMessage not found - id: " + id).build();
         if(contentType.contains(ContentTypeVS.TEXT.getName())) {
-            return Response.ok().entity(messageCMS.getContentPEM()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
-        } else return RequestUtils.processRequest(messageCMS, context, req, resp);
+            return Response.ok().entity(cmsMessage.getContentPEM()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
+        } else return RequestUtils.processRequest(cmsMessage, context, req, resp);
     }
 
     @Transactional

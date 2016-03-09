@@ -11,6 +11,7 @@ import org.votingsystem.client.webextension.service.WebSocketService;
 import org.votingsystem.client.webextension.task.*;
 import org.votingsystem.client.webextension.util.MsgUtils;
 import org.votingsystem.client.webextension.util.Utils;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.currency.GroupVSDto;
@@ -383,7 +384,7 @@ public class OperationVS implements PasswordDialog.Listener {
                 break;
             case OPEN_CMS:
                 try {
-                    DocumentBrowserDialog.showDialog(Base64.getDecoder().decode(message.getBytes()), event -> {
+                    DocumentBrowserDialog.showDialog(message.getBytes(), event -> {
                         BrowserHost.sendMessageToBrowser(MessageDto.DIALOG_CLOSE(tabId));
                     });
                 } catch (Exception ex) {

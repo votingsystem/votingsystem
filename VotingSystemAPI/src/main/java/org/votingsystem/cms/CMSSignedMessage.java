@@ -141,7 +141,7 @@ public class CMSSignedMessage extends CMSSignedData {
     }
 
     /**
-     * Digest for storing unique MessageCMS in database
+     * Digest for storing unique CMSMessage in database
      */
     public String getContentDigestStr() throws Exception {
         MessageDigest messageDigest = MessageDigest.getInstance("MD5");

@@ -25,8 +25,8 @@ public class BackupRequestVS extends EntityVS implements Serializable {
     @Column(name="type", nullable=false)
     private TypeVS type;
     @OneToOne
-    @JoinColumn(name="messageCMS")
-    private MessageCMS messageCMS;
+    @JoinColumn(name="cmsMessage")
+    private CMSMessage cmsMessage;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representative")
     private UserVS representative;
@@ -49,11 +49,11 @@ public class BackupRequestVS extends EntityVS implements Serializable {
         this.email = email;
     }
 
-    public BackupRequestVS(String filePath, TypeVS type, UserVS representative, MessageCMS messageCMS, String email) {
+    public BackupRequestVS(String filePath, TypeVS type, UserVS representative, CMSMessage cmsMessage, String email) {
         this.filePath = filePath;
         this.type = type;
         this.representative = representative;
-        this.messageCMS = messageCMS;
+        this.cmsMessage = cmsMessage;
         this.email = email;
     }
 
@@ -97,12 +97,12 @@ public class BackupRequestVS extends EntityVS implements Serializable {
 		this.filePath = filePath;
 	}
 
-	public MessageCMS getMessageCMS() {
-		return messageCMS;
+	public CMSMessage getCmsMessage() {
+		return cmsMessage;
 	}
 
-	public void setMessageCMS(MessageCMS messageCMS) {
-		this.messageCMS = messageCMS;
+	public void setCmsMessage(CMSMessage cmsMessage) {
+		this.cmsMessage = cmsMessage;
 	}
 
 	public UserVS getRepresentative() {

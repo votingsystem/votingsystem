@@ -28,7 +28,7 @@ public class ImageVS extends EntityVS implements Serializable {
      @Column(name="fileBytes")
      private byte[] fileBytes;
      @OneToOne
-     private MessageCMS messageCMS;
+     private CMSMessage cmsMessage;
      @Temporal(TemporalType.TIMESTAMP)
      @Column(name="dateCreated", length=23)
      private Date dateCreated;
@@ -38,9 +38,9 @@ public class ImageVS extends EntityVS implements Serializable {
      
      public ImageVS() { }
 
-    public ImageVS(UserVS userVS, MessageCMS messageCMS, Type type, byte[] fileBytes) {
+    public ImageVS(UserVS userVS, CMSMessage cmsMessage, Type type, byte[] fileBytes) {
         this.userVS = userVS;
-        this.messageCMS = messageCMS;
+        this.cmsMessage = cmsMessage;
         this.type = type;
         this.fileBytes = fileBytes;
     }
@@ -102,12 +102,12 @@ public class ImageVS extends EntityVS implements Serializable {
 		this.fileBytes = fileBytes;
 	}
 
-     public MessageCMS getMessageCMS() {
-		return messageCMS;
+     public CMSMessage getCmsMessage() {
+		return cmsMessage;
 	}
 
-	 public void setMessageCMS(MessageCMS messageCMS) {
-		this.messageCMS = messageCMS;
+	 public void setCmsMessage(CMSMessage cmsMessage) {
+		this.cmsMessage = cmsMessage;
 	}
 
 }

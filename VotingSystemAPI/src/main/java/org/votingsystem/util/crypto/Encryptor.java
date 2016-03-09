@@ -130,27 +130,6 @@ public class Encryptor {
         return cipher.doFinal(bundle.cipherText);
     }
 
-    /*public static String encryptAES(String messageToEncrypt, AESParams params) throws
-            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException,
-            NoSuchProviderException {
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, params.getKey(), params.getIV());
-        byte[] encryptedMessage = cipher.doFinal(messageToEncrypt.getBytes("UTF-8"));
-        return new String(org.bouncycastle.util.encoders.Base64.encode(encryptedMessage));
-    }
-
-    //decrypts base64 encoded AES message
-    public static String decryptAES(String messageToDecrypt, AESParams params) throws
-            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException {
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, params.getKey(), params.getIV());
-        byte[] encryptedMessageBytes = org.bouncycastle.util.encoders.Base64.decode(messageToDecrypt.getBytes());
-        byte[] decryptedBytes = cipher.doFinal(encryptedMessageBytes);
-        return new String(decryptedBytes, "UTF8");
-    }*/
-
     //BC provider to avoid key length restrictions on normal jvm
     public static String encryptAES(String messageToEncrypt, AESParams aesParams) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,

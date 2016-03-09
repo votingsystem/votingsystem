@@ -40,8 +40,8 @@ public class EventVSElectionBean {
     @Inject TimeStampBean timeStampBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
 
-    public EventVSElection saveEvent(MessageCMS messageCMS) throws Exception {
-        CMSSignedMessage cmsReq = messageCMS.getCMS();
+    public EventVSElection saveEvent(CMSMessage cmsMessage) throws Exception {
+        CMSSignedMessage cmsReq = cmsMessage.getCMS();
         EventVSDto request = cmsReq.getSignedContent(EventVSDto.class);
         request.validate(config.getContextURL());
         AccessControlVS accessControl = checkAccessControl(request.getAccessControlURL());
@@ -51,7 +51,7 @@ public class EventVSElectionBean {
         EventVSElection eventVS = request.getEventVSElection();
         eventVS.setAccessControlVS(accessControl);
         eventVS.setUserVS(user);
-        eventVS.setPublishRequestCMS(messageCMS);
+        eventVS.setPublishRequestCMS(cmsMessage);
         setEventDatesState(eventVS);
         eventVS.updateAccessControlIds();
         dao.persist(eventVS);
@@ -70,10 +70,10 @@ public class EventVSElectionBean {
         return dao.merge(eventVS);
     }
 
-    public MessageCMS cancelEvent(MessageCMS messageCMS) throws Exception {
+    public CMSMessage cancelEvent(CMSMessage cmsMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS signer = messageCMS.getUserVS();
-        EventVSDto request = messageCMS.getSignedContent(EventVSDto.class);
+        UserVS signer = cmsMessage.getUserVS();
+        EventVSDto request = cmsMessage.getSignedContent(EventVSDto.class);
         Query query = dao.getEM().createQuery("select e from EventVSElection e where e.accessControlEventVSId =:eventId")
                 .setParameter("eventId", request.getEventId());
         EventVSElection eventVS = dao.getSingleResult(EventVSElection.class, query);
@@ -84,12 +84,12 @@ public class EventVSElectionBean {
         if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || cmsBean.isAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
         request.validateCancelation(eventVS.getAccessControlVS().getServerURL());
-        CMSSignedMessage cmsResp = cmsBean.addSignature(messageCMS.getCMS());
-        dao.merge(messageCMS.setCMS(cmsResp));
+        CMSSignedMessage cmsResp = cmsBean.addSignature(cmsMessage.getCMS());
+        dao.merge(cmsMessage.setCMS(cmsResp));
         eventVS.setState(request.getState()).setDateCanceled(new Date());
         dao.merge(eventVS);
         log.info("cancelEvent - canceled EventVSElection  id:" + eventVS.getId());
-        return messageCMS;
+        return cmsMessage;
     }
 
     private AccessControlVS checkAccessControl(String serverURL) {

@@ -45,9 +45,9 @@ public class CSRBean {
     @Inject CMSBean cmsBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
 
-    public DeviceVS signCertUserVS(MessageCMS messageCMS) throws Exception {
-        UserVS userVS = messageCMS.getUserVS();
-        CertValidationDto certValidationDto = messageCMS.getSignedContent(CertValidationDto.class);
+    public DeviceVS signCertUserVS(CMSMessage cmsMessage) throws Exception {
+        UserVS userVS = cmsMessage.getUserVS();
+        CertValidationDto certValidationDto = cmsMessage.getSignedContent(CertValidationDto.class);
         if(!cmsBean.isAdmin(userVS.getNif()) && !userVS.getNif().equals(certValidationDto.getNif()))
             throw new ExceptionVS("operation: signCertUserVS - userWithoutPrivilegesERROR - userVS nif: " + userVS.getNif());
         String validatedNif = NifUtils.validate(certValidationDto.getNif());
@@ -75,7 +75,7 @@ public class CSRBean {
         CertificateVS certificate = dao.persist(CertificateVS.USER(deviceVS.getUserVS(), issuedCert));
         dao.merge(deviceVS.getUserVS().updateCertInfo(issuedCert));
         dao.merge(deviceVS.setCertificateVS(certificate).setState(DeviceVS.State.OK).updateCertInfo(issuedCert));
-        dao.merge(csrRequest.setCertificateVS(certificate).setActivationCMS(messageCMS));
+        dao.merge(csrRequest.setCertificateVS(certificate).setActivationCMS(cmsMessage));
         return deviceVS;
     }
 

@@ -1,8 +1,8 @@
 package org.votingsystem.model.voting;
 
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 
@@ -32,8 +32,8 @@ public class UserRequestCsrVS extends EntityVS implements Serializable {
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
-    @OneToOne private MessageCMS cancelationCMS;
-    @OneToOne private MessageCMS activationCMS;
+    @OneToOne private CMSMessage cancelationCMS;
+    @OneToOne private CMSMessage activationCMS;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23, insertable=true) private Date lastUpdated;
 
@@ -104,19 +104,19 @@ public class UserRequestCsrVS extends EntityVS implements Serializable {
         return this;
 	}
 
-    public MessageCMS getCancelationCMS() {
+    public CMSMessage getCancelationCMS() {
         return cancelationCMS;
     }
 
-    public void setCancelationCMS(MessageCMS cancelationCMS) {
+    public void setCancelationCMS(CMSMessage cancelationCMS) {
         this.cancelationCMS = cancelationCMS;
     }
 
-    public MessageCMS getActivationCMS() {
+    public CMSMessage getActivationCMS() {
         return activationCMS;
     }
 
-    public UserRequestCsrVS setActivationCMS(MessageCMS activationCMS) {
+    public UserRequestCsrVS setActivationCMS(CMSMessage activationCMS) {
         this.activationCMS = activationCMS;
         return this;
     }

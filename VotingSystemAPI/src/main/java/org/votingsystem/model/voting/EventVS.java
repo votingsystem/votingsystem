@@ -1,9 +1,9 @@
 package org.votingsystem.model.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.KeyStoreVS;
-import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.TypeVS;
@@ -84,7 +84,7 @@ public class EventVS extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS")
     private UserVS userVS;
-    @OneToOne private MessageCMS publishRequestCMS;
+    @OneToOne private CMSMessage publishRequestCMS;
     @OneToOne private KeyStoreVS keyStoreVS;
     @Column(name="backupAvailable") private Boolean backupAvailable = Boolean.TRUE;
     @ElementCollection
@@ -144,11 +144,11 @@ public class EventVS extends EntityVS implements Serializable {
         return this;
     }
 
-    public MessageCMS getPublishRequestCMS() {
+    public CMSMessage getPublishRequestCMS() {
         return publishRequestCMS;
     }
 
-    public EventVS setPublishRequestCMS(MessageCMS publishRequestCMS) {
+    public EventVS setPublishRequestCMS(CMSMessage publishRequestCMS) {
         this.publishRequestCMS = publishRequestCMS;
         return this;
     }

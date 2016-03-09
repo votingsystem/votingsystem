@@ -1,6 +1,6 @@
 package org.votingsystem.model.voting;
 
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 
@@ -30,8 +30,8 @@ public class RepresentativeDocument  extends EntityVS implements Serializable {
     private Long id;
     @Enumerated(EnumType.STRING)
     @Column(name="state", nullable=false) private State state = State.OK;
-    @OneToOne private MessageCMS activationCMS;
-    @OneToOne private MessageCMS cancellationCMS;
+    @OneToOne private CMSMessage activationCMS;
+    @OneToOne private CMSMessage cancellationCMS;
 	@Column(name="description", columnDefinition="TEXT" ) private String description;
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
@@ -44,7 +44,7 @@ public class RepresentativeDocument  extends EntityVS implements Serializable {
 
     public RepresentativeDocument() {}
 
-    public RepresentativeDocument(UserVS userVS, MessageCMS activationCMS, String description) {
+    public RepresentativeDocument(UserVS userVS, CMSMessage activationCMS, String description) {
         this.userVS = userVS;
         this.activationCMS = activationCMS;
         this.description = description;
@@ -83,19 +83,19 @@ public class RepresentativeDocument  extends EntityVS implements Serializable {
 		this.lastUpdated = lastUpdated;
 	}
 
-	public MessageCMS getActivationCMS() {
+	public CMSMessage getActivationCMS() {
 		return activationCMS;
 	}
 
-	public void setActivationCMS(MessageCMS activationCMS) {
+	public void setActivationCMS(CMSMessage activationCMS) {
 		this.activationCMS = activationCMS;
 	}
 
-	public MessageCMS getCancellationCMS() {
+	public CMSMessage getCancellationCMS() {
 		return cancellationCMS;
 	}
 
-	public RepresentativeDocument setCancellationCMS(MessageCMS cancellationCMS) {
+	public RepresentativeDocument setCancellationCMS(CMSMessage cancellationCMS) {
 		this.cancellationCMS = cancellationCMS;
         return this;
 	}

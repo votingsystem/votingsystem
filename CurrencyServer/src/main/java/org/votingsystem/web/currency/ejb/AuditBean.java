@@ -2,7 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.*;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.BankVS;
@@ -81,8 +81,8 @@ public class AuditBean {
                 balancesFromMap.put(transaction.getCurrencyCode(), tagMap);
             }
             TransactionVSDto dto = transactionVSBean.getTransactionDto(transaction);
-            MessageCMS messageCMS = transaction.getMessageCMS();
-            dto.setCmsMessagePEM(Base64.getUrlEncoder().encodeToString(messageCMS.getContentPEM()));
+            CMSMessage cmsMessage = transaction.getCmsMessage();
+            dto.setCmsMessagePEM(Base64.getUrlEncoder().encodeToString(cmsMessage.getContentPEM()));
             transactionFromList.add(dto);
         }
         BalancesDto balancesDto = BalancesDto.FROM(transactionFromList, balancesFromMap);
@@ -104,8 +104,8 @@ public class AuditBean {
                 balancesToMap.put(transaction.getCurrencyCode(), currencyMap);
             }
             TransactionVSDto transactionDto = transactionVSBean.getTransactionDto(transaction);
-            MessageCMS messageCMS = transaction.getMessageCMS();
-            transactionDto.setCmsMessagePEM(Base64.getUrlEncoder().encodeToString(messageCMS.getContentPEM()));
+            CMSMessage cmsMessage = transaction.getCmsMessage();
+            transactionDto.setCmsMessagePEM(Base64.getUrlEncoder().encodeToString(cmsMessage.getContentPEM()));
             transactionToList.add(transactionDto);
         }
         balancesDto.setTo(transactionToList, balancesToMap);
@@ -196,10 +196,10 @@ public class AuditBean {
                 String signedMessageSubject =  messages.get("tagInitPeriodMsg", tagVSEntry.getKey());
                 String signedContent = JSON.getMapper().writeValueAsString(new InitPeriodTransactionVSDto(amountResult,
                         timeLimitedNotExpended, currencyCode, tagVSEntry.getKey(), userVS));
-                CMSSignedMessage cmsMessage = cmsBean.signDataWithTimeStamp(signedContent);
-                MessageCMS messageCMS = dao.persist(new MessageCMS(cmsMessage, cmsBean.getSystemUser(),
+                CMSSignedMessage cmsSignedMessage = cmsBean.signDataWithTimeStamp(signedContent);
+                CMSMessage cmsMessage = dao.persist(new CMSMessage(cmsSignedMessage, cmsBean.getSystemUser(),
                         TypeVS.CURRENCY_PERIOD_INIT));
-                dao.persist(new TransactionVS(userVS, userVS, amountResult, currencyCode, signedMessageSubject, messageCMS,
+                dao.persist(new TransactionVS(userVS, userVS, amountResult, currencyCode, signedMessageSubject, cmsMessage,
                         TransactionVS.Type.CURRENCY_PERIOD_INIT, TransactionVS.State.OK, currentTagVS));
                 if(timeLimitedNotExpended.compareTo(BigDecimal.ZERO) > 0) {
                     query = dao.getEM().createNamedQuery("findAccountByUserIBANAndStateAndCurrencyAndTag")
@@ -210,13 +210,13 @@ public class AuditBean {
                     accountFromMovements.put(account, timeLimitedNotExpended);
                     TransactionVS transactionVS = dao.persist(new TransactionVS(userVS, cmsBean.getSystemUser(),
                             timeLimitedNotExpended, currencyCode,
-                            signedMessageSubject, messageCMS,TransactionVS.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED,
+                            signedMessageSubject, cmsMessage,TransactionVS.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED,
                             TransactionVS.State.OK,currentTagVS ));
                     transactionVS.setAccountFromMovements(accountFromMovements);
                 }
                 File outputFile = reportFiles.getTagReceiptFile(tagVSEntry.getKey());
                 log.info(currencyCode + " - " + currentTagVS.getName() + " - result: " + outputFile.getAbsolutePath());
-                FileUtils.copyBytesToFile(cmsMessage.toPEM(), outputFile);
+                FileUtils.copyBytesToFile(cmsSignedMessage.toPEM(), outputFile);
             }
         }
         return true;

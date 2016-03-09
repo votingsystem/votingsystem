@@ -48,12 +48,12 @@ public class TransactionVSUserVSBean {
         //Transactions from users doesn't need parent transaction
         TransactionVS transactionVS = dao.persist(TransactionVS.USERVS(request.getSigner(), request.getReceptor(),
                 request.getType(), accountFromMovements, request.getAmount(), request.getCurrencyCode(),
-                request.getSubject(), request.getValidTo(), request.getMessageCMS_DB(), tagVS));
+                request.getSubject(), request.getValidTo(), request.getCmsMessage_DB(), tagVS));
         transactionVSBean.updateCurrencyAccounts(transactionVS);
-        CMSSignedMessage receipt = cmsBean.addSignature(request.getMessageCMS_DB().getCMS());
-        dao.merge(request.getMessageCMS_DB().setCMS(receipt));
+        CMSSignedMessage receipt = cmsBean.addSignature(request.getCmsMessage_DB().getCMS());
+        dao.merge(request.getCmsMessage_DB().setCMS(receipt));
         TransactionVSDto dto = new TransactionVSDto(transactionVS);
-        dto.setCmsMessagePEM(Base64.getEncoder().encodeToString(request.getMessageCMS_DB().getContentPEM()));
+        dto.setCmsMessagePEM(Base64.getEncoder().encodeToString(request.getCmsMessage_DB().getContentPEM()));
         List<TransactionVSDto> listDto = Arrays.asList(dto);
         ResultListDto<TransactionVSDto> resultListDto = new ResultListDto<>(listDto, request.getOperation());
         resultListDto.setStatusCode(ResponseVS.SC_OK);

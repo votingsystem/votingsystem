@@ -1,6 +1,6 @@
 package org.votingsystem.model.voting;
 
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.EntityVS;
 
@@ -29,10 +29,10 @@ public class RepresentationDocument extends EntityVS implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name="state", nullable=false) private State state;
     @OneToOne
-    @JoinColumn(name="activationCMS") private MessageCMS activationCMS;
+    @JoinColumn(name="activationCMS") private CMSMessage activationCMS;
 
     @OneToOne
-    @JoinColumn(name="cancellationCMS") private MessageCMS cancellationCMS;
+    @JoinColumn(name="cancellationCMS") private CMSMessage cancellationCMS;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
@@ -51,9 +51,9 @@ public class RepresentationDocument extends EntityVS implements Serializable {
 
     public RepresentationDocument() {}
 
-    public RepresentationDocument(MessageCMS messageCMS, UserVS userVS, UserVS representative,
+    public RepresentationDocument(CMSMessage cmsMessage, UserVS userVS, UserVS representative,
                                   State state) {
-        this.activationCMS = messageCMS;
+        this.activationCMS = cmsMessage;
         this.userVS = userVS;
         this.representative = representative;
         this.state = state;
@@ -92,19 +92,19 @@ public class RepresentationDocument extends EntityVS implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
-    public MessageCMS getActivationCMS() {
+    public CMSMessage getActivationCMS() {
         return activationCMS;
     }
 
-    public void setActivationCMS(MessageCMS activationCMS) {
+    public void setActivationCMS(CMSMessage activationCMS) {
         this.activationCMS = activationCMS;
     }
 
-    public MessageCMS getCancellationCMS() {
+    public CMSMessage getCancellationCMS() {
         return cancellationCMS;
     }
 
-    public RepresentationDocument setCancellationCMS(MessageCMS cancellationCMS) {
+    public RepresentationDocument setCancellationCMS(CMSMessage cancellationCMS) {
         this.cancellationCMS = cancellationCMS;
         return this;
     }

@@ -42,10 +42,10 @@ public class EventVSElectionBean {
     @Inject RepresentativeBean representativeBean;
     @Inject TimeStampBean timeStampBean;
 
-    public EventVSElection saveEvent(MessageCMS messageCMS) throws Exception {
+    public EventVSElection saveEvent(CMSMessage cmsMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS userSigner = messageCMS.getUserVS();
-        EventVSDto request  = messageCMS.getSignedContent(EventVSDto.class);
+        UserVS userSigner = cmsMessage.getUserVS();
+        EventVSDto request  = cmsMessage.getSignedContent(EventVSDto.class);
         request.setDateFinish(DateUtils.resetDay(DateUtils.addDays(request.getDateBegin(), 1).getTime()).getTime());
         ControlCenterVS controlCenterVS = config.getControlCenter();
         Query query = dao.getEM().createQuery("select a from ActorVS a where a.serverURL =:serverURL")
@@ -94,9 +94,9 @@ public class EventVSElectionBean {
                 CertificateVS.ACTORVS(controlCenterVS, controlCenterCert.getX509Cert()));
         CertificateVS accessControlCertEventVS = dao.persist(
                 CertificateVS.ACTORVS(null, cmsBean.getServerCert()));
-        dao.merge(messageCMS.setType(TypeVS.VOTING_EVENT).setCMS(cms));
+        dao.merge(cmsMessage.setType(TypeVS.VOTING_EVENT).setCMS(cms));
         dao.merge(eventVS.setControlCenterCert(controlCenterCertEventVS).setAccessControlCert(accessControlCertEventVS)
-                .setState(EventVS.State.ACTIVE).setPublishRequestCMS(messageCMS));
+                .setState(EventVS.State.ACTIVE).setPublishRequestCMS(cmsMessage));
         return eventVS;
     }
 
@@ -182,7 +182,7 @@ public class EventVSElectionBean {
         List<AccessRequestVS> accessRequestList = query.getResultList();
         for(AccessRequestVS accessRequest : accessRequestList) {
             File cmsFile = new File(format("{0}/accessRequest_{1}.p7m", accessRequestBaseDir, accessRequest.getUserVS().getNif()));
-            IOUtils.write(accessRequest.getMessageCMS().getContentPEM(), new FileOutputStream(cmsFile));
+            IOUtils.write(accessRequest.getCmsMessage().getContentPEM(), new FileOutputStream(cmsFile));
             /*if((accessRequests.getRowNumber() % 100) == 0) {
                 String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillis(
                         System.currentTimeMillis() - begin)

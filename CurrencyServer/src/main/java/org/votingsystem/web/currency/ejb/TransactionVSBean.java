@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.currency.Currency;
@@ -47,11 +47,11 @@ public class TransactionVSBean {
     @Inject TransactionVSUserVSBean transactionVSUserVSBean;
 
 
-    public ResultListDto<TransactionVSDto> processTransactionVS(MessageCMS messageCMS) throws Exception {
+    public ResultListDto<TransactionVSDto> processTransactionVS(CMSMessage cmsMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        TransactionVSDto request = messageCMS.getSignedContent(TransactionVSDto.class);
+        TransactionVSDto request = cmsMessage.getSignedContent(TransactionVSDto.class);
         request.validate();
-        request.setMessageCMS_DB(messageCMS);
+        request.setCmsMessage_DB(cmsMessage);
         if(request.getToUserIBAN() != null) {
             for(String IBAN : request.getToUserIBAN()) {
                 config.validateIBAN(IBAN);

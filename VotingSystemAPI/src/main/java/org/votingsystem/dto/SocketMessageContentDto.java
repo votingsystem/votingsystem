@@ -174,7 +174,7 @@ public class SocketMessageContentDto {
         this.from = from;
     }
 
-    public String getCMSMessage() {
+    public String getCmsMessage() {
         return cmsMessage;
     }
 

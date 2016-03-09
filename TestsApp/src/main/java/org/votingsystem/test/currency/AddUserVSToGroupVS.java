@@ -15,7 +15,7 @@ public class AddUserVSToGroupVS {
 
     private static Logger log =  Logger.getLogger(AddUserVSToGroupVS.class.getName());
 
-    private static boolean subscribeNewUserList = false;
+    private static boolean subscribeNewUserList = true;
 
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
@@ -23,7 +23,7 @@ public class AddUserVSToGroupVS {
         UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
         userBaseSimulationData.setUserIndex(100L);
         SimulationData simulationData = new SimulationData();
-        simulationData.setGroupId(5L);
+        simulationData.setGroupId(4L);
         simulationData.setServerURL("https://192.168.1.5/CurrencyServer");
         simulationData.setNumRequestsProjected(5);
         simulationData.setUserBaseSimulationData(userBaseSimulationData);

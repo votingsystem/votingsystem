@@ -2,7 +2,7 @@ package org.votingsystem.web.accesscontrol.servlet;
 
 
 import org.votingsystem.dto.MessageDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -48,9 +48,9 @@ public class AccessRequestVSServlet extends HttpServlet {
             throws ServletException, IOException, IOException {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ACCESS_REQUEST);
-            MessageCMS messageCMS = cmsBean.validateCMS(
-                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
-            CsrResponse csrResponse = accessRequestBean.saveRequest(messageCMS, requestVS.getCSRBytes());
+            CMSMessage cmsMessage = cmsBean.validateCMS(
+                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getCmsMessage();
+            CsrResponse csrResponse = accessRequestBean.saveRequest(cmsMessage, requestVS.getCSRBytes());
             resp.setContentType(ContentTypeVS.TEXT_STREAM.getName());
             resp.setContentLength(csrResponse.getIssuedCert().length);
             resp.getOutputStream().write(csrResponse.getIssuedCert());

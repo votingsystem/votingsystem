@@ -2,7 +2,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
@@ -58,11 +58,11 @@ public class EventVSBean {
         if (todayDate.before(eventVS.getDateBegin())) eventVS.setState(EventVS.State.PENDING);
     }
 
-    public MessageCMS cancelEvent(MessageCMS messageCMS) throws Exception {
+    public CMSMessage cancelEvent(CMSMessage cmsMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        CMSSignedMessage cmsMessageReq = messageCMS.getCMS();
-        UserVS signer = messageCMS.getUserVS();
-        EventVSDto request = messageCMS.getSignedContent(EventVSDto.class);
+        CMSSignedMessage cmsMessageReq = cmsMessage.getCMS();
+        UserVS signer = cmsMessage.getUserVS();
+        EventVSDto request = cmsMessage.getSignedContent(EventVSDto.class);
         EventVS eventVS = dao.find(EventVS.class, request.getEventId());
         if (eventVS == null) throw new ValidationExceptionVS("ERROR - EventVS not found - eventId: " + request.getId());
         if(eventVS.getState() != EventVS.State.ACTIVE && eventVS.getState() != EventVS.State.PENDING)
@@ -83,7 +83,7 @@ public class EventVSBean {
                         "ERROR - controlCenterCommunicationErrorMsg -  controlCenterUrl: " + controlCenterUrl);
             }
         } else cmsMessageResp = cmsBean.addSignature(cmsMessageReq);
-        messageCMS.setCMS(cmsMessageResp);
+        cmsMessage.setCMS(cmsMessageResp);
         eventVS.setState(request.getState());
         eventVS.setDateCanceled(new Date());
         if(eventVS.getKeyStoreVS() != null) {
@@ -92,7 +92,7 @@ public class EventVSBean {
         }
         dao.merge(eventVS);
         log.info("EventVS with id:" + eventVS.getId() + " changed to state: " + request.getState().toString());
-        return messageCMS;
+        return cmsMessage;
     }
 
 }

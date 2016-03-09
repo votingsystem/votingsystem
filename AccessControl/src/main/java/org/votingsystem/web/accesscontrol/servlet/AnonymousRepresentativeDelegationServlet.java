@@ -1,6 +1,6 @@
 package org.votingsystem.web.accesscontrol.servlet;
 
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -49,10 +49,10 @@ public class AnonymousRepresentativeDelegationServlet extends HttpServlet {
             throws ServletException, IOException, IOException {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ANONYMOUS_DELEGATION);
-            MessageCMS messageCMS = cmsBean.validateCMS(
-                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
+            CMSMessage cmsMessage = cmsBean.validateCMS(
+                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getCmsMessage();
             X509Certificate anonymousIssuedCert = representativeDelegationBean.validateAnonymousRequest(
-                    messageCMS, requestVS.getCSRBytes());
+                    cmsMessage, requestVS.getCSRBytes());
             byte[] issuedCertPEMBytes = PEMUtils.getPEMEncoded(anonymousIssuedCert);
             resp.setContentType(MediaTypeVS.PEM);
             resp.setContentLength(issuedCertPEMBytes.length);

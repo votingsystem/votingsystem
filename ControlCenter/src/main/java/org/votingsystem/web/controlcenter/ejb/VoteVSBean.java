@@ -3,8 +3,8 @@ package org.votingsystem.web.controlcenter.ejb;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.CMSDto;
 import org.votingsystem.dto.voting.VoteVSCancelerDto;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.MessageCMS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVSElection;
@@ -50,11 +50,11 @@ public class VoteVSBean {
     @Transactional
     public VoteVS validateVote(CMSDto CMSDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        MessageCMS messageCMS = CMSDto.getMessageCMS();
+        CMSMessage cmsMessage = CMSDto.getCmsMessage();
         EventVSElection eventVS = (EventVSElection) CMSDto.getEventVS();
         eventVS = em.merge(eventVS);
-        VoteVS voteVS = messageCMS.getCMS().getVoteVS();
-        voteVS.setCmsMessage(messageCMS);
+        VoteVS voteVS = cmsMessage.getCMS().getVoteVS();
+        voteVS.setCmsMessage(cmsMessage);
         Query query = em.createQuery("select f from FieldEventVS f where f.eventVS =:eventVS and " +
                 "f.accessControlFieldEventId =:fieldEventId").setParameter("eventVS", eventVS).setParameter(
                 "fieldEventId", voteVS.getOptionSelected().getId());
@@ -63,8 +63,8 @@ public class VoteVSBean {
                 voteVS.getOptionSelected().getId());
         CertificateVS certificateVS = CertificateVS.VOTE(voteVS.getHashCertVSBase64(),
                 voteVS.getCMSMessage().getUserVS(), voteVS.getX509Certificate());
-        String signedVoteDigest = messageCMS.getCMS().getContentDigestStr();
-        CMSSignedMessage validatedVote = cmsBean.addSignature(messageCMS.getCMS());
+        String signedVoteDigest = cmsMessage.getCMS().getContentDigestStr();
+        CMSSignedMessage validatedVote = cmsBean.addSignature(cmsMessage.getCMS());
         ResponseVS responseVS = HttpHelper.getInstance().sendData(validatedVote.toPEM(), ContentTypeVS.VOTE,
                 eventVS.getAccessControlVS().getVoteServiceURL());
         if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(messages.get(
@@ -75,7 +75,7 @@ public class VoteVSBean {
                     cmsMessageResp.getContentDigestStr());
         }
         cmsBean.validateVoteCerts(cmsMessageResp, eventVS);
-        em.merge(messageCMS.setCMS(cmsMessageResp).setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE));
+        em.merge(cmsMessage.setCMS(cmsMessageResp).setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE));
         voteVS.setState(VoteVS.State.OK).setOptionSelected(optionSelected);
         em.persist(certificateVS);
         voteVS.setCertificateVS(certificateVS);
@@ -85,10 +85,10 @@ public class VoteVSBean {
         return voteVS;
     }
 
-    public VoteVSCanceler processCancel (MessageCMS messageCMS) throws Exception {
+    public VoteVSCanceler processCancel (CMSMessage cmsMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS signer = messageCMS.getUserVS();
-        VoteVSCancelerDto request = messageCMS.getSignedContent(VoteVSCancelerDto.class);
+        UserVS signer = cmsMessage.getUserVS();
+        VoteVSCancelerDto request = cmsMessage.getSignedContent(VoteVSCancelerDto.class);
         request.validate();
         Query query = dao.getEM().createQuery("select c from CertificateVS c where c.hashCertVSBase64 =:hashCertVSBase64 and " +
                 "c.state =:state").setParameter("hashCertVSBase64", request.getHashCertVSBase64())
@@ -104,9 +104,9 @@ public class VoteVSBean {
                 "timestampDateErrorMsg", DateUtils.getDateStr(timeStampDate),
                 DateUtils.getDateStr(voteVS.getEventVS().getDateBegin()),
                 DateUtils.getDateStr(voteVS.getEventVS().getDateFinish())));
-        CMSSignedMessage cmsMessage = cmsBean.addSignature(messageCMS.getCMS());
-        dao.merge(messageCMS.setCMS(cmsMessage));
-        VoteVSCanceler voteCanceler = new VoteVSCanceler(messageCMS, null, VoteVSCanceler.State.CANCELLATION_OK,
+        CMSSignedMessage cmsSignedMessage = cmsBean.addSignature(cmsMessage.getCMS());
+        dao.merge(cmsMessage.setCMS(cmsSignedMessage));
+        VoteVSCanceler voteCanceler = new VoteVSCanceler(cmsMessage, null, VoteVSCanceler.State.CANCELLATION_OK,
                 request.getOriginHashAccessRequest(), request.getHashAccessRequestBase64(),
                 request.getOriginHashCertVote(), request.getHashCertVSBase64(), voteVS);
         dao.persist(voteCanceler);

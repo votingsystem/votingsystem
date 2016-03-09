@@ -1,6 +1,6 @@
 package org.votingsystem.model.voting;
 
-import org.votingsystem.model.MessageCMS;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;
@@ -16,7 +16,7 @@ public class FieldValueEventVS extends EntityVS implements Serializable {
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
-    @OneToOne private MessageCMS messageCMS;
+    @OneToOne private CMSMessage cmsMessage;
     @Column(name="value", length=1000) private String value;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="fieldEventVS", nullable=false) private FieldEventVS fieldEventVS;
@@ -25,8 +25,8 @@ public class FieldValueEventVS extends EntityVS implements Serializable {
     
     public FieldValueEventVS() {}
 
-    public FieldValueEventVS(MessageCMS messageCMS, FieldEventVS fieldEventVS, String value) {
-        this.messageCMS = messageCMS;
+    public FieldValueEventVS(CMSMessage cmsMessage, FieldEventVS fieldEventVS, String value) {
+        this.cmsMessage = cmsMessage;
         this.fieldEventVS = fieldEventVS;
         this.value = value;
     }
@@ -71,12 +71,12 @@ public class FieldValueEventVS extends EntityVS implements Serializable {
         this.value = value;
     }
 
-    public MessageCMS getMessageCMS() {
-        return messageCMS;
+    public CMSMessage getCmsMessage() {
+        return cmsMessage;
     }
 
-    public void setMessageCMS(MessageCMS messageCMS) {
-        this.messageCMS = messageCMS;
+    public void setCmsMessage(CMSMessage cmsMessage) {
+        this.cmsMessage = cmsMessage;
     }
     
 }
