@@ -42,23 +42,29 @@ public class ContextVS {
 
     private static Logger log = Logger.getLogger(ContextVS.class.getName());
 
-    static { Security.addProvider(new BouncyCastleProvider()); }
+    public static final String PROVIDER = BouncyCastleProvider.PROVIDER_NAME;
 
-    public static final int VOTE_TAG                                = 0;
-    public static final int REPRESENTATIVE_VOTE_TAG                 = 1;
-    public static final int ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG = 2;
-    public static final int CURRENCY_TAG                            = 3;
-    public static final int DEVICEVS_TAG                            = 4;
-    public static final int ANONYMOUS_CERT_TAG                      = 5;
+    public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
 
-    public static final String VOTING_SYSTEM_BASE_OID = "0.0.0.0.0.0.0.0.0.";
-    public static final String REPRESENTATIVE_VOTE_OID = VOTING_SYSTEM_BASE_OID + REPRESENTATIVE_VOTE_TAG;
-    public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_OID = VOTING_SYSTEM_BASE_OID +
-            ANONYMOUS_REPRESENTATIVE_DELEGATION_TAG;
-    public static final String VOTE_OID = VOTING_SYSTEM_BASE_OID + VOTE_TAG;
-    public static final String CURRENCY_OID = VOTING_SYSTEM_BASE_OID + CURRENCY_TAG;
-    public static final String DEVICEVS_OID = VOTING_SYSTEM_BASE_OID + DEVICEVS_TAG;
-    public static final String ANONYMOUS_CERT_OID = VOTING_SYSTEM_BASE_OID + ANONYMOUS_CERT_TAG;
+    public static final String VOTING_SYSTEM_BASE_OID                  = "0.0.0.0.0.0.0.0.0.";
+    public static final String VOTE_OID                                = VOTING_SYSTEM_BASE_OID + 0;
+    public static final String REPRESENTATIVE_VOTE_OID                 = VOTING_SYSTEM_BASE_OID + 1;
+    public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_OID = VOTING_SYSTEM_BASE_OID + 2;
+    public static final String CURRENCY_OID                            = VOTING_SYSTEM_BASE_OID + 3;
+    public static final String DEVICEVS_OID                            = VOTING_SYSTEM_BASE_OID + 4;
+    public static final String ANONYMOUS_CERT_OID                      = VOTING_SYSTEM_BASE_OID + 5;
+
+    public static final int KEY_SIZE = 2048;
+    public static final String SIG_NAME = "RSA";
+    public static final String ALGORITHM_RNG = "SHA1PRNG";
+    public static final String CERT_GENERATION_SIG_ALGORITHM = "SHA256WithRSAEncryption";
+    public static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
+    public static final String DATA_DIGEST_ALGORITHM = "SHA256";
+    //For tests environments
+    public static final String END_ENTITY_ALIAS = "endEntityAlias";
+    public static final String KEYSTORE_USER_CERT_ALIAS = "UserTestKeysStore";
+    public static final String PASSWORD = "PemPass";
+
 
     private String appDir;
     private String tempDir;
@@ -84,31 +90,6 @@ public class ContextVS {
     public static final String CMS_FILE_NAME   = "cms" + ":" + MediaTypeVS.JSON_SIGNED;
     public static final String CMS_ANONYMOUS_FILE_NAME   = "cmsAnonymous" + ":" + MediaTypeVS.JSON_SIGNED;
 
-    public static final String CERT_RAIZ_PATH = "AC_RAIZ_DNIE_SHA1.pem";
-    public static final int KEY_SIZE = 1024;
-    public static final String SIG_NAME = "RSA";
-    /** Random Number Generator algorithm. */
-    public static final String ALGORITHM_RNG = "SHA1PRNG";
-    public static final String CERT_GENERATION_SIG_ALGORITHM = "SHA1WithRSAEncryption";
-    public static final String PROVIDER = BouncyCastleProvider.PROVIDER_NAME;
-
-    public static final String CERT_AUTENTICATION = "CertAutenticacion";
-    public static final String CERT_SIGN = "CertFirmaDigital";
-    public static final String CERT_CA = "CertCAIntermediaDGP";
-    public static final String DNIe_AUTH_PRIVATE_KEY_LABEL = "KprivAutenticacion";
-    public static final String DNIe_SIGN_PRIVATE_KEY_LABEL = "KprivFirmaDigital";
-
-    // public static final Mechanism DNIe_SESSION_MECHANISM = Mechanism.RSA_X_509;
-    public static final String DNIe_SIGN_MECHANISM = "SHA1withRSA";
-
-    public static final String SIGN_MECHANISM = "SHA256withRSA";
-    public static final String VOTE_SIGN_MECHANISM = "SHA512withRSA";
-    public static final String VOTING_DATA_DIGEST = "SHA256";
-
-    public static final String DEFAULT_SIGNED_FILE_NAME = "cmsMessage.p7m";
-    public static String CERT_STORE_TYPE = "Collection";
-
-    public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
 
     public static final int IMAGE_MAX_FILE_SIZE_KB = 1024;
     public static final int IMAGE_MAX_FILE_SIZE = IMAGE_MAX_FILE_SIZE_KB * 1024;
@@ -117,17 +98,8 @@ public class ContextVS {
 
     public static final int MAX_MSG_LENGTH = 300;
 
-    public static final String MULTISIGNED_FILE_NAME = "MultiSign";
-    public static final String BASE64_ENCODED_CONTENT_TYPE = "Base64Encoded";
-    public static final String KEYSTORE_USER_CERT_ALIAS = "UserTestKeysStore";
-
-    //For tests environments
-    public static final String END_ENTITY_ALIAS = "endEntityAlias";
-    public static final String PASSWORD = "PemPass";
-
     private X509Certificate timeStampCACert;
     private Locale locale = new Locale("es");
-
 
     private static final Map<String, WebSocketSession> sessionMap = new HashMap<>();
 
@@ -196,8 +168,6 @@ public class ContextVS {
         tempDir = appDir + File.separator + "temp";
         new File(appDir).mkdirs();
         new File(tempDir).mkdirs();
-        FileUtils.copyStreamToFile(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(CERT_RAIZ_PATH),  new File(INSTANCE.appDir + "/" + CERT_RAIZ_PATH));
         FileHandler fileHandler = new FileHandler(new File(appDir + "/app.log").getAbsolutePath());
         fileHandler.setFormatter(new SimpleFormatter());
         Logger.getLogger("").addHandler(fileHandler);

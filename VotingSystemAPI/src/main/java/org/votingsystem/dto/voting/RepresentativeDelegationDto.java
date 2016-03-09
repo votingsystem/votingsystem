@@ -149,12 +149,12 @@ public class RepresentativeDelegationDto implements Serializable {
     public RepresentativeDelegationDto getAnonymousCertRequest() throws NoSuchAlgorithmException, IOException,
             NoSuchProviderException, InvalidKeyException, SignatureException, OperatorCreationException {
         originHashCertVS = java.util.UUID.randomUUID().toString();
-        hashCertVSBase64 = StringUtils.getHashBase64(originHashCertVS, ContextVS.VOTING_DATA_DIGEST);
+        hashCertVSBase64 = StringUtils.getHashBase64(originHashCertVS, ContextVS.DATA_DIGEST_ALGORITHM);
         originHashAnonymousDelegation = java.util.UUID.randomUUID().toString();
-        hashAnonymousDelegation = StringUtils.getHashBase64(originHashAnonymousDelegation, ContextVS.VOTING_DATA_DIGEST);
+        hashAnonymousDelegation = StringUtils.getHashBase64(originHashAnonymousDelegation, ContextVS.DATA_DIGEST_ALGORITHM);
         dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
         dateTo = DateUtils.addDays(dateFrom, weeksOperationActive * 7).getTime();
-        certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(ContextVS.VOTE_SIGN_MECHANISM,
+        certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(ContextVS.SIGNATURE_ALGORITHM,
                 ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive, dateFrom, dateTo);
         RepresentativeDelegationDto requestDto = getRequest(TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST);
         requestDto.setHashAnonymousDelegation(hashAnonymousDelegation);

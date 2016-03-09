@@ -75,7 +75,7 @@ public class CMSBean {
         res = Thread.currentThread().getContextClassLoader().getResource(keyStoreFileName);
         File keyStoreFile = FileUtils.getFileFromBytes(IOUtils.toByteArray(res.openStream()));
         cmsGenerator = new CMSGenerator(FileUtils.getBytesFromFile(keyStoreFile),
-                keyAlias, password.toCharArray(), ContextVS.SIGN_MECHANISM);
+                keyAlias, password.toCharArray(), ContextVS.SIGNATURE_ALGORITHM);
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
         certChain = new ArrayList<>();

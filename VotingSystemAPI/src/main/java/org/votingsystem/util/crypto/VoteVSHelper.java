@@ -36,10 +36,10 @@ public class VoteVSHelper {
         VoteVSHelper voteVSHelper = new VoteVSHelper();
         voteVSHelper.originHashAccessRequest = UUID.randomUUID().toString();
         voteVSHelper.hashAccessRequestBase64 = StringUtils.getHashBase64(
-                voteVSHelper.originHashAccessRequest, ContextVS.VOTING_DATA_DIGEST);
+                voteVSHelper.originHashAccessRequest, ContextVS.DATA_DIGEST_ALGORITHM);
         voteVSHelper.originHashCertVote = UUID.randomUUID().toString();
         voteVSHelper.hashCertVSBase64 = StringUtils.getHashBase64(
-                voteVSHelper.originHashCertVote, ContextVS.VOTING_DATA_DIGEST);
+                voteVSHelper.originHashCertVote, ContextVS.DATA_DIGEST_ALGORITHM);
         voteVSHelper.eventVSId = voteVSDto.getEventVSId();
         voteVSHelper.eventVSURL = voteVSDto.getEventURL();
         voteVSHelper.genVote(voteVSDto.getOptionSelected());

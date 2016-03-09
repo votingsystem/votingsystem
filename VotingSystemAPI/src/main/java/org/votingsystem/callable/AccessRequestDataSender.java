@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
-import static org.votingsystem.util.ContextVS.VOTE_SIGN_MECHANISM;
+import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
 
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -38,7 +38,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
                                    String hashCertVSBase64) throws Exception {
         this.cmsMessage = cmsMessage;
         this.receiverCert = ContextVS.getInstance().getAccessControl().getX509Certificate();
-        this.certificationRequest = CertificationRequestVS.getVoteRequest(VOTE_SIGN_MECHANISM,
+        this.certificationRequest = CertificationRequestVS.getVoteRequest(SIGNATURE_ALGORITHM,
                 ContextVS.PROVIDER, ContextVS.getInstance().getAccessControl().getServerURL(),
                 accessRequest.getEventId(), hashCertVSBase64);
     }

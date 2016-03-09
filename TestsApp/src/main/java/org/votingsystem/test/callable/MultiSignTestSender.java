@@ -36,7 +36,7 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
         ResponseVS responseVS = HttpHelper.getInstance().sendData(
                 cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED, serverURL);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            CMSSignedMessage cmsResponse = new CMSSignedMessage(responseVS.getMessageBytes());
+            CMSSignedMessage cmsResponse = CMSSignedMessage.FROM_PEM(responseVS.getMessageBytes());
             log.info("- cmsResponse.isValidSignature(): " + cmsResponse.isValidSignature());
         } else throw new ExceptionVS(responseVS.getMessage());
         return responseVS;

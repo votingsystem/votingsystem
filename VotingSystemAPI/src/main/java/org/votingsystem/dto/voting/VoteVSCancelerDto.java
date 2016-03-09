@@ -33,9 +33,9 @@ public class VoteVSCancelerDto {
         if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
         if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
         if(!hashAccessRequestBase64.equals(StringUtils.getHashBase64(originHashAccessRequest,
-                ContextVS.VOTING_DATA_DIGEST))) throw new ValidationExceptionVS("voteCancellationAccessRequestHashError");
+                ContextVS.DATA_DIGEST_ALGORITHM))) throw new ValidationExceptionVS("voteCancellationAccessRequestHashError");
         if(!hashCertVSBase64.equals(StringUtils.getHashBase64(originHashCertVote,
-                ContextVS.VOTING_DATA_DIGEST))) throw new ValidationExceptionVS("voteCancellationHashCertificateError");
+                ContextVS.DATA_DIGEST_ALGORITHM))) throw new ValidationExceptionVS("voteCancellationHashCertificateError");
     }
 
     public String getOriginHashCertVote() {

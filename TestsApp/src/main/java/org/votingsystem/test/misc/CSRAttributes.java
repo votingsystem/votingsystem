@@ -50,7 +50,7 @@ public class CSRAttributes {
 
     public static void testCurrencyCSR() throws Exception {
         CertificationRequestVS certificationRequest = CertificationRequestVS.getCurrencyRequest(
-                ContextVS.VOTE_SIGN_MECHANISM, ContextVS.PROVIDER,
+                ContextVS.SIGNATURE_ALGORITHM, ContextVS.PROVIDER,
                 "currencyServerURL", "hashCertVS", new BigDecimal(10), "EUR", false, "WILDTAG");
         byte[] csrPEM = certificationRequest.getCsrPEM();
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrPEM);

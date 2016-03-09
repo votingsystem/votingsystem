@@ -52,12 +52,12 @@ public class PublishAndSendElection {
 
         UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
         userBaseSimulationData.setUserIndex(100);
-        userBaseSimulationData.setNumUsersWithoutRepresentative(1);
-        userBaseSimulationData.setNumUsersWithoutRepresentativeWithVote(1);
+        userBaseSimulationData.setNumUsersWithoutRepresentative(10);
+        userBaseSimulationData.setNumUsersWithoutRepresentativeWithVote(10);
         userBaseSimulationData.setNumRepresentatives(5);
         userBaseSimulationData.setNumRepresentativesWithVote(1);
-        userBaseSimulationData.setNumUsersWithRepresentative(1);
-        userBaseSimulationData.setNumUsersWithRepresentativeWithVote(1);
+        userBaseSimulationData.setNumUsersWithRepresentative(0);
+        userBaseSimulationData.setNumUsersWithRepresentativeWithVote(0);
 
         simulationData = new VotingSimulationData();
         simulationData.setServerURL("https://192.168.1.5/AccessControl");
@@ -129,13 +129,9 @@ public class PublishAndSendElection {
             while(!synchronizedElectorList.isEmpty()) {
                 if(!simulationData.waitingForVoteRequests()) {
                     int randomElector = new Random().nextInt(synchronizedElectorList.size());
-                    String electorNif = synchronizedElectorList.remove(randomElector);
-                    if(electorNif == null) {
-                        log.info("============== NULL electorNif");
-                        continue;
-                    }
+                    String electorNIF = synchronizedElectorList.remove(randomElector);
                     VoteVSHelper voteVSHelper = VoteVSHelper.genRandomVote(eventVS.getId(), eventVS.getUrl(), eventVS.getFieldsEventVS());
-                    voteVSHelper.setNIF(electorNif);
+                    voteVSHelper.setNIF(electorNIF);
                     voteVSMap.put(voteVSHelper.getHashCertVSBase64(), voteVSHelper);
                     responseService.submit(new VoteSender(voteVSHelper));
                 } else Thread.sleep(500);

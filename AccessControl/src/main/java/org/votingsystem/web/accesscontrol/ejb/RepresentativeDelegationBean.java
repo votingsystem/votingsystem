@@ -124,7 +124,7 @@ public class RepresentativeDelegationBean {
         if(!anonymousDelegation.getHashAnonymousDelegation().equals(request.getHashAnonymousDelegation()))
             throw new ValidationExceptionVS("ERROR - cancelation hash doesn't match active one");
         String hashAnonymousDelegation = StringUtils.getHashBase64(request.getOriginHashAnonymousDelegation(),
-                ContextVS.VOTING_DATA_DIGEST);
+                ContextVS.DATA_DIGEST_ALGORITHM);
         if(!hashAnonymousDelegation.equals(anonymousDelegation.getHashAnonymousDelegation()))
             throw new ValidationExceptionVS("ERROR - AnonymousDelegation hash error - calculated hash doesn't match active one");
         CMSSignedMessage cmsMessageResp = cmsBean.addSignature(messageCMS.getCMS());
@@ -142,7 +142,7 @@ public class RepresentativeDelegationBean {
                 "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION' found '" + request.getOperation() + "'");
         if(request.getHashCertVSBase64() == null) throw new ValidationExceptionVS("missing param 'hashCertVSBase64'");
         if(request.getOriginHashCertVS() == null) throw new ValidationExceptionVS("missing param 'originHashCertVSBase64'");
-        String hashCertVSBase64 = StringUtils.getHashBase64(request.getOriginHashCertVS(), ContextVS.VOTING_DATA_DIGEST);
+        String hashCertVSBase64 = StringUtils.getHashBase64(request.getOriginHashCertVS(), ContextVS.DATA_DIGEST_ALGORITHM);
         if(!request.getHashCertVSBase64().equals(hashCertVSBase64)) {
             throw new ValidationExceptionVS("calculated 'hashCertVSBase64' doesn't match request one");
         }

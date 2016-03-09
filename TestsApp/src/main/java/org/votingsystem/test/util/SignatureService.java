@@ -56,7 +56,7 @@ public class SignatureService {
         log.info("init");
         this.keyStore = keyStore;
         certSignerChain = keyStore.getCertificateChain(keyAlias);
-        cmsGenerator = new CMSGenerator(keyStore, keyAlias, password.toCharArray(),ContextVS.SIGN_MECHANISM);
+        cmsGenerator = new CMSGenerator(keyStore, keyAlias, password.toCharArray(),ContextVS.SIGNATURE_ALGORITHM);
         byte[] pemCertsArray = null;
         for (int i = 0; i < certSignerChain.length; i++) {
             log.info("Adding local kesystore");
@@ -191,7 +191,7 @@ public class SignatureService {
             KeyStore mockDnie = generateKeyStore(userNif);
             groupVSDto.setUUID(UUID.randomUUID().toString());
             CMSGenerator cmsGenerator = new CMSGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
-                    ContextVS.PASSWORD.toCharArray(), ContextVS.DNIe_SIGN_MECHANISM);
+                    ContextVS.PASSWORD.toCharArray(), ContextVS.SIGNATURE_ALGORITHM);
             userList.add(new DNIBundle(userNif, mockDnie));
             CMSSignedMessage cmsMessage = cmsGenerator.signData(JSON.getMapper().writeValueAsString(groupVSDto));
             cmsMessage = new MessageTimeStamper(cmsMessage, currencyServer.getTimeStampServiceURL()).call();
