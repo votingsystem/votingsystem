@@ -28,7 +28,7 @@ public class SignedFile {
     private boolean signatureVerified = false;
 
     public SignedFile(byte[] signedFileBytes, String name) throws Exception {
-        cmsMessage = new CMSSignedMessage(signedFileBytes);
+        cmsMessage = CMSSignedMessage.FROM_PEM(signedFileBytes);
         signatureVerified = cmsMessage.isValidSignature();
         this.name = name;
     }

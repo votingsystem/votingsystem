@@ -9,7 +9,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -42,7 +42,7 @@ public class ConfigVSImpl implements ConfigVS {
     private static final Logger log = Logger.getLogger(ConfigVSImpl.class.getName());
 
     @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject SubscriptionVSBean subscriptionBean;
     @Inject EventVSElectionBean eventVSElectionBean;
     @Inject TimeStampBean timeStampBean;
@@ -122,7 +122,7 @@ public class ConfigVSImpl implements ConfigVS {
         executorService.submit(() -> {
             try {
                 timeStampBean.init();
-                signatureBean.init();
+                cmsBean.init();
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }
@@ -245,7 +245,7 @@ public class ConfigVSImpl implements ConfigVS {
                         "ERROR - serverURLMismatch expected URL: " + serverURL + " - found: " + actorVS.getServerURL());
                 X509Certificate x509Cert = PEMUtils.fromPEMToX509CertCollection(
                         actorVS.getCertChainPEM().getBytes()).iterator().next();
-                signatureBean.verifyCertificate(x509Cert);
+                cmsBean.verifyCertificate(x509Cert);
                 if(controlCenterDB == null) {
                     controlCenterDB = dao.persist((ControlCenterVS) new ControlCenterVS(actorVS).setX509Certificate(
                             x509Cert).setState(ActorVS.State.OK));

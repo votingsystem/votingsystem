@@ -28,7 +28,7 @@ import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.currency.ejb.*;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -60,7 +60,7 @@ public class UserVSResource {
     @Inject BalancesBean balancesBean;
     @Inject UserVSBean userVSBean;
     @Inject BankVSBean bankVSBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject DAOBean dao;
     @Inject ConfigVS config;
 
@@ -313,7 +313,7 @@ public class UserVSResource {
     @Path("/csrSignedWithIDCard")
     @POST @Produces("text/plain")
     public Response csrSignedWithIDCard(MessageCMS messageCMS) throws Exception {
-        X509Certificate issuedCert = signatureBean.signCSRSignedWithIDCard(messageCMS);
+        X509Certificate issuedCert = cmsBean.signCSRSignedWithIDCard(messageCMS);
         return Response.ok().entity(PEMUtils.getPEMEncoded(issuedCert)).build();
     }
 

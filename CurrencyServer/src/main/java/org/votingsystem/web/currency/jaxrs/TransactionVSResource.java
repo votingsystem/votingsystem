@@ -23,7 +23,7 @@ import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
@@ -58,7 +58,7 @@ public class TransactionVSResource {
 
     @Inject UserVSBean serVSBean;
     @Inject TransactionVSBean transactionVSBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject CurrencyBean currencyBean;
     @Inject BalancesBean balancesBean;
     @Inject DAOBean dao;
@@ -70,7 +70,7 @@ public class TransactionVSResource {
         TransactionVS transactionVS = dao.find(TransactionVS.class, id);
         if(transactionVS != null) {
             TransactionVSDto transactionDto = transactionVSBean.getTransactionDto(transactionVS);
-            transactionDto.setReceipt(new String(transactionVS.getMessageCMS().getContent(), "UTF-8"));
+            transactionDto.setReceipt(new String(transactionVS.getMessageCMS().getContentPEM(), "UTF-8"));
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(transactionDto)).build();
         } else return Response.status(Response.Status.NOT_FOUND).entity("ERROR - TransactionVS not found - id: " + id).build();
     }
@@ -151,7 +151,7 @@ public class TransactionVSResource {
             File zipFile = new File (tempDir, "transaction_" + desc + "_" + transactionList.size() +  ".zip");
             for(TransactionVS transactionVS :  transactionList) {
                 File cmsFile = new File(format("{0}/transaction_{1}.p7m", tempDir.getAbsolutePath(), transactionVS.getId()));
-                IOUtils.write(transactionVS.getMessageCMS().getContent(), new FileOutputStream(cmsFile));
+                IOUtils.write(transactionVS.getMessageCMS().getContentPEM(), new FileOutputStream(cmsFile));
             }
             new ZipUtils(tempDir).zipIt(zipFile);
             resp.sendRedirect(config.getStaticResURL() + tempPath + File.separator + zipFile.getName());

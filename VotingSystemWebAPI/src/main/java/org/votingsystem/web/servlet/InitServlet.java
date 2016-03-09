@@ -3,7 +3,7 @@ package org.votingsystem.web.servlet;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.crypto.PEMUtils;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -25,13 +25,14 @@ public class InitServlet extends HttpServlet{
 
     private static Logger log = Logger.getLogger(InitServlet.class.getName());
 
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject ConfigVS config;
 
     @Override public void init() throws ServletException {
         try {
             MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
-            List<X509Certificate> fileSystemX509TrustedCerts = new ArrayList<>();
+            List<X509Certificate> fileSystemCATrustedCerts = new ArrayList<>();
+            List<X509Certificate> fileSystemCA_anonymous_provider_TrustedCerts = new ArrayList<>();
             List<UserVS> admins = new ArrayList<>();
             for (String res : getServletContext().getResourcePaths("WEB-INF/votingsystem/certs")) {
                 String resFileName = res.split("WEB-INF/votingsystem/certs/")[1];
@@ -39,7 +40,10 @@ public class InitServlet extends HttpServlet{
                 if(resFileName.startsWith("AC_") && resFileName.endsWith(".pem")) {
                     X509Certificate fileSystemX509TrustedCert = PEMUtils.fromPEMToX509Cert(FileUtils.getBytesFromStream(
                             getServletContext().getResourceAsStream(res)));
-                    fileSystemX509TrustedCerts.add(fileSystemX509TrustedCert);
+                    fileSystemCATrustedCerts.add(fileSystemX509TrustedCert);
+                    if(resFileName.contains("ANONYMOUS_CERT_PROVIDER")) {
+                        fileSystemCA_anonymous_provider_TrustedCerts.add(fileSystemX509TrustedCert);
+                    }
                 } else if(resFileName.startsWith("ADMIN_") && resFileName.endsWith(".pem")) {
                     X509Certificate adminCert = PEMUtils.fromPEMToX509Cert(FileUtils.getBytesFromStream(
                             getServletContext().getResourceAsStream(res)));
@@ -47,8 +51,9 @@ public class InitServlet extends HttpServlet{
                     admins.add(userVS);
                 }
             }
-            signatureBean.initCertAuthorities(fileSystemX509TrustedCerts);
-            signatureBean.initAdmins(admins);
+            cmsBean.initAnonymousCertAuthorities(fileSystemCA_anonymous_provider_TrustedCerts);
+            cmsBean.initCertAuthorities(fileSystemCATrustedCerts);
+            cmsBean.initAdmins(admins);
             config.mainServletInitialized();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

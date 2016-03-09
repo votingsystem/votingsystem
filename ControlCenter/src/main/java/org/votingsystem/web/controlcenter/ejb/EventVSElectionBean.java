@@ -13,7 +13,7 @@ import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -36,7 +36,7 @@ public class EventVSElectionBean {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject TimeStampBean timeStampBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
 
@@ -55,7 +55,7 @@ public class EventVSElectionBean {
         setEventDatesState(eventVS);
         eventVS.updateAccessControlIds();
         dao.persist(eventVS);
-        X509Certificate controlCenterX509Cert = signatureBean.getServerCert();
+        X509Certificate controlCenterX509Cert = cmsBean.getServerCert();
         CertificateVS eventVSControlCenterCertificate =  CertificateVS.ACTORVS(null, controlCenterX509Cert);
         dao.persist(eventVSControlCenterCertificate);
         Collection<X509Certificate> accessControlCerts = PEMUtils.fromPEMToX509CertCollection(request.getCertChain().getBytes());
@@ -81,10 +81,10 @@ public class EventVSElectionBean {
                 "ERROR - EventVSElection not found - accessControlEventVSId: " +request.getEventId());
         if(EventVS.State.ACTIVE != eventVS.getState()) throw new ValidationExceptionVS(new MessageDto(
                 ResponseVS.SC_ERROR_REQUEST_REPEATED, "ERROR - trying to cancel an EventVS tha isn't active"));
-        if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isAdmin(signer.getNif())))
+        if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || cmsBean.isAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
         request.validateCancelation(eventVS.getAccessControlVS().getServerURL());
-        CMSSignedMessage cmsResp = signatureBean.addSignature(messageCMS.getCMS());
+        CMSSignedMessage cmsResp = cmsBean.addSignature(messageCMS.getCMS());
         dao.merge(messageCMS.setCMS(cmsResp));
         eventVS.setState(request.getState()).setDateCanceled(new Date());
         dao.merge(eventVS);

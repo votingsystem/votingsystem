@@ -15,7 +15,7 @@ import org.votingsystem.web.currency.cdi.ConfigVSImpl;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.currency.util.ReportFiles;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -46,7 +46,7 @@ public class AuditBean {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject TransactionVSBean transactionVSBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject BalancesBean balancesBean;
 
     //Check that the sum of all issued Currency match with valid request
@@ -82,7 +82,7 @@ public class AuditBean {
             }
             TransactionVSDto dto = transactionVSBean.getTransactionDto(transaction);
             MessageCMS messageCMS = transaction.getMessageCMS();
-            dto.setCmsMessagePEM(Base64.getUrlEncoder().encodeToString(messageCMS.getContent()));
+            dto.setCmsMessagePEM(Base64.getUrlEncoder().encodeToString(messageCMS.getContentPEM()));
             transactionFromList.add(dto);
         }
         BalancesDto balancesDto = BalancesDto.FROM(transactionFromList, balancesFromMap);
@@ -105,7 +105,7 @@ public class AuditBean {
             }
             TransactionVSDto transactionDto = transactionVSBean.getTransactionDto(transaction);
             MessageCMS messageCMS = transaction.getMessageCMS();
-            transactionDto.setCmsMessagePEM(Base64.getUrlEncoder().encodeToString(messageCMS.getContent()));
+            transactionDto.setCmsMessagePEM(Base64.getUrlEncoder().encodeToString(messageCMS.getContentPEM()));
             transactionToList.add(transactionDto);
         }
         balancesDto.setTo(transactionToList, balancesToMap);
@@ -196,8 +196,8 @@ public class AuditBean {
                 String signedMessageSubject =  messages.get("tagInitPeriodMsg", tagVSEntry.getKey());
                 String signedContent = JSON.getMapper().writeValueAsString(new InitPeriodTransactionVSDto(amountResult,
                         timeLimitedNotExpended, currencyCode, tagVSEntry.getKey(), userVS));
-                CMSSignedMessage cmsMessage = signatureBean.signDataWithTimeStamp(signedContent);
-                MessageCMS messageCMS = dao.persist(new MessageCMS(cmsMessage, signatureBean.getSystemUser(),
+                CMSSignedMessage cmsMessage = cmsBean.signDataWithTimeStamp(signedContent);
+                MessageCMS messageCMS = dao.persist(new MessageCMS(cmsMessage, cmsBean.getSystemUser(),
                         TypeVS.CURRENCY_PERIOD_INIT));
                 dao.persist(new TransactionVS(userVS, userVS, amountResult, currencyCode, signedMessageSubject, messageCMS,
                         TransactionVS.Type.CURRENCY_PERIOD_INIT, TransactionVS.State.OK, currentTagVS));
@@ -208,7 +208,7 @@ public class AuditBean {
                     CurrencyAccount account = dao.getSingleResult (CurrencyAccount.class, query);
                     Map accountFromMovements = new HashMap<>();
                     accountFromMovements.put(account, timeLimitedNotExpended);
-                    TransactionVS transactionVS = dao.persist(new TransactionVS(userVS, signatureBean.getSystemUser(),
+                    TransactionVS transactionVS = dao.persist(new TransactionVS(userVS, cmsBean.getSystemUser(),
                             timeLimitedNotExpended, currencyCode,
                             signedMessageSubject, messageCMS,TransactionVS.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED,
                             TransactionVS.State.OK,currentTagVS ));
@@ -264,7 +264,7 @@ public class AuditBean {
         Files.write(Paths.get(reportFiles.getJsonFile().getAbsolutePath()), resultBalanceStr.getBytes());
         //String subjectSufix = "[" + DateUtils.getDateStr(timePeriod.getDateFrom()) + " - " +
         //        DateUtils.getDateStr(timePeriod.getDateTo()) + "]";
-        CMSSignedMessage receipt = signatureBean.signDataWithTimeStamp(resultBalanceStr);
+        CMSSignedMessage receipt = cmsBean.signDataWithTimeStamp(resultBalanceStr);
         FileUtils.copyBytesToFile(receipt.toPEM(), reportFiles.getReceiptFile());
         String elapsedTime = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc);
         log.info("numTotalUsers:" + numTotalUsers + " - finished in: " + elapsedTime);

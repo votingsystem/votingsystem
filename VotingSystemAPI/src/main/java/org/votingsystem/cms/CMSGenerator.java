@@ -70,7 +70,7 @@ public class CMSGenerator {
         Store signedDataCertStore = cmsMessage.getCertificates();
         SignerInformationStore signers = cmsMessage.getSignerInfos();
         //You'll need to copy the other signers certificates across as well if you want them included.
-        List certList = new ArrayList();
+        List resultCertList = new ArrayList();
         Iterator it = signers.getSigners().iterator();
         while (it.hasNext()) {
             SignerInformation signer = (SignerInformation)it.next();
@@ -78,17 +78,16 @@ public class CMSGenerator {
             X509CertificateHolder certificateHolder = (X509CertificateHolder)certCollection.iterator().next();
             X509Certificate x509Certificate = new JcaX509CertificateConverter().setProvider(
                     ContextVS.PROVIDER).getCertificate(certificateHolder);
-            certList.add(x509Certificate);
+            resultCertList.add(x509Certificate);
         }
-        certList.add((X509Certificate) certList.get(0));
-        Store certs = new JcaCertStore(certList);
+        resultCertList.add((X509Certificate) certList.get(0));
+        Store certs = new JcaCertStore(resultCertList);
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
         ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").setProvider(ContextVS.PROVIDER).build(key);
         gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder()
                 .setProvider(ContextVS.PROVIDER).build()).build(signer, (X509Certificate) certList.get(0)));
         gen.addCertificates(certs);
         gen.addSigners(signers);
-        CMSSignedData multiSignedData = gen.generate((CMSTypedData)cmsMessage.getSignedContent(), true);
-        return multiSignedData;
+        return gen.generate((CMSTypedData)cmsMessage.getSignedContent(), true);
     }
 }

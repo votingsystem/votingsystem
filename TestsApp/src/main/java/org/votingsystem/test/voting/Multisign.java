@@ -23,7 +23,7 @@ public class Multisign {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SimulationData simulationData = new SimulationData();
-        simulationData.setServerURL("http://sistemavotacion.org/AccessControl");
+        simulationData.setServerURL("https://192.168.1.5/AccessControl");
         simulationData.setMaxPendingResponses(10);
         simulationData.setNumRequestsProjected(1);
         Map timerMap = new HashMap<>();
@@ -35,15 +35,13 @@ public class Multisign {
 
         SignatureService signatureService = SignatureService.genUserVSSignatureService("08888888D");
         SignatureService signatureService1 = SignatureService.genUserVSSignatureService("00111222V");
-        SignatureService signatureService2 = SignatureService.genUserVSSignatureService("03455543T");
         CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsString(dataToSignMap));
 
         CMSSignedMessage cmsSigned = signatureService1.addSignature("03455543T", "08888888D", cmsMessage,
                 DateUtils.getDateStr(new Date()));
-        //log.info(new String(cmsSigned.getBytes()))
-        X509Certificate x509Cert = signatureService1.getCertSigner();
         cmsSigned.isValidSignature();
-        Collection result = cmsSigned.checkSignerCert(x509Cert);
+        log.info("signers: " + cmsSigned.getSigners().size() + " - document: " + cmsSigned.toPEMStr());
+        Collection result = cmsSigned.checkSignerCert(signatureService1.getCertSigner());
         log.info("cert matches: " + result.size());
         simulationData.finishAndExit(ResponseVS.SC_OK, null);
     }

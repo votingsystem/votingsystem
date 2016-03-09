@@ -14,7 +14,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -38,7 +38,7 @@ public class VoteVSBean {
 
     @Inject private ConfigVS config;
     @Inject private DAOBean dao;
-    @Inject private SignatureBean signatureBean;
+    @Inject private CMSBean cmsBean;
 
 
     public VoteVS validateVote(CMSDto CMSDto) throws Exception {
@@ -51,7 +51,7 @@ public class VoteVSBean {
         FieldEventVS optionSelected = eventVS.checkOptionId(voteVSRequest.getOptionSelected().getId());
         if (optionSelected == null) throw new ValidationExceptionVS(messages.get("voteOptionNotFoundErrorMsg",
                 voteVSRequest.getOptionSelected().getId().toString()));
-        CMSSignedMessage cmsMessageResp = signatureBean.addSignature(messageCMS.getCMS());
+        CMSSignedMessage cmsMessageResp = cmsBean.addSignature(messageCMS.getCMS());
         messageCMS.setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE).setCMS(cmsMessageResp);
         dao.merge(voteVSCertificate.setState(CertificateVS.State.USED));
         return dao.persist(new VoteVS(optionSelected, eventVS, VoteVS.State.OK, voteVSCertificate,  messageCMS));
@@ -83,7 +83,7 @@ public class VoteVSBean {
                 "timestampDateErrorMsg", DateUtils.getDateStr(timeStampDate),
                 DateUtils.getDateStr(voteVS.getEventVS().getDateBegin()),
                 DateUtils.getDateStr(voteVS.getEventVS().getDateFinish())));
-        CMSSignedMessage cmsMessageReq = signatureBean.addSignature(cmsMessage);
+        CMSSignedMessage cmsMessageReq = cmsBean.addSignature(cmsMessage);
         String cancelerServiceURL = voteVS.getEventVS().getControlCenterVS().getVoteVSCancelerURL();
         ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(cmsMessageReq.toPEM(),
                 ContentTypeVS.JSON_SIGNED, cancelerServiceURL);
@@ -91,7 +91,7 @@ public class VoteVSBean {
             CMSSignedMessage cmsMessageResp = new CMSSignedMessage(responseVSControlCenter.getMessageBytes());
             if(!cmsMessage.getContentDigestStr().equals(cmsMessageResp.getContentDigestStr()))
                     throw new ValidationExceptionVS("cmsContentMismatchError");
-            signatureBean.validateSignersCerts(cmsMessageResp);
+            cmsBean.validateSignersCerts(cmsMessageResp);
             dao.merge(messageCMS.setType(TypeVS.CANCEL_VOTE).setCMS(cmsMessageResp));
         } else {
             messageCMS.setType(TypeVS.ERROR).setReason(responseVSControlCenter.getMessage());

@@ -40,7 +40,7 @@ public class AccessRequestVSResource {
         AccessRequestVS accessRequestVS = dao.find(AccessRequestVS.class, id);
         if(accessRequestVS == null) return Response.status(Response.Status.NOT_FOUND).entity(messages.get("ERROR - "
             + "not found - AccessRequestVS id: " + id)).build();
-        else return Response.ok().entity(accessRequestVS.getMessageCMS().getContent())
+        else return Response.ok().entity(accessRequestVS.getMessageCMS().getContentPEM())
                 .type(ContentTypeVS.TEXT_STREAM.getName()).build();
 
     }
@@ -55,7 +55,7 @@ public class AccessRequestVSResource {
         AccessRequestVS accessRequestVS = dao.getSingleResult(AccessRequestVS.class, query);
         if(accessRequestVS == null) return Response.status(Response.Status.NOT_FOUND).entity(messages.get("ERROR - "
                 + "not found - AccessRequestVS hashHex: " + hashHex)).build();
-        else return Response.ok().entity(accessRequestVS.getMessageCMS().getContent())
+        else return Response.ok().entity(accessRequestVS.getMessageCMS().getContentPEM())
                 .type(ContentTypeVS.TEXT_STREAM.getName()).build();
     }
 
@@ -76,7 +76,7 @@ public class AccessRequestVSResource {
         AccessRequestVS accessRequestVS = dao.getSingleResult(AccessRequestVS.class, query);
         if(accessRequestVS == null) return Response.status(Response.Status.NOT_FOUND).entity(messages.get("ERROR - "
                 + "not found - AccessRequestVS event id: " + eventId + " - userVS nif: " + nif)).build();
-        else return Response.ok().entity(accessRequestVS.getMessageCMS().getContent())
+        else return Response.ok().entity(accessRequestVS.getMessageCMS().getContentPEM())
                 .type(ContentTypeVS.TEXT_STREAM.getName()).build();
     }
 

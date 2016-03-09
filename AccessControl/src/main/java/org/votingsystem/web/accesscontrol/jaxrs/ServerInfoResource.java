@@ -3,7 +3,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.voting.ControlCenterVS;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -29,7 +29,7 @@ public class ServerInfoResource {
     private static final Logger log = Logger.getLogger(ServerInfoResource.class.getName());
 
     @EJB ConfigVS configVS;
-    @EJB SignatureBean signatureBean;
+    @EJB CMSBean cmsBean;
     @EJB TimeStampBean timeStampBean;
 
     @GET @Produces(MediaType.APPLICATION_JSON)
@@ -45,7 +45,7 @@ public class ServerInfoResource {
         serverInfo.put("environmentMode", configVS.getMode());
         serverInfo.put("timeStampCertPEM", new String(timeStampBean.getSigningCertPEMBytes()));
         serverInfo.put("timeStampServerURL", configVS.getTimeStampServerURL());
-        serverInfo.put("certChainPEM", new String(signatureBean.getKeyStorePEMCerts()));
+        serverInfo.put("certChainPEM", new String(cmsBean.getKeyStorePEMCerts()));
         //resp.setHeader("Access-Control-Allow-Origin", "*");
         //if (params.callback) render "${param.callback}(${serverInfo as JSON})"
         return serverInfo;

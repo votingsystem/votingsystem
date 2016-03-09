@@ -229,7 +229,7 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
 
     public byte[] getMessageBytes() throws Exception {
         if(contentType!= null && contentType.isSigned() && messageBytes == null && messageCMS != null)
-            return messageCMS.getCMS().getEncoded();
+            return messageCMS.getCMS().toPEM();
         if(messageBytes == null && message != null) return message.getBytes();
         return messageBytes;
     }
@@ -239,7 +239,7 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     }
 
     public CMSSignedMessage getCMS() throws Exception {
-        if(cmsMessage == null) cmsMessage = new CMSSignedMessage(getMessageBytes());
+        if(cmsMessage == null) cmsMessage = CMSSignedMessage.FROM_PEM(getMessageBytes());
         return cmsMessage;
     }
 

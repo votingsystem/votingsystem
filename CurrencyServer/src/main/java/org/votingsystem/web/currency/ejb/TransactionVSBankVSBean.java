@@ -11,7 +11,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -32,7 +32,7 @@ public class TransactionVSBankVSBean {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject TransactionVSBean transactionVSBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
 
     public ResultListDto<TransactionVSDto> processTransactionVS(TransactionVSDto request, TagVS tagVS) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
@@ -43,7 +43,7 @@ public class TransactionVSBankVSBean {
         TransactionVS transactionVS = dao.persist(TransactionVS.FROM_BANKVS(bankVS, request.getFromUserIBAN(),
                 request.getFromUser(), request.getReceptor(), request.getAmount(), request.getCurrencyCode(),
                 request.getSubject(), request.getValidTo(), request.getMessageCMS_DB(), tagVS));
-        CMSSignedMessage receipt = signatureBean.addSignature(request.getMessageCMS_DB().getCMS());
+        CMSSignedMessage receipt = cmsBean.addSignature(request.getMessageCMS_DB().getCMS());
         dao.merge(request.getMessageCMS_DB().setType(TypeVS.FROM_BANKVS).setCMS(receipt));
         transactionVSBean.updateCurrencyAccounts(transactionVS);
         log.info("BankVS: " + bankVS.getId() + " - to user: " + request.getReceptor().getId());

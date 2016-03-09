@@ -10,8 +10,8 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -33,7 +33,7 @@ public class UserVSBean {
     @Inject ConfigVS config;
     @Inject CurrencyAccountBean currencyAccountBean;
     @Inject UserVSBean userVSBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
     @Inject TransactionVSBean transactionVSBean;
     
@@ -41,7 +41,7 @@ public class UserVSBean {
     public UserVS saveUser(MessageCMS cmsReq) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS signer = cmsReq.getUserVS();
-        if(!signatureBean.isAdmin(signer.getNif())) throw new ExceptionVS(messages.get("userWithoutPrivilegesErrorMsg",
+        if(!cmsBean.isAdmin(signer.getNif())) throw new ExceptionVS(messages.get("userWithoutPrivilegesErrorMsg",
                 signer.getNif(), TypeVS.CERT_CA_NEW.toString()));
 
         Map<String, String> dataMap = cmsReq.getCMS().getSignedContent(new TypeReference<HashMap<String, String>>() {});;
@@ -52,7 +52,7 @@ public class UserVSBean {
         Collection<X509Certificate> certChain = PEMUtils.fromPEMToX509CertCollection(
                 dataMap.get("certChainPEM").getBytes());
         UserVS newUser = UserVS.FROM_X509_CERT(certChain.iterator().next());
-        signatureBean.verifyUserCertificate(newUser);
+        cmsBean.verifyUserCertificate(newUser);
         newUser = subscriptionVSBean.checkUser(newUser);
         dao.merge(newUser.setState(UserVS.State.ACTIVE).setReason(dataMap.get("info")));
         return newUser;

@@ -114,7 +114,7 @@ public class EventVSElectionResource {
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         EventVSElection response = eventVSElectionBean.saveEvent(messageCMS);
         resp.setHeader("eventURL", format("{0}/rest/eventVSElection/id/{1}", config.getContextURL(), response.getId()));
-        return Response.ok().entity(response.getPublishRequestCMS().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(response.getPublishRequestCMS().getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
     @Path("/cancel") @POST
@@ -157,7 +157,7 @@ public class EventVSElectionResource {
         EventVSElection eventVS = dao.find(EventVSElection.class, id);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection not found - " +
                 "eventId: " + id).build();
-        return Response.ok().entity(eventVS.getPublishRequestCMS().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(eventVS.getPublishRequestCMS().getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
 }

@@ -6,11 +6,9 @@ import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.crypto.CertUtils;
 
 import javax.persistence.*;
-import java.io.IOException;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Map;
 
 import static javax.persistence.GenerationType.IDENTITY;
 

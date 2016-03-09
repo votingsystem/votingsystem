@@ -10,7 +10,7 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.crypto.CsrResponse;
 import org.votingsystem.web.accesscontrol.ejb.AccessRequestBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MultipartRequestVS;
 
@@ -34,7 +34,7 @@ public class AccessRequestVSServlet extends HttpServlet {
 
     private final static Logger log = Logger.getLogger(AccessRequestVSServlet.class.getName());
 
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject AccessRequestBean accessRequestBean;
     @Inject ConfigVS config;
 
@@ -48,7 +48,7 @@ public class AccessRequestVSServlet extends HttpServlet {
             throws ServletException, IOException, IOException {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ACCESS_REQUEST);
-            MessageCMS messageCMS = signatureBean.validateCMS(
+            MessageCMS messageCMS = cmsBean.validateCMS(
                     requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
             CsrResponse csrResponse = accessRequestBean.saveRequest(messageCMS, requestVS.getCSRBytes());
             resp.setContentType(ContentTypeVS.TEXT_STREAM.getName());

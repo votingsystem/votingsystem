@@ -11,7 +11,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -33,7 +33,7 @@ public class GroupVSBean {
     @Inject ConfigVS config;
     @Inject UserVSBean userVSBean;
     @Inject CurrencyAccountBean currencyAccountBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
     @Inject TransactionVSBean transactionVSBean;
 
@@ -41,7 +41,7 @@ public class GroupVSBean {
     public GroupVS cancelGroup(GroupVS groupVS, MessageCMS messageCMS) throws Exception {
         UserVS signer = messageCMS.getUserVS();
         log.info("signer:" + signer.getNif());
-        if(!groupVS.getRepresentative().getNif().equals(signer.getNif()) && !signatureBean.isAdmin(signer.getNif())) {
+        if(!groupVS.getRepresentative().getNif().equals(signer.getNif()) && !cmsBean.isAdmin(signer.getNif())) {
             throw new ExceptionVS("operation: " +  TypeVS.CURRENCY_GROUP_CANCEL.toString() +
                     " - userWithoutGroupPrivilegesErrorMsg - user: " + signer.getNif() + " - group: " + groupVS.getName());
         }
@@ -55,7 +55,7 @@ public class GroupVSBean {
         UserVS signer = messageCMS.getUserVS();
         log.info("signer:" + signer.getNif());
         if(!groupVS.getRepresentative().getNif().equals(messageCMS.getUserVS().getNif()) &&
-                !signatureBean.isAdmin(messageCMS.getUserVS().getNif())) {
+                !cmsBean.isAdmin(messageCMS.getUserVS().getNif())) {
             throw new ExceptionVS("operation: " +  TypeVS.CURRENCY_GROUP_EDIT.toString() +
                     " - userWithoutGroupPrivilegesErrorMsg - user: " + signer.getNif() + " - group: " + groupVS.getName());
         }
@@ -90,7 +90,7 @@ public class GroupVSBean {
         groupVS = dao.persist(new GroupVS(request.getName().trim(), UserVS.State.ACTIVE, signer,
                 request.getDescription(), request.getTags()));
         config.createIBAN(groupVS);
-        CMSSignedMessage receipt = signatureBean.addSignature(messageCMS.getCMS());
+        CMSSignedMessage receipt = cmsBean.addSignature(messageCMS.getCMS());
         messageCMS.setCMS(receipt);
         log.info("saveGroup - GroupVS id:" + groupVS.getId());
         return groupVS;

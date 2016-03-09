@@ -114,7 +114,7 @@ public class EventVSElectionResource {
     public Response cancel(MessageCMS messageCMS, @Context ServletContext context,
                            @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         MessageCMS responseMessage = eventVSBean.cancelEvent(messageCMS);
-        return Response.ok().entity(responseMessage.getContent()).type(MediaType.TEXT_PLAIN).build();
+        return Response.ok().entity(responseMessage.getContentPEM()).type(MediaType.TEXT_PLAIN).build();
     }
 
     @Transactional
@@ -140,7 +140,7 @@ public class EventVSElectionResource {
         EventVSElection eventVS = dao.find(EventVSElection.class, id);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSElection not found - " +
                 "eventId: " + id).build();
-        return Response.ok().entity(eventVS.getPublishRequestCMS().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(eventVS.getPublishRequestCMS().getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
 }

@@ -23,7 +23,7 @@ public class RequestUtils {
     public static Object processRequest(MessageCMS messageCMS, @Context ServletContext context,
                                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        String cmsMessageStr = Base64.getEncoder().encodeToString(messageCMS.getContent());
+        String cmsMessageStr = Base64.getEncoder().encodeToString(messageCMS.getContentPEM());
         CMSSignedMessage cmsMessage = messageCMS.getCMS();
         Date timeStampDate = null;
         Map signedContentMap;

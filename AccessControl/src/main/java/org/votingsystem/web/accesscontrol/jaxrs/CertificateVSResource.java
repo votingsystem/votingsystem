@@ -15,9 +15,9 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.CertificateVSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
@@ -51,7 +51,7 @@ public class CertificateVSResource {
 
     @Inject ConfigVS app;
     @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject CertificateVSBean certificateVSBean;
 
 
@@ -173,7 +173,7 @@ public class CertificateVSResource {
     @Path("/trustedCerts")
     @GET  @Produces(MediaType.TEXT_PLAIN)
     public Response trustedCerts() throws Exception {
-        Set<X509Certificate> trustedCerts = signatureBean.getTrustedCerts();
+        Set<X509Certificate> trustedCerts = cmsBean.getTrustedCerts();
         return Response.ok().entity(PEMUtils.getPEMEncoded (trustedCerts)).build();
     }
 

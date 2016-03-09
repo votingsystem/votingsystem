@@ -6,8 +6,8 @@ import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EnvironmentVS;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -37,7 +37,7 @@ public class ConfigVSImpl implements ConfigVS {
     private static final Logger log = Logger.getLogger(ConfigVSImpl.class.getName());
 
     @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject SubscriptionVSBean subscriptionBean;
     @Inject TimeStampBean timeStampBean;
     /* Executor service for asynchronous processing */
@@ -105,7 +105,7 @@ public class ConfigVSImpl implements ConfigVS {
         executorService.submit(() -> {
             try {
                 timeStampBean.init();
-                signatureBean.init();
+                cmsBean.init();
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
             }

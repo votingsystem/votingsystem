@@ -11,7 +11,7 @@ import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MultipartRequestVS;
 
@@ -31,7 +31,7 @@ public class CurrencyRequestServlet extends HttpServlet {
 
     private final static Logger log = Logger.getLogger(CurrencyRequestServlet.class.getName());
 
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject CurrencyBean currencyBean;
@@ -45,7 +45,7 @@ public class CurrencyRequestServlet extends HttpServlet {
         MessageCMS messageCMS = null;
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.CURRENCY_REQUEST);
-            messageCMS = signatureBean.validateCMS(
+            messageCMS = cmsBean.validateCMS(
                     requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
             CurrencyRequestDto requestDto = CurrencyRequestDto.validateRequest(requestVS.getCSRBytes(),
                     messageCMS, config.getContextURL());

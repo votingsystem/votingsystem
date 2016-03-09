@@ -41,7 +41,7 @@ public class SubscriptionVSBean {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
 
     public UserVS checkUser(UserVS userVS) throws Exception {
         log.log(Level.FINE, "nif: " + userVS.getNif());
@@ -84,7 +84,7 @@ public class SubscriptionVSBean {
                         .setParameter("deviceId", deviceData.getDeviceId());
                 deviceVS = dao.getSingleResult(DeviceVS.class, query);
                 if(deviceVS == null) {
-                    deviceVS = (DeviceVS) dao.persist(new DeviceVS(userVS, deviceData.getDeviceId(), deviceData.getEmail(),
+                    deviceVS = dao.persist(new DeviceVS(userVS, deviceData.getDeviceId(), deviceData.getEmail(),
                             deviceData.getMobilePhone(), deviceData.getDeviceName(), certificate));
                     log.log(Level.FINE, "new device with id: " + deviceVS.getId());
                 } else dao.getEM().merge(deviceVS.updateCertInfo(deviceData));
@@ -131,7 +131,7 @@ public class SubscriptionVSBean {
         if(groupVS == null || !request.getGroupvsName().equals(groupVS.getName())) {
             throw new ExceptionVS("group with name: " + request.getGroupvsName() + " and id: " + request.getId() + " not found");
         }
-        if(!groupVS.getRepresentative().getNif().equals(request.getUserVSNIF()) && !signatureBean.isAdmin(signer.getNif())) {
+        if(!groupVS.getRepresentative().getNif().equals(request.getUserVSNIF()) && !cmsBean.isAdmin(signer.getNif())) {
             throw new ExceptionVS("'userWithoutGroupPrivilegesErrorMsg - groupVS:" + request.getGroupvsName() + " - nif:" +
                     signer.getNif());
         }
@@ -162,7 +162,7 @@ public class SubscriptionVSBean {
         if(groupVS == null || !request.getGroupvsName().equals(groupVS.getName())) {
             throw new ValidationExceptionVS("Group with id: " + request.getId() + " and name: " + request.getGroupvsName() + " not found");
         }
-        if(!groupVS.getRepresentative().getNif().equals(signer.getNif()) && !signatureBean.isAdmin(signer.getNif())) {
+        if(!groupVS.getRepresentative().getNif().equals(signer.getNif()) && !cmsBean.isAdmin(signer.getNif())) {
             throw new ValidationExceptionVS("userWithoutGroupPrivilegesErrorMsg - operation: " +
                     TypeVS.CURRENCY_GROUP_USER_ACTIVATE.toString() + " - nif: " + signer.getNif() + " - group: " +
                     request.getGroupvsName());

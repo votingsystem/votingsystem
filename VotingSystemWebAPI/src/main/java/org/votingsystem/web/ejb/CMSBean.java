@@ -38,9 +38,9 @@ import static java.text.MessageFormat.format;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Singleton
-public class SignatureBean {
+public class CMSBean {
 
-    private static Logger log = Logger.getLogger(SignatureBean.class.getName());
+    private static Logger log = Logger.getLogger(CMSBean.class.getName());
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
@@ -86,11 +86,10 @@ public class SignatureBean {
         keyStorePEMCerts = PEMUtils.getPEMEncoded (certChain);
         localServerCertSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
         currencyAnchors = new HashSet<>();
-        anonymousCertIssuers = new HashSet<>();
+
         currencyAnchors.add(new TrustAnchor(localServerCertSigner, null));
         Query query = dao.getEM().createNamedQuery("findCertBySerialNumber")
                 .setParameter("serialNumber", localServerCertSigner.getSerialNumber().longValue());
-        anonymousCertIssuers.add(localServerCertSigner.getSerialNumber().longValue());
         serverCertificateVS = dao.getSingleResult(CertificateVS.class, query);
         serverPrivateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
         encryptor = new Encryptor(localServerCertSigner, serverPrivateKey);
@@ -135,6 +134,13 @@ public class SignatureBean {
         dao.merge(systemUser);
         log.info("initAdmins - admins list:" + adminsNIF);
         setAdmins(adminsNIF);
+    }
+
+    public void initAnonymousCertAuthorities(List<X509Certificate>  anonymous_provider_TrustedCerts) throws Exception {
+        anonymousCertIssuers = new HashSet<>();
+        for(X509Certificate anonymous_provider:anonymous_provider_TrustedCerts) {
+            anonymousCertIssuers.add(anonymous_provider.getSerialNumber().longValue());
+        }
     }
 
     public void initCertAuthorities(List<X509Certificate> resourceCerts) throws Exception {

@@ -9,7 +9,7 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MultipartRequestVS;
 
@@ -33,7 +33,7 @@ public class AnonymousRepresentativeDelegationCancelerServlet extends HttpServle
 
     private final static Logger log = Logger.getLogger(AnonymousRepresentativeDelegationCancelerServlet.class.getName());
 
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject ConfigVS config;
     @Inject RepresentativeDelegationBean representativeDelegationBean;
 
@@ -48,14 +48,14 @@ public class AnonymousRepresentativeDelegationCancelerServlet extends HttpServle
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(),
                     MultipartRequestVS.Type.ANONYMOUS_DELEGATION_CANCELATION);
-            MessageCMS messageCMS = signatureBean.validateCMS(
+            MessageCMS messageCMS = cmsBean.validateCMS(
                     requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
-            MessageCMS anonymousMessageCMS = signatureBean.validateCMS(
+            MessageCMS anonymousMessageCMS = cmsBean.validateCMS(
                     requestVS.getAnonymousCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
             AnonymousDelegation anonymousDelegation = representativeDelegationBean.cancelAnonymousDelegation(
                     messageCMS, anonymousMessageCMS);
 
-            byte[] receiptBytes = anonymousDelegation.getCancellationCMS().getContent();
+            byte[] receiptBytes = anonymousDelegation.getCancellationCMS().getContentPEM();
             resp.setContentType(MediaTypeVS.JSON_SIGNED);
             resp.setContentLength(receiptBytes.length);
             resp.getOutputStream().write(receiptBytes);

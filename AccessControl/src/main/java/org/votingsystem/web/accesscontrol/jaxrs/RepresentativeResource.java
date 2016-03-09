@@ -84,7 +84,7 @@ public class RepresentativeResource {
     @Path("/revoke") @POST
     public Response revoke(MessageCMS messageCMS) throws Exception {
         MessageCMS response = representativeBean.processRevoke(messageCMS);
-        return Response.ok().entity(response.getContent()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(response.getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
     @Path("/") @GET
@@ -179,8 +179,7 @@ public class RepresentativeResource {
     @Path("/anonymousDelegation") @POST
     public Response anonymousDelegation(MessageCMS messageCMS) throws Exception {
         RepresentationDocument response = representativeDelegationBean.saveAnonymousDelegation(messageCMS);
-        return Response.ok().entity(response.getActivationCMS().getContent()).type(
-                MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(response.getActivationCMS().getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
 

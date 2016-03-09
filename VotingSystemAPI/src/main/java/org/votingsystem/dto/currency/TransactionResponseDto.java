@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.util.TypeVS;
 
-import java.util.Base64;
-
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */

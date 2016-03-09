@@ -37,7 +37,7 @@ public class MessageCMS extends EntityVS implements Serializable {
     @Column(name="id", unique=true, nullable=false)
     private Long id;
     @Column(name="type") @Enumerated(EnumType.STRING) private TypeVS type;
-    @Column(name="content") private byte[] content;
+    @Column(name="content") private byte[] contentPEM;
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
@@ -82,49 +82,47 @@ public class MessageCMS extends EntityVS implements Serializable {
     @Transient private transient Set<UserVS> signers;
     @Transient private transient UserVS anonymousSigner;
 
-    public byte[] getContent() {
-        return content;
+    public byte[] getContentPEM() {
+        return contentPEM;
     }
 
     public MessageCMS() {}
 
-    public MessageCMS(String reason, TypeVS typeVS, String metaInf, byte[] content) {
+    public MessageCMS(String reason, TypeVS typeVS, String metaInf, byte[] contentPEM) throws Exception {
         this.reason = reason;
         this.type = typeVS;
         this.metaInf = metaInf;
-        this.content = content;
+        setCMS(CMSSignedMessage.FROM_PEM(contentPEM));
     }
 
-    public MessageCMS(CMSSignedMessage cms, CMSDto CMSDto, TypeVS type) throws Exception {
-        this.cmsMessage = cms;
-        this.content = cmsMessage.getEncoded();
-        this.base64ContentDigest = cms.getContentDigestStr();
+    public MessageCMS(CMSSignedMessage cms, CMSDto dto, TypeVS type) throws Exception {
         this.type = type;
-        this.userVS = CMSDto.getSigner();
-        this.anonymousSigner = CMSDto.getAnonymousSigner();
-        this.signers = CMSDto.getSigners();
+        this.userVS = dto.getSigner();
+        this.anonymousSigner = dto.getAnonymousSigner();
+        this.signers = dto.getSigners();
+        setCMS(cms);
     }
 
     public MessageCMS(CMSSignedMessage cms, UserVS userVS, TypeVS type) throws Exception {
-        this.cmsMessage = cms;
         this.userVS = userVS;
         this.type = type;
+        setCMS(cms);
     }
 
     public MessageCMS(CMSSignedMessage cms, TypeVS typeVS, MessageCMS cmsParent) throws Exception {
-        this.cmsMessage = cms;
-        this.cmsParent = cmsParent;
         this.type = typeVS;
+        this.cmsParent = cmsParent;
+        setCMS(cms);
     }
 
 
     public MessageCMS(CMSSignedMessage cms, TypeVS typeVS) throws Exception {
-        this.cmsMessage = cms;
         this.type = typeVS;
+        setCMS(cms);
     }
 
-    public MessageCMS setContent(byte[] content) {
-        this.content = content;
+    public MessageCMS setContentPEM(byte[] content) {
+        this.contentPEM = content;
         return this;
     }
 
@@ -193,16 +191,15 @@ public class MessageCMS extends EntityVS implements Serializable {
 	}
 
     public CMSSignedMessage getCMS() throws Exception {
-		if(cmsMessage == null && content != null) {
-			cmsMessage = new CMSSignedMessage(content);
-            cmsMessage.isValidSignature();
-		}
+		if(cmsMessage == null && contentPEM != null) cmsMessage = CMSSignedMessage.FROM_PEM(contentPEM);
 		return cmsMessage;
 	}
 
 	public MessageCMS setCMS(CMSSignedMessage cmsMessage) throws Exception {
 		this.cmsMessage = cmsMessage;
-        this.content = cmsMessage.getEncoded();
+        this.contentPEM = cmsMessage.toPEM();
+        this.base64ContentDigest = cmsMessage.getContentDigestStr();
+        this.signedContent = cmsMessage.getSignedContentStr();
         return this;
 	}
 
@@ -253,9 +250,7 @@ public class MessageCMS extends EntityVS implements Serializable {
         setDateCreated(date);
         setLastUpdated(date);
         try {
-            setSignedContent(cmsMessage.getSignedContentStr());
-            setContent(cmsMessage.getEncoded());
-            setBase64ContentDigest(cmsMessage.getContentDigestStr());
+            setCMS(cmsMessage);
         }catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

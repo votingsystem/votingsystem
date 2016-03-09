@@ -8,7 +8,7 @@ import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.accesscontrol.ejb.CSRBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -37,7 +37,7 @@ public class CSRResource {
     @Inject CSRBean csrBean;
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/request") @POST @Transactional
@@ -63,7 +63,7 @@ public class CSRResource {
             return Response.status(Response.Status.BAD_REQUEST).entity(messages.get("csrRequestNotValidated")).build();
         }
         X509Certificate certX509 = CertUtils.loadCertificate(csrRequest.getCertificateVS().getContent());
-        List<X509Certificate> certs = Arrays.asList(certX509, signatureBean.getServerCert());
+        List<X509Certificate> certs = Arrays.asList(certX509, cmsBean.getServerCert());
         return Response.ok().entity(PEMUtils.getPEMEncoded (certs)).build();
     }
 

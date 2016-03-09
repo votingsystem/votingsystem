@@ -8,7 +8,7 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MultipartRequestVS;
 
@@ -34,7 +34,7 @@ public class AnonymousRepresentativeDelegationServlet extends HttpServlet {
 
     private final static Logger log = Logger.getLogger(AnonymousRepresentativeDelegationServlet.class.getName());
 
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject ConfigVS config;
     @Inject RepresentativeDelegationBean representativeDelegationBean;
 
@@ -49,7 +49,7 @@ public class AnonymousRepresentativeDelegationServlet extends HttpServlet {
             throws ServletException, IOException, IOException {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ANONYMOUS_DELEGATION);
-            MessageCMS messageCMS = signatureBean.validateCMS(
+            MessageCMS messageCMS = cmsBean.validateCMS(
                     requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getMessageCMS();
             X509Certificate anonymousIssuedCert = representativeDelegationBean.validateAnonymousRequest(
                     messageCMS, requestVS.getCSRBytes());

@@ -18,7 +18,7 @@ import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.DAOUtils;
 import org.votingsystem.web.util.MessagesVS;
@@ -45,7 +45,7 @@ public class VoteVSBean {
     @Inject private ConfigVS config;
     @PersistenceContext private EntityManager em;
     @Inject DAOBean dao;
-    @Inject private SignatureBean signatureBean;
+    @Inject private CMSBean cmsBean;
 
     @Transactional
     public VoteVS validateVote(CMSDto CMSDto) throws Exception {
@@ -64,7 +64,7 @@ public class VoteVSBean {
         CertificateVS certificateVS = CertificateVS.VOTE(voteVS.getHashCertVSBase64(),
                 voteVS.getCMSMessage().getUserVS(), voteVS.getX509Certificate());
         String signedVoteDigest = messageCMS.getCMS().getContentDigestStr();
-        CMSSignedMessage validatedVote = signatureBean.addSignature(messageCMS.getCMS());
+        CMSSignedMessage validatedVote = cmsBean.addSignature(messageCMS.getCMS());
         ResponseVS responseVS = HttpHelper.getInstance().sendData(validatedVote.toPEM(), ContentTypeVS.VOTE,
                 eventVS.getAccessControlVS().getVoteServiceURL());
         if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(messages.get(
@@ -74,7 +74,7 @@ public class VoteVSBean {
             throw new ValidationExceptionVS("ERROR - expected signedVoteDigest: " + signedVoteDigest + " - found: " +
                     cmsMessageResp.getContentDigestStr());
         }
-        signatureBean.validateVoteCerts(cmsMessageResp, eventVS);
+        cmsBean.validateVoteCerts(cmsMessageResp, eventVS);
         em.merge(messageCMS.setCMS(cmsMessageResp).setType(TypeVS.ACCESS_CONTROL_VALIDATED_VOTE));
         voteVS.setState(VoteVS.State.OK).setOptionSelected(optionSelected);
         em.persist(certificateVS);
@@ -104,7 +104,7 @@ public class VoteVSBean {
                 "timestampDateErrorMsg", DateUtils.getDateStr(timeStampDate),
                 DateUtils.getDateStr(voteVS.getEventVS().getDateBegin()),
                 DateUtils.getDateStr(voteVS.getEventVS().getDateFinish())));
-        CMSSignedMessage cmsMessage = signatureBean.addSignature(messageCMS.getCMS());
+        CMSSignedMessage cmsMessage = cmsBean.addSignature(messageCMS.getCMS());
         dao.merge(messageCMS.setCMS(cmsMessage));
         VoteVSCanceler voteCanceler = new VoteVSCanceler(messageCMS, null, VoteVSCanceler.State.CANCELLATION_OK,
                 request.getOriginHashAccessRequest(), request.getHashAccessRequestBase64(),

@@ -383,20 +383,20 @@ public class UserBaseSimulationData extends SimulationData {
     }
 
     public List<String> getElectorList() {
-        List<String> result = new ArrayList<String>(getNumberElectors());
-        List<String> tempList = new ArrayList<String>(this.representativeNifList);
+        List<String> result = new ArrayList<>(getNumberElectors());
+        List<String> tempList = new ArrayList<>(this.representativeNifList);
         if(getNumRepresentativesWithVote() > 0) {
             for(int i = 0; i < getNumRepresentativesWithVote(); i++) {
                 result.add(tempList.remove(ThreadLocalRandom.current().nextInt(tempList.size())));
             }
             log.info("getElectorList - '" + getNumRepresentativesWithVote() + "' representatives with vote");
         }
-        tempList = new ArrayList<String>(this.usersWithRepresentativeList);
+        tempList = new ArrayList<>(this.usersWithRepresentativeList);
         for(int i = 0; i < getNumUsersWithRepresentativeWithVote(); i++) {
             result.add(tempList.remove(ThreadLocalRandom.current().nextInt(tempList.size())));
         }
         log.info("getElectorList - '" +  getNumUsersWithRepresentativeWithVote() + "' users WITH representative and vote");
-        tempList = new ArrayList<String>(this.usersWithoutRepresentativeList);
+        tempList = new ArrayList<>(this.usersWithoutRepresentativeList);
         for(int i = 0; i < getNumUsersWithoutRepresentativeWithVote(); i++) {
             result.add(tempList.remove(ThreadLocalRandom.current().nextInt(tempList.size())));
         }

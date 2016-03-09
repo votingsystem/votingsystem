@@ -11,7 +11,7 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -35,7 +35,7 @@ public class TransactionVSUserVSBean {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject WalletBean walletBean;
     @Inject TransactionVSBean transactionVSBean;
 
@@ -50,10 +50,10 @@ public class TransactionVSUserVSBean {
                 request.getType(), accountFromMovements, request.getAmount(), request.getCurrencyCode(),
                 request.getSubject(), request.getValidTo(), request.getMessageCMS_DB(), tagVS));
         transactionVSBean.updateCurrencyAccounts(transactionVS);
-        CMSSignedMessage receipt = signatureBean.addSignature(request.getMessageCMS_DB().getCMS());
+        CMSSignedMessage receipt = cmsBean.addSignature(request.getMessageCMS_DB().getCMS());
         dao.merge(request.getMessageCMS_DB().setCMS(receipt));
         TransactionVSDto dto = new TransactionVSDto(transactionVS);
-        dto.setCmsMessagePEM(Base64.getEncoder().encodeToString(request.getMessageCMS_DB().getContent()));
+        dto.setCmsMessagePEM(Base64.getEncoder().encodeToString(request.getMessageCMS_DB().getContentPEM()));
         List<TransactionVSDto> listDto = Arrays.asList(dto);
         ResultListDto<TransactionVSDto> resultListDto = new ResultListDto<>(listDto, request.getOperation());
         resultListDto.setStatusCode(ResponseVS.SC_OK);

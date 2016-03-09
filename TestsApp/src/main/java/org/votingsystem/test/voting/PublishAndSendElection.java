@@ -127,9 +127,13 @@ public class PublishAndSendElection {
         if(simulationData.isTimerBased()) startSimulationTimer(userBaseSimulationData);
         else {
             while(!synchronizedElectorList.isEmpty()) {
-                if(!((VotingSimulationData)simulationData).waitingForVoteRequests()) {
+                if(!simulationData.waitingForVoteRequests()) {
                     int randomElector = new Random().nextInt(synchronizedElectorList.size());
                     String electorNif = synchronizedElectorList.remove(randomElector);
+                    if(electorNif == null) {
+                        log.info("============== NULL electorNif");
+                        continue;
+                    }
                     VoteVSHelper voteVSHelper = VoteVSHelper.genRandomVote(eventVS.getId(), eventVS.getUrl(), eventVS.getFieldsEventVS());
                     voteVSHelper.setNIF(electorNif);
                     voteVSMap.put(voteVSHelper.getHashCertVSBase64(), voteVSHelper);
@@ -174,9 +178,8 @@ public class PublishAndSendElection {
                 ContextVS.getInstance().getAccessControl().getPublishElectionURL(), "eventURL");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         String eventURL = ((List<String>)responseVS.getData()).iterator().next();
-        byte[] responseBytes = responseVS.getMessageBytes();
-        ContextVS.getInstance().copyFile(responseBytes, "/electionSimulation", "ElectionPublishedReceipt");
-        CMSSignedMessage message = new CMSSignedMessage(responseBytes);
+        ContextVS.getInstance().copyFile(responseVS.getMessageBytes(), "/electionSimulation", "ElectionPublishedReceipt");
+        CMSSignedMessage message = responseVS.getCMS();
         responseVS = HttpHelper.getInstance().getData(eventURL, ContentTypeVS.JSON);
         EventVSDto eventVSJSON = JSON.getMapper().readValue(responseVS.getMessage(), EventVSDto.class);
         return eventVSJSON.getEventVSElection();

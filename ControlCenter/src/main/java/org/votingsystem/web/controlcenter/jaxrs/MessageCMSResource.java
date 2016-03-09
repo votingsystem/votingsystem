@@ -41,7 +41,7 @@ public class MessageCMSResource {
         if(messageCMS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "MessageCMS not found - id: " + id).build();
         if(contentType.contains(ContentTypeVS.TEXT.getName())) {
-            return Response.ok().entity(messageCMS.getContent()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
+            return Response.ok().entity(messageCMS.getContentPEM()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
         } else return processRequest(messageCMS, context, req, resp);
     }
 

@@ -14,9 +14,13 @@ import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Store;
 import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.VoteVS;
+import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.KeyGeneratorVS;
@@ -124,8 +128,20 @@ public class CMSSignedMessage extends CMSSignedData {
         CMSSignedData timeStampedSignedData = CMSUtils.addTimeStamp(signedMessage, timeStampToken);
         return new CMSSignedMessage(timeStampedSignedData.getEncoded());
     }
+
+    public static CMSSignedMessage addTimeStamp(CMSSignedMessage signedData, String timeStampServerURL) throws Exception {
+        TimeStampRequest tspRequest = signedData.getTimeStampRequest();
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(tspRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY,
+                timeStampServerURL);
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(responseVS.getMessageBytes()));
+            signedData = signedData.addTimeStamp(signedData, timeStampToken);
+        } else throw new ExceptionVS(responseVS.getMessage());
+        return signedData;
+    }
+
     /**
-     * Digest for storing unique MessageSMIME in database
+     * Digest for storing unique MessageCMS in database
      */
     public String getContentDigestStr() throws Exception {
         MessageDigest messageDigest = MessageDigest.getInstance("MD5");
@@ -215,8 +231,8 @@ public class CMSSignedMessage extends CMSSignedData {
         private boolean checkSignature() throws Exception {
             Store certs = getCertificates();
             SignerInformationStore signerInfos = getSignerInfos();
-            Set<X509Certificate> signerCerts = new HashSet<X509Certificate>();
-            log.info("checkSignature - document with '" + signerInfos.size() + "' signers");
+            Set<X509Certificate> signerCerts = new HashSet<>();
+            log.info("checkSignature - cms document with '" + signerInfos.size() + "' signers");
             Iterator it = signerInfos.getSigners().iterator();
             Date firstSignature = null;
             signers = new HashSet<>();

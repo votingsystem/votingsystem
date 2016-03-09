@@ -15,7 +15,7 @@ import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.currency.ejb.ShopExampleBean;
 import org.votingsystem.web.currency.util.AsyncRequestShopBundle;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -48,7 +48,7 @@ public class ShopExampleResource {
 
     private static final Logger log = Logger.getLogger(ShopExampleResource.class.getName());
 
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject ShopExampleBean shopExampleBean;
@@ -108,7 +108,7 @@ public class ShopExampleResource {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         AsyncRequestShopBundle requestBundle = shopExampleBean.getRequestBundle(uuid);
         String currencyCSR = requestBundle.addHashCertVS(config.getContextURL(), hashCertVS);
-        CMSSignedMessage cmsMessage = signatureBean.signData(currencyCSR);
+        CMSSignedMessage cmsMessage = cmsBean.signData(currencyCSR);
         if(requestBundle.getTransactionDto() != null) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(requestBundle.getTransactionDto(
                     cmsMessage))).type(MediaTypeVS.JSON).build();

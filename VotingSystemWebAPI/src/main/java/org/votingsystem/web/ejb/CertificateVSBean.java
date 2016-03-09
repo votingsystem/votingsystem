@@ -28,7 +28,7 @@ public class CertificateVSBean {
     private static final Logger log = Logger.getLogger(CertificateVSBean.class.getName());
 
     @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject ConfigVS config;
 
     /*
@@ -40,7 +40,7 @@ public class CertificateVSBean {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         CertificateVSRequest request = messageCMS.getSignedContent(CertificateVSRequest.class);
         request.validateNewCARequest();
-        if(!signatureBean.isAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
+        if(!cmsBean.isAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
                 "userWithoutPrivilegesErrorMsg - operation: " + TypeVS.CERT_CA_NEW.toString() + " - user: " +
                 request.signer.getId());
         Collection<X509Certificate> certX509CertCollection = PEMUtils.fromPEMToX509CertCollection(
@@ -55,7 +55,7 @@ public class CertificateVSBean {
             certificateVS = dao.persist(CertificateVS.AUTHORITY(x509NewCACert, request.info));
         }
         log.info("addCertificateAuthority - new CA - id:" + certificateVS.getId());
-        signatureBean.addCertAuthority(certificateVS);
+        cmsBean.addCertAuthority(certificateVS);
         return new MessageDto(ResponseVS.SC_OK,  messages.get("certUpdatedToCAMsg", x509NewCACert.getSerialNumber().toString()),
                 config.getContextURL() + "/rest/certificateVS/serialNumber/" + x509NewCACert.getSerialNumber().toString());
     }
@@ -100,7 +100,7 @@ public class CertificateVSBean {
     public CertificateVS editCert(MessageCMS messageCMS) throws Exception {
         CertificateVSRequest request = messageCMS.getSignedContent(CertificateVSRequest.class);
         request.validatEditCertRequest();
-        if(!signatureBean.isAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
+        if(!cmsBean.isAdmin(request.signer.getNif())) throw new ValidationExceptionVS(
                 "userWithoutPrivilegesErrorMsg - operation: " + TypeVS.CERT_EDIT.toString() + " - user: " +
                         request.signer.getId());
         Query query = dao.getEM().createNamedQuery("findCertBySerialNumber").setParameter("serialNumber", request.serialNumber);

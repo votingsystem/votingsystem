@@ -14,7 +14,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -47,7 +47,7 @@ public class RepresentativeBean {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject MailBean mailBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject RepresentativeDelegationBean representativeDelegationBean;
 
     public RepresentativeDocument saveRepresentative(MessageCMS messageCMS) throws Exception {
@@ -82,7 +82,7 @@ public class RepresentativeBean {
             dao.merge(representativeDocument);
 
         }
-        messageCMS.setCMS(signatureBean.addSignature(messageCMS.getCMS()));
+        messageCMS.setCMS(cmsBean.addSignature(messageCMS.getCMS()));
         dao.merge(messageCMS);
         RepresentativeDocument repDocument = dao.persist(new RepresentativeDocument(signer, messageCMS,
                 request.getDescription()));
@@ -101,7 +101,7 @@ public class RepresentativeBean {
         if(TypeVS.REPRESENTATIVE_REVOKE != request.getOperation()) throw new ValidationExceptionVS(
                 "ERROR - operation missmatch - expected: 'TypeVS.REPRESENTATIVE_REVOKE' - found:" + request.getOperation());
         String representativeNIF = NifUtils.validate(request.getNIF());
-        if(!signatureBean.isAdmin(signer.getNif()) && !signer.getNif().equals(representativeNIF)) {
+        if(!cmsBean.isAdmin(signer.getNif()) && !signer.getNif().equals(representativeNIF)) {
             throw new ValidationExceptionVS("user without privileges");
         }
         if(signer.getNif().equals(signer.getNif())) representative = signer;
@@ -129,7 +129,7 @@ public class RepresentativeBean {
             dao.merge(represented.setRepresentative(null));
         }
         dao.merge(representative.setType(UserVS.Type.USER));
-        CMSSignedMessage cmsMessageResp = signatureBean.addSignature(cmsMessage);
+        CMSSignedMessage cmsMessageResp = cmsBean.addSignature(cmsMessage);
         dao.merge(messageCMS.setCMS(cmsMessageResp));
         dao.merge(representativeDocument.setState(RepresentativeDocument.State.CANCELED)
                 .setCancellationCMS(messageCMS).setDateCanceled(new Date()));
@@ -252,7 +252,7 @@ public class RepresentativeBean {
                             repDocFileName = format("{0}/{1}_delegation_with_vote.p7m", representativeBaseDir, represented.getNif());
                         } else repDocFileName = format("{0}/{1}_delegation.p7m", representativeBaseDir, represented.getNif());
                         File representationDocFile = new File(repDocFileName);
-                        IOUtils.write(representationDoc.getActivationCMS().getContent(), new FileOutputStream(representationDocFile));
+                        IOUtils.write(representationDoc.getActivationCMS().getContentPEM(), new FileOutputStream(representationDocFile));
                         if((numRepresented  % 100) == 0) {
                             dao.getEM().flush();
                             dao.getEM().clear();
@@ -355,7 +355,7 @@ public class RepresentativeBean {
                 ++numAccreditations;
                 MessageCMS messageCMS = representationDocument.getActivationCMS();
                 File cmsFile = new File(format("{0}/accreditation_{1}", basedir, representationDocument.getId()));
-                IOUtils.write(messageCMS.getContent(), new FileOutputStream(cmsFile));
+                IOUtils.write(messageCMS.getContentPEM(), new FileOutputStream(cmsFile));
                 if((numAccreditations % 100) == 0) {
                     dao.getEM().flush();
                     dao.getEM().clear();
@@ -459,7 +459,7 @@ public class RepresentativeBean {
         for (VoteVS voteVS : representativeVotes) {
             String voteId = String.format("%08d", voteVS.getId());
             File cmsFile = new File(format("{0}/vote_{1}.p7m", basedir, voteId));
-            IOUtils.write(voteVS.getCMSMessage().getContent(), new FileOutputStream(cmsFile));
+            IOUtils.write(voteVS.getCMSMessage().getContentPEM(), new FileOutputStream(cmsFile));
         }
         log.info(format("representative: {0} - numVotes: {1}", representative.getNif(), numVotes));
         String representativeURL = format("{0}/rest/representative/id/{1}", config.getContextURL(), representative.getId());

@@ -15,8 +15,8 @@ import org.votingsystem.util.Interval;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.currency.util.LoggerVS;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -40,7 +40,7 @@ public class CSRBean {
     private BigDecimal currencyMinValue = BigDecimal.ONE;
 
     @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject ConfigVS config;
 
 
@@ -52,12 +52,12 @@ public class CSRBean {
             Date dateTo = DateUtils.addDays(dateFrom, 365).getTime(); //one year
             timePeriod = new Interval(dateFrom, dateTo);
         }
-        CertificateVS authorityCertificateVS = signatureBean.getServerCertificateVS();
+        CertificateVS authorityCertificateVS = cmsBean.getServerCertificateVS();
         Set<Currency> issuedCurrencySet = new HashSet<>();
         Set<String> issuedCertSet = new HashSet<>();
         try {
             for(CurrencyDto currencyDto : requestDto.getCurrencyDtoMap().values()) {
-                X509Certificate x509AnonymousCert = signatureBean.signCSR(
+                X509Certificate x509AnonymousCert = cmsBean.signCSR(
                         currencyDto.getCsrPKCS10(), null, timePeriod.getDateFrom(), timePeriod.getDateTo());
                 Currency currency = Currency.FROM_CERT(x509AnonymousCert, requestDto.getTagVS(), authorityCertificateVS);
                 currency.setType(Currency.Type.REQUEST);
@@ -91,9 +91,9 @@ public class CSRBean {
             Date dateTo = DateUtils.addDays(dateFrom, 365).getTime(); //one year
             timePeriod = new Interval(dateFrom, dateTo);
         }
-        CertificateVS authorityCertificateVS = signatureBean.getServerCertificateVS();
+        CertificateVS authorityCertificateVS = cmsBean.getServerCertificateVS();
         try {
-            X509Certificate x509AnonymousCert = signatureBean.signCSR(
+            X509Certificate x509AnonymousCert = cmsBean.signCSR(
                     pkcs10Req, null, timePeriod.getDateFrom(), timePeriod.getDateTo());
             Currency currency = Currency.FROM_CERT(x509AnonymousCert, tagVS, authorityCertificateVS);
             currency.setType(type);

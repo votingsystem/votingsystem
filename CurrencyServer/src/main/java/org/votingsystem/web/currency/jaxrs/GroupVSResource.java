@@ -25,7 +25,7 @@ import org.votingsystem.web.currency.ejb.CurrencyAccountBean;
 import org.votingsystem.web.currency.ejb.GroupVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -59,7 +59,7 @@ public class GroupVSResource {
     @Inject GroupVSBean groupVSBean;
     @Inject UserVSBean userVSBean;
     @Inject BalancesBean balancesBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
 
     @Path("/")

@@ -4,7 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.votingsystem.dto.EncryptedMsgDto;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -29,7 +29,7 @@ public class EncryptedMsgReader implements MessageBodyReader<EncryptedMsgDto> {
 
     private static final Logger log = Logger.getLogger(EncryptedMsgReader.class.getName());
 
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
@@ -40,7 +40,7 @@ public class EncryptedMsgReader implements MessageBodyReader<EncryptedMsgDto> {
     public EncryptedMsgDto readFrom(Class<EncryptedMsgDto> aClass, Type type, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
         try {
-            byte[] decryptedBytes = signatureBean.decryptCMS(IOUtils.toByteArray(inputStream));
+            byte[] decryptedBytes = cmsBean.decryptCMS(IOUtils.toByteArray(inputStream));
             return JSON.getMapper().readValue(decryptedBytes, EncryptedMsgDto.class);
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

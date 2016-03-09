@@ -4,7 +4,7 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.MessageCMS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -29,7 +29,7 @@ public class CurrencyReader implements MessageBodyReader<MessageCMS> {
 
     private static final Logger log = Logger.getLogger(CurrencyReader.class.getName());
 
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
@@ -40,7 +40,7 @@ public class CurrencyReader implements MessageBodyReader<MessageCMS> {
     public MessageCMS readFrom(Class<MessageCMS> aClass, Type type, Annotation[] annotations, MediaType mediaType,
                                MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
         try {
-            return signatureBean.validateCMS(CMSSignedMessage.FROM_PEM(inputStream), ContentTypeVS.JSON_SIGNED).getMessageCMS();
+            return cmsBean.validateCMS(CMSSignedMessage.FROM_PEM(inputStream), ContentTypeVS.JSON_SIGNED).getMessageCMS();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

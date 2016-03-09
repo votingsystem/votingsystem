@@ -10,8 +10,8 @@ import org.votingsystem.model.voting.EventVSElection;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -27,7 +27,7 @@ public class EventVSBean {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
 
     public void checkEventVSDates (EventVS eventVS) throws ValidationExceptionVS {
         if(eventVS.getState() == EventVS.State.CANCELED) return;
@@ -68,12 +68,12 @@ public class EventVSBean {
         if(eventVS.getState() != EventVS.State.ACTIVE && eventVS.getState() != EventVS.State.PENDING)
                 throw new ValidationExceptionVS("ERROR - EventVS not ACTIVE - eventId: " + request.getEventId());
         request.validateCancelation(config.getContextURL());
-        if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || signatureBean.isAdmin(signer.getNif())))
+        if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || cmsBean.isAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
         CMSSignedMessage cmsMessageResp = null;
         String fromUser = config.getServerName();
         if(eventVS instanceof EventVSElection) {
-            cmsMessageResp = signatureBean.addSignature(cmsMessageReq);
+            cmsMessageResp = cmsBean.addSignature(cmsMessageReq);
             String controlCenterUrl = ((EventVSElection)eventVS).getControlCenterVS().getServerURL();
             ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(cmsMessageResp.toPEM(),
                     ContentTypeVS.JSON_SIGNED, controlCenterUrl + "/rest/eventVSElection/cancel");
@@ -82,7 +82,7 @@ public class EventVSBean {
                 throw new ValidationExceptionVS(
                         "ERROR - controlCenterCommunicationErrorMsg -  controlCenterUrl: " + controlCenterUrl);
             }
-        } else cmsMessageResp = signatureBean.addSignature(cmsMessageReq);
+        } else cmsMessageResp = cmsBean.addSignature(cmsMessageReq);
         messageCMS.setCMS(cmsMessageResp);
         eventVS.setState(request.getState());
         eventVS.setDateCanceled(new Date());

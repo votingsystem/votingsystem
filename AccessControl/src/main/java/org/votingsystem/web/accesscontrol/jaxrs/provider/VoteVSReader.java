@@ -3,7 +3,7 @@ package org.votingsystem.web.accesscontrol.jaxrs.provider;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.CMSDto;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -28,7 +28,7 @@ public class VoteVSReader implements MessageBodyReader<CMSDto> {
 
     private static final Logger log = Logger.getLogger(VoteVSReader.class.getName());
 
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
 
     @Override
     public boolean isReadable(Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType) {
@@ -39,7 +39,7 @@ public class VoteVSReader implements MessageBodyReader<CMSDto> {
     public CMSDto readFrom(Class<CMSDto> aClass, Type type, Annotation[] annotations, MediaType mediaType,
                            MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
         try {
-            return signatureBean.validatedVoteFromControlCenter(CMSSignedMessage.FROM_PEM(inputStream));
+            return cmsBean.validatedVoteFromControlCenter(CMSSignedMessage.FROM_PEM(inputStream));
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             throw new WebApplicationException(ex);

@@ -16,8 +16,8 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -39,7 +39,7 @@ public class TransactionVSGroupVSBean {
 
     private static Logger log = Logger.getLogger(TransactionVSGroupVSBean.class.getName());
 
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject WalletBean walletBean;
     @Inject DAOBean dao;
     @Inject ConfigVS config;
@@ -67,7 +67,7 @@ public class TransactionVSGroupVSBean {
             for(UserVS toUser: request.getToUserVSList()) {
                 TransactionVS triggeredTransaction = TransactionVS.generateTriggeredTransaction(
                         transactionParent, userPart, toUser, toUser.getIBAN());
-                CMSSignedMessage receipt = signatureBean.signData(mapper.writeValueAsString(
+                CMSSignedMessage receipt = cmsBean.signData(mapper.writeValueAsString(
                         new TransactionVSDto(triggeredTransaction)));
                 MessageCMS messageCMSReceipt = dao.persist(new MessageCMS(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS,
                         request.getMessageCMS_DB()));
@@ -137,7 +137,7 @@ public class TransactionVSGroupVSBean {
             String toUserNIF = subscription.getUserVS().getNif();
             TransactionVSDto triggeredDto = request.getGroupVSChild(
                     toUserNIF, userPart, subscriptionList.size(), config.getContextURL());
-            CMSSignedMessage receipt = signatureBean.signData(mapper.writeValueAsString(triggeredDto));
+            CMSSignedMessage receipt = cmsBean.signData(mapper.writeValueAsString(triggeredDto));
             dao.persist(new MessageCMS(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS, request.getMessageCMS_DB()));
             TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(transactionParent,
                     userPart, subscription.getUserVS(), subscription.getUserVS().getIBAN()));
@@ -147,7 +147,7 @@ public class TransactionVSGroupVSBean {
         log.info("transactionVS: " + transactionParent.getId() + " - operation: " + request.getOperation().toString());
         ResultListDto<TransactionVSDto> resultDto = new ResultListDto(resultList);
         MessageCMS requestMessageCMS = request.getMessageCMS_DB();
-        CMSSignedMessage parentReceipt = signatureBean.addSignature(requestMessageCMS.getCMS());
+        CMSSignedMessage parentReceipt = cmsBean.addSignature(requestMessageCMS.getCMS());
         dao.merge(requestMessageCMS.setCMS(parentReceipt));
         resultDto.setMessage(messages.get("transactionVSFromGroupToAllMembersGroupOKMsg",
                 request.getAmount().toString() + " " + request.getCurrencyCode()));

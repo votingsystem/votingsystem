@@ -12,8 +12,8 @@ import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.Interval;
 import org.votingsystem.util.currency.BalanceUtils;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.ejb.Stateless;
@@ -33,7 +33,7 @@ public class BalancesBean {
 
     @Inject ConfigVS config;
     @Inject GroupVSBean groupVSBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject BankVSBean bankVSBean;
     @Inject UserVSBean userVSBean;
     @Inject DAOBean dao;

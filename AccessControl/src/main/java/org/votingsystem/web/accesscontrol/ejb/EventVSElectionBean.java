@@ -10,7 +10,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -38,7 +38,7 @@ public class EventVSElectionBean {
     @Inject EventVSBean eventVSBean;
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject RepresentativeBean representativeBean;
     @Inject TimeStampBean timeStampBean;
 
@@ -69,7 +69,7 @@ public class EventVSElectionBean {
         request.setDateCreated(eventVS.getDateCreated());
         request.setType(EventVS.Type.ELECTION);
 
-        KeyStoreDto keyStoreDto = signatureBean.generateElectionKeysStore(eventVS);
+        KeyStoreDto keyStoreDto = cmsBean.generateElectionKeysStore(eventVS);
         CertificateVS certificateVS = dao.persist(CertificateVS.ELECTION((X509Certificate) keyStoreDto.getX509Cert()));
         dao.merge(eventVS.setCertificateVS(certificateVS));
         keyStoreDto.getKeyStoreVS().setCertificateVS(certificateVS);
@@ -77,10 +77,10 @@ public class EventVSElectionBean {
         eventVS.setKeyStoreVS(keyStoreVS);
 
         request.setCertCAVotacion( new String(PEMUtils.getPEMEncoded (keyStoreVS.getCertificateVS().getX509Cert())));
-        request.setCertChain(new String(PEMUtils.getPEMEncoded (signatureBean.getCertChain())));
+        request.setCertChain(new String(PEMUtils.getPEMEncoded (cmsBean.getCertChain())));
         X509Certificate certUsuX509 = userSigner.getCertificate();
         request.setUserVS(new String(PEMUtils.getPEMEncoded(certUsuX509)));
-        CMSSignedMessage cms = signatureBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsString(request));
+        CMSSignedMessage cms = cmsBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsString(request));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cms.toPEM(),
                 ContentTypeVS.JSON_SIGNED, controlCenterVS.getServerURL() + "/rest/eventVSElection");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
@@ -93,7 +93,7 @@ public class EventVSElectionBean {
         CertificateVS controlCenterCertEventVS = dao.persist(
                 CertificateVS.ACTORVS(controlCenterVS, controlCenterCert.getX509Cert()));
         CertificateVS accessControlCertEventVS = dao.persist(
-                CertificateVS.ACTORVS(null, signatureBean.getServerCert()));
+                CertificateVS.ACTORVS(null, cmsBean.getServerCert()));
         dao.merge(messageCMS.setType(TypeVS.VOTING_EVENT).setCMS(cms));
         dao.merge(eventVS.setControlCenterCert(controlCenterCertEventVS).setAccessControlCert(accessControlCertEventVS)
                 .setState(EventVS.State.ACTIVE).setPublishRequestCMS(messageCMS));
@@ -130,7 +130,7 @@ public class EventVSElectionBean {
         RepresentativesAccreditations representativesAccreditations =
                 representativeBean.getAccreditationsBackupForEvent(eventVS);
         Set<X509Certificate> eventTrustedCerts = eventVS.getTrustedCerts();
-        Set<X509Certificate> systemTrustedCerts = signatureBean.getTrustedCerts();
+        Set<X509Certificate> systemTrustedCerts = cmsBean.getTrustedCerts();
         File systemTrustedCertsFile = new File(format("{0}/systemTrustedCerts.pem", filesDir.getAbsolutePath()));
         IOUtils.write(PEMUtils.getPEMEncoded(systemTrustedCerts), new FileOutputStream(systemTrustedCertsFile));
 
@@ -182,7 +182,7 @@ public class EventVSElectionBean {
         List<AccessRequestVS> accessRequestList = query.getResultList();
         for(AccessRequestVS accessRequest : accessRequestList) {
             File cmsFile = new File(format("{0}/accessRequest_{1}.p7m", accessRequestBaseDir, accessRequest.getUserVS().getNif()));
-            IOUtils.write(accessRequest.getMessageCMS().getContent(), new FileOutputStream(cmsFile));
+            IOUtils.write(accessRequest.getMessageCMS().getContentPEM(), new FileOutputStream(cmsFile));
             /*if((accessRequests.getRowNumber() % 100) == 0) {
                 String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillis(
                         System.currentTimeMillis() - begin)

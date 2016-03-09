@@ -1,10 +1,6 @@
 package org.votingsystem.model.voting;
 
-
-import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
 import org.votingsystem.dto.voting.VoteVSDto;
@@ -12,10 +8,9 @@ import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.MessageCMS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
-import org.votingsystem.util.JSON;
+import org.votingsystem.util.crypto.CertUtils;
 
 import javax.persistence.*;
-import java.io.IOException;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -272,24 +267,15 @@ public class VoteVS extends EntityVS implements Serializable {
         this.accessControlEventVSId = accessControlEventVSId;
     }
 
-    public VoteVS loadSignatureData(X509Certificate x509Certificate, TimeStampToken timeStampToken) throws IOException {
+    public VoteVS loadSignatureData(X509Certificate x509Certificate, TimeStampToken timeStampToken) throws Exception {
         this.timeStampToken = timeStampToken;
         this.x509Certificate = x509Certificate;
-        byte[] voteExtensionValue = x509Certificate.getExtensionValue(ContextVS.VOTE_OID);
-        if(voteExtensionValue != null) {
-            DERTaggedObject voteCertDataDER = (DERTaggedObject) X509ExtensionUtil.fromExtensionValue(voteExtensionValue);
-            VoteCertExtensionDto certExtensionDto = JSON.getMapper().readValue(((DERUTF8String) voteCertDataDER.getObject()).toString(),
-                    VoteCertExtensionDto.class);
-            this.accessControlEventVSId = certExtensionDto.getEventId();
-            this.accessControlURL = certExtensionDto.getAccessControlURL();
-            this.hashCertVSBase64 = certExtensionDto.getHashCertVS();
-        }
-        byte[] representativeURLExtensionValue = x509Certificate.getExtensionValue(ContextVS.REPRESENTATIVE_VOTE_OID);
-        if(representativeURLExtensionValue != null) {
-            DERTaggedObject representativeURL_DER = (DERTaggedObject)X509ExtensionUtil.fromExtensionValue(
-                    representativeURLExtensionValue);
-            setRepresentativeURL(((DERUTF8String) representativeURL_DER.getObject()).toString());
-        }
+        VoteCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(VoteCertExtensionDto.class, x509Certificate,
+                ContextVS.VOTE_OID);
+        this.accessControlEventVSId = certExtensionDto.getEventId();
+        this.accessControlURL = certExtensionDto.getAccessControlURL();
+        this.hashCertVSBase64 = certExtensionDto.getHashCertVS();
+        this.representativeURL = CertUtils.getCertExtensionData(x509Certificate, ContextVS.REPRESENTATIVE_VOTE_OID);
         return this;
     }
 

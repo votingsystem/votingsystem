@@ -10,7 +10,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -37,7 +37,7 @@ public class BankVSBean {
     @Inject UserVSBean userVSBean;
     @Inject TransactionVSBean transactionVSBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject ConfigVS config;
 
     public BankVS saveBankVS(MessageCMS cmsReq) throws Exception {
@@ -46,14 +46,14 @@ public class BankVSBean {
         BankVSDto request = cmsReq.getSignedContent(BankVSDto.class);
         request.validatePublishRequest();
         Iban IBAN = Iban.valueOf(request.getIBAN());
-        if(!signatureBean.isAdmin(signer.getNif())) {
+        if(!cmsBean.isAdmin(signer.getNif())) {
             throw new ValidationExceptionVS("operation: " + request.getOperation() +
                     " - userWithoutPrivilegesErrorMsg - nif: " + signer.getNif());
         }
         Collection<X509Certificate> certChain = PEMUtils.fromPEMToX509CertCollection(request.getCertChainPEM().getBytes());
         X509Certificate x509Certificate = certChain.iterator().next();
         BankVS bankVS = BankVS.getUserVS(x509Certificate);
-        signatureBean.verifyUserCertificate(bankVS);
+        cmsBean.verifyUserCertificate(bankVS);
         String validatedNIF = org.votingsystem.util.NifUtils.validate(bankVS.getNif());
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", validatedNIF);
         Object bankVSDB = dao.getSingleResult(Object.class, query);

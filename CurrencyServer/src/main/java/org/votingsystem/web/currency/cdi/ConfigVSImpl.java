@@ -12,8 +12,8 @@ import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.web.currency.ejb.AuditBean;
 import org.votingsystem.web.currency.util.LoggerVS;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -47,7 +47,7 @@ public class ConfigVSImpl implements ConfigVS {
     private static final Logger log = Logger.getLogger(ConfigVS.class.getName());
 
     @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject SubscriptionVSBean subscriptionBean;
     @Inject TimeStampBean timeStampBean;
     @Inject AuditBean auditBean;
@@ -129,7 +129,7 @@ public class ConfigVSImpl implements ConfigVS {
                 try {
                     LoggerVS.init(serverDir + "/logs");
                     timeStampBean.init();
-                    signatureBean.init();
+                    cmsBean.init();
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }

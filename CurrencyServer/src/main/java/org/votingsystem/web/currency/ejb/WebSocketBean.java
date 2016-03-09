@@ -7,8 +7,8 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.currency.websocket.SessionVSManager;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -30,7 +30,7 @@ public class WebSocketBean {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject TransactionVSBean transactionVSBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
 
     @Transactional
     public void processRequest(SocketMessageDto messageDto) throws Exception {
@@ -83,7 +83,7 @@ public class WebSocketBean {
             case INIT_REMOTE_SIGNED_BROWSER_SESSION:
                 break;
             case INIT_REMOTE_SIGNED_SESSION:
-                messageCMS = signatureBean.validateCMS(messageDto.getCMS(), null).getMessageCMS();
+                messageCMS = cmsBean.validateCMS(messageDto.getCMS(), null).getMessageCMS();
                 signer = messageCMS.getUserVS();
                 signedMessageDto = messageCMS.getSignedContent(SocketMessageDto.class);
                 Session remoteSession = SessionVSManager.getInstance().getNotAuthenticatedSession(signedMessageDto.getSessionId());
@@ -96,7 +96,7 @@ public class WebSocketBean {
                 dao.getEM().merge(messageCMS.setType(TypeVS.WEB_SOCKET_INIT));
                 break;
             case INIT_SIGNED_SESSION:
-                messageCMS = signatureBean.validateCMS(messageDto.getCMS(), null).getMessageCMS();
+                messageCMS = cmsBean.validateCMS(messageDto.getCMS(), null).getMessageCMS();
                 signer = messageCMS.getUserVS();
                 if(CertificateVS.Type.USER_ID_CARD != signer.getCertificateVS().getType())
                     throw new ExceptionVS("ERROR - ID_CARD signature required");
@@ -114,7 +114,7 @@ public class WebSocketBean {
                             .setParameter("userVS", signer).setParameter("state", UserVSToken.State.OK);
                     UserVSToken token = dao.getSingleResult(UserVSToken.class, query);
                     if(token != null) {
-                        byte[] userToken = signatureBean.decryptCMS(token.getToken());
+                        byte[] userToken = cmsBean.decryptCMS(token.getToken());
                         responseDto.setMessage(new String(userToken));
                     }
                     responseDto.setConnectedDevice(DeviceVSDto.INIT_AUTHENTICATED_SESSION(signer));

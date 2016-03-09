@@ -13,7 +13,7 @@ import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.crypto.KeyStoreUtil;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -43,7 +43,7 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject CSRBean csrBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
 
     @Override
     public void generateBackup(Long eventId) throws Exception {
@@ -57,7 +57,7 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
     @Override
     public byte[] generateUserKeyStore(String givenName, String surname, String nif, char[] password) throws Exception {
         MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
-        KeyStore keyStore = signatureBean.generateKeysStore(givenName, surname, nif, password);
+        KeyStore keyStore = cmsBean.generateKeysStore(givenName, surname, nif, password);
         return KeyStoreUtil.getBytes(keyStore, password);
     }
 

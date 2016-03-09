@@ -10,7 +10,7 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
@@ -37,7 +37,7 @@ public class TagVSResource {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
 
     @Path("/")
     @GET @Produces(MediaType.APPLICATION_JSON)

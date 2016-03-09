@@ -2,7 +2,6 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
@@ -23,7 +22,7 @@ import org.votingsystem.util.crypto.CsrResponse;
 import org.votingsystem.util.crypto.KeyStoreInfo;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -33,7 +32,6 @@ import javax.persistence.Query;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -44,13 +42,13 @@ public class CSRBean {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
 
     public DeviceVS signCertUserVS(MessageCMS messageCMS) throws Exception {
         UserVS userVS = messageCMS.getUserVS();
         CertValidationDto certValidationDto = messageCMS.getSignedContent(CertValidationDto.class);
-        if(!signatureBean.isAdmin(userVS.getNif()) && !userVS.getNif().equals(certValidationDto.getNif()))
+        if(!cmsBean.isAdmin(userVS.getNif()) && !userVS.getNif().equals(certValidationDto.getNif()))
             throw new ExceptionVS("operation: signCertUserVS - userWithoutPrivilegesERROR - userVS nif: " + userVS.getNif());
         String validatedNif = NifUtils.validate(certValidationDto.getNif());
         Query query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId and d.userVS.nif =:nif " +
@@ -85,7 +83,7 @@ public class CSRBean {
         Date validFrom = new Date();
         Date validTo = DateUtils.addDays(validFrom, 365).getTime(); //one year
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getContent());
-        X509Certificate issuedCert = signatureBean.signCSR(csr, null, validFrom, validTo);
+        X509Certificate issuedCert = cmsBean.signCSR(csr, null, validFrom, validTo);
         csrRequest.setSerialNumber(issuedCert.getSerialNumber().longValue());
         dao.persist(csrRequest.setState(UserRequestCsrVS.State.OK));
         CertificateVS certificate = dao.persist(CertificateVS.USER(csrRequest.getUserVS(), issuedCert));
@@ -99,7 +97,7 @@ public class CSRBean {
         CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
         KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
         //TODO ==== vote keystore -- this is for developement
-        KeyStoreInfo keyStoreInfo = signatureBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
+        KeyStoreInfo keyStoreInfo = cmsBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         X509Certificate issuedCert = CertUtils.signCSR(csr, null, keyStoreInfo.getPrivateKeySigner(),
                 keyStoreInfo.getCertSigner(), eventVS.getDateBegin(), eventVS.getDateFinish());
@@ -113,7 +111,7 @@ public class CSRBean {
         CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
         KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
         //TODO ==== vote keystore -- this is for developement
-        KeyStoreInfo keyStoreInfo = signatureBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
+        KeyStoreInfo keyStoreInfo = cmsBean.getKeyStoreInfo(keyStoreVS.getBytes(), keyStoreVS.getKeyAlias());
         String representativeURL = config.getContextURL() + "/rest/representative/id/" + representative.getId();
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         Attribute attribute = new Attribute(new ASN1ObjectIdentifier(ContextVS.REPRESENTATIVE_VOTE_OID),
@@ -156,7 +154,7 @@ public class CSRBean {
         Date certValidFrom = DateUtils.getMonday(Calendar.getInstance()).getTime();
         Calendar calendarValidTo = Calendar.getInstance();
         calendarValidTo.add(Calendar.DATE, 1);//cert valid for one day
-        X509Certificate issuedCert = signatureBean.signCSR(csr, null, certValidFrom, calendarValidTo.getTime());
+        X509Certificate issuedCert = cmsBean.signCSR(csr, null, certValidFrom, calendarValidTo.getTime());
         CertificateVS certificate = CertificateVS.ANONYMOUS_REPRESENTATIVE_DELEGATION(
                 certExtensionDto.getHashCertVS(), issuedCert);
         dao.persist(certificate);

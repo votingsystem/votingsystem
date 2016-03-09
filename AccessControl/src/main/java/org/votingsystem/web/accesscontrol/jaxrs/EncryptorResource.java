@@ -7,8 +7,8 @@ import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -36,7 +36,7 @@ public class EncryptorResource {
     private static final Logger log = Logger.getLogger(EncryptorResource.class.getName());
 
     @Inject ConfigVS config;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject DAOBean dao;
     private MessagesVS messages = MessagesVS.getCurrentInstance();
 
@@ -50,15 +50,15 @@ public class EncryptorResource {
         //log.debug("receiverPublic.toString(): " + receiverPublic.toString());
         request.setMessage(format("Hello ''{0}'' from ''{1}''", request.getFrom(), config.getServerName()));
         byte[] responseBytes = JSON.getMapper().writeValueAsBytes(request);
-        //if(requestMap.receiverCert) signatureBean.encryptToCMS(responseBytes, requestMap.receiverCert)
-        return Response.ok().entity(signatureBean.encryptToCMS(responseBytes, receiverPublic)).type(
+        //if(requestMap.receiverCert) cmsBean.encryptToCMS(responseBytes, requestMap.receiverCert)
+        return Response.ok().entity(cmsBean.encryptToCMS(responseBytes, receiverPublic)).type(
                 MediaTypeVS.MULTIPART_ENCRYPTED).build();
     }
 
     @Path("/getMultiSignedMessage") @POST
     public Response getMultiSignedMessage(MessageCMS messageCMS, @Context ServletContext context,
                                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        CMSSignedMessage cmsMessage = signatureBean.addSignature(messageCMS.getCMS());
+        CMSSignedMessage cmsMessage = cmsBean.addSignature(messageCMS.getCMS());
         return  Response.ok().entity(cmsMessage.toPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 

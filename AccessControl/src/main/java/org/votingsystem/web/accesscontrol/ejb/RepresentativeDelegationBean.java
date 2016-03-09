@@ -16,7 +16,7 @@ import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -40,7 +40,7 @@ public class RepresentativeDelegationBean {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject CSRBean csrBean;
 
     public X509Certificate validateAnonymousRequest(MessageCMS messageCMS, byte[] csrRequest) throws Exception {
@@ -49,7 +49,7 @@ public class RepresentativeDelegationBean {
                 "expected operation 'ANONYMOUS_SELECTION_CERT_REQUEST' but found '" + request.getOperation() + "'");
         UserVS userVS = messageCMS.getUserVS();
         checkUserDelegationStatus(userVS);
-        CMSSignedMessage cmsMessageResp = signatureBean.addSignature(messageCMS.getCMS());
+        CMSSignedMessage cmsMessageResp = cmsBean.addSignature(messageCMS.getCMS());
         messageCMS.setType(request.getOperation()).setCMS(cmsMessageResp);
         X509Certificate anonymousCert = csrBean.signAnonymousDelegationCert(csrRequest);
         dao.merge(userVS.setRepresentative(null));
@@ -96,7 +96,7 @@ public class RepresentativeDelegationBean {
         Date dateToCheck = DateUtils.addDays(dateFromCheck, request.getWeeksOperationActive() * 7).getTime();
         if(request.getDateTo().compareTo(dateToCheck) != 0) throw new ValidationExceptionVS(
                 format("dateTo expected '{0}' received '{1}'", dateToCheck, request.getDateTo()));
-        CMSSignedMessage cmsMessage = signatureBean.addSignature(messageCMS.getCMS());
+        CMSSignedMessage cmsMessage = cmsBean.addSignature(messageCMS.getCMS());
         messageCMS.setCMS(cmsMessage);
         dao.merge(messageCMS);
         dao.merge(certificateVS.setState(CertificateVS.State.USED).setMessageCMS(messageCMS));
@@ -127,7 +127,7 @@ public class RepresentativeDelegationBean {
                 ContextVS.VOTING_DATA_DIGEST);
         if(!hashAnonymousDelegation.equals(anonymousDelegation.getHashAnonymousDelegation()))
             throw new ValidationExceptionVS("ERROR - AnonymousDelegation hash error - calculated hash doesn't match active one");
-        CMSSignedMessage cmsMessageResp = signatureBean.addSignature(messageCMS.getCMS());
+        CMSSignedMessage cmsMessageResp = cmsBean.addSignature(messageCMS.getCMS());
         dao.merge(messageCMS.setCMS(cmsMessageResp));
         anonymousDelegation.setOriginHashAnonymousDelegation(request.getOriginHashAnonymousDelegation()).setDateCancelled(new Date());
         dao.merge(anonymousDelegation.setStatus(AnonymousDelegation.Status.CANCELED).setCancellationCMS(messageCMS));
@@ -162,7 +162,7 @@ public class RepresentativeDelegationBean {
         RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
         if(representationDocument == null) throw new ValidationExceptionVS(
                 "ERROR - RepresentationDocument for request not found");
-        CMSSignedMessage cmsMessageResp = signatureBean.addSignature(messageCMS.getCMS());
+        CMSSignedMessage cmsMessageResp = cmsBean.addSignature(messageCMS.getCMS());
         dao.merge(messageCMS.setCMS(cmsMessageResp));
         dao.merge(representationDocument.setState(RepresentationDocument.State.CANCELED).setCancellationCMS(messageCMS));
         return representationDocument;

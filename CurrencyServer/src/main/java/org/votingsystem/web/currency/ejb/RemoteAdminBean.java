@@ -3,7 +3,7 @@ package org.votingsystem.web.currency.ejb;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.service.EJBRemoteAdminCurrencyServer;
 import org.votingsystem.util.crypto.KeyStoreUtil;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -26,7 +26,7 @@ public class RemoteAdminBean implements EJBRemoteAdminCurrencyServer {
     private static final Logger log = Logger.getLogger(RemoteAdminBean.class.getName());
 
     @Inject AuditBean auditBean;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject ConfigVS config;
 
     @Asynchronous
@@ -45,7 +45,7 @@ public class RemoteAdminBean implements EJBRemoteAdminCurrencyServer {
     @Override
     public byte[] generateUserKeyStore(String givenName, String surname, String nif, char[] password) throws Exception {
         MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
-        KeyStore keyStore = signatureBean.generateKeysStore(givenName, surname, nif, password);
+        KeyStore keyStore = cmsBean.generateKeysStore(givenName, surname, nif, password);
         return KeyStoreUtil.getBytes(keyStore, password);
     }
 

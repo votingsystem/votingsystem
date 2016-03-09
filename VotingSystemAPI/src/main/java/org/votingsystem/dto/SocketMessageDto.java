@@ -20,7 +20,6 @@ import org.votingsystem.util.crypto.Encryptor;
 import javax.websocket.Session;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;

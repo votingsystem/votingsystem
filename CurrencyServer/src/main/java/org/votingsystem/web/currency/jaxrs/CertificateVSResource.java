@@ -16,7 +16,7 @@ import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CertificateVSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
@@ -46,7 +46,7 @@ public class CertificateVSResource {
 
     @Inject ConfigVS app;
     @Inject DAOBean dao;
-    @Inject SignatureBean signatureBean;
+    @Inject CMSBean cmsBean;
     @Inject CertificateVSBean certificateVSBean;
 
     @Path("/hashHex/{hashHex}")

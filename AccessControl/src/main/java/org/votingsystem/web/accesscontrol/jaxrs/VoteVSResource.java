@@ -44,7 +44,7 @@ public class VoteVSResource {
     public Response save(CMSDto CMSDto, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         VoteVS voteVS = voteVSBean.validateVote(CMSDto);
-        return Response.ok().entity(voteVS.getCMSMessage().getContent()).type(ContentTypeVS.VOTE.getName()).build();
+        return Response.ok().entity(voteVS.getCMSMessage().getContentPEM()).type(ContentTypeVS.VOTE.getName()).build();
     }
 
     @Transactional
@@ -89,7 +89,7 @@ public class VoteVSResource {
         VoteVSCanceler voteVSCanceler = dao.getSingleResult(VoteVSCanceler.class, query);
         if(voteVSCanceler == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - VoteVSCanceler not found - voteId: " + id).build();
-        return Response.ok().entity(voteVSCanceler.getMessageCMS().getContent())
+        return Response.ok().entity(voteVSCanceler.getMessageCMS().getContentPEM())
                 .type(MediaTypeVS.JSON_SIGNED).build();
     }
 
@@ -113,7 +113,7 @@ public class VoteVSResource {
     public Response post (MessageCMS messageCMS, @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         VoteVSCanceler canceler = voteVSBean.processCancel(messageCMS);
-        return Response.ok().entity(canceler.getMessageCMS().getContent()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(canceler.getMessageCMS().getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 
 }

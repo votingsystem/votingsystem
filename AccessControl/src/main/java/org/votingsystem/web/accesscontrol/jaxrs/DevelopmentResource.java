@@ -8,8 +8,8 @@ import org.votingsystem.model.voting.RepresentativeDocument;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.crypto.PEMUtils;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SignatureBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -43,7 +43,7 @@ public class DevelopmentResource implements Serializable {
     @EJB ConfigVS config;
     @EJB SubscriptionVSBean subscriptionVSBean;
     @EJB DAOBean dao;
-    @EJB SignatureBean signatureBean;
+    @EJB CMSBean cmsBean;
     private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Transactional
@@ -80,7 +80,7 @@ public class DevelopmentResource implements Serializable {
         if(config.getMode() != EnvironmentVS.DEVELOPMENT) {
             throw new ValidationExceptionVS("SERVICE AVAILABLE ONLY IN DEVELOPMENT MODE");
         }
-        if(!signatureBean.isAdmin(messageCMS.getUserVS().getNif()))
+        if(!cmsBean.isAdmin(messageCMS.getUserVS().getNif()))
             throw new ValidationExceptionVS("user without privileges");
         log.severe(" ===== VOTING SIMULATION - RESETING REPRESENTATIVES ===== ");
         List<RepresentativeDocument.State> inList = Arrays.asList(RepresentativeDocument.State.OK,
