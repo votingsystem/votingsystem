@@ -80,7 +80,7 @@
         </plugins>
     </build>
     <properties>
-        <votingsystem.version>0.8.0-SNAPSHOT</votingsystem.version>
+        <votingsystem.version>0.8.1-SNAPSHOT</votingsystem.version>
         <hibernate.version>5.0.7.Final</hibernate.version>
         <jackson.version>2.6.2</jackson.version>
         <zxing.version>3.2.1</zxing.version>

@@ -1,6 +1,6 @@
 {
   "name": "CurrencyServer",
-  "version": "0.7.0",
+  "version": "0.8.1",
   "authors": [
     "JJ <jgzornoza@gmail.com>"
   ],
@@ -35,4 +35,7 @@
     "polymer": "^1.2.3"
   }
 }
+
+
+
 

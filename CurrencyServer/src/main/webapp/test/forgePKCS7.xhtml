@@ -2,47 +2,82 @@
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
-        <script type="text/javascript" src="../resources/bower_components/forge/js/util.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/oids.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/asn1.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/pki.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/sha256.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/pkcs1.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/sha1.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/jsbn.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/rsa.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/x509.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/cipher.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/cipherModes.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/aes.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/prng.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/random.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/pkcs7.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/pem.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/forge.js" rel="import"/>
-
+        <link href="../resources/forgePKCS7.html" rel="import"/>
         <script type="text/javascript" src="./ForgeUtils.js"></script>
-
         <style></style>
     </ui:define>
     <ui:define name="content">
+
+        <div id="cmsMessage" style="display:none;">
+            forgePKCS7.xhtml:169 -----BEGIN PKCS7-----
+            MIIE5QYJKoZIhvcNAQcCoIIE1jCCBNICAQExDzANBglghkgBZQMEAgEFADApBgkq
+            hkiG9w0BBwGgHAQaU29tZSBjb250ZW50IHRvIGJlIHNpZ25lZC6gggMIMIIDBDCC
+            Am2gAwIBAgIBATANBgkqhkiG9w0BAQUFADBpMRQwEgYDVQQDEwtleGFtcGxlLm9y
+            ZzELMAkGA1UEBhMCVVMxETAPBgNVBAgTCFZpcmdpbmlhMRMwEQYDVQQHEwpCbGFj
+            a3NidXJnMQ0wCwYDVQQKEwRUZXN0MQ0wCwYDVQQLEwRUZXN0MB4XDTE2MDMxMDEz
+            MjA1N1oXDTE3MDMxMDEzMjA1N1owaTEUMBIGA1UEAxMLZXhhbXBsZS5vcmcxCzAJ
+            BgNVBAYTAlVTMREwDwYDVQQIEwhWaXJnaW5pYTETMBEGA1UEBxMKQmxhY2tzYnVy
+            ZzENMAsGA1UEChMEVGVzdDENMAsGA1UECxMEVGVzdDCBnzANBgkqhkiG9w0BAQEF
+            AAOBjQAwgYkCgYEAy6M6KxWB6VI0ta47Q5kU+FplleMF2IkjR8LZ/n5mqmNbuGuB
+            sUrdnS6UKc2SKZBgQazm5sSXbd/OnZsXni0J4BxjHeqt/qB5ymzb441dnyf+UVlw
+            WZnL7wp0FeqIz+NWQUvGdKu9HMp3v7HNO5MdUYZXlqFJ0WbqNdFvtwThJbkCAwEA
+            AaOBuzCBuDAMBgNVHRMEBTADAQH/MAsGA1UdDwQEAwIC9DA7BgNVHSUENDAyBggr
+            BgEFBQcDAQYIKwYBBQUHAwIGCCsGAQUFBwMDBggrBgEFBQcDBAYIKwYBBQUHAwgw
+            EQYJYIZIAYb4QgEBBAQDAgD3MCwGA1UdEQQlMCOGG2h0dHA6Ly9leGFtcGxlLm9y
+            Zy93ZWJpZCNtZYcEfwAAATAdBgNVHQ4EFgQUK40VSdfnMja8LiEfUrCoRFexo3cw
+            DQYJKoZIhvcNAQEFBQADgYEAciWsG9Q3msOBnvpEfWJObQ0a3VicErmpL05LhUUI
+            81jeA6GQtKW0Q5iBmGrj+gWPjC7kDvMPgo1wy0IYp8KQ6BTK+9ySH6vpo8Hfqnn1
+            8XpAg6JhbS4NalC8wEaUguh0rGeusdWyNWyUqArCSGg9Lz+aTIWxCQF2cUq/KJNY
+            d3wxggGDMIIBfwIBATBuMGkxFDASBgNVBAMTC2V4YW1wbGUub3JnMQswCQYDVQQG
+            EwJVUzERMA8GA1UECBMIVmlyZ2luaWExEzARBgNVBAcTCkJsYWNrc2J1cmcxDTAL
+            BgNVBAoTBFRlc3QxDTALBgNVBAsTBFRlc3QCAQEwDQYJYIZIAWUDBAIBBQCgaTAY
+            BgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMC8GCSqGSIb3DQEJBDEiBCBiJ2Anl246
+            eFG9wI+2nC7dn9xWaYlWZN+J3emy+hECpTAcBgkqhkiG9w0BCQUxDxcNMTYwMzEw
+            MTMyMDU3WjANBgkqhkiG9w0BAQEFAASBgKQT9lCRyb6gEt3OTUt/1LTHz34zlhR/
+            PNl/gLdtx5jw7E36FmoTr1qdMKyIJEyjNc0rVQlkGWgt9lWCjGnnjgUwp9hYsaNd
+            p4qrHTxow1xEWyepEZM0/6GI/m8d4EsYrljj7fpWqCaxBAQM8yMgPnsO8mouFEIl
+            kYph+lGtYQRj
+            -----END PKCS7-----
+        </div>
+
         <script>
             <!-- missing RFC 3161 Time Stamp Requests -->
 
             var pkcs7PEMForge = '-----BEGIN PKCS7-----\r\n' +
-                    'MIICTgYJKoZIhvcNAQcDoIICPzCCAjsCAQAxggHGMIIBwgIBADCBqTCBmzELMAkG\r\n' +
-                    'A1UEBhMCREUxEjAQBgNVBAgMCUZyYW5jb25pYTEQMA4GA1UEBwwHQW5zYmFjaDEV\r\n' +
-                    'MBMGA1UECgwMU3RlZmFuIFNpZWdsMRIwEAYDVQQLDAlHZWllcmxlaW4xFjAUBgNV\r\n' +
-                    'BAMMDUdlaWVybGVpbiBERVYxIzAhBgkqhkiG9w0BCQEWFHN0ZXNpZUBicm9rZW5w\r\n' +
-                    'aXBlLmRlAgkA1FQcQNg14vMwDQYJKoZIhvcNAQEBBQAEggEAJhWQz5SniCd1w3A8\r\n' +
-                    'uKVZEfc8Tp21I7FMfFqou+UOVsZCq7kcEa9uv2DIj3o7zD8wbLK1fuyFi4SJxTwx\r\n' +
-                    'kR0a6V4bbonIpXPPJ1f615dc4LydAi2tv5w14LJ1Js5XCgGVnkAmQHDaW3EHXB7X\r\n' +
-                    'T4w9PR3+tcS/5YAnWaM6Es38zCKHd7TnHpuakplIkwSK9rBFAyA1g/IyTPI+ktrE\r\n' +
-                    'EHcVuJcz/7eTlF6wJEa2HL8F1TVWuL0p/0GsJP/8y0MYGdCdtr+TIVo//3YGhoBl\r\n' +
-                    'N4tnheFT/jRAzfCZtflDdgAukW24CekrJ1sG2M42p5cKQ5rGFQtzNy/n8EjtUutO\r\n' +
-                    'HD5YITBsBgkqhkiG9w0BBwEwHQYJYIZIAWUDBAEqBBBmlpfy3WrYj3uWW7+xNEiH\r\n' +
-                    'gEAm2mfSF5xFPLEqqFkvKTM4w8PfhnF0ehmfQNApvoWQRQanNWLCT+Q9GHx6DCFj\r\n' +
-                    'TUHl+53x88BrCl1E7FhYPs92\r\n' +
+                    'MIIGRwYJKoZIhvcNAQcCoIIGODCCBjQCAQExDzANBglghkgBZQMEAgEFADAcBgkq\r\n' +
+                    'hkiG9w0BBwGgDwQNVG8gYmUgc2lnbmVkLqCCA7gwggO0MIICnAIJANRUHEDYNeLz\r\n' +
+                    'MA0GCSqGSIb3DQEBBQUAMIGbMQswCQYDVQQGEwJERTESMBAGA1UECAwJRnJhbmNv\r\n' +
+                    'bmlhMRAwDgYDVQQHDAdBbnNiYWNoMRUwEwYDVQQKDAxTdGVmYW4gU2llZ2wxEjAQ\r\n' +
+                    'BgNVBAsMCUdlaWVybGVpbjEWMBQGA1UEAwwNR2VpZXJsZWluIERFVjEjMCEGCSqG\r\n' +
+                    'SIb3DQEJARYUc3Rlc2llQGJyb2tlbnBpcGUuZGUwHhcNMTIwMzE4MjI1NzQzWhcN\r\n' +
+                    'MTMwMzE4MjI1NzQzWjCBmzELMAkGA1UEBhMCREUxEjAQBgNVBAgMCUZyYW5jb25p\r\n' +
+                    'YTEQMA4GA1UEBwwHQW5zYmFjaDEVMBMGA1UECgwMU3RlZmFuIFNpZWdsMRIwEAYD\r\n' +
+                    'VQQLDAlHZWllcmxlaW4xFjAUBgNVBAMMDUdlaWVybGVpbiBERVYxIzAhBgkqhkiG\r\n' +
+                    '9w0BCQEWFHN0ZXNpZUBicm9rZW5waXBlLmRlMIIBIjANBgkqhkiG9w0BAQEFAAOC\r\n' +
+                    'AQ8AMIIBCgKCAQEAywBtDh9Z68eo/UrXL97CkxLe9ii8G2jsiwoGrS/c2YLaQ9/c\r\n' +
+                    '2HJpIp+M45Lm4A840t98tyT6IZ04ssWJro5KkzrS3JAhX2UehGHt84Rg5FpvRn5o\r\n' +
+                    'FRlwQZP3Ki0E6tpfVhspzl/1c77zR4bhdi9vm5rU0evFap7jDanfMYkIo77Aem8a\r\n' +
+                    'RsrPSd+7fqPBbPlqKF8eL2Gn/GzyZ8fzqYgqIPt/ZfYp5nU8r1G+mkDRfeUtvZUs\r\n' +
+                    '6oy34UdaJzJn/COFBnihbnmWfbJglRD5p2WBpic+u2ezGZtPEz732gXQXb8eYas2\r\n' +
+                    'zyctlK9rVXL6GaOZbPr87xnGGIiPugFGphwChwIDAQABMA0GCSqGSIb3DQEBBQUA\r\n' +
+                    'A4IBAQC9++27fUYUE7n6YWM8ChHgGXMqr8fcQ86pLxyb9OMeANEAvBKfApgIWz9t\r\n' +
+                    'eoTiI5MPqi1XhO6xfcQ9uova/NlARxmfqlpT+hllVfBCoypjm1/a15CI3GrE2ZIg\r\n' +
+                    'Q9Ec6vZBUFUjHZgXg+jz0oZSon27/f/XSUOpHCmxF6KOvlQq/lrKARyfBxbz417i\r\n' +
+                    'tPH3fhQOy60obbR2vm2tl9ZBFVL19L0IXAl6ERccAxRz/T77zQ2F9C2GZZlaVYzV\r\n' +
+                    'Hd2vhOsg+1Z2fnPQy0Z4O+oGTseMauFxVLqQCzJn3L+V8s+MG7GVAAfO0QkJaAjh\r\n' +
+                    'Nbf9EuGB+DaAjWegzafzgJ2aKx+SMYICQjCCAj4CAQEwgakwgZsxCzAJBgNVBAYT\r\n' +
+                    'AkRFMRIwEAYDVQQIDAlGcmFuY29uaWExEDAOBgNVBAcMB0Fuc2JhY2gxFTATBgNV\r\n' +
+                    'BAoMDFN0ZWZhbiBTaWVnbDESMBAGA1UECwwJR2VpZXJsZWluMRYwFAYDVQQDDA1H\r\n' +
+                    'ZWllcmxlaW4gREVWMSMwIQYJKoZIhvcNAQkBFhRzdGVzaWVAYnJva2VucGlwZS5k\r\n' +
+                    'ZQIJANRUHEDYNeLzMA0GCWCGSAFlAwQCAQUAoGswGAYJKoZIhvcNAQkDMQsGCSqG\r\n' +
+                    'SIb3DQEHATAvBgkqhkiG9w0BCQQxIgQgL/TDBQ+1LmkIk4u0TacbQj6GvXtVN5Sr\r\n' +
+                    'LFvTa+Sr82MwHgYJKoZIhvcNAQkFMREYDzE5NDkxMjMxMjM1OTU5WjANBgkqhkiG\r\n' +
+                    '9w0BAQEFAASCAQCNB13woMM5xYY5B0k/2dDF1flyAs5JaahqXSIH04ea+qgyFkgZ\r\n' +
+                    'uRoialeVzXXXpSPmpgEubQimFMYFslle9Ozpu6ECrXtw53wWm1GAlj8T6w50lKyd\r\n' +
+                    '6Ip/wclO/lPIB9qk7Ki3kN+ISBWXSgUMTTo94IdyZH3lbBqW3xsak1FM6STrGiUS\r\n' +
+                    'CoinmPKajIbIQBUORZ9eF9qN5erdpKwYNMB43yLle5jNGIeq6ztbL9en9boFp04q\r\n' +
+                    'PU+/ZeNY2QJhnoGQVYfHkK+8X6/ZKX1fRnca2L+DUUb9g7Tc0oeW5zwB3wzIEpTN\r\n' +
+                    'JxV3HaZ/Jvfnx9uH9wpFYg5yFX6PBLxlHarf\r\n' +
                     '-----END PKCS7-----\r\n';
 
             var pkcs7PEMBC = "-----BEGIN PKCS7-----\n" +
@@ -74,10 +109,13 @@
                     "-----END PKCS7-----";
 
 
-            //ERROR, this doesn' work!!!
+
             function readPKCS7Message() {
-                var p7 = forge.pkcs7.messageFromPem(pkcs7PEMForge);
+                var cmsMessage = document.querySelector("#cmsMessage").innerHTML;
+                var p7 = forge.pkcs7.messageFromPem(cmsMessage);
                 console.log(p7)
+                console.log(" --- Signers:")
+                console.log(signers)
             }
 
             function createPKCS7Message() {
@@ -85,7 +123,6 @@
                 p7.content = forge.util.createBuffer('Some content to be signed.', 'utf8');
                 var certPrivateKeyPair = getSelfSignedCert();
                 var cert = certPrivateKeyPair.cert;
-                console.log(cert)
                 p7.addCertificate(cert);
                 p7.addSigner({
                     key: certPrivateKeyPair.privateKey,
@@ -107,6 +144,12 @@
                 console.log(p7)
                 var pem = forge.pkcs7.messageToPem(p7);
                 console.log(pem)
+
+                var p7 = forge.pkcs7.messageFromPem(pem);
+                console.log(p7)
+                console.log(p7.rawCapture.signerInfos)
+
+                //forge.pkcs7.messageFromPem(pem);
             }
 
             function getSelfSignedCert() {
@@ -202,7 +245,8 @@
                 return {cert:cert, privateKey:keys.privateKey};
             }
 
-            createPKCS7Message();
+            createPKCS7Message()
+
         </script>
     </ui:define>
 </ui:composition>

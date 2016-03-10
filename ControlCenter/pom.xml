@@ -131,7 +131,7 @@
 
 
     <properties>
-        <votingsystem.version>0.8.0-SNAPSHOT</votingsystem.version>
+        <votingsystem.version>0.8.1-SNAPSHOT</votingsystem.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.wildfly.maven.plugin>1.0.2.Final</version.wildfly.maven.plugin>
         <version.compiler.plugin>3.1</version.compiler.plugin>

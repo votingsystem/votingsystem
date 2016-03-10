@@ -3,6 +3,7 @@ package org.votingsystem.util.crypto;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.util.ContextVS;
 
@@ -24,7 +25,7 @@ public class PEMUtils {
 
     public static byte[] getPEMEncoded (Object objectToEncode) throws IOException {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        PEMWriter pemWrt = new PEMWriter(new OutputStreamWriter(bOut));
+        JcaPEMWriter pemWrt = new JcaPEMWriter(new OutputStreamWriter(bOut));
         if(objectToEncode instanceof Collection) {
             Collection objectToEncodeColection = ((Collection)objectToEncode);
             for(Object object : objectToEncodeColection) {

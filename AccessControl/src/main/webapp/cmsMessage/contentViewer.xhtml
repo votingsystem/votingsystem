@@ -4,6 +4,7 @@
     <ui:define name="head">
         <title>${msg.signedDocumentLbl}</title>
         <link href="${viewer}.vsp" rel="import"/>
+        <link href="../resources/forgePKCS7.html" rel="import"/>
     </ui:define>
     <ui:define name="content">
         <div class="horizontal layout" style="margin:1px 0 0 0;">
@@ -34,6 +35,12 @@
 
             function loadContent() {
                 viewer.cmsMessage = document.querySelector("#cmsMessage").innerHTML;
+
+                console.log(viewer.cmsMessage)
+
+                var p7 = forge.pkcs7.messageFromPem(viewer.cmsMessage);
+                console.log(p7)
+
                 viewer.cmsMessageContent = cmsMessageContent
                 viewer.timeStampDate = timeStampDate
                 cmsMessageContent = null
