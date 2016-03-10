@@ -13,8 +13,8 @@ import static javax.persistence.GenerationType.IDENTITY;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Entity @Table(name="AccessRequestVS")
-public class AccessRequestVS extends EntityVS implements Serializable {
+@Entity @Table(name="AccessRequest")
+public class AccessRequest extends EntityVS implements Serializable {
 
     public enum State {OK, CANCELED, ERROR}
 
@@ -28,15 +28,15 @@ public class AccessRequestVS extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS") private UserVS userVS;
     @OneToOne private CMSMessage cmsMessage;
-    @OneToOne(mappedBy="accessRequestVS") private VoteVSCanceler voteVSCanceler;
+    @OneToOne(mappedBy="accessRequest") private VoteCanceler voteCanceler;
     @Column(name="hashAccessRequestBase64") private String hashAccessRequestBase64;
     @Column(name="metainf") private String metaInf;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
-    public AccessRequestVS() {}
+    public AccessRequest() {}
 
-    public AccessRequestVS(UserVS userVS, CMSMessage cmsMessage, State state, String hashAccessRequestBase64,
+    public AccessRequest(UserVS userVS, CMSMessage cmsMessage, State state, String hashAccessRequestBase64,
                            EventVS eventVS) {
         this.userVS = userVS;
         this.cmsMessage = cmsMessage;
@@ -49,11 +49,11 @@ public class AccessRequestVS extends EntityVS implements Serializable {
 
     public Long getId() {return id;}
 
-    public void setEventVSElection(EventVS eventVS) {  this.eventVS = eventVS; }
+    public void setEventElection(EventVS eventVS) {  this.eventVS = eventVS; }
 
-    public EventVS getEventVSElection() { return eventVS; }
+    public EventVS getEventElection() { return eventVS; }
 
-    public AccessRequestVS setState(State state) {
+    public AccessRequest setState(State state) {
         this.state = state;
         return this;
     }
@@ -74,9 +74,9 @@ public class AccessRequestVS extends EntityVS implements Serializable {
 
     public void setUserVS(UserVS userVS) { this.userVS = userVS; }
 
-    public VoteVSCanceler getVoteVSCanceler() { return voteVSCanceler; }
+    public VoteCanceler getVoteCanceler() { return voteCanceler; }
 
-    public void setVoteVSCanceler(VoteVSCanceler voteVSCanceler) { this.voteVSCanceler = voteVSCanceler; }
+    public void setVoteCanceler(VoteCanceler voteCanceler) { this.voteCanceler = voteCanceler; }
 
     public Date getDateCreated() { return dateCreated; }
 

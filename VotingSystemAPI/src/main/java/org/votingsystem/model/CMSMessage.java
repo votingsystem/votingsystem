@@ -24,7 +24,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 */
 @Entity @Table(name="CMSMessage")
 @NamedQueries({
-        @NamedQuery(name = "findMessageCMSByBase64ContentDigest", query =
+        @NamedQuery(name = "findcmsMessageByBase64ContentDigest", query =
                 "SELECT m FROM CMSMessage m WHERE m.base64ContentDigest =:base64ContentDigest")
 })
 public class CMSMessage extends EntityVS implements Serializable {

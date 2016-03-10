@@ -10,8 +10,8 @@ import org.votingsystem.dto.UserCertificationRequestDto;
 import org.votingsystem.dto.voting.KeyStoreDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.EventVSElection;
-import org.votingsystem.model.voting.VoteVS;
+import org.votingsystem.model.voting.EventElection;
+import org.votingsystem.model.voting.Vote;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
@@ -221,7 +221,7 @@ public class CMSBean {
     public KeyStoreDto generateElectionKeysStore(EventVS eventVS) throws Exception {
         //StringUtils.getRandomAlphaNumeric(7).toUpperCase()
         // _ TODO _ ====== crypto token
-        String eventVSUrl = config.getContextURL() + "/rest/eventVSElection/id/" + eventVS.getId();
+        String eventVSUrl = config.getContextURL() + "/rest/eventElection/id/" + eventVS.getId();
         String strSubjectDNRoot = format("CN=eventVSUrl:{0}, OU=Elections", eventVSUrl);
         KeyStore keyStore = KeyStoreUtil.createRootKeyStore(eventVS.getDateBegin(), eventVS.getDateFinish(),
                 password.toCharArray(), keyAlias, strSubjectDNRoot);
@@ -306,7 +306,7 @@ public class CMSBean {
     public CMSDto validateCMS(CMSSignedMessage cmsSignedMessage, ContentTypeVS contenType) throws Exception {
         if (cmsSignedMessage.isValidSignature()) {
             MessagesVS messages = MessagesVS.getCurrentInstance();
-            Query query = dao.getEM().createNamedQuery("findMessageCMSByBase64ContentDigest")
+            Query query = dao.getEM().createNamedQuery("findcmsMessageByBase64ContentDigest")
                     .setParameter("base64ContentDigest", cmsSignedMessage.getContentDigestStr());
             CMSMessage cmsMessage = dao.getSingleResult(CMSMessage.class, query);
             if(cmsMessage != null) throw new ExceptionVS(messages.get("cmsDigestRepeatedErrorMsg",
@@ -323,34 +323,34 @@ public class CMSBean {
 
     public CMSDto validatedVote(CMSSignedMessage cmsSignedMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        Query query = dao.getEM().createNamedQuery("findMessageCMSByBase64ContentDigest")
+        Query query = dao.getEM().createNamedQuery("findcmsMessageByBase64ContentDigest")
                 .setParameter("base64ContentDigest", cmsSignedMessage.getContentDigestStr());
         CMSMessage cmsMessage = dao.getSingleResult(CMSMessage.class, query);
         if(cmsMessage != null) throw new ExceptionVS(messages.get("cmsDigestRepeatedErrorMsg",
                     cmsSignedMessage.getContentDigestStr()));
-        VoteVS voteVS = cmsSignedMessage.getVoteVS();
-        CMSDto cmsDto = new CMSDto(voteVS);
-        if(voteVS == null || voteVS.getX509Certificate() == null) throw new ExceptionVS(
+        Vote vote = cmsSignedMessage.getVote();
+        CMSDto cmsDto = new CMSDto(vote);
+        if(vote == null || vote.getX509Certificate() == null) throw new ExceptionVS(
                 messages.get("documentWithoutSignersErrorMsg"));
-        if (voteVS.getRepresentativeURL() != null) {
+        if (vote.getRepresentativeURL() != null) {
             query = dao.getEM().createQuery("select u from UserVS u where u.url =:userURL")
-                    .setParameter("userURL", voteVS.getRepresentativeURL());
+                    .setParameter("userURL", vote.getRepresentativeURL());
             UserVS checkedSigner = dao.getSingleResult(UserVS.class, query);
-            if(checkedSigner == null) checkedSigner = dao.persist(UserVS.REPRESENTATIVE(voteVS.getRepresentativeURL()));
+            if(checkedSigner == null) checkedSigner = dao.persist(UserVS.REPRESENTATIVE(vote.getRepresentativeURL()));
             cmsDto.setSigner(checkedSigner);
         }
-        query = dao.getEM().createQuery("select e from EventVS e where e.accessControlEventVSId =:eventId and " +
-                "e.accessControlVS.serverURL =:serverURL").setParameter("eventId", voteVS.getAccessControlEventVSId())
-                .setParameter("serverURL", voteVS.getAccessControlURL());
-        EventVSElection eventVS = dao.getSingleResult(EventVSElection.class, query);
-        if(eventVS == null) throw new ExceptionVS(messages.get("voteEventVSElectionUnknownErrorMsg",
-                voteVS.getAccessControlURL(), voteVS.getAccessControlEventVSId()));
+        query = dao.getEM().createQuery("select e from EventVS e where e.accessControlEventId =:eventId and " +
+                "e.accessControlVS.serverURL =:serverURL").setParameter("eventId", vote.getAccessControlEventId())
+                .setParameter("serverURL", vote.getAccessControlURL());
+        EventElection eventVS = dao.getSingleResult(EventElection.class, query);
+        if(eventVS == null) throw new ExceptionVS(messages.get("voteEventElectionUnknownErrorMsg",
+                vote.getAccessControlURL(), vote.getAccessControlEventId()));
         if(eventVS.getState() != EventVS.State.ACTIVE)
             throw new ExceptionVS(messages.get("electionClosed", eventVS.getSubject()));
         cmsDto.setEventVS(eventVS);
         Set<TrustAnchor> eventTrustedAnchors = getEventTrustedAnchors(eventVS);
-        timeStampBean.validateToken(voteVS.getTimeStampToken());
-        X509Certificate checkedCert = voteVS.getX509Certificate();
+        timeStampBean.validateToken(vote.getTimeStampToken());
+        X509Certificate checkedCert = vote.getX509Certificate();
         PKIXCertPathValidatorResult validatorResult = CertUtils.verifyCertificate(
                 eventTrustedAnchors, false, Arrays.asList(checkedCert));
         validatorResult.getTrustAnchor().getTrustedCert();
@@ -361,14 +361,14 @@ public class CMSBean {
     public CMSDto validatedVoteFromControlCenter(CMSSignedMessage cmsSignedMessage) throws Exception {
         CMSDto cmsDto = validatedVote(cmsSignedMessage);
         Query query = dao.getEM().createQuery("select c from CertificateVS c where c.hashCertVSBase64 =:hashCertVS and c.state =:state")
-                .setParameter("hashCertVS", cmsDto.getVoteVS().getHashCertVSBase64()).setParameter("state", CertificateVS.State.OK);
+                .setParameter("hashCertVS", cmsDto.getVote().getHashCertVSBase64()).setParameter("state", CertificateVS.State.OK);
         CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
         if (certificateVS == null) {
-            cmsDto.getCmsMessage().setType(TypeVS.ERROR).setReason("missing VoteVS CertificateVS");
+            cmsDto.getCmsMessage().setType(TypeVS.ERROR).setReason("missing Vote CertificateVS");
             dao.merge(cmsDto.getCmsMessage());
-            throw new ValidationExceptionVS("missing VoteVS CertificateVS");
+            throw new ValidationExceptionVS("missing Vote CertificateVS");
         }
-        cmsDto.getCmsMessage().getCMS().getVoteVS().setCertificateVS(certificateVS);
+        cmsDto.getCmsMessage().getCMS().getVote().setCertificateVS(certificateVS);
         return cmsDto;
     }
     

@@ -36,7 +36,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getAccessServiceURL() {
-        return getServerURL() + "/accessRequestVS";
+        return getServerURL() + "/accessRequest";
     }
 
     public String getAnonymousDelegationRequestServiceURL() {
@@ -48,7 +48,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getBackupServiceURL() {
-        return getServerURL() + "/rest/backupVS";
+        return getServerURL() + "/rest/backup";
     }
 
     public String getCertRequestServiceURL() {
@@ -56,11 +56,11 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getDownloadServiceURL(String param) {
-        return getServerURL() + "/rest/backupVS/download/" + param;
+        return getServerURL() + "/rest/backup/download/" + param;
     }
 
     public String getPublishElectionURL() {
-        return getServerURL() + "/rest/eventVSElection";
+        return getServerURL() + "/rest/eventElection";
     }
 
     public String getEventURL(String eventId) {
@@ -68,7 +68,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getCancelEventServiceURL() {
-        return getServerURL() + "/rest/eventVSElection/cancelled";
+        return getServerURL() + "/rest/eventElection/cancelled";
     }
 
     public String getServerSubscriptionServiceURL() {
@@ -84,7 +84,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getVoteCancelerServiceURL() {
-        return getServerURL() + "/rest/voteVS/cancel";
+        return getServerURL() + "/rest/vote/cancel";
     }
 
     public String getAnonymousDelegationCancelerServiceURL() {
@@ -92,10 +92,10 @@ public class AccessControlVS extends ActorVS implements Serializable {
     }
 
     public String getVoteStateServiceURL(String voteHashHex) {
-        return getServerURL() + "/rest/voteVS/hash/" + voteHashHex;
+        return getServerURL() + "/rest/vote/hash/" + voteHashHex;
     }
     public String getVoteServiceURL() {
-        return getServerURL() + "/rest/voteVS";
+        return getServerURL() + "/rest/vote";
     }
 
     public String getDashBoardURL(String menu, String locale) {
@@ -105,7 +105,7 @@ public class AccessControlVS extends ActorVS implements Serializable {
 
     public String getVotingPageURL(String menu, String locale) {
         String sufix = (menu != null || locale != null)? "?menu=" + menu + "&locale=" + locale : "";
-        return getServerURL() + "/spa.xhtml#!/eventVSElection" + sufix;
+        return getServerURL() + "/spa.xhtml#!/eventElection" + sufix;
     }
 
     public String getSelectRepresentativePageURL(String menu, String locale) {

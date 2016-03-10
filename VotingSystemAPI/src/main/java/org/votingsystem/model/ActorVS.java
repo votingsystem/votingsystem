@@ -281,15 +281,15 @@ public class ActorVS extends EntityVS implements Serializable {
     }
 
     public String getReceiptViewerURL() {
-        return getServerURL() + "/rest/messageCMS/contentViewer";
+        return getServerURL() + "/rest/cmsMessage/contentViewer";
     }
 
-    public String getVoteVSCancelerURL() {
-        return getServerURL() + "/rest/voteVS/cancel";
+    public String getVoteCancelerURL() {
+        return getServerURL() + "/rest/vote/cancel";
     }
 
     public static String getReceiptViewerURL(String serverURL) {
-        return serverURL + "/rest/messageCMS/contentViewer";
+        return serverURL + "/rest/cmsMessage/contentViewer";
     }
 
     public String getGroupURL(Long id) {

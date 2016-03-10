@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="../eventVSElection/eventvs-election.vsp" rel="import"/>
+<link href="../eventElection/eventvs-election.vsp" rel="import"/>
 <link href="../element/search-info.vsp" rel="import"/>
 <link href="../resources/bower_components/vs-pager/vs-pager.html" rel="import"/>
 <link href="../resources/bower_components/vs-advanced-search-dialog/vs-advanced-search-dialog.html" rel="import"/>
@@ -67,8 +67,8 @@
             loadURL:function(path, querystring) {
                 console.log(this.tagName + " - loadURL - path: " + path + " - querystring: " + querystring)
                 if(querystring) {
-                    this.url = contextURL + "/rest/eventVSElection?" + querystring
-                } else this.url = contextURL + "/rest/eventVSElection"
+                    this.url = contextURL + "/rest/eventElection?" + querystring
+                } else this.url = contextURL + "/rest/eventElection"
                 this.eventVSState = getURLParam("eventVSState", path)
                 if(this.eventVSState === "") this.eventVSState = 'ACTIVE'
                 this.$.eventVSStateSelect.value = this.eventVSState
@@ -89,7 +89,7 @@
                 var optionSelected = this.$.eventVSStateSelect.value
                 console.log("eventVSStateSelect: " + optionSelected)
                 this.$.vspager.style.display = 'none'
-                targetURL = contextURL + "/rest/eventVSElection?menu=" + menuType + "&eventVSState=" +
+                targetURL = contextURL + "/rest/eventElection?menu=" + menuType + "&eventVSState=" +
                         optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
@@ -98,7 +98,7 @@
             showEventVSDetails :  function(e) {
                 console.log(this.tagName + " - showEventVSDetails")
                 vs.eventvs = e.model.item;
-                page("/rest/eventVSElection/id/" + vs.eventvs.id)
+                page("/rest/eventElection/id/" + vs.eventvs.id)
             },
             getRepresentativeName:function(groupvs) {
                 return groupvs.representative.firstName + " " + groupvs.representative.lastName
@@ -128,7 +128,7 @@
             eventVSStateSelect: function() {
                 this.eventVSState = this.$.eventVSStateSelect.value
                 console.log("eventVSStateSelect: " + this.eventVSState)
-                targetURL = contextURL + "/rest/eventVSElection?eventVSState=" + this.eventVSState
+                targetURL = contextURL + "/rest/eventElection?eventVSState=" + this.eventVSState
                 var newURL = setURLParameter(window.location.href, "eventVSState",  this.eventVSState)
                 history.pushState(null, null, newURL);
                 this.url = targetURL

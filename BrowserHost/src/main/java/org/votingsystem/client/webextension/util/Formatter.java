@@ -103,14 +103,14 @@ public class Formatter {
         if(dateFinish!= null) result.append("<b>" + dateFinishLabel + "</b>: ").append(dateFinish + "<br/>");
         if(eventVS.getUrl() != null) result.append("<b>" + urlLabel + "</b>: ").
                 append(eventVS.getUrl() + "<br/>");
-        if(eventVS.getVoteVS() != null) {
-            if(eventVS.getVoteVS().getHashCertVSBase64() != null) result.append("<b>" +
+        if(eventVS.getVote() != null) {
+            if(eventVS.getVote().getHashCertVSBase64() != null) result.append("<b>" +
                     hashAccessRequestBase64Label + "</b>: ").append(
-                    eventVS.getVoteVS().getHashAccessRequestBase64() + "<br/>");
-            if(eventVS.getVoteVS().getOptionSelected() != null) {
+                    eventVS.getVote().getHashAccessRequestBase64() + "<br/>");
+            if(eventVS.getVote().getOptionSelected() != null) {
                 result.append("<b>" +
                         optionSelectedContentLabel + "</b>: ").append(
-                        eventVS.getVoteVS().getOptionSelected().getContent() + "<br/>");
+                        eventVS.getVote().getOptionSelected().getContent() + "<br/>");
             }
         }
         return result.toString();

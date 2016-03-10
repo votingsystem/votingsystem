@@ -4,7 +4,7 @@ import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.KeyStoreVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.UserRequestCsrVS;
 import org.votingsystem.service.EJBRemoteAdminAccessControl;
 import org.votingsystem.throwable.ExceptionVS;
@@ -39,7 +39,7 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
 
     private static final Logger log = Logger.getLogger(RemoteAdminBean.class.getName());
 
-    @Inject EventVSElectionBean eventVSElectionBean;
+    @Inject EventElectionBean eventElectionBean;
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject CSRBean csrBean;
@@ -49,9 +49,9 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
     public void generateBackup(Long eventId) throws Exception {
         log.info("generateBackup: " + eventId);
         MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
-        EventVSElection eventVSElection = dao.find(EventVSElection.class, eventId);
-        if(eventVSElection == null) throw new ValidationExceptionVS("ERROR - EventVSElection not found - eventId: " + eventId);
-        eventVSElectionBean.generateBackup(eventVSElection);
+        EventElection eventElection = dao.find(EventElection.class, eventId);
+        if(eventElection == null) throw new ValidationExceptionVS("ERROR - EventElection not found - eventId: " + eventId);
+        eventElectionBean.generateBackup(eventElection);
     }
 
     @Override

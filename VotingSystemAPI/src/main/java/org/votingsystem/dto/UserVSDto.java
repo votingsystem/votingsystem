@@ -115,7 +115,7 @@ public class UserVSDto implements Serializable {
         userVSDto.type = UserVS.Type.REPRESENTATIVE;
         userVSDto.numRepresentations = numRepresentations;
         userVSDto.URL = format("{0}/rest/representative/id/{1}", contextURL, userVS.getId());
-        userVSDto.representativeMessageURL = format("{0}/rest/messageCMS/id/{1}", contextURL, cmsActivationId);
+        userVSDto.representativeMessageURL = format("{0}/rest/cmsMessage/id/{1}", contextURL, cmsActivationId);
         userVSDto.imageURL = format("{0}/rest/representative/id/{1}/image", contextURL, userVS.getId());
         userVSDto.description = userVS.getDescription();
         return userVSDto;

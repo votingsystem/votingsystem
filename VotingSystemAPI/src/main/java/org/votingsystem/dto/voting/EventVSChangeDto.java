@@ -21,7 +21,7 @@ public class EventVSChangeDto {
     public EventVSChangeDto(EventVS eventVS, String serverURL, TypeVS operation, EventVS.State state) {
         this.operation = operation;
         this.accessControlURL = serverURL;
-        if(eventVS.getAccessControlEventVSId() != null) eventId = eventVS.getAccessControlEventVSId();
+        if(eventVS.getAccessControlEventId() != null) eventId = eventVS.getAccessControlEventId();
         else eventId = eventVS.getId();
         this.state = state;
         this.UUID = java.util.UUID.randomUUID().toString();

@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="votevs-result-dialog">
+<dom-module name="vote-result-dialog">
     <template>
         <div id="modalDialog" class="modalDialog">
             <div>
@@ -35,14 +35,14 @@
     </template>
     <script>
         Polymer({
-            is:'votevs-result-dialog',
+            is:'vote-result-dialog',
             properties: {
-                votevsReceipt:{type:String},
+                voteReceipt:{type:String},
                 hashCertVSHex:{type:String},
                 hashCertVSBase64:{type:String},
                 statusCode:{type:Number},
                 messageType:{type:String, observer:'messageTypeChanged'},
-                voteVSCancellationReceipt:{type:String},
+                voteCancellationReceipt:{type:String},
                 checkSignatureButtonMsg:{type:String, value:'${msg.checkVoteLbl}'}
             },
             ready: function() {
@@ -53,7 +53,7 @@
                 this.message = null
                 this.caption = null
                 this.optionSelected = null
-                this.votevsReceipt = null
+                this.voteReceipt = null
                 this.statusCode = appMessageJSON.statusCode
                 this.isOK = (this.statusCode === 200)
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
@@ -61,7 +61,7 @@
                     this.message = "${msg.voteResultOKMsg}"
                     this.optionSelected = appMessageJSON.optionSelected
                     this.hashCertVSHex = appMessageJSON.hashCertVSHex
-                    this.votevsReceipt = appMessageJSON.voteVSReceipt
+                    this.voteReceipt = appMessageJSON.voteReceipt
                     this.hashCertVSBase64 = appMessageJSON.hashCertVSBase64
                     this.checkSignatureButtonMsg = '${msg.checkVoteLbl}'
                 }
@@ -79,8 +79,8 @@
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_CMS)
-                if(this.messageType == 'VOTE_RESULT') operationVS.message = this.votevsReceipt
-                else if(this.messageType == 'VOTE_CANCELLATION_RESULT') operationVS.message = this.voteVSCancellationReceipt
+                if(this.messageType == 'VOTE_RESULT') operationVS.message = this.voteReceipt
+                else if(this.messageType == 'VOTE_CANCELLATION_RESULT') operationVS.message = this.voteCancellationReceipt
                 VotingSystemClient.setMessage(operationVS);
             }
         });

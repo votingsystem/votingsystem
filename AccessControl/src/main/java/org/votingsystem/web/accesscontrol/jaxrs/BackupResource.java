@@ -1,11 +1,11 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import org.votingsystem.model.BackupRequestVS;
+import org.votingsystem.model.BackupRequest;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.TypeVS;
-import org.votingsystem.web.accesscontrol.ejb.EventVSElectionBean;
+import org.votingsystem.web.accesscontrol.ejb.EventElectionBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -28,22 +28,22 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@Path("/backupVS")
-public class BackupVSResource {
+@Path("/backup")
+public class BackupResource {
 
-    private static Logger log = Logger.getLogger(BackupVSResource.class.getName());
+    private static Logger log = Logger.getLogger(BackupResource.class.getName());
 
     @Inject DAOBean dao;
-    @Inject EventVSElectionBean eventVSElectionBean;
+    @Inject EventElectionBean eventElectionBean;
     @Inject ConfigVS config;
     private MessagesVS messages = MessagesVS.getCurrentInstance();
 
     @Path("/request/id/{requestId}/download") @GET
     public Object download(@PathParam("requestId") long requestId, @Context ServletContext context,
                @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ServletException, IOException {
-        BackupRequestVS backupRequest = dao.find(BackupRequestVS.class, requestId);
+        BackupRequest backupRequest = dao.find(BackupRequest.class, requestId);
         if(backupRequest == null) return Response.status(Response.Status.BAD_REQUEST).entity(
-                "ERROR - BackupRequestVS not found - id: " + requestId).build();
+                "ERROR - BackupRequest not found - id: " + requestId).build();
         log.info("backupRequest: " + backupRequest.getId() + " - " + backupRequest.getFilePath());
         String downloadURL = config.getStaticResURL() + backupRequest.getFilePath();
         resp.sendRedirect(downloadURL);
@@ -54,9 +54,9 @@ public class BackupVSResource {
     public Object getRequest(@PathParam("requestId") long requestId, @Context ServletContext context,
                    @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        BackupRequestVS backupRequest = dao.find(BackupRequestVS.class, requestId);
+        BackupRequest backupRequest = dao.find(BackupRequest.class, requestId);
         if(backupRequest == null) return Response.status(Response.Status.BAD_REQUEST).entity(
-                "ERROR - BackupRequestVS not found - id: " + requestId).build();
+                "ERROR - BackupRequest not found - id: " + requestId).build();
         if(contentType.contains(ContentTypeVS.TEXT.getName())) {
             return Response.ok().entity(backupRequest.getCmsMessage().getContentPEM()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
         } else return RequestUtils.processRequest(backupRequest.getCmsMessage(), context, req, resp);
@@ -74,8 +74,8 @@ public class BackupVSResource {
                 "ERROR - EventVS not found - eventId: " + eventId).build();
         if(!eventVS.getBackupAvailable()) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - EventVS without backup - eventId: " + eventId).build();
-        eventVSElectionBean.generateBackup((EventVSElection) eventVS);
-        dao.persist(new BackupRequestVS(null, TypeVS.VOTING_EVENT, email));
+        eventElectionBean.generateBackup((EventElection) eventVS);
+        dao.persist(new BackupRequest(null, TypeVS.VOTING_EVENT, email));
         return Response.ok().entity(messages.get("backupRequestOKMsg", email)).build();
     }
 

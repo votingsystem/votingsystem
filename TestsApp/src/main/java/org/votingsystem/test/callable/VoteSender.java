@@ -11,7 +11,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.crypto.CertificationRequestVS;
-import org.votingsystem.util.crypto.VoteVSHelper;
+import org.votingsystem.util.crypto.VoteHelper;
 
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -23,32 +23,32 @@ public class VoteSender implements Callable<ResponseVS> {
     
     private static Logger log = Logger.getLogger(VoteSender.class.getName());
    
-    private VoteVSHelper voteVSHelper;
+    private VoteHelper voteHelper;
         
-    public VoteSender(VoteVSHelper voteVSHelper) throws Exception {
-        this.voteVSHelper = voteVSHelper;
+    public VoteSender(VoteHelper voteHelper) throws Exception {
+        this.voteHelper = voteHelper;
     }
     
-    @Override public ResponseVS<VoteVSHelper> call() throws Exception {
-        SignatureService signatureService = SignatureService.genUserVSSignatureService(voteVSHelper.getNIF());
-        AccessRequestDto accessRequestDto = voteVSHelper.getAccessRequest();
+    @Override public ResponseVS<VoteHelper> call() throws Exception {
+        SignatureService signatureService = SignatureService.genUserVSSignatureService(voteHelper.getNIF());
+        AccessRequestDto accessRequestDto = voteHelper.getAccessRequest();
         CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsString(accessRequestDto));
         ResponseVS responseVS = new AccessRequestDataSender(cmsMessage,
-                accessRequestDto, voteVSHelper.getHashCertVSBase64()).call();
+                accessRequestDto, voteHelper.getHashCertVSBase64()).call();
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
-            cmsMessage = certificationRequest.signData(JSON.getMapper().writeValueAsString(voteVSHelper.getVote()));
+            cmsMessage = certificationRequest.signData(JSON.getMapper().writeValueAsString(voteHelper.getVote()));
             cmsMessage = new MessageTimeStamper(cmsMessage,
                     ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
             responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.VOTE,
                     ContextVS.getInstance().getControlCenter().getVoteServiceURL());
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 CMSSignedMessage voteReceipt = responseVS.getCMS();
-                voteVSHelper.setValidatedVote(voteReceipt);
+                voteHelper.setValidatedVote(voteReceipt);
                 //_ TODO _ validate receipt
             }
         }
-        return responseVS.setData(voteVSHelper);
+        return responseVS.setData(voteHelper);
     }
 
 }

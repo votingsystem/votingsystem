@@ -16,7 +16,7 @@ import org.votingsystem.client.webextension.util.DocumentVS;
 import org.votingsystem.client.webextension.util.Formatter;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.CertUtils;
@@ -110,7 +110,7 @@ public class CMSPane extends GridPane implements DocumentVS {
                 checkVoteButton.setOnAction(actionEvent -> {
                     try {
                         ProgressDialog.show(new CheckVoteTask(
-                            signedFile.getCMS().getVoteVS().getX509Certificate()), ContextVS.getMessage("checkVoteLbl"));
+                            signedFile.getCMS().getVote().getX509Certificate()), ContextVS.getMessage("checkVoteLbl"));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -160,9 +160,9 @@ public class CMSPane extends GridPane implements DocumentVS {
                     StringUtils.toHex(certExtensionDto.getHashCertVS()));
             ResponseVS responseVS = HttpHelper.getInstance().getData(voteStateServiceURL, ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                VoteVSDto voteVSDto = (VoteVSDto) responseVS.getMessage(VoteVSDto.class);
+                VoteDto voteDto = (VoteDto) responseVS.getMessage(VoteDto.class);
                 StringBuilder sb = new StringBuilder();
-                switch (voteVSDto.getState()) {
+                switch (voteDto.getState()) {
                     case OK:
                         sb.append(ContextVS.getMessage("voteStateOKMsg"));
                         break;
@@ -174,7 +174,7 @@ public class CMSPane extends GridPane implements DocumentVS {
                         break;
                 }
                 sb.append("<br/><br/><b>" + ContextVS.getMessage("optionSelectedLbl") + "</b>: " +
-                        voteVSDto.getOptionSelected().getContent());
+                        voteDto.getOptionSelected().getContent());
                 BrowserHost.showMessage(sb.toString(), ContextVS.getMessage("checkVoteLbl"));
             } else BrowserHost.showMessage(responseVS.getStatusCode(), responseVS.getMessage());
             return responseVS;

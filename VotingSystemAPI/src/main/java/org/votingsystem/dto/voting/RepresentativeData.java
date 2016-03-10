@@ -145,8 +145,8 @@ public class RepresentativeData {
    
     public Long getOptionSelectedIdFromVote() throws Exception {
         if(vote == null) return null;
-        VoteVSDto voteVS = vote.getSignedContent(VoteVSDto.class);
-        return voteVS.getOptionSelected().getId();
+        VoteDto voteDto = vote.getSignedContent(VoteDto.class);
+        return voteDto.getOptionSelected().getId();
     }
     /**
      * @param optionSelectedId the optionSelectedId to set

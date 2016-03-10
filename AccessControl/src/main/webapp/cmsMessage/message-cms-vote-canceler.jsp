@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 
-<dom-module name="message-cms-votevs-canceler">
+<dom-module name="message-cms-vote-canceler">
     <template>
         <style>
             .messageToUser {
@@ -18,7 +18,7 @@
             <div>
                 <div style="margin: 10px auto; max-width:1000px;">
                     <div class="layout horizontal center center-justified">
-                        <div class="pageHeader"><h3>${msg.voteVSCancelerReceipt}</h3></div>
+                        <div class="pageHeader"><h3>${msg.voteCancelerReceipt}</h3></div>
                     </div>
                     <div hidden="{{!timeStampDate}}" class="timeStampMsg">
                         <b>${msg.timeStampDateLbl}: </b><span>{{timeStampDate}}</span>
@@ -44,7 +44,7 @@
     </template>
     <script>
         Polymer({
-            is:'message-cms-votevs-canceler',
+            is:'message-cms-vote-canceler',
             properties: {
                 cmsMessageContent:{type:Object, value:{}, observer:'cmsMessageContentChanged'}
             },

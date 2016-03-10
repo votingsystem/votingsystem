@@ -4,7 +4,7 @@ import com.sun.syndication.feed.synd.*;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedOutput;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -44,20 +44,20 @@ public class SubscriptionVSResource {
     }
 
     private String getElectionFeeds(String feedType) throws IOException, FeedException {
-        Query query = dao.getEM().createQuery("select e from EventVSElection e where e.state =:state order by e.dateCreated DESC")
+        Query query = dao.getEM().createQuery("select e from EventElection e where e.state =:state order by e.dateCreated DESC")
                 .setParameter("state", EventVS.State.ACTIVE);
-        List<EventVSElection> eventVSList = query.getResultList();
+        List<EventElection> eventVSList = query.getResultList();
         List<SyndEntryImpl> feeds = new ArrayList<>();
-        for(EventVSElection eventVSElection : eventVSList) {
-            String electionURL = config.getContextURL() + "/rest/eventVSElection/id/" + eventVSElection.getId();
+        for(EventElection eventElection : eventVSList) {
+            String electionURL = config.getContextURL() + "/rest/eventElection/id/" + eventElection.getId();
             SyndEntryImpl entry = new SyndEntryImpl();
-            entry.setTitle(eventVSElection.getSubject());
+            entry.setTitle(eventElection.getSubject());
             entry.setLink(electionURL);
-            entry.setPublishedDate(eventVSElection.getDateCreated());
+            entry.setPublishedDate(eventElection.getDateCreated());
             SyndContent description = new SyndContentImpl();
             description.setType("text/plain");
-            String feedContent = format("<p>{0}</p><a href=''{1}''>{2}</a>", eventVSElection.getContent(),
-                    new String(Base64.getDecoder().decode(eventVSElection.getContent().getBytes())),
+            String feedContent = format("<p>{0}</p><a href=''{1}''>{2}</a>", eventElection.getContent(),
+                    new String(Base64.getDecoder().decode(eventElection.getContent().getBytes())),
                     messages.get("voteLbl"));
             description.setValue(feedContent);
             entry.setDescription(description);
@@ -66,7 +66,7 @@ public class SubscriptionVSResource {
         SyndFeed feed = new SyndFeedImpl();
         feed.setFeedType(feedType);
         feed.setTitle(messages.get("electionsSubscriptionTitle") + " - " + config.getServerName());
-        feed.setLink(config.getContextURL() + "/rest/eventVSElection");
+        feed.setLink(config.getContextURL() + "/rest/eventElection");
         feed.setDescription(messages.get("electionsSubscriptionDescription"));
         feed.setEntries(feeds);
 

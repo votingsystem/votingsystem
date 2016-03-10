@@ -58,8 +58,8 @@ public class EventVS extends EntityVS implements Serializable {
     @Column(name="id", unique=true, nullable=false)
     //@DocumentId
     private Long id;
-    @Column(name="accessControlEventVSId", unique=true)
-    private Long accessControlEventVSId;//id of the event in the Access Control
+    @Column(name="accessControlEventId", unique=true)
+    private Long accessControlEventId;//id of the event in the Access Control
     @Column(name="content", columnDefinition="TEXT")
     //@Analyzer(definition = "customAnalyzer")
     private String content;
@@ -84,7 +84,7 @@ public class EventVS extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userVS")
     private UserVS userVS;
-    @OneToOne private CMSMessage publishRequestCMS;
+    @OneToOne private CMSMessage cmsMessage;
     @OneToOne private KeyStoreVS keyStoreVS;
     @Column(name="backupAvailable") private Boolean backupAvailable = Boolean.TRUE;
     @ElementCollection
@@ -121,7 +121,7 @@ public class EventVS extends EntityVS implements Serializable {
     @Transient private Integer numSignaturesCollected;
     @Transient private Integer numVotesCollected;
     @Transient private Boolean signed;
-    @Transient private VoteVS voteVS;
+    @Transient private Vote vote;
 
     public EventVS() {}
 
@@ -144,12 +144,12 @@ public class EventVS extends EntityVS implements Serializable {
         return this;
     }
 
-    public CMSMessage getPublishRequestCMS() {
-        return publishRequestCMS;
+    public CMSMessage getCmsMessage() {
+        return cmsMessage;
     }
 
-    public EventVS setPublishRequestCMS(CMSMessage publishRequestCMS) {
-        this.publishRequestCMS = publishRequestCMS;
+    public EventVS setCmsMessage(CMSMessage publishRequestCMS) {
+        this.cmsMessage = publishRequestCMS;
         return this;
     }
 
@@ -161,12 +161,12 @@ public class EventVS extends EntityVS implements Serializable {
         this.numSignaturesCollected = numSignaturesCollected;
     }
 
-    public VoteVS getVoteVS() {
-        return voteVS;
+    public Vote getVote() {
+        return vote;
     }
 
-    public void setVoteVS(VoteVS voteVS) {
-        this.voteVS = voteVS;
+    public void setVote(Vote vote) {
+        this.vote = vote;
     }
 
     public Integer getNumVotesCollected() {
@@ -308,12 +308,12 @@ public class EventVS extends EntityVS implements Serializable {
         this.accessControlVS = accessControlVS;
     }
 
-    public Long getAccessControlEventVSId() {
-        return accessControlEventVSId;
+    public Long getAccessControlEventId() {
+        return accessControlEventId;
     }
 
-    public void setAccessControlEventVSId(Long accessControlEventVSId) {
-        this.accessControlEventVSId = accessControlEventVSId;
+    public void setAccessControlEventId(Long accessControlEventId) {
+        this.accessControlEventId = accessControlEventId;
     }
 
     public KeyStoreVS getKeyStoreVS() {
@@ -327,7 +327,7 @@ public class EventVS extends EntityVS implements Serializable {
     public static String getURL(TypeVS type, String serverURL, Long id) {
         if(type == null) return serverURL + "/eventVS/" + id;
         switch (type) {
-            case VOTING_EVENT: return serverURL + "/eventVSElection/" + id;
+            case VOTING_EVENT: return serverURL + "/eventElection/" + id;
             default: return serverURL + "/eventVS/" + id;
         }
     }
@@ -346,7 +346,7 @@ public class EventVS extends EntityVS implements Serializable {
     }
 
     public static Type getType(EventVS eventVS) {
-        if(eventVS instanceof EventVSElection) return Type.ELECTION;
+        if(eventVS instanceof EventElection) return Type.ELECTION;
         return null;
     }
 

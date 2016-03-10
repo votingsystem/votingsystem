@@ -3,7 +3,7 @@ package org.votingsystem.model.voting;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.util.ContextVS;
@@ -24,10 +24,10 @@ import static javax.persistence.GenerationType.IDENTITY;
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 @Entity
-@Table(name="VoteVS")
-public class VoteVS extends EntityVS implements Serializable {
+@Table(name="Vote")
+public class Vote extends EntityVS implements Serializable {
 
-    private static Logger log = Logger.getLogger(VoteVS.class.getName());
+    private static Logger log = Logger.getLogger(Vote.class.getName());
 
     public enum State{OK, CANCELED, ERROR}
 
@@ -40,7 +40,7 @@ public class VoteVS extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="optionSelected") private FieldEventVS optionSelected;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="eventVSElection") private EventVSElection eventVS;
+    @JoinColumn(name="eventElection") private EventElection eventVS;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @Column(name="dateCreated", length=23) @Temporal(TemporalType.TIMESTAMP) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
@@ -51,7 +51,7 @@ public class VoteVS extends EntityVS implements Serializable {
     @Transient private String hashAccessRequestBase64;
     @Transient private String accessControlURL;
     @Transient private String eventURL;
-    @Transient private Long accessControlEventVSId;
+    @Transient private Long accessControlEventId;
     @Transient private String representativeURL;
     @Transient private String originHashCertVote;
     @Transient private String originHashAccessRequest;
@@ -61,31 +61,31 @@ public class VoteVS extends EntityVS implements Serializable {
     @Transient private CMSSignedMessage receipt;
     @Transient private boolean isValid = false;
 
-    public VoteVS () {}
+    public Vote () {}
 
-    public VoteVS (VoteVSDto voteVSDto) {
-        id = voteVSDto.getId();
-        eventVS = new EventVSElection();
-        eventVS.setId(voteVSDto.getEventVSId());
-        eventVS.setUrl(voteVSDto.getEventURL());
-        eventURL = voteVSDto.getEventURL();
-        hashCertVSBase64 = voteVSDto.getHashCertVSBase64();
-        optionSelected = voteVSDto.getOptionSelected();
-        voteUUID = voteVSDto.getUUID();
-        state = voteVSDto.getState();
+    public Vote (VoteDto voteDto) {
+        id = voteDto.getId();
+        eventVS = new EventElection();
+        eventVS.setId(voteDto.getEventId());
+        eventVS.setUrl(voteDto.getEventURL());
+        eventURL = voteDto.getEventURL();
+        hashCertVSBase64 = voteDto.getHashCertVSBase64();
+        optionSelected = voteDto.getOptionSelected();
+        voteUUID = voteDto.getUUID();
+        state = voteDto.getState();
     }
 
-    public VoteVS (EventVSElection eventVS) {
+    public Vote (EventElection eventVS) {
         this.eventVS = eventVS;
         this.eventURL = eventVS.getUrl();
     }
 
-    public VoteVS (X509Certificate x509Certificate, TimeStampToken timeStampToken) {
+    public Vote (X509Certificate x509Certificate, TimeStampToken timeStampToken) {
         this.timeStampToken = timeStampToken;
         this.x509Certificate = x509Certificate;
     }
 
-    public VoteVS (FieldEventVS optionSelected, EventVSElection eventVS, State state, CertificateVS certificateVS,
+    public Vote (FieldEventVS optionSelected, EventElection eventVS, State state, CertificateVS certificateVS,
                     CMSMessage cmsMessage) {
         this.optionSelected = optionSelected;
         this.eventVS = eventVS;
@@ -142,11 +142,11 @@ public class VoteVS extends EntityVS implements Serializable {
 		return id;
 	}
 
-	public void setEventVS(EventVSElection eventVS) {
+	public void setEventVS(EventElection eventVS) {
 		this.eventVS = eventVS;
 	}
 
-	public EventVSElection getEventVS() {
+	public EventElection getEventVS() {
 		return eventVS;
 	}
 
@@ -170,7 +170,7 @@ public class VoteVS extends EntityVS implements Serializable {
 		return state;
 	}
 
-	public VoteVS setState(State state) {
+	public Vote setState(State state) {
 		this.state = state;
         return this;
 	}
@@ -259,20 +259,20 @@ public class VoteVS extends EntityVS implements Serializable {
         this.eventURL = eventURL;
     }
 
-    public Long getAccessControlEventVSId() {
-        return accessControlEventVSId;
+    public Long getAccessControlEventId() {
+        return accessControlEventId;
     }
 
-    public void setAccessControlEventVSId(Long accessControlEventVSId) {
-        this.accessControlEventVSId = accessControlEventVSId;
+    public void setAccessControlEventId(Long accessControlEventId) {
+        this.accessControlEventId = accessControlEventId;
     }
 
-    public VoteVS loadSignatureData(X509Certificate x509Certificate, TimeStampToken timeStampToken) throws Exception {
+    public Vote loadSignatureData(X509Certificate x509Certificate, TimeStampToken timeStampToken) throws Exception {
         this.timeStampToken = timeStampToken;
         this.x509Certificate = x509Certificate;
         VoteCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(VoteCertExtensionDto.class, x509Certificate,
                 ContextVS.VOTE_OID);
-        this.accessControlEventVSId = certExtensionDto.getEventId();
+        this.accessControlEventId = certExtensionDto.getEventId();
         this.accessControlURL = certExtensionDto.getAccessControlURL();
         this.hashCertVSBase64 = certExtensionDto.getHashCertVS();
         this.representativeURL = CertUtils.getCertExtensionData(x509Certificate, ContextVS.REPRESENTATIVE_VOTE_OID);

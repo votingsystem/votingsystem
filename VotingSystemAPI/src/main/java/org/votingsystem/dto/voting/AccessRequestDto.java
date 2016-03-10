@@ -2,8 +2,8 @@ package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.voting.AccessRequestVS;
-import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.AccessRequest;
+import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.util.TypeVS;
 
 /**
@@ -18,8 +18,8 @@ public class AccessRequestDto {
     private String hashAccessRequestBase64;
     private String UUID;
 
-    @JsonIgnore private EventVSElection eventVS;
-    @JsonIgnore private AccessRequestVS accessRequestVS;
+    @JsonIgnore private EventElection eventVS;
+    @JsonIgnore private AccessRequest accessRequest;
 
     public AccessRequestDto() {}
 
@@ -64,20 +64,20 @@ public class AccessRequestDto {
         this.UUID = UUID;
     }
 
-    public EventVSElection getEventVS() {
+    public EventElection getEventVS() {
         return eventVS;
     }
 
-    public void setEventVS(EventVSElection eventVS) {
+    public void setEventVS(EventElection eventVS) {
         this.eventVS = eventVS;
     }
 
-    public AccessRequestVS getAccessRequestVS() {
-        return accessRequestVS;
+    public AccessRequest getAccessRequest() {
+        return accessRequest;
     }
 
-    public void setAccessRequestVS(AccessRequestVS accessRequestVS) {
-        this.accessRequestVS = accessRequestVS;
+    public void setAccessRequest(AccessRequest accessRequest) {
+        this.accessRequest = accessRequest;
     }
 
 }

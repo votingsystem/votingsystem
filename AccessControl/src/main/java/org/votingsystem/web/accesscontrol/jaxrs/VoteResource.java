@@ -1,14 +1,14 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.dto.CMSDto;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.voting.VoteVS;
-import org.votingsystem.model.voting.VoteVSCanceler;
+import org.votingsystem.model.voting.Vote;
+import org.votingsystem.model.voting.VoteCanceler;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.web.accesscontrol.ejb.VoteVSBean;
+import org.votingsystem.web.accesscontrol.ejb.VoteBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -25,15 +25,16 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.util.logging.Logger;
 
-@Path("/voteVS")
-public class VoteVSResource {
+@Path("/vote")
+public class VoteResource {
 
-    private static final Logger log = Logger.getLogger(VoteVSResource.class.getName());
+    private static final Logger log = Logger.getLogger(VoteResource.class.getName());
 
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject VoteVSBean voteVSBean;
+    @Inject
+    VoteBean voteBean;
 
     /**
      * Service that receives and checks the votes signed by the Control Center
@@ -43,8 +44,8 @@ public class VoteVSResource {
     @POST
     public Response save(CMSDto CMSDto, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        VoteVS voteVS = voteVSBean.validateVote(CMSDto);
-        return Response.ok().entity(voteVS.getCMSMessage().getContentPEM()).type(ContentTypeVS.VOTE.getName()).build();
+        Vote vote = voteBean.validateVote(CMSDto);
+        return Response.ok().entity(vote.getCMSMessage().getContentPEM()).type(ContentTypeVS.VOTE.getName()).build();
     }
 
     @Transactional
@@ -52,11 +53,11 @@ public class VoteVSResource {
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response get(@PathParam("id") long id, @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        VoteVS voteVS = dao.find(VoteVS.class, id);
-        if(voteVS == null) return Response.status(Response.Status.BAD_REQUEST).entity(
-                "ERROR - VoteVS not found - voteId: " + id).build();
+        Vote vote = dao.find(Vote.class, id);
+        if(vote == null) return Response.status(Response.Status.BAD_REQUEST).entity(
+                "ERROR - Vote not found - voteId: " + id).build();
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
-                new VoteVSDto(voteVS, config.getContextURL()))).type(MediaTypeVS.JSON).build();
+                new VoteDto(vote, config.getContextURL()))).type(MediaTypeVS.JSON).build();
     }
 
     @Transactional
@@ -65,14 +66,14 @@ public class VoteVSResource {
     public Response getByHash(@PathParam("hashHex") String hashHex, @Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String hashCertVSBase64 = new String(new HexBinaryAdapter().unmarshal(hashHex));
-        Query query = dao.getEM().createQuery("select v from VoteVS v where v.certificateVS.hashCertVSBase64 =:hashCertVSBase64")
+        Query query = dao.getEM().createQuery("select v from Vote v where v.certificateVS.hashCertVSBase64 =:hashCertVSBase64")
                 .setParameter("hashCertVSBase64", hashCertVSBase64);
-        VoteVS voteVS = dao.getSingleResult(VoteVS.class, query);
-        if(voteVS == null) {
+        Vote vote = dao.getSingleResult(Vote.class, query);
+        if(vote == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity(
-                    "ERROR - VoteVS not found - hashHex: " + hashHex).build();
+                    "ERROR - Vote not found - hashHex: " + hashHex).build();
         }
-        VoteVSDto dto = new VoteVSDto(voteVS, config.getContextURL());
+        VoteDto dto = new VoteDto(vote, config.getContextURL());
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
     }
 
@@ -81,15 +82,15 @@ public class VoteVSResource {
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response cancelation(@PathParam("id") Long id, @Context ServletContext context,
                               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        VoteVS voteVS = dao.find(VoteVS.class, id);
-        if(voteVS == null) return Response.status(Response.Status.BAD_REQUEST).entity(
-                "ERROR - VoteVS not found - voteId: " + id).build();
-        Query query = dao.getEM().createQuery("select v from VoteVSCanceler v where v.voteVS =:voteVS")
-                .setParameter("voteVS", voteVS);
-        VoteVSCanceler voteVSCanceler = dao.getSingleResult(VoteVSCanceler.class, query);
-        if(voteVSCanceler == null) return Response.status(Response.Status.BAD_REQUEST).entity(
-                "ERROR - VoteVSCanceler not found - voteId: " + id).build();
-        return Response.ok().entity(voteVSCanceler.getCmsMessage().getContentPEM())
+        Vote vote = dao.find(Vote.class, id);
+        if(vote == null) return Response.status(Response.Status.BAD_REQUEST).entity(
+                "ERROR - Vote not found - voteId: " + id).build();
+        Query query = dao.getEM().createQuery("select v from VoteCanceler v where v.vote =:vote")
+                .setParameter("vote", vote);
+        VoteCanceler voteCanceler = dao.getSingleResult(VoteCanceler.class, query);
+        if(voteCanceler == null) return Response.status(Response.Status.BAD_REQUEST).entity(
+                "ERROR - VoteCanceler not found - voteId: " + id).build();
+        return Response.ok().entity(voteCanceler.getCmsMessage().getContentPEM())
                 .type(MediaTypeVS.JSON_SIGNED).build();
     }
 
@@ -100,19 +101,19 @@ public class VoteVSResource {
     public Response cancelerByHash(@PathParam("hashHex") String hashHex, @Context ServletContext context,
                               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String hashCertVSBase64 = new String(new HexBinaryAdapter().unmarshal(hashHex));
-        Query query = dao.getEM().createQuery("select v from VoteVSCanceler v where v.hashCertVSBase64 =:hashCertVSBase64")
+        Query query = dao.getEM().createQuery("select v from VoteCanceler v where v.hashCertVSBase64 =:hashCertVSBase64")
                 .setParameter("hashCertVSBase64", hashCertVSBase64);
-        VoteVSCanceler voteCanceler = dao.getSingleResult(VoteVSCanceler.class, query);
+        VoteCanceler voteCanceler = dao.getSingleResult(VoteCanceler.class, query);
         if(voteCanceler == null) return Response.status(Response.Status.BAD_REQUEST).entity(
-                "ERROR - VoteVSCanceler not found - hashHex: " + hashHex + " - hashBase64: " + hashCertVSBase64).build();
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(new VoteVSDto(voteCanceler, config.getContextURL())))
+                "ERROR - VoteCanceler not found - hashHex: " + hashHex + " - hashBase64: " + hashCertVSBase64).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(new VoteDto(voteCanceler, config.getContextURL())))
                 .entity(MediaTypeVS.JSON).build();
     }
 
     @Path("/cancel") @POST
     public Response post (CMSMessage cmsMessage, @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        VoteVSCanceler canceler = voteVSBean.processCancel(cmsMessage);
+        VoteCanceler canceler = voteBean.processCancel(cmsMessage);
         return Response.ok().entity(canceler.getCmsMessage().getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
     }
 

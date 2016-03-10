@@ -15,17 +15,17 @@ import java.util.Date;
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 //@Indexed
-@Entity @DiscriminatorValue("EventVSElection")
-public class EventVSElection extends EventVS implements Serializable {
+@Entity @DiscriminatorValue("EventElection")
+public class EventElection extends EventVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @OneToOne private CertificateVS accessControlCert;
     @OneToOne private CertificateVS controlCenterCert;
 
-    public EventVSElection() {}
+    public EventElection() {}
 
-    public EventVSElection(String subject, String content, Cardinality cardinality, UserVS userVS,
+    public EventElection(String subject, String content, Cardinality cardinality, UserVS userVS,
                    ControlCenterVS controlCenterVS, Date dateBegin, Date dateFinish) {
         setSubject(subject);
         setContent(content);
@@ -36,9 +36,9 @@ public class EventVSElection extends EventVS implements Serializable {
         setDateFinish(dateFinish);
     }
 
-    public EventVSElection(Long accessControlEventVSId, String subject, String content, String URL,
+    public EventElection(Long accessControlEventId, String subject, String content, String URL,
                    AccessControlVS accessControl, UserVS userVS, Date dateBegin, Date dateFinish) {
-        setAccessControlEventVSId(accessControlEventVSId);
+        setAccessControlEventId(accessControlEventId);
         setSubject(subject);
         setContent(content);
         setUrl(URL);
@@ -55,7 +55,7 @@ public class EventVSElection extends EventVS implements Serializable {
         throw new ValidationExceptionVS("FieldEventVS not found - id: " + optionId);
     }
 
-    public EventVSElection updateAccessControlIds() {
+    public EventElection updateAccessControlIds() {
         setId(null);
         if(getFieldsEventVS() != null) {
             for(FieldEventVS fieldEventVS : getFieldsEventVS()) {
@@ -70,7 +70,7 @@ public class EventVSElection extends EventVS implements Serializable {
         return accessControlCert;
     }
 
-    public EventVSElection setAccessControlCert(CertificateVS accessControlCert) {
+    public EventElection setAccessControlCert(CertificateVS accessControlCert) {
         this.accessControlCert = accessControlCert;
         return this;
     }
@@ -79,7 +79,7 @@ public class EventVSElection extends EventVS implements Serializable {
         return controlCenterCert;
     }
 
-    public EventVSElection setControlCenterCert(CertificateVS controlCenterCert) {
+    public EventElection setControlCenterCert(CertificateVS controlCenterCert) {
         this.controlCenterCert = controlCenterCert;
         return this;
     }

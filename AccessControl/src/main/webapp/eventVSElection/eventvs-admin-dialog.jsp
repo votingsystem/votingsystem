@@ -78,7 +78,7 @@
                         messageSubject = '${msg.cancelEventVSMsgSubject}'
                     }
                     var operationVS = new OperationVS(Operation.EVENT_CANCELLATION)
-                    operationVS.serviceURL= contextURL + "/rest/eventVSElection/cancel"
+                    operationVS.serviceURL= contextURL + "/rest/eventElection/cancel"
                     var signedContent = {operation:Operation.EVENT_CANCELLATION,
                         accessControlURL:contextURL, eventId:Number(this.eventvs.id), state:state}
                     operationVS.jsonStr = JSON.stringify(signedContent)
@@ -94,8 +94,8 @@
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                     caption = "${msg.operationOKCaption}"
                     msg = "${msg.documentCancellationOKMsg}".format(this.eventvs.subject);
-                    if(this.$.selectDeleteDocument.checked) page("/eventVSElection")
-                    else page("/rest/eventVSElection/id/" + this.eventvs.id)
+                    if(this.$.selectDeleteDocument.checked) page("/eventElection")
+                    else page("/rest/eventElection/id/" + this.eventvs.id)
                 } else {
                     caption = "${msg.operationERRORCaption}"
                     msg = appMessageJSON.message

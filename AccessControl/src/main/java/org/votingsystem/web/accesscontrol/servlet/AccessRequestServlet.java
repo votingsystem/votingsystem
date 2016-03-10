@@ -28,11 +28,11 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-@WebServlet("/accessRequestVS")
+@WebServlet("/accessRequest")
 @MultipartConfig(location="/tmp", fileSizeThreshold=1024*1024, maxFileSize=1024*1024*50, maxRequestSize=1024*1024*5*50)
-public class AccessRequestVSServlet extends HttpServlet {
+public class AccessRequestServlet extends HttpServlet {
 
-    private final static Logger log = Logger.getLogger(AccessRequestVSServlet.class.getName());
+    private final static Logger log = Logger.getLogger(AccessRequestServlet.class.getName());
 
     @Inject CMSBean cmsBean;
     @Inject AccessRequestBean accessRequestBean;

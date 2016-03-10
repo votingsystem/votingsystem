@@ -1,7 +1,7 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.voting.VoteVS;
+import org.votingsystem.model.voting.Vote;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -51,14 +51,14 @@ public class CMSMessageResource {
     public Response getVoteByHash(@PathParam("hashHex") String hashHex, @Context ServletContext context,
                               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String hashCertVSBase64 = new String(new HexBinaryAdapter().unmarshal(hashHex));
-        Query query = dao.getEM().createQuery("select v from VoteVS v where v.certificateVS.hashCertVSBase64 =:hashCertVSBase64")
+        Query query = dao.getEM().createQuery("select v from Vote v where v.certificateVS.hashCertVSBase64 =:hashCertVSBase64")
                 .setParameter("hashCertVSBase64", hashCertVSBase64);
-        VoteVS voteVS = dao.getSingleResult(VoteVS.class, query);
-        if(voteVS == null) {
+        Vote vote = dao.getSingleResult(Vote.class, query);
+        if(vote == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity(
-                    "ERROR - VoteVS not found - hashHex: " + hashHex).build();
+                    "ERROR - Vote not found - hashHex: " + hashHex).build();
         }
-        return Response.ok().entity(voteVS.getCMSMessage().getCMS().toPEM()).type(MediaTypeVS.PEM).build();
+        return Response.ok().entity(vote.getCMSMessage().getCMS().toPEM()).type(MediaTypeVS.PEM).build();
     }
 
 }

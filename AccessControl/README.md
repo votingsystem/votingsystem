@@ -18,6 +18,12 @@ Change what follows to the standalone / domain  server configuration (if you are
 
 The value of the variables 'vs.staticResourcesURL' and 'vs.staticResourcesPath' must be set according to the values configured.
 
+The applications need access to a running instance of the [timestamp server](https://github.com/votingsystem/votingsystem/tree/master/TimeStampServer) 
+to add timestamps to the signatures. You must install this app in your server before running the **voting system** or the **currency server**
+
+The applications need access to a running instance of the [timestamp server](https://github.com/votingsystem/votingsystem/tree/master/ControlCenter).
+ You must install this app in your server before running **Access Control**
+
 #### enable appplication filter
 To enable application filters change what follows to the standalone / domain  server configuration 
 ([details] (https://docs.jboss.org/author/display/WFLY8/Undertow+subsystem+configuration)):

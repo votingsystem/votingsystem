@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="eventvs-admin-dialog.vsp" rel="import"/>
-<link href="votevs-result-dialog.vsp" rel="import"/>
+<link href="vote-result-dialog.vsp" rel="import"/>
 
 <dom-module name="eventvs-election">
     <template>
@@ -27,7 +27,7 @@
                         <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
                     </div>
                     <div class="flex" on-click="showVoteResul">
-                        <div hidden="{{!votevsResul}}" style="cursor: pointer;background: #ffeb3b;width: 50px; text-align: center;">
+                        <div hidden="{{!voteResul}}" style="cursor: pointer;background: #ffeb3b;width: 50px; text-align: center;">
                             <i class="fa fa-envelope" style="margin:10px;color: #ba0011;font-size: 1.3em;"></i> </div>
                     </div>
                 </div>
@@ -88,7 +88,7 @@
 
         <eventvs-election-vote-confirm-dialog id="confirmOptionDialog" on-option-confirmed="submitVote"></eventvs-election-vote-confirm-dialog>
         <eventvs-admin-dialog id="eventVSAdminDialog" eventvs="{{eventvs}}"></eventvs-admin-dialog>
-        <votevs-result-dialog id="votevsResultDialog"></votevs-result-dialog>
+        <vote-result-dialog id="voteResultDialog"></vote-result-dialog>
     </template>
     <script>
         Polymer({
@@ -112,7 +112,7 @@
                 console.log("eventvsChanged - eventvs: " + this.eventvs.state)
                 this.optionVSSelected = null
                 this.dateFinish = new Date(this.eventvs.dateFinish)
-                this.votevsResul = null;
+                this.voteResul = null;
                 this.isPending = ('PENDING' === this.eventvs.state)? true : false
                 this.isTerminated = ('TERMINATED' === this.eventvs.state)? true : false
                 this.isCanceled = ('CANCELED' === this.eventvs.state)? true : false
@@ -122,7 +122,7 @@
                     if(this.eventvs.state === 'ACTIVE' || this.eventvs.state === 'PENDING') this.adminMenuHidden = false
                 }
                 this.fieldsEventVS = this.eventvs.fieldsEventVS
-                d3.xhr(contextURL + "/rest/eventVSElection/id/" + this.eventvs.id + "/stats")
+                d3.xhr(contextURL + "/rest/eventElection/id/" + this.eventvs.id + "/stats")
                         .header("Content-Type", "application/json").get(function(err, rawData){
                         if(this.isTerminated == true) {
                             this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
@@ -159,13 +159,13 @@
                 if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message, "${msg.errorLbl}")
             },
             showVoteResul:function() {
-                this.$.votevsResultDialog.show(this.votevsResul)
+                this.$.voteResultDialog.show(this.voteResul)
             },
             submitVote:function() {
                 console.log("submitVote - eventvs.url: " + this.eventvs.url)
                 var operationVS = new OperationVS(Operation.SEND_VOTE)
-                this.eventvs.voteVS = {optionSelected:this.optionVSSelected, eventVSId:this.eventvs.id, eventURL:this.eventvs.url}
-                operationVS.voteVS = this.eventvs.voteVS
+                this.eventvs.vote = {optionSelected:this.optionVSSelected, EventId:this.eventvs.id, eventURL:this.eventvs.url}
+                operationVS.vote = this.eventvs.vote
                 operationVS.signedMessageSubject = '${msg.sendVoteMsgSubject} - ' + this.eventvs.subject
                 operationVS.setCallback(function(appMessage) {
                     this.voteResponse(appMessage)}.bind(this))
@@ -178,8 +178,8 @@
                     var resultJSON = toJSON(appMessageJSON.message)
                     resultJSON.eventVS = this.eventvs
                     resultJSON.optionSelected = this.optionVSSelected.content
-                    this.votevsResul = resultJSON
-                    this.$.votevsResultDialog.show(resultJSON)
+                    this.voteResul = resultJSON
+                    this.$.voteResultDialog.show(resultJSON)
                 } else if (appMessageJSON.statusCode === ResponseVS.SC_ERROR_REQUEST_REPEATED) {
                     var msgJSON = toJSON(appMessageJSON.message)
                     var msgTemplate =  "${msg.accessRequestRepeatedMsg}"

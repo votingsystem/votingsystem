@@ -1,6 +1,6 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import org.votingsystem.model.BackupRequestVS;
+import org.votingsystem.model.BackupRequest;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -70,14 +70,14 @@ public class MailBean {
     }
 
     @Asynchronous
-    public void sendBackupMsg (BackupRequestVS request, String content) {
+    public void sendBackupMsg (BackupRequest request, String content) {
         //MessagesVS messages = MessagesVS.getCurrentInstance();
         /*(view:"/mail/backupRequestMessage.jsp", model:[fromUser:fromUser, requestURL:requestURL,
         subject:subject, downloadURL:downloadURL])*/
         log.log(Level.FINE, "sendBackupMsg - email:" + request.getEmail() + " - request:"+ request.getId());
         UserVS toUser = request.getCmsMessage().getUserVS();
-        String downloadURL = config.getContextURL() + "/rest/backupVS/request/id/" + request.getId() + "/download";
-        String requestURL = config.getContextURL() + "/rest/backupVS/request/id/" + request.getId();
+        String downloadURL = config.getContextURL() + "/rest/backup/request/id/" + request.getId() + "/download";
+        String requestURL = config.getContextURL() + "/rest/backup/request/id/" + request.getId();
         //String subject = messages.get("downloadBackupMailSubject");
         //send(toUser.getEmail(), subject, content);
     }

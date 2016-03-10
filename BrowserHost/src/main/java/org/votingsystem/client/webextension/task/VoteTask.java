@@ -8,7 +8,7 @@ import org.votingsystem.client.webextension.OperationVS;
 import org.votingsystem.client.webextension.service.BrowserSessionService;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -16,7 +16,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.crypto.CertificationRequestVS;
-import org.votingsystem.util.crypto.VoteVSHelper;
+import org.votingsystem.util.crypto.VoteHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,15 +43,15 @@ public class VoteTask extends Task<Void> {
         try {
             updateMessage(message);
             String fromUser = ContextVS.getInstance().getMessage("electorLbl");
-            VoteVSHelper voteVSHelper = VoteVSHelper.load(operationVS.getVoteVS());
-            VoteVSDto voteVS = voteVSHelper.getVote();
-            String toUser = voteVS.getEventURL();
-            String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + voteVS.getEventVSId();
-            AccessRequestDto accessRequestDto = voteVSHelper.getAccessRequest();
+            VoteHelper voteHelper = VoteHelper.load(operationVS.getVote());
+            VoteDto vote = voteHelper.getVote();
+            String toUser = vote.getEventURL();
+            String msgSubject = ContextVS.getInstance().getMessage("accessRequestMsgSubject")  + vote.getEventId();
+            AccessRequestDto accessRequestDto = voteHelper.getAccessRequest();
             CMSSignedMessage cmsMessage = BrowserSessionService.getCMS(fromUser, toUser,
                     JSON.getMapper().writeValueAsString(accessRequestDto), password, msgSubject);
             responseVS = new AccessRequestDataSender(cmsMessage,
-                    accessRequestDto, voteVS.getHashCertVSBase64()).call();
+                    accessRequestDto, vote.getHashCertVSBase64()).call();
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
 
                 operationVS.processResult(responseVS);
@@ -59,7 +59,7 @@ public class VoteTask extends Task<Void> {
             }
             updateProgress(60, 100);
             CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
-            String textToSign = JSON.getMapper().writeValueAsString(voteVS); ;
+            String textToSign = JSON.getMapper().writeValueAsString(vote); ;
             cmsMessage = certificationRequest.signData(textToSign);
             updateProgress(70, 100);
             cmsMessage = new MessageTimeStamper(cmsMessage,
@@ -68,17 +68,17 @@ public class VoteTask extends Task<Void> {
                     ContextVS.getInstance().getControlCenter().getVoteServiceURL());
             updateProgress(90, 100);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                voteVSHelper.setValidatedVote(responseVS.getCMS());
+                voteHelper.setValidatedVote(responseVS.getCMS());
                 ResponseVS voteResponse = new ResponseVS(ResponseVS.SC_OK);
-                voteResponse.setData(voteVSHelper);
-                ContextVS.getInstance().addHashCertVSData(voteVS.getHashCertVSBase64(), voteResponse);
-                String hashCertVSHex = new String(Hex.encode(voteVS.getHashCertVSBase64().getBytes()));
+                voteResponse.setData(voteHelper);
+                ContextVS.getInstance().addHashCertVSData(vote.getHashCertVSBase64(), voteResponse);
+                String hashCertVSHex = new String(Hex.encode(vote.getHashCertVSBase64().getBytes()));
                 Map responseMap = new HashMap<>();
                 responseMap.put("statusCode", ResponseVS.SC_OK);
-                responseMap.put("hashCertVSBase64", voteVS.getHashCertVSBase64());
+                responseMap.put("hashCertVSBase64", vote.getHashCertVSBase64());
                 responseMap.put("hashCertVSHex", hashCertVSHex);
                 responseMap.put("voteURL", ContextVS.getInstance().getAccessControl().getVoteStateServiceURL(hashCertVSHex));
-                responseMap.put("voteVSReceipt", voteVSHelper.getValidatedVote().toPEMStr());
+                responseMap.put("voteReceipt", voteHelper.getValidatedVote().toPEMStr());
                 responseVS.setMessage(JSON.getMapper().writeValueAsString(responseMap));
             }
 

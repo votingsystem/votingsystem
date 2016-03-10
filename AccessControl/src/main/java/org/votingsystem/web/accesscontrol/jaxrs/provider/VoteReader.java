@@ -1,4 +1,4 @@
-package org.votingsystem.web.controlcenter.jaxrs.provider;
+package org.votingsystem.web.accesscontrol.jaxrs.provider;
 
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.CMSDto;
@@ -24,9 +24,9 @@ import java.util.logging.Logger;
  */
 @Provider
 @Consumes(MediaTypeVS.VOTE)
-public class VoteVSReader implements MessageBodyReader<CMSDto> {
+public class VoteReader implements MessageBodyReader<CMSDto> {
 
-    private static final Logger log = Logger.getLogger(VoteVSReader.class.getName());
+    private static final Logger log = Logger.getLogger(VoteReader.class.getName());
 
     @Inject CMSBean cmsBean;
 
@@ -39,7 +39,7 @@ public class VoteVSReader implements MessageBodyReader<CMSDto> {
     public CMSDto readFrom(Class<CMSDto> aClass, Type type, Annotation[] annotations, MediaType mediaType,
                            MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
         try {
-            return cmsBean.validatedVote(CMSSignedMessage.FROM_PEM(inputStream));
+            return cmsBean.validatedVoteFromControlCenter(CMSSignedMessage.FROM_PEM(inputStream));
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             throw new WebApplicationException(ex);

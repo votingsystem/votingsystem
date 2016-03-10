@@ -12,7 +12,7 @@ import org.votingsystem.dto.DeviceVSDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
 import org.votingsystem.model.*;
-import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.UserRequestCsrVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -93,7 +93,7 @@ public class CSRBean {
     }
 
 
-    public CsrResponse signCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS) throws Exception {
+    public CsrResponse signCertVote (byte[] csrPEMBytes, EventElection eventVS) throws Exception {
         CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
         KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
         //TODO ==== vote keystore -- this is for developement
@@ -106,7 +106,7 @@ public class CSRBean {
         return csrResponse;
     }
 
-    public CsrResponse signRepresentativeCertVoteVS (byte[] csrPEMBytes, EventVSElection eventVS,
+    public CsrResponse signRepresentativeCertVote (byte[] csrPEMBytes, EventElection eventVS,
                           UserVS representative) throws Exception {
         CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
         KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
@@ -125,7 +125,7 @@ public class CSRBean {
         return csrResponse;
     }
 
-    private CsrResponse validateCSRVote(byte[] csrPEMBytes, EventVSElection eventVS) throws Exception{
+    private CsrResponse validateCSRVote(byte[] csrPEMBytes, EventElection eventVS) throws Exception{
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         VoteCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(VoteCertExtensionDto.class, csr,
                 ContextVS.VOTE_OID);

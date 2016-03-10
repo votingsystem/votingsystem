@@ -2,8 +2,8 @@ package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.voting.FieldEventVS;
-import org.votingsystem.model.voting.VoteVS;
-import org.votingsystem.model.voting.VoteVSCanceler;
+import org.votingsystem.model.voting.Vote;
+import org.votingsystem.model.voting.VoteCanceler;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
 
@@ -13,48 +13,48 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VoteVSDto {
+public class VoteDto {
 
     private TypeVS operation;
     private Long id;
     private Long cancelerId;
-    private Long eventVSId;
+    private Long EventId;
     private String certificateURL;
     private String hashCertVSBase64;
     private String hashCertVoteHex;
     private String cmsMessageURL;
     private String cmsCancelationMessageURL;
     private String eventURL;
-    private VoteVS.State state;
+    private Vote.State state;
     private FieldEventVS optionSelected;
     private String UUID;
 
 
-    public VoteVSDto() {}
+    public VoteDto() {}
 
 
-    public VoteVSDto(VoteVSCanceler canceler, String contextURL) {
-        this.setId(canceler.getVoteVS().getId());
+    public VoteDto(VoteCanceler canceler, String contextURL) {
+        this.setId(canceler.getVote().getId());
         this.setCancelerId(canceler.getId());
-        this.setState(canceler.getVoteVS().getState());
-        this.setCmsCancelationMessageURL(contextURL + "/rest/voteVS/id/" + canceler.getVoteVS().getId() + "/cancelation");
+        this.setState(canceler.getVote().getState());
+        this.setCmsCancelationMessageURL(contextURL + "/rest/vote/id/" + canceler.getVote().getId() + "/cancelation");
     }
 
-    public VoteVSDto(VoteVS voteVS, String contextURL) {
+    public VoteDto(Vote vote, String contextURL) {
         HexBinaryAdapter hexConverter = new HexBinaryAdapter();
-        setId(voteVS.getId());
-        setState(voteVS.getState());
-        if(VoteVS.State.CANCELED == getState()) {
-            setCmsCancelationMessageURL(contextURL + "/rest/voteVS/id/" + voteVS.getId() + "/cancelation");
+        setId(vote.getId());
+        setState(vote.getState());
+        if(Vote.State.CANCELED == getState()) {
+            setCmsCancelationMessageURL(contextURL + "/rest/vote/id/" + vote.getId() + "/cancelation");
         }
-        setEventVSId(voteVS.getEventVS().getId());
-        setEventURL(contextURL + "/rest/eventVSElection/id/" + getEventVSId());
-        setOptionSelected(voteVS.getOptionSelected());
-        setHashCertVSBase64(voteVS.getCertificateVS().getHashCertVSBase64());
+        setEventId(vote.getEventVS().getId());
+        setEventURL(contextURL + "/rest/eventElection/id/" + getEventId());
+        setOptionSelected(vote.getOptionSelected());
+        setHashCertVSBase64(vote.getCertificateVS().getHashCertVSBase64());
         if(getHashCertVSBase64() != null) setHashCertVoteHex(StringUtils.toHex(getHashCertVSBase64()));
-        String hashHex = hexConverter.marshal(voteVS.getCertificateVS().getHashCertVSBase64().getBytes());
+        String hashHex = hexConverter.marshal(vote.getCertificateVS().getHashCertVSBase64().getBytes());
         setCertificateURL(contextURL + "/rest/certificateVS/hashHex/" + hashHex);
-        setCmsMessageURL(contextURL + "/rest/messageCMS/id/" + voteVS.getCMSMessage().getId());
+        setCmsMessageURL(contextURL + "/rest/cmsMessage/id/" + vote.getCMSMessage().getId());
     }
 
 
@@ -74,12 +74,12 @@ public class VoteVSDto {
         this.cancelerId = cancelerId;
     }
 
-    public Long getEventVSId() {
-        return eventVSId;
+    public Long getEventId() {
+        return EventId;
     }
 
-    public void setEventVSId(Long eventVSId) {
-        this.eventVSId = eventVSId;
+    public void setEventId(Long EventId) {
+        this.EventId = EventId;
     }
 
     public String getCertificateURL() {
@@ -130,11 +130,11 @@ public class VoteVSDto {
         this.eventURL = eventURL;
     }
 
-    public VoteVS.State getState() {
+    public Vote.State getState() {
         return state;
     }
 
-    public void setState(VoteVS.State state) {
+    public void setState(Vote.State state) {
         this.state = state;
     }
 

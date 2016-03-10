@@ -7,7 +7,7 @@ import org.votingsystem.dto.voting.RepresentativeVotingHistoryDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ImageVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.RepresentationDocument;
 import org.votingsystem.model.voting.RepresentativeDocument;
 import org.votingsystem.throwable.ExceptionVS;
@@ -167,9 +167,9 @@ public class RepresentativeResource {
 
     @Path("eventVS/id/{id}/accreditationsBackup") @GET
     public Response accreditationsBackupForEvent(@PathParam("id") Long id) throws IOException, ExceptionVS {
-        EventVSElection eventVS = dao.find(EventVSElection.class, id);
+        EventElection eventVS = dao.find(EventElection.class, id);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - EventVSElection not found - eventId" + id).build();
+                "ERROR - EventElection not found - eventId" + id).build();
         if(eventVS.isActive(new Date())) return Response.status(Response.Status.BAD_REQUEST).entity(
                 messages.get("eventActiveErrorMsg")).build();
         representativeBean.getAccreditationsBackupForEvent(eventVS);

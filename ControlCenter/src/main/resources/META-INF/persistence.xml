@@ -13,14 +13,14 @@
         <class>org.votingsystem.model.TagVS</class>
         <class>org.votingsystem.model.UserVS</class>
         <class>org.votingsystem.model.voting.AccessControlVS</class>
-        <class>org.votingsystem.model.voting.AccessRequestVS</class>
+        <class>org.votingsystem.model.voting.AccessRequest</class>
         <class>org.votingsystem.model.voting.ControlCenterVS</class>
         <class>org.votingsystem.model.voting.EventVS</class>
-        <class>org.votingsystem.model.voting.EventVSElection</class>
+        <class>org.votingsystem.model.voting.EventElection</class>
         <class>org.votingsystem.model.voting.FieldEventVS</class>
         <class>org.votingsystem.model.voting.FieldValueEventVS</class>
-        <class>org.votingsystem.model.voting.VoteVSCanceler</class>
-        <class>org.votingsystem.model.voting.VoteVS</class>
+        <class>org.votingsystem.model.voting.VoteCanceler</class>
+        <class>org.votingsystem.model.voting.Vote</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

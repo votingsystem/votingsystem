@@ -138,7 +138,7 @@ public class TimeStampBean {
                 }
             }
             log.log(Level.SEVERE, "ERROR fetching TimeStampServer data - serverURL: " +
-                    timeStampServer.getServerURL() + " - retry");
+                    timeStampServer.getServerURL());
         });
     }
 

@@ -6,7 +6,7 @@ import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
-import org.votingsystem.web.controlcenter.ejb.EventVSElectionBean;
+import org.votingsystem.web.controlcenter.ejb.EventElectionBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -33,7 +33,7 @@ public class SearchResource {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject EventVSElectionBean eventVSElectionBean;
+    @Inject EventElectionBean eventElectionBean;
 
     @Transactional
     @Path("/eventVS") @GET

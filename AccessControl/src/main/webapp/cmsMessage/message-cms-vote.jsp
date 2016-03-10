@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="message-cms-votevs">
+<dom-module name="message-cms-vote">
     <template>
         <style>
         .messageToUser {
@@ -16,7 +16,7 @@
         <div class="layout vertical center center-justified" style="margin: 0px auto; max-width:800px;">
             <div>
                 <div class="layout horizontal center center-justified">
-                    <div class="pageHeader"><h3>${msg.voteVSReceipt}</h3></div>
+                    <div class="pageHeader"><h3>${msg.voteReceipt}</h3></div>
                 </div>
                 <div hidden="{{!timeStampDate}}" class="timeStampMsg">
                     <b>${msg.timeStampDateLbl}: </b><span>{{timeStampDate}}</span>
@@ -43,7 +43,7 @@
     </template>
     <script>
         Polymer({
-            is:'message-cms-votevs',
+            is:'message-cms-vote',
             properties: {
                 cmsMessageContent:{type:Object, value:{}, observer:'cmsMessageContentChanged'}
             },

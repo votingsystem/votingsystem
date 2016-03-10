@@ -13,10 +13,10 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.Store;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.voting.VoteVS;
+import org.votingsystem.model.voting.Vote;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
@@ -195,8 +195,8 @@ public class CMSSignedMessage extends CMSSignedData {
         return getMessageData().getSigners();
     }
 
-    public VoteVS getVoteVS() throws Exception {
-        return getMessageData().getVoteVS();
+    public Vote getVote() throws Exception {
+        return getMessageData().getVote();
     }
 
     public Set<X509Certificate> getSignersCerts() throws Exception {
@@ -216,7 +216,7 @@ public class CMSSignedMessage extends CMSSignedData {
         private UserVS signerVS;
         private Set<UserVS> signers;
         private TimeStampToken timeStampToken;
-        private VoteVS voteVS;
+        private Vote vote;
         private X509Certificate currencyCert;
 
 
@@ -269,13 +269,13 @@ public class CMSSignedMessage extends CMSSignedData {
                 }
                 signers.add(userVS);
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
-                    VoteVSDto dto = getSignedContent(VoteVSDto.class);
-                    voteVS = new VoteVS(dto).loadSignatureData(cert, timeStampToken);
+                    VoteDto dto = getSignedContent(VoteDto.class);
+                    vote = new Vote(dto).loadSignatureData(cert, timeStampToken);
                 } else if (cert.getExtensionValue(ContextVS.CURRENCY_OID) != null) {
                     currencyCert = cert;
                 } else {signerCerts.add(cert);}
             }
-            if(voteVS != null) voteVS.setServerCerts(signerCerts);
+            if(vote != null) vote.setServerCerts(signerCerts);
             return true;
         }
 
@@ -291,8 +291,8 @@ public class CMSSignedMessage extends CMSSignedData {
             return timeStampToken;
         }
 
-        public VoteVS getVoteVS() {
-            return voteVS;
+        public Vote getVote() {
+            return vote;
         }
 
         public X509Certificate getCurrencyCert() {

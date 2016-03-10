@@ -10,7 +10,7 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
-import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.crypto.CertUtils;
@@ -148,10 +148,10 @@ public class CertificateVSResource {
     @Path("/eventVS/id/{eventId}/CACert")
     @GET  @Produces(MediaType.TEXT_PLAIN)
     public Response eventCA(@PathParam("eventId") Long eventId) throws Exception {
-        EventVSElection eventVSElection = dao.find(EventVSElection.class, eventId);
-        if(eventVSElection == null) return Response.status(Response.Status.BAD_REQUEST).entity(
-                "ERROR - EventVSElection not found - eventId: " + eventId).build();
-        X509Certificate certX509 = CertUtils.loadCertificate(eventVSElection.getCertificateVS().getContent());
+        EventElection eventElection = dao.find(EventElection.class, eventId);
+        if(eventElection == null) return Response.status(Response.Status.BAD_REQUEST).entity(
+                "ERROR - EventElection not found - eventId: " + eventId).build();
+        X509Certificate certX509 = CertUtils.loadCertificate(eventElection.getCertificateVS().getContent());
         return Response.ok().entity(PEMUtils.getPEMEncoded (certX509)).build();
     }
 

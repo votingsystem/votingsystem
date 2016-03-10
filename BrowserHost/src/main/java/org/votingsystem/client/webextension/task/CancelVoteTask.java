@@ -2,12 +2,12 @@ package org.votingsystem.client.webextension.task;
 
 import javafx.concurrent.Task;
 import org.votingsystem.client.webextension.OperationVS;
-import org.votingsystem.dto.voting.VoteVSCancelerDto;
+import org.votingsystem.dto.voting.VoteCancelerDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.crypto.VoteVSHelper;
+import org.votingsystem.util.crypto.VoteHelper;
 
 import java.util.Base64;
 import java.util.concurrent.ExecutorService;
@@ -36,8 +36,8 @@ public class CancelVoteTask extends Task<ResponseVS> {
         try {
             updateMessage(message);
             ResponseVS voteResponse = ContextVS.getInstance().getHashCertVSData(operationVS.getMessage());
-            VoteVSHelper voteVSHelper = (VoteVSHelper) voteResponse.getData();
-            VoteVSCancelerDto cancelerDto = voteVSHelper.getVoteCanceler();
+            VoteHelper voteHelper = (VoteHelper) voteResponse.getData();
+            VoteCancelerDto cancelerDto = voteHelper.getVoteCanceler();
             ExecutorService executor = Executors.newSingleThreadExecutor();
             Future future = executor.submit(new SendCMSTask(operationVS, JSON.getMapper().writeValueAsString(cancelerDto),
                     message, password));

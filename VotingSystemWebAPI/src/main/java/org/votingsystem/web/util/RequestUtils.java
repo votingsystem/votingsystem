@@ -35,10 +35,10 @@ public class RequestUtils {
         TypeVS operation = TypeVS.valueOf((String) signedContentMap.get("operation"));
         switch(operation) {
             case SEND_VOTE:
-                viewer = "message-cms-votevs";
+                viewer = "message-cms-vote";
                 break;
             case CANCEL_VOTE:
-                viewer = "message-cms-votevs-canceler";
+                viewer = "message-cms-vote-canceler";
                 break;
             case ANONYMOUS_SELECTION_CERT_REQUEST:
                 viewer = "message-cms-representative-anonymousdelegation-request";

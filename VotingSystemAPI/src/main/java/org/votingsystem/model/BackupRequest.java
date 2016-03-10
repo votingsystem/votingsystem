@@ -13,8 +13,8 @@ import static javax.persistence.GenerationType.IDENTITY;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity
-@Table(name="BackupRequestVS")
-public class BackupRequestVS extends EntityVS implements Serializable {
+@Table(name="BackupRequest")
+public class BackupRequest extends EntityVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -41,15 +41,15 @@ public class BackupRequestVS extends EntityVS implements Serializable {
     @Column(name="lastUpdated", length=23)
     private Date lastUpdated;
      
-    public BackupRequestVS() { }
+    public BackupRequest() { }
 
-    public BackupRequestVS(String filePath,  TypeVS type,  String email) {
+    public BackupRequest(String filePath, TypeVS type, String email) {
         this.filePath = filePath;
         this.type = type;
         this.email = email;
     }
 
-    public BackupRequestVS(String filePath, TypeVS type, UserVS representative, CMSMessage cmsMessage, String email) {
+    public BackupRequest(String filePath, TypeVS type, UserVS representative, CMSMessage cmsMessage, String email) {
         this.filePath = filePath;
         this.type = type;
         this.representative = representative;

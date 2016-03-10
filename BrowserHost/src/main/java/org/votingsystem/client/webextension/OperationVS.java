@@ -18,7 +18,7 @@ import org.votingsystem.dto.currency.GroupVSDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.RepresentationStateDto;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
@@ -58,7 +58,7 @@ public class OperationVS implements PasswordDialog.Listener {
     private String jsonStr;
     private String contentType;
     private EventVSDto eventVS;
-    private VoteVSDto voteVS;
+    private VoteDto vote;
     private UserVSDto userVS;
     private String UUID;
     private char[] password;
@@ -224,12 +224,12 @@ public class OperationVS implements PasswordDialog.Listener {
         this.jsonStr = jsonStr;
     }
 
-    public VoteVSDto getVoteVS() {
-        return voteVS;
+    public VoteDto getVote() {
+        return vote;
     }
 
-    public void setVoteVS(VoteVSDto voteVS) {
-        this.voteVS = voteVS;
+    public void setVote(VoteDto vote) {
+        this.vote = vote;
     }
 
     public String getUUID() {

@@ -38,7 +38,7 @@ public class AppResource {
         if(req.getParameter("androidClientLoaded") != null && Boolean.getBoolean(req.getParameter("androidClientLoaded"))) {
             return Response.temporaryRedirect(new URI("../app/index.xhtml")).build();
         } else {
-            String uri = config.getContextURL() + "/eventVSElection/main?androidClientLoaded=false";
+            String uri = config.getContextURL() + "/eventElection/main?androidClientLoaded=false";
             if(browserToken != null) uri = uri + "#" + browserToken;
             if(eventId != null) uri =  uri + "&eventId=" + eventId;
             if(serverURL != null) uri = uri + "&serverURL=" + serverURL;

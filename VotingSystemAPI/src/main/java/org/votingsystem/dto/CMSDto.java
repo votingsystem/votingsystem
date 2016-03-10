@@ -3,7 +3,7 @@ package org.votingsystem.dto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.VoteVS;
+import org.votingsystem.model.voting.Vote;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +14,7 @@ import java.util.Set;
 public class CMSDto {
 
     private UserVS signer;
-    private VoteVS voteVS;
+    private Vote vote;
     private EventVS eventVS;
     private UserVS anonymousSigner;
     private Set<UserVS> signers;
@@ -22,8 +22,8 @@ public class CMSDto {
 
     public CMSDto() {}
 
-    public CMSDto(VoteVS voteVS) {
-        this.voteVS = voteVS;
+    public CMSDto(Vote vote) {
+        this.vote = vote;
     }
 
     public UserVS getSigner() {
@@ -57,12 +57,12 @@ public class CMSDto {
         signers.add(signer);
     }
 
-    public VoteVS getVoteVS() {
-        return voteVS;
+    public Vote getVote() {
+        return vote;
     }
 
-    public void setVoteVS(VoteVS voteVS) {
-        this.voteVS = voteVS;
+    public void setVote(Vote vote) {
+        this.vote = vote;
     }
 
     public EventVS getEventVS() {

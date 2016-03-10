@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 
-<dom-module name="message-cms-votevs">
+<dom-module name="message-cms-vote">
     <template>
         <style>
         .messageToUser {
@@ -42,7 +42,7 @@
     </template>
     <script>
         Polymer({
-            is:'message-cms-votevs',
+            is:'message-cms-vote',
             properties: {
                 cmsMessageContent:{type:Object, value:{}, observer:'cmsMessageContentChanged'}
             },

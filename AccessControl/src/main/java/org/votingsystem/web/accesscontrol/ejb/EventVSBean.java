@@ -6,7 +6,7 @@ import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.HttpHelper;
@@ -72,11 +72,11 @@ public class EventVSBean {
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
         CMSSignedMessage cmsMessageResp = null;
         String fromUser = config.getServerName();
-        if(eventVS instanceof EventVSElection) {
+        if(eventVS instanceof EventElection) {
             cmsMessageResp = cmsBean.addSignature(cmsMessageReq);
-            String controlCenterUrl = ((EventVSElection)eventVS).getControlCenterVS().getServerURL();
+            String controlCenterUrl = ((EventElection)eventVS).getControlCenterVS().getServerURL();
             ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(cmsMessageResp.toPEM(),
-                    ContentTypeVS.JSON_SIGNED, controlCenterUrl + "/rest/eventVSElection/cancel");
+                    ContentTypeVS.JSON_SIGNED, controlCenterUrl + "/rest/eventElection/cancel");
             if(ResponseVS.SC_OK != responseVSControlCenter.getStatusCode() &&
                     ResponseVS.SC_ERROR_REQUEST_REPEATED != responseVSControlCenter.getStatusCode()) {
                 throw new ValidationExceptionVS(

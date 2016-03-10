@@ -30,9 +30,9 @@ import java.util.logging.Logger;
 
 
 @Stateless
-public class EventVSElectionBean {
+public class EventElectionBean {
 
-    private static final Logger log = Logger.getLogger(EventVSElectionBean.class.getName());
+    private static final Logger log = Logger.getLogger(EventElectionBean.class.getName());
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
@@ -40,7 +40,7 @@ public class EventVSElectionBean {
     @Inject TimeStampBean timeStampBean;
     @Inject SubscriptionVSBean subscriptionVSBean;
 
-    public EventVSElection saveEvent(CMSMessage cmsMessage) throws Exception {
+    public EventElection saveEvent(CMSMessage cmsMessage) throws Exception {
         CMSSignedMessage cmsReq = cmsMessage.getCMS();
         EventVSDto request = cmsReq.getSignedContent(EventVSDto.class);
         request.validate(config.getContextURL());
@@ -48,10 +48,10 @@ public class EventVSElectionBean {
         X509Certificate certCAVotacion = PEMUtils.fromPEMToX509Cert(request.getCertCAVotacion().getBytes());
         X509Certificate userCert = PEMUtils.fromPEMToX509Cert(request.getUserVS().getBytes());
         UserVS user = subscriptionVSBean.checkUser(UserVS.FROM_X509_CERT(userCert));
-        EventVSElection eventVS = request.getEventVSElection();
+        EventElection eventVS = request.getEventElection();
         eventVS.setAccessControlVS(accessControl);
         eventVS.setUserVS(user);
-        eventVS.setPublishRequestCMS(cmsMessage);
+        eventVS.setCmsMessage(cmsMessage);
         setEventDatesState(eventVS);
         eventVS.updateAccessControlIds();
         dao.persist(eventVS);
@@ -74,11 +74,11 @@ public class EventVSElectionBean {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         UserVS signer = cmsMessage.getUserVS();
         EventVSDto request = cmsMessage.getSignedContent(EventVSDto.class);
-        Query query = dao.getEM().createQuery("select e from EventVSElection e where e.accessControlEventVSId =:eventId")
+        Query query = dao.getEM().createQuery("select e from EventElection e where e.accessControlEventId =:eventId")
                 .setParameter("eventId", request.getEventId());
-        EventVSElection eventVS = dao.getSingleResult(EventVSElection.class, query);
+        EventElection eventVS = dao.getSingleResult(EventElection.class, query);
         if(eventVS == null) throw new ValidationExceptionVS(
-                "ERROR - EventVSElection not found - accessControlEventVSId: " +request.getEventId());
+                "ERROR - EventElection not found - accessControlEventId: " +request.getEventId());
         if(EventVS.State.ACTIVE != eventVS.getState()) throw new ValidationExceptionVS(new MessageDto(
                 ResponseVS.SC_ERROR_REQUEST_REPEATED, "ERROR - trying to cancel an EventVS tha isn't active"));
         if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || cmsBean.isAdmin(signer.getNif())))
@@ -88,7 +88,7 @@ public class EventVSElectionBean {
         dao.merge(cmsMessage.setCMS(cmsResp));
         eventVS.setState(request.getState()).setDateCanceled(new Date());
         dao.merge(eventVS);
-        log.info("cancelEvent - canceled EventVSElection  id:" + eventVS.getId());
+        log.info("cancelEvent - canceled EventElection  id:" + eventVS.getId());
         return cmsMessage;
     }
 
@@ -144,22 +144,22 @@ public class EventVSElectionBean {
         if (todayDate.before(eventVS.getDateBegin())) eventVS.setState(EventVS.State.PENDING);
     }
 
-    public EventVSStatsDto getStats (EventVSElection eventVS) {
+    public EventVSStatsDto getStats (EventElection eventVS) {
         EventVSStatsDto statsDto = new EventVSStatsDto();
         statsDto.setId(eventVS.getId());
         statsDto.setSubject(eventVS.getSubject() + " - 'this is inside simple quotes' - ");
-        Query query = dao.getEM().createQuery("select count(v) from VoteVS v where v.eventVS =:eventVS")
+        Query query = dao.getEM().createQuery("select count(v) from Vote v where v.eventVS =:eventVS")
                 .setParameter("eventVS", eventVS);
         statsDto.setNumVotesVS((long) query.getSingleResult());
-        query = dao.getEM().createQuery("select count(v) from VoteVS v where v.eventVS =:eventVS and v.state =:state")
-                .setParameter("eventVS", eventVS).setParameter("state", VoteVS.State.OK);
+        query = dao.getEM().createQuery("select count(v) from Vote v where v.eventVS =:eventVS and v.state =:state")
+                .setParameter("eventVS", eventVS).setParameter("state", Vote.State.OK);
         statsDto.setNumVotesVSOK((long) query.getSingleResult());
-        query = dao.getEM().createQuery("select count(v) from VoteVS v where v.eventVS =:eventVS and v.state =:state")
-                .setParameter("eventVS", eventVS).setParameter("state", VoteVS.State.CANCELED);
+        query = dao.getEM().createQuery("select count(v) from Vote v where v.eventVS =:eventVS and v.state =:state")
+                .setParameter("eventVS", eventVS).setParameter("state", Vote.State.CANCELED);
         statsDto.setNumVotesVSVotesVSCANCELED((long) query.getSingleResult());
         for(FieldEventVS option : eventVS.getFieldsEventVS()) {
-            query = dao.getEM().createQuery("select count(v) from VoteVS v where v.optionSelected =:option " +
-                    "and v.state =:state").setParameter("option", option).setParameter("state", VoteVS.State.OK);
+            query = dao.getEM().createQuery("select count(v) from Vote v where v.optionSelected =:option " +
+                    "and v.state =:state").setParameter("option", option).setParameter("state", Vote.State.OK);
             option.setNumVotesVS((long) query.getSingleResult());
         }
         statsDto.setFieldsEventVS(eventVS.getFieldsEventVS());

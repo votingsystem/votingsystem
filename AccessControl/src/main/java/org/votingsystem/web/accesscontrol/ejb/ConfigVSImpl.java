@@ -44,7 +44,7 @@ public class ConfigVSImpl implements ConfigVS {
     @Inject DAOBean dao;
     @Inject CMSBean cmsBean;
     @Inject SubscriptionVSBean subscriptionBean;
-    @Inject EventVSElectionBean eventVSElectionBean;
+    @Inject EventElectionBean eventElectionBean;
     @Inject TimeStampBean timeStampBean;
     /* Executor service for asynchronous processing */
     @Resource(name="comp/DefaultManagedExecutorService")
@@ -132,7 +132,7 @@ public class ConfigVSImpl implements ConfigVS {
     @Schedule(dayOfWeek = "*")
     public void generateElectionBackups() throws Exception {
         log.info("scheduled - generateElectionBackups");
-        eventVSElectionBean.generateBackups();
+        eventElectionBean.generateBackups();
     }
 
     @PreDestroy

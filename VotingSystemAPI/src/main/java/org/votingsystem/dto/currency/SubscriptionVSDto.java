@@ -40,10 +40,10 @@ public class SubscriptionVSDto {
         SubscriptionVSDto result = new SubscriptionVSDto();
         result.setId(subscriptionVS.getId());
         result.setState(subscriptionVS.getState());
-        result.setSubscriptionCMS_URL(contextURL + "/rest/messageCMS/id/" + subscriptionVS.getSubscriptionCMS().getId());
-        if(subscriptionVS.getActivationCMS() != null) result.setActivationCMS_URL(contextURL + "/rest/messageCMS/id/" +
+        result.setSubscriptionCMS_URL(contextURL + "/rest/cmsMessage/id/" + subscriptionVS.getSubscriptionCMS().getId());
+        if(subscriptionVS.getActivationCMS() != null) result.setActivationCMS_URL(contextURL + "/rest/cmsMessage/id/" +
                 subscriptionVS.getActivationCMS().getId());
-        if(subscriptionVS.getCancellationCMS() != null) result.setActivationCMS_URL(contextURL + "/rest/messageCMS/id/" +
+        if(subscriptionVS.getCancellationCMS() != null) result.setActivationCMS_URL(contextURL + "/rest/cmsMessage/id/" +
                 subscriptionVS.getCancellationCMS().getId());
         result.setDateActivated(subscriptionVS.getDateActivated());
         result.setDateCreated(subscriptionVS.getDateCreated());

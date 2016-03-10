@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="message-cms-votevs-canceler">
+<dom-module name="message-cms-vote-canceler">
     <template>
         <style>
             .messageToUser {
@@ -42,7 +42,7 @@
     </template>
     <script>
         Polymer({
-            is:'message-cms-votevs-canceler',
+            is:'message-cms-vote-canceler',
             properties: {
                 cmsMessageContent:{type:Object, value:{}, observer:'cmsMessageContentChanged'}
             },

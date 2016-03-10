@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.model.voting.ControlCenterVS;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.EventVSElection;
+import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.FieldEventVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
@@ -44,13 +44,13 @@ public class EventVSDto {
     private TypeVS operation;
     private EventVS.Type type;
     private Long eventId;
-    private Long accessControlEventVSId;
+    private Long accessControlEventId;
     private String certCAVotacion;
     private String controlCenterURL;
     private String certChain;
     private String accessControlURL;
     private String serverURL;
-    private VoteVSDto voteVS;
+    private VoteDto vote;
     private String UUID;
 
     public EventVSDto() {}
@@ -81,8 +81,8 @@ public class EventVSDto {
 
     public EventVSDto(EventVS eventVS, String serverName, String contextURL) {
         this(eventVS);
-        if(eventVS instanceof EventVSElection) {
-            this.setURL(contextURL + "/rest/eventVSElection/id/" + eventVS.getId());
+        if(eventVS instanceof EventElection) {
+            this.setURL(contextURL + "/rest/eventElection/id/" + eventVS.getId());
             ControlCenterVS controlCenterVS = eventVS.getControlCenterVS();
             if(controlCenterVS != null) this.setControlCenter(new ActorVSDto(
                     controlCenterVS.getServerURL(), controlCenterVS.getName()));
@@ -91,7 +91,7 @@ public class EventVSDto {
     }
 
     public static EventVSDto formatToSign(EventVS eventVS) {
-        if(!(eventVS instanceof EventVSElection)) return new EventVSDto(eventVS, null, null);
+        if(!(eventVS instanceof EventElection)) return new EventVSDto(eventVS, null, null);
         EventVSDto result = new EventVSDto();
         result.subject = eventVS.getSubject();
         result.content = eventVS.getContent();
@@ -100,8 +100,8 @@ public class EventVSDto {
         result.URL = eventVS.getUrl();
         result.setBackupAvailable(eventVS.getBackupAvailable());
         if(eventVS.getUserVS() != null) result.userVS = eventVS.getUserVS().getNif();
-        if(eventVS.getVoteVS() != null) result.voteVS = new VoteVSDto(eventVS.getVoteVS(), null);
-        result.accessControlEventVSId = eventVS.getAccessControlEventVSId();
+        if(eventVS.getVote() != null) result.vote = new VoteDto(eventVS.getVote(), null);
+        result.accessControlEventId = eventVS.getAccessControlEventId();
         result.type = eventVS.getType();
         result.id = eventVS.getId();
         result.UUID =  java.util.UUID.randomUUID().toString();
@@ -117,10 +117,10 @@ public class EventVSDto {
     }
 
     @JsonIgnore
-    public EventVSElection getEventVSElection() {
-        EventVSElection result = new EventVSElection();
+    public EventElection getEventElection() {
+        EventElection result = new EventElection();
         result.setId(id);
-        result.setAccessControlEventVSId(accessControlEventVSId);
+        result.setAccessControlEventId(accessControlEventId);
         result.setDateCreated(dateCreated);
         result.setSubject(subject);
         result.setContent(getContent());
@@ -328,12 +328,12 @@ public class EventVSDto {
         this.eventId = eventId;
     }
 
-    public Long getAccessControlEventVSId() {
-        return accessControlEventVSId;
+    public Long getAccessControlEventId() {
+        return accessControlEventId;
     }
 
-    public void setAccessControlEventVSId(Long accessControlEventVSId) {
-        this.accessControlEventVSId = accessControlEventVSId;
+    public void setAccessControlEventId(Long accessControlEventId) {
+        this.accessControlEventId = accessControlEventId;
     }
 
     public String getCertCAVotacion() {
@@ -384,11 +384,11 @@ public class EventVSDto {
         this.serverURL = serverURL;
     }
 
-    public VoteVSDto getVoteVS() {
-        return voteVS;
+    public VoteDto getVote() {
+        return vote;
     }
 
-    public void setVoteVS(VoteVSDto voteVS) {
-        this.voteVS = voteVS;
+    public void setVote(VoteDto vote) {
+        this.vote = vote;
     }
 }

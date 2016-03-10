@@ -13,8 +13,8 @@ import static javax.persistence.GenerationType.IDENTITY;
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 @Entity
-@Table(name="VoteVSCanceler")
-public class VoteVSCanceler extends EntityVS implements Serializable {
+@Table(name="VoteCanceler")
+public class VoteCanceler extends EntityVS implements Serializable {
 
 
     public enum State {CANCELLATION_WITHOUT_VOTE,//Access request without vote
@@ -26,8 +26,8 @@ public class VoteVSCanceler extends EntityVS implements Serializable {
     @Column(name="id", unique=true, nullable=false)
     private Long id;
     @OneToOne private CMSMessage cmsMessage;
-    @OneToOne private AccessRequestVS accessRequestVS;
-    @OneToOne private VoteVS voteVS;
+    @OneToOne private AccessRequest accessRequest;
+    @OneToOne private Vote vote;
     @Enumerated(EnumType.STRING)
     @Column(name="state", nullable=false)
     private State state;
@@ -36,25 +36,25 @@ public class VoteVSCanceler extends EntityVS implements Serializable {
     @Column(name="hashAccessRequestBase64") private String hashAccessRequestBase64;
     @Column(name="originHashAccessRequestBase64") private String originHashAccessRequestBase64;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="eventVSElection", nullable=false)
-    private EventVSElection eventVSElection;
+    @JoinColumn(name="eventElection", nullable=false)
+    private EventElection eventElection;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
-    public VoteVSCanceler() {}
+    public VoteCanceler() {}
 
-    public VoteVSCanceler(CMSMessage cmsMessage, AccessRequestVS accessRequestVS, State state,
+    public VoteCanceler(CMSMessage cmsMessage, AccessRequest accessRequest, State state,
 						  String originHashAccessRequestBase64, String hashAccessRequestBase64, String originHashCertVSBase64,
-						  String hashCertVSBase64, VoteVS voteVS) {
+						  String hashCertVSBase64, Vote vote) {
         this.cmsMessage = cmsMessage;
-        this.accessRequestVS = accessRequestVS;
+        this.accessRequest = accessRequest;
         this.state = state;
         this.originHashAccessRequestBase64 = originHashAccessRequestBase64;
         this.hashAccessRequestBase64 = hashAccessRequestBase64;
         this.originHashCertVSBase64 = originHashCertVSBase64;
         this.hashCertVSBase64 = hashCertVSBase64;
-        this.eventVSElection = (EventVSElection) voteVS.getEventVS();
-        this.voteVS = voteVS;
+        this.eventElection = (EventElection) vote.getEventVS();
+        this.vote = vote;
     }
 
     public Date getDateCreated() {
@@ -81,20 +81,20 @@ public class VoteVSCanceler extends EntityVS implements Serializable {
 		return id;
 	}
 
-	public void setEventVSElection(EventVSElection eventVSElection) {
-		this.eventVSElection = eventVSElection;
+	public void setEventElection(EventElection eventElection) {
+		this.eventElection = eventElection;
 	}
 
-	public EventVSElection getEventVSElection() {
-		return eventVSElection;
+	public EventElection getEventElection() {
+		return eventElection;
 	}
 
-	public AccessRequestVS getAccessRequestVS() {
-		return accessRequestVS;
+	public AccessRequest getAccessRequest() {
+		return accessRequest;
 	}
 
-	public void setAccessRequestVS(AccessRequestVS accessRequestVS) {
-		this.accessRequestVS = accessRequestVS;
+	public void setAccessRequest(AccessRequest accessRequest) {
+		this.accessRequest = accessRequest;
 	}
 
 	public String getHashCertVSBase64() {
@@ -131,12 +131,12 @@ public class VoteVSCanceler extends EntityVS implements Serializable {
 		this.originHashAccessRequestBase64 = originHashAccessRequestBase64;
 	}
 
-	public VoteVS getVoteVS() {
-		return voteVS;
+	public Vote getVote() {
+		return vote;
 	}
 
-	public void setVoteVS(VoteVS voteVS) {
-		this.voteVS = voteVS;
+	public void setVote(Vote vote) {
+		this.vote = vote;
 	}
 
 	public State getState() {

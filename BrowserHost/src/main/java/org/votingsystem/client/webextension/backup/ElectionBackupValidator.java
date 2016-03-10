@@ -350,14 +350,14 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                     statusCode = validationResponse.getStatusCode();
                     if(ResponseVS.SC_OK == validationResponse.getStatusCode()) {
                         CMSSignedMessage cmsMessage = new CMSSignedMessage(FileUtils.getBytesFromFile(vote));
-                        boolean repeatedVote = signerCertMap.containsKey(validationResponse.getCMS().getVoteVS()
+                        boolean repeatedVote = signerCertMap.containsKey(validationResponse.getCMS().getVote()
                                 .getX509Certificate().getSerialNumber().longValue());
-                        Long certSerialNumber = cmsMessage.getVoteVS().getX509Certificate().getSerialNumber().longValue();
+                        Long certSerialNumber = cmsMessage.getVote().getX509Certificate().getSerialNumber().longValue();
                         if(repeatedVote){
                             numVotesERROR++;
                             statusCode = ResponseVS.SC_ERROR;
                             String msg = ContextVS.getInstance().getMessage(
-                                    "voteRepeatedErrorMsg", cmsMessage.getVoteVS().getX509Certificate()
+                                    "voteRepeatedErrorMsg", cmsMessage.getVote().getX509Certificate()
                                     .getSerialNumber().longValue()) + " - " + vote.getAbsolutePath() + " - " +
                                     signerCertMap.get(certSerialNumber);
                             errorList.add(msg);

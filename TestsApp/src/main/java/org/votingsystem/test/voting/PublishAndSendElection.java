@@ -20,7 +20,7 @@ import org.votingsystem.test.util.UserBaseSimulationData;
 import org.votingsystem.test.util.VotingSimulationData;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
-import org.votingsystem.util.crypto.VoteVSHelper;
+import org.votingsystem.util.crypto.VoteHelper;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -39,7 +39,7 @@ public class PublishAndSendElection {
     private static List<String> synchronizedElectorList;
     private static ExecutorService simulatorExecutor;
     private static ExecutorCompletionService responseService;
-    private static final Map<String, VoteVSHelper> voteVSMap = new ConcurrentHashMap<>();
+    private static final Map<String, VoteHelper> voteMap = new ConcurrentHashMap<>();
 
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
@@ -130,10 +130,10 @@ public class PublishAndSendElection {
                 if(!simulationData.waitingForVoteRequests()) {
                     int randomElector = new Random().nextInt(synchronizedElectorList.size());
                     String electorNIF = synchronizedElectorList.remove(randomElector);
-                    VoteVSHelper voteVSHelper = VoteVSHelper.genRandomVote(eventVS.getId(), eventVS.getUrl(), eventVS.getFieldsEventVS());
-                    voteVSHelper.setNIF(electorNIF);
-                    voteVSMap.put(voteVSHelper.getHashCertVSBase64(), voteVSHelper);
-                    responseService.submit(new VoteSender(voteVSHelper));
+                    VoteHelper voteHelper = VoteHelper.genRandomVote(eventVS.getId(), eventVS.getUrl(), eventVS.getFieldsEventVS());
+                    voteHelper.setNIF(electorNIF);
+                    voteMap.put(voteHelper.getHashCertVSBase64(), voteHelper);
+                    responseService.submit(new VoteSender(voteHelper));
                 } else Thread.sleep(500);
             }
         }
@@ -143,12 +143,12 @@ public class PublishAndSendElection {
         log.info("waitForVoteResponses - Num. votes: " + simulationData.getNumOfElectors());
         while (simulationData.hasPendingVotes()) {
             try {
-                Future<ResponseVS<VoteVSHelper>> f = responseService.take();
-                ResponseVS<VoteVSHelper> responseVS = f.get();
+                Future<ResponseVS<VoteHelper>> f = responseService.take();
+                ResponseVS<VoteHelper> responseVS = f.get();
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                    VoteVSHelper voteVSHelper = f.get().getData();
-                    if(isWithVoteCancellation) cancelVote(voteVSMap.get(voteVSHelper.getHashCertVSBase64()),
-                            voteVSHelper.getNIF());
+                    VoteHelper voteHelper = f.get().getData();
+                    if(isWithVoteCancellation) cancelVote(voteMap.get(voteHelper.getHashCertVSBase64()),
+                            voteHelper.getNIF());
                     simulationData.getAndIncrementNumVotingRequestsOK();
                 } else simulationData.finishAndExit(ResponseVS.SC_ERROR, "ERROR" + responseVS.getMessage());
             } catch(Exception ex) {
@@ -178,7 +178,7 @@ public class PublishAndSendElection {
         CMSSignedMessage message = responseVS.getCMS();
         responseVS = HttpHelper.getInstance().getData(eventURL, ContentTypeVS.JSON);
         EventVSDto eventVSJSON = JSON.getMapper().readValue(responseVS.getMessage(), EventVSDto.class);
-        return eventVSJSON.getEventVSElection();
+        return eventVSJSON.getEventElection();
     }
 
     public static void startSimulationTimer(SimulationData simulationData) throws Exception {
@@ -202,10 +202,10 @@ public class PublishAndSendElection {
     }
 
 
-    private static void cancelVote(VoteVSHelper voteVSHelper, String nif) throws Exception {
+    private static void cancelVote(VoteHelper voteHelper, String nif) throws Exception {
         SignatureService signatureService = SignatureService.getUserVSSignatureService(nif, UserVS.Type.USER);
         CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsString(
-                voteVSHelper.getVoteCanceler()));
+                voteHelper.getVoteCanceler()));
         cmsMessage = new MessageTimeStamper(cmsMessage, ContextVS.getInstance().getAccessControl()
                 .getTimeStampServiceURL()).call();
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,

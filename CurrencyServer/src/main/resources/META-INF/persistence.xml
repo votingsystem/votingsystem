@@ -4,7 +4,7 @@
         <jta-data-source>java:jboss/datasources/CurrencyServer</jta-data-source>
         <class>org.votingsystem.model.ActorVS</class>
         <class>org.votingsystem.model.AddressVS</class>
-        <class>org.votingsystem.model.BackupRequestVS</class>
+        <class>org.votingsystem.model.BackupRequest</class>
         <class>org.votingsystem.model.currency.BankVSInfo</class>
         <class>org.votingsystem.model.BatchVS</class>
         <class>org.votingsystem.model.CertificateVS</class>

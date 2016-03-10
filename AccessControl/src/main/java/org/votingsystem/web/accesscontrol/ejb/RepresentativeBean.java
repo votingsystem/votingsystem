@@ -5,7 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.*;
-import org.votingsystem.model.BackupRequestVS;
+import org.votingsystem.model.BackupRequest;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ImageVS;
 import org.votingsystem.model.UserVS;
@@ -165,7 +165,7 @@ public class RepresentativeBean {
         return result;
     }
 
-    public RepresentativesAccreditations getAccreditationsBackupForEvent (EventVSElection eventVS)
+    public RepresentativesAccreditations getAccreditationsBackupForEvent (EventElection eventVS)
             throws ExceptionVS, IOException {
 		/*if(event.isActive(Calendar.getInstance().getTime())) {
 			return new ResponseVS(statusCode:ResponseVS.SC_ERROR, message:messageSource.getMessage('eventActiveErrorMsg',
@@ -186,12 +186,12 @@ public class RepresentativeBean {
         Map<Long, ElectionOptionDto> optionsMap = new HashMap<>();
         Query query = null;
         for(FieldEventVS option : eventVS.getFieldsEventVS()) {
-            query = dao.getEM().createQuery("select count(v) from VoteVS v where v.optionSelected =:option " +
-                    "and v.state =:state").setParameter("option", option).setParameter("state", VoteVS.State.OK);
+            query = dao.getEM().createQuery("select count(v) from Vote v where v.optionSelected =:option " +
+                    "and v.state =:state").setParameter("option", option).setParameter("state", Vote.State.OK);
             Long numVoteRequests = (long) query.getSingleResult();
-            query = dao.getEM().createQuery("select count(v) from VoteVS v where v.optionSelected =:option " +
+            query = dao.getEM().createQuery("select count(v) from Vote v where v.optionSelected =:option " +
                     "and v.state =:state and v.certificateVS.userVS is null").setParameter("option", option)
-                    .setParameter("state", VoteVS.State.OK);
+                    .setParameter("state", Vote.State.OK);
             Long numUsersWithVote = (long) query.getSingleResult();
             Long numRepresentativesWithVote = numVoteRequests - numUsersWithVote;
             ElectionOptionDto electionOptionDto = new ElectionOptionDto(option.getContent(), numVoteRequests, numUsersWithVote,
@@ -242,10 +242,10 @@ public class RepresentativeBean {
                     for(RepresentationDocument representationDoc : representationList) {
                         UserVS represented = representationDoc.getUserVS();
                         ++numRepresented;
-                        Query representationDocQuery = dao.getEM().createQuery("select a from AccessRequestVS a where " +
-                                "a.state =:state and a.userVS =:userVS and a.eventVS =:eventVS").setParameter("state", AccessRequestVS.State.OK)
+                        Query representationDocQuery = dao.getEM().createQuery("select a from AccessRequest a where " +
+                                "a.state =:state and a.userVS =:userVS and a.eventVS =:eventVS").setParameter("state", AccessRequest.State.OK)
                                 .setParameter("userVS", represented).setParameter("eventVS", eventVS);
-                        AccessRequestVS representedAccessRequest = dao.getSingleResult(AccessRequestVS.class, query);
+                        AccessRequest representedAccessRequest = dao.getSingleResult(AccessRequest.class, query);
                         String repDocFileName = null;
                         if(representedAccessRequest != null) {
                             numRepresentedWithAccessRequest++;
@@ -272,19 +272,19 @@ public class RepresentativeBean {
                 numTotalRepresented += numRepresented;
                 numTotalRepresentedWithAccessRequest += numRepresentedWithAccessRequest;
                 State state = State.WITHOUT_ACCESS_REQUEST;
-                Query representativeQuery = dao.getEM().createQuery("select a from AccessRequestVS a where " +
+                Query representativeQuery = dao.getEM().createQuery("select a from AccessRequest a where " +
                         "a.eventVS =:eventVS and a.userVS =:userVS and a.state =:state")
                         .setParameter("eventVS", eventVS).setParameter("userVS", representative)
-                        .setParameter("state", AccessRequestVS.State.OK);
-                AccessRequestVS accessRequestVS = dao.getSingleResult(AccessRequestVS.class, representativeQuery);
-                VoteVS representativeVote = null;
-                if(accessRequestVS != null) {//Representative has access request
+                        .setParameter("state", AccessRequest.State.OK);
+                AccessRequest accessRequest = dao.getSingleResult(AccessRequest.class, representativeQuery);
+                Vote representativeVote = null;
+                if(accessRequest != null) {//Representative has access request
                     numRepresentativesWithAccessRequest++;
                     state = State.WITH_ACCESS_REQUEST;
-                    representativeQuery = dao.getEM().createQuery("select v from VoteVS v where v.certificateVS.userVS =:userVS and " +
+                    representativeQuery = dao.getEM().createQuery("select v from Vote v where v.certificateVS.userVS =:userVS and " +
                             "v.eventVS =:eventVS and v.state =:state").setParameter("userVS", representative)
-                            .setParameter("eventVS", eventVS).setParameter("state", VoteVS.State.OK);
-                    representativeVote = dao.getSingleResult(VoteVS.class, representativeQuery);
+                            .setParameter("eventVS", eventVS).setParameter("state", Vote.State.OK);
+                    representativeVote = dao.getSingleResult(Vote.class, representativeQuery);
                 }
                 Long numVotesRepresentedByRepresentative = 0L;
                 if(representativeVote != null) {
@@ -388,11 +388,11 @@ public class RepresentativeBean {
                     request.getRepresentativeNif());
             RepresentativeVotingHistoryMetaInf metaInf =
                     getVotingHistoryBackup(representative, request.getDateFrom(), request.getDateTo());
-            BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getDownloadURL(),
+            BackupRequest backupRequest = dao.persist(new BackupRequest(metaInf.getDownloadURL(),
                     TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST,
                     representative, cmsMessage, request.getEmail()));
-            String downloadURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId() + "/download";
-            String requestURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId();
+            String downloadURL = config.getContextURL() + "/rest/backup/request/id/" + backupRequest.getId() + "/download";
+            String requestURL = config.getContextURL() + "/rest/backup/request/id/" + backupRequest.getId();
             String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
             String content = MessageFormat.format(messageTemplate, userVS.getName(), requestURL, representative.getName(),
                     DateUtils.getDayWeekDateStr(request.getDateFrom(), "HH:mm"), DateUtils.getDayWeekDateStr(request.getDateTo(), "HH:mm"),
@@ -416,10 +416,10 @@ public class RepresentativeBean {
             if(representative == null) throw new ValidationExceptionVS("ERROR - representativeNifErrorMsg - nif: " +
                     request.getRepresentativeNif());
             RepresentativeAccreditationsMetaInf metaInf = getAccreditationsBackup(representative, request.getSelectedDate());
-            BackupRequestVS backupRequest = dao.persist(new BackupRequestVS(metaInf.getFilePath(),
+            BackupRequest backupRequest = dao.persist(new BackupRequest(metaInf.getFilePath(),
                     TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST, representative, cmsMessage, request.getEmail()));
-            String downloadURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId() + "/download";
-            String requestURL = config.getContextURL() + "/rest/backupVS/request/id/" + backupRequest.getId();
+            String downloadURL = config.getContextURL() + "/rest/backup/request/id/" + backupRequest.getId() + "/download";
+            String requestURL = config.getContextURL() + "/rest/backup/request/id/" + backupRequest.getId();
             String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
             String content = MessageFormat.format(messageTemplate, userVS.getName(), requestURL, representative.getName(),
                     DateUtils.getDayWeekDateStr(request.getSelectedDate(), "HH:mm"), downloadURL);
@@ -451,15 +451,15 @@ public class RepresentativeBean {
                 return metaInf;
             }
         }
-        Query query = dao.getEM().createQuery("select v from VoteVS v where v.certificateVS.userVS =:userVS " +
+        Query query = dao.getEM().createQuery("select v from Vote v where v.certificateVS.userVS =:userVS " +
                 "and v.state =:state  and v.dateCreated between :dateFrom and :dateTo").setParameter("userVS", representative)
-                .setParameter("state", VoteVS.State.OK).setParameter("dateFrom", dateFrom).setParameter("dateTo", dateTo);
-        List<VoteVS> representativeVotes = query.getResultList();
+                .setParameter("state", Vote.State.OK).setParameter("dateFrom", dateFrom).setParameter("dateTo", dateTo);
+        List<Vote> representativeVotes = query.getResultList();
         long numVotes = representativeVotes.size();
-        for (VoteVS voteVS : representativeVotes) {
-            String voteId = String.format("%08d", voteVS.getId());
+        for (Vote vote : representativeVotes) {
+            String voteId = String.format("%08d", vote.getId());
             File cmsFile = new File(format("{0}/vote_{1}.p7m", basedir, voteId));
-            IOUtils.write(voteVS.getCMSMessage().getContentPEM(), new FileOutputStream(cmsFile));
+            IOUtils.write(vote.getCMSMessage().getContentPEM(), new FileOutputStream(cmsFile));
         }
         log.info(format("representative: {0} - numVotes: {1}", representative.getNif(), numVotes));
         String representativeURL = format("{0}/rest/representative/id/{1}", config.getContextURL(), representative.getId());

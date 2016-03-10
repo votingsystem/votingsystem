@@ -2,8 +2,8 @@ package org.votingsystem.util.crypto;
 
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
-import org.votingsystem.dto.voting.VoteVSCancelerDto;
-import org.votingsystem.dto.voting.VoteVSDto;
+import org.votingsystem.dto.voting.VoteCancelerDto;
+import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.model.voting.FieldEventVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.StringUtils;
@@ -17,9 +17,9 @@ import java.util.UUID;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class VoteVSHelper {
+public class VoteHelper {
 
-    private Long eventVSId;
+    private Long EventId;
     private String eventVSURL;
     private String NIF;
     private String originHashAccessRequest;
@@ -27,32 +27,32 @@ public class VoteVSHelper {
     private String originHashCertVote;
     private String hashCertVSBase64;
     private CMSSignedMessage validatedVote;
-    private VoteVSDto voteVSDto;
-    private VoteVSCancelerDto cancelerDto;
+    private VoteDto voteDto;
+    private VoteCancelerDto cancelerDto;
     private AccessRequestDto accessRequestDto;
 
 
-    public static VoteVSHelper load(VoteVSDto voteVSDto) throws NoSuchAlgorithmException {
-        VoteVSHelper voteVSHelper = new VoteVSHelper();
-        voteVSHelper.originHashAccessRequest = UUID.randomUUID().toString();
-        voteVSHelper.hashAccessRequestBase64 = StringUtils.getHashBase64(
-                voteVSHelper.originHashAccessRequest, ContextVS.DATA_DIGEST_ALGORITHM);
-        voteVSHelper.originHashCertVote = UUID.randomUUID().toString();
-        voteVSHelper.hashCertVSBase64 = StringUtils.getHashBase64(
-                voteVSHelper.originHashCertVote, ContextVS.DATA_DIGEST_ALGORITHM);
-        voteVSHelper.eventVSId = voteVSDto.getEventVSId();
-        voteVSHelper.eventVSURL = voteVSDto.getEventURL();
-        voteVSHelper.genVote(voteVSDto.getOptionSelected());
-        return voteVSHelper;
+    public static VoteHelper load(VoteDto voteDto) throws NoSuchAlgorithmException {
+        VoteHelper voteHelper = new VoteHelper();
+        voteHelper.originHashAccessRequest = UUID.randomUUID().toString();
+        voteHelper.hashAccessRequestBase64 = StringUtils.getHashBase64(
+                voteHelper.originHashAccessRequest, ContextVS.DATA_DIGEST_ALGORITHM);
+        voteHelper.originHashCertVote = UUID.randomUUID().toString();
+        voteHelper.hashCertVSBase64 = StringUtils.getHashBase64(
+                voteHelper.originHashCertVote, ContextVS.DATA_DIGEST_ALGORITHM);
+        voteHelper.EventId = voteDto.getEventId();
+        voteHelper.eventVSURL = voteDto.getEventURL();
+        voteHelper.genVote(voteDto.getOptionSelected());
+        return voteHelper;
     }
 
-    public static VoteVSHelper genRandomVote(Long eventVSId, String eventVSURL, Set<FieldEventVS> options)
+    public static VoteHelper genRandomVote(Long EventId, String eventVSURL, Set<FieldEventVS> options)
             throws NoSuchAlgorithmException {
-        VoteVSDto voteVSDto =  new VoteVSDto();
-        voteVSDto.setEventVSId(eventVSId);
-        voteVSDto.setEventURL(eventVSURL);
-        voteVSDto.setOptionSelected(getRandomOption(options));
-        return VoteVSHelper.load(voteVSDto);
+        VoteDto voteDto =  new VoteDto();
+        voteDto.setEventId(EventId);
+        voteDto.setEventURL(eventVSURL);
+        voteDto.setOptionSelected(getRandomOption(options));
+        return VoteHelper.load(voteDto);
     }
 
     public static FieldEventVS getRandomOption (Set<FieldEventVS> options) {
@@ -62,31 +62,31 @@ public class VoteVSHelper {
 
     private void genVote(FieldEventVS optionSelected) {
         genAccessRequest();
-        voteVSDto = new VoteVSDto();
-        voteVSDto.setOperation(TypeVS.SEND_VOTE);
-        voteVSDto.setHashCertVSBase64(hashCertVSBase64);
-        voteVSDto.setEventVSId(eventVSId);
-        voteVSDto.setEventURL(eventVSURL);
-        voteVSDto.setOptionSelected(optionSelected);
-        voteVSDto.setUUID(UUID.randomUUID().toString());
+        voteDto = new VoteDto();
+        voteDto.setOperation(TypeVS.SEND_VOTE);
+        voteDto.setHashCertVSBase64(hashCertVSBase64);
+        voteDto.setEventId(EventId);
+        voteDto.setEventURL(eventVSURL);
+        voteDto.setOptionSelected(optionSelected);
+        voteDto.setUUID(UUID.randomUUID().toString());
     }
 
 
     private void genAccessRequest() {
         accessRequestDto = new AccessRequestDto();
-        accessRequestDto.setEventId(eventVSId);
+        accessRequestDto.setEventId(EventId);
         accessRequestDto.setEventURL(eventVSURL);
         accessRequestDto.setHashAccessRequestBase64(hashAccessRequestBase64);
         accessRequestDto.setUUID(UUID.randomUUID().toString());
     }
 
-    public VoteVSDto getVote() {
-        return voteVSDto;
+    public VoteDto getVote() {
+        return voteDto;
     }
 
-    public VoteVSCancelerDto getVoteCanceler() {
+    public VoteCancelerDto getVoteCanceler() {
         if(cancelerDto == null) {
-            cancelerDto = new VoteVSCancelerDto();
+            cancelerDto = new VoteCancelerDto();
             cancelerDto.setOperation(TypeVS.CANCEL_VOTE);
             cancelerDto.setOriginHashAccessRequest(originHashAccessRequest);
             cancelerDto.setHashAccessRequestBase64(hashAccessRequestBase64);

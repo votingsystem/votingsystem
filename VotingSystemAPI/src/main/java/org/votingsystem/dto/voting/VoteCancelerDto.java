@@ -12,7 +12,7 @@ import java.security.NoSuchAlgorithmException;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VoteVSCancelerDto {
+public class VoteCancelerDto {
 
     private String originHashCertVote;
     private String hashCertVSBase64;
@@ -22,7 +22,7 @@ public class VoteVSCancelerDto {
     private String UUID;
 
 
-    public VoteVSCancelerDto() {}
+    public VoteCancelerDto() {}
 
     public void validate() throws ValidationExceptionVS, NoSuchAlgorithmException {
         if(operation == null || TypeVS.CANCEL_VOTE != operation) throw new ValidationExceptionVS(
