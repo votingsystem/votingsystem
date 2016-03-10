@@ -13,6 +13,12 @@
             <groupId>org.votingsystem</groupId>
             <artifactId>VotingSystemAPI</artifactId>
             <version>0.8.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
