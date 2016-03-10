@@ -10,9 +10,9 @@ public enum ContentTypeVS {
     JAVASCRIPT("application/javascript", "js"),
 
     JSON(MediaTypeVS.JSON, "json"),
-    JSON_SIGNED(MediaTypeVS.JSON_SIGNED,"p7m"),
-    JSON_ENCRYPTED(MediaTypeVS.JSON_ENCRYPTED,"p7m"),//.p7c
-    JSON_SIGNED_AND_ENCRYPTED("application/json;application/pkcs7-signature;application/pkcs7-encrypted", "p7m"),
+    JSON_SIGNED(MediaTypeVS.JSON_SIGNED,"p7s"),
+    JSON_ENCRYPTED(MediaTypeVS.JSON_ENCRYPTED,"p7s"),//.p7c
+    JSON_SIGNED_AND_ENCRYPTED("application/json;application/pkcs7-signature;application/pkcs7-encrypted", "p7s"),
 
     MESSAGEVS(MediaTypeVS.MESSAGEVS, "vs"),
     MULTIPART_SIGNED("multipart/signed", null),
@@ -31,8 +31,8 @@ public enum ContentTypeVS {
 
     CMS_SIGNED("signed-data", null),
     SIGNED("application/pkcs7-signature","p7s"),
-    ENCRYPTED(MediaTypeVS.ENCRYPTED, "p7m"),//.p7c
-    SIGNED_AND_ENCRYPTED("application/pkcs7-signature;application/pkcs7-encrypted", "p7m"),
+    ENCRYPTED(MediaTypeVS.ENCRYPTED, "p7s"),//.p7c
+    SIGNED_AND_ENCRYPTED("application/pkcs7-signature;application/pkcs7-encrypted", "p7s"),
 
     PKCS7_CERT("application/pkcs7-certificates","p7b"),//.spc
     PKCS7_CERT_REQ_RESP("application/pkcs7-certreqresp","p7r"),

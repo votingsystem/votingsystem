@@ -304,7 +304,7 @@ public class CMSBean {
     }
 
     public CMSDto validateCMS(CMSSignedMessage cmsSignedMessage, ContentTypeVS contenType) throws Exception {
-        if (cmsSignedMessage.isValidSignature()) {
+        if (cmsSignedMessage.isValidSignature() != null) {
             MessagesVS messages = MessagesVS.getCurrentInstance();
             Query query = dao.getEM().createNamedQuery("findcmsMessageByBase64ContentDigest")
                     .setParameter("base64ContentDigest", cmsSignedMessage.getContentDigestStr());

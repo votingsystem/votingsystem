@@ -150,7 +150,7 @@ public class TransactionVSResource {
             String desc = (transactionType == null? "":transactionvsType) + (tag == null? "":tag);
             File zipFile = new File (tempDir, "transaction_" + desc + "_" + transactionList.size() +  ".zip");
             for(TransactionVS transactionVS :  transactionList) {
-                File cmsFile = new File(format("{0}/transaction_{1}.p7m", tempDir.getAbsolutePath(), transactionVS.getId()));
+                File cmsFile = new File(format("{0}/transaction_{1}.p7s", tempDir.getAbsolutePath(), transactionVS.getId()));
                 IOUtils.write(transactionVS.getCmsMessage().getContentPEM(), new FileOutputStream(cmsFile));
             }
             new ZipUtils(tempDir).zipIt(zipFile);

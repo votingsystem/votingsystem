@@ -249,8 +249,8 @@ public class RepresentativeBean {
                         String repDocFileName = null;
                         if(representedAccessRequest != null) {
                             numRepresentedWithAccessRequest++;
-                            repDocFileName = format("{0}/{1}_delegation_with_vote.p7m", representativeBaseDir, represented.getNif());
-                        } else repDocFileName = format("{0}/{1}_delegation.p7m", representativeBaseDir, represented.getNif());
+                            repDocFileName = format("{0}/{1}_delegation_with_vote.p7s", representativeBaseDir, represented.getNif());
+                        } else repDocFileName = format("{0}/{1}_delegation.p7s", representativeBaseDir, represented.getNif());
                         File representationDocFile = new File(repDocFileName);
                         IOUtils.write(representationDoc.getActivationCMS().getContentPEM(), new FileOutputStream(representationDocFile));
                         if((numRepresented  % 100) == 0) {
@@ -458,7 +458,7 @@ public class RepresentativeBean {
         long numVotes = representativeVotes.size();
         for (Vote vote : representativeVotes) {
             String voteId = String.format("%08d", vote.getId());
-            File cmsFile = new File(format("{0}/vote_{1}.p7m", basedir, voteId));
+            File cmsFile = new File(format("{0}/vote_{1}.p7s", basedir, voteId));
             IOUtils.write(vote.getCMSMessage().getContentPEM(), new FileOutputStream(cmsFile));
         }
         log.info(format("representative: {0} - numVotes: {1}", representative.getNif(), numVotes));

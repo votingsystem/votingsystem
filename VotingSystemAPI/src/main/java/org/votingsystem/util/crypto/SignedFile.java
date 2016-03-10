@@ -25,16 +25,14 @@ public class SignedFile {
     private String name = null;
     private File file = null;
     private CMSSignedMessage cmsMessage = null;
-    private boolean signatureVerified = false;
 
     public SignedFile(byte[] signedFileBytes, String name) throws Exception {
-        cmsMessage = CMSSignedMessage.FROM_PEM(signedFileBytes);
-        signatureVerified = cmsMessage.isValidSignature();
+        cmsMessage = CMSSignedMessage.FROM_PEM(signedFileBytes).isValidSignature();
         this.name = name;
     }
 
     public boolean isValidSignature() {
-        return signatureVerified;
+        return cmsMessage != null;
     }
 
     public byte[] getSignedFileBytes() {
@@ -86,7 +84,7 @@ public class SignedFile {
     public boolean isCMS() {
         if(cmsMessage != null) return true;
         if(signedFileBytes == null) return false;
-        if(name.toLowerCase().endsWith(".p7m") && signatureVerified) return true;
+        if(name.toLowerCase().endsWith(".p7s") && (cmsMessage != null)) return true;
         else return false;
     }
 

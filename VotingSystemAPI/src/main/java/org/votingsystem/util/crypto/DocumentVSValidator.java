@@ -37,10 +37,12 @@ public class DocumentVSValidator {
         byte[] fileBytes = FileUtils.getBytesFromFile(voteFile);
         CMSSignedMessage signedFile = new CMSSignedMessage(fileBytes);
         Long signedFileOptionSelectedId = null;
-        if(!signedFile.isValidSignature()) {
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
+        try {
+            signedFile.isValidSignature();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
                     voteFile.getAbsolutePath()));
-
         }
         Set<UserVS> signersVS = signedFile.getSigners();
         Date voteDate = signedFile.getTimeStampToken().getTimeStampInfo().getGenTime();
@@ -104,11 +106,16 @@ public class DocumentVSValidator {
         return new ResponseVS(ResponseVS.SC_OK, null, signedFileOptionSelectedId).setCMS(signedFile);
     }
 
+
+
     public static ResponseVS validateRepresentationDocument(File signedFile, Set<TrustAnchor> trustAnchors, Date dateBegin,
             Date dateFinish, String representativeNif, X509Certificate timeStampServerCert) throws Exception {
         CMSSignedMessage cmsMessage = new CMSSignedMessage(FileUtils.getBytesFromFile(signedFile));
-        if(!cmsMessage.isValidSignature()) {
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
+        try {
+            cmsMessage.isValidSignature();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
                     signedFile.getName()));
         }
         UserVS userVS = cmsMessage.getSigner();
@@ -165,9 +172,12 @@ public class DocumentVSValidator {
     public static ResponseVS validateAccessRequest(File signedFile, Set<TrustAnchor> trustAnchors,
             String eventURL, Date dateBegin, Date dateFinish, X509Certificate timeStampServerCert) throws Exception {
         CMSSignedMessage cmsMessage = new CMSSignedMessage(FileUtils.getBytesFromFile(signedFile));
-        if(!cmsMessage.isValidSignature()) {
-            return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage(
-                    "signatureErrorMsg", signedFile.getName()));
+        try {
+            cmsMessage.isValidSignature();
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
+                    signedFile.getName()));
         }
         UserVS signer = cmsMessage.getSigner();
         try {

@@ -209,14 +209,14 @@ public class CurrencyBean {
                 .setParameter("typeVS",  TypeVS.CURRENCY_REQUEST);
         List<CMSMessage> resultList = query.getResultList();
         for(CMSMessage cmsMessage : resultList) {
-            File cmsFile = new File(format("{0}/cmsMessage_{1}.p7m", currencyRequestDir.getAbsolutePath(), cmsMessage.getId()));
+            File cmsFile = new File(format("{0}/cmsMessage_{1}.p7s", currencyRequestDir.getAbsolutePath(), cmsMessage.getId()));
             IOUtils.write(cmsMessage.getContentPEM(), new FileOutputStream(cmsFile));
         }
         query = dao.getEM().createQuery("SELECT c FROM CurrencyBatch c WHERE c.state =:state and c.type =:typeVS")
                 .setParameter("typeVS",  TypeVS.CURRENCY_SEND).setParameter("state", BatchVS.State.OK);
         List<CurrencyBatch> currencyBatchList = query.getResultList();
         for(CurrencyBatch currencyBatch : currencyBatchList) {
-            File cmsFile = new File(format("{0}/CURRENCY_SEND_cmsMessage_{1}.p7m", currencyBatchDir.getAbsolutePath(),
+            File cmsFile = new File(format("{0}/CURRENCY_SEND_cmsMessage_{1}.p7s", currencyBatchDir.getAbsolutePath(),
                     currencyBatch.getCmsMessage().getId()));
             IOUtils.write(currencyBatch.getCmsMessage().getContentPEM(), new FileOutputStream(cmsFile));
         }
@@ -225,7 +225,7 @@ public class CurrencyBean {
                 .setParameter("typeVS",  TypeVS.CURRENCY_CHANGE).setParameter("state", BatchVS.State.OK);
         currencyBatchList = query.getResultList();
         for(CurrencyBatch currencyBatch : currencyBatchList) {
-            File cmsFile = new File(format("{0}/CURRENCY_CHANGE_cmsMessage_{1}.p7m", currencyBatchDir.getAbsolutePath(),
+            File cmsFile = new File(format("{0}/CURRENCY_CHANGE_cmsMessage_{1}.p7s", currencyBatchDir.getAbsolutePath(),
                     currencyBatch.getCmsMessage().getId()));
             IOUtils.write(currencyBatch.getCmsMessage().getContentPEM(), new FileOutputStream(cmsFile));
         }

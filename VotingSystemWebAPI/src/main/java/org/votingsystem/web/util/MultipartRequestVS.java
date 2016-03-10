@@ -68,7 +68,7 @@ public class MultipartRequestVS {
                     if(part.getName().contains(ContextVS.CMS_FILE_NAME)) {
                         cms = CMSSignedMessage.FROM_PEM(part.getInputStream());
                     } else if(part.getName().contains(ContextVS.CMS_ANONYMOUS_FILE_NAME)) {
-                        anonymousCMS = cms = CMSSignedMessage.FROM_PEM(part.getInputStream());
+                        anonymousCMS = CMSSignedMessage.FROM_PEM(part.getInputStream());
                     } else {
                         throw new ValidationExceptionVS("ANONYMOUS_DELEGATION_CANCELATION - bad request - file name: " + part.getName());
                     }

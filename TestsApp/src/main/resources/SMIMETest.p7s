@@ -4,8 +4,8 @@ Subject: TransactionVS from BankVS
 MIME-Version: 1.0
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; 
 	micalg=sha1; boundary="----=_Part_46_643391342.1412785932056"; 
-	name=vmngill.p7m
-Content-Disposition: attachment; fileName=vmngill.p7m
+	name=vmngill.p7s
+Content-Disposition: attachment; fileName=vmngill.p7s
 
 ------=_Part_46_643391342.1412785932056
 Content-Type: text/plain; charset=us-ascii

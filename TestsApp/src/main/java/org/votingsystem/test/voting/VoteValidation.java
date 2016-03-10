@@ -39,7 +39,7 @@ public class VoteValidation {
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
         simulationData.setTimerMap(timerMap);
-        File voteFile = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("voting/vote.p7m"));
+        File voteFile = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("voting/vote.p7s"));
         byte[] voteBytes = FileUtils.getBytesFromFile(voteFile);
         File trustedCertsFile = FileUtils.getFileFromBytes(
                 ContextVS.getInstance().getResourceBytes("voting/systemTrustedCerts.pem"));
@@ -70,7 +70,7 @@ public class VoteValidation {
         CMSSignedMessage vote = new CMSSignedMessage(voteBytes);
         Date tokenDate = vote.getSigner().getTimeStampToken().getTimeStampInfo().getGenTime();
 
-        if(!vote.isValidSignature()) {
+        if(vote.isValidSignature() == null) {
             log.log(Level.SEVERE, ContextVS.getInstance().getProperty("signatureErrorMsg", voteFile.getAbsolutePath()));
         }
 

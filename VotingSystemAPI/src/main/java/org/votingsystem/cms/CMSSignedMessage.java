@@ -119,9 +119,9 @@ public class CMSSignedMessage extends CMSSignedData {
         return new String(PEMUtils.getPEMEncoded(toASN1Structure()));
     }
 
-    public boolean isValidSignature() throws Exception {
+    public CMSSignedMessage isValidSignature() throws Exception {
         getMessageData();
-        return true;
+        return this;
     }
 
     public static CMSSignedMessage addTimeStamp(CMSSignedMessage signedMessage, TimeStampToken timeStampToken) throws Exception {

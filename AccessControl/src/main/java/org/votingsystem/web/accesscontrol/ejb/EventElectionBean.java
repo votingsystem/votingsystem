@@ -166,9 +166,9 @@ public class EventElectionBean {
             UserVS representative = vote.getCertificateVS().getUserVS();
             File cmsFile = null;
             if(representative != null) {//not anonymous, representative vote
-                cmsFile = new File(format("{0}/representativeVote_{1}.p7m", votesBaseDir, representative.getNif()));
+                cmsFile = new File(format("{0}/representativeVote_{1}.p7s", votesBaseDir, representative.getNif()));
             } else {//anonymous, user vote
-                cmsFile = new File(format("{0}/vote_{1}.p7m", votesBaseDir, formatted.format(vote.getId())));
+                cmsFile = new File(format("{0}/vote_{1}.p7s", votesBaseDir, formatted.format(vote.getId())));
             }
             IOUtils.write(vote.getCMSMessage().getCMS().toPEM(), new FileOutputStream(cmsFile));
             /*if(((votes.getRowNumber() + 1) % 2000) == 0) {
@@ -181,7 +181,7 @@ public class EventElectionBean {
                 .setParameter("state", AccessRequest.State.OK).setParameter("eventVS", eventVS);
         List<AccessRequest> accessRequestList = query.getResultList();
         for(AccessRequest accessRequest : accessRequestList) {
-            File cmsFile = new File(format("{0}/accessRequest_{1}.p7m", accessRequestBaseDir, accessRequest.getUserVS().getNif()));
+            File cmsFile = new File(format("{0}/accessRequest_{1}.p7s", accessRequestBaseDir, accessRequest.getUserVS().getNif()));
             IOUtils.write(accessRequest.getCmsMessage().getContentPEM(), new FileOutputStream(cmsFile));
             /*if((accessRequests.getRowNumber() % 100) == 0) {
                 String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillis(
