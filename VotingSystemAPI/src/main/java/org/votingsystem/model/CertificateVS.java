@@ -35,7 +35,8 @@ public class CertificateVS extends EntityVS implements Serializable {
 
     public enum State {OK, ERROR, CANCELED, USED, LAPSED, UNKNOWN}
 
-    public enum Type {Vote_ROOT, Vote, USER, USER_ID_CARD, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD,
+    public enum Type {
+        VOTE_ROOT, VOTE, USER, USER_ID_CARD, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD,
         ACTOR_VS, ANONYMOUS_REPRESENTATIVE_DELEGATION, CURRENCY, TIMESTAMP_SERVER}
 
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -99,7 +100,7 @@ public class CertificateVS extends EntityVS implements Serializable {
             throws CertificateEncodingException {
         CertificateVS result = new CertificateVS(x509Cert);
         result.setIsRoot(false);
-        result.setState(State.OK).setType(Type.Vote);
+        result.setState(State.OK).setType(Type.VOTE);
         result.setHashCertVSBase64(hashCertVSBase64);
         result.setUserVS(userVS);
         result.subjectDN = x509Cert.getSubjectDN().toString();
@@ -108,7 +109,7 @@ public class CertificateVS extends EntityVS implements Serializable {
 
     public static CertificateVS ELECTION(X509Certificate x509Cert) throws CertificateEncodingException {
         CertificateVS result = new CertificateVS(x509Cert);
-        result.type = CertificateVS.Type.Vote_ROOT;
+        result.type = CertificateVS.Type.VOTE_ROOT;
         result.state = CertificateVS.State.OK;
         result.subjectDN = x509Cert.getSubjectDN().toString();
         return result;
