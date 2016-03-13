@@ -38,7 +38,7 @@ public class TimeStampDiscreteServlet extends HttpServlet {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         PrintWriter writer = null;
         ContentTypeVS contentTypeVS = ContentTypeVS.getByName(req.getContentType());
-        String contentEncoding = req.getHeader("Content-Encoding").toLowerCase();
+        String contentEncoding = req.getHeader("Content-Encoding");
         if(contentTypeVS == ContentTypeVS.TIMESTAMP_QUERY) {
             try {
                 TimeStampResponseGenerator responseGenerator = null;
