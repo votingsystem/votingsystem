@@ -42,6 +42,10 @@ public class ContextVS {
 
     private static Logger log = Logger.getLogger(ContextVS.class.getName());
 
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
     public static final String PROVIDER = BouncyCastleProvider.PROVIDER_NAME;
 
     public static final String OCSP_DNIE_URL = "http://ocsp.dnie.es";
@@ -120,7 +124,6 @@ public class ContextVS {
     public ContextVS(String localizatedMessagesFileName, String localeParam) {
         log.info("localizatedMessagesFileName: " + localizatedMessagesFileName + " - locale: " + locale);
         try {
-            Security.addProvider(new BouncyCastleProvider());
             KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {

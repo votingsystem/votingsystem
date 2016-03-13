@@ -58,6 +58,7 @@ public class DocumentBrowserDialog extends DialogVS {
 
     public static DocumentBrowserDialog showDialog(File selectedFile) {
         if(INSTANCE == null) INSTANCE = new DocumentBrowserDialog(new DocumentBrowserPane());
+        if(selectedFile == null) return INSTANCE;
         try {
             if(new ZipInputStream(new FileInputStream(selectedFile)).getNextEntry() != null){
                 final String outputFolder = ContextVS.getInstance().getTempDir() + File.separator + UUID.randomUUID();

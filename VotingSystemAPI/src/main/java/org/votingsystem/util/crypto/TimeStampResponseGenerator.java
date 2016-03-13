@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.cert.CertificateEncodingException;
 import java.util.Date;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -50,7 +51,9 @@ public class TimeStampResponseGenerator {
         TimeStampRequest timeStampRequest;
         try {
             timeStampRequest = new TimeStampRequest(requestInputStream);
-        } catch (Exception ex) {throw new ExceptionVS("request null");}
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+            throw new ExceptionVS("request null");}
         serialNumber = KeyGeneratorVS.INSTANCE.getSerno();
         log.info("getTimeStampResponse - serialNumber: " + serialNumber + " - CertReq: " + timeStampRequest.getCertReq());
         JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(

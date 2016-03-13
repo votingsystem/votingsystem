@@ -147,6 +147,12 @@ public class StringUtils {
         return hexConverter.marshal(paramsStr.getBytes());
     }
 
+    public static String toHex(byte[] bytes) {
+        if (bytes == null) return null;
+        HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+        return hexConverter.marshal(bytes);
+    }
+
     public static String getNormalized (String string) {
         if(string == null) return null;
         else return normalize(string).replaceAll(" ", "_").replaceAll("[\\/:.]", "");

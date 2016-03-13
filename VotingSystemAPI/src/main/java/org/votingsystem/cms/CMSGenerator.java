@@ -1,22 +1,36 @@
 package org.votingsystem.cms;
 
+import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.*;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.bouncycastle.util.Store;
+import org.bouncycastle.tsp.TimeStampRequest;
+import org.bouncycastle.tsp.TimeStampRequestGenerator;
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.util.*;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.crypto.KeyStoreUtil;
 
 import java.security.KeyStore;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.Arrays;
 
 
 public class CMSGenerator {
@@ -24,6 +38,8 @@ public class CMSGenerator {
     private PrivateKey key;
     private List<Certificate> certList;
     private String signatureMechanism;
+    private AlgorithmIdentifier sigAlgId;
+    private AlgorithmIdentifier digAlgId;
 
     public CMSGenerator() {}
 
@@ -33,6 +49,8 @@ public class CMSGenerator {
         key = (PrivateKey)keyStore.getKey(keyAlias, password);
         certList = Arrays.asList(keyStore.getCertificateChain(keyAlias));
         this.signatureMechanism = signatureMechanism;
+        sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(signatureMechanism);
+        digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
     }
 
     public CMSGenerator(KeyStore keyStore, String keyAlias,
@@ -40,18 +58,50 @@ public class CMSGenerator {
         key = (PrivateKey)keyStore.getKey(keyAlias, password);
         certList = Arrays.asList(keyStore.getCertificateChain(keyAlias));
         this.signatureMechanism = signatureMechanism;
+        sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(signatureMechanism);
+        digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
     }
 
     public CMSGenerator(PrivateKey privateKey, X509Certificate[] arrayCerts, String signatureMechanism) {
         this.key = privateKey;
         certList = Arrays.asList(arrayCerts);
         this.signatureMechanism = signatureMechanism;
+        sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(signatureMechanism);
+        digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
     }
 
     public CMSGenerator(PrivateKey privateKey, List<Certificate> certList, String signatureMechanism) {
         this.key = privateKey;
         this.certList = certList;
         this.signatureMechanism = signatureMechanism;
+        sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find(signatureMechanism);
+        digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+    }
+
+    public TimeStampRequest getTimeStampRequest(byte[] signatureContent) throws NoSuchAlgorithmException {
+        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
+        return reqgen.generate(digAlgId.getAlgorithm(), getContentDigest(signatureContent));
+    }
+
+    public CMSSignedMessage signDataWithTimeStamp(byte[] signatureContent, TimeStampToken timeStampToken) throws Exception {
+        DERSet derset = new DERSet(timeStampToken.toCMSSignedData().toASN1Structure());
+        Attribute timeStampAsAttribute = new Attribute(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, derset);
+        Hashtable hashTable = new Hashtable();
+        hashTable.put(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, timeStampAsAttribute);
+        AttributeTable timeStampAsAttributeTable = new AttributeTable(hashTable);
+        DefaultSignedAttributeTableGenerator signedAttributeGenerator = new DefaultSignedAttributeTableGenerator(timeStampAsAttributeTable);
+
+        CMSTypedData msg = new CMSProcessableByteArray(signatureContent);
+        Store certs = new JcaCertStore(certList);
+        CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+        ContentSigner signer = new JcaContentSignerBuilder(signatureMechanism).setProvider(ContextVS.PROVIDER).build(key);
+        gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder()
+                .setProvider(ContextVS.PROVIDER).build()).setSignedAttributeGenerator(signedAttributeGenerator)
+                .build(signer, (X509Certificate) certList.get(0)));
+        gen.addCertificates(certs);
+        CMSSignedData signedData = gen.generate(msg, true);
+        return  new CMSSignedMessage(signedData);
     }
 
     public CMSSignedMessage signData(String signatureContent) throws Exception {
@@ -64,6 +114,12 @@ public class CMSGenerator {
         gen.addCertificates(certs);
         CMSSignedData signedData = gen.generate(msg, true);
         return  new CMSSignedMessage(signedData);
+    }
+
+    public byte[] getContentDigest(byte[] contentBytes) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance(digAlgId.getAlgorithm().getId());
+        //digest.update(contentBytes, 0, contentBytes.length);
+        return digest.digest(contentBytes);
     }
 
     public synchronized CMSSignedData addSignature(CMSSignedData cmsMessage) throws Exception {
@@ -80,14 +136,16 @@ public class CMSGenerator {
                     ContextVS.PROVIDER).getCertificate(certificateHolder);
             resultCertList.add(x509Certificate);
         }
-        resultCertList.add((X509Certificate) certList.get(0));
+        resultCertList.add(certList.get(0));
         Store certs = new JcaCertStore(resultCertList);
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
-        ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").setProvider(ContextVS.PROVIDER).build(key);
+        ContentSigner signer = new JcaContentSignerBuilder(signatureMechanism).setProvider(ContextVS.PROVIDER).build(key);
         gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder()
                 .setProvider(ContextVS.PROVIDER).build()).build(signer, (X509Certificate) certList.get(0)));
         gen.addCertificates(certs);
         gen.addSigners(signers);
-        return gen.generate((CMSTypedData)cmsMessage.getSignedContent(), true);
+        return gen.generate(cmsMessage.getSignedContent(), true);
     }
+
+
 }

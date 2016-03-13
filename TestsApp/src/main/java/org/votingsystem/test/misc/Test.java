@@ -33,7 +33,7 @@ public class Test {
         CertValidationDto certValidationDto = CertValidationDto.validationRequest("7553172H", "C8-0A-A9-AB-47-BE");
         SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService(
                 "Currency_07553172H", UserVS.Type.USER);
-        CMSSignedMessage cmsMessage = superUserSignatureService.addSignatureWithTimeStamp(
+        CMSSignedMessage cmsMessage = superUserSignatureService.addSignatureWithTimeStampToUnsignedAttributes(
                 JSON.getMapper().writeValueAsString(certValidationDto));
         responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 "https://192.168.1.5/CurrencyServer/rest/test/testCMS");

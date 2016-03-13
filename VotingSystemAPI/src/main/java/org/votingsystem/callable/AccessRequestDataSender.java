@@ -55,7 +55,7 @@ public class AccessRequestDataSender implements Callable<ResponseVS> {
             SignerInformationVerifier timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().
                     setProvider(ContextVS.PROVIDER).build(timeStampCert);
             timeStampToken.validate(timeStampSignerInfoVerifier);
-            CMSSignedData timeStampedSignedData = CMSUtils.addTimeStamp(cmsMessage, timeStampToken);
+            CMSSignedData timeStampedSignedData = CMSUtils.addTimeStampToUnsignedAttributes(cmsMessage, timeStampToken);
             Map<String, Object> mapToSend = new HashMap<>();
             mapToSend.put(ContextVS.CSR_FILE_NAME, certificationRequest.getCsrPEM());
             mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME, PEMUtils.getPEMEncoded(timeStampedSignedData.toASN1Structure()));

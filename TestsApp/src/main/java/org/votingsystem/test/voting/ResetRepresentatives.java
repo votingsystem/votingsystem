@@ -29,7 +29,7 @@ public class ResetRepresentatives {
         SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService("AccessControl_07553172H", UserVS.Type.USER);
         Map dataMap = new HashMap<>();
         dataMap.put("UUID", UUID.randomUUID().toString());
-        CMSSignedMessage cmsMessage = superUserSignatureService.addSignatureWithTimeStamp(JSON.getMapper().writeValueAsString(dataMap));
+        CMSSignedMessage cmsMessage = superUserSignatureService.addSignatureWithTimeStampToUnsignedAttributes(JSON.getMapper().writeValueAsString(dataMap));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 "https://192.168.1.5/AccessControl/rest/development/resetRepresentatives");
         log.info("result - responseVS: " + responseVS.getMessage());

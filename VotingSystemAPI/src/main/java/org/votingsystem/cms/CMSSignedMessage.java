@@ -1,6 +1,7 @@
 package org.votingsystem.cms;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.cms.*;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -12,25 +13,23 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.tsp.TimeStampTokenInfo;
+import org.bouncycastle.tsp.cms.ImprintDigestInvalidException;
 import org.bouncycastle.util.Store;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.Vote;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
-import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
-import org.votingsystem.util.JSON;
+import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.CMSUtils;
-import org.votingsystem.util.crypto.KeyGeneratorVS;
 import org.votingsystem.util.crypto.PEMUtils;
 
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -53,23 +52,23 @@ public class CMSSignedMessage extends CMSSignedData {
     }
 
     public String getSignedContentStr() throws Exception {
-        return new String((byte[])getSignedContent().getContent());
+        return new String((byte[]) getSignedContent().getContent());
     }
 
     public <T> T getSignedContent(Class<T> type) throws Exception {
-        return JSON.getMapper().readValue((byte[])getSignedContent().getContent(), type);
+        return JSON.getMapper().readValue((byte[]) getSignedContent().getContent(), type);
     }
 
     public <T> T getSignedContent(TypeReference type) throws Exception {
-        return JSON.getMapper().readValue((byte[])getSignedContent().getContent(), type);
+        return JSON.getMapper().readValue((byte[]) getSignedContent().getContent(), type);
     }
 
     public static TimeStampToken checkTimeStampToken(SignerInformation signer) throws Exception {
         TimeStampToken timeStampToken = null;
         AttributeTable unsignedAttributes = signer.getUnsignedAttributes();
-        if(unsignedAttributes != null) {
+        if (unsignedAttributes != null) {
             Attribute timeStampAttribute = unsignedAttributes.get(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken);
-            if(timeStampAttribute != null) {
+            if (timeStampAttribute != null) {
                 CMSSignedData signedData = new CMSSignedData(timeStampAttribute.getAttrValues()
                         .getObjectAt(0).toASN1Primitive().getEncoded());
                 timeStampToken = new TimeStampToken(signedData);
@@ -80,14 +79,13 @@ public class CMSSignedMessage extends CMSSignedData {
     }
 
     public TimeStampRequest getTimeStampRequest() throws Exception {
-        SignerInformation signerInformation = (SignerInformation) getSignerInfos().getSigners().iterator().next();
+        SignerInformation signerInformation = getSignerInfos().getSigners().iterator().next();
         AttributeTable table = signerInformation.getSignedAttributes();
         Attribute hash = table.get(CMSAttributes.messageDigest);
-        ASN1OctetString as = ((ASN1OctetString)hash.getAttrValues().getObjectAt(0));
+        ASN1OctetString as = ((ASN1OctetString) hash.getAttrValues().getObjectAt(0));
         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         //reqgen.setReqPolicy(m_sPolicyOID);
-        return reqgen.generate(signerInformation.getDigestAlgOID(), as.getOctets(),
-                BigInteger.valueOf(KeyGeneratorVS.INSTANCE.getNextRandomInt()));
+        return reqgen.generate(new ASN1ObjectIdentifier(signerInformation.getDigestAlgOID()), as.getOctets());
     }
 
     public TimeStampToken getTimeStampToken() throws Exception {
@@ -99,12 +97,12 @@ public class CMSSignedMessage extends CMSSignedData {
         SignerInformationStore signerInfos = getSignerInfos();
         Iterator it = signerInfos.getSigners().iterator();
         while (it.hasNext()) {
-            SignerInformation   signer = (SignerInformation)it.next();
+            SignerInformation signer = (SignerInformation) it.next();
             Collection certCollection = certs.getMatches(signer.getSID());
             Iterator certIt = certCollection.iterator();
             X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER).getCertificate(
                     (X509CertificateHolder) certIt.next());
-            if(requestCert.getSerialNumber().equals(cert.getSerialNumber())) {
+            if (requestCert.getSerialNumber().equals(cert.getSerialNumber())) {
                 return checkTimeStampToken(signer);
             }
         }
@@ -124,18 +122,22 @@ public class CMSSignedMessage extends CMSSignedData {
         return this;
     }
 
-    public static CMSSignedMessage addTimeStamp(CMSSignedMessage signedMessage, TimeStampToken timeStampToken) throws Exception {
-        CMSSignedData timeStampedSignedData = CMSUtils.addTimeStamp(signedMessage, timeStampToken);
+    public static CMSSignedMessage addTimeStampToUnsignedAttributes(CMSSignedMessage signedMessage,
+                                                                    TimeStampToken timeStampToken) throws Exception {
+        CMSSignedData timeStampedSignedData = CMSUtils.addTimeStampToUnsignedAttributes(signedMessage, timeStampToken);
         return new CMSSignedMessage(timeStampedSignedData.getEncoded());
     }
 
-    public static CMSSignedMessage addTimeStamp(CMSSignedMessage signedData, String timeStampServerURL) throws Exception {
+    public static CMSSignedMessage addTimeStampToUnsignedAttributes(
+            CMSSignedMessage signedData, String timeStampServerURL) throws Exception {
         TimeStampRequest tspRequest = signedData.getTimeStampRequest();
+        log.info("========== tspRequest: " + Base64.getEncoder().encodeToString(tspRequest.getEncoded()));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(tspRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY,
                 timeStampServerURL);
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+        if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            log.info("========== timeStampToken: " + Base64.getEncoder().encodeToString(responseVS.getMessageBytes()));
             TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(responseVS.getMessageBytes()));
-            signedData = signedData.addTimeStamp(signedData, timeStampToken);
+            signedData = signedData.addTimeStampToUnsignedAttributes(signedData, timeStampToken);
         } else throw new ExceptionVS(responseVS.getMessage());
         return signedData;
     }
@@ -145,7 +147,7 @@ public class CMSSignedMessage extends CMSSignedData {
      */
     public String getContentDigestStr() throws Exception {
         MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-        return Base64.getEncoder().encodeToString(messageDigest.digest((byte[])getSignedContent().getContent()));
+        return Base64.getEncoder().encodeToString(messageDigest.digest((byte[]) getSignedContent().getContent()));
     }
 
     public Collection checkSignerCert(X509Certificate x509Cert) throws Exception {
@@ -183,12 +185,12 @@ public class CMSSignedMessage extends CMSSignedData {
     }
 
     private MessageData getMessageData() throws Exception {
-        if(messageData == null) messageData = new MessageData();
+        if (messageData == null) messageData = new MessageData();
         return messageData;
     }
 
     public UserVS getSigner() throws Exception {
-        return  getMessageData().getSignerVS();
+        return getMessageData().getSignerVS();
     }
 
     public Set<UserVS> getSigners() throws Exception {
@@ -201,7 +203,7 @@ public class CMSSignedMessage extends CMSSignedData {
 
     public Set<X509Certificate> getSignersCerts() throws Exception {
         Set<X509Certificate> signerCerts = new HashSet<>();
-        for(UserVS userVS : getMessageData().getSigners()) {
+        for (UserVS userVS : getMessageData().getSigners()) {
             signerCerts.add(userVS.getCertificate());
         }
         return signerCerts;
@@ -237,7 +239,7 @@ public class CMSSignedMessage extends CMSSignedData {
             Date firstSignature = null;
             signers = new HashSet<>();
             while (it.hasNext()) {
-                SignerInformation   signer = (SignerInformation)it.next();
+                SignerInformation signer = (SignerInformation) it.next();
                 Collection certCollection = certs.getMatches(signer.getSID());
                 Iterator certIt = certCollection.iterator();
                 X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER).getCertificate(
@@ -248,7 +250,7 @@ public class CMSSignedMessage extends CMSSignedData {
                             ContextVS.PROVIDER).build(cert));
                     //concurrency issues ->
                     //signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(ContextVS.PROVIDER).build(cert));
-                } catch(CMSVerifierCertificateNotValidException ex) {
+                } catch (CMSVerifierCertificateNotValidException ex) {
                     log.log(Level.SEVERE, "checkSignature - cert notBefore: " + cert.getNotBefore() + " - NotAfter: " +
                             cert.getNotAfter());
                     throw ex;
@@ -257,15 +259,22 @@ public class CMSSignedMessage extends CMSSignedData {
                 }
                 UserVS userVS = UserVS.FROM_X509_CERT(cert);
                 userVS.setSignerInformation(signer);
-                TimeStampToken tsToken = checkTimeStampToken(signer);
+                TimeStampToken tsToken = CMSUtils.checkTimeStampToken(signer);
                 userVS.setTimeStampToken(tsToken);
-                if(tsToken != null) {
+                if (tsToken != null) {
+                    byte[] signerDigest = CMSUtils.getSignerDigest(signer);
+                    TimeStampTokenInfo info = tsToken.getTimeStampInfo();
+                    byte[] tsrMessageDigest = info.getMessageImprintDigest();
+                    if (!org.bouncycastle.util.Arrays.areEqual(signerDigest, tsrMessageDigest)) {
+                        throw new ImprintDigestInvalidException(
+                                "hash calculated is different from MessageImprintDigest found in TimeStampToken", tsToken);
+                    }
                     Date timeStampDate = tsToken.getTimeStampInfo().getGenTime();
-                    if(firstSignature == null || firstSignature.after(timeStampDate)) {
+                    if (firstSignature == null || firstSignature.after(timeStampDate)) {
                         firstSignature = timeStampDate;
                         signerVS = userVS;
+                        timeStampToken = tsToken;
                     }
-                    timeStampToken = tsToken;
                 }
                 signers.add(userVS);
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
@@ -273,9 +282,11 @@ public class CMSSignedMessage extends CMSSignedData {
                     vote = new Vote(dto).loadSignatureData(cert, timeStampToken);
                 } else if (cert.getExtensionValue(ContextVS.CURRENCY_OID) != null) {
                     currencyCert = cert;
-                } else {signerCerts.add(cert);}
+                } else {
+                    signerCerts.add(cert);
+                }
             }
-            if(vote != null) vote.setServerCerts(signerCerts);
+            if (vote != null) vote.setServerCerts(signerCerts);
             return true;
         }
 
@@ -300,4 +311,5 @@ public class CMSSignedMessage extends CMSSignedData {
         }
 
     }
+
 }

@@ -51,7 +51,7 @@ public class MessageTimeStamper implements Callable<CMSSignedMessage> {
                         JcaSimpleSignerInfoVerifierBuilder().build(timeStampCert);
                 timeStampToken.validate(timeStampSignerInfoVerifier);
             } else log.info("TIMESTAMP RESPONSE NOT VALIDATED");
-            if(cmsMessage != null) cmsMessage = CMSSignedMessage.addTimeStamp(cmsMessage, timeStampToken);
+            if(cmsMessage != null) cmsMessage = CMSSignedMessage.addTimeStampToUnsignedAttributes(cmsMessage, timeStampToken);
             return cmsMessage;
         } else throw new ExceptionVS(responseVS.getMessage());
     }

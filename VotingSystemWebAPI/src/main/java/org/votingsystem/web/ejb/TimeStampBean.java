@@ -158,7 +158,7 @@ public class TimeStampBean {
     }
 
 
-    public CMSSignedMessage timeStampCMS(CMSSignedMessage cmsMessage) throws Exception {
+    public CMSSignedMessage addTimeStampToUnsignedAttributes(CMSSignedMessage cmsMessage) throws Exception {
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.getTimeStampRequest().getEncoded(),
                 ContentTypeVS.TIMESTAMP_QUERY, timeStampServiceURL);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
@@ -167,7 +167,8 @@ public class TimeStampBean {
             SignerInformationVerifier timeStampSignerInfoVerifier = new
                     JcaSimpleSignerInfoVerifierBuilder().build(x509TimeStampServerCert);
             timeStampToken.validate(timeStampSignerInfoVerifier);
-            CMSSignedMessage timeStampedSignedMessage = CMSSignedMessage.addTimeStamp(cmsMessage, timeStampToken);
+            CMSSignedMessage timeStampedSignedMessage = CMSSignedMessage.addTimeStampToUnsignedAttributes(
+                    cmsMessage, timeStampToken);
             return timeStampedSignedMessage;
         } else throw new ExceptionVS(responseVS.getMessage());
     }

@@ -1,0 +1,36 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/polymer.xhtml">
+    <ui:define name="head">
+        <link href="../resources/forgePKCS7.html" rel="import"/>
+        <script type="text/javascript" src="./ForgeUtils.js"></script>
+        <script type="text/javascript" src="./TestUtils.js"></script>
+        <style></style>
+    </ui:define>
+    <ui:define name="content">
+        <h1><div id="timeStampresponse"></div></h1>
+
+        <div id="base64TimeStampRequest" style="display:none;">MDwCAQEwMTANBglghkgBZQMEAgEFAAQgGF+NsyJx/iX1Yab8k4suJkMG7DBO2lGAB9F2SCY4GWkCBMTu8+0=</div>
+        <div id="base64TimeStampToken" style="display:none;">MIAGCSqGSIb3DQEHAqCAMIACAQMxDzANBglghkgBZQMEAgEFADCABgsqhkiG9w0BCRABBKCAJIAEajBoAgEBBgIqAzAxMA0GCWCGSAFlAwQCAQUABCAYX42zInH+JfVhpvyTiy4mQwbsME7aUYAH0XZIJjgZaQIIO41t4wNOvGEYDzIwMTYwMzExMTAxNzU2WjALAgEBgAIB9IECAfQCBMTu8+0AAAAAAAAxggHIMIIBxAIBATBIMD4xLDAqBgNVBAMMI1ZvdGluZyBTeXN0ZW0gQ2VydGlmaWNhdGUgQXV0aG9yaXR5MQ4wDAYDVQQLDAVDZXJ0cwIGAVAT70dQMA0GCWCGSAFlAwQCAQUAoIHTMBoGCSqGSIb3DQEJAzENBgsqhkiG9w0BCRABBDAcBgkqhkiG9w0BCQUxDxcNMTYwMzExMTAxNzU2WjAtBgkqhkiG9w0BCTQxIDAeMA0GCWCGSAFlAwQCAQUAoQ0GCSqGSIb3DQEBAQUAMC8GCSqGSIb3DQEJBDEiBCCiWxsKY7O0UGlMkiBQUaX3k+kWWD+kBGD9cfuEROh9rzA3BgsqhkiG9w0BCRACLzEoMCYwJDAiBCBsQzp0p0lP4lbdUpeSD85UyR+2mGB3a8JDY97cbvfl+DANBgkqhkiG9w0BAQEFAASBgIkM8N5Q+3BgVvc9Zmw695syfAVYHCL6PkBjDgNtwofXUss4LClSRSUbOARiqfonwoR/4N0VD1OwCtcJ094h63dQ6P/4ox5dtHY0I6f0+M0TZa0NDSgmonnxmKEmldDhYwpfC1I1QBsSZdEZ+VX9Gy1Z5MmgnHziu2dKE51tofWQAAAAAAAA</div>
+
+
+        <script>
+        //<![CDATA[
+            function readBase64TimeStampToken() {
+                var TSTInfo = vs.getTSTInfoFromTimeStampTokenBase64(
+                        document.querySelector("#base64TimeStampToken").innerHTML)
+                console.log("TSTInfo:")
+                console.log(TSTInfo)
+            }
+
+            function createTimestampRequest() {
+                vs.getTimeStampToken("Hello TimeStamp", function (timeStampTokenASN1) {
+                    console.log(timeStampTokenASN1)
+                })
+            }
+
+            createTimestampRequest();
+        //]]>
+        </script>
+    </ui:define>
+</ui:composition>

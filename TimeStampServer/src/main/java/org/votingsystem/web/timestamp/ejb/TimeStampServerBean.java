@@ -5,9 +5,9 @@ import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.service.TimeStampService;
 import org.votingsystem.service.impl.TimeStampServiceImpl;
-import org.votingsystem.util.crypto.TimeStampResponseGenerator;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.FileUtils;
+import org.votingsystem.util.crypto.TimeStampResponseGenerator;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.annotation.PostConstruct;

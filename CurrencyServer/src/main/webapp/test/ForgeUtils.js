@@ -73,3 +73,68 @@ AESUtil.prototype.decryptSocketMsg = function(messageJSON) {
     if(msgContentJSON.locale != null) messageJSON.locale = msgContentJSON.locale;
     messageJSON.encryptedMessage = null;
 }
+
+vs.getTSTInfoFromTimeStampTokenBase64 = function (base64TimeStampToken) {
+    var timeStampTokenDer =  forge.util.decode64(base64TimeStampToken)
+    var timeStampTokenASN1 = forge.asn1.fromDer(timeStampTokenDer)
+    return vs.getTSTInfoFromTimeStampTokenASN1(timeStampTokenASN1)
+}
+
+vs.getTSTInfoFromTimeStampTokenASN1 = function (timeStampTokenASN1) {
+    var capture = {};
+    var errors = [];
+    if(!forge.asn1.validate(timeStampTokenASN1, forge.pkcs7asn1.timeStampValidator, capture, errors)) {
+        console.log(errors)
+        throw new Error('ASN.1 object is not an PKCS#7 TimeStampData.');
+    }
+    var TSTInfoASN1 = forge.asn1.fromDer(capture.tsInfoDer)
+    return vs.getTSTInfoFromASN1(TSTInfoASN1)
+}
+
+vs.getTSTInfoFromASN1 = function (TSTInfoASN1) {
+    capture = {};
+    errors = [];
+    if(!forge.asn1.validate(TSTInfoASN1, forge.pkcs7asn1.TSTInfoValidator, capture, errors)) {
+        console.log(errors)
+        var error = new Error('Cannot read TSTInfo. ASN.1 object is not an TSTInfo.');
+        error.errors = errors;
+        throw error;
+    }
+    var TSTInfo = capture
+    TSTInfo.date = forge.asn1.generalizedTimeToDate(capture.generalizedTime)
+    TSTInfo.digestOID = forge.asn1.derToOid(capture.digestOID)
+    TSTInfo.digestHex = forge.util.bytesToHex(capture.digest)
+    return TSTInfo
+}
+
+vs.getTimeStampToken = function (contentToSign, listener) {
+    var asn1 = forge.asn1
+    var digest = forge.md["sha256"].create().start().update(contentToSign).digest();
+    var digestASN1 = asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false, digest.bytes());
+    var timeStampRequestASN1 =  asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+        asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false, asn1.integerToDer("1").getBytes()),
+        asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+            asn1.create(asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
+                asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OID, false, asn1.oidToDer(forge.pki.oids.sha256).getBytes()),
+                asn1.create(asn1.Class.UNIVERSAL, asn1.Type.NULL, false, '')
+            ]),
+            digestASN1
+        ]),
+        asn1.create(asn1.Class.UNIVERSAL, asn1.Type.INTEGER, false, asn1.integerToDer(
+            Math.floor(Math.random() * (2000000000  - 0))).getBytes())
+    ]);
+    var timeStampRequestDer = forge.asn1.toDer(timeStampRequestASN1);
+    var timeStampRequestBase64 = forge.util.encode64(timeStampRequestDer.getBytes());
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (xhttp.readyState == 4 && xhttp.status == 200) {
+            var timeStampTokenDer = forge.util.decode64(xhttp.responseText);
+            var timeStampTokenASN1 = forge.asn1.fromDer(timeStampTokenDer)
+            listener(timeStampTokenASN1)
+        }
+    };
+    xhttp.open("POST", "https://192.168.1.5/TimeStampServer/timestamp", true);
+    xhttp.setRequestHeader("Content-type", "application/timestamp-query");
+    xhttp.setRequestHeader("Content-Encoding", "base64");
+    xhttp.send(timeStampRequestBase64);
+}

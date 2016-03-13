@@ -296,7 +296,7 @@ public class CMSBean {
 
     public CMSSignedMessage signDataWithTimeStamp(String textToSign) throws Exception {
         CMSSignedMessage cmsMessage = cmsGenerator.signData(textToSign);
-        return timeStampBean.timeStampCMS(cmsMessage);
+        return timeStampBean.addTimeStampToUnsignedAttributes(cmsMessage);
     }
 
     public synchronized CMSSignedMessage addSignature (final CMSSignedMessage cmsMessage) throws Exception {

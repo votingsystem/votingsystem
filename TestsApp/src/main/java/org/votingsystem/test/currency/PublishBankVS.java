@@ -27,7 +27,7 @@ public class PublishBankVS {
         ContextVS.getInstance().setDefaultServer(currencyServer);
         SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService(
                 "Currency_07553172H", UserVS.Type.USER);
-        CMSSignedMessage cmsMessage = superUserSignatureService.addSignatureWithTimeStamp(
+        CMSSignedMessage cmsMessage = superUserSignatureService.addSignatureWithTimeStampToUnsignedAttributes(
                 JSON.getMapper().writeValueAsString(bankVSDto));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 currencyServer.getSaveBankServiceURL());

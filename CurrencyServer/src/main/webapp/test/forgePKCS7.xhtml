@@ -4,248 +4,109 @@
     <ui:define name="head">
         <link href="../resources/forgePKCS7.html" rel="import"/>
         <script type="text/javascript" src="./ForgeUtils.js"></script>
+        <script type="text/javascript" src="./TestUtils.js"></script>
         <style></style>
     </ui:define>
     <ui:define name="content">
-
         <div id="cmsMessage" style="display:none;">
-            forgePKCS7.xhtml:169 -----BEGIN PKCS7-----
-            MIIE5QYJKoZIhvcNAQcCoIIE1jCCBNICAQExDzANBglghkgBZQMEAgEFADApBgkq
-            hkiG9w0BBwGgHAQaU29tZSBjb250ZW50IHRvIGJlIHNpZ25lZC6gggMIMIIDBDCC
-            Am2gAwIBAgIBATANBgkqhkiG9w0BAQUFADBpMRQwEgYDVQQDEwtleGFtcGxlLm9y
-            ZzELMAkGA1UEBhMCVVMxETAPBgNVBAgTCFZpcmdpbmlhMRMwEQYDVQQHEwpCbGFj
-            a3NidXJnMQ0wCwYDVQQKEwRUZXN0MQ0wCwYDVQQLEwRUZXN0MB4XDTE2MDMxMDEz
-            MjA1N1oXDTE3MDMxMDEzMjA1N1owaTEUMBIGA1UEAxMLZXhhbXBsZS5vcmcxCzAJ
-            BgNVBAYTAlVTMREwDwYDVQQIEwhWaXJnaW5pYTETMBEGA1UEBxMKQmxhY2tzYnVy
-            ZzENMAsGA1UEChMEVGVzdDENMAsGA1UECxMEVGVzdDCBnzANBgkqhkiG9w0BAQEF
-            AAOBjQAwgYkCgYEAy6M6KxWB6VI0ta47Q5kU+FplleMF2IkjR8LZ/n5mqmNbuGuB
-            sUrdnS6UKc2SKZBgQazm5sSXbd/OnZsXni0J4BxjHeqt/qB5ymzb441dnyf+UVlw
-            WZnL7wp0FeqIz+NWQUvGdKu9HMp3v7HNO5MdUYZXlqFJ0WbqNdFvtwThJbkCAwEA
-            AaOBuzCBuDAMBgNVHRMEBTADAQH/MAsGA1UdDwQEAwIC9DA7BgNVHSUENDAyBggr
-            BgEFBQcDAQYIKwYBBQUHAwIGCCsGAQUFBwMDBggrBgEFBQcDBAYIKwYBBQUHAwgw
-            EQYJYIZIAYb4QgEBBAQDAgD3MCwGA1UdEQQlMCOGG2h0dHA6Ly9leGFtcGxlLm9y
-            Zy93ZWJpZCNtZYcEfwAAATAdBgNVHQ4EFgQUK40VSdfnMja8LiEfUrCoRFexo3cw
-            DQYJKoZIhvcNAQEFBQADgYEAciWsG9Q3msOBnvpEfWJObQ0a3VicErmpL05LhUUI
-            81jeA6GQtKW0Q5iBmGrj+gWPjC7kDvMPgo1wy0IYp8KQ6BTK+9ySH6vpo8Hfqnn1
-            8XpAg6JhbS4NalC8wEaUguh0rGeusdWyNWyUqArCSGg9Lz+aTIWxCQF2cUq/KJNY
-            d3wxggGDMIIBfwIBATBuMGkxFDASBgNVBAMTC2V4YW1wbGUub3JnMQswCQYDVQQG
-            EwJVUzERMA8GA1UECBMIVmlyZ2luaWExEzARBgNVBAcTCkJsYWNrc2J1cmcxDTAL
-            BgNVBAoTBFRlc3QxDTALBgNVBAsTBFRlc3QCAQEwDQYJYIZIAWUDBAIBBQCgaTAY
-            BgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMC8GCSqGSIb3DQEJBDEiBCBiJ2Anl246
-            eFG9wI+2nC7dn9xWaYlWZN+J3emy+hECpTAcBgkqhkiG9w0BCQUxDxcNMTYwMzEw
-            MTMyMDU3WjANBgkqhkiG9w0BAQEFAASBgKQT9lCRyb6gEt3OTUt/1LTHz34zlhR/
-            PNl/gLdtx5jw7E36FmoTr1qdMKyIJEyjNc0rVQlkGWgt9lWCjGnnjgUwp9hYsaNd
-            p4qrHTxow1xEWyepEZM0/6GI/m8d4EsYrljj7fpWqCaxBAQM8yMgPnsO8mouFEIl
-            kYph+lGtYQRj
+            -----BEGIN PKCS7-----
+            MIAGCSqGSIb3DQEHAqCAMIACAQExDzANBglghkgBZQMEAgEFADCABgkqhkiG9w0B
+            BwGggCSABBVIZWxsbyBUaW1lU3RhbXBTaWduZWQAAAAAAACggDCCA1YwggK/oAMC
+            AQICCHZc3chVPidLMA0GCSqGSIb3DQEBCwUAMFkxEjAQBgNVBAUTCTA4ODg4ODg4
+            RDEiMCAGA1UEBBMZVGVzdHMtVm90aW5nU3lzdGVtU3VybmFtZTEfMB0GA1UEKhMW
+            VGVzdHMtVm90aW5nU3lzdGVtTmFtZTAeFw0xNjAzMTMxODEzMTNaFw0xNzAzMTMx
+            ODEzMTNaME8xEjAQBgNVBAUTCTA4ODg4ODg4RDEbMBkGA1UEBAwSbGFzdE5hbWVf
+            MDg4ODg4ODhEMRwwGgYDVQQqDBNGaXJzdE5hbWVfMDg4ODg4ODhEMIIBIjANBgkq
+            hkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA8rr9rHfkTrK1+h2FTw8d+3i31dNL1LrY
+            qN6rfojqOs/d2iE4uq87ecgEQdDD9E6EXg/zibRNyy9TXvV4Rit+J/iv7qaxQyvR
+            K3aMC68Defpn4Katpef1SI19Mg9524991LL0p+OnmXi7IJGz3vFcMP6RofGvqJaD
+            57XRYpj2fK8Ed2snjNUaTDEji4rjfPEkWV5XsB+eoCNX4kewWX4qxu6womGjx3+a
+            bC/hYdZ4opVLxMIUIrx78/HHg/I5WrJo6wFt/9FWrI97ixb6w8etWf1NtADSqbcL
+            lxM788DckkFNjX35niPZqTfyGTg4KmP2LSJ8ILT9ytYDmB0duDKqUQIDAQABo4Gs
+            MIGpMGoGA1UdIwRjMGGAFAM8opx4gmlE7xIlHNxRlr4msrD5oT+kPTA7MRIwEAYD
+            VQQFEwk1MDAwMDAwMFIxJTAjBgNVBAMTHFZvdGluZyBTeXN0ZW0gQWNjZXNzIENv
+            bnRyb2yCCFb7x+YQceZWMB0GA1UdDgQWBBQ55lJXRmFFAa85nQobLgqyzPK8DDAM
+            BgNVHRMBAf8EAjAAMA4GA1UdDwEB/wQEAwIFoDANBgkqhkiG9w0BAQsFAAOBgQAN
+            VxjhnrfoGYKhWMLs2ZwL8JsmPcxinOQKwml8/9MZYfBOXN5lMlibqWyE9qaJ4/NX
+            uVAubttGRtKD5cZvbL2C7tCCd7W2KGs3JZEC3DHhXeBDvjBpvaEWrG3MH//ci19b
+            G86TshaIC8C7M5rLyxCkzJIxzZcMRj9fI3fKCm32tDCCAsEwggIqoAMCAQICCFb7
+            x+YQceZWMA0GCSqGSIb3DQEBBQUAMDsxEjAQBgNVBAUTCTUwMDAwMDAwUjElMCMG
+            A1UEAxMcVm90aW5nIFN5c3RlbSBBY2Nlc3MgQ29udHJvbDAeFw0xNDEyMDExMjIw
+            NTdaFw0xNTExMzAyMzAwMDBaMFkxEjAQBgNVBAUTCTA4ODg4ODg4RDEiMCAGA1UE
+            BBMZVGVzdHMtVm90aW5nU3lzdGVtU3VybmFtZTEfMB0GA1UEKhMWVGVzdHMtVm90
+            aW5nU3lzdGVtTmFtZTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAgimbCUSy
+            KHJh1eOqgpx8Mz2UZsxtntin2Pkxo/nEiaviyXduU+dOS5i7LodHmEkxD1KO0Cc2
+            Q0rRlFSxBJaasDwgjTD64bOAt925slNvS1Hcu4IJ+WQr7S7XRl5GlQTjcBtBSLzQ
+            hiZePjt9M4kW0hnPgt0HXN77vLL+XVcVx9cCAwEAAaOBrzCBrDBtBgNVHSMEZjBk
+            gBR5ZuroHheWMR8LG5r7uBquVdW+WaFCpEAwPjEsMCoGA1UEAwwjVm90aW5nIFN5
+            c3RlbSBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkxDjAMBgNVBAsMBUNlcnRzgggkPrWq
+            aEVFoTAdBgNVHQ4EFgQUAzyinHiCaUTvEiUc3FGWviaysPkwDAYDVR0TAQH/BAIw
+            ADAOBgNVHQ8BAf8EBAMCBaAwDQYJKoZIhvcNAQEFBQADgYEACV/OVgQkaGuh0fNl
+            3kDh/lxHKcZUm1CBBv4UH5409FotfrFxBC8qDn3cH+2faxAClIS2Qel7H2wDL4Db
+            at06WNrhwFNMMpJBudKLvgXPniHvPT2GpSbJthZVYmU11ueQeSWMzQoeQFmyQXzt
+            dQb0JTvBVr+3Z8LRw4A6+wyz8ugAADGCBK8wggSrAgEBMGUwWTESMBAGA1UEBRMJ
+            MDg4ODg4ODhEMSIwIAYDVQQEExlUZXN0cy1Wb3RpbmdTeXN0ZW1TdXJuYW1lMR8w
+            HQYDVQQqExZUZXN0cy1Wb3RpbmdTeXN0ZW1OYW1lAgh2XN3IVT4nSzANBglghkgB
+            ZQMEAgEFAKCCAxswGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0B
+            CQUxDxcNMTYwMzEzMTgxMzE0WjAtBgkqhkiG9w0BCTQxIDAeMA0GCWCGSAFlAwQC
+            AQUAoQ0GCSqGSIb3DQEBAQUAMC8GCSqGSIb3DQEJBDEiBCAz53wtDpEXUUmcdxFg
+            YkedRqt4FT/FXJiWYEhQf7PdTDCCAn8GCyqGSIb3DQEJEAIOMYICbjCCAmoGCSqG
+            SIb3DQEHAqCCAlswggJXAgEDMQ8wDQYJYIZIAWUDBAIBBQAwdQYLKoZIhvcNAQkQ
+            AQSgZgRkMGICAQEGAioDMDEwDQYJYIZIAWUDBAIBBQAEIDPnfC0OkRdRSZx3EWBi
+            R51Gq3gVP8VcmJZgSFB/s91MAghU+suEx9Ml9hgPMjAxNjAzMTMxODEzMTRaMAsC
+            AQGAAgH0gQIB9DGCAcgwggHEAgEBMEgwPjEsMCoGA1UEAwwjVm90aW5nIFN5c3Rl
+            bSBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkxDjAMBgNVBAsMBUNlcnRzAgYBUBPvR1Aw
+            DQYJYIZIAWUDBAIBBQCggdMwGgYJKoZIhvcNAQkDMQ0GCyqGSIb3DQEJEAEEMBwG
+            CSqGSIb3DQEJBTEPFw0xNjAzMTMxODEzMTRaMC0GCSqGSIb3DQEJNDEgMB4wDQYJ
+            YIZIAWUDBAIBBQChDQYJKoZIhvcNAQEBBQAwLwYJKoZIhvcNAQkEMSIEIJhg3Nak
+            ajU+JCJwxt5QcPV3VY5GHCbR0mSdZXYLmeBNMDcGCyqGSIb3DQEJEAIvMSgwJjAk
+            MCIEIGxDOnSnSU/iVt1Sl5IPzlTJH7aYYHdrwkNj3txu9+X4MA0GCSqGSIb3DQEB
+            AQUABIGAjOKSZLVzeUonqv4ziktu5EXqUZV+UnTv6FAQlUG/TjiO8Koz0uop2k8H
+            TsHHmiYIn/o3FH8eQ8HiTT3vr+wNlBHxa3fmp8+JPleS5xlIkuHDn3oW54amTQni
+            2oNL/Qg3n2IxI7nsS4NPaB84li1dWtxeznH0i9RXhZ7DoQxY9/cwDQYJKoZIhvcN
+            AQEBBQAEggEAp0OCxnPhimeAlhtJKh+h+hN0VoJtA94ynoCpGBDmYkjSlDiZI71u
+            D80ZxZqAOrxv/aIrNvGLULHQ6K7V96ZKGbh8h8R/+by1B7BkXT1O6PbtVyLL0BMm
+            a81s5wNBv6l3wGKzlswW0JOS4Ao0RHuxaBjOMv2138oaRhRiZDXUiAN1/ogPCdZK
+            DugOfW7Mr1U6RQ1pcIpRQWGEVCTyzMxSinweEGNEPBZT12iI5GqzjeAdv4+dzP4J
+            aUHCyGIE0jBuvutxCdSWmBHSfTb9eNJA7t/dyfHyUIJqh0x1itYLV7ybgj2vZO/8
+            z68zGhXmFa8ojKjPgZbRP2WK/+x1SrB81wAAAAAAAA==
             -----END PKCS7-----
         </div>
 
         <script>
-            <!-- missing RFC 3161 Time Stamp Requests -->
-
-            var pkcs7PEMForge = '-----BEGIN PKCS7-----\r\n' +
-                    'MIIGRwYJKoZIhvcNAQcCoIIGODCCBjQCAQExDzANBglghkgBZQMEAgEFADAcBgkq\r\n' +
-                    'hkiG9w0BBwGgDwQNVG8gYmUgc2lnbmVkLqCCA7gwggO0MIICnAIJANRUHEDYNeLz\r\n' +
-                    'MA0GCSqGSIb3DQEBBQUAMIGbMQswCQYDVQQGEwJERTESMBAGA1UECAwJRnJhbmNv\r\n' +
-                    'bmlhMRAwDgYDVQQHDAdBbnNiYWNoMRUwEwYDVQQKDAxTdGVmYW4gU2llZ2wxEjAQ\r\n' +
-                    'BgNVBAsMCUdlaWVybGVpbjEWMBQGA1UEAwwNR2VpZXJsZWluIERFVjEjMCEGCSqG\r\n' +
-                    'SIb3DQEJARYUc3Rlc2llQGJyb2tlbnBpcGUuZGUwHhcNMTIwMzE4MjI1NzQzWhcN\r\n' +
-                    'MTMwMzE4MjI1NzQzWjCBmzELMAkGA1UEBhMCREUxEjAQBgNVBAgMCUZyYW5jb25p\r\n' +
-                    'YTEQMA4GA1UEBwwHQW5zYmFjaDEVMBMGA1UECgwMU3RlZmFuIFNpZWdsMRIwEAYD\r\n' +
-                    'VQQLDAlHZWllcmxlaW4xFjAUBgNVBAMMDUdlaWVybGVpbiBERVYxIzAhBgkqhkiG\r\n' +
-                    '9w0BCQEWFHN0ZXNpZUBicm9rZW5waXBlLmRlMIIBIjANBgkqhkiG9w0BAQEFAAOC\r\n' +
-                    'AQ8AMIIBCgKCAQEAywBtDh9Z68eo/UrXL97CkxLe9ii8G2jsiwoGrS/c2YLaQ9/c\r\n' +
-                    '2HJpIp+M45Lm4A840t98tyT6IZ04ssWJro5KkzrS3JAhX2UehGHt84Rg5FpvRn5o\r\n' +
-                    'FRlwQZP3Ki0E6tpfVhspzl/1c77zR4bhdi9vm5rU0evFap7jDanfMYkIo77Aem8a\r\n' +
-                    'RsrPSd+7fqPBbPlqKF8eL2Gn/GzyZ8fzqYgqIPt/ZfYp5nU8r1G+mkDRfeUtvZUs\r\n' +
-                    '6oy34UdaJzJn/COFBnihbnmWfbJglRD5p2WBpic+u2ezGZtPEz732gXQXb8eYas2\r\n' +
-                    'zyctlK9rVXL6GaOZbPr87xnGGIiPugFGphwChwIDAQABMA0GCSqGSIb3DQEBBQUA\r\n' +
-                    'A4IBAQC9++27fUYUE7n6YWM8ChHgGXMqr8fcQ86pLxyb9OMeANEAvBKfApgIWz9t\r\n' +
-                    'eoTiI5MPqi1XhO6xfcQ9uova/NlARxmfqlpT+hllVfBCoypjm1/a15CI3GrE2ZIg\r\n' +
-                    'Q9Ec6vZBUFUjHZgXg+jz0oZSon27/f/XSUOpHCmxF6KOvlQq/lrKARyfBxbz417i\r\n' +
-                    'tPH3fhQOy60obbR2vm2tl9ZBFVL19L0IXAl6ERccAxRz/T77zQ2F9C2GZZlaVYzV\r\n' +
-                    'Hd2vhOsg+1Z2fnPQy0Z4O+oGTseMauFxVLqQCzJn3L+V8s+MG7GVAAfO0QkJaAjh\r\n' +
-                    'Nbf9EuGB+DaAjWegzafzgJ2aKx+SMYICQjCCAj4CAQEwgakwgZsxCzAJBgNVBAYT\r\n' +
-                    'AkRFMRIwEAYDVQQIDAlGcmFuY29uaWExEDAOBgNVBAcMB0Fuc2JhY2gxFTATBgNV\r\n' +
-                    'BAoMDFN0ZWZhbiBTaWVnbDESMBAGA1UECwwJR2VpZXJsZWluMRYwFAYDVQQDDA1H\r\n' +
-                    'ZWllcmxlaW4gREVWMSMwIQYJKoZIhvcNAQkBFhRzdGVzaWVAYnJva2VucGlwZS5k\r\n' +
-                    'ZQIJANRUHEDYNeLzMA0GCWCGSAFlAwQCAQUAoGswGAYJKoZIhvcNAQkDMQsGCSqG\r\n' +
-                    'SIb3DQEHATAvBgkqhkiG9w0BCQQxIgQgL/TDBQ+1LmkIk4u0TacbQj6GvXtVN5Sr\r\n' +
-                    'LFvTa+Sr82MwHgYJKoZIhvcNAQkFMREYDzE5NDkxMjMxMjM1OTU5WjANBgkqhkiG\r\n' +
-                    '9w0BAQEFAASCAQCNB13woMM5xYY5B0k/2dDF1flyAs5JaahqXSIH04ea+qgyFkgZ\r\n' +
-                    'uRoialeVzXXXpSPmpgEubQimFMYFslle9Ozpu6ECrXtw53wWm1GAlj8T6w50lKyd\r\n' +
-                    '6Ip/wclO/lPIB9qk7Ki3kN+ISBWXSgUMTTo94IdyZH3lbBqW3xsak1FM6STrGiUS\r\n' +
-                    'CoinmPKajIbIQBUORZ9eF9qN5erdpKwYNMB43yLle5jNGIeq6ztbL9en9boFp04q\r\n' +
-                    'PU+/ZeNY2QJhnoGQVYfHkK+8X6/ZKX1fRnca2L+DUUb9g7Tc0oeW5zwB3wzIEpTN\r\n' +
-                    'JxV3HaZ/Jvfnx9uH9wpFYg5yFX6PBLxlHarf\r\n' +
-                    '-----END PKCS7-----\r\n';
-
-            var pkcs7PEMBC = "-----BEGIN PKCS7-----\n" +
-                    "MIAGCSqGSIb3DQEHAqCAMIACAQExDzANBglghkgBZQMEAgEFADCABgkqhkiG9w0B\n" +
-                    "BwEAAKCAMIICzzCCAjigAwIBAgIIUkGI3crYt/owDQYJKoZIhvcNAQEFBQAwWTES\n" +
-                    "MBAGA1UEBRMJMDg4ODg4ODhEMSIwIAYDVQQEExlUZXN0cy1Wb3RpbmdTeXN0ZW1T\n" +
-                    "dXJuYW1lMR8wHQYDVQQqExZUZXN0cy1Wb3RpbmdTeXN0ZW1OYW1lMB4XDTE2MDMw\n" +
-                    "NjExNTA0M1oXDTE3MDMwNjExNTA0M1owTDERMA8GA1UEBRMINzU1MzE3MkgxGjAY\n" +
-                    "BgNVBAQMEWxhc3ROYW1lXzc1NTMxNzJIMRswGQYDVQQqDBJGaXJzdE5hbWVfNzU1\n" +
-                    "MzE3MkgwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAJg48T40KaX1hSPhWS6g\n" +
-                    "mN97GGJ//HoI26ls2GFY6na2b0/PAyUBiL6cbyrAxWqgbUX/heub5wI6fb4nZYjk\n" +
-                    "mPXlTEV5h9a8ApE90lvjubz1cwlYu3qprCxukjrIWlAogndp/tNpwnHOiuEbxb54\n" +
-                    "WRCA+Ws5fPTNNq/OUBGNF5M1AgMBAAGjgawwgakwagYDVR0jBGMwYYAUAzyinHiC\n" +
-                    "aUTvEiUc3FGWviaysPmhP6Q9MDsxEjAQBgNVBAUTCTUwMDAwMDAwUjElMCMGA1UE\n" +
-                    "AxMcVm90aW5nIFN5c3RlbSBBY2Nlc3MgQ29udHJvbIIIVvvH5hBx5lYwHQYDVR0O\n" +
-                    "BBYEFFBB1Ad31KCEh/u+CbeMVLcTp6F1MAwGA1UdEwEB/wQCMAAwDgYDVR0PAQH/\n" +
-                    "BAQDAgWgMA0GCSqGSIb3DQEBBQUAA4GBAEBTY4kT+YoIbWG00gM+bi8ITDV1lZ7b\n" +
-                    "Rfa0MzotsqzplD12IbbzULWHW092I0MAoIG9mdM+BDweZCsH/bRVWwyQ5V3DaU3C\n" +
-                    "3mVuHRuU2beju5w4CMOffn21504Ypm8WAbOZugS9byN5vO5ybDI6qOWk4z9ipmoI\n" +
-                    "IRgUGSp/Iy8MAAAxggF6MIIBdgIBATBlMFkxEjAQBgNVBAUTCTA4ODg4ODg4RDEi\n" +
-                    "MCAGA1UEBBMZVGVzdHMtVm90aW5nU3lzdGVtU3VybmFtZTEfMB0GA1UEKhMWVGVz\n" +
-                    "dHMtVm90aW5nU3lzdGVtTmFtZQIIUkGI3crYt/owDQYJYIZIAWUDBAIBBQCgaTAY\n" +
-                    "BgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0xNjAzMDYx\n" +
-                    "MTUwNDNaMC8GCSqGSIb3DQEJBDEiBCDAU15L4ref/ZMpEwVDa/iJMU5KP67AXs/8\n" +
-                    "u33zGtnlGjANBgkqhkiG9w0BAQEFAASBgCAbErISb3bYqYelPnjcmF5XxyfIeyzD\n" +
-                    "aepQrj5TbRbJMkUg3+2xjvP/pmmK1OwJ1r2qolFPndX7mGX1UX4T8eMr5SHZQ14m\n" +
-                    "7IMnhUyvHkwnO13Uv6SCiXWk5TMteWnLZgsY16yG3Wha3tpgtt5fbN37oNwnznTs\n" +
-                    "gsidFvZ1o7cfAAAAAAAA\n" +
-                    "-----END PKCS7-----";
-
-
 
             function readPKCS7Message() {
-                var cmsMessage = document.querySelector("#cmsMessage").innerHTML;
-                var p7 = forge.pkcs7.messageFromPem(cmsMessage);
-                console.log(p7)
-                console.log(" --- Signers:")
-                console.log(signers)
+                var cmsMessagePEM = document.querySelector("#cmsMessage").innerHTML;
+                var cmsSignedMessage = forge.pkcs7.messageFromPem(cmsMessagePEM);
+                console.log(cmsSignedMessage)
+            }
+
+            function createPKCS7MessageTimeStamped() {
+                var certPrivateKeyPair = test.createSelfSignedCert();
+                var contentToSign = "Hello signed and TimeStamped message"
+                vs.getTimeStampToken(contentToSign, function (timeStampTokenASN1) {
+                    console.log(timeStampTokenASN1)
+                    var cmsSignedMessage =  test.createCMSSignedMessage(certPrivateKeyPair, contentToSign, timeStampTokenASN1)
+                    console.log(cmsSignedMessage)
+                    var pem = forge.pkcs7.messageToPem(cmsSignedMessage);
+                    console.log("--------- timeStamped PKCS7Message:")
+                    console.log(pem)
+                    var p7 = forge.pkcs7.messageFromPem(pem);
+                    console.log(p7)
+                })
             }
 
             function createPKCS7Message() {
-                var p7 = forge.pkcs7.createSignedData();
-                p7.content = forge.util.createBuffer('Some content to be signed.', 'utf8');
-                var certPrivateKeyPair = getSelfSignedCert();
-                var cert = certPrivateKeyPair.cert;
-                p7.addCertificate(cert);
-                p7.addSigner({
-                    key: certPrivateKeyPair.privateKey,
-                    certificate: cert,
-                    digestAlgorithm: forge.pki.oids.sha256,
-                    authenticatedAttributes: [{
-                        type: forge.pki.oids.contentType,
-                        value: forge.pki.oids.data
-                    }, {
-                        type: forge.pki.oids.messageDigest
-                        // value will be auto-populated at signing time
-                    }, {
-                        type: forge.pki.oids.signingTime,
-                        // value can also be auto-populated at signing time
-                        value: new Date()
-                    }]
-                });
-                p7.sign();
-                console.log(p7)
-                var pem = forge.pkcs7.messageToPem(p7);
-                console.log(pem)
-
+                var certPrivateKeyPair = test.createSelfSignedCert();
+                var cmsSignedMessage =  test.createCMSSignedMessage(certPrivateKeyPair, 'Some content to be signed.')
+                console.log(cmsSignedMessage)
+                var pem = forge.pkcs7.messageToPem(cmsSignedMessage);
                 var p7 = forge.pkcs7.messageFromPem(pem);
                 console.log(p7)
-                console.log(p7.rawCapture.signerInfos)
-
-                //forge.pkcs7.messageFromPem(pem);
             }
 
-            function getSelfSignedCert() {
-                // generate a keypair and create an X.509v3 certificate
-                var keys = forge.pki.rsa.generateKeyPair(1024);
-                var cert = forge.pki.createCertificate();
-                cert.publicKey = keys.publicKey;
-// alternatively set public key from a csr
-//cert.publicKey = csr.publicKey;
-                cert.serialNumber = '01';
-                cert.validity.notBefore = new Date();
-                cert.validity.notAfter = new Date();
-                cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1);
-                var attrs = [{
-                    name: 'commonName',
-                    value: 'example.org'
-                }, {
-                    name: 'countryName',
-                    value: 'US'
-                }, {
-                    shortName: 'ST',
-                    value: 'Virginia'
-                }, {
-                    name: 'localityName',
-                    value: 'Blacksburg'
-                }, {
-                    name: 'organizationName',
-                    value: 'Test'
-                }, {
-                    shortName: 'OU',
-                    value: 'Test'
-                }];
-                cert.setSubject(attrs);
-                // alternatively set subject from a csr
-                //cert.setSubject(csr.subject.attributes);
-                cert.setIssuer(attrs);
-                cert.setExtensions([{
-                    name: 'basicConstraints',
-                    cA: true
-                }, {
-                    name: 'keyUsage',
-                    keyCertSign: true,
-                    digitalSignature: true,
-                    nonRepudiation: true,
-                    keyEncipherment: true,
-                    dataEncipherment: true
-                }, {
-                    name: 'extKeyUsage',
-                    serverAuth: true,
-                    clientAuth: true,
-                    codeSigning: true,
-                    emailProtection: true,
-                    timeStamping: true
-                }, {
-                    name: 'nsCertType',
-                    client: true,
-                    server: true,
-                    email: true,
-                    objsign: true,
-                    sslCA: true,
-                    emailCA: true,
-                    objCA: true
-                }, {
-                    name: 'subjectAltName',
-                    altNames: [{
-                        type: 6, // URI
-                        value: 'http://example.org/webid#me'
-                    }, {
-                        type: 7, // IP
-                        ip: '127.0.0.1'
-                    }]
-                }, {
-                    name: 'subjectKeyIdentifier'
-                }]);
-                /* alternatively set extensions from a csr
-                 var extensions = csr.getAttribute({name: 'extensionRequest'}).extensions;
-                 // optionally add more extensions
-                 extensions.push.apply(extensions, [{
-                 name: 'basicConstraints',
-                 cA: true
-                 }, {
-                 name: 'keyUsage',
-                 keyCertSign: true,
-                 digitalSignature: true,
-                 nonRepudiation: true,
-                 keyEncipherment: true,
-                 dataEncipherment: true
-                 }]);
-                 cert.setExtensions(extensions);
-                 */
-                // self-sign certificate
-                cert.sign(keys.privateKey);
-                return {cert:cert, privateKey:keys.privateKey};
-            }
-
-            createPKCS7Message()
+            //readPKCS7Message()
+            createPKCS7MessageTimeStamped()
 
         </script>
     </ui:define>
