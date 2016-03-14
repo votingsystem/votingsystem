@@ -8,18 +8,13 @@
           next();
       }
 
-      var iframeVS
-      function loadFrameVS(url, pageCaption) {
-          Polymer.Base.importHref('./resources/bower_components/vs-iframe/vs-iframe.html', function(e) {
-              if(!iframeVS) iframeVS = document.createElement('vs-iframe');
-              iframeVS.url = url
-              vs.loadMainContent(iframeVS, pageCaption)
-          });
-      }
-
+      var contactPage
       page('*/app/contact', scrollToTop, function (ctx) {
           vs.route = 'contact';
-          loadFrameVS(contextURL + "/app/contact.xhtml", "${msg.contactLbl}")
+          Polymer.Base.importHref('./app/contact-page.vsp', function(e) {
+              if(!contactPage) contactPage = document.createElement('contact-page');
+              vs.loadMainContent(contactPage, "${msg.contactLbl}")
+          });
       });
 
       var eventElectionList
@@ -38,14 +33,18 @@
           Polymer.Base.importHref('./eventElection/eventvs-election.vsp', function () {
               if (!eventElection) eventElection = document.createElement('eventvs-election');
               if(vs.eventvs) eventElection.eventvs = vs.eventvs
-              else eventElection.url = contextURL + ctx.path
+              else eventElection.url = vs.contextURL + ctx.path
               vs.loadMainContent(eventElection, "${msg.electionSystemLbl}")
           });
       });
 
+      var feedsPage
       page('*/subscriptionVS/feeds', scrollToTop, function (ctx) {
           vs.route = 'feeds';
-          loadFrameVS(contextURL + "/subscriptionVS/feeds.xhtml", "${msg.subscriptionLbl}")
+          Polymer.Base.importHref('./subscriptionVS/feeds-page.vsp', function(e) {
+              if(!feedsPage) feedsPage = document.createElement('feeds-page');
+              vs.loadMainContent(feedsPage, "${msg.subscriptionLbl}")
+          });
       });
 
       page({

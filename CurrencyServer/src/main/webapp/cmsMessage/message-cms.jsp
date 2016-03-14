@@ -116,22 +116,22 @@
                 this.messageContent = this.cmsMessageContent
             },
             showToUserInfo:function(e) {
-                var groupURL = contextURL + "/rest/groupVS/" + e.model.item.toUserVS.id
+                var groupURL = vs.contextURL + "/rest/groupVS/" + e.model.item.toUserVS.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },
             showFromUserInfo:function(group) {
-                var groupURL = contextURL + "/rest/groupVS/" +  e.model.item.fromUserVS.id
+                var groupURL = vs.contextURL + "/rest/groupVS/" +  e.model.item.fromUserVS.id
                 console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showInfoIBAN:function(e) {
-                var fromUserIBANInfoURL = contextURL + "/rest/IBAN/from/" + e.model.item.fromUserVS.sender.fromUserIBAN
+                var fromUserIBANInfoURL = vs.contextURL + "/rest/IBAN/from/" + e.model.item.fromUserVS.sender.fromUserIBAN
                 console.log(this.tagName + " - showInfoIBAN - fromUserIBANInfoURL: " + fromUserIBANInfoURL)
             },
             showByUserIBAN:function(e) {
                 console.log(this.tagName + " - showByUserIBAN - " + e)
                 if(e.model) IBAN = e.model.IBAN
                 else IBAN = e.target.innerText
-                window.open(contextURL + "/#!" + contextURL + "/rest/userVS/IBAN/" + IBAN, "_blank")
+                window.open(vs.contextURL + "/#!" + vs.contextURL + "/rest/userVS/IBAN/" + IBAN, "_blank")
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_CMS)

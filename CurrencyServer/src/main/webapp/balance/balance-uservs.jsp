@@ -129,7 +129,7 @@
                 }
             },
             goToUserVSPage:function() {
-                page.show(contextURL + "/rest/userVS/id/" + this.balance.userVS.id)
+                page.show(vs.contextURL + "/rest/userVS/id/" + this.balance.userVS.id)
             },
             getTimeLimitedForTagMsg: function(currency, tag) {
                 var expendedFromTag = 0

@@ -45,7 +45,7 @@
             properties: {
                 representativeListDto:{type:Object},
                 representationInfo:{type:Boolean, value:false},
-                url:{type:String, value: contextURL + "/rest/representative", observer:'getHTTP'}
+                url:{type:String, value: vs.contextURL + "/rest/representative", observer:'getHTTP'}
             },
             ready : function(e) {
                 console.log(this.tagName + " - ready")

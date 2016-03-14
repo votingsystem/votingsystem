@@ -8,29 +8,22 @@
           next();
       }
 
-      var iframeVS
-      function loadFrameVS(url, pageCaption) {
-          Polymer.Base.importHref('./resources/bower_components/vs-iframe/vs-iframe.html', function(e) {
-              if(!iframeVS) iframeVS = document.createElement('vs-iframe');
-              iframeVS.url = url
-              vs.loadMainContent(iframeVS, pageCaption)
-          });
-      }
-
-      // Routes
+      var contactPage
       page('*/app/contact', scrollToTop, function (ctx) {
           vs.route = 'contact';
-          loadFrameVS(contextURL + "/app/contact.xhtml", "${msg.contactLbl}")
+          Polymer.Base.importHref('./app/contact-page.vsp', function(e) {
+              if(!contactPage) contactPage = document.createElement('contact-page');
+              vs.loadMainContent(contactPage, "${msg.contactLbl}")
+          });
       });
 
+      var toolsPage
       page('*/app/tools', scrollToTop, function (ctx) {
           vs.route = 'tools';
-          if(vs.webextension_available === true) VotingSystemClient.setMessage(new OperationVS(Operation.TOOL_VS))
-          else loadFrameVS(contextURL + "/app/tools.xhtml", "${msg.toolsPageTitle}")
-      });
-
-      page('/resources/certificationCenters', scrollToTop, function (ctx) {
-          loadFrameVS(contextURL + "/resources/certificationCenters.html")
+          Polymer.Base.importHref('./app/tools-page.vsp', function(e) {
+              if(!toolsPage) toolsPage = document.createElement('tools-page');
+              vs.loadMainContent(toolsPage, "${msg.toolsPageTitle}")
+          });
       });
 
       var eventElectionList
@@ -49,7 +42,7 @@
           Polymer.Base.importHref('./eventElection/eventvs-election.vsp', function () {
               if (!eventElection) eventElection = document.createElement('eventvs-election');
               if(vs.eventvs) eventElection.eventvs = vs.eventvs
-              else eventElection.url = contextURL + ctx.path
+              else eventElection.url = vs.contextURL + ctx.path
               vs.loadMainContent(eventElection, "${msg.pollLbl}")
           });
       });
@@ -60,7 +53,7 @@
           Polymer.Base.importHref('./representative/representative-info.vsp', function () {
               if (!representativePage) representativePage = document.createElement('representative-info');
               if(vs.representative) representativePage.representative = vs.representative
-              else representativePage.url = contextURL + ctx.path
+              else representativePage.url = vs.contextURL + ctx.path
               vs.loadMainContent(representativePage, "${msg.representativeLbl}")
           });
       });
@@ -92,9 +85,13 @@
           });
       });
 
+      var feedsPage
       page('*/subscriptionVS/feeds', scrollToTop, function (ctx) {
           vs.route = 'feeds';
-          loadFrameVS(contextURL + "/subscriptionVS/feeds.xhtml", "${msg.subscriptionLbl}")
+          Polymer.Base.importHref('./subscriptionVS/feeds-page.vsp', function(e) {
+              if(!feedsPage) feedsPage = document.createElement('feeds-page');
+              vs.loadMainContent(feedsPage, "${msg.subscriptionLbl}")
+          });
       });
 
       page({

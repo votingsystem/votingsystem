@@ -33,7 +33,7 @@
             console.log(this.tagName + " - ready")
             this.$.transactionSelector.addEventListener('selected', function (e) {
                 var transactionvsType = e.detail
-                var targetURL = contextURL + "/rest/transactionVS";
+                var targetURL = vs.contextURL + "/rest/transactionVS";
                 if("" != transactionvsType) {
                     targetURL = targetURL + "?transactionvsType=" + transactionvsType
                 }
@@ -53,11 +53,11 @@
         },
         processSearch:function (textToSearch) {
             vs.updateSearchMessage("${msg.searchResultLbl} '" + textToSearch + "'")
-            this.url = contextURL + "/rest/transactionVS?searchText=" + textToSearch
+            this.url = vs.contextURL + "/rest/transactionVS?searchText=" + textToSearch
         },
         processSearchJSON:function (dataJSON) {
             this.params = dataJSON
-            this.url = contextURL + "/rest/transactionVS"
+            this.url = vs.contextURL + "/rest/transactionVS"
         },
         getHTTP: function (targetURL) {
             this.transactionvsType = getURLParam("transactionvsType", this.url)

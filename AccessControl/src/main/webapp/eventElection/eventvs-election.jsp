@@ -122,7 +122,7 @@
                     if(this.eventvs.state === 'ACTIVE' || this.eventvs.state === 'PENDING') this.adminMenuHidden = false
                 }
                 this.fieldsEventVS = this.eventvs.fieldsEventVS
-                d3.xhr(contextURL + "/rest/eventElection/id/" + this.eventvs.id + "/stats")
+                d3.xhr(vs.contextURL + "/rest/eventElection/id/" + this.eventvs.id + "/stats")
                         .header("Content-Type", "application/json").get(function(err, rawData){
                         if(this.isTerminated == true) {
                             this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS

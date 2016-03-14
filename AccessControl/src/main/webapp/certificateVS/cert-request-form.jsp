@@ -85,7 +85,7 @@
         messagedialogAccept: function () {
             console.log("messagedialogAccept")
             var operationVS = new OperationVS(Operation.CERT_USER_NEW)
-            operationVS.serviceURL = contextURL + "/rest/csr/request"
+            operationVS.serviceURL = vs.contextURL + "/rest/csr/request"
             operationVS.signedMessageSubject = "${msg.certRequestLbl}"
             operationVS.jsonStr = JSON.stringify({nif:validateNIF(this.$.nif.value), givenname:this.$.givenname.value.toUpperCase(),
                 surname:this.$.surname.value.toUpperCase(), mobilePhone:this.$.phone.value, email:this.$.email.value,
@@ -96,7 +96,6 @@
         showResponse :function(appMessageJSON) {
             var message = appMessageJSON.message
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
-                page.show("/resources/certificationCenters")
                 message = "${msg.certRequestOKMsg}"
                 alert(message, '${msg.certRequestLbl}', 'resultMessage',true)
             } else alert(message, '${msg.certRequestLbl}')

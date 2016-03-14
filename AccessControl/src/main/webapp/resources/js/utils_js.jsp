@@ -1,6 +1,7 @@
 <%@page contentType="text/javascript" %>
-
-    var contextURL = "${contextURL}"
+    var vs = {}
+    vs.contextURL = "${contextURL}"
+    vs.timeStampServerURL = "${timeStampServerURL}"
 
     function OperationVS(operation, statusCode) {
         this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING
@@ -69,7 +70,7 @@
     };
 
     window.addEventListener('WebComponentsReady', function() {
-        Polymer.Base.importHref(contextURL + '/element/alert-dialog.vsp', function(e) {
+        Polymer.Base.importHref(vs.contextURL + '/element/alert-dialog.vsp', function(e) {
             var alertDialog = document.createElement('alert-dialog');
             window.alert = function(message, caption, callerId, isConfirmMessage) {
                 if(!caption) caption = "${msg.messageLbl}"
@@ -79,11 +80,11 @@
         });
     })
 
-    var weekdays = [${msg.weekdaysShort}];
-    var months = [${msg.monthsShort}];
+    vs.weekdays = [${msg.weekdaysShort}];
+    vs.months = [${msg.monthsShort}];
 
     Date.prototype.getDayWeekFormat = function() {
-        return weekdays[this.getDay()] + " " + this.getDate() + " " + months[ this.getMonth()] + " " + this.getFullYear();
+        return vs.weekdays[this.getDay()] + " " + this.getDate() + " " + vs.months[ this.getMonth()] + " " + this.getFullYear();
     };
 
     Date.prototype.getDayWeekAndHourFormat = function() {

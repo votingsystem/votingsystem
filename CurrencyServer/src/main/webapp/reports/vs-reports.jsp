@@ -38,7 +38,7 @@
     Polymer({
         is:'vs-reports',
         properties: {
-            url:{type:String, value: contextURL + '/rest/reports', observer:'getHTTP'},
+            url:{type:String, value: vs.contextURL + '/rest/reports', observer:'getHTTP'},
             reportsInfoDto: {type:Object}
         },
         ready: function() { },
@@ -47,7 +47,7 @@
         },
         getPeriodReportURL: function(timePeriod) {
             var dateFrom = new Date(timePeriod.dateFrom)
-            return contextURL + "/rest/reports/" + dateFrom.format() + "/week"
+            return vs.contextURL + "/rest/reports/" + dateFrom.format() + "/week"
         },
         getHTTP: function (targetURL) {
             if(!targetURL) targetURL = this.url

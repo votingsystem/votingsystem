@@ -77,7 +77,7 @@ public class AppResource {
     @GET @Path("/contact")
     public Response contact(@Context ServletContext context, @Context HttpServletRequest req,
                               @Context HttpServletResponse resp) throws ServletException, IOException, ExceptionVS, URISyntaxException {
-        return Response.temporaryRedirect(new URI("../app/contact.xhtml")).build();
+        return Response.temporaryRedirect(new URI("../app/contact")).build();
     }
 
     @GET @Path("/jsonDocs")

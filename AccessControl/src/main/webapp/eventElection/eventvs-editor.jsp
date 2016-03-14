@@ -70,7 +70,7 @@
                     return
                 }
                 var operationVS = new OperationVS(Operation.PUBLISH_EVENT)
-                operationVS.serviceURL = contextURL + "/rest/eventElection"
+                operationVS.serviceURL = vs.contextURL + "/rest/eventElection"
                 operationVS.signedMessageSubject = "${msg.publishVoteLbl}"
                 var content = window.btoa(encodeURIComponent( escape(this.$.editor.getContent())))
                 var fieldsEventVS = []

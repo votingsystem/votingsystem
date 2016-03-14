@@ -66,13 +66,13 @@
         is:'uservs-dashboard',
         properties: {
             dashBoardDto:{type:Object, value:null, observer:'dashBoardDtoChanged'},
-            url:{type:String, value:contextURL + "/rest/app/userVSDashboard", observer:'getHTTP'}
+            url:{type:String, value:vs.contextURL + "/rest/app/userVSDashboard", observer:'getHTTP'}
         },
         ready: function() {
             this.lapse = window.location.href.substr(window.location.href.lastIndexOf('/') + 1);
             if(isNumber(this.lapse)) {
                 this.$.transactionLapsedSelect.value = this.lapse
-                this.url = contextURL + "/rest/app/userVSDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
+                this.url = vs.contextURL + "/rest/app/userVSDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
             } else this.lapse = null
             console.log(this.tagName + " - ready - lapse: " + this.lapse)
         },
@@ -93,13 +93,13 @@
         },
         selectAction: function() {
             var servicePath = "/rest/app/userVSDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
-            var targetURL = contextURL + servicePath
-            var newURL = contextURL + "/spa.xhtml#!" + servicePath
+            var targetURL = vs.contextURL + servicePath
+            var newURL = vs.contextURL + "/spa.xhtml#!" + servicePath
             history.pushState(null, null, newURL);
             this.url = targetURL
         },
         transBlockSelected: function(e) {
-            page.show(contextURL + "/rest/transactionVS/from/" + this.dateFrom.urlFormatWithTime() + "/to/" +
+            page.show(vs.contextURL + "/rest/transactionVS/from/" + this.dateFrom.urlFormatWithTime() + "/to/" +
                     this.dateTo.urlFormatWithTime() + "?transactionvsType=" + e.target.parentNode.id)
         },
         getHTTP: function (targetURL) {

@@ -165,8 +165,8 @@
                 this.textToSearch = this.$.inputSearch.value.trim()
                 if(this.textToSearch === "") return
                 this.url = null
-                if(this.groupVSId) this.url = contextURL + "/rest/groupVS/id/" + this.groupVSId + "/searchUsers?searchText=" + this.textToSearch
-                else this.url = contextURL + "/rest/userVS/search?searchText=" + this.textToSearch
+                if(this.groupVSId) this.url = vs.contextURL + "/rest/groupVS/id/" + this.groupVSId + "/searchUsers?searchText=" + this.textToSearch
+                else this.url = vs.contextURL + "/rest/userVS/search?searchText=" + this.textToSearch
             },
             setContactsView:function() {
                 this.modeSearch = false

@@ -67,7 +67,7 @@
             },
             showByUserIBAN:function(e) {
                 console.log(this.tagName + " - showByUserIBAN - " + e)
-                window.open(contextURL + "/#!" + contextURL + "/rest/userVS/IBAN/" + e.target.innerText, "_blank")
+                window.open(vs.contextURL + "/#!" + vs.contextURL + "/rest/userVS/IBAN/" + e.target.innerText, "_blank")
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_CMS)

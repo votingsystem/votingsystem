@@ -79,11 +79,11 @@
                 sendSignalVS({caption:"${msg.transactionVSFromBankVS}"})
             },
             showFromUserVSByIBAN:function(e) {
-                window.open(contextURL + "/#!" + contextURL + "/rest/userVS/IBAN/" + this.cmsMessageContent.fromUserIBAN, "_blank")
+                window.open(vs.contextURL + "/#!" + vs.contextURL + "/rest/userVS/IBAN/" + this.cmsMessageContent.fromUserIBAN, "_blank")
             },
             showToUserVSByIBAN:function(e) {
                 console.log(this.tagName + " - showUserVSByIBAN:" + e)
-                window.open(contextURL + "/#!" + contextURL + "/rest/userVS/IBAN/" + e.model.IBAN, "_blank")
+                window.open(vs.contextURL + "/#!" + vs.contextURL + "/rest/userVS/IBAN/" + e.model.IBAN, "_blank")
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_CMS)

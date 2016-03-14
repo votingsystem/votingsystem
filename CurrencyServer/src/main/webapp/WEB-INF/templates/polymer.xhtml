@@ -9,8 +9,8 @@
     <link href="../resources/bower_components/polymer/polymer.html" rel="import"/>
     <link href="../resources/css/currency.css" media="all" rel="stylesheet" />
     <link href="../resources/bower_components/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
-    <script src="../resources/js/utilsVS.js" type="text/javascript"></script>
     <script src="../resources/js/utils_js.vsp" type="text/javascript"></script>
+    <script src="../resources/js/utilsVS.js" type="text/javascript"></script>
     <link rel="import" href="../resources/bower_components/iron-flex-layout/classes/iron-flex-layout.html"/>
     <ui:insert name="head" />
 </h:head>
@@ -22,13 +22,13 @@
         document.querySelector("#voting_system_page").addEventListener('message_from_extension',
                 function(event) {
                     vs.webextension_available = true
-                    Polymer.Base.importHref(contextURL + '/resources/bower_components/vs-block-screen/vs-block-screen.vsp', function(e) {
+                    Polymer.Base.importHref(vs.contextURL + '/resources/bower_components/vs-block-screen/vs-block-screen.vsp', function(e) {
                         var blockScreen = document.createElement('vs-block-screen');
                         document.querySelector("body").appendChild(blockScreen)
                         vs.blockScreen = blockScreen.block.bind(blockScreen)
 
                         var operationVS = new OperationVS(Operation.INIT_SERVER)
-                        operationVS.serverURL = contextURL
+                        operationVS.serverURL = vs.contextURL
                         VotingSystemClient.setMessage(operationVS);
                     });
                     document.querySelector("#voting_system_page").addEventListener("message_from_webextension:dialog_closed", function(e) {

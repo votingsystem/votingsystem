@@ -117,10 +117,10 @@
             d3.select(this).select("#userDescriptionDiv").html(this.uservs.description)
          },
         getUserVSURL:function(id) {
-            return contextURL + "/rest/userVS/" + id
+            return vs.contextURL + "/rest/userVS/" + id
         },
         goToWeekBalance:function() {
-            page.show(contextURL + "/rest/balance/userVS/id/" + this.uservs.id)
+            page.show(vs.contextURL + "/rest/balance/userVS/id/" + this.uservs.id)
         },
         blockUser:function() {
             console.log(this.tagName + " - blockUser")
@@ -131,7 +131,7 @@
             this.page = 1;
         },
         showByIBAN:function(IBAN) {
-            this.url =  contextURL + "/rest/userVS/IBAN/" + IBAN
+            this.url =  vs.contextURL + "/rest/userVS/IBAN/" + IBAN
         },
         showSendMessageDialog: function () {
             this.$.sendMessageDialog.show(this.uservs)

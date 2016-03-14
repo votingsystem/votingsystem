@@ -109,7 +109,7 @@
             if(selectedTags == null) this.selectedTagList = []
             else this.selectedTagList = selectedTags
             this.tagBoxHidden = (this.selectedTagList.length === 0)
-            this.url = contextURL + "/rest/tagVS/list"
+            this.url = vs.contextURL + "/rest/tagVS/list"
             this.$.modalDialog.style.opacity = 1
             this.$.modalDialog.style['pointer-events'] = 'auto'
         },

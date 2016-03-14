@@ -25,7 +25,7 @@
                         break;
                     case "message-cms-transactionvs-from-bankvs":
                         if(!this.FROM_BANKVS) {
-                            Polymer.Base.importHref(contextURL + '/cmsMessagePEM/message-cms-transactionvs-from-bankvs.vsp', function(e) {
+                            Polymer.Base.importHref(vs.contextURL + '/cmsMessagePEM/message-cms-transactionvs-from-bankvs.vsp', function(e) {
                                 console.log(this.tagName + " - message-cms-transactionvs-from-bankvs: " + this.FROM_BANKVS)
                                 this.FROM_BANKVS = document.createElement('message-cms-transactionvs-from-bankvs');
                                 this.loadMainContent(this.FROM_BANKVS)

@@ -95,13 +95,13 @@
                 if('admin' === menuType) {
                     if(this.eventvs.state === 'ACTIVE' || this.eventvs.state === 'PENDING') this.adminMenuHidden = false
                 }
-                d3.xhr(contextURL + "/rest/eventElection/id/" + this.eventvs.id + "/stats")
+                d3.xhr(vs.contextURL + "/rest/eventElection/id/" + this.eventvs.id + "/stats")
                         .header("Content-Type", "application/json").get(function(err, rawData){
                             this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
                             this.async(function (targetURL) { d3.select(this).selectAll(".numVotesClass").style("display", "block")}.bind(this))
                         }.bind(this)
                 );
-                d3.xhr(contextURL + "/rest/eventElection/id/" + this.eventvs.id + "/stats")
+                d3.xhr(vs.contextURL + "/rest/eventElection/id/" + this.eventvs.id + "/stats")
                         .header("Content-Type", "application/json").get(function(err, rawData){
                     if('TERMINATED' == this.eventvs.state) {
                         this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS

@@ -33,7 +33,7 @@
             loadGroupUsers:function(groupvsId) {
                 this.groupvsId = groupvsId
                 console.log(this.tagName + " - loadGroupUsers - groupvsId: " + this.groupvsId)
-                this.url = contextURL + "/rest/groupVS/id/" + this.groupvsId + "/listUsers"
+                this.url = vs.contextURL + "/rest/groupVS/id/" + this.groupvsId + "/listUsers"
             },
             refreshList: function() {
                 getHTTP(this.url)

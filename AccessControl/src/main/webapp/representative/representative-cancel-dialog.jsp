@@ -47,7 +47,7 @@
                 console.log(this.tagName + " - removeRepresentative")
                 var operationVS = new OperationVS(Operation.REPRESENTATIVE_REVOKE)
                 operationVS.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_REVOKE, nif:validatedNif})
-                operationVS.serviceURL = contextURL + "/rest/representative/revoke"
+                operationVS.serviceURL = vs.contextURL + "/rest/representative/revoke"
                 operationVS.signedMessageSubject = '${msg.removeRepresentativeMsgSubject}'
                 operationVS.setCallback(function(appMessage) { this.revokeResponse(appMessage) }.bind(this))
                 VotingSystemClient.setMessage(operationVS);

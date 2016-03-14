@@ -78,9 +78,9 @@
                         messageSubject = '${msg.cancelEventVSMsgSubject}'
                     }
                     var operationVS = new OperationVS(Operation.EVENT_CANCELLATION)
-                    operationVS.serviceURL= contextURL + "/rest/eventElection/cancel"
+                    operationVS.serviceURL= vs.contextURL + "/rest/eventElection/cancel"
                     var signedContent = {operation:Operation.EVENT_CANCELLATION,
-                        accessControlURL:contextURL, eventId:Number(this.eventvs.id), state:state}
+                        accessControlURL:vs.contextURL, eventId:Number(this.eventvs.id), state:state}
                     operationVS.jsonStr = JSON.stringify(signedContent)
                     operationVS.signedMessageSubject = messageSubject
                     operationVS.setCallback(function(appMessage) { this.cancelationResponse(appMessage)}.bind(this))

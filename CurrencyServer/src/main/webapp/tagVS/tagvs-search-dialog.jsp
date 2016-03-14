@@ -69,7 +69,7 @@
             numTags:{type:Number, value:1},
             caption:{type:String, value:null},
             tagBoxHidden:{type:Boolean, value:true},
-            serviceUrl:{type:String, value:contextURL + "/rest/tagVS"},
+            serviceUrl:{type:String, value:vs.contextURL + "/rest/tagVS"},
             resultListDto:{type:Object},
             messages:{type:Object},
             searchResultTagList:{type:Array, value:[]}

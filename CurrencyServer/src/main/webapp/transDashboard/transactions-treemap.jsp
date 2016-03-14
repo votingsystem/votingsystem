@@ -235,7 +235,7 @@
                 },
                 openFullScreen: function() {
                     localStorage.treemapRoot = this.treemapRoot
-                    window.open(contextURL + "/transDashboard/treemap.xhtml", '_blank' );
+                    window.open(vs.contextURL + "/transDashboard/treemap.xhtml", '_blank' );
                 },
                 getAncestors: function (node) {
                     var path = [];

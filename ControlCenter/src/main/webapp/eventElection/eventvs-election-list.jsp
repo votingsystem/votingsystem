@@ -66,8 +66,8 @@
             loadURL:function(path, querystring) {
                 console.log(this.tagName + " - loadURL - path: " + path + " - querystring: " + querystring)
                 if(querystring) {
-                    this.url = contextURL + "/rest/eventElection?" + querystring
-                } else this.url = contextURL + "/rest/eventElection"
+                    this.url = vs.contextURL + "/rest/eventElection?" + querystring
+                } else this.url = vs.contextURL + "/rest/eventElection"
                 this.eventVSState = getURLParam("eventVSState", path)
                 if(this.eventVSState === "") this.eventVSState = 'ACTIVE'
                 this.$.eventVSStateSelect.value = this.eventVSState
@@ -88,7 +88,7 @@
                 var optionSelected = this.$.eventVSStateSelect.value
                 console.log("eventVSStateSelect: " + optionSelected)
                 this.$.vspager.style.display = 'none'
-                targetURL = contextURL + "/rest/eventElection?menu=" + menuType + "&eventVSState=" +
+                targetURL = vs.contextURL + "/rest/eventElection?menu=" + menuType + "&eventVSState=" +
                         optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
@@ -127,7 +127,7 @@
             eventVSStateSelect: function() {
                 this.eventVSState = this.$.eventVSStateSelect.value
                 console.log("eventVSStateSelect: " + this.eventVSState)
-                targetURL = contextURL + "/rest/eventElection?eventVSState=" + this.eventVSState
+                targetURL = vs.contextURL + "/rest/eventElection?eventVSState=" + this.eventVSState
                 var newURL = setURLParameter(window.location.href, "eventVSState",  this.eventVSState)
                 history.pushState(null, null, newURL);
                 this.url = targetURL

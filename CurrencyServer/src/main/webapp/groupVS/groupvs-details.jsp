@@ -70,7 +70,7 @@
             <div hidden="{{isClientToolConnected}}" id="clientToolMsg" class="text-center"
                  style="color:#6c0404; font-size: 1.2em;margin:30px 0 20px 0;">
                 <f:view>
-                    <h:outputFormat value="#{msg.clientToolNeededMsg}" escape="false">
+                    <h:outputFormat value="#{msg.nativeClientURLMsg}" escape="false">
                         <f:param value="#{contextURL}/tools/ClientTool.zip"/>
                     </h:outputFormat>
                     <br/>
@@ -162,7 +162,7 @@
             console.log(this.tagName + ".messagedialogAccepted")
             if('cancel_group' == e.detail) {
                 var operationVS = new OperationVS(Operation.CURRENCY_GROUP_CANCEL)
-                operationVS.serviceURL = contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/cancel"
+                operationVS.serviceURL = vs.contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/cancel"
                 operationVS.signedMessageSubject = "${msg.cancelGroupVSSignedMessageSubject}"
                 operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_CANCEL, name:this.groupvs.name,
                     id:this.groupvs.id})
@@ -176,18 +176,18 @@
             var caption = '${msg.groupCancelERRORLbl}'
             if(ResponseVS.SC_OK == this.appMessageJSON.statusCode) {
                 caption = "${msg.groupCancelOKLbl}"
-                page.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id)
+                page.show(vs.contextURL + "/rest/groupVS/id/" + this.groupvs.id)
             }
             alert(this.appMessageJSON.message, caption)
         },
         goToWeekBalance:function() {
-            page.show(contextURL + "/rest/balance/userVS/id/" + this.groupvs.id)
+            page.show(vs.contextURL + "/rest/balance/userVS/id/" + this.groupvs.id)
         },
         subscribeToGroup: function () {
             console.log("subscribeToGroup")
             var representative = {id:this.groupvs.representative.id, nif:this.groupvs.representative.nif}
             var operationVS = new OperationVS(Operation.CURRENCY_GROUP_SUBSCRIBE)
-            operationVS.serviceURL = contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/subscribe"
+            operationVS.serviceURL = vs.contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/subscribe"
             operationVS.signedMessageSubject = "${msg.subscribeToCurrencyGroupMsg}"
             operationVS.jsonStr = JSON.stringify({operation:Operation.CURRENCY_GROUP_SUBSCRIBE,
                 id:this.groupvs.id, name:this.groupvs.name , representative:representative})
@@ -199,7 +199,7 @@
             var caption
             if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
                 caption = "${msg.groupSubscriptionOKLbl}"
-                page.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id)
+                page.show(vs.contextURL + "/rest/groupVS/id/" + this.groupvs.id)
             } else caption = '${msg.groupSubscriptionERRORLbl}'
             alert(appMessageJSON.message, caption)
         },
@@ -227,7 +227,7 @@
             if(this.groupvs.representative) this.representativeName =
                     this.groupvs.representative.firstName + " " + this.groupvs.representative.lastName
             if(this.groupvs.tags) this.tagsHidden = (this.groupvs.tags.length === 0)
-            this.$.userList.url = contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/listUsers"
+            this.$.userList.url = vs.contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/listUsers"
             if(this.groupvs.id) this.$.userList.loadGroupUsers(this.groupvs.id)
             this.$.contentDiv.innerHTML = window.atob(this.groupvs.description)
             console.log("this.isUserView: " + this.isUserView + " - groupvs.state: " + this.groupvs.state +
@@ -268,7 +268,7 @@
         },
         showUserDetails:function(e) {
             console.log(this.tagName + " - showUserDetails - user id: " + e.detail)
-            this.$.userDescription.show(contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/user/id", e.detail)
+            this.$.userDescription.show(vs.contextURL + "/rest/groupVS/id/" + this.groupvs.id + "/user/id", e.detail)
         },
         getHTTP: function (targetURL) {
             if(!targetURL) targetURL = this.url

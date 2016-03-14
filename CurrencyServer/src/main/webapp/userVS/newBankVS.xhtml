@@ -60,7 +60,7 @@
                         return false
                     }
                     var operationVS = new OperationVS(Operation.BANKVS_NEW)
-                    operationVS.serviceURL = contextURL + "/rest/userVS/newBankVS"
+                    operationVS.serviceURL = vs.contextURL + "/rest/userVS/newBankVS"
                     operationVS.signedMessageSubject = "${msg.newBankVSMsgSubject}"
                     operationVS.jsonStr = JSON.stringify({info:document.querySelector("#description").value,
                             certChainPEM:document.querySelector("#pemCert").value,

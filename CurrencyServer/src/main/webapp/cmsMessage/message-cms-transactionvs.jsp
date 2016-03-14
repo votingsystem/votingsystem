@@ -108,13 +108,13 @@
                 sendSignalVS({caption:this.messageType})
             },
             showByUserIBAN:function(e) {
-                page.show(contextURL + "/rest/userVS/IBAN/" + this.fromUserIBAN, '_blank')
+                page.show(vs.contextURL + "/rest/userVS/IBAN/" + this.fromUserIBAN, '_blank')
             },
             showByUserIBAN:function(e) {
                 console.log(this.tagName + " - showByUserIBAN - " + e)
                 if(e.model) IBAN = e.model.IBAN
                 else IBAN = e.target.innerText
-                window.open(contextURL + "/#!" + contextURL + "/rest/userVS/IBAN/" + IBAN, "_blank")
+                window.open(vs.contextURL + "/#!" + vs.contextURL + "/rest/userVS/IBAN/" + IBAN, "_blank")
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_CMS)

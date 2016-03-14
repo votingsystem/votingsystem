@@ -68,7 +68,7 @@
                     return;
                 }
                 var operationVS = new OperationVS(Operation.EDIT_REPRESENTATIVE)
-                operationVS.serviceURL = contextURL + "/rest/representative/save"
+                operationVS.serviceURL = vs.contextURL + "/rest/representative/save"
                 operationVS.signedMessageSubject = "${msg.newRepresentativeLbl}"
                 var description = window.btoa(this.$.editor.getContent())
                 operationVS.jsonStr = JSON.stringify({description:description, base64Image:this.selectedFileBase64,  UUID: "${spa.getUUID()}"})

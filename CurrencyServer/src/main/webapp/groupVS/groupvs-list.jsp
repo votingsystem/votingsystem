@@ -45,22 +45,22 @@
                 if(!("admin" == menuType || "superuser" == menuType)) this.$.groupStateSelector.style.display = 'none'
                 if(this.state) {
                     this.$.groupvsTypeSelect.value = this.state
-                    this.url = contextURL + "/rest/groupVS?state=" + this.state
-                } else this.url = contextURL + "/rest/groupVS"
+                    this.url = vs.contextURL + "/rest/groupVS?state=" + this.state
+                } else this.url = vs.contextURL + "/rest/groupVS"
                 document.querySelector('#voting_system_page').addEventListener('search-request', function (e) {
-                    this.url = contextURL + "/rest/groupVS?menu=" + menuType + "&searchText=" + e.detail.query
+                    this.url = vs.contextURL + "/rest/groupVS?menu=" + menuType + "&searchText=" + e.detail.query
                     this.searchMsgHidden = false
                 }.bind(this))
             },
             pagerChange:function(e) {
                 var optionSelected = this.$.groupvsTypeSelect.value
-                this.url = contextURL + "/rest/groupVS?menu=" + menuType + "&state=" +
+                this.url = vs.contextURL + "/rest/groupVS?menu=" + menuType + "&state=" +
                         optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
             },
             groupvsTypeSelect: function() {
                 var optionSelected = this.$.groupvsTypeSelect.value
                 if("" != optionSelected) {
-                    targetURL = contextURL + "/rest/groupVS?menu=" + menuType + "&state=" + optionSelected
+                    targetURL = vs.contextURL + "/rest/groupVS?menu=" + menuType + "&state=" + optionSelected
                     var newURL = setURLParameter(window.location.href, "state",  optionSelected)
                     history.pushState(null, null, newURL);
                     console.log(this.tagName + " - groupvsTypeSelect: " + targetURL)
@@ -69,7 +69,7 @@
             },
             processSearch:function (textToSearch) {
                 vs.updateSearchMessage("${msg.searchResultLbl} '" + textToSearch + "'")
-                this.url = contextURL + "/rest/search/groupVS?searchText=" + textToSearch
+                this.url = vs.contextURL + "/rest/search/groupVS?searchText=" + textToSearch
             },
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url

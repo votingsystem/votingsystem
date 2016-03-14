@@ -111,7 +111,7 @@
         _showGroupDetails :  function() {
             console.log(this.tagName + " - showGroupDetails")
             vs.groupvs = this.groupvs;
-            page(contextURL + "/rest/groupVS/id/" + vs.groupvs.id)
+            page(vs.contextURL + "/rest/groupVS/id/" + vs.groupvs.id)
         },
         _groupvsClass:function(state) {
             switch (state) {

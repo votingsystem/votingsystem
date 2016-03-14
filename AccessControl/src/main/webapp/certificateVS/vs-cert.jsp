@@ -62,13 +62,13 @@
                 document.querySelector("#voting_system_page").addEventListener('on-submit-reason',
                         function() {
                             var operationVS = new OperationVS(Operation.CERT_EDIT)
-                            operationVS.serviceURL = contextURL + "/rest/certificateVS/editCert"
+                            operationVS.serviceURL = vs.contextURL + "/rest/certificateVS/editCert"
                             operationVS.signedMessageSubject = "${msg.cancelCertMessageSubject}"
                             var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                                 changeCertToState:"${CertificateVS.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
                             operationVS.jsonStr = JSON.stringify()
                             operationVS.setCallback(function() {
-                                this.url = contextURL + "/rest/certificateVS/serialNumber/${certMap.serialNumber}?menu=" + menuType
+                                this.url = vs.contextURL + "/rest/certificateVS/serialNumber/${certMap.serialNumber}?menu=" + menuType
                             })
                             VotingSystemClient.setMessage(operationVS);
                         }.bind(this))
@@ -95,7 +95,7 @@
             certIssuerClicked:function(e) {
                 var issuerSerialNumber = this.certvs.issuerSerialNumber
                 if(issuerSerialNumber != null) {
-                    var certURL = contextURL + "/rest/certificateVS/serialNumber/" + issuerSerialNumber
+                    var certURL = vs.contextURL + "/rest/certificateVS/serialNumber/" + issuerSerialNumber
                     console.log(this.tagName + " - certIssuerClicked: " + certURL)
                     this.certsSelectedStack.push(this.certvs)
                     this.url = certURL

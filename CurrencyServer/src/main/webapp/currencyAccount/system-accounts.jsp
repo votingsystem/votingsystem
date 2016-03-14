@@ -45,7 +45,7 @@
             is:'system-accounts',
             properties: {
                 systemAccountsDto: {type:Object},
-                url:{type:String, value: contextURL + '/rest/currencyAccount/system', observer:'getHTTP'}
+                url:{type:String, value: vs.contextURL + '/rest/currencyAccount/system', observer:'getHTTP'}
             },
             ready: function() {
                 console.log(this.tagName + " - ready - ")

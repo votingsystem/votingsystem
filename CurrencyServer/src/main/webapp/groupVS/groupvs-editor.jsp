@@ -107,7 +107,7 @@
                     return
                 }
                 var operationVS = new OperationVS(this.operationVS)
-                operationVS.serviceURL = contextURL + "/rest/groupVS/saveGroup"
+                operationVS.serviceURL = vs.contextURL + "/rest/groupVS/saveGroup"
                 operationVS.signedMessageSubject = this.signedMessageSubject
                 var description = window.btoa(this.$.editor.getContent())
                 operationVS.jsonStr = JSON.stringify({operation:this.operationVS , id:this.groupvsId,

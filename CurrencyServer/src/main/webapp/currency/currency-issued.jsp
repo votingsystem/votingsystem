@@ -75,7 +75,7 @@
                 console.log(this.tagName + " - ready - ")
             },
             currencyCodeChanged: function() {
-                this.getHTTP(contextURL + "/rest/currency/issued/currencyCode/" + this.currencyCode)
+                this.getHTTP(vs.contextURL + "/rest/currency/issued/currencyCode/" + this.currencyCode)
             },
             currencyIssuedDtoChanged: function() {
                 console.log(this.tagName + " - currencyIssuedDto: " + this.currencyIssuedDto)

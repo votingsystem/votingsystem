@@ -134,7 +134,7 @@ vs.getTimeStampToken = function (contentToSign, listener) {
             listener(timeStampTokenASN1)
         }
     };
-    xhttp.open("POST", "https://192.168.1.5/TimeStampServer/timestamp", true);
+    xhttp.open("POST",  vs.timeStampServerURL + "/timestamp", true);
     xhttp.setRequestHeader("Content-type", "application/timestamp-query");
     xhttp.setRequestHeader("Content-Encoding", "base64");
     xhttp.send(timeStampRequestBase64);

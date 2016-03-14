@@ -201,7 +201,7 @@
                     break;
             }
             var operationVS = new OperationVS(this.operation)
-            operationVS.serviceURL = contextURL + "/rest/transactionVS"
+            operationVS.serviceURL = vs.contextURL + "/rest/transactionVS"
             operationVS.signedMessageSubject = "${msg.transactionvsFromGroupMsgSubject}"
             var signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
                 timeLimited:this.$.timeLimitedButton.checked, tags:tagList, amount: this.$.amount.value,
@@ -221,7 +221,7 @@
         },
         transactionFromUser:function(tagList) {
             var operationVS = new OperationVS(this.operation)
-            operationVS.serviceURL = contextURL + "/rest/transactionVS"
+            operationVS.serviceURL = vs.contextURL + "/rest/transactionVS"
             operationVS.signedMessageSubject = "${msg.transactionVSFromUserVS}"
             var signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
                 timeLimited:this.$.timeLimitedButton.checked, tags:tagList, amount: this.$.amount.value,

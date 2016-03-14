@@ -8,20 +8,20 @@
           next();
       }
 
-      var iframeVS
-      function loadFrameVS(url, pageCaption) {
-          Polymer.Base.importHref('./resources/bower_components/vs-iframe/vs-iframe.html', function(e) {
-              if(!iframeVS) iframeVS = document.createElement('vs-iframe');
-              iframeVS.url = url
-              vs.loadMainContent(iframeVS, pageCaption)
+      var contactPage
+      page('*/app/contact', scrollToTop, function (ctx) {
+          vs.route = 'contact';
+          Polymer.Base.importHref('./app/contact-page.vsp', function(e) {
+              if(!contactPage) contactPage = document.createElement('contact-page');
+              vs.loadMainContent(contactPage, "${msg.contactLbl}")
           });
-      }
+      });
 
       var pageMap = {}
       page('*/innerVSPage*', scrollToTop, function(ctx) {
           var route = getQueryParam('data_route', ctx.querystring)
           if(route) vs.route = route
-          var url = contextURL + getQueryParam('url', ctx.querystring)
+          var url = vs.contextURL + getQueryParam('url', ctx.querystring)
           var pageCaption = getQueryParam('caption', ctx.querystring)
           console.log("innerVSPage - url: " + url + " - caption: " + pageCaption)
           if(pageMap[url]) vs.loadMainContent(pageMap[url], pageCaption)
@@ -33,10 +33,13 @@
           }
       });
 
+      var toolsPage
       page('*/app/tools', scrollToTop, function (ctx) {
           vs.route = 'tools';
-          if(vs.webextension_available === true) VotingSystemClient.setMessage(new OperationVS(Operation.TOOL_VS))
-          else loadFrameVS(contextURL + "/app/tools.xhtml", "${msg.toolsPageTitle}")
+          Polymer.Base.importHref('./app/tools-page.vsp', function(e) {
+              if(!toolsPage) toolsPage = document.createElement('tools-page');
+              vs.loadMainContent(toolsPage, "${msg.toolsPageTitle}")
+          });
       });
 
       var transactionsDashboard
@@ -180,7 +183,7 @@
           vs.route = 'userVS';
           Polymer.Base.importHref('./balance/balance-uservs.vsp', function(e) {
               if(!userVSBalance) userVSBalance = document.createElement('balance-uservs');
-              userVSBalance.url = contextURL + "/rest/balance/userVS/nif/" +  ctx.params.nif
+              userVSBalance.url = vs.contextURL + "/rest/balance/userVS/nif/" +  ctx.params.nif
               vs.loadMainContent(userVSBalance, "${msg.balanceLbl}")
           });
       });

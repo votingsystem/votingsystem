@@ -83,7 +83,7 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready - ")
-                this.url = contextURL + "/rest/certificateVS/certs"
+                this.url = vs.contextURL + "/rest/certificateVS/certs"
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
@@ -115,7 +115,7 @@
             },
             pagerChange:function(e) {
                 var certTypeSelectValue = this.$.certTypeSelect.value
-                targetURL = contextURL + "/rest/certificateVS/certs?menu=" + menuType + certTypeSelectValue +
+                targetURL = vs.contextURL + "/rest/certificateVS/certs?menu=" + menuType + certTypeSelectValue +
                         "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
@@ -124,7 +124,7 @@
             certTypeSelect: function () {
                 var optionSelected = this.$.certTypeSelect.value
                 if("" != optionSelected) {
-                    targetURL = contextURL + "/rest/certificateVS/certs?menu=" + menuType + optionSelected
+                    targetURL = vs.contextURL + "/rest/certificateVS/certs?menu=" + menuType + optionSelected
                     history.pushState(null, null, targetURL);
                     this.url = targetURL
                 }

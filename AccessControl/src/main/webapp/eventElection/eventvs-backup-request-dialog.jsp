@@ -62,7 +62,7 @@
                     return
                 }
                 var operationVS = new OperationVS(Operation.BACKUP_REQUEST)
-                operationVS.serviceURL = contextURL + "/rest/backup"
+                operationVS.serviceURL = vs.contextURL + "/rest/backup"
                 operationVS.signedMessageSubject = '${msg.requestEventvsBackupMsgSubject}'
                 operationVS.eventVS = this.eventvs
                 operationVS.jsonStr = JSON.stringify(this.eventvs)

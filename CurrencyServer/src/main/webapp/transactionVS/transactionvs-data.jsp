@@ -166,19 +166,19 @@
                 this.timeStampDate = this.getDate(this.transactionvs.dateCreated)
             },
             showToUserInfo:function(e) {
-                var groupURL = contextURL + "/rest/groupVS/" + this.transactionvs.toUserVS.id
+                var groupURL = vs.contextURL + "/rest/groupVS/" + this.transactionvs.toUserVS.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },
             showFromUserInfo:function(group) {
-                var groupURL = contextURL + "/rest/groupVS/" +  this.transactionvs.fromUserVS.id
+                var groupURL = vs.contextURL + "/rest/groupVS/" +  this.transactionvs.fromUserVS.id
                 console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showFromUserIBAN:function(e) {
-                var serviceURL = contextURL + "/rest/userVS/IBAN/" + this.getFromUserIBAN(this.transactionvs)
+                var serviceURL = vs.contextURL + "/rest/userVS/IBAN/" + this.getFromUserIBAN(this.transactionvs)
                 window.open(serviceURL, '_blank');
             },
             showToUserIBAN:function(e) {
-                var serviceURL = contextURL + "/rest/userVS/IBAN/" + this.transactionvs.toUserVS.iban
+                var serviceURL = vs.contextURL + "/rest/userVS/IBAN/" + this.transactionvs.toUserVS.iban
                 window.open(serviceURL, '_blank');
             },
             checkReceipt: function() {
