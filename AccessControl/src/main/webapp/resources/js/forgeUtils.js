@@ -108,7 +108,7 @@ vs.getTSTInfoFromASN1 = function (TSTInfoASN1) {
     return TSTInfo
 }
 
-vs.getTimeStampToken = function (contentToSign, listener) {
+vs.getTimeStampToken = function (contentToSign, callback) {
     var asn1 = forge.asn1
     var digest = forge.md["sha256"].create().start().update(contentToSign).digest();
     var digestASN1 = asn1.create(asn1.Class.UNIVERSAL, asn1.Type.OCTETSTRING, false, digest.bytes());
@@ -131,10 +131,10 @@ vs.getTimeStampToken = function (contentToSign, listener) {
         if (xhttp.readyState == 4 && xhttp.status == 200) {
             var timeStampTokenDer = forge.util.decode64(xhttp.responseText);
             var timeStampTokenASN1 = forge.asn1.fromDer(timeStampTokenDer)
-            listener(timeStampTokenASN1)
+            callback(timeStampTokenASN1)
         }
     };
-    xhttp.open("POST", "https://192.168.1.5/TimeStampServer/timestamp", true);
+    xhttp.open("POST",  vs.timeStampServerURL + "/timestamp", true);
     xhttp.setRequestHeader("Content-type", "application/timestamp-query");
     xhttp.setRequestHeader("Content-Encoding", "base64");
     xhttp.send(timeStampRequestBase64);

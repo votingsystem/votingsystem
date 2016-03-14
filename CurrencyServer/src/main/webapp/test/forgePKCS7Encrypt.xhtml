@@ -79,13 +79,18 @@
             //encrypt aes256-CBC
             function testEncrypt() {
                 var p7 = forge.pkcs7.createEnvelopedData();
-                var cert = forge.pki.certificateFromPem(_pem.certificate);
-                var privateKey = PKI.privateKeyFromPem(_pem.privateKey);
+                var cert = forge.pki.certificateFromPem(document.querySelector("#cert").innerHTML);
                 p7.addRecipient(cert);
                 p7.content = forge.util.createBuffer('Just a little test');
                 p7.encrypt();
-                var pem = forge.pkcs7.messageToPem(cmsSignedMessage);
+                var pem = forge.pkcs7.messageToPem(p7);
+                console.log("Encrypted:")
                 console.log(pem)
+                var privateKey = forge.pki.privateKeyFromPem(document.querySelector("#privateKey").innerHTML);
+                p7 = forge.pkcs7.messageFromPem(pem);
+                p7.decrypt(p7.recipients[0], privateKey);
+                console.log("Decrypted:")
+                console.log(p7)
             }
 
             function testDecryptFromBC() {
@@ -99,7 +104,7 @@
             }
 
             window.addEventListener('WebComponentsReady', function() {
-                testDecryptFromBC();
+                testEncrypt();
             })
             //]]>
         </script>
