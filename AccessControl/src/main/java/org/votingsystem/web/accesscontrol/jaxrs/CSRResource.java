@@ -1,14 +1,14 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.apache.commons.io.IOUtils;
-import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.CMSMessage;
+import org.votingsystem.model.DeviceVS;
 import org.votingsystem.model.voting.UserRequestCsrVS;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.accesscontrol.ejb.CSRBean;
-import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.CMSBean;
+import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 

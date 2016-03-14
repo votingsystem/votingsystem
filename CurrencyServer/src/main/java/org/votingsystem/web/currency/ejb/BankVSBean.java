@@ -9,8 +9,8 @@ import org.votingsystem.model.currency.BankVSInfo;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.crypto.PEMUtils;
-import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.CMSBean;
+import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.util.ConfigVS;
 

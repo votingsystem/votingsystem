@@ -1,0 +1,107 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/polymer.xhtml">
+    <ui:define name="head">
+        <link href="../resources/forgePKCS7.html" rel="import"/>
+        <style></style>
+    </ui:define>
+    <ui:define name="content">
+        <h3><div id="selectedMsgDiv"></div></h3>
+        <div id="oids"></div>
+        <div id="privateKey" style="display:none;">
+            -----BEGIN RSA PRIVATE KEY-----
+            MIIEogIBAAKCAQEA0d1ISuyJzfQVhbYxfB4uFOyVTeubuAGbc5ZAWho+OHm8ar15
+            uWGaKdC4y6fmxYl4ksXiJTrA3YW1lKHMjVmuMxtv0Xl1iV+R1xLAXoqdlI+3k+23
+            GVuKun/C96hvNjWXPNNyFQguOreEHnoFgj/g1jkXyX1B0MzHl7iYsr0RxT0t3dLq
+            Z2aA4NepsUK99t5fInP0ZuUv73+WvfEoYgkiL8UwSWgvLa7f4aOV3iVesQgFulWu
+            CcL3yzcefSM5UVo2vJWKb4733mkHe9m2t+WHJr0a6lo6S7EUm8hy4i2yEmqDKEEK
+            TLuSgDfuJG+r1hV0zfuwTKp3EvHHC/UHSxjI0wIDAQABAoIBABaxKkpNA1A4A+++
+            VeF0KKAYk22me+L3QYYhCU+fe3ot0kK/FB9dv1v6y/sxaibn3hgOD42I/yZfeSqG
+            HZEXJlqJApvlhIutwB4/p89RMQge9hxSXYmqDU5sgXoNRgvYMESNHyPJC6lLrfHX
+            Ayt57rzF1Z2deUqzfyLCUg3ZmxyhdjaRc2076OyEje051wsnu+7wVASZCvsZ0CNt
+            1rcqMKZPbyBuvzp+9CX3rGeJ18W6HY30Kg1HdfQWl2uOR23IgWgRslqdcpuaxtDE
+            cMw6UpJn+EJEPWVl3bzwvMzBguMaFZDX+qBc27E5xbJmzOkeVhe/WVbU5uQS3Hiq
+            wo53kukCgYEA/UMTKWEIGOkTPOLnIJjQNu7seRe8mpFu3lUTH7i2IjIybYF9VKH4
+            JdASuyUWBybjbY6CiTiVIAGNejfrQjATO90Acd3eTt79wQEGw6AWlLaw6l+2750A
+            F4I54bh+vXFipkjQagF0j76VYmCGFwa4cruOAmKVNHxh8KtVo/W34+0CgYEA1CIZ
+            yrrjwMkyH42FNb8cBrNI8wh1Pum8Qu58WCBNW+aYHaRvLte9eJyDLF8reQgkWv7b
+            tJgX/YslLH7pFDuwCgma6LP+JGC0RUGE5bPIlYUKkGMS9PsWjsQvsqVOlasGzZUG
+            aT/9FUxIBG507n1J13n/VfQRtKmY3HnFGGmLR78CgYArvMe0X7N8SdQusajksj9T
+            HVPtXbIOp4sUDnEtC0M5CJ441yID2az3KsXxV+hD9+1S4Eee1wy56Eq8jqesWI0Z
+            y4LmJ0DbMht0l27Jnf4IVLyc3UbEfsKjTLQeTTRmFwzIVs7XX8T3hhxaTv0ZQOnd
+            tpJByzClTc3EOHKjzC2jyQKBgGRqrAjihRNqajazeD5j8/FcBwk8lLuuSzbny6av
+            y87YDmPhxdvHtmIUvKdRebO2XfdRM1F+ucSEjJlOjijMxF1MBK9pHMG9oTgzdqSB
+            gU7+Bm0o6P1cqmX0ipunUtbYecTxaXKDHttpG6I1Y1bNqhm9H1hhy8vYiIq9fcY7
+            l/njAoGADrffOkDD+i/hdSKNms2UOmLGUTdr+ORHu+IbVtJ+thPDy1xOW01OcA0c
+            tho5RIqEZetMSAfbCUHEQAoKzoNsd8gPFPjhVpZCitrHsVs5dd4tHyBzrxE9DdNI
+            ze9o6jnnIf/pqb+MJVlWRkKdmST6SxlM3B+0hZMQZXhYMJd/UiY=
+            -----END RSA PRIVATE KEY-----
+        </div>
+        <div id="cert" style="display:none;">
+            -----BEGIN CERTIFICATE-----
+            MIIDVjCCAr+gAwIBAgIIEy36qJOyFe8wDQYJKoZIhvcNAQELBQAwWTESMBAGA1UE
+            BRMJMDg4ODg4ODhEMSIwIAYDVQQEExlUZXN0cy1Wb3RpbmdTeXN0ZW1TdXJuYW1l
+            MR8wHQYDVQQqExZUZXN0cy1Wb3RpbmdTeXN0ZW1OYW1lMB4XDTE2MDMxNDE3MzIx
+            N1oXDTE3MDMxNDE3MzIxN1owTzESMBAGA1UEBRMJMDg4ODg4ODhEMRswGQYDVQQE
+            DBJsYXN0TmFtZV8wODg4ODg4OEQxHDAaBgNVBCoME0ZpcnN0TmFtZV8wODg4ODg4
+            OEQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDR3UhK7InN9BWFtjF8
+            Hi4U7JVN65u4AZtzlkBaGj44ebxqvXm5YZop0LjLp+bFiXiSxeIlOsDdhbWUocyN
+            Wa4zG2/ReXWJX5HXEsBeip2Uj7eT7bcZW4q6f8L3qG82NZc803IVCC46t4QeegWC
+            P+DWORfJfUHQzMeXuJiyvRHFPS3d0upnZoDg16mxQr323l8ic/Rm5S/vf5a98Shi
+            CSIvxTBJaC8trt/ho5XeJV6xCAW6Va4JwvfLNx59IzlRWja8lYpvjvfeaQd72ba3
+            5YcmvRrqWjpLsRSbyHLiLbISaoMoQQpMu5KAN+4kb6vWFXTN+7BMqncS8ccL9QdL
+            GMjTAgMBAAGjgawwgakwagYDVR0jBGMwYYAUAzyinHiCaUTvEiUc3FGWviaysPmh
+            P6Q9MDsxEjAQBgNVBAUTCTUwMDAwMDAwUjElMCMGA1UEAxMcVm90aW5nIFN5c3Rl
+            bSBBY2Nlc3MgQ29udHJvbIIIVvvH5hBx5lYwHQYDVR0OBBYEFJo9/DpW+xRLVLKV
+            AXnj6F968WCzMAwGA1UdEwEB/wQCMAAwDgYDVR0PAQH/BAQDAgWgMA0GCSqGSIb3
+            DQEBCwUAA4GBAEPms+RkwVJBu+BeXPPnTKC9TiRV0kaOndomMACDHeSFCwB/c1/c
+            B3Q2ZmcoM89Tgrp7tPGYaqFSl9WqwAmK8aE7gKhk5QXBpjy5G+Sw56XqnB7Tw+qL
+            bofTOdmKMK1cwXzKXmiCtiAm5T5SFTEHwhAy2y3/rzF4n3vPILPftLjm
+            -----END CERTIFICATE-----
+        </div>
+        <div id="encryptedCMSMsg" style="display:none;">
+            -----BEGIN PKCS7-----
+            MIAGCSqGSIb3DQEHA6CAMIACAQAxggGBMIIBfQIBADBlMFkxEjAQBgNVBAUTCTA4
+            ODg4ODg4RDEiMCAGA1UEBBMZVGVzdHMtVm90aW5nU3lzdGVtU3VybmFtZTEfMB0G
+            A1UEKhMWVGVzdHMtVm90aW5nU3lzdGVtTmFtZQIIEy36qJOyFe8wDQYJKoZIhvcN
+            AQEBBQAEggEAXmVcepY0NfPI4oOHmsu+r2s3uak3NWcrzbQIwVHzLKSAYhCHpSlw
+            v3Q5zfT9xFJYgAi/YIWdnBPYU1BPXEtVirXknGNZhtPO1LyhyZd1WgmRpnqSDzJo
+            5KUstXYdirRAvCYarxT1yAJWOrr9ZL3rhGaxfR93U7BTsxYNX2IpwDKMhxWcHYG0
+            sc630iHPJLY3okgz+QhfJe/6RovlmgCp0v9HdPkjt/JJynokIgDtLOQugid+iQ+D
+            gJ2oVrYNqBWnMQxyNoyezcS0qMIVdg9xOg3wLLZkqnjUvGCb4gbeCmKwxy49rAp+
+            ui1FNWkcRRRag0Av/KcM70aliXu8FknZqzCABgkqhkiG9w0BBwEwHQYJYIZIAWUD
+            BAEqBBDt3M7RgwmvDSiaHK8GZ8jMoIAEELPHzrUKdL+UuN6gUIhhRYsAAAAAAAAA
+            AAAA
+            -----END PKCS7-----
+        </div>
+        <script>
+            //<![CDATA[
+            //encrypt aes256-CBC
+            function testEncrypt() {
+                var p7 = forge.pkcs7.createEnvelopedData();
+                var cert = forge.pki.certificateFromPem(_pem.certificate);
+                var privateKey = PKI.privateKeyFromPem(_pem.privateKey);
+                p7.addRecipient(cert);
+                p7.content = forge.util.createBuffer('Just a little test');
+                p7.encrypt();
+                var pem = forge.pkcs7.messageToPem(cmsSignedMessage);
+                console.log(pem)
+            }
+
+            function testDecryptFromBC() {
+                var encryptedCMSMsg = forge.pkcs7.messageFromPem(document.querySelector("#encryptedCMSMsg").innerHTML);
+                var privateKey = forge.pki.privateKeyFromPem(document.querySelector("#privateKey").innerHTML);
+                console.log("privateKey:")
+                console.log(privateKey)
+                encryptedCMSMsg.decrypt(encryptedCMSMsg.recipients[0], privateKey);
+                console.log("encryptedCMSMsg:")
+                console.log(encryptedCMSMsg)
+            }
+
+            window.addEventListener('WebComponentsReady', function() {
+                testDecryptFromBC();
+            })
+            //]]>
+        </script>
+    </ui:define>
+</ui:composition>

@@ -15,8 +15,8 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.CertUtils;
-import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.CMSBean;
+import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 

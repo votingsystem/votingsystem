@@ -10,8 +10,8 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
-import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.CMSBean;
+import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MultipartRequestVS;
 

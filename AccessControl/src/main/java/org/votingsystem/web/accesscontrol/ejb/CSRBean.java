@@ -16,13 +16,16 @@ import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.UserRequestCsrVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.DateUtils;
+import org.votingsystem.util.NifUtils;
+import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.CsrResponse;
 import org.votingsystem.util.crypto.KeyStoreInfo;
 import org.votingsystem.util.crypto.PEMUtils;
-import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.CMSBean;
+import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SubscriptionVSBean;
 import org.votingsystem.web.util.ConfigVS;
 

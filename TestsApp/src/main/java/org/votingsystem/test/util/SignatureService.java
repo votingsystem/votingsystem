@@ -2,8 +2,6 @@ package org.votingsystem.test.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.SignerInformationVerifier;
-import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.callable.MessageTimeStamper;

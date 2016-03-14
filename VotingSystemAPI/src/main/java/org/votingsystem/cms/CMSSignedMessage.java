@@ -21,11 +21,13 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.UserVS;
 import org.votingsystem.model.voting.Vote;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.JSON;
 import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,5 +1,6 @@
 package org.votingsystem.util.crypto;
 
+import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.*;
 import org.bouncycastle.cms.bc.BcCMSContentEncryptorBuilder;
@@ -14,6 +15,7 @@ import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.openssl.PEMParser;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 
@@ -21,7 +23,9 @@ import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.cert.X509Certificate;
@@ -35,9 +39,6 @@ import java.util.logging.Logger;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
- *
- * What is triple-DES -> http://www.rsa.com/rsalabs/node.asp?id=2231
- * http://www.bouncycastle.org/wiki/display/JA1/Frequently+Asked+Questions
  */
 public class Encryptor {
  
@@ -62,7 +63,7 @@ public class Encryptor {
         CMSEnvelopedData ed = edGen.generate(
                 new CMSProcessableByteArray(bytesToEncrypt),
                 new BcCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).build());
-        return Base64.getEncoder().encode(ed.getEncoded());
+        return PEMUtils.getPEMEncoded(ed.toASN1Structure());
     }
 
     public static byte[] encryptToCMS(byte[] bytesToEncrypt, X509Certificate receiverCert) throws Exception {
@@ -71,12 +72,13 @@ public class Encryptor {
         CMSEnvelopedData ed = edGen.generate(
                 new CMSProcessableByteArray(bytesToEncrypt),
                 new BcCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).build());
-        return Base64.getEncoder().encode(ed.getEncoded());
+        return PEMUtils.getPEMEncoded(ed.toASN1Structure());
     }
 
-    public byte[] decryptCMS(byte[] base64EncryptedData) throws Exception {
-        byte[] cmsEncryptedData = Base64.getDecoder().decode(base64EncryptedData);
-        CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
+    public byte[] decryptCMS(byte[] pemEncrypted) throws Exception {
+        PEMParser PEMParser = new PEMParser(new InputStreamReader(new ByteArrayInputStream(pemEncrypted)));
+        ContentInfo contentInfo = (ContentInfo) PEMParser.readObject();
+        CMSEnvelopedDataParser ep = new CMSEnvelopedDataParser(contentInfo.getEncoded());
         RecipientInformationStore  recipients = ep.getRecipientInfos();
         Iterator                   it = recipients.getRecipients().iterator();
         byte[] result = null;
@@ -89,9 +91,10 @@ public class Encryptor {
         return result;
     }
 
-    public static byte[] decryptCMS (byte[] base64EncryptedData, PrivateKey privateKey) throws CMSException, IOException {
-        byte[] cmsEncryptedData = org.bouncycastle.util.encoders.Base64.decode(base64EncryptedData);
-        CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(cmsEncryptedData);
+    public static byte[] decryptCMS (byte[] pemEncrypted, PrivateKey privateKey) throws CMSException, IOException {
+        PEMParser PEMParser = new PEMParser(new InputStreamReader(new ByteArrayInputStream(pemEncrypted)));
+        ContentInfo contentInfo = (ContentInfo) PEMParser.readObject();
+        CMSEnvelopedDataParser ep = new CMSEnvelopedDataParser(contentInfo.getEncoded());
         RecipientInformationStore  recipients = ep.getRecipientInfos();
         Iterator                   it = recipients.getRecipients().iterator();
         byte[] result = null;

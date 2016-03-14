@@ -14,9 +14,9 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.CertificateVSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;

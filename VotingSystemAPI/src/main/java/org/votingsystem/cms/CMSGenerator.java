@@ -1,9 +1,8 @@
 package org.votingsystem.cms;
 
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -19,7 +18,7 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.util.*;
+import org.bouncycastle.util.Store;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.crypto.KeyStoreUtil;
 
@@ -30,7 +29,6 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import java.util.Arrays;
 
 
 public class CMSGenerator {

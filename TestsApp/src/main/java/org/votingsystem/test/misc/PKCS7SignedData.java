@@ -1,6 +1,5 @@
 package org.votingsystem.test.misc;
 
-import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.ContextVS;
@@ -123,18 +122,20 @@ public class PKCS7SignedData {
 
         /*CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(forge_pkcs7PEM);
         cmsSignedMessage.isValidSignature();
-        log.info("timstamp: " + cmsSignedMessage.getTimeStampToken().getTimeStampInfo().getGenTime());*/
-        byte[] pemBytes = createPKCS7SignedDataWithTimeStampSigned();
+        log.info("timstamp: " + cmsSignedMessage.getTimeStampToken().getTimeStampInfo().getGenTime());
+        byte[] pemBytes = createCMSSignedDataWithTimeStampSigned();
         log.info(new String(pemBytes));
         CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(pemBytes);
         cmsSignedMessage.isValidSignature();
-        TimeStampToken timeStampToken = cmsSignedMessage.getSigner().getTimeStampToken();
+        TimeStampToken timeStampToken = cmsSignedMessage.getSigner().getTimeStampToken();*/
 
         //log.info("TimeStamp - MessageImprintDigest: " + new String(timeStampToken.getTimeStampInfo().getMessageImprintDigest()));
         //log.info(new String(pemBytes));
     }
 
-    private static byte[] createPKCS7SignedData() throws Exception {
+
+
+    private static byte[] createCMSSignedData() throws Exception {
         SignatureService signatureService = SignatureService.genUserVSSignatureService("08888888D");
         CMSSignedMessage cmsSignedMessage = signatureService.signData("Hello");
         cmsSignedMessage = CMSSignedMessage.addTimeStampToUnsignedAttributes(
@@ -143,7 +144,7 @@ public class PKCS7SignedData {
         return pemBytes;
     }
 
-    private static byte[] createPKCS7SignedDataWithTimeStampSigned() throws Exception {
+    private static byte[] createCMSSignedDataWithTimeStampSigned() throws Exception {
         SignatureService signatureService = SignatureService.genUserVSSignatureService("08888888D");
         CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp("Hello TimeStampSigned".getBytes());
         byte[] pemBytes = cmsSignedMessage.toPEM();

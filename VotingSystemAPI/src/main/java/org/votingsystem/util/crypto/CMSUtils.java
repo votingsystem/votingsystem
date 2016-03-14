@@ -17,7 +17,6 @@ import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.tsp.TimeStampToken;
 
 import java.util.*;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 /**

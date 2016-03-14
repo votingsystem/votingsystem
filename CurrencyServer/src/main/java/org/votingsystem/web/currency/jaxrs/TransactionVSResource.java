@@ -22,8 +22,8 @@ import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
 import org.votingsystem.web.currency.ejb.UserVSBean;
-import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.CMSBean;
+import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
