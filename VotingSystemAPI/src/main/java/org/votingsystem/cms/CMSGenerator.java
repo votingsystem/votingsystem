@@ -118,8 +118,7 @@ public class CMSGenerator {
 
     public byte[] getContentDigest(byte[] contentBytes) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance(digAlgId.getAlgorithm().getId());
-        //digest.update(contentBytes, 0, contentBytes.length);
-        return digest.digest(contentBytes);
+            return digest.digest(contentBytes);
     }
 
     public synchronized CMSSignedData addSignature(CMSSignedData cmsMessage) throws Exception {

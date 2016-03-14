@@ -130,7 +130,6 @@ public class PKCS7SignedData {
         cmsSignedMessage.isValidSignature();
         TimeStampToken timeStampToken = cmsSignedMessage.getSigner().getTimeStampToken();
 
-
         //log.info("TimeStamp - MessageImprintDigest: " + new String(timeStampToken.getTimeStampInfo().getMessageImprintDigest()));
         //log.info(new String(pemBytes));
     }

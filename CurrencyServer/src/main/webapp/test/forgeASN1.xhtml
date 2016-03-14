@@ -135,38 +135,27 @@
             var cmsMessage = forge.pkcs7.messageFromPem(document.querySelector("#" + selectedMsg).innerHTML);
             console.log("cmsMessage:")
             console.log(cmsMessage)
-            console.log(forge.pkcs7asn1.signedDataValidator)
-
 
             var authenticatedAttributes = cmsMessage.rawCapture.authenticatedAttributes;
             console.log("authenticatedAttributes:")
             console.log(authenticatedAttributes)
 
             var signature = cmsMessage.rawCapture.signature;
-            console.log("signature:")
-            console.log(signature)
-
-            var attrs = []
-            var asn1Set = forge.asn1.create(forge.asn1.Class.UNIVERSAL, forge.asn1.Type.SET, true, attrs); // packed them inside of the SET object
-            console.log("asn1 set:")
-            console.log(asn1Set)
-
-            //var buf = new Buffer(asn1.toDer(set).data, 'binary'); // DO NOT forget 'binary', otherwise it tries to interpret bytes as UTF-8 chars
-            var buf = forge.util.createBuffer(forge.asn1.toDer(asn1Set).data, 'binary')
-            console.log("buf:")
-            console.log(buf)
+            console.log("signatureBase64:")
+            console.log(forge.util.encode64(signature))
 
             var attrDigest = null;
             for (var i = 0; i < authenticatedAttributes.length; ++i) {
                 var authenticatedAttribute = authenticatedAttributes[i].value;
-                console.log("authenticatedAttribute oid:" + forge.asn1.derToOid(authenticatedAttribute[0].value))
+                var oidId = forge.pki.oids[forge.asn1.derToOid(authenticatedAttribute[0].value)]
+                if(!oidId) oidId = forge.asn1.derToOid(authenticatedAttribute[0].value)
+                console.log("authenticatedAttribute oid: " + oidId  )
                 if (forge.asn1.derToOid(authenticatedAttribute[0].value) === oids.messageDigest) {
                     attrDigest = authenticatedAttribute[1].value[0].value;
                 }
             }
-            console.log("attrDigest:")
-            console.log(attrDigest)
-
+            console.log("attrDigestBase64:")
+            console.log(forge.util.encode64(attrDigest))
             //]]>
         </script>
     </ui:define>

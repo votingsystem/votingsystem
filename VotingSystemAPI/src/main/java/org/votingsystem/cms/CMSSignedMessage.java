@@ -131,11 +131,9 @@ public class CMSSignedMessage extends CMSSignedData {
     public static CMSSignedMessage addTimeStampToUnsignedAttributes(
             CMSSignedMessage signedData, String timeStampServerURL) throws Exception {
         TimeStampRequest tspRequest = signedData.getTimeStampRequest();
-        log.info("========== tspRequest: " + Base64.getEncoder().encodeToString(tspRequest.getEncoded()));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(tspRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY,
                 timeStampServerURL);
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            log.info("========== timeStampToken: " + Base64.getEncoder().encodeToString(responseVS.getMessageBytes()));
             TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(responseVS.getMessageBytes()));
             signedData = signedData.addTimeStampToUnsignedAttributes(signedData, timeStampToken);
         } else throw new ExceptionVS(responseVS.getMessage());

@@ -25,11 +25,12 @@
 
             function createTimestampRequest() {
                 vs.getTimeStampToken("Hello TimeStamp", function (timeStampTokenASN1) {
+                    console.log("timeStampTokenASN1:")
                     console.log(timeStampTokenASN1)
                 })
             }
 
-            createTimestampRequest();
+            readBase64TimeStampToken();
         //]]>
         </script>
     </ui:define>

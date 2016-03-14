@@ -13,22 +13,22 @@ test.createSelfSignedCert = function () {
     cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1);
     var attrs = [{
         name: 'commonName',
-        value: 'example.org'
+        value: 'votingsystem.org'
     }, {
         name: 'countryName',
-        value: 'US'
+        value: 'countryNameVS'
     }, {
         shortName: 'ST',
-        value: 'Virginia'
+        value: 'UserShortNameVS'
     }, {
         name: 'localityName',
-        value: 'Blacksburg'
+        value: 'UserLocalityNameVS'
     }, {
         name: 'organizationName',
-        value: 'Test'
+        value: 'VotingSystem Test'
     }, {
         shortName: 'OU',
-        value: 'Test'
+        value: 'TestVS'
     }];
     cert.setSubject(attrs);
     // alternatively set subject from a csr
@@ -39,7 +39,7 @@ test.createSelfSignedCert = function () {
         cA: true
     }, {
         name: 'keyUsage',
-        keyCertSign: true,
+        keyCertSign: false,
         digitalSignature: true,
         nonRepudiation: true,
         keyEncipherment: true,
@@ -64,7 +64,7 @@ test.createSelfSignedCert = function () {
         name: 'subjectAltName',
         altNames: [{
             type: 6, // URI
-            value: 'http://example.org/webid#me'
+            value: 'https://192.168.1.5/CurrencyServer/rest/usreVS/123456'
         }, {
             type: 7, // IP
             ip: '127.0.0.1'
