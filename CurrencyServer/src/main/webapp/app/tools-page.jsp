@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<fmt:setBundle basename="org.votingsystem.web.accesscontrol.messages" var="bundle"/>
+<fmt:setBundle basename="org.votingsystem.web.currency.messages" var="bundle"/>
 
 <dom-module name="tools-page">
     <template>

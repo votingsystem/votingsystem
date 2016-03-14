@@ -20,20 +20,22 @@
         <script type="text/javascript" src="../resources/bower_components/forge/js/pem.js"></script>
         <script type="text/javascript" src="../resources/bower_components/forge/js/forge.js" rel="import"/>
 
-        <script type="text/javascript" src="./ForgeUtils.js"></script>
+        <script type="text/javascript" src="../resources/js/forgeUtils.js"></script>
 
         <style></style>
     </ui:define>
     <ui:define name="content">
         <script>
-            var rsaUtil = new RSAUtil();
-            console.log(rsaUtil.pemPrivate)
-            console.log(rsaUtil.pemPublic)
-            console.log("publicKeyBase64: " + rsaUtil.publicKeyBase64)
+            window.addEventListener('WebComponentsReady', function() {
+                var rsaUtil = new RSAUtil();
+                console.log(rsaUtil.pemPrivate)
+                console.log(rsaUtil.pemPublic)
+                console.log("publicKeyBase64: " + rsaUtil.publicKeyBase64)
 
-            var encrypted = rsaUtil.encrypt("texto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto")
-            console.log("encryptRSA - encryptedBase64: " + encrypted)
-            console.log("encryptRSA - decrypted: " + rsaUtil.decrypt(encrypted))
+                var encrypted = rsaUtil.encrypt("texto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto planotexto")
+                console.log("encryptRSA - encryptedBase64: " + encrypted)
+                console.log("encryptRSA - decrypted: " + rsaUtil.decrypt(encrypted))
+            })
         </script>
     </ui:define>
 </ui:composition>

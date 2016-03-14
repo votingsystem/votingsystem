@@ -3,7 +3,6 @@
                 template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
         <link href="../resources/forgePKCS7.html" rel="import"/>
-        <script type="text/javascript" src="./ForgeUtils.js"></script>
         <script type="text/javascript" src="./TestUtils.js"></script>
         <style></style>
     </ui:define>
@@ -38,7 +37,9 @@
                 console.log(cmsSignedMessage)
             }
 
-            createPKCS7MessageTimeStamped()
+            window.addEventListener('WebComponentsReady', function() {
+                createPKCS7MessageTimeStamped();
+            })
         </script>
     </ui:define>
 </ui:composition>

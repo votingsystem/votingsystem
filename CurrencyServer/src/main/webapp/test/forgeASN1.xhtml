@@ -3,7 +3,7 @@
                 template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
         <link href="../resources/forgePKCS7.html" rel="import"/>
-        <script type="text/javascript" src="./ForgeUtils.js"></script>
+        <script type="text/javascript" src="../resources/js/forgeUtils.js"></script>
         <style></style>
     </ui:define>
     <ui:define name="content">
@@ -126,36 +126,43 @@
 
         <script>
             //<![CDATA[
-            var selectedMsg = "timeStampedCMSMessage"
-            document.querySelector("#selectedMsgDiv").innerHTML = selectedMsg
+            function test() {
+                var selectedMsg = "timeStampedCMSMessage"
+                document.querySelector("#selectedMsgDiv").innerHTML = selectedMsg
 
-            var oids = forge.pki.oids;
-            document.querySelector("#oids").innerHTML = JSON.stringify(oids)
+                var oids = forge.pki.oids;
+                document.querySelector("#oids").innerHTML = JSON.stringify(oids)
 
-            var cmsMessage = forge.pkcs7.messageFromPem(document.querySelector("#" + selectedMsg).innerHTML);
-            console.log("cmsMessage:")
-            console.log(cmsMessage)
+                var cmsMessage = forge.pkcs7.messageFromPem(document.querySelector("#" + selectedMsg).innerHTML);
+                console.log("cmsMessage:")
+                console.log(cmsMessage)
 
-            var authenticatedAttributes = cmsMessage.rawCapture.authenticatedAttributes;
-            console.log("authenticatedAttributes:")
-            console.log(authenticatedAttributes)
+                var authenticatedAttributes = cmsMessage.rawCapture.authenticatedAttributes;
+                console.log("authenticatedAttributes:")
+                console.log(authenticatedAttributes)
 
-            var signature = cmsMessage.rawCapture.signature;
-            console.log("signatureBase64:")
-            console.log(forge.util.encode64(signature))
+                var signature = cmsMessage.rawCapture.signature;
+                console.log("signatureBase64:")
+                console.log(forge.util.encode64(signature))
 
-            var attrDigest = null;
-            for (var i = 0; i < authenticatedAttributes.length; ++i) {
-                var authenticatedAttribute = authenticatedAttributes[i].value;
-                var oidId = forge.pki.oids[forge.asn1.derToOid(authenticatedAttribute[0].value)]
-                if(!oidId) oidId = forge.asn1.derToOid(authenticatedAttribute[0].value)
-                console.log("authenticatedAttribute oid: " + oidId  )
-                if (forge.asn1.derToOid(authenticatedAttribute[0].value) === oids.messageDigest) {
-                    attrDigest = authenticatedAttribute[1].value[0].value;
+                var attrDigest = null;
+                for (var i = 0; i < authenticatedAttributes.length; ++i) {
+                    var authenticatedAttribute = authenticatedAttributes[i].value;
+                    var oidId = forge.pki.oids[forge.asn1.derToOid(authenticatedAttribute[0].value)]
+                    if(!oidId) oidId = forge.asn1.derToOid(authenticatedAttribute[0].value)
+                    console.log("authenticatedAttribute oid: " + oidId  )
+                    if (forge.asn1.derToOid(authenticatedAttribute[0].value) === oids.messageDigest) {
+                        attrDigest = authenticatedAttribute[1].value[0].value;
+                    }
                 }
+                console.log("attrDigestBase64:")
+                console.log(forge.util.encode64(attrDigest))
             }
-            console.log("attrDigestBase64:")
-            console.log(forge.util.encode64(attrDigest))
+
+
+            window.addEventListener('WebComponentsReady', function() {
+                test();
+            })
             //]]>
         </script>
     </ui:define>

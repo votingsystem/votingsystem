@@ -77,7 +77,7 @@ public class CMSMessageResource {
             signedContentMap.put("fromUserVS", UserVSDto.BASIC(cmsMessage.getUserVS()));
         }
         if(cmsMessage.getUserVS() != null)
-            signedContentMap.put("fromUserIBAN", cmsMessage.getUserVS().getIBAN());
+            signedContentMap.put("fromUserVS", UserVSDto.BASIC(cmsMessage.getUserVS()));
         switch(operation) {
             case FROM_BANKVS:
                 viewer = "message-cms-transactionvs-from-bankvs";
@@ -100,14 +100,14 @@ public class CMSMessageResource {
             resultMap.put("operation", signedContentMap.get("operation"));
             resultMap.put("cmsMessage", cmsMessageStr);
             resultMap.put("signedContentMap", signedContentMap);
-            resultMap.put("timeStampDate", timeStampDate.getTime());
+            if(timeStampDate != null) resultMap.put("timeStampDate", timeStampDate.getTime());
             resultMap.put("viewer", viewer);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
         } else {
             req.getSession().setAttribute("operation", operation);
             req.getSession().setAttribute("cmsMessage", cmsMessageStr);
             req.getSession().setAttribute("signedContentMap", JSON.getMapper().writeValueAsString(signedContentMap));
-            req.getSession().setAttribute("timeStampDate", timeStampDate.getTime());
+            if(timeStampDate != null) req.getSession().setAttribute("timeStampDate", timeStampDate.getTime());
             req.getSession().setAttribute("viewer", viewer);
             return Response.temporaryRedirect(new URI("../cmsMessage/contentViewer.xhtml")).build();
         }

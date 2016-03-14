@@ -2,29 +2,23 @@
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
-        <script type="text/javascript" src="../resources/bower_components/forge/js/util.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/sha256.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/cipher.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/cipherModes.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/aes.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/prng.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/random.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/pem.js"></script>
-        <script type="text/javascript" src="../resources/bower_components/forge/js/forge.js" rel="import"/>
-
-        <script type="text/javascript" src="./ForgeUtils.js"></script>
-
+        <link href="../resources/forgePKCS7.html" rel="import"/>
+        <script type="text/javascript" src="../resources/js/forgeUtils.js" rel="import"></script>
         <style></style>
     </ui:define>
     <ui:define name="content">
+        <button onclick="test()">Encrypt and decrypt</button>
         <script>
-            var aesUtil = new AESUtil().init();
-            console.log("ivBase64: " + aesUtil.ivBase64)
-            console.log("keyBase64: " + aesUtil.keyBase64)
+            function test() {
+                var aesUtil = new AESUtil().init();
+                console.log("ivBase64: " + aesUtil.ivBase64)
+                console.log("keyBase64: " + aesUtil.keyBase64)
 
-            var encryptedBase64 = aesUtil.encrypt("hello");
-            console.log("encryptedBase64: " + encryptedBase64);
-            console.log("decrypted: " + aesUtil.decrypt(encryptedBase64));
+                var encryptedBase64 = aesUtil.encrypt("hello");
+                console.log("encryptedBase64: " + encryptedBase64);
+                console.log("decrypted: " + aesUtil.decrypt(encryptedBase64));
+            }
+
         </script>
     </ui:define>
 </ui:composition>

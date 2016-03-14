@@ -3,7 +3,7 @@ var RSAUtil = function() {
     // generate an RSA key pair synchronously
     this.keypair = this.rsa.generateKeyPair({bits: 1024, e: 0x10001});
     this.pemPublic = forge.pki.publicKeyToPem(this.keypair.publicKey),
-    this.pemPrivate = forge.pki.privateKeyToPem(this.keypair.privateKey);
+        this.pemPrivate = forge.pki.privateKeyToPem(this.keypair.privateKey);
     this.publicKeyBase64 =  forge.util.encode64(this.pemPublic);
 }
 

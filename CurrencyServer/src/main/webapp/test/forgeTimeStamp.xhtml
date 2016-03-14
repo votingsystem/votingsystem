@@ -3,7 +3,6 @@
                 template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
         <link href="../resources/forgePKCS7.html" rel="import"/>
-        <script type="text/javascript" src="./ForgeUtils.js"></script>
         <script type="text/javascript" src="./TestUtils.js"></script>
         <style></style>
     </ui:define>
@@ -16,21 +15,25 @@
 
         <script>
         //<![CDATA[
-            function readBase64TimeStampToken() {
-                var TSTInfo = vs.getTSTInfoFromTimeStampTokenBase64(
-                        document.querySelector("#base64TimeStampToken").innerHTML)
-                console.log("TSTInfo:")
-                console.log(TSTInfo)
-            }
 
-            function createTimestampRequest() {
-                vs.getTimeStampToken("Hello TimeStamp", function (timeStampTokenASN1) {
-                    console.log("timeStampTokenASN1:")
-                    console.log(timeStampTokenASN1)
-                })
-            }
+        function readBase64TimeStampToken() {
+            var TSTInfo = vs.getTSTInfoFromTimeStampTokenBase64(
+                    document.querySelector("#base64TimeStampToken").innerHTML)
+            console.log("TSTInfo:")
+            console.log(TSTInfo)
+        }
 
+        function createTimestampRequest() {
+            vs.getTimeStampToken("Hello TimeStamp", function (timeStampTokenASN1) {
+                console.log("timeStampTokenASN1:")
+                console.log(timeStampTokenASN1)
+            })
+        }
+
+        window.addEventListener('WebComponentsReady', function() {
             readBase64TimeStampToken();
+        })
+
         //]]>
         </script>
     </ui:define>
