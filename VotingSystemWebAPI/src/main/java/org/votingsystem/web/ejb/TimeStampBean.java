@@ -18,6 +18,7 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.util.ConfigVS;
@@ -157,20 +158,5 @@ public class TimeStampBean {
         return timeStampSignerInfoVerifier;
     }
 
-
-    public CMSSignedMessage addTimeStampToUnsignedAttributes(CMSSignedMessage cmsMessage) throws Exception {
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.getTimeStampRequest().getEncoded(),
-                ContentTypeVS.TIMESTAMP_QUERY, timeStampServiceURL);
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            byte[] bytesToken = responseVS.getMessageBytes();
-            TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));
-            SignerInformationVerifier timeStampSignerInfoVerifier = new
-                    JcaSimpleSignerInfoVerifierBuilder().build(x509TimeStampServerCert);
-            timeStampToken.validate(timeStampSignerInfoVerifier);
-            CMSSignedMessage timeStampedSignedMessage = CMSSignedMessage.addTimeStampToUnsignedAttributes(
-                    cmsMessage, timeStampToken);
-            return timeStampedSignedMessage;
-        } else throw new ExceptionVS(responseVS.getMessage());
-    }
 
 }

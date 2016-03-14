@@ -3,7 +3,6 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
@@ -93,10 +92,10 @@ public class CurrencyBatchDto {
         }
         batchDto.currencySet = new HashSet<>();
         for (Currency currency : currencyList) {
-            CMSSignedMessage cmsMessage = currency.getCertificationRequest().signData(JSON.getMapper().writeValueAsString(
-                    CurrencyDto.BATCH_ITEM(batchDto, currency)));
-            MessageTimeStamper timeStamper = new MessageTimeStamper(cmsMessage, timeStampServiceURL);
-            currency.setCMS(timeStamper.call());
+            byte[] contentToSign = JSON.getMapper().writeValueAsBytes(
+                    CurrencyDto.BATCH_ITEM(batchDto, currency));
+            CMSSignedMessage cmsMessage = currency.getCertificationRequest().signDataWithTimeStamp(contentToSign);
+            currency.setCMS(cmsMessage);
             batchDto.currencySet.add(currency.getCMS().toPEMStr());
         }
         return batchDto;

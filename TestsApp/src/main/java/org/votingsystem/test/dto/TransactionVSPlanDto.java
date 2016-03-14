@@ -59,7 +59,8 @@ public class TransactionVSPlanDto {
 
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
                         transactionVS.getFromUserVS().getNIF(), UserVS.Type.BANKVS);
-            CMSSignedMessage cmsMessage = signatureService.addSignatureWithTimeStampToUnsignedAttributes(JSON.getMapper().writeValueAsString(transactionVS));
+            CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(
+                    JSON.getMapper().writeValueAsBytes(transactionVS));
             ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                     getCurrencyServer().getTransactionVSServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
@@ -76,7 +77,8 @@ public class TransactionVSPlanDto {
             UserVSDto representative = groupVSDto.getRepresentative();
             SignatureService signatureService = SignatureService.getUserVSSignatureService(
                     representative.getNIF(), UserVS.Type.USER);
-            CMSSignedMessage cmsMessage = signatureService.addSignatureWithTimeStampToUnsignedAttributes(JSON.getMapper().writeValueAsString(transactionVS));
+            CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(
+                    JSON.getMapper().writeValueAsBytes(transactionVS));
             ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                     getCurrencyServer().getTransactionVSServiceURL());
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());

@@ -80,7 +80,7 @@ public class EventElectionBean {
         request.setCertChain(new String(PEMUtils.getPEMEncoded (cmsBean.getCertChain())));
         X509Certificate certUsuX509 = userSigner.getCertificate();
         request.setUserVS(new String(PEMUtils.getPEMEncoded(certUsuX509)));
-        CMSSignedMessage cms = cmsBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsString(request));
+        CMSSignedMessage cms = cmsBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(request));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cms.toPEM(),
                 ContentTypeVS.JSON_SIGNED, controlCenterVS.getServerURL() + "/rest/eventElection");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {

@@ -10,6 +10,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
+import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.cms.CMSGenerator;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.CertExtensionDto;
@@ -136,10 +137,11 @@ public class CertificationRequestVS implements java.io.Serializable {
         this.setSignedCsr(signedCsr);
     }
     
-    public CMSSignedMessage signData(String textToSign) throws Exception {
+    public CMSSignedMessage signDataWithTimeStamp(byte[] cotentToSign) throws Exception {
         if (cmsGenerator == null) cmsGenerator = new CMSGenerator(
                 keyPair.getPrivate(), Arrays.asList(certificate), signatureMechanism);
-        return cmsGenerator.signData(textToSign);
+        TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(signatureMechanism, cotentToSign);
+        return cmsGenerator.signDataWithTimeStamp(cotentToSign, timeStampToken);
     }
 
     public X509Certificate getCertificate() {

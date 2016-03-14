@@ -1,7 +1,6 @@
 package org.votingsystem.test.voting;
 
 import com.google.common.collect.Sets;
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ActorVSDto;
 import org.votingsystem.dto.voting.EventVSChangeDto;
@@ -166,10 +165,8 @@ public class PublishAndSendElection {
         eventVS.setDateBegin(new Date());
         eventVS.setSubject(eventVS.getSubject()+ " -> " + DateUtils.getDayWeekDateStr(new Date(), "HH:mm:ss"));
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
-        CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsString(
+        CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(
                 new EventVSDto(eventVS)));
-        cmsMessage = new MessageTimeStamper(cmsMessage,
-                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 ContextVS.getInstance().getAccessControl().getPublishElectionURL(), "eventURL");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
@@ -193,9 +190,7 @@ public class PublishAndSendElection {
         EventVSChangeDto cancelData = new EventVSChangeDto(eventVS, ContextVS.getInstance().getAccessControl().getServerURL(),
                 TypeVS.EVENT_CANCELLATION, simulationData.getEventStateWhenFinished());
         SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
-        CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsString(cancelData));
-        cmsMessage = new MessageTimeStamper(cmsMessage,
-                ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
+        CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(cancelData));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 ContextVS.getInstance().getAccessControl().getCancelEventServiceURL());
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
@@ -204,10 +199,8 @@ public class PublishAndSendElection {
 
     private static void cancelVote(VoteHelper voteHelper, String nif) throws Exception {
         SignatureService signatureService = SignatureService.getUserVSSignatureService(nif, UserVS.Type.USER);
-        CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsString(
+        CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(
                 voteHelper.getVoteCanceler()));
-        cmsMessage = new MessageTimeStamper(cmsMessage, ContextVS.getInstance().getAccessControl()
-                .getTimeStampServiceURL()).call();
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 ContextVS.getInstance().getAccessControl().getVoteCancelerServiceURL());
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());

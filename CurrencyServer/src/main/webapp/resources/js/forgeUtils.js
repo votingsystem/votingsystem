@@ -17,6 +17,12 @@ RSAUtil.prototype.decrypt = function(encryptedBase64) {
     return this.keypair.privateKey.decrypt(encrypted, 'RSAES-PKCS1-V1_5');
 }
 
+RSAUtil.prototype.decryptCMS = function(encryptedPEM) {
+    var encryptedCMSMsg = forge.pkcs7.messageFromPem(encryptedPEM);
+    var privateKey = forge.pki.privateKeyFromPem(document.querySelector("#privateKey").innerHTML);
+    encryptedCMSMsg.decrypt(encryptedCMSMsg.recipients[0], this.keypair.privateKey);
+    return encryptedCMSMsg;
+}
 
 var AESUtil = function() { }
 

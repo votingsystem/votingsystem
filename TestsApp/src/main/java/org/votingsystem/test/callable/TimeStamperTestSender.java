@@ -1,13 +1,11 @@
 package org.votingsystem.test.callable;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.JSON;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -22,19 +20,15 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
     private static Logger log = Logger.getLogger(TimeStamperTestSender.class.getName());
 
     private String nif;
-    private String serverURL;
 
-    public TimeStamperTestSender(String nif, String timestampServerURL) throws Exception {
+    public TimeStamperTestSender(String nif) throws Exception {
         this.nif = nif;
-        this.serverURL = timestampServerURL;
     }
         
     @Override public ResponseVS call() throws Exception {
-        String subject = "Message from MultiSignTestSender";
         SignatureService signatureService = SignatureService.genUserVSSignatureService(this.nif);
-        CMSSignedMessage cmsMessage = signatureService.signData(getRequest(nif));
-        MessageTimeStamper timeStamper = new MessageTimeStamper(cmsMessage, ActorVS.getTimeStampServiceURL(serverURL));
-        return ResponseVS.OK(null).setCMS(timeStamper.call());
+        CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(getRequest(nif).getBytes());
+        return ResponseVS.OK(null).setCMS(cmsMessage);
     }
         
     private String getRequest(String nif) throws JsonProcessingException {

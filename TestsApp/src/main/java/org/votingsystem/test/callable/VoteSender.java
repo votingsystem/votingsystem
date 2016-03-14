@@ -1,7 +1,5 @@
 package org.votingsystem.test.callable;
 
-import org.votingsystem.callable.AccessRequestDataSender;
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.model.ResponseVS;
@@ -11,10 +9,13 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.util.crypto.VoteHelper;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
+import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
 
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -32,23 +33,33 @@ public class VoteSender implements Callable<ResponseVS> {
     @Override public ResponseVS<VoteHelper> call() throws Exception {
         SignatureService signatureService = SignatureService.genUserVSSignatureService(voteHelper.getNIF());
         AccessRequestDto accessRequestDto = voteHelper.getAccessRequest();
-        CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsString(accessRequestDto));
-        ResponseVS responseVS = new AccessRequestDataSender(cmsMessage,
-                accessRequestDto, voteHelper.getHashCertVSBase64()).call();
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            CertificationRequestVS certificationRequest = (CertificationRequestVS) responseVS.getData();
-            cmsMessage = certificationRequest.signData(JSON.getMapper().writeValueAsString(voteHelper.getVote()));
-            cmsMessage = new MessageTimeStamper(cmsMessage,
-                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
-            responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.VOTE,
-                    ContextVS.getInstance().getControlCenter().getVoteServiceURL());
-            if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                CMSSignedMessage voteReceipt = responseVS.getCMS();
-                voteHelper.setValidatedVote(voteReceipt);
-                //_ TODO _ validate receipt
+        CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(
+                JSON.getMapper().writeValueAsBytes(accessRequestDto));
+        CertificationRequestVS certificationRequest = CertificationRequestVS.getVoteRequest(SIGNATURE_ALGORITHM,
+                ContextVS.PROVIDER, ContextVS.getInstance().getAccessControl().getServerURL(),
+                accessRequestDto.getEventId(), voteHelper.getHashCertVSBase64());
+        Map<String, Object> mapToSend = new HashMap<>();
+        mapToSend.put(ContextVS.CSR_FILE_NAME, certificationRequest.getCsrPEM());
+        mapToSend.put(ContextVS.ACCESS_REQUEST_FILE_NAME, PEMUtils.getPEMEncoded(cmsMessage.toASN1Structure()));
+        ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend,
+                ContextVS.getInstance().getAccessControl().getAccessServiceURL());
+        if (ResponseVS.SC_OK != responseVS.getStatusCode()) {
+            return responseVS;
+        } else {
+            certificationRequest.initSigner(responseVS.getMessageBytes());
+            if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                cmsMessage = certificationRequest.signDataWithTimeStamp(
+                        JSON.getMapper().writeValueAsBytes(voteHelper.getVote()));
+                responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.VOTE,
+                        ContextVS.getInstance().getControlCenter().getVoteServiceURL());
+                if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
+                    CMSSignedMessage voteReceipt = responseVS.getCMS();
+                    voteHelper.setValidatedVote(voteReceipt);
+                    //_ TODO _ validate receipt
+                }
             }
+            return responseVS.setData(voteHelper);
         }
-        return responseVS.setData(voteHelper);
     }
 
 }

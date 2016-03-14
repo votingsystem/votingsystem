@@ -29,7 +29,7 @@ public class RepresentativeDataSender implements Callable<ResponseVS> {
     
     @Override  public ResponseVS call() throws Exception {
         SignatureService signatureService = SignatureService.genUserVSSignatureService(representativeNIF);
-        CMSSignedMessage cmsMessage = signatureService.addSignatureWithTimeStampToUnsignedAttributes(JSON.getMapper().writeValueAsString(
+        CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(
                 getRequest(representativeNIF, imageBytes)));
         ResponseVS responseVS =  HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 ContextVS.getInstance().getAccessControl().getRepresentativeServiceURL());

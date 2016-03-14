@@ -49,8 +49,8 @@ public class CurrencyRequest {
         Map<String, Object> mapToSend = new HashMap<>();
         byte[] requestBytes = JSON.getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());
         mapToSend.put(ContextVS.CSR_FILE_NAME, requestBytes);
-        String textToSign =  JSON.getMapper().writeValueAsString(requestDto);
-        CMSSignedMessage cmsMessage = signatureService.addSignatureWithTimeStampToUnsignedAttributes(textToSign);
+        byte[] contentToSign =  JSON.getMapper().writeValueAsBytes(requestDto);
+        CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(contentToSign);
         mapToSend.put(ContextVS.CURRENCY_REQUEST_DATA_FILE_NAME, cmsMessage.toPEM());
         ResponseVS responseVS = HttpHelper.getInstance().sendObjectMap(mapToSend, currencyServer.getCurrencyRequestServiceURL());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

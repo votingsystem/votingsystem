@@ -32,7 +32,7 @@ public class PKCS7EncryptedData {
 
     private static void signAndEncrypt(SignatureService signatureService) throws Exception {
         log.info("signAndEncrypt");
-        CMSSignedMessage cmsSignedMessage = signatureService.signData("Hello text signed and encrypted");
+        CMSSignedMessage cmsSignedMessage = signatureService.signData("Hello text signed and encrypted".getBytes());
         byte[] encryptedBytes = Encryptor.encryptToCMS(cmsSignedMessage.getEncoded(),
                 signatureService.getCertSigner());
         byte[] decryptedBytes = Encryptor.decryptCMS(encryptedBytes, signatureService.getPrivateKey());

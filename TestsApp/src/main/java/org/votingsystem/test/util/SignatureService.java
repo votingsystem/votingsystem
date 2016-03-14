@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.cms.CMSGenerator;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResultListDto;
@@ -17,6 +16,7 @@ import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.currency.SubscriptionVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
+import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.Encryptor;
 import org.votingsystem.util.crypto.KeyStoreUtil;
 import org.votingsystem.util.crypto.PEMUtils;
@@ -135,16 +135,9 @@ public class SignatureService {
         keyStore.load(new ByteArrayInputStream(keyStoreBytes), password.toCharArray());
         return keyStore;
     }
-
-    public CMSSignedMessage addSignatureWithTimeStampToUnsignedAttributes(String textToSign) throws Exception {
-        CMSSignedMessage cmsMessage = cmsGenerator.signData(textToSign);
-        MessageTimeStamper timeStamper = new MessageTimeStamper(
-                cmsMessage,  ActorVS.getTimeStampServiceURL(ContextVS.getInstance().getProperty("timeStampServerURL")));
-        return timeStamper.call();
-    }
 		
-	public CMSSignedMessage signData(String textToSign) throws Exception {
-		return cmsGenerator.signData(textToSign);
+	public CMSSignedMessage signData(byte[] contentToSign) throws Exception {
+		return cmsGenerator.signData(contentToSign);
 	}
 
     public CMSSignedMessage signDataWithTimeStamp(byte[] contentToSign) throws Exception {
@@ -207,8 +200,9 @@ public class SignatureService {
             CMSGenerator cmsGenerator = new CMSGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
                     ContextVS.PASSWORD.toCharArray(), ContextVS.SIGNATURE_ALGORITHM);
             userList.add(new DNIBundle(userNif, mockDnie));
-            CMSSignedMessage cmsMessage = cmsGenerator.signData(JSON.getMapper().writeValueAsString(groupVSDto));
-            cmsMessage = new MessageTimeStamper(cmsMessage, currencyServer.getTimeStampServiceURL()).call();
+            byte[] contentToSign = JSON.getMapper().writeValueAsBytes(groupVSDto);
+            TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(cmsGenerator.getSignatureMechanism() ,contentToSign);
+            CMSSignedMessage cmsMessage = cmsGenerator.signDataWithTimeStamp(contentToSign, timeStampToken);
             ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                     currencyServer.getGroupVSSubscriptionServiceURL(simulationData.getGroupId()));
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
@@ -234,7 +228,7 @@ public class SignatureService {
         }
         UserVS userVS = UserVS.FROM_X509_CERT(certSigner);
         for (SubscriptionVSDto subscriptionVSDto : subscriptionVSDtoList.getResultList()) {
-            CMSSignedMessage cmsMessage = addSignatureWithTimeStampToUnsignedAttributes(JSON.getMapper().writeValueAsString(subscriptionVSDto));
+            CMSSignedMessage cmsMessage = signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(subscriptionVSDto));
             ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                     currencyServer.getGroupVSUsersActivationServiceURL());
             if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(

@@ -32,8 +32,10 @@ public class PublishGroupVS {
         groupVSDto.setUUID(UUID.randomUUID().toString());
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         ContextVS.getInstance().setDefaultServer(currencyServer);
-        SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService("Currency_07553172H", UserVS.Type.USER);
-        CMSSignedMessage cmsMessage = representativeSignatureService.addSignatureWithTimeStampToUnsignedAttributes(JSON.getMapper().writeValueAsString(groupVSDto));
+        SignatureService representativeSignatureService = SignatureService.getUserVSSignatureService(
+                "Currency_07553172H", UserVS.Type.USER);
+        CMSSignedMessage cmsMessage = representativeSignatureService.signDataWithTimeStamp(
+                JSON.getMapper().writeValueAsBytes(groupVSDto));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 currencyServer.getSaveGroupVSServiceURL());
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage());

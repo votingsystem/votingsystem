@@ -194,9 +194,9 @@ public class AuditBean {
                 BigDecimal timeLimitedNotExpended = balancesDto.getTimeLimitedNotExpended(currencyCode, currentTagVS.getName());
                 BigDecimal amountResult = tagVSEntry.getValue().subtract(timeLimitedNotExpended);
                 String signedMessageSubject =  messages.get("tagInitPeriodMsg", tagVSEntry.getKey());
-                String signedContent = JSON.getMapper().writeValueAsString(new InitPeriodTransactionVSDto(amountResult,
+                byte[] contentToSign = JSON.getMapper().writeValueAsBytes(new InitPeriodTransactionVSDto(amountResult,
                         timeLimitedNotExpended, currencyCode, tagVSEntry.getKey(), userVS));
-                CMSSignedMessage cmsSignedMessage = cmsBean.signDataWithTimeStamp(signedContent);
+                CMSSignedMessage cmsSignedMessage = cmsBean.signDataWithTimeStamp(contentToSign);
                 CMSMessage cmsMessage = dao.persist(new CMSMessage(cmsSignedMessage, cmsBean.getSystemUser(),
                         TypeVS.CURRENCY_PERIOD_INIT));
                 dao.persist(new TransactionVS(userVS, userVS, amountResult, currencyCode, signedMessageSubject, cmsMessage,
@@ -260,11 +260,11 @@ public class AuditBean {
             log.info("processed " + offset + " of " + numTotalUsers + " - elapsedTime: " + elapsedTime);
         }
         periodResultDto.setSystemBalance(balancesBean.getSystemBalancesDto(timePeriod));
-        String resultBalanceStr = JSON.getMapper().writeValueAsString(periodResultDto);
-        Files.write(Paths.get(reportFiles.getJsonFile().getAbsolutePath()), resultBalanceStr.getBytes());
+        byte[] resultBalanceBytes = JSON.getMapper().writeValueAsBytes(periodResultDto);
+        Files.write(Paths.get(reportFiles.getJsonFile().getAbsolutePath()), resultBalanceBytes);
         //String subjectSufix = "[" + DateUtils.getDateStr(timePeriod.getDateFrom()) + " - " +
         //        DateUtils.getDateStr(timePeriod.getDateTo()) + "]";
-        CMSSignedMessage receipt = cmsBean.signDataWithTimeStamp(resultBalanceStr);
+        CMSSignedMessage receipt = cmsBean.signDataWithTimeStamp(resultBalanceBytes);
         FileUtils.copyBytesToFile(receipt.toPEM(), reportFiles.getReceiptFile());
         String elapsedTime = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc);
         log.info("numTotalUsers:" + numTotalUsers + " - finished in: " + elapsedTime);

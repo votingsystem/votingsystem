@@ -134,16 +134,6 @@ public class PKCS7SignedData {
     }
 
 
-
-    private static byte[] createCMSSignedData() throws Exception {
-        SignatureService signatureService = SignatureService.genUserVSSignatureService("08888888D");
-        CMSSignedMessage cmsSignedMessage = signatureService.signData("Hello");
-        cmsSignedMessage = CMSSignedMessage.addTimeStampToUnsignedAttributes(
-                cmsSignedMessage, "https://192.168.1.5/TimeStampServer/timestamp");
-        byte[] pemBytes = cmsSignedMessage.toPEM();
-        return pemBytes;
-    }
-
     private static byte[] createCMSSignedDataWithTimeStampSigned() throws Exception {
         SignatureService signatureService = SignatureService.genUserVSSignatureService("08888888D");
         CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp("Hello TimeStampSigned".getBytes());

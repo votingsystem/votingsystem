@@ -1,6 +1,5 @@
 package org.votingsystem.test.callable;
 
-import org.votingsystem.callable.MessageTimeStamper;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserVSDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
@@ -41,9 +40,8 @@ public class RepresentativeDelegationDataSender implements Callable<ResponseVS> 
         RepresentativeDelegationDto anonymousDelegationRequest = anonymousDelegation.getDelegation();
         ResponseVS responseVS = null;
         try {
-            CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsString(anonymousCertRequest));
-            cmsMessage = new MessageTimeStamper(cmsMessage,
-                    ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
+            CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(
+                    JSON.getMapper().writeValueAsBytes(anonymousCertRequest));
             anonymousDelegation.setAnonymousDelegationRequestBase64ContentDigest(cmsMessage.getContentDigestStr());
 
             Map<String, Object> mapToSend = new HashMap<>();
@@ -57,13 +55,8 @@ public class RepresentativeDelegationDataSender implements Callable<ResponseVS> 
             //this is the delegation request signed with anonymous cert
 
             Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(responseVS.getMessageBytes());
-            FileUtils.copyBytesToFile(PEMUtils.getPEMEncoded(certificates.iterator().next())
-                    , new File("/home/jgzornoza/anonymouscert.pem"));
-
-            cmsMessage = anonymousDelegation.getCertificationRequest().signData(JSON.getMapper().writeValueAsString(
-                    anonymousDelegationRequest));
-            cmsMessage = new MessageTimeStamper(
-                    cmsMessage, ContextVS.getInstance().getAccessControl().getTimeStampServiceURL()).call();
+            cmsMessage = anonymousDelegation.getCertificationRequest().signDataWithTimeStamp(
+                    JSON.getMapper().writeValueAsBytes(anonymousDelegationRequest));
             responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                     ContextVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

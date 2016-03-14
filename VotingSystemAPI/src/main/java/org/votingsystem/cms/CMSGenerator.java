@@ -102,8 +102,8 @@ public class CMSGenerator {
         return  new CMSSignedMessage(signedData);
     }
 
-    public CMSSignedMessage signData(String signatureContent) throws Exception {
-        CMSTypedData msg = new CMSProcessableByteArray(signatureContent.getBytes());
+    public CMSSignedMessage signData(byte[] contentToSign) throws Exception {
+        CMSTypedData msg = new CMSProcessableByteArray(contentToSign);
         Store certs = new JcaCertStore(certList);
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
         ContentSigner signer = new JcaContentSignerBuilder(signatureMechanism).setProvider(ContextVS.PROVIDER).build(key);
@@ -117,6 +117,10 @@ public class CMSGenerator {
     public byte[] getContentDigest(byte[] contentBytes) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance(digAlgId.getAlgorithm().getId());
             return digest.digest(contentBytes);
+    }
+
+    public String getSignatureMechanism() {
+        return signatureMechanism;
     }
 
     public synchronized CMSSignedData addSignature(CMSSignedData cmsMessage) throws Exception {

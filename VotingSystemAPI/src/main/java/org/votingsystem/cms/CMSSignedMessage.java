@@ -124,24 +124,6 @@ public class CMSSignedMessage extends CMSSignedData {
         return this;
     }
 
-    public static CMSSignedMessage addTimeStampToUnsignedAttributes(CMSSignedMessage signedMessage,
-                                                                    TimeStampToken timeStampToken) throws Exception {
-        CMSSignedData timeStampedSignedData = CMSUtils.addTimeStampToUnsignedAttributes(signedMessage, timeStampToken);
-        return new CMSSignedMessage(timeStampedSignedData.getEncoded());
-    }
-
-    public static CMSSignedMessage addTimeStampToUnsignedAttributes(
-            CMSSignedMessage signedData, String timeStampServerURL) throws Exception {
-        TimeStampRequest tspRequest = signedData.getTimeStampRequest();
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(tspRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY,
-                timeStampServerURL);
-        if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-            TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(responseVS.getMessageBytes()));
-            signedData = signedData.addTimeStampToUnsignedAttributes(signedData, timeStampToken);
-        } else throw new ExceptionVS(responseVS.getMessage());
-        return signedData;
-    }
-
     /**
      * Digest for storing unique CMSMessage in database
      */

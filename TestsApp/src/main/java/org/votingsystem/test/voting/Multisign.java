@@ -36,7 +36,7 @@ public class Multisign {
 
         SignatureService signatureService = SignatureService.genUserVSSignatureService("08888888D");
         SignatureService signatureService1 = SignatureService.genUserVSSignatureService("00111222V");
-        CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsString(dataToSignMap));
+        CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsBytes(dataToSignMap));
 
         CMSSignedMessage cmsSigned = signatureService1.addSignature(cmsMessage);
         cmsSigned.isValidSignature();

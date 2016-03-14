@@ -80,7 +80,7 @@ public class CurrencyBean {
             }
             Currency currencyChange = csrBean.signCurrencyRequest(batchDto.getCurrencyChangePKCS10(), Currency.Type.CHANGE,
                     currencyBatch);
-            CMSSignedMessage receipt = cmsBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsString(batchDto));
+            CMSSignedMessage receipt = cmsBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(batchDto));
             CMSMessage cmsMessage =  dao.persist(new CMSMessage(receipt, TypeVS.BATCH_RECEIPT));
             currencyBatch.setLeftOver(leftOver);
             currencyBatch.setCurrencyChange(currencyChange);
@@ -107,7 +107,7 @@ public class CurrencyBean {
                 currencyBatch.setLeftOver(leftOver);
                 leftOverCert = new String(PEMUtils.getPEMEncoded(leftOver.getX509AnonymousCert()));
             }
-            CMSSignedMessage receipt = cmsBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsString(batchDto));
+            CMSSignedMessage receipt = cmsBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(batchDto));
             CMSMessage cmsMessage =  dao.persist(new CMSMessage(receipt, TypeVS.BATCH_RECEIPT));
             dao.persist(currencyBatch.setCmsMessage(cmsMessage).setState(BatchVS.State.OK));
             log.info("currencyBatch:" + currencyBatch.getId() + " - cmsMessage:" + cmsMessage.getId());

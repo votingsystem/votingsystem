@@ -67,7 +67,7 @@ public class TransactionVSGroupVSBean {
             for(UserVS toUser: request.getToUserVSList()) {
                 TransactionVS triggeredTransaction = TransactionVS.generateTriggeredTransaction(
                         transactionParent, userPart, toUser, toUser.getIBAN());
-                CMSSignedMessage receipt = cmsBean.signData(mapper.writeValueAsString(
+                CMSSignedMessage receipt = cmsBean.signData(mapper.writeValueAsBytes(
                         new TransactionVSDto(triggeredTransaction)));
                 CMSMessage cmsMessageReceipt = dao.persist(new CMSMessage(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS,
                         request.getCmsMessage_DB()));
@@ -137,7 +137,7 @@ public class TransactionVSGroupVSBean {
             String toUserNIF = subscription.getUserVS().getNif();
             TransactionVSDto triggeredDto = request.getGroupVSChild(
                     toUserNIF, userPart, subscriptionList.size(), config.getContextURL());
-            CMSSignedMessage receipt = cmsBean.signData(mapper.writeValueAsString(triggeredDto));
+            CMSSignedMessage receipt = cmsBean.signData(mapper.writeValueAsBytes(triggeredDto));
             dao.persist(new CMSMessage(receipt, TypeVS.FROM_GROUP_TO_ALL_MEMBERS, request.getCmsMessage_DB()));
             TransactionVS triggeredTransaction = dao.persist(TransactionVS.generateTriggeredTransaction(transactionParent,
                     userPart, subscription.getUserVS(), subscription.getUserVS().getIBAN()));

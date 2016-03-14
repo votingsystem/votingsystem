@@ -76,7 +76,7 @@ public class TimeStampRequest {
             if((simulationData.getNumRequests() - simulationData.
                     getNumRequestsCollected()) <= simulationData.getMaxPendingResponses()) {
                 String nifFrom = NifUtils.getNif(simulationData.getAndIncrementNumRequests().intValue());
-                completionService.submit(new TimeStamperTestSender(nifFrom, simulationData.getServerURL()));
+                completionService.submit(new TimeStamperTestSender(nifFrom));
             } else Thread.sleep(300);
         }
     }

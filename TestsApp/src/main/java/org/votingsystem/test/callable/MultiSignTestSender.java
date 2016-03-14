@@ -32,7 +32,7 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
     
     @Override public ResponseVS call() throws Exception {
         SignatureService signatureService = SignatureService.genUserVSSignatureService(this.nif);
-        CMSSignedMessage cmsMessage = signatureService.addSignatureWithTimeStampToUnsignedAttributes(getRequest(nif));
+        CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(getRequest(nif).getBytes());
         ResponseVS responseVS = HttpHelper.getInstance().sendData(
                 cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED, serverURL);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {

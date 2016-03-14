@@ -9,13 +9,27 @@ import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.tsp.TSPException;
+import org.bouncycastle.tsp.TimeStampRequest;
+import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.model.ResponseVS;
+import org.votingsystem.throwable.ExceptionVS;
+import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.HttpHelper;
 
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -71,7 +85,7 @@ public class CMSUtils {
     }
 
     public static CMSSignedData addTimeStampToUnsignedAttributes(CMSSignedData cmsdata,
-                                                                 TimeStampToken timeStampToken) throws Exception {
+                                         TimeStampToken timeStampToken) throws Exception {
         DERSet derset = new DERSet(timeStampToken.toCMSSignedData().toASN1Structure());
         Attribute timeStampAsAttribute = new Attribute(PKCSObjectIdentifiers.id_aa_signatureTimeStampToken, derset);
         Hashtable hashTable = new Hashtable();
@@ -114,6 +128,25 @@ public class CMSUtils {
             timeStampToken = new TimeStampToken(signedData);
         }
         return timeStampToken;
+    }
+
+    public static TimeStampToken getTimeStampToken(String signatureAlgorithm, byte[] contentToSign)
+            throws Exception {
+        AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
+                .find(signatureAlgorithm);
+        AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+        MessageDigest digest = MessageDigest.getInstance(digAlgId.getAlgorithm().getId());
+        byte[]  digestBytes = digest.digest(contentToSign);
+        TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
+        TimeStampRequest timeStampRequest = reqgen.generate(
+                digAlgId.getAlgorithm().getId(), digestBytes);
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(
+                timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY,
+                ContextVS.getInstance().getDefaultServer().getTimeStampServerURL() + "/timestamp");
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
+            byte[] bytesToken = responseVS.getMessageBytes();
+            return new TimeStampToken(new CMSSignedData(bytesToken));
+        } else throw new ExceptionVS(responseVS.getMessage());
     }
 
     public static ASN1Encodable getSingleValuedAttribute(AttributeTable signedAttrTable,

@@ -37,6 +37,7 @@ import org.apache.http.message.BasicLineParser;
 import org.apache.http.message.LineParser;
 import org.apache.http.util.CharArrayBuffer;
 import org.apache.http.util.EntityUtils;
+import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.*;

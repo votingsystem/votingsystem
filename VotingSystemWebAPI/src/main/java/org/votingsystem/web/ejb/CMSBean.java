@@ -1,7 +1,11 @@
 package org.votingsystem.web.ejb;
 
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.SignerInformationVerifier;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.cms.CMSGenerator;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.CMSDto;
@@ -290,13 +294,13 @@ public class CMSBean {
         return issuedCert;
     }
 
-    public CMSSignedMessage signData(String textToSign) throws Exception {
-        return cmsGenerator.signData(textToSign);
+    public CMSSignedMessage signData(byte[] contentToSign) throws Exception {
+        return cmsGenerator.signData(contentToSign);
     }
 
-    public CMSSignedMessage signDataWithTimeStamp(String textToSign) throws Exception {
-        CMSSignedMessage cmsMessage = cmsGenerator.signData(textToSign);
-        return timeStampBean.addTimeStampToUnsignedAttributes(cmsMessage);
+    public CMSSignedMessage signDataWithTimeStamp(byte[] contentToSign) throws Exception {
+        TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(cmsGenerator.getSignatureMechanism(), contentToSign);
+        return cmsGenerator.signDataWithTimeStamp(contentToSign, timeStampToken);
     }
 
     public synchronized CMSSignedMessage addSignature (final CMSSignedMessage cmsMessage) throws Exception {
