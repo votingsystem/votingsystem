@@ -487,6 +487,7 @@ public class SocketMessageDto {
         } else log.log(Level.SEVERE, "Missing target public key info");
     }
 
+    @JsonIgnore
     private void setEncryptedMessage(EncryptedContentDto encryptedDto) throws Exception {
         if(pemCert != null) {
             X509Certificate targetDeviceCert = PEMUtils.fromPEMToX509Cert(pemCert.getBytes());
@@ -501,6 +502,7 @@ public class SocketMessageDto {
         } else log.log(Level.SEVERE, "Missing target public key info");
     }
 
+    @JsonIgnore
     public void decryptMessage(PrivateKey privateKey) throws Exception {
         byte[] decryptedBytes = Encryptor.decryptCMS(encryptedMessage.getBytes(), privateKey);
         EncryptedContentDto encryptedDto =
