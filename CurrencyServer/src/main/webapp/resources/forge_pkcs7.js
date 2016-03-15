@@ -853,22 +853,27 @@ function _recipientFromAsn1(obj) {
   var capture = {};
   var errors = [];
   if(!asn1.validate(obj, p7.asn1.recipientInfoValidator, capture, errors)) {
-    var error = new Error('Cannot read PKCS#7 RecipientInfo. ' +
-      'ASN.1 object is not an PKCS#7 RecipientInfo.');
-    error.errors = errors;
-    throw error;
+    //check if encrypted witl public key instead of certificate
+    if(!asn1.validate(obj, p7.asn1.recipientInfoValidatorPublicKey, capture, errors)) {
+      var error = new Error('Cannot read PKCS#7 RecipientInfo. ' +
+          'ASN.1 object is not an PKCS#7 RecipientInfo.');
+      error.errors = errors;
+      throw error; 
+    }
   }
 
-  return {
+  var result = {
     version: capture.version.charCodeAt(0),
-    issuer: forge.pki.RDNAttributesAsArray(capture.issuer),
-    serialNumber: forge.util.createBuffer(capture.serial).toHex(),
     encryptedContent: {
       algorithm: asn1.derToOid(capture.encAlgorithm),
       parameter: capture.encParameter.value,
       content: capture.encKey
     }
-  };
+  }
+  if(capture.issuer) result.issuer = capture.issuer
+  if(capture.serial) result.serialNumber = forge.util.createBuffer(capture.serial).toHex()
+  
+  return result;
 }
 
 /**

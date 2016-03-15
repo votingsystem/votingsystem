@@ -490,6 +490,43 @@ p7v.recipientInfoValidator = {
   }]
 };
 
+  p7v.recipientInfoValidatorPublicKey = {
+    name: 'RecipientInfo',
+    tagClass: asn1.Class.UNIVERSAL,
+    type: asn1.Type.SEQUENCE,
+    constructed: true,
+    value: [{
+      name: 'RecipientInfo.version',
+      tagClass: asn1.Class.UNIVERSAL,
+      type: asn1.Type.INTEGER,
+      constructed: false,
+      capture: 'version'
+    }, {  }, {
+      name: 'RecipientInfo.keyEncryptionAlgorithm',
+      tagClass: asn1.Class.UNIVERSAL,
+      type: asn1.Type.SEQUENCE,
+      constructed: true,
+      value: [{
+        name: 'RecipientInfo.keyEncryptionAlgorithm.algorithm',
+        tagClass: asn1.Class.UNIVERSAL,
+        type: asn1.Type.OID,
+        constructed: false,
+        capture: 'encAlgorithm'
+      }, {
+        name: 'RecipientInfo.keyEncryptionAlgorithm.parameter',
+        tagClass: asn1.Class.UNIVERSAL,
+        constructed: false,
+        captureAsn1: 'encParameter'
+      }]
+    }, {
+      name: 'RecipientInfo.encryptedKey',
+      tagClass: asn1.Class.UNIVERSAL,
+      type: asn1.Type.OCTETSTRING,
+      constructed: false,
+      capture: 'encKey'
+    }]
+  };
+
 } // end module implementation
 
 /* ########## Begin module wrapper ########## */
