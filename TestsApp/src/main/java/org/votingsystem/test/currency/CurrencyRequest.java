@@ -6,7 +6,7 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
@@ -39,12 +39,12 @@ public class CurrencyRequest {
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         BigDecimal totalAmount = new BigDecimal(10);
         String curencyCode = "EUR";
-        TransactionVSDto transactionVSDto = new TransactionVSDto();
-        transactionVSDto.setAmount(totalAmount);
-        transactionVSDto.setCurrencyCode(curencyCode);
-        transactionVSDto.setTags(Sets.newHashSet("ENERGY"));
-        transactionVSDto.setTimeLimited(true);
-        CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionVSDto, totalAmount,
+        TransactionDto transactionDto = new TransactionDto();
+        transactionDto.setAmount(totalAmount);
+        transactionDto.setCurrencyCode(curencyCode);
+        transactionDto.setTags(Sets.newHashSet("ENERGY"));
+        transactionDto.setTimeLimited(true);
+        CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionDto, totalAmount,
                 ContextVS.getInstance().getCurrencyServer().getServerURL());
         Map<String, Object> mapToSend = new HashMap<>();
         byte[] requestBytes = JSON.getMapper().writeValueAsBytes(requestDto.getRequestCSRSet());

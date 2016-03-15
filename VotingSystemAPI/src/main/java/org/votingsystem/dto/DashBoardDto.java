@@ -1,7 +1,7 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.Interval;
 
 /**
@@ -11,7 +11,7 @@ import org.votingsystem.util.Interval;
 public class DashBoardDto {
 
     private Interval timePeriod;
-    private TransactionVS.Type type;
+    private Transaction.Type type;
     private Long numTransFromBank;
     private Long numTransFromUser;
     private Long numTransCurrencyInitPeriod;
@@ -38,11 +38,11 @@ public class DashBoardDto {
         this.timePeriod = timePeriod;
     }
 
-    public TransactionVS.Type getType() {
+    public Transaction.Type getType() {
         return type;
     }
 
-    public void setType(TransactionVS.Type type) {
+    public void setType(Transaction.Type type) {
         this.type = type;
     }
 

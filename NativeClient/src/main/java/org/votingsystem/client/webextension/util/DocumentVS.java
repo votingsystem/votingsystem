@@ -1,6 +1,6 @@
 package org.votingsystem.client.webextension.util;
 
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -8,6 +8,6 @@ import org.votingsystem.util.ContentTypeVS;
 public interface DocumentVS {
 
     public byte[] getDocumentBytes() throws Exception;
-    public ContentTypeVS getContentTypeVS();
+    public ContentType getContentTypeVS();
 
 }

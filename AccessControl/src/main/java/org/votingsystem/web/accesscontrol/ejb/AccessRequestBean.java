@@ -7,7 +7,7 @@ import org.votingsystem.model.User;
 import org.votingsystem.model.voting.AccessRequest;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.crypto.CsrResponse;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -61,21 +61,21 @@ public class AccessRequestBean {
         }
     }
 
-    private void validateAccessRequest(AccessRequestDto accessRequestDto, Date timeStampDate) throws ValidationExceptionVS {
-        if(accessRequestDto.getEventId() == null) throw new ValidationExceptionVS("missing param 'eventId'");
-        if(accessRequestDto.getEventURL() == null) throw new ValidationExceptionVS("missing param 'eventURL'");
-        if(accessRequestDto.getHashAccessRequestBase64() == null) throw new ValidationExceptionVS("missing param 'hashAccessRequestBase64'");
+    private void validateAccessRequest(AccessRequestDto accessRequestDto, Date timeStampDate) throws ValidationException {
+        if(accessRequestDto.getEventId() == null) throw new ValidationException("missing param 'eventId'");
+        if(accessRequestDto.getEventURL() == null) throw new ValidationException("missing param 'eventURL'");
+        if(accessRequestDto.getHashAccessRequestBase64() == null) throw new ValidationException("missing param 'hashAccessRequestBase64'");
         EventElection eventVS = dao.find(EventElection.class, accessRequestDto.getEventId());
-        if(eventVS == null) throw new ValidationExceptionVS("eventVSNotFound - eventId: " + accessRequestDto.getEventId());
+        if(eventVS == null) throw new ValidationException("eventVSNotFound - eventId: " + accessRequestDto.getEventId());
         if(!eventVS.isActive(timeStampDate)) {
-            throw new ValidationExceptionVS("timeStampRangeErrorMsg - timeStampDate: " + timeStampDate +
+            throw new ValidationException("timeStampRangeErrorMsg - timeStampDate: " + timeStampDate +
                     " - range: [" + eventVS.getDateBegin() + " - " + eventVS.getDateFinish() + "]");
         }
         Query query = dao.getEM().createQuery("select a from AccessRequest a " + "where a.hashAccessRequestBase64 =:hashAccessRequestBase64")
                 .setParameter("hashAccessRequestBase64", accessRequestDto.getHashAccessRequestBase64());
         AccessRequest accessRequest = dao.getSingleResult(AccessRequest.class, query);
         if (accessRequest != null) {
-            throw new ValidationExceptionVS("ERROR - AccessRequest repeated -  hashRepeated:" +
+            throw new ValidationException("ERROR - AccessRequest repeated -  hashRepeated:" +
                     accessRequestDto.getHashAccessRequestBase64());
         }
         accessRequestDto.setAccessRequest(accessRequest);

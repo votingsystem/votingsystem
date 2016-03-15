@@ -6,7 +6,7 @@ import org.votingsystem.dto.currency.CurrencyStateDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.TestUtils;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
@@ -25,7 +25,7 @@ public class CheckBundle {
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         Set<String> hashCertSet = Sets.newHashSet("2dZCSiH8prnd731kyUEGzhoPF0OwA23vFvG+RYOcR5o=");
         ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsBytes(hashCertSet),
-                ContentTypeVS.JSON, currencyServer.getCurrencyBundleStateServiceURL());
+                ContentType.JSON, currencyServer.getCurrencyBundleStateServiceURL());
         log.info("mayBeJSON: " + responseVS.getMessage().trim());
         Map<String, CurrencyStateDto> result = (Map<String, CurrencyStateDto>) responseVS.getMessage(
                 new TypeReference<Map<String, CurrencyStateDto>>() {});

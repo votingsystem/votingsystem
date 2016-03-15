@@ -1,13 +1,13 @@
 package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.dto.CertificateVSDto;
+import org.votingsystem.dto.CertificateDto;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Group;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.TypeVS;
 
 import java.util.Date;
@@ -30,7 +30,7 @@ public class GroupDto {
     private Date dateCreated;
     private UserDto representative;
     private Set<DeviceDto> connectedDevices;
-    private Set<CertificateVSDto> certCollection;
+    private Set<CertificateDto> certCollection;
     private Long numPendingUsers;
     private Long numActiveUsers;
     private String IBAN;
@@ -83,33 +83,33 @@ public class GroupDto {
         this.tags = tags;
     }
 
-    public void validateNewGroupRequest() throws ValidationExceptionVS {
-        if(TypeVS.CURRENCY_GROUP_NEW != operation) throw new ValidationExceptionVS(
+    public void validateNewGroupRequest() throws ValidationException {
+        if(TypeVS.CURRENCY_GROUP_NEW != operation) throw new ValidationException(
                 "operation expected: 'CURRENCY_GROUP_NEW' - operation found: " + operation);
-        if(name == null) throw new ValidationExceptionVS("missing param 'groupName'");
-        if(description == null) throw new ValidationExceptionVS("missing param 'groupInfo'");
+        if(name == null) throw new ValidationException("missing param 'groupName'");
+        if(description == null) throw new ValidationException("missing param 'groupInfo'");
     }
 
-    public void validateCancelRequest() throws ValidationExceptionVS {
-        if(TypeVS.CURRENCY_GROUP_CANCEL != operation) throw new ValidationExceptionVS(
+    public void validateCancelRequest() throws ValidationException {
+        if(TypeVS.CURRENCY_GROUP_CANCEL != operation) throw new ValidationException(
                 "operation expected: 'CURRENCY_GROUP_CANCEL' - operation found: " + operation);
-        if(name == null) throw new ValidationExceptionVS("missing param 'name'");
-        if(id == null) throw new ValidationExceptionVS("missing param 'id'");
+        if(name == null) throw new ValidationException("missing param 'name'");
+        if(id == null) throw new ValidationException("missing param 'id'");
     }
 
-    public void validateEditRequest() throws ValidationExceptionVS {
-        if(TypeVS.CURRENCY_GROUP_EDIT != operation) throw new ValidationExceptionVS(
+    public void validateEditRequest() throws ValidationException {
+        if(TypeVS.CURRENCY_GROUP_EDIT != operation) throw new ValidationException(
                 "operation expected: 'CURRENCY_GROUP_EDIT' - operation found: " + operation);
-        if(name == null) throw new ValidationExceptionVS("missing param 'name'");
-        if(id == null) throw new ValidationExceptionVS("missing param 'id'");
-        if(description == null) throw new ValidationExceptionVS("missing param 'info'");
+        if(name == null) throw new ValidationException("missing param 'name'");
+        if(id == null) throw new ValidationException("missing param 'id'");
+        if(description == null) throw new ValidationException("missing param 'info'");
     }
 
-    public void validateSubscriptionRequest() throws ValidationExceptionVS {
-        if(TypeVS.CURRENCY_GROUP_SUBSCRIBE != operation) throw new ValidationExceptionVS(
+    public void validateSubscriptionRequest() throws ValidationException {
+        if(TypeVS.CURRENCY_GROUP_SUBSCRIBE != operation) throw new ValidationException(
                 "operation expected: 'CURRENCY_GROUP_SUBSCRIBE' - operation found: " + operation);
-        if(name == null) throw new ValidationExceptionVS("missing param 'name'");
-        if(id == null) throw new ValidationExceptionVS("missing param 'id'");
+        if(name == null) throw new ValidationException("missing param 'name'");
+        if(id == null) throw new ValidationException("missing param 'id'");
     }
 
     public String getName() {
@@ -176,11 +176,11 @@ public class GroupDto {
         this.connectedDevices = connectedDevices;
     }
 
-    public Set<CertificateVSDto> getCertCollection() {
+    public Set<CertificateDto> getCertCollection() {
         return certCollection;
     }
 
-    public void setCertCollection(Set<CertificateVSDto> certCollection) {
+    public void setCertCollection(Set<CertificateDto> certCollection) {
         this.certCollection = certCollection;
     }
 

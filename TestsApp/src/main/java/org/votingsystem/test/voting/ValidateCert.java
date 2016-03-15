@@ -10,7 +10,7 @@ import org.votingsystem.model.User;
 import org.votingsystem.model.voting.AccessControl;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
@@ -26,7 +26,7 @@ public class ValidateCert {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(
-                "https://192.168.1.5/AccessControl"), ContentTypeVS.JSON);
+                "https://192.168.1.5/AccessControl"), ContentType.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         Actor actor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
         if(!(actor instanceof AccessControl)) throw new ExceptionVS("Expected access control but found " +
@@ -38,7 +38,7 @@ public class ValidateCert {
                 "AccessControl_07553172H", User.Type.USER);
         CMSSignedMessage cmsMessage = superUserSignatureService.signDataWithTimeStamp(
                 JSON.getMapper().writeValueAsBytes(certValidationDto));
-        responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+        responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                 accessControl.getUserCSRValidationServiceURL());
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage());
         System.exit(0);

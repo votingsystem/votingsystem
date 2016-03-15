@@ -84,9 +84,9 @@ public class User extends EntityVS implements Serializable {
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
     
-    @Transient private transient X509Certificate certificate;
-    @Transient private transient CertificateVS certificateVS;
-    @Transient private transient CertificateVS certificateCA;
+    @Transient private transient X509Certificate x509Certificate;
+    @Transient private transient Certificate certificate;
+    @Transient private transient Certificate certificateCA;
     @Transient private transient Map metaInfMap;
     @Transient private transient TimeStampToken timeStampToken;
     @Transient private transient SignerInformation signerInformation;
@@ -132,6 +132,14 @@ public class User extends EntityVS implements Serializable {
         User result = new User();
         result.setType(User.Type.REPRESENTATIVE).setUrl(representativeURL);
         return result;
+    }
+
+    public X509Certificate getX509Certificate() {
+        return x509Certificate;
+    }
+
+    public void setX509Certificate(X509Certificate x509Certificate) {
+        this.x509Certificate = x509Certificate;
     }
 
     public SignerInformation getSignerInformation() {
@@ -201,14 +209,6 @@ public class User extends EntityVS implements Serializable {
         return cn;
     }
 
-    public void setCertificate(X509Certificate certificate) {
-        this.certificate = certificate;
-    }
-
-    public X509Certificate getCertificate() {
-        return certificate;
-    }
-
 	public String getPhone() {
 		return phone;
 	}
@@ -233,11 +233,11 @@ public class User extends EntityVS implements Serializable {
 		this.id = id;
 	}
 
-	public CertificateVS getCertificateCA() {
+	public Certificate getCertificateCA() {
 		return certificateCA;
 	}
 
-	public void setCertificateCA(CertificateVS certificate) {
+	public void setCertificateCA(Certificate certificate) {
 		this.certificateCA = certificate;
 	}
 
@@ -351,12 +351,12 @@ public class User extends EntityVS implements Serializable {
         return this;
     }
 
-    public CertificateVS getCertificateVS() {
-        return certificateVS;
+    public Certificate getCertificate() {
+        return certificate;
     }
 
-    public void setCertificateVS(CertificateVS certificateVS) {
-        this.certificateVS = certificateVS;
+    public void setCertificate(Certificate certificate) {
+        this.certificate = certificate;
     }
 
     public Set<TagVS> getTagVSSet() {
@@ -434,7 +434,7 @@ public class User extends EntityVS implements Serializable {
 
     public static User FROM_X509_CERT(X509Certificate certificate) {
         User user = getUser(certificate.getSubjectDN().getName());
-        user.setCertificate(certificate);
+        user.setX509Certificate(certificate);
         return user;
     }
 

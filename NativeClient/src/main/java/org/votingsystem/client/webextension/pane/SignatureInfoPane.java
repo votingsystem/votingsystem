@@ -56,7 +56,7 @@ public class SignatureInfoPane extends GridPane {
         signerLabel.setStyle("-fx-font-weight: bold;");
         WebView webView = new WebView();
         String finalHTML = "<html style='font-size:0.9em;background: #f9f9f9;'>" +
-                Formatter.getInfoCert(signer.getCertificate()) + "</html>";
+                Formatter.getInfoCert(signer.getX509Certificate()) + "</html>";
         webView.getEngine().loadContent(finalHTML);
         webView.setPrefHeight(150);
         setHgrow(webView, Priority.ALWAYS);

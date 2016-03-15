@@ -7,7 +7,7 @@ import org.votingsystem.dto.currency.SystemAccountsDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.JSON;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -88,9 +88,9 @@ public class CurrencyAccountResource {
         }
 
 
-        query = dao.getEM().createQuery("select SUM(t.amount), tag, t.currencyCode from TransactionVS t JOIN t.tag tag where t.state =:state " +
-                "and t.type =:type group by tag, t.currencyCode").setParameter("state", TransactionVS.State.OK)
-                .setParameter("type", TransactionVS.Type.FROM_BANK);
+        query = dao.getEM().createQuery("select SUM(t.amount), tag, t.currencyCode from Transaction t JOIN t.tag tag where t.state =:state " +
+                "and t.type =:type group by tag, t.currencyCode").setParameter("state", Transaction.State.OK)
+                .setParameter("type", Transaction.Type.FROM_BANK);
         resultList = query.getResultList();
         List<TagVSDto> bankBalanceList = new ArrayList<>();
         for(Object[] result : resultList) {

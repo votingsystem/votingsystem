@@ -2,8 +2,8 @@ package org.votingsystem.model.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.KeyStoreVS;
+import org.votingsystem.model.Certificate;
+import org.votingsystem.model.KeyStore;
 import org.votingsystem.model.User;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.TypeVS;
@@ -80,12 +80,12 @@ public class EventVS extends EntityVS implements Serializable {
     private State state;
     @Column(name="cardinality") @Enumerated(EnumType.STRING)
     private Cardinality cardinality = Cardinality.EXCLUSIVE;
-    @OneToOne private CertificateVS certificateVS;
+    @OneToOne private Certificate certificate;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userId")
     private User user;
     @OneToOne private CMSMessage cmsMessage;
-    @OneToOne private KeyStoreVS keyStoreVS;
+    @OneToOne private KeyStore keyStore;
     @Column(name="backupAvailable") private Boolean backupAvailable = Boolean.TRUE;
     @ElementCollection
     private List<String> tagList;
@@ -316,12 +316,12 @@ public class EventVS extends EntityVS implements Serializable {
         this.accessControlEventId = accessControlEventId;
     }
 
-    public KeyStoreVS getKeyStoreVS() {
-        return keyStoreVS;
+    public KeyStore getKeyStore() {
+        return keyStore;
     }
 
-    public void setKeyStoreVS(KeyStoreVS keyStoreVS) {
-        this.keyStoreVS = keyStoreVS;
+    public void setKeyStore(KeyStore keyStore) {
+        this.keyStore = keyStore;
     }
 
     public static String getURL(TypeVS type, String serverURL, Long id) {
@@ -350,19 +350,19 @@ public class EventVS extends EntityVS implements Serializable {
         return null;
     }
 
-    public CertificateVS getCertificateVS() {
-        return certificateVS;
+    public Certificate getCertificate() {
+        return certificate;
     }
 
-    public EventVS setCertificateVS(CertificateVS certificateVS) {
-        this.certificateVS = certificateVS;
+    public EventVS setCertificate(Certificate certificate) {
+        this.certificate = certificate;
         return this;
     }
 
     @JsonIgnore
     public Set<X509Certificate> getTrustedCerts() throws Exception {
         Set<X509Certificate> eventTrustedCerts = new HashSet<X509Certificate>();
-        eventTrustedCerts.add(CertUtils.loadCertificate(certificateVS.getContent()));
+        eventTrustedCerts.add(CertUtils.loadCertificate(certificate.getContent()));
         return eventTrustedCerts;
     }
 

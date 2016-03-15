@@ -5,16 +5,16 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.crypto.CertUtils;
-import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.CertificationRequest;
 
 import javax.persistence.*;
 import java.io.IOException;
@@ -71,13 +71,13 @@ public class Currency extends EntityVS implements Serializable  {
     @JoinColumn(name="toUser") private User toUser;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="authorityCertificateVS") private CertificateVS authorityCertificateVS;
+    @JoinColumn(name="authorityCertificate") private Certificate authorityCertificate;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="tagVS", nullable=false) private TagVS tagVS;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="transactionvs") private TransactionVS transactionVS;
+    @JoinColumn(name="transaction") private Transaction transaction;
 
     @OneToOne @JoinColumn(name="cmsMessage") private CMSMessage cmsMessage;
 
@@ -87,7 +87,7 @@ public class Currency extends EntityVS implements Serializable  {
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
-    @Transient private CertificationRequestVS certificationRequest;
+    @Transient private CertificationRequest certificationRequest;
     @Transient private X509Certificate x509AnonymousCert;
     @Transient private transient CMSSignedMessage cmsSignedMessage;
     @Transient private String toUserIBAN;
@@ -126,7 +126,7 @@ public class Currency extends EntityVS implements Serializable  {
         this.timeLimited = timeLimited;
         try {
             this.hashCertVS = hashCertVS;
-            certificationRequest = CertificationRequestVS.getCurrencyRequest(
+            certificationRequest = CertificationRequest.getCurrencyRequest(
                     ContextVS.SIGNATURE_ALGORITHM, ContextVS.PROVIDER,
                     currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tagVS.getName());
         } catch(Exception ex) {  ex.printStackTrace(); }
@@ -141,18 +141,18 @@ public class Currency extends EntityVS implements Serializable  {
         try {
             this.originHashCertVS = UUID.randomUUID().toString();
             this.hashCertVS = StringUtils.getHashBase64(getOriginHashCertVS(), ContextVS.DATA_DIGEST_ALGORITHM);
-            certificationRequest = CertificationRequestVS.getCurrencyRequest(
+            certificationRequest = CertificationRequest.getCurrencyRequest(
                     ContextVS.SIGNATURE_ALGORITHM, ContextVS.PROVIDER,
                     currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tag.getName());
         } catch(Exception ex) {  ex.printStackTrace(); }
     }
 
     public static Currency FROM_CERT(X509Certificate x509AnonymousCert, TagVS tagVS,
-                                     CertificateVS authorityCertificateVS) throws Exception {
+                                     Certificate authorityCertificate) throws Exception {
         Currency currency = new Currency();
         currency.initCertData(x509AnonymousCert);
         currency.tagVS = tagVS;
-        currency.authorityCertificateVS = authorityCertificateVS;
+        currency.authorityCertificate = authorityCertificate;
         currency.state = State.OK;
         return currency;
     }
@@ -171,7 +171,7 @@ public class Currency extends EntityVS implements Serializable  {
         serialNumber = x509AnonymousCert.getSerialNumber().longValue();
         certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 x509AnonymousCert, ContextVS.CURRENCY_OID);
-        if(certExtensionDto == null) throw new ValidationExceptionVS("error missing cert extension data");
+        if(certExtensionDto == null) throw new ValidationException("error missing cert extension data");
         amount = certExtensionDto.getAmount();
         currencyCode = certExtensionDto.getCurrencyCode();
         hashCertVS = certExtensionDto.getHashCertVS();
@@ -183,13 +183,13 @@ public class Currency extends EntityVS implements Serializable  {
         String subjectDN = x509AnonymousCert.getSubjectDN().toString();
         CurrencyDto certSubjectDto = CurrencyDto.getCertSubjectDto(subjectDN, hashCertVS);
         if(!certSubjectDto.getCurrencyServerURL().equals(certExtensionDto.getCurrencyServerURL()))
-            throw new ValidationExceptionVS("currencyServerURL: " + currencyServerURL + " - certSubject: " + subjectDN);
+            throw new ValidationException("currencyServerURL: " + currencyServerURL + " - certSubject: " + subjectDN);
         if(certSubjectDto.getAmount().compareTo(amount) != 0)
-            throw new ValidationExceptionVS("amount: " + amount + " - certSubject: " + subjectDN);
+            throw new ValidationException("amount: " + amount + " - certSubject: " + subjectDN);
         if(!certSubjectDto.getCurrencyCode().equals(currencyCode))
-            throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
+            throw new ValidationException("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
         if(!certSubjectDto.getTag().equals(certExtensionDto.getTag()))
-            throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
+            throw new ValidationException("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
         return this;
     }
 
@@ -256,7 +256,7 @@ public class Currency extends EntityVS implements Serializable  {
         initCertData(certificationRequest.getCertificate());
     }
 
-    public static Currency fromCertificationRequestVS(CertificationRequestVS certificationRequest) throws Exception {
+    public static Currency fromCertificationRequestVS(CertificationRequest certificationRequest) throws Exception {
         Currency currency = new Currency();
         currency.setCertificationRequest(certificationRequest);
         currency.initSigner(certificationRequest.getSignedCsr());
@@ -403,12 +403,12 @@ public class Currency extends EntityVS implements Serializable  {
         this.lastUpdated = lastUpdated;
     }
 
-    public CertificateVS getAuthorityCertificateVS() {
-        return authorityCertificateVS;
+    public Certificate getAuthorityCertificate() {
+        return authorityCertificate;
     }
 
-    public void setAuthorityCertificateVS(CertificateVS authorityCertificateVS) {
-        this.authorityCertificateVS = authorityCertificateVS;
+    public void setAuthorityCertificate(Certificate authorityCertificate) {
+        this.authorityCertificate = authorityCertificate;
     }
 
     public State getState() {
@@ -437,12 +437,12 @@ public class Currency extends EntityVS implements Serializable  {
         this.currencyCode = currencyCode;
     }
 
-    public TransactionVS getTransactionVS() {
-        return transactionVS;
+    public Transaction getTransaction() {
+        return transaction;
     }
 
-    public Currency setTransactionVS(TransactionVS transactionParent) {
-        this.transactionVS = transactionParent;
+    public Currency setTransaction(Transaction transactionParent) {
+        this.transaction = transactionParent;
         return this;
     }
 
@@ -454,11 +454,11 @@ public class Currency extends EntityVS implements Serializable  {
         this.toUser = user;
     }
 
-    public CertificationRequestVS getCertificationRequest() {
+    public CertificationRequest getCertificationRequest() {
         return certificationRequest;
     }
 
-    public void setCertificationRequest(CertificationRequestVS certificationRequest) {
+    public void setCertificationRequest(CertificationRequest certificationRequest) {
         this.certificationRequest = certificationRequest;
     }
 

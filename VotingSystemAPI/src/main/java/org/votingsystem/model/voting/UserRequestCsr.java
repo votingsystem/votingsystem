@@ -1,7 +1,7 @@
 package org.votingsystem.model.voting;
 
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
 import org.votingsystem.util.EntityVS;
@@ -26,7 +26,7 @@ public class UserRequestCsr extends EntityVS implements Serializable {
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="serialNumber") private Long serialNumber;
     @Column(name="content", nullable=false) private byte[] content;
-    @OneToOne private CertificateVS certificateVS;
+    @OneToOne private Certificate certificate;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="device") private Device device;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
@@ -86,12 +86,12 @@ public class UserRequestCsr extends EntityVS implements Serializable {
 		return id;
 	}
 
-	public CertificateVS getCertificateVS() {
-		return certificateVS;
+	public Certificate getCertificate() {
+		return certificate;
 	}
 
-	public UserRequestCsr setCertificateVS(CertificateVS certificateVS) {
-		this.certificateVS = certificateVS;
+	public UserRequestCsr setCertificate(Certificate certificate) {
+		this.certificate = certificate;
         return this;
 	}
 

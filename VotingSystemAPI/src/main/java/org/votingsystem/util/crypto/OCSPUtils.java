@@ -5,7 +5,7 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.ocsp.*;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.util.ContextVS;
 
 import java.io.BufferedOutputStream;
@@ -26,8 +26,8 @@ public class OCSPUtils {
 
     private static Logger log = Logger.getLogger(OCSPUtils.class.getName());
 
-    public static CertificateVS.State validateCert(X509Certificate intermediateCert,  X509CertificateHolder certificateHolder,
-            BigInteger serialNumber, Date dateCheck) throws Exception {
+    public static Certificate.State validateCert(X509Certificate intermediateCert, X509CertificateHolder certificateHolder,
+                                                 BigInteger serialNumber, Date dateCheck) throws Exception {
         DigestCalculatorProvider digCalcProv = new JcaDigestCalculatorProviderBuilder().setProvider(ContextVS.PROVIDER).build();
         CertificateID id = new CertificateID(digCalcProv.get(CertificateID.HASH_SHA1), certificateHolder, serialNumber);
         OCSPReqBuilder gen = new OCSPReqBuilder();
@@ -47,19 +47,19 @@ public class OCSPUtils {
         OCSPResp ocspResponse = new OCSPResp(in);
         BasicOCSPResp basicOCSPResp ;
         if(ocspResponse.getStatus() == OCSPResponseStatus.SUCCESSFUL) {
-            CertificateVS.State certificateState = null;
+            Certificate.State certificateState = null;
             basicOCSPResp = (BasicOCSPResp) ocspResponse.getResponseObject();
             for(SingleResp singleResponse : basicOCSPResp.getResponses()){
                 Object stat = singleResponse.getCertStatus();
                 if (stat == CertificateStatus.GOOD) {
-                    certificateState = CertificateVS.State.OK;
+                    certificateState = Certificate.State.OK;
                 }else if (stat instanceof RevokedStatus) {
                     Date fechaRevocacion = ((RevokedStatus)stat).getRevocationTime();
                     if (dateCheck.after(fechaRevocacion)) 
-                        certificateState = CertificateVS.State.CANCELED;
-                    else certificateState = CertificateVS.State.OK;
+                        certificateState = Certificate.State.CANCELED;
+                    else certificateState = Certificate.State.OK;
                 }else if (stat instanceof UnknownStatus) {
-                    certificateState = CertificateVS.State.UNKNOWN;
+                    certificateState = Certificate.State.UNKNOWN;
                 }
             }
             return certificateState;

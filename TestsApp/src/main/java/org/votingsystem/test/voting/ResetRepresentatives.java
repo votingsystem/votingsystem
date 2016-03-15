@@ -23,7 +23,7 @@ public class ResetRepresentatives {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         ActorDto actorDto = HttpHelper.getInstance().getData(ActorDto.class,
-                Actor.getServerInfoURL("https://192.168.1.5/AccessControl"), MediaTypeVS.JSON);
+                Actor.getServerInfoURL("https://192.168.1.5/AccessControl"), MediaType.JSON);
         AccessControl accessControl = (AccessControl) actorDto.getActor();
         ContextVS.getInstance().setAccessControl(accessControl);
         SignatureService superUserSignatureService = SignatureService.getUserSignatureService(
@@ -32,7 +32,7 @@ public class ResetRepresentatives {
         dataMap.put("UUID", UUID.randomUUID().toString());
         CMSSignedMessage cmsMessage = superUserSignatureService.signDataWithTimeStamp(
                 JSON.getMapper().writeValueAsBytes(dataMap));
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                 "https://192.168.1.5/AccessControl/rest/development/resetRepresentatives");
         log.info("result - responseVS: " + responseVS.getMessage());
         System.exit(0);

@@ -7,11 +7,11 @@ import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.*;
 import org.votingsystem.model.BackupRequest;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.ImageVS;
+import org.votingsystem.model.Image;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.*;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -54,7 +54,7 @@ public class RepresentativeBean {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         User signer = cmsMessage.getUser();
         AnonymousDelegation anonymousDelegation = representativeDelegationBean.getAnonymousDelegation(signer);
-        if(anonymousDelegation != null) throw new ValidationExceptionVS(messages.get(
+        if(anonymousDelegation != null) throw new ValidationException(messages.get(
                 "representativeRequestWithActiveAnonymousDelegation"));
         UserDto request = cmsMessage.getSignedContent(UserDto.class);
         String msg = null;
@@ -66,14 +66,14 @@ public class RepresentativeBean {
             msg = messages.get("representativeDataUpdatedMsg", signer.getFirstName(), signer.getLastName());
         }
         dao.merge(signer.setType(User.Type.REPRESENTATIVE).setRepresentative(null));
-        Query query = dao.getEM().createQuery("select i from ImageVS i where i.user =:user and i.type =:type")
-                .setParameter("user", signer).setParameter("type", ImageVS.Type.REPRESENTATIVE);
-        List<ImageVS> images = query.getResultList();
-        for(ImageVS imageVS : images) {
-            dao.merge(imageVS.setType(ImageVS.Type.REPRESENTATIVE_CANCELED));
+        Query query = dao.getEM().createQuery("select i from Image i where i.user =:user and i.type =:type")
+                .setParameter("user", signer).setParameter("type", Image.Type.REPRESENTATIVE);
+        List<Image> images = query.getResultList();
+        for(Image image : images) {
+            dao.merge(image.setType(Image.Type.REPRESENTATIVE_CANCELED));
         }
         byte[] imageBytes = Base64.getDecoder().decode(request.getBase64Image().getBytes());
-        dao.persist(new ImageVS(signer, cmsMessage, ImageVS.Type.REPRESENTATIVE, imageBytes));
+        dao.persist(new Image(signer, cmsMessage, Image.Type.REPRESENTATIVE, imageBytes));
         query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.user =:user " +
                 "and r.state =:state").setParameter("user", signer).setParameter("state", RepresentativeDocument.State.OK);
         RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
@@ -98,11 +98,11 @@ public class RepresentativeBean {
         User representative = null;
         Query query = null;
         UserDto request = cmsMessage.getSignedContent(UserDto.class);
-        if(TypeVS.REPRESENTATIVE_REVOKE != request.getOperation()) throw new ValidationExceptionVS(
+        if(TypeVS.REPRESENTATIVE_REVOKE != request.getOperation()) throw new ValidationException(
                 "ERROR - operation missmatch - expected: 'TypeVS.REPRESENTATIVE_REVOKE' - found:" + request.getOperation());
         String representativeNIF = NifUtils.validate(request.getNIF());
         if(!cmsBean.isAdmin(signer.getNif()) && !signer.getNif().equals(representativeNIF)) {
-            throw new ValidationExceptionVS("user without privileges");
+            throw new ValidationException("user without privileges");
         }
         if(signer.getNif().equals(signer.getNif())) representative = signer;
         else {
@@ -112,7 +112,7 @@ public class RepresentativeBean {
         query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.user =:user and " +
                 "r.state =:state").setParameter("user", representative).setParameter("state", RepresentativeDocument.State.OK);
         RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
-        if(representativeDocument == null) throw new ValidationExceptionVS(
+        if(representativeDocument == null) throw new ValidationException(
                 messages.get("unsubscribeRepresentativeUserErrorMsg", representative.getNif()));
         log.info("processRevoke - user: " + representative.getId());
         query = dao.getEM().createQuery("select u from User u where u.representative =:user")
@@ -141,7 +141,7 @@ public class RepresentativeBean {
         nifToCheck = NifUtils.validate(nifToCheck);
         Query query = dao.getEM().createQuery("select u from User u where u.nif =:nif").setParameter("nif", nifToCheck);
         User user = dao.getSingleResult(User.class, query);
-        if(user == null) throw new ValidationExceptionVS(messages.get("userNotFoundByNIF", nifToCheck));
+        if(user == null) throw new ValidationException(messages.get("userNotFoundByNIF", nifToCheck));
         RepresentationStateDto result = new RepresentationStateDto();
         result.setLastCheckedDate(new Date());
         if(User.Type.REPRESENTATIVE == user.getType()) {
@@ -190,7 +190,7 @@ public class RepresentativeBean {
                     "and v.state =:state").setParameter("option", option).setParameter("state", Vote.State.OK);
             Long numVoteRequests = (long) query.getSingleResult();
             query = dao.getEM().createQuery("select count(v) from Vote v where v.optionSelected =:option " +
-                    "and v.state =:state and v.certificateVS.user is null").setParameter("option", option)
+                    "and v.state =:state and v.certificate.user is null").setParameter("option", option)
                     .setParameter("state", Vote.State.OK);
             Long numUsersWithVote = (long) query.getSingleResult();
             Long numRepresentativesWithVote = numVoteRequests - numUsersWithVote;
@@ -281,7 +281,7 @@ public class RepresentativeBean {
                 if(accessRequest != null) {//Representative has access request
                     numRepresentativesWithAccessRequest++;
                     state = State.WITH_ACCESS_REQUEST;
-                    representativeQuery = dao.getEM().createQuery("select v from Vote v where v.certificateVS.user =:user and " +
+                    representativeQuery = dao.getEM().createQuery("select v from Vote v where v.certificate.user =:user and " +
                             "v.eventVS =:eventVS and v.state =:state").setParameter("user", representative)
                             .setParameter("eventVS", eventVS).setParameter("state", Vote.State.OK);
                     representativeVote = dao.getSingleResult(Vote.class, representativeQuery);
@@ -384,7 +384,7 @@ public class RepresentativeBean {
             Query query = dao.getEM().createQuery("select u from User u where u.nif =:nif and u.type =:type")
                     .setParameter("nif", request.getRepresentativeNif()).setParameter("type", User.Type.REPRESENTATIVE);
             User representative = dao.getSingleResult(User.class, query);
-            if(representative == null) throw new ValidationExceptionVS("ERROR - user is not representative - nif: " +
+            if(representative == null) throw new ValidationException("ERROR - user is not representative - nif: " +
                     request.getRepresentativeNif());
             RepresentativeVotingHistoryMetaInf metaInf =
                     getVotingHistoryBackup(representative, request.getDateFrom(), request.getDateTo());
@@ -413,7 +413,7 @@ public class RepresentativeBean {
             Query query = dao.getEM().createQuery("select u from User u where u.nif =:nif and u.type =:type")
                     .setParameter("nif", request.getRepresentativeNif()).setParameter("type", User.Type.REPRESENTATIVE);
             User representative = dao.getSingleResult(User.class, query);
-            if(representative == null) throw new ValidationExceptionVS("ERROR - representativeNifErrorMsg - nif: " +
+            if(representative == null) throw new ValidationException("ERROR - representativeNifErrorMsg - nif: " +
                     request.getRepresentativeNif());
             RepresentativeAccreditationsMetaInf metaInf = getAccreditationsBackup(representative, request.getSelectedDate());
             BackupRequest backupRequest = dao.persist(new BackupRequest(metaInf.getFilePath(),
@@ -451,7 +451,7 @@ public class RepresentativeBean {
                 return metaInf;
             }
         }
-        Query query = dao.getEM().createQuery("select v from Vote v where v.certificateVS.user =:user " +
+        Query query = dao.getEM().createQuery("select v from Vote v where v.certificate.user =:user " +
                 "and v.state =:state  and v.dateCreated between :dateFrom and :dateTo").setParameter("user", representative)
                 .setParameter("state", Vote.State.OK).setParameter("dateFrom", dateFrom).setParameter("dateTo", dateTo);
         List<Vote> representativeVotes = query.getResultList();

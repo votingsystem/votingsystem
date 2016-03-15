@@ -3,7 +3,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.AccessRequest;
 import org.votingsystem.model.voting.EventElection;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -41,7 +41,7 @@ public class AccessRequestResource {
         if(accessRequest == null) return Response.status(Response.Status.NOT_FOUND).entity(messages.get("ERROR - "
             + "not found - AccessRequest id: " + id)).build();
         else return Response.ok().entity(accessRequest.getCmsMessage().getContentPEM())
-                .type(ContentTypeVS.TEXT_STREAM.getName()).build();
+                .type(ContentType.TEXT_STREAM.getName()).build();
 
     }
 
@@ -56,7 +56,7 @@ public class AccessRequestResource {
         if(accessRequest == null) return Response.status(Response.Status.NOT_FOUND).entity(messages.get("ERROR - "
                 + "not found - AccessRequest hashHex: " + hashHex)).build();
         else return Response.ok().entity(accessRequest.getCmsMessage().getContentPEM())
-                .type(ContentTypeVS.TEXT_STREAM.getName()).build();
+                .type(ContentType.TEXT_STREAM.getName()).build();
     }
 
     @Path("/eventVS/id/{eventId}/user/nif/{nif}") @GET
@@ -77,7 +77,7 @@ public class AccessRequestResource {
         if(accessRequest == null) return Response.status(Response.Status.NOT_FOUND).entity(messages.get("ERROR - "
                 + "not found - AccessRequest event id: " + eventId + " - user nif: " + nif)).build();
         else return Response.ok().entity(accessRequest.getCmsMessage().getContentPEM())
-                .type(ContentTypeVS.TEXT_STREAM.getName()).build();
+                .type(ContentType.TEXT_STREAM.getName()).build();
     }
 
 

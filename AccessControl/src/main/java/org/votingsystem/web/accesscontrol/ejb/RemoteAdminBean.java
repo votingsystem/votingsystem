@@ -2,13 +2,13 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import org.votingsystem.model.Actor;
 import org.votingsystem.model.Device;
-import org.votingsystem.model.KeyStoreVS;
+import org.votingsystem.model.KeyStore;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.UserRequestCsr;
 import org.votingsystem.service.EJBRemoteAdminAccessControl;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.crypto.KeyStoreUtil;
 import org.votingsystem.web.ejb.CMSBean;
@@ -22,7 +22,6 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.security.auth.x500.X500PrivateCredential;
 import java.io.ByteArrayInputStream;
-import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
@@ -49,23 +48,23 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
         log.info("generateBackup: " + eventId);
         MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         EventElection eventElection = dao.find(EventElection.class, eventId);
-        if(eventElection == null) throw new ValidationExceptionVS("ERROR - EventElection not found - eventId: " + eventId);
+        if(eventElection == null) throw new ValidationException("ERROR - EventElection not found - eventId: " + eventId);
         eventElectionBean.generateBackup(eventElection);
     }
 
     @Override
     public byte[] generateUserKeyStore(String givenName, String surname, String nif, char[] password) throws Exception {
         MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
-        KeyStore keyStore = cmsBean.generateKeysStore(givenName, surname, nif, password);
+        java.security.KeyStore keyStore = cmsBean.generateKeysStore(givenName, surname, nif, password);
         return KeyStoreUtil.getBytes(keyStore, password);
     }
 
     @Override
     public byte[] generateServerKeyStore(Actor.Type type, String givenName, String keyAlias, String nif,
-                                         char[] password, KeyStoreVS keyStoreVS) throws Exception {
+                                         char[] password, KeyStore keyStoreVS) throws Exception {
         log.info("generateKeyStore - type: " + type + " - nif: " + nif);
         MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
-        KeyStore keyStore = null;
+        java.security.KeyStore keyStore = null;
         switch(type) {
             case SERVER:
                 keyStore = generateServerKeyStore(givenName, keyAlias, nif, password, keyStoreVS);
@@ -76,8 +75,8 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
         return KeyStoreUtil.getBytes(keyStore, password);
     }
 
-    public KeyStore generateServerKeyStore(String givenName, String keyAlias, String nif, char[] password,
-                  KeyStoreVS rootKeyStoreVS) throws Exception {
+    public java.security.KeyStore generateServerKeyStore(String givenName, String keyAlias, String nif, char[] password,
+                                                         KeyStore rootKeyStore) throws Exception {
         log.info("generateServerKeyStore - nif: " + nif);
         MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         Date validFrom = Calendar.getInstance().getTime();
@@ -87,20 +86,20 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
         today_plus_year.set(Calendar.MINUTE, 0);
         today_plus_year.set(Calendar.SECOND, 0);
         Date validTo = today_plus_year.getTime();
-        KeyStore keyStore = KeyStore.getInstance("JKS");
-        keyStore.load(new ByteArrayInputStream(rootKeyStoreVS.getBytes()), rootKeyStoreVS.getPassword().toCharArray());
-        X509Certificate rootCertSigner = (X509Certificate) keyStore.getCertificate(rootKeyStoreVS.getKeyAlias());
-        PrivateKey rootPrivateKey = (PrivateKey)keyStore.getKey(rootKeyStoreVS.getKeyAlias(),
-                rootKeyStoreVS.getPassword().toCharArray());
+        java.security.KeyStore keyStore = java.security.KeyStore.getInstance("JKS");
+        keyStore.load(new ByteArrayInputStream(rootKeyStore.getBytes()), rootKeyStore.getPassword().toCharArray());
+        X509Certificate rootCertSigner = (X509Certificate) keyStore.getCertificate(rootKeyStore.getKeyAlias());
+        PrivateKey rootPrivateKey = (PrivateKey)keyStore.getKey(rootKeyStore.getKeyAlias(),
+                rootKeyStore.getPassword().toCharArray());
         X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(rootCertSigner,
-                rootPrivateKey, rootKeyStoreVS.getKeyAlias());
+                rootPrivateKey, rootKeyStore.getKeyAlias());
         String testUserDN = format("GIVENNAME={0}, SERIALNUMBER={1}", givenName, nif);
         return KeyStoreUtil.createUserKeyStore(validFrom.getTime(),
                 (validTo.getTime() - validFrom.getTime()), password, keyAlias, rootCAPrivateCredential, testUserDN);
     }
 
-    public KeyStore generateTimeStampKeyStore(String givenName, String keyAlias, String nif, char[] password,
-                          KeyStoreVS rootKeyStoreVS) throws Exception {
+    public java.security.KeyStore generateTimeStampKeyStore(String givenName, String keyAlias, String nif, char[] password,
+                                                            KeyStore rootKeyStore) throws Exception {
         log.info("generateTimeStampKeyStore - nif: " + nif);
         MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         Date validFrom = Calendar.getInstance().getTime();
@@ -110,13 +109,13 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
         today_plus_year.set(Calendar.MINUTE, 0);
         today_plus_year.set(Calendar.SECOND, 0);
         Date validTo = today_plus_year.getTime();
-        KeyStore keyStore = KeyStore.getInstance("JKS");
-        keyStore.load(new ByteArrayInputStream(rootKeyStoreVS.getBytes()), rootKeyStoreVS.getPassword().toCharArray());
-        X509Certificate rootCertSigner = (X509Certificate) keyStore.getCertificate(rootKeyStoreVS.getKeyAlias());
-        PrivateKey rootPrivateKey = (PrivateKey)keyStore.getKey(rootKeyStoreVS.getKeyAlias(),
-                rootKeyStoreVS.getPassword().toCharArray());
+        java.security.KeyStore keyStore = java.security.KeyStore.getInstance("JKS");
+        keyStore.load(new ByteArrayInputStream(rootKeyStore.getBytes()), rootKeyStore.getPassword().toCharArray());
+        X509Certificate rootCertSigner = (X509Certificate) keyStore.getCertificate(rootKeyStore.getKeyAlias());
+        PrivateKey rootPrivateKey = (PrivateKey)keyStore.getKey(rootKeyStore.getKeyAlias(),
+                rootKeyStore.getPassword().toCharArray());
         X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(rootCertSigner,
-                rootPrivateKey, rootKeyStoreVS.getKeyAlias());
+                rootPrivateKey, rootKeyStore.getKeyAlias());
         String testUserDN = format("GIVENNAME={0}, SERIALNUMBER={1}", givenName, nif);
         return KeyStoreUtil.createTimeStampingKeyStore(validFrom.getTime(),
                 (validTo.getTime() - validFrom.getTime()), password, keyAlias, rootCAPrivateCredential, testUserDN);

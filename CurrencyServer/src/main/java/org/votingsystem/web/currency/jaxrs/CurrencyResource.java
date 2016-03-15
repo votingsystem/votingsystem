@@ -7,9 +7,9 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
-import org.votingsystem.web.currency.ejb.TransactionVSBean;
+import org.votingsystem.web.currency.ejb.TransactionBean;
 import org.votingsystem.web.currency.ejb.UserBean;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.IOException;
@@ -47,13 +46,14 @@ public class CurrencyResource {
     @Inject DAOBean dao;
     @Inject
     UserBean userBean;
-    @Inject TransactionVSBean transactionVSBean;
+    @Inject
+    TransactionBean transactionBean;
     @Inject ConfigVS config;
     @Inject CMSBean cmsBean;
     @Inject CurrencyBean currencyBean;
 
     @Path("/issuedLog")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Object issuedLog(@Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {
         //TODO get reference to currency logging file and render file content as JSON
@@ -61,7 +61,7 @@ public class CurrencyResource {
     }
 
     @Path("/requestLog")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Object processReques(@Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {
         //TODO get reference to currency logging file and render file content as JSON
@@ -78,23 +78,23 @@ public class CurrencyResource {
                 .setParameter("hashCertVS", hashCertVSBase64);
         Currency currency = dao.getSingleResult(Currency.class, query);
         if(currency == null) return Response.status(ResponseVS.SC_NOT_FOUND).entity(
-                messages.get("currencyNotFoundErrorMsg")).type(MediaType.TEXT_PLAIN + ";charset=utf-8").build();
+                messages.get("currencyNotFoundErrorMsg")).type(javax.ws.rs.core.MediaType.TEXT_PLAIN + ";charset=utf-8").build();
         CurrencyStateDto currencyStateDto = new CurrencyStateDto(currency);
         if(currency.getCurrencyBatch() != null) {
             query = dao.getEM().createQuery("select c from Currency c where c.currencyBatch =:currencyBatch")
                     .setParameter("currencyBatch", currency.getCurrencyBatch());
             currencyStateDto.setBatchResponseCerts(query.getResultList());
         }
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyStateDto)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyStateDto)).type(MediaType.JSON).build();
     }
 
     @Path("/bundleState")
-    @POST @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
+    @POST @Consumes(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response bundleState(Set<String> hashSet) throws Exception {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyBean.checkBundleState(hashSet))).build();
     }
 
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     @Path("/issued/currencyCode/{currencyCode}") @Transactional
     public Response currencyIssued(@PathParam("currencyCode") String currencyCode, @Context HttpServletRequest req,
                @Context HttpServletResponse resp, @Context ServletContext context) throws IOException, ServletException {

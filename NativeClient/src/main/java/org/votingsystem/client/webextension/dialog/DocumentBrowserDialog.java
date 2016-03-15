@@ -9,7 +9,7 @@ import org.votingsystem.client.webextension.pane.DocumentBrowserPane;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.ObjectUtils;
@@ -64,7 +64,7 @@ public class DocumentBrowserDialog extends DialogVS {
                 final String outputFolder = ContextVS.getInstance().getTempDir() + File.separator + UUID.randomUUID();
                 ProgressDialog.show(new DecompressBackupTask(selectedFile.getAbsolutePath(), outputFolder), null);
             } else {
-                if(selectedFile.getName().endsWith(ContentTypeVS.CURRENCY.getExtension())) {
+                if(selectedFile.getName().endsWith(ContentType.CURRENCY.getExtension())) {
                     CurrencyDialog.show((Currency) ObjectUtils.deSerializeObject(FileUtils.getBytesFromFile(selectedFile)),
                             documentBrowserPane.getScene().getWindow(), null);
                 } else {
@@ -82,7 +82,7 @@ public class DocumentBrowserDialog extends DialogVS {
         Platform.runLater(() -> {
             FileChooser fileChooser = new FileChooser();
             /*FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                    ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentTypeVS.SIGNED.getExtension());
+                    ContextVS.getMessage("signedFileFileFilterMsg"), "*" + ContentType.SIGNED.getExtension());
             fileChooser.getExtensionFilters().add(extFilter);*/
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
             //fileChooser.setInitialFileName(ContextVS.getMessage("genericReceiptFileName"));

@@ -238,7 +238,7 @@ public class Wallet {
                     new TypeReference<Set<CurrencyStateDto>>() {},
                     JSON.getMapper().writeValueAsBytes(hashCertVSSet),
                     currencyServer.getCurrencyBundleStateServiceURL(),
-                    ContentTypeVS.JSON);
+                    ContentType.JSON);
             response = CurrencyCheckResponse.load(responseDto, currencyMap);
         } catch (Exception ex) {
             ex.printStackTrace();

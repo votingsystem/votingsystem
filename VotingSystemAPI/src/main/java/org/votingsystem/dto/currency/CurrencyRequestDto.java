@@ -7,7 +7,7 @@ import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
@@ -46,26 +46,26 @@ public class CurrencyRequestDto {
     public CurrencyRequestDto() {}
 
 
-    public static CurrencyRequestDto CREATE_REQUEST(TransactionVSDto transactionVSDto, BigDecimal currencyValue,
+    public static CurrencyRequestDto CREATE_REQUEST(TransactionDto transactionDto, BigDecimal currencyValue,
                                                     String serverURL) throws Exception {
         CurrencyRequestDto currencyRequestDto = new CurrencyRequestDto();
         currencyRequestDto.serverURL = serverURL;
-        currencyRequestDto.subject = transactionVSDto.getSubject();
-        currencyRequestDto.totalAmount = transactionVSDto.getAmount();
-        currencyRequestDto.currencyCode = transactionVSDto.getCurrencyCode();
-        currencyRequestDto.timeLimited = transactionVSDto.isTimeLimited();
-        currencyRequestDto.tagVS = new TagVS(transactionVSDto.getTagName());;
+        currencyRequestDto.subject = transactionDto.getSubject();
+        currencyRequestDto.totalAmount = transactionDto.getAmount();
+        currencyRequestDto.currencyCode = transactionDto.getCurrencyCode();
+        currencyRequestDto.timeLimited = transactionDto.isTimeLimited();
+        currencyRequestDto.tagVS = new TagVS(transactionDto.getTagName());;
         currencyRequestDto.UUID = java.util.UUID.randomUUID().toString();
 
         Map<String, Currency> currencyMap = new HashMap<>();
         Set<String> requestCSRSet = new HashSet<>();
-        BigDecimal divideAndRemainder[] = transactionVSDto.getAmount().divideAndRemainder(currencyValue);
-        if(divideAndRemainder[1].compareTo(BigDecimal.ZERO) != 0) throw new ValidationExceptionVS(MessageFormat.format(
+        BigDecimal divideAndRemainder[] = transactionDto.getAmount().divideAndRemainder(currencyValue);
+        if(divideAndRemainder[1].compareTo(BigDecimal.ZERO) != 0) throw new ValidationException(MessageFormat.format(
                 "request with remainder - requestAmount ''{0}''  currencyValue ''{{1}}'' remainder ''{{2}}''",
-                transactionVSDto.getAmount(), currencyValue, divideAndRemainder[1]));
+                transactionDto.getAmount(), currencyValue, divideAndRemainder[1]));
         for(int i = 0; i < divideAndRemainder[0].intValue(); i++) {
-            Currency currency = new Currency(serverURL, currencyValue, transactionVSDto.getCurrencyCode(),
-                    transactionVSDto.isTimeLimited(), currencyRequestDto.tagVS);
+            Currency currency = new Currency(serverURL, currencyValue, transactionDto.getCurrencyCode(),
+                    transactionDto.isTimeLimited(), currencyRequestDto.tagVS);
             requestCSRSet.add(new String(currency.getCertificationRequest().getCsrPEM()));
             currencyMap.put(currency.getHashCertVS(), currency);
         }
@@ -111,17 +111,17 @@ public class CurrencyRequestDto {
         Map<String, CurrencyDto> currencyDtoMap = new HashMap<>();
         for(String currencyCSR : requestDto.requestCSRSet) {
             CurrencyDto currencyDto = new CurrencyDto(PEMUtils.fromPEMToPKCS10CertificationRequest(currencyCSR.getBytes()));
-            if(!currencyDto.getCurrencyCode().equals(requestDto.getCurrencyCode())) throw new ValidationExceptionVS(
+            if(!currencyDto.getCurrencyCode().equals(requestDto.getCurrencyCode())) throw new ValidationException(
                     "currency error - CurrencyCSRDto currencyCode: " + currencyDto.getCurrencyCode() +
                             " - csr currencyCode: " + currencyDto.getCurrencyCode());
-            if(!currencyDto.getTag().equals(requestDto.getTagVS().getName())) throw new ValidationExceptionVS(
+            if(!currencyDto.getTag().equals(requestDto.getTagVS().getName())) throw new ValidationException(
                     "requestDto tag: " + requestDto.getTagVS().getName() + " - CurrencyCSRDto tag: " + currencyDto.getTag());
             if (!contextURL.equals(currencyDto.getCurrencyServerURL()))  throw new ExceptionVS("serverURL error - " +
                     " serverURL: " + contextURL + " - csr serverURL: " + currencyDto.getCurrencyServerURL());
             csrRequestAmount = csrRequestAmount.add(currencyDto.getAmount());
             currencyDtoMap.put(currencyDto.getHashCertVS(), currencyDto);
         }
-        if(requestDto.getTotalAmount().compareTo(csrRequestAmount) != 0) throw new ValidationExceptionVS(MessageFormat.format(
+        if(requestDto.getTotalAmount().compareTo(csrRequestAmount) != 0) throw new ValidationException(MessageFormat.format(
                 "Amount mismatch - CurrencyRequestDto ''{0}'' - csr ''{1}''", requestDto.getTotalAmount(), csrRequestAmount));
         requestDto.setCurrencyDtoMap(currencyDtoMap);
         return requestDto;

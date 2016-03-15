@@ -5,7 +5,6 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.*;
-import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 
 import java.util.List;
@@ -35,7 +34,7 @@ public class AddUserToGroup {
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(simulationData.getServerURL());
         ContextVS.getInstance().setDefaultServer(currencyServer);
         String groupURL = currencyServer.getGroupURL(simulationData.getGroupId());
-        GroupDto groupDto = HttpHelper.getInstance().getData(GroupDto.class, groupURL, MediaTypeVS.JSON);
+        GroupDto groupDto = HttpHelper.getInstance().getData(GroupDto.class, groupURL, MediaType.JSON);
         groupDto.setOperation(TypeVS.CURRENCY_GROUP_SUBSCRIBE);
         if(subscribeNewUserList) {
             log.info("subscribeUsers");

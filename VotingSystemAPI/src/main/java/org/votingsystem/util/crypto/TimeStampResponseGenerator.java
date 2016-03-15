@@ -54,7 +54,7 @@ public class TimeStampResponseGenerator {
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             throw new ExceptionVS("request null");}
-        serialNumber = KeyGeneratorVS.INSTANCE.getSerno();
+        serialNumber = KeyGenerator.INSTANCE.getSerno();
         log.info("getTimeStampResponse - serialNumber: " + serialNumber + " - CertReq: " + timeStampRequest.getCertReq());
         JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(
                 new JcaDigestCalculatorProviderBuilder().setProvider(ContextVS.PROVIDER).build());

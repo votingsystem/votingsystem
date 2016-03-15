@@ -1,9 +1,9 @@
 package org.votingsystem.model.voting;
 
 
-import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.model.User;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -20,8 +20,8 @@ public class EventElection extends EventVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @OneToOne private CertificateVS accessControlCert;
-    @OneToOne private CertificateVS controlCenterCert;
+    @OneToOne private Certificate accessControlCert;
+    @OneToOne private Certificate controlCenterCert;
 
     public EventElection() {}
 
@@ -48,11 +48,11 @@ public class EventElection extends EventVS implements Serializable {
         setDateFinish(dateFinish);
     }
 
-    public FieldEvent checkOptionId(Long optionId) throws ValidationExceptionVS {
+    public FieldEvent checkOptionId(Long optionId) throws ValidationException {
         for(FieldEvent option: getFieldsEventVS()) {
             if(optionId.longValue() == option.getId().longValue()) return option;
         }
-        throw new ValidationExceptionVS("FieldEvent not found - id: " + optionId);
+        throw new ValidationException("FieldEvent not found - id: " + optionId);
     }
 
     public EventElection updateAccessControlIds() {
@@ -66,20 +66,20 @@ public class EventElection extends EventVS implements Serializable {
         return this;
     }
 
-    public CertificateVS getAccessControlCert() {
+    public Certificate getAccessControlCert() {
         return accessControlCert;
     }
 
-    public EventElection setAccessControlCert(CertificateVS accessControlCert) {
+    public EventElection setAccessControlCert(Certificate accessControlCert) {
         this.accessControlCert = accessControlCert;
         return this;
     }
 
-    public CertificateVS getControlCenterCert() {
+    public Certificate getControlCenterCert() {
         return controlCenterCert;
     }
 
-    public EventElection setControlCenterCert(CertificateVS controlCenterCert) {
+    public EventElection setControlCenterCert(Certificate controlCenterCert) {
         this.controlCenterCert = controlCenterCert;
         return this;
     }

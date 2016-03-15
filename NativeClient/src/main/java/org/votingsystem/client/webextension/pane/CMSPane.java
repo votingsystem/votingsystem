@@ -140,8 +140,8 @@ public class CMSPane extends GridPane implements DocumentVS {
         return signedFile.getCMS().toPEM();
     }
 
-    @Override public ContentTypeVS getContentTypeVS() {
-        return ContentTypeVS.SIGNED;
+    @Override public ContentType getContentTypeVS() {
+        return ContentType.SIGNED;
     }
 
     public class CheckVoteTask extends Task<ResponseVS> {
@@ -158,7 +158,7 @@ public class CMSPane extends GridPane implements DocumentVS {
                     VoteCertExtensionDto.class, x509AnonymousCert, ContextVS.VOTE_OID);
             String voteStateServiceURL = ContextVS.getInstance().getAccessControl().getVoteStateServiceURL(
                     StringUtils.toHex(certExtensionDto.getHashCertVS()));
-            ResponseVS responseVS = HttpHelper.getInstance().getData(voteStateServiceURL, ContentTypeVS.JSON);
+            ResponseVS responseVS = HttpHelper.getInstance().getData(voteStateServiceURL, ContentType.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 VoteDto voteDto = (VoteDto) responseVS.getMessage(VoteDto.class);
                 StringBuilder sb = new StringBuilder();

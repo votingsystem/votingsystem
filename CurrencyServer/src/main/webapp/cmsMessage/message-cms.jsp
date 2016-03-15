@@ -52,7 +52,7 @@
                     <div class="flex"></div>
                     <div hidden="{{!isClientToolConnected}}" class="horizontal layout end-justified" style="margin:10px 0px 10px 0px;">
                         <button style="font-size: 1.1em;" on-click="checkReceipt">
-                            <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
+                            <i class="fa fa-x509Certificate"></i>  ${msg.checkSignatureLbl}
                         </button>
                     </div>
                 </div>
@@ -80,14 +80,14 @@
                 } else this.receptorLbl = '${msg.receptorLbl}'
                 switch (this.cmsMessageContent.operation) {
                     case 'FROM_BANK':
-                        this.caption = "${msg.transactionVSFromBank}"
+                        this.caption = "${msg.transactionFromBank}"
                         break;
                     case 'FROM_GROUP_TO_ALL_MEMBERS':
                         this.isReceptorVisible = false
-                        this.caption = "${msg.transactionVSFromGroupToAllMembers}"
+                        this.caption = "${msg.transactionFromGroupToAllMembers}"
                         break;
                     case 'FROM_GROUP_TO_MEMBER_GROUP':
-                        this.caption = "${msg.transactionVSFromGroupToMemberGroup}"
+                        this.caption = "${msg.transactionFromGroupToMemberGroup}"
                         break;
                     case 'CURRENCY_PERIOD_INIT':
                         this.caption = "${msg.currencyPeriodInitLbl}"
@@ -99,7 +99,7 @@
                         break;
                     case 'CURRENCY':
                     case 'CURRENCY_SEND':
-                        this.caption = "${msg.anonymousTransactionVSLbl}"
+                        this.caption = "${msg.anonymousTransactionLbl}"
                         this.$.fromUserDivContainer.style.display = 'none'
                         this.isReceptorVisible = false
                         this.iban = this.cmsMessageContent.toUserIBAN
@@ -107,7 +107,7 @@
                         this.receptorLbl = '${msg.receptorLbl}'
                         break;
                     case 'FROM_USER':
-                        this.caption = "${msg.transactionVSFromUser}"
+                        this.caption = "${msg.transactionFromUser}"
                         break;
                     default:
                         this.caption = this.cmsMessageContent.operation

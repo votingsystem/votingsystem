@@ -5,7 +5,7 @@ import org.votingsystem.model.*;
 import org.votingsystem.model.voting.AccessControl;
 import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CMSBean;
@@ -171,7 +171,7 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public User createIBAN(User user) throws ValidationExceptionVS { return null;}
+    public User createIBAN(User user) throws ValidationException { return null;}
 
     @Override
     public User getSystemUser() {
@@ -208,19 +208,19 @@ public class ConfigVSImpl implements ConfigVS {
     public void checkControlCenter(String serverURL) throws Exception {
         try {
             log.info("checkControlCenter - serverURL:" + serverURL);
-            CertificateVS controlCenterCert = null;
+            Certificate controlCenterCert = null;
             serverURL = StringUtils.checkURL(serverURL);
             Query query = dao.getEM().createQuery("select c from ControlCenter c where c.serverURL =:serverURL")
                     .setParameter("serverURL", serverURL);
             ControlCenter controlCenterDB = dao.getSingleResult(ControlCenter.class, query);
             if(controlCenterDB != null) {
-                query = dao.getEM().createQuery("select c from CertificateVS c where c.actor =:actor " +
+                query = dao.getEM().createQuery("select c from Certificate c where c.actor =:actor " +
                         "and c.state =:state").setParameter("actor", controlCenterDB)
-                        .setParameter("state", CertificateVS.State.OK);
-                controlCenterCert = dao.getSingleResult(CertificateVS.class, query);
+                        .setParameter("state", Certificate.State.OK);
+                controlCenterCert = dao.getSingleResult(Certificate.class, query);
                 if(controlCenterCert != null) return ;
             }
-            ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(serverURL), ContentTypeVS.JSON);
+            ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(serverURL), ContentType.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 Actor actor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
                 if (Actor.Type.CONTROL_CENTER != actor.getType()) throw new ExceptionVS(
@@ -235,7 +235,7 @@ public class ConfigVSImpl implements ConfigVS {
                             x509Cert).setState(Actor.State.OK));
                 }
                 controlCenterDB.setCertChainPEM(actor.getCertChainPEM());
-                controlCenterCert = CertificateVS.ACTOR(controlCenterDB, x509Cert);
+                controlCenterCert = Certificate.ACTOR(controlCenterDB, x509Cert);
                 controlCenterCert.setCertChainPEM(actor.getCertChainPEM().getBytes());
                 dao.persist(controlCenterCert);
                 controlCenter = controlCenterDB;

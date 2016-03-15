@@ -141,7 +141,7 @@ public class SignatureService {
 
     public CMSSignedMessage signDataWithTimeStamp(byte[] contentToSign) throws Exception {
         TimeStampRequest timeStampRequest = cmsGenerator.getTimeStampRequest(contentToSign);
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY,
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(), ContentType.TIMESTAMP_QUERY,
                 ContextVS.getInstance().getProperty("timeStampServerURL") + "/timestamp");
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();
@@ -202,7 +202,7 @@ public class SignatureService {
             byte[] contentToSign = JSON.getMapper().writeValueAsBytes(groupDto);
             TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(cmsGenerator.getSignatureMechanism() ,contentToSign);
             CMSSignedMessage cmsMessage = cmsGenerator.signDataWithTimeStamp(contentToSign, timeStampToken);
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                     currencyServer.getGroupSubscriptionServiceURL(simulationData.getGroupId()));
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 throw new org.votingsystem.throwable.ExceptionVS("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
@@ -219,7 +219,7 @@ public class SignatureService {
         log.info("validateUserSubscriptions");
         ResultListDto<SubscriptionDto> subscriptionDtoList = HttpHelper.getInstance().getData(new TypeReference<ResultListDto<SubscriptionDto>>(){},
                 currencyServer.getGroupUsersServiceURL( groupId, 1000, 0, Subscription.State.PENDING, User.State.ACTIVE),
-                MediaTypeVS.JSON);
+                MediaType.JSON);
         for(SubscriptionDto subscriptionDto : subscriptionDtoList.getResultList()) {
             if(subscriptionDto.getState() == Subscription.State.PENDING) {
                 subscriptionDto.loadActivationRequest();
@@ -228,7 +228,7 @@ public class SignatureService {
         User user = User.FROM_X509_CERT(certSigner);
         for (SubscriptionDto subscriptionDto : subscriptionDtoList.getResultList()) {
             CMSSignedMessage cmsMessage = signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(subscriptionDto));
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+            ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                     currencyServer.getGroupUsersActivationServiceURL());
             if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(
                     responseVS.getMessage());

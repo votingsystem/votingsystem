@@ -2,7 +2,7 @@ package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.TypeVS;
 
@@ -25,13 +25,13 @@ public class RepresentativeAccreditationsDto {
     public RepresentativeAccreditationsDto() {}
 
     public void validate() throws ExceptionVS {
-        if(TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST != getOperation()) throw new ValidationExceptionVS(
+        if(TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST != getOperation()) throw new ValidationException(
                 format("ERROR - operation missmatch - expected: {0} - found: {1}",
                         TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST, getOperation()));
         setRepresentativeNif(NifUtils.validate(getRepresentativeNif()));
-        if(getEmail() == null) throw new ValidationExceptionVS("missing param 'email'");
-        if(getSelectedDate() == null) throw new ValidationExceptionVS("missing param 'selectedDate'");
-        if(getUUID() == null) throw new ValidationExceptionVS("missing param 'UUID'");
+        if(getEmail() == null) throw new ValidationException("missing param 'email'");
+        if(getSelectedDate() == null) throw new ValidationException("missing param 'selectedDate'");
+        if(getUUID() == null) throw new ValidationException("missing param 'UUID'");
     }
 
     public TypeVS getOperation() {

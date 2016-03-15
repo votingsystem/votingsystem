@@ -33,7 +33,7 @@
                     <div class="flex"></div>
                     <div hidden="{{!isClientToolConnected}}" class="flex horizontal layout end-justified" style="margin:10px 0px 10px 0px;">
                         <button on-click="checkReceipt">
-                            <i class="fa fa-certificate"></i>  ${msg.checkSignatureLbl}
+                            <i class="fa fa-x509Certificate"></i>  ${msg.checkSignatureLbl}
                         </button>
                     </div>
                 </div>

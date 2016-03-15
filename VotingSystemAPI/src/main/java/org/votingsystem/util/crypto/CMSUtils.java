@@ -22,7 +22,7 @@ import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 
@@ -138,7 +138,7 @@ public class CMSUtils {
         TimeStampRequest timeStampRequest = reqgen.generate(
                 digAlgId.getAlgorithm().getId(), digestBytes);
         ResponseVS responseVS = HttpHelper.getInstance().sendData(
-                timeStampRequest.getEncoded(), ContentTypeVS.TIMESTAMP_QUERY,
+                timeStampRequest.getEncoded(), ContentType.TIMESTAMP_QUERY,
                 ContextVS.getInstance().getDefaultServer().getTimeStampServerURL() + "/timestamp");
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();

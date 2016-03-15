@@ -7,7 +7,7 @@ import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.web.accesscontrol.ejb.EventVSBean;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -89,7 +89,7 @@ public class SearchResource {
             dtoList.add(new EventVSDto(eventVS, config.getServerName(), config.getContextURL()));
         }
         ResultListDto<EventVSDto> resultListDto = new ResultListDto<>(dtoList, offset, max, dtoList.size());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
     }
 
 }

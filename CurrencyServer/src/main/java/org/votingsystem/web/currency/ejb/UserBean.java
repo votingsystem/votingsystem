@@ -4,12 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.model.User;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.PEMUtils;
-import org.votingsystem.web.currency.websocket.SessionVSManager;
+import org.votingsystem.web.currency.websocket.SessionManager;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SubscriptionBean;
@@ -37,7 +37,8 @@ public class UserBean {
     @Inject CMSBean cmsBean;
     @Inject
     SubscriptionBean subscriptionBean;
-    @Inject TransactionVSBean transactionVSBean;
+    @Inject
+    TransactionBean transactionBean;
     
     
     public User saveUser(CMSMessage cmsReq) throws Exception {
@@ -62,13 +63,13 @@ public class UserBean {
 
     @Transactional
     public UserDto getUserDto(User user, boolean withCerts) throws Exception {
-        List<CertificateVS> certificates = null;
+        List<Certificate> certificates = null;
         if(withCerts) {
-            Query query = dao.getEM().createQuery("SELECT c FROM CertificateVS c WHERE c.user =:user and c.state =:state")
-                    .setParameter("user", user).setParameter("state", CertificateVS.State.OK);
+            Query query = dao.getEM().createQuery("SELECT c FROM Certificate c WHERE c.user =:user and c.state =:state")
+                    .setParameter("user", user).setParameter("state", Certificate.State.OK);
             certificates = query.getResultList();
         }
-        Set<DeviceDto> deviceDtoSet = SessionVSManager.getInstance().connectedDeviceMap(user.getId());
+        Set<DeviceDto> deviceDtoSet = SessionManager.getInstance().connectedDeviceMap(user.getId());
         return UserDto.DEVICES(user, deviceDtoSet, certificates);
     }
     

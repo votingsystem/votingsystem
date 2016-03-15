@@ -14,7 +14,7 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 
@@ -99,7 +99,7 @@ public class AddTagVSDialog extends DialogVS {
             updateMessage(ContextVS.getMessage("addTagVSLbl"));
             updateProgress(3, 10);
             String targetURL = ContextVS.getInstance().getCurrencyServer().getTagVSServiceURL();
-            ResponseVS responseVS  = HttpHelper.getInstance().getData(targetURL, ContentTypeVS.JSON);
+            ResponseVS responseVS  = HttpHelper.getInstance().getData(targetURL, ContentType.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 ResultListDto<TagVSDto> resultListDto = (ResultListDto<TagVSDto>) responseVS.getMessage(
                         new TypeReference<ResultListDto<TagVSDto>>() { });

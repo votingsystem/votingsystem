@@ -121,7 +121,7 @@ public class SignedFile {
     public Long getSignerCertSerialNumber() throws Exception {
         if(cmsMessage == null) return null;
         User user = cmsMessage.getSigner();
-        return user.getCertificate().getSerialNumber().longValue();
+        return user.getX509Certificate().getSerialNumber().longValue();
     }
 
 }

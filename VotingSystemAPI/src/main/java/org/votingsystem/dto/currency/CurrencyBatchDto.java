@@ -8,7 +8,7 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyBatch;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
@@ -82,7 +82,7 @@ public class CurrencyBatchDto {
             accumulated = accumulated.add(currency.getAmount());
         }
         if(batchAmount.compareTo(accumulated) > 0) {
-            throw new ValidationExceptionVS(MessageFormat.format("''{0}'' batchAmount exceeds currency sum ''{1}''",
+            throw new ValidationException(MessageFormat.format("''{0}'' batchAmount exceeds currency sum ''{1}''",
                     batchAmount, accumulated));
         } else if(batchAmount.compareTo(accumulated) != 0){
             batchDto.leftOver = accumulated.subtract(batchAmount);
@@ -113,7 +113,7 @@ public class CurrencyBatchDto {
                     currencyList = new ArrayList<>();
                 }
                 checkBatchItem(currency.getBatchItemDto());
-                if(checkDate.after(currency.getValidTo())) throw new ValidationExceptionVS(MessageFormat.format(
+                if(checkDate.after(currency.getValidTo())) throw new ValidationException(MessageFormat.format(
                         "currency ''{0}'' is lapsed", currency.getHashCertVS()));
                 accumulated = accumulated.add(currency.getAmount());
                 if(TagVS.WILDTAG.equals(currency.getTagVS().getName()))
@@ -124,40 +124,40 @@ public class CurrencyBatchDto {
             }
         }
         if(currencyList == null || currencyList.isEmpty())
-            throw new ValidationExceptionVS("CurrencyBatch without signed transactions");
+            throw new ValidationException("CurrencyBatch without signed transactions");
         CurrencyCertExtensionDto certExtensionDto = null;
         if(leftOverCSR != null) {
             leftOverPKCS10 = PEMUtils.fromPEMToPKCS10CertificationRequest(leftOverCSR.getBytes());
             certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                     leftOverPKCS10, ContextVS.CURRENCY_OID);
-            if(leftOver.compareTo(certExtensionDto.getAmount()) != 0) throw new ValidationExceptionVS(
+            if(leftOver.compareTo(certExtensionDto.getAmount()) != 0) throw new ValidationException(
                     "leftOver 'amount' mismatch - request: " + leftOver + " - csr: " + certExtensionDto.getAmount());
-            if(!certExtensionDto.getCurrencyCode().equals(currencyCode)) throw new ValidationExceptionVS(
+            if(!certExtensionDto.getCurrencyCode().equals(currencyCode)) throw new ValidationException(
                     "leftOver 'currencyCode' mismatch - request: " + currencyCode + " - csr: " + certExtensionDto.getCurrencyCode());
             if(!certExtensionDto.getTag().equals(tag)) {
-                if(wildTagAccumulated.compareTo(leftOver) < 0) throw new ValidationExceptionVS(
+                if(wildTagAccumulated.compareTo(leftOver) < 0) throw new ValidationException(
                     "leftOver 'tag' mismatch - request: " + tag + " - csr: " + certExtensionDto.getTag() +
                     " - wildTagAccumulated: " + wildTagAccumulated);
             }
             BigDecimal leftOverCalculated = accumulated.subtract(batchAmount);
-            if(leftOverCalculated.compareTo(leftOver) != 0) throw new ValidationExceptionVS(
+            if(leftOverCalculated.compareTo(leftOver) != 0) throw new ValidationException(
                     "leftOverCalculated: " + leftOverCalculated + " - leftOver: " + leftOver);
-        } else if(leftOver.compareTo(BigDecimal.ZERO) != 0) throw new ValidationExceptionVS(
+        } else if(leftOver.compareTo(BigDecimal.ZERO) != 0) throw new ValidationException(
                 "leftOver request: " + leftOver + " without CSR");
         if(currencyChangeCSR != null) {
             currencyChangePKCS10 = PEMUtils.fromPEMToPKCS10CertificationRequest(currencyChangeCSR.getBytes());
             certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                     currencyChangePKCS10, ContextVS.CURRENCY_OID);
-            if(certExtensionDto.getAmount().compareTo(this.batchAmount) != 0) throw new ValidationExceptionVS(
+            if(certExtensionDto.getAmount().compareTo(this.batchAmount) != 0) throw new ValidationException(
                     "currencyChange 'amount' mismatch - request: " + this.batchAmount +
                     " - csr: " + certExtensionDto.getAmount());
-            if(!certExtensionDto.getCurrencyCode().equals(currencyCode)) throw new ValidationExceptionVS(
+            if(!certExtensionDto.getCurrencyCode().equals(currencyCode)) throw new ValidationException(
                     "currencyChange 'currencyCode' mismatch - request: " + currencyCode +
                     " - csr: " + certExtensionDto.getCurrencyCode());
-            if(!certExtensionDto.getTag().equals(tag)) throw new ValidationExceptionVS(
+            if(!certExtensionDto.getTag().equals(tag)) throw new ValidationException(
                     "certExtensionDto 'tag' mismatch - request: " + tag + " - csr: " + certExtensionDto.getTag());
             if(timeLimited.booleanValue() !=  certExtensionDto.getTimeLimited().booleanValue())
-                throw new ValidationExceptionVS("certExtensionDto 'timeLimited' mismatch ");
+                throw new ValidationException("certExtensionDto 'timeLimited' mismatch ");
         }
         CurrencyBatch currencyBatch = new CurrencyBatch();
         currencyBatch.setType(operation);
@@ -181,16 +181,16 @@ public class CurrencyBatchDto {
             leftOverCurrency.initSigner(responseDto.getLeftOverCert().getBytes());
         }
         CurrencyBatchDto signedDto = receipt.getSignedContent(CurrencyBatchDto.class);
-        if(signedDto.getBatchAmount().compareTo(batchAmount) != 0) throw new ValidationExceptionVS(MessageFormat.format(
+        if(signedDto.getBatchAmount().compareTo(batchAmount) != 0) throw new ValidationException(MessageFormat.format(
             "ERROR - batchAmount ''{0}'' - receipt amount ''{1}''",  batchAmount, signedDto.getBatchAmount()));
-        if(!signedDto.getCurrencyCode().equals(signedDto.getCurrencyCode())) throw new ValidationExceptionVS(MessageFormat.format(
+        if(!signedDto.getCurrencyCode().equals(signedDto.getCurrencyCode())) throw new ValidationException(MessageFormat.format(
              "ERROR - batch currencyCode ''{0}'' - receipt currencyCode ''{1}''",  currencyCode, signedDto.getCurrencyCode()));
         if(timeLimited.booleanValue() != signedDto.getTimeLimited().booleanValue()) throw
-                new ValidationExceptionVS(MessageFormat.format(
+                new ValidationException(MessageFormat.format(
                 "ERROR - batch timeLimited ''{0}'' - receipt timeLimited ''{1}''",  timeLimited, signedDto.getTimeLimited()));
-        if(!tag.equals(signedDto.getTag())) throw new ValidationExceptionVS(MessageFormat.format(
+        if(!tag.equals(signedDto.getTag())) throw new ValidationException(MessageFormat.format(
                 "ERROR - batch tag ''{0}'' - receipt tag ''{1}''",  tag, signedDto.getTag()));
-        if(!currencySet.equals(signedDto.getCurrencySet())) throw new ValidationExceptionVS("ERROR - currencySet mismatch");
+        if(!currencySet.equals(signedDto.getCurrencySet())) throw new ValidationException("ERROR - currencySet mismatch");
     }
 
     @JsonIgnore
@@ -206,15 +206,15 @@ public class CurrencyBatchDto {
     @JsonIgnore
     public void checkBatchItem(CurrencyDto batchItem) throws ExceptionVS {
         String currencyData = "batchItem with hash '" + batchItem.getHashCertVS() + "' ";
-        if(!subject.equals(batchItem.getSubject())) throw new ValidationExceptionVS(
+        if(!subject.equals(batchItem.getSubject())) throw new ValidationException(
                 currencyData + "expected subject " + subject + " found " + batchItem.getSubject());
         if(toUserIBAN != null) {
-            if(!toUserIBAN.equals(batchItem.getToUserIBAN())) throw new ValidationExceptionVS(
+            if(!toUserIBAN.equals(batchItem.getToUserIBAN())) throw new ValidationException(
                     currencyData + "expected toUserIBAN " + toUserIBAN + " found " + batchItem.getToUserIBAN());
         }
-        if(!currencyCode.equals(batchItem.getCurrencyCode())) throw new ValidationExceptionVS(
+        if(!currencyCode.equals(batchItem.getCurrencyCode())) throw new ValidationException(
                 currencyData + "expected currencyCode " + currencyCode + " found " + batchItem.getCurrencyCode());
-        if(!tag.equals(batchItem.getTag())) throw new ValidationExceptionVS(
+        if(!tag.equals(batchItem.getTag())) throw new ValidationException(
                 currencyData + "expected tag " + tag + " found " + batchItem.getTag());
     }
 

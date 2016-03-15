@@ -62,7 +62,7 @@ public class CSRResource {
         if(csrRequest == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity(messages.get("csrRequestNotValidated")).build();
         }
-        X509Certificate certX509 = CertUtils.loadCertificate(csrRequest.getCertificateVS().getContent());
+        X509Certificate certX509 = CertUtils.loadCertificate(csrRequest.getCertificate().getContent());
         List<X509Certificate> certs = Arrays.asList(certX509, cmsBean.getServerCert());
         return Response.ok().entity(PEMUtils.getPEMEncoded (certs)).build();
     }

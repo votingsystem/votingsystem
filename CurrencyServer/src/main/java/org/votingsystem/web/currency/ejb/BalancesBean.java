@@ -2,13 +2,13 @@ package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.currency.BalancesDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Group;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.Interval;
 import org.votingsystem.util.currency.BalanceUtils;
@@ -40,7 +40,8 @@ public class BalancesBean {
     @Inject
     UserBean userBean;
     @Inject DAOBean dao;
-    @Inject TransactionVSBean transactionVSBean;
+    @Inject
+    TransactionBean transactionBean;
     @Inject CurrencyAccountBean currencyAccountBean;
 
     public BalancesDto getSystemBalancesDto(Interval timePeriod) throws Exception {
@@ -48,24 +49,24 @@ public class BalancesBean {
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("timePeriod", timePeriod);
         resultMap.put("user", userBean.getUserDto(config.getSystemUser(), false));
-        Query query = dao.getEM().createNamedQuery("findSystemTransactionVSList").setParameter("state", TransactionVS.State.OK)
+        Query query = dao.getEM().createNamedQuery("findSystemTransactionList").setParameter("state", Transaction.State.OK)
                 .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())
-                .setParameter("typeList", Arrays.asList(TransactionVS.Type.CURRENCY_SEND));
-        List<TransactionVS> transactionList = query.getResultList();
+                .setParameter("typeList", Arrays.asList(Transaction.Type.CURRENCY_SEND));
+        List<Transaction> transactionList = query.getResultList();
         BalancesDto balancesDto = getBalancesDto(
-                transactionList, TransactionVS.Source.FROM);
-        query = dao.getEM().createNamedQuery("findSystemTransactionVSFromList").setParameter("dateFrom", timePeriod.getDateFrom())
+                transactionList, Transaction.Source.FROM);
+        query = dao.getEM().createNamedQuery("findSystemTransactionFromList").setParameter("dateFrom", timePeriod.getDateFrom())
                 .setParameter("dateTo", timePeriod.getDateTo())
-                .setParameter("typeList", Arrays.asList(TransactionVS.Type.CURRENCY_SEND));
+                .setParameter("typeList", Arrays.asList(Transaction.Type.CURRENCY_SEND));
         transactionList = query.getResultList();
-        BalancesDto balancesToDto = getBalancesDto(transactionList, TransactionVS.Source.FROM);
+        BalancesDto balancesToDto = getBalancesDto(transactionList, Transaction.Source.FROM);
         balancesDto.setTo(balancesToDto);
         return balancesDto;
     }
 
     public BalancesDto getBankBalancesDto(Bank bank, Interval timePeriod) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
-                transactionVSBean.getTransactionFromList(bank, timePeriod), TransactionVS.Source.FROM);
+                transactionBean.getTransactionFromList(bank, timePeriod), Transaction.Source.FROM);
         balancesDto.setTimePeriod(timePeriod);
         balancesDto.setUser(userBean.getUserDto(bank, false));
         return balancesDto;
@@ -73,12 +74,12 @@ public class BalancesBean {
 
     public BalancesDto getGroupBalancesDto(Group group, Interval timePeriod) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
-                transactionVSBean.getTransactionFromList(group, timePeriod), TransactionVS.Source.FROM);
+                transactionBean.getTransactionFromList(group, timePeriod), Transaction.Source.FROM);
         balancesDto.setTimePeriod(timePeriod);
         balancesDto.setUser(UserDto.BASIC(group));
 
         BalancesDto balancesToDto = getBalancesDto(
-                transactionVSBean.getTransactionToList(group, timePeriod), TransactionVS.Source.TO);
+                transactionBean.getTransactionToList(group, timePeriod), Transaction.Source.TO);
         balancesDto.setTo(balancesToDto);
         balancesDto.calculateCash();
         currencyAccountBean.checkBalancesWithCurrencyAccounts(group, balancesDto.getBalancesCash());
@@ -87,12 +88,12 @@ public class BalancesBean {
 
     public BalancesDto getUserBalancesDto(User user, Interval timePeriod) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
-                transactionVSBean.getTransactionFromList(user, timePeriod), TransactionVS.Source.FROM);
+                transactionBean.getTransactionFromList(user, timePeriod), Transaction.Source.FROM);
         balancesDto.setTimePeriod(timePeriod);
         balancesDto.setUser(userBean.getUserDto(user, false));
 
         BalancesDto balancesToDto = getBalancesDto(
-                transactionVSBean.getTransactionToList(user, timePeriod), TransactionVS.Source.TO);
+                transactionBean.getTransactionToList(user, timePeriod), Transaction.Source.TO);
         balancesDto.setTo(balancesToDto);
 
         balancesDto.calculateCash();
@@ -111,10 +112,10 @@ public class BalancesBean {
         dao.getEM().merge(tagAccount.setBalance(tagAccount.getBalance().add(amount)));
     }
 
-    public BalancesDto getBalancesDto(List<TransactionVS> transactionList, TransactionVS.Source source) throws ExceptionVS {
-        List<TransactionVSDto> transactionFromList = new ArrayList<>();
-        for(TransactionVS transaction : transactionList) {
-            transactionFromList.add(transactionVSBean.getTransactionDto(transaction));
+    public BalancesDto getBalancesDto(List<Transaction> transactionList, Transaction.Source source) throws ExceptionVS {
+        List<TransactionDto> transactionFromList = new ArrayList<>();
+        for(Transaction transaction : transactionList) {
+            transactionFromList.add(transactionBean.getTransactionDto(transaction));
         }
         switch (source) {
             case FROM:

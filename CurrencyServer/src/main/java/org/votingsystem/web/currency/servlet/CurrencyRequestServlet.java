@@ -5,9 +5,9 @@ import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.ejb.CMSBean;
@@ -46,12 +46,12 @@ public class CurrencyRequestServlet extends HttpServlet {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.CURRENCY_REQUEST);
             cmsMessage = cmsBean.validateCMS(
-                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getCmsMessage();
+                    requestVS.getCMS(), ContentType.JSON_SIGNED).getCmsMessage();
             CurrencyRequestDto requestDto = CurrencyRequestDto.validateRequest(requestVS.getCSRBytes(),
                     cmsMessage, config.getContextURL());
             requestDto.setTagVS(config.getTag(requestDto.getTagVS().getName()));
             ResultListDto<String> dto = currencyBean.processCurrencyRequest(requestDto);
-            resp.setContentType(MediaTypeVS.JSON);
+            resp.setContentType(MediaType.JSON);
             resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(dto));
         } catch (ExceptionVS ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -61,7 +61,7 @@ public class CurrencyRequestServlet extends HttpServlet {
             }
             if(ex.getMessageDto() != null) {
                 resp.setStatus(ex.getMessageDto().getStatusCode());
-                resp.setContentType(MediaTypeVS.JSON);
+                resp.setContentType(MediaType.JSON);
                 resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(ex.getMessageDto()));
             } else writeException(resp, ex);
         } catch (Exception ex) {

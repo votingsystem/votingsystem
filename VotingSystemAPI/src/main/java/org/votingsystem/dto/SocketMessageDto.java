@@ -8,7 +8,7 @@ import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
@@ -226,7 +226,7 @@ public class SocketMessageDto {
     }
 
 
-    public void setSession(Session session) throws ValidationExceptionVS {
+    public void setSession(Session session) throws ValidationException {
         this.session = session;
         //if sessionId isn't null is because it's a MSG_TO_DEVICE_BY_TARGET_SESSION_ID
         if(sessionId == null) this.sessionId = session.getId();

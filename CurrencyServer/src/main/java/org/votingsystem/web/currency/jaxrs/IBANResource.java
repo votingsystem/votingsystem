@@ -2,8 +2,8 @@ package org.votingsystem.web.currency.jaxrs;
 
 import org.iban4j.CountryCode;
 import org.iban4j.Iban;
-import org.votingsystem.model.currency.TransactionVS;
-import org.votingsystem.web.currency.ejb.TransactionVSBean;
+import org.votingsystem.model.currency.Transaction;
+import org.votingsystem.web.currency.ejb.TransactionBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -34,7 +34,8 @@ public class IBANResource {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject TransactionVSBean transactionVSBean;
+    @Inject
+    TransactionBean transactionBean;
 
     @Path("/from/{IBANCode}")
     @GET @Produces(MediaType.APPLICATION_JSON)
@@ -45,19 +46,19 @@ public class IBANResource {
 
         if(iban.getBankCode().equals(config.getBankCode()) && iban.getBranchCode().equals(config.getBranchCode())) {
             log.log(Level.FINE, "VotingSystem IBAN");
-            Query query = dao.getEM().createQuery("select t from TransactionVS t where t.fromUser.IBAN =:IBAN")
+            Query query = dao.getEM().createQuery("select t from Transaction t where t.fromUser.IBAN =:IBAN")
                     .setParameter("IBAN", iban.toString());
-            List<TransactionVS> transactionVSList = query.getResultList();
-            for(TransactionVS transactionVS : transactionVSList) {
-                result.add(transactionVSBean.getTransactionDto(transactionVS));
+            List<Transaction> transactionList = query.getResultList();
+            for(Transaction transaction : transactionList) {
+                result.add(transactionBean.getTransactionDto(transaction));
             }
         } else {
             log.log(Level.FINE, "external IBAN");
-            Query query = dao.getEM().createQuery("select t from TransactionVS t where t.fromUserIBAN =:IBAN")
+            Query query = dao.getEM().createQuery("select t from Transaction t where t.fromUserIBAN =:IBAN")
                     .setParameter("IBAN", iban.toString());
-            List<TransactionVS> transactionVSList = query.getResultList();
-            for(TransactionVS transactionVS : transactionVSList) {
-                result.add(transactionVSBean.getTransactionDto(transactionVS));
+            List<Transaction> transactionList = query.getResultList();
+            for(Transaction transaction : transactionList) {
+                result.add(transactionBean.getTransactionDto(transaction));
             }
         }
         return result;

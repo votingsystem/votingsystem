@@ -7,7 +7,7 @@ import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.BankInfo;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -37,7 +37,8 @@ public class BankBean {
     BankBean bankBean;
     @Inject
     UserBean userBean;
-    @Inject TransactionVSBean transactionVSBean;
+    @Inject
+    TransactionBean transactionBean;
     @Inject
     SubscriptionBean subscriptionBean;
     @Inject CMSBean cmsBean;
@@ -50,7 +51,7 @@ public class BankBean {
         request.validatePublishRequest();
         Iban IBAN = Iban.valueOf(request.getIBAN());
         if(!cmsBean.isAdmin(signer.getNif())) {
-            throw new ValidationExceptionVS("operation: " + request.getOperation() +
+            throw new ValidationException("operation: " + request.getOperation() +
                     " - userWithoutPrivilegesErrorMsg - nif: " + signer.getNif());
         }
         Collection<X509Certificate> certChain = PEMUtils.fromPEMToX509CertCollection(request.getCertChainPEM().getBytes());
@@ -68,7 +69,7 @@ public class BankBean {
             log.info("NEW bank id: " + ((Bank) bankDB).getId());
         } else {
             ((Bank)bankDB).setDescription(request.getInfo()).setCertificateCA(bank.getCertificateCA());
-            ((Bank)bankDB).setCertificate(bank.getCertificate());
+            ((Bank)bankDB).setX509Certificate(bank.getX509Certificate());
             ((Bank)bankDB).setTimeStampToken(bank.getTimeStampToken());
         }
         bank = (Bank) bankDB;

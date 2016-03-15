@@ -5,7 +5,7 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 
@@ -34,7 +34,7 @@ public class MultiSignTestSender implements Callable<ResponseVS> {
         SignatureService signatureService = SignatureService.load(this.nif);
         CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(getRequest(nif).getBytes());
         ResponseVS responseVS = HttpHelper.getInstance().sendData(
-                cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED, serverURL);
+                cmsMessage.toPEM(), ContentType.JSON_SIGNED, serverURL);
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             CMSSignedMessage cmsResponse = CMSSignedMessage.FROM_PEM(responseVS.getMessageBytes());
             log.info("- cmsResponse.isValidSignature(): " + cmsResponse.isValidSignature());

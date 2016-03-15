@@ -10,11 +10,13 @@ import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.UserCertificationRequestDto;
 import org.votingsystem.dto.voting.KeyStoreDto;
 import org.votingsystem.model.*;
+import org.votingsystem.model.Certificate;
+import org.votingsystem.model.KeyStore;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.Vote;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.*;
 import org.votingsystem.web.util.ConfigVS;
@@ -55,11 +57,11 @@ public class CMSBean {
     private Set<Long> anonymousCertIssuers;
     private Set<X509Certificate> trustedCerts;
     private PrivateKey serverPrivateKey;
-    private CertificateVS serverCertificateVS;
+    private Certificate serverCertificate;
     private X509Certificate localServerCertSigner;
     private List<X509Certificate> certChain;
     private byte[] keyStorePEMCerts;
-    private Map<Long, CertificateVS> trustedCertsHashMap = new HashMap<>();
+    private Map<Long, Certificate> trustedCertsHashMap = new HashMap<>();
     private static final HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsMap = new HashMap<>();
     private Set<String> admins;
     private User systemUser;
@@ -78,7 +80,7 @@ public class CMSBean {
         File keyStoreFile = FileUtils.getFileFromBytes(IOUtils.toByteArray(res.openStream()));
         cmsGenerator = new CMSGenerator(FileUtils.getBytesFromFile(keyStoreFile),
                 keyAlias, password.toCharArray(), ContextVS.SIGNATURE_ALGORITHM);
-        KeyStore keyStore = KeyStore.getInstance("JKS");
+        java.security.KeyStore keyStore = java.security.KeyStore.getInstance("JKS");
         keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
         certChain = new ArrayList<>();
         for(java.security.cert.Certificate certificate : keyStore.getCertificateChain(keyAlias)) {
@@ -92,7 +94,7 @@ public class CMSBean {
         currencyAnchors.add(new TrustAnchor(localServerCertSigner, null));
         Query query = dao.getEM().createNamedQuery("findCertBySerialNumber")
                 .setParameter("serialNumber", localServerCertSigner.getSerialNumber().longValue());
-        serverCertificateVS = dao.getSingleResult(CertificateVS.class, query);
+        serverCertificate = dao.getSingleResult(Certificate.class, query);
         serverPrivateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
         encryptor = new Encryptor(localServerCertSigner, serverPrivateKey);
     }
@@ -118,7 +120,7 @@ public class CMSBean {
     }
 
     public KeyStoreInfo getKeyStoreInfo(byte[] keyStoreBytes, String keyAlias) throws Exception {
-        KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password.toCharArray());
+        java.security.KeyStore keyStore = KeyStoreUtil.getKeyStoreFromBytes(keyStoreBytes, password.toCharArray());
         PrivateKey privateKeySigner = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
         X509Certificate certSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
         return new KeyStoreInfo(keyStore, privateKeySigner, certSigner);
@@ -150,44 +152,44 @@ public class CMSBean {
         for(X509Certificate fileSystemX509TrustedCert:resourceCerts) {
             checkAuthorityCertDB(fileSystemX509TrustedCert);
         }
-        Query query = dao.getEM().createQuery("SELECT c FROM CertificateVS c WHERE c.type in :typeList and c.state =:state")
-                .setParameter("typeList", Arrays.asList(CertificateVS.Type.CERTIFICATE_AUTHORITY,
-                        CertificateVS.Type.CERTIFICATE_AUTHORITY_ID_CARD))
-                .setParameter("state", CertificateVS.State.OK);
-        List<CertificateVS>  trustedCertsList = query.getResultList();
+        Query query = dao.getEM().createQuery("SELECT c FROM Certificate c WHERE c.type in :typeList and c.state =:state")
+                .setParameter("typeList", Arrays.asList(Certificate.Type.CERTIFICATE_AUTHORITY,
+                        Certificate.Type.CERTIFICATE_AUTHORITY_ID_CARD))
+                .setParameter("state", Certificate.State.OK);
+        List<Certificate>  trustedCertsList = query.getResultList();
         trustedCertsHashMap = new HashMap<>();
         trustedCerts = new HashSet<>();
         trustAnchors = new HashSet<>();
-        for (CertificateVS certificateVS : trustedCertsList) {
-            addCertAuthority(certificateVS);
+        for (Certificate certificate : trustedCertsList) {
+            addCertAuthority(certificate);
         }
     }
 
-    public void addCertAuthority(CertificateVS certificateVS) throws Exception {
-        X509Certificate x509Cert = certificateVS.getX509Cert();
+    public void addCertAuthority(Certificate certificate) throws Exception {
+        X509Certificate x509Cert = certificate.getX509Cert();
         trustedCerts.add(x509Cert);
-        trustedCertsHashMap.put(x509Cert.getSerialNumber().longValue(), certificateVS);
+        trustedCertsHashMap.put(x509Cert.getSerialNumber().longValue(), certificate);
         TrustAnchor trustAnchor = new TrustAnchor(x509Cert, null);
         trustAnchors.add(trustAnchor);
-        log.info("addCertAuthority - certificateVS.id: " + certificateVS.getId() + " - " + x509Cert.getSubjectDN() +
+        log.info("addCertAuthority - certificate.id: " + certificate.getId() + " - " + x509Cert.getSubjectDN() +
                 " - num. trustedCerts: " + trustedCerts.size());
     }
 
-    private CertificateVS checkAuthorityCertDB(X509Certificate x509AuthorityCert) throws CertificateException,
+    private Certificate checkAuthorityCertDB(X509Certificate x509AuthorityCert) throws CertificateException,
             NoSuchAlgorithmException, NoSuchProviderException, ExceptionVS {
         log.info(x509AuthorityCert.getSubjectDN().toString());
-        Query query = dao.getEM().createQuery("SELECT c FROM CertificateVS c WHERE c.serialNumber =:serialNumber")
+        Query query = dao.getEM().createQuery("SELECT c FROM Certificate c WHERE c.serialNumber =:serialNumber")
                 .setParameter("serialNumber", x509AuthorityCert.getSerialNumber().longValue());
-        CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
-        if(certificateVS == null) {
-            certificateVS = dao.persist(CertificateVS.AUTHORITY(x509AuthorityCert, null));
-            log.info("ADDED NEW FILE SYSTEM CA CERT - certificateVS.id:" + certificateVS.getId() + " - type: " +
-                    certificateVS.getType());
-        } else if (CertificateVS.State.OK != certificateVS.getState()) {
+        Certificate certificate = dao.getSingleResult(Certificate.class, query);
+        if(certificate == null) {
+            certificate = dao.persist(Certificate.AUTHORITY(x509AuthorityCert, null));
+            log.info("ADDED NEW FILE SYSTEM CA CERT - certificate.id:" + certificate.getId() + " - type: " +
+                    certificate.getType());
+        } else if (Certificate.State.OK != certificate.getState()) {
             throw new ExceptionVS("File system athority cert: " + x509AuthorityCert.getSubjectDN() + " }' " +
-                    " - certificateVS.id: " + certificateVS.getId() + " - state:" + certificateVS.getState());
+                    " - certificate.id: " + certificate.getId() + " - state:" + certificate.getState());
         }
-        return certificateVS;
+        return certificate;
     }
 
     public void validateVoteCerts(CMSSignedMessage cmsMessage, EventVS eventVS) throws Exception {
@@ -195,7 +197,7 @@ public class CMSBean {
         if(signersVS.isEmpty()) throw new ExceptionVS("ERROR - document without signers");
         Set<TrustAnchor> eventTrustedAnchors = getEventTrustedAnchors(eventVS);
         for(User user : signersVS) {
-            CertUtils.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(user.getCertificate()));
+            CertUtils.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(user.getX509Certificate()));
             //X509Certificate certCaResult = validatorResult.getTrustAnchor().getTrustedCert();
         }
     }
@@ -203,7 +205,7 @@ public class CMSBean {
     public Set<TrustAnchor> getEventTrustedAnchors(EventVS eventVS) throws Exception {
         Set<TrustAnchor> eventTrustedAnchors = eventTrustedAnchorsMap.get(eventVS.getId());
         if(eventTrustedAnchors == null) {
-            CertificateVS eventCACert = eventVS.getCertificateVS();
+            Certificate eventCACert = eventVS.getCertificate();
             X509Certificate certCAEventVS = eventCACert.getX509Cert();
             eventTrustedAnchors = new HashSet<>();
             eventTrustedAnchors.add(new TrustAnchor(certCAEventVS, null));
@@ -215,7 +217,7 @@ public class CMSBean {
 
     public boolean isSignerCertificate(Set<User> signers, X509Certificate cert) throws CertificateEncodingException {
         for(User user : signers) {
-            if(Arrays.equals(user.getCertificate().getEncoded(), cert.getEncoded())) return true;
+            if(Arrays.equals(user.getX509Certificate().getEncoded(), cert.getEncoded())) return true;
         }
         return false;
     }
@@ -225,15 +227,15 @@ public class CMSBean {
         // _ TODO _ ====== crypto token
         String eventVSUrl = config.getContextURL() + "/rest/eventElection/id/" + eventVS.getId();
         String strSubjectDNRoot = format("CN=eventVSUrl:{0}, OU=Elections", eventVSUrl);
-        KeyStore keyStore = KeyStoreUtil.createRootKeyStore(eventVS.getDateBegin(), eventVS.getDateFinish(),
+        java.security.KeyStore keyStore = KeyStoreUtil.createRootKeyStore(eventVS.getDateBegin(), eventVS.getDateFinish(),
                 password.toCharArray(), keyAlias, strSubjectDNRoot);
         java.security.cert.Certificate[] chain = keyStore.getCertificateChain(keyAlias);
         java.security.cert.Certificate cert = chain[0];
-        return new KeyStoreDto(new KeyStoreVS (keyAlias, KeyStoreUtil.getBytes(keyStore, password.toCharArray()),
+        return new KeyStoreDto(new KeyStore(keyAlias, KeyStoreUtil.getBytes(keyStore, password.toCharArray()),
                 eventVS.getDateBegin(), eventVS.getDateFinish()), (X509Certificate) cert);
     }
 
-    public KeyStore generateKeysStore(String givenName, String surname, String nif, char[] password) throws Exception {
+    public java.security.KeyStore generateKeysStore(String givenName, String surname, String nif, char[] password) throws Exception {
         log.info("generateKeysStore - nif: " + nif);
         Date validFrom = Calendar.getInstance().getTime();
         Calendar today_plus_year = Calendar.getInstance();
@@ -250,7 +252,7 @@ public class CMSBean {
         //String strSubjectDN = "CN=Voting System Cert Authority , OU=VotingSystem"
         //KeyStore rootCAKeyStore = KeyStoreUtil.createRootKeyStore (validFrom.getTime(), (validTo.getTime() - validFrom.getTime()),
         //        userPassword.toCharArray(), keyAlias, strSubjectDN);
-        //X509Certificate certSigner = (X509Certificate)rootCAKeyStore.getCertificate(keyAlias);
+        //X509Certificate certSigner = (X509Certificate)rootCAKeyStore.getX509Certificate(keyAlias);
         //PrivateKey privateKeySigner = (PrivateKey)rootCAKeyStore.getKey(keyAlias, userPassword.toCharArray());
         //X500PrivateCredential rootCAPrivateCredential = new X500PrivateCredential(certSigner, privateKeySigner,  keyAlias);
         return KeyStoreUtil.createUserKeyStore(validFrom.getTime(),
@@ -262,15 +264,15 @@ public class CMSBean {
         return localServerCertSigner;
     }
 
-    public CertificateVS getServerCertificateVS() {
-        return serverCertificateVS;
+    public Certificate getServerCertificate() {
+        return serverCertificate;
     }
 
     private PrivateKey getServerPrivateKey() {
         return serverPrivateKey;
     }
 
-    private Map<Long, CertificateVS> getTrustedCertsHashMap() {
+    private Map<Long, Certificate> getTrustedCertsHashMap() {
         return trustedCertsHashMap;
     }
 
@@ -280,7 +282,7 @@ public class CMSBean {
 
     public boolean isSystemSignedMessage(Set<User> signers) {
         for(User user : signers) {
-            if(user.getCertificate().equals(localServerCertSigner)) return true;
+            if(user.getX509Certificate().equals(localServerCertSigner)) return true;
         }
         return false;
     }
@@ -305,7 +307,7 @@ public class CMSBean {
         return new CMSSignedMessage(cmsGenerator.addSignature(cmsMessage));
     }
 
-    public CMSDto validateCMS(CMSSignedMessage cmsSignedMessage, ContentTypeVS contenType) throws Exception {
+    public CMSDto validateCMS(CMSSignedMessage cmsSignedMessage, ContentType contenType) throws Exception {
         if (cmsSignedMessage.isValidSignature() != null) {
             MessagesVS messages = MessagesVS.getCurrentInstance();
             Query query = dao.getEM().createNamedQuery("findcmsMessageByBase64ContentDigest")
@@ -315,12 +317,12 @@ public class CMSBean {
                     cmsSignedMessage.getContentDigestStr()));
             CMSDto cmsDto = validateSignersCerts(cmsSignedMessage);
             TypeVS typeVS = TypeVS.OK;
-            if(ContentTypeVS.CURRENCY == contenType) typeVS = TypeVS.CURRENCY;
+            if(ContentType.CURRENCY == contenType) typeVS = TypeVS.CURRENCY;
             cmsMessage = dao.persist(new CMSMessage(cmsSignedMessage, cmsDto, typeVS));
             CMSMessage.setCurrentInstance(cmsMessage);
             cmsDto.setCmsMessage(cmsMessage);
             return cmsDto;
-        } else throw new ValidationExceptionVS("invalid CMSMessage");
+        } else throw new ValidationException("invalid CMSMessage");
     }
 
     public CMSDto validatedVote(CMSSignedMessage cmsSignedMessage) throws Exception {
@@ -362,15 +364,15 @@ public class CMSBean {
 
     public CMSDto validatedVoteFromControlCenter(CMSSignedMessage cmsSignedMessage) throws Exception {
         CMSDto cmsDto = validatedVote(cmsSignedMessage);
-        Query query = dao.getEM().createQuery("select c from CertificateVS c where c.hashCertVSBase64 =:hashCertVS and c.state =:state")
-                .setParameter("hashCertVS", cmsDto.getVote().getHashCertVSBase64()).setParameter("state", CertificateVS.State.OK);
-        CertificateVS certificateVS = dao.getSingleResult(CertificateVS.class, query);
-        if (certificateVS == null) {
-            cmsDto.getCmsMessage().setType(TypeVS.ERROR).setReason("missing Vote CertificateVS");
+        Query query = dao.getEM().createQuery("select c from Certificate c where c.hashCertVSBase64 =:hashCertVS and c.state =:state")
+                .setParameter("hashCertVS", cmsDto.getVote().getHashCertVSBase64()).setParameter("state", Certificate.State.OK);
+        Certificate certificate = dao.getSingleResult(Certificate.class, query);
+        if (certificate == null) {
+            cmsDto.getCmsMessage().setType(TypeVS.ERROR).setReason("missing Vote Certificate");
             dao.merge(cmsDto.getCmsMessage());
-            throw new ValidationExceptionVS("missing Vote CertificateVS");
+            throw new ValidationException("missing Vote Certificate");
         }
-        cmsDto.getCmsMessage().getCMS().getVote().setCertificateVS(certificateVS);
+        cmsDto.getCmsMessage().getCMS().getVote().setCertificate(certificate);
         return cmsDto;
     }
     
@@ -389,7 +391,7 @@ public class CMSBean {
         CMSDto cmsDto = new CMSDto();
         for(User user: signersVS) {
             if(user.getTimeStampToken() != null) timeStampBean.validateToken(user.getTimeStampToken());
-            else log.info("signature without timestamp - signer: " + user.getCertificate().getSubjectDN());
+            else log.info("signature without timestamp - signer: " + user.getX509Certificate().getSubjectDN());
             verifyUserCertificate(user);
             if(user.isAnonymousUser()) {
                 log.log(Level.FINE, "validateSignersCerts - is anonymous signer");
@@ -405,22 +407,22 @@ public class CMSBean {
 
     public PKIXCertPathValidatorResult verifyUserCertificate(User user) throws Exception {
         PKIXCertPathValidatorResult validatorResult = CertUtils.verifyCertificate(
-                getTrustAnchors(), false, Arrays.asList(user.getCertificate()));
+                getTrustAnchors(), false, Arrays.asList(user.getX509Certificate()));
         X509Certificate certCaResult = validatorResult.getTrustAnchor().getTrustedCert();
         user.setCertificateCA(getTrustedCertsHashMap().get(certCaResult.getSerialNumber().longValue()));
         if(anonymousCertIssuers.contains(certCaResult.getSerialNumber().longValue()) &&
-                Boolean.valueOf(CertUtils.getCertExtensionData(user.getCertificate(), ContextVS.ANONYMOUS_CERT_OID))) {
+                Boolean.valueOf(CertUtils.getCertExtensionData(user.getX509Certificate(), ContextVS.ANONYMOUS_CERT_OID))) {
             user.setAnonymousUser(true);
         }
         log.log(Level.FINE, "verifyCertificate - user:" + user.getNif() + " cert issuer: " + certCaResult.getSubjectDN() +
-                " - CA certificateVS.id : " + user.getCertificateCA().getId());
+                " - CA certificate.id : " + user.getCertificateCA().getId());
         return validatorResult;
     }
 
     //issues certificates if the request is signed with an Id card
     public X509Certificate signCSRSignedWithIDCard(CMSMessage cmsReq) throws Exception {
         User signer = cmsReq.getUser();
-        if(signer.getCertificateVS().getType() != CertificateVS.Type.USER_ID_CARD)
+        if(signer.getCertificate().getType() != Certificate.Type.USER_ID_CARD)
                 throw new Exception("Service available only for ID CARD signed requests");
         UserCertificationRequestDto requestDto = cmsReq.getSignedContent(UserCertificationRequestDto.class);
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(requestDto.getCsrRequest());
@@ -440,23 +442,23 @@ public class CMSBean {
         Date validFrom = new Date();
         Date validTo = DateUtils.addDays(validFrom, 365).getTime(); //one year
         X509Certificate issuedCert = signCSR(csr, null, validFrom, validTo);
-        CertificateVS certificate = dao.persist(CertificateVS.ISSUED_USER_CERT(signer, issuedCert, serverCertificateVS));
+        Certificate certificate = dao.persist(Certificate.ISSUED_USER_CERT(signer, issuedCert, serverCertificate));
         Query query = dao.getEM().createQuery("select d from Device d where d.deviceId =:deviceId and d.user.nif =:nif ")
                 .setParameter("deviceId", certExtensionDto.getDeviceId()).setParameter("nif", validatedNif);
         Device device = dao.getSingleResult(Device.class, query);
         if(device == null) {
             device = dao.persist(new Device(signer, certExtensionDto.getDeviceId(), certExtensionDto.getEmail(),
                     certExtensionDto.getMobilePhone(), certExtensionDto.getDeviceType()).setState(Device.State.OK)
-                    .setCertificateVS(certificate));
+                    .setCertificate(certificate));
         } else {
-            dao.merge(device.getCertificateVS().setState(CertificateVS.State.CANCELED).setCmsMessage(cmsReq));
+            dao.merge(device.getCertificate().setState(Certificate.State.CANCELED).setCmsMessage(cmsReq));
             dao.merge(device.setEmail(certExtensionDto.getEmail()).setPhone(certExtensionDto.getMobilePhone())
-                    .setCertificateVS(certificate));
+                    .setCertificate(certificate));
         }
         dao.getEM().createQuery("UPDATE UserToken SET state=:state WHERE user=:user").setParameter(
                 "state", UserToken.State.CANCELLED).setParameter("user", signer).executeUpdate();
         dao.persist(new UserToken(signer, requestDto.getToken(), certificate, cmsReq));
-        log.info("signCertUser - issued new CertificateVS id: " + certificate.getId() + " for device: " + device.getId());
+        log.info("signCertUser - issued new Certificate id: " + certificate.getId() + " for device: " + device.getId());
         return issuedCert;
     }
 

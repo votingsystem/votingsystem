@@ -5,7 +5,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.callable.RepresentativeDataSender;
 import org.votingsystem.test.callable.RepresentativeDelegationDataSender;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.NifUtils;
@@ -294,7 +294,7 @@ public class UserBaseSimulationData extends SimulationData {
             byte[] usertCertPEMBytes = PEMUtils.getPEMEncoded(signatureService.getCertSigner());
             String certServiceURL = ContextVS.getInstance().getAccessControl().getUserCertServiceURL();
             ResponseVS responseVS = HttpHelper.getInstance().sendData(
-                    usertCertPEMBytes,ContentTypeVS.X509_USER,certServiceURL);
+                    usertCertPEMBytes, ContentType.X509_USER,certServiceURL);
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
             if((i % 50) == 0) log.info("createUsersWithoutRepresentative - " + i + " of " +
                     getNumUsersWithoutRepresentativeWithVote());

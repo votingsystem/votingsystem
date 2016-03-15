@@ -1,0 +1,10 @@
+{
+    "userList":[],
+    "groupList":[ ],
+    "bankList":[
+        {"operation":"FROM_BANK", "bankIBAN":"ES1877777777450000000050",
+        "fromUser": "ClientBank App1 App2", "currencyCode": "EUR",
+        "fromUserIBAN":"ES8477777777450000012345", "toUserIBAN":["ES8978788989450000000004"], "toUserName":"toUserName",
+        "amount":"30000", "tags":["HIDROGENO"], "isTimeLimited":true, "subject":"Bank transaction"}
+    ]
+}

@@ -1,7 +1,7 @@
 package org.votingsystem.test.ejb;
 
 import org.votingsystem.model.Actor;
-import org.votingsystem.model.KeyStoreVS;
+import org.votingsystem.model.KeyStore;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.service.EJBRemoteAdminAccessControl;
 import org.votingsystem.service.EJBRemoteAdminCurrencyServer;
@@ -15,7 +15,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.io.File;
-import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -126,9 +125,9 @@ public class EJBClient {
         byte[] keyStoreBytes = null;
         if(type == Actor.Type.SERVER || type == Actor.Type.TIMESTAMP_SERVER) {
             File rootKeyStoreFile = new File(ROOT_KEYSTORE_PATH);
-            KeyStoreVS rootKeyStore = null;
+            KeyStore rootKeyStore = null;
             if(rootKeyStoreFile.exists()) {
-                rootKeyStore = new KeyStoreVS(ROOT_KEY_ALIAS, FileUtils.getBytesFromFile(rootKeyStoreFile), null, null);
+                rootKeyStore = new KeyStore(ROOT_KEY_ALIAS, FileUtils.getBytesFromFile(rootKeyStoreFile), null, null);
                 rootKeyStore.setPassword(ROOT_KEY_PASSW);
                 keyStoreBytes = votingSystemRemote.generateServerKeyStore(type, givenName, keyAlias, nif, password,
                         rootKeyStore);
@@ -150,7 +149,7 @@ public class EJBClient {
     }
 
     //This is only for testing
-    private KeyStoreVS generateRootKeyStore() throws Exception {
+    private KeyStore generateRootKeyStore() throws Exception {
         Date validFrom = Calendar.getInstance().getTime();
         Calendar today_plus_year = Calendar.getInstance();
         today_plus_year.add(Calendar.YEAR, 1);
@@ -158,9 +157,9 @@ public class EJBClient {
         today_plus_year.set(Calendar.MINUTE, 0);
         today_plus_year.set(Calendar.SECOND, 0);
         Date validTo = today_plus_year.getTime();
-        KeyStoreVS keyStoreVS = new KeyStoreVS(ROOT_KEY_ALIAS, null, validFrom, validTo);
+        KeyStore keyStoreVS = new KeyStore(ROOT_KEY_ALIAS, null, validFrom, validTo);
         keyStoreVS.setPassword(ROOT_KEY_PASSW);
-        KeyStore keyStore = KeyStoreUtil.createRootKeyStore(validFrom, validTo,
+        java.security.KeyStore keyStore = KeyStoreUtil.createRootKeyStore(validFrom, validTo,
                 keyStoreVS.getPassword().toCharArray(), keyStoreVS.getKeyAlias(),
                 "CN=Voting System Certificate Authority, OU=Certs");
         keyStoreVS.setBytes(KeyStoreUtil.getBytes(keyStore, keyStoreVS.getPassword().toCharArray()));

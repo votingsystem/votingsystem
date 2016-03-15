@@ -50,7 +50,7 @@ public class Formatter {
                     result = formatVote(dataMap);
                     break;
                 case FROM_GROUP_TO_ALL_MEMBERS:
-                    result = formatTransactionVSFromGroupToAllMembers(dataMap);
+                    result = formatTransactionFromGroupToAllMembers(dataMap);
                     break;
                 default:
                     log.info("Formatter not found for " + operation);
@@ -75,7 +75,7 @@ public class Formatter {
         return JSON.getMapper().writeValueAsString(result);
     }
 
-    private static String formatTransactionVSFromGroupToAllMembers(Map dataMap){
+    private static String formatTransactionFromGroupToAllMembers(Map dataMap){
         return dataMap.toString();
     }
 

@@ -12,9 +12,9 @@ import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControl;
 import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.KeyStoreExceptionVS;
+import org.votingsystem.throwable.KeyStoreException;
 import org.votingsystem.util.crypto.CertUtils;
-import org.votingsystem.util.crypto.KeyGeneratorVS;
+import org.votingsystem.util.crypto.KeyGenerator;
 import org.votingsystem.util.crypto.KeyStoreUtil;
 import org.votingsystem.util.crypto.PEMUtils;
 
@@ -86,13 +86,13 @@ public class ContextVS {
     public static String CANCEL_DATA_FILE_NAME = "cancellationDataVS";
     public static String CANCEL_BUNDLE_FILE_NAME = "cancellationBundleVS";
 
-    public static final String CSR_FILE_NAME                 = "csr" + ":" + ContentTypeVS.TEXT.getName();
+    public static final String CSR_FILE_NAME                 = "csr" + ":" + ContentType.TEXT.getName();
     public static final String IMAGE_FILE_NAME               = "image";
     public static final String REPRESENTATIVE_DATA_FILE_NAME = "representativeData";
-    public static final String CURRENCY_REQUEST_DATA_FILE_NAME = "currencyRequestData" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String CMS_FILE_NAME   = "cms" + ":" + MediaTypeVS.JSON_SIGNED;
-    public static final String CMS_ANONYMOUS_FILE_NAME   = "cmsAnonymous" + ":" + MediaTypeVS.JSON_SIGNED;
+    public static final String CURRENCY_REQUEST_DATA_FILE_NAME = "currencyRequestData" + ":" + MediaType.JSON_SIGNED;
+    public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest" + ":" + MediaType.JSON_SIGNED;
+    public static final String CMS_FILE_NAME   = "cms" + ":" + MediaType.JSON_SIGNED;
+    public static final String CMS_ANONYMOUS_FILE_NAME   = "cmsAnonymous" + ":" + MediaType.JSON_SIGNED;
 
 
     public static final int IMAGE_MAX_FILE_SIZE_KB = 1024;
@@ -124,7 +124,7 @@ public class ContextVS {
     public ContextVS(String localizatedMessagesFileName, String localeParam) {
         log.info("localizatedMessagesFileName: " + localizatedMessagesFileName + " - locale: " + locale);
         try {
-            KeyGeneratorVS.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
+            KeyGenerator.INSTANCE.init(SIG_NAME, PROVIDER, KEY_SIZE, ALGORITHM_RNG);
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
                     shutdown();
@@ -293,7 +293,7 @@ public class ContextVS {
         else if(accessControl != null && accessControl.getServerURL().equals(serverURL)) actor = accessControl;
         else if(controlCenter != null && controlCenter.getServerURL().equals(serverURL)) actor = controlCenter;
         if (actor == null) {
-            ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(serverURL), ContentTypeVS.JSON);
+            ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(serverURL), ContentType.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 actor = ((ActorDto) responseVS.getMessage(ActorDto.class)).getActor();
                 responseVS.setData(actor);
@@ -368,7 +368,7 @@ public class ContextVS {
         User user = User.FROM_X509_CERT((X509Certificate)chain[0]);
 
         CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
-                user.getCertificate(), ContextVS.DEVICE_OID);
+                user.getX509Certificate(), ContextVS.DEVICE_OID);
         DeviceDto deviceDto = new DeviceDto(user, certExtensionDto);
         deviceDto.setDeviceName(user.getNif() + " - " + user.getName());
 
@@ -411,14 +411,14 @@ public class ContextVS {
         return null;
     }
 
-    public KeyStore getUserKeyStore(char[] password) throws KeyStoreExceptionVS {
+    public KeyStore getUserKeyStore(char[] password) throws KeyStoreException {
         File keyStoreFile = null;
         KeyStore keyStore = null;
         try {
             keyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
-            if(!keyStoreFile.exists()) throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"));
+            if(!keyStoreFile.exists()) throw new KeyStoreException(getMessage("cryptoTokenNotFoundErrorMsg"));
         } catch(Exception ex) {
-            throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
+            throw new KeyStoreException(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
         }
         try {
             Map keyStoreMap = JSON.getMapper().readValue(keyStoreFile, new TypeReference<Map<String, String>>() {});
@@ -426,25 +426,25 @@ public class ContextVS {
             keyStore = KeyStore.getInstance("JKS");
             keyStore.load(new ByteArrayInputStream(keyStoreBytes), password);
         } catch(Exception ex) {
-            throw new KeyStoreExceptionVS(getMessage("cryptoTokenPasswdErrorMsg"), ex);
+            throw new KeyStoreException(getMessage("cryptoTokenPasswdErrorMsg"), ex);
         }
         return keyStore;
     }
 
-    public KeyStore getUserKeyStore(String nif, String password) throws KeyStoreExceptionVS{
+    public KeyStore getUserKeyStore(String nif, String password) throws KeyStoreException {
         if(nif == null) return getUserKeyStore(password.toCharArray());
         File keyStoreFile = null;
         KeyStore keyStore = null;
         try {
             keyStoreFile = new File(appDir + File.separator + nif + "_" + USER_KEYSTORE_FILE_NAME);
         } catch(Exception ex) {
-            throw new KeyStoreExceptionVS(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
+            throw new KeyStoreException(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
         }
         try {
             keyStore = KeyStore.getInstance("JKS");
             keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
         } catch(Exception ex) {
-            throw new KeyStoreExceptionVS(getMessage("cryptoTokenPasswdErrorMsg"), ex);
+            throw new KeyStoreException(getMessage("cryptoTokenPasswdErrorMsg"), ex);
         }
         return keyStore;
     }

@@ -9,10 +9,10 @@ import org.bouncycastle.tsp.TSPUtil;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.dto.ActorDto;
 import org.votingsystem.model.Actor;
-import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
@@ -58,21 +58,21 @@ public class TimeStampBean {
             timeStampServiceURL = serverURL + "/timestamp";
             Query query = dao.getEM().createNamedQuery("findActorByServerURL").setParameter("serverURL", serverURL);
             Actor timeStampServer = dao.getSingleResult(Actor.class, query);
-            CertificateVS timeStampServerCert = null;
+            Certificate timeStampServerCert = null;
             if(timeStampServer == null) {
                 fetchTimeStampServerInfo(new Actor(serverURL));
                 return;
             } else {
                 query = dao.getEM().createNamedQuery("findCertByActorAndStateAndType").setParameter("actor", timeStampServer)
-                        .setParameter("state", CertificateVS.State.OK).setParameter("type", CertificateVS.Type.TIMESTAMP_SERVER);
-                timeStampServerCert = dao.getSingleResult(CertificateVS.class, query);
+                        .setParameter("state", Certificate.State.OK).setParameter("type", Certificate.Type.TIMESTAMP_SERVER);
+                timeStampServerCert = dao.getSingleResult(Certificate.class, query);
                 if(timeStampServerCert != null) {
                     x509TimeStampServerCert = CertUtils.loadCertificate(timeStampServerCert.getContent());
                     if(new Date().before(x509TimeStampServerCert.getNotAfter())) {
                         signingCertPEMBytes = PEMUtils.getPEMEncoded(x509TimeStampServerCert);
                     } else {
                         log.info("timeStampServerCert lapsed - not valid after:" + x509TimeStampServerCert.getNotAfter());
-                        dao.getEM().merge(timeStampServerCert.setState(CertificateVS.State.LAPSED));
+                        dao.getEM().merge(timeStampServerCert.setState(Certificate.State.LAPSED));
                     }
                 }
                 if(signingCertPEMBytes == null) {
@@ -101,11 +101,11 @@ public class TimeStampBean {
         if(new Date().after(x509TimeStampServerCert.getNotAfter())) {
             throw new ExceptionVS(timeStampServer.getServerURL() + " - signing cert is lapsed");
         }
-        CertificateVS certificateVS = CertificateVS.ACTOR(timeStampServer, x509TimeStampServerCert);
-        certificateVS.setType(CertificateVS.Type.TIMESTAMP_SERVER);
-        certificateVS.setCertChainPEM(timeStampServer.getCertChainPEM().getBytes());
-        dao.persist(certificateVS);
-        log.info("updateTimeStampServer - new CertificateVS - id: " + certificateVS.getId());
+        Certificate certificate = Certificate.ACTOR(timeStampServer, x509TimeStampServerCert);
+        certificate.setType(Certificate.Type.TIMESTAMP_SERVER);
+        certificate.setCertChainPEM(timeStampServer.getCertChainPEM().getBytes());
+        dao.persist(certificate);
+        log.info("updateTimeStampServer - new Certificate - id: " + certificate.getId());
         signingCertPEMBytes = PEMUtils.getPEMEncoded(x509TimeStampServerCert);
         timeStampSignerInfoVerifier = new JcaSimpleSignerInfoVerifierBuilder().setProvider(
                 ContextVS.PROVIDER).build(x509TimeStampServerCert);
@@ -119,7 +119,7 @@ public class TimeStampBean {
         log.info("fetchTimeStampServerInfo");
         executorService.submit(() -> {
             ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(
-                    timeStampServer.getServerURL()), ContentTypeVS.JSON);
+                    timeStampServer.getServerURL()), ContentType.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     Actor serverActor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();

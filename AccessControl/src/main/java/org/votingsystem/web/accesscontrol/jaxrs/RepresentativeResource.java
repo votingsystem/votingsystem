@@ -5,15 +5,15 @@ import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.RepresentativeAccreditationsDto;
 import org.votingsystem.dto.voting.RepresentativeVotingHistoryDto;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.ImageVS;
+import org.votingsystem.model.Image;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.RepresentationDocument;
 import org.votingsystem.model.voting.RepresentativeDocument;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
@@ -55,7 +55,7 @@ public class RepresentativeResource {
     public Response save(CMSMessage cmsMessage) throws Exception {
         RepresentativeDocument representativeDocument = representativeBean.saveRepresentative(cmsMessage);
         UserDto representativeDto = representativeBean.getRepresentativeDto(representativeDocument.getUser());
-        return Response.ok().entity(representativeDto).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(representativeDto).type(MediaType.JSON).build();
     }
 
     @Path("/history") @POST
@@ -84,7 +84,7 @@ public class RepresentativeResource {
     @Path("/revoke") @POST
     public Response revoke(CMSMessage cmsMessage) throws Exception {
         CMSMessage response = representativeBean.processRevoke(cmsMessage);
-        return Response.ok().entity(response.getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(response.getContentPEM()).type(MediaType.JSON_SIGNED).build();
     }
 
     @Path("/") @GET
@@ -101,7 +101,7 @@ public class RepresentativeResource {
         //TODO totalCount
         ResultListDto<UserDto> resultListDto = new ResultListDto<>(responseList, offset, max, responseList.size());
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
-                .type(MediaTypeVS.JSON).build();
+                .type(MediaType.JSON).build();
     }
 
     @Path("/id/{id}") @GET
@@ -116,7 +116,7 @@ public class RepresentativeResource {
         if(contentType.contains("json")) {
             UserDto representativeDto = representativeBean.getRepresentativeDto(representative);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
-                    .type(MediaTypeVS.JSON).build();
+                    .type(MediaType.JSON).build();
         } else {
             return Response.temporaryRedirect(new URI("../spa.xhtml#!/rest/representative/id/" + representative.getId())).build();
         }
@@ -136,7 +136,7 @@ public class RepresentativeResource {
         if(contentType.contains("json")) {
             UserDto representativeDto = representativeBean.getRepresentativeDto(representative);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
-                    .type(MediaTypeVS.JSON).build();
+                    .type(MediaType.JSON).build();
         } else {
             return Response.temporaryRedirect(new URI("../spa.xhtml#!/rest/representative/id/" + representative.getId())).build();
         }
@@ -145,9 +145,9 @@ public class RepresentativeResource {
     @Path("/image/id/{id}") @GET
     public Response imageById(@PathParam("id") Long id, @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException {
-        ImageVS image = dao.find(ImageVS.class, id);
-        if(image == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - ImageVS not found - imageId: " + id).build();
-        return Response.ok().entity(image.getFileBytes()).type(ContentTypeVS.IMAGE.getName()).build();
+        Image image = dao.find(Image.class, id);
+        if(image == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - Image not found - imageId: " + id).build();
+        return Response.ok().entity(image.getFileBytes()).type(ContentType.IMAGE.getName()).build();
     }
 
     @Path("/id/{id}/image") @GET
@@ -156,13 +156,13 @@ public class RepresentativeResource {
         User representative = dao.find(User.class, id);
         if (representative == null || User.Type.REPRESENTATIVE != representative.getType()) return Response.status(
                 Response.Status.NOT_FOUND).entity("ERROR - representative not found - userId: " + id).build();
-        Query query = dao.getEM().createQuery("select i from ImageVS i where i.user =:representative and " +
+        Query query = dao.getEM().createQuery("select i from Image i where i.user =:representative and " +
                 "i.type =:type").setParameter("representative", representative).setParameter("type",
-                ImageVS.Type.REPRESENTATIVE);
-        ImageVS image = dao.getSingleResult(ImageVS.class, query);
+                Image.Type.REPRESENTATIVE);
+        Image image = dao.getSingleResult(Image.class, query);
         if(image == null)return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - ImageVS not found - representativeId:" + id).build();
-        return Response.ok().entity(image.getFileBytes()).type(ContentTypeVS.IMAGE.getName()).build();
+                "ERROR - Image not found - representativeId:" + id).build();
+        return Response.ok().entity(image.getFileBytes()).type(ContentType.IMAGE.getName()).build();
     }
 
     @Path("eventVS/id/{id}/accreditationsBackup") @GET
@@ -179,7 +179,7 @@ public class RepresentativeResource {
     @Path("/anonymousDelegation") @POST
     public Response anonymousDelegation(CMSMessage cmsMessage) throws Exception {
         RepresentationDocument response = representativeDelegationBean.saveAnonymousDelegation(cmsMessage);
-        return Response.ok().entity(response.getActivationCMS().getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(response.getActivationCMS().getContentPEM()).type(MediaType.JSON_SIGNED).build();
     }
 
 

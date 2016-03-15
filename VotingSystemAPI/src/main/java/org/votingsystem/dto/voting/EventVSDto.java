@@ -7,7 +7,7 @@ import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.FieldEvent;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
@@ -137,27 +137,27 @@ public class EventVSDto {
         return result;
     }
 
-    public void validate(String serverURL) throws ValidationExceptionVS {
-        if(id == null) throw new ValidationExceptionVS("ERROR - missing param - 'id'");
-        if(certCAVotacion == null) throw new ValidationExceptionVS("ERROR - missing param - 'certCAVotacion'");
-        if(user == null) throw new ValidationExceptionVS("ERROR - missing param - 'user'");
-        if(fieldsEventVS == null) throw new ValidationExceptionVS("ERROR - missing param - 'fieldsEventVS'");
-        if(URL == null) throw new ValidationExceptionVS("ERROR - missing param - 'fieldsEventVS'");
-        if(controlCenterURL == null) throw new ValidationExceptionVS("ERROR - missing param - 'controlCenterURL'");
+    public void validate(String serverURL) throws ValidationException {
+        if(id == null) throw new ValidationException("ERROR - missing param - 'id'");
+        if(certCAVotacion == null) throw new ValidationException("ERROR - missing param - 'certCAVotacion'");
+        if(user == null) throw new ValidationException("ERROR - missing param - 'user'");
+        if(fieldsEventVS == null) throw new ValidationException("ERROR - missing param - 'fieldsEventVS'");
+        if(URL == null) throw new ValidationException("ERROR - missing param - 'fieldsEventVS'");
+        if(controlCenterURL == null) throw new ValidationException("ERROR - missing param - 'controlCenterURL'");
         controlCenterURL = StringUtils.checkURL(controlCenterURL);
-        if (!controlCenterURL.equals(serverURL)) throw new ValidationExceptionVS("ERROR - expected controlCenterURL:" +
+        if (!controlCenterURL.equals(serverURL)) throw new ValidationException("ERROR - expected controlCenterURL:" +
                 serverURL + " found: " + controlCenterURL);
     }
 
-    public void validateCancelation(String contextURL) throws ValidationExceptionVS {
-        if(operation == null || TypeVS.EVENT_CANCELLATION != operation) throw new ValidationExceptionVS(
+    public void validateCancelation(String contextURL) throws ValidationException {
+        if(operation == null || TypeVS.EVENT_CANCELLATION != operation) throw new ValidationException(
                 "ERROR - operation expected 'EVENT_CANCELLATION' found: " + operation);
-        if(accessControlURL == null) throw new ValidationExceptionVS("ERROR - missing param 'accessControlURL'");
-        if(!accessControlURL.equals(contextURL))  throw new ValidationExceptionVS(
+        if(accessControlURL == null) throw new ValidationException("ERROR - missing param 'accessControlURL'");
+        if(!accessControlURL.equals(contextURL))  throw new ValidationException(
                 "ERROR - accessControlURL - expected: " + contextURL + " - found: " + accessControlURL);
-        if(eventId == null) throw new ValidationExceptionVS("ERROR - missing param 'eventId'");
+        if(eventId == null) throw new ValidationException("ERROR - missing param 'eventId'");
         if(state == null || (EventVS.State.DELETED_FROM_SYSTEM != state && EventVS.State.CANCELED != state))
-            throw new ValidationExceptionVS("ERROR - expected state 'DELETED_FROM_SYSTEM' found: " + state);
+            throw new ValidationException("ERROR - expected state 'DELETED_FROM_SYSTEM' found: " + state);
     }
 
     public void setNumSignatures(Long numSignatures) {

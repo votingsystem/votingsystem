@@ -8,7 +8,7 @@ import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.crypto.CertUtils;
-import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.CertificationRequest;
 import org.votingsystem.util.crypto.PEMUtils;
 
 import java.math.BigDecimal;
@@ -49,7 +49,7 @@ public class CSRAttributes {
     }
 
     public static void testCurrencyCSR() throws Exception {
-        CertificationRequestVS certificationRequest = CertificationRequestVS.getCurrencyRequest(
+        CertificationRequest certificationRequest = CertificationRequest.getCurrencyRequest(
                 ContextVS.SIGNATURE_ALGORITHM, ContextVS.PROVIDER,
                 "currencyServerURL", "hashCertVS", new BigDecimal(10), "EUR", false, "WILDTAG");
         byte[] csrPEM = certificationRequest.getCsrPEM();

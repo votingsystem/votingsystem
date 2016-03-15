@@ -31,7 +31,7 @@ public class RepresentativeDataSender implements Callable<ResponseVS> {
         SignatureService signatureService = SignatureService.load(representativeNIF);
         CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(
                 getRequest(representativeNIF, imageBytes)));
-        ResponseVS responseVS =  HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+        ResponseVS responseVS =  HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                 ContextVS.getInstance().getAccessControl().getRepresentativeServiceURL());
         if (ResponseVS.SC_OK == responseVS.getStatusCode()) responseVS.setMessage(representativeNIF);
         return responseVS;

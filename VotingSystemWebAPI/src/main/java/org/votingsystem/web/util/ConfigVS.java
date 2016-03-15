@@ -3,7 +3,7 @@ package org.votingsystem.web.util;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.ControlCenter;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import java.io.File;
 import java.util.Properties;
 
@@ -20,7 +20,7 @@ public interface ConfigVS  {
 
     public String getProperty(String key);
 
-    public TagVS getTag(String tagName) throws ValidationExceptionVS;
+    public TagVS getTag(String tagName) throws ValidationException;
 
     public void mainServletInitialized() throws Exception;
 
@@ -36,7 +36,7 @@ public interface ConfigVS  {
 
     public File getServerDir();
 
-    public User createIBAN(User user) throws ValidationExceptionVS;
+    public User createIBAN(User user) throws ValidationException;
 
     public User getSystemUser();
 

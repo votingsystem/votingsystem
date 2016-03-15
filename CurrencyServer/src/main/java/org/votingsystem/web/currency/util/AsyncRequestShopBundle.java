@@ -1,7 +1,7 @@
 package org.votingsystem.web.currency.util;
 
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 
@@ -14,11 +14,11 @@ import java.util.Map;
  */
 public class AsyncRequestShopBundle {
 
-    private TransactionVSDto transactionDto;
+    private TransactionDto transactionDto;
     private Map<String, Currency> currencyMap;
     private AsyncResponse asyncResponse;
 
-    public AsyncRequestShopBundle(TransactionVSDto dto, AsyncResponse asyncResponse) {
+    public AsyncRequestShopBundle(TransactionDto dto, AsyncResponse asyncResponse) {
         this.transactionDto = dto;
         this.asyncResponse = asyncResponse;
     }
@@ -45,16 +45,16 @@ public class AsyncRequestShopBundle {
         return currencyMap.get(hashCertVS);
     }
 
-    public TransactionVSDto getTransactionDto() {
+    public TransactionDto getTransactionDto() {
         return transactionDto;
     }
 
-    public TransactionVSDto getTransactionDto(CMSSignedMessage cmsMessage) throws Exception {
+    public TransactionDto getTransactionDto(CMSSignedMessage cmsMessage) throws Exception {
         transactionDto.setCmsMessagePEM(cmsMessage.toPEMStr());
         return transactionDto;
     }
 
-    public void setTransactionDto(TransactionVSDto transactionDto) {
+    public void setTransactionDto(TransactionDto transactionDto) {
         this.transactionDto = transactionDto;
     }
 }

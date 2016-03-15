@@ -70,7 +70,7 @@ public class PublishAndSendElection {
         timerMap.put("time", "00:00:10");
         simulationData.setTimerMap(timerMap);
         ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(
-                simulationData.getServerURL()), ContentTypeVS.JSON);
+                simulationData.getServerURL()), ContentType.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         Actor actor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
         if(!(actor instanceof AccessControl)) throw new ExceptionVS("Expected access control but found " +
@@ -164,13 +164,13 @@ public class PublishAndSendElection {
         SignatureService signatureService = SignatureService.getUserSignatureService(publisherNIF, User.Type.USER);
         CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(
                 new EventVSDto(eventVS)));
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                 ContextVS.getInstance().getAccessControl().getPublishElectionURL(), "eventURL");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         String eventURL = ((List<String>)responseVS.getData()).iterator().next();
         ContextVS.getInstance().copyFile(responseVS.getMessageBytes(), "/electionSimulation", "ElectionPublishedReceipt");
         CMSSignedMessage message = responseVS.getCMS();
-        responseVS = HttpHelper.getInstance().getData(eventURL, ContentTypeVS.JSON);
+        responseVS = HttpHelper.getInstance().getData(eventURL, ContentType.JSON);
         EventVSDto eventVSJSON = JSON.getMapper().readValue(responseVS.getMessage(), EventVSDto.class);
         return eventVSJSON.getEventElection();
     }
@@ -188,7 +188,7 @@ public class PublishAndSendElection {
                 TypeVS.EVENT_CANCELLATION, simulationData.getEventStateWhenFinished());
         SignatureService signatureService = SignatureService.getUserSignatureService(publisherNIF, User.Type.USER);
         CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(cancelData));
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                 ContextVS.getInstance().getAccessControl().getCancelEventServiceURL());
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
     }
@@ -198,7 +198,7 @@ public class PublishAndSendElection {
         SignatureService signatureService = SignatureService.getUserSignatureService(nif, User.Type.USER);
         CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(
                 voteHelper.getVoteCanceler()));
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                 ContextVS.getInstance().getAccessControl().getVoteCancelerServiceURL());
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
     }

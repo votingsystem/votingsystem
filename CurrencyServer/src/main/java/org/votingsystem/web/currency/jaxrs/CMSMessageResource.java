@@ -3,7 +3,7 @@ package org.votingsystem.web.currency.jaxrs;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.*;
 import org.votingsystem.web.currency.ejb.UserBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -43,18 +43,18 @@ public class CMSMessageResource {
         CMSMessage cmsMessage = dao.find(CMSMessage.class, id);
         if(cmsMessage == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "CMSMessage not found - id: " + id).build();
-        if(contentType.contains(ContentTypeVS.TEXT.getName())) {
-            return Response.ok().entity(cmsMessage.getContentPEM()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
+        if(contentType.contains(ContentType.TEXT.getName())) {
+            return Response.ok().entity(cmsMessage.getContentPEM()).type(ContentType.TEXT_STREAM.getName()).build();
         } else return processRequest(cmsMessage, context, req, resp);
     }
 
-    @Path("/transactionVS/id/{id}") @GET @Transactional
-    public Response transactionVS(@PathParam("id") long id, @Context ServletContext context,
-                                  @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        TransactionVS transactionVS = dao.find(TransactionVS.class, id);
-        if(transactionVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "TransactionVS not found - transactionVSId: " + id).build();
-        return processRequest(transactionVS.getCmsMessage(), context, req, resp);
+    @Path("/transaction/id/{id}") @GET @Transactional
+    public Response transaction(@PathParam("id") long id, @Context ServletContext context,
+                                @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        Transaction transaction = dao.find(Transaction.class, id);
+        if(transaction == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "Transaction not found - transactionId: " + id).build();
+        return processRequest(transaction.getCmsMessage(), context, req, resp);
     }
 
     private Response processRequest(CMSMessage cmsMessage, @Context ServletContext context,
@@ -81,19 +81,19 @@ public class CMSMessageResource {
             signedContentMap.put("fromUser", UserDto.BASIC(cmsMessage.getUser()));
         switch(operation) {
             case FROM_BANK:
-                viewer = "message-cms-transactionvs-from-bank";
+                viewer = "message-cms-transaction-from-bank";
                 break;
             case CURRENCY_REQUEST:
-                viewer = "message-cms-transactionvs-currency-request";
+                viewer = "message-cms-transaction-currency-request";
                 break;
             case FROM_GROUP_TO_ALL_MEMBERS:
-                viewer = "message-cms-transactionvs";
+                viewer = "message-cms-transaction";
                 break;
             case CURRENCY_CHANGE:
                 signedContentMap.remove("currencySet");
                 signedContentMap.remove("currencyChangeCSR");
                 signedContentMap.remove("leftOverCSR");
-                viewer = "message-cms-transactionvs-currency-change";
+                viewer = "message-cms-transaction-currency-change";
                 break;
         }
         if(contentType.contains("json")) {
@@ -103,7 +103,7 @@ public class CMSMessageResource {
             resultMap.put("signedContentMap", signedContentMap);
             if(timeStampDate != null) resultMap.put("timeStampDate", timeStampDate.getTime());
             resultMap.put("viewer", viewer);
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaType.JSON).build();
         } else {
             req.getSession().setAttribute("operation", operation);
             req.getSession().setAttribute("cmsMessage", cmsMessageStr);

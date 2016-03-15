@@ -4,11 +4,11 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.util.SignatureService;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.CertificationRequest;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.util.crypto.VoteHelper;
 
@@ -37,7 +37,7 @@ public class VoteSender implements Callable<ResponseVS> {
         AccessRequestDto accessRequestDto = voteHelper.getAccessRequest();
         CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(
                 JSON.getMapper().writeValueAsBytes(accessRequestDto));
-        CertificationRequestVS certificationRequest = CertificationRequestVS.getVoteRequest(SIGNATURE_ALGORITHM,
+        CertificationRequest certificationRequest = CertificationRequest.getVoteRequest(SIGNATURE_ALGORITHM,
                 ContextVS.PROVIDER, ContextVS.getInstance().getAccessControl().getServerURL(),
                 accessRequestDto.getEventId(), voteHelper.getHashCertVSBase64());
         Map<String, Object> mapToSend = new HashMap<>();
@@ -52,7 +52,7 @@ public class VoteSender implements Callable<ResponseVS> {
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 cmsMessage = certificationRequest.signDataWithTimeStamp(
                         JSON.getMapper().writeValueAsBytes(voteHelper.getVote()));
-                responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.VOTE,
+                responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.VOTE,
                         ContextVS.getInstance().getControlCenter().getVoteServiceURL());
                 if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                     CMSSignedMessage voteReceipt = responseVS.getCMS();

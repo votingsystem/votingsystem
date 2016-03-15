@@ -13,19 +13,19 @@
         <div class="layout flex horizontal wrap around-justified" style="padding: 15px 0 0 0;">
             <div>
                 <div>
-                    <button onclick="sendTransactionVSFromBank()" style="margin: 0px 0px 0px 5px;">
-                        TransactionVS from Bank
+                    <button onclick="sendTransactionFromBank()" style="margin: 0px 0px 0px 5px;">
+                        Transaction from Bank
                     </button>
                 </div>
-                <div id="transactionvsFromBank" style="width: 500px; height: 300px;"></div>
+                <div id="transactionFromBank" style="width: 500px; height: 300px;"></div>
             </div>
 
             <div>
                 <div class="layout horizontal center center-justified">
-                    <button style="margin: 0px 0px 0px 5px;">TransactionVS</button>
+                    <button style="margin: 0px 0px 0px 5px;">Transaction</button>
                     - http://currency:8086/CurrencyServer/transaction
                 </div>
-                <div id="transactionvsEditor" style="width: 500px; height: 300px;"></div>
+                <div id="transactionEditor" style="width: 500px; height: 300px;"></div>
             </div>
 
             <div>
@@ -41,42 +41,42 @@
         </div>
         <script>
             //date -> 'yyyy/MM/dd HH:mm:ss'
-            var transactionvsFromBank = new JSONEditor(document.querySelector("#transactionvsFromBank"));
+            var transactionFromBank = new JSONEditor(document.querySelector("#transactionFromBank"));
             var signedContent
-            var jsonTransactionVSFromBank = {operation:"FROM_BANK",
-                signedMessageSubject:"TransactionVS from Bank",
+            var jsonTransactionFromBank = {operation:"FROM_BANK",
+                signedMessageSubject:"Transaction from Bank",
                 signedContent:{operation:"FROM_BANK", bankIBAN:"ES1877777777450000000050",
                     fromUserName: "ClientBank App1 App2", currencyCode: "EUR",
                     fromUserIBAN:"ES8477777777450000012345", toUserIBAN:["ES8978788989450000000004"], toUserName:"toUserName",
-                    amount:"30000", tags:["HIDROGENO"], timeLimited:true, subject:"Bank transactionvs" },
-                serviceURL: "/transactionVS",
+                    amount:"30000", tags:["HIDROGENO"], timeLimited:true, subject:"Bank transaction" },
+                serviceURL: "/transaction",
                 serverURL: vs.contextURL,
                 timeStampServerURL:"${timeStampServerURL}"
             }
             //fromUserIBAN -> IBAN external to Currency System controlled by Bank
             //if validTo present -> change to limited in time Currency
-            transactionvsFromBank.set(jsonTransactionVSFromBank);
+            transactionFromBank.set(jsonTransactionFromBank);
 
 
-            function sendTransactionVSFromBank() {
-                console.log("transactionvsFromBank")
-                var operationVS = transactionvsFromBank.get();
+            function sendTransactionFromBank() {
+                console.log("transactionFromBank")
+                var operationVS = transactionFromBank.get();
                 operationVS.statusCode = ResponseVS.SC_PROCESSING
                 operationVS.objectId = Math.random().toString(36).substring(7)
                 window[operationVS.objectId] = function(appMessage) {
-                    console.log("sendTransactionVSFromBank - message: " + appMessage);
+                    console.log("sendTransactionFromBank - message: " + appMessage);
                     appMessageJSON = JSON.parse(appMessage)
-                    alert(JSON.stringify(appMessageJSON.message), "sendTransactionVSFromBank " + appMessageJSON.statusCode)
+                    alert(JSON.stringify(appMessageJSON.message), "sendTransactionFromBank " + appMessageJSON.statusCode)
                 }
                 VotingSystemClient.setMessage(operationVS);
             }
 
-            var transactionvsEditor = new JSONEditor(document.querySelector("#transactionvsEditor"));
-            var jsonTransactionVSEditor = {  "operation": "FROM_GROUP_TO_MEMBER_GROUP", "amount": "10", "fromUserName":
+            var transactionEditor = new JSONEditor(document.querySelector("#transactionEditor"));
+            var jsonTransactionEditor = {  "operation": "FROM_GROUP_TO_MEMBER_GROUP", "amount": "10", "fromUserName":
                     "Cheques comida &apos;proyecto Currency&apos;", "subject": "Transacción 'sábado' \"21 junio\" a 20C",
                 "fromUserIBAN": "ES8978788989450000000004", "toUserIBAN":  [ "ES9478788989450000000011"], "currencyCode": "EUR",
                 "validTo": "2014/06/23 00:00:00"}
-            transactionvsEditor.set(jsonTransactionVSEditor);
+            transactionEditor.set(jsonTransactionEditor);
 
 
 

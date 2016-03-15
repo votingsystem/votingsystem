@@ -2,7 +2,7 @@ package org.votingsystem.web.currency.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.currency.CurrencyDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.JSON;
 
@@ -29,7 +29,7 @@ public class LoggerVS {
     public static String currencyIssuedLogPath;
     public static String weekPeriodLogPath;
 
-    static class TransactionVSFormatter extends Formatter {
+    static class TransactionFormatter extends Formatter {
         @Override public String format(LogRecord record) {
             return record.getMessage();
         }
@@ -44,21 +44,21 @@ public class LoggerVS {
             weekPeriodLogPath = logsDir + "/weekPeriodLog.log";
 
             FileHandler transactionsHandler = new FileHandler(transactionsLogPath);
-            transactionsHandler.setFormatter(new TransactionVSFormatter());
+            transactionsHandler.setFormatter(new TransactionFormatter());
             transactionslog.addHandler(transactionsHandler);
             //handler.setLevel (java.util.logging.Level.FINE);
 
 
             FileHandler currencyIssuedHandler = new FileHandler(currencyIssuedLogPath);
-            currencyIssuedHandler.setFormatter(new TransactionVSFormatter());
+            currencyIssuedHandler.setFormatter(new TransactionFormatter());
             currencyIssuedlog.addHandler(currencyIssuedHandler);
 
             FileHandler reportsHandler = new FileHandler(reporstLogPath);
-            reportsHandler.setFormatter(new TransactionVSFormatter());
+            reportsHandler.setFormatter(new TransactionFormatter());
             reportslog.addHandler(reportsHandler);
 
             FileHandler weekPeriodHandler = new FileHandler(weekPeriodLogPath);
-            weekPeriodHandler.setFormatter(new TransactionVSFormatter());
+            weekPeriodHandler.setFormatter(new TransactionFormatter());
             weekPeriodLog.addHandler(weekPeriodHandler);
 
         } catch (Exception ex) { ex.printStackTrace();}
@@ -80,7 +80,7 @@ public class LoggerVS {
         reportslog.info(JSON.getMapper().writeValueAsString(dataMap) + ",");
     }
 
-    public static void logTransactionVS(TransactionVSDto dto) throws JsonProcessingException {
+    public static void logTransaction(TransactionDto dto) throws JsonProcessingException {
         dto.setDateCreated(new Date());
         transactionslog.info(JSON.getMapper().writeValueAsString(dto) + ",");
     }

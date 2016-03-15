@@ -3,7 +3,7 @@ package org.votingsystem.web.controlcenter.cdi;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.ControlCenter;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -144,7 +144,7 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public User createIBAN(User user) throws ValidationExceptionVS { return null;}
+    public User createIBAN(User user) throws ValidationException { return null;}
 
     @Override
     public User getSystemUser() {

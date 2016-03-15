@@ -1,7 +1,7 @@
 package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
@@ -24,18 +24,18 @@ public class VoteCancelerDto {
 
     public VoteCancelerDto() {}
 
-    public void validate() throws ValidationExceptionVS, NoSuchAlgorithmException {
-        if(operation == null || TypeVS.CANCEL_VOTE != operation) throw new ValidationExceptionVS(
+    public void validate() throws ValidationException, NoSuchAlgorithmException {
+        if(operation == null || TypeVS.CANCEL_VOTE != operation) throw new ValidationException(
                 "ERROR - expected operation 'CANCEL_VOTE' - found: " + operation);
-        if(originHashCertVote == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashCertVote'");
-        if(hashCertVSBase64 == null) throw new ValidationExceptionVS("ERROR - missing param 'hashCertVSBase64'");
-        if(hashAccessRequestBase64 == null) throw new ValidationExceptionVS("ERROR - missing param 'hashAccessRequestBase64'");
-        if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
-        if(originHashAccessRequest == null) throw new ValidationExceptionVS("ERROR - missing param 'originHashAccessRequest'");
+        if(originHashCertVote == null) throw new ValidationException("ERROR - missing param 'originHashCertVote'");
+        if(hashCertVSBase64 == null) throw new ValidationException("ERROR - missing param 'hashCertVSBase64'");
+        if(hashAccessRequestBase64 == null) throw new ValidationException("ERROR - missing param 'hashAccessRequestBase64'");
+        if(originHashAccessRequest == null) throw new ValidationException("ERROR - missing param 'originHashAccessRequest'");
+        if(originHashAccessRequest == null) throw new ValidationException("ERROR - missing param 'originHashAccessRequest'");
         if(!hashAccessRequestBase64.equals(StringUtils.getHashBase64(originHashAccessRequest,
-                ContextVS.DATA_DIGEST_ALGORITHM))) throw new ValidationExceptionVS("voteCancellationAccessRequestHashError");
+                ContextVS.DATA_DIGEST_ALGORITHM))) throw new ValidationException("voteCancellationAccessRequestHashError");
         if(!hashCertVSBase64.equals(StringUtils.getHashBase64(originHashCertVote,
-                ContextVS.DATA_DIGEST_ALGORITHM))) throw new ValidationExceptionVS("voteCancellationHashCertificateError");
+                ContextVS.DATA_DIGEST_ALGORITHM))) throw new ValidationException("voteCancellationHashCertificateError");
     }
 
     public String getOriginHashCertVote() {

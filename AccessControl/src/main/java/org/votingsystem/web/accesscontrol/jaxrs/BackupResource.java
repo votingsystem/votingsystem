@@ -3,7 +3,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 import org.votingsystem.model.BackupRequest;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.accesscontrol.ejb.EventElectionBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -57,8 +57,8 @@ public class BackupResource {
         BackupRequest backupRequest = dao.find(BackupRequest.class, requestId);
         if(backupRequest == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - BackupRequest not found - id: " + requestId).build();
-        if(contentType.contains(ContentTypeVS.TEXT.getName())) {
-            return Response.ok().entity(backupRequest.getCmsMessage().getContentPEM()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
+        if(contentType.contains(ContentType.TEXT.getName())) {
+            return Response.ok().entity(backupRequest.getCmsMessage().getContentPEM()).type(ContentType.TEXT_STREAM.getName()).build();
         } else return RequestUtils.processRequest(backupRequest.getCmsMessage(), context, req, resp);
     }
 

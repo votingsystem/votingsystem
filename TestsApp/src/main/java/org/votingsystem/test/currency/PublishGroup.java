@@ -36,7 +36,7 @@ public class PublishGroup {
                 "Currency_07553172H", User.Type.USER);
         CMSSignedMessage cmsMessage = representativeSignatureService.signDataWithTimeStamp(
                 JSON.getMapper().writeValueAsBytes(groupDto));
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                 currencyServer.getSaveGroupServiceURL());
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage());
         System.exit(0);

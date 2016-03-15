@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.voting.RepresentationStateDto;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeBean;
 
 import javax.inject.Inject;
@@ -21,7 +21,7 @@ public class UserResource {
     @Path("/nif/{nif}/representationState") @GET
     public Response state(@PathParam("nif") String nifReq) throws JsonProcessingException, ExceptionVS {
         RepresentationStateDto result = representativeBean.checkRepresentationState(nifReq);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(result)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(result)).type(MediaType.JSON).build();
     }
 
 }

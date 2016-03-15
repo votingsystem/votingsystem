@@ -2,8 +2,8 @@ package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.dto.currency.TransactionDto;
+import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.*;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.util.ConfigVS;
@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +41,7 @@ public class ReportsResource {
     @Inject ConfigVS config;
 
     @Path("/{year}/{month}/{day}/week")
-    @GET  @Produces(MediaType.APPLICATION_JSON) @Transactional
+    @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
     public Response week(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,
                           @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
@@ -54,13 +53,13 @@ public class ReportsResource {
             StringBuilder stringBuilder = new StringBuilder("{");
             stringBuilder.append(FileUtils.getStringFromFile(reportsFile));
             stringBuilder.append("}");
-            return Response.ok().type(MediaTypeVS.JSON).entity(stringBuilder.toString()).build();
+            return Response.ok().type(MediaType.JSON).entity(stringBuilder.toString()).build();
         } else return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - not found - file: " + LoggerVS.weekPeriodLogPath).build();
     }
 
     @Path("/")
-    @GET  @Produces(MediaType.APPLICATION_JSON) @Transactional
+    @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
     public Response index(@Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         File weekReportsBaseDir = new File(config.getServerDir() +  "/weekReports");
@@ -81,7 +80,7 @@ public class ReportsResource {
     }
 
     @Path("/logs")
-    @GET  @Produces(MediaType.APPLICATION_JSON) @Transactional
+    @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
     public Response logs(@Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         File reportsFile = new File(LoggerVS.reporstLogPath);
@@ -90,35 +89,35 @@ public class ReportsResource {
         StringBuilder stringBuilder = new StringBuilder("{\"resultList\":[");
         stringBuilder.append(FileUtils.getStringFromFile(reportsFile));
         stringBuilder.append("]}");
-        return Response.ok().type(MediaTypeVS.JSON).entity(stringBuilder.toString()).build();
+        return Response.ok().type(MediaType.JSON).entity(stringBuilder.toString()).build();
     }
 
-    @Path("/transactionvs")
-    @GET  @Produces(MediaType.APPLICATION_JSON) @Transactional
-    public Response transactionvs(@Context ServletContext context, @QueryParam("transactionvsType") String transactionvsType,
-                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+    @Path("/transaction")
+    @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
+    public Response transaction(@Context ServletContext context, @QueryParam("transactionType") String transactionType,
+                                @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         File reportsFile = new File(LoggerVS.transactionsLogPath);
         if(!reportsFile.exists()) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - not found - file: " + LoggerVS.reporstLogPath).build();
         ObjectMapper mapper =  JSON.getMapper();
         String result = null;
         AtomicLong totalCount = new AtomicLong(0);
-        if(transactionvsType != null) {
-            List<TransactionVSDto> resultList = new ArrayList<>();
-            TransactionVS.Type type = TransactionVS.Type.valueOf(transactionvsType);
+        if(transactionType != null) {
+            List<TransactionDto> resultList = new ArrayList<>();
+            Transaction.Type type = Transaction.Type.valueOf(transactionType);
             Files.readAllLines(Paths.get(reportsFile.toURI()), Charset.defaultCharset()).forEach(line -> {
                     totalCount.getAndIncrement();
                     try {
-                        TransactionVSDto transactionVSDto =  mapper.readValue(line, TransactionVSDto.class);
-                        if(type == transactionVSDto.getType()) {
-                            resultList.add(transactionVSDto);
+                        TransactionDto transactionDto =  mapper.readValue(line, TransactionDto.class);
+                        if(type == transactionDto.getType()) {
+                            resultList.add(transactionDto);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
             );
-            ResultListDto<TransactionVSDto> resultListDto = new ResultListDto<>(resultList);
+            ResultListDto<TransactionDto> resultListDto = new ResultListDto<>(resultList);
             result = mapper.writeValueAsString(resultListDto);
         } else {
             StringBuilder stringBuilder = new StringBuilder("{\"resultList\":[");
@@ -126,7 +125,7 @@ public class ReportsResource {
             stringBuilder.append("]}");
             result = stringBuilder.toString();
         }
-        return Response.ok().type(MediaTypeVS.JSON).entity(result).build();
+        return Response.ok().type(MediaType.JSON).entity(result).build();
     }
 
 }

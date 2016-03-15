@@ -3,9 +3,9 @@ package org.votingsystem.web.accesscontrol.servlet;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
 import org.votingsystem.web.ejb.CMSBean;
@@ -50,18 +50,18 @@ public class AnonymousRepresentativeDelegationServlet extends HttpServlet {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ANONYMOUS_DELEGATION);
             CMSMessage cmsMessage = cmsBean.validateCMS(
-                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getCmsMessage();
+                    requestVS.getCMS(), ContentType.JSON_SIGNED).getCmsMessage();
             X509Certificate anonymousIssuedCert = representativeDelegationBean.validateAnonymousRequest(
                     cmsMessage, requestVS.getCSRBytes());
             byte[] issuedCertPEMBytes = PEMUtils.getPEMEncoded(anonymousIssuedCert);
-            resp.setContentType(MediaTypeVS.PEM);
+            resp.setContentType(MediaType.PEM);
             resp.setContentLength(issuedCertPEMBytes.length);
             resp.getOutputStream().write(issuedCertPEMBytes);
         } catch (ExceptionVS ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             if(ex.getMessageDto() != null) {
                 resp.setStatus(ex.getMessageDto().getStatusCode());
-                resp.setContentType(MediaTypeVS.JSON);
+                resp.setContentType(MediaType.JSON);
                 resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(ex.getMessageDto()));
             } else writeException(resp, ex);
         } catch (Exception ex) {

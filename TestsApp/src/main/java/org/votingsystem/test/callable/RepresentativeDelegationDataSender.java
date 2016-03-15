@@ -56,7 +56,7 @@ public class RepresentativeDelegationDataSender implements Callable<ResponseVS> 
             Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(responseVS.getMessageBytes());
             cmsMessage = anonymousDelegation.getCertificationRequest().signDataWithTimeStamp(
                     JSON.getMapper().writeValueAsBytes(anonymousDelegationRequest));
-            responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+            responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                     ContextVS.getInstance().getAccessControl().getAnonymousDelegationServiceURL());
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 anonymousDelegation.setDelegationReceipt(responseVS.getCMS(),

@@ -5,7 +5,7 @@ import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.model.Actor;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.crypto.PEMUtils;
@@ -35,7 +35,7 @@ public class FetchX509Cert {
     public static void getServer() throws Exception {
         String serverURL = "https://192.168.1.5/CurrencyServer";
         String serverInfoURL = Actor.getServerInfoURL(serverURL);
-        ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
+        ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentType.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
             throw new ExceptionVS("serverInfoURL - error: " + responseVS.getMessage());
         Actor actor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
@@ -60,7 +60,7 @@ public class FetchX509Cert {
 
     public static void getDeviceDto() throws Exception {
             String serverURL = "https://192.168.1.5/CurrencyServer/rest/device/id/2";
-        ResponseVS responseVS = HttpHelper.getInstance().getData(serverURL, ContentTypeVS.JSON);
+        ResponseVS responseVS = HttpHelper.getInstance().getData(serverURL, ContentType.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
             throw new ExceptionVS("serverInfoURL - error: " + responseVS.getMessage());
         DeviceDto dto = (DeviceDto) responseVS.getMessage(DeviceDto.class);

@@ -98,7 +98,7 @@
                 document.querySelector("#voting_system_page").addEventListener('download-zipped-transactions',
                         function(e) {
                             console.log(this.tagName + " - download-zip - detail: " + e.detail + " - orderBy: " + this.orderBy)
-                            if(this.orderBy === "orderByType") targetURL = this.getTargetURL("zip") + "&transactionvsType=" + e.detail
+                            if(this.orderBy === "orderByType") targetURL = this.getTargetURL("zip") + "&transactionType=" + e.detail
                             else if(this.orderBy === "orderByTag") targetURL = this.getTargetURL("zip") + "&tag=" + e.detail
                             window.open(targetURL, "_blank")
                         }.bind(this))
@@ -144,8 +144,8 @@
                 this.$.transactionsScatter.filterChart(this.transStats)
                 var filteredTransStats = new TransactionsStats()
                 if(e && e.detail) this.orderBy = e.detail
-                this.chartData.forEach(function(transactionvs) {
-                    if(!this.transStats.checkFilters(transactionvs).filtered) filteredTransStats.pushTransaction(transactionvs, this.orderBy)
+                this.chartData.forEach(function(transaction) {
+                    if(!this.transStats.checkFilters(transaction).filtered) filteredTransStats.pushTransaction(transaction, this.orderBy)
                 }.bind(this))
                 if(this.orderBy === "orderByType") treemapData = filteredTransStats.transactionsTreeByType
                 if(this.orderBy === "orderByTag") treemapData = filteredTransStats.transactionsTreeByTag
@@ -159,7 +159,7 @@
                 return transactionsMap[transactionType].lbl
             },
             getTargetURL:function(contentType) {
-                var targetURL = "/CurrencyServer/rest/transactionVS/from/" + this.formatDate(this.$.dateFromDatepicker.getDate()) +
+                var targetURL = "/CurrencyServer/rest/transaction/from/" + this.formatDate(this.$.dateFromDatepicker.getDate()) +
                         "/to/" + this.formatDate(this.$.dateToDatepicker.getDate())
                 if(this.$.searchInput.value != null && this.$.searchInput.value.trim() !== "") {
                     targetURL = targetURL + "?searchText=" + this.$.searchInput.value.trim()
@@ -176,8 +176,8 @@
                 d3.json(targetURL, function (json) {
                     this.chartData = json.resultList
                     this.transStats = new TransactionsStats()
-                    this.chartData.forEach(function(transactionvs) {
-                        this.transStats.pushTransaction(transactionvs, "orderByType")
+                    this.chartData.forEach(function(transaction) {
+                        this.transStats.pushTransaction(transaction, "orderByType")
                     }.bind(this))
                     this.transactionTypes = this.transStats.transactionTypes
                     this.tags = this.transStats.tags

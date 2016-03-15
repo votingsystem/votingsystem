@@ -18,7 +18,7 @@ import org.controlsfx.glyphfont.GlyphFont;
 import org.controlsfx.glyphfont.GlyphFontRegistry;
 import org.votingsystem.client.webextension.MainApp;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
@@ -114,7 +114,7 @@ public class Utils {
     public static File getReceiptBundle(ResponseVS responseVS) throws Exception {
         Map delegationDataMap = (Map) responseVS.getData();
         java.util.List<File> fileList = new ArrayList<File>();
-        File cmsTempFile = File.createTempFile(ContextVS.RECEIPT_FILE_NAME, ContentTypeVS.SIGNED.getExtension());
+        File cmsTempFile = File.createTempFile(ContextVS.RECEIPT_FILE_NAME, ContentType.SIGNED.getExtension());
         cmsTempFile.deleteOnExit();
         FileUtils.copyStreamToFile(new ByteArrayInputStream(responseVS.getCMS().toPEM()), cmsTempFile);
         File certVSDataFile = File.createTempFile(ContextVS.CANCEL_DATA_FILE_NAME, "");

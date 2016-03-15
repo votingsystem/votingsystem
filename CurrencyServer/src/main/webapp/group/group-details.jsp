@@ -3,7 +3,7 @@
 <%@ taglib prefix="h" uri="http://java.sun.com/jsf/html" %>
 <%@ taglib prefix="f" uri="http://java.sun.com/jsf/core" %>
 
-<link href="../transactionVS/transactionvs-form.vsp" rel="import"/>
+<link href="../transaction/transaction-form.vsp" rel="import"/>
 <link href="../user/user-list.vsp" rel="import"/>
 <link href="../group/group-user.vsp" rel="import"/>
 
@@ -30,15 +30,15 @@
         <div style="width: 400px;">
             <div class="layout horizontal center center-justified">
                 <div hidden="{{!caption}}" flex style="font-size: 1.4em; font-weight: bold; color:#6c0404;">
-                    <div style="text-align: center;">${msg.makeTransactionVSFromGroupLbl}</div>
+                    <div style="text-align: center;">${msg.makeTransactionFromGroupLbl}</div>
                 </div>
                 <div style="position: absolute; top: 0px; right: 0px;">
                     <i class="fa fa-times closeIcon" on-click="closeTransactionSelectorDialog"></i>
                 </div>
             </div>
             <div class="vertical layout center center-justified" style="padding: 20px 10px 10px 10px;">
-                <button on-click="fromGroupToMemberGroup" style="margin: 10px; width: 250px;">${msg.makeTransactionVSFromGroupToMemberGroupLbl}</button>
-                <button on-click="fromGroupToAllMember" style="margin: 10px; width: 250px;">${msg.makeTransactionVSFromGroupToAllMembersLbl}</button>
+                <button on-click="fromGroupToMemberGroup" style="margin: 10px; width: 250px;">${msg.makeTransactionFromGroupToMemberGroupLbl}</button>
+                <button on-click="fromGroupToAllMember" style="margin: 10px; width: 250px;">${msg.makeTransactionFromGroupToAllMembersLbl}</button>
             </div>
         </div>
     </div>
@@ -55,7 +55,7 @@
                     </div>
                     <div>
                         <button on-click="openTransactionSelectorDialog">
-                            <i class="fa fa-money"></i> ${msg.makeTransactionVSFromGroupLbl}</button>
+                            <i class="fa fa-money"></i> ${msg.makeTransactionFromGroupLbl}</button>
                     </div>
                 </div>
             </div>
@@ -63,8 +63,8 @@
                 <button style="margin:0 20px 0 0;" on-click="subscribeToGroup">
                     <i class="fa fa-sign-in"></i> ${msg.subscribeGroupLbl}
                 </button>
-                <button style="margin:0 20px 0 0; font-size: 1em;" on-click="sendTransactionVS">
-                    <i class="fa fa-money"></i> ${msg.sendTransactionVSLbl}
+                <button style="margin:0 20px 0 0; font-size: 1em;" on-click="sendTransaction">
+                    <i class="fa fa-money"></i> ${msg.sendTransactionLbl}
                 </button>
             </div>
             <div hidden="{{isClientToolConnected}}" id="clientToolMsg" class="text-center"
@@ -117,12 +117,12 @@
         </div>
     </div>
 
-    <div id="transactionvsFormDialog" class="modalDialog">
+    <div id="transactionFormDialog" class="modalDialog">
         <div style="width:600px;">
             <div style="position: absolute; top: 0px; right: 0px;">
                 <i class="fa fa-times closeIcon" on-click="closeDialog"></i>
             </div>
-            <transactionvs-form id="transactionvsForm"></transactionvs-form>
+            <transaction-form id="transactionForm"></transaction-form>
         </div>
     </div>
 
@@ -152,11 +152,11 @@
             this.$.certDetailsDialog.style.opacity = 0
             this.$.certDetailsDialog.style['pointer-events'] = 'none'
         },
-        sendTransactionVS:function() {
-            console.log(this.tagName + " - sendTransactionVS")
-            this.$.transactionvsForm.init(Operation.FROM_USER, this.group.name, this.group.iban , this.group.id)
-            this.$.transactionvsFormDialog.style.opacity = 1
-            this.$.transactionvsFormDialog.style['pointer-events'] = 'auto'
+        sendTransaction:function() {
+            console.log(this.tagName + " - sendTransaction")
+            this.$.transactionForm.init(Operation.FROM_USER, this.group.name, this.group.iban , this.group.id)
+            this.$.transactionFormDialog.style.opacity = 1
+            this.$.transactionFormDialog.style['pointer-events'] = 'auto'
         },
         messagedialogAccepted:function(e) {
             console.log(this.tagName + ".messagedialogAccepted")
@@ -234,12 +234,12 @@
                 " - menuType: " + menuType)
         },
         fromGroupToAllMember:function() {
-            this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_ALL_MEMBERS, this.group.name,
+            this.$.transactionForm.init(Operation.FROM_GROUP_TO_ALL_MEMBERS, this.group.name,
                     this.group.iban, this.group.id)
             this.closeTransactionSelectorDialog()
         },
         fromGroupToMemberGroup:function() {
-            this.$.transactionvsForm.init(Operation.FROM_GROUP_TO_MEMBER_GROUP, this.group.name,
+            this.$.transactionForm.init(Operation.FROM_GROUP_TO_MEMBER_GROUP, this.group.name,
                     this.group.iban, this.group.id)
             this.closeTransactionSelectorDialog()
         },

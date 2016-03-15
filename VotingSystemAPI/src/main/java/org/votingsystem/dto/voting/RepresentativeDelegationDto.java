@@ -10,7 +10,7 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
-import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.CertificationRequest;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -46,7 +46,7 @@ public class RepresentativeDelegationDto implements Serializable {
     private String UUID;
 
     @JsonIgnore private transient CMSSignedMessage receipt;
-    @JsonIgnore private CertificationRequestVS certificationRequest;
+    @JsonIgnore private CertificationRequest certificationRequest;
 
     public RepresentativeDelegationDto() {}
 
@@ -75,7 +75,7 @@ public class RepresentativeDelegationDto implements Serializable {
     }
 
     @JsonIgnore
-    public CertificationRequestVS getCertificationRequest() {
+    public CertificationRequest getCertificationRequest() {
         return certificationRequest;
     }
 
@@ -154,7 +154,7 @@ public class RepresentativeDelegationDto implements Serializable {
         hashAnonymousDelegation = StringUtils.getHashBase64(originHashAnonymousDelegation, ContextVS.DATA_DIGEST_ALGORITHM);
         dateFrom = DateUtils.getMonday(DateUtils.addDays(7)).getTime();//Next week Monday
         dateTo = DateUtils.addDays(dateFrom, weeksOperationActive * 7).getTime();
-        certificationRequest = CertificationRequestVS.getAnonymousDelegationRequest(ContextVS.SIGNATURE_ALGORITHM,
+        certificationRequest = CertificationRequest.getAnonymousDelegationRequest(ContextVS.SIGNATURE_ALGORITHM,
                 ContextVS.PROVIDER, serverURL, hashCertVSBase64, weeksOperationActive, dateFrom, dateTo);
         RepresentativeDelegationDto requestDto = getRequest(TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST);
         requestDto.setHashAnonymousDelegation(hashAnonymousDelegation);

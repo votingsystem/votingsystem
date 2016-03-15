@@ -62,7 +62,7 @@ public class Actor extends EntityVS implements Serializable {
     @Transient private Collection<X509Certificate> certChain;
     @Transient private transient X509Certificate x509Certificate;
     @Transient private Set<TrustAnchor> trustAnchors = null;
-    @Transient private CertificateVS certificateVS;
+    @Transient private Certificate certificate;
     @Transient private Date date;
     @Transient private ControlCenter controlCenter;
     @Transient private X509Certificate timeStampCert = null;
@@ -167,12 +167,12 @@ public class Actor extends EntityVS implements Serializable {
         return this;
     }
 
-    public CertificateVS getCertificateVS() {
-        return certificateVS;
+    public Certificate getCertificate() {
+        return certificate;
     }
 
-    public void setCertificateVS(CertificateVS certificateVS) {
-        this.certificateVS = certificateVS;
+    public void setCertificate(Certificate certificate) {
+        this.certificate = certificate;
     }
 
     public Type getType() { return serverType; }
@@ -239,11 +239,11 @@ public class Actor extends EntityVS implements Serializable {
     }
 
     public String getRootCAServiceURL() {
-        return serverURL + "/rest/certificateVS/addCertificateAuthority";
+        return serverURL + "/rest/certificate/addCertificateAuthority";
     }
 
     public static String getRootCAServiceURL(String serverURL) {
-        return serverURL + "/rest/certificateVS/addCertificateAuthority";
+        return serverURL + "/rest/certificate/addCertificateAuthority";
     }
 
     public String getServerInfoURL() {

@@ -51,7 +51,7 @@ public class AccessControl extends Actor implements Serializable {
     }
 
     public String getCertRequestServiceURL() {
-        return getServerURL() + "/certificateVS/certRequest.xhtml";
+        return getServerURL() + "/certificate/certRequest.xhtml";
     }
 
     public String getDownloadServiceURL(String param) {

@@ -5,7 +5,7 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.voting.ControlCenter;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.StringUtils;
@@ -143,7 +143,7 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public TagVS getTag(String tagName) throws ValidationExceptionVS {
+    public TagVS getTag(String tagName) throws ValidationException {
         if(tagName.toLowerCase().equals(MessagesVS.getCurrentInstance().get("wildTagLbl"))) tagName = TagVS.WILDTAG;
         Query query = dao.getEM().createNamedQuery("findTagByName").setParameter("name", tagName.toUpperCase());
         return dao.getSingleResult(TagVS.class, query);
@@ -158,7 +158,7 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public User createIBAN(User user) throws ValidationExceptionVS {
+    public User createIBAN(User user) throws ValidationException {
         String accountNumberStr = String.format("%010d", user.getId());
         Iban iban = new Iban.Builder().countryCode(CountryCode.ES).bankCode(bankCode).branchCode(branchCode)
                 .accountNumber(accountNumberStr).nationalCheckDigit("45").build();

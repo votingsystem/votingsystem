@@ -4,13 +4,13 @@ import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.currency.SubscriptionDto;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Group;
 import org.votingsystem.model.currency.Subscription;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.CertUtils;
@@ -46,7 +46,7 @@ public class SubscriptionBean {
     public User checkUser(User user) throws Exception {
         log.log(Level.FINE, "nif: " + user.getNif());
         if(user.getNif() == null) throw new ExceptionVS("ERROR - missing Nif");
-        X509Certificate x509Cert = user.getCertificate();
+        X509Certificate x509Cert = user.getX509Certificate();
         if (x509Cert == null) throw new ExceptionVS("Missing certificate!!!");
         user.setNif(org.votingsystem.util.NifUtils.validate(user.getNif()));
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", user.getNif());
@@ -59,7 +59,7 @@ public class SubscriptionBean {
             log.log(Level.INFO, "checkUser ### NEW User: " + userDB.getNif());
         } else {
             userDB.setCertificateCA(user.getCertificateCA());
-            userDB.setCertificate(user.getCertificate());
+            userDB.setX509Certificate(user.getX509Certificate());
             userDB.setTimeStampToken(user.getTimeStampToken());
         }
         setUserData(userDB, deviceData);
@@ -69,16 +69,16 @@ public class SubscriptionBean {
     public void setUserData(User user, CertExtensionDto deviceData) throws
             CertificateException, IOException, NoSuchAlgorithmException, NoSuchProviderException {
         log.log(Level.FINE, " deviceData: " + deviceData);
-        X509Certificate x509Cert = user.getCertificate();
-        Query query = dao.getEM().createQuery("SELECT c FROM CertificateVS c WHERE c.user =:user and c.state =:state " +
-                "and c.serialNumber =:serialNumber and c.authorityCertificateVS =:authorityCertificateVS")
-                .setParameter("user", user).setParameter("state",CertificateVS.State.OK)
+        X509Certificate x509Cert = user.getX509Certificate();
+        Query query = dao.getEM().createQuery("SELECT c FROM Certificate c WHERE c.user =:user and c.state =:state " +
+                "and c.serialNumber =:serialNumber and c.authorityCertificate =:authorityCertificate")
+                .setParameter("user", user).setParameter("state", Certificate.State.OK)
                 .setParameter("serialNumber", x509Cert.getSerialNumber().longValue())
-                .setParameter("authorityCertificateVS", user.getCertificateCA());
-        CertificateVS certificate = dao.getSingleResult(CertificateVS.class, query);
+                .setParameter("authorityCertificate", user.getCertificateCA());
+        Certificate certificate = dao.getSingleResult(Certificate.class, query);
         Device device = null;
         if(certificate == null){
-            certificate = dao.persist(CertificateVS.USER(user, x509Cert));
+            certificate = dao.persist(Certificate.USER(user, x509Cert));
             if(deviceData != null) {
                 query = dao.getEM().createNamedQuery("findDeviceByUserAndDeviceId").setParameter("user", user)
                         .setParameter("deviceId", deviceData.getDeviceId());
@@ -91,7 +91,7 @@ public class SubscriptionBean {
             }
             log.log(Level.FINE, "new certificate with id:" + certificate.getId());
         } else if(deviceData != null && deviceData.getDeviceId() != null) {
-            query = dao.getEM().createQuery("SELECT d FROM Device d WHERE d.deviceId =:deviceId and d.certificateVS =:certificate")
+            query = dao.getEM().createQuery("SELECT d FROM Device d WHERE d.deviceId =:deviceId and d.certificate =:certificate")
                     .setParameter("deviceId", deviceData.getDeviceId())
                     .setParameter("certificate", certificate);
             device = dao.getSingleResult(Device.class, query);
@@ -101,7 +101,7 @@ public class SubscriptionBean {
                 log.log(Level.FINE, "new device with id: " + device.getId());
             }
         }
-        user.setCertificateVS(certificate);
+        user.setCertificate(certificate);
         user.setDevice(device);
     }
 
@@ -110,8 +110,8 @@ public class SubscriptionBean {
         log.info(format("checkDevice - givenname: {0} - surname: {1} - nif:{2} - phone: {3}" +
                 " - email: {4} - deviceId: {5} - deviceType: {6}", dto.getFirstName(), dto.getLastName(), dto.getNIF(),
                 dto.getPhone(), dto.getEmail(), dto.getDeviceId(), dto.getDeviceType()));
-        if(dto.getNIF() == null) throw new ValidationExceptionVS("missing 'nif'");
-        if(dto.getDeviceId() == null) throw new ValidationExceptionVS("missing 'deviceId'");
+        if(dto.getNIF() == null) throw new ValidationException("missing 'nif'");
+        if(dto.getDeviceId() == null) throw new ValidationException("missing 'deviceId'");
         String validatedNIF = org.votingsystem.util.NifUtils.validate(dto.getNIF());
         Query query = dao.getEM().createQuery("select u from User u where u.nif =:nif").setParameter("nif", validatedNIF);
         User user = dao.getSingleResult(User.class, query);
@@ -137,7 +137,7 @@ public class SubscriptionBean {
         }
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getUserNIF());
         User groupUser = dao.getSingleResult(User.class, query);
-        if(groupUser == null) throw new ValidationExceptionVS("user unknown - nif:" + request.getUserNIF());
+        if(groupUser == null) throw new ValidationException("user unknown - nif:" + request.getUserNIF());
         query = dao.getEM().createNamedQuery("findSubscriptionByGroupAndUser").setParameter("group", group)
                 .setParameter("user", groupUser);
         Subscription subscription = dao.getSingleResult(Subscription.class, query);
@@ -160,20 +160,20 @@ public class SubscriptionBean {
         request.validateActivationRequest();
         Group group = dao.find(Group.class, request.getGroupId());
         if(group == null || !request.getGroupName().equals(group.getName())) {
-            throw new ValidationExceptionVS("Group with id: " + request.getId() + " and name: " + request.getGroupName() + " not found");
+            throw new ValidationException("Group with id: " + request.getId() + " and name: " + request.getGroupName() + " not found");
         }
         if(!group.getRepresentative().getNif().equals(signer.getNif()) && !cmsBean.isAdmin(signer.getNif())) {
-            throw new ValidationExceptionVS("userWithoutGroupPrivilegesErrorMsg - operation: " +
+            throw new ValidationException("userWithoutGroupPrivilegesErrorMsg - operation: " +
                     TypeVS.CURRENCY_GROUP_USER_ACTIVATE.toString() + " - nif: " + signer.getNif() + " - group: " +
                     request.getGroupName());
         }
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getUserNIF());
         User groupUser = dao.getSingleResult(User.class, query);
-        if(groupUser == null) throw new ValidationExceptionVS("user unknown - nif:" + request.getUserNIF());
+        if(groupUser == null) throw new ValidationException("user unknown - nif:" + request.getUserNIF());
         query = dao.getEM().createNamedQuery("findSubscriptionByGroupAndUser").setParameter("group", group)
                 .setParameter("user", groupUser);
         Subscription subscription = dao.getSingleResult(Subscription.class, query);
-        if(subscription == null) throw new ValidationExceptionVS("user:" + request.getUserNIF() +
+        if(subscription == null) throw new ValidationException("user:" + request.getUserNIF() +
                 " has not pending subscription request");
         subscription.setState(Subscription.State.ACTIVE);
         subscription.setDateActivated(new Date());

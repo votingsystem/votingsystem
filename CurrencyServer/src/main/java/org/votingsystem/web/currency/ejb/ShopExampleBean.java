@@ -4,13 +4,13 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.currency.util.AsyncRequestShopBundle;
@@ -41,7 +41,7 @@ public class ShopExampleBean {
     @Inject ConfigVS config;
 
 
-    public void putTransactionRequest(String sessionId, TransactionVSDto transactionRequest) {
+    public void putTransactionRequest(String sessionId, TransactionDto transactionRequest) {
         log.info("putTransactionRequest - sessionId $sessionId");
         transactionRequestMap.put(sessionId, new AsyncRequestShopBundle(transactionRequest, null));
     }
@@ -53,7 +53,7 @@ public class ShopExampleBean {
         } else return null;
     }
 
-    public TransactionVSDto getTransactionRequest(String sessionId) {
+    public TransactionDto getTransactionRequest(String sessionId) {
         if(transactionRequestMap.containsKey(sessionId)) {
             transactionRequestMap.get(sessionId).getAsyncResponse().setTimeout(180, TimeUnit.SECONDS);
             return transactionRequestMap.get(sessionId).getTransactionDto();
@@ -87,10 +87,10 @@ public class ShopExampleBean {
                             currency.getCurrencyCode() + " - " + currency.getTagVS().getName());
                 }
                 requestBundle.getTransactionDto().validateReceipt(cmsMessage, true);
-                MessageDto<TransactionVSDto> messageDto = MessageDto.OK("OK");
+                MessageDto<TransactionDto> messageDto = MessageDto.OK("OK");
                 messageDto.setData(requestBundle.getTransactionDto());
                 requestBundle.getAsyncResponse().resume(Response.ok().entity(JSON.getMapper()
-                        .writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build());
+                        .writeValueAsBytes(messageDto)).type(MediaType.JSON).build());
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);
                 requestBundle.getAsyncResponse().resume(Response.status(ResponseVS.SC_OK).entity(

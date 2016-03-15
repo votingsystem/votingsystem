@@ -8,7 +8,7 @@ import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Group;
 import org.votingsystem.model.currency.Subscription;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -37,7 +37,8 @@ public class GroupBean {
     @Inject CMSBean cmsBean;
     @Inject
     SubscriptionBean subscriptionBean;
-    @Inject TransactionVSBean transactionVSBean;
+    @Inject
+    TransactionBean transactionBean;
 
 
     public Group cancelGroup(Group group, CMSMessage cmsMessage) throws Exception {
@@ -76,11 +77,11 @@ public class GroupBean {
         GroupDto request = cmsMessage.getSignedContent(GroupDto.class);
         if (TypeVS.CURRENCY_GROUP_EDIT == request.getOperation()) {
             Group group = dao.find(Group.class, request.getId());
-            if(group == null) throw new ValidationExceptionVS("ERROR - Group not found - id: " + request.getId());
+            if(group == null) throw new ValidationException("ERROR - Group not found - id: " + request.getId());
             return editGroup(group, cmsMessage);
         } else if(TypeVS.CURRENCY_GROUP_NEW == request.getOperation()) {
             validateNewGroupRequest(request);
-        } else throw new ValidationExceptionVS("ERROR - operation expected CURRENCY_GROUP_EDIT, CURRENCY_GROUP_NEW - " +
+        } else throw new ValidationException("ERROR - operation expected CURRENCY_GROUP_EDIT, CURRENCY_GROUP_NEW - " +
                 "found: " + request.getOperation());
         Query query = dao.getEM().createQuery("SELECT u FROM User u WHERE u.name =:name")
                 .setParameter("name", request.getName().trim());
@@ -98,7 +99,7 @@ public class GroupBean {
         return group;
     }
 
-    private GroupDto validateNewGroupRequest(GroupDto groupDto) throws ValidationExceptionVS {
+    private GroupDto validateNewGroupRequest(GroupDto groupDto) throws ValidationException {
         groupDto.validateNewGroupRequest();
         if(groupDto.getTags() != null) {
             Set<TagVS> resultTagVSSet = new HashSet<>();

@@ -3,7 +3,7 @@ package org.votingsystem.web.util;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.TypeVS;
 
 import javax.servlet.ServletContext;
@@ -53,7 +53,7 @@ public class RequestUtils {
             resultMap.put("signedContentMap", signedContentMap);
             resultMap.put("timeStampDate", timeStampDate.getTime());
             resultMap.put("viewer", viewer);
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaType.JSON).build();
         } else {
             req.getSession().setAttribute("operation", operation);
             req.getSession().setAttribute("cmsMessage", cmsSignedMessageStr);

@@ -5,7 +5,7 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.crypto.CertUtils;
@@ -36,7 +36,7 @@ public class Vote extends EntityVS implements Serializable {
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
     @OneToOne private CMSMessage cmsMessage;
-    @OneToOne private CertificateVS certificateVS;
+    @OneToOne private Certificate certificate;
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="optionSelected") private FieldEvent optionSelected;
     @ManyToOne(fetch=FetchType.LAZY)
@@ -85,12 +85,12 @@ public class Vote extends EntityVS implements Serializable {
         this.x509Certificate = x509Certificate;
     }
 
-    public Vote (FieldEvent optionSelected, EventElection eventVS, State state, CertificateVS certificateVS,
+    public Vote (FieldEvent optionSelected, EventElection eventVS, State state, Certificate certificate,
                  CMSMessage cmsMessage) {
         this.optionSelected = optionSelected;
         this.eventVS = eventVS;
         this.state = state;
-        this.certificateVS = certificateVS;
+        this.certificate = certificate;
         this.cmsMessage = cmsMessage;
     }
 
@@ -183,12 +183,12 @@ public class Vote extends EntityVS implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
-	public CertificateVS getCertificateVS() {
-		return certificateVS;
+	public Certificate getCertificate() {
+		return certificate;
 	}
 
-	public void setCertificateVS(CertificateVS certificateVS) {
-		this.certificateVS = certificateVS;
+	public void setCertificate(Certificate certificate) {
+		this.certificate = certificate;
 	}
 
     public String getHashCertVSBase64() {

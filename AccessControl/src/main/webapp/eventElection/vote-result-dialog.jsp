@@ -25,7 +25,7 @@
                         <div class="flex"></div>
                         <div style="margin:10px 0px 10px 0px;">
                             <button on-click="checkReceipt">
-                                <i class="fa fa-certificate"></i><span>{{checkSignatureButtonMsg}}</span>
+                                <i class="fa fa-x509Certificate"></i><span>{{checkSignatureButtonMsg}}</span>
                             </button>
                         </div>
                     </div>

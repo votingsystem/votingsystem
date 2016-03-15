@@ -7,12 +7,12 @@ import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.ObjectUtils;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.CertUtils;
-import org.votingsystem.util.crypto.CertificationRequestVS;
+import org.votingsystem.util.crypto.CertificationRequest;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -52,14 +52,14 @@ public class CurrencyDto implements Serializable {
 
     public CurrencyDto() {}
 
-    public static CurrencyDto BATCH_ITEM(CurrencyBatchDto currencyBatchDto, Currency currency) throws ValidationExceptionVS {
-        if(!currencyBatchDto.getCurrencyCode().equals(currency.getCurrencyCode())) throw new ValidationExceptionVS(
+    public static CurrencyDto BATCH_ITEM(CurrencyBatchDto currencyBatchDto, Currency currency) throws ValidationException {
+        if(!currencyBatchDto.getCurrencyCode().equals(currency.getCurrencyCode())) throw new ValidationException(
                 "CurrencyBatch currencyCode: " + currencyBatchDto.getCurrencyCode()
                 + " - Currency currencyCode: " + currency.getCurrencyCode());
-        if(currency.getTimeLimited() && !currencyBatchDto.getTimeLimited()) throw new ValidationExceptionVS(
+        if(currency.getTimeLimited() && !currencyBatchDto.getTimeLimited()) throw new ValidationException(
                 "TimeLimited currency cannot go inside NOT TimeLimited CurrencyBatch");
         if(!TagVS.WILDTAG.equals(currency.getTagVS().getName()) && !currency.getTagVS().getName().equals(
-                currencyBatchDto.getTag())) throw new ValidationExceptionVS(MessageFormat.format(
+                currencyBatchDto.getTag())) throw new ValidationException(MessageFormat.format(
                 "''{0}'' Currency  cannot go inside ''{1}'' CurrencyBatch", currency.getTagVS().getName(), currencyBatchDto.getTag()));
         CurrencyDto currencyDto = new CurrencyDto(currency);
         currencyDto.subject = currencyBatchDto.getSubject();
@@ -76,7 +76,7 @@ public class CurrencyDto implements Serializable {
         String subjectDN = info.getSubject().toString();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 csrPKCS10, ContextVS.CURRENCY_OID);
-        if(certExtensionDto == null) throw new ValidationExceptionVS("error missing cert extension data");
+        if(certExtensionDto == null) throw new ValidationException("error missing cert extension data");
         currencyServerURL = certExtensionDto.getCurrencyServerURL();
         hashCertVS = certExtensionDto.getHashCertVS();
         amount = certExtensionDto.getAmount();
@@ -84,12 +84,12 @@ public class CurrencyDto implements Serializable {
         tag = certExtensionDto.getTag();
         CurrencyDto certSubjectDto = getCertSubjectDto(subjectDN, hashCertVS);
         if(!certSubjectDto.getCurrencyServerURL().equals(currencyServerURL))
-                throw new ValidationExceptionVS("currencyServerURL: " + currencyServerURL + " - certSubject: " + subjectDN);
+                throw new ValidationException("currencyServerURL: " + currencyServerURL + " - certSubject: " + subjectDN);
         if(certSubjectDto.getAmount().compareTo(amount) != 0)
-            throw new ValidationExceptionVS("amount: " + amount + " - certSubject: " + subjectDN);
+            throw new ValidationException("amount: " + amount + " - certSubject: " + subjectDN);
         if(!certSubjectDto.getCurrencyCode().equals(currencyCode))
-            throw new ValidationExceptionVS("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
-        if(!certSubjectDto.getTag().equals(tag)) throw new ValidationExceptionVS("tag: " + tag + " - certSubject: " + subjectDN);
+            throw new ValidationException("currencyCode: " + currencyCode + " - certSubject: " + subjectDN);
+        if(!certSubjectDto.getTag().equals(tag)) throw new ValidationException("tag: " + tag + " - certSubject: " + subjectDN);
     }
 
     public CurrencyDto(Currency currency) {
@@ -116,7 +116,7 @@ public class CurrencyDto implements Serializable {
         currencyDto.setHashCertVS(currency.getHashCertVS());
         currencyDto.setTag(currency.getTagVS().getName());
         currencyDto.setTimeLimited(currency.getTimeLimited());
-        //CertificationRequestVS instead of Currency to make it easier deserialization on Android
+        //CertificationRequest instead of Currency to make it easier deserialization on Android
         currencyDto.setObject(ObjectUtils.serializeObjectToString(currency.getCertificationRequest()));
         return currencyDto;
     }
@@ -144,9 +144,9 @@ public class CurrencyDto implements Serializable {
 
     public Currency deSerialize() throws Exception {
         try {
-            CertificationRequestVS certificationRequestVS =
-                    (CertificationRequestVS) ObjectUtils.deSerializeObject(object.getBytes());
-            return Currency.fromCertificationRequestVS(certificationRequestVS);
+            CertificationRequest certificationRequest =
+                    (CertificationRequest) ObjectUtils.deSerializeObject(object.getBytes());
+            return Currency.fromCertificationRequestVS(certificationRequest);
         }catch (Exception ex) {
             return (Currency) ObjectUtils.deSerializeObject(object.getBytes());
         }

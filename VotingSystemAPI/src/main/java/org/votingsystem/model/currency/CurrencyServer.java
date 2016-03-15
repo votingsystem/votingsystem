@@ -36,8 +36,8 @@ public class CurrencyServer extends Actor implements Serializable {
         return Type.CURRENCY;
     }
 
-    public String getTransactionVSServiceURL() {
-        return getServerURL() + "/rest/transactionVS";
+    public String getTransactionServiceURL() {
+        return getServerURL() + "/rest/transaction";
     }
 
     public String getCurrencyRequestServiceURL() {
@@ -53,7 +53,7 @@ public class CurrencyServer extends Actor implements Serializable {
     }
 
     public String getCurrencyTransactionServiceURL() {
-        return getServerURL() + "/rest/transactionVS/currency";
+        return getServerURL() + "/rest/transaction/currency";
     }
 
     public String getGroupListURL(String menu, String locale) {

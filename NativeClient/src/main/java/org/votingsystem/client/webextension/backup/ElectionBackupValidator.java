@@ -10,7 +10,7 @@ import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.FieldEvent;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
-import org.votingsystem.util.crypto.DocumentVSValidator;
+import org.votingsystem.util.crypto.DocumentValidator;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.util.crypto.SignedFile;
 
@@ -206,7 +206,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                                 errorList.add(errorMsg);
                             }
                         }
-                        ResponseVS responseVS = DocumentVSValidator.validateRepresentationDocument(repDoc,
+                        ResponseVS responseVS = DocumentValidator.validateRepresentationDocument(repDoc,
                                 trustAnchors, metaInf.getDateBegin(),  metaInf.getDateFinish(), representativeNif,
                                 timeStampServerCert);
                         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
@@ -221,7 +221,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                     List<File> result = FileUtils.findRecursively(votesDir, "_" + representativeNif);
                     if(!result.isEmpty()) {
                         File voteFile = result.iterator().next();
-                        ResponseVS representativeVoteResponse = DocumentVSValidator.validateVote(voteFile,
+                        ResponseVS representativeVoteResponse = DocumentValidator.validateVote(voteFile,
                                 trustAnchors, eventTrustedAnchors,  representativeDataMetaInf.
                                 getOptionSelectedId(), eventURL, metaInf.getDateBegin(), metaInf.getDateFinish(),
                                 timeStampServerCert);
@@ -286,7 +286,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                     if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELED);
                     String errorMessage = null;
                     byte[] accessRequestBytes = FileUtils.getBytesFromFile(accessRequest);
-                    ResponseVS validationResponse = DocumentVSValidator.validateAccessRequest(accessRequest,
+                    ResponseVS validationResponse = DocumentValidator.validateAccessRequest(accessRequest,
                             trustAnchors, eventURL, metaInf.getDateBegin(),
                             metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();
@@ -344,7 +344,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
                 File[] votes = batchDir.listFiles();
                 for(File vote : votes) {
                     if(isCanceled.get()) return new ResponseVS(ResponseVS.SC_CANCELED);
-                    ResponseVS<Long> validationResponse = DocumentVSValidator.validateVote(vote,
+                    ResponseVS<Long> validationResponse = DocumentValidator.validateVote(vote,
                             trustAnchors, eventTrustedAnchors, null, eventURL,
                             metaInf.getDateBegin(), metaInf.getDateFinish(), timeStampServerCert);
                     statusCode = validationResponse.getStatusCode();

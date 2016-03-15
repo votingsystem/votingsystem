@@ -6,7 +6,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.callable.TimeStamperTestSender;
 import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.NifUtils;
@@ -43,7 +43,7 @@ public class TimeStampRequest {
         simulationData.setTimerMap(timerMap);
 
         ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(
-                simulationData.getServerURL()), ContentTypeVS.JSON);
+                simulationData.getServerURL()), ContentType.JSON);
         if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         Actor actor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
         ContextVS.getInstance().setDefaultServer(actor);

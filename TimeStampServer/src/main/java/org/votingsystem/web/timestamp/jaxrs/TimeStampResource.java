@@ -1,7 +1,7 @@
 package org.votingsystem.web.timestamp.jaxrs;
 
-import org.votingsystem.model.TimeStampVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.model.TimeStamp;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;
@@ -22,11 +22,11 @@ public class TimeStampResource {
     @GET
     @Path("/{id}")
     public Response lookupTimeStampById(@PathParam("id") long timeStampId) {
-        TimeStampVS timeStampVS = (TimeStampVS) dao.find(TimeStampVS.class, timeStampId);
-        if(timeStampVS != null) {
-            return Response.ok(timeStampVS.getTokenBytes()).type(ContentTypeVS.TIMESTAMP_RESPONSE.getName()).build();
+        TimeStamp timeStamp = (TimeStamp) dao.find(TimeStamp.class, timeStampId);
+        if(timeStamp != null) {
+            return Response.ok(timeStamp.getTokenBytes()).type(ContentType.TIMESTAMP_RESPONSE.getName()).build();
 
-        } else throw new NotFoundException("TimeStampVS id '" + timeStampId + "'");
+        } else throw new NotFoundException("TimeStamp id '" + timeStampId + "'");
     }
 
 }

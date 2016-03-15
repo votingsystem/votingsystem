@@ -2,9 +2,9 @@ package org.votingsystem.web.timestamp.servlet;
 
 import org.apache.commons.io.IOUtils;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.TimeStampVS;
+import org.votingsystem.model.TimeStamp;
 import org.votingsystem.service.TimeStampService;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.crypto.TimeStampResponseGenerator;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.MessagesVS;
@@ -37,9 +37,9 @@ public class TimeStampServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         PrintWriter writer = null;
-        ContentTypeVS contentTypeVS = ContentTypeVS.getByName(req.getContentType());
+        ContentType contentType = ContentType.getByName(req.getContentType());
         String contentEncoding = req.getHeader("Content-Encoding");
-        if(contentTypeVS == ContentTypeVS.TIMESTAMP_QUERY) {
+        if(contentType == ContentType.TIMESTAMP_QUERY) {
             try {
                 TimeStampResponseGenerator responseGenerator = null;
                 if(contentEncoding != null && "base64".equals(contentEncoding)) {
@@ -52,9 +52,9 @@ public class TimeStampServlet extends HttpServlet {
                             req.getInputStream());
                 }
                 byte[] tokenBytes = responseGenerator.getTimeStampToken().getEncoded();
-                dao.persist(new TimeStampVS(responseGenerator.getSerialNumber().longValue(),
-                        tokenBytes, TimeStampVS.State.OK));
-                resp.setContentType(ContentTypeVS.TIMESTAMP_RESPONSE.getName());
+                dao.persist(new TimeStamp(responseGenerator.getSerialNumber().longValue(),
+                        tokenBytes, TimeStamp.State.OK));
+                resp.setContentType(ContentType.TIMESTAMP_RESPONSE.getName());
                 final ServletOutputStream out = resp.getOutputStream();
                 if(contentEncoding != null && "base64".equals(contentEncoding)) {
                     out.write(Base64.getEncoder().encode(tokenBytes));

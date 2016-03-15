@@ -36,7 +36,7 @@
                             <i class="fa fa-tag"></i> ${msg.addTagLbl}
                         </button>
                     </div>
-                    <div>${msg.transactionvsWithTagAdvertMsg}</div>
+                    <div>${msg.transactionWithTagAdvertMsg}</div>
                 </div>
                 <div hidden="{{selectedTagsHidden}}" class="layout horizontal center center-justified"
                      style="font-weight:bold;font-size: 0.9em; color: #888;

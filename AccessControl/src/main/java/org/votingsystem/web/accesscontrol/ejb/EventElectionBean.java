@@ -6,7 +6,7 @@ import org.votingsystem.dto.voting.*;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.*;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CMSBean;
@@ -56,7 +56,7 @@ public class EventElectionBean {
         eventVS.setControlCenter(controlCenter);
         eventVS.setAccessControl(accessControl);
         eventVSBean.setEventDatesState(eventVS);
-        if(EventVS.State.TERMINATED ==  eventVS.getState()) throw new ValidationExceptionVS(
+        if(EventVS.State.TERMINATED ==  eventVS.getState()) throw new ValidationException(
                 "ERROR - eventFinishedErrorMsg dateFinish: " + request.getDateFinish());
         request.setControlCenterURL(controlCenter.getServerURL());
         dao.persist(eventVS);
@@ -70,30 +70,30 @@ public class EventElectionBean {
         request.setType(EventVS.Type.ELECTION);
 
         KeyStoreDto keyStoreDto = cmsBean.generateElectionKeysStore(eventVS);
-        CertificateVS certificateVS = dao.persist(CertificateVS.ELECTION((X509Certificate) keyStoreDto.getX509Cert()));
-        dao.merge(eventVS.setCertificateVS(certificateVS));
-        keyStoreDto.getKeyStoreVS().setCertificateVS(certificateVS);
-        KeyStoreVS keyStoreVS = dao.persist(keyStoreDto.getKeyStoreVS());
-        eventVS.setKeyStoreVS(keyStoreVS);
+        Certificate certificate = dao.persist(Certificate.ELECTION((X509Certificate) keyStoreDto.getX509Cert()));
+        dao.merge(eventVS.setCertificate(certificate));
+        keyStoreDto.getKeyStore().setCertificate(certificate);
+        KeyStore keyStore = dao.persist(keyStoreDto.getKeyStore());
+        eventVS.setKeyStore(keyStore);
 
-        request.setCertCAVotacion( new String(PEMUtils.getPEMEncoded (keyStoreVS.getCertificateVS().getX509Cert())));
+        request.setCertCAVotacion( new String(PEMUtils.getPEMEncoded (keyStore.getCertificate().getX509Cert())));
         request.setCertChain(new String(PEMUtils.getPEMEncoded (cmsBean.getCertChain())));
-        X509Certificate certUsuX509 = userSigner.getCertificate();
+        X509Certificate certUsuX509 = userSigner.getX509Certificate();
         request.setUser(new String(PEMUtils.getPEMEncoded(certUsuX509)));
         CMSSignedMessage cms = cmsBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(request));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cms.toPEM(),
-                ContentTypeVS.JSON_SIGNED, controlCenter.getServerURL() + "/rest/eventElection");
+                ContentType.JSON_SIGNED, controlCenter.getServerURL() + "/rest/eventElection");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
             throw new ExceptionVS(messages.get("controlCenterCommunicationErrorMsg", controlCenter.getServerURL()));
         }
-        query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type " +
-                "and c.actor =:actor and c.state =:state").setParameter("type", CertificateVS.Type.ACTOR_VS)
-                .setParameter("actor", controlCenter).setParameter("state", CertificateVS.State.OK);
-        CertificateVS controlCenterCert = dao.getSingleResult(CertificateVS.class, query);
-        CertificateVS controlCenterCertEventVS = dao.persist(
-                CertificateVS.ACTOR(controlCenter, controlCenterCert.getX509Cert()));
-        CertificateVS accessControlCertEventVS = dao.persist(
-                CertificateVS.ACTOR(null, cmsBean.getServerCert()));
+        query = dao.getEM().createQuery("select c from Certificate c where c.type =:type " +
+                "and c.actor =:actor and c.state =:state").setParameter("type", Certificate.Type.ACTOR_VS)
+                .setParameter("actor", controlCenter).setParameter("state", Certificate.State.OK);
+        Certificate controlCenterCert = dao.getSingleResult(Certificate.class, query);
+        Certificate controlCenterCertEventVS = dao.persist(
+                Certificate.ACTOR(controlCenter, controlCenterCert.getX509Cert()));
+        Certificate accessControlCertEventVS = dao.persist(
+                Certificate.ACTOR(null, cmsBean.getServerCert()));
         dao.merge(cmsMessage.setType(TypeVS.VOTING_EVENT).setCMS(cms));
         dao.merge(eventVS.setControlCenterCert(controlCenterCertEventVS).setAccessControlCert(accessControlCertEventVS)
                 .setState(EventVS.State.ACTIVE).setCmsMessage(cmsMessage));
@@ -163,7 +163,7 @@ public class EventElectionBean {
                 .setParameter("state", Vote.State.OK).setParameter("eventVS", eventVS);
         List<Vote> votes = query.getResultList();
         for (Vote vote : votes) {
-            User representative = vote.getCertificateVS().getUser();
+            User representative = vote.getCertificate().getUser();
             File cmsFile = null;
             if(representative != null) {//not anonymous, representative vote
                 cmsFile = new File(format("{0}/representativeVote_{1}.p7s", votesBaseDir, representative.getNif()));

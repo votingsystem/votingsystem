@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Calendar;
@@ -60,7 +59,7 @@ public class BalanceResource {
     }
 
     @Path("/user/id/{userId}/{timePeriod}")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response user(@PathParam("userId") long userId, @PathParam("timePeriod") String lapseStr,
                          @Context ServletContext context, @Context HttpServletRequest req,
                          @Context HttpServletResponse resp) throws Exception {
@@ -74,7 +73,7 @@ public class BalanceResource {
     }
 
     @Path("/user/id/{userId}/{year}/{month}/{day}")
-    @GET  @Produces(MediaType.APPLICATION_JSON)
+    @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response userWithDate(@PathParam("userId") long userId, @PathParam("year") int year, @PathParam("month") int month,
                                  @PathParam("day") int day, @Context ServletContext context, @Context HttpServletRequest req,
                                  @Context HttpServletResponse resp) throws Exception {
@@ -88,12 +87,12 @@ public class BalanceResource {
     private Response getUserBalancesDto(HttpServletRequest req, HttpServletResponse resp, ServletContext context,
                                         User user, Interval timePeriod) throws Exception {
         BalancesDto balancesDto = balancesBean.getBalancesDto(user, timePeriod);
-        return Response.ok().type(MediaTypeVS.JSON).entity(
+        return Response.ok().type(MediaType.JSON).entity(
                 JSON.getMapper().writeValueAsBytes(balancesDto)).build();
     }
 
     @Path("/user/id/{userId}/db")
-    @GET  @Produces(MediaType.APPLICATION_JSON)
+    @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Map userDB(@PathParam("userId") long userId, @Context ServletContext context,
             @Context HttpServletRequest req, @Context HttpServletResponse resp) {
         User user = dao.find(User.class, userId);
@@ -104,7 +103,7 @@ public class BalanceResource {
 
     //data for <balance-weekreport>
     @Path("/week/{year}/{month}/{day}")
-    @GET  @Produces(MediaType.APPLICATION_JSON)
+    @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Object week(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {
@@ -116,14 +115,14 @@ public class BalanceResource {
         } else {
             Map<String, Object> dataMap = JSON.getMapper().readValue(reportFiles.getJsonFile(),
                     new TypeReference<HashMap<String, Object>>() {});
-            return Response.ok().type(MediaTypeVS.JSON).entity(
+            return Response.ok().type(MediaType.JSON).entity(
                     JSON.getMapper().writeValueAsBytes(dataMap)).build();
         }
     }
 
 
     @Path("/weekdb/{year}/{month}/{day}")
-    @GET  @Produces(MediaType.APPLICATION_JSON)
+    @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Object weekdb(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,
                        @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws IOException, ServletException {

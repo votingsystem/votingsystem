@@ -1,7 +1,7 @@
 package org.votingsystem.test.misc;
 
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.util.ContextVS;
 
 import java.util.logging.Logger;
@@ -17,7 +17,7 @@ public class CheckTransactionFromUserToUser {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         CMSSignedMessage cmsMessage = new CMSSignedMessage(ContextVS.getInstance().getResourceBytes("2222.p7s"));
-        TransactionVSDto dto = cmsMessage.getSignedContent(TransactionVSDto.class);
+        TransactionDto dto = cmsMessage.getSignedContent(TransactionDto.class);
         CMSSignedMessage receipt = CMSSignedMessage.FROM_PEM(dto.getCmsMessagePEM());
         log.info("receipt.getSignedContent: " + receipt.getSignedContent());
         System.exit(0);

@@ -18,7 +18,6 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
@@ -230,14 +229,14 @@ public class HttpHelper {
             } else {
                 MessageDto messageDto = null;
                 String responseStr = null;
-                if(responseContentType != null && responseContentType.contains(MediaTypeVS.JSON)) messageDto =
+                if(responseContentType != null && responseContentType.contains(MediaType.JSON)) messageDto =
                         JSON.getMapper().readValue(responseBytes, MessageDto.class);
                 else responseStr = new String(responseBytes, StandardCharsets.UTF_8);
                 switch (response.getStatusLine().getStatusCode()) {
-                    case ResponseVS.SC_NOT_FOUND: throw new NotFoundExceptionVS(responseStr, messageDto);
-                    case ResponseVS.SC_ERROR_REQUEST_REPEATED: throw new RequestRepeatedExceptionVS(responseStr, messageDto);
-                    case ResponseVS.SC_ERROR_REQUEST: throw new BadRequestExceptionVS(responseStr, messageDto);
-                    case ResponseVS.SC_ERROR: throw new ServerExceptionVS(EntityUtils.toString(response.getEntity()), messageDto);
+                    case ResponseVS.SC_NOT_FOUND: throw new NotFoundException(responseStr, messageDto);
+                    case ResponseVS.SC_ERROR_REQUEST_REPEATED: throw new RequestRepeatedException(responseStr, messageDto);
+                    case ResponseVS.SC_ERROR_REQUEST: throw new BadRequestException(responseStr, messageDto);
+                    case ResponseVS.SC_ERROR: throw new ServerException(EntityUtils.toString(response.getEntity()), messageDto);
                     default:throw new ExceptionVS(responseStr, messageDto);
                 }
             }
@@ -251,12 +250,12 @@ public class HttpHelper {
     }
 
 
-    public ResponseVS getData (String serverURL, ContentTypeVS contentType) {
+    public ResponseVS getData (String serverURL, ContentType contentType) {
         log.info("getData - contentType: " + contentType + " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
         CloseableHttpResponse response = null;
         HttpGet httpget = null;
-        ContentTypeVS responseContentType = null;
+        ContentType responseContentType = null;
         try {
             httpget = new HttpGet(serverURL);
             //httpget.setHeader("Accept-Language", Locale.getDefault().getLanguage());
@@ -269,7 +268,7 @@ public class HttpHelper {
                     connManager.getTotalStats().toString());
             log.info("----------------------------------------");
             Header header = response.getFirstHeader("Content-Type");
-            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
+            if(header != null) responseContentType = ContentType.getByName(header.getValue());
             if(ResponseVS.SC_OK == response.getStatusLine().getStatusCode()) {
                 byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
                 responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes, responseContentType);
@@ -290,16 +289,16 @@ public class HttpHelper {
         }
     }
     
-    public ResponseVS sendFile (File file, ContentTypeVS contentTypeVS, String serverURL,  String... headerNames) {
+    public ResponseVS sendFile (File file, ContentType contentTypeVS, String serverURL, String... headerNames) {
         log.info("sendFile - contentType: " + contentTypeVS + " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
         HttpPost httpPost = null;
-        ContentTypeVS responseContentType = null;
+        ContentType responseContentType = null;
         CloseableHttpResponse response = null;
         try {
             httpPost = new HttpPost(serverURL);
-            ContentType contentType = null;
-            if(contentTypeVS != null) contentType = ContentType.create(contentTypeVS.getName());
+            org.apache.http.entity.ContentType contentType = null;
+            if(contentTypeVS != null) contentType = org.apache.http.entity.ContentType.create(contentTypeVS.getName());
             FileEntity entity = new FileEntity(file, contentType);
             httpPost.setEntity(entity);
             response = httpClient.execute(httpPost);
@@ -308,7 +307,7 @@ public class HttpHelper {
                     connManager.getTotalStats().toString());
             log.info("----------------------------------------");
             Header header = response.getFirstHeader("Content-Type");
-            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
+            if(header != null) responseContentType = ContentType.getByName(header.getValue());
             byte[] responseBytes =  EntityUtils.toByteArray(response.getEntity());
             responseVS = new ResponseVS(response.getStatusLine().getStatusCode(), responseBytes, responseContentType);
             if(headerNames != null) {
@@ -331,22 +330,22 @@ public class HttpHelper {
         }
     }
 
-    public <T> T sendData(TypeReference type, byte[] data, String serverURL, ContentTypeVS contentType) throws Exception {
+    public <T> T sendData(TypeReference type, byte[] data, String serverURL, ContentType contentType) throws Exception {
         return sendData(null, type, data, contentType, serverURL);
     }
 
-    public <T> T sendData(Class<T> type, byte[] data, String serverURL, ContentTypeVS contentType) throws Exception {
+    public <T> T sendData(Class<T> type, byte[] data, String serverURL, ContentType contentType) throws Exception {
         return sendData(type, null, data, contentType, serverURL);
     }
 
     public <T> T sendData(Class<T> type, TypeReference typeReference, byte[] byteArray,
-                                 ContentTypeVS contentType, String serverURL, String... headerNames) throws IOException, ExceptionVS {
+                          ContentType contentType, String serverURL, String... headerNames) throws IOException, ExceptionVS {
         log.info("sendData - contentType: " + contentType + " - serverURL: " + serverURL);
         HttpPost httpPost = null;
         CloseableHttpResponse response = null;
         httpPost = new HttpPost(serverURL);
         ByteArrayEntity entity = null;
-        if(contentType != null) entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType.getName()));
+        if(contentType != null) entity = new ByteArrayEntity(byteArray,  org.apache.http.entity.ContentType.create(contentType.getName()));
         else entity = new ByteArrayEntity(byteArray);
         httpPost.setEntity(entity);
         response = httpClient.execute(httpPost);
@@ -364,20 +363,20 @@ public class HttpHelper {
         } else {
             MessageDto messageDto = null;
             String responseStr = null;
-            if(responseContentType.contains(MediaTypeVS.JSON)) messageDto =
+            if(responseContentType.contains(MediaType.JSON)) messageDto =
                     JSON.getMapper().readValue(responseBytes, MessageDto.class);
             else responseStr = new String(responseBytes, "UTF-8");
             switch (response.getStatusLine().getStatusCode()) {
-                case ResponseVS.SC_NOT_FOUND: throw new NotFoundExceptionVS(responseStr, messageDto);
-                case ResponseVS.SC_ERROR_REQUEST_REPEATED: throw new RequestRepeatedExceptionVS(responseStr, messageDto);
-                case ResponseVS.SC_ERROR_REQUEST: throw new BadRequestExceptionVS(responseStr, messageDto);
-                case ResponseVS.SC_ERROR: throw new ServerExceptionVS(EntityUtils.toString(response.getEntity()), messageDto);
+                case ResponseVS.SC_NOT_FOUND: throw new NotFoundException(responseStr, messageDto);
+                case ResponseVS.SC_ERROR_REQUEST_REPEATED: throw new RequestRepeatedException(responseStr, messageDto);
+                case ResponseVS.SC_ERROR_REQUEST: throw new BadRequestException(responseStr, messageDto);
+                case ResponseVS.SC_ERROR: throw new ServerException(EntityUtils.toString(response.getEntity()), messageDto);
                 default:throw new ExceptionVS(responseStr, messageDto);
             }
         }
     }
 
-    public ResponseVS sendData(byte[] byteArray, ContentTypeVS contentType,
+    public ResponseVS sendData(byte[] byteArray, ContentType contentType,
             String serverURL, String... headerNames) throws IOException {
         log.info("sendData - contentType: " + contentType + " - serverURL: " + serverURL);
         ResponseVS responseVS = null;
@@ -386,13 +385,13 @@ public class HttpHelper {
         try {
             httpPost = new HttpPost(serverURL);
             ByteArrayEntity entity = null;
-            if(contentType != null) entity = new ByteArrayEntity(byteArray,  ContentType.create(contentType.getName()));
+            if(contentType != null) entity = new ByteArrayEntity(byteArray,  org.apache.http.entity.ContentType.create(contentType.getName()));
             else entity = new ByteArrayEntity(byteArray);
             httpPost.setEntity(entity);
             response = httpClient.execute(httpPost);
-            ContentTypeVS responseContentType = null;
+            ContentType responseContentType = null;
             Header header = response.getFirstHeader("Content-Type");
-            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
+            if(header != null) responseContentType = ContentType.getByName(header.getValue());
             log.info("------------------------------------------------");
             log.info(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType +
                     " - connManager stats: " + connManager.getTotalStats().toString());
@@ -430,7 +429,7 @@ public class HttpHelper {
                 ContextVS.getInstance().getMessage("requestWithoutFileMapErrorMsg"));
         HttpPost httpPost = null;
         CloseableHttpResponse response = null;
-        ContentTypeVS responseContentType = null;
+        ContentType responseContentType = null;
         try {
             httpPost = new HttpPost(serverURL);
             Set<String> fileNames = fileMap.keySet();
@@ -450,7 +449,7 @@ public class HttpHelper {
             httpPost.setEntity(reqEntity);
             response = httpClient.execute(httpPost);
             Header header = response.getFirstHeader("Content-Type");
-            if(header != null) responseContentType = ContentTypeVS.getByName(header.getValue());
+            if(header != null) responseContentType = ContentType.getByName(header.getValue());
             log.info("----------------------------------------");
             log.info(response.getStatusLine().toString() + " - contentTypeVS: " + responseContentType +
                     " - connManager stats: " + connManager.getTotalStats().toString());

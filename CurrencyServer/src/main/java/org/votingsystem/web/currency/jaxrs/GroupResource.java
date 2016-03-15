@@ -19,7 +19,7 @@ import org.votingsystem.model.currency.Group;
 import org.votingsystem.model.currency.Subscription;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.CurrencyAccountBean;
 import org.votingsystem.web.currency.ejb.GroupBean;
@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.*;
@@ -66,7 +65,7 @@ public class GroupResource {
     SubscriptionBean subscriptionBean;
 
     @Path("/")
-    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
     public Response index(@DefaultValue("0") @QueryParam("offset") int offset,
                         @DefaultValue("100") @QueryParam("max") int max,
                         @QueryParam("state") String stateStr,
@@ -105,11 +104,11 @@ public class GroupResource {
         long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         ResultListDto resultListDto = ResultListDto.GROUP(resultList, state, offset, max, totalCount);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
-                .type(MediaTypeVS.JSON).build();
+                .type(MediaType.JSON).build();
     }
 
     @Path("/id/{id}")
-    @GET @Transactional @Produces(MediaType.APPLICATION_JSON)
+    @GET @Transactional @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response getById(@PathParam("id") long id, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
@@ -118,14 +117,14 @@ public class GroupResource {
                 "Group not found - groupId: " + id).build();
         GroupDto groupDto = groupBean.getGroupDto(group);
         if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(groupDto)).type(MediaTypeVS.JSON).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(groupDto)).type(MediaType.JSON).build();
         } else {
             return Response.temporaryRedirect(new URI("../spa.xhtml#!/CurrencyServer/rest/group/id/" + group.getId())).build();
         }
     }
 
     @Path("/id/{id}/searchUsers")
-    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
     public Response searchUsers(@PathParam("id") long id,
             @DefaultValue("0") @QueryParam("offset") int offset,
             @DefaultValue("100") @QueryParam("max") int max,
@@ -167,7 +166,7 @@ public class GroupResource {
     }
 
     @Path("/id/{groupId}/listUsers")
-    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
     public Response listUsers(@PathParam("groupId") long groupId, @Context ServletContext context,
                           @DefaultValue("0") @QueryParam("offset") int offset,
                           @DefaultValue("100") @QueryParam("max") int max,
@@ -192,7 +191,7 @@ public class GroupResource {
     }
 
     @Path("/id/{id}/balance")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Object balance(@PathParam("id") long id,
                             @DefaultValue("0") @QueryParam("offset") int offset,
                             @DefaultValue("100") @QueryParam("max") int max,
@@ -207,12 +206,12 @@ public class GroupResource {
 
     @Transactional
     @Path("/saveGroup")
-    @POST @Produces(MediaType.APPLICATION_JSON)
+    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Object saveGroup(CMSMessage cmsMessage, @Context ServletContext context,
                             @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         Group group = groupBean.saveGroup(cmsMessage);
         GroupDto dto = GroupDto.DETAILS(group, null);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaType.JSON).build();
     }
 
 
@@ -228,7 +227,7 @@ public class GroupResource {
         String URL = config.getContextURL() + "/rest/group/id/" + group.getId();
         String message =  messages.get("currencyGroupCancelledOKMsg", group.getName());
         MessageDto messageDto = new MessageDto(ResponseVS.SC_OK, message, URL);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaType.JSON).build();
     }
 
     @Path("/id/{id}/subscribe")
@@ -245,7 +244,7 @@ public class GroupResource {
     }
 
     @Path("/id/{groupId}/user/id/{userId}")
-    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
     public Response user(@PathParam("groupId") long groupId, @PathParam("userId") long userId,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp) 
             throws Exception {
@@ -256,11 +255,11 @@ public class GroupResource {
                 "Subscription not found - groupId: " + groupId + " - userId: " + userId).build();
         SubscriptionDto dto = SubscriptionDto.DETAILED(subscription, config.getContextURL());
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto))
-                .type(MediaTypeVS.JSON).build();
+                .type(MediaType.JSON).build();
     }
 
     @Path("/activateUser")
-    @POST @Produces(MediaType.APPLICATION_JSON)
+    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response activateUser(CMSMessage cmsMessage, @Context ServletContext context,
                                  @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
@@ -268,18 +267,18 @@ public class GroupResource {
         currencyAccountBean.checkUserAccount(subscription.getUser());
         MessageDto dto = MessageDto.OK(messages.get("currencyGroupUserActivatedMsg", subscription.getUser().getNif(),
                 subscription.getGroup().getName()), null);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaType.JSON).build();
     }
 
     @Path("/deActivateUser")
-    @POST @Produces(MediaType.APPLICATION_JSON)
+    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response deActivateUser(CMSMessage cmsMessage, @Context ServletContext context,
                                    @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         Subscription subscription = subscriptionBean.deActivateUser(cmsMessage);
         MessageDto dto = MessageDto.OK(messages.get("currencyGroupUserdeActivatedMsg", subscription.getUser().getNif(),
                 subscription.getGroup().getName()), null);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).type(MediaType.JSON).build();
     }
 
 }

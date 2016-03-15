@@ -7,7 +7,7 @@ import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.NifUtils;
-import org.votingsystem.web.currency.websocket.SessionVSManager;
+import org.votingsystem.web.currency.websocket.SessionManager;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;
@@ -39,7 +39,7 @@ public class DeviceResource {
         if(device == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - Device not found - id:" + deviceId).build();
         DeviceDto dto = new DeviceDto(device);
-        dto.setSessionId(SessionVSManager.getInstance().getDeviceSessionId(device.getId()));
+        dto.setSessionId(SessionManager.getInstance().getDeviceSessionId(device.getId()));
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
@@ -66,7 +66,7 @@ public class DeviceResource {
         User user = dao.getSingleResult(User.class, query);
         if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - User not found - nif:" + nif).build();
-        Set<Device> deviceSet = SessionVSManager.getInstance().getUserDeviceSet(user.getId());
+        Set<Device> deviceSet = SessionManager.getInstance().getUserDeviceSet(user.getId());
         Set<DeviceDto> deviceSetDto = new HashSet<>();
         for(Device device : deviceSet) {
             deviceSetDto.add(new DeviceDto(device));
@@ -79,11 +79,11 @@ public class DeviceResource {
     public Response connectedDevice(@PathParam("deviceId") Long deviceId,
             @DefaultValue("false") @QueryParam("getAllDevicesFromOwner") boolean getAllDevicesFromOwner) throws Exception {
         Set<DeviceDto> deviceSetDto = new HashSet<>();
-        String sessionId = SessionVSManager.getInstance().getDeviceSessionId(deviceId);
+        String sessionId = SessionManager.getInstance().getDeviceSessionId(deviceId);
         User user = null;
         Device device = null;
         if(sessionId != null) {
-            Session session = SessionVSManager.getInstance().getAuthenticatedSession(sessionId);
+            Session session = SessionManager.getInstance().getAuthenticatedSession(sessionId);
             user = (User) session.getUserProperties().get("user");
             device = (Device) session.getUserProperties().get("device");
             if(device != null) deviceSetDto.add(new DeviceDto(device));
@@ -95,7 +95,7 @@ public class DeviceResource {
             }
             if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
                     "ERROR - User not found for device with id:" + deviceId).build();
-            Set<Device> deviceSet = SessionVSManager.getInstance().getUserDeviceSet(user.getId());
+            Set<Device> deviceSet = SessionManager.getInstance().getUserDeviceSet(user.getId());
             for(Device dev : deviceSet) {
                 if(dev == null || !dev.getId().equals(dev.getId())) deviceSetDto.add(new DeviceDto(dev));
             }

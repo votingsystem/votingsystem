@@ -2,7 +2,7 @@ package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.TypeVS;
 
@@ -26,10 +26,10 @@ public class RepresentativeVotingHistoryDto {
 
 
     public void validate() throws ExceptionVS {
-        if(TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST != operation) throw new ValidationExceptionVS(
+        if(TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST != operation) throw new ValidationException(
                 format("ERROR - operation missmatch - expected: {0} - found: {1}",
                         TypeVS.REPRESENTATIVE_VOTING_HISTORY_REQUEST, operation));
-        if(dateFrom.after(dateTo)) throw new ValidationExceptionVS(
+        if(dateFrom.after(dateTo)) throw new ValidationException(
                 format("dateFrom '{0}' can no be after dateTo '{1}'", dateFrom, dateTo));
         representativeNif =  NifUtils.validate(representativeNif);
     }

@@ -36,7 +36,7 @@
                     <div class="movemenType">${msg.incomesLbl} - <span>{{currency.currencyName}}</span></div>
                     <template is="dom-repeat" items="{{getTagVSList(currency)}}" as="tagVS">
                         <div class="layout horizontal">
-                            <div class="tagLbl">{{tagVS.name}}</div>  - ${msg.numTransactionVSLbl}: <span>{{tagVS.numTransactionVS}}</span> -
+                            <div class="tagLbl">{{tagVS.name}}</div>  - ${msg.numTransactionLbl}: <span>{{tagVS.numTransaction}}</span> -
                         ${msg.amountLbl}: <span>{{tagVS.amount}}</span> <span>{{currency.currencyName}}</span>
                         </div>
                     </template>
@@ -48,7 +48,7 @@
                     <div class="movemenType">${msg.expensesLbl} - {{currency.currencyName}}</div>
                     <template is="dom-repeat" items="{{getTagVSList(currency)}}" as="tagVS">
                         <div class="layout horizontal">
-                            <div class="tagLbl">{{tagVS.name}}</div>  - ${msg.numTransactionVSLbl}: <span>{{tagVS.numTransactionVS}}</span> -
+                            <div class="tagLbl">{{tagVS.name}}</div>  - ${msg.numTransactionLbl}: <span>{{tagVS.numTransaction}}</span> -
                             ${msg.amountLbl}: <span>{{tagVS.amount}}</span> <span>{{currency.currencyName}}</span>
                         </div>
                     </template>
@@ -82,8 +82,8 @@
                 var tagVSMap = currencyInfoMap.tagVSMap
                 var tagVSList = []
                 Object.keys(tagVSMap).forEach(function(entry) {
-                    //{"HIDROGENO":{"numTransactionVS":6,"amount":"61236.00"}
-                    var dataMap = {name:entry, numTransactionVS:tagVSMap[entry].numTransactionVS,
+                    //{"HIDROGENO":{"numTransaction":6,"amount":"61236.00"}
+                    var dataMap = {name:entry, numTransaction:tagVSMap[entry].numTransaction,
                         amount:tagVSMap[entry].amount}
                     tagVSList.push(dataMap)
                 });

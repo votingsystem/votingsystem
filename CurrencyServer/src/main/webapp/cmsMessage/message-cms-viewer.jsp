@@ -23,20 +23,20 @@
                 switch (this.cmsMessageDto.viewer) {
                     case "message-cms":
                         break;
-                    case "message-cms-transactionvs-from-bank":
+                    case "message-cms-transaction-from-bank":
                         if(!this.FROM_BANK) {
-                            Polymer.Base.importHref(vs.contextURL + '/cmsMessagePEM/message-cms-transactionvs-from-bank.vsp', function(e) {
-                                console.log(this.tagName + " - message-cms-transactionvs-from-bank: " + this.FROM_BANK)
-                                this.FROM_BANK = document.createElement('message-cms-transactionvs-from-bank');
+                            Polymer.Base.importHref(vs.contextURL + '/cmsMessagePEM/message-cms-transaction-from-bank.vsp', function(e) {
+                                console.log(this.tagName + " - message-cms-transaction-from-bank: " + this.FROM_BANK)
+                                this.FROM_BANK = document.createElement('message-cms-transaction-from-bank');
                                 this.loadMainContent(this.FROM_BANK)
                             }.bind(this));
                         } else this.loadMainContent(this.FROM_BANK)
                         break;
-                    case "message-cms-transactionvs-currency-request":
+                    case "message-cms-transaction-currency-request":
                         break;
-                    case "message-cms-transactionvs":
+                    case "message-cms-transaction":
                         break;
-                    case "message-cms-transactionvs-currency-change":
+                    case "message-cms-transaction-currency-change":
                         break;
                 }
             },

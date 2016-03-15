@@ -41,7 +41,7 @@ public class CurrencySendFromWallet {
                 currencyServer.getTimeStampServiceURL());
 
         ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsBytes(currencyBatchDto),
-                ContentTypeVS.JSON, currencyServer.getCurrencyTransactionServiceURL());
+                ContentType.JSON, currencyServer.getCurrencyTransactionServiceURL());
         log.info("Currency Transaction result: " + responseVS.getStatusCode());
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         CurrencyBatchResponseDto responseDto = JSON.getMapper().readValue(responseVS.getMessage(),

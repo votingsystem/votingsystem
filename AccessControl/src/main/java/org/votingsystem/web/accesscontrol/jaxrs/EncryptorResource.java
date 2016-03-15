@@ -6,7 +6,7 @@ import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -52,14 +52,14 @@ public class EncryptorResource {
         byte[] responseBytes = JSON.getMapper().writeValueAsBytes(request);
         //if(requestMap.receiverCert) cmsBean.encryptToCMS(responseBytes, requestMap.receiverCert)
         return Response.ok().entity(cmsBean.encryptToCMS(responseBytes, receiverPublic)).type(
-                MediaTypeVS.MULTIPART_ENCRYPTED).build();
+                MediaType.MULTIPART_ENCRYPTED).build();
     }
 
     @Path("/getMultiSignedMessage") @POST
     public Response getMultiSignedMessage(CMSMessage cmsMessage, @Context ServletContext context,
                                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         CMSSignedMessage cmsSignedMessage = cmsBean.addSignature(cmsMessage.getCMS());
-        return  Response.ok().entity(cmsSignedMessage.toPEM()).type(MediaTypeVS.JSON_SIGNED).build();
+        return  Response.ok().entity(cmsSignedMessage.toPEM()).type(MediaType.JSON_SIGNED).build();
     }
 
     @Path("/validateTimeStamp") @POST

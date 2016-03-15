@@ -103,7 +103,7 @@ public class Encryptor {
             InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException,
             UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        byte[] salt = KeyGeneratorVS.INSTANCE.getSalt();
+        byte[] salt = KeyGenerator.INSTANCE.getSalt();
         KeySpec spec = new PBEKeySpec(password, salt, ITERATION_COUNT, KEY_LENGTH);
         SecretKey secret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");

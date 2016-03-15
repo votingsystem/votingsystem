@@ -22,7 +22,7 @@ public class Bank extends User implements Serializable {
 
     public static Bank getUser(X509Certificate certificate) {
         Bank user = new Bank();
-        user.setCertificate(certificate);
+        user.setX509Certificate(certificate);
         String subjectDN = certificate.getSubjectDN().getName();
         if (subjectDN.contains("C=")) user.setCountry(subjectDN.split("C=")[1].split(",")[0]);
         if (subjectDN.contains("SERIALNUMBER=")) user.setNif(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);

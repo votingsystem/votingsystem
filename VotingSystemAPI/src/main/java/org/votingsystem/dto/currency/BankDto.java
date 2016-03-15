@@ -1,7 +1,7 @@
 package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.TypeVS;
 
 /**
@@ -28,13 +28,13 @@ public class BankDto {
         return bankDto;
     }
 
-    public void validatePublishRequest() throws ValidationExceptionVS {
-        if(operation == null) throw new ValidationExceptionVS("missing param 'operation'");
-        if(TypeVS.BANK_NEW != operation) throw new ValidationExceptionVS(
+    public void validatePublishRequest() throws ValidationException {
+        if(operation == null) throw new ValidationException("missing param 'operation'");
+        if(TypeVS.BANK_NEW != operation) throw new ValidationException(
                 "Operation expected: 'BANK_NEW' - operation found: " + operation.toString());
-        if(IBAN == null) throw new ValidationExceptionVS("missing param 'IBAN'");
-        if(info == null) throw new ValidationExceptionVS("missing param 'info'");
-        if(certChainPEM == null) throw new ValidationExceptionVS("missing param 'certChainPEM'");
+        if(IBAN == null) throw new ValidationException("missing param 'IBAN'");
+        if(info == null) throw new ValidationException("missing param 'info'");
+        if(certChainPEM == null) throw new ValidationException("missing param 'certChainPEM'");
     }
 
     public TypeVS getOperation() {

@@ -1,7 +1,7 @@
 package org.votingsystem.dto.currency;
 
 
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.Transaction;
 
 import java.math.BigDecimal;
 
@@ -24,8 +24,8 @@ public class IncomesDto {
         if(this.timeLimited == null) this.timeLimited = BigDecimal.ZERO;
     }
 
-    public IncomesDto(TransactionVS transactionVS) {
-        add(transactionVS);
+    public IncomesDto(Transaction transaction) {
+        add(transaction);
     }
 
     public BigDecimal getTotal() {
@@ -53,9 +53,9 @@ public class IncomesDto {
         else timeLimited = timeLimited.add(sum);
     }
 
-    public IncomesDto add(TransactionVS transactionVS) {
-        if(transactionVS.getIsTimeLimited()) timeLimited = timeLimited.add(transactionVS.getAmount());
-        total = total.add(transactionVS.getAmount());
+    public IncomesDto add(Transaction transaction) {
+        if(transaction.getIsTimeLimited()) timeLimited = timeLimited.add(transaction.getAmount());
+        total = total.add(transaction.getAmount());
         return this;
     }
 

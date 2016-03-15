@@ -4,13 +4,13 @@ import org.apache.commons.io.IOUtils;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.*;
-import org.votingsystem.model.BatchVS;
+import org.votingsystem.model.Batch;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.CurrencyBatch;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.CurrencyExpendedException;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
@@ -51,7 +51,8 @@ public class CurrencyBean {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject TransactionVSBean transactionVSBean;
+    @Inject
+    TransactionBean transactionBean;
     @Inject CMSBean cmsBean;
     @Inject
     UserBean userBean;
@@ -86,12 +87,12 @@ public class CurrencyBean {
             currencyBatch.setLeftOver(leftOver);
             currencyBatch.setCurrencyChange(currencyChange);
             currencyBatch.setValidatedCurrencySet(validatedCurrencySet);
-            dao.persist(currencyBatch.setCmsMessage(cmsMessage).setState(BatchVS.State.OK));
-            TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_CHANGE(
+            dao.persist(currencyBatch.setCmsMessage(cmsMessage).setState(Batch.State.OK));
+            Transaction transaction = dao.persist(Transaction.CURRENCY_CHANGE(
                     currencyBatch, validTo, cmsMessage, currencyBatch.getTagVS()));
-            transactionVSBean.updateCurrencyAccounts(transactionVS.setCurrencyBatch(currencyBatch));
+            transactionBean.updateCurrencyAccounts(transaction.setCurrencyBatch(currencyBatch));
             for(Currency currency : validatedCurrencySet) {
-                dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
+                dao.merge(currency.setState(Currency.State.EXPENDED).setTransaction(transaction));
             }
             return new CurrencyBatchResponseDto(receipt, new String(PEMUtils.getPEMEncoded(leftOver.getX509AnonymousCert())),
                     new String(PEMUtils.getPEMEncoded(currencyChange.getX509AnonymousCert())));
@@ -110,14 +111,14 @@ public class CurrencyBean {
             }
             CMSSignedMessage receipt = cmsBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(batchDto));
             CMSMessage cmsMessage =  dao.persist(new CMSMessage(receipt, TypeVS.BATCH_RECEIPT));
-            dao.persist(currencyBatch.setCmsMessage(cmsMessage).setState(BatchVS.State.OK));
+            dao.persist(currencyBatch.setCmsMessage(cmsMessage).setState(Batch.State.OK));
             log.info("currencyBatch:" + currencyBatch.getId() + " - cmsMessage:" + cmsMessage.getId());
-            TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_SEND(
+            Transaction transaction = dao.persist(Transaction.CURRENCY_SEND(
                     currencyBatch, toUser, validTo, cmsMessage, currencyBatch.getTagVS()));
             currencyBatch.setValidatedCurrencySet(validatedCurrencySet);
-            transactionVSBean.updateCurrencyAccounts(transactionVS.setCurrencyBatch(currencyBatch));
+            transactionBean.updateCurrencyAccounts(transaction.setCurrencyBatch(currencyBatch));
             for(Currency currency : validatedCurrencySet) {
-                dao.merge(currency.setState(Currency.State.EXPENDED).setTransactionVS(transactionVS));
+                dao.merge(currency.setState(Currency.State.EXPENDED).setTransaction(transaction));
             }
             CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto(receipt, leftOverCert);
             responseDto.setMessage(messages.get("currencyBatchOKMsg", batchDto.getBatchAmount() + " " +
@@ -142,11 +143,11 @@ public class CurrencyBean {
             User user = cmsMessage.getSigner(); //anonymous signer
             timeStampBean.validateToken(user.getTimeStampToken());
             PKIXCertPathValidatorResult certValidatorResult = CertUtils.verifyCertificate(
-                    cmsBean.getCurrencyAnchors(), false, Arrays.asList(user.getCertificate()));
+                    cmsBean.getCurrencyAnchors(), false, Arrays.asList(user.getX509Certificate()));
             X509Certificate certCaResult = certValidatorResult.getTrustAnchor().getTrustedCert();
         } else  throw new ExceptionVS(messages.get("currencyStateErrorMsg", currencyDB.getId().toString(),
                 currencyDB.getState().toString()));
-        currency.setAuthorityCertificateVS(cmsBean.getServerCertificateVS());
+        currency.setAuthorityCertificate(cmsBean.getServerCertificate());
         return currency;
     }
 
@@ -157,9 +158,9 @@ public class CurrencyBean {
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
                 fromUser.getIBAN(), requestDto.getTagVS(), requestDto.getTotalAmount(), requestDto.getCurrencyCode());
         Set<String> currencyCertSet = csrBean.signCurrencyRequest(requestDto);
-        TransactionVS userTransaction = TransactionVS.CURRENCY_REQUEST(messages.get("currencyRequestLbl"),
+        Transaction userTransaction = Transaction.CURRENCY_REQUEST(messages.get("currencyRequestLbl"),
                 accountFromMovements, requestDto);
-        transactionVSBean.updateCurrencyAccounts(userTransaction);
+        transactionBean.updateCurrencyAccounts(userTransaction);
         ResultListDto resultListDto = new ResultListDto(currencyCertSet);
         resultListDto.setMessage(messages.get("withdrawalMsg", requestDto.getTotalAmount().toString(),
                 requestDto.getCurrencyCode()) + " " + messages.getTagMessage(requestDto.getTagVS().getName()));
@@ -214,7 +215,7 @@ public class CurrencyBean {
             IOUtils.write(cmsMessage.getContentPEM(), new FileOutputStream(cmsFile));
         }
         query = dao.getEM().createQuery("SELECT c FROM CurrencyBatch c WHERE c.state =:state and c.type =:typeVS")
-                .setParameter("typeVS",  TypeVS.CURRENCY_SEND).setParameter("state", BatchVS.State.OK);
+                .setParameter("typeVS",  TypeVS.CURRENCY_SEND).setParameter("state", Batch.State.OK);
         List<CurrencyBatch> currencyBatchList = query.getResultList();
         for(CurrencyBatch currencyBatch : currencyBatchList) {
             File cmsFile = new File(format("{0}/CURRENCY_SEND_cmsMessage_{1}.p7s", currencyBatchDir.getAbsolutePath(),
@@ -223,7 +224,7 @@ public class CurrencyBean {
         }
 
         query = dao.getEM().createQuery("SELECT c FROM CurrencyBatch c WHERE c.state =:state and c.type =:typeVS")
-                .setParameter("typeVS",  TypeVS.CURRENCY_CHANGE).setParameter("state", BatchVS.State.OK);
+                .setParameter("typeVS",  TypeVS.CURRENCY_CHANGE).setParameter("state", Batch.State.OK);
         currencyBatchList = query.getResultList();
         for(CurrencyBatch currencyBatch : currencyBatchList) {
             File cmsFile = new File(format("{0}/CURRENCY_CHANGE_cmsMessage_{1}.p7s", currencyBatchDir.getAbsolutePath(),

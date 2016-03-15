@@ -8,7 +8,7 @@ import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Group;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.web.currency.cdi.ConfigVSImpl;
@@ -45,7 +45,8 @@ public class AuditBean {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject TransactionVSBean transactionVSBean;
+    @Inject
+    TransactionBean transactionBean;
     @Inject CMSBean cmsBean;
     @Inject BalancesBean balancesBean;
 
@@ -53,7 +54,7 @@ public class AuditBean {
     public void checkCurrencyRequest(Interval timePeriod) { }
 
     //Backup user transactions for timePeriod
-    public BalancesDto backupUserTransactionVSList(User user, Interval timePeriod) throws IOException {
+    public BalancesDto backupUserTransactionList(User user, Interval timePeriod) throws IOException {
         String lapsePath = DateUtils.getDirPath(timePeriod.getDateFrom());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MMM_dd");
         lapsePath = "/" + formatter.format(timePeriod.getDateFrom()) + "__" +  formatter.format(timePeriod.getDateTo());
@@ -64,10 +65,10 @@ public class AuditBean {
         Query query = dao.getEM().createNamedQuery("findTransByFromUserAndTransactionParentNullAndDateCreatedBetween")
                 .setParameter("fromUser", user).setParameter("dateFrom", timePeriod.getDateFrom())
                 .setParameter("dateTo", timePeriod.getDateTo());
-        List<TransactionVS> transactionList = query.getResultList();
-        List<TransactionVSDto> transactionFromList = new ArrayList<>();
+        List<Transaction> transactionList = query.getResultList();
+        List<TransactionDto> transactionFromList = new ArrayList<>();
         Map<String, Map<String, BigDecimal>> balancesFromMap = new HashMap<>();
-        for(TransactionVS transaction : transactionList) {
+        for(Transaction transaction : transactionList) {
             Map<String, BigDecimal> currencyMap = null;
             if((currencyMap = balancesFromMap.get(transaction.getCurrencyCode())) != null) {
                 Map<String, BigDecimal> tagMap = balancesFromMap.get(transaction.getCurrencyCode());
@@ -80,7 +81,7 @@ public class AuditBean {
                 tagMap.put(transaction.getTag().getName(), transaction.getAmount());
                 balancesFromMap.put(transaction.getCurrencyCode(), tagMap);
             }
-            TransactionVSDto dto = transactionVSBean.getTransactionDto(transaction);
+            TransactionDto dto = transactionBean.getTransactionDto(transaction);
             CMSMessage cmsMessage = transaction.getCmsMessage();
             dto.setCmsMessagePEM(Base64.getUrlEncoder().encodeToString(cmsMessage.getContentPEM()));
             transactionFromList.add(dto);
@@ -89,9 +90,9 @@ public class AuditBean {
         query = dao.getEM().createNamedQuery("findTransByToUserAndDateCreatedBetween").setParameter("toUser", user)
                 .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo",timePeriod.getDateTo());
         transactionList = query.getResultList();
-        List<TransactionVSDto> transactionToList = new ArrayList<>();
+        List<TransactionDto> transactionToList = new ArrayList<>();
         Map<String, Map<String, IncomesDto>> balancesToMap = new HashMap<>();
-        for(TransactionVS transaction : transactionList) {
+        for(Transaction transaction : transactionList) {
             Map<String, IncomesDto> currencyMap = null;
             if((currencyMap = balancesToMap.get(transaction.getCurrencyCode())) != null) {
                 IncomesDto tagAccumulated = null;
@@ -103,7 +104,7 @@ public class AuditBean {
                 currencyMap.put(transaction.getTag().getName(), new IncomesDto(transaction));
                 balancesToMap.put(transaction.getCurrencyCode(), currencyMap);
             }
-            TransactionVSDto transactionDto = transactionVSBean.getTransactionDto(transaction);
+            TransactionDto transactionDto = transactionBean.getTransactionDto(transaction);
             CMSMessage cmsMessage = transaction.getCmsMessage();
             transactionDto.setCmsMessagePEM(Base64.getUrlEncoder().encodeToString(cmsMessage.getContentPEM()));
             transactionToList.add(transactionDto);
@@ -182,25 +183,25 @@ public class AuditBean {
         for(String currencyCode: currencyMap.keySet()) {
             for(Map.Entry<String, BigDecimal> tagVSEntry:  currencyMap.get(currencyCode).entrySet()) {
                 TagVS currentTagVS = config.getTag(tagVSEntry.getKey());
-                query = dao.getEM().createQuery("SELECT count (t) FROM TransactionVS t WHERE t.toUser =:toUser and " +
+                query = dao.getEM().createQuery("SELECT count (t) FROM Transaction t WHERE t.toUser =:toUser and " +
                         "t.state =:state and t.type =:type and t.tag =:tag and t.dateCreated >=:dateTo")
-                        .setParameter("toUser", user).setParameter("state", TransactionVS.State.OK)
-                        .setParameter("type", TransactionVS.Type.CURRENCY_PERIOD_INIT)
+                        .setParameter("toUser", user).setParameter("state", Transaction.State.OK)
+                        .setParameter("type", Transaction.Type.CURRENCY_PERIOD_INIT)
                         .setParameter("tag", currentTagVS).setParameter("dateTo", timePeriod.getDateTo());
 
                 long numInitPeriodTransaction = (long) query.getSingleResult();
-                if(numInitPeriodTransaction > 0) throw new ExceptionVS("REPEATED CURRENCY_PERIOD_INIT TransactionVS for " +
+                if(numInitPeriodTransaction > 0) throw new ExceptionVS("REPEATED CURRENCY_PERIOD_INIT Transaction for " +
                         "User:" + user.getId() + " - tag: " + tagVSEntry.getKey() + " - timePeriod:" + timePeriod);
                 BigDecimal timeLimitedNotExpended = balancesDto.getTimeLimitedNotExpended(currencyCode, currentTagVS.getName());
                 BigDecimal amountResult = tagVSEntry.getValue().subtract(timeLimitedNotExpended);
                 String signedMessageSubject =  messages.get("tagInitPeriodMsg", tagVSEntry.getKey());
-                byte[] contentToSign = JSON.getMapper().writeValueAsBytes(new InitPeriodTransactionVSDto(amountResult,
+                byte[] contentToSign = JSON.getMapper().writeValueAsBytes(new InitPeriodTransactionDto(amountResult,
                         timeLimitedNotExpended, currencyCode, tagVSEntry.getKey(), user));
                 CMSSignedMessage cmsSignedMessage = cmsBean.signDataWithTimeStamp(contentToSign);
                 CMSMessage cmsMessage = dao.persist(new CMSMessage(cmsSignedMessage, cmsBean.getSystemUser(),
                         TypeVS.CURRENCY_PERIOD_INIT));
-                dao.persist(new TransactionVS(user, user, amountResult, currencyCode, signedMessageSubject, cmsMessage,
-                        TransactionVS.Type.CURRENCY_PERIOD_INIT, TransactionVS.State.OK, currentTagVS));
+                dao.persist(new Transaction(user, user, amountResult, currencyCode, signedMessageSubject, cmsMessage,
+                        Transaction.Type.CURRENCY_PERIOD_INIT, Transaction.State.OK, currentTagVS));
                 if(timeLimitedNotExpended.compareTo(BigDecimal.ZERO) > 0) {
                     query = dao.getEM().createNamedQuery("findAccountByUserIBANAndStateAndCurrencyAndTag")
                             .setParameter("userIBAN", user.getIBAN()).setParameter("state", CurrencyAccount.State.ACTIVE)
@@ -208,11 +209,11 @@ public class AuditBean {
                     CurrencyAccount account = dao.getSingleResult (CurrencyAccount.class, query);
                     Map accountFromMovements = new HashMap<>();
                     accountFromMovements.put(account, timeLimitedNotExpended);
-                    TransactionVS transactionVS = dao.persist(new TransactionVS(user, cmsBean.getSystemUser(),
+                    Transaction transaction = dao.persist(new Transaction(user, cmsBean.getSystemUser(),
                             timeLimitedNotExpended, currencyCode,
-                            signedMessageSubject, cmsMessage,TransactionVS.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED,
-                            TransactionVS.State.OK,currentTagVS ));
-                    transactionVS.setAccountFromMovements(accountFromMovements);
+                            signedMessageSubject, cmsMessage, Transaction.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED,
+                            Transaction.State.OK,currentTagVS ));
+                    transaction.setAccountFromMovements(accountFromMovements);
                 }
                 File outputFile = reportFiles.getTagReceiptFile(tagVSEntry.getKey());
                 log.info(currencyCode + " - " + currentTagVS.getName() + " - result: " + outputFile.getAbsolutePath());

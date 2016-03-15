@@ -124,10 +124,10 @@ public class DocumentBrowserPane extends VBox {
             try {
                 metaInf = JSON.getMapper().readValue(metaInfFile, MetaInf.class);
                 switch (metaInf.getType()) {
-                    case TRANSACTIONVS_INFO:
+                    case TRANSACTION_INFO:
                         fileList = new ArrayList<>();
                         for(File file : decompressedBackupDir.listFiles()) {
-                            if(file.getName().toLowerCase().endsWith(ContentTypeVS.JSON_SIGNED.getExtension()))
+                            if(file.getName().toLowerCase().endsWith(ContentType.JSON_SIGNED.getExtension()))
                                 fileList.add(file.getAbsolutePath());
                         }
                         if(fileList.size() > 0) {
@@ -166,7 +166,7 @@ public class DocumentBrowserPane extends VBox {
                     fos.write(((DocumentVS)content).getDocumentBytes());
                     fos.close();
                 } else if(content instanceof EventVSInfoPane) {
-                    if(!fileName.contains(".")) fileName = fileName + ContentTypeVS.ZIP.getExtension();
+                    if(!fileName.contains(".")) fileName = fileName + ContentType.ZIP.getExtension();
                     FileOutputStream fos = new FileOutputStream(new File(fileName));
                     fos.write(FileUtils.getBytesFromFile(selectedFile));
                     fos.close();

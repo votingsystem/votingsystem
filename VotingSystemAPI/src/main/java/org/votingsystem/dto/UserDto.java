@@ -2,7 +2,7 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.CertificateVS;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
@@ -34,7 +34,7 @@ public class UserDto implements Serializable {
     private String description;
     private Set<DeviceDto> connectedDevices;
     private DeviceDto device;
-    private Set<CertificateVSDto> certCollection = new HashSet<>();
+    private Set<CertificateDto> certCollection = new HashSet<>();
     private String firstName;
     private String lastName;
     private String phone;
@@ -81,9 +81,9 @@ public class UserDto implements Serializable {
 
     public static UserDto COMPLETE(User user) throws Exception {
         UserDto userDto = BASIC(user);
-        if(user.getCertificate() != null) {
-            Set<CertificateVSDto> certCollection = new HashSet<>();
-            certCollection.add(new CertificateVSDto(user.getCertificate()));
+        if(user.getX509Certificate() != null) {
+            Set<CertificateDto> certCollection = new HashSet<>();
+            certCollection.add(new CertificateDto(user.getX509Certificate()));
             userDto.setCertCollection(certCollection);
         }
         DeviceDto device = new DeviceDto();
@@ -94,15 +94,15 @@ public class UserDto implements Serializable {
     }
 
     public static UserDto DEVICES(User user, Set<DeviceDto> connectedDevices,
-                                  List<CertificateVS> certificateVSList) throws Exception {
+                                  List<Certificate> certificateList) throws Exception {
         UserDto userDto = BASIC(user);
         userDto.setReason(user.getReason());
         userDto.setDescription(user.getDescription());
         userDto.setConnectedDevices(connectedDevices);
-        if(certificateVSList != null) {
-            Set<CertificateVSDto> certCollection = new HashSet<>();
-            for(CertificateVS certificateVS : certificateVSList) {
-                certCollection.add(new CertificateVSDto(certificateVS.getX509Cert()));
+        if(certificateList != null) {
+            Set<CertificateDto> certCollection = new HashSet<>();
+            for(Certificate certificate : certificateList) {
+                certCollection.add(new CertificateDto(certificate.getX509Cert()));
             }
             userDto.setCertCollection(certCollection);
         }
@@ -136,7 +136,7 @@ public class UserDto implements Serializable {
                 user = new User();
         }
         if(!certCollection.isEmpty()) {
-            user.setCertificate(certCollection.iterator().next().getX509Cert());
+            user.setX509Certificate(certCollection.iterator().next().getX509Cert());
         }
         user.setId(id);
         user.setName(name);
@@ -251,11 +251,11 @@ public class UserDto implements Serializable {
         this.lastName = lastName;
     }
 
-    public Set<CertificateVSDto> getCertCollection() {
+    public Set<CertificateDto> getCertCollection() {
         return certCollection;
     }
 
-    public void setCertCollection(Set<CertificateVSDto> certCollection) {
+    public void setCertCollection(Set<CertificateDto> certCollection) {
         this.certCollection = certCollection;
     }
 

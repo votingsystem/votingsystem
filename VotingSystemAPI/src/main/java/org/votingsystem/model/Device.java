@@ -41,7 +41,7 @@ public class Device extends EntityVS implements Serializable {
     @Column(name="phone" ) private String phone;
     @Column(name="state" ) @Enumerated(EnumType.STRING)  private State state;
     @Column(name="metaInf" ) private String metaInf;
-    @OneToOne private CertificateVS certificateVS;
+    @OneToOne private Certificate certificate;
     @Column(name="reason", columnDefinition="TEXT") private String reason;
     @Column(name="deviceName") private String deviceName;
     @Temporal(TemporalType.TIMESTAMP)
@@ -57,13 +57,13 @@ public class Device extends EntityVS implements Serializable {
     }
 
     public Device(User user, String deviceId, String email, String phone, String deviceName,
-                  CertificateVS certificateVS) {
+                  Certificate certificate) {
         this.user = user;
         this.deviceId =deviceId;
         this.email = email;
         this.phone = phone;
         this.deviceName = deviceName;
-        this.certificateVS = certificateVS;
+        this.certificate = certificate;
     }
 
     public Device(User user, String deviceId, String email, String phone, Type type) {
@@ -171,12 +171,12 @@ public class Device extends EntityVS implements Serializable {
         this.deviceName = deviceName;
     }
 
-    public CertificateVS getCertificateVS() {
-        return certificateVS;
+    public Certificate getCertificate() {
+        return certificate;
     }
 
-    public Device setCertificateVS(CertificateVS certificateVS) {
-        this.certificateVS = certificateVS;
+    public Device setCertificate(Certificate certificate) {
+        this.certificate = certificate;
         return this;
     }
 
@@ -190,7 +190,7 @@ public class Device extends EntityVS implements Serializable {
     }
 
     public X509Certificate getX509Certificate() throws Exception {
-        if(x509Certificate == null) x509Certificate = CertUtils.loadCertificate(certificateVS.getContent());
+        if(x509Certificate == null) x509Certificate = CertUtils.loadCertificate(certificate.getContent());
         return x509Certificate;
     }
 

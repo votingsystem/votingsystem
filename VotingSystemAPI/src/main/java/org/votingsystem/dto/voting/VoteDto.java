@@ -50,10 +50,10 @@ public class VoteDto {
         setEventId(vote.getEventVS().getId());
         setEventURL(contextURL + "/rest/eventElection/id/" + getEventId());
         setOptionSelected(vote.getOptionSelected());
-        setHashCertVSBase64(vote.getCertificateVS().getHashCertVSBase64());
+        setHashCertVSBase64(vote.getCertificate().getHashCertVSBase64());
         if(getHashCertVSBase64() != null) setHashCertVoteHex(StringUtils.toHex(getHashCertVSBase64()));
-        String hashHex = hexConverter.marshal(vote.getCertificateVS().getHashCertVSBase64().getBytes());
-        setCertificateURL(contextURL + "/rest/certificateVS/hashHex/" + hashHex);
+        String hashHex = hexConverter.marshal(vote.getCertificate().getHashCertVSBase64().getBytes());
+        setCertificateURL(contextURL + "/rest/certificate/hashHex/" + hashHex);
         setCmsMessageURL(contextURL + "/rest/cmsMessage/id/" + vote.getCMSMessage().getId());
     }
 

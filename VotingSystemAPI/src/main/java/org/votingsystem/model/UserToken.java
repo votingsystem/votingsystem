@@ -25,7 +25,7 @@ public class UserToken extends EntityVS implements Serializable {
     @Column(name="state") @Enumerated(EnumType.STRING) private State state = State.OK;
     //user token encrypted with the server certificate
     @Column(name="token") private byte[] token;
-    @OneToOne private CertificateVS certificateVS;
+    @OneToOne private Certificate certificate;
     @OneToOne private User user;
     @OneToOne private CMSMessage cmsMessage;
     @Temporal(TemporalType.TIMESTAMP)
@@ -35,10 +35,10 @@ public class UserToken extends EntityVS implements Serializable {
 
     public UserToken() {}
 
-    public UserToken(User user, byte[] token, CertificateVS certificateVS, CMSMessage cmsMessage) {
+    public UserToken(User user, byte[] token, Certificate certificate, CMSMessage cmsMessage) {
         this.user = user;
         this.token = token;
-        this.certificateVS = certificateVS;
+        this.certificate = certificate;
         this.cmsMessage = cmsMessage;
     }
 
@@ -50,12 +50,12 @@ public class UserToken extends EntityVS implements Serializable {
         this.token = token;
     }
 
-    public CertificateVS getCertificateVS() {
-        return certificateVS;
+    public Certificate getCertificate() {
+        return certificate;
     }
 
-    public void setCertificateVS(CertificateVS certificateVS) {
-        this.certificateVS = certificateVS;
+    public void setCertificate(Certificate certificate) {
+        this.certificate = certificate;
     }
 
     public CMSMessage getCmsMessage() {

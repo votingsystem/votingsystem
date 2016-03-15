@@ -51,12 +51,12 @@
           });
       });
 
-      var certificateVSList
-      page('*/certificateVS/certs', scrollToTop, function() {
-          vs.route = 'certificateVS';
-          Polymer.Base.importHref('./certificateVS/cert-list.vsp', function(e) {
-              if(!certificateVSList) certificateVSList = document.createElement('cert-list');
-              vs.loadMainContent(certificateVSList, "${msg.certsPageTitle}")
+      var certificateList
+      page('*/x509Certificate/certs', scrollToTop, function() {
+          vs.route = 'x509Certificate';
+          Polymer.Base.importHref('./x509Certificate/cert-list.vsp', function(e) {
+              if(!certificateList) certificateList = document.createElement('cert-list');
+              vs.loadMainContent(certificateList, "${msg.certsPageTitle}")
           });
       });
 
@@ -188,13 +188,13 @@
           });
       });
 
-      var transactionVSList
-      page('*/transactionVS/from*', scrollToTop, function(data) {
+      var transactionList
+      page('*/transaction/from*', scrollToTop, function(data) {
           vs.route = 'userDashboard';
-          Polymer.Base.importHref('./transactionVS/transactionvs-list.vsp', function(e) {
-              if(!transactionVSList) transactionVSList = document.createElement('transactionvs-list');
-              transactionVSList.url = data.path
-              vs.loadMainContent(transactionVSList, "${msg.transactionsLbl}")
+          Polymer.Base.importHref('./transaction/transaction-list.vsp', function(e) {
+              if(!transactionList) transactionList = document.createElement('transaction-list');
+              transactionList.url = data.path
+              vs.loadMainContent(transactionList, "${msg.transactionsLbl}")
           });
       });
 

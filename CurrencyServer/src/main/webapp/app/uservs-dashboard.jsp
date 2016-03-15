@@ -25,15 +25,15 @@
             </div>
             <div id="FROM_USER" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransFromUser}}</div>
-                <div class="transDesc">${msg.transactionVSFromUser}</div>
+                <div class="transDesc">${msg.transactionFromUser}</div>
             </div>
             <div id="FROM_GROUP_TO_MEMBER_GROUP" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{fromGroupToMemberGroupInfo}}</div>
-                <div class="transDesc">${msg.transactionVSFromGroupToMemberGroup}</div>
+                <div class="transDesc">${msg.transactionFromGroupToMemberGroup}</div>
             </div>
             <div id="FROM_GROUP_TO_ALL_MEMBERS" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{fromGroupToAllMembersInfo}}</div>
-                <div class="transDesc">${msg.transactionVSFromGroupToAllMembers}</div>
+                <div class="transDesc">${msg.transactionFromGroupToAllMembers}</div>
             </div>
             <div id="CURRENCY_PERIOD_INIT" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencyInitPeriod}}</div>
@@ -99,8 +99,8 @@
             this.url = targetURL
         },
         transBlockSelected: function(e) {
-            page.show(vs.contextURL + "/rest/transactionVS/from/" + this.dateFrom.urlFormatWithTime() + "/to/" +
-                    this.dateTo.urlFormatWithTime() + "?transactionvsType=" + e.target.parentNode.id)
+            page.show(vs.contextURL + "/rest/transaction/from/" + this.dateFrom.urlFormatWithTime() + "/to/" +
+                    this.dateTo.urlFormatWithTime() + "?transactionType=" + e.target.parentNode.id)
         },
         getHTTP: function (targetURL) {
             if(!targetURL) targetURL = this.url

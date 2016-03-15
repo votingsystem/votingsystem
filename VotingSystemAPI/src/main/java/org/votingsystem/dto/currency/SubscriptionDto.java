@@ -3,7 +3,7 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.currency.Subscription;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.TypeVS;
 
 import java.util.Date;
@@ -53,17 +53,17 @@ public class SubscriptionDto {
         return result;
     }
 
-    private void validate() throws ValidationExceptionVS {
-        if(operation == null) throw new ValidationExceptionVS("missing param 'operation'");
-        if(groupId == null) throw new ValidationExceptionVS("missing param 'groupId'");
-        if(groupName == null) throw new ValidationExceptionVS("missing param 'groupName'");
-        if(userName == null) throw new ValidationExceptionVS("missing param 'userName'");
-        if(userNIF == null) throw new ValidationExceptionVS("missing param 'userNIF'");
+    private void validate() throws ValidationException {
+        if(operation == null) throw new ValidationException("missing param 'operation'");
+        if(groupId == null) throw new ValidationException("missing param 'groupId'");
+        if(groupName == null) throw new ValidationException("missing param 'groupName'");
+        if(userName == null) throw new ValidationException("missing param 'userName'");
+        if(userNIF == null) throw new ValidationException("missing param 'userNIF'");
     }
 
-    public void validateActivationRequest() throws ValidationExceptionVS {
+    public void validateActivationRequest() throws ValidationException {
         validate();
-        if(TypeVS.CURRENCY_GROUP_USER_ACTIVATE != operation) throw new ValidationExceptionVS(
+        if(TypeVS.CURRENCY_GROUP_USER_ACTIVATE != operation) throw new ValidationException(
                 "Operation expected: 'CURRENCY_GROUP_USER_ACTIVATE' - operation found: " + operation);
     }
 
@@ -76,9 +76,9 @@ public class SubscriptionDto {
         UUID = java.util.UUID.randomUUID().toString();
     }
 
-    public void validateDeActivationRequest() throws ValidationExceptionVS {
+    public void validateDeActivationRequest() throws ValidationException {
         validate();
-        if(TypeVS.CURRENCY_GROUP_USER_DEACTIVATE != operation) throw new ValidationExceptionVS(
+        if(TypeVS.CURRENCY_GROUP_USER_DEACTIVATE != operation) throw new ValidationException(
                 "Operation expected: 'CURRENCY_GROUP_USER_DEACTIVATE' - operation found: " + operation);
     }
 

@@ -2,7 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 
 import org.votingsystem.dto.DashBoardDto;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.Interval;
 
 import javax.ejb.Stateless;
@@ -27,53 +27,53 @@ public class DashBoardBean {
          DashBoardDto dto = new DashBoardDto(timePeriod);
          Query query = em.createNamedQuery("countTransByToUserIsNotNullAndTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_BANK);
+                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.FROM_BANK);
          dto.setNumTransFromBank((long)query.getSingleResult());
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_USER);
+                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.FROM_USER);
          dto.setNumTransFromUser((long) query.getSingleResult());
          query = em.createNamedQuery("countTransByToUserIsNotNullAndTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP);
+                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.FROM_GROUP_TO_MEMBER_GROUP);
          Long numTrans = (long)query.getSingleResult();
          query = em.createNamedQuery("countTransByToUserIsNotNullAndTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP);
+                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.FROM_GROUP_TO_MEMBER_GROUP);
          Long numUsers = (long)query.getSingleResult();
          dto.setTransFromGroupToMemberGroup(new DashBoardDto.TransFromGroup(numTrans, numUsers));
          query = em.createNamedQuery("countTransByToUserIsNullAndTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS);
+                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.FROM_GROUP_TO_ALL_MEMBERS);
          numTrans = (long)query.getSingleResult();
          query = em.createNamedQuery("countTransByToUserIsNotNullAndTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS);
+                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.FROM_GROUP_TO_ALL_MEMBERS);
          numUsers = (long)query.getSingleResult();
          dto.setTransFromGroupToAllMembers(new DashBoardDto.TransFromGroup(numTrans, numUsers));
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CURRENCY_PERIOD_INIT);
+                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.CURRENCY_PERIOD_INIT);
          dto.setNumTransCurrencyInitPeriod((long) query.getSingleResult());
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED);
+                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED);
          dto.setNumTransCurrencyInitPeriodTimeLimited((long) query.getSingleResult());
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CURRENCY_REQUEST);
+                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.CURRENCY_REQUEST);
          dto.setNumTransCurrencyRequest((long) query.getSingleResult());
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CURRENCY_SEND);
+                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.CURRENCY_SEND);
          dto.setNumTransCurrencySend((long)query.getSingleResult());
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CURRENCY_CHANGE);
+                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.CURRENCY_CHANGE);
          dto.setNumTransCurrencyChange((long)query.getSingleResult());
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CANCELLATION);
+                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.CANCELLATION);
          dto.setNumTransCancellation((long) query.getSingleResult());
          return dto;
     }

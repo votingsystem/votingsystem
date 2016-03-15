@@ -28,32 +28,32 @@ TransactionsStats.getColorScale = function(name) {
     return TransactionsStats.colorsScale(name)
 }
 
-TransactionsStats.prototype.checkFilters = function(transactionvs) {
-    var timeType = transactionvs.timeLimited ? 'timeLimited':'timeFree'
-    transactionvs.filtered = false
-    if(this.transactionTimeFilter.indexOf(timeType) > -1) transactionvs.filtered = true
-    else if(this.transactionTypeFilter.indexOf(transactionvs.type) > -1) transactionvs.filtered = true
-    else if(this.transactionTagFilter.indexOf(transactionvs.tags[0]) > -1) transactionvs.filtered = true
-    else if(this.transactionCurrencyFilter.indexOf(transactionvs.currencyCode) > -1) transactionvs.filtered = true
-    return transactionvs
+TransactionsStats.prototype.checkFilters = function(transaction) {
+    var timeType = transaction.timeLimited ? 'timeLimited':'timeFree'
+    transaction.filtered = false
+    if(this.transactionTimeFilter.indexOf(timeType) > -1) transaction.filtered = true
+    else if(this.transactionTypeFilter.indexOf(transaction.type) > -1) transaction.filtered = true
+    else if(this.transactionTagFilter.indexOf(transaction.tags[0]) > -1) transaction.filtered = true
+    else if(this.transactionCurrencyFilter.indexOf(transaction.currencyCode) > -1) transaction.filtered = true
+    return transaction
 }
 
-TransactionsStats.prototype.pushTransactionForTreeByTag = function(transactionvs) {
+TransactionsStats.prototype.pushTransactionForTreeByTag = function(transaction) {
     var currencyNode //first level node
     var tagNode //second level node
     var typeNode //third level node
     this.transactionsTreeByTag.children.forEach(function(firstLevelNode) {
-        if(firstLevelNode.name === transactionvs.currencyCode) {
+        if(firstLevelNode.name === transaction.currencyCode) {
             currencyNode = firstLevelNode
-            addTransactionDataToNode(currencyNode, transactionvs)
+            addTransactionDataToNode(currencyNode, transaction)
             currencyNode.children.forEach(function(secondLevelNode) {
-                if(secondLevelNode.name === transactionvs.tags[0]) {
+                if(secondLevelNode.name === transaction.tags[0]) {
                     tagNode = secondLevelNode
-                    addTransactionDataToNode(tagNode, transactionvs)
+                    addTransactionDataToNode(tagNode, transaction)
                     tagNode.children.forEach(function(thirdLevelNode) {
-                        if(thirdLevelNode.name === transactionvs.type) {
+                        if(thirdLevelNode.name === transaction.type) {
                             typeNode  = thirdLevelNode
-                            addTransactionDataToNode(typeNode, transactionvs)
+                            addTransactionDataToNode(typeNode, transaction)
                         }
                     })
                 }
@@ -61,41 +61,41 @@ TransactionsStats.prototype.pushTransactionForTreeByTag = function(transactionvs
         }
     })
     if(!currencyNode) {
-        currencyNode = emptyNode(transactionvs.currencyCode, transactionvs)
-        currencyNode.currencyCode = transactionvs.currencyCode
-        tagNode = emptyNode(transactionvs.tags[0], transactionvs)
+        currencyNode = emptyNode(transaction.currencyCode, transaction)
+        currencyNode.currencyCode = transaction.currencyCode
+        tagNode = emptyNode(transaction.tags[0], transaction)
         currencyNode.children = [tagNode]
-        typeNode = emptyNode(transactionvs.type, transactionvs)
+        typeNode = emptyNode(transaction.type, transaction)
         tagNode.children = [typeNode]
         this.transactionsTreeByTag.children.push(currencyNode)
     }
     if(!tagNode) {
-        tagNode = emptyNode(transactionvs.tags[0], transactionvs)
+        tagNode = emptyNode(transaction.tags[0], transaction)
         currencyNode.children.push(tagNode)
     }
     if(!typeNode) {
-        typeNode = emptyNode(transactionvs.type, transactionvs)
+        typeNode = emptyNode(transaction.type, transaction)
         tagNode.children.push(typeNode)
     }
-    typeNode.description = transactionsMap[transactionvs.type].lbl
+    typeNode.description = transactionsMap[transaction.type].lbl
 }
 
-TransactionsStats.prototype.pushTransactionForTreeByType = function(transactionvs) {
+TransactionsStats.prototype.pushTransactionForTreeByType = function(transaction) {
     var currencyNode //first level node
     var typeNode //second level node
     var tagNode //third level node
     this.transactionsTreeByType.children.forEach(function(firstLevelNode) {
-        if(firstLevelNode.name === transactionvs.currencyCode) {
+        if(firstLevelNode.name === transaction.currencyCode) {
             currencyNode = firstLevelNode
-            addTransactionDataToNode(currencyNode, transactionvs)
+            addTransactionDataToNode(currencyNode, transaction)
             currencyNode.children.forEach(function(secondLevelNode) {
-                if(secondLevelNode.name === transactionvs.type) {
+                if(secondLevelNode.name === transaction.type) {
                     typeNode = secondLevelNode
-                    addTransactionDataToNode(typeNode, transactionvs)
+                    addTransactionDataToNode(typeNode, transaction)
                     typeNode.children.forEach(function(thirdLevelNode) {
-                        if(thirdLevelNode.name === transactionvs.tags[0]) {
+                        if(thirdLevelNode.name === transaction.tags[0]) {
                             tagNode = thirdLevelNode
-                            addTransactionDataToNode(tagNode, transactionvs)
+                            addTransactionDataToNode(tagNode, transaction)
                         }
                     })
                 }
@@ -103,51 +103,51 @@ TransactionsStats.prototype.pushTransactionForTreeByType = function(transactionv
         }
     })
     if(!currencyNode) {
-        currencyNode = emptyNode(transactionvs.currencyCode, transactionvs)
-        currencyNode.currencyCode = transactionvs.currencyCode
-        typeNode = emptyNode(transactionvs.type, transactionvs)
+        currencyNode = emptyNode(transaction.currencyCode, transaction)
+        currencyNode.currencyCode = transaction.currencyCode
+        typeNode = emptyNode(transaction.type, transaction)
         currencyNode.children = [typeNode]
-        tagNode = emptyNode(transactionvs.tags[0], transactionvs)
+        tagNode = emptyNode(transaction.tags[0], transaction)
         typeNode.children = [tagNode]
         this.transactionsTreeByType.children.push(currencyNode)
     }
     if(!typeNode) {
-        typeNode = emptyNode(transactionvs.type, transactionvs)
+        typeNode = emptyNode(transaction.type, transaction)
         currencyNode.children.push(typeNode)
     }
     if(!tagNode) {
-        tagNode = emptyNode(transactionvs.tags[0], transactionvs)
+        tagNode = emptyNode(transaction.tags[0], transaction)
         typeNode.children.push(tagNode)
     }
-    typeNode.description = transactionsMap[transactionvs.type].lbl
+    typeNode.description = transactionsMap[transaction.type].lbl
 }
 
-function emptyNode(name, transactionvs) {
-    var result= {name:name, totalAmount:transactionvs.amount, numTotalTransactions:1,
+function emptyNode(name, transaction) {
+    var result= {name:name, totalAmount:transaction.amount, numTotalTransactions:1,
         timeLimitedAmount:0, numTimeLimitedTransactions:0, children:[]}
-    if(transactionvs.timeLimited) {
-        result.timeLimitedAmount += transactionvs.amount
+    if(transaction.timeLimited) {
+        result.timeLimitedAmount += transaction.amount
         result.numTimeLimitedTransactions += 1
     }
     return result
 }
 
-function addTransactionDataToNode(node, transactionvs){
-    node.totalAmount +=  transactionvs.amount
+function addTransactionDataToNode(node, transaction){
+    node.totalAmount +=  transaction.amount
     node.numTotalTransactions +=1
-    if(transactionvs.timeLimited) {
-        node.timeLimitedAmount += transactionvs.amount
+    if(transaction.timeLimited) {
+        node.timeLimitedAmount += transaction.amount
         node.numTimeLimitedTransactions += 1
     }
 }
 
 
-TransactionsStats.prototype.pushTransaction = function(transactionvs, orderBy) {
-    if(this.tags.indexOf(transactionvs.tags[0]) < 0) this.tags.push(transactionvs.tags[0])
-    if(this.currencyCodes.indexOf(transactionvs.currencyCode) < 0) this.currencyCodes.push(transactionvs.currencyCode)
-    if(this.transactionTypes.indexOf(transactionvs.type) < 0) this.transactionTypes.push(transactionvs.type)
-    if(orderBy === "orderByType") this.pushTransactionForTreeByType(transactionvs)
-    if(orderBy === "orderByTag") this.pushTransactionForTreeByTag(transactionvs)
+TransactionsStats.prototype.pushTransaction = function(transaction, orderBy) {
+    if(this.tags.indexOf(transaction.tags[0]) < 0) this.tags.push(transaction.tags[0])
+    if(this.currencyCodes.indexOf(transaction.currencyCode) < 0) this.currencyCodes.push(transaction.currencyCode)
+    if(this.transactionTypes.indexOf(transaction.type) < 0) this.transactionTypes.push(transaction.type)
+    if(orderBy === "orderByType") this.pushTransactionForTreeByType(transaction)
+    if(orderBy === "orderByTag") this.pushTransactionForTreeByTag(transaction)
 }
 
 TransactionsStats.prototype.setCurrencyPercentages = function () {

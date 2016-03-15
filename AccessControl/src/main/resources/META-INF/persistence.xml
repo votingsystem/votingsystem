@@ -6,12 +6,12 @@
         <class>org.votingsystem.model.Actor</class>
         <class>org.votingsystem.model.Address</class>
         <class>org.votingsystem.model.BackupRequest</class>
-        <class>org.votingsystem.model.BatchVS</class>
-        <class>org.votingsystem.model.CertificateVS</class>
+        <class>org.votingsystem.model.Batch</class>
+        <class>org.votingsystem.model.Certificate</class>
         <class>org.votingsystem.model.Device</class>
         <class>org.votingsystem.model.currency.Group</class>
-        <class>org.votingsystem.model.ImageVS</class>
-        <class>org.votingsystem.model.KeyStoreVS</class>
+        <class>org.votingsystem.model.Image</class>
+        <class>org.votingsystem.model.KeyStore</class>
         <class>org.votingsystem.model.CMSMessage</class>
         <class>org.votingsystem.model.ResponseVS</class>
         <class>org.votingsystem.model.TagVS</class>
@@ -23,7 +23,7 @@
         <class>org.votingsystem.model.voting.EventVS</class>
         <class>org.votingsystem.model.voting.EventElection</class>
         <class>org.votingsystem.model.voting.FieldEvent</class>
-        <class>org.votingsystem.model.voting.FieldValueEventVS</class>
+        <class>org.votingsystem.model.voting.FieldValueEvent</class>
         <class>org.votingsystem.model.voting.RepresentationDocument</class>
         <class>org.votingsystem.model.voting.RepresentativeDocument</class>
         <class>org.votingsystem.model.voting.UserRequestCsr</class>

@@ -6,7 +6,7 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.util.encoders.Base64;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 
@@ -27,7 +27,7 @@ public class TestTimeStamp {
         byte[] decodedRequest = Base64.decode(forge_TimeStamp);
         TimeStampRequest timeStampRequest = new TimeStampRequest(new ByteArrayInputStream(decodedRequest));
         log.info(timeStampRequest.getEncoded().toString());
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(forge_TimeStamp.getBytes(), ContentTypeVS.TIMESTAMP_QUERY,
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(forge_TimeStamp.getBytes(), ContentType.TIMESTAMP_QUERY,
                 ContextVS.getInstance().getProperty("timeStampServerURL") + "/timestamp");
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();

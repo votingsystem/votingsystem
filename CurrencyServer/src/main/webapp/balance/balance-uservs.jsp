@@ -2,8 +2,8 @@
 
 <link href="../resources/bower_components/paper-progress/paper-progress.html" rel="import"/>
 <link href="../resources/bower_components/iron-media-query/iron-media-query.html" rel="import"/>
-<link href="../transactionVS/transactionvs-data.vsp" rel="import"/>
-<link href="../transactionVS/transactionvs-list-balance.vsp" rel="import"/>
+<link href="../transaction/transaction-data.vsp" rel="import"/>
+<link href="../transaction/transaction-list-balance.vsp" rel="import"/>
 
 <dom-module name="balance-user">
     <template>
@@ -14,7 +14,7 @@
             .tab {font-weight: bold; font-size: 1.1em; margin:0 40px 0 0; text-align: center; cursor:pointer; width: 100%;color:#888;}
             .tabSelected { border-bottom: 2px solid #ba0011;color:#434343;}
         </style>
-        <transactionvs-data id="transactionViewer"></transactionvs-data>
+        <transaction-data id="transactionViewer"></transaction-data>
 
         <iron-media-query query="max-width: 1200px" query-matches="{{smallScreen}}"></iron-media-query>
         <div style="padding: 0 20px;">
@@ -61,16 +61,16 @@
             <div class="layout horizontal">
                 <div hidden="{{incomesTabHidden}}" class="flex"
                      style=" margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
-                    <transactionvs-list-balance caption="${msg.incomesLbl}"
+                    <transaction-list-balance caption="${msg.incomesLbl}"
                             transaction-list="{{balance.transactionToList}}"
-                            balances="{{balance.balancesTo}}" on-transactionviewer="viewTransaction"></transactionvs-list-balance>
+                            balances="{{balance.balancesTo}}" on-transactionviewer="viewTransaction"></transaction-list-balance>
                 </div>
                 <div hidden="{{smallScreen}}" style="width: 1px; border-right: 2px solid  #6c0404; margin:0 10px 0 10px;"></div>
                 <div hidden="{{expensesTabHidden}}" class="flex"
                      style=" margin:0px 20px 0 0; padding:0 20px 0 20px; vertical-align: top;">
-                    <transactionvs-list-balance id="balanceFromItem"
+                    <transaction-list-balance id="balanceFromItem"
                             transaction-list="{{balance.transactionFromList}}" balances="{{balance.balancesFrom}}"
-                            on-transactionviewer="viewTransaction"></transactionvs-list-balance>
+                            on-transactionviewer="viewTransaction"></transaction-list-balance>
                 </div>
             </div>
         </div>

@@ -3,7 +3,7 @@ package org.votingsystem.web.currency.ejb;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -60,13 +60,13 @@ public class WalletBean {
                     BigDecimal available = tagAccountAvailable.add(wildTagAccount.getBalance());
                     String msg = "lowBalanceForTagErrorMsg: " + tag.getName() + " " + available.toString() + " " +
                             currencyCode + " - " + amount.toString() + " " + currencyCode;
-                    throw new ValidationExceptionVS(msg);
+                    throw new ValidationException(msg);
                 }
             }
         } else {
             if(wildTagAccount.getBalance().compareTo(amount) > 0) {
                 result.put(wildTagAccount, amount);
-            } else throw new ValidationExceptionVS(messages.get("wildTagLowBalanceErrorMsg",
+            } else throw new ValidationException(messages.get("wildTagLowBalanceErrorMsg",
                     wildTagAccount.getBalance() + " " + currencyCode,  amount + " " + currencyCode));
         }
         return result;

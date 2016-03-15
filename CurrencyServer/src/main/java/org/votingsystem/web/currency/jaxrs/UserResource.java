@@ -23,10 +23,10 @@ import org.votingsystem.model.currency.Subscription;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Interval;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.currency.ejb.*;
-import org.votingsystem.web.currency.websocket.SessionVSManager;
+import org.votingsystem.web.currency.websocket.SessionManager;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -40,7 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.security.cert.X509Certificate;
@@ -55,7 +54,8 @@ public class UserResource {
 
     private static final Logger log = Logger.getLogger(UserResource.class.getName());
 
-    @Inject TransactionVSBean transactionVSBean;
+    @Inject
+    TransactionBean transactionBean;
     @Inject
     GroupBean groupBean;
     @Inject BalancesBean balancesBean;
@@ -68,7 +68,7 @@ public class UserResource {
     @Inject ConfigVS config;
 
     @Path("/") @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response indexJSON(@DefaultValue("0") @QueryParam("offset") int offset,
                         @DefaultValue("100") @QueryParam("max") int max,
                         @QueryParam("searchText") String searchText,
@@ -106,12 +106,12 @@ public class UserResource {
         }
         long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
     }
 
 
     @Path("/IBAN/{IBAN}")
-    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
     public Response findByIBAN(@PathParam("IBAN") String IBAN, @Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
@@ -134,7 +134,7 @@ public class UserResource {
     }
 
     @Path("/id/{id}")
-    @GET @Produces(MediaType.APPLICATION_JSON) @Transactional
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
     public Response index(@PathParam("id") long id,
                 @DefaultValue("false") @QueryParam("connectedDevices") Boolean connectedDevices,
                 @Context ServletContext context, @Context HttpServletRequest req,
@@ -161,7 +161,7 @@ public class UserResource {
     }
 
     @Path("/search")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response searchHTML(@DefaultValue("0") @QueryParam("offset") int offset,
              @DefaultValue("100") @QueryParam("max") int max, @QueryParam("searchText") String searchText,
             @Context ServletContext context, @Context HttpServletRequest req,
@@ -190,12 +190,12 @@ public class UserResource {
                 .setParameter("state", User.State.ACTIVE)
                 .setParameter("searchText", "%" + searchText + "%");
         ResultListDto resultListDto = new ResultListDto(resultList, offset, max, (long)query.getSingleResult());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
     }
 
 
     @Path("/search/group/{groupId}")
-    @POST @Produces(MediaType.APPLICATION_JSON)
+    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     @Consumes({"application/json"})
     public Response searchGroup(@DefaultValue("0") @QueryParam("offset") int offset,
             @DefaultValue("100") @QueryParam("max") int max, @QueryParam("searchText") String searchText,
@@ -230,7 +230,7 @@ public class UserResource {
     }
 
     @Path("/nif/{nif}/{year}/{month}/{day}")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response userInfo(@PathParam("nif") String nif,
                            @PathParam("year") int year,
                            @PathParam("month") int month,
@@ -247,7 +247,7 @@ public class UserResource {
     }
 
     @Path("/nif/{nif}")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response userInfoByNif(@PathParam("nif") String nif,
                            @Context ServletContext context, @Context HttpServletRequest req,
                            @Context HttpServletResponse resp) throws Exception {
@@ -261,7 +261,7 @@ public class UserResource {
 
     @Transactional
     @Path("/searchByDevice")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Object searchByDevice(@QueryParam("phone") String phone, @QueryParam("email") String email,
                                  @Context HttpServletRequest req) throws Exception {
         if(phone == null && email == null) {
@@ -280,7 +280,7 @@ public class UserResource {
     }
 
     @Path("/bankList")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response bankList(@Context ServletContext context, @Context HttpServletRequest req,
                              @Context HttpServletResponse resp) throws Exception {
         List<Bank> bankList = dao.findAll(Bank.class);
@@ -292,7 +292,7 @@ public class UserResource {
     }
 
     @Path("/userInfoTest")
-    @POST @Produces(MediaType.APPLICATION_JSON)
+    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response userInfoTest(CMSMessage cmsMessage, @Context HttpServletRequest req, @Context
         HttpServletResponse resp) throws Exception {
         CMSSignedMessage cmsSignedMessage = cmsMessage.getCMS();
@@ -304,7 +304,7 @@ public class UserResource {
     }
 
     @Path("/save")
-    @POST @Produces(MediaType.APPLICATION_JSON)
+    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response save(CMSMessage cmsMessage, @Context HttpServletRequest req) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         User newUser = userBean.saveUser(cmsMessage);
@@ -321,22 +321,22 @@ public class UserResource {
     }
 
     @Path("/newBank")
-    @POST @Produces(MediaType.APPLICATION_JSON)
+    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response newBank(CMSMessage cmsMessage, @Context HttpServletRequest req) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         Bank newBank = bankBean.saveBank(cmsMessage);
         MessageDto messageDto = new MessageDto(ResponseVS.SC_OK,
-                messages.get("newBankOKMsg", newBank.getCertificate().getSubjectDN().toString()),
+                messages.get("newBankOKMsg", newBank.getX509Certificate().getSubjectDN().toString()),
                 config.getContextURL() + "/rest/user/id/" + newBank.getId());
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaTypeVS.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaType.JSON).build();
     }
 
     @Path("/connected")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response connected(@Context HttpServletRequest req) throws Exception {
         //TODO
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(
-                SessionVSManager.getInstance().getConnectedUsersDto())).build();
+                SessionManager.getInstance().getConnectedUsersDto())).build();
     }
 
 }

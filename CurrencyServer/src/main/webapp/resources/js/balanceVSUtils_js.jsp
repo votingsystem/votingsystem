@@ -147,13 +147,13 @@
         return result
     }
 
-    function checkBalanceMap(transactionVSListBalanceMap, serverBalanceMap) {
+    function checkBalanceMap(transactionListBalanceMap, serverBalanceMap) {
         console.log("checkBalanceMap")
-        Object.keys(transactionVSListBalanceMap).forEach(function(entry) {
+        Object.keys(transactionListBalanceMap).forEach(function(entry) {
             if(serverBalanceMap[entry] == null) {
                 throw new Error("Calculated currency: '" + entry + "' not found on server balance map")
             }
-            var tagDataMap = transactionVSListBalanceMap[entry]
+            var tagDataMap = transactionListBalanceMap[entry]
             Object.keys(tagDataMap).forEach(function(tagEntry) {
                 var calculatedAmount = tagDataMap[tagEntry].amount
                 var amount = (serverBalanceMap[entry][tagEntry].total)?serverBalanceMap[entry][tagEntry].total:
@@ -166,25 +166,25 @@
         });
     }
 
-    function getCurrencyMap(transactionVSList) {
+    function getCurrencyMap(transactionList) {
         var currencyInfoMap = {}
-        for(idx in transactionVSList) {
-            var transactionvs = transactionVSList[idx]
-            var tagName = transactionvs.tags[0]
-            if(currencyInfoMap[transactionvs.currency]) {
-                if(currencyInfoMap[transactionvs.currency][tagName] != null){
-                    var tagVSInfoMap = currencyInfoMap[transactionvs.currency][tagName]
-                    tagVSInfoMap.numTransactionVS = ++tagVSInfoMap.numTransactionVS
-                    var totalAmount = new Number(transactionvs.amount) + new Number(tagVSInfoMap.amount)
+        for(idx in transactionList) {
+            var transaction = transactionList[idx]
+            var tagName = transaction.tags[0]
+            if(currencyInfoMap[transaction.currency]) {
+                if(currencyInfoMap[transaction.currency][tagName] != null){
+                    var tagVSInfoMap = currencyInfoMap[transaction.currency][tagName]
+                    tagVSInfoMap.numTransaction = ++tagVSInfoMap.numTransaction
+                    var totalAmount = new Number(transaction.amount) + new Number(tagVSInfoMap.amount)
                     tagVSInfoMap.amount = totalAmount.toFixed(2)
                 } else {
-                    currencyInfoMap[transactionvs.currency][tagName] =
-                    {numTransactionVS:1, amount:transactionvs.amount}
+                    currencyInfoMap[transaction.currency][tagName] =
+                    {numTransaction:1, amount:transaction.amount}
                 }
             } else {
-                currencyInfoMap[transactionvs.currency] = {}
-                currencyInfoMap[transactionvs.currency][tagName] =
-                {numTransactionVS:1, amount:transactionvs.amount}
+                currencyInfoMap[transaction.currency] = {}
+                currencyInfoMap[transaction.currency][tagName] =
+                {numTransaction:1, amount:transaction.amount}
             }
         }
         return currencyInfoMap

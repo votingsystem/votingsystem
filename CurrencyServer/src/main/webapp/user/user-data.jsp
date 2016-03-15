@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="../transactionVS/transactionvs-form.vsp" rel="import"/>
+<link href="../transaction/transaction-form.vsp" rel="import"/>
 <link href="../element/messagevs-send-dialog.vsp" rel="import"/>
 
 <dom-module name="user-data">
@@ -39,8 +39,8 @@
                         </button>
                     </div>
                     <div hidden="{{isBank}}" style="margin:0 20px 0 0;">
-                        <button on-click="makeTransactionVS">
-                            <i class="fa fa-money"></i> ${msg.sendTransactionVSLbl}
+                        <button on-click="makeTransaction">
+                            <i class="fa fa-money"></i> ${msg.sendTransactionLbl}
                         </button>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
         </div>
     </div>
     <div hidden="{{transactionFormHidden}}">
-        <transactionvs-form id="transactionvsForm" fab-visible="true"></transactionvs-form>
+        <transaction-form id="transactionForm" fab-visible="true"></transaction-form>
     </div>
     <messagevs-send-dialog id="sendMessageDialog"></messagevs-send-dialog>
 </template>
@@ -96,7 +96,7 @@
         ready: function() {
             this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
             console.log(this.tagName + " - ready - menuType: " + this.menuType)
-            this.$.transactionvsForm.addEventListener('closed', function (e) {
+            this.$.transactionForm.addEventListener('closed', function (e) {
                 this.page = 0;
             }.bind(this))
             if(this.message) alert(this.message, "${msg.messageLbl}")
@@ -125,9 +125,9 @@
         blockUser:function() {
             console.log(this.tagName + " - blockUser")
         },
-        makeTransactionVS:function() {
-            console.log(this.tagName + " - makeTransactionVS")
-            this.$.transactionvsForm.init(Operation.FROM_USER, this.user.name, this.user.iban , this.user.id)
+        makeTransaction:function() {
+            console.log(this.tagName + " - makeTransaction")
+            this.$.transactionForm.init(Operation.FROM_USER, this.user.name, this.user.iban , this.user.id)
             this.page = 1;
         },
         showByIBAN:function(IBAN) {

@@ -1,6 +1,6 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.model.BatchVS;
+import org.votingsystem.model.Batch;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
 
@@ -12,7 +12,7 @@ import java.io.Serializable;
  */
 @Entity
 @DiscriminatorValue("CurrencyRequestBatch")
-public class CurrencyRequestBatch extends BatchVS implements Serializable  {
+public class CurrencyRequestBatch extends Batch implements Serializable  {
 
     public static final long serialVersionUID = 1L;
 

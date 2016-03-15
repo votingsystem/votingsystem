@@ -37,7 +37,7 @@ public class SendEncryptedMessages {
         simulationData.setTimerMap(timerMap);
 
         ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(
-                simulationData.getServerURL()), ContentTypeVS.JSON);
+                simulationData.getServerURL()), ContentType.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         Actor actor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
         ContextVS.getInstance().setDefaultServer(actor);

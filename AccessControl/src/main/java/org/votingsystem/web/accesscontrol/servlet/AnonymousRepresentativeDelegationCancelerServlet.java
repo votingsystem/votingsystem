@@ -5,9 +5,9 @@ import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.AnonymousDelegation;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.web.accesscontrol.ejb.RepresentativeDelegationBean;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -49,21 +49,21 @@ public class AnonymousRepresentativeDelegationCancelerServlet extends HttpServle
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(),
                     MultipartRequestVS.Type.ANONYMOUS_DELEGATION_CANCELATION);
             CMSMessage cmsMessage = cmsBean.validateCMS(
-                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getCmsMessage();
+                    requestVS.getCMS(), ContentType.JSON_SIGNED).getCmsMessage();
             CMSMessage anonymousCMSMessage = cmsBean.validateCMS(
-                    requestVS.getAnonymousCMS(), ContentTypeVS.JSON_SIGNED).getCmsMessage();
+                    requestVS.getAnonymousCMS(), ContentType.JSON_SIGNED).getCmsMessage();
             AnonymousDelegation anonymousDelegation = representativeDelegationBean.cancelAnonymousDelegation(
                     cmsMessage, anonymousCMSMessage);
 
             byte[] receiptBytes = anonymousDelegation.getCancellationCMS().getContentPEM();
-            resp.setContentType(MediaTypeVS.JSON_SIGNED);
+            resp.setContentType(MediaType.JSON_SIGNED);
             resp.setContentLength(receiptBytes.length);
             resp.getOutputStream().write(receiptBytes);
         } catch (ExceptionVS ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             if(ex.getMessageDto() != null) {
                 resp.setStatus(ex.getMessageDto().getStatusCode());
-                resp.setContentType(MediaTypeVS.JSON);
+                resp.setContentType(MediaType.JSON);
                 resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(ex.getMessageDto()));
             } else writeException(resp, ex);
         } catch (Exception ex) {

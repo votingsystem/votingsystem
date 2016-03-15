@@ -5,9 +5,9 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.crypto.CsrResponse;
 import org.votingsystem.web.accesscontrol.ejb.AccessRequestBean;
 import org.votingsystem.web.ejb.CMSBean;
@@ -49,9 +49,9 @@ public class AccessRequestServlet extends HttpServlet {
         try {
             MultipartRequestVS requestVS = new MultipartRequestVS(req.getParts(), MultipartRequestVS.Type.ACCESS_REQUEST);
             CMSMessage cmsMessage = cmsBean.validateCMS(
-                    requestVS.getCMS(), ContentTypeVS.JSON_SIGNED).getCmsMessage();
+                    requestVS.getCMS(), ContentType.JSON_SIGNED).getCmsMessage();
             CsrResponse csrResponse = accessRequestBean.saveRequest(cmsMessage, requestVS.getCSRBytes());
-            resp.setContentType(ContentTypeVS.TEXT_STREAM.getName());
+            resp.setContentType(ContentType.TEXT_STREAM.getName());
             resp.setContentLength(csrResponse.getIssuedCert().length);
             resp.getOutputStream().write(csrResponse.getIssuedCert());
         } catch (Exception ex) {
@@ -59,7 +59,7 @@ public class AccessRequestServlet extends HttpServlet {
                 MessageDto messageDto = ((ExceptionVS) ex).getMessageDto();
                 log.severe(messageDto.toString());
                 resp.setStatus(messageDto.getStatusCode());
-                resp.setHeader("Content-Type", MediaTypeVS.JSON);
+                resp.setHeader("Content-Type", MediaType.JSON);
                 resp.getOutputStream().write(JSON.getMapper().writeValueAsBytes(messageDto));
             } else {
                 log.log(Level.SEVERE, ex.getMessage(), ex);

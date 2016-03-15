@@ -14,6 +14,6 @@ public class RestFilterVS implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         //requestContext.abortWith( Response.status( Response.Status.UNAUTHORIZED ).build() );
-        //requestContext.setProperty("contenttypevs", ContentTypeVS.JSON);
+        //requestContext.setProperty("contenttypevs", ContentType.JSON);
     }
 }

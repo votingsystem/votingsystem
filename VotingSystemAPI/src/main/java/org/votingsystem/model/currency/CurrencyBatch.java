@@ -1,6 +1,6 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.model.BatchVS;
+import org.votingsystem.model.Batch;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
@@ -15,7 +15,7 @@ import java.util.Set;
  */
 @Entity
 @DiscriminatorValue("CurrencyBatch")
-public class CurrencyBatch extends BatchVS implements Serializable {
+public class CurrencyBatch extends Batch implements Serializable {
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="toUser") private User toUser;

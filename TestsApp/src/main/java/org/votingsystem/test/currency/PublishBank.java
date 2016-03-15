@@ -29,7 +29,7 @@ public class PublishBank {
                 "Currency_07553172H", User.Type.USER);
         CMSSignedMessage cmsMessage = superUserSignatureService.signDataWithTimeStamp(
                 JSON.getMapper().writeValueAsBytes(bankDto));
-        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
+        ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                 currencyServer.getSaveBankServiceURL());
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage());
         System.exit(0);

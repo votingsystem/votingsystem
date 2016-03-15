@@ -77,9 +77,9 @@ public class VoteValidation {
         Set<User> signersVS = vote.getSigners();
         for(User signerVS:signersVS) {
             if(signerVS.getTimeStampToken() != null) {//user signature
-                CertUtils.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(signerVS.getCertificate()), tokenDate);
+                CertUtils.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(signerVS.getX509Certificate()), tokenDate);
             } else {//server signature
-                CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(signerVS.getCertificate()));
+                CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(signerVS.getX509Certificate()));
             }
         }
         SignerInformationVerifier timeStampSignerInfoVerifier = new

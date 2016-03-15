@@ -52,7 +52,7 @@ public class CertUtils {
     public static X509Certificate generateEndEntityCert(PublicKey entityKey, PrivateKey caKey, X509Certificate caCert,
             Date dateBegin, Date dateFinish, String endEntitySubjectDN) throws Exception {
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
-        certGen.setSerialNumber(KeyGeneratorVS.INSTANCE.getSerno());
+        certGen.setSerialNumber(KeyGenerator.INSTANCE.getSerno());
         certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
         certGen.setNotBefore(dateBegin);
         certGen.setNotAfter(dateFinish);
@@ -77,7 +77,7 @@ public class CertUtils {
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
         log.info("strSubjectDN: " + strSubjectDN);
         X509Principal x509Principal = new X509Principal(strSubjectDN);
-        certGen.setSerialNumber(KeyGeneratorVS.INSTANCE.getSerno());
+        certGen.setSerialNumber(KeyGenerator.INSTANCE.getSerno());
         certGen.setIssuerDN(x509Principal);
         certGen.setNotBefore(dateBegin);
         certGen.setNotAfter(dateFinish);
@@ -101,7 +101,7 @@ public class CertUtils {
     public static X509Certificate generateV1RootCert(KeyPair pair, long comienzo, int period,
              String principal) throws Exception {
         X509V1CertificateGenerator  certGen = new X509V1CertificateGenerator();
-        certGen.setSerialNumber(KeyGeneratorVS.INSTANCE.getSerno());
+        certGen.setSerialNumber(KeyGenerator.INSTANCE.getSerno());
         certGen.setIssuerDN(new X500Principal(principal));
         certGen.setNotBefore(new Date(comienzo));
         certGen.setNotAfter(new Date(comienzo + period));
@@ -166,7 +166,7 @@ public class CertUtils {
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
         PublicKey publicKey = getPublicKey(csr);
         X509Principal x509Principal = new X509Principal(subjectDN);
-        certGen.setSerialNumber(KeyGeneratorVS.INSTANCE.getSerno());
+        certGen.setSerialNumber(KeyGenerator.INSTANCE.getSerno());
         log.info("generateV3EndEntityCertFromCsr - issuer: " + caCert.getSubjectX500Principal());
         certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
         certGen.setNotBefore(dateBegin);

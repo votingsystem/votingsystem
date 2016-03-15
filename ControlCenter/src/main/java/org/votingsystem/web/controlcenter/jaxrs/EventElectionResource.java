@@ -11,9 +11,9 @@ import org.votingsystem.dto.voting.EventVSStatsDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.web.controlcenter.ejb.EventElectionBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
@@ -53,7 +52,7 @@ public class EventElectionResource {
     @Transactional
     @Path("/id/{id}") @GET
     public Response getById (@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
-                             @Context HttpServletResponse resp) throws ValidationExceptionVS, IOException, ServletException, URISyntaxException {
+                             @Context HttpServletResponse resp) throws ValidationException, IOException, ServletException, URISyntaxException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE, EventVS.State.PENDING, EventVS.State.CANCELED,
                 EventVS.State.TERMINATED);
@@ -65,7 +64,7 @@ public class EventElectionResource {
         eventVSBean.checkEventVSDates(eventVS);
         EventVSDto eventVSDto = new EventVSDto(eventVS);
         if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventVSDto)).type(MediaTypeVS.JSON).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventVSDto)).type(MediaType.JSON).build();
         } else {
             req.getSession().setAttribute("eventDto", JSON.getMapper().writeValueAsString(eventVSDto));
             return Response.temporaryRedirect(new URI("../eventElection/eventElection.xhtml")).build();
@@ -77,7 +76,7 @@ public class EventElectionResource {
     public Response index (@QueryParam("eventVSState") String eventVSStateReq,
                    @DefaultValue("0") @QueryParam("offset") int offset,
                    @DefaultValue("50") @QueryParam("max") int max, @Context ServletContext context,
-                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ValidationExceptionVS,
+                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws ValidationException,
             IOException, ServletException {
         List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE);
         if(eventVSStateReq != null) {
@@ -100,21 +99,21 @@ public class EventElectionResource {
         }
         ResultListDto<EventVSDto> resultListDto = new ResultListDto<>(eventVSListDto, offset, max, totalCount);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
-                .type(MediaTypeVS.JSON).build();
+                .type(MediaType.JSON).build();
     }
 
     @Path("/") @POST
     public Response save(CMSMessage cmsMessage, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         EventElection eventElection = eventVSBean.saveEvent(cmsMessage);
-        return Response.ok().entity(eventElection.getId()).type(MediaType.TEXT_PLAIN).build();
+        return Response.ok().entity(eventElection.getId()).type(javax.ws.rs.core.MediaType.TEXT_PLAIN).build();
     }
 
     @Path("/cancel") @POST
     public Response cancel(CMSMessage cmsMessage, @Context ServletContext context,
                            @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         CMSMessage responseMessage = eventVSBean.cancelEvent(cmsMessage);
-        return Response.ok().entity(responseMessage.getContentPEM()).type(MediaType.TEXT_PLAIN).build();
+        return Response.ok().entity(responseMessage.getContentPEM()).type(javax.ws.rs.core.MediaType.TEXT_PLAIN).build();
     }
 
     @Transactional
@@ -127,7 +126,7 @@ public class EventElectionResource {
                 "ERROR - EventElection not found - eventId: " + id).build();
         EventVSStatsDto statsDto = eventVSBean.getStats(eventVS);
         if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(statsDto)).type(MediaTypeVS.JSON).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(statsDto)).type(MediaType.JSON).build();
         } else {
             req.getSession().setAttribute("statsDto", JSON.getMapper().writeValueAsString(statsDto));
             return Response.temporaryRedirect(new URI("../eventElection/stats.xhtml")).build();
@@ -140,7 +139,7 @@ public class EventElectionResource {
         EventElection eventVS = dao.find(EventElection.class, id);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventElection not found - " +
                 "eventId: " + id).build();
-        return Response.ok().entity(eventVS.getCmsMessage().getContentPEM()).type(MediaTypeVS.JSON_SIGNED).build();
+        return Response.ok().entity(eventVS.getCmsMessage().getContentPEM()).type(MediaType.JSON_SIGNED).build();
     }
 
 }

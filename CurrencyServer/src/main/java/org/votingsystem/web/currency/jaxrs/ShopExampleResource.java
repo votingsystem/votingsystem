@@ -4,14 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
-import org.votingsystem.dto.currency.TransactionVSDto;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Group;
-import org.votingsystem.model.currency.TransactionVS;
+import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.web.currency.ejb.ShopExampleBean;
 import org.votingsystem.web.currency.util.AsyncRequestShopBundle;
 import org.votingsystem.web.ejb.CMSBean;
@@ -29,7 +29,6 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.container.TimeoutHandler;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -62,10 +61,10 @@ public class ShopExampleResource {
         List<Group> result = query.getResultList();
         if(result.isEmpty()) throw new ExceptionVS("To do the test you must enter a Group");
         Group group = result.iterator().next();
-        TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(group.getName(), User.Type.GROUP,
+        TransactionDto dto = TransactionDto.PAYMENT_REQUEST(group.getName(), User.Type.GROUP,
                 new BigDecimal(5), "EUR", group.getIBAN(), "shop example payment - " + new Date(), "HIDROGENO");
-        dto.setPaymentOptions(Arrays.asList(TransactionVS.Type.FROM_USER,
-                TransactionVS.Type.CURRENCY_SEND, TransactionVS.Type.CURRENCY_CHANGE));
+        dto.setPaymentOptions(Arrays.asList(Transaction.Type.FROM_USER,
+                Transaction.Type.CURRENCY_SEND, Transaction.Type.CURRENCY_CHANGE));
         String sessionID = dto.getUUID().substring(0, 8);
         String paymentInfoServiceURL = config.getContextURL() + "/rest/shop/" + sessionID;
         shopExampleBean.putTransactionRequest(sessionID, dto);
@@ -80,7 +79,7 @@ public class ShopExampleResource {
     //Called with async Javascript from the web page that shows the QR code, we store an AsyncContext in order to notify
     //the web client of any change in the requested transaction state
     @Path("/listenTransactionChanges/{shopSessionID}")
-    @GET @Produces(MediaType.APPLICATION_JSON)
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response listenTransactionChanges(@PathParam("shopSessionID") String shopSessionID,
            @Context HttpServletRequest req, @Suspended AsyncResponse asyncResponse) throws Exception {
         asyncResponse.setTimeoutHandler(new TimeoutHandler() {
@@ -111,10 +110,10 @@ public class ShopExampleResource {
         CMSSignedMessage cmsMessage = cmsBean.signData(currencyCSR.getBytes());
         if(requestBundle.getTransactionDto() != null) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(requestBundle.getTransactionDto(
-                    cmsMessage))).type(MediaTypeVS.JSON).build();
+                    cmsMessage))).type(MediaType.JSON).build();
         } else {
             return Response.status(Response.Status.NOT_FOUND).entity(messages.get("sessionExpiredMsg"))
-                    .type(MediaType.TEXT_PLAIN + ";charset=utf-8").build();
+                    .type(javax.ws.rs.core.MediaType.TEXT_PLAIN + ";charset=utf-8").build();
         }
     }
 

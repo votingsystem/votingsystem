@@ -44,7 +44,7 @@ public class KeyStoreUtil {
               String rootAlias, String strSubjectDN) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
-        KeyPair rootPair = KeyGeneratorVS.INSTANCE.genKeyPair();
+        KeyPair rootPair = KeyGenerator.INSTANCE.genKeyPair();
         X509Certificate rootCert = CertUtils.generateV3RootCert(rootPair, dateBegin, dateFinish, strSubjectDN);
         X500PrivateCredential rootCredential = new X500PrivateCredential(rootCert, rootPair.getPrivate(), rootAlias);
         store.setCertificateEntry(rootCredential.getAlias(), rootCredential.getCertificate());
@@ -61,7 +61,7 @@ public class KeyStoreUtil {
             String endEntitySubjectDN) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
-        KeyPair endPair = KeyGeneratorVS.INSTANCE.genKeyPair();
+        KeyPair endPair = KeyGenerator.INSTANCE.genKeyPair();
         Date dateBegin = new Date(begin);
         Date dateFinish = new Date(begin + period);
         X509Certificate endCert = CertUtils.generateEndEntityCert(endPair.getPublic(),
@@ -82,7 +82,7 @@ public class KeyStoreUtil {
             String endEntitySubjectDN) throws Exception {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(null, null);
-        KeyPair endPair = KeyGeneratorVS.INSTANCE.genKeyPair();
+        KeyPair endPair = KeyGenerator.INSTANCE.genKeyPair();
         X509Certificate endCert = CertUtils.generateTimeStampingCert(endPair.getPublic(),
                 rootCredential.getPrivateKey(), rootCredential.getCertificate(),
                 begin, period, endEntitySubjectDN);

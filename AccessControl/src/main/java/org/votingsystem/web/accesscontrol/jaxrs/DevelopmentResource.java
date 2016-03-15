@@ -5,7 +5,7 @@ import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.RepresentationDocument;
 import org.votingsystem.model.voting.RepresentativeDocument;
-import org.votingsystem.throwable.ValidationExceptionVS;
+import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -74,7 +74,7 @@ public class DevelopmentResource implements Serializable {
     public Response resetRepresentatives(CMSMessage cmsMessage, @Context ServletContext context,
                                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         if(!cmsBean.isAdmin(cmsMessage.getUser().getNif()))
-            throw new ValidationExceptionVS("user without privileges");
+            throw new ValidationException("user without privileges");
         log.severe(" ===== VOTING SIMULATION - RESETING REPRESENTATIVES ===== ");
         List<RepresentativeDocument.State> inList = Arrays.asList(RepresentativeDocument.State.OK,
                 RepresentativeDocument.State.RENEWED);

@@ -182,7 +182,7 @@ public class CMSSignedMessage extends CMSSignedData {
     public Set<X509Certificate> getSignersCerts() throws Exception {
         Set<X509Certificate> signerCerts = new HashSet<>();
         for (User user : getMessageData().getSigners()) {
-            signerCerts.add(user.getCertificate());
+            signerCerts.add(user.getX509Certificate());
         }
         return signerCerts;
     }

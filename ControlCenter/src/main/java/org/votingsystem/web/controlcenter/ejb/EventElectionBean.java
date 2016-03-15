@@ -7,8 +7,8 @@ import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.dto.voting.EventVSStatsDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.*;
-import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.throwable.ValidationException;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.crypto.PEMUtils;
@@ -57,17 +57,17 @@ public class EventElectionBean {
         eventVS.updateAccessControlIds();
         dao.persist(eventVS);
         X509Certificate controlCenterX509Cert = cmsBean.getServerCert();
-        CertificateVS eventVSControlCenterCertificate =  CertificateVS.ACTOR(null, controlCenterX509Cert);
+        Certificate eventVSControlCenterCertificate =  Certificate.ACTOR(null, controlCenterX509Cert);
         dao.persist(eventVSControlCenterCertificate);
         Collection<X509Certificate> accessControlCerts = PEMUtils.fromPEMToX509CertCollection(request.getCertChain().getBytes());
         X509Certificate accessControlX509Cert = accessControlCerts.iterator().next();
-        CertificateVS eventVSAccessControlCertificate = CertificateVS.ACTOR(accessControl, accessControlX509Cert);
+        Certificate eventVSAccessControlCertificate = Certificate.ACTOR(accessControl, accessControlX509Cert);
         dao.persist(eventVSAccessControlCertificate);
-        CertificateVS eventVSCertificate = CertificateVS.ELECTION(certCAVotacion);
+        Certificate eventVSCertificate = Certificate.ELECTION(certCAVotacion);
         eventVSCertificate.setActor(accessControl);
         dao.persist(eventVSCertificate);
         eventVS.setAccessControlCert(eventVSAccessControlCertificate).setControlCenterCert(eventVSControlCenterCertificate)
-                .setCertificateVS(eventVSCertificate).setState(EventVS.State.ACTIVE);
+                .setCertificate(eventVSCertificate).setState(EventVS.State.ACTIVE);
         return dao.merge(eventVS);
     }
 
@@ -78,12 +78,12 @@ public class EventElectionBean {
         Query query = dao.getEM().createQuery("select e from EventElection e where e.accessControlEventId =:eventId")
                 .setParameter("eventId", request.getEventId());
         EventElection eventVS = dao.getSingleResult(EventElection.class, query);
-        if(eventVS == null) throw new ValidationExceptionVS(
+        if(eventVS == null) throw new ValidationException(
                 "ERROR - EventElection not found - accessControlEventId: " +request.getEventId());
-        if(EventVS.State.ACTIVE != eventVS.getState()) throw new ValidationExceptionVS(new MessageDto(
+        if(EventVS.State.ACTIVE != eventVS.getState()) throw new ValidationException(new MessageDto(
                 ResponseVS.SC_ERROR_REQUEST_REPEATED, "ERROR - trying to cancel an EventVS tha isn't active"));
         if(!(eventVS.getUser().getNif().equals(signer.getNif()) || cmsBean.isAdmin(signer.getNif())))
-            throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
+            throw new ValidationException("userWithoutPrivilege - nif: " + signer.getNif());
         request.validateCancelation(eventVS.getAccessControl().getServerURL());
         CMSSignedMessage cmsResp = cmsBean.addSignature(cmsMessage.getCMS());
         dao.merge(cmsMessage.setCMS(cmsResp));
@@ -102,7 +102,7 @@ public class EventElectionBean {
         if(accessControl != null) return accessControl;
         else {
             ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(serverURL),
-                    ContentTypeVS.JSON);
+                    ContentType.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
                     accessControl = (AccessControl) ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
@@ -115,9 +115,9 @@ public class EventElectionBean {
         return null;
     }
     
-    public void checkEventVSDates (EventVS eventVS) throws ValidationExceptionVS {
+    public void checkEventVSDates (EventVS eventVS) throws ValidationException {
         if(eventVS.getState() == EventVS.State.CANCELED) return;
-        if(eventVS.getDateBegin().after(eventVS.getDateFinish())) throw new ValidationExceptionVS(
+        if(eventVS.getDateBegin().after(eventVS.getDateFinish())) throw new ValidationException(
                 "date begin after date finish - dateBegin: " + eventVS.getDateBegin() + " - dateFinish: " + eventVS.getDateFinish());
         Date currentDate = new Date();
         if (currentDate.after(eventVS.getDateFinish()) && eventVS.getState() != EventVS.State.TERMINATED) {
@@ -133,10 +133,10 @@ public class EventElectionBean {
     }
     
 
-    public void setEventDatesState (EventVS eventVS) throws ValidationExceptionVS {
+    public void setEventDatesState (EventVS eventVS) throws ValidationException {
         if(eventVS.getDateBegin() == null) eventVS.setDateBegin(new Date());
         Date todayDate = new Date(System.currentTimeMillis() + 1);// to avoid race conditions
-        if(eventVS.getDateBegin().after(eventVS.getDateFinish())) throw new ValidationExceptionVS(
+        if(eventVS.getDateBegin().after(eventVS.getDateFinish())) throw new ValidationException(
                 "date begin after date finish - dateBegin: " + eventVS.getDateBegin() + " - dateFinish: " + eventVS.getDateFinish());
 
         if (todayDate.after(eventVS.getDateFinish())) eventVS.setState(EventVS.State.TERMINATED);

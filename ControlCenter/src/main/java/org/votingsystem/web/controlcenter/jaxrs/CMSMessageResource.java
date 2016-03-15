@@ -2,9 +2,9 @@ package org.votingsystem.web.controlcenter.jaxrs;
 
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.MediaTypeVS;
+import org.votingsystem.util.MediaType;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
 
@@ -40,8 +40,8 @@ public class CMSMessageResource {
         CMSMessage cmsMessage = dao.find(CMSMessage.class, id);
         if(cmsMessage == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "CMSMessage not found - id: " + id).build();
-        if(contentType.contains(ContentTypeVS.TEXT.getName())) {
-            return Response.ok().entity(cmsMessage.getContentPEM()).type(ContentTypeVS.TEXT_STREAM.getName()).build();
+        if(contentType.contains(ContentType.TEXT.getName())) {
+            return Response.ok().entity(cmsMessage.getContentPEM()).type(ContentType.TEXT_STREAM.getName()).build();
         } else return processRequest(cmsMessage, context, req, resp);
     }
 
@@ -74,7 +74,7 @@ public class CMSMessageResource {
             resultMap.put("signedContentMap", signedContentMap);
             resultMap.put("timeStampDate", timeStampDate.getTime());
             resultMap.put("viewer", viewer);
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaTypeVS.JSON).build();
+            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).type(MediaType.JSON).build();
         } else {
             req.getSession().setAttribute("operation", operation);
             req.getSession().setAttribute("cmsMessage", cmsMessageStr);

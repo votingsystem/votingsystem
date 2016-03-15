@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
+import org.votingsystem.util.ContentType;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
@@ -79,7 +79,7 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     @Transient private CMSSignedMessage cmsSignedMessage;
     @Transient private EventVS eventVS;
     @Transient private T data;
-    @Transient private ContentTypeVS contentType = ContentTypeVS.HTML;
+    @Transient private ContentType contentType = ContentType.HTML;
     @Transient private File file;
     @Transient private List<String> errorList;
         
@@ -89,7 +89,7 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         this.statusCode = statusCode;    
     }
 
-    public ResponseVS (int statusCode, ContentTypeVS contentType) {
+    public ResponseVS (int statusCode, ContentType contentType) {
         this.statusCode = statusCode;
         this.contentType = contentType;
     }
@@ -121,7 +121,7 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         this.type = typeVS;
     }
 
-    public ResponseVS (Integer statusCode, String msg, ContentTypeVS contentType) {
+    public ResponseVS (Integer statusCode, String msg, ContentType contentType) {
         this.statusCode = statusCode;
         this.message = msg;
         this.contentType = contentType;
@@ -150,7 +150,7 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         this.messageBytes = messageBytes;
     }
         
-    public ResponseVS (int statusCode, byte[] messageBytes, ContentTypeVS contentType) {
+    public ResponseVS (int statusCode, byte[] messageBytes, ContentType contentType) {
         this.statusCode = statusCode;
         this.messageBytes = messageBytes;
         this.contentType = contentType;
@@ -273,11 +273,11 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         this.file = file;
     }
 
-    public ContentTypeVS getContentType() {
+    public ContentType getContentType() {
         return contentType;
     }
 
-    public ResponseVS setContentType(ContentTypeVS contentType) {
+    public ResponseVS setContentType(ContentType contentType) {
         this.contentType = contentType;
         return this;
     }
