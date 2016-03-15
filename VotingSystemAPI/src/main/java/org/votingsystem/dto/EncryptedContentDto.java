@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SocketMessageEncryptedDto {
+public class EncryptedContentDto {
 
     private TypeVS operation;
     private Integer statusCode;
@@ -38,17 +38,17 @@ public class SocketMessageEncryptedDto {
     private String URL;
 
 
-    public SocketMessageEncryptedDto() {}
+    public EncryptedContentDto() {}
 
-    public SocketMessageEncryptedDto(TypeVS operation, Integer statusCode, String message, String URL) {
+    public EncryptedContentDto(TypeVS operation, Integer statusCode, String message, String URL) {
         this.operation = operation;
         this.statusCode = statusCode;
         this.message = message;
         this.URL = URL;
     }
 
-    public static SocketMessageEncryptedDto getSignRequest(String toUser, String textToSign, String subject) throws Exception {
-        SocketMessageEncryptedDto messageContentDto =  new SocketMessageEncryptedDto();
+    public static EncryptedContentDto getSignRequest(String toUser, String textToSign, String subject) throws Exception {
+        EncryptedContentDto messageContentDto =  new EncryptedContentDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
         messageContentDto.setToUser(toUser);
@@ -58,8 +58,8 @@ public class SocketMessageEncryptedDto {
         return messageContentDto;
     }
 
-    public static SocketMessageEncryptedDto getCurrencyWalletChangeRequest(List<Currency> currencyList) throws Exception {
-        SocketMessageEncryptedDto messageContentDto = new SocketMessageEncryptedDto();
+    public static EncryptedContentDto getCurrencyWalletChangeRequest(List<Currency> currencyList) throws Exception {
+        EncryptedContentDto messageContentDto = new EncryptedContentDto();
         messageContentDto.setOperation(TypeVS.CURRENCY_WALLET_CHANGE);
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
         messageContentDto.setDeviceFromId(ContextVS.getInstance().getConnectedDevice().getId());
@@ -68,9 +68,9 @@ public class SocketMessageEncryptedDto {
         return messageContentDto;
     }
 
-    public static SocketMessageEncryptedDto getMessageVSToDevice(
+    public static EncryptedContentDto getMessageVSToDevice(
             User user, String toUser, String message) throws Exception {
-        SocketMessageEncryptedDto messageContentDto = new SocketMessageEncryptedDto();
+        EncryptedContentDto messageContentDto = new EncryptedContentDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS);
         messageContentDto.setFrom(user.getFullName());
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
