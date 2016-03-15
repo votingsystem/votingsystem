@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SocketMessageContentDto {
+public class SocketMessageEncryptedDto {
 
     private TypeVS operation;
     private Integer statusCode;
@@ -31,21 +31,24 @@ public class SocketMessageContentDto {
     private String toUser;
     private String hashCertVS;
     private String cmsMessage;
+    private String pemCert;
+    private String pemPublicKey;
+    private boolean timeLimited;
     private Set<CurrencyDto> currencyList;
     private String URL;
 
 
-    public SocketMessageContentDto() {}
+    public SocketMessageEncryptedDto() {}
 
-    public SocketMessageContentDto(TypeVS operation, Integer statusCode, String message, String URL) {
+    public SocketMessageEncryptedDto(TypeVS operation, Integer statusCode, String message, String URL) {
         this.operation = operation;
         this.statusCode = statusCode;
         this.message = message;
         this.URL = URL;
     }
 
-    public static SocketMessageContentDto getSignRequest(String toUser, String textToSign, String subject) throws Exception {
-        SocketMessageContentDto messageContentDto =  new SocketMessageContentDto();
+    public static SocketMessageEncryptedDto getSignRequest(String toUser, String textToSign, String subject) throws Exception {
+        SocketMessageEncryptedDto messageContentDto =  new SocketMessageEncryptedDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
         messageContentDto.setToUser(toUser);
@@ -55,8 +58,8 @@ public class SocketMessageContentDto {
         return messageContentDto;
     }
 
-    public static SocketMessageContentDto getCurrencyWalletChangeRequest(List<Currency> currencyList) throws Exception {
-        SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
+    public static SocketMessageEncryptedDto getCurrencyWalletChangeRequest(List<Currency> currencyList) throws Exception {
+        SocketMessageEncryptedDto messageContentDto = new SocketMessageEncryptedDto();
         messageContentDto.setOperation(TypeVS.CURRENCY_WALLET_CHANGE);
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
         messageContentDto.setDeviceFromId(ContextVS.getInstance().getConnectedDevice().getId());
@@ -65,9 +68,9 @@ public class SocketMessageContentDto {
         return messageContentDto;
     }
 
-    public static SocketMessageContentDto getMessageVSToDevice(
+    public static SocketMessageEncryptedDto getMessageVSToDevice(
             User user, String toUser, String message) throws Exception {
-        SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
+        SocketMessageEncryptedDto messageContentDto = new SocketMessageEncryptedDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS);
         messageContentDto.setFrom(user.getFullName());
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
@@ -210,5 +213,29 @@ public class SocketMessageContentDto {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public String getPemCert() {
+        return pemCert;
+    }
+
+    public void setPemCert(String pemCert) {
+        this.pemCert = pemCert;
+    }
+
+    public boolean isTimeLimited() {
+        return timeLimited;
+    }
+
+    public void setTimeLimited(boolean timeLimited) {
+        this.timeLimited = timeLimited;
+    }
+
+    public String getPemPublicKey() {
+        return pemPublicKey;
+    }
+
+    public void setPemPublicKey(String pemPublicKey) {
+        this.pemPublicKey = pemPublicKey;
     }
 }

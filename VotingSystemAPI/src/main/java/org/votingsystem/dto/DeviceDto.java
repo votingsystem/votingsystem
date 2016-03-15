@@ -7,6 +7,7 @@ import org.votingsystem.model.User;
 import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.Serializable;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
@@ -24,7 +25,8 @@ public class DeviceDto implements Serializable {
     private String deviceName;
     private String email;
     private String phone;
-    private String certPEM;
+    private String pemPublicKey;
+    private String pemCert;
     private String firstName;
     private String lastName;
     private String NIF;
@@ -67,7 +69,7 @@ public class DeviceDto implements Serializable {
         this.setPhone(device.getPhone());
         this.setEmail(device.getEmail());
         X509Certificate x509Cert = device.getX509Certificate();
-        if(x509Cert != null) certPEM = new String(PEMUtils.getPEMEncoded(x509Cert));
+        if(x509Cert != null) pemCert = new String(PEMUtils.getPEMEncoded(x509Cert));
     }
 
     @JsonIgnore
@@ -78,8 +80,8 @@ public class DeviceDto implements Serializable {
         device.setDeviceName(getDeviceName());
         device.setEmail(getEmail());
         device.setPhone(getPhone());
-        if(getCertPEM() != null) {
-            Collection<X509Certificate> certChain = PEMUtils.fromPEMToX509CertCollection(getCertPEM().getBytes());
+        if(getPemCert() != null) {
+            Collection<X509Certificate> certChain = PEMUtils.fromPEMToX509CertCollection(getPemCert().getBytes());
             device.setX509Certificate(certChain.iterator().next());
         }
         return device;
@@ -126,17 +128,17 @@ public class DeviceDto implements Serializable {
         this.phone = phone;
     }
 
-    public String getCertPEM() {
-        return certPEM;
+    public String getPemCert() {
+        return pemCert;
     }
 
-    public void setCertPEM(String certPEM) {
-        this.certPEM = certPEM;
+    public void setPemCert(String pemCert) {
+        this.pemCert = pemCert;
     }
 
-    @JsonIgnore public X509Certificate getX509Cert() throws Exception {
-        if(certPEM == null) return null;
-        else return PEMUtils.fromPEMToX509Cert(certPEM.getBytes());
+    @JsonIgnore public X509Certificate getX509Certificate() throws Exception {
+        if(pemCert == null) return null;
+        else return PEMUtils.fromPEMToX509Cert(pemCert.getBytes());
     }
 
     public String getSessionId() {
@@ -185,6 +187,19 @@ public class DeviceDto implements Serializable {
 
     public void setIBAN(String IBAN) {
         this.IBAN = IBAN;
+    }
+
+    public String getPemPublicKey() {
+        return pemPublicKey;
+    }
+
+    public void setPemPublicKey(String pemPublicKey) {
+        this.pemPublicKey = pemPublicKey;
+    }
+
+    @JsonIgnore public PublicKey getPublicKey() throws Exception {
+        if(pemPublicKey == null) return null;
+        else return PEMUtils.fromPEMToRSAPublicKey(pemPublicKey);
     }
 
 }

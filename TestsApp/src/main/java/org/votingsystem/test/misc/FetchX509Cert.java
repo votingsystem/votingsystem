@@ -64,7 +64,7 @@ public class FetchX509Cert {
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
             throw new ExceptionVS("serverInfoURL - error: " + responseVS.getMessage());
         DeviceDto dto = (DeviceDto) responseVS.getMessage(DeviceDto.class);
-        log.info(PEMUtils.fromPEMToX509Cert(dto.getCertPEM().getBytes()).toString());
+        log.info(PEMUtils.fromPEMToX509Cert(dto.getPemCert().getBytes()).toString());
     }
 }
 

@@ -1,8 +1,7 @@
 package org.votingsystem.util;
 
+import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.model.Device;
-import org.votingsystem.util.crypto.AESParams;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -10,30 +9,23 @@ import org.votingsystem.util.crypto.AESParams;
 public class WebSocketSession<T> {
 
     private TypeVS typeVS;
-    private AESParams aesParams;
     private T data;
-    private Device device;
+    private DeviceDto device;
     private String UUID;
 
     public WebSocketSession(SocketMessageDto socketMsg) {
-        this.aesParams = socketMsg.getAesEncryptParams();
         this.typeVS = socketMsg.getOperation();
         this.UUID = socketMsg.getUUID();
     }
 
-    public WebSocketSession(AESParams aesParams, Device device, T data, TypeVS typeVS) {
-        this.aesParams = aesParams;
+    public WebSocketSession(DeviceDto device, T data, TypeVS typeVS) {
         this.data = data;
         this.device = device;
         this.typeVS = typeVS;
     }
 
-    public AESParams getAESParams() {
-        return aesParams;
-    }
-
-    public void setAESParams(AESParams aesParams) {
-        this.aesParams = aesParams;
+    public WebSocketSession(DeviceDto device) {
+        this.device = device;
     }
 
     public T getData() {
@@ -44,11 +36,11 @@ public class WebSocketSession<T> {
         this.data = data;
     }
 
-    public Device getDevice() {
+    public DeviceDto getDevice() {
         return device;
     }
 
-    public void setDevice(Device device) {
+    public void setDevice(DeviceDto device) {
         this.device = device;
     }
 

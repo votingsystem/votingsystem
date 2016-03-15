@@ -12,7 +12,7 @@
         <div id="qrCodeImgDiv" class="vertical layout center center-justified">
             <div style="margin: 25px 0 0 0;font-size: 1.2em;"><b>${msg.accessLbl}</b></div>
             <img id="qrImg"  src="" alt="read it with your mobile"/>
-            <div id="websocketSessionDiv"></div>
+            <div id="websocketSessionDiv" style="text-transform: uppercase;font-size: 1.4em;font-weight: bold;"></div>
         </div>
 
         <script>
@@ -97,10 +97,13 @@
 
                     } else {
                         if(messageJSON.encryptedMessage != null) {
-                            var AESParamsDto = toJSON(rsaUtil.decrypt(messageJSON.aesParams));
-                            console.log("AESParamsDto: " + JSON.stringify(AESParamsDto))
-                            var aesUtil =  new AESUtil().loadData(AESParamsDto.key, AESParamsDto.iv)
-                            aesUtil.decryptSocketMsg(messageJSON)
+                            rsaUtil.decryptSocketMsg(messageJSON)
+                            //var AESParamsDto = toJSON(rsaUtil.decrypt(messageJSON.aesParams));
+                            //console.log("AESParamsDto: " + JSON.stringify(AESParamsDto))
+                            //var aesUtil =  new AESUtil().loadData(AESParamsDto.key, AESParamsDto.iv)
+                            //aesUtil.decryptSocketMsg(messageJSON)
+                            console.log("decryptSocketMsg: ")
+                            console.log(messageJSON)
                         }
                         switch(messageJSON.operation) {
                             case "QR_MESSAGE_INFO":
@@ -108,16 +111,18 @@
                                 var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
                                     deviceToId:messageJSON.deviceFromId,
                                     deviceId:wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
-                                socketMessageDto.encryptedMessage = aesUtil.encrypt(JSON.stringify(qrOperation))
+                                socketMessageDto.encryptedMessage = vs.encryptToCMS(
+                                        messageJSON.pemCert, JSON.stringify(qrOperation))
                                 websocket.send(JSON.stringify(socketMessageDto))
                                 break;
                             case "INIT_REMOTE_SIGNED_BROWSER_SESSION":
                                 var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
                                     deviceToId:messageJSON.deviceFromId,
                                     deviceId:wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
-                                var messageContentDto = {operation:INIT_REMOTE_SIGNED_BROWSER_SESSION,
+                                var encryptedDto = {operation:INIT_REMOTE_SIGNED_BROWSER_SESSION,
                                     sessionId:wsSessionId, deviceFromId:wsDeviceId}
-                                socketMessageDto.encryptedMessage = AESUtil.encrypt(JSON.stringify(socketMessageDto))
+                                socketMessageDto.encryptedMessage = vs.encryptToCMS(
+                                        messageJSON.pemCert, JSON.stringify(encryptedDto))
                                 websocket.send(JSON.stringify(socketMessageDto))
                                 break;
                         }

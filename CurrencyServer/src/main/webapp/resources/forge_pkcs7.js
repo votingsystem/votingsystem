@@ -853,7 +853,7 @@ function _recipientFromAsn1(obj) {
   var capture = {};
   var errors = [];
   if(!asn1.validate(obj, p7.asn1.recipientInfoValidator, capture, errors)) {
-    //check if encrypted witl public key instead of certificate
+    //check if encrypted with public key instead of certificate
     if(!asn1.validate(obj, p7.asn1.recipientInfoValidatorPublicKey, capture, errors)) {
       var error = new Error('Cannot read PKCS#7 RecipientInfo. ' +
           'ASN.1 object is not an PKCS#7 RecipientInfo.');

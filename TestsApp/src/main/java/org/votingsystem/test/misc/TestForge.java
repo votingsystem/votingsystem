@@ -2,13 +2,13 @@ package org.votingsystem.test.misc;
 
 import org.bouncycastle.util.encoders.Base64;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.crypto.AESParams;
 import org.votingsystem.util.crypto.Encryptor;
 import org.votingsystem.util.crypto.PEMUtils;
 
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.*;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.logging.Logger;
@@ -82,15 +82,6 @@ public class TestForge {
         log.info("cipherText: " + cipherText);
         String plainText = Encryptor.decryptRSA(cipherText, privkey);
         log.info("plainText: " + plainText);
-    }
-
-    private static final void testAES()  throws Exception {
-        byte[] decodeKeyBytes = Base64.decode(keyBase64.getBytes());
-        Key key = new SecretKeySpec(decodeKeyBytes, 0, decodeKeyBytes.length, "AES");
-        byte[] iv = Base64.decode(ivBase64.getBytes());
-        IvParameterSpec ivParamSpec = new IvParameterSpec(iv);
-        AESParams aesParams = new AESParams(key, ivParamSpec);
-        log.info("Decrypted: " + Encryptor.decryptAES(aesCipherText, aesParams));
     }
 
 }

@@ -19,9 +19,33 @@ RSAUtil.prototype.decrypt = function(encryptedBase64) {
 
 RSAUtil.prototype.decryptCMS = function(encryptedPEM) {
     var encryptedCMSMsg = forge.pkcs7.messageFromPem(encryptedPEM);
-    var privateKey = forge.pki.privateKeyFromPem(document.querySelector("#privateKey").innerHTML);
     encryptedCMSMsg.decrypt(encryptedCMSMsg.recipients[0], this.keypair.privateKey);
     return encryptedCMSMsg;
+}
+
+RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
+    var decryptedMsg = this.decryptCMS(messageJSON.encryptedMessage)
+    console.log("decryptedMsg: ")
+    console.log(decryptedMsg.content.data)
+    if(decryptedMsg.content && decryptedMsg.content.data) {
+        var msgContentJSON = toJSON(decryptedMsg.content.data)
+        messageJSON.messageType = messageJSON.operation
+        messageJSON.operation = msgContentJSON.operation
+
+        if(msgContentJSON.statusCode != null) messageJSON.statusCode = msgContentJSON.statusCode;
+        if(msgContentJSON.pemCert != null) messageJSON.pemCert = msgContentJSON.pemCert;
+        if(msgContentJSON.deviceFromName != null) messageJSON.deviceFromName = msgContentJSON.deviceFromName;
+        if(msgContentJSON.from != null) messageJSON.from = msgContentJSON.from;
+        if(msgContentJSON.deviceFromId != null) messageJSON.deviceFromId = msgContentJSON.deviceFromId;
+        if(msgContentJSON.cmsMessage != null) messageJSON.cms = msgContentJSON.cmsMessage;
+        if(msgContentJSON.subject != null) messageJSON.subject = msgContentJSON.subject;
+        if(msgContentJSON.message != null) messageJSON.message = msgContentJSON.message;
+        if(msgContentJSON.toUser != null) messageJSON.toUser = msgContentJSON.toUser;
+        if(msgContentJSON.deviceToName != null) messageJSON.deviceToName = msgContentJSON.deviceToName;
+        if(msgContentJSON.URL != null) messageJSON.URL = msgContentJSON.URL;
+        if(msgContentJSON.locale != null) messageJSON.locale = msgContentJSON.locale;
+        messageJSON.encryptedMessage = null;
+    } else console.error("encrypted content not found")
 }
 
 var AESUtil = function() { }
@@ -79,6 +103,17 @@ AESUtil.prototype.decryptSocketMsg = function(messageJSON) {
     if(msgContentJSON.locale != null) messageJSON.locale = msgContentJSON.locale;
     messageJSON.encryptedMessage = null;
 }
+
+
+vs.encryptToCMS = function (receptorCertPEM, contentToEncrypt) {
+    var p7 = forge.pkcs7.createEnvelopedData();
+    var cert = forge.pki.certificateFromPem(receptorCertPEM);
+    p7.addRecipient(cert);
+    p7.content = forge.util.createBuffer(contentToEncrypt);
+    p7.encrypt();
+    return forge.pkcs7.messageToPem(p7);
+}
+
 
 vs.getTSTInfoFromTimeStampTokenBase64 = function (base64TimeStampToken) {
     var timeStampTokenDer =  forge.util.decode64(base64TimeStampToken)
