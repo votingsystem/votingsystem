@@ -58,7 +58,6 @@ public class ConfigVSImpl implements ConfigVS {
     private String webSocketURL;
     private String serverName;
     private String timeStampServerURL;
-    private EnvironmentVS mode;
     private Properties props;
     private String emailAdmin;
     private String staticResURL;
@@ -68,19 +67,7 @@ public class ConfigVSImpl implements ConfigVS {
 
     public ConfigVSImpl() {
         try {
-            String resourceFile = null;
-            log.info("environment: " + System.getProperty("vs.environment"));
-            if(System.getProperty("vs.environment") != null) {
-                mode = EnvironmentVS.valueOf(System.getProperty("vs.environment"));
-            } else mode = EnvironmentVS.DEVELOPMENT;
-            switch (mode) {
-                case DEVELOPMENT:
-                    resourceFile = "AccessControl_DEVELOPMENT.properties";
-                    break;
-                case PRODUCTION:
-                    resourceFile = "AccessControl_PRODUCTION.properties";
-                    break;
-            }
+            String resourceFile = "AccessControl.properties";
             props = new Properties();
             URL res = Thread.currentThread().getContextClassLoader().getResource(resourceFile);
             props.load(res.openStream());
@@ -146,10 +133,6 @@ public class ConfigVSImpl implements ConfigVS {
     public TagVS getTag(String tagName) {
         Query query = dao.getEM().createNamedQuery("findTagByName").setParameter("name", tagName);
         return dao.getSingleResult(TagVS.class, query);
-    }
-
-    public EnvironmentVS getMode() {
-        return mode;
     }
 
     @Override

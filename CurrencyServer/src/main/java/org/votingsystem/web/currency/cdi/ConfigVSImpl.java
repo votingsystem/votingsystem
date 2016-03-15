@@ -7,7 +7,6 @@ import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.web.currency.ejb.AuditBean;
@@ -61,7 +60,6 @@ public class ConfigVSImpl implements ConfigVS {
     private String webSocketURL;
     private String serverName;
     private String timeStampServerURL;
-    private EnvironmentVS mode;
     private Properties props;
     private String bankCode = null;
     private String  branchCode = null;
@@ -72,19 +70,7 @@ public class ConfigVSImpl implements ConfigVS {
 
     public ConfigVSImpl() {
         try {
-            String resourceFile = null;
-            log.info("environment: " + System.getProperty("vs.environment"));
-            if(System.getProperty("vs.environment") != null) {
-                mode = EnvironmentVS.valueOf(System.getProperty("vs.environment"));
-            } else mode = EnvironmentVS.DEVELOPMENT;
-            switch (mode) {
-                case DEVELOPMENT:
-                    resourceFile = "CurrencyServer_DEVELOPMENT.properties";
-                    break;
-                case PRODUCTION:
-                    resourceFile = "CurrencyServer_PRODUCTION.properties";
-                    break;
-            }
+            String resourceFile = "CurrencyServer.properties";
             props = new Properties();
             URL res = Thread.currentThread().getContextClassLoader().getResource(resourceFile);
             props.load(res.openStream());
@@ -201,10 +187,6 @@ public class ConfigVSImpl implements ConfigVS {
 
     public User getSystemUser() {
         return systemUser;
-    }
-
-    public EnvironmentVS getMode() {
-        return mode;
     }
 
     public String getContextURL() {

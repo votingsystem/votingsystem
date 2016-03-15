@@ -9,7 +9,6 @@ import org.votingsystem.model.voting.UserRequestCsr;
 import org.votingsystem.service.EJBRemoteAdminAccessControl;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.NifUtils;
 import org.votingsystem.util.crypto.KeyStoreUtil;
 import org.votingsystem.web.ejb.CMSBean;
@@ -127,9 +126,6 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
     public String validateCSR(String nif, String deviceId) throws Exception {
         log.info("validateCSR - nif: " + nif + " - deviceId: " + deviceId);
         MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
-        if(config.getMode() != EnvironmentVS.DEVELOPMENT) {
-            throw new ExceptionVS("service available only in mode DEVELOPMENT - actual mode: " + config.getMode());
-        }
         Query query = dao.getEM().createQuery("select d from Device d where d.deviceId =:deviceId").setParameter("deviceId", deviceId);
         Device device = dao.getSingleResult(Device.class, query);
         if(device == null) throw new ExceptionVS("Device not found - deviceId: " + deviceId);

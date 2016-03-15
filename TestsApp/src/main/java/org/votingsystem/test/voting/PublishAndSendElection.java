@@ -75,9 +75,6 @@ public class PublishAndSendElection {
         Actor actor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
         if(!(actor instanceof AccessControl)) throw new ExceptionVS("Expected access control but found " +
                 actor.getType().toString());
-        if(actor.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actor.getEnvironmentVS()) {
-            throw new ExceptionVS("Expected DEVELOPMENT environment but found " + actor.getEnvironmentVS());
-        }
         ContextVS.getInstance().setAccessControl((AccessControl) actor);
         //EventVSJSON eventVSJSON = publishEvent(simulationData.getEventVS(), publisherNIF, "publishElectionMsgSubject");
         eventVS = publishEvent(simulationData.getEventVS(), publisherNIF, "publishElectionMsgSubject");

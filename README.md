@@ -4,13 +4,7 @@ The project needs Java 8 and JavaFX. In Debian you can install them with this co
         sudo apt-get install openjfx
         update-java-alternatives -s java-1.8.0-openjdk-amd64
 
-Application environment default is set to DEVELOPMENT, to change that add what follows to the standalone / domain server configuration just after the extensions section:
-
-        <system-properties>
-                <property name="vs.environment" value="PRODUCTION"/>
-        </system-properties>
-
-In order to run the applications you must set appropiated values in '/src/main/resources/\*_DEVELOPMENT.properties' and '/src/main/resources/\*_PRODUCTION.properties' files
+In order to run the applications you must set appropiated values in '/src/main/resources/\*.properties' file
 
 To run the applications you need to:
 

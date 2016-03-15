@@ -39,7 +39,6 @@ public class ServerInfoResource {
         serverInfo.put("serverURL", config.getContextURL());
         serverInfo.put("state",  Actor.State.OK);
         serverInfo.put("date", new Date());
-        serverInfo.put("environmentMode", config.getMode());
         serverInfo.put("timeStampCertPEM", new String(timeStampBean.getSigningCertPEMBytes()));
         serverInfo.put("timeStampServerURL", config.getTimeStampServerURL());
         serverInfo.put("certChainPEM", new String(cmsBean.getKeyStorePEMCerts()));

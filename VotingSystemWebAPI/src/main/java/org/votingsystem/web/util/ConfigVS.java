@@ -4,8 +4,6 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.EnvironmentVS;
-
 import java.io.File;
 import java.util.Properties;
 
@@ -33,8 +31,6 @@ public interface ConfigVS  {
     public String getWebSocketURL();
 
     public String getStaticResURL();
-
-    public EnvironmentVS getMode();
 
     public Properties getProperties();
 

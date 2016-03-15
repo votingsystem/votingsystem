@@ -6,7 +6,6 @@ import org.votingsystem.model.User;
 import org.votingsystem.model.voting.RepresentationDocument;
 import org.votingsystem.model.voting.RepresentativeDocument;
 import org.votingsystem.throwable.ValidationExceptionVS;
-import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -41,8 +40,7 @@ public class DevelopmentResource implements Serializable {
     private static final Logger log = Logger.getLogger(DevelopmentResource.class.getName());
 
     @EJB ConfigVS config;
-    @EJB
-    SubscriptionBean subscriptionBean;
+    @EJB SubscriptionBean subscriptionBean;
     @EJB DAOBean dao;
     @EJB CMSBean cmsBean;
     private MessagesVS messages = MessagesVS.getCurrentInstance();
@@ -51,9 +49,6 @@ public class DevelopmentResource implements Serializable {
     @Path("/adduser") @POST
     public Response adduser(@Context ServletContext context, @Context HttpServletRequest req,
                             @Context HttpServletResponse resp) throws Exception {
-        if(config.getMode() != EnvironmentVS.DEVELOPMENT) {
-            throw new ValidationExceptionVS("SERVICE AVAILABLE ONLY IN DEVELOPMENT MODE");
-        }
         byte[] requestBytes = IOUtils.toByteArray(req.getInputStream());
         Collection<X509Certificate> userCertCollection = PEMUtils.fromPEMToX509CertCollection(requestBytes);
         X509Certificate userCert = userCertCollection.iterator().next();
@@ -78,9 +73,6 @@ public class DevelopmentResource implements Serializable {
     @Path("/resetRepresentatives") @POST
     public Response resetRepresentatives(CMSMessage cmsMessage, @Context ServletContext context,
                                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        if(config.getMode() != EnvironmentVS.DEVELOPMENT) {
-            throw new ValidationExceptionVS("SERVICE AVAILABLE ONLY IN DEVELOPMENT MODE");
-        }
         if(!cmsBean.isAdmin(cmsMessage.getUser().getNif()))
             throw new ValidationExceptionVS("user without privileges");
         log.severe(" ===== VOTING SIMULATION - RESETING REPRESENTATIVES ===== ");

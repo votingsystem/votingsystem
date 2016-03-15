@@ -7,15 +7,8 @@ To enable application filters change what follows to the standalone / domain  se
         <servlet-container name="default" allow-non-standard-wrappers="true">
 
 #### Build and Deploy on Wildfly
-1. Application environment default is set to DEVELOPMENT, to change that add what follows to the standalone / domain 
-server configuration just after the extensions section:
-
-        <system-properties>
-                <property name="vs.environment" value="PRODUCTION"/>
-        </system-properties>
-        
-2. Make sure you have  Wildfly server started.
-3. Add the datasource in Wildfly through the management interface:
+1. Make sure you have  Wildfly server started.
+2. Add the datasource in Wildfly through the management interface:
 
         Name: TimeStampServer
         JNDI Name: java:jboss/datasources/TimeStampServer
@@ -23,7 +16,7 @@ server configuration just after the extensions section:
         username:userVS
         password:userVS
         
-4. Use this command to build and deploy the archive:
+3. Use this command to build and deploy the archive:
 
             mvn clean package wildfly:deploy
             

@@ -36,7 +36,6 @@ public class ServerInfoResource {
         serverInfo.put("serverType", Actor.Type.TIMESTAMP_SERVER);
         serverInfo.put("certChainPEM", new String(timeStampService.getSigningCertChainPEMBytes()));
         serverInfo.put("serverURL", config.getContextURL());
-        serverInfo.put("environmentMode", config.getMode());
         resp.setHeader("Access-Control-Allow-Origin", "*");
         return JSON.getMapper().writeValueAsString(serverInfo);
     }

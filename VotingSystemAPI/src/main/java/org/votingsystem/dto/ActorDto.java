@@ -6,7 +6,6 @@ import org.votingsystem.model.Actor;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControl;
 import org.votingsystem.model.voting.ControlCenter;
-import org.votingsystem.util.EnvironmentVS;
 
 import java.util.Date;
 
@@ -25,7 +24,6 @@ public class ActorDto {
     private ActorDto controlCenter;
     private Actor.Type serverType;
     private Actor.State state;
-    private EnvironmentVS environmentMode;
 
     public ActorDto() {}
 
@@ -64,7 +62,6 @@ public class ActorDto {
                 break;
         }
         actor.setId(id);
-        actor.setEnvironmentVS(environmentMode);
         actor.setServerURL(serverURL);
         actor.setWebSocketURL(webSocketURL);
         actor.setName(name);
@@ -160,14 +157,6 @@ public class ActorDto {
 
     public void setState(Actor.State state) {
         this.state = state;
-    }
-
-    public EnvironmentVS getEnvironmentMode() {
-        return environmentMode;
-    }
-
-    public void setEnvironmentMode(EnvironmentVS environmentMode) {
-        this.environmentMode = environmentMode;
     }
 
     public String getWebSocketURL() {

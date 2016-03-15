@@ -21,7 +21,6 @@ public class ControlCenter extends Actor implements Serializable {
         setName(actor.getName());
         setX509Certificate(actor.getX509Certificate());
         setControlCenter(actor.getControlCenter());
-        setEnvironmentVS(actor.getEnvironmentVS());
         setServerURL(actor.getServerURL());
         setState(actor.getState());
         setId(actor.getId());

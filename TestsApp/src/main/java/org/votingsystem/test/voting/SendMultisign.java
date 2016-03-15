@@ -40,9 +40,6 @@ public class SendMultisign {
                 simulationData.getServerURL()), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         Actor actor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
-        if(actor.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actor.getEnvironmentVS()) {
-            throw new ExceptionVS("Expected DEVELOPMENT environment but found " + actor.getEnvironmentVS());
-        }
         ContextVS.getInstance().setDefaultServer(actor);
         initSimulation();
     }

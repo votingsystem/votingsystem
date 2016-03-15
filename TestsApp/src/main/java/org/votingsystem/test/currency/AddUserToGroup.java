@@ -33,9 +33,6 @@ public class AddUserToGroup {
 
         log.info("initializeServer");
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(simulationData.getServerURL());
-        if(currencyServer.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != currencyServer.getEnvironmentVS()) {
-            throw new ExceptionVS("SERVER NOT IN DEVELOPMENT MODE. Server mode:" + currencyServer.getEnvironmentVS());
-        }
         ContextVS.getInstance().setDefaultServer(currencyServer);
         String groupURL = currencyServer.getGroupURL(simulationData.getGroupId());
         GroupDto groupDto = HttpHelper.getInstance().getData(GroupDto.class, groupURL, MediaTypeVS.JSON);

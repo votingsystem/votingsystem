@@ -41,7 +41,6 @@ public class ServerInfoResource {
         actor.setServerURL(config.getContextURL());
         actor.setWebSocketURL(config.getWebSocketURL());
         actor.setState(Actor.State.OK);
-        actor.setEnvironmentMode(config.getMode());
         actor.setDate(new Date());
         actor.setTimeStampCertPEM(new String(timeStampBean.getSigningCertPEMBytes()));
         actor.setTimeStampServerURL(config.getTimeStampServerURL());

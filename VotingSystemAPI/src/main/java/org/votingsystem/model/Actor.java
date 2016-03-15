@@ -2,7 +2,6 @@ package org.votingsystem.model;
 
 import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.util.EntityVS;
-import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 
@@ -64,7 +63,6 @@ public class Actor extends EntityVS implements Serializable {
     @Transient private transient X509Certificate x509Certificate;
     @Transient private Set<TrustAnchor> trustAnchors = null;
     @Transient private CertificateVS certificateVS;
-    @Transient private EnvironmentVS environmentMode;
     @Transient private Date date;
     @Transient private ControlCenter controlCenter;
     @Transient private X509Certificate timeStampCert = null;
@@ -180,14 +178,6 @@ public class Actor extends EntityVS implements Serializable {
     public Type getType() { return serverType; }
 
     public void setType(Type serverType) { this.serverType = serverType; }
-
-    public EnvironmentVS getEnvironmentVS() {
-        return environmentMode;
-    }
-
-    public void setEnvironmentVS(EnvironmentVS environmentMode) {
-        this.environmentMode = environmentMode;
-    }
 
     public X509Certificate getTimeStampCert() {
         return timeStampCert;

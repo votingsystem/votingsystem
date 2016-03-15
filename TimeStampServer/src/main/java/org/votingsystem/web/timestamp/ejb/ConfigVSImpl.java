@@ -5,7 +5,6 @@ import org.votingsystem.model.User;
 import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.ejb.Singleton;
@@ -28,24 +27,11 @@ public class ConfigVSImpl implements ConfigVS {
     private static final Logger log = Logger.getLogger(ConfigVSImpl.class.getName());
 
     private String contextURL;
-    private EnvironmentVS mode;
     private Properties props;
 
     public ConfigVSImpl() {
         try {
-            String resourceFile = null;
-            log.info("environment: " + System.getProperty("vs.environment"));
-            if(System.getProperty("vs.environment") != null) {
-                mode = EnvironmentVS.valueOf(System.getProperty("vs.environment"));
-            } else mode = EnvironmentVS.DEVELOPMENT;
-            switch (mode) {
-                case DEVELOPMENT:
-                    resourceFile = "TimeStampServer_DEVELOPMENT.properties";
-                    break;
-                case PRODUCTION:
-                    resourceFile = "TimeStampServer_PRODUCTION.properties";
-                    break;
-            }
+            String resourceFile = "TimeStampServer.properties";
             props = new Properties();
             URL res = Thread.currentThread().getContextClassLoader().getResource(resourceFile);
             props.load(res.openStream());
@@ -83,10 +69,6 @@ public class ConfigVSImpl implements ConfigVS {
     @Override
     public String getServerName() {
         return null;
-    }
-
-    public EnvironmentVS getMode() {
-        return mode;
     }
 
     @Override

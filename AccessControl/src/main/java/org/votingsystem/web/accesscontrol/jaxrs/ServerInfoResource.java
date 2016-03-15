@@ -42,7 +42,6 @@ public class ServerInfoResource {
         serverInfo.put("date", new Date());
         ControlCenter controlCenter = configVS.getControlCenter();
         if(controlCenter != null) serverInfo.put("controlCenter", new ActorDto(controlCenter));
-        serverInfo.put("environmentMode", configVS.getMode());
         serverInfo.put("timeStampCertPEM", new String(timeStampBean.getSigningCertPEMBytes()));
         serverInfo.put("timeStampServerURL", configVS.getTimeStampServerURL());
         serverInfo.put("certChainPEM", new String(cmsBean.getKeyStorePEMCerts()));
