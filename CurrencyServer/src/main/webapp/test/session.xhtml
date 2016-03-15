@@ -69,7 +69,6 @@
                 };
 
                 var rsaUtil = new RSAUtil();
-                console.log("publicKeyBase64: " + rsaUtil.publicKeyBase64)
 
                 websocket.onmessage = function (event) {
                     console.log('Received: ' + event.data);
@@ -90,7 +89,7 @@
                                     document.querySelector("#qrImg").setAttribute(
                                             "src", getQRCodeURL(QR_MESSAGE_INFO, opCode,
                                                     wsDeviceId, null, rsaUtil.publicKeyBase64))
-                                    document.querySelector("#websocketSessionDiv").innerHTML = rsaUtil.publicKeyBase64.substring(0, 4);
+                                    document.querySelector("#websocketSessionDiv").innerHTML = opCode;
                                 }
                                 break;
                         }
@@ -98,10 +97,6 @@
                     } else {
                         if(messageJSON.encryptedMessage != null) {
                             rsaUtil.decryptSocketMsg(messageJSON)
-                            //var AESParamsDto = toJSON(rsaUtil.decrypt(messageJSON.aesParams));
-                            //console.log("AESParamsDto: " + JSON.stringify(AESParamsDto))
-                            //var aesUtil =  new AESUtil().loadData(AESParamsDto.key, AESParamsDto.iv)
-                            //aesUtil.decryptSocketMsg(messageJSON)
                             console.log("decryptSocketMsg: ")
                             console.log(messageJSON)
                         }
@@ -109,14 +104,17 @@
                             case "QR_MESSAGE_INFO":
                                 var qrOperation = qrCodes_OperationsMap[messageJSON.message]
                                 var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
+                                    statusCode:700,
                                     deviceToId:messageJSON.deviceFromId,
                                     deviceId:wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
                                 socketMessageDto.encryptedMessage = vs.encryptToCMS(
                                         messageJSON.pemCert, JSON.stringify(qrOperation))
+                                console.log(socketMessageDto)
                                 websocket.send(JSON.stringify(socketMessageDto))
                                 break;
                             case "INIT_REMOTE_SIGNED_BROWSER_SESSION":
                                 var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
+                                    statusCode:700,
                                     deviceToId:messageJSON.deviceFromId,
                                     deviceId:wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
                                 var encryptedDto = {operation:INIT_REMOTE_SIGNED_BROWSER_SESSION,

@@ -63,7 +63,6 @@ public class SocketMessageDto {
     private Date date;
     private DeviceDto connectedDevice;
 
-    private EncryptedContentDto encryptedDto;
     @JsonIgnore private User user;
     @JsonIgnore private Set<Currency> currencySet;
     @JsonIgnore private WebSocketSession webSocketSession;
@@ -95,7 +94,7 @@ public class SocketMessageDto {
         if(cmsMessage != null) encryptedDto.setCMSMessage(cmsMessage.toPEMStr());
         encryptedDto.setDeviceFromId(deviceFromId);
         encryptedDto.setOperation(operation);
-        setEncryptedMessage(encryptedDto);
+        encryptMessage(encryptedDto);
         socketMessageDto.setUUID(UUID);
         return socketMessageDto;
     }
@@ -302,13 +301,6 @@ public class SocketMessageDto {
         this.state = state;
     }
 
-    public EncryptedContentDto getContent() {
-        return encryptedDto;
-    }
-
-    public void setContent(EncryptedContentDto content) {
-        this.encryptedDto = content;
-    }
 
     public String getFrom() {
         return from;
@@ -427,7 +419,7 @@ public class SocketMessageDto {
         socketMessageDto.setDeviceToName(deviceTo.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
         EncryptedContentDto encryptedDto = EncryptedContentDto.getSignRequest(toUser, textToSign, subject);
-        setEncryptedMessage(socketMessageDto, encryptedDto, deviceTo);
+        encryptMessage(socketMessageDto, encryptedDto, deviceTo);
         return socketMessageDto;
     }
 
@@ -442,7 +434,7 @@ public class SocketMessageDto {
         socketMessageDto.setDeviceToId(deviceTo.getId());
         socketMessageDto.setDeviceToName(deviceTo.getDeviceName());
         EncryptedContentDto encryptedDto = EncryptedContentDto.getCurrencyWalletChangeRequest(currencyList);
-        setEncryptedMessage(socketMessageDto, encryptedDto, deviceTo);
+        encryptMessage(socketMessageDto, encryptedDto, deviceTo);
         return socketMessageDto;
     }
 
@@ -456,7 +448,7 @@ public class SocketMessageDto {
         socketMessageDto.setDeviceToName(deviceTo.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
         EncryptedContentDto encryptedDto = EncryptedContentDto.getMessageVSToDevice(user, toUser, textToEncrypt);
-        setEncryptedMessage(socketMessageDto, encryptedDto, deviceTo);
+        encryptMessage(socketMessageDto, encryptedDto, deviceTo);
         return socketMessageDto;
     }
 
@@ -470,12 +462,12 @@ public class SocketMessageDto {
         socketMessageDto.setDeviceToName(from);
         socketMessageDto.setUUID(socketSession.getUUID());
         EncryptedContentDto encryptedDto = EncryptedContentDto.getMessageVSToDevice(user, from, textToEncrypt);
-        setEncryptedMessage(encryptedDto);
+        encryptMessage(encryptedDto);
         return socketMessageDto;
     }
 
-    private static void setEncryptedMessage(SocketMessageDto socketMessageDto,
-                                            EncryptedContentDto encryptedDto, DeviceDto device) throws Exception {
+    private static void encryptMessage(SocketMessageDto socketMessageDto,
+                                       EncryptedContentDto encryptedDto, DeviceDto device) throws Exception {
         if(device.getX509Certificate() != null) {
             byte[] encryptedCMS_PEM = Encryptor.encryptToCMS(
                     JSON.getMapper().writeValueAsBytes(encryptedDto), device.getX509Certificate());
@@ -488,7 +480,7 @@ public class SocketMessageDto {
     }
 
     @JsonIgnore
-    private void setEncryptedMessage(EncryptedContentDto encryptedDto) throws Exception {
+    private void encryptMessage(EncryptedContentDto encryptedDto) throws Exception {
         if(pemCert != null) {
             X509Certificate targetDeviceCert = PEMUtils.fromPEMToX509Cert(pemCert.getBytes());
             byte[] encryptedMessageBytes = Encryptor.encryptToCMS(
