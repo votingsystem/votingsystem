@@ -1,6 +1,6 @@
 package org.votingsystem.web.currency.util;
 
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 
 import java.security.Principal;
 
@@ -9,10 +9,10 @@ import java.security.Principal;
  */
 public class PrincipalVS implements Principal {
 
-    private UserVS userVS;
+    private User user;
 
-    public PrincipalVS(UserVS userVS) {
-        this.userVS = userVS;
+    public PrincipalVS(User user) {
+        this.user = user;
     }
 
     @Override
@@ -21,26 +21,26 @@ public class PrincipalVS implements Principal {
     }
 
     public boolean equals(PrincipalVS other) {
-        return this == other || other != null && userVS.getNif().equals(other.getUserVS().getNif());
+        return this == other || other != null && user.getNif().equals(other.getUser().getNif());
     }
 
     @Override
     public String toString() {
-        return userVS.getNif() + " - id: " + userVS.getId();
+        return user.getNif() + " - id: " + user.getId();
     }
 
     @Override
     public int hashCode() {
-        return userVS.getNif().hashCode();
+        return user.getNif().hashCode();
     }
 
     @Override
     public String getName() {
-        return userVS.getNif();
+        return user.getNif();
     }
 
-    public UserVS getUserVS() {
-        return userVS;
+    public User getUser() {
+        return user;
     }
 
 }

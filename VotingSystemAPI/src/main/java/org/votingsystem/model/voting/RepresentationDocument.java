@@ -1,7 +1,7 @@
 package org.votingsystem.model.voting;
 
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;
@@ -35,10 +35,10 @@ public class RepresentationDocument extends EntityVS implements Serializable {
     @JoinColumn(name="cancellationCMS") private CMSMessage cancellationCMS;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="userVS") private UserVS userVS;
+    @JoinColumn(name="user") private User user;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="representative") private UserVS representative;
+    @JoinColumn(name="representative") private User representative;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCanceled", length=23) private Date dateCanceled;
@@ -51,10 +51,10 @@ public class RepresentationDocument extends EntityVS implements Serializable {
 
     public RepresentationDocument() {}
 
-    public RepresentationDocument(CMSMessage cmsMessage, UserVS userVS, UserVS representative,
+    public RepresentationDocument(CMSMessage cmsMessage, User user, User representative,
                                   State state) {
         this.activationCMS = cmsMessage;
-        this.userVS = userVS;
+        this.user = user;
         this.representative = representative;
         this.state = state;
     }
@@ -109,11 +109,11 @@ public class RepresentationDocument extends EntityVS implements Serializable {
         return this;
     }
 
-    public UserVS getRepresentative() {
+    public User getRepresentative() {
         return representative;
     }
 
-    public void setRepresentative(UserVS representative) {
+    public void setRepresentative(User representative) {
         this.representative = representative;
     }
 
@@ -126,11 +126,11 @@ public class RepresentationDocument extends EntityVS implements Serializable {
         return this;
     }
 
-    public UserVS getUserVS() {
-        return userVS;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserVS(UserVS user) {
-        this.userVS = user;
+    public void setUser(User user) {
+        this.user = user;
     }
 }

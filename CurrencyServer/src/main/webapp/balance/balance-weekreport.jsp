@@ -2,14 +2,14 @@
 
 <script src="../resources/js/balanceVSUtils_js.vsp" type="text/javascript"></script>
 
-<dom-module name="balance-uservs-details">
+<dom-module name="balance-user-details">
     <template>
         <style>
             .movemenType{
                 font-size: 1.2em; font-weight: bold; text-decoration: underline;color: #6c0404;
             }
             .tagLbl{ font-weight: bold; }
-            .userVS{font-weight: bold; text-align: center; color: #888;}
+            .user{font-weight: bold; text-align: center; color: #888;}
             .errorMessage {color: #ba0011; border: 1px solid #ba0011; padding: 4px;}
             .card {
                 position: relative;
@@ -25,7 +25,7 @@
         </style>
         <div class="card" layout vertical>
             <div hidden="{{!errorMessage}}" class="errorMessage">{{errorMessage}}</div>
-            <div class="userVS"><span>{{infoName}}</span> - <span>{{name}}</span></div>
+            <div class="user"><span>{{infoName}}</span> - <span>{{name}}</span></div>
             <div class="layout horizontal center center-justified">
                 ${msg.numExpensesLbl}: <span>{{balance.transactionFromList.length}}</span> ---
                 ${msg.numIncomesLbl}: <span>{{balance.transactionToList.length}}</span>
@@ -59,7 +59,7 @@
     </template>
     <script>
         Polymer({
-            is:'balance-uservs-details',
+            is:'balance-user-details',
             properties:{
                 url:{type:String, observer:'getHTTP'},
                 balance:{type:Object},
@@ -94,17 +94,17 @@
                     console.log("balanceChanged - balance null")
                     return
                 }
-                if(this.type === "userVS") {
-                    this.infoName = this.balance.userVS.nif
-                    this.name = this.balance.userVS.firstName + " " + this.balance.userVS.lastName
+                if(this.type === "user") {
+                    this.infoName = this.balance.user.nif
+                    this.name = this.balance.user.firstName + " " + this.balance.user.lastName
                 }
-                if(this.type === "groupVS") {
+                if(this.type === "group") {
                     this.infoName = "${msg.groupLbl}"
-                    this.name = this.balance.userVS.name
+                    this.name = this.balance.user.name
                 }
                 if(this.type === "systemVS") {
                     this.infoName = "${msg.systemLbl}"
-                    this.name = this.balance.userVS.name
+                    this.name = this.balance.user.name
                 }
                 this.transactionFromInfoMap = getCurrencyMap(this.balance.transactionFromList)
                 this.transactionToInfoMap = getCurrencyMap(this.balance.transactionToList)
@@ -137,16 +137,16 @@
         <!--JavaFX Webkit gives problems with tables and templates -->
         <div class="layout center center-justified" style="margin: 0px auto 0px auto;">
             <div class="layout flex horizontal wrap around-justified">
-                <balance-uservs-details type="systemVS" balance="{{balances.userBalances.systemBalance}}"></balance-uservs-details>
+                <balance-user-details type="systemVS" balance="{{balances.userBalances.systemBalance}}"></balance-user-details>
             </div>
             <div class="layout flex horizontal wrap around-justified">
-                <template is="dom-repeat" items="{{balances.userBalances.groupVSBalanceList}}" as="groupBalance">
-                    <balance-uservs-details type="groupVS" balance="{{groupBalance}}"></balance-uservs-details>
+                <template is="dom-repeat" items="{{balances.userBalances.groupBalanceList}}" as="groupBalance">
+                    <balance-user-details type="group" balance="{{groupBalance}}"></balance-user-details>
                 </template>
             </div>
             <div class="layout flex horizontal wrap around-justified">
-                <template is="dom-repeat" items="{{balances.userBalances.userVSBalanceList}}" as="userBalance">
-                    <balance-uservs-details  type="userVS" balance="{{userBalance}}"></balance-uservs-details>
+                <template is="dom-repeat" items="{{balances.userBalances.userBalanceList}}" as="userBalance">
+                    <balance-user-details  type="user" balance="{{userBalance}}"></balance-user-details>
                 </template>
             </div>
         </div>

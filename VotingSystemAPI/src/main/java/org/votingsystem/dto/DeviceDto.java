@@ -1,0 +1,190 @@
+package org.votingsystem.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.model.Device;
+import org.votingsystem.model.User;
+import org.votingsystem.util.crypto.PEMUtils;
+
+import java.io.Serializable;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+
+/**
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class DeviceDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private Long id;
+    private String deviceId;
+    private String sessionId;
+    private String deviceName;
+    private String email;
+    private String phone;
+    private String certPEM;
+    private String firstName;
+    private String lastName;
+    private String NIF;
+    private String IBAN;
+    private Device.Type deviceType;
+
+    public DeviceDto() {}
+
+    public DeviceDto(User user, CertExtensionDto certExtensionDto) {
+        this.NIF = user.getNif();
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.phone = certExtensionDto.getMobilePhone();
+        this.email = certExtensionDto.getEmail();
+        this.deviceId = certExtensionDto.getDeviceId();
+        this.deviceType = certExtensionDto.getDeviceType();
+    }
+
+    public DeviceDto(Long id, String name) {
+        this.setId(id);
+        this.setDeviceName(name);
+    }
+
+    public DeviceDto(Long id, String deviceId, String sessionId) {
+        this.setId(id);
+        this.setDeviceId(deviceId);
+        this.setSessionId(sessionId);
+    }
+
+    public static DeviceDto INIT_AUTHENTICATED_SESSION(User user) throws Exception {
+        DeviceDto deviceDto = new DeviceDto(user.getDevice());
+        deviceDto.setIBAN(user.getIBAN());
+        return deviceDto;
+    }
+
+    public DeviceDto(Device device) throws Exception {
+        this.setId(device.getId());
+        this.setDeviceId(device.getDeviceId());
+        this.setDeviceName(device.getDeviceName());
+        this.setPhone(device.getPhone());
+        this.setEmail(device.getEmail());
+        X509Certificate x509Cert = device.getX509Certificate();
+        if(x509Cert != null) certPEM = new String(PEMUtils.getPEMEncoded(x509Cert));
+    }
+
+    @JsonIgnore
+    public Device getDevice() throws Exception {
+        Device device = new Device();
+        device.setId(getId());
+        device.setDeviceId(getDeviceId());
+        device.setDeviceName(getDeviceName());
+        device.setEmail(getEmail());
+        device.setPhone(getPhone());
+        if(getCertPEM() != null) {
+            Collection<X509Certificate> certChain = PEMUtils.fromPEMToX509CertCollection(getCertPEM().getBytes());
+            device.setX509Certificate(certChain.iterator().next());
+        }
+        return device;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getCertPEM() {
+        return certPEM;
+    }
+
+    public void setCertPEM(String certPEM) {
+        this.certPEM = certPEM;
+    }
+
+    @JsonIgnore public X509Certificate getX509Cert() throws Exception {
+        if(certPEM == null) return null;
+        else return PEMUtils.fromPEMToX509Cert(certPEM.getBytes());
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getNIF() {
+        return NIF;
+    }
+
+    public void setNIF(String NIF) {
+        this.NIF = NIF;
+    }
+
+    public Device.Type getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(Device.Type deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public String getIBAN() {
+        return IBAN;
+    }
+
+    public void setIBAN(String IBAN) {
+        this.IBAN = IBAN;
+    }
+
+}

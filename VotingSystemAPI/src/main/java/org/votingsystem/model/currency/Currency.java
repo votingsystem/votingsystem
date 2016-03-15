@@ -7,7 +7,7 @@ import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
@@ -68,7 +68,7 @@ public class Currency extends EntityVS implements Serializable  {
     @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="toUserVS") private UserVS toUserVS;
+    @JoinColumn(name="toUser") private User toUser;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="authorityCertificateVS") private CertificateVS authorityCertificateVS;
@@ -204,7 +204,7 @@ public class Currency extends EntityVS implements Serializable  {
         if(currencyRequest.getAmount().compareTo(amount) != 0)  throw new ExceptionVS("checkRequestWithDB_amount");
         this.cmsSignedMessage = currencyRequest.getCMS();
         this.x509AnonymousCert = currencyRequest.getX509AnonymousCert();
-        this.toUserVS = currencyRequest.getToUserVS();
+        this.toUser = currencyRequest.getToUser();
         this.toUserIBAN = currencyRequest.getToUserIBAN();
         this.subject = currencyRequest.getSubject();
         return this;
@@ -446,12 +446,12 @@ public class Currency extends EntityVS implements Serializable  {
         return this;
     }
 
-    public UserVS getToUserVS() {
-        return toUserVS;
+    public User getToUser() {
+        return toUser;
     }
 
-    public void setToUserVS(UserVS userVS) {
-        this.toUserVS = userVS;
+    public void setToUser(User user) {
+        this.toUser = user;
     }
 
     public CertificationRequestVS getCertificationRequest() {

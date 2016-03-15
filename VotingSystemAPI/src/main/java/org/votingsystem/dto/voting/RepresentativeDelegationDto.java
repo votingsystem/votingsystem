@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
@@ -40,7 +40,7 @@ public class RepresentativeDelegationDto implements Serializable {
     private String anonymousDelegationRequestBase64ContentDigest;
     private Integer weeksOperationActive;
     private String serverURL;
-    private UserVSDto representative;
+    private UserDto representative;
     private Date dateFrom;
     private Date dateTo;
     private String UUID;
@@ -109,11 +109,11 @@ public class RepresentativeDelegationDto implements Serializable {
         this.weeksOperationActive = weeksOperationActive;
     }
 
-    public UserVSDto getRepresentative() {
+    public UserDto getRepresentative() {
         return representative;
     }
 
-    public void setRepresentative(UserVSDto representative) {
+    public void setRepresentative(UserDto representative) {
         this.representative = representative;
     }
 

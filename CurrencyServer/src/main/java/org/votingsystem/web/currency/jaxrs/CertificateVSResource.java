@@ -9,7 +9,7 @@ import org.votingsystem.dto.CertificateVSDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.util.crypto.CertUtils;
@@ -64,16 +64,16 @@ public class CertificateVSResource {
         } else return Response.status(Response.Status.NOT_FOUND).entity("hashHex: " + hashHex).build();
     }
 
-    @Path("/userVS/id/{userId}")
+    @Path("/user/id/{userId}")
     @GET  @Produces(MediaType.TEXT_PLAIN)
-    public Response userVS(@PathParam("userId") long userId, @Context Request req, @Context HttpServletResponse resp)
+    public Response user(@PathParam("userId") long userId, @Context Request req, @Context HttpServletResponse resp)
             throws Exception {
-        UserVS userVS = dao.find(UserVS.class, userId);
-        if(userVS == null) {
+        User user = dao.find(User.class, userId);
+        if(user == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("userId: " + userId).build();
         } else {
-            Query query = dao.getEM().createQuery("select c from CertificateVS c where c.userVS =:userVS and c.state =:state")
-                    .setParameter("userVS", userVS).setParameter("state", CertificateVS.State.OK);
+            Query query = dao.getEM().createQuery("select c from CertificateVS c where c.user =:user and c.state =:state")
+                    .setParameter("user", user).setParameter("state", CertificateVS.State.OK);
             CertificateVS certificate = dao.getSingleResult(CertificateVS.class, query);
             if (certificate != null) {
                 X509Certificate certX509 = CertUtils.loadCertificate (certificate.getContent());
@@ -104,7 +104,7 @@ public class CertificateVSResource {
         CertificateVS.Type type = CertificateVS.Type.valueOf(typeStr);
         CertificateVS.State state = CertificateVS.State.valueOf(stateStr);
         Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(CertificateVS.class)
-                .createAlias("userVS", "user");
+                .createAlias("user", "user");
         criteria.add(Restrictions.eq("state", state));
         criteria.add(Restrictions.eq("type", type));
         if(searchText != null) {

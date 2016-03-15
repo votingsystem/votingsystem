@@ -1,0 +1,9 @@
+{
+    "userList":[],
+    "groupList":[
+        {"toUserList":[],"operation":"FROM_GROUP_TO_ALL_MEMBERS", "subject":"Group Transaction Test",
+            "amount":"10000", "currencyCode": "EUR", "tags":["HOME"], "timeLimited":true}
+
+    ],
+    "bankList":[]
+}

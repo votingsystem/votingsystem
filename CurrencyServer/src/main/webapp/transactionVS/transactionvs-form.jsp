@@ -3,7 +3,7 @@
 <link href="../resources/bower_components/vs-user-box/vs-user-box.html" rel="import"/>
 <link href="../resources/bower_components/vs-currency-selector/vs-currency-selector.html" rel="import"/>
 <link href="../tagVS/tagvs-select-dialog.vsp" rel="import"/>
-<link href="../userVS/uservs-selector-dialog.vsp" rel="import"/>
+<link href="../user/user-selector-dialog.vsp" rel="import"/>
 
 <dom-module name="transactionvs-form">
 <template>
@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    <uservs-selector-dialog id="userVSSelectorDialog" groupvs-id="{{groupId}}"></uservs-selector-dialog>
+    <user-selector-dialog id="userSelectorDialog" group-id="{{groupId}}"></user-selector-dialog>
     <tagvs-select-dialog id="tagDialog" caption="${msg.addTagDialogCaption}"></tagvs-select-dialog>
 
 </template>
@@ -120,7 +120,7 @@
             }.bind(this))
         },
         openSearchUserDialog:function(){
-            this.$.userVSSelectorDialog.show(this.groupId)
+            this.$.userSelectorDialog.show(this.groupId)
         },
         showTagDialog: function() {
             this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
@@ -196,7 +196,7 @@
                         return false
                     }
                     break;
-                case Operation.FROM_USERVS:
+                case Operation.FROM_USER:
                     return this.transactionFromUser(tagList)
                     break;
             }
@@ -205,9 +205,9 @@
             operationVS.signedMessageSubject = "${msg.transactionvsFromGroupMsgSubject}"
             var signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
                 timeLimited:this.$.timeLimitedButton.checked, tags:tagList, amount: this.$.amount.value,
-                currencyCode:this.$.currencySelector.getSelected(), fromUser:this.fromUserName,
+                currencyCode:this.$.currencySelector.getSelected(), fromUserName:this.fromUserName,
                 fromUserIBAN:this.fromUserIBAN, toUserIBAN: this.getToUserIBAN()}
-            if(this.toUserName)  signedContent.toUser = this.toUserName
+            if(this.toUserName)  signedContent.toUserName = this.toUserName
             operationVS.jsonStr = JSON.stringify(signedContent)
             operationVS.setCallback(function(appMessage) { this.transactionResponse(appMessage)}.bind(this))
             VotingSystemClient.setMessage(operationVS);
@@ -222,10 +222,10 @@
         transactionFromUser:function(tagList) {
             var operationVS = new OperationVS(this.operation)
             operationVS.serviceURL = vs.contextURL + "/rest/transactionVS"
-            operationVS.signedMessageSubject = "${msg.transactionVSFromUserVS}"
+            operationVS.signedMessageSubject = "${msg.transactionVSFromUser}"
             var signedContent = {operation:this.operation, subject:this.$.transactionvsSubject.value,
                 timeLimited:this.$.timeLimitedButton.checked, tags:tagList, amount: this.$.amount.value,
-                currencyCode:this.$.currencySelector.getSelected(), toUser:this.toUserName, toUserIBAN: this.getToUserIBAN()}
+                currencyCode:this.$.currencySelector.getSelected(), toUserName:this.toUserName, toUserIBAN: this.getToUserIBAN()}
             operationVS.jsonStr = JSON.stringify(signedContent)
             operationVS.setCallback(this.transactionVSCallback)
             VotingSystemClient.setMessage(operationVS);
@@ -241,7 +241,7 @@
         getToUserIBAN: function () {
             var result = []
             if(this.operation === Operation.FROM_GROUP_TO_ALL_MEMBERS) return null
-            else if(this.operation === Operation.FROM_USERVS) {
+            else if(this.operation === Operation.FROM_USER) {
                 result.push(this.toUserIBAN);
             } else {
                 var receptorList = this.$.receptorBox.getUserList()
@@ -251,14 +251,14 @@
             }
             return result
         },
-        init:function(operation, userName, userIBAN, userVSId) {
+        init:function(operation, userName, userIBAN, userId) {
             console.log(this.id + " - init - operation: " + operation + " - userIBAN: " + userIBAN)
             this.reset()
             this.operation = operation
             this.fromUserName = userName
             this.fromUserIBAN = userIBAN
             this.toUserIBAN = null
-            this.groupId = userVSId
+            this.groupId = userId
             this.$.transactionvsSubject.value = ""
             this.$.amount.value = ""
             this.isWithUserSelector = true
@@ -274,15 +274,15 @@
                     this.operationMsg = "${msg.transactionVSFromGroupToAllMembers}"
                     this.selectReceptorMsg = '${msg.transactionvsToAllGroupMembersMsg}'
                     break;
-                case Operation.FROM_USERVS:
-                    this.operationMsg = "${msg.transactionVSFromUserVS} ${msg.forLbl} '" +
+                case Operation.FROM_USER:
+                    this.operationMsg = "${msg.transactionVSFromUser} ${msg.forLbl} '" +
                             userName + "'"
                     this.fromUserName = null
                     this.fromUserIBAN = null
                     this.toUserIBAN = userIBAN
                     this.isWithUserSelector = false
                     this.toUserName = userName
-                    this.$.receptorBox.uservsList= [{name:userName, IBAN:userIBAN}]
+                    this.$.receptorBox.userList= [{name:userName, IBAN:userIBAN}]
                     break;
             }
             this.selectedTags = []

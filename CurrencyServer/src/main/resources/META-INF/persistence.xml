@@ -2,28 +2,28 @@
 <persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
     <persistence-unit name="CurrencyServer" transaction-type="JTA">
         <jta-data-source>java:jboss/datasources/CurrencyServer</jta-data-source>
-        <class>org.votingsystem.model.ActorVS</class>
-        <class>org.votingsystem.model.AddressVS</class>
+        <class>org.votingsystem.model.Actor</class>
+        <class>org.votingsystem.model.Address</class>
         <class>org.votingsystem.model.BackupRequest</class>
-        <class>org.votingsystem.model.currency.BankVSInfo</class>
+        <class>org.votingsystem.model.currency.BankInfo</class>
         <class>org.votingsystem.model.BatchVS</class>
         <class>org.votingsystem.model.CertificateVS</class>
-        <class>org.votingsystem.model.DeviceVS</class>
+        <class>org.votingsystem.model.Device</class>
         <class>org.votingsystem.model.ImageVS</class>
         <class>org.votingsystem.model.KeyStoreVS</class>
         <class>org.votingsystem.model.CMSMessage</class>
         <class>org.votingsystem.model.ResponseVS</class>
         <class>org.votingsystem.model.TagVS</class>
-        <class>org.votingsystem.model.UserVS</class>
-        <class>org.votingsystem.model.UserVSToken</class>
-        <class>org.votingsystem.model.currency.BankVS</class>
+        <class>org.votingsystem.model.User</class>
+        <class>org.votingsystem.model.UserToken</class>
+        <class>org.votingsystem.model.currency.Bank</class>
         <class>org.votingsystem.model.currency.Currency</class>
         <class>org.votingsystem.model.currency.CurrencyAccount</class>
         <class>org.votingsystem.model.currency.CurrencyRequestBatch</class>
         <class>org.votingsystem.model.currency.CurrencyBatch</class>
-        <class>org.votingsystem.model.currency.GroupVS</class>
+        <class>org.votingsystem.model.currency.Group</class>
         <class>org.votingsystem.model.currency.MessageVS</class>
-        <class>org.votingsystem.model.currency.SubscriptionVS</class>
+        <class>org.votingsystem.model.currency.Subscription</class>
         <class>org.votingsystem.model.currency.TransactionVS</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

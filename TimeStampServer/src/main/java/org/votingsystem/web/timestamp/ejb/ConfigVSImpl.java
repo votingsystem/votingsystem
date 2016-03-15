@@ -1,8 +1,8 @@
 package org.votingsystem.web.timestamp.ejb;
 
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.voting.ControlCenterVS;
+import org.votingsystem.model.User;
+import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EnvironmentVS;
@@ -109,10 +109,10 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public UserVS createIBAN(UserVS userVS) throws ValidationExceptionVS { return null;}
+    public User createIBAN(User user) throws ValidationExceptionVS { return null;}
 
     @Override
-    public UserVS getSystemUser() {
+    public User getSystemUser() {
         return null;
     }
 
@@ -132,7 +132,7 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public ControlCenterVS getControlCenter() {
+    public ControlCenter getControlCenter() {
         return null;
     }
 

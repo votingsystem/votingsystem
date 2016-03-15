@@ -10,7 +10,7 @@ import javafx.scene.layout.Priority;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.dialog.DialogVS;
 import org.votingsystem.client.webextension.util.Utils;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.crypto.SignedFile;
 
@@ -38,9 +38,9 @@ public class CMSSignersPane extends GridPane {
         closeButton.setOnAction(actionEvent -> CMSSignersPane.this.setVisible(false));
         Tab newTab = null;
         try {
-            Set<UserVS> signersVS = signedFile.getCMS().getSigners();
+            Set<User> signersVS = signedFile.getCMS().getSigners();
             log.info("Num. signers: " + signersVS.size());
-            for (UserVS signerVS:signersVS) {
+            for (User signerVS:signersVS) {
                 SignatureInfoPane signerVSPanel = new SignatureInfoPane(signerVS, signedFile.getCMS());
                 String tabName = ContextVS.getMessage("signerLbl");
                 if(signerVS.getNif() != null) tabName = signerVS.getNif();

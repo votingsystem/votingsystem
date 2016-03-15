@@ -45,7 +45,7 @@ public class IBANResource {
 
         if(iban.getBankCode().equals(config.getBankCode()) && iban.getBranchCode().equals(config.getBranchCode())) {
             log.log(Level.FINE, "VotingSystem IBAN");
-            Query query = dao.getEM().createQuery("select t from TransactionVS t where t.fromUserVS.IBAN =:IBAN")
+            Query query = dao.getEM().createQuery("select t from TransactionVS t where t.fromUser.IBAN =:IBAN")
                     .setParameter("IBAN", iban.toString());
             List<TransactionVS> transactionVSList = query.getResultList();
             for(TransactionVS transactionVS : transactionVSList) {

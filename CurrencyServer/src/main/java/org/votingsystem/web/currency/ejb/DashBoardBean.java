@@ -22,35 +22,35 @@ public class DashBoardBean {
 
     @PersistenceContext private EntityManager em;
 
-     public DashBoardDto getUserVSInfo(Interval timePeriod) {
+     public DashBoardDto getUserInfo(Interval timePeriod) {
          log.info("timePeriod: " + timePeriod.toString());
          DashBoardDto dto = new DashBoardDto(timePeriod);
-         Query query = em.createNamedQuery("countTransByToUserVSIsNotNullAndTypeAndDateCreatedBetween").setParameter(
+         Query query = em.createNamedQuery("countTransByToUserIsNotNullAndTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_BANKVS);
-         dto.setNumTransFromBankVS((long)query.getSingleResult());
+                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_BANK);
+         dto.setNumTransFromBank((long)query.getSingleResult());
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_USERVS);
-         dto.setNumTransFromUserVS((long) query.getSingleResult());
-         query = em.createNamedQuery("countTransByToUserVSIsNotNullAndTypeAndDateCreatedBetween").setParameter(
+                 TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_USER);
+         dto.setNumTransFromUser((long) query.getSingleResult());
+         query = em.createNamedQuery("countTransByToUserIsNotNullAndTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
                  TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP);
          Long numTrans = (long)query.getSingleResult();
-         query = em.createNamedQuery("countTransByToUserVSIsNotNullAndTypeAndDateCreatedBetween").setParameter(
+         query = em.createNamedQuery("countTransByToUserIsNotNullAndTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
                  TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_GROUP_TO_MEMBER_GROUP);
          Long numUsers = (long)query.getSingleResult();
-         dto.setTransFromGroupVSToMemberGroup(new DashBoardDto.TransFromGroupVS(numTrans, numUsers));
-         query = em.createNamedQuery("countTransByToUserVSIsNullAndTypeAndDateCreatedBetween").setParameter(
+         dto.setTransFromGroupToMemberGroup(new DashBoardDto.TransFromGroup(numTrans, numUsers));
+         query = em.createNamedQuery("countTransByToUserIsNullAndTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
                  TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS);
          numTrans = (long)query.getSingleResult();
-         query = em.createNamedQuery("countTransByToUserVSIsNotNullAndTypeAndDateCreatedBetween").setParameter(
+         query = em.createNamedQuery("countTransByToUserIsNotNullAndTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
                  TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS);
          numUsers = (long)query.getSingleResult();
-         dto.setTransFromGroupVSToAllMembers(new DashBoardDto.TransFromGroupVS(numTrans, numUsers));
+         dto.setTransFromGroupToAllMembers(new DashBoardDto.TransFromGroup(numTrans, numUsers));
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
                  TemporalType.TIMESTAMP).setParameter("type", TransactionVS.Type.CURRENCY_PERIOD_INIT);

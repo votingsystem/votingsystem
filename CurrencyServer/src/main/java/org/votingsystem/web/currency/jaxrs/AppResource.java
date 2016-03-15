@@ -86,22 +86,22 @@ public class AppResource {
         return Response.temporaryRedirect(new URI("../app/jsonDocs.xhtml")).build();
     }
 
-    @GET @Path("/userVSDashboard")
+    @GET @Path("/userDashboard")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response userVS(@Context ServletContext context, @Context HttpServletRequest req,
-                           @Context HttpServletResponse resp) throws ServletException, IOException {
+    public Response user(@Context ServletContext context, @Context HttpServletRequest req,
+                         @Context HttpServletResponse resp) throws ServletException, IOException {
         Interval timePeriod = DateUtils.addHours(Calendar.getInstance(), -1);//default to 1 hour
-        DashBoardDto dto = dashBoardBean.getUserVSInfo(timePeriod);
+        DashBoardDto dto = dashBoardBean.getUserInfo(timePeriod);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
-    @GET @Path("/userVSDashboard/hoursAgo/{numHours}")
+    @GET @Path("/userDashboard/hoursAgo/{numHours}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response userVS(@PathParam("numHours") Integer numHours,
-            @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
+    public Response user(@PathParam("numHours") Integer numHours,
+                         @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws ServletException, IOException {
         Interval timePeriod = DateUtils.addHours(Calendar.getInstance(), - numHours);
-        DashBoardDto dto = dashBoardBean.getUserVSInfo(timePeriod);
+        DashBoardDto dto = dashBoardBean.getUserInfo(timePeriod);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 

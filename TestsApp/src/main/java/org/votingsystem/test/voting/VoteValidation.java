@@ -4,7 +4,7 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.test.util.SimulationData;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
@@ -74,8 +74,8 @@ public class VoteValidation {
             log.log(Level.SEVERE, ContextVS.getInstance().getProperty("signatureErrorMsg", voteFile.getAbsolutePath()));
         }
 
-        Set<UserVS> signersVS = vote.getSigners();
-        for(UserVS signerVS:signersVS) {
+        Set<User> signersVS = vote.getSigners();
+        for(User signerVS:signersVS) {
             if(signerVS.getTimeStampToken() != null) {//user signature
                 CertUtils.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(signerVS.getCertificate()), tokenDate);
             } else {//server signature

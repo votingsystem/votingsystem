@@ -23,8 +23,8 @@ public class ImageVS extends EntityVS implements Serializable {
 	 @Column(name="type", nullable=false)
 	 private Type type;
 	 @ManyToOne(fetch=FetchType.LAZY)
-	 @JoinColumn(name="userVS")
-	 private UserVS userVS;
+	 @JoinColumn(name="user")
+	 private User user;
      @Column(name="fileBytes")
      private byte[] fileBytes;
      @OneToOne
@@ -38,8 +38,8 @@ public class ImageVS extends EntityVS implements Serializable {
      
      public ImageVS() { }
 
-    public ImageVS(UserVS userVS, CMSMessage cmsMessage, Type type, byte[] fileBytes) {
-        this.userVS = userVS;
+    public ImageVS(User user, CMSMessage cmsMessage, Type type, byte[] fileBytes) {
+        this.user = user;
         this.cmsMessage = cmsMessage;
         this.type = type;
         this.fileBytes = fileBytes;
@@ -73,13 +73,13 @@ public class ImageVS extends EntityVS implements Serializable {
 		this.lastUpdated = lastUpdated;
 	}
 
-	 public UserVS getUserVS() {
-		return userVS;
+	 public User getUser() {
+		return user;
 	}
 
 
-	 public void setUserVS(UserVS userVS) {
-		this.userVS = userVS;
+	 public void setUser(User user) {
+		this.user = user;
 	}
 
 

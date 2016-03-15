@@ -1,7 +1,7 @@
 package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.util.Interval;
 
@@ -16,7 +16,7 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BalancesDto {
 
-    private UserVSDto userVS;
+    private UserDto user;
     private Interval timePeriod;
     private List<TransactionVSDto> transactionList;
     private List<TransactionVSDto> transactionFromList;
@@ -109,12 +109,12 @@ public class BalancesDto {
         else return BigDecimal.ZERO;
     }
 
-    public UserVSDto getUserVS() {
-        return userVS;
+    public UserDto getUser() {
+        return user;
     }
 
-    public void setUserVS(UserVSDto userVS) {
-        this.userVS = userVS;
+    public void setUser(UserDto user) {
+        this.user = user;
     }
 
     public List<TransactionVSDto> getTransactionList() {

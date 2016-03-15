@@ -43,7 +43,7 @@ public class VoteResource {
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         Vote vote = voteBean.validateVote(CMSDto);
         CMSMessage cmsMessage = CMSDto.getCmsMessage();
-        if(cmsMessage.getUserVS() != null) resp.setHeader("representativeNIF", cmsMessage.getUserVS().getNif());
+        if(cmsMessage.getUser() != null) resp.setHeader("representativeNIF", cmsMessage.getUser().getNif());
         return Response.ok().entity(vote.getCMSMessage().getContentPEM()).type(ContentTypeVS.VOTE.getName()).build();
     }
 

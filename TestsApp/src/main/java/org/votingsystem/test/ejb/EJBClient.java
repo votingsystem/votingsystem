@@ -1,6 +1,6 @@
 package org.votingsystem.test.ejb;
 
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.Actor;
 import org.votingsystem.model.KeyStoreVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.service.EJBRemoteAdminAccessControl;
@@ -95,7 +95,7 @@ public class EJBClient {
     }
 
     private void newKeyStore() throws Exception {
-        ActorVS.Type type =  null;
+        Actor.Type type =  null;
         String givenName = null;
         String surname = null;
         String keyAlias = null;
@@ -103,17 +103,17 @@ public class EJBClient {
             String typeInput = IOUtils.readLine("enter type (user, server, timestamp_authority): ");
             switch (typeInput) {
                 case "user":
-                    type = ActorVS.Type.USER;
+                    type = Actor.Type.USER;
                     givenName = IOUtils.readLine("enter givenName: ");
                     surname = IOUtils.readLine("enter surname: ");
                     break;
                 case "server":
-                    type = ActorVS.Type.SERVER;
+                    type = Actor.Type.SERVER;
                     givenName = IOUtils.readLine("enter name: ");
                     keyAlias = IOUtils.readLine("enter keyAlias: ");
                     break;
                 case "timestamp_authority":
-                    type = ActorVS.Type.TIMESTAMP_SERVER;
+                    type = Actor.Type.TIMESTAMP_SERVER;
                     givenName = IOUtils.readLine("enter name: ");
                     keyAlias = IOUtils.readLine("enter keyAlias: ");
                     break;
@@ -124,7 +124,7 @@ public class EJBClient {
         String nif = IOUtils.readLine("enter nif: ");
         char[] password = IOUtils.readLine("enter key password: ").toCharArray();
         byte[] keyStoreBytes = null;
-        if(type == ActorVS.Type.SERVER || type == ActorVS.Type.TIMESTAMP_SERVER) {
+        if(type == Actor.Type.SERVER || type == Actor.Type.TIMESTAMP_SERVER) {
             File rootKeyStoreFile = new File(ROOT_KEYSTORE_PATH);
             KeyStoreVS rootKeyStore = null;
             if(rootKeyStoreFile.exists()) {

@@ -1,6 +1,6 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.Actor;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -34,10 +34,10 @@ public class ServerInfoResource {
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Map doGet(@Context HttpServletRequest req, @Context HttpServletResponse resp) {
         HashMap serverInfo = new HashMap();
-        serverInfo.put("serverType", ActorVS.Type.CONTROL_CENTER);
+        serverInfo.put("serverType", Actor.Type.CONTROL_CENTER);
         serverInfo.put("name", config.getServerName());
         serverInfo.put("serverURL", config.getContextURL());
-        serverInfo.put("state",  ActorVS.State.OK);
+        serverInfo.put("state",  Actor.State.OK);
         serverInfo.put("date", new Date());
         serverInfo.put("environmentMode", config.getMode());
         serverInfo.put("timeStampCertPEM", new String(timeStampBean.getSigningCertPEMBytes()));

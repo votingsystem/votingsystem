@@ -6,8 +6,8 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.model.User;
+import org.votingsystem.model.currency.Group;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
@@ -58,13 +58,13 @@ public class ShopExampleResource {
     @Path("/") @GET
     public Object index(@Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        Query query = dao.getEM().createQuery("select g from GroupVS g").setMaxResults(1);
-        List<GroupVS> result = query.getResultList();
-        if(result.isEmpty()) throw new ExceptionVS("To do the test you must enter a GroupVS");
-        GroupVS groupVS = result.iterator().next();
-        TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(groupVS.getName(), UserVS.Type.GROUP,
-                new BigDecimal(5), "EUR", groupVS.getIBAN(), "shop example payment - " + new Date(), "HIDROGENO");
-        dto.setPaymentOptions(Arrays.asList(TransactionVS.Type.FROM_USERVS,
+        Query query = dao.getEM().createQuery("select g from Group g").setMaxResults(1);
+        List<Group> result = query.getResultList();
+        if(result.isEmpty()) throw new ExceptionVS("To do the test you must enter a Group");
+        Group group = result.iterator().next();
+        TransactionVSDto dto = TransactionVSDto.PAYMENT_REQUEST(group.getName(), User.Type.GROUP,
+                new BigDecimal(5), "EUR", group.getIBAN(), "shop example payment - " + new Date(), "HIDROGENO");
+        dto.setPaymentOptions(Arrays.asList(TransactionVS.Type.FROM_USER,
                 TransactionVS.Type.CURRENCY_SEND, TransactionVS.Type.CURRENCY_CHANGE));
         String sessionID = dto.getUUID().substring(0, 8);
         String paymentInfoServiceURL = config.getContextURL() + "/rest/shop/" + sessionID;

@@ -3,10 +3,10 @@ package org.votingsystem.web.currency.websocket;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
 import org.votingsystem.dto.ConnectedUsersDto;
-import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.Device;
+import org.votingsystem.model.User;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 
@@ -28,7 +28,7 @@ public class SessionVSManager {
     private ConcurrentHashMap<String, Session> sessionMap = null;
     private ConcurrentHashMap<String, Session> authenticatedSessionMap = null;
     private ConcurrentHashMap<Long, Session> deviceSessionMap = null;
-    private ConcurrentHashMap<Long, Set<DeviceVS>> userVSDeviceMap = null;
+    private ConcurrentHashMap<Long, Set<Device>> userDeviceMap = null;
 
     private static final SessionVSManager instance = new SessionVSManager();
 
@@ -38,7 +38,7 @@ public class SessionVSManager {
         sessionMap = new ConcurrentHashMap<>();
         authenticatedSessionMap = new ConcurrentHashMap<>();
         deviceSessionMap = new ConcurrentHashMap<>();
-        userVSDeviceMap = new ConcurrentHashMap<>();
+        userDeviceMap = new ConcurrentHashMap<>();
     }
 
     public Long getAndIncrementBrowserDeviceId() {
@@ -51,25 +51,25 @@ public class SessionVSManager {
         } else log.info("put - session already in sessionMap");
     }
 
-    public void putAuthenticatedDevice(Session session, UserVS userVS) throws ExceptionVS {
-        log.info("putAuthenticatedDevice - session id: " + session.getId() + " - UserVS id:" + userVS.getId());
+    public void putAuthenticatedDevice(Session session, User user) throws ExceptionVS {
+        log.info("putAuthenticatedDevice - session id: " + session.getId() + " - User id:" + user.getId());
         if(sessionMap.containsKey(session.getId())) sessionMap.remove(session.getId());
         authenticatedSessionMap.put(session.getId(), session);
-        deviceSessionMap.put(userVS.getDeviceVS().getId(), session);
-        if(userVSDeviceMap.containsKey(userVS.getId())) {
-            Set<DeviceVS> deviceSet = userVSDeviceMap.get(userVS.getId()).stream().filter(device ->
-                !device.getDeviceId().equals(userVS.getDeviceVS().getDeviceId())
+        deviceSessionMap.put(user.getDevice().getId(), session);
+        if(userDeviceMap.containsKey(user.getId())) {
+            Set<Device> deviceSet = userDeviceMap.get(user.getId()).stream().filter(device ->
+                !device.getDeviceId().equals(user.getDevice().getDeviceId())
             ).collect(Collectors.toSet());
-            deviceSet.add(userVS.getDeviceVS());
-            userVSDeviceMap.put(userVS.getId(), deviceSet);
-        } else userVSDeviceMap.put(userVS.getId(), Sets.newHashSet(userVS.getDeviceVS()));
-        session.getUserProperties().put("userVS", userVS);
-        session.getUserProperties().put("deviceVS", userVS.getDeviceVS());
+            deviceSet.add(user.getDevice());
+            userDeviceMap.put(user.getId(), deviceSet);
+        } else userDeviceMap.put(user.getId(), Sets.newHashSet(user.getDevice()));
+        session.getUserProperties().put("user", user);
+        session.getUserProperties().put("device", user.getDevice());
     }
 
     public void putBrowserDevice(Session session){
-        DeviceVS deviceVS = (DeviceVS) session.getUserProperties().get("deviceVS");
-        deviceSessionMap.put(deviceVS.getId(), session);
+        Device device = (Device) session.getUserProperties().get("device");
+        deviceSessionMap.put(device.getId(), session);
     }
 
     public Collection<Long> getAuthenticatedDevices() {
@@ -77,21 +77,21 @@ public class SessionVSManager {
     }
 
     public Collection<Long> getAuthenticatedUsers() {
-        return Collections.list(userVSDeviceMap.keys());
+        return Collections.list(userDeviceMap.keys());
     }
 
-    public Set<DeviceVSDto> connectedDeviceMap(Long userId) {
-        if(!userVSDeviceMap.containsKey(userId)) return new HashSet<>();
+    public Set<DeviceDto> connectedDeviceMap(Long userId) {
+        if(!userDeviceMap.containsKey(userId)) return new HashSet<>();
         else {
-            Set<DeviceVSDto> userVSConnectedDevices = userVSDeviceMap.get(userId).stream().map(     d -> {
+            Set<DeviceDto> userConnectedDevices = userDeviceMap.get(userId).stream().map(d -> {
                 try {
-                    return new DeviceVSDto(d);
+                    return new DeviceDto(d);
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
                 return null;
             }).collect(Collectors.toSet());
-            return userVSConnectedDevices;
+            return userConnectedDevices;
         }
     }
 
@@ -102,14 +102,14 @@ public class SessionVSManager {
             notAuthenticatedSessions.add(session.getId());
         }
         connectedUsersDto.setNotAuthenticatedSessions(notAuthenticatedSessions);
-        Map<Long, Set<DeviceVSDto>>  usersAuthenticated = new HashMap();
+        Map<Long, Set<DeviceDto>>  usersAuthenticated = new HashMap();
         for(Long deviceId : deviceSessionMap.keySet()) {
             Session deviceSession = deviceSessionMap.get(deviceId);
-            DeviceVS deviceVS = (DeviceVS) deviceSession.getUserProperties().get("deviceVS");
-            UserVS userVS = (UserVS) deviceSession.getUserProperties().get("userVS");
-            DeviceVSDto deviceVSDto = new DeviceVSDto(deviceVS.getId(), deviceVS.getDeviceId(), deviceSession.getId());
-            if(usersAuthenticated.containsKey(userVS.getId())) usersAuthenticated.get(userVS.getId()).add(deviceVSDto);
-            else usersAuthenticated.put(userVS.getId(), new HashSet<>(Arrays.asList(deviceVSDto)));
+            Device device = (Device) deviceSession.getUserProperties().get("device");
+            User user = (User) deviceSession.getUserProperties().get("user");
+            DeviceDto deviceDto = new DeviceDto(device.getId(), device.getDeviceId(), deviceSession.getId());
+            if(usersAuthenticated.containsKey(user.getId())) usersAuthenticated.get(user.getId()).add(deviceDto);
+            else usersAuthenticated.put(user.getId(), new HashSet<>(Arrays.asList(deviceDto)));
         }
         connectedUsersDto.setUsersAuthenticated(usersAuthenticated);
         return connectedUsersDto;
@@ -119,13 +119,13 @@ public class SessionVSManager {
         log.info("remove - session id: " + session.getId());
         if(sessionMap.containsKey(session.getId())) sessionMap.remove(session.getId());
         if(authenticatedSessionMap.containsKey(session.getId())) authenticatedSessionMap.remove(session.getId());
-        DeviceVS deviceVS = null;
-        if( (deviceVS = (DeviceVS) session.getUserProperties().get("deviceVS")) != null) deviceSessionMap.remove(deviceVS.getId());
-        UserVS userVS = null;
-        if( (userVS = (UserVS) session.getUserProperties().get("userVS")) != null) {
-            Set<DeviceVS> deviceVSSet = userVSDeviceMap.get(userVS.getId());
-            for(DeviceVS userVSDevice:deviceVSSet) {
-                if(userVSDevice.getId().longValue() == deviceVS.getId().longValue()) deviceVSSet.remove(userVSDevice);
+        Device device = null;
+        if( (device = (Device) session.getUserProperties().get("device")) != null) deviceSessionMap.remove(device.getId());
+        User user = null;
+        if( (user = (User) session.getUserProperties().get("user")) != null) {
+            Set<Device> deviceSet = userDeviceMap.get(user.getId());
+            for(Device userDevice: deviceSet) {
+                if(userDevice.getId().longValue() == device.getId().longValue()) deviceSet.remove(userDevice);
             }
         }
         try {
@@ -196,8 +196,8 @@ public class SessionVSManager {
         return brokenSessionSet;
     }
 
-    public Set<DeviceVS> getUserVSDeviceVSSet(Long userId) {
-        Set<DeviceVS> result = userVSDeviceMap.get(userId);
+    public Set<Device> getUserDeviceSet(Long userId) {
+        Set<Device> result = userDeviceMap.get(userId);
         if(result == null) result = new HashSet<>();
         return result;
     }
@@ -221,8 +221,8 @@ public class SessionVSManager {
         return brokenSessionSet;
     }
 
-    public void sendMessage(List<DeviceVS> userVSDeviceList, SocketMessageDto messageDto) throws ExceptionVS {
-        for(DeviceVS device : userVSDeviceList) {
+    public void sendMessage(List<Device> userDeviceList, SocketMessageDto messageDto) throws ExceptionVS {
+        for(Device device : userDeviceList) {
             Session deviceSession = deviceSessionMap.get(device.getId());
             if(messageDto.getSessionId() != null) {
                 if(!sendMessage(messageDto, deviceSession.getId())) deviceSessionMap.remove(device.getId());

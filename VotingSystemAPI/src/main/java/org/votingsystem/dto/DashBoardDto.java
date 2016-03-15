@@ -12,8 +12,8 @@ public class DashBoardDto {
 
     private Interval timePeriod;
     private TransactionVS.Type type;
-    private Long numTransFromBankVS;
-    private Long numTransFromUserVS;
+    private Long numTransFromBank;
+    private Long numTransFromUser;
     private Long numTransCurrencyInitPeriod;
     private Long numTransCurrencyInitPeriodTimeLimited;
     private Long numTransCurrencyRequest;
@@ -21,8 +21,8 @@ public class DashBoardDto {
     private Long numTransCurrencyChange;
     private Long numTransCancellation;
 
-    private TransFromGroupVS transFromGroupVSToMemberGroup;
-    private TransFromGroupVS transFromGroupVSToAllMembers;
+    private TransFromGroup transFromGroupToMemberGroup;
+    private TransFromGroup transFromGroupToAllMembers;
 
     public DashBoardDto () {}
 
@@ -46,20 +46,20 @@ public class DashBoardDto {
         this.type = type;
     }
 
-    public Long getNumTransFromBankVS() {
-        return numTransFromBankVS;
+    public Long getNumTransFromBank() {
+        return numTransFromBank;
     }
 
-    public void setNumTransFromBankVS(Long numTransFromBankVS) {
-        this.numTransFromBankVS = numTransFromBankVS;
+    public void setNumTransFromBank(Long numTransFromBank) {
+        this.numTransFromBank = numTransFromBank;
     }
 
-    public Long getNumTransFromUserVS() {
-        return numTransFromUserVS;
+    public Long getNumTransFromUser() {
+        return numTransFromUser;
     }
 
-    public void setNumTransFromUserVS(Long numTransFromUserVS) {
-        this.numTransFromUserVS = numTransFromUserVS;
+    public void setNumTransFromUser(Long numTransFromUser) {
+        this.numTransFromUser = numTransFromUser;
     }
 
     public Long getNumTransCurrencyInitPeriod() {
@@ -102,20 +102,20 @@ public class DashBoardDto {
         this.numTransCancellation = numTransCancellation;
     }
 
-    public TransFromGroupVS getTransFromGroupVSToMemberGroup() {
-        return transFromGroupVSToMemberGroup;
+    public TransFromGroup getTransFromGroupToMemberGroup() {
+        return transFromGroupToMemberGroup;
     }
 
-    public void setTransFromGroupVSToMemberGroup(TransFromGroupVS transFromGroupVSToMemberGroup) {
-        this.transFromGroupVSToMemberGroup = transFromGroupVSToMemberGroup;
+    public void setTransFromGroupToMemberGroup(TransFromGroup transFromGroupToMemberGroup) {
+        this.transFromGroupToMemberGroup = transFromGroupToMemberGroup;
     }
 
-    public TransFromGroupVS getTransFromGroupVSToAllMembers() {
-        return transFromGroupVSToAllMembers;
+    public TransFromGroup getTransFromGroupToAllMembers() {
+        return transFromGroupToAllMembers;
     }
 
-    public void setTransFromGroupVSToAllMembers(TransFromGroupVS transFromGroupVSToAllMembers) {
-        this.transFromGroupVSToAllMembers = transFromGroupVSToAllMembers;
+    public void setTransFromGroupToAllMembers(TransFromGroup transFromGroupToAllMembers) {
+        this.transFromGroupToAllMembers = transFromGroupToAllMembers;
     }
 
     public Long getNumTransCurrencyChange() {
@@ -127,13 +127,13 @@ public class DashBoardDto {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class TransFromGroupVS {
+    public static class TransFromGroup {
         private Long numTrans;
         private Long numUsers;
 
-        public TransFromGroupVS() {}
+        public TransFromGroup() {}
 
-        public TransFromGroupVS(Long numTrans, Long numUsers) {
+        public TransFromGroup(Long numTrans, Long numUsers) {
             this.numTrans = numTrans;
             this.numUsers = numUsers;
         }

@@ -1,7 +1,7 @@
 package org.votingsystem.test.voting;
 
-import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.dto.ActorDto;
+import org.votingsystem.model.Actor;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.callable.TimeStamperTestSender;
 import org.votingsystem.test.util.SimulationData;
@@ -42,15 +42,15 @@ public class TimeStampRequest {
         timerMap.put("time", "00:00:10");
         simulationData.setTimerMap(timerMap);
 
-        ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
+        ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(
                 simulationData.getServerURL()), ContentTypeVS.JSON);
         if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
-        /*if (actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {
-            throw new ExceptionVS("Expected DEVELOPMENT environment but found " + actorVS.getEnvironmentVS());
+        Actor actor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
+        /*if (actor.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actor.getEnvironmentVS()) {
+            throw new ExceptionVS("Expected DEVELOPMENT environment but found " + actor.getEnvironmentVS());
         }*/
-        ContextVS.getInstance().setDefaultServer(actorVS);
-        ContextVS.getInstance().setTimeStampServerCert(actorVS.getX509Certificate());
+        ContextVS.getInstance().setDefaultServer(actor);
+        ContextVS.getInstance().setTimeStampServerCert(actor.getX509Certificate());
         if(!(simulationData.getNumRequestsProjected() > 0)) {
             log.info("NumRequestsProjected = 0");
             return;

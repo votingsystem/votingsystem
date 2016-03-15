@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="transactionvs-uservs">
+<dom-module name="transactionvs-user">
     <template>
         <div>
             <div style="font-weight: bold;">num. transactionTo: <span>{{balancesDto.transactionToList.length}}</span></div>
@@ -17,7 +17,7 @@
     </template>
     <script>
         Polymer({
-            is:'transactionvs-uservs',
+            is:'transactionvs-user',
             properties: {
                 balancesDto: {type:Object, value: {}}
             },

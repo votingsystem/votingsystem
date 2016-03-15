@@ -50,7 +50,7 @@
                             </button>
                         </div>
                         <div id="eventAuthorDiv" class="flex" style="margin:0px 20px 0 30px; color:#888; font-size: 0.85em;">
-                            <b>${msg.byLbl}:</b> <span>{{eventvs.userVS}}</span>
+                            <b>${msg.byLbl}:</b> <span>{{eventvs.user}}</span>
                         </div>
                     </div>
 

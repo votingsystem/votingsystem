@@ -12,7 +12,7 @@
                 <span>{{transactionRequest.tags}}</span>
             </h3>
             <div class="horizontal layout">
-                <b>${msg.receptorLbl}:</b><span style="margin: 0 20px 0 0;">{{transactionRequest.toUser}}</span>
+                <b>${msg.receptorLbl}:</b><span style="margin: 0 20px 0 0;">{{transactionRequest.toUserName}}</span>
                 <b>IBAN:</b><span>{{transactionRequest.toUserIBAN}}</span>
             </div>
             <div id="qrCodeImgDiv" class="vertical layout center center-justified">

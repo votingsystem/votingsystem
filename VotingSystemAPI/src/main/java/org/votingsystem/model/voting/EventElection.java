@@ -2,7 +2,7 @@ package org.votingsystem.model.voting;
 
 
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.throwable.ValidationExceptionVS;
 
 import javax.persistence.DiscriminatorValue;
@@ -25,42 +25,42 @@ public class EventElection extends EventVS implements Serializable {
 
     public EventElection() {}
 
-    public EventElection(String subject, String content, Cardinality cardinality, UserVS userVS,
-                   ControlCenterVS controlCenterVS, Date dateBegin, Date dateFinish) {
+    public EventElection(String subject, String content, Cardinality cardinality, User user,
+                         ControlCenter controlCenter, Date dateBegin, Date dateFinish) {
         setSubject(subject);
         setContent(content);
         setCardinality(cardinality);
-        setUserVS(userVS);
-        setControlCenterVS(controlCenterVS);
+        setUser(user);
+        setControlCenter(controlCenter);
         setDateBegin(dateBegin);
         setDateFinish(dateFinish);
     }
 
     public EventElection(Long accessControlEventId, String subject, String content, String URL,
-                   AccessControlVS accessControl, UserVS userVS, Date dateBegin, Date dateFinish) {
+                         AccessControl accessControl, User user, Date dateBegin, Date dateFinish) {
         setAccessControlEventId(accessControlEventId);
         setSubject(subject);
         setContent(content);
         setUrl(URL);
-        setAccessControlVS(accessControl);
-        setUserVS(userVS);
+        setAccessControl(accessControl);
+        setUser(user);
         setDateBegin(dateBegin);
         setDateFinish(dateFinish);
     }
 
-    public FieldEventVS checkOptionId(Long optionId) throws ValidationExceptionVS {
-        for(FieldEventVS option: getFieldsEventVS()) {
+    public FieldEvent checkOptionId(Long optionId) throws ValidationExceptionVS {
+        for(FieldEvent option: getFieldsEventVS()) {
             if(optionId.longValue() == option.getId().longValue()) return option;
         }
-        throw new ValidationExceptionVS("FieldEventVS not found - id: " + optionId);
+        throw new ValidationExceptionVS("FieldEvent not found - id: " + optionId);
     }
 
     public EventElection updateAccessControlIds() {
         setId(null);
         if(getFieldsEventVS() != null) {
-            for(FieldEventVS fieldEventVS : getFieldsEventVS()) {
-                fieldEventVS.setAccessControlFieldEventId(fieldEventVS.getId());
-                fieldEventVS.setId(null);
+            for(FieldEvent fieldEvent : getFieldsEventVS()) {
+                fieldEvent.setAccessControlFieldEventId(fieldEvent.getId());
+                fieldEvent.setId(null);
             }
         }
         return this;

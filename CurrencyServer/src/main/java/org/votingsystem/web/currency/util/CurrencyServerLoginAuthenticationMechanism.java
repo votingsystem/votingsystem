@@ -7,7 +7,7 @@ import io.undertow.security.idm.Account;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.form.FormParserFactory;
 import io.undertow.servlet.handlers.ServletRequestContext;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,9 +39,9 @@ public class CurrencyServerLoginAuthenticationMechanism implements Authenticatio
         log.info("authenticate");
         ServletRequestContext servletRequestContext = exchange.getAttachment(ServletRequestContext.ATTACHMENT_KEY);
         HttpServletRequest request = servletRequestContext.getOriginalRequest();
-        UserVS userVS = (UserVS) request.getSession().getAttribute("userVS");
-        if(userVS == null) return AuthenticationMechanismOutcome.NOT_ATTEMPTED;
-        Account account =  new AccountImpl(new PrincipalVS(userVS), roles);
+        User user = (User) request.getSession().getAttribute("user");
+        if(user == null) return AuthenticationMechanismOutcome.NOT_ATTEMPTED;
+        Account account =  new AccountImpl(new PrincipalVS(user), roles);
         securityContext.authenticationComplete(account, mechanismName, true);
         return AuthenticationMechanismOutcome.AUTHENTICATED;
     }

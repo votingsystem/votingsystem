@@ -49,9 +49,9 @@ public class QRMessageDto<T> implements Serializable {
         this.UUID = java.util.UUID.randomUUID().toString().substring(0,3);
     }
 
-    public QRMessageDto(DeviceVSDto deviceVSDto, TypeVS typeVS) {
+    public QRMessageDto(DeviceDto deviceDto, TypeVS typeVS) {
         this.typeVS = typeVS;
-        this.deviceId = deviceVSDto.getId();
+        this.deviceId = deviceDto.getId();
         dateCreated = new Date();
         this.UUID = java.util.UUID.randomUUID().toString().substring(0,3);
     }

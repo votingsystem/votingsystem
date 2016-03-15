@@ -1,7 +1,7 @@
 package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.voting.FieldEventVS;
+import org.votingsystem.model.voting.FieldEvent;
 
 import java.util.Set;
 
@@ -19,7 +19,7 @@ public class EventVSStatsDto {
     private Long numVotesVSOK;
     private Long numVotesVSVotesVSCANCELED;
     private String subject;
-    private Set<FieldEventVS> fieldsEventVS;
+    private Set<FieldEvent> fieldsEventVS;
 
     public EventVSStatsDto() {}
 
@@ -88,11 +88,11 @@ public class EventVSStatsDto {
         this.subject = subject;
     }
 
-    public Set<FieldEventVS> getFieldsEventVS() {
+    public Set<FieldEvent> getFieldsEventVS() {
         return fieldsEventVS;
     }
 
-    public void setFieldsEventVS(Set<FieldEventVS> fieldsEventVS) {
+    public void setFieldsEventVS(Set<FieldEvent> fieldsEventVS) {
         this.fieldsEventVS = fieldsEventVS;
     }
 

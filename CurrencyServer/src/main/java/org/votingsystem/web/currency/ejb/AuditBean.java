@@ -4,10 +4,10 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.*;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.BankVS;
+import org.votingsystem.model.User;
+import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.model.currency.Group;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
@@ -53,16 +53,16 @@ public class AuditBean {
     public void checkCurrencyRequest(Interval timePeriod) { }
 
     //Backup user transactions for timePeriod
-    public BalancesDto backupUserVSTransactionVSList (UserVS userVS, Interval timePeriod) throws IOException {
+    public BalancesDto backupUserTransactionVSList(User user, Interval timePeriod) throws IOException {
         String lapsePath = DateUtils.getDirPath(timePeriod.getDateFrom());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MMM_dd");
         lapsePath = "/" + formatter.format(timePeriod.getDateFrom()) + "__" +  formatter.format(timePeriod.getDateTo());
         File backupDir = new File(config.getServerDir().getAbsolutePath() + "/backups/userTransactionHistory" + lapsePath);
         backupDir.mkdirs();
-        log.info( "user: " + userVS.getId() + " - timePeriod: " + timePeriod.toString() + " - backupDir: " + backupDir.getAbsolutePath());
+        log.info( "user: " + user.getId() + " - timePeriod: " + timePeriod.toString() + " - backupDir: " + backupDir.getAbsolutePath());
         //Expenses
         Query query = dao.getEM().createNamedQuery("findTransByFromUserAndTransactionParentNullAndDateCreatedBetween")
-                .setParameter("fromUserVS", userVS).setParameter("dateFrom", timePeriod.getDateFrom())
+                .setParameter("fromUser", user).setParameter("dateFrom", timePeriod.getDateFrom())
                 .setParameter("dateTo", timePeriod.getDateTo());
         List<TransactionVS> transactionList = query.getResultList();
         List<TransactionVSDto> transactionFromList = new ArrayList<>();
@@ -86,7 +86,7 @@ public class AuditBean {
             transactionFromList.add(dto);
         }
         BalancesDto balancesDto = BalancesDto.FROM(transactionFromList, balancesFromMap);
-        query = dao.getEM().createNamedQuery("findTransByToUserAndDateCreatedBetween").setParameter("toUserVS", userVS)
+        query = dao.getEM().createNamedQuery("findTransByToUserAndDateCreatedBetween").setParameter("toUser", user)
                 .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo",timePeriod.getDateTo());
         transactionList = query.getResultList();
         List<TransactionVSDto> transactionToList = new ArrayList<>();
@@ -109,9 +109,9 @@ public class AuditBean {
             transactionToList.add(transactionDto);
         }
         balancesDto.setTo(transactionToList, balancesToMap);
-        File userHistoryFile = new File(backupDir.getAbsolutePath() + "/" + userVS.getNif() + ".json");
+        File userHistoryFile = new File(backupDir.getAbsolutePath() + "/" + user.getNif() + ".json");
         JSON.getMapper().writeValue(userHistoryFile, balancesDto);
-        log.info("user: " + userVS.getId() + " - userHistoryFile:" + userHistoryFile.getAbsolutePath());
+        log.info("user: " + user.getId() + " - userHistoryFile:" + userHistoryFile.getAbsolutePath());
         return balancesDto;
     }
 
@@ -121,28 +121,28 @@ public class AuditBean {
         //we know this is launch every Monday after 00:00 so we just make sure to select a day from last week
         Interval timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(requestDate));
         String transactionSubject =  messages.get("initWeekMsg", DateUtils.getDayWeekDateStr(timePeriod.getDateTo(), "HH:mm"));
-        List<UserVS.State> notActiveList = Arrays.asList(UserVS.State.SUSPENDED, UserVS.State.CANCELED);
-        List<UserVS.Type> userVSTypeList = Arrays.asList(UserVS.Type.GROUP, UserVS.Type.USER);
-        Query query = dao.getEM().createQuery("SELECT COUNT(u) FROM UserVS u WHERE u.type in :typeList and(" +
+        List<User.State> notActiveList = Arrays.asList(User.State.SUSPENDED, User.State.CANCELED);
+        List<User.Type> userTypeList = Arrays.asList(User.Type.GROUP, User.Type.USER);
+        Query query = dao.getEM().createQuery("SELECT COUNT(u) FROM User u WHERE u.type in :typeList and(" +
                 "u.state = 'ACTIVE' or (u.state in :notActiveList and(u.dateCancelled >=:dateCancelled)))")
-                .setParameter("typeList", userVSTypeList)
+                .setParameter("typeList", userTypeList)
                 .setParameter("notActiveList", notActiveList)
                 .setParameter("dateCancelled", timePeriod.getDateFrom());
         long numTotalUsers = (long)query.getSingleResult();
         log.info(transactionSubject + " - numTotalUsers:" + numTotalUsers + " - " + timePeriod.toString());
         int offset = 0;
         int pageSize = 100;
-        List<UserVS> userVSList;
+        List<User> userList;
         query = dao.getEM().createNamedQuery("findUserActiveOrCancelledAfterAndInList").setFirstResult(0).setMaxResults(pageSize)
-                .setParameter("typeList", userVSTypeList)
+                .setParameter("typeList", userTypeList)
                 .setParameter("notActiveList", notActiveList)
                 .setParameter("dateCancelled", timePeriod.getDateFrom());;
-        while ((userVSList = query.getResultList()).size() > 0) {
-            for (UserVS userVS : userVSList) {
+        while ((userList = query.getResultList()).size() > 0) {
+            for (User user : userList) {
                 try {
-                    if(!initUserVSWeekPeriod(userVS, timePeriod, transactionSubject)) continue;
+                    if(!initUserWeekPeriod(user, timePeriod, transactionSubject)) continue;
                 } catch(Exception ex) {
-                    LoggerVS.weekLog(Level.SEVERE, "userVS: " + userVS.getId()  + " - " +  ex.getMessage(), ex);
+                    LoggerVS.weekLog(Level.SEVERE, "user: " + user.getId()  + " - " +  ex.getMessage(), ex);
                 }
             }
             if((offset % 2000) == 0) {
@@ -151,64 +151,64 @@ public class AuditBean {
             }
             dao.getEM().flush();
             dao.getEM().clear();
-            log.info("processed " + (offset + userVSList.size()) + " of " + numTotalUsers + " - elapsedTime: " +
+            log.info("processed " + (offset + userList.size()) + " of " + numTotalUsers + " - elapsedTime: " +
                     DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc));
             offset += pageSize;
             query.setFirstResult(offset);
         }
     }
 
-    public boolean initUserVSWeekPeriod(UserVS userVS, Interval timePeriod, String transactionSubject)
+    public boolean initUserWeekPeriod(User user, Interval timePeriod, String transactionSubject)
             throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         BalancesDto balancesDto = null;
         String userSubPath;
-        if(userVS instanceof GroupVS) {
-            balancesDto = balancesBean.getBalancesDto(userVS, timePeriod);
-            userSubPath = "GroupVS_"+ userVS.getId();
-        } else if (userVS instanceof UserVS) {
-            balancesDto = balancesBean.getBalancesDto(userVS, timePeriod);
-            //userSubPath = StringUtils.getUserDirPath(userVS.getNif());
-            userSubPath = userVS.getNif();
+        if(user instanceof Group) {
+            balancesDto = balancesBean.getBalancesDto(user, timePeriod);
+            userSubPath = "Group_"+ user.getId();
+        } else if (user instanceof User) {
+            balancesDto = balancesBean.getBalancesDto(user, timePeriod);
+            //userSubPath = StringUtils.getUserDirPath(user.getNif());
+            userSubPath = user.getNif();
         } else {
-            log.info("userVS id: " + userVS.getId() + " is " + userVS.getClass().getSimpleName() + " - no init period");
+            log.info("user id: " + user.getId() + " is " + user.getClass().getSimpleName() + " - no init period");
             return false;
         }
         ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), userSubPath);
-        log.info(format("initUserVSWeekPeriod - UserVS ''{0}'' - dir ''{1}''", userVS.getId(),
+        log.info(format("initUserWeekPeriod - User ''{0}'' - dir ''{1}''", user.getId(),
                 reportFiles.getBaseDir().getAbsolutePath()) );
         Map<String, Map<String, BigDecimal>> currencyMap = balancesDto.getBalancesCash();
         Query query = null;
         for(String currencyCode: currencyMap.keySet()) {
             for(Map.Entry<String, BigDecimal> tagVSEntry:  currencyMap.get(currencyCode).entrySet()) {
                 TagVS currentTagVS = config.getTag(tagVSEntry.getKey());
-                query = dao.getEM().createQuery("SELECT count (t) FROM TransactionVS t WHERE t.toUserVS =:toUserVS and " +
+                query = dao.getEM().createQuery("SELECT count (t) FROM TransactionVS t WHERE t.toUser =:toUser and " +
                         "t.state =:state and t.type =:type and t.tag =:tag and t.dateCreated >=:dateTo")
-                        .setParameter("toUserVS", userVS).setParameter("state", TransactionVS.State.OK)
+                        .setParameter("toUser", user).setParameter("state", TransactionVS.State.OK)
                         .setParameter("type", TransactionVS.Type.CURRENCY_PERIOD_INIT)
                         .setParameter("tag", currentTagVS).setParameter("dateTo", timePeriod.getDateTo());
 
                 long numInitPeriodTransaction = (long) query.getSingleResult();
                 if(numInitPeriodTransaction > 0) throw new ExceptionVS("REPEATED CURRENCY_PERIOD_INIT TransactionVS for " +
-                        "UserVS:" + userVS.getId() + " - tag: " + tagVSEntry.getKey() + " - timePeriod:" + timePeriod);
+                        "User:" + user.getId() + " - tag: " + tagVSEntry.getKey() + " - timePeriod:" + timePeriod);
                 BigDecimal timeLimitedNotExpended = balancesDto.getTimeLimitedNotExpended(currencyCode, currentTagVS.getName());
                 BigDecimal amountResult = tagVSEntry.getValue().subtract(timeLimitedNotExpended);
                 String signedMessageSubject =  messages.get("tagInitPeriodMsg", tagVSEntry.getKey());
                 byte[] contentToSign = JSON.getMapper().writeValueAsBytes(new InitPeriodTransactionVSDto(amountResult,
-                        timeLimitedNotExpended, currencyCode, tagVSEntry.getKey(), userVS));
+                        timeLimitedNotExpended, currencyCode, tagVSEntry.getKey(), user));
                 CMSSignedMessage cmsSignedMessage = cmsBean.signDataWithTimeStamp(contentToSign);
                 CMSMessage cmsMessage = dao.persist(new CMSMessage(cmsSignedMessage, cmsBean.getSystemUser(),
                         TypeVS.CURRENCY_PERIOD_INIT));
-                dao.persist(new TransactionVS(userVS, userVS, amountResult, currencyCode, signedMessageSubject, cmsMessage,
+                dao.persist(new TransactionVS(user, user, amountResult, currencyCode, signedMessageSubject, cmsMessage,
                         TransactionVS.Type.CURRENCY_PERIOD_INIT, TransactionVS.State.OK, currentTagVS));
                 if(timeLimitedNotExpended.compareTo(BigDecimal.ZERO) > 0) {
                     query = dao.getEM().createNamedQuery("findAccountByUserIBANAndStateAndCurrencyAndTag")
-                            .setParameter("userIBAN", userVS.getIBAN()).setParameter("state", CurrencyAccount.State.ACTIVE)
+                            .setParameter("userIBAN", user.getIBAN()).setParameter("state", CurrencyAccount.State.ACTIVE)
                             .setParameter("currencyCode", currencyCode).setParameter("tag", currentTagVS);
                     CurrencyAccount account = dao.getSingleResult (CurrencyAccount.class, query);
                     Map accountFromMovements = new HashMap<>();
                     accountFromMovements.put(account, timeLimitedNotExpended);
-                    TransactionVS transactionVS = dao.persist(new TransactionVS(userVS, cmsBean.getSystemUser(),
+                    TransactionVS transactionVS = dao.persist(new TransactionVS(user, cmsBean.getSystemUser(),
                             timeLimitedNotExpended, currencyCode,
                             signedMessageSubject, cmsMessage,TransactionVS.Type.CURRENCY_PERIOD_INIT_TIME_LIMITED,
                             TransactionVS.State.OK,currentTagVS ));
@@ -227,25 +227,25 @@ public class AuditBean {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         long beginCalc = System.currentTimeMillis();
         Query query = dao.getEM().createNamedQuery("countUserActiveByDateAndInList").setParameter("date", timePeriod.getDateFrom())
-                .setParameter("inList", Arrays.asList(UserVS.Type.USER, UserVS.Type.GROUP, UserVS.Type.BANKVS));
+                .setParameter("inList", Arrays.asList(User.Type.USER, User.Type.GROUP, User.Type.BANK));
         long numTotalUsers = (long)query.getSingleResult();
 
         ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), null);
         PeriodResultDto periodResultDto = PeriodResultDto.init(timePeriod);
         int offset = 0;
         int pageSize = 100;
-        List<UserVS> userVSList;
+        List<User> userList;
         query = dao.getEM().createNamedQuery("findUserActiveOrCancelledAfterAndInList").setParameter("dateCancelled",
-                timePeriod.getDateFrom()).setParameter("typeList", Arrays.asList(UserVS.Type.USER, UserVS.Type.GROUP, UserVS.Type.BANKVS))
+                timePeriod.getDateFrom()).setParameter("typeList", Arrays.asList(User.Type.USER, User.Type.GROUP, User.Type.BANK))
                 .setFirstResult(0).setMaxResults(pageSize);
-        while ((userVSList = query.getResultList()).size() > 0) {
-            for (UserVS userVS : userVSList) {
+        while ((userList = query.getResultList()).size() > 0) {
+            for (User user : userList) {
                 try {
-                    if(userVS instanceof BankVS)
-                        periodResultDto.addBankVSBalance(balancesBean.getBalancesDto(userVS, timePeriod));
-                    else if(userVS instanceof GroupVS)
-                        periodResultDto.addGroupVSBalance(balancesBean.getBalancesDto(userVS, timePeriod));
-                    else periodResultDto.addUserVSBalance(balancesBean.getBalancesDto(userVS, timePeriod));
+                    if(user instanceof Bank)
+                        periodResultDto.addBankBalance(balancesBean.getBalancesDto(user, timePeriod));
+                    else if(user instanceof Group)
+                        periodResultDto.addGroupBalance(balancesBean.getBalancesDto(user, timePeriod));
+                    else periodResultDto.addUserBalance(balancesBean.getBalancesDto(user, timePeriod));
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }

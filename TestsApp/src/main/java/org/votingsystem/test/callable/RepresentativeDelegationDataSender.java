@@ -1,14 +1,13 @@
 package org.votingsystem.test.callable;
 
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.PEMUtils;
 
-import java.io.File;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -74,7 +73,7 @@ public class RepresentativeDelegationDataSender implements Callable<ResponseVS> 
     }
 
     private RepresentativeDelegationDto getDelegationDto(String representativeNIF) {
-        UserVSDto representative = new UserVSDto();
+        UserDto representative = new UserDto();
         representative.setNIF(representativeNIF);
         RepresentativeDelegationDto delegationDto = new RepresentativeDelegationDto();
         delegationDto.setServerURL(ContextVS.getInstance().getAccessControl().getServerURL());

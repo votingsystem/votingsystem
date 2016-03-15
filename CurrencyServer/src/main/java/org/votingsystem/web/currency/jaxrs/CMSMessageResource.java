@@ -1,11 +1,11 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.*;
-import org.votingsystem.web.currency.ejb.UserVSBean;
+import org.votingsystem.web.currency.ejb.UserBean;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;
@@ -33,7 +33,8 @@ public class CMSMessageResource {
     private static final List<TypeVS> anonymousTransaction = Arrays.asList(TypeVS.CURRENCY_SEND, TypeVS.CURRENCY_CHANGE);
 
     @Inject DAOBean dao;
-    @Inject UserVSBean userVSBean;
+    @Inject
+    UserBean userBean;
 
     @Path("/id/{id}") @GET @Transactional
     public Response index(@PathParam("id") long id, @Context ServletContext context,
@@ -74,13 +75,13 @@ public class CMSMessageResource {
         }
         TypeVS operation = TypeVS.valueOf((String) signedContentMap.get("operation"));
         if(!anonymousTransaction.contains(operation)) {
-            signedContentMap.put("fromUserVS", UserVSDto.BASIC(cmsMessage.getUserVS()));
+            signedContentMap.put("fromUser", UserDto.BASIC(cmsMessage.getUser()));
         }
-        if(cmsMessage.getUserVS() != null)
-            signedContentMap.put("fromUserVS", UserVSDto.BASIC(cmsMessage.getUserVS()));
+        if(cmsMessage.getUser() != null)
+            signedContentMap.put("fromUser", UserDto.BASIC(cmsMessage.getUser()));
         switch(operation) {
-            case FROM_BANKVS:
-                viewer = "message-cms-transactionvs-from-bankvs";
+            case FROM_BANK:
+                viewer = "message-cms-transactionvs-from-bank";
                 break;
             case CURRENCY_REQUEST:
                 viewer = "message-cms-transactionvs-currency-request";

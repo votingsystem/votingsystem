@@ -2,7 +2,7 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.DeviceVS;
+import org.votingsystem.model.Device;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -17,12 +17,12 @@ public class CertExtensionDto {
     private String nif;
     private String givenname;
     private String surname;
-    private DeviceVS.Type deviceType;
+    private Device.Type deviceType;
 
 
     public CertExtensionDto() {}
 
-    public CertExtensionDto(String deviceId, String deviceName, String email, String phone, DeviceVS.Type deviceType) {
+    public CertExtensionDto(String deviceId, String deviceName, String email, String phone, Device.Type deviceType) {
         this.deviceId = deviceId;
         this.deviceName = deviceName;
         this.email = email;
@@ -62,11 +62,11 @@ public class CertExtensionDto {
         this.mobilePhone = mobilePhone;
     }
 
-    public DeviceVS.Type getDeviceType() {
+    public Device.Type getDeviceType() {
         return deviceType;
     }
 
-    public void setDeviceType(DeviceVS.Type deviceType) {
+    public void setDeviceType(Device.Type deviceType) {
         this.deviceType = deviceType;
     }
 

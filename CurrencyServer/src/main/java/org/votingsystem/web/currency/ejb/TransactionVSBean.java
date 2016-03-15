@@ -6,10 +6,10 @@ import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.model.currency.Group;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -42,9 +42,12 @@ public class TransactionVSBean {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject BalancesBean balancesBean;
-    @Inject TransactionVSGroupVSBean transactionVSGroupVSBean;
-    @Inject TransactionVSBankVSBean transactionVSBankVSBean;
-    @Inject TransactionVSUserVSBean transactionVSUserVSBean;
+    @Inject
+    TransactionVSGroupBean transactionVSGroupBean;
+    @Inject
+    TransactionVSBankBean transactionVSBankBean;
+    @Inject
+    TransactionVSUserBean transactionVSUserBean;
 
 
     public ResultListDto<TransactionVSDto> processTransactionVS(CMSMessage cmsMessage) throws Exception {
@@ -66,19 +69,19 @@ public class TransactionVSBean {
         LoggerVS.logTransactionVS(request);
 
         switch(request.getOperation()) {
-            case FROM_BANKVS:
-                return transactionVSBankVSBean.processTransactionVS(request, tagVS);
+            case FROM_BANK:
+                return transactionVSBankBean.processTransactionVS(request, tagVS);
             case FROM_GROUP_TO_MEMBER_GROUP:
             case FROM_GROUP_TO_ALL_MEMBERS:
-                return transactionVSGroupVSBean.processTransactionVS(request, tagVS);
-            case FROM_USERVS:
-                return transactionVSUserVSBean.processTransactionVS(request, tagVS);
+                return transactionVSGroupBean.processTransactionVS(request, tagVS);
+            case FROM_USER:
+                return transactionVSUserBean.processTransactionVS(request, tagVS);
             default:
                 throw new ExceptionVS(messages.get("unknownTransactionErrorMsg",request.getOperation().toString()));
         }
     }
 
-    private synchronized CurrencyAccount updateUserVSAccountTo(TransactionVS transactionVS) throws ExceptionVS {
+    private synchronized CurrencyAccount updateUserAccountTo(TransactionVS transactionVS) throws ExceptionVS {
         if(transactionVS.getToUserIBAN() == null) throw new ExceptionVS("transactionVS without toUserIBAN");
         Query query = dao.getEM().createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")
                 .setParameter("userIBAN", transactionVS.getToUserIBAN()).setParameter("tag", transactionVS.getTag())
@@ -87,7 +90,7 @@ public class TransactionVSBean {
         CurrencyAccount accountTo = dao.getSingleResult(CurrencyAccount.class, query);
         BigDecimal resultAmount =  transactionVS.getAmount();
         if(!TagVS.WILDTAG.equals(transactionVS.getTag().getName())) {
-            BigDecimal wildTagExpensesForTag = checkWildTagExpensesForTag(transactionVS.getToUserVS(),
+            BigDecimal wildTagExpensesForTag = checkWildTagExpensesForTag(transactionVS.getToUser(),
                     transactionVS.getTag(), transactionVS.getCurrencyCode());
             if(wildTagExpensesForTag.compareTo(BigDecimal.ZERO) > 0) {
                 resultAmount = resultAmount.subtract(wildTagExpensesForTag);
@@ -106,27 +109,27 @@ public class TransactionVSBean {
             }
         }
         if(accountTo == null) {//new user account for tag
-            //UserVS userVS, BigDecimal balance, String currencyCode, TagVS tag
-            accountTo = new CurrencyAccount(transactionVS.getToUserVS(), resultAmount, transactionVS.getCurrencyCode(),
+            //User user, BigDecimal balance, String currencyCode, TagVS tag
+            accountTo = new CurrencyAccount(transactionVS.getToUser(), resultAmount, transactionVS.getCurrencyCode(),
                     transactionVS.getTag());
             dao.persist(accountTo);
             log.info("new CurrencyAccount: " + accountTo.getId() + " - for IBAN:" + transactionVS.getToUserIBAN() +
                     " -  tag:" + accountTo.getTag().getName() + " - amount:" + accountTo.getBalance());
         } else {
             dao.merge(accountTo.setBalance(accountTo.getBalance().add(resultAmount)));
-            log.info("updateUserVSAccountTo - account id: " + accountTo.getId() + " - balance: " +
+            log.info("updateUserAccountTo - account id: " + accountTo.getId() + " - balance: " +
                     accountTo.getBalance() + " - LastUpdated: " + accountTo.getLastUpdated());
         }
         return accountTo;
     }
 
-    private synchronized void updateUserVSAccountFrom(TransactionVS transactionVS) throws ExceptionVS {
+    private synchronized void updateUserAccountFrom(TransactionVS transactionVS) throws ExceptionVS {
         if(transactionVS.getAccountFromMovements() == null)
             throw new ExceptionVS("TransactionVS without accountFromMovements");
         for(Map.Entry<CurrencyAccount, BigDecimal> entry: transactionVS.getAccountFromMovements().entrySet()) {
             CurrencyAccount currencyAccount = entry.getKey();
             dao.merge(currencyAccount.setBalance(currencyAccount.getBalance().subtract(entry.getValue())));
-            log.info("updateUserVSAccountFrom - account id: " + currencyAccount.getId() + " - balance: " +
+            log.info("updateUserAccountFrom - account id: " + currencyAccount.getId() + " - balance: " +
                     currencyAccount.getBalance() + " - LastUpdated: " + currencyAccount.getLastUpdated());
         }
     }
@@ -140,19 +143,19 @@ public class TransactionVSBean {
                 case CURRENCY_PERIOD_INIT:
                     break;
                 case CURRENCY_PERIOD_INIT_TIME_LIMITED:
-                    updateUserVSAccountFrom(transactionVS);
+                    updateUserAccountFrom(transactionVS);
                     balancesBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(), transactionVS.getTag());
                     break;
-                case FROM_USERVS:
-                    updateUserVSAccountFrom(transactionVS);
-                    updateUserVSAccountTo(transactionVS);
+                case FROM_USER:
+                    updateUserAccountFrom(transactionVS);
+                    updateUserAccountTo(transactionVS);
                     break;
                 case CURRENCY_REQUEST:
-                    updateUserVSAccountFrom(transactionVS);
+                    updateUserAccountFrom(transactionVS);
                     balancesBean.updateTagBalance(transactionVS.getAmount(), transactionVS.getCurrencyCode(), transactionVS.getTag());
                     break;
                 case CURRENCY_SEND:
-                    updateUserVSAccountTo(transactionVS);
+                    updateUserAccountTo(transactionVS);
                     for(Currency currency : transactionVS.getCurrencyBatch().getValidatedCurrencySet()) {
                         balancesBean.updateTagBalance(currency.getAmount().negate(), currency.getCurrencyCode(),
                                 currency.getTagVS());
@@ -161,8 +164,8 @@ public class TransactionVSBean {
                     if(leftOver != null) balancesBean.updateTagBalance(leftOver.getAmount(), leftOver.getCurrencyCode(),
                             leftOver.getTagVS());
                     break;
-                case FROM_BANKVS:
-                    updateUserVSAccountTo(transactionVS);
+                case FROM_BANK:
+                    updateUserAccountTo(transactionVS);
                     break;
                 case CURRENCY_CHANGE:
                     for(Currency currency : transactionVS.getCurrencyBatch().getValidatedCurrencySet()) {
@@ -178,17 +181,17 @@ public class TransactionVSBean {
                     break;
                 default:
                     if(isParentTransaction) {//Parent transaction, to system before trigger to receptors
-                        if(transactionVS.getType() != TransactionVS.Type.FROM_BANKVS) updateUserVSAccountFrom(transactionVS);
+                        if(transactionVS.getType() != TransactionVS.Type.FROM_BANK) updateUserAccountFrom(transactionVS);
                         balancesBean.updateTagBalance(transactionVS.getAmount(),transactionVS.getCurrencyCode(),
                                 transactionVS.getTag());
                     } else {
-                        updateUserVSAccountTo(transactionVS);
+                        updateUserAccountTo(transactionVS);
                         balancesBean.updateTagBalance(transactionVS.getAmount().negate(), transactionVS.getCurrencyCode(),
                                 transactionVS.getTag());
                         log.info("transactionVS: " + transactionVS.getType() + " - " + transactionVS.getAmount() +  " " +
                                 transactionVS.getCurrencyCode() + " - " + transactionVS.getTag().getName() + " - " +
                                 "fromUserIBAN: " + transactionVS.getFromUserIBAN() + " - toIBAN: " +
-                                transactionVS.getToUserVS().getIBAN());
+                                transactionVS.getToUser().getIBAN());
                     }
             }
         } else log.log(Level.SEVERE, "TransactionVS:" + transactionVS.getId() + " - state:" +
@@ -196,11 +199,11 @@ public class TransactionVSBean {
     }
 
     //Check the amount from WILDTAG account expended for the param tag
-    public BigDecimal checkWildTagExpensesForTag(UserVS userVS, TagVS tagVS, String currencyCode) {
+    public BigDecimal checkWildTagExpensesForTag(User user, TagVS tagVS, String currencyCode) {
         Interval timePeriod = DateUtils.getCurrentWeekPeriod();
         Map<String, Map<String, BigDecimal>> balancesFrom =
-                BalanceUtils.getBalancesFrom(getTransactionFromList(userVS, timePeriod));
-        Map<String, Map<String, IncomesDto>> balancesTo = BalanceUtils.getBalancesTo(getTransactionToList(userVS, timePeriod));
+                BalanceUtils.getBalancesFrom(getTransactionFromList(user, timePeriod));
+        Map<String, Map<String, IncomesDto>> balancesTo = BalanceUtils.getBalancesTo(getTransactionToList(user, timePeriod));
         if(balancesFrom.get(currencyCode) == null) return BigDecimal.ZERO;
         BigDecimal expendedForTagVS = balancesFrom.get(currencyCode).get(tagVS.getName());
         if(expendedForTagVS == null || BigDecimal.ZERO.compareTo(expendedForTagVS) == 0) return BigDecimal.ZERO;
@@ -239,8 +242,8 @@ public class TransactionVSBean {
             case "CURRENCY_SEND":
                 typeDescription = messages.get("currencySendLbl");
                 break;
-            case "FROM_BANKVS":
-                typeDescription = messages.get("bankVSInputLbl");
+            case "FROM_BANK":
+                typeDescription = messages.get("bankInputLbl");
                 break;
             case "FROM_GROUP_TO_MEMBER_GROUP":
                 typeDescription = messages.get("transactionVSFromGroupToMemberGroup");
@@ -253,32 +256,32 @@ public class TransactionVSBean {
         return typeDescription;
     }
 
-    public List<TransactionVS> getTransactionFromList(UserVS fromUserVS, Interval timePeriod) {
+    public List<TransactionVS> getTransactionFromList(User fromUser, Interval timePeriod) {
         List<TransactionVS> transactionList = null;
         Query query = null;
-        if(fromUserVS instanceof GroupVS) {
-            query = dao.getEM().createQuery("SELECT t FROM TransactionVS t WHERE (t.fromUserVS =:fromUserVS and t.state =:state " +
+        if(fromUser instanceof Group) {
+            query = dao.getEM().createQuery("SELECT t FROM TransactionVS t WHERE (t.fromUser =:fromUser and t.state =:state " +
                     "and t.transactionParent is not null and t.dateCreated between :dateFrom and :dateTo " +
-                    "and t.type not in (:notList)) OR (t.fromUserVS =:fromUserVS and t.state =:state " +
+                    "and t.type not in (:notList)) OR (t.fromUser =:fromUser and t.state =:state " +
                     "and t.transactionParent is null and  t.dateCreated between :dateFrom and :dateTo " +
-                    "and t.type in (:inList))").setParameter("fromUserVS", fromUserVS).setParameter("state", TransactionVS.State.OK)
+                    "and t.type in (:inList))").setParameter("fromUser", fromUser).setParameter("state", TransactionVS.State.OK)
                     .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())
                     .setParameter("notList", Arrays.asList(TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS, TransactionVS.Type.CURRENCY_PERIOD_INIT))
                     .setParameter("inList", Arrays.asList(TransactionVS.Type.FROM_GROUP_TO_ALL_MEMBERS));
             transactionList = query.getResultList();
         } else {
-            query = dao.getEM().createNamedQuery("findUserVSTransFromByFromUserAndStateAndDateCreatedAndInList")
-                    .setParameter("fromUserVS", fromUserVS).setParameter("state", TransactionVS.State.OK)
+            query = dao.getEM().createNamedQuery("findUserTransFromByFromUserAndStateAndDateCreatedAndInList")
+                    .setParameter("fromUser", fromUser).setParameter("state", TransactionVS.State.OK)
                     .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())
-                    .setParameter("inList", Arrays.asList(TransactionVS.Type.CURRENCY_REQUEST, TransactionVS.Type.FROM_USERVS));
+                    .setParameter("inList", Arrays.asList(TransactionVS.Type.CURRENCY_REQUEST, TransactionVS.Type.FROM_USER));
             transactionList = query.getResultList();
         }
         return transactionList;
     }
 
-    public List<TransactionVS> getTransactionToList(UserVS toUserVS, Interval timePeriod) {
+    public List<TransactionVS> getTransactionToList(User toUser, Interval timePeriod) {
         Query query = dao.getEM().createNamedQuery("findTransByToUserAndStateAndDateCreatedBetween")
-                .setParameter("toUserVS", toUserVS).setParameter("state", TransactionVS.State.OK)
+                .setParameter("toUser", toUser).setParameter("state", TransactionVS.State.OK)
                 .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo());
         return query.getResultList();
     }

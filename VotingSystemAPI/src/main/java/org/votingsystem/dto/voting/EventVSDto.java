@@ -2,11 +2,11 @@ package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.model.voting.ControlCenterVS;
+import org.votingsystem.dto.ActorDto;
+import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.FieldEventVS;
+import org.votingsystem.model.voting.FieldEvent;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.StringUtils;
@@ -33,13 +33,13 @@ public class EventVSDto {
     private String subject;
     private String content;
     private String duration;
-    private String userVS;
+    private String user;
     private EventVS.Cardinality cardinality;
     private EventVS.State state;
     private List<String> tags;
-    private Set<FieldEventVS> fieldsEventVS;
-    private ActorVSDto accessControl;
-    private ActorVSDto controlCenter;
+    private Set<FieldEvent> fieldsEventVS;
+    private ActorDto accessControl;
+    private ActorDto controlCenter;
     private boolean backupAvailable;
     private TypeVS operation;
     private EventVS.Type type;
@@ -65,7 +65,7 @@ public class EventVSDto {
         this.setDateCreated(eventVS.getDateCreated());
         this.setSubject(eventVS.getSubject());
         this.setContent(eventVS.getContent());
-        if(eventVS.getUserVS() != null) this.setUserVS(eventVS.getUserVS().getName());
+        if(eventVS.getUser() != null) this.setUser(eventVS.getUser().getName());
         this.setCardinality(eventVS.getCardinality());
         this.setTags(eventVS.getTagList());
         this.setBackupAvailable(eventVS.getBackupAvailable());
@@ -83,11 +83,11 @@ public class EventVSDto {
         this(eventVS);
         if(eventVS instanceof EventElection) {
             this.setURL(contextURL + "/rest/eventElection/id/" + eventVS.getId());
-            ControlCenterVS controlCenterVS = eventVS.getControlCenterVS();
-            if(controlCenterVS != null) this.setControlCenter(new ActorVSDto(
-                    controlCenterVS.getServerURL(), controlCenterVS.getName()));
+            ControlCenter controlCenter = eventVS.getControlCenter();
+            if(controlCenter != null) this.setControlCenter(new ActorDto(
+                    controlCenter.getServerURL(), controlCenter.getName()));
         }
-        this.setAccessControl(new ActorVSDto(contextURL, serverName));
+        this.setAccessControl(new ActorDto(contextURL, serverName));
     }
 
     public static EventVSDto formatToSign(EventVS eventVS) {
@@ -99,17 +99,17 @@ public class EventVSDto {
         result.dateFinish = eventVS.getDateFinish();
         result.URL = eventVS.getUrl();
         result.setBackupAvailable(eventVS.getBackupAvailable());
-        if(eventVS.getUserVS() != null) result.userVS = eventVS.getUserVS().getNif();
+        if(eventVS.getUser() != null) result.user = eventVS.getUser().getNif();
         if(eventVS.getVote() != null) result.vote = new VoteDto(eventVS.getVote(), null);
         result.accessControlEventId = eventVS.getAccessControlEventId();
         result.type = eventVS.getType();
         result.id = eventVS.getId();
         result.UUID =  java.util.UUID.randomUUID().toString();
         result.tags = eventVS.getTagList();
-        if(eventVS.getControlCenterVS() != null) {
-            result.controlCenter = new ActorVSDto(eventVS.getControlCenterVS().getName(),
-                    eventVS.getControlCenterVS().getServerURL());
-            result.controlCenter.setId(eventVS.getControlCenterVS().getId());
+        if(eventVS.getControlCenter() != null) {
+            result.controlCenter = new ActorDto(eventVS.getControlCenter().getName(),
+                    eventVS.getControlCenter().getServerURL());
+            result.controlCenter.setId(eventVS.getControlCenter().getId());
         }
         result.fieldsEventVS = eventVS.getFieldsEventVS();
         result.cardinality = eventVS.getCardinality();
@@ -129,18 +129,18 @@ public class EventVSDto {
         result.setFieldsEventVS(fieldsEventVS);
         result.setTagList(getTags());
         result.setUrl(getURL());
-        Set<FieldEventVS> fieldEventVSSet = new HashSet<>(getFieldsEventVS());
-        for(FieldEventVS fieldEventVS : fieldEventVSSet) {
-            fieldEventVS.setEventVS(result);
+        Set<FieldEvent> fieldEventSet = new HashSet<>(getFieldsEventVS());
+        for(FieldEvent fieldEvent : fieldEventSet) {
+            fieldEvent.setEventVS(result);
         }
-        result.setFieldsEventVS(fieldEventVSSet);
+        result.setFieldsEventVS(fieldEventSet);
         return result;
     }
 
     public void validate(String serverURL) throws ValidationExceptionVS {
         if(id == null) throw new ValidationExceptionVS("ERROR - missing param - 'id'");
         if(certCAVotacion == null) throw new ValidationExceptionVS("ERROR - missing param - 'certCAVotacion'");
-        if(userVS == null) throw new ValidationExceptionVS("ERROR - missing param - 'userVS'");
+        if(user == null) throw new ValidationExceptionVS("ERROR - missing param - 'user'");
         if(fieldsEventVS == null) throw new ValidationExceptionVS("ERROR - missing param - 'fieldsEventVS'");
         if(URL == null) throw new ValidationExceptionVS("ERROR - missing param - 'fieldsEventVS'");
         if(controlCenterURL == null) throw new ValidationExceptionVS("ERROR - missing param - 'controlCenterURL'");
@@ -204,8 +204,8 @@ public class EventVSDto {
         return duration;
     }
 
-    public String getUserVS() {
-        return userVS;
+    public String getUser() {
+        return user;
     }
 
     public EventVS.Cardinality getCardinality() {
@@ -220,15 +220,15 @@ public class EventVSDto {
         return tags;
     }
 
-    public Set<FieldEventVS> getFieldsEventVS() {
+    public Set<FieldEvent> getFieldsEventVS() {
         return fieldsEventVS;
     }
 
-    public ActorVSDto getAccessControl() {
+    public ActorDto getAccessControl() {
         return accessControl;
     }
 
-    public ActorVSDto getControlCenter() {
+    public ActorDto getControlCenter() {
         return controlCenter;
     }
 
@@ -272,8 +272,8 @@ public class EventVSDto {
         this.duration = duration;
     }
 
-    public void setUserVS(String userVS) {
-        this.userVS = userVS;
+    public void setUser(String user) {
+        this.user = user;
     }
 
     public void setCardinality(EventVS.Cardinality cardinality) {
@@ -288,15 +288,15 @@ public class EventVSDto {
         this.tags = tags;
     }
 
-    public void setFieldsEventVS(Set<FieldEventVS> fieldsEventVS) {
+    public void setFieldsEventVS(Set<FieldEvent> fieldsEventVS) {
         this.fieldsEventVS = fieldsEventVS;
     }
 
-    public void setAccessControl(ActorVSDto accessControl) {
+    public void setAccessControl(ActorDto accessControl) {
         this.accessControl = accessControl;
     }
 
-    public void setControlCenter(ActorVSDto controlCenter) {
+    public void setControlCenter(ActorDto controlCenter) {
         this.controlCenter = controlCenter;
     }
 

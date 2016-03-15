@@ -2,7 +2,7 @@
 
 <link href="../resources/bower_components/google-chart/google-chart.html" rel="import">
 
-<dom-module name="balance-uservs-chart">
+<dom-module name="balance-user-chart">
     <template>
         <div class="horizontal layout center center-justified">
             <google-chart id="chart" type='column'>
@@ -11,7 +11,7 @@
     </template>
     <script>
         Polymer({
-            is:'balance-uservs-chart',
+            is:'balance-user-chart',
             properties: {
                 xAxisCategories: {type:Array, value: []},
                 series:{type:Object, value: {}},

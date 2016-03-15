@@ -4,7 +4,7 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -61,20 +61,20 @@ public class EventVSBean {
     public CMSMessage cancelEvent(CMSMessage cmsMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         CMSSignedMessage cmsMessageReq = cmsMessage.getCMS();
-        UserVS signer = cmsMessage.getUserVS();
+        User signer = cmsMessage.getUser();
         EventVSDto request = cmsMessage.getSignedContent(EventVSDto.class);
         EventVS eventVS = dao.find(EventVS.class, request.getEventId());
         if (eventVS == null) throw new ValidationExceptionVS("ERROR - EventVS not found - eventId: " + request.getId());
         if(eventVS.getState() != EventVS.State.ACTIVE && eventVS.getState() != EventVS.State.PENDING)
                 throw new ValidationExceptionVS("ERROR - EventVS not ACTIVE - eventId: " + request.getEventId());
         request.validateCancelation(config.getContextURL());
-        if(!(eventVS.getUserVS().getNif().equals(signer.getNif()) || cmsBean.isAdmin(signer.getNif())))
+        if(!(eventVS.getUser().getNif().equals(signer.getNif()) || cmsBean.isAdmin(signer.getNif())))
             throw new ValidationExceptionVS("userWithoutPrivilege - nif: " + signer.getNif());
         CMSSignedMessage cmsMessageResp = null;
         String fromUser = config.getServerName();
         if(eventVS instanceof EventElection) {
             cmsMessageResp = cmsBean.addSignature(cmsMessageReq);
-            String controlCenterUrl = ((EventElection)eventVS).getControlCenterVS().getServerURL();
+            String controlCenterUrl = ((EventElection)eventVS).getControlCenter().getServerURL();
             ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(cmsMessageResp.toPEM(),
                     ContentTypeVS.JSON_SIGNED, controlCenterUrl + "/rest/eventElection/cancel");
             if(ResponseVS.SC_OK != responseVSControlCenter.getStatusCode() &&

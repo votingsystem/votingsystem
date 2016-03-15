@@ -39,9 +39,9 @@
       });
 
       var feedsPage
-      page('*/subscriptionVS/feeds', scrollToTop, function (ctx) {
+      page('*/subscription/feeds', scrollToTop, function (ctx) {
           vs.route = 'feeds';
-          Polymer.Base.importHref('./subscriptionVS/feeds-page.vsp', function(e) {
+          Polymer.Base.importHref('./subscription/feeds-page.vsp', function(e) {
               if(!feedsPage) feedsPage = document.createElement('feeds-page');
               vs.loadMainContent(feedsPage, "${msg.subscriptionLbl}")
           });

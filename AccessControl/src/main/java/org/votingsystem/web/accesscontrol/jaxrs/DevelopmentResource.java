@@ -2,7 +2,7 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.apache.commons.io.IOUtils;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.RepresentationDocument;
 import org.votingsystem.model.voting.RepresentativeDocument;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -10,7 +10,7 @@ import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SubscriptionVSBean;
+import org.votingsystem.web.ejb.SubscriptionBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -41,7 +41,8 @@ public class DevelopmentResource implements Serializable {
     private static final Logger log = Logger.getLogger(DevelopmentResource.class.getName());
 
     @EJB ConfigVS config;
-    @EJB SubscriptionVSBean subscriptionVSBean;
+    @EJB
+    SubscriptionBean subscriptionBean;
     @EJB DAOBean dao;
     @EJB CMSBean cmsBean;
     private MessagesVS messages = MessagesVS.getCurrentInstance();
@@ -57,19 +58,19 @@ public class DevelopmentResource implements Serializable {
         Collection<X509Certificate> userCertCollection = PEMUtils.fromPEMToX509CertCollection(requestBytes);
         X509Certificate userCert = userCertCollection.iterator().next();
         if(userCert != null) {
-            UserVS userVS = UserVS.FROM_X509_CERT(userCert);
-            userVS = subscriptionVSBean.checkUser(userVS);
-            userVS.setType(UserVS.Type.USER);
-            userVS.setRepresentative(null);
-            userVS.setMetaInf(null);
-            Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS")
-                    .setParameter("userVS", userVS);
+            User user = User.FROM_X509_CERT(userCert);
+            user = subscriptionBean.checkUser(user);
+            user.setType(User.Type.USER);
+            user.setRepresentative(null);
+            user.setMetaInf(null);
+            Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.user =:user")
+                    .setParameter("user", user);
             RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
             if(representativeDocument != null) {
                 dao.merge(representativeDocument.setDateCanceled(new Date()).setState(RepresentativeDocument.State.CANCELED));
             }
-            dao.merge(userVS);
-            return Response.ok().entity("UservS OK").build();
+            dao.merge(user);
+            return Response.ok().entity("User OK").build();
         } else return Response.status(Response.Status.BAD_REQUEST).entity("ERROR - missing user certs").build();
     }
 
@@ -80,7 +81,7 @@ public class DevelopmentResource implements Serializable {
         if(config.getMode() != EnvironmentVS.DEVELOPMENT) {
             throw new ValidationExceptionVS("SERVICE AVAILABLE ONLY IN DEVELOPMENT MODE");
         }
-        if(!cmsBean.isAdmin(cmsMessage.getUserVS().getNif()))
+        if(!cmsBean.isAdmin(cmsMessage.getUser().getNif()))
             throw new ValidationExceptionVS("user without privileges");
         log.severe(" ===== VOTING SIMULATION - RESETING REPRESENTATIVES ===== ");
         List<RepresentativeDocument.State> inList = Arrays.asList(RepresentativeDocument.State.OK,
@@ -89,15 +90,15 @@ public class DevelopmentResource implements Serializable {
                 "select r from RepresentativeDocument r where r.state in :inList").setParameter("inList", inList);
         List<RepresentativeDocument> representativeDocList = query.getResultList();
         StringBuilder stringBuilder = new StringBuilder("Num. representatives updated: " + representativeDocList.size());
-        Integer numUserVSUpdated = 0;
+        Integer numUserUpdated = 0;
         for(RepresentativeDocument representativeDocument : representativeDocList) {
-            UserVS representative = representativeDocument.getUserVS();
-            query = dao.getEM().createQuery("select u from UserVS u where u.representative =:representative")
+            User representative = representativeDocument.getUser();
+            query = dao.getEM().createQuery("select u from User u where u.representative =:representative")
                     .setParameter("representative", representative);
-            List<UserVS> representedList = query.getResultList();
-            numUserVSUpdated = numUserVSUpdated + representedList.size();
-            for(UserVS represented : representedList) {
-                query = dao.getEM().createQuery("select r from RepresentationDocument r where r.userVS =:represented " +
+            List<User> representedList = query.getResultList();
+            numUserUpdated = numUserUpdated + representedList.size();
+            for(User represented : representedList) {
+                query = dao.getEM().createQuery("select r from RepresentationDocument r where r.user =:represented " +
                         "and r.state =:state").setParameter("represented", represented)
                         .setParameter("state", RepresentationDocument.State.OK);
                 RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
@@ -106,16 +107,16 @@ public class DevelopmentResource implements Serializable {
                 dao.merge(representationDocument);
                 dao.merge(represented.setRepresentative(null));
             }
-            dao.merge(representative.setType(UserVS.Type.USER));
+            dao.merge(representative.setType(User.Type.USER));
             dao.merge(representativeDocument.setDateCanceled(new Date()).setState(RepresentativeDocument.State.CANCELED));
         }
-        query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
-                .setParameter("type", UserVS.Type.REPRESENTATIVE);
-        List<UserVS> representativeList = query.getResultList();
-        for(UserVS representative : representativeList) {
-            dao.merge(representative.setType(UserVS.Type.USER));
+        query = dao.getEM().createQuery("select u from User u where u.type =:type")
+                .setParameter("type", User.Type.REPRESENTATIVE);
+        List<User> representativeList = query.getResultList();
+        for(User representative : representativeList) {
+            dao.merge(representative.setType(User.Type.USER));
         }
-        stringBuilder.append(" - Num. users updated: " + numUserVSUpdated);
+        stringBuilder.append(" - Num. users updated: " + numUserUpdated);
         return Response.ok().entity(stringBuilder.toString()).build();
     }
 

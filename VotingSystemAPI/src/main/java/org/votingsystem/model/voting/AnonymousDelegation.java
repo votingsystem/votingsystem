@@ -1,7 +1,7 @@
 package org.votingsystem.model.voting;
 
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;
@@ -32,7 +32,7 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
     @Column(name="originHashAnonymousDelegation", unique=true) private String originHashAnonymousDelegation;
     @Column(name="hashAnonymousDelegation", unique=true) private String hashAnonymousDelegation;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="userVS") private UserVS userVS;
+    @JoinColumn(name="user") private User user;
     @OneToOne private CMSMessage delegationCMS;
 
     @OneToOne private CMSMessage cancellationCMS;
@@ -58,11 +58,11 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
 
     public AnonymousDelegation() {}
 
-    public AnonymousDelegation(Status status, CMSMessage delegationCMS, UserVS userVS, Date dateFrom,
+    public AnonymousDelegation(Status status, CMSMessage delegationCMS, User user, Date dateFrom,
                                Date dateTo) {
         this.status = status;
         this.delegationCMS = delegationCMS;
-        this.userVS = userVS;
+        this.user = user;
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
     }
@@ -125,12 +125,12 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
         return this;
     }
 
-    public UserVS getUserVS() {
-        return userVS;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserVS(UserVS userVS) {
-        this.userVS = userVS;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Date getDateFrom() {

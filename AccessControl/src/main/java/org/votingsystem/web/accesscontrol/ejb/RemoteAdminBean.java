@@ -1,11 +1,11 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.DeviceVS;
+import org.votingsystem.model.Actor;
+import org.votingsystem.model.Device;
 import org.votingsystem.model.KeyStoreVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.EventElection;
-import org.votingsystem.model.voting.UserRequestCsrVS;
+import org.votingsystem.model.voting.UserRequestCsr;
 import org.votingsystem.service.EJBRemoteAdminAccessControl;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -62,8 +62,8 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
     }
 
     @Override
-    public byte[] generateServerKeyStore(ActorVS.Type type, String givenName, String keyAlias, String nif,
-               char[] password,  KeyStoreVS keyStoreVS) throws Exception {
+    public byte[] generateServerKeyStore(Actor.Type type, String givenName, String keyAlias, String nif,
+                                         char[] password, KeyStoreVS keyStoreVS) throws Exception {
         log.info("generateKeyStore - type: " + type + " - nif: " + nif);
         MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         KeyStore keyStore = null;
@@ -130,20 +130,20 @@ public class RemoteAdminBean implements EJBRemoteAdminAccessControl {
         if(config.getMode() != EnvironmentVS.DEVELOPMENT) {
             throw new ExceptionVS("service available only in mode DEVELOPMENT - actual mode: " + config.getMode());
         }
-        Query query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId").setParameter("deviceId", deviceId);
-        DeviceVS device = dao.getSingleResult(DeviceVS.class, query);
-        if(device == null) throw new ExceptionVS("DeviceVS not found - deviceId: " + deviceId);
+        Query query = dao.getEM().createQuery("select d from Device d where d.deviceId =:deviceId").setParameter("deviceId", deviceId);
+        Device device = dao.getSingleResult(Device.class, query);
+        if(device == null) throw new ExceptionVS("Device not found - deviceId: " + deviceId);
         String validatedNIF = NifUtils.validate(nif);
-        query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif").setParameter("nif", validatedNIF);
-        UserVS userVS = dao.getSingleResult(UserVS.class, query);
-        if(userVS == null) throw new ExceptionVS("UserVS not found - nif: " + validatedNIF);
-        query = dao.getEM().createQuery("select csr from UserRequestCsrVS csr where csr.deviceVS=:deviceVS and " +
-                "csr.userVS =:userVS and csr.state=:state").setParameter("deviceVS", device).setParameter("userVS", userVS)
-                .setParameter("state", UserRequestCsrVS.State.OK);
-        UserRequestCsrVS csrRequest = dao.getSingleResult(UserRequestCsrVS.class, query);
-        if(csrRequest == null) throw new ExceptionVS("UserRequestCsrVS not found for nif: " + validatedNIF +
+        query = dao.getEM().createQuery("select u from User u where u.nif =:nif").setParameter("nif", validatedNIF);
+        User user = dao.getSingleResult(User.class, query);
+        if(user == null) throw new ExceptionVS("User not found - nif: " + validatedNIF);
+        query = dao.getEM().createQuery("select csr from UserRequestCsr csr where csr.device=:device and " +
+                "csr.user =:user and csr.state=:state").setParameter("device", device).setParameter("user", user)
+                .setParameter("state", UserRequestCsr.State.OK);
+        UserRequestCsr csrRequest = dao.getSingleResult(UserRequestCsr.class, query);
+        if(csrRequest == null) throw new ExceptionVS("UserRequestCsr not found for nif: " + validatedNIF +
                 " - and deviceId: " + deviceId);
-        X509Certificate issuedCert = csrBean.signCertUserVS(csrRequest);
+        X509Certificate issuedCert = csrBean.signCertUser(csrRequest);
         return "issued cert:" + issuedCert.getSerialNumber().longValue() + "- subjectDN: " + issuedCert.getSubjectDN();
     }
 

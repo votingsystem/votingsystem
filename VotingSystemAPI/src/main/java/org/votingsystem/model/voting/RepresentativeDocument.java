@@ -1,7 +1,7 @@
 package org.votingsystem.model.voting;
 
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;
@@ -34,7 +34,7 @@ public class RepresentativeDocument  extends EntityVS implements Serializable {
     @OneToOne private CMSMessage cancellationCMS;
 	@Column(name="description", columnDefinition="TEXT" ) private String description;
     @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name="userVS") private UserVS userVS;
+    @JoinColumn(name="user") private User user;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCanceled", length=23) private Date dateCanceled;
     @Temporal(TemporalType.TIMESTAMP)
@@ -44,8 +44,8 @@ public class RepresentativeDocument  extends EntityVS implements Serializable {
 
     public RepresentativeDocument() {}
 
-    public RepresentativeDocument(UserVS userVS, CMSMessage activationCMS, String description) {
-        this.userVS = userVS;
+    public RepresentativeDocument(User user, CMSMessage activationCMS, String description) {
+        this.user = user;
         this.activationCMS = activationCMS;
         this.description = description;
     }
@@ -109,12 +109,12 @@ public class RepresentativeDocument  extends EntityVS implements Serializable {
         return this;
 	}
 
-	public UserVS getUserVS() {
-		return userVS;
+	public User getUser() {
+		return user;
 	}
 
-	public void setUserVS(UserVS user) {
-		this.userVS = user;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public String getDescription() {

@@ -2,7 +2,7 @@ package org.votingsystem.web.currency.jaxrs;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.dto.currency.BalancesDto;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.*;
 import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.CurrencyAccountBean;
@@ -39,67 +39,67 @@ public class BalanceResource {
     @Inject CurrencyAccountBean accountBean;
     @Inject BalancesBean balancesBean;
 
-    @GET @Path("/userVS/id/{userId}")
-    public Response userVS(@PathParam("userId") long userId, @Context ServletContext context,
+    @GET @Path("/user/id/{userId}")
+    public Response user(@PathParam("userId") long userId, @Context ServletContext context,
              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        UserVS uservs = dao.find(UserVS.class, userId);
-        if(uservs == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - UserVS not found - userId: " + userId).build();
-        return getUserVSBalancesDto(req, resp, context, uservs, DateUtils.getWeekPeriod(Calendar.getInstance()));
+        User user = dao.find(User.class, userId);
+        if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - User not found - userId: " + userId).build();
+        return getUserBalancesDto(req, resp, context, user, DateUtils.getWeekPeriod(Calendar.getInstance()));
     }
 
-    @GET @Path("/userVS/nif/{userNIF}")
-    public Response userVSByNIF(@PathParam("userNIF") String nif, @Context ServletContext context,
+    @GET @Path("/user/nif/{userNIF}")
+    public Response userByNIF(@PathParam("userNIF") String nif, @Context ServletContext context,
                            @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         nif = NifUtils.validate(nif);
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", nif);;
-        UserVS uservs = dao.getSingleResult(UserVS.class, query);
-        if(uservs == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - UserVS not found - userId: " + nif).build();
-        return getUserVSBalancesDto(req, resp, context, uservs, DateUtils.getWeekPeriod(Calendar.getInstance()));
+        User user = dao.getSingleResult(User.class, query);
+        if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - User not found - userId: " + nif).build();
+        return getUserBalancesDto(req, resp, context, user, DateUtils.getWeekPeriod(Calendar.getInstance()));
     }
 
-    @Path("/userVS/id/{userId}/{timePeriod}")
+    @Path("/user/id/{userId}/{timePeriod}")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Response userVS(@PathParam("userId") long userId, @PathParam("timePeriod") String lapseStr,
+    public Response user(@PathParam("userId") long userId, @PathParam("timePeriod") String lapseStr,
                          @Context ServletContext context, @Context HttpServletRequest req,
                          @Context HttpServletResponse resp) throws Exception {
-        UserVS userVS = dao.find(UserVS.class, userId);
-        if(userVS == null) {
+        User user = dao.find(User.class, userId);
+        if(user == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("not found - userId: " + userId).build();
         }
         Interval.Lapse lapse =  Interval.Lapse.valueOf(lapseStr.toUpperCase());
         Interval timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(req.getLocale()).getTime(), lapse);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesBean.getBalancesDto(userVS, timePeriod))).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesBean.getBalancesDto(user, timePeriod))).build();
     }
 
-    @Path("/userVS/id/{userId}/{year}/{month}/{day}")
+    @Path("/user/id/{userId}/{year}/{month}/{day}")
     @GET  @Produces(MediaType.APPLICATION_JSON)
-    public Response userVSWithDate(@PathParam("userId") long userId, @PathParam("year") int year, @PathParam("month") int month,
-            @PathParam("day") int day, @Context ServletContext context, @Context HttpServletRequest req,
-            @Context HttpServletResponse resp) throws Exception {
+    public Response userWithDate(@PathParam("userId") long userId, @PathParam("year") int year, @PathParam("month") int month,
+                                 @PathParam("day") int day, @Context ServletContext context, @Context HttpServletRequest req,
+                                 @Context HttpServletResponse resp) throws Exception {
         Calendar calendar = DateUtils.getCalendar(year, month, day);
-        UserVS uservs = dao.find(UserVS.class, userId);
-        if(uservs == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - UserVS not found - userId: " + userId).build();
-        return getUserVSBalancesDto(req, resp, context, uservs, DateUtils.getWeekPeriod(calendar));
+        User user = dao.find(User.class, userId);
+        if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - User not found - userId: " + userId).build();
+        return getUserBalancesDto(req, resp, context, user, DateUtils.getWeekPeriod(calendar));
     }
 
-    private Response getUserVSBalancesDto(HttpServletRequest req, HttpServletResponse resp, ServletContext context,
-                  UserVS uservs, Interval timePeriod) throws Exception {
-        BalancesDto balancesDto = balancesBean.getBalancesDto(uservs, timePeriod);
+    private Response getUserBalancesDto(HttpServletRequest req, HttpServletResponse resp, ServletContext context,
+                                        User user, Interval timePeriod) throws Exception {
+        BalancesDto balancesDto = balancesBean.getBalancesDto(user, timePeriod);
         return Response.ok().type(MediaTypeVS.JSON).entity(
                 JSON.getMapper().writeValueAsBytes(balancesDto)).build();
     }
 
-    @Path("/userVS/id/{userId}/db")
+    @Path("/user/id/{userId}/db")
     @GET  @Produces(MediaType.APPLICATION_JSON)
-    public Map userVSDB(@PathParam("userId") long userId, @Context ServletContext context,
+    public Map userDB(@PathParam("userId") long userId, @Context ServletContext context,
             @Context HttpServletRequest req, @Context HttpServletResponse resp) {
-        UserVS userVS = dao.find(UserVS.class, userId);
-        if(userVS == null) {
+        User user = dao.find(User.class, userId);
+        if(user == null) {
             throw new NotFoundException("userId: " + userId);
-        } else return accountBean.getAccountsBalanceMap(userVS);
+        } else return accountBean.getAccountsBalanceMap(user);
     }
 
     //data for <balance-weekreport>

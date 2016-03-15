@@ -22,10 +22,10 @@ public class SendTransactionVSPlan {
         File transactionPlan = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("transactionPlan.json"));
         TransactionVSPlanDto transactionVSPlanDto = JSON.getMapper().readValue(transactionPlan, TransactionVSPlanDto.class);
         transactionVSPlanDto.setCurrencyServer(currencyServer);
-        transactionVSPlanDto.runBankVSTransactions();
-        transactionVSPlanDto.runGroupVSTransactions();
-        log.info("bankVSCurrencyResultMap: " + transactionVSPlanDto.getBankVSBalance() + "\n groupVSCurrencyResultMap: " +
-                transactionVSPlanDto.getGroupVSBalance());
+        transactionVSPlanDto.runBankTransactions();
+        transactionVSPlanDto.runGroupTransactions();
+        log.info("bankCurrencyResultMap: " + transactionVSPlanDto.getBankBalance() + "\n groupCurrencyResultMap: " +
+                transactionVSPlanDto.getGroupBalance());
     }
 
 }

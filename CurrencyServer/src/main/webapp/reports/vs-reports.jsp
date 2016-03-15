@@ -5,8 +5,8 @@
         <div class="layout vertical center center-justified" style="max-width:1000px; padding:20px 30px 0px 30px;">
             <div>
                 <div style="margin:20px 0px;">
-                    <a href="/userVS/bankVSList">
-                        ${msg.bankVSListLbl}
+                    <a href="/user/bankList">
+                        ${msg.bankListLbl}
                     </a>
                 </div>
                 <div style="margin:20px 0px;">

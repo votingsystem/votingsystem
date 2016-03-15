@@ -69,7 +69,7 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     @Column(name="message", columnDefinition="TEXT") private String message;
     @Column(name="typeVS") @Enumerated(EnumType.STRING) private TypeVS type;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="userVS") private UserVS userVS;
+    @JoinColumn(name="user") private User user;
     @Column(name="messageBytes") private byte[] messageBytes;
     @OneToOne private CMSMessage cmsMessage;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
@@ -256,12 +256,12 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         this.eventVS = eventVS;
     }
 
-	public UserVS getUserVS() {
-		return userVS;
+	public User getUser() {
+		return user;
 	}
 
-	public ResponseVS setUserVS(UserVS userVS) {
-		this.userVS = userVS;
+	public ResponseVS setUser(User user) {
+		this.user = user;
         return this;
 	}
 

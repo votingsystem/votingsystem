@@ -1,6 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
-import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.*;
 import org.votingsystem.throwable.ExceptionVS;
@@ -37,7 +37,7 @@ public class WebSocketBean {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         CMSMessage cmsMessage = null;
         SocketMessageDto signedMessageDto = null;
-        UserVS signer = null;
+        User signer = null;
         SocketMessageDto responseDto = null;
         switch(messageDto.getOperation()) {
             //Device (authenticated or not) sends message knowing target device id. Target device must be authenticated.
@@ -51,7 +51,7 @@ public class WebSocketBean {
                 break;
             //Authenticated device sends message knowing target device session id. Target device can be authenticated or not.
             case MSG_TO_DEVICE_BY_TARGET_SESSION_ID:
-                if(messageDto.getSession().getUserProperties().get("userVS") == null) {
+                if(messageDto.getSession().getUserProperties().get("user") == null) {
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                             messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
                             messages.get("userNotAuthenticatedErrorMsg"))));
@@ -72,9 +72,9 @@ public class WebSocketBean {
                 }
                 break;
             case INIT_BROWSER_SESSION:
-                DeviceVS browserDevice = new DeviceVS(SessionVSManager.getInstance().getAndIncrementBrowserDeviceId())
-                        .setType(DeviceVS.Type.BROWSER);
-                messageDto.getSession().getUserProperties().put("deviceVS", browserDevice);
+                Device browserDevice = new Device(SessionVSManager.getInstance().getAndIncrementBrowserDeviceId())
+                        .setType(Device.Type.BROWSER);
+                messageDto.getSession().getUserProperties().put("device", browserDevice);
                 SessionVSManager.getInstance().putBrowserDevice(messageDto.getSession());
                 SocketMessageDto response = messageDto.getServerResponse(ResponseVS.SC_OK, null)
                         .setDeviceId(browserDevice.getId().toString()).setMessageType(TypeVS.INIT_BROWSER_SESSION);
@@ -84,46 +84,46 @@ public class WebSocketBean {
                 break;
             case INIT_REMOTE_SIGNED_SESSION:
                 cmsMessage = cmsBean.validateCMS(messageDto.getCMS(), null).getCmsMessage();
-                signer = cmsMessage.getUserVS();
+                signer = cmsMessage.getUser();
                 signedMessageDto = cmsMessage.getSignedContent(SocketMessageDto.class);
                 Session remoteSession = SessionVSManager.getInstance().getNotAuthenticatedSession(signedMessageDto.getSessionId());
                 SessionVSManager.getInstance().putAuthenticatedDevice(remoteSession, signer);
                 remoteSession.getUserProperties().put("remote", true);
                 responseDto = messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK, null)
                         .setSessionId(remoteSession.getId()).setMessageType(TypeVS.INIT_REMOTE_SIGNED_SESSION);
-                responseDto.setConnectedDevice(DeviceVSDto.INIT_AUTHENTICATED_SESSION(signer));
+                responseDto.setConnectedDevice(DeviceDto.INIT_AUTHENTICATED_SESSION(signer));
                 remoteSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
                 dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
                 break;
             case INIT_SIGNED_SESSION:
                 cmsMessage = cmsBean.validateCMS(messageDto.getCMS(), null).getCmsMessage();
-                signer = cmsMessage.getUserVS();
+                signer = cmsMessage.getUser();
                 if(CertificateVS.Type.USER_ID_CARD != signer.getCertificateVS().getType())
                     throw new ExceptionVS("ERROR - ID_CARD signature required");
                 SocketMessageDto dto = cmsMessage.getSignedContent(SocketMessageDto.class);
-                Query query = dao.getEM().createQuery("select d from DeviceVS d where d.userVS.nif =:nif and d.deviceId =:deviceId")
+                Query query = dao.getEM().createQuery("select d from Device d where d.user.nif =:nif and d.deviceId =:deviceId")
                         .setParameter("nif", signer.getNif()).setParameter("deviceId", dto.getDeviceId());
-                DeviceVS deviceVS = dao.getSingleResult(DeviceVS.class, query);
-                if(deviceVS != null) {
-                    signer.setDeviceVS(deviceVS);
+                Device device = dao.getSingleResult(Device.class, query);
+                if(device != null) {
+                    signer.setDevice(device);
                     messageDto.getSession().getUserProperties().put("remote", false);
                     SessionVSManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer);
                     responseDto = messageDto.getServerResponse(
                             ResponseVS.SC_WS_CONNECTION_INIT_OK, null).setMessageType(TypeVS.INIT_SIGNED_SESSION);
-                    query = dao.getEM().createQuery("select t from UserVSToken t where t.userVS =:userVS and t.state =:state")
-                            .setParameter("userVS", signer).setParameter("state", UserVSToken.State.OK);
-                    UserVSToken token = dao.getSingleResult(UserVSToken.class, query);
+                    query = dao.getEM().createQuery("select t from UserToken t where t.user =:user and t.state =:state")
+                            .setParameter("user", signer).setParameter("state", UserToken.State.OK);
+                    UserToken token = dao.getSingleResult(UserToken.class, query);
                     if(token != null) {
                         byte[] userToken = cmsBean.decryptCMS(token.getToken());
                         responseDto.setMessage(new String(userToken));
                     }
-                    responseDto.setConnectedDevice(DeviceVSDto.INIT_AUTHENTICATED_SESSION(signer));
+                    responseDto.setConnectedDevice(DeviceDto.INIT_AUTHENTICATED_SESSION(signer));
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
                     dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
                 } else {
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                             messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
-                            messages.get("certWithoutDeviceVSInfoErrorMsg"))));
+                            messages.get("certWithoutDeviceInfoErrorMsg"))));
                 }
                 break;
             case WEB_SOCKET_BAN_SESSION:

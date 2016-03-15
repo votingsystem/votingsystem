@@ -47,10 +47,10 @@
                     <div hidden="{{!isReceptorVisible}}" style="margin:20px 0px 0px 20px;">
                         <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold;color: #621">{{receptorLbl}}</div>
                         <div hidden="{{receptorMsg}}">
-                            <div><b>${msg.nameLbl}: </b> <span>{{transactionvs.toUserVS.name}}</span></div>
+                            <div><b>${msg.nameLbl}: </b> <span>{{transactionvs.toUserName.name}}</span></div>
                             <div class="horizontal layout">
                                 <b>${msg.IBANLbl}: </b>
-                                <div on-click="showToUserIBAN" class="IBANLink">{{transactionvs.toUserVS.iban}}</div>
+                                <div on-click="showToUserIBAN" class="IBANLink">{{transactionvs.toUserName.iban}}</div>
                             </div>
                         </div>
                     </div >
@@ -101,19 +101,19 @@
             },
             getFromUserName: function (transactionvs) {
                 var result
-                if(transactionvs.fromUserVS) {
-                    if(transactionvs.fromUserVS.sender != null && transactionvs.fromUserVS.sender.fromUser != null)
-                        result = transactionvs.fromUserVS.sender.fromUser
-                    else result = transactionvs.fromUserVS.name
+                if(transactionvs.fromUserName) {
+                    if(transactionvs.fromUserName.sender != null && transactionvs.fromUserName.sender.fromUserName != null)
+                        result = transactionvs.fromUserName.sender.fromUserName
+                    else result = transactionvs.fromUserName.name
                 }
                 return result
             },
             getFromUserIBAN: function (transactionvs) {
                 var result
-                if(transactionvs.fromUserVS) {
-                    if(transactionvs.fromUserVS.sender != null && transactionvs.fromUserVS.sender.fromUserIBAN != null)
-                        result = transactionvs.fromUserVS.sender.fromUserIBAN
-                    else result = transactionvs.fromUserVS.iban
+                if(transactionvs.fromUserName) {
+                    if(transactionvs.fromUserName.sender != null && transactionvs.fromUserName.sender.fromUserIBAN != null)
+                        result = transactionvs.fromUserName.sender.fromUserIBAN
+                    else result = transactionvs.fromUserName.iban
                 }
                 return result
             },
@@ -127,16 +127,16 @@
                 console.log(this.tagName + " - transactionvsChanged - transactionvs.cmsMessageURL: " +
                         this.transactionvs.cmsMessageURL)
                 switch (this.transactionvs.type) {
-                    case 'FROM_USERVS':
-                        this.caption = "${msg.transactionVSFromUserVS}"
+                    case 'FROM_USER':
+                        this.caption = "${msg.transactionVSFromUser}"
                         break;
-                    case 'FROM_BANKVS':
-                        this.caption = "${msg.transactionVSFromBankVS}"
+                    case 'FROM_BANK':
+                        this.caption = "${msg.transactionVSFromBank}"
                         break;
                     case 'FROM_GROUP_TO_ALL_MEMBERS':
                         this.isReceptorVisible = false
                         this.caption = "${msg.transactionVSFromGroupToAllMembers}"
-                        this.receptorMsg = "${msg.transactionVSGroupVSReceptorsMsg}".format(
+                        this.receptorMsg = "${msg.transactionVSGroupReceptorsMsg}".format(
                                 this.transactionvs.numChildTransactions)
                         break;
                     case 'FROM_GROUP_TO_MEMBER_GROUP':
@@ -155,8 +155,8 @@
                         this.isSenderVisible = false
                         this.isReceptorVisible = false
                         break;
-                    case 'FROM_BANKVS':
-                        this.caption = "${msg.transactionVSFromBankVS}"
+                    case 'FROM_BANK':
+                        this.caption = "${msg.transactionVSFromBank}"
                         break;
                     default:
                         this.caption = this.transactionvs.type
@@ -166,19 +166,19 @@
                 this.timeStampDate = this.getDate(this.transactionvs.dateCreated)
             },
             showToUserInfo:function(e) {
-                var groupURL = vs.contextURL + "/rest/groupVS/" + this.transactionvs.toUserVS.id
+                var groupURL = vs.contextURL + "/rest/group/" + this.transactionvs.toUserName.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },
             showFromUserInfo:function(group) {
-                var groupURL = vs.contextURL + "/rest/groupVS/" +  this.transactionvs.fromUserVS.id
+                var groupURL = vs.contextURL + "/rest/group/" +  this.transactionvs.fromUserName.id
                 console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showFromUserIBAN:function(e) {
-                var serviceURL = vs.contextURL + "/rest/userVS/IBAN/" + this.getFromUserIBAN(this.transactionvs)
+                var serviceURL = vs.contextURL + "/rest/user/IBAN/" + this.getFromUserIBAN(this.transactionvs)
                 window.open(serviceURL, '_blank');
             },
             showToUserIBAN:function(e) {
-                var serviceURL = vs.contextURL + "/rest/userVS/IBAN/" + this.transactionvs.toUserVS.iban
+                var serviceURL = vs.contextURL + "/rest/user/IBAN/" + this.transactionvs.toUserName.iban
                 window.open(serviceURL, '_blank');
             },
             checkReceipt: function() {

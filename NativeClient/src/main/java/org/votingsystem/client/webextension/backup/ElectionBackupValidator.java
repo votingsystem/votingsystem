@@ -7,7 +7,7 @@ import org.votingsystem.dto.voting.RepresentativeData;
 import org.votingsystem.dto.voting.RepresentativesData;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.FieldEventVS;
+import org.votingsystem.model.voting.FieldEvent;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.DocumentVSValidator;
@@ -107,7 +107,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
             metaInf.loadRepresentativeData(representativeDataMap);
             eventURL= EventVS.getURL(TypeVS.VOTING_EVENT, metaInf.getServerURL(), metaInf.getId());
         }
-        for(FieldEventVS option : metaInf.getOptionList()) {
+        for(FieldEvent option : metaInf.getOptionList()) {
             optionsMap.put(option.getId(), 0L);
         }
         
@@ -390,7 +390,7 @@ public class ElectionBackupValidator implements BackupValidator<ResponseVS> {
             statusCode = ResponseVS.SC_ERROR;
             errorList.add(ContextVS.getMessage("numVotesResultErrorMsg", metaInf.getNumVotes(), numVotesOK));
         }
-        for(FieldEventVS option : metaInf.getOptionList()) {
+        for(FieldEvent option : metaInf.getOptionList()) {
             if(option.getNumVotesResult().longValue() != optionsMap.get(option.getId()).longValue()) {
                 statusCode = ResponseVS.SC_ERROR;
                 errorList.add(ContextVS.getMessage("numVotesOptionErrorMsg", option.getContent(),

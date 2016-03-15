@@ -3,7 +3,7 @@ package org.votingsystem.web.accesscontrol.ejb;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.AccessRequest;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.throwable.ExceptionVS;
@@ -30,11 +30,11 @@ public class AccessRequestBean {
 
     @Transactional
     public CsrResponse saveRequest(CMSMessage cmsMessage, byte[] csr) throws Exception {
-        UserVS signer = cmsMessage.getUserVS();
+        User signer = cmsMessage.getUser();
         AccessRequestDto request =  cmsMessage.getSignedContent(AccessRequestDto.class);
         validateAccessRequest(request, signer.getTimeStampToken().getTimeStampInfo().getGenTime());
-        Query query = dao.getEM().createQuery("select a from AccessRequest a where a.userVS =:userVS and " +
-                "a.eventVS =:eventVS and a.state =:state").setParameter("userVS", signer)
+        Query query = dao.getEM().createQuery("select a from AccessRequest a where a.user =:user and " +
+                "a.eventVS =:eventVS and a.state =:state").setParameter("user", signer)
                 .setParameter("eventVS", request.getEventVS()).setParameter("state", AccessRequest.State.OK);
         AccessRequest accessRequest = dao.getSingleResult(AccessRequest.class, query);
         if (accessRequest != null){
@@ -46,7 +46,7 @@ public class AccessRequestBean {
             request.setAccessRequest(accessRequest);
             CsrResponse csrResponse = null;
             try {
-                if(signer.getType() == UserVS.Type.REPRESENTATIVE) {
+                if(signer.getType() == User.Type.REPRESENTATIVE) {
                     csrResponse = csrBean.signRepresentativeCertVote(csr, request.getEventVS(), signer);
                 } else csrResponse = csrBean.signCertVote(csr, request.getEventVS());
             } catch (Exception ex) {

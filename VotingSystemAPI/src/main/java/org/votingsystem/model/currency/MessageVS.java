@@ -1,7 +1,7 @@
 package org.votingsystem.model.currency;
 
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.TypeVS;
 
@@ -32,8 +32,8 @@ public class MessageVS extends EntityVS implements Serializable {
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @Column(name="content") private byte[] content;
     
-    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="fromUserVS") private UserVS fromUserVS;
-    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="toUserVS") private UserVS toUserVS;
+    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="fromUser") private User fromUser;
+    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="toUser") private User toUser;
 
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23, insertable=true) private Date lastUpdated;
@@ -97,20 +97,20 @@ public class MessageVS extends EntityVS implements Serializable {
         this.reason = reason;
     }
 
-    public UserVS getFromUserVS() {
-        return fromUserVS;
+    public User getFromUser() {
+        return fromUser;
     }
 
-    public void setFromUserVS(UserVS fromUserVS) {
-        this.fromUserVS = fromUserVS;
+    public void setFromUser(User fromUser) {
+        this.fromUser = fromUser;
     }
 
-    public UserVS getToUserVS() {
-        return toUserVS;
+    public User getToUser() {
+        return toUser;
     }
 
-    public void setToUserVS(UserVS toUserVS) {
-        this.toUserVS = toUserVS;
+    public void setToUser(User toUser) {
+        this.toUser = toUser;
     }
 
     public CMSMessage getSenderCMSMessage() {

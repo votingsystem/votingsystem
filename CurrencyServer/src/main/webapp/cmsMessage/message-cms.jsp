@@ -27,7 +27,7 @@
                     <div style="font-size: 1.1em; text-decoration: underline;font-weight: bold; margin:10px 0px 0px 0px;color: #621;">
                         ${msg.senderLbl}</div>
                     <div id="fromUserDiv">
-                        <div><b>${msg.nameLbl}:</b> <span>{{messageContent.fromUserVS.name}}</span></div>
+                        <div><b>${msg.nameLbl}:</b> <span>{{messageContent.fromUserName.name}}</span></div>
                         <div> <b>${msg.IBANLbl}:</b>
                             <span on-click="showByUserIBAN" class="iban-link">{{messageContent.fromUserIBAN}}</span></div>
                     </div>
@@ -79,8 +79,8 @@
                     this.receptorLbl = '${msg.receptorsLbl}'
                 } else this.receptorLbl = '${msg.receptorLbl}'
                 switch (this.cmsMessageContent.operation) {
-                    case 'FROM_BANKVS':
-                        this.caption = "${msg.transactionVSFromBankVS}"
+                    case 'FROM_BANK':
+                        this.caption = "${msg.transactionVSFromBank}"
                         break;
                     case 'FROM_GROUP_TO_ALL_MEMBERS':
                         this.isReceptorVisible = false
@@ -94,7 +94,7 @@
                         this.$.fromUserDiv.innerHTML = "${msg.systemLbl}"
                         this.$.fromUserDiv.classList.add("systemLbl");
                         this.cmsMessageContent.toUserIBAN  = []
-                        this.cmsMessageContent.toUserIBAN .push(this.cmsMessageContent.toUser.iban)
+                        this.cmsMessageContent.toUserIBAN .push(this.cmsMessageContent.toUserName.iban)
                         this.cmsMessageContent.subject = this.cmsMessageContent.tag
                         break;
                     case 'CURRENCY':
@@ -106,8 +106,8 @@
                         this.toUserName = this.cmsMessageContent.toUserName
                         this.receptorLbl = '${msg.receptorLbl}'
                         break;
-                    case 'FROM_USERVS':
-                        this.caption = "${msg.transactionVSFromUserVS}"
+                    case 'FROM_USER':
+                        this.caption = "${msg.transactionVSFromUser}"
                         break;
                     default:
                         this.caption = this.cmsMessageContent.operation
@@ -116,22 +116,22 @@
                 this.messageContent = this.cmsMessageContent
             },
             showToUserInfo:function(e) {
-                var groupURL = vs.contextURL + "/rest/groupVS/" + e.model.item.toUserVS.id
+                var groupURL = vs.contextURL + "/rest/group/" + e.model.item.toUserName.id
                 console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
             },
             showFromUserInfo:function(group) {
-                var groupURL = vs.contextURL + "/rest/groupVS/" +  e.model.item.fromUserVS.id
+                var groupURL = vs.contextURL + "/rest/group/" +  e.model.item.fromUserName.id
                 console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showInfoIBAN:function(e) {
-                var fromUserIBANInfoURL = vs.contextURL + "/rest/IBAN/from/" + e.model.item.fromUserVS.sender.fromUserIBAN
+                var fromUserIBANInfoURL = vs.contextURL + "/rest/IBAN/from/" + e.model.item.fromUserName.sender.fromUserIBAN
                 console.log(this.tagName + " - showInfoIBAN - fromUserIBANInfoURL: " + fromUserIBANInfoURL)
             },
             showByUserIBAN:function(e) {
                 console.log(this.tagName + " - showByUserIBAN - " + e)
                 if(e.model) IBAN = e.model.IBAN
                 else IBAN = e.target.innerText
-                window.open(vs.contextURL + "/#!" + vs.contextURL + "/rest/userVS/IBAN/" + IBAN, "_blank")
+                window.open(vs.contextURL + "/#!" + vs.contextURL + "/rest/user/IBAN/" + IBAN, "_blank")
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_CMS)

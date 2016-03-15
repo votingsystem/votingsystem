@@ -3,7 +3,7 @@ package org.votingsystem.web.controlcenter.jaxrs;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.EncryptedMsgDto;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
@@ -65,11 +65,11 @@ public class EncryptorResource {
     @Path("/validateTimeStamp") @POST
     public Response validateTimeStamp(CMSMessage cmsMessage, @Context ServletContext context,
                                       @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        UserVS userVS = cmsMessage.getUserVS();
+        User user = cmsMessage.getUser();
         //Date dateFinish = DateUtils.getDateFromString("2014-01-01 00:00:00")
         Map requestMap = cmsMessage.getSignedContent(Map.class);
         EventVS eventVS = dao.find(EventVS.class, ((Number)requestMap.get("eventId")).longValue());
-        Date signatureTime = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
+        Date signatureTime = user.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(!eventVS.isActive(signatureTime)) {
             return Response.status(Response.Status.BAD_REQUEST).entity(messages.get("checkedDateRangeErrorMsg",
                     signatureTime, eventVS.getDateBegin(), eventVS.getDateFinish())).build();

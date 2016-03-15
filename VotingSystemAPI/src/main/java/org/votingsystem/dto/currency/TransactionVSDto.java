@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Sets;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
@@ -27,15 +27,15 @@ public class TransactionVSDto {
     private TypeVS operation;
     private Long id;
     private Long userId;
-    private UserVSDto fromUserVS;
-    private UserVSDto toUserVS;
+    private UserDto fromUser;
+    private UserDto toUser;
     private Date validTo;
     private Date dateCreated;
     private String subject;
     private String description;
     private String currencyCode;
-    private String fromUser;
-    private String toUser;
+    private String fromUserName;
+    private String toUserName;
     private String fromUserIBAN;
     private String receipt;
     private String bankIBAN;
@@ -51,13 +51,13 @@ public class TransactionVSDto {
     private Set<String> toUserIBAN = null;
     private Long numChildTransactions;
 
-    private UserVS.Type userToType;
+    private User.Type userToType;
     private List<TransactionVS.Type> paymentOptions;
     private TransactionVSDetailsDto details;
 
-    @JsonIgnore private List<UserVS> toUserVSList;
-    @JsonIgnore private UserVS signer;
-    @JsonIgnore private UserVS receptor;
+    @JsonIgnore private List<User> toUserList;
+    @JsonIgnore private User signer;
+    @JsonIgnore private User receptor;
     @JsonIgnore private CMSMessage cmsMessage_DB;
 
 
@@ -65,13 +65,13 @@ public class TransactionVSDto {
 
     public TransactionVSDto(TransactionVS transactionVS) {
         this.setId(transactionVS.getId());
-        if(transactionVS.getFromUserVS() != null) {
-            this.setFromUserVS(UserVSDto.BASIC(transactionVS.getFromUserVS()));
+        if(transactionVS.getFromUser() != null) {
+            this.setFromUser(UserDto.BASIC(transactionVS.getFromUser()));
         }
         fromUserIBAN = transactionVS.getFromUserIBAN();
-        fromUser = transactionVS.getFromUser();
-        if(transactionVS.getToUserVS() != null) {
-            this.setToUserVS(UserVSDto.BASIC(transactionVS.getToUserVS()));
+        fromUserName = transactionVS.getFromUserName();
+        if(transactionVS.getToUser() != null) {
+            this.setToUser(UserDto.BASIC(transactionVS.getToUser()));
         }
         this.setValidTo(transactionVS.getValidTo());
         this.setDateCreated(transactionVS.getDateCreated());
@@ -89,12 +89,12 @@ public class TransactionVSDto {
         }
     }
 
-    public static TransactionVSDto PAYMENT_REQUEST(String toUser, UserVS.Type userToType, BigDecimal amount,
-               String currencyCode, String toUserIBAN, String subject, String tag) {
+    public static TransactionVSDto PAYMENT_REQUEST(String toUser, User.Type userToType, BigDecimal amount,
+                                                   String currencyCode, String toUserIBAN, String subject, String tag) {
         TransactionVSDto dto = new TransactionVSDto();
         dto.setOperation(TypeVS.TRANSACTIONVS_INFO);
         dto.setUserToType(userToType);
-        dto.setToUser(toUser);
+        dto.setToUserName(toUser);
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);
         dto.setSubject(subject);
@@ -110,7 +110,7 @@ public class TransactionVSDto {
         TransactionVSDto dto = new TransactionVSDto();
         dto.setOperation(TypeVS.CURRENCY_SEND);
         dto.setSubject(subject);
-        dto.setToUser(toUser);
+        dto.setToUserName(toUser);
         dto.setAmount(amount);
         dto.setToUserIBAN(Sets.newHashSet(toUserIBAN));
         dto.setTags(Sets.newHashSet(tag));
@@ -120,11 +120,11 @@ public class TransactionVSDto {
         return dto;
     }
 
-    public static TransactionVSDto BASIC(String toUser, UserVS.Type userToType, BigDecimal amount,
-                 String currencyCode, String toUserIBAN, String subject, String tag) {
+    public static TransactionVSDto BASIC(String toUser, User.Type userToType, BigDecimal amount,
+                                         String currencyCode, String toUserIBAN, String subject, String tag) {
         TransactionVSDto dto = new TransactionVSDto();
         dto.setUserToType(userToType);
-        dto.setToUser(toUser);
+        dto.setToUserName(toUser);
         dto.setAmount(amount);
         dto.setCurrencyCode(currencyCode);
         dto.setSubject(subject);
@@ -150,15 +150,15 @@ public class TransactionVSDto {
     public TransactionVS getTransactionVS(TagVS tagVS) throws Exception {
         TransactionVS transactionVS = new TransactionVS();
         transactionVS.setId(id);
-        transactionVS.setFromUser(fromUser);
+        transactionVS.setFromUserName(fromUserName);
         transactionVS.setUserId(getUserId());
         transactionVS.setType(type);
-        if(toUserVS != null) {
-            transactionVS.setToUserVS(toUserVS.getUserVS());
+        if(toUser != null) {
+            transactionVS.setToUser(toUser.getUser());
         }
         transactionVS.setFromUserIBAN(fromUserIBAN);
-        if(fromUserVS != null) {
-            transactionVS.setFromUserVS(fromUserVS.getUserVS());
+        if(fromUser != null) {
+            transactionVS.setFromUser(fromUser.getUser());
         }
         transactionVS.setTag(tagVS);
         transactionVS.setIsTimeLimited(timeLimited);
@@ -171,13 +171,13 @@ public class TransactionVSDto {
     }
 
     @JsonIgnore
-    public TransactionVS getTransactionVS(UserVS fromUserVS, UserVS toUserVS,
-                  Map<CurrencyAccount, BigDecimal> accountFromMovements, TagVS tagVS) throws Exception {
+    public TransactionVS getTransactionVS(User fromUser, User toUser,
+                                          Map<CurrencyAccount, BigDecimal> accountFromMovements, TagVS tagVS) throws Exception {
         TransactionVS transactionVS = new TransactionVS();
-        transactionVS.setFromUserVS(fromUserVS);
-        transactionVS.setFromUserIBAN(fromUserVS.getIBAN());
-        transactionVS.setToUserVS(toUserVS);
-        if(toUserVS != null) transactionVS.setToUserIBAN(toUserVS.getIBAN());
+        transactionVS.setFromUser(fromUser);
+        transactionVS.setFromUserIBAN(fromUser.getIBAN());
+        transactionVS.setToUser(toUser);
+        if(toUser != null) transactionVS.setToUserIBAN(toUser.getIBAN());
         transactionVS.setType(getType());
         transactionVS.setAccountFromMovements(accountFromMovements);
         transactionVS.setAmount(amount);
@@ -198,20 +198,20 @@ public class TransactionVSDto {
         this.id = id;
     }
 
-    public UserVSDto getFromUserVS() {
-        return fromUserVS;
+    public UserDto getFromUser() {
+        return fromUser;
     }
 
-    public void setFromUserVS(UserVSDto fromUserVS) {
-        this.fromUserVS = fromUserVS;
+    public void setFromUser(UserDto fromUser) {
+        this.fromUser = fromUser;
     }
 
-    public UserVSDto getToUserVS() {
-        return toUserVS;
+    public UserDto getToUser() {
+        return toUser;
     }
 
-    public void setToUserVS(UserVSDto toUserVS) {
-        this.toUserVS = toUserVS;
+    public void setToUser(UserDto toUser) {
+        this.toUser = toUser;
     }
 
     public Date getValidTo() {
@@ -320,12 +320,12 @@ public class TransactionVSDto {
         this.currencyCode = currencyCode;
     }
 
-    public String getFromUser() {
-        return fromUser;
+    public String getFromUserName() {
+        return fromUserName;
     }
 
-    public void setFromUser(String fromUser) {
-        this.fromUser = fromUser;
+    public void setFromUserName(String fromUserName) {
+        this.fromUserName = fromUserName;
     }
 
     public String getFromUserIBAN() {
@@ -344,13 +344,13 @@ public class TransactionVSDto {
         this.numReceptors = numReceptors;
     }
 
-    public List<UserVS> getToUserVSList() {
-        return toUserVSList;
+    public List<User> getToUserList() {
+        return toUserList;
     }
 
-    public void setToUserVSList(List<UserVS> toUserVSList) {
-        this.toUserVSList = toUserVSList;
-        this.numReceptors = toUserVSList.size();
+    public void setToUserList(List<User> toUserList) {
+        this.toUserList = toUserList;
+        this.numReceptors = toUserList.size();
     }
 
 
@@ -367,19 +367,19 @@ public class TransactionVSDto {
         this.toUserIBAN = toUserIBAN;
     }
 
-    public UserVS getSigner() {
+    public User getSigner() {
         return signer;
     }
 
-    public void setSigner(UserVS signer) {
+    public void setSigner(User signer) {
         this.signer = signer;
     }
 
-    public UserVS getReceptor() {
+    public User getReceptor() {
         return receptor;
     }
 
-    public void setReceptor(UserVS receptor) {
+    public void setReceptor(User receptor) {
         this.receptor = receptor;
     }
 
@@ -389,26 +389,26 @@ public class TransactionVSDto {
 
     public void setCmsMessage_DB(CMSMessage cmsMessage_DB) {
         this.cmsMessage_DB = cmsMessage_DB;
-        this.signer = cmsMessage_DB.getUserVS();
+        this.signer = cmsMessage_DB.getUser();
     }
 
     public String getUUID() {
         return UUID;
     }
 
-    public void loadBankVSTransaction(String UUID) {
+    public void loadBankTransaction(String UUID) {
         setUUID(UUID);
-        if((toUserIBAN == null || toUserIBAN.isEmpty()) && toUserVS != null) {
-            toUserIBAN = Sets.newHashSet(toUserVS.getIBAN());
-            toUserVS = null;
+        if((toUserIBAN == null || toUserIBAN.isEmpty()) && toUser != null) {
+            toUserIBAN = Sets.newHashSet(toUser.getIBAN());
+            toUser = null;
         }
     }
 
-    public TransactionVSDto getGroupVSChild(String receptorNIF, BigDecimal receptorPart, Integer numReceptors,
-                String contextURL) {
+    public TransactionVSDto getGroupChild(String receptorNIF, BigDecimal receptorPart, Integer numReceptors,
+                                          String contextURL) {
         TransactionVSDto dto =  new TransactionVSDto();
         dto.setOperation(operation);
-        dto.setToUser(receptorNIF);
+        dto.setToUserName(receptorNIF);
         dto.setAmount(receptorPart);
         dto.setCmsMessageParentURL(contextURL + "/rest/cmsMessage/id/" + cmsMessage_DB.getId());
         dto.setNumReceptors(numReceptors);
@@ -435,12 +435,12 @@ public class TransactionVSDto {
         this.userId = userId;
     }
 
-    public String getToUser() {
-        return toUser;
+    public String getToUserName() {
+        return toUserName;
     }
 
-    public void setToUser(String toUser) {
-        this.toUser = toUser;
+    public void setToUserName(String toUserName) {
+        this.toUserName = toUserName;
     }
 
     public String getCmsMessageParentURL() {
@@ -451,11 +451,11 @@ public class TransactionVSDto {
         this.cmsMessageParentURL = cmsMessageParentURL;
     }
 
-    public UserVS.Type getUserToType() {
+    public User.Type getUserToType() {
         return userToType;
     }
 
-    public void setUserToType(UserVS.Type userToType) {
+    public void setUserToType(User.Type userToType) {
         this.userToType = userToType;
     }
 
@@ -470,8 +470,8 @@ public class TransactionVSDto {
     public String validateReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
         TransactionVSDto dto = cmsMessage.getSignedContent(TransactionVSDto.class);
         switch(dto.getOperation()) {
-            case FROM_USERVS:
-                return validateFromUserVSReceipt(cmsMessage, isIncome);
+            case FROM_USER:
+                return validateFromUserReceipt(cmsMessage, isIncome);
             case CURRENCY_SEND:
                 return validateCurrencySendReceipt(cmsMessage, isIncome);
             case CURRENCY_CHANGE:
@@ -502,7 +502,7 @@ public class TransactionVSDto {
                 receiptDto.getCurrencyCode(), receiptDto.getTag());
     }
 
-    private String validateFromUserVSReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
+    private String validateFromUserReceipt(CMSSignedMessage cmsMessage, boolean isIncome) throws Exception {
         TransactionVSDto receiptDto = cmsMessage.getSignedContent(TransactionVSDto.class);
         if(type == TransactionVS.Type.TRANSACTIONVS_INFO) {
             if(!paymentOptions.contains(receiptDto.getType())) throw new ValidationExceptionVS("unexpected type " +
@@ -516,8 +516,8 @@ public class TransactionVSDto {
                 "expected toUserIBAN " + toUserIBAN + " found " + receiptDto.getToUserIBAN());
         if(!subject.equals(receiptDto.getSubject())) throw new ValidationExceptionVS("expected subject " + subject +
                 " found " + receiptDto.getSubject());
-        if(!toUser.equals(receiptDto.getToUser())) throw new ValidationExceptionVS(
-                "expected toUser " + toUser + " found " + receiptDto.getToUser());
+        if(!toUserName.equals(receiptDto.getToUserName())) throw new ValidationExceptionVS(
+                "expected toUserName " + toUserName + " found " + receiptDto.getToUserName());
         if(amount.compareTo(receiptDto.getAmount()) != 0) throw new ValidationExceptionVS(
                 "expected amount " + amount + " amount " + receiptDto.getAmount());
         if(!currencyCode.equals(receiptDto.getCurrencyCode())) throw new ValidationExceptionVS(
@@ -527,7 +527,7 @@ public class TransactionVSDto {
         if(details != null && !details.equals(receiptDto.getDetails())) throw new ValidationExceptionVS(
                 "expected details " + details + " found " + receiptDto.getDetails());
         String action = isIncome ? ContextVS.getMessage("income_lbl"): ContextVS.getMessage("expense_lbl");
-        return ContextVS.getMessage("from_uservs_receipt_ok_msg", action, receiptDto.getAmount() + " " +
+        return ContextVS.getMessage("from_user_receipt_ok_msg", action, receiptDto.getAmount() + " " +
                 receiptDto.getCurrencyCode(), receiptDto.getTagName());
     }
 

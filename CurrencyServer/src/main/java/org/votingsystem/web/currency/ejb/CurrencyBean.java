@@ -6,7 +6,7 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.*;
 import org.votingsystem.model.BatchVS;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.CurrencyBatch;
@@ -53,7 +53,8 @@ public class CurrencyBean {
     @Inject DAOBean dao;
     @Inject TransactionVSBean transactionVSBean;
     @Inject CMSBean cmsBean;
-    @Inject UserVSBean userVSBean;
+    @Inject
+    UserBean userBean;
     @Inject CSRBean csrBean;
     @Inject WalletBean walletBean;
     @Inject TimeStampBean timeStampBean;
@@ -96,9 +97,9 @@ public class CurrencyBean {
                     new String(PEMUtils.getPEMEncoded(currencyChange.getX509AnonymousCert())));
         } else {
             Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", batchDto.getToUserIBAN());
-            UserVS toUserVS = dao.getSingleResult(UserVS.class, query);
-            currencyBatch.setToUserVS(toUserVS);
-            if(toUserVS == null) throw new ExceptionVS("CurrencyTransactionBatch:" + currencyBatch.getBatchUUID() +
+            User toUser = dao.getSingleResult(User.class, query);
+            currencyBatch.setToUser(toUser);
+            if(toUser == null) throw new ExceptionVS("CurrencyTransactionBatch:" + currencyBatch.getBatchUUID() +
                     " has wrong receptor IBAN '" + batchDto.getToUserIBAN());
             String leftOverCert = null;
             if(batchDto.getLeftOverPKCS10() != null) {
@@ -112,7 +113,7 @@ public class CurrencyBean {
             dao.persist(currencyBatch.setCmsMessage(cmsMessage).setState(BatchVS.State.OK));
             log.info("currencyBatch:" + currencyBatch.getId() + " - cmsMessage:" + cmsMessage.getId());
             TransactionVS transactionVS = dao.persist(TransactionVS.CURRENCY_SEND(
-                    currencyBatch, toUserVS, validTo, cmsMessage, currencyBatch.getTagVS()));
+                    currencyBatch, toUser, validTo, cmsMessage, currencyBatch.getTagVS()));
             currencyBatch.setValidatedCurrencySet(validatedCurrencySet);
             transactionVSBean.updateCurrencyAccounts(transactionVS.setCurrencyBatch(currencyBatch));
             for(Currency currency : validatedCurrencySet) {
@@ -120,7 +121,7 @@ public class CurrencyBean {
             }
             CurrencyBatchResponseDto responseDto = new CurrencyBatchResponseDto(receipt, leftOverCert);
             responseDto.setMessage(messages.get("currencyBatchOKMsg", batchDto.getBatchAmount() + " " +
-                    batchDto.getCurrencyCode(), toUserVS.getFullName()));
+                    batchDto.getCurrencyCode(), toUser.getFullName()));
             return responseDto;
         }
     }
@@ -138,10 +139,10 @@ public class CurrencyBean {
             throw new CurrencyExpendedException(currency.getHashCertVS());
         } else if(currencyDB.getState() == Currency.State.OK) {
             currency = currencyDB.checkRequestWithDB(currency);
-            UserVS userVS = cmsMessage.getSigner(); //anonymous signer
-            timeStampBean.validateToken(userVS.getTimeStampToken());
+            User user = cmsMessage.getSigner(); //anonymous signer
+            timeStampBean.validateToken(user.getTimeStampToken());
             PKIXCertPathValidatorResult certValidatorResult = CertUtils.verifyCertificate(
-                    cmsBean.getCurrencyAnchors(), false, Arrays.asList(userVS.getCertificate()));
+                    cmsBean.getCurrencyAnchors(), false, Arrays.asList(user.getCertificate()));
             X509Certificate certCaResult = certValidatorResult.getTrustAnchor().getTrustedCert();
         } else  throw new ExceptionVS(messages.get("currencyStateErrorMsg", currencyDB.getId().toString(),
                 currencyDB.getState().toString()));
@@ -151,10 +152,10 @@ public class CurrencyBean {
 
     public ResultListDto<String> processCurrencyRequest(CurrencyRequestDto requestDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS fromUserVS = requestDto.getCmsMessage().getUserVS();
+        User fromUser = requestDto.getCmsMessage().getUser();
         //check cash available for user
         Map<CurrencyAccount, BigDecimal> accountFromMovements = walletBean.getAccountMovementsForTransaction(
-                fromUserVS.getIBAN(), requestDto.getTagVS(), requestDto.getTotalAmount(), requestDto.getCurrencyCode());
+                fromUser.getIBAN(), requestDto.getTagVS(), requestDto.getTotalAmount(), requestDto.getCurrencyCode());
         Set<String> currencyCertSet = csrBean.signCurrencyRequest(requestDto);
         TransactionVS userTransaction = TransactionVS.CURRENCY_REQUEST(messages.get("currencyRequestLbl"),
                 accountFromMovements, requestDto);

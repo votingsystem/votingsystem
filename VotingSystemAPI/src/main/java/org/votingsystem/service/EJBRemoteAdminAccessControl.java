@@ -1,15 +1,15 @@
 package org.votingsystem.service;
 
 
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.Actor;
 import org.votingsystem.model.KeyStoreVS;
 
 public interface EJBRemoteAdminAccessControl {
 
     public void generateBackup(Long eventId) throws Exception;
     public byte[] generateUserKeyStore(String givenName, String surname, String nif, char[] password) throws Exception;
-    public byte[] generateServerKeyStore(ActorVS.Type type, String givenName, String keyAlias, String nif,
-           char[] password, KeyStoreVS keyStoreVS) throws Exception;
+    public byte[] generateServerKeyStore(Actor.Type type, String givenName, String keyAlias, String nif,
+                                         char[] password, KeyStoreVS keyStoreVS) throws Exception;
     public String validateCSR(String nif, String deviceId) throws Exception;
 
 }

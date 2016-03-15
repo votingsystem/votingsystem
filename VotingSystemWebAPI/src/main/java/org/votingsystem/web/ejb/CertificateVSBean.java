@@ -4,7 +4,7 @@ import org.votingsystem.dto.MessageDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.PEMUtils;
@@ -74,7 +74,7 @@ public class CertificateVSBean {
         String certChainPEM, info, description;
         CertificateVS.State changeCertToState;
         TypeVS operation;
-        UserVS signer;
+        User signer;
         Long serialNumber;
 
         public CertificateVSRequest() { }

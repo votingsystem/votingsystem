@@ -54,8 +54,8 @@
                 return new Date(dateStamp).getDayWeekFormat()
             },
             getClass: function(transactionvs) {
-                if(!this.isUserVSTable) return
-                if(transactionvs.fromUserVS && transactionvs.fromUserVS.nif == this.userNif) {
+                if(!this.isUserTable) return
+                if(transactionvs.fromUserName && transactionvs.fromUserName.nif == this.userNif) {
                     return "expenseTrans"
                 } else return ""
             },
@@ -67,10 +67,10 @@
             transactionDescription: function(transactionvs) {
                 var result = null
                 if(this.userNif) {
-                    if(transactionvs.fromUserVS && transactionvs.fromUserVS.nif == this.userNif) {
+                    if(transactionvs.fromUserName && transactionvs.fromUserName.nif == this.userNif) {
                         result = "${msg.spendingLbl} - "
                     }
-                    if(transactionvs.toUserVS && transactionvs.toUserVS.nif == this.userNif) {
+                    if(transactionvs.toUserName && transactionvs.toUserName.nif == this.userNif) {
                         result = result? result + "${msg.incomeLbl} - " : "${msg.incomeLbl} - "
                     }
                 }

@@ -3,7 +3,7 @@ package org.votingsystem.dto.voting;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.FieldEventVS;
+import org.votingsystem.model.voting.FieldEvent;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
@@ -30,7 +30,7 @@ public class MetaInf {
     private BackupData BACKUP;
 
     private List<String> errorsList;
-    private List<FieldEventVS> optionList;
+    private List<FieldEvent> optionList;
 
     @JsonIgnore
     public String getFormattedInfo() {
@@ -59,7 +59,7 @@ public class MetaInf {
                 if(optionList != null) {
                     result.append("<br/><br/><div style='font-size:1.1em;'><b><u>" +
                             ContextVS.getMessage("votingResultLbl") + "</u><b></div>");
-                    for(FieldEventVS option: optionList) {
+                    for(FieldEvent option: optionList) {
                         result.append("<div style='margin:10px 0 0 40px;'>");
                         result.append("<div style='font-size:1.1em;'><b> - " + option.getContent() +"</b></div>");
                         result.append("<b>" + ContextVS.getMessage("numVoteRequestsLbl") +": </b>" +
@@ -105,9 +105,9 @@ public class MetaInf {
         if(metaInfMap.containsKey("options")) {
             Map options = (Map) metaInfMap.get("options");
             Set<String> keySet = options.keySet();
-            List<FieldEventVS> optionList = new ArrayList<FieldEventVS>();
+            List<FieldEvent> optionList = new ArrayList<FieldEvent>();
             for(String key:keySet) {
-                FieldEventVS option = new FieldEventVS();
+                FieldEvent option = new FieldEvent();
                 Map optionJSON = (Map) options.get(key);
                 option.setId(Long.valueOf(key));
                 option.setContent((String) optionJSON.get("content"));
@@ -146,7 +146,7 @@ public class MetaInf {
         StringBuilder result = new StringBuilder("<html>");
         if(TypeVS.VOTING_EVENT == type) {
             result.append("<ul>");
-            for(FieldEventVS option : optionList) {
+            for(FieldEvent option : optionList) {
                 result.append("<li><b>Opcion:</b> " + option.getContent() + "<br/>" +
                         "id:" + option.getId() + "<br/>" +
                         "numVoteRequests:" + option.getNumVoteRequests() + "<br/>" +
@@ -236,7 +236,7 @@ public class MetaInf {
     public String getOptionContent(Long optionId) {
         if(optionId == null) return null;
         if(optionList == null) return null;
-        for(FieldEventVS option:optionList) {
+        for(FieldEvent option:optionList) {
             if(option.getId() == optionId) return option.getContent();
         }
         return null;
@@ -295,11 +295,11 @@ public class MetaInf {
         this.serverURL = StringUtils.checkURL(serverURL);
     }
 
-    public List<FieldEventVS> getOptionList() {
+    public List<FieldEvent> getOptionList() {
         return optionList;
     }
 
-    public void setOptionList(List<FieldEventVS> optionList) {
+    public void setOptionList(List<FieldEvent> optionList) {
         this.optionList = optionList;
     }
 

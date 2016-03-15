@@ -1,7 +1,7 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.Actor;
+import org.votingsystem.model.User;
 import org.votingsystem.util.StringUtils;
 
 import javax.persistence.DiscriminatorValue;
@@ -15,22 +15,22 @@ import java.io.Serializable;
 @Entity
 @Table(name="CurrencyServer")
 @DiscriminatorValue("CurrencyServer")
-public class CurrencyServer extends ActorVS implements Serializable {
+public class CurrencyServer extends Actor implements Serializable {
 
     public static final long serialVersionUID = 1L;
 
     public CurrencyServer() {}
 
-    public CurrencyServer(ActorVS actorVS) throws Exception {
-        setName(actorVS.getName());
-        setX509Certificate(actorVS.getX509Certificate());
-        setControlCenter(actorVS.getControlCenter());
-        setEnvironmentVS(actorVS.getEnvironmentVS());
-        setServerURL(actorVS.getServerURL());
-        setState(actorVS.getState());
-        setId(actorVS.getId());
-        setTimeStampCert(actorVS.getTimeStampCert());
-        setTrustAnchors(actorVS.getTrustAnchors());
+    public CurrencyServer(Actor actor) throws Exception {
+        setName(actor.getName());
+        setX509Certificate(actor.getX509Certificate());
+        setControlCenter(actor.getControlCenter());
+        setEnvironmentVS(actor.getEnvironmentVS());
+        setServerURL(actor.getServerURL());
+        setState(actor.getState());
+        setId(actor.getId());
+        setTimeStampCert(actor.getTimeStampCert());
+        setTrustAnchors(actor.getTrustAnchors());
     }
 
     @Override public Type getType() {
@@ -57,21 +57,21 @@ public class CurrencyServer extends ActorVS implements Serializable {
         return getServerURL() + "/rest/transactionVS/currency";
     }
 
-    public String getGroupVSListURL(String menu, String locale) {
+    public String getGroupListURL(String menu, String locale) {
         String sufix = (menu != null || locale != null)? "?menu=" + menu + "&locale=" + locale : "";
-        return getServerURL() + "/rest/groupVS" + sufix;
+        return getServerURL() + "/rest/group" + sufix;
     }
 
     public String getSaveBankServiceURL() {
-        return getServerURL() + "/rest/userVS/newBankVS";
+        return getServerURL() + "/rest/user/newBank";
     }
 
-    public String getSaveGroupVSServiceURL() {
-        return getServerURL() + "/rest/groupVS/saveGroup";
+    public String getSaveGroupServiceURL() {
+        return getServerURL() + "/rest/group/saveGroup";
     }
 
-    public String getGroupVSSubscriptionServiceURL(Long groupId) {
-        return getServerURL() + "/rest/groupVS/id/" + String.valueOf(groupId) + "/subscribe";
+    public String getGroupSubscriptionServiceURL(Long groupId) {
+        return getServerURL() + "/rest/group/id/" + String.valueOf(groupId) + "/subscribe";
     }
 
     public String getTagVSSearchServiceURL(String searchParam) {
@@ -82,25 +82,25 @@ public class CurrencyServer extends ActorVS implements Serializable {
         return getServerURL() + "/rest/tagVS/list";
     }
 
-    public String getGroupVSUsersServiceURL(Long groupId, Integer max, Integer offset,
-                SubscriptionVS.State subscriptionState, UserVS.State userVSState) {
-        return getServerURL() + "/rest/groupVS/id/" + String.valueOf(groupId) + "/listUsers" +
+    public String getGroupUsersServiceURL(Long groupId, Integer max, Integer offset,
+                                          Subscription.State subscriptionState, User.State userState) {
+        return getServerURL() + "/rest/group/id/" + String.valueOf(groupId) + "/listUsers" +
                 "?max=" + ((max != null)?max:"") +
                 "&offset=" + ((offset != null)?offset:"") +
                 "&subscriptionState=" + ((subscriptionState != null)?subscriptionState.toString():"") +
-                "&userVSState=" + ((userVSState != null)?userVSState.toString():"");
+                "&userState=" + ((userState != null)?userState.toString():"");
     }
 
-    public String getGroupVSUsersActivationServiceURL() {
-        return getServerURL() + "/rest/groupVS/activateUser";
+    public String getGroupUsersActivationServiceURL() {
+        return getServerURL() + "/rest/group/activateUser";
     }
 
-    public String getDeviceVSConnectedServiceURL(String nif) {
-        return getServerURL() + "/rest/deviceVS/nif/" + nif + "/connected";
+    public String getDeviceConnectedServiceURL(String nif) {
+        return getServerURL() + "/rest/device/nif/" + nif + "/connected";
     }
 
-    public String getDeviceVSByIdServiceURL(Long deviceId) {
-        return getServerURL() + "/rest/deviceVS/id/" + deviceId;
+    public String getDeviceByIdServiceURL(Long deviceId) {
+        return getServerURL() + "/rest/device/id/" + deviceId;
     }
 
 }

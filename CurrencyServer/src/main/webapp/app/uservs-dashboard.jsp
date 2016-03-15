@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<dom-module name="uservs-dashboard">
+<dom-module name="user-dashboard">
     <template>
         <style>
             .transBlock { border: 1px solid #6c0404; margin: 10px;
@@ -19,13 +19,13 @@
             </select>
         </div>
         <div class="layout flex horizontal wrap around-justified">
-            <div id="FROM_BANKVS" class="transBlock" on-click="transBlockSelected">
-                <div class="numTrans">{{dashBoardDto.numTransFromBankVS}}</div>
-                <div class="transDesc">${msg.bankVSInputLbl}</div>
+            <div id="FROM_BANK" class="transBlock" on-click="transBlockSelected">
+                <div class="numTrans">{{dashBoardDto.numTransFromBank}}</div>
+                <div class="transDesc">${msg.bankInputLbl}</div>
             </div>
-            <div id="FROM_USERVS" class="transBlock" on-click="transBlockSelected">
-                <div class="numTrans">{{dashBoardDto.numTransFromUserVS}}</div>
-                <div class="transDesc">${msg.transactionVSFromUserVS}</div>
+            <div id="FROM_USER" class="transBlock" on-click="transBlockSelected">
+                <div class="numTrans">{{dashBoardDto.numTransFromUser}}</div>
+                <div class="transDesc">${msg.transactionVSFromUser}</div>
             </div>
             <div id="FROM_GROUP_TO_MEMBER_GROUP" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{fromGroupToMemberGroupInfo}}</div>
@@ -63,16 +63,16 @@
     </template>
 <script>
     Polymer({
-        is:'uservs-dashboard',
+        is:'user-dashboard',
         properties: {
             dashBoardDto:{type:Object, value:null, observer:'dashBoardDtoChanged'},
-            url:{type:String, value:vs.contextURL + "/rest/app/userVSDashboard", observer:'getHTTP'}
+            url:{type:String, value:vs.contextURL + "/rest/app/userDashboard", observer:'getHTTP'}
         },
         ready: function() {
             this.lapse = window.location.href.substr(window.location.href.lastIndexOf('/') + 1);
             if(isNumber(this.lapse)) {
                 this.$.transactionLapsedSelect.value = this.lapse
-                this.url = vs.contextURL + "/rest/app/userVSDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
+                this.url = vs.contextURL + "/rest/app/userDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
             } else this.lapse = null
             console.log(this.tagName + " - ready - lapse: " + this.lapse)
         },
@@ -82,17 +82,17 @@
             console.log(this.tagName + " - timePeriod:" + JSON.stringify(this.dashBoardDto.timePeriod) )
             this.dateFrom = new Date(this.dashBoardDto.timePeriod.dateFrom)
             this.dateTo = new Date(this.dashBoardDto.timePeriod.dateTo)
-            if(this.dashBoardDto.transFromGroupVSToMemberGroup.numTrans > 0) {
-                this.fromGroupToMemberGroupInfo = this.dashBoardDto.transFromGroupVSToMemberGroup.numTrans + " trans - " +
-                        dashBoardDto.transFromGroupVSToMemberGroup.numUsers + " users"
+            if(this.dashBoardDto.transFromGroupToMemberGroup.numTrans > 0) {
+                this.fromGroupToMemberGroupInfo = this.dashBoardDto.transFromGroupToMemberGroup.numTrans + " trans - " +
+                        dashBoardDto.transFromGroupToMemberGroup.numUsers + " users"
             } else this.fromGroupToMemberGroupInfo = 0
-            if(this.dashBoardDto.transFromGroupVSToAllMembers.numTrans > 0) {
-                this.fromGroupToAllMembersInfo = this.dashBoardDto.transFromGroupVSToAllMembers.numTrans + " trans - " +
-                        this.dashBoardDto.transFromGroupVSToAllMembers.numUsers + " users"
+            if(this.dashBoardDto.transFromGroupToAllMembers.numTrans > 0) {
+                this.fromGroupToAllMembersInfo = this.dashBoardDto.transFromGroupToAllMembers.numTrans + " trans - " +
+                        this.dashBoardDto.transFromGroupToAllMembers.numUsers + " users"
             } else this.fromGroupToAllMembersInfo = 0
         },
         selectAction: function() {
-            var servicePath = "/rest/app/userVSDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
+            var servicePath = "/rest/app/userDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value
             var targetURL = vs.contextURL + servicePath
             var newURL = vs.contextURL + "/spa.xhtml#!" + servicePath
             history.pushState(null, null, newURL);

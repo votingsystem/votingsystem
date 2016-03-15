@@ -10,7 +10,7 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
-import org.votingsystem.web.currency.ejb.UserVSBean;
+import org.votingsystem.web.currency.ejb.UserBean;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -45,7 +45,8 @@ public class CurrencyResource {
     private static final Logger log = Logger.getLogger(CurrencyResource.class.getName());
 
     @Inject DAOBean dao;
-    @Inject UserVSBean userVSBean;
+    @Inject
+    UserBean userBean;
     @Inject TransactionVSBean transactionVSBean;
     @Inject ConfigVS config;
     @Inject CMSBean cmsBean;

@@ -1,6 +1,6 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.AccessRequest;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.util.ContentTypeVS;
@@ -59,23 +59,23 @@ public class AccessRequestResource {
                 .type(ContentTypeVS.TEXT_STREAM.getName()).build();
     }
 
-    @Path("/eventVS/id/{eventId}/userVS/nif/{nif}") @GET
+    @Path("/eventVS/id/{eventId}/user/nif/{nif}") @GET
     public Response findByEventAndNif(@PathParam("eventId") long eventId, @PathParam("nif") String nif,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws Exception {
         EventElection eventVS = dao.find(EventElection.class, eventId);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity(messages.get("ERROR - "
                 + "not found - EventElection id: " + eventId)).build();
-        Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif").setParameter("nif", nif);
-        UserVS userVS = dao.getSingleResult(UserVS.class, query);
-        if(userVS == null) return Response.status(Response.Status.NOT_FOUND).entity(messages.get("ERROR - "
-                + "not found - UserVS nif: " + nif)).build();
+        Query query = dao.getEM().createQuery("select u from User u where u.nif =:nif").setParameter("nif", nif);
+        User user = dao.getSingleResult(User.class, query);
+        if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(messages.get("ERROR - "
+                + "not found - User nif: " + nif)).build();
         query = dao.getEM().createQuery("select a from AccessRequest a where a.eventVS =:eventVS " +
-                "and a.userVS =:userVS and a.state =:state").setParameter("eventVS", eventVS)
-                .setParameter("userVS", userVS).setParameter("state", AccessRequest.State.OK);
+                "and a.user =:user and a.state =:state").setParameter("eventVS", eventVS)
+                .setParameter("user", user).setParameter("state", AccessRequest.State.OK);
         AccessRequest accessRequest = dao.getSingleResult(AccessRequest.class, query);
         if(accessRequest == null) return Response.status(Response.Status.NOT_FOUND).entity(messages.get("ERROR - "
-                + "not found - AccessRequest event id: " + eventId + " - userVS nif: " + nif)).build();
+                + "not found - AccessRequest event id: " + eventId + " - user nif: " + nif)).build();
         else return Response.ok().entity(accessRequest.getCmsMessage().getContentPEM())
                 .type(ContentTypeVS.TEXT_STREAM.getName()).build();
     }

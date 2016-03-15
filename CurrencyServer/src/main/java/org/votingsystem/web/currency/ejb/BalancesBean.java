@@ -1,13 +1,13 @@
 package org.votingsystem.web.currency.ejb;
 
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.currency.BankVS;
+import org.votingsystem.model.User;
+import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.GroupVS;
+import org.votingsystem.model.currency.Group;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.Interval;
@@ -32,10 +32,13 @@ public class BalancesBean {
     private static Logger log = Logger.getLogger(BalancesBean.class.getName());
 
     @Inject ConfigVS config;
-    @Inject GroupVSBean groupVSBean;
+    @Inject
+    GroupBean groupBean;
     @Inject CMSBean cmsBean;
-    @Inject BankVSBean bankVSBean;
-    @Inject UserVSBean userVSBean;
+    @Inject
+    BankBean bankBean;
+    @Inject
+    UserBean userBean;
     @Inject DAOBean dao;
     @Inject TransactionVSBean transactionVSBean;
     @Inject CurrencyAccountBean currencyAccountBean;
@@ -44,7 +47,7 @@ public class BalancesBean {
         log.info("timePeriod: " + timePeriod.toString());
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("timePeriod", timePeriod);
-        resultMap.put("userVS", userVSBean.getUserVSDto(config.getSystemUser(), false));
+        resultMap.put("user", userBean.getUserDto(config.getSystemUser(), false));
         Query query = dao.getEM().createNamedQuery("findSystemTransactionVSList").setParameter("state", TransactionVS.State.OK)
                 .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())
                 .setParameter("typeList", Arrays.asList(TransactionVS.Type.CURRENCY_SEND));
@@ -60,41 +63,41 @@ public class BalancesBean {
         return balancesDto;
     }
 
-    public BalancesDto getBankVSBalancesDto(BankVS bankVS, Interval timePeriod) throws Exception {
+    public BalancesDto getBankBalancesDto(Bank bank, Interval timePeriod) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
-                transactionVSBean.getTransactionFromList(bankVS, timePeriod), TransactionVS.Source.FROM);
+                transactionVSBean.getTransactionFromList(bank, timePeriod), TransactionVS.Source.FROM);
         balancesDto.setTimePeriod(timePeriod);
-        balancesDto.setUserVS(userVSBean.getUserVSDto(bankVS, false));
+        balancesDto.setUser(userBean.getUserDto(bank, false));
         return balancesDto;
     }
 
-    public BalancesDto getGroupVSBalancesDto(GroupVS groupVS, Interval timePeriod) throws Exception {
+    public BalancesDto getGroupBalancesDto(Group group, Interval timePeriod) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
-                transactionVSBean.getTransactionFromList(groupVS, timePeriod), TransactionVS.Source.FROM);
+                transactionVSBean.getTransactionFromList(group, timePeriod), TransactionVS.Source.FROM);
         balancesDto.setTimePeriod(timePeriod);
-        balancesDto.setUserVS(UserVSDto.BASIC(groupVS));
+        balancesDto.setUser(UserDto.BASIC(group));
 
         BalancesDto balancesToDto = getBalancesDto(
-                transactionVSBean.getTransactionToList(groupVS, timePeriod), TransactionVS.Source.TO);
+                transactionVSBean.getTransactionToList(group, timePeriod), TransactionVS.Source.TO);
         balancesDto.setTo(balancesToDto);
         balancesDto.calculateCash();
-        currencyAccountBean.checkBalancesWithCurrencyAccounts(groupVS, balancesDto.getBalancesCash());
+        currencyAccountBean.checkBalancesWithCurrencyAccounts(group, balancesDto.getBalancesCash());
         return balancesDto;
     }
 
-    public BalancesDto getUserVSBalancesDto(UserVS userVS, Interval timePeriod) throws Exception {
+    public BalancesDto getUserBalancesDto(User user, Interval timePeriod) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
-                transactionVSBean.getTransactionFromList(userVS, timePeriod), TransactionVS.Source.FROM);
+                transactionVSBean.getTransactionFromList(user, timePeriod), TransactionVS.Source.FROM);
         balancesDto.setTimePeriod(timePeriod);
-        balancesDto.setUserVS(userVSBean.getUserVSDto(userVS, false));
+        balancesDto.setUser(userBean.getUserDto(user, false));
 
         BalancesDto balancesToDto = getBalancesDto(
-                transactionVSBean.getTransactionToList(userVS, timePeriod), TransactionVS.Source.TO);
+                transactionVSBean.getTransactionToList(user, timePeriod), TransactionVS.Source.TO);
         balancesDto.setTo(balancesToDto);
 
         balancesDto.calculateCash();
-        if(UserVS.Type.SYSTEM != userVS.getType() && timePeriod.isCurrentWeekPeriod())
-            currencyAccountBean.checkBalancesWithCurrencyAccounts(userVS, balancesDto.getBalancesCash());
+        if(User.Type.SYSTEM != user.getType() && timePeriod.isCurrentWeekPeriod())
+            currencyAccountBean.checkBalancesWithCurrencyAccounts(user, balancesDto.getBalancesCash());
         return balancesDto;
     }
 
@@ -122,10 +125,10 @@ public class BalancesBean {
         throw new ExceptionVS("unknown source: " + source);
     }
 
-    public BalancesDto getBalancesDto(UserVS userVS, Interval timePeriod) throws Exception {
-        if(userVS instanceof BankVS) return getBankVSBalancesDto((BankVS) userVS, timePeriod);
-        else if(userVS instanceof GroupVS) return getGroupVSBalancesDto((GroupVS) userVS, timePeriod);
-        else return getUserVSBalancesDto(userVS, timePeriod);
+    public BalancesDto getBalancesDto(User user, Interval timePeriod) throws Exception {
+        if(user instanceof Bank) return getBankBalancesDto((Bank) user, timePeriod);
+        else if(user instanceof Group) return getGroupBalancesDto((Group) user, timePeriod);
+        else return getUserBalancesDto(user, timePeriod);
     }
 
 }

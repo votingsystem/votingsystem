@@ -91,9 +91,9 @@ public class Formatter {
         if(eventVS.getDateFinish() != null) dateFinish = DateUtils.getDateStr(eventVS.getDateFinish());
 
 
-        if(eventVS.getAccessControlVS() != null) {
+        if(eventVS.getAccessControl() != null) {
             result.append("<b>" + accessControlLbl + "</b>:").append(
-                eventVS.getAccessControlVS().getName()).append("<br/>");
+                eventVS.getAccessControl().getName()).append("<br/>");
         }
         if(eventVS.getSubject() != null) result.append("<b>" + subjectLabel + "</b>: ").
                 append(eventVS.getSubject() + "<br/>");

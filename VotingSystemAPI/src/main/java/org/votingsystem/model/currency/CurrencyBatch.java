@@ -3,7 +3,7 @@ package org.votingsystem.model.currency;
 import org.votingsystem.model.BatchVS;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -18,7 +18,7 @@ import java.util.Set;
 public class CurrencyBatch extends BatchVS implements Serializable {
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="toUserVS") private UserVS toUserVS;
+    @JoinColumn(name="toUser") private User toUser;
     @Column(name="batchAmount") private BigDecimal batchAmount;
     @OneToOne
     @JoinColumn(name="leftOver") private Currency leftOver;
@@ -56,12 +56,12 @@ public class CurrencyBatch extends BatchVS implements Serializable {
         this.batchUUID = batchUUID;
     }
 
-    public UserVS getToUserVS() {
-        return toUserVS;
+    public User getToUser() {
+        return toUser;
     }
 
-    public CurrencyBatch setToUserVS(UserVS toUserVS) {
-        this.toUserVS = toUserVS;
+    public CurrencyBatch setToUser(User toUser) {
+        this.toUser = toUser;
         return this;
     }
 

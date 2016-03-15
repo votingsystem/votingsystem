@@ -63,8 +63,8 @@
         CURRENCY_SEND:{lbl:"${msg.selectCurrencySendLbl}"},
         CURRENCY_PERIOD_INIT:{lbl:"${msg.currencyPeriodInitLbl}"},
         CURRENCY_PERIOD_INIT_TIME_LIMITED:{lbl:"${msg.currencyPeriodInitTimeLimitedLbl}"},
-        FROM_BANKVS:{lbl:"${msg.bankVSInputLbl}"},
-        FROM_USERVS:{lbl:"${msg.transactionVSFromUserVS}"},
+        FROM_BANK:{lbl:"${msg.bankInputLbl}"},
+        FROM_USER:{lbl:"${msg.transactionVSFromUser}"},
         FROM_GROUP_TO_MEMBER_GROUP:{lbl:"${msg.transactionVSFromGroupToMemberGroup}"},
         FROM_GROUP_TO_ALL_MEMBERS:{lbl:"${msg.transactionVSFromGroupToAllMembers}"}}
 

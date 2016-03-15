@@ -20,7 +20,7 @@
                 var encodedRefererURL = encodeURIComponent(window.location.href)
                 var encodedReceptor = encodeURIComponent('${msg.receptorTestWebAccountLbl}')
                 var uriData = vs.contextURL + "/rest/app/androidClient?operation=TRANSACTIONVS&amp;amount=20&amp;currencyCode=EUR" +
-                        "&amp;tagVS=HIDROGENO&amp;IBAN=" + encodedIBAN + "&amp;subject=" + encodedSubject + "&amp;toUser=" + encodedReceptor +
+                        "&amp;tagVS=HIDROGENO&amp;IBAN=" + encodedIBAN + "&amp;subject=" + encodedSubject + "&amp;toUserName=" + encodedReceptor +
                         "&amp;toUserIBAN=ES8978788989450000000004&amp;refererURL=" + encodedRefererURL
                 window.location.href = uriData.replace("\n","")
                 return false

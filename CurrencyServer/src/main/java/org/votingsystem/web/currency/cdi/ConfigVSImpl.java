@@ -2,9 +2,9 @@ package org.votingsystem.web.currency.cdi;
 
 import org.iban4j.*;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.voting.ControlCenterVS;
+import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EnvironmentVS;
@@ -14,7 +14,7 @@ import org.votingsystem.web.currency.ejb.AuditBean;
 import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SubscriptionVSBean;
+import org.votingsystem.web.ejb.SubscriptionBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -48,7 +48,8 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Inject DAOBean dao;
     @Inject CMSBean cmsBean;
-    @Inject SubscriptionVSBean subscriptionBean;
+    @Inject
+    SubscriptionBean subscriptionBean;
     @Inject TimeStampBean timeStampBean;
     @Inject AuditBean auditBean;
     @Resource(name="comp/DefaultManagedExecutorService")
@@ -67,7 +68,7 @@ public class ConfigVSImpl implements ConfigVS {
     private String emailAdmin = null;
     private String staticResURL = null;
     private File serverDir = null;
-    private UserVS systemUser;
+    private User systemUser;
 
     public ConfigVSImpl() {
         try {
@@ -112,11 +113,11 @@ public class ConfigVSImpl implements ConfigVS {
         log.info("initialize");
         try {
             MessagesVS.setCurrentInstance(Locale.getDefault(), getProperty("vs.bundleBaseName"));
-            Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", UserVS.Type.SYSTEM);
-            systemUser = dao.getSingleResult(UserVS.class, query);
+            Query query = dao.getEM().createNamedQuery("findUserByType").setParameter("type", User.Type.SYSTEM);
+            systemUser = dao.getSingleResult(User.class, query);
             if(systemUser == null) { //First time run
                 dao.persist(new TagVS(TagVS.WILDTAG));
-                systemUser = dao.persist(new UserVS(systemNIF, UserVS.Type.SYSTEM, serverName));
+                systemUser = dao.persist(new User(systemNIF, User.Type.SYSTEM, serverName));
                 createIBAN(systemUser);
                 URL res = Thread.currentThread().getContextClassLoader().getResource("defaultTags.txt");
                 String[] defaultTags = FileUtils.getStringFromInputStream(res.openStream()).split(",");
@@ -171,15 +172,15 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public UserVS createIBAN(UserVS userVS) throws ValidationExceptionVS {
-        String accountNumberStr = String.format("%010d", userVS.getId());
+    public User createIBAN(User user) throws ValidationExceptionVS {
+        String accountNumberStr = String.format("%010d", user.getId());
         Iban iban = new Iban.Builder().countryCode(CountryCode.ES).bankCode(bankCode).branchCode(branchCode)
                 .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
-        userVS.setIBAN(iban.toString());
-        userVS = dao.merge(userVS);
-        dao.persist(new CurrencyAccount(userVS, BigDecimal.ZERO,
+        user.setIBAN(iban.toString());
+        user = dao.merge(user);
+        dao.persist(new CurrencyAccount(user, BigDecimal.ZERO,
                 java.util.Currency.getInstance("EUR").getCurrencyCode(), getTag(TagVS.WILDTAG)));
-        return userVS;
+        return user;
     }
 
     public String getIBAN(Long userId, String bankCodeStr, String branchCodeStr) {
@@ -198,7 +199,7 @@ public class ConfigVSImpl implements ConfigVS {
         return File.separator + "temp";
     }
 
-    public UserVS getSystemUser() {
+    public User getSystemUser() {
         return systemUser;
     }
 
@@ -244,7 +245,7 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public ControlCenterVS getControlCenter() {
+    public ControlCenter getControlCenter() {
         return null;
     }
 

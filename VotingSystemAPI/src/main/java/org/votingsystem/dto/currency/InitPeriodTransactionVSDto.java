@@ -1,8 +1,8 @@
 package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.dto.UserVSDto;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.dto.UserDto;
+import org.votingsystem.model.User;
 import org.votingsystem.util.TypeVS;
 
 import java.math.BigDecimal;
@@ -16,7 +16,7 @@ public class InitPeriodTransactionVSDto {
     private TypeVS operation;
     private BigDecimal amount;
     private BigDecimal timeLimitedNotExpended;
-    private UserVSDto toUser;
+    private UserDto toUser;
     private String tag;
     private String currencyCode;
     private String UUID;
@@ -25,13 +25,13 @@ public class InitPeriodTransactionVSDto {
     public InitPeriodTransactionVSDto() {}
 
     public InitPeriodTransactionVSDto(BigDecimal amount, BigDecimal timeLimitedNotExpended, String currencyCode,
-                      String tag, UserVS userVS) {
+                      String tag, User user) {
         this.setOperation(TypeVS.CURRENCY_PERIOD_INIT);
         this.setAmount(amount);
         this.setTimeLimitedNotExpended(timeLimitedNotExpended);
         this.setCurrencyCode(currencyCode);
         this.setTag(tag);
-        this.setToUser(UserVSDto.BASIC(userVS));
+        this.setToUser(UserDto.BASIC(user));
         this.setUUID(java.util.UUID.randomUUID().toString());
     }
 
@@ -59,11 +59,11 @@ public class InitPeriodTransactionVSDto {
         this.timeLimitedNotExpended = timeLimitedNotExpended;
     }
 
-    public UserVSDto getToUser() {
+    public UserDto getToUser() {
         return toUser;
     }
 
-    public void setToUser(UserVSDto toUser) {
+    public void setToUser(UserDto toUser) {
         this.toUser = toUser;
     }
 

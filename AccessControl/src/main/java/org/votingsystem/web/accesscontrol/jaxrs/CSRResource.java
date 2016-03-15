@@ -2,8 +2,8 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.apache.commons.io.IOUtils;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.DeviceVS;
-import org.votingsystem.model.voting.UserRequestCsrVS;
+import org.votingsystem.model.Device;
+import org.votingsystem.model.voting.UserRequestCsr;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.accesscontrol.ejb.CSRBean;
@@ -44,21 +44,21 @@ public class CSRResource {
     public Response request(@Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         byte[] requestBytes = IOUtils.toByteArray(req.getInputStream());
-        UserRequestCsrVS userRequestCsr = csrBean.saveUserCSR(requestBytes);
+        UserRequestCsr userRequestCsr = csrBean.saveUserCSR(requestBytes);
         return Response.ok().entity(userRequestCsr.getId().toString()).build();
     }
 
     @Path("/validate") @POST
     public Object validate(CMSMessage cmsMessage) throws Exception {
-        DeviceVS deviceVS = csrBean.signCertUserVS(cmsMessage);
-        return Response.ok().entity(PEMUtils.getPEMEncoded(deviceVS.getX509Certificate())).build();
+        Device device = csrBean.signCertUser(cmsMessage);
+        return Response.ok().entity(PEMUtils.getPEMEncoded(device.getX509Certificate())).build();
     }
 
     @Path("/") @GET
     public Response getIssuedCert(@QueryParam("csrRequestId") Long csrRequestId) throws Exception {
-        Query query = dao.getEM().createQuery("select u from UserRequestCsrVS u where u.id =:id and u.state =:state")
-                .setParameter("id", csrRequestId).setParameter("state", UserRequestCsrVS.State.OK);
-        UserRequestCsrVS csrRequest = dao.getSingleResult(UserRequestCsrVS.class, query);
+        Query query = dao.getEM().createQuery("select u from UserRequestCsr u where u.id =:id and u.state =:state")
+                .setParameter("id", csrRequestId).setParameter("state", UserRequestCsr.State.OK);
+        UserRequestCsr csrRequest = dao.getSingleResult(UserRequestCsr.class, query);
         if(csrRequest == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity(messages.get("csrRequestNotValidated")).build();
         }

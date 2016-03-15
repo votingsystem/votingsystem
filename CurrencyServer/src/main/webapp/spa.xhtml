@@ -25,23 +25,23 @@
                 <div id="pageTitle" class="app-name" style="padding: 8px 0 8px 15px;font-size: 2em; font-weight: bold;"></div>
             </div>
             <div class="vertical layout flex" style="background-color: #fefefe;">
-                <a class="menuItem menuItemSelected" data-route="groupVS" href="#{contextURL}/spa.xhtml#!/groupVS">
-                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupvsLbl}
+                <a class="menuItem menuItemSelected" data-route="group" href="#{contextURL}/spa.xhtml#!/group">
+                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupLbl}
                 </a>
                 <a class="menuItem menuItemSelected" data-route="transactionsDashboard" href="#{contextURL}/spa.xhtml#!/transactionsDashboard">
                     <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
                 </a>
-                <a class="menuItem menuItemSelected" data-route="userVS" href="#{contextURL}/spa.xhtml#!/userVS/search">
-                    <i class="fa fa-user" style="margin:0px 10px 0px 0px;"></i> ${msg.locateUserVSLbl}
+                <a class="menuItem menuItemSelected" data-route="user" href="#{contextURL}/spa.xhtml#!/user/search">
+                    <i class="fa fa-user" style="margin:0px 10px 0px 0px;"></i> ${msg.locateUserLbl}
                 </a>
                 <a class="menuItem menuItemSelected" data-route="currencyRequest" href="#{contextURL}/spa.xhtml#!/currency/request">
                     <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> ${msg.doCurrencyRequestLbl}
                 </a>
-                <a class="menuItem menuItemSelected isAdminView" data-route="newGroupVS" href="#{contextURL}/spa.xhtml#!/groupvs_editor">
-                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupVSLbl}
+                <a class="menuItem menuItemSelected isAdminView" data-route="newGroup" href="#{contextURL}/spa.xhtml#!/group_editor">
+                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupLbl}
                 </a>
-                <a class="menuItem menuItemSelected isSuperUserView" data-route="newBankVS" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/userVS/newBankVS.xhtml&amp;caption=${msg.newBankVSLbl}&amp;data_route=newBankVS">
-                    <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankVSLbl}
+                <a class="menuItem menuItemSelected isSuperUserView" data-route="newBank" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/user/newBank.xhtml&amp;caption=${msg.newBankLbl}&amp;data_route=newBank">
+                    <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankLbl}
                 </a>
                 <a class="menuItem menuItemSelected isSuperUserView" data-route="certificateVS" href="#{contextURL}/spa.xhtml#!/certificateVS/certs">
                     <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
@@ -145,7 +145,7 @@
 
             document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
                 console.log("spa.xhtml - user-clicked")
-                page.show(contextURL + "/rest/userVS/id/" + e.detail.id + "?connectedDevices=true")
+                page.show(contextURL + "/rest/user/id/" + e.detail.id + "?connectedDevices=true")
             })
 
             vs.updateMenuView()

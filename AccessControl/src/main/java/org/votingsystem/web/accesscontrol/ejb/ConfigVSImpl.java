@@ -1,16 +1,16 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import org.votingsystem.dto.ActorVSDto;
+import org.votingsystem.dto.ActorDto;
 import org.votingsystem.model.*;
-import org.votingsystem.model.voting.AccessControlVS;
-import org.votingsystem.model.voting.ControlCenterVS;
+import org.votingsystem.model.voting.AccessControl;
+import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SubscriptionVSBean;
+import org.votingsystem.web.ejb.SubscriptionBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -43,7 +43,8 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Inject DAOBean dao;
     @Inject CMSBean cmsBean;
-    @Inject SubscriptionVSBean subscriptionBean;
+    @Inject
+    SubscriptionBean subscriptionBean;
     @Inject EventElectionBean eventElectionBean;
     @Inject TimeStampBean timeStampBean;
     /* Executor service for asynchronous processing */
@@ -62,8 +63,8 @@ public class ConfigVSImpl implements ConfigVS {
     private String emailAdmin;
     private String staticResURL;
     private File serverDir;
-    private UserVS systemUser;
-    private ControlCenterVS controlCenter;
+    private User systemUser;
+    private ControlCenter controlCenter;
 
     public ConfigVSImpl() {
         try {
@@ -103,20 +104,20 @@ public class ConfigVSImpl implements ConfigVS {
     @PostConstruct
     public void initialize() {
         log.info("initialize");
-        Query query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
-                .setParameter("type", UserVS.Type.SYSTEM);
-        systemUser = dao.getSingleResult(UserVS.class, query);
+        Query query = dao.getEM().createQuery("select u from User u where u.type =:type")
+                .setParameter("type", User.Type.SYSTEM);
+        systemUser = dao.getSingleResult(User.class, query);
         if(systemUser == null) {
-            systemUser = dao.persist(new UserVS(systemNIF, serverName, UserVS.Type.SYSTEM));
+            systemUser = dao.persist(new User(systemNIF, serverName, User.Type.SYSTEM));
         }
-        query = dao.getEM().createQuery("select a from ActorVS a where a.serverURL =:serverURL")
+        query = dao.getEM().createQuery("select a from Actor a where a.serverURL =:serverURL")
                 .setParameter("serverURL", contextURL);
-        AccessControlVS actorVS = dao.getSingleResult(AccessControlVS.class, query);
-        if(actorVS == null) {
-            actorVS = new AccessControlVS();
-            actorVS.setServerURL(contextURL);
-            actorVS.setState(ActorVS.State.OK).setName(serverName);
-            dao.persist(actorVS);
+        AccessControl actor = dao.getSingleResult(AccessControl.class, query);
+        if(actor == null) {
+            actor = new AccessControl();
+            actor.setServerURL(contextURL);
+            actor.setState(Actor.State.OK).setName(serverName);
+            dao.persist(actor);
         }
         new ContextVS(null, null);
         executorService.submit(() -> {
@@ -187,10 +188,10 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public UserVS createIBAN(UserVS userVS) throws ValidationExceptionVS { return null;}
+    public User createIBAN(User user) throws ValidationExceptionVS { return null;}
 
     @Override
-    public UserVS getSystemUser() {
+    public User getSystemUser() {
         return systemUser;
     }
 
@@ -217,7 +218,7 @@ public class ConfigVSImpl implements ConfigVS {
         return emailAdmin;
     }
 
-    public ControlCenterVS getControlCenter() {
+    public ControlCenter getControlCenter() {
         return controlCenter;
     }
 
@@ -226,38 +227,38 @@ public class ConfigVSImpl implements ConfigVS {
             log.info("checkControlCenter - serverURL:" + serverURL);
             CertificateVS controlCenterCert = null;
             serverURL = StringUtils.checkURL(serverURL);
-            Query query = dao.getEM().createQuery("select c from ControlCenterVS c where c.serverURL =:serverURL")
+            Query query = dao.getEM().createQuery("select c from ControlCenter c where c.serverURL =:serverURL")
                     .setParameter("serverURL", serverURL);
-            ControlCenterVS controlCenterDB = dao.getSingleResult(ControlCenterVS.class, query);
+            ControlCenter controlCenterDB = dao.getSingleResult(ControlCenter.class, query);
             if(controlCenterDB != null) {
-                query = dao.getEM().createQuery("select c from CertificateVS c where c.actorVS =:actorVS " +
-                        "and c.state =:state").setParameter("actorVS", controlCenterDB)
+                query = dao.getEM().createQuery("select c from CertificateVS c where c.actor =:actor " +
+                        "and c.state =:state").setParameter("actor", controlCenterDB)
                         .setParameter("state", CertificateVS.State.OK);
                 controlCenterCert = dao.getSingleResult(CertificateVS.class, query);
                 if(controlCenterCert != null) return ;
             }
-            ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON);
+            ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(serverURL), ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
-                if (ActorVS.Type.CONTROL_CENTER != actorVS.getType()) throw new ExceptionVS(
+                Actor actor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
+                if (Actor.Type.CONTROL_CENTER != actor.getType()) throw new ExceptionVS(
                         "ERROR - actorNotControlCenterMsg serverURL: " + serverURL);
-                if(!actorVS.getServerURL().equals(serverURL)) throw new ExceptionVS(
-                        "ERROR - serverURLMismatch expected URL: " + serverURL + " - found: " + actorVS.getServerURL());
+                if(!actor.getServerURL().equals(serverURL)) throw new ExceptionVS(
+                        "ERROR - serverURLMismatch expected URL: " + serverURL + " - found: " + actor.getServerURL());
                 X509Certificate x509Cert = PEMUtils.fromPEMToX509CertCollection(
-                        actorVS.getCertChainPEM().getBytes()).iterator().next();
+                        actor.getCertChainPEM().getBytes()).iterator().next();
                 cmsBean.verifyCertificate(x509Cert);
                 if(controlCenterDB == null) {
-                    controlCenterDB = dao.persist((ControlCenterVS) new ControlCenterVS(actorVS).setX509Certificate(
-                            x509Cert).setState(ActorVS.State.OK));
+                    controlCenterDB = dao.persist((ControlCenter) new ControlCenter(actor).setX509Certificate(
+                            x509Cert).setState(Actor.State.OK));
                 }
-                controlCenterDB.setCertChainPEM(actorVS.getCertChainPEM());
-                controlCenterCert = CertificateVS.ACTORVS(controlCenterDB, x509Cert);
-                controlCenterCert.setCertChainPEM(actorVS.getCertChainPEM().getBytes());
+                controlCenterDB.setCertChainPEM(actor.getCertChainPEM());
+                controlCenterCert = CertificateVS.ACTOR(controlCenterDB, x509Cert);
+                controlCenterCert.setCertChainPEM(actor.getCertChainPEM().getBytes());
                 dao.persist(controlCenterCert);
                 controlCenter = controlCenterDB;
                 return;
             }
-            log.log(Level.SEVERE, "ERROR fetching ControlCenterVS - serverURL: " + serverURL + " - retry");
+            log.log(Level.SEVERE, "ERROR fetching ControlCenter - serverURL: " + serverURL + " - retry");
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -267,9 +268,9 @@ public class ConfigVSImpl implements ConfigVS {
     public void mainServletInitialized() throws Exception{
         log.info("mainServletInitialized - initControlCenter");
         try {
-            Query query = dao.getEM().createQuery("select c from ControlCenterVS c where c.state =:state")
-                    .setParameter("state", ActorVS.State.OK);
-            controlCenter = dao.getSingleResult(ControlCenterVS.class, query);
+            Query query = dao.getEM().createQuery("select c from ControlCenter c where c.state =:state")
+                    .setParameter("state", Actor.State.OK);
+            controlCenter = dao.getSingleResult(ControlCenter.class, query);
             if(controlCenter == null) {
                 executorService.submit(() -> {
                     try {

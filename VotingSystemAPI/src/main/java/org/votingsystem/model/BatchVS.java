@@ -34,7 +34,7 @@ public class BatchVS extends EntityVS implements Serializable  {
     @Column(name="type") @Enumerated(EnumType.STRING) private TypeVS type;
     @Column(name="content") private byte[] content;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="userVS") private UserVS userVS;
+    @JoinColumn(name="user") private User user;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
@@ -102,12 +102,12 @@ public class BatchVS extends EntityVS implements Serializable  {
         return this;
     }
 
-    public UserVS getUserVS() {
-        return userVS;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserVS(UserVS userVS) {
-        this.userVS = userVS;
+    public void setUser(User user) {
+        this.user = user;
     }
 
 }

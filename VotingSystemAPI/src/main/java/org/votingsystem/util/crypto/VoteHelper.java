@@ -4,7 +4,7 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.voting.AccessRequestDto;
 import org.votingsystem.dto.voting.VoteCancelerDto;
 import org.votingsystem.dto.voting.VoteDto;
-import org.votingsystem.model.voting.FieldEventVS;
+import org.votingsystem.model.voting.FieldEvent;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.util.TypeVS;
@@ -46,7 +46,7 @@ public class VoteHelper {
         return voteHelper;
     }
 
-    public static VoteHelper genRandomVote(Long EventId, String eventVSURL, Set<FieldEventVS> options)
+    public static VoteHelper genRandomVote(Long EventId, String eventVSURL, Set<FieldEvent> options)
             throws NoSuchAlgorithmException {
         VoteDto voteDto =  new VoteDto();
         voteDto.setEventId(EventId);
@@ -55,12 +55,12 @@ public class VoteHelper {
         return VoteHelper.load(voteDto);
     }
 
-    public static FieldEventVS getRandomOption (Set<FieldEventVS> options) {
+    public static FieldEvent getRandomOption (Set<FieldEvent> options) {
         int item = new Random().nextInt(options.size()); // In real life, the Random object should be rather more shared than this
-        return (FieldEventVS) options.toArray()[item];
+        return (FieldEvent) options.toArray()[item];
     }
 
-    private void genVote(FieldEventVS optionSelected) {
+    private void genVote(FieldEvent optionSelected) {
         genAccessRequest();
         voteDto = new VoteDto();
         voteDto.setOperation(TypeVS.SEND_VOTE);

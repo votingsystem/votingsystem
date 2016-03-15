@@ -11,7 +11,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.votingsystem.client.webextension.util.Formatter;
 import org.votingsystem.client.webextension.util.Utils;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 
@@ -24,10 +24,10 @@ public class SignatureInfoPane extends GridPane {
 
     private static Logger log = Logger.getLogger(SignatureInfoPane.class.getName());
 
-    private UserVS signer;
+    private User signer;
     private String signatureAlgorithmValue = null;
 
-    public SignatureInfoPane(UserVS signer, CMSSignedMessage signedMessage) throws Exception {
+    public SignatureInfoPane(User signer, CMSSignedMessage signedMessage) throws Exception {
         this.signer = signer;
         signatureAlgorithmValue = signer.getEncryptiontId() + " - " + signer.getDigestId();
         initComponents();

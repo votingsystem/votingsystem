@@ -5,7 +5,7 @@ import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyAccountDto;
 import org.votingsystem.dto.currency.SystemAccountsDto;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.util.JSON;
@@ -46,16 +46,16 @@ public class CurrencyAccountResource {
     @Inject ConfigVS config;
 
 
-    @Path("/userVS/id/{userId}/balance")
+    @Path("/user/id/{userId}/balance")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response balance(@PathParam("userId") long userId, @Context ServletContext context,
               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException {
-        UserVS userVS = dao.find(UserVS.class, userId);
-        if(userVS == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("userVS id: " + userId).build();
+        User user = dao.find(User.class, userId);
+        if(user == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("user id: " + userId).build();
         }
-        Query query = dao.getEM().createQuery("select a from CurrencyAccount a where a.userVS =:userVS " +
-                "and a.state =:state").setParameter("userVS", userVS).setParameter("state", CurrencyAccount.State.ACTIVE);
+        Query query = dao.getEM().createQuery("select a from CurrencyAccount a where a.user =:user " +
+                "and a.state =:state").setParameter("user", user).setParameter("state", CurrencyAccount.State.ACTIVE);
         List<CurrencyAccount> userAccountsDB = query.getResultList();
         List<CurrencyAccountDto> userAccounts = new ArrayList<>();
         for(CurrencyAccount account : userAccountsDB) {
@@ -70,16 +70,16 @@ public class CurrencyAccountResource {
     @Path("/system") @Transactional
     public Response system(@Context HttpServletRequest req, @Context HttpServletResponse resp,
                              @Context ServletContext context) throws IOException, ServletException {
-        Query query = dao.getEM().createQuery("select c FROM CurrencyAccount c where c.userVS =:userVS and c.state =:state")
-                .setParameter("userVS", config.getSystemUser()).setParameter("state", CurrencyAccount.State.ACTIVE);
+        Query query = dao.getEM().createQuery("select c FROM CurrencyAccount c where c.user =:user and c.state =:state")
+                .setParameter("user", config.getSystemUser()).setParameter("state", CurrencyAccount.State.ACTIVE);
         List<CurrencyAccount> accountList = query.getResultList();
         List<CurrencyAccountDto> accountListDto = new ArrayList<>();
         for(CurrencyAccount currencyAccount :accountList) {
             accountListDto.add(new CurrencyAccountDto(currencyAccount));
         }
-        List<UserVS.Type> notList = Arrays.asList(UserVS.Type.SYSTEM);
+        List<User.Type> notList = Arrays.asList(User.Type.SYSTEM);
         query = dao.getEM().createQuery("select SUM(c.balance), tag, c.currencyCode from CurrencyAccount c JOIN c.tag tag where c.state =:state " +
-                "and c.userVS.type not in :notList group by tag, c.currencyCode").setParameter("state", CurrencyAccount.State.ACTIVE)
+                "and c.user.type not in :notList group by tag, c.currencyCode").setParameter("state", CurrencyAccount.State.ACTIVE)
                 .setParameter("notList", notList);
         List<Object[]> resultList = query.getResultList();
         List<TagVSDto> tagVSBalanceList = new ArrayList<>();
@@ -90,13 +90,13 @@ public class CurrencyAccountResource {
 
         query = dao.getEM().createQuery("select SUM(t.amount), tag, t.currencyCode from TransactionVS t JOIN t.tag tag where t.state =:state " +
                 "and t.type =:type group by tag, t.currencyCode").setParameter("state", TransactionVS.State.OK)
-                .setParameter("type", TransactionVS.Type.FROM_BANKVS);
+                .setParameter("type", TransactionVS.Type.FROM_BANK);
         resultList = query.getResultList();
-        List<TagVSDto> bankVSBalanceList = new ArrayList<>();
+        List<TagVSDto> bankBalanceList = new ArrayList<>();
         for(Object[] result : resultList) {
-            bankVSBalanceList.add(new TagVSDto((BigDecimal) result[0], (String) result[2], (TagVS) result[1]));
+            bankBalanceList.add(new TagVSDto((BigDecimal) result[0], (String) result[2], (TagVS) result[1]));
         }
-        SystemAccountsDto systemAccountsDto = new SystemAccountsDto(accountListDto, tagVSBalanceList, bankVSBalanceList);
+        SystemAccountsDto systemAccountsDto = new SystemAccountsDto(accountListDto, tagVSBalanceList, bankBalanceList);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(systemAccountsDto)).build();
     }
 

@@ -1,7 +1,7 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.AddressVS;
+import org.votingsystem.model.Address;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -9,14 +9,14 @@ import org.votingsystem.model.AddressVS;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserCertificationRequestDto {
 
-    private AddressVS addressVS;
+    private Address address;
     private byte[] csrRequest;
     private byte[] token;
 
     public UserCertificationRequestDto(){}
 
-    public UserCertificationRequestDto(AddressVS addressVS, byte[] csrRequest,  byte[] token) {
-        this.addressVS = addressVS;
+    public UserCertificationRequestDto(Address address, byte[] csrRequest, byte[] token) {
+        this.address = address;
         this.csrRequest = csrRequest;
         this.token = token;
     }
@@ -29,12 +29,12 @@ public class UserCertificationRequestDto {
         this.csrRequest = csrRequest;
     }
 
-    public AddressVS getAddressVS() {
-        return addressVS;
+    public Address getAddress() {
+        return address;
     }
 
-    public void setAddressVS(AddressVS addressVS) {
-        this.addressVS = addressVS;
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
     public byte[] getToken() {

@@ -2,7 +2,7 @@ package org.votingsystem.test.callable;
 
 
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.*;
@@ -37,8 +37,8 @@ public class RepresentativeDataSender implements Callable<ResponseVS> {
         return responseVS;
     }
     
-    private UserVSDto getRequest(String representativeNIF, byte[] imageBytes) {
-        UserVSDto dto = new UserVSDto();
+    private UserDto getRequest(String representativeNIF, byte[] imageBytes) {
+        UserDto dto = new UserDto();
         dto.setOperation(TypeVS.EDIT_REPRESENTATIVE);
         String representativeDescription = " --- data about the representative -" + representativeNIF;
         dto.setDescription(Base64.getEncoder().encodeToString(representativeDescription.getBytes()));

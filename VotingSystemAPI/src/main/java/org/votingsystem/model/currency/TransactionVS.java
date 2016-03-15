@@ -3,7 +3,7 @@ package org.votingsystem.model.currency;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -22,10 +22,10 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity
 @Table(name="TransactionVS")
 @NamedQueries({
-        @NamedQuery(name = "countTransByToUserVSIsNullAndTypeAndDateCreatedBetween", query =
-        "SELECT COUNT(t) FROM TransactionVS t WHERE t.dateCreated between :dateFrom and :dateTo AND t.toUserVS is null AND t.type =:type"),
-        @NamedQuery(name = "countTransByToUserVSIsNotNullAndTypeAndDateCreatedBetween", query =
-        "SELECT COUNT(t) FROM TransactionVS t WHERE t.dateCreated between :dateFrom and :dateTo AND t.toUserVS is not null AND t.type =:type"),
+        @NamedQuery(name = "countTransByToUserIsNullAndTypeAndDateCreatedBetween", query =
+        "SELECT COUNT(t) FROM TransactionVS t WHERE t.dateCreated between :dateFrom and :dateTo AND t.toUser is null AND t.type =:type"),
+        @NamedQuery(name = "countTransByToUserIsNotNullAndTypeAndDateCreatedBetween", query =
+        "SELECT COUNT(t) FROM TransactionVS t WHERE t.dateCreated between :dateFrom and :dateTo AND t.toUser is not null AND t.type =:type"),
         @NamedQuery(name="countTransByTypeAndDateCreatedBetween", query=
         "SELECT COUNT(t) FROM TransactionVS t WHERE t.type =:type AND t.dateCreated between :dateFrom and :dateTo"),
         @NamedQuery(name="findSystemTransactionVSList", query=
@@ -36,17 +36,17 @@ import static javax.persistence.GenerationType.IDENTITY;
                 "SELECT t FROM TransactionVS t WHERE t.transactionParent is null and t.dateCreated between :dateFrom and :dateTo and t.type not in :typeList"),
         @NamedQuery(name="countTransByTransactionParent", query=
                 "SELECT COUNT(t) FROM TransactionVS t WHERE t.transactionParent =:transactionParent"),
-        @NamedQuery(name="findUserVSTransFromByFromUserAndStateAndDateCreatedAndInList", query=
-                "SELECT t FROM TransactionVS t WHERE (t.fromUserVS =:fromUserVS and t.state =:state " +
+        @NamedQuery(name="findUserTransFromByFromUserAndStateAndDateCreatedAndInList", query=
+                "SELECT t FROM TransactionVS t WHERE (t.fromUser =:fromUser and t.state =:state " +
                         "and t.transactionParent is not null and t.dateCreated between :dateFrom and :dateTo) " +
-                        "OR (t.fromUserVS =:fromUserVS and t.state =:state and t.transactionParent is null " +
+                        "OR (t.fromUser =:fromUser and t.state =:state and t.transactionParent is null " +
                         "and  t.dateCreated between :dateFrom and :dateTo and t.type in (:inList))"),
         @NamedQuery(name="findTransByToUserAndStateAndDateCreatedBetween", query= "SELECT t FROM TransactionVS t " +
-                "WHERE t.toUserVS =:toUserVS and t.state =:state and t.dateCreated between :dateFrom and :dateTo"),
+                "WHERE t.toUser =:toUser and t.state =:state and t.dateCreated between :dateFrom and :dateTo"),
         @NamedQuery(name="findTransByFromUserAndTransactionParentNullAndDateCreatedBetween", query= "SELECT t FROM TransactionVS t " +
-        "WHERE t.fromUserVS =:fromUserVS and t.transactionParent is null and t.dateCreated between :dateFrom and :dateTo"),
+        "WHERE t.fromUser =:fromUser and t.transactionParent is null and t.dateCreated between :dateFrom and :dateTo"),
         @NamedQuery(name="findTransByToUserAndDateCreatedBetween", query= "SELECT t FROM TransactionVS t  WHERE " +
-                "t.toUserVS =:toUserVS and t.dateCreated between :dateFrom and :dateTo")
+                "t.toUser =:toUser and t.dateCreated between :dateFrom and :dateTo")
 })
 public class TransactionVS implements Serializable {
 
@@ -56,7 +56,8 @@ public class TransactionVS implements Serializable {
 
     public enum Source {FROM, TO}
 
-    public enum Type {FROM_BANKVS, FROM_USERVS, FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_ALL_MEMBERS,
+    public enum Type {
+        FROM_BANK, FROM_USER, FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_ALL_MEMBERS,
         CURRENCY_PERIOD_INIT, CURRENCY_PERIOD_INIT_TIME_LIMITED, CURRENCY_REQUEST, CURRENCY_SEND, CURRENCY_CHANGE,
         CANCELLATION, TRANSACTIONVS_INFO; }
 
@@ -81,15 +82,15 @@ public class TransactionVS implements Serializable {
     @JoinColumn(name="transactionParent") private TransactionVS transactionParent;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="fromUserVS") private UserVS fromUserVS;
+    @JoinColumn(name="fromUser") private User fromUser;
 
     //This is to set the data of the Bank client the transaction comes from
     @Column(name="fromUserIBAN") private String fromUserIBAN;
-    @Column(name="fromUser") private String fromUser;
+    @Column(name="fromUserName") private String fromUserName;
 
     @Column(name="toUserIBAN") private String toUserIBAN;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="toUserVS") private UserVS toUserVS;
+    @JoinColumn(name="toUser") private User toUser;
     @OneToOne @JoinColumn(name="currencyBatch")  private CurrencyBatch currencyBatch;
     @Column(name="isTimeLimited") private Boolean isTimeLimited;
     @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
@@ -100,17 +101,17 @@ public class TransactionVS implements Serializable {
 
     @Transient private Map<CurrencyAccount, BigDecimal> accountFromMovements;
     @Transient private Long userId;
-    @Transient private List<String> toUserVSList;
+    @Transient private List<String> toUserList;
 
     public TransactionVS() {}
 
-    public TransactionVS(UserVS fromUserVS, UserVS toUserVS, BigDecimal amount, String currencyCode, String subject,
+    public TransactionVS(User fromUser, User toUser, BigDecimal amount, String currencyCode, String subject,
                          CMSMessage cmsMessage, Type type, State state, TagVS tag) {
         this.amount = amount;
-        this.fromUserVS = fromUserVS;
-        this.fromUserIBAN = fromUserVS.getIBAN();
-        this.toUserVS = toUserVS;
-        this.toUserIBAN = toUserVS.getIBAN();
+        this.fromUser = fromUser;
+        this.fromUserIBAN = fromUser.getIBAN();
+        this.toUser = toUser;
+        this.toUserIBAN = toUser.getIBAN();
         this.cmsMessage = cmsMessage;
         this.subject = subject;
         this.currencyCode = currencyCode;
@@ -119,11 +120,11 @@ public class TransactionVS implements Serializable {
         this.tag = tag;
     }
 
-    public static TransactionVS CURRENCY_SEND(CurrencyBatch batch, UserVS toUserVS, Date validTo,
+    public static TransactionVS CURRENCY_SEND(CurrencyBatch batch, User toUser, Date validTo,
                                               CMSMessage cmsMessage, TagVS tagVS) {
-        TransactionVS transactionVS = BASIC(toUserVS, TransactionVS.Type.CURRENCY_SEND, null, batch.getBatchAmount(),
+        TransactionVS transactionVS = BASIC(toUser, TransactionVS.Type.CURRENCY_SEND, null, batch.getBatchAmount(),
                 batch.getCurrencyCode(), batch.getSubject(), validTo, cmsMessage, batch.getTagVS());
-        transactionVS.setToUserIBAN(batch.getToUserVS().getIBAN());
+        transactionVS.setToUserIBAN(batch.getToUser().getIBAN());
         transactionVS.setCurrencyBatch(batch);
         transactionVS.setState(TransactionVS.State.OK);
         transactionVS.setTag(tagVS);
@@ -146,20 +147,20 @@ public class TransactionVS implements Serializable {
         return transactionVS;
     }
 
-    public static TransactionVS USERVS(UserVS userVS, UserVS toUserVS, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
-                                       BigDecimal amount, String currencyCode, String subject, Date validTo, CMSMessage cmsMessage, TagVS tag) {
-        TransactionVS transactionVS = BASIC(toUserVS, type, accountFromMovements, amount, currencyCode, subject,
+    public static TransactionVS USER(User user, User toUser, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
+                                     BigDecimal amount, String currencyCode, String subject, Date validTo, CMSMessage cmsMessage, TagVS tag) {
+        TransactionVS transactionVS = BASIC(toUser, type, accountFromMovements, amount, currencyCode, subject,
                 validTo, cmsMessage, tag);
-        transactionVS.setFromUserVS(userVS);
-        transactionVS.setFromUserIBAN(userVS.getIBAN());
+        transactionVS.setFromUser(user);
+        transactionVS.setFromUserIBAN(user.getIBAN());
         return transactionVS;
     }
 
-    public static TransactionVS BASIC(UserVS toUserVS, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
+    public static TransactionVS BASIC(User toUser, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
                                       BigDecimal amount, String currencyCode, String subject, Date validTo, CMSMessage cmsMessage, TagVS tag) {
         TransactionVS transactionVS = new TransactionVS();
-        transactionVS.setToUserVS(toUserVS);
-        transactionVS.setToUserIBAN(toUserVS.getIBAN());
+        transactionVS.setToUser(toUser);
+        transactionVS.setToUserIBAN(toUser.getIBAN());
         transactionVS.setType(type);
         transactionVS.setAccountFromMovements(accountFromMovements);
         transactionVS.setAmount(amount);
@@ -172,13 +173,13 @@ public class TransactionVS implements Serializable {
         return transactionVS;
     }
 
-    public static TransactionVS FROM_BANKVS(BankVS bankVS, String bankClientIBAN, String bankClientName, UserVS toUser,
-                                            BigDecimal amount, String currencyCode, String subject, Date validTo, CMSMessage cmsMessage, TagVS tag) {
+    public static TransactionVS FROM_BANK(Bank bank, String bankClientIBAN, String bankClientName, User toUser,
+              BigDecimal amount, String currencyCode, String subject, Date validTo, CMSMessage cmsMessage, TagVS tag) {
         TransactionVS transactionVS = new TransactionVS();
-        transactionVS.setFromUserVS(bankVS);
+        transactionVS.setFromUser(bank);
         transactionVS.setFromUserIBAN(bankClientIBAN);
-        transactionVS.setFromUser(bankClientName);
-        transactionVS.setToUserVS(toUser);
+        transactionVS.setFromUserName(bankClientName);
+        transactionVS.setToUser(toUser);
         transactionVS.setToUserIBAN(toUser.getIBAN());
         transactionVS.setAmount(amount);
         transactionVS.setCurrencyCode(currencyCode);
@@ -187,7 +188,7 @@ public class TransactionVS implements Serializable {
         transactionVS.setCmsMessage(cmsMessage);
         transactionVS.setTag(tag);
         transactionVS.setState(TransactionVS.State.OK);
-        transactionVS.setType(TransactionVS.Type.FROM_BANKVS);
+        transactionVS.setType(TransactionVS.Type.FROM_BANK);
         return transactionVS;
     }
 
@@ -201,7 +202,7 @@ public class TransactionVS implements Serializable {
         transaction.setTag(requestDto.getTagVS());
         transaction.setSubject(subject);
         transaction.setCmsMessage(requestDto.getCmsMessage());
-        transaction.setFromUserVS(requestDto.getCmsMessage().getUserVS());
+        transaction.setFromUser(requestDto.getCmsMessage().getUser());
         transaction.setAccountFromMovements(accountFromMovements);
         return transaction;
     }
@@ -230,20 +231,20 @@ public class TransactionVS implements Serializable {
         this.cancellationCMS = cancellationCMS;
     }
 
-    public UserVS getFromUserVS() {
-        return fromUserVS;
+    public User getFromUser() {
+        return fromUser;
     }
 
-    public void setFromUserVS(UserVS fromUserVS) {
-        this.fromUserVS = fromUserVS;
+    public void setFromUser(User fromUser) {
+        this.fromUser = fromUser;
     }
 
-    public UserVS getToUserVS() {
-        return toUserVS;
+    public User getToUser() {
+        return toUser;
     }
 
-    public void setToUserVS(UserVS toUserVS) {
-        this.toUserVS = toUserVS;
+    public void setToUser(User toUser) {
+        this.toUser = toUser;
     }
 
     public Date getDateCreated() {
@@ -342,12 +343,12 @@ public class TransactionVS implements Serializable {
         this.toUserIBAN = toUserIBAN;
     }
 
-    public String getFromUser() {
-        return fromUser;
+    public String getFromUserName() {
+        return fromUserName;
     }
 
-    public void setFromUser(String fromUser) {
-        this.fromUser = fromUser;
+    public void setFromUserName(String fromUser) {
+        this.fromUserName = fromUser;
     }
 
 
@@ -359,12 +360,12 @@ public class TransactionVS implements Serializable {
         this.isTimeLimited = isTimeLimited;
     }
 
-    public List<String> getToUserVSList() {
-        return toUserVSList;
+    public List<String> getToUserList() {
+        return toUserList;
     }
 
-    public void setToUserVSList(List<String> toUserVSList) {
-        this.toUserVSList = toUserVSList;
+    public void setToUserList(List<String> toUserList) {
+        this.toUserList = toUserList;
     }
 
     public TagVS getTag() {
@@ -390,11 +391,11 @@ public class TransactionVS implements Serializable {
     }
 
     public static TransactionVS generateTriggeredTransaction(TransactionVS transactionParent, BigDecimal amount,
-             UserVS toUser, String toUserIBAN) {
+                                                             User toUser, String toUserIBAN) {
         TransactionVS result = new TransactionVS();
         result.amount = amount;
         result.cmsMessage = transactionParent.cmsMessage;
-        result.fromUserVS = transactionParent.fromUserVS;
+        result.fromUser = transactionParent.fromUser;
         result.fromUser = transactionParent.fromUser;
         result.fromUserIBAN = transactionParent.fromUserIBAN;
         result.state = transactionParent.state;
@@ -404,7 +405,7 @@ public class TransactionVS implements Serializable {
         result.type = transactionParent.type;
         result.tag = transactionParent.tag;
         result.transactionParent = transactionParent;
-        result.toUserVS = toUser;
+        result.toUser = toUser;
         result.toUserIBAN = toUserIBAN;
         return result;
     }

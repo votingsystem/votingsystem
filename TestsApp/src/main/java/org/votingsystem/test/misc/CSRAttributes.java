@@ -40,7 +40,7 @@ public class CSRAttributes {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getBytes());
-        CertExtensionDto dto = CertUtils.getCertExtensionData(CertExtensionDto.class, csr, ContextVS.DEVICEVS_OID);
+        CertExtensionDto dto = CertUtils.getCertExtensionData(CertExtensionDto.class, csr, ContextVS.DEVICE_OID);
         log.info("dto: " + dto.toString());
         PublicKey publicKey = CertUtils.getPublicKey(csr);
         SubjectKeyIdentifier subjectKeyIdentifier = new BcX509ExtensionUtils().createSubjectKeyIdentifier(

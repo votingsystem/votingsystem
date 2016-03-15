@@ -1,7 +1,7 @@
 package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.web.ejb.DAOBean;
@@ -25,19 +25,19 @@ public class CurrencyAccountBean {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
 
-    public CurrencyAccount checkUserVSAccount(UserVS userVS) throws Exception {
-        Query query = dao.getEM().createNamedQuery("findAccountByUser").setParameter("userVS", userVS);
+    public CurrencyAccount checkUserAccount(User user) throws Exception {
+        Query query = dao.getEM().createNamedQuery("findAccountByUser").setParameter("user", user);
         CurrencyAccount userAccount = dao.getSingleResult(CurrencyAccount.class, query);
         if(userAccount == null) {
-            userAccount = dao.persist(new CurrencyAccount(userVS, BigDecimal.ZERO, Currency.getInstance("EUR")
+            userAccount = dao.persist(new CurrencyAccount(user, BigDecimal.ZERO, Currency.getInstance("EUR")
                     .getCurrencyCode(), config.getTag(TagVS.WILDTAG)));
         }
         return userAccount;
     }
 
-    public Map<String, Map<String, Map<String, BigDecimal>>> getAccountsBalanceMap(UserVS userVS) {
+    public Map<String, Map<String, Map<String, BigDecimal>>> getAccountsBalanceMap(User user) {
         Query query = dao.getEM().createNamedQuery("findAccountByTypeAndUser").setParameter(
-                "type", CurrencyAccount.Type.SYSTEM).setParameter("userVS", userVS);
+                "type", CurrencyAccount.Type.SYSTEM).setParameter("user", user);
         List<CurrencyAccount> currencyAccounts = query.getResultList();
         Map<String, Map<String, Map<String, BigDecimal>>> result = new HashMap<>();
         for(CurrencyAccount account: currencyAccounts) {
@@ -62,12 +62,12 @@ public class CurrencyAccountBean {
     }
 
     //Method that checks that the calculated balance from transactions corresponds with the accounts state
-    public void checkBalancesWithCurrencyAccounts(UserVS userVS, Map<String, Map<String, BigDecimal>> balancesMap) throws ExceptionVS {
-        Map<String, Map<String, Map<String, BigDecimal>>> accountsMap = getAccountsBalanceMap(userVS);
-        if(accountsMap.keySet().size() > 1) throw new ExceptionVS("UserVS: " + userVS.getId() + "has " +
+    public void checkBalancesWithCurrencyAccounts(User user, Map<String, Map<String, BigDecimal>> balancesMap) throws ExceptionVS {
+        Map<String, Map<String, Map<String, BigDecimal>>> accountsMap = getAccountsBalanceMap(user);
+        if(accountsMap.keySet().size() > 1) throw new ExceptionVS("User: " + user.getId() + "has " +
                 accountsMap.keySet().size() + " accounts");
         if(accountsMap.keySet().isEmpty()) return;
-        //TODO - bucle when UserVS could have multiple accounts
+        //TODO - bucle when User could have multiple accounts
         Map<String, Map<String, BigDecimal>> mainAccountMap = accountsMap.values().iterator().next();
         for(String currency : mainAccountMap.keySet()) {
             BigDecimal wildTagExpendedInTags = BigDecimal.ZERO;
@@ -82,24 +82,24 @@ public class CurrencyAccountBean {
                             wildTagExpendedInTags = wildTagExpendedInTags.add(tagBalanceAmount.subtract(tagAccountAmount));
                     } else {
                         if(tagAccountAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS(
-                                "tagAccountAmount Error with userVS " + userVS.getId() + " - " + tag + " - " +
+                                "tagAccountAmount Error with user " + user.getId() + " - " + tag + " - " +
                                 currency + " - tagAccountAmount: " + tagAccountAmount);
                     }
                 }
             } else {//check if there's a tag with negative balance
                 for(String tag: mainAccountMap.get(currency).keySet()) {
                     BigDecimal tagAccountAmount = mainAccountMap.get(currency).get(tag);
-                    if(tagAccountAmount.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS("Error with userVS: " +
-                            userVS.getId() + " - tag " + tag + " - tagAccountAmount: " + tagAccountAmount + " - currency: " + currency +
+                    if(tagAccountAmount.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS("Error with user: " +
+                            user.getId() + " - tag " + tag + " - tagAccountAmount: " + tagAccountAmount + " - currency: " + currency +
                             " - accounts: " + accountsMap + " - balance:" + balancesMap);
                 }
             }
             //check WILDTAG balance result match with stored in account
             BigDecimal wildTagAccountAmount = mainAccountMap.get(currency).get(TagVS.WILDTAG);
             if(wildTagAccountAmount.compareTo(wildTagBalance.subtract(wildTagExpendedInTags)) != 0) throw new ExceptionVS(
-                    format("ERROR - wildTag mismatch -  userVS: ''{0}'' - currency: ''{1}'' - wildTagAccountAmount: ''{2}'' " +
+                    format("ERROR - wildTag mismatch -  user: ''{0}'' - currency: ''{1}'' - wildTagAccountAmount: ''{2}'' " +
                             "- wildTagExpendedInTags: ''{3}'' - wildTagBalance: ''{4}'' - accounts: ''{5}''",
-                            userVS.getId(), currency, wildTagAccountAmount, wildTagExpendedInTags, wildTagBalance, accountsMap));
+                            user.getId(), currency, wildTagAccountAmount, wildTagExpendedInTags, wildTagBalance, accountsMap));
 
         }
     }

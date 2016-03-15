@@ -1,8 +1,8 @@
 package org.votingsystem.web.util;
 
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.voting.ControlCenterVS;
+import org.votingsystem.model.User;
+import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.EnvironmentVS;
 
@@ -40,9 +40,9 @@ public interface ConfigVS  {
 
     public File getServerDir();
 
-    public UserVS createIBAN(UserVS userVS) throws ValidationExceptionVS;
+    public User createIBAN(User user) throws ValidationExceptionVS;
 
-    public UserVS getSystemUser();
+    public User getSystemUser();
 
     public String validateIBAN(String IBAN) throws Exception;
 
@@ -50,6 +50,6 @@ public interface ConfigVS  {
 
     public String getBranchCode();
 
-    public ControlCenterVS getControlCenter();
+    public ControlCenter getControlCenter();
 
 }

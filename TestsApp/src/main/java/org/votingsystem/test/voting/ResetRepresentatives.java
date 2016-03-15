@@ -2,11 +2,11 @@ package org.votingsystem.test.voting;
 
 
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.dto.ActorDto;
+import org.votingsystem.model.Actor;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.voting.AccessControlVS;
+import org.votingsystem.model.User;
+import org.votingsystem.model.voting.AccessControl;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.*;
 
@@ -22,12 +22,12 @@ public class ResetRepresentatives {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        ActorVSDto actorVSDto = HttpHelper.getInstance().getData(ActorVSDto.class,
-                ActorVS.getServerInfoURL("https://192.168.1.5/AccessControl"), MediaTypeVS.JSON);
-        AccessControlVS accessControlVS = (AccessControlVS) actorVSDto.getActorVS();
-        ContextVS.getInstance().setAccessControl(accessControlVS);
-        SignatureService superUserSignatureService = SignatureService.getUserVSSignatureService(
-                "AccessControl_07553172H", UserVS.Type.USER);
+        ActorDto actorDto = HttpHelper.getInstance().getData(ActorDto.class,
+                Actor.getServerInfoURL("https://192.168.1.5/AccessControl"), MediaTypeVS.JSON);
+        AccessControl accessControl = (AccessControl) actorDto.getActor();
+        ContextVS.getInstance().setAccessControl(accessControl);
+        SignatureService superUserSignatureService = SignatureService.getUserSignatureService(
+                "AccessControl_07553172H", User.Type.USER);
         Map dataMap = new HashMap<>();
         dataMap.put("UUID", UUID.randomUUID().toString());
         CMSSignedMessage cmsMessage = superUserSignatureService.signDataWithTimeStamp(

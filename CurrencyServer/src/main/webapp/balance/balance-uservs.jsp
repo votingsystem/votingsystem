@@ -5,7 +5,7 @@
 <link href="../transactionVS/transactionvs-data.vsp" rel="import"/>
 <link href="../transactionVS/transactionvs-list-balance.vsp" rel="import"/>
 
-<dom-module name="balance-uservs">
+<dom-module name="balance-user">
     <template>
         <style>
             .pageTitle {color: #6c0404; font-weight: bold; font-size: 1.3em; text-align: center;
@@ -20,7 +20,7 @@
         <div style="padding: 0 20px;">
             <div class="horizontal layout center center-justified">
                 <div class="flex"></div>
-                <div id="caption" class="pageTitle" on-click="goToUserVSPage"><span>{{caption}}</span> - <span>{{userVSName}}</span></div>
+                <div id="caption" class="pageTitle" on-click="goToUserPage"><span>{{caption}}</span> - <span>{{userName}}</span></div>
                 <div class="flex" style="font-size: 0.7em; color: #888; font-weight: normal; text-align: right;">{{description}}</div>
             </div>
             <div class="horizontal layout center center-justified" style="text-align: center;font-weight: bold; color: #888; margin:0 0 8px 0;">
@@ -77,7 +77,7 @@
     </template>
     <script>
         Polymer({
-            is:'balance-uservs',
+            is:'balance-user',
             properties: {
                 url:{type:String, observer:'getHTTP'},
                 balance: {type:Object, observer:'balanceChanged'},
@@ -128,8 +128,8 @@
                     default: return tagName
                 }
             },
-            goToUserVSPage:function() {
-                page.show(vs.contextURL + "/rest/userVS/id/" + this.balance.userVS.id)
+            goToUserPage:function() {
+                page.show(vs.contextURL + "/rest/user/id/" + this.balance.user.id)
             },
             getTimeLimitedForTagMsg: function(currency, tag) {
                 var expendedFromTag = 0
@@ -174,23 +174,23 @@
             balanceChanged:function() {
                 console.log(this.tagName + " - initBalance typeof: " + typeof balance)
                 console.log(this.tagName + " - this.balance: " + this.balance)
-                this.description = "NIF:" + this.balance.userVS.nif + " - IBAN: " + this.balance.userVS.iban
-                this.userVSName = this.balance.userVS.name
-                if('SYSTEM' == this.balance.userVS.type) {
+                this.description = "NIF:" + this.balance.user.nif + " - IBAN: " + this.balance.user.iban
+                this.userName = this.balance.user.name
+                if('SYSTEM' == this.balance.user.type) {
                     this.caption = "${msg.systemLbl}"
-                    this.description = "IBAN: " + this.balance.userVS.iban
+                    this.description = "IBAN: " + this.balance.user.iban
                 }
-                else if('BANKVS' == this.balance.userVS.type) {
-                    this.caption = "${msg.bankVSLbl}"
+                else if('BANK' == this.balance.user.type) {
+                    this.caption = "${msg.bankLbl}"
                     this.$.balanceFromItem.caption = "${msg.contributionsLbl}"
                 }
-                else if('GROUP' == this.balance.userVS.type) {
+                else if('GROUP' == this.balance.user.type) {
                     this.caption = "${msg.groupLbl}"
-                    this.description = "IBAN: " + this.balance.userVS.iban
-                    this.balance.userVS.nif = ""
+                    this.description = "IBAN: " + this.balance.user.iban
+                    this.balance.user.nif = ""
                 }
-                else if('USER' == this.balance.userVS.type) {
-                    this.userVSName = this.balance.userVS.firstName + " " + this.balance.userVS.lastName
+                else if('USER' == this.balance.user.type) {
+                    this.userName = this.balance.user.firstName + " " + this.balance.user.lastName
                     this.caption = "${msg.userLbl}"
                 }
             },

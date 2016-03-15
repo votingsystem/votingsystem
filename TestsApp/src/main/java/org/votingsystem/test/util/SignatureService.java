@@ -7,13 +7,12 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.cms.CMSGenerator;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.currency.GroupVSDto;
-import org.votingsystem.dto.currency.SubscriptionVSDto;
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.dto.currency.GroupDto;
+import org.votingsystem.dto.currency.SubscriptionDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.model.currency.SubscriptionVS;
+import org.votingsystem.model.currency.Subscription;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
 import org.votingsystem.util.crypto.CMSUtils;
@@ -49,7 +48,7 @@ public class SignatureService {
     private Encryptor encryptor;
     private static SignatureService authoritySignatureService;
     private KeyStore keyStore;
-    private UserVS userVS;
+    private User user;
 
 
     public SignatureService(KeyStore keyStore, String keyAlias, String password) throws Exception {
@@ -76,22 +75,22 @@ public class SignatureService {
     public static SignatureService getAuthoritySignatureService() throws Exception {
         if(authoritySignatureService != null) return authoritySignatureService;
         String keyStorePath = ContextVS.getInstance().getProperty("authorityKeyStorePath");
-        String keyAlias = ContextVS.getInstance().getProperty("userVSKeyAlias");
-        String password = ContextVS.getInstance().getProperty("userVSKeyPassword");
+        String keyAlias = ContextVS.getInstance().getProperty("userKeyAlias");
+        String password = ContextVS.getInstance().getProperty("userKeyPassword");
         KeyStore keyStore = loadKeyStore(keyStorePath, password);
         authoritySignatureService = new SignatureService(keyStore, keyAlias, password);
-        signatureServices.put(authoritySignatureService.getUserVS().getNif(), authoritySignatureService);
+        signatureServices.put(authoritySignatureService.getUser().getNif(), authoritySignatureService);
         return authoritySignatureService;
     }
 
-    public static SignatureService getUserVSSignatureService(String nif, UserVS.Type userType) throws Exception {
+    public static SignatureService getUserSignatureService(String nif, User.Type userType) throws Exception {
         SignatureService signatureService = signatureServices.get(nif);
         if(signatureService != null)
                 return signatureService;
         String keyStorePath = format("./certs/Cert_{0}_{1}.jks", userType.toString(), nif);
         log.info("loading keystore: " + keyStorePath);
-        String keyAlias = ContextVS.getInstance().getProperty("userVSKeyAlias", "userVSKeyAlias");
-        String password = ContextVS.getInstance().getProperty("userVSKeyPassword", "userVSKeyPassword");
+        String keyAlias = ContextVS.getInstance().getProperty("userKeyAlias", "userKeyAlias");
+        String password = ContextVS.getInstance().getProperty("userKeyPassword", "userKeyPassword");
         KeyStore keyStore = loadKeyStore(keyStorePath, password);
         signatureService = new SignatureService(keyStore, keyAlias, password);
         signatureServices.put(nif, signatureService);
@@ -105,9 +104,9 @@ public class SignatureService {
         return signatureService;
     }
 
-    public UserVS getUserVS() {
-        if(userVS == null) userVS = UserVS.FROM_X509_CERT(certSigner);
-        return userVS;
+    public User getUser() {
+        if(user == null) user = User.FROM_X509_CERT(certSigner);
+        return user;
     }
 
     public  KeyStore getKeyStore() {
@@ -181,12 +180,12 @@ public class SignatureService {
                 "GIVENNAME=FirstName_" + userNIF + " ,SURNAME=lastName_" + userNIF + ", SERIALNUMBER=" + userNIF);
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, ContextVS.PASSWORD.toCharArray());
         String userSubPath = StringUtils.getUserDirPath(userNIF);
-        ContextVS.getInstance().copyFile(keyStoreBytes, userSubPath,  "userVS_" + userNIF + ".jks");
+        ContextVS.getInstance().copyFile(keyStoreBytes, userSubPath,  "user_" + userNIF + ".jks");
         return keyStore;
     }
 
-    public List<DNIBundle> subscribeUsers(GroupVSDto groupVSDto, SimulationData simulationData,
-                            CurrencyServer currencyServer) throws Exception {
+    public List<DNIBundle> subscribeUsers(GroupDto groupDto, SimulationData simulationData,
+                                          CurrencyServer currencyServer) throws Exception {
         log.info("subscribeUser - Num. Users:" + simulationData.getNumRequestsProjected());
         List<DNIBundle> userList = new ArrayList<>();
         int fromFirstUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue();
@@ -196,45 +195,45 @@ public class SignatureService {
             int userIndex = new Long(simulationData.getUserBaseSimulationData().getAndIncrementUserIndex()).intValue();
             String userNif = NifUtils.getNif(userIndex);
             KeyStore mockDnie = generateKeyStore(userNif);
-            groupVSDto.setUUID(UUID.randomUUID().toString());
+            groupDto.setUUID(UUID.randomUUID().toString());
             CMSGenerator cmsGenerator = new CMSGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
                     ContextVS.PASSWORD.toCharArray(), ContextVS.SIGNATURE_ALGORITHM);
             userList.add(new DNIBundle(userNif, mockDnie));
-            byte[] contentToSign = JSON.getMapper().writeValueAsBytes(groupVSDto);
+            byte[] contentToSign = JSON.getMapper().writeValueAsBytes(groupDto);
             TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(cmsGenerator.getSignatureMechanism() ,contentToSign);
             CMSSignedMessage cmsMessage = cmsGenerator.signDataWithTimeStamp(contentToSign, timeStampToken);
             ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
-                    currencyServer.getGroupVSSubscriptionServiceURL(simulationData.getGroupId()));
+                    currencyServer.getGroupSubscriptionServiceURL(simulationData.getGroupId()));
             if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
                 throw new org.votingsystem.throwable.ExceptionVS("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
             } else simulationData.getAndIncrementNumRequestsOK();
             if((i % 50) == 0) log.info("Subscribed " + i + " of " +
-                    simulationData.getUserBaseSimulationData().getNumRequestsProjected() + " users to groupVS");
+                    simulationData.getUserBaseSimulationData().getNumRequestsProjected() + " users to group");
         }
         log.info("subscribeUser - '" + userList.size() + "' user subscribed");
         return userList;
     }
 
-    public Collection<SubscriptionVSDto> validateUserVSSubscriptions(Long groupVSId, CurrencyServer currencyServer)
+    public Collection<SubscriptionDto> validateUserSubscriptions(Long groupId, CurrencyServer currencyServer)
             throws Exception {
-        log.info("validateUserVSSubscriptions");
-        ResultListDto<SubscriptionVSDto> subscriptionVSDtoList = HttpHelper.getInstance().getData(new TypeReference<ResultListDto<SubscriptionVSDto>>(){},
-                currencyServer.getGroupVSUsersServiceURL( groupVSId, 1000, 0, SubscriptionVS.State.PENDING, UserVS.State.ACTIVE),
+        log.info("validateUserSubscriptions");
+        ResultListDto<SubscriptionDto> subscriptionDtoList = HttpHelper.getInstance().getData(new TypeReference<ResultListDto<SubscriptionDto>>(){},
+                currencyServer.getGroupUsersServiceURL( groupId, 1000, 0, Subscription.State.PENDING, User.State.ACTIVE),
                 MediaTypeVS.JSON);
-        for(SubscriptionVSDto subscriptionVSDto : subscriptionVSDtoList.getResultList()) {
-            if(subscriptionVSDto.getState() == SubscriptionVS.State.PENDING) {
-                subscriptionVSDto.loadActivationRequest();
+        for(SubscriptionDto subscriptionDto : subscriptionDtoList.getResultList()) {
+            if(subscriptionDto.getState() == Subscription.State.PENDING) {
+                subscriptionDto.loadActivationRequest();
             }
         }
-        UserVS userVS = UserVS.FROM_X509_CERT(certSigner);
-        for (SubscriptionVSDto subscriptionVSDto : subscriptionVSDtoList.getResultList()) {
-            CMSSignedMessage cmsMessage = signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(subscriptionVSDto));
+        User user = User.FROM_X509_CERT(certSigner);
+        for (SubscriptionDto subscriptionDto : subscriptionDtoList.getResultList()) {
+            CMSSignedMessage cmsMessage = signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(subscriptionDto));
             ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
-                    currencyServer.getGroupVSUsersActivationServiceURL());
+                    currencyServer.getGroupUsersActivationServiceURL());
             if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(
                     responseVS.getMessage());
         }
-        return subscriptionVSDtoList.getResultList();
+        return subscriptionDtoList.getResultList();
     }
 
 }

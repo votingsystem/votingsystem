@@ -6,7 +6,7 @@ import org.votingsystem.dto.voting.VoteCancelerDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.*;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -48,7 +48,7 @@ public class VoteBean {
         eventVS = dao.merge(eventVS);
         Vote voteRequest = cmsMessage.getCMS().getVote();
         CertificateVS voteCertificate = voteRequest.getCertificateVS();
-        FieldEventVS optionSelected = eventVS.checkOptionId(voteRequest.getOptionSelected().getId());
+        FieldEvent optionSelected = eventVS.checkOptionId(voteRequest.getOptionSelected().getId());
         if (optionSelected == null) throw new ValidationExceptionVS(messages.get("voteOptionNotFoundErrorMsg",
                 voteRequest.getOptionSelected().getId().toString()));
         CMSSignedMessage cmsMessageResp = cmsBean.addSignature(cmsMessage.getCMS());
@@ -59,7 +59,7 @@ public class VoteBean {
 
     public VoteCanceler processCancel (CMSMessage cmsMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS signer = cmsMessage.getUserVS();
+        User signer = cmsMessage.getUser();
         CMSSignedMessage cmsSignedMessage = cmsMessage.getCMS();
         VoteCancelerDto request = cmsMessage.getSignedContent(VoteCancelerDto.class);
         request.validate();
@@ -84,7 +84,7 @@ public class VoteBean {
                 DateUtils.getDateStr(vote.getEventVS().getDateBegin()),
                 DateUtils.getDateStr(vote.getEventVS().getDateFinish())));
         CMSSignedMessage cmsSignedMessageReq = cmsBean.addSignature(cmsSignedMessage);
-        String cancelerServiceURL = vote.getEventVS().getControlCenterVS().getVoteCancelerURL();
+        String cancelerServiceURL = vote.getEventVS().getControlCenter().getVoteCancelerURL();
         ResponseVS responseVSControlCenter = HttpHelper.getInstance().sendData(cmsSignedMessageReq.toPEM(),
                 ContentTypeVS.JSON_SIGNED, cancelerServiceURL);
         if (ResponseVS.SC_OK == responseVSControlCenter.getStatusCode()) {

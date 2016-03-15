@@ -2,9 +2,9 @@ package org.votingsystem.web.accesscontrol.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
@@ -43,12 +43,12 @@ public class SearchResource {
                           @DefaultValue("0") @QueryParam("offset") int offset,
                           @DefaultValue("100") @QueryParam("max") int max,
                           @Context Request req, @Context HttpServletResponse resp) throws JsonProcessingException {
-        Query query = dao.getEM().createQuery("select u from UserVS u where u.type =:type and (u.firstName like :searchText " +
+        Query query = dao.getEM().createQuery("select u from User u where u.type =:type and (u.firstName like :searchText " +
                 "or u.lastName like :searchText or u.description like :searchText)").setParameter(
-                "type", UserVS.Type.REPRESENTATIVE).setParameter("searchText", "%" + searchText + "%");
-        List<UserVS> representativeList = query.getResultList();
-        List<UserVSDto> resultList = new ArrayList<>();
-        for(UserVS representative : representativeList) {
+                "type", User.Type.REPRESENTATIVE).setParameter("searchText", "%" + searchText + "%");
+        List<User> representativeList = query.getResultList();
+        List<UserDto> resultList = new ArrayList<>();
+        for(User representative : representativeList) {
             resultList.add(representativeBean.getRepresentativeDto(representative));
         }
         Map representativeMap = new HashMap<>();

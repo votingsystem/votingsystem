@@ -1,7 +1,7 @@
 package org.votingsystem.web.timestamp.jaxrs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.Actor;
 import org.votingsystem.service.TimeStampService;
 import org.votingsystem.util.JSON;
 import org.votingsystem.web.util.ConfigVS;
@@ -33,7 +33,7 @@ public class ServerInfoResource {
     @GET @Produces(MediaType.APPLICATION_JSON)
     public String doGet(@Context Request req, @Context HttpServletResponse resp) throws URISyntaxException, JsonProcessingException {
         HashMap serverInfo = new HashMap();
-        serverInfo.put("serverType", ActorVS.Type.TIMESTAMP_SERVER);
+        serverInfo.put("serverType", Actor.Type.TIMESTAMP_SERVER);
         serverInfo.put("certChainPEM", new String(timeStampService.getSigningCertChainPEMBytes()));
         serverInfo.put("serverURL", config.getContextURL());
         serverInfo.put("environmentMode", config.getMode());

@@ -2,15 +2,15 @@ package org.votingsystem.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.votingsystem.dto.ActorVSDto;
+import org.votingsystem.dto.ActorDto;
 import org.votingsystem.dto.CertExtensionDto;
-import org.votingsystem.dto.DeviceVSDto;
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.dto.DeviceDto;
+import org.votingsystem.model.Actor;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.model.voting.AccessControlVS;
-import org.votingsystem.model.voting.ControlCenterVS;
+import org.votingsystem.model.voting.AccessControl;
+import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.KeyStoreExceptionVS;
 import org.votingsystem.util.crypto.CertUtils;
@@ -55,7 +55,7 @@ public class ContextVS {
     public static final String REPRESENTATIVE_VOTE_OID                 = VOTING_SYSTEM_BASE_OID + 1;
     public static final String ANONYMOUS_REPRESENTATIVE_DELEGATION_OID = VOTING_SYSTEM_BASE_OID + 2;
     public static final String CURRENCY_OID                            = VOTING_SYSTEM_BASE_OID + 3;
-    public static final String DEVICEVS_OID                            = VOTING_SYSTEM_BASE_OID + 4;
+    public static final String DEVICE_OID                              = VOTING_SYSTEM_BASE_OID + 4;
     public static final String ANONYMOUS_CERT_OID                      = VOTING_SYSTEM_BASE_OID + 5;
 
     public static final int KEY_SIZE = 2048;
@@ -113,12 +113,12 @@ public class ContextVS {
     private ResourceBundle resBundle;
     private ResourceBundle parentBundle;
     private Properties settings;
-    private UserVS userVS;
+    private User user;
     private CurrencyServer currencyServer;
-    private AccessControlVS accessControl;
-    private ControlCenterVS controlCenter;
-    private ActorVS defaultServer;
-    private DeviceVSDto connectedDevice;
+    private AccessControl accessControl;
+    private ControlCenter controlCenter;
+    private Actor defaultServer;
+    private DeviceDto connectedDevice;
     private static ContextVS INSTANCE;
 
     public ContextVS(String localizatedMessagesFileName, String localeParam) {
@@ -219,12 +219,12 @@ public class ContextVS {
         return FileUtils.getBytesFromStream(input);
     }
 
-    public void setSessionUser(UserVS userVS) {
-        log.info("setSessionUser - nif: " + userVS.getNif());
-        this.userVS = userVS;
+    public void setSessionUser(User user) {
+        log.info("setSessionUser - nif: " + user.getNif());
+        this.user = user;
     }
 
-    public UserVS getSessionUser() { return userVS; }
+    public User getSessionUser() { return user; }
 
     public Properties getSettings() {
         FileInputStream input = null;
@@ -286,31 +286,31 @@ public class ContextVS {
         }
     }
 
-    public ResponseVS<ActorVS> checkServer(String serverURL) throws Exception {
+    public ResponseVS<Actor> checkServer(String serverURL) throws Exception {
         log.info(" - checkServer: " + serverURL);
-        ActorVS actorVS = null;
-        if(currencyServer != null && currencyServer.getServerURL().equals(serverURL)) actorVS = currencyServer;
-        else if(accessControl != null && accessControl.getServerURL().equals(serverURL)) actorVS = accessControl;
-        else if(controlCenter != null && controlCenter.getServerURL().equals(serverURL)) actorVS = controlCenter;
-        if (actorVS == null) {
-            ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(serverURL), ContentTypeVS.JSON);
+        Actor actor = null;
+        if(currencyServer != null && currencyServer.getServerURL().equals(serverURL)) actor = currencyServer;
+        else if(accessControl != null && accessControl.getServerURL().equals(serverURL)) actor = accessControl;
+        else if(controlCenter != null && controlCenter.getServerURL().equals(serverURL)) actor = controlCenter;
+        if (actor == null) {
+            ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(serverURL), ContentTypeVS.JSON);
             if (ResponseVS.SC_OK == responseVS.getStatusCode()) {
-                actorVS = ((ActorVSDto) responseVS.getMessage(ActorVSDto.class)).getActorVS();
-                responseVS.setData(actorVS);
+                actor = ((ActorDto) responseVS.getMessage(ActorDto.class)).getActor();
+                responseVS.setData(actor);
                 log.log(Level.INFO,"checkServer - adding " + serverURL.trim() + " to sever map");
-                switch (actorVS.getType()) {
+                switch (actor.getType()) {
                     case ACCESS_CONTROL:
-                        setAccessControl((AccessControlVS) actorVS);
+                        setAccessControl((AccessControl) actor);
                         break;
                     case CURRENCY:
-                        setCurrencyServer((CurrencyServer) actorVS);
-                        setTimeStampServerCert(actorVS.getTimeStampCert());
+                        setCurrencyServer((CurrencyServer) actor);
+                        setTimeStampServerCert(actor.getTimeStampCert());
                         break;
                     case CONTROL_CENTER:
-                        setControlCenter((ControlCenterVS) actorVS);
+                        setControlCenter((ControlCenter) actor);
                         break;
                     default:
-                        log.info("Unprocessed actor:" + actorVS.getType());
+                        log.info("Unprocessed actor:" + actor.getType());
                 }
             } else if (ResponseVS.SC_NOT_FOUND == responseVS.getStatusCode()) {
                 responseVS.setMessage(ContextVS.getMessage("serverNotFoundMsg", serverURL.trim()));
@@ -318,7 +318,7 @@ public class ContextVS {
             return responseVS;
         } else {
             ResponseVS responseVS = new ResponseVS(ResponseVS.SC_OK);
-            responseVS.setData(actorVS);
+            responseVS.setData(actor);
             return responseVS;
         }
     }
@@ -331,8 +331,8 @@ public class ContextVS {
         return sessionMap.get(UUID);
     }
     public WebSocketSession getWSSession(Long deviceId) {
-        List<WebSocketSession> result = sessionMap.entrySet().stream().filter(k ->  k.getValue().getDeviceVS() != null &&
-                k.getValue().getDeviceVS().getId() == deviceId).map(k -> k.getValue()).collect(toList());
+        List<WebSocketSession> result = sessionMap.entrySet().stream().filter(k ->  k.getValue().getDevice() != null &&
+                k.getValue().getDevice().getId() == deviceId).map(k -> k.getValue()).collect(toList());
         return result.isEmpty()? null : result.get(0);
     }
 
@@ -356,7 +356,7 @@ public class ContextVS {
         }
     }
 
-    public UserVS saveUserKeyStore(KeyStore keyStore, char[] password) throws Exception{
+    public User saveUserKeyStore(KeyStore keyStore, char[] password) throws Exception{
         byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password);
         File mainKeyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
         if(mainKeyStoreFile.exists()) {
@@ -365,31 +365,31 @@ public class ContextVS {
             mainKeyStoreFile.createNewFile();
         } else mainKeyStoreFile.createNewFile();
         Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
-        UserVS userVS = UserVS.FROM_X509_CERT((X509Certificate)chain[0]);
+        User user = User.FROM_X509_CERT((X509Certificate)chain[0]);
 
         CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
-                userVS.getCertificate(), ContextVS.DEVICEVS_OID);
-        DeviceVSDto deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
-        deviceVSDto.setDeviceName(userVS.getNif() + " - " + userVS.getName());
+                user.getCertificate(), ContextVS.DEVICE_OID);
+        DeviceDto deviceDto = new DeviceDto(user, certExtensionDto);
+        deviceDto.setDeviceName(user.getNif() + " - " + user.getName());
 
-        File userVSKeyStoreFile = new File(appDir + File.separator + userVS.getNif() + "_" + USER_KEYSTORE_FILE_NAME);
-        userVSKeyStoreFile.createNewFile();
+        File userKeyStoreFile = new File(appDir + File.separator + user.getNif() + "_" + USER_KEYSTORE_FILE_NAME);
+        userKeyStoreFile.createNewFile();
         Map keyStoreMap = new HashMap<>();
-        keyStoreMap.put("deviceVSDto", JSON.getMapper().writeValueAsString(deviceVSDto));
+        keyStoreMap.put("deviceDto", JSON.getMapper().writeValueAsString(deviceDto));
         keyStoreMap.put("certPEM", new String(PEMUtils.getPEMEncoded(chain[0])));
         keyStoreMap.put("keyStore", Base64.getEncoder().encodeToString(keyStoreBytes));
         JSON.getMapper().writeValue(mainKeyStoreFile, keyStoreMap);
-        JSON.getMapper().writeValue(userVSKeyStoreFile, keyStoreMap);
-        return userVS;
+        JSON.getMapper().writeValue(userKeyStoreFile, keyStoreMap);
+        return user;
     }
 
-    public DeviceVSDto getKeyStoreDevice() {
-        DeviceVSDto result = null;
+    public DeviceDto getKeyStoreDevice() {
+        DeviceDto result = null;
         try {
             File keyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
             if(keyStoreFile.createNewFile()) return null;
             Map keyStoreMap = JSON.getMapper().readValue(keyStoreFile, new TypeReference<Map<String, String>>() { });
-            result = JSON.getMapper().readValue((String) keyStoreMap.get("deviceVSDto"), DeviceVSDto.class);
+            result = JSON.getMapper().readValue((String) keyStoreMap.get("deviceDto"), DeviceDto.class);
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         } finally {
@@ -397,14 +397,14 @@ public class ContextVS {
         }
     }
 
-    public UserVS getKeyStoreUserVS() {
+    public User getKeyStoreUser() {
         try {
             File keyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
             if(keyStoreFile.createNewFile()) return null;
             Map keyStoreMap = JSON.getMapper().readValue(keyStoreFile, new TypeReference<Map<String, String>>() { });
             Collection<X509Certificate> certChain = PEMUtils.fromPEMToX509CertCollection(
                     ((String) keyStoreMap.get("certPEM")).getBytes());
-            return UserVS.FROM_X509_CERT(certChain.iterator().next());
+            return User.FROM_X509_CERT(certChain.iterator().next());
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -483,19 +483,19 @@ public class ContextVS {
         FileUtils.copyStreamToFile(new ByteArrayInputStream(fileToCopy), newFile);
     }
 
-    public AccessControlVS getAccessControl() {
+    public AccessControl getAccessControl() {
         return accessControl;
     }
 
-    public void setAccessControl(AccessControlVS accessControl) {
+    public void setAccessControl(AccessControl accessControl) {
         this.accessControl = accessControl;
         this.controlCenter = accessControl.getControlCenter();
         if(this.defaultServer == null) this.defaultServer = accessControl;
     }
 
-    public ControlCenterVS getControlCenter() { return controlCenter; }
+    public ControlCenter getControlCenter() { return controlCenter; }
 
-    public void setControlCenter(ControlCenterVS controlCenter) { this.controlCenter = controlCenter; }
+    public void setControlCenter(ControlCenter controlCenter) { this.controlCenter = controlCenter; }
 
     public static String getMessage(String key, Object... arguments) {
         String pattern = null;
@@ -526,30 +526,30 @@ public class ContextVS {
         this.currencyServer = currencyServer;
     }
 
-    public void setServer(ActorVS server) {
+    public void setServer(Actor server) {
         if(server instanceof CurrencyServer) setCurrencyServer((CurrencyServer) server);
-        else if(server instanceof AccessControlVS) setAccessControl((AccessControlVS) server);
-        else if(server instanceof ControlCenterVS) setControlCenter((ControlCenterVS) server);
+        else if(server instanceof AccessControl) setAccessControl((AccessControl) server);
+        else if(server instanceof ControlCenter) setControlCenter((ControlCenter) server);
         else log.log(Level.SEVERE, "setServer - unknown server type: " + server.getType() + " - class: " + server.getClass().getSimpleName());
     }
 
-    public void setDefaultServer(ActorVS server) {
+    public void setDefaultServer(Actor server) {
         log.info("setDefaultServer - serverURL: " + server.getServerURL());
         this.defaultServer = server;
     }
 
-    public ActorVS getDefaultServer() throws ExceptionVS {
+    public Actor getDefaultServer() throws ExceptionVS {
         if(defaultServer != null) return defaultServer;
         if(accessControl != null) return accessControl;
         if(currencyServer != null) return currencyServer;
         throw new ExceptionVS("Missing default server");
     }
 
-    public DeviceVSDto getConnectedDevice() {
+    public DeviceDto getConnectedDevice() {
         return connectedDevice;
     }
 
-    public void setConnectedDevice(DeviceVSDto connectedDevice) {
+    public void setConnectedDevice(DeviceDto connectedDevice) {
         this.connectedDevice = connectedDevice;
     }
 }

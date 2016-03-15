@@ -24,8 +24,8 @@ import static javax.persistence.GenerationType.IDENTITY;
 @NamedQueries({
         @NamedQuery(name = "findCertBySerialNumber", query =
                 "SELECT c FROM CertificateVS c WHERE c.serialNumber =:serialNumber"),
-        @NamedQuery(name = "findCertByActorVSAndStateAndType", query =
-                "SELECT c FROM CertificateVS c WHERE c.actorVS =:actorVS and c.state =:state and c.type =:type")
+        @NamedQuery(name = "findCertByActorAndStateAndType", query =
+                "SELECT c FROM CertificateVS c WHERE c.actor =:actor and c.state =:state and c.type =:type")
 })
 public class CertificateVS extends EntityVS implements Serializable {
 
@@ -45,10 +45,10 @@ public class CertificateVS extends EntityVS implements Serializable {
     @Column(name="content", nullable=false) private byte[] content;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="userVS") private UserVS userVS;
+    @JoinColumn(name="user") private User user;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="actorVS") private ActorVS actorVS;
+    @JoinColumn(name="actor") private Actor actor;
 
     @Column(name="hashCertVSBase64", unique=true) private String hashCertVSBase64;
 
@@ -96,13 +96,13 @@ public class CertificateVS extends EntityVS implements Serializable {
         this.serialNumber = x509Cert.getSerialNumber().longValue();
     }
 
-    public static CertificateVS VOTE(String hashCertVSBase64, UserVS userVS, X509Certificate x509Cert)
+    public static CertificateVS VOTE(String hashCertVSBase64, User user, X509Certificate x509Cert)
             throws CertificateEncodingException {
         CertificateVS result = new CertificateVS(x509Cert);
         result.setIsRoot(false);
         result.setState(State.OK).setType(Type.VOTE);
         result.setHashCertVSBase64(hashCertVSBase64);
-        result.setUserVS(userVS);
+        result.setUser(user);
         result.subjectDN = x509Cert.getSubjectDN().toString();
         return result;
     }
@@ -115,13 +115,13 @@ public class CertificateVS extends EntityVS implements Serializable {
         return result;
     }
 
-    public static CertificateVS ACTORVS(ActorVS actorVS, X509Certificate x509Cert)
+    public static CertificateVS ACTOR(Actor actor, X509Certificate x509Cert)
             throws CertificateEncodingException {
         CertificateVS result = new CertificateVS(x509Cert);
         result.type = CertificateVS.Type.ACTOR_VS;
         result.state = CertificateVS.State.OK;
         result.subjectDN = x509Cert.getSubjectDN().toString();
-        result.actorVS = actorVS;
+        result.actor = actor;
         return result;
     }
 
@@ -149,26 +149,26 @@ public class CertificateVS extends EntityVS implements Serializable {
         return result;
     }
 
-    public static CertificateVS USER(UserVS userVS, X509Certificate x509Cert)
+    public static CertificateVS USER(User user, X509Certificate x509Cert)
             throws CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
         CertificateVS result = new CertificateVS(x509Cert);
-        if(userVS.getCertificateCA() != null &&
-                Type.CERTIFICATE_AUTHORITY_ID_CARD == userVS.getCertificateCA().getType()) result.type = Type.USER_ID_CARD;
+        if(user.getCertificateCA() != null &&
+                Type.CERTIFICATE_AUTHORITY_ID_CARD == user.getCertificateCA().getType()) result.type = Type.USER_ID_CARD;
         else result.type = Type.USER;
         result.state = CertificateVS.State.OK;
-        result.userVS = userVS;
+        result.user = user;
         result.subjectDN = x509Cert.getSubjectDN().toString();
-        result.authorityCertificateVS = userVS.getCertificateCA();
+        result.authorityCertificateVS = user.getCertificateCA();
         return result;
     }
 
-    public static CertificateVS ISSUED_USER_CERT(UserVS userVS, X509Certificate x509Cert, CertificateVS authorityCertificate)
+    public static CertificateVS ISSUED_USER_CERT(User user, X509Certificate x509Cert, CertificateVS authorityCertificate)
             throws CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
         CertificateVS result = new CertificateVS(x509Cert);
         if(Type.CERTIFICATE_AUTHORITY_ID_CARD == authorityCertificate.getType()) result.type = Type.USER_ID_CARD;
         else result.type = Type.USER;
         result.state = CertificateVS.State.OK;
-        result.userVS = userVS;
+        result.user = user;
         result.subjectDN = x509Cert.getSubjectDN().toString();
         result.authorityCertificateVS = authorityCertificate;
         return result;
@@ -191,12 +191,12 @@ public class CertificateVS extends EntityVS implements Serializable {
         this.content = content;
     }
 
-    public UserVS getUserVS() {
-        return userVS;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserVS(UserVS userVS) {
-        this.userVS = userVS;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Long getSerialNumber() {
@@ -248,12 +248,12 @@ public class CertificateVS extends EntityVS implements Serializable {
         return this;
     }
 
-    public ActorVS getActorVS() {
-        return actorVS;
+    public Actor getActor() {
+        return actor;
     }
 
-    public void setActorVS(ActorVS actorVS) {
-        this.actorVS = actorVS;
+    public void setActor(Actor actor) {
+        this.actor = actor;
     }
 
     public String getEventId() {

@@ -5,7 +5,7 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.FileUtils;
@@ -44,9 +44,9 @@ public class DocumentVSValidator {
             new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
                     voteFile.getAbsolutePath()));
         }
-        Set<UserVS> signersVS = signedFile.getSigners();
+        Set<User> signersVS = signedFile.getSigners();
         Date voteDate = signedFile.getTimeStampToken().getTimeStampInfo().getGenTime();
-        for(UserVS signerVS:signersVS) {
+        for(User signerVS:signersVS) {
             try {
                 if(signerVS.getTimeStampToken() != null) {//user signature
                     CertUtils.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(signerVS.getCertificate()),
@@ -118,28 +118,28 @@ public class DocumentVSValidator {
             new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
                     signedFile.getName()));
         }
-        UserVS userVS = cmsMessage.getSigner();
+        User user = cmsMessage.getSigner();
         if(representativeNif == null) return new ResponseVS(
                 ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("badRequestMsg") +
                 " - " + ContextVS.getInstance().getMessage("missingRepresentativeNifErrorMsg"));
         try {
-            CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(userVS.getCertificate()));
+            CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(user.getCertificate()));
             //log.info(" - pkixResult.toString(): " + pkixResult.toString());
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("certificateErrorMsg",
-                    userVS.getNif(), signedFile.getName()));
+                    user.getNif(), signedFile.getName()));
         }
         try {
             SignerInformationVerifier timeStampSignerInfoVerifier = new
                     JcaSimpleSignerInfoVerifierBuilder().build(timeStampServerCert);
-            userVS.getTimeStampToken().validate(timeStampSignerInfoVerifier);
+            user.getTimeStampToken().validate(timeStampSignerInfoVerifier);
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("timestampValidationErrorMsg",
                     signedFile.getName()));
         }
-        Date tokenDate = userVS.getTimeStampToken().getTimeStampInfo().getGenTime();
+        Date tokenDate = user.getTimeStampToken().getTimeStampInfo().getGenTime();
         if(!tokenDate.before(dateFinish)) {
             return new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("dateErrorMsg",
                     DateUtils.getDateStr(dateFinish),DateUtils.getDateStr(tokenDate),
@@ -179,7 +179,7 @@ public class DocumentVSValidator {
             new ResponseVS(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("signatureErrorMsg",
                     signedFile.getName()));
         }
-        UserVS signer = cmsMessage.getSigner();
+        User signer = cmsMessage.getSigner();
         try {
             CertUtils.verifyCertificate(trustAnchors, false, Arrays.asList(signer.getCertificate()));
         } catch(Exception ex) {

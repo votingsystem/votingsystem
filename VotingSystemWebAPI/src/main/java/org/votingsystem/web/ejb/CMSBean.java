@@ -1,9 +1,6 @@
 package org.votingsystem.web.ejb;
 
 import org.apache.commons.io.IOUtils;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.SignerInformationVerifier;
-import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.cms.CMSGenerator;
@@ -49,7 +46,8 @@ public class CMSBean {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject TimeStampBean timeStampBean;
-    @Inject SubscriptionVSBean subscriptionVSBean;
+    @Inject
+    SubscriptionBean subscriptionBean;
     private CMSGenerator cmsGenerator;
     private Encryptor encryptor;
     private Set<TrustAnchor> trustAnchors;
@@ -64,7 +62,7 @@ public class CMSBean {
     private Map<Long, CertificateVS> trustedCertsHashMap = new HashMap<>();
     private static final HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsMap = new HashMap<>();
     private Set<String> admins;
-    private UserVS systemUser;
+    private User systemUser;
     private String password;
     private String keyAlias;
 
@@ -107,7 +105,7 @@ public class CMSBean {
         this.admins = admins;
     }
 
-    public UserVS getSystemUser() {
+    public User getSystemUser() {
         return systemUser;
     }
 
@@ -126,13 +124,13 @@ public class CMSBean {
         return new KeyStoreInfo(keyStore, privateKeySigner, certSigner);
     }
 
-    public void initAdmins(List<UserVS> admins) throws Exception {
+    public void initAdmins(List<User> admins) throws Exception {
         systemUser = config.getSystemUser();
         Set<String> adminsNIF = new HashSet<>();
-        for(UserVS userVS:admins) {
-            verifyUserCertificate(userVS);
-            userVS = subscriptionVSBean.checkUser(userVS);
-            adminsNIF.add(userVS.getNif());
+        for(User user :admins) {
+            verifyUserCertificate(user);
+            user = subscriptionBean.checkUser(user);
+            adminsNIF.add(user.getNif());
         }
         systemUser.updateAdmins(adminsNIF);
         dao.merge(systemUser);
@@ -193,11 +191,11 @@ public class CMSBean {
     }
 
     public void validateVoteCerts(CMSSignedMessage cmsMessage, EventVS eventVS) throws Exception {
-        Set<UserVS> signersVS = cmsMessage.getSigners();
+        Set<User> signersVS = cmsMessage.getSigners();
         if(signersVS.isEmpty()) throw new ExceptionVS("ERROR - document without signers");
         Set<TrustAnchor> eventTrustedAnchors = getEventTrustedAnchors(eventVS);
-        for(UserVS userVS: signersVS) {
-            CertUtils.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(userVS.getCertificate()));
+        for(User user : signersVS) {
+            CertUtils.verifyCertificate(eventTrustedAnchors, false, Arrays.asList(user.getCertificate()));
             //X509Certificate certCaResult = validatorResult.getTrustAnchor().getTrustedCert();
         }
     }
@@ -215,9 +213,9 @@ public class CMSBean {
         return eventTrustedAnchors;
     }
 
-    public boolean isSignerCertificate(Set<UserVS> signers, X509Certificate cert) throws CertificateEncodingException {
-        for(UserVS userVS : signers) {
-            if(Arrays.equals(userVS.getCertificate().getEncoded(), cert.getEncoded())) return true;
+    public boolean isSignerCertificate(Set<User> signers, X509Certificate cert) throws CertificateEncodingException {
+        for(User user : signers) {
+            if(Arrays.equals(user.getCertificate().getEncoded(), cert.getEncoded())) return true;
         }
         return false;
     }
@@ -280,9 +278,9 @@ public class CMSBean {
         return CertUtils.verifyCertificate(getTrustAnchors(), false, Arrays.asList(certToValidate));
     }
 
-    public boolean isSystemSignedMessage(Set<UserVS> signers) {
-        for(UserVS userVS: signers) {
-            if(userVS.getCertificate().equals(localServerCertSigner)) return true;
+    public boolean isSystemSignedMessage(Set<User> signers) {
+        for(User user : signers) {
+            if(user.getCertificate().equals(localServerCertSigner)) return true;
         }
         return false;
     }
@@ -337,14 +335,14 @@ public class CMSBean {
         if(vote == null || vote.getX509Certificate() == null) throw new ExceptionVS(
                 messages.get("documentWithoutSignersErrorMsg"));
         if (vote.getRepresentativeURL() != null) {
-            query = dao.getEM().createQuery("select u from UserVS u where u.url =:userURL")
+            query = dao.getEM().createQuery("select u from User u where u.url =:userURL")
                     .setParameter("userURL", vote.getRepresentativeURL());
-            UserVS checkedSigner = dao.getSingleResult(UserVS.class, query);
-            if(checkedSigner == null) checkedSigner = dao.persist(UserVS.REPRESENTATIVE(vote.getRepresentativeURL()));
+            User checkedSigner = dao.getSingleResult(User.class, query);
+            if(checkedSigner == null) checkedSigner = dao.persist(User.REPRESENTATIVE(vote.getRepresentativeURL()));
             cmsDto.setSigner(checkedSigner);
         }
         query = dao.getEM().createQuery("select e from EventVS e where e.accessControlEventId =:eventId and " +
-                "e.accessControlVS.serverURL =:serverURL").setParameter("eventId", vote.getAccessControlEventId())
+                "e.accessControl.serverURL =:serverURL").setParameter("eventId", vote.getAccessControlEventId())
                 .setParameter("serverURL", vote.getAccessControlURL());
         EventElection eventVS = dao.getSingleResult(EventElection.class, query);
         if(eventVS == null) throw new ExceptionVS(messages.get("voteEventElectionUnknownErrorMsg",
@@ -383,21 +381,21 @@ public class CMSBean {
     }
 
     public CMSDto validateSignersCerts(CMSSignedMessage cmsSignedMessage) throws Exception {
-        Set<UserVS> signersVS = cmsSignedMessage.getSigners();
+        Set<User> signersVS = cmsSignedMessage.getSigners();
         if(signersVS.isEmpty()) throw new ExceptionVS("documentWithoutSignersErrorMsg");
         String signerNIF = null;
         if(cmsSignedMessage.getSigner().getNif() != null) signerNIF =
                 org.votingsystem.util.NifUtils.validate(cmsSignedMessage.getSigner().getNif());
         CMSDto cmsDto = new CMSDto();
-        for(UserVS userVS: signersVS) {
-            if(userVS.getTimeStampToken() != null) timeStampBean.validateToken(userVS.getTimeStampToken());
-            else log.info("signature without timestamp - signer: " + userVS.getCertificate().getSubjectDN());
-            verifyUserCertificate(userVS);
-            if(userVS.isAnonymousUser()) {
+        for(User user: signersVS) {
+            if(user.getTimeStampToken() != null) timeStampBean.validateToken(user.getTimeStampToken());
+            else log.info("signature without timestamp - signer: " + user.getCertificate().getSubjectDN());
+            verifyUserCertificate(user);
+            if(user.isAnonymousUser()) {
                 log.log(Level.FINE, "validateSignersCerts - is anonymous signer");
-                cmsDto.setAnonymousSigner(userVS);
+                cmsDto.setAnonymousSigner(user);
             } else {
-                UserVS user = subscriptionVSBean.checkUser(userVS);
+                user = subscriptionBean.checkUser(user);
                 if(user.getNif().equals(signerNIF)) cmsDto.setSigner(user);
                 else cmsDto.addSigner(user);
             }
@@ -405,37 +403,37 @@ public class CMSBean {
         return cmsDto;
     }
 
-    public PKIXCertPathValidatorResult verifyUserCertificate(UserVS userVS) throws Exception {
+    public PKIXCertPathValidatorResult verifyUserCertificate(User user) throws Exception {
         PKIXCertPathValidatorResult validatorResult = CertUtils.verifyCertificate(
-                getTrustAnchors(), false, Arrays.asList(userVS.getCertificate()));
+                getTrustAnchors(), false, Arrays.asList(user.getCertificate()));
         X509Certificate certCaResult = validatorResult.getTrustAnchor().getTrustedCert();
-        userVS.setCertificateCA(getTrustedCertsHashMap().get(certCaResult.getSerialNumber().longValue()));
+        user.setCertificateCA(getTrustedCertsHashMap().get(certCaResult.getSerialNumber().longValue()));
         if(anonymousCertIssuers.contains(certCaResult.getSerialNumber().longValue()) &&
-                Boolean.valueOf(CertUtils.getCertExtensionData(userVS.getCertificate(), ContextVS.ANONYMOUS_CERT_OID))) {
-            userVS.setAnonymousUser(true);
+                Boolean.valueOf(CertUtils.getCertExtensionData(user.getCertificate(), ContextVS.ANONYMOUS_CERT_OID))) {
+            user.setAnonymousUser(true);
         }
-        log.log(Level.FINE, "verifyCertificate - user:" + userVS.getNif() + " cert issuer: " + certCaResult.getSubjectDN() +
-                " - CA certificateVS.id : " + userVS.getCertificateCA().getId());
+        log.log(Level.FINE, "verifyCertificate - user:" + user.getNif() + " cert issuer: " + certCaResult.getSubjectDN() +
+                " - CA certificateVS.id : " + user.getCertificateCA().getId());
         return validatorResult;
     }
 
     //issues certificates if the request is signed with an Id card
     public X509Certificate signCSRSignedWithIDCard(CMSMessage cmsReq) throws Exception {
-        UserVS signer = cmsReq.getUserVS();
+        User signer = cmsReq.getUser();
         if(signer.getCertificateVS().getType() != CertificateVS.Type.USER_ID_CARD)
                 throw new Exception("Service available only for ID CARD signed requests");
         UserCertificationRequestDto requestDto = cmsReq.getSignedContent(UserCertificationRequestDto.class);
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(requestDto.getCsrRequest());
         CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(
-                CertExtensionDto.class, csr, ContextVS.DEVICEVS_OID);
+                CertExtensionDto.class, csr, ContextVS.DEVICE_OID);
         String validatedNif = NifUtils.validate(certExtensionDto.getNif());
-        AddressVS address = signer.getAddressVS();
+        Address address = signer.getAddress();
         if(address == null) {
-            address = dao.persist(requestDto.getAddressVS());
-            signer.setAddressVS(address);
+            address = dao.persist(requestDto.getAddress());
+            signer.setAddress(address);
             dao.merge(signer);
         } else {
-            address.update(requestDto.getAddressVS());
+            address.update(requestDto.getAddress());
             dao.merge(address);
         }
         dao.merge(signer);
@@ -443,22 +441,22 @@ public class CMSBean {
         Date validTo = DateUtils.addDays(validFrom, 365).getTime(); //one year
         X509Certificate issuedCert = signCSR(csr, null, validFrom, validTo);
         CertificateVS certificate = dao.persist(CertificateVS.ISSUED_USER_CERT(signer, issuedCert, serverCertificateVS));
-        Query query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId and d.userVS.nif =:nif ")
+        Query query = dao.getEM().createQuery("select d from Device d where d.deviceId =:deviceId and d.user.nif =:nif ")
                 .setParameter("deviceId", certExtensionDto.getDeviceId()).setParameter("nif", validatedNif);
-        DeviceVS deviceVS = dao.getSingleResult(DeviceVS.class, query);
-        if(deviceVS == null) {
-            deviceVS = dao.persist(new DeviceVS(signer, certExtensionDto.getDeviceId(), certExtensionDto.getEmail(),
-                    certExtensionDto.getMobilePhone(), certExtensionDto.getDeviceType()).setState(DeviceVS.State.OK)
+        Device device = dao.getSingleResult(Device.class, query);
+        if(device == null) {
+            device = dao.persist(new Device(signer, certExtensionDto.getDeviceId(), certExtensionDto.getEmail(),
+                    certExtensionDto.getMobilePhone(), certExtensionDto.getDeviceType()).setState(Device.State.OK)
                     .setCertificateVS(certificate));
         } else {
-            dao.merge(deviceVS.getCertificateVS().setState(CertificateVS.State.CANCELED).setCmsMessage(cmsReq));
-            dao.merge(deviceVS.setEmail(certExtensionDto.getEmail()).setPhone(certExtensionDto.getMobilePhone())
+            dao.merge(device.getCertificateVS().setState(CertificateVS.State.CANCELED).setCmsMessage(cmsReq));
+            dao.merge(device.setEmail(certExtensionDto.getEmail()).setPhone(certExtensionDto.getMobilePhone())
                     .setCertificateVS(certificate));
         }
-        dao.getEM().createQuery("UPDATE UserVSToken SET state=:state WHERE userVS=:userVS").setParameter(
-                "state", UserVSToken.State.CANCELLED).setParameter("userVS", signer).executeUpdate();
-        dao.persist(new UserVSToken(signer, requestDto.getToken(), certificate, cmsReq));
-        log.info("signCertUserVS - issued new CertificateVS id: " + certificate.getId() + " for device: " + deviceVS.getId());
+        dao.getEM().createQuery("UPDATE UserToken SET state=:state WHERE user=:user").setParameter(
+                "state", UserToken.State.CANCELLED).setParameter("user", signer).executeUpdate();
+        dao.persist(new UserToken(signer, requestDto.getToken(), certificate, cmsReq));
+        log.info("signCertUser - issued new CertificateVS id: " + certificate.getId() + " for device: " + device.getId());
         return issuedCert;
     }
 

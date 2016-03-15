@@ -1,7 +1,7 @@
 package org.votingsystem.model.currency;
 
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;
@@ -20,16 +20,16 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Table(name="CurrencyAccount")
 @NamedQueries({
         @NamedQuery(name = "findAccountByTypeAndUser", query =
-                "SELECT account FROM CurrencyAccount account WHERE account.userVS =:userVS AND account.type =:type"),
+                "SELECT account FROM CurrencyAccount account WHERE account.user =:user AND account.type =:type"),
         @NamedQuery(name = "findAccountByUser", query =
-                "SELECT account FROM CurrencyAccount account WHERE account.userVS =:userVS"),
+                "SELECT account FROM CurrencyAccount account WHERE account.user =:user"),
         @NamedQuery(name = "findAccountByUserIBANAndTagAndCurrencyCodeAndState", query =
                 "SELECT account FROM CurrencyAccount account WHERE account.IBAN =:userIBAN and account.tag =:tag " +
                 "and account.currencyCode =:currencyCode and account.state =:state"),
         @NamedQuery(name = "findAccountByUserAndState", query = "SELECT account FROM CurrencyAccount account WHERE " +
-                "account.userVS =:userVS and account.state =:state"),
+                "account.user =:user and account.state =:state"),
         @NamedQuery(name = "findAccountByUserIBANAndStateAndCurrencyAndTag", query = "SELECT account FROM CurrencyAccount account WHERE " +
-                "account.userVS.IBAN =:userIBAN and account.state =:state and account.currencyCode =:currencyCode " +
+                "account.user.IBAN =:userIBAN and account.state =:state and account.currencyCode =:currencyCode " +
                 "and account.tag =:tag")
 
 
@@ -55,7 +55,7 @@ public class CurrencyAccount extends EntityVS implements Serializable {
     @Column(name="IBAN", nullable=false) private String IBAN;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="userVS") private UserVS userVS;
+    @JoinColumn(name="user") private User user;
 
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="tag") private TagVS tag;
@@ -65,11 +65,11 @@ public class CurrencyAccount extends EntityVS implements Serializable {
 
     public CurrencyAccount() {}
 
-    public CurrencyAccount(UserVS userVS, BigDecimal balance, String currencyCode, TagVS tag) {
+    public CurrencyAccount(User user, BigDecimal balance, String currencyCode, TagVS tag) {
         this.currencyCode = currencyCode;
-        this.userVS = userVS;
+        this.user = user;
         this.balance = balance;
-        this.IBAN = userVS.getIBAN();
+        this.IBAN = user.getIBAN();
         this.tag = tag;
     }
 
@@ -90,12 +90,12 @@ public class CurrencyAccount extends EntityVS implements Serializable {
         return this;
     }
 
-    public UserVS getUserVS() {
-        return userVS;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserVS(UserVS userVS) {
-        this.userVS = userVS;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Date getDateCreated() {
@@ -156,7 +156,6 @@ public class CurrencyAccount extends EntityVS implements Serializable {
 
     public void afterInsert() {
         if(balance.compareTo(BigDecimal.ZERO) < 0) {
-            //ResponseVS.ALERT(null, "UserVSAccount_id_" + this.id + "_negativeBalance_" + this.balance.toString())
             log.log(Level.SEVERE, "CurrencyAccount:" + id + "### NEGATIVE balance ###");
         }
     }

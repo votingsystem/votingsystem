@@ -40,7 +40,7 @@ public class CMSMessage extends EntityVS implements Serializable {
     @Column(name="content") private byte[] contentPEM;
     
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="userVS") private UserVS userVS;
+    @JoinColumn(name="user") private User user;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="cmsParent") private CMSMessage cmsParent;
@@ -79,8 +79,8 @@ public class CMSMessage extends EntityVS implements Serializable {
     }
 
     @Transient private transient CMSSignedMessage cmsMessage;
-    @Transient private transient Set<UserVS> signers;
-    @Transient private transient UserVS anonymousSigner;
+    @Transient private transient Set<User> signers;
+    @Transient private transient User anonymousSigner;
 
     public byte[] getContentPEM() {
         return contentPEM;
@@ -97,14 +97,14 @@ public class CMSMessage extends EntityVS implements Serializable {
 
     public CMSMessage(CMSSignedMessage cms, CMSDto dto, TypeVS type) throws Exception {
         this.type = type;
-        this.userVS = dto.getSigner();
+        this.user = dto.getSigner();
         this.anonymousSigner = dto.getAnonymousSigner();
         this.signers = dto.getSigners();
         setCMS(cms);
     }
 
-    public CMSMessage(CMSSignedMessage cms, UserVS userVS, TypeVS type) throws Exception {
-        this.userVS = userVS;
+    public CMSMessage(CMSSignedMessage cms, User user, TypeVS type) throws Exception {
+        this.user = user;
         this.type = type;
         setCMS(cms);
     }
@@ -126,12 +126,12 @@ public class CMSMessage extends EntityVS implements Serializable {
         return this;
     }
 
-    public UserVS getUserVS() {
-        return userVS;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserVS(UserVS userVS) {
-        this.userVS = userVS;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Long getId() {
@@ -203,19 +203,19 @@ public class CMSMessage extends EntityVS implements Serializable {
         return this;
 	}
 
-    public Set<UserVS> getSigners() {
+    public Set<User> getSigners() {
 		return signers;
 	}
 
-	public void setSigners(Set<UserVS> signers) {
+	public void setSigners(Set<User> signers) {
 		this.signers = signers;
 	}
 
-    public UserVS getAnonymousSigner() {
+    public User getAnonymousSigner() {
         return anonymousSigner;
     }
 
-    public void setAnonymousSigner(UserVS anonymousSigner) {
+    public void setAnonymousSigner(User anonymousSigner) {
         this.anonymousSigner = anonymousSigner;
     }
 

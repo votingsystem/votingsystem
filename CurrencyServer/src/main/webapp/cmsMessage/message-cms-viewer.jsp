@@ -11,7 +11,7 @@
                 cmsMessageDto:{type:Object, value:{}, observer:'cmsMessageChanged'},
                 MESSAGE_CMS:{type:Object, value:null},
                 CURRENCY_GROUP_NEW:{type:Object, value:null},
-                FROM_BANKVS:{type:Object, value:null},
+                FROM_BANK:{type:Object, value:null},
                 CURRENCY_REQUEST:{type:Object, value:null},
                 FROM_GROUP_TO_ALL_MEMBERS:{type:Object, value:null},
                 CURRENCY_CHANGE:{type:Object, value:null},
@@ -23,14 +23,14 @@
                 switch (this.cmsMessageDto.viewer) {
                     case "message-cms":
                         break;
-                    case "message-cms-transactionvs-from-bankvs":
-                        if(!this.FROM_BANKVS) {
-                            Polymer.Base.importHref(vs.contextURL + '/cmsMessagePEM/message-cms-transactionvs-from-bankvs.vsp', function(e) {
-                                console.log(this.tagName + " - message-cms-transactionvs-from-bankvs: " + this.FROM_BANKVS)
-                                this.FROM_BANKVS = document.createElement('message-cms-transactionvs-from-bankvs');
-                                this.loadMainContent(this.FROM_BANKVS)
+                    case "message-cms-transactionvs-from-bank":
+                        if(!this.FROM_BANK) {
+                            Polymer.Base.importHref(vs.contextURL + '/cmsMessagePEM/message-cms-transactionvs-from-bank.vsp', function(e) {
+                                console.log(this.tagName + " - message-cms-transactionvs-from-bank: " + this.FROM_BANK)
+                                this.FROM_BANK = document.createElement('message-cms-transactionvs-from-bank');
+                                this.loadMainContent(this.FROM_BANK)
                             }.bind(this));
-                        } else this.loadMainContent(this.FROM_BANKVS)
+                        } else this.loadMainContent(this.FROM_BANK)
                         break;
                     case "message-cms-transactionvs-currency-request":
                         break;

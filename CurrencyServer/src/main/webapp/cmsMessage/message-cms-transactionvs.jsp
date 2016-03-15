@@ -41,7 +41,7 @@
                 <div style="margin-left: 20px;">
                     <div class="actorLbl" style=" margin:10px 0px 0px 0px;">${msg.senderLbl}</div>
                     <div>
-                        <div><b>${msg.nameLbl}:  </b>{{cmsMessageContent.fromUserVS.name}}</div>
+                        <div><b>${msg.nameLbl}:  </b>{{cmsMessageContent.fromUserName.name}}</div>
                         <div class="horizontal layout">
                             <div><b>${msg.IBANLbl}: </b></div>
                             <div class="iban-link" on-click="showByUserIBAN">{{cmsMessageContent.fromUserIBAN}}</div>
@@ -108,13 +108,13 @@
                 sendSignalVS({caption:this.messageType})
             },
             showByUserIBAN:function(e) {
-                page.show(vs.contextURL + "/rest/userVS/IBAN/" + this.fromUserIBAN, '_blank')
+                page.show(vs.contextURL + "/rest/user/IBAN/" + this.fromUserIBAN, '_blank')
             },
             showByUserIBAN:function(e) {
                 console.log(this.tagName + " - showByUserIBAN - " + e)
                 if(e.model) IBAN = e.model.IBAN
                 else IBAN = e.target.innerText
-                window.open(vs.contextURL + "/#!" + vs.contextURL + "/rest/userVS/IBAN/" + IBAN, "_blank")
+                window.open(vs.contextURL + "/#!" + vs.contextURL + "/rest/user/IBAN/" + IBAN, "_blank")
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_CMS)

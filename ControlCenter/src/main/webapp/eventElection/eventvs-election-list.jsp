@@ -30,7 +30,7 @@
                             </div>
                             <div class='eventAuthorDiv'>
                                 <div class='eventAuthorLblDiv'>${msg.byLbl}:</div>
-                                <div class='eventAuthorValueDiv'>{{item.userVS}}</div>
+                                <div class='eventAuthorValueDiv'>{{item.user}}</div>
                             </div>
                             <div hidden="{{!isCanceled(item)}}" class='cancelMessage'>${msg.eventCancelledLbl}</div>
                         </div>
@@ -99,8 +99,8 @@
                 vs.eventvs = e.model.item;
                 page("/rest/eventElection/id/" + vs.eventvs.id)
             },
-            getRepresentativeName:function(groupvs) {
-                return groupvs.representative.firstName + " " + groupvs.representative.lastName
+            getRepresentativeName:function(group) {
+                return group.representative.firstName + " " + group.representative.lastName
             },
             getSubject:function(eventSubject) {
                 return eventSubject.substring(0,50) + ((eventSubject.length > 50)? "...":"");

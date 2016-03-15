@@ -1,6 +1,6 @@
 package org.votingsystem.test.misc;
 
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
@@ -19,7 +19,7 @@ public class TestEncryptWallet {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        SignatureService signatureService = SignatureService.getUserVSSignatureService("Currency_07553172H", UserVS.Type.USER);
+        SignatureService signatureService = SignatureService.getUserSignatureService("Currency_07553172H", User.Type.USER);
         File fileToEncrypt = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("plainWallet"));
         //Map<String, Object> dataMap = JSON.getMapper().readValue(fileToEncrypt, new TypeReference<HashMap<String, Object>>() {});
         byte[] encryptedBytes = signatureService.encryptToCMS(FileUtils.getBytesFromFile(fileToEncrypt),

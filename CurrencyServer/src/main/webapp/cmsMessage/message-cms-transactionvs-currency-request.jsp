@@ -29,7 +29,7 @@
                 <div style="margin: 20px 0 0 20px;">
                     <div class="actorLbl">${msg.senderLbl}</div>
                     <div>
-                        <div><b>${msg.nameLbl}:</b> <span>{{cmsMessageContent.fromUserVS.name}}</span></div>
+                        <div><b>${msg.nameLbl}:</b> <span>{{cmsMessageContent.fromUserName.name}}</span></div>
                     </div>
                     <div> <b>${msg.IBANLbl}:</b>
                         <span on-click="showByUserIBAN" class="iban-link">{{cmsMessageContent.fromUserIBAN}}</span></div>
@@ -67,7 +67,7 @@
             },
             showByUserIBAN:function(e) {
                 console.log(this.tagName + " - showByUserIBAN - " + e)
-                window.open(vs.contextURL + "/#!" + vs.contextURL + "/rest/userVS/IBAN/" + e.target.innerText, "_blank")
+                window.open(vs.contextURL + "/#!" + vs.contextURL + "/rest/user/IBAN/" + e.target.innerText, "_blank")
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_CMS)

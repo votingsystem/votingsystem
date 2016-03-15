@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.KeyStoreVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.CertUtils;
@@ -67,10 +67,10 @@ public class EventVS extends EntityVS implements Serializable {
     private String metaInf = "{}"; 
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="controlCenter")
-    private ControlCenterVS controlCenterVS;
+    private ControlCenter controlCenter;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="accessControl")
-    private AccessControlVS accessControlVS;
+    private AccessControl accessControl;
     @Column(name="subject", length=1000)
     //@Field(index = Index.YES, analyze=Analyze.YES, store=Store.YES)
     private String subject;
@@ -82,8 +82,8 @@ public class EventVS extends EntityVS implements Serializable {
     private Cardinality cardinality = Cardinality.EXCLUSIVE;
     @OneToOne private CertificateVS certificateVS;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="userVS")
-    private UserVS userVS;
+    @JoinColumn(name="user")
+    private User user;
     @OneToOne private CMSMessage cmsMessage;
     @OneToOne private KeyStoreVS keyStoreVS;
     @Column(name="backupAvailable") private Boolean backupAvailable = Boolean.TRUE;
@@ -92,7 +92,7 @@ public class EventVS extends EntityVS implements Serializable {
     @Column(name="url")
     private String url;
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy="eventVS")
-    private Set<FieldEventVS> fieldsEventVS;
+    private Set<FieldEvent> fieldsEventVS;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateBegin", length=23, nullable=false)
@@ -125,9 +125,9 @@ public class EventVS extends EntityVS implements Serializable {
 
     public EventVS() {}
 
-    public EventVS(UserVS userVS, String subject, String content, Boolean backupAvailable, Cardinality cardinality,
+    public EventVS(User user, String subject, String content, Boolean backupAvailable, Cardinality cardinality,
                    Date dateFinish) {
-        this.userVS = userVS;
+        this.user = user;
         this.subject = subject;
         this.content = content;
         this.backupAvailable = backupAvailable;
@@ -177,11 +177,11 @@ public class EventVS extends EntityVS implements Serializable {
         this.numVotesCollected = numVotesCollected;
     }
 
-    public Set<FieldEventVS> getFieldsEventVS() {
+    public Set<FieldEvent> getFieldsEventVS() {
         return fieldsEventVS;
     }
 
-    public void setFieldsEventVS(Set<FieldEventVS> fieldsEventVS) {
+    public void setFieldsEventVS(Set<FieldEvent> fieldsEventVS) {
         this.fieldsEventVS = fieldsEventVS;
     }
 
@@ -233,12 +233,12 @@ public class EventVS extends EntityVS implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
-    public void setUserVS(UserVS userVS) {
-        this.userVS = userVS;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public UserVS getUserVS() {
-        return userVS;
+    public User getUser() {
+        return user;
     }
 
     public void setId(Long id) {
@@ -268,12 +268,12 @@ public class EventVS extends EntityVS implements Serializable {
         return this;
     }
 
-    public ControlCenterVS getControlCenterVS() {
-        return controlCenterVS;
+    public ControlCenter getControlCenter() {
+        return controlCenter;
     }
 
-    public void setControlCenterVS(ControlCenterVS controlCenterVS) {
-        this.controlCenterVS = controlCenterVS;
+    public void setControlCenter(ControlCenter controlCenter) {
+        this.controlCenter = controlCenter;
     }
 
 
@@ -300,12 +300,12 @@ public class EventVS extends EntityVS implements Serializable {
         return this;
 	}
 
-    public AccessControlVS getAccessControlVS() {
-        return accessControlVS;
+    public AccessControl getAccessControl() {
+        return accessControl;
     }
 
-    public void setAccessControlVS(AccessControlVS accessControlVS) {
-        this.accessControlVS = accessControlVS;
+    public void setAccessControl(AccessControl accessControl) {
+        this.accessControl = accessControl;
     }
 
     public Long getAccessControlEventId() {

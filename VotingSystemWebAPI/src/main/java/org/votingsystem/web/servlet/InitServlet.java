@@ -1,6 +1,6 @@
 package org.votingsystem.web.servlet;
 
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CMSBean;
@@ -33,7 +33,7 @@ public class InitServlet extends HttpServlet{
             MessagesVS.setCurrentInstance(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
             List<X509Certificate> fileSystemCATrustedCerts = new ArrayList<>();
             List<X509Certificate> fileSystemCA_anonymous_provider_TrustedCerts = new ArrayList<>();
-            List<UserVS> admins = new ArrayList<>();
+            List<User> admins = new ArrayList<>();
             for (String res : getServletContext().getResourcePaths("WEB-INF/votingsystem/certs")) {
                 String resFileName = res.split("WEB-INF/votingsystem/certs/")[1];
                 log.info("checking resource: " + res + " - resFileName: " + resFileName);
@@ -47,8 +47,8 @@ public class InitServlet extends HttpServlet{
                 } else if(resFileName.startsWith("ADMIN_") && resFileName.endsWith(".pem")) {
                     X509Certificate adminCert = PEMUtils.fromPEMToX509Cert(FileUtils.getBytesFromStream(
                             getServletContext().getResourceAsStream(res)));
-                    UserVS userVS = UserVS.FROM_X509_CERT(adminCert);
-                    admins.add(userVS);
+                    User user = User.FROM_X509_CERT(adminCert);
+                    admins.add(user);
                 }
             }
             cmsBean.initAnonymousCertAuthorities(fileSystemCA_anonymous_provider_TrustedCerts);

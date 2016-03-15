@@ -58,7 +58,7 @@ public class TestCert {
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         X509Certificate anonymousDelegationCert = PEMUtils.fromPEMToX509Cert(certWithAnonymouesExtensionPEM.getBytes());
         log.info(anonymousDelegationCert.toString());
-        CertExtensionDto dto = CertUtils.getCertExtensionData(CertExtensionDto.class, anonymousDelegationCert, ContextVS.DEVICEVS_OID);
+        CertExtensionDto dto = CertUtils.getCertExtensionData(CertExtensionDto.class, anonymousDelegationCert, ContextVS.DEVICE_OID);
     }
 
 }

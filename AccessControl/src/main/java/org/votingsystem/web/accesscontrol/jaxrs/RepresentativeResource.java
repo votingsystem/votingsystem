@@ -1,12 +1,12 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.RepresentativeAccreditationsDto;
 import org.votingsystem.dto.voting.RepresentativeVotingHistoryDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.ImageVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.RepresentationDocument;
 import org.votingsystem.model.voting.RepresentativeDocument;
@@ -54,7 +54,7 @@ public class RepresentativeResource {
     @Path("/save") @POST
     public Response save(CMSMessage cmsMessage) throws Exception {
         RepresentativeDocument representativeDocument = representativeBean.saveRepresentative(cmsMessage);
-        UserVSDto representativeDto = representativeBean.getRepresentativeDto(representativeDocument.getUserVS());
+        UserDto representativeDto = representativeBean.getRepresentativeDto(representativeDocument.getUser());
         return Response.ok().entity(representativeDto).type(MediaTypeVS.JSON).build();
     }
 
@@ -91,15 +91,15 @@ public class RepresentativeResource {
     public Response index( @DefaultValue("0") @QueryParam("offset") int offset, @DefaultValue("50") @QueryParam("max") int max,
             @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp)
             throws ServletException, IOException {
-        List<UserVSDto> responseList = new ArrayList<>();
-        Query query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
-                .setParameter("type", UserVS.Type.REPRESENTATIVE);
-        List<UserVS> representativeList = query.getResultList();
-        for(UserVS representative : representativeList) {
+        List<UserDto> responseList = new ArrayList<>();
+        Query query = dao.getEM().createQuery("select u from User u where u.type =:type")
+                .setParameter("type", User.Type.REPRESENTATIVE);
+        List<User> representativeList = query.getResultList();
+        for(User representative : representativeList) {
             responseList.add(representativeBean.getRepresentativeDto(representative));
         }
         //TODO totalCount
-        ResultListDto<UserVSDto> resultListDto = new ResultListDto<>(responseList, offset, max, responseList.size());
+        ResultListDto<UserDto> resultListDto = new ResultListDto<>(responseList, offset, max, responseList.size());
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto))
                 .type(MediaTypeVS.JSON).build();
     }
@@ -108,13 +108,13 @@ public class RepresentativeResource {
     public Response indexById(@PathParam("id") Long id, @Context ServletContext context,
                               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException, URISyntaxException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        UserVS representative = dao.find(UserVS.class, id);
-        if(representative == null || UserVS.Type.REPRESENTATIVE != representative.getType()) {
+        User representative = dao.find(User.class, id);
+        if(representative == null || User.Type.REPRESENTATIVE != representative.getType()) {
             return Response.status(Response.Status.NOT_FOUND).entity(
-                    "ERROR - UserVS is not a representative - id: " + id).build();
+                    "ERROR - User is not a representative - id: " + id).build();
         }
         if(contentType.contains("json")) {
-            UserVSDto representativeDto = representativeBean.getRepresentativeDto(representative);
+            UserDto representativeDto = representativeBean.getRepresentativeDto(representative);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
                     .type(MediaTypeVS.JSON).build();
         } else {
@@ -128,13 +128,13 @@ public class RepresentativeResource {
              @Context HttpServletResponse resp) throws IOException, ExceptionVS, ServletException, URISyntaxException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         String nif = NifUtils.validate(nifReq);
-        Query query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
-                .setParameter("nif", nif).setParameter("type", UserVS.Type.REPRESENTATIVE);
-        UserVS representative = dao.getSingleResult(UserVS.class, query);
+        Query query = dao.getEM().createQuery("select u from User u where u.nif =:nif and u.type =:type")
+                .setParameter("nif", nif).setParameter("type", User.Type.REPRESENTATIVE);
+        User representative = dao.getSingleResult(User.class, query);
         if(representative == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - UserVS is not a representative - nif: " + nif).build();
+                "ERROR - User is not a representative - nif: " + nif).build();
         if(contentType.contains("json")) {
-            UserVSDto representativeDto = representativeBean.getRepresentativeDto(representative);
+            UserDto representativeDto = representativeBean.getRepresentativeDto(representative);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(representativeDto))
                     .type(MediaTypeVS.JSON).build();
         } else {
@@ -153,10 +153,10 @@ public class RepresentativeResource {
     @Path("/id/{id}/image") @GET
     public Response image(@PathParam("id") Long id, @Context ServletContext context,
                               @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException {
-        UserVS representative = dao.find(UserVS.class, id);
-        if (representative == null || UserVS.Type.REPRESENTATIVE != representative.getType()) return Response.status(
+        User representative = dao.find(User.class, id);
+        if (representative == null || User.Type.REPRESENTATIVE != representative.getType()) return Response.status(
                 Response.Status.NOT_FOUND).entity("ERROR - representative not found - userId: " + id).build();
-        Query query = dao.getEM().createQuery("select i from ImageVS i where i.userVS =:representative and " +
+        Query query = dao.getEM().createQuery("select i from ImageVS i where i.user =:representative and " +
                 "i.type =:type").setParameter("representative", representative).setParameter("type",
                 ImageVS.Type.REPRESENTATIVE);
         ImageVS image = dao.getSingleResult(ImageVS.class, query);

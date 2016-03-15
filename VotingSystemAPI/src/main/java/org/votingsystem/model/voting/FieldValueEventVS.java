@@ -19,15 +19,15 @@ public class FieldValueEventVS extends EntityVS implements Serializable {
     @OneToOne private CMSMessage cmsMessage;
     @Column(name="value", length=1000) private String value;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="fieldEventVS", nullable=false) private FieldEventVS fieldEventVS;
+    @JoinColumn(name="fieldEvent", nullable=false) private FieldEvent fieldEvent;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
     
     public FieldValueEventVS() {}
 
-    public FieldValueEventVS(CMSMessage cmsMessage, FieldEventVS fieldEventVS, String value) {
+    public FieldValueEventVS(CMSMessage cmsMessage, FieldEvent fieldEvent, String value) {
         this.cmsMessage = cmsMessage;
-        this.fieldEventVS = fieldEventVS;
+        this.fieldEvent = fieldEvent;
         this.value = value;
     }
 
@@ -39,12 +39,12 @@ public class FieldValueEventVS extends EntityVS implements Serializable {
         this.id = id;
     }
 
-    public void setFieldEventVS(FieldEventVS fieldEventVS) {
-        this.fieldEventVS = fieldEventVS;
+    public void setFieldEvent(FieldEvent fieldEvent) {
+        this.fieldEvent = fieldEvent;
     }
 
-    public FieldEventVS getFieldEventVS() {
-        return fieldEventVS;
+    public FieldEvent getFieldEvent() {
+        return fieldEvent;
     }
 
     public void setDateCreated(Date dateCreated) {

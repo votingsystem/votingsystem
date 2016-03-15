@@ -14,55 +14,55 @@ public class PeriodResultDto {
 
     private Interval timePeriod;
     private BalancesDto systemBalance;
-    private List<BalancesDto> groupVSBalanceList;
-    private List<BalancesDto>  userVSBalanceList;
-    private List<BalancesDto>  bankVSBalanceList;
+    private List<BalancesDto> groupBalanceList;
+    private List<BalancesDto> userBalanceList;
+    private List<BalancesDto> bankBalanceList;
 
     public PeriodResultDto() {}
 
     public static PeriodResultDto init(Interval timePeriod) {
         PeriodResultDto periodResultDto = new PeriodResultDto();
-        periodResultDto.setGroupVSBalanceList(new ArrayList<>());
-        periodResultDto.setUserVSBalanceList(new ArrayList<>());
-        periodResultDto.setBankVSBalanceList(new ArrayList<>());
+        periodResultDto.setGroupBalanceList(new ArrayList<>());
+        periodResultDto.setUserBalanceList(new ArrayList<>());
+        periodResultDto.setBankBalanceList(new ArrayList<>());
         periodResultDto.setTimePeriod(timePeriod);
         return periodResultDto;
     }
 
-    public List<BalancesDto> getGroupVSBalanceList() {
-        return groupVSBalanceList;
+    public List<BalancesDto> getGroupBalanceList() {
+        return groupBalanceList;
     }
 
-    public void setGroupVSBalanceList(List<BalancesDto> groupVSBalanceList) {
-        this.groupVSBalanceList = groupVSBalanceList;
+    public void setGroupBalanceList(List<BalancesDto> groupBalanceList) {
+        this.groupBalanceList = groupBalanceList;
     }
 
-    public List<BalancesDto> getUserVSBalanceList() {
-        return userVSBalanceList;
+    public List<BalancesDto> getUserBalanceList() {
+        return userBalanceList;
     }
 
-    public void setUserVSBalanceList(List<BalancesDto> userVSBalanceList) {
-        this.userVSBalanceList = userVSBalanceList;
+    public void setUserBalanceList(List<BalancesDto> userBalanceList) {
+        this.userBalanceList = userBalanceList;
     }
 
-    public List<BalancesDto> getBankVSBalanceList() {
-        return bankVSBalanceList;
+    public List<BalancesDto> getBankBalanceList() {
+        return bankBalanceList;
     }
 
-    public void setBankVSBalanceList(List<BalancesDto> bankVSBalanceList) {
-        this.bankVSBalanceList = bankVSBalanceList;
+    public void setBankBalanceList(List<BalancesDto> bankBalanceList) {
+        this.bankBalanceList = bankBalanceList;
     }
 
-    public void addBankVSBalance(BalancesDto balancesDto) {
-        bankVSBalanceList.add(balancesDto);
+    public void addBankBalance(BalancesDto balancesDto) {
+        bankBalanceList.add(balancesDto);
     }
 
-    public void addGroupVSBalance(BalancesDto balancesDto) {
-        groupVSBalanceList.add(balancesDto);
+    public void addGroupBalance(BalancesDto balancesDto) {
+        groupBalanceList.add(balancesDto);
     }
 
-    public void addUserVSBalance(BalancesDto balancesDto) {
-        userVSBalanceList.add(balancesDto);
+    public void addUserBalance(BalancesDto balancesDto) {
+        userBalanceList.add(balancesDto);
     }
 
     public BalancesDto getSystemBalance() {

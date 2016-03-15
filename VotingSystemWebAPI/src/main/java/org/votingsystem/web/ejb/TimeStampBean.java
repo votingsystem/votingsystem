@@ -2,15 +2,13 @@ package org.votingsystem.web.ejb;
 
 
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TSPUtil;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.dto.ActorDto;
+import org.votingsystem.model.Actor;
 import org.votingsystem.model.CertificateVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
@@ -18,7 +16,6 @@ import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.StringUtils;
-import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.util.ConfigVS;
@@ -59,14 +56,14 @@ public class TimeStampBean {
         try {
             String serverURL = StringUtils.checkURL(config.getTimeStampServerURL());
             timeStampServiceURL = serverURL + "/timestamp";
-            Query query = dao.getEM().createNamedQuery("findActorVSByServerURL").setParameter("serverURL", serverURL);
-            ActorVS timeStampServer = dao.getSingleResult(ActorVS.class, query);
+            Query query = dao.getEM().createNamedQuery("findActorByServerURL").setParameter("serverURL", serverURL);
+            Actor timeStampServer = dao.getSingleResult(Actor.class, query);
             CertificateVS timeStampServerCert = null;
             if(timeStampServer == null) {
-                fetchTimeStampServerInfo(new ActorVS(serverURL));
+                fetchTimeStampServerInfo(new Actor(serverURL));
                 return;
             } else {
-                query = dao.getEM().createNamedQuery("findCertByActorVSAndStateAndType").setParameter("actorVS", timeStampServer)
+                query = dao.getEM().createNamedQuery("findCertByActorAndStateAndType").setParameter("actor", timeStampServer)
                         .setParameter("state", CertificateVS.State.OK).setParameter("type", CertificateVS.Type.TIMESTAMP_SERVER);
                 timeStampServerCert = dao.getSingleResult(CertificateVS.class, query);
                 if(timeStampServerCert != null) {
@@ -94,7 +91,7 @@ public class TimeStampBean {
         }
     }
 
-    private void updateTimeStampServer(ActorVS timeStampServer) throws Exception {
+    private void updateTimeStampServer(Actor timeStampServer) throws Exception {
         log.info("updateTimeStampServer");
         if(timeStampServer.getId() == null) {
             dao.persist(timeStampServer);
@@ -104,7 +101,7 @@ public class TimeStampBean {
         if(new Date().after(x509TimeStampServerCert.getNotAfter())) {
             throw new ExceptionVS(timeStampServer.getServerURL() + " - signing cert is lapsed");
         }
-        CertificateVS certificateVS = CertificateVS.ACTORVS(timeStampServer, x509TimeStampServerCert);
+        CertificateVS certificateVS = CertificateVS.ACTOR(timeStampServer, x509TimeStampServerCert);
         certificateVS.setType(CertificateVS.Type.TIMESTAMP_SERVER);
         certificateVS.setCertChainPEM(timeStampServer.getCertChainPEM().getBytes());
         dao.persist(certificateVS);
@@ -118,22 +115,22 @@ public class TimeStampBean {
     }
 
 
-    private void fetchTimeStampServerInfo(final ActorVS timeStampServer) {
+    private void fetchTimeStampServerInfo(final Actor timeStampServer) {
         log.info("fetchTimeStampServerInfo");
         executorService.submit(() -> {
-            ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
+            ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(
                     timeStampServer.getServerURL()), ContentTypeVS.JSON);
             if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
                 try {
-                    ActorVS serverActorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
-                    if(timeStampServer.getServerURL().equals(serverActorVS.getServerURL())) {
+                    Actor serverActor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
+                    if(timeStampServer.getServerURL().equals(serverActor.getServerURL())) {
                         if(timeStampServer.getId() != null) {
-                            timeStampServer.setCertChainPEM(serverActorVS.getCertChainPEM());
+                            timeStampServer.setCertChainPEM(serverActor.getCertChainPEM());
                             updateTimeStampServer(timeStampServer);
-                        } else updateTimeStampServer(serverActorVS);
+                        } else updateTimeStampServer(serverActor);
                         return;
                     } else log.log(Level.SEVERE, "Expected server URL:" + timeStampServer.getServerURL()  +
-                            " - found " + serverActorVS.getServerURL());
+                            " - found " + serverActor.getServerURL());
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
                 }

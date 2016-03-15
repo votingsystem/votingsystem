@@ -10,8 +10,8 @@
             <option value="CURRENCY_CHANGE"> - ${msg.selectCurrencyChangeLbl} - </option>
             <option value="CURRENCY_PERIOD_INIT"> - ${msg.currencyPeriodInitLbl} - </option>
             <option value="CURRENCY_PERIOD_INIT_TIME_LIMITED"> - ${msg.currencyPeriodInitTimeLimitedLbl} - </option>
-            <option value="FROM_BANKVS"> - ${msg.bankVSInputLbl} - </option>
-            <option value="FROM_USERVS"> - ${msg.transactionVSFromUserVS} - </option>
+            <option value="FROM_BANK"> - ${msg.bankInputLbl} - </option>
+            <option value="FROM_USER"> - ${msg.transactionVSFromUser} - </option>
             <option value="FROM_GROUP_TO_MEMBER_GROUP"> - ${msg.transactionVSFromGroupToMemberGroup} - </option>
             <option value="FROM_GROUP_TO_ALL_MEMBERS"> - ${msg.transactionVSFromGroupToAllMembers} - </option>
         </select>

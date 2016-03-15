@@ -10,7 +10,7 @@
     </head>
     <body>
         <fmt:message key="downloadEventVSBackupMsg" bundle="${bundle}">
-            <fmt:param value="${fromUser}"/>
+            <fmt:param value="${fromUserName}"/>
             <fmt:param value="${requestURL}"/>
             <fmt:param value="${subject}"/>
         </fmt:message>

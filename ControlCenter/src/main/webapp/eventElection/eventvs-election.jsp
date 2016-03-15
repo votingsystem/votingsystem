@@ -30,7 +30,7 @@
 
                 <div class="horizontal layout center center-justified">
                     <div id="eventAuthorDiv" class="flex" style="margin:0px 20px 0 20px; color:#888; font-size: 0.85em;">
-                        <b>${msg.byLbl}:</b> <span>{{eventvs.userVS}}</span>
+                        <b>${msg.byLbl}:</b> <span>{{eventvs.user}}</span>
                     </div>
                     <div style="font-size: 1.1em;">
                         <a href="{{eventvs.url}}" target="_blank">${msg.accessControlLbl}</a>

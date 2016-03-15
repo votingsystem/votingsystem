@@ -8,7 +8,7 @@ import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.SignatureService;
@@ -33,9 +33,9 @@ public class CurrencyRequest {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        SignatureService signatureService = SignatureService.getUserVSSignatureService(
-                "Currency_07553172H", UserVS.Type.USER);
-        UserVS fromUserVS = signatureService.getUserVS();
+        SignatureService signatureService = SignatureService.getUserSignatureService(
+                "Currency_07553172H", User.Type.USER);
+        User fromUser = signatureService.getUser();
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
         BigDecimal totalAmount = new BigDecimal(10);
         String curencyCode = "EUR";

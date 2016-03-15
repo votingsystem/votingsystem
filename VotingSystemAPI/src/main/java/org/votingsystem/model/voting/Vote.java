@@ -38,7 +38,7 @@ public class Vote extends EntityVS implements Serializable {
     @OneToOne private CMSMessage cmsMessage;
     @OneToOne private CertificateVS certificateVS;
     @ManyToOne(fetch=FetchType.EAGER)
-    @JoinColumn(name="optionSelected") private FieldEventVS optionSelected;
+    @JoinColumn(name="optionSelected") private FieldEvent optionSelected;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="eventElection") private EventElection eventVS;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
@@ -85,8 +85,8 @@ public class Vote extends EntityVS implements Serializable {
         this.x509Certificate = x509Certificate;
     }
 
-    public Vote (FieldEventVS optionSelected, EventElection eventVS, State state, CertificateVS certificateVS,
-                    CMSMessage cmsMessage) {
+    public Vote (FieldEvent optionSelected, EventElection eventVS, State state, CertificateVS certificateVS,
+                 CMSMessage cmsMessage) {
         this.optionSelected = optionSelected;
         this.eventVS = eventVS;
         this.state = state;
@@ -102,11 +102,11 @@ public class Vote extends EntityVS implements Serializable {
         this.hashAccessRequestBase64 = hashAccessRequestBase64;
     }
 
-    public FieldEventVS getOptionSelected() {
+    public FieldEvent getOptionSelected() {
         return optionSelected;
     }
 
-    public void setOptionSelected(FieldEventVS optionSelected) {
+    public void setOptionSelected(FieldEvent optionSelected) {
         this.optionSelected = optionSelected;
     }
 
@@ -150,11 +150,11 @@ public class Vote extends EntityVS implements Serializable {
 		return eventVS;
 	}
 
-	public void setFieldEventVS(FieldEventVS optionSelected) {
+	public void setFieldEvent(FieldEvent optionSelected) {
 		this.setOptionSelected(optionSelected);
 	}
 
-	public FieldEventVS getFieldEventVS() {
+	public FieldEvent getFieldEvent() {
 		return getOptionSelected();
 	}
 

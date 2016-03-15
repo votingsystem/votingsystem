@@ -2,15 +2,15 @@ package org.votingsystem.test.voting;
 
 import com.google.common.collect.Sets;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.ActorVSDto;
+import org.votingsystem.dto.ActorDto;
 import org.votingsystem.dto.voting.EventVSChangeDto;
 import org.votingsystem.dto.voting.EventVSDto;
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.model.Actor;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.voting.AccessControlVS;
+import org.votingsystem.model.User;
+import org.votingsystem.model.voting.AccessControl;
 import org.votingsystem.model.voting.EventVS;
-import org.votingsystem.model.voting.FieldEventVS;
+import org.votingsystem.model.voting.FieldEvent;
 import org.votingsystem.test.callable.SignTask;
 import org.votingsystem.test.callable.VoteSender;
 import org.votingsystem.test.util.SignatureService;
@@ -47,7 +47,7 @@ public class PublishAndSendElection {
         eventVS.setSubject("voting subject");
         eventVS.setContent(Base64.getEncoder().encodeToString("<p>election content</p>".getBytes()));
         eventVS.setDateBegin(new Date());
-        eventVS.setFieldsEventVS(Sets.newHashSet(new FieldEventVS("field1", null), new FieldEventVS("field2", null)));
+        eventVS.setFieldsEventVS(Sets.newHashSet(new FieldEvent("field1", null), new FieldEvent("field2", null)));
 
         UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
         userBaseSimulationData.setUserIndex(100);
@@ -69,16 +69,16 @@ public class PublishAndSendElection {
         timerMap.put("active", false);
         timerMap.put("time", "00:00:10");
         simulationData.setTimerMap(timerMap);
-        ResponseVS responseVS = HttpHelper.getInstance().getData(ActorVS.getServerInfoURL(
+        ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(
                 simulationData.getServerURL()), ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
-        if(!(actorVS instanceof AccessControlVS)) throw new ExceptionVS("Expected access control but found " +
-                actorVS.getType().toString());
-        if(actorVS.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actorVS.getEnvironmentVS()) {
-            throw new ExceptionVS("Expected DEVELOPMENT environment but found " + actorVS.getEnvironmentVS());
+        Actor actor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
+        if(!(actor instanceof AccessControl)) throw new ExceptionVS("Expected access control but found " +
+                actor.getType().toString());
+        if(actor.getEnvironmentVS() == null || EnvironmentVS.DEVELOPMENT != actor.getEnvironmentVS()) {
+            throw new ExceptionVS("Expected DEVELOPMENT environment but found " + actor.getEnvironmentVS());
         }
-        ContextVS.getInstance().setAccessControl((AccessControlVS) actorVS);
+        ContextVS.getInstance().setAccessControl((AccessControl) actor);
         //EventVSJSON eventVSJSON = publishEvent(simulationData.getEventVS(), publisherNIF, "publishElectionMsgSubject");
         eventVS = publishEvent(simulationData.getEventVS(), publisherNIF, "publishElectionMsgSubject");
         simulatorExecutor = Executors.newFixedThreadPool(100);
@@ -164,7 +164,7 @@ public class PublishAndSendElection {
         log.info("publishEvent");
         eventVS.setDateBegin(new Date());
         eventVS.setSubject(eventVS.getSubject()+ " -> " + DateUtils.getDayWeekDateStr(new Date(), "HH:mm:ss"));
-        SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
+        SignatureService signatureService = SignatureService.getUserSignatureService(publisherNIF, User.Type.USER);
         CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(
                 new EventVSDto(eventVS)));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
@@ -189,7 +189,7 @@ public class PublishAndSendElection {
         log.info("changeEventState");
         EventVSChangeDto cancelData = new EventVSChangeDto(eventVS, ContextVS.getInstance().getAccessControl().getServerURL(),
                 TypeVS.EVENT_CANCELLATION, simulationData.getEventStateWhenFinished());
-        SignatureService signatureService = SignatureService.getUserVSSignatureService(publisherNIF, UserVS.Type.USER);
+        SignatureService signatureService = SignatureService.getUserSignatureService(publisherNIF, User.Type.USER);
         CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(cancelData));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,
                 ContextVS.getInstance().getAccessControl().getCancelEventServiceURL());
@@ -198,7 +198,7 @@ public class PublishAndSendElection {
 
 
     private static void cancelVote(VoteHelper voteHelper, String nif) throws Exception {
-        SignatureService signatureService = SignatureService.getUserVSSignatureService(nif, UserVS.Type.USER);
+        SignatureService signatureService = SignatureService.getUserSignatureService(nif, User.Type.USER);
         CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(
                 voteHelper.getVoteCanceler()));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentTypeVS.JSON_SIGNED,

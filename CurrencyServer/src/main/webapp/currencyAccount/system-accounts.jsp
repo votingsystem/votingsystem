@@ -21,7 +21,7 @@
                 </div>
             </template>
         </div>
-        <div class="sectionHeader" style="margin: 30px 0 0 0;">${msg.userVSAccountsLbl}</div>
+        <div class="sectionHeader" style="margin: 30px 0 0 0;">${msg.userAccountsLbl}</div>
         <div class="layout flex horizontal wrap around-justified">
             <template is="dom-repeat" items="{{systemAccountsDto.tagVSBalanceList}}">
                 <div class="accountBlock">
@@ -30,9 +30,9 @@
                 </div>
             </template>
         </div>
-        <div class="sectionHeader" style="margin: 30px 0 0 0;">${msg.bankVSInputsLbl}</div>
+        <div class="sectionHeader" style="margin: 30px 0 0 0;">${msg.bankInputsLbl}</div>
         <div class="layout flex horizontal wrap around-justified">
-            <template is="dom-repeat" items="{{systemAccountsDto.bankVSBalanceList}}">
+            <template is="dom-repeat" items="{{systemAccountsDto.bankBalanceList}}">
                 <div class="accountBlock">
                     <div class="accountBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
                     <div class="tagDesc">{{item.name}}</div>

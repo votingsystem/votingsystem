@@ -1,7 +1,7 @@
 package org.votingsystem.dto;
 
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.Vote;
 
@@ -13,11 +13,11 @@ import java.util.Set;
  */
 public class CMSDto {
 
-    private UserVS signer;
+    private User signer;
     private Vote vote;
     private EventVS eventVS;
-    private UserVS anonymousSigner;
-    private Set<UserVS> signers;
+    private User anonymousSigner;
+    private Set<User> signers;
     private CMSMessage cmsMessage;
 
     public CMSDto() {}
@@ -26,33 +26,33 @@ public class CMSDto {
         this.vote = vote;
     }
 
-    public UserVS getSigner() {
+    public User getSigner() {
         return signer;
     }
 
-    public void setSigner(UserVS signer) {
+    public void setSigner(User signer) {
         this.signer = signer;
         addSigner(signer);
     }
 
-    public UserVS getAnonymousSigner() {
+    public User getAnonymousSigner() {
         return anonymousSigner;
     }
 
-    public void setAnonymousSigner(UserVS anonymousSigner) {
+    public void setAnonymousSigner(User anonymousSigner) {
         this.anonymousSigner = anonymousSigner;
         addSigner(anonymousSigner);
     }
 
-    public Set<UserVS> getSigners() {
+    public Set<User> getSigners() {
         return signers;
     }
 
-    public void setSigners(Set<UserVS> signers) {
+    public void setSigners(Set<User> signers) {
         this.signers = signers;
     }
 
-    public void addSigner(UserVS signer) {
+    public void addSigner(User signer) {
         if(signers == null) signers = new HashSet<>();
         signers.add(signer);
     }

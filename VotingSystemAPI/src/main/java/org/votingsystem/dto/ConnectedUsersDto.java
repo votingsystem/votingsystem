@@ -13,7 +13,7 @@ import java.util.Set;
 public class ConnectedUsersDto {
 
     private List<String> notAuthenticatedSessions;
-    private Map<Long, Set<DeviceVSDto>> usersAuthenticated;
+    private Map<Long, Set<DeviceDto>> usersAuthenticated;
 
     public ConnectedUsersDto() {}
 
@@ -25,11 +25,11 @@ public class ConnectedUsersDto {
         this.notAuthenticatedSessions = notAuthenticatedSessions;
     }
 
-    public Map<Long, Set<DeviceVSDto>> getUsersAuthenticated() {
+    public Map<Long, Set<DeviceDto>> getUsersAuthenticated() {
         return usersAuthenticated;
     }
 
-    public void setUsersAuthenticated(Map<Long, Set<DeviceVSDto>> usersAuthenticated) {
+    public void setUsersAuthenticated(Map<Long, Set<DeviceDto>> usersAuthenticated) {
         this.usersAuthenticated = usersAuthenticated;
     }
 

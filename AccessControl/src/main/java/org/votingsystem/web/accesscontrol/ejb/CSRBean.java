@@ -8,12 +8,12 @@ import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.CertValidationDto;
-import org.votingsystem.dto.DeviceVSDto;
+import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.EventElection;
-import org.votingsystem.model.voting.UserRequestCsrVS;
+import org.votingsystem.model.voting.UserRequestCsr;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
@@ -26,7 +26,7 @@ import org.votingsystem.util.crypto.KeyStoreInfo;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SubscriptionVSBean;
+import org.votingsystem.web.ejb.SubscriptionBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.ejb.Stateless;
@@ -46,51 +46,52 @@ public class CSRBean {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject CMSBean cmsBean;
-    @Inject SubscriptionVSBean subscriptionVSBean;
+    @Inject
+    SubscriptionBean subscriptionBean;
 
-    public DeviceVS signCertUserVS(CMSMessage cmsMessage) throws Exception {
-        UserVS userVS = cmsMessage.getUserVS();
+    public Device signCertUser(CMSMessage cmsMessage) throws Exception {
+        User user = cmsMessage.getUser();
         CertValidationDto certValidationDto = cmsMessage.getSignedContent(CertValidationDto.class);
-        if(!cmsBean.isAdmin(userVS.getNif()) && !userVS.getNif().equals(certValidationDto.getNif()))
-            throw new ExceptionVS("operation: signCertUserVS - userWithoutPrivilegesERROR - userVS nif: " + userVS.getNif());
+        if(!cmsBean.isAdmin(user.getNif()) && !user.getNif().equals(certValidationDto.getNif()))
+            throw new ExceptionVS("operation: signCertUser - userWithoutPrivilegesERROR - user nif: " + user.getNif());
         String validatedNif = NifUtils.validate(certValidationDto.getNif());
-        Query query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId and d.userVS.nif =:nif " +
-                "and d.state =:state").setParameter("state", DeviceVS.State.PENDING)
+        Query query = dao.getEM().createQuery("select d from Device d where d.deviceId =:deviceId and d.user.nif =:nif " +
+                "and d.state =:state").setParameter("state", Device.State.PENDING)
                 .setParameter("deviceId", certValidationDto.getDeviceId()).setParameter("nif", validatedNif);
-        DeviceVS deviceVS = dao.getSingleResult(DeviceVS.class, query);
-        if(deviceVS == null) throw new ExceptionVS("deviceNotFoundErrorMsg - deviceId: " + certValidationDto.getDeviceId() +
+        Device device = dao.getSingleResult(Device.class, query);
+        if(device == null) throw new ExceptionVS("deviceNotFoundErrorMsg - deviceId: " + certValidationDto.getDeviceId() +
                 " - nif: " + validatedNif);
-        query = dao.getEM().createQuery("select u from UserRequestCsrVS u where u.userVS =:userVS and u.state =:state")
-                .setParameter("userVS", deviceVS.getUserVS()).setParameter("state", UserRequestCsrVS.State.PENDING);
-        UserRequestCsrVS csrRequest = dao.getSingleResult(UserRequestCsrVS.class, query);
+        query = dao.getEM().createQuery("select u from UserRequestCsr u where u.user =:user and u.state =:state")
+                .setParameter("user", device.getUser()).setParameter("state", UserRequestCsr.State.PENDING);
+        UserRequestCsr csrRequest = dao.getSingleResult(UserRequestCsr.class, query);
         if (csrRequest == null) throw new ExceptionVS("userRequestCsrMissingErrorMsg - validatedNif: " + validatedNif +
             " - deviceId: " + certValidationDto.getDeviceId());
-        query = dao.getEM().createQuery("select d from DeviceVS d where d.deviceId =:deviceId and d.userVS.nif =:nif " +
-                "and d.state =:state").setParameter("state", DeviceVS.State.OK)
+        query = dao.getEM().createQuery("select d from Device d where d.deviceId =:deviceId and d.user.nif =:nif " +
+                "and d.state =:state").setParameter("state", Device.State.OK)
                 .setParameter("deviceId", certValidationDto.getDeviceId()).setParameter("nif", validatedNif);
-        List<DeviceVS> oldDeviceList = dao.findAll(DeviceVS.class);
+        List<Device> oldDeviceList = dao.findAll(Device.class);
         if(!oldDeviceList.isEmpty()) {
-            for(DeviceVS device :  oldDeviceList) {
-                dao.merge(device.setState(DeviceVS.State.CANCELED));
+            for(Device oldDevice :  oldDeviceList) {
+                dao.merge(oldDevice.setState(Device.State.CANCELED));
             }
         }
-        X509Certificate issuedCert = signCertUserVS(csrRequest);
-        CertificateVS certificate = dao.persist(CertificateVS.USER(deviceVS.getUserVS(), issuedCert));
-        dao.merge(deviceVS.getUserVS().updateCertInfo(issuedCert));
-        dao.merge(deviceVS.setCertificateVS(certificate).setState(DeviceVS.State.OK).updateCertInfo(issuedCert));
+        X509Certificate issuedCert = signCertUser(csrRequest);
+        CertificateVS certificate = dao.persist(CertificateVS.USER(device.getUser(), issuedCert));
+        dao.merge(device.getUser().updateCertInfo(issuedCert));
+        dao.merge(device.setCertificateVS(certificate).setState(Device.State.OK).updateCertInfo(issuedCert));
         dao.merge(csrRequest.setCertificateVS(certificate).setActivationCMS(cmsMessage));
-        return deviceVS;
+        return device;
     }
 
-    public X509Certificate signCertUserVS(UserRequestCsrVS csrRequest) throws Exception {
+    public X509Certificate signCertUser(UserRequestCsr csrRequest) throws Exception {
         Date validFrom = new Date();
         Date validTo = DateUtils.addDays(validFrom, 365).getTime(); //one year
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getContent());
         X509Certificate issuedCert = cmsBean.signCSR(csr, null, validFrom, validTo);
         csrRequest.setSerialNumber(issuedCert.getSerialNumber().longValue());
-        dao.persist(csrRequest.setState(UserRequestCsrVS.State.OK));
-        CertificateVS certificate = dao.persist(CertificateVS.USER(csrRequest.getUserVS(), issuedCert));
-        log.info("signCertUserVS - issued new CertificateVS id: " + certificate.getId() + " for UserRequestCsrVS: " +
+        dao.persist(csrRequest.setState(UserRequestCsr.State.OK));
+        CertificateVS certificate = dao.persist(CertificateVS.USER(csrRequest.getUser(), issuedCert));
+        log.info("signCertUser - issued new CertificateVS id: " + certificate.getId() + " for UserRequestCsr: " +
                 csrRequest.getId());
         return issuedCert;
     }
@@ -110,7 +111,7 @@ public class CSRBean {
     }
 
     public CsrResponse signRepresentativeCertVote (byte[] csrPEMBytes, EventElection eventVS,
-                          UserVS representative) throws Exception {
+                          User representative) throws Exception {
         CsrResponse csrResponse = validateCSRVote(csrPEMBytes, eventVS);
         KeyStoreVS keyStoreVS = eventVS.getKeyStoreVS();
         //TODO ==== vote keystore -- this is for developement
@@ -122,7 +123,7 @@ public class CSRBean {
         X509Certificate issuedCert = CertUtils.signCSR(csr, null, keyStoreInfo.getPrivateKeySigner(),
                 keyStoreInfo.getCertSigner(), eventVS.getDateBegin(), eventVS.getDateFinish(), attribute);
         CertificateVS certificate = CertificateVS.VOTE(csrResponse.getHashCertVSBase64(), representative, issuedCert);
-        certificate.setUserVS(representative);
+        certificate.setUser(representative);
         dao.persist(certificate);
         csrResponse.setIssuedCert(PEMUtils.getPEMEncoded(issuedCert));
         return csrResponse;
@@ -166,24 +167,24 @@ public class CSRBean {
 
     /*  C=ES, ST=State or Province, L=locality name, O=organization name, OU=org unit, CN=common name,
     emailAddress=user@votingsystem.org, SERIALNUMBER=1234, SN=surname, GN=given name, GN=name given */
-    public UserRequestCsrVS saveUserCSR(byte[] csrPEMBytes) throws Exception {
+    public UserRequestCsr saveUserCSR(byte[] csrPEMBytes) throws Exception {
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
         CertificationRequestInfo info = csr.toASN1Structure().getCertificationRequestInfo();
         String subjectDN = info.getSubject().toString();
-        UserVS userVS = UserVS.getUserVS(subjectDN);
+        User user = User.getUser(subjectDN);
         CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
-                csr, ContextVS.DEVICEVS_OID);
-        DeviceVSDto deviceVSDto = new DeviceVSDto(userVS, certExtensionDto);
-        DeviceVS deviceVS = subscriptionVSBean.checkDeviceFromCSR(deviceVSDto);
-        Query query = dao.getEM().createQuery("select r from UserRequestCsrVS r where r.deviceVS.deviceId =:device and " +
-                "r.userVS.nif =:user and r.state =:state").setParameter("device", deviceVS.getDeviceId())
-                .setParameter("user", userVS.getNif()).setParameter("state", UserRequestCsrVS.State.PENDING);
-        List<UserRequestCsrVS> previousRequestList = query.getResultList();
-        for(UserRequestCsrVS prevRequest: previousRequestList) {
-            dao.merge(prevRequest.setState(UserRequestCsrVS.State.CANCELED));
+                csr, ContextVS.DEVICE_OID);
+        DeviceDto deviceDto = new DeviceDto(user, certExtensionDto);
+        Device device = subscriptionBean.checkDeviceFromCSR(deviceDto);
+        Query query = dao.getEM().createQuery("select r from UserRequestCsr r where r.device.deviceId =:device and " +
+                "r.user.nif =:user and r.state =:state").setParameter("device", device.getDeviceId())
+                .setParameter("user", user.getNif()).setParameter("state", UserRequestCsr.State.PENDING);
+        List<UserRequestCsr> previousRequestList = query.getResultList();
+        for(UserRequestCsr prevRequest: previousRequestList) {
+            dao.merge(prevRequest.setState(UserRequestCsr.State.CANCELED));
         }
-        UserRequestCsrVS requestCSR = dao.persist(new UserRequestCsrVS(UserRequestCsrVS.State.PENDING, csrPEMBytes,
-                deviceVS));
+        UserRequestCsr requestCSR = dao.persist(new UserRequestCsr(UserRequestCsr.State.PENDING, csrPEMBytes,
+                device));
         log.info("requestCSR id:" + requestCSR.getId() + " - cert subject: " + subjectDN);
         return requestCSR;
     }

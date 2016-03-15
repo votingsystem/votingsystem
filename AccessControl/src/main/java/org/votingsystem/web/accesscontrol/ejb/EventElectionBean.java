@@ -44,21 +44,21 @@ public class EventElectionBean {
 
     public EventElection saveEvent(CMSMessage cmsMessage) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        UserVS userSigner = cmsMessage.getUserVS();
+        User userSigner = cmsMessage.getUser();
         EventVSDto request  = cmsMessage.getSignedContent(EventVSDto.class);
         request.setDateFinish(DateUtils.resetDay(DateUtils.addDays(request.getDateBegin(), 1).getTime()).getTime());
-        ControlCenterVS controlCenterVS = config.getControlCenter();
-        Query query = dao.getEM().createQuery("select a from ActorVS a where a.serverURL =:serverURL")
+        ControlCenter controlCenter = config.getControlCenter();
+        Query query = dao.getEM().createQuery("select a from Actor a where a.serverURL =:serverURL")
                 .setParameter("serverURL", config.getContextURL());
-        AccessControlVS accessControlVS = dao.getSingleResult(AccessControlVS.class, query);
+        AccessControl accessControl = dao.getSingleResult(AccessControl.class, query);
         EventElection eventVS = request.getEventElection();
-        eventVS.setUserVS(userSigner);
-        eventVS.setControlCenterVS(controlCenterVS);
-        eventVS.setAccessControlVS(accessControlVS);
+        eventVS.setUser(userSigner);
+        eventVS.setControlCenter(controlCenter);
+        eventVS.setAccessControl(accessControl);
         eventVSBean.setEventDatesState(eventVS);
         if(EventVS.State.TERMINATED ==  eventVS.getState()) throw new ValidationExceptionVS(
                 "ERROR - eventFinishedErrorMsg dateFinish: " + request.getDateFinish());
-        request.setControlCenterURL(controlCenterVS.getServerURL());
+        request.setControlCenterURL(controlCenter.getServerURL());
         dao.persist(eventVS);
         eventVS.setAccessControlEventId(eventVS.getId());
         request.setFieldsEventVS(eventVS.getFieldsEventVS());
@@ -79,21 +79,21 @@ public class EventElectionBean {
         request.setCertCAVotacion( new String(PEMUtils.getPEMEncoded (keyStoreVS.getCertificateVS().getX509Cert())));
         request.setCertChain(new String(PEMUtils.getPEMEncoded (cmsBean.getCertChain())));
         X509Certificate certUsuX509 = userSigner.getCertificate();
-        request.setUserVS(new String(PEMUtils.getPEMEncoded(certUsuX509)));
+        request.setUser(new String(PEMUtils.getPEMEncoded(certUsuX509)));
         CMSSignedMessage cms = cmsBean.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(request));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cms.toPEM(),
-                ContentTypeVS.JSON_SIGNED, controlCenterVS.getServerURL() + "/rest/eventElection");
+                ContentTypeVS.JSON_SIGNED, controlCenter.getServerURL() + "/rest/eventElection");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-            throw new ExceptionVS(messages.get("controlCenterCommunicationErrorMsg", controlCenterVS.getServerURL()));
+            throw new ExceptionVS(messages.get("controlCenterCommunicationErrorMsg", controlCenter.getServerURL()));
         }
         query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type " +
-                "and c.actorVS =:actorVS and c.state =:state").setParameter("type", CertificateVS.Type.ACTOR_VS)
-                .setParameter("actorVS", controlCenterVS).setParameter("state", CertificateVS.State.OK);
+                "and c.actor =:actor and c.state =:state").setParameter("type", CertificateVS.Type.ACTOR_VS)
+                .setParameter("actor", controlCenter).setParameter("state", CertificateVS.State.OK);
         CertificateVS controlCenterCert = dao.getSingleResult(CertificateVS.class, query);
         CertificateVS controlCenterCertEventVS = dao.persist(
-                CertificateVS.ACTORVS(controlCenterVS, controlCenterCert.getX509Cert()));
+                CertificateVS.ACTOR(controlCenter, controlCenterCert.getX509Cert()));
         CertificateVS accessControlCertEventVS = dao.persist(
-                CertificateVS.ACTORVS(null, cmsBean.getServerCert()));
+                CertificateVS.ACTOR(null, cmsBean.getServerCert()));
         dao.merge(cmsMessage.setType(TypeVS.VOTING_EVENT).setCMS(cms));
         dao.merge(eventVS.setControlCenterCert(controlCenterCertEventVS).setAccessControlCert(accessControlCertEventVS)
                 .setState(EventVS.State.ACTIVE).setCmsMessage(cmsMessage));
@@ -163,7 +163,7 @@ public class EventElectionBean {
                 .setParameter("state", Vote.State.OK).setParameter("eventVS", eventVS);
         List<Vote> votes = query.getResultList();
         for (Vote vote : votes) {
-            UserVS representative = vote.getCertificateVS().getUserVS();
+            User representative = vote.getCertificateVS().getUser();
             File cmsFile = null;
             if(representative != null) {//not anonymous, representative vote
                 cmsFile = new File(format("{0}/representativeVote_{1}.p7s", votesBaseDir, representative.getNif()));
@@ -181,7 +181,7 @@ public class EventElectionBean {
                 .setParameter("state", AccessRequest.State.OK).setParameter("eventVS", eventVS);
         List<AccessRequest> accessRequestList = query.getResultList();
         for(AccessRequest accessRequest : accessRequestList) {
-            File cmsFile = new File(format("{0}/accessRequest_{1}.p7s", accessRequestBaseDir, accessRequest.getUserVS().getNif()));
+            File cmsFile = new File(format("{0}/accessRequest_{1}.p7s", accessRequestBaseDir, accessRequest.getUser().getNif()));
             IOUtils.write(accessRequest.getCmsMessage().getContentPEM(), new FileOutputStream(cmsFile));
             /*if((accessRequests.getRowNumber() % 100) == 0) {
                 String elapsedTimeStr = DateUtils.getElapsedTimeHoursMinutesMillis(
@@ -223,7 +223,7 @@ public class EventElectionBean {
         query = dao.getEM().createQuery("select count(v) from Vote v where v.eventVS =:eventVS and v.state =:state")
                 .setParameter("eventVS", eventVS).setParameter("state", Vote.State.CANCELED);
         statsDto.setNumVotesVSVotesVSCANCELED((long) query.getSingleResult());
-        for(FieldEventVS option : eventVS.getFieldsEventVS()) {
+        for(FieldEvent option : eventVS.getFieldsEventVS()) {
             query = dao.getEM().createQuery("select count(v) from Vote v where v.optionSelected =:option " +
                     "and v.state =:state").setParameter("option", option).setParameter("state", Vote.State.OK);
             option.setNumVotesVS((long) query.getSingleResult());

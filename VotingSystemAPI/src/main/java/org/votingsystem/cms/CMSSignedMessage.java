@@ -17,13 +17,9 @@ import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle.tsp.cms.ImprintDigestInvalidException;
 import org.bouncycastle.util.Store;
 import org.votingsystem.dto.voting.VoteDto;
-import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.Vote;
-import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.ContentTypeVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.PEMUtils;
@@ -171,11 +167,11 @@ public class CMSSignedMessage extends CMSSignedData {
         return messageData;
     }
 
-    public UserVS getSigner() throws Exception {
+    public User getSigner() throws Exception {
         return getMessageData().getSignerVS();
     }
 
-    public Set<UserVS> getSigners() throws Exception {
+    public Set<User> getSigners() throws Exception {
         return getMessageData().getSigners();
     }
 
@@ -185,8 +181,8 @@ public class CMSSignedMessage extends CMSSignedData {
 
     public Set<X509Certificate> getSignersCerts() throws Exception {
         Set<X509Certificate> signerCerts = new HashSet<>();
-        for (UserVS userVS : getMessageData().getSigners()) {
-            signerCerts.add(userVS.getCertificate());
+        for (User user : getMessageData().getSigners()) {
+            signerCerts.add(user.getCertificate());
         }
         return signerCerts;
     }
@@ -197,8 +193,8 @@ public class CMSSignedMessage extends CMSSignedData {
 
     private class MessageData {
 
-        private UserVS signerVS;
-        private Set<UserVS> signers;
+        private User signerVS;
+        private Set<User> signers;
         private TimeStampToken timeStampToken;
         private Vote vote;
         private X509Certificate currencyCert;
@@ -239,10 +235,10 @@ public class CMSSignedMessage extends CMSSignedData {
                 } catch (Exception ex) {
                     throw ex;
                 }
-                UserVS userVS = UserVS.FROM_X509_CERT(cert);
-                userVS.setSignerInformation(signer);
+                User user = User.FROM_X509_CERT(cert);
+                user.setSignerInformation(signer);
                 TimeStampToken tsToken = CMSUtils.checkTimeStampToken(signer);
-                userVS.setTimeStampToken(tsToken);
+                user.setTimeStampToken(tsToken);
                 if (tsToken != null) {
                     byte[] signerDigest = CMSUtils.getSignerDigest(signer);
                     TimeStampTokenInfo info = tsToken.getTimeStampInfo();
@@ -254,11 +250,11 @@ public class CMSSignedMessage extends CMSSignedData {
                     Date timeStampDate = tsToken.getTimeStampInfo().getGenTime();
                     if (firstSignature == null || firstSignature.after(timeStampDate)) {
                         firstSignature = timeStampDate;
-                        signerVS = userVS;
+                        signerVS = user;
                         timeStampToken = tsToken;
                     }
                 }
-                signers.add(userVS);
+                signers.add(user);
                 if (cert.getExtensionValue(ContextVS.VOTE_OID) != null) {
                     VoteDto dto = getSignedContent(VoteDto.class);
                     vote = new Vote(dto).loadSignatureData(cert, timeStampToken);
@@ -272,11 +268,11 @@ public class CMSSignedMessage extends CMSSignedData {
             return true;
         }
 
-        public UserVS getSignerVS() {
+        public User getSignerVS() {
             return signerVS;
         }
 
-        public Set<UserVS> getSigners() {
+        public Set<User> getSigners() {
             return signers;
         }
 

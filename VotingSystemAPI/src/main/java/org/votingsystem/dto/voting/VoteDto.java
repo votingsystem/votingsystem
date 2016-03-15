@@ -1,7 +1,7 @@
 package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.model.voting.FieldEventVS;
+import org.votingsystem.model.voting.FieldEvent;
 import org.votingsystem.model.voting.Vote;
 import org.votingsystem.model.voting.VoteCanceler;
 import org.votingsystem.util.StringUtils;
@@ -26,7 +26,7 @@ public class VoteDto {
     private String cmsCancelationMessageURL;
     private String eventURL;
     private Vote.State state;
-    private FieldEventVS optionSelected;
+    private FieldEvent optionSelected;
     private String UUID;
 
 
@@ -138,11 +138,11 @@ public class VoteDto {
         this.state = state;
     }
 
-    public FieldEventVS getOptionSelected() {
+    public FieldEvent getOptionSelected() {
         return optionSelected;
     }
 
-    public void setOptionSelected(FieldEventVS optionSelected) {
+    public void setOptionSelected(FieldEvent optionSelected) {
         this.optionSelected = optionSelected;
     }
 

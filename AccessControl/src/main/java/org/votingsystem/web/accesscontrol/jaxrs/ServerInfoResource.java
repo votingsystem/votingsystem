@@ -1,8 +1,8 @@
 package org.votingsystem.web.accesscontrol.jaxrs;
 
-import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.model.ActorVS;
-import org.votingsystem.model.voting.ControlCenterVS;
+import org.votingsystem.dto.ActorDto;
+import org.votingsystem.model.Actor;
+import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -35,13 +35,13 @@ public class ServerInfoResource {
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Map doGet(@Context HttpServletRequest req, @Context HttpServletResponse resp) {
         HashMap serverInfo = new HashMap();
-        serverInfo.put("serverType", ActorVS.Type.ACCESS_CONTROL);
+        serverInfo.put("serverType", Actor.Type.ACCESS_CONTROL);
         serverInfo.put("name", configVS.getServerName());
         serverInfo.put("serverURL", configVS.getContextURL());
-        serverInfo.put("state",  ActorVS.State.OK);
+        serverInfo.put("state",  Actor.State.OK);
         serverInfo.put("date", new Date());
-        ControlCenterVS controlCenterVS = configVS.getControlCenter();
-        if(controlCenterVS != null) serverInfo.put("controlCenter", new ActorVSDto(controlCenterVS));
+        ControlCenter controlCenter = configVS.getControlCenter();
+        if(controlCenter != null) serverInfo.put("controlCenter", new ActorDto(controlCenter));
         serverInfo.put("environmentMode", configVS.getMode());
         serverInfo.put("timeStampCertPEM", new String(timeStampBean.getSigningCertPEMBytes()));
         serverInfo.put("timeStampServerURL", configVS.getTimeStampServerURL());

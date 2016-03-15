@@ -4,7 +4,7 @@ import org.votingsystem.dto.CertificateVSDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaTypeVS;
@@ -74,15 +74,15 @@ public class CertificateVSResource {
                     .setFirstResult(offset).setMaxResults(max);;
         } else {
             query = dao.getEM().createQuery("select count (c) from CertificateVS c where c.type =:type and c.state =:state " +
-                    "and (c.userVS.name like :searchText or c.userVS.nif like :searchText " +
-                    "or c.userVS.firstName like :searchText or c.userVS.lastName like :searchText " +
-                    "or c.userVS.description like :searchText)").setParameter("type", type)
+                    "and (c.user.name like :searchText or c.user.nif like :searchText " +
+                    "or c.user.firstName like :searchText or c.user.lastName like :searchText " +
+                    "or c.user.description like :searchText)").setParameter("type", type)
                     .setParameter("state", state).setParameter("searchText", "%" + searchText + "%");
             totalCount = (long) query.getSingleResult();
             query = dao.getEM().createQuery("select c from CertificateVS c where c.type =:type and c.state =:state " +
-                    "and (c.userVS.name like :searchText or c.userVS.nif like :searchText " +
-                    "or c.userVS.firstName like :searchText or c.userVS.lastName like :searchText " +
-                    "or c.userVS.description like :searchText)").setParameter("type", type)
+                    "and (c.user.name like :searchText or c.user.nif like :searchText " +
+                    "or c.user.firstName like :searchText or c.user.lastName like :searchText " +
+                    "or c.user.description like :searchText)").setParameter("type", type)
                     .setParameter("state", state).setParameter("searchText", "%" + searchText + "%")
                     .setFirstResult(offset).setMaxResults(max);;
         }
@@ -135,19 +135,19 @@ public class CertificateVSResource {
         }
     }
 
-    @Path("/userVS/id/{userId}")
+    @Path("/user/id/{userId}")
     @GET  @Produces(MediaType.TEXT_PLAIN)
-    public Response userVS(@PathParam("userId") Long userId) throws Exception {
-        UserVS userVS = dao.find(UserVS.class, userId);
-        if(userVS == null) return Response.status(Response.Status.BAD_REQUEST).entity(
-                "ERROR - UserVS not found - userId: " + userId).build();
-        Query query = dao.getEM().createQuery("select c from CertificateVS c where c.userVS =:userVS and c.state =:state")
-                .setParameter("userVS", userVS).setParameter("state", CertificateVS.State.OK);
+    public Response user(@PathParam("userId") Long userId) throws Exception {
+        User user = dao.find(User.class, userId);
+        if(user == null) return Response.status(Response.Status.BAD_REQUEST).entity(
+                "ERROR - User not found - userId: " + userId).build();
+        Query query = dao.getEM().createQuery("select c from CertificateVS c where c.user =:user and c.state =:state")
+                .setParameter("user", user).setParameter("state", CertificateVS.State.OK);
         CertificateVS certificate = dao.getSingleResult(CertificateVS.class, query);
         if (certificate != null) {
             X509Certificate certX509 = CertUtils.loadCertificate(certificate.getContent());
             return Response.ok().entity(PEMUtils.getPEMEncoded (certX509)).build();
-        } else return Response.status(Response.Status.BAD_REQUEST).entity("ERROR - UserVS without active CertificateVS").build();
+        } else return Response.status(Response.Status.BAD_REQUEST).entity("ERROR - User without active CertificateVS").build();
     }
 
     @Path("/eventVS/id/{eventId}/CACert")
@@ -183,16 +183,16 @@ public class CertificateVSResource {
         return Response.ok().entity(PEMUtils.getPEMEncoded (trustedCerts)).build();
     }
 
-    @Path("/userVS/{userId}")
+    @Path("/user/{userId}")
     @GET  @Produces(MediaType.TEXT_PLAIN)
-    public Response userVS(@PathParam("userId") long userId, @Context Request req, @Context HttpServletResponse resp)
+    public Response user(@PathParam("userId") long userId, @Context Request req, @Context HttpServletResponse resp)
             throws Exception {
-        UserVS userVS = dao.find(UserVS.class, userId);
-        if(userVS == null) {
+        User user = dao.find(User.class, userId);
+        if(user == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("userId: " + userId).build();
         } else {
-            Query query = dao.getEM().createQuery("select c from CertificateVS c where c.userVS =:userVS and c.state =:state")
-                    .setParameter("userVS", userVS).setParameter("state", CertificateVS.State.OK);
+            Query query = dao.getEM().createQuery("select c from CertificateVS c where c.user =:user and c.state =:state")
+                    .setParameter("user", user).setParameter("state", CertificateVS.State.OK);
             CertificateVS certificate = dao.getSingleResult(CertificateVS.class, query);
             if (certificate != null) {
                 X509Certificate certX509 = CertUtils.loadCertificate (certificate.getContent());

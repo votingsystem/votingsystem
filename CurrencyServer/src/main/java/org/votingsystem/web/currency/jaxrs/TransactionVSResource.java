@@ -13,7 +13,7 @@ import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.TransactionVSDto;
 import org.votingsystem.dto.voting.MetaInf;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.TransactionVS;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.*;
@@ -21,7 +21,7 @@ import org.votingsystem.web.currency.cdi.ConfigVSImpl;
 import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.CurrencyBean;
 import org.votingsystem.web.currency.ejb.TransactionVSBean;
-import org.votingsystem.web.currency.ejb.UserVSBean;
+import org.votingsystem.web.currency.ejb.UserBean;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -56,7 +56,8 @@ public class TransactionVSResource {
 
     private static final Logger log = Logger.getLogger(TransactionVSResource.class.getName());
 
-    @Inject UserVSBean serVSBean;
+    @Inject
+    UserBean serVSBean;
     @Inject TransactionVSBean transactionVSBean;
     @Inject CMSBean cmsBean;
     @Inject CurrencyBean currencyBean;
@@ -167,24 +168,24 @@ public class TransactionVSResource {
         }
     }
 
-    @Path("/userVS/id/{userId}/{timePeriod}") @Transactional
+    @Path("/user/id/{userId}/{timePeriod}") @Transactional
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response transactionsTo(@PathParam("userId") long userId, @Context ServletContext context,
              @PathParam("timePeriod") String lapseStr,
              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType():"";
-        UserVS userVS = dao.find(UserVS.class, userId);
-        if(userVS == null) {
+        User user = dao.find(User.class, userId);
+        if(user == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("not found - userId: " + userId).build();
         }
         Interval.Lapse lapse =  Interval.Lapse.valueOf(lapseStr.toUpperCase());
         Interval timePeriod = DateUtils.getLapsePeriod(Calendar.getInstance(req.getLocale()).getTime(), lapse);
-        List<TransactionVS> transactionsToList = transactionVSBean.getTransactionToList(userVS, timePeriod);
+        List<TransactionVS> transactionsToList = transactionVSBean.getTransactionToList(user, timePeriod);
         List<TransactionVSDto> transactionsToListDto = new ArrayList<>();
         for(TransactionVS transaction : transactionsToList) {
             transactionsToListDto.add(transactionVSBean.getTransactionDto(transaction));
         }
-        List<TransactionVS> transactionsFromList = transactionVSBean.getTransactionFromList(userVS, timePeriod);
+        List<TransactionVS> transactionsFromList = transactionVSBean.getTransactionFromList(user, timePeriod);
         List<TransactionVSDto> transactionsFromListDto = new ArrayList<>();
         for(TransactionVS transaction : transactionsFromList) {
             transactionsFromListDto.add(transactionVSBean.getTransactionDto(transaction));
@@ -196,7 +197,7 @@ public class TransactionVSResource {
                 JSON.getMapper().writeValueAsBytes(balancesDto)).build();
         else {
             req.getSession().setAttribute("balancesDto", JSON.getMapper().writeValueAsString(balancesDto));
-            return Response.temporaryRedirect(new URI("../transactionVS/userVS.xhtml")).build();
+            return Response.temporaryRedirect(new URI("../transactionVS/user.xhtml")).build();
         }
     }
 

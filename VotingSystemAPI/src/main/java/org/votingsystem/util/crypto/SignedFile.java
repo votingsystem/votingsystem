@@ -3,7 +3,7 @@ package org.votingsystem.util.crypto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.TypeVS;
@@ -120,8 +120,8 @@ public class SignedFile {
 
     public Long getSignerCertSerialNumber() throws Exception {
         if(cmsMessage == null) return null;
-        UserVS userVS = cmsMessage.getSigner();
-        return userVS.getCertificate().getSerialNumber().longValue();
+        User user = cmsMessage.getSigner();
+        return user.getCertificate().getSerialNumber().longValue();
     }
 
 }

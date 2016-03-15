@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.CurrencyDto;
-import org.votingsystem.model.DeviceVS;
+import org.votingsystem.model.Device;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
@@ -55,10 +55,10 @@ public class SocketMessageDto {
     private String URL;
     private List<CurrencyDto> currencyDtoList;
     private Date date;
-    private DeviceVSDto connectedDevice;
+    private DeviceDto connectedDevice;
 
     private SocketMessageContentDto content;
-    @JsonIgnore private UserVS userVS;
+    @JsonIgnore private User user;
     @JsonIgnore private Set<Currency> currencySet;
     @JsonIgnore private AESParams aesEncryptParams;
     @JsonIgnore private WebSocketSession webSocketSession;
@@ -341,12 +341,12 @@ public class SocketMessageDto {
         this.URL = URL;
     }
 
-    public UserVS getUserVS() {
-        return userVS;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserVS(UserVS userVS) {
-        this.userVS = userVS;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Set<Currency> getCurrencySet() throws Exception {
@@ -407,15 +407,15 @@ public class SocketMessageDto {
         this.aesEncryptParams = aesEncryptParams;
     }
 
-    public DeviceVSDto getConnectedDevice() {
+    public DeviceDto getConnectedDevice() {
         return connectedDevice;
     }
 
-    public void setConnectedDevice(DeviceVSDto connectedDevice) {
+    public void setConnectedDevice(DeviceDto connectedDevice) {
         this.connectedDevice = connectedDevice;
     }
 
-    public static SocketMessageDto getSignRequest(DeviceVS deviceTo, String toUser, String textToSign, String subject)
+    public static SocketMessageDto getSignRequest(Device deviceTo, String toUser, String textToSign, String subject)
             throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceTo, null, TypeVS.MESSAGEVS_SIGN);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
@@ -433,7 +433,7 @@ public class SocketMessageDto {
         return socketMessageDto;
     }
 
-    public static SocketMessageDto getCurrencyWalletChangeRequest(DeviceVS deviceTo, List<Currency> currencyList) throws Exception {
+    public static SocketMessageDto getCurrencyWalletChangeRequest(Device deviceTo, List<Currency> currencyList) throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceTo, currencyList, TypeVS.CURRENCY_WALLET_CHANGE);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
@@ -451,8 +451,8 @@ public class SocketMessageDto {
         return socketMessageDto;
     }
 
-    public static SocketMessageDto getMessageVSToDevice(UserVS userVS, DeviceVS deviceTo, String toUser,
-                            String textToEncrypt) throws Exception {
+    public static SocketMessageDto getMessageVSToDevice(User user, Device deviceTo, String toUser,
+                                                        String textToEncrypt) throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceTo, null, TypeVS.MESSAGEVS);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
@@ -461,7 +461,7 @@ public class SocketMessageDto {
         socketMessageDto.setDeviceToName(deviceTo.getDeviceName());
         socketMessageDto.setUUID(socketSession.getUUID());
 
-        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getMessageVSToDevice(userVS, toUser, textToEncrypt);
+        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getMessageVSToDevice(user, toUser, textToEncrypt);
         String aesParams = JSON.getMapper().writeValueAsString(socketSession.getAESParams().getDto());
         byte[] base64EncryptedAESDataRequestBytes = Encryptor.encryptToCMS(aesParams.getBytes(), deviceTo.getX509Certificate());
         socketMessageDto.setAesParams(new String(base64EncryptedAESDataRequestBytes));
@@ -471,7 +471,7 @@ public class SocketMessageDto {
     }
 
     //method to response a message previously received
-    public SocketMessageDto getMessageVSResponse(UserVS userVS, String textToEncrypt) throws Exception {
+    public SocketMessageDto getMessageVSResponse(User user, String textToEncrypt) throws Exception {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
@@ -480,7 +480,7 @@ public class SocketMessageDto {
         socketMessageDto.setDeviceToName(from);
         socketMessageDto.setUUID(socketSession.getUUID());
 
-        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getMessageVSToDevice(userVS, from, textToEncrypt);
+        SocketMessageContentDto messageContentDto = SocketMessageContentDto.getMessageVSToDevice(user, from, textToEncrypt);
         socketMessageDto.setEncryptedMessage(Encryptor.encryptAES(
                 JSON.getMapper().writeValueAsString(messageContentDto), socketSession.getAESParams()));
         return socketMessageDto;
@@ -516,7 +516,7 @@ public class SocketMessageDto {
         this.encryptedMessage = null;
     }
 
-    public static <T> WebSocketSession checkWebSocketSession (DeviceVS deviceTo, T data, TypeVS typeVS)
+    public static <T> WebSocketSession checkWebSocketSession (Device deviceTo, T data, TypeVS typeVS)
             throws NoSuchAlgorithmException {
         WebSocketSession webSocketSession = null;
         if(deviceTo != null) webSocketSession = ContextVS.getInstance().getWSSession(deviceTo.getId());

@@ -32,7 +32,7 @@ public class TagVS implements Serializable {
     @Column(name="frequency") private Long frequency;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCreated", length=23) private Date dateCreated;
-    @ManyToMany(mappedBy = "tagVSSet", fetch = FetchType.LAZY) @JsonIgnore private Set<UserVS> userVSSet;
+    @ManyToMany(mappedBy = "tagVSSet", fetch = FetchType.LAZY) @JsonIgnore private Set<User> userSet;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23) private Date lastUpdated;
 
@@ -87,12 +87,12 @@ public class TagVS implements Serializable {
         return lastUpdated;
     }
 
-    public Set<UserVS> getUserVSSet() {
-        return userVSSet;
+    public Set<User> getUserSet() {
+        return userSet;
     }
 
-    public void setUserVSSet(Set<UserVS> userVSSet) {
-        this.userVSSet = userVSSet;
+    public void setUserSet(Set<User> userSet) {
+        this.userSet = userSet;
     }
 
     @PrePersist

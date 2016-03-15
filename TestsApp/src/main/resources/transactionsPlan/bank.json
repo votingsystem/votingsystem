@@ -1,0 +1,9 @@
+{
+    "userList":[],
+    "groupList":[],
+    "bankList":[
+        {"fromUser":{"id":3}, "bankIBAN":"", "toUser":{"id":2}, "operation":"FROM_BANK",  "subject":"Bank transactionvs to user",
+         "fromUser": "ClientBank App1", "fromUserIBAN":"ES8477777777450000012345",
+         "amount":"100000", "currencyCode": "EUR", "tags":["WILDTAG"], "isTimeLimited":false}
+    ]
+}

@@ -2,7 +2,6 @@ package org.votingsystem.test.callable;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.model.ActorVS;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.JSON;

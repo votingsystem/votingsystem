@@ -38,15 +38,15 @@
         Polymer({
             is:'messagevs-send-dialog',
             properties: {
-                uservs:{type:Object},
+                user:{type:Object},
                 messageVS:{type:String},
-                sendMessageTemplateMsg:{type:String, value:"${msg.uservsMessageVSLbl}"}
+                sendMessageTemplateMsg:{type:String, value:"${msg.userMessageVSLbl}"}
             },
             ready: function() { },
-            show: function (uservs) {
-                this.uservs = uservs;
+            show: function (user) {
+                this.user = user;
                 this.messageVS = ""
-                this.messageToUser = this.sendMessageTemplateMsg.format(this.uservs.name),
+                this.messageToUser = this.sendMessageTemplateMsg.format(this.user.name),
                 this.$.modalDialog.style.opacity = 1
                 this.$.modalDialog.style['pointer-events'] = 'auto'
             },
@@ -59,8 +59,8 @@
                 if(this.messageVS.trim() == "") return
                 var operationVS = new OperationVS(Operation.MESSAGEVS)
                 operationVS.message = this.messageVS
-                operationVS.nif = this.uservs.nif
-                operationVS.userVS = this.uservs
+                operationVS.nif = this.user.nif
+                operationVS.user = this.user
                 operationVS.setCallback(function(appMessageJSON) {
                     if(ResponseVS.SC_OK == appMessageJSON.statusCode) this.$.toast.show()
                     else  alert(appMessageJSON.message, '${msg.errorLbl}')

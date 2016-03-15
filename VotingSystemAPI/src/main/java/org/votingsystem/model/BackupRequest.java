@@ -29,7 +29,7 @@ public class BackupRequest extends EntityVS implements Serializable {
     private CMSMessage cmsMessage;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representative")
-    private UserVS representative;
+    private User representative;
     @Column(name="email")
     private String email;
     @Column(name="filePath")
@@ -49,7 +49,7 @@ public class BackupRequest extends EntityVS implements Serializable {
         this.email = email;
     }
 
-    public BackupRequest(String filePath, TypeVS type, UserVS representative, CMSMessage cmsMessage, String email) {
+    public BackupRequest(String filePath, TypeVS type, User representative, CMSMessage cmsMessage, String email) {
         this.filePath = filePath;
         this.type = type;
         this.representative = representative;
@@ -105,11 +105,11 @@ public class BackupRequest extends EntityVS implements Serializable {
 		this.cmsMessage = cmsMessage;
 	}
 
-	public UserVS getRepresentative() {
+	public User getRepresentative() {
 		return representative;
 	}
 
-	public void setRepresentative(UserVS representative) {
+	public void setRepresentative(User representative) {
 		this.representative = representative;
 	}
 

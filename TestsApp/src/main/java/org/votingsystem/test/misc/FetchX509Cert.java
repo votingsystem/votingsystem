@@ -1,8 +1,8 @@
 package org.votingsystem.test.misc;
 
-import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.dto.DeviceVSDto;
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.dto.ActorDto;
+import org.votingsystem.dto.DeviceDto;
+import org.votingsystem.model.Actor;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentTypeVS;
@@ -28,20 +28,20 @@ public class FetchX509Cert {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        getDeviceVSDto();
+        getDeviceDto();
         System.exit(0);
     }
 
     public static void getServer() throws Exception {
         String serverURL = "https://192.168.1.5/CurrencyServer";
-        String serverInfoURL = ActorVS.getServerInfoURL(serverURL);
+        String serverInfoURL = Actor.getServerInfoURL(serverURL);
         ResponseVS responseVS = HttpHelper.getInstance().getData(serverInfoURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
             throw new ExceptionVS("serverInfoURL - error: " + responseVS.getMessage());
-        ActorVS actorVS = ((ActorVSDto)responseVS.getMessage(ActorVSDto.class)).getActorVS();
-        if(serverURL.equals(actorVS.getServerURL())) {
+        Actor actor = ((ActorDto)responseVS.getMessage(ActorDto.class)).getActor();
+        if(serverURL.equals(actor.getServerURL())) {
             Collection<X509Certificate> certCollection = PEMUtils.fromPEMToX509CertCollection(
-                    actorVS.getCertChainPEM().getBytes());
+                    actor.getCertChainPEM().getBytes());
             for(X509Certificate cert: certCollection) {
                 log.info(format("cert {0} - not valid after {1}", cert.getSubjectDN(), cert.getNotAfter()));
             }
@@ -55,15 +55,15 @@ public class FetchX509Cert {
                         serverInfoURL, x509TimeStampServerCert.getNotAfter()));
                 throw new ExceptionVS(serverInfoURL + " signing cert is lapsed");
             }
-        } else throw new ExceptionVS(format("Expected server URL {0} found {1}", serverURL, actorVS.getServerURL()));
+        } else throw new ExceptionVS(format("Expected server URL {0} found {1}", serverURL, actor.getServerURL()));
     }
 
-    public static void getDeviceVSDto() throws Exception {
-            String serverURL = "https://192.168.1.5/CurrencyServer/rest/deviceVS/id/2";
+    public static void getDeviceDto() throws Exception {
+            String serverURL = "https://192.168.1.5/CurrencyServer/rest/device/id/2";
         ResponseVS responseVS = HttpHelper.getInstance().getData(serverURL, ContentTypeVS.JSON);
         if(ResponseVS.SC_OK != responseVS.getStatusCode())
             throw new ExceptionVS("serverInfoURL - error: " + responseVS.getMessage());
-        DeviceVSDto dto = (DeviceVSDto) responseVS.getMessage(DeviceVSDto.class);
+        DeviceDto dto = (DeviceDto) responseVS.getMessage(DeviceDto.class);
         log.info(PEMUtils.fromPEMToX509Cert(dto.getCertPEM().getBytes()).toString());
     }
 }

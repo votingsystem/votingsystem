@@ -1,7 +1,7 @@
 package org.votingsystem.model.voting;
 
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.util.EntityVS;
 
 import javax.persistence.*;
@@ -26,7 +26,7 @@ public class AccessRequest extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="eventVS") private EventVS eventVS;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="userVS") private UserVS userVS;
+    @JoinColumn(name="user") private User user;
     @OneToOne private CMSMessage cmsMessage;
     @OneToOne(mappedBy="accessRequest") private VoteCanceler voteCanceler;
     @Column(name="hashAccessRequestBase64") private String hashAccessRequestBase64;
@@ -36,9 +36,9 @@ public class AccessRequest extends EntityVS implements Serializable {
 
     public AccessRequest() {}
 
-    public AccessRequest(UserVS userVS, CMSMessage cmsMessage, State state, String hashAccessRequestBase64,
-                           EventVS eventVS) {
-        this.userVS = userVS;
+    public AccessRequest(User user, CMSMessage cmsMessage, State state, String hashAccessRequestBase64,
+                         EventVS eventVS) {
+        this.user = user;
         this.cmsMessage = cmsMessage;
         this.state = state;
         this.hashAccessRequestBase64 = hashAccessRequestBase64;
@@ -70,9 +70,9 @@ public class AccessRequest extends EntityVS implements Serializable {
 
     public void setCmsMessage(CMSMessage cmsMessage) { this.cmsMessage = cmsMessage; }
 
-    public UserVS getUserVS() { return userVS; }
+    public User getUser() { return user; }
 
-    public void setUserVS(UserVS userVS) { this.userVS = userVS; }
+    public void setUser(User user) { this.user = user; }
 
     public VoteCanceler getVoteCanceler() { return voteCanceler; }
 

@@ -2,12 +2,12 @@ package org.votingsystem.web.accesscontrol.ejb;
 
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.RepresentativeDelegationDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CertificateVS;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.voting.AnonymousDelegation;
 import org.votingsystem.model.voting.RepresentationDocument;
 import org.votingsystem.model.voting.RepresentativeDocument;
@@ -47,14 +47,14 @@ public class RepresentativeDelegationBean {
         RepresentativeDelegationDto request = cmsMessage.getSignedContent(RepresentativeDelegationDto.class);
         if(TypeVS.ANONYMOUS_SELECTION_CERT_REQUEST != request.getOperation()) throw new ValidationExceptionVS(
                 "expected operation 'ANONYMOUS_SELECTION_CERT_REQUEST' but found '" + request.getOperation() + "'");
-        UserVS userVS = cmsMessage.getUserVS();
-        checkUserDelegationStatus(userVS);
+        User user = cmsMessage.getUser();
+        checkUserDelegationStatus(user);
         CMSSignedMessage cmsMessageResp = cmsBean.addSignature(cmsMessage.getCMS());
         cmsMessage.setType(request.getOperation()).setCMS(cmsMessageResp);
         X509Certificate anonymousCert = csrBean.signAnonymousDelegationCert(csrRequest);
-        dao.merge(userVS.setRepresentative(null));
+        dao.merge(user.setRepresentative(null));
         AnonymousDelegation anonymousDelegation = new AnonymousDelegation(AnonymousDelegation.Status.OK, cmsMessage,
-                userVS, request.getDateFrom(), request.getDateTo());
+                user, request.getDateFrom(), request.getDateTo());
         anonymousDelegation.setHashAnonymousDelegation(request.getHashAnonymousDelegation());
         dao.persist(anonymousDelegation);
         return anonymousCert;
@@ -77,9 +77,9 @@ public class RepresentativeDelegationBean {
         RepresentativeDelegationDto request = cmsMessage.getSignedContent(RepresentativeDelegationDto.class);
         if(request.getRepresentative() == null) throw new ValidationExceptionVS("missing param 'representative'");
         request.getRepresentative().setNIF(NifUtils.validate(request.getRepresentative().getNIF()));
-        query = dao.getEM().createQuery("select u from UserVS u where u.nif =:nif and u.type =:type")
-                .setParameter("nif", request.getRepresentative().getNIF()).setParameter("type", UserVS.Type.REPRESENTATIVE);
-        UserVS representative = dao.getSingleResult(UserVS.class, query);
+        query = dao.getEM().createQuery("select u from User u where u.nif =:nif and u.type =:type")
+                .setParameter("nif", request.getRepresentative().getNIF()).setParameter("type", User.Type.REPRESENTATIVE);
+        User representative = dao.getSingleResult(User.class, query);
         if(representative == null) throw new ValidationExceptionVS(
                 "ERROR - representativeNifErrorMsg - nif: " + request.getRepresentative().getNIF());
         if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION != request.getOperation()) throw new ValidationExceptionVS(
@@ -110,7 +110,7 @@ public class RepresentativeDelegationBean {
     public AnonymousDelegation cancelAnonymousDelegation(
             CMSMessage cmsMessage, CMSMessage anonymousCMSMessage) throws Exception {
         cancelAnonymousRepresentationDocument(anonymousCMSMessage);
-        UserVS userVS = cmsMessage.getUserVS();
+        User user = cmsMessage.getUser();
         RepresentativeDelegationDto request = cmsMessage.getSignedContent(RepresentativeDelegationDto.class);
         if(TypeVS.ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION != request.getOperation()) throw new ValidationExceptionVS(
                 "expected operation 'ANONYMOUS_REPRESENTATIVE_SELECTION_CANCELATION' found '" + request.getOperation() + "'");
@@ -118,9 +118,9 @@ public class RepresentativeDelegationBean {
             throw new ValidationExceptionVS("missing param 'hashAnonymousDelegation'");
         if(request.getOriginHashAnonymousDelegation() == null)
             throw new ValidationExceptionVS("missing param 'originHashAnonymousDelegation'");
-        AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS);
+        AnonymousDelegation anonymousDelegation = getAnonymousDelegation(user);
         if(anonymousDelegation == null)  throw new ValidationExceptionVS(
-                "ERROR - userWithoutAnonymousDelegationErrorMsg - userVS nif: " + userVS.getNif());
+                "ERROR - userWithoutAnonymousDelegationErrorMsg - user nif: " + user.getNif());
         if(!anonymousDelegation.getHashAnonymousDelegation().equals(request.getHashAnonymousDelegation()))
             throw new ValidationExceptionVS("ERROR - cancelation hash doesn't match active one");
         String hashAnonymousDelegation = StringUtils.getHashBase64(request.getOriginHashAnonymousDelegation(),
@@ -169,35 +169,35 @@ public class RepresentativeDelegationBean {
     }
 
     public void cancelRepresentationDocument(CMSMessage cmsMessage) {
-        UserVS userVS = cmsMessage.getUserVS();
-        Query query = dao.getEM().createQuery("select r from RepresentationDocument r where r.userVS =:userVS " +
-                "and r .state =:state").setParameter("userVS", userVS).setParameter("state", RepresentationDocument.State.OK);
+        User user = cmsMessage.getUser();
+        Query query = dao.getEM().createQuery("select r from RepresentationDocument r where r.user =:user " +
+                "and r .state =:state").setParameter("user", user).setParameter("state", RepresentationDocument.State.OK);
         RepresentationDocument representationDocument = dao.getSingleResult(RepresentationDocument.class, query);
         if(representationDocument != null) {
             representationDocument.setState(RepresentationDocument.State.CANCELED).setCancellationCMS(cmsMessage)
-                    .setDateCanceled(userVS.getTimeStampToken().getTimeStampInfo().getGenTime());
+                    .setDateCanceled(user.getTimeStampToken().getTimeStampInfo().getGenTime());
             dao.merge(representationDocument);
             log.info(format("cancelRepresentationDocument - user '{0}' " +
-                    " - representationDocument {1}", userVS.getNif(), representationDocument.getId()));
-        } else log.info("cancelRepresentationDocument - user without representative - user id: " + userVS.getId());
+                    " - representationDocument {1}", user.getNif(), representationDocument.getId()));
+        } else log.info("cancelRepresentationDocument - user without representative - user id: " + user.getId());
     }
 
-    private void checkUserDelegationStatus(UserVS userVS) throws ExceptionVS {
+    private void checkUserDelegationStatus(User user) throws ExceptionVS {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        if(UserVS.Type.REPRESENTATIVE == userVS.getType()) throw new ValidationExceptionVS(
-                messages.get("userIsRepresentativeErrorMsg", userVS.getNif()));
-        AnonymousDelegation anonymousDelegation = getAnonymousDelegation(userVS);
+        if(User.Type.REPRESENTATIVE == user.getType()) throw new ValidationExceptionVS(
+                messages.get("userIsRepresentativeErrorMsg", user.getNif()));
+        AnonymousDelegation anonymousDelegation = getAnonymousDelegation(user);
         if (anonymousDelegation != null) {
             String delegationURL = format("{0}/rest/cmsMessage/id/{1}", config.getContextURL(),
                     anonymousDelegation.getDelegationCMS().getId());
-            throw new ExceptionVS(MessageDto.REQUEST_REPEATED(messages.get("userWithPreviousDelegationErrorMsg", userVS.getNif(),
+            throw new ExceptionVS(MessageDto.REQUEST_REPEATED(messages.get("userWithPreviousDelegationErrorMsg", user.getNif(),
                     DateUtils.getDateStr(anonymousDelegation.getDateTo())), delegationURL));
         }
     }
 
-    public AnonymousDelegation getAnonymousDelegation(UserVS userVS) {
-        Query query = dao.getEM().createQuery("select a from AnonymousDelegation a where a.userVS =:userVS and " +
-                "a.status =:status").setParameter("userVS", userVS).setParameter("status", AnonymousDelegation.Status.OK);
+    public AnonymousDelegation getAnonymousDelegation(User user) {
+        Query query = dao.getEM().createQuery("select a from AnonymousDelegation a where a.user =:user and " +
+                "a.status =:status").setParameter("user", user).setParameter("status", AnonymousDelegation.Status.OK);
         AnonymousDelegation anonymousDelegation = dao.getSingleResult(AnonymousDelegation.class, query);
         if(anonymousDelegation != null && new Date().after(anonymousDelegation.getDateTo())) {
             dao.merge(anonymousDelegation.setStatus(AnonymousDelegation.Status.FINISHED));
@@ -205,15 +205,15 @@ public class RepresentativeDelegationBean {
         } else return anonymousDelegation;
     }
 
-    public UserVSDto getRepresentativeDto(UserVS representative) {
-        Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.userVS =:userVS and " +
-                "r.state =:state").setParameter("userVS", representative).setParameter("state", RepresentativeDocument.State.OK);
+    public UserDto getRepresentativeDto(User representative) {
+        Query query = dao.getEM().createQuery("select r from RepresentativeDocument r where r.user =:user and " +
+                "r.state =:state").setParameter("user", representative).setParameter("state", RepresentativeDocument.State.OK);
         RepresentativeDocument representativeDocument = dao.getSingleResult(RepresentativeDocument.class, query);
         query = dao.getEM().createQuery("select count(r) from RepresentationDocument r where " +
                 "r.representative =:representative and r.state =:state").setParameter("representative", representative)
                 .setParameter("state", RepresentationDocument.State.OK);
         long numRepresentations = (long) query.getSingleResult() + 1;//plus the representative itself
-        return UserVSDto.REPRESENTATIVE(representative, representativeDocument.getActivationCMS().getId(),
+        return UserDto.REPRESENTATIVE(representative, representativeDocument.getActivationCMS().getId(),
                 numRepresentations, config.getContextURL());
     }
 

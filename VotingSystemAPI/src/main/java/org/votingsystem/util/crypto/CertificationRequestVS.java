@@ -99,7 +99,7 @@ public class CertificationRequestVS implements java.io.Serializable {
         KeyPair keyPair = KeyGeneratorVS.INSTANCE.genKeyPair();
         X500Principal subject = new X500Principal(certExtensionDto.getPrincipal());
         PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject, keyPair.getPublic());
-        pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(ContextVS.DEVICEVS_OID),
+        pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(ContextVS.DEVICE_OID),
                 new DERUTF8String(JSON.getMapper().writeValueAsString(certExtensionDto)));
         PKCS10CertificationRequest request = pkcs10Builder.build(new JcaContentSignerBuilder(
                 signatureMechanism).setProvider(provider).build(keyPair.getPrivate()));

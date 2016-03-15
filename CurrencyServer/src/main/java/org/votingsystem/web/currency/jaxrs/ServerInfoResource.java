@@ -1,7 +1,7 @@
 package org.votingsystem.web.currency.jaxrs;
 
-import org.votingsystem.dto.ActorVSDto;
-import org.votingsystem.model.ActorVS;
+import org.votingsystem.dto.ActorDto;
+import org.votingsystem.model.Actor;
 import org.votingsystem.util.JSON;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -35,20 +35,20 @@ public class ServerInfoResource {
     @GET @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response serverInfo(@Context HttpServletRequest req) throws Exception {
-        ActorVSDto actorVS = new ActorVSDto();
-        actorVS.setServerType(ActorVS.Type.CURRENCY);
-        actorVS.setName(config.getServerName());
-        actorVS.setServerURL(config.getContextURL());
-        actorVS.setWebSocketURL(config.getWebSocketURL());
-        actorVS.setState(ActorVS.State.OK);
-        actorVS.setEnvironmentMode(config.getMode());
-        actorVS.setDate(new Date());
-        actorVS.setTimeStampCertPEM(new String(timeStampBean.getSigningCertPEMBytes()));
-        actorVS.setTimeStampServerURL(config.getTimeStampServerURL());
-        actorVS.setCertChainPEM(new String(cmsBean.getKeyStorePEMCerts()));
+        ActorDto actor = new ActorDto();
+        actor.setServerType(Actor.Type.CURRENCY);
+        actor.setName(config.getServerName());
+        actor.setServerURL(config.getContextURL());
+        actor.setWebSocketURL(config.getWebSocketURL());
+        actor.setState(Actor.State.OK);
+        actor.setEnvironmentMode(config.getMode());
+        actor.setDate(new Date());
+        actor.setTimeStampCertPEM(new String(timeStampBean.getSigningCertPEMBytes()));
+        actor.setTimeStampServerURL(config.getTimeStampServerURL());
+        actor.setCertChainPEM(new String(cmsBean.getKeyStorePEMCerts()));
         //resp.setHeader("Access-Control-Allow-Origin", "*");
         //if (params.callback) render "${param.callback}(${serverInfo as JSON})"
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(actorVS)).build() ;
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(actor)).build() ;
     }
 
     @GET @Path("/certChain")

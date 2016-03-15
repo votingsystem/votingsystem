@@ -1,14 +1,14 @@
 package org.votingsystem.web.controlcenter.cdi;
 
 import org.votingsystem.model.TagVS;
-import org.votingsystem.model.UserVS;
-import org.votingsystem.model.voting.ControlCenterVS;
+import org.votingsystem.model.User;
+import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ValidationExceptionVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EnvironmentVS;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
-import org.votingsystem.web.ejb.SubscriptionVSBean;
+import org.votingsystem.web.ejb.SubscriptionBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -38,7 +38,8 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Inject DAOBean dao;
     @Inject CMSBean cmsBean;
-    @Inject SubscriptionVSBean subscriptionBean;
+    @Inject
+    SubscriptionBean subscriptionBean;
     @Inject TimeStampBean timeStampBean;
     /* Executor service for asynchronous processing */
     @Resource(name="comp/DefaultManagedExecutorService")
@@ -55,7 +56,7 @@ public class ConfigVSImpl implements ConfigVS {
     private String emailAdmin;
     private String staticResURL;
     private File serverDir;
-    private UserVS systemUser;
+    private User systemUser;
 
     public ConfigVSImpl() {
         try {
@@ -95,11 +96,11 @@ public class ConfigVSImpl implements ConfigVS {
     @PostConstruct
     public void initialize() {
         log.info("initialize");
-        Query query = dao.getEM().createQuery("select u from UserVS u where u.type =:type")
-                .setParameter("type", UserVS.Type.SYSTEM);
-        systemUser = dao.getSingleResult(UserVS.class, query);
+        Query query = dao.getEM().createQuery("select u from User u where u.type =:type")
+                .setParameter("type", User.Type.SYSTEM);
+        systemUser = dao.getSingleResult(User.class, query);
         if(systemUser == null) {
-            systemUser = dao.persist(new UserVS(systemNIF, serverName, UserVS.Type.SYSTEM));
+            systemUser = dao.persist(new User(systemNIF, serverName, User.Type.SYSTEM));
         }
         new ContextVS(null, null);
         executorService.submit(() -> {
@@ -161,10 +162,10 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public UserVS createIBAN(UserVS userVS) throws ValidationExceptionVS { return null;}
+    public User createIBAN(User user) throws ValidationExceptionVS { return null;}
 
     @Override
-    public UserVS getSystemUser() {
+    public User getSystemUser() {
         return systemUser;
     }
 
@@ -184,7 +185,7 @@ public class ConfigVSImpl implements ConfigVS {
     }
 
     @Override
-    public ControlCenterVS getControlCenter() {
+    public ControlCenter getControlCenter() {
         return null;
     }
 

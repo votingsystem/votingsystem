@@ -1,7 +1,7 @@
 package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.dto.UserVSDto;
+import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.voting.RepresentationState;
 import org.votingsystem.util.ObjectUtils;
 
@@ -17,7 +17,7 @@ public class RepresentationStateDto {
     private Date lastCheckedDate;
     private Date dateFrom;
     private Date dateTo;
-    private UserVSDto representative;
+    private UserDto representative;
     private String anonymousDelegationObject;
     private String base64ContentDigest;
     private String stateMsg;
@@ -79,11 +79,11 @@ public class RepresentationStateDto {
         this.dateTo = dateTo;
     }
 
-    public UserVSDto getRepresentative() {
+    public UserDto getRepresentative() {
         return representative;
     }
 
-    public void setRepresentative(UserVSDto representative) {
+    public void setRepresentative(UserDto representative) {
         this.representative = representative;
     }
 

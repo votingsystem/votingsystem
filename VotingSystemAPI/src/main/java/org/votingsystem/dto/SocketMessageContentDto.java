@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.CurrencyDto;
-import org.votingsystem.model.UserVS;
+import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
@@ -66,10 +66,10 @@ public class SocketMessageContentDto {
     }
 
     public static SocketMessageContentDto getMessageVSToDevice(
-            UserVS userVS, String toUser, String message) throws Exception {
+            User user, String toUser, String message) throws Exception {
         SocketMessageContentDto messageContentDto = new SocketMessageContentDto();
         messageContentDto.setOperation(TypeVS.MESSAGEVS);
-        messageContentDto.setFrom(userVS.getFullName());
+        messageContentDto.setFrom(user.getFullName());
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
         messageContentDto.setDeviceFromId(ContextVS.getInstance().getConnectedDevice().getId());
         messageContentDto.setToUser(toUser);
