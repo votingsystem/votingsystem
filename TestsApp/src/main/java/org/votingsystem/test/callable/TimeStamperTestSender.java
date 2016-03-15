@@ -26,7 +26,7 @@ public class TimeStamperTestSender implements Callable<ResponseVS> {
     }
         
     @Override public ResponseVS call() throws Exception {
-        SignatureService signatureService = SignatureService.genUserVSSignatureService(this.nif);
+        SignatureService signatureService = SignatureService.load(this.nif);
         CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(getRequest(nif).getBytes());
         return ResponseVS.OK(null).setCMS(cmsMessage);
     }

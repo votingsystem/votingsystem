@@ -98,7 +98,7 @@ public class SignatureService {
         return signatureService;
     }
 
-    public static SignatureService genUserVSSignatureService(String nif) throws Exception {
+    public static SignatureService load(String nif) throws Exception {
         KeyStore mockDnie = getAuthoritySignatureService().generateKeyStore(nif);
         SignatureService signatureService = new SignatureService(mockDnie, ContextVS.END_ENTITY_ALIAS, ContextVS.PASSWORD);
         signatureServices.put(nif, signatureService);

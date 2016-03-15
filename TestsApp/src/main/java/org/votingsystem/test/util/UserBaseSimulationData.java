@@ -289,7 +289,7 @@ public class UserBaseSimulationData extends SimulationData {
         for(int i = 1; i <= getNumUsersWithoutRepresentativeWithVote(); i++ ) {
             int userIndex = new Long(getAndIncrementUserIndex()).intValue();
             String userNif = NifUtils.getNif(userIndex);
-            SignatureService signatureService = SignatureService.genUserVSSignatureService(userNif);
+            SignatureService signatureService = SignatureService.load(userNif);
             usersWithoutRepresentativeList.add(userNif);
             byte[] usertCertPEMBytes = PEMUtils.getPEMEncoded(signatureService.getCertSigner());
             String certServiceURL = ContextVS.getInstance().getAccessControl().getUserCertServiceURL();

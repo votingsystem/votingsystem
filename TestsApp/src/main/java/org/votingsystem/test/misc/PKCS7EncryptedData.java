@@ -16,7 +16,7 @@ public class PKCS7EncryptedData {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initTestEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        SignatureService signatureService = SignatureService.genUserVSSignatureService("08888888D");
+        SignatureService signatureService = SignatureService.load("08888888D");
         log.info("privateKey" + new String(PEMUtils.getPEMEncoded(signatureService.getPrivateKey())));
         log.info("cert" + new String(PEMUtils.getPEMEncoded(signatureService.getCertSigner())));
         signAndEncrypt(signatureService);
@@ -35,8 +35,10 @@ public class PKCS7EncryptedData {
         CMSSignedMessage cmsSignedMessage = signatureService.signData("Hello text signed and encrypted".getBytes());
         byte[] encryptedBytes = Encryptor.encryptToCMS(cmsSignedMessage.getEncoded(),
                 signatureService.getCertSigner());
+        log.info("Encrypted signed CMS: " + new String(encryptedBytes));
         byte[] decryptedBytes = Encryptor.decryptCMS(encryptedBytes, signatureService.getPrivateKey());
         CMSSignedMessage signedData = new CMSSignedMessage(decryptedBytes);
+        signedData.isValidSignature();
         log.info("SignedContent: " + signedData.getSignedContentStr());
     }
 

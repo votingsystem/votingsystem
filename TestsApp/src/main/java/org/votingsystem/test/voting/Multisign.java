@@ -34,8 +34,8 @@ public class Multisign {
         Map dataToSignMap = new HashMap<>();
         dataToSignMap.put("UUID", UUID.randomUUID().toString());
 
-        SignatureService signatureService = SignatureService.genUserVSSignatureService("08888888D");
-        SignatureService signatureService1 = SignatureService.genUserVSSignatureService("00111222V");
+        SignatureService signatureService = SignatureService.load("08888888D");
+        SignatureService signatureService1 = SignatureService.load("00111222V");
         CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsBytes(dataToSignMap));
 
         CMSSignedMessage cmsSigned = signatureService1.addSignature(cmsMessage);

@@ -31,7 +31,7 @@ public class VoteSender implements Callable<ResponseVS> {
     }
     
     @Override public ResponseVS<VoteHelper> call() throws Exception {
-        SignatureService signatureService = SignatureService.genUserVSSignatureService(voteHelper.getNIF());
+        SignatureService signatureService = SignatureService.load(voteHelper.getNIF());
         AccessRequestDto accessRequestDto = voteHelper.getAccessRequest();
         CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(
                 JSON.getMapper().writeValueAsBytes(accessRequestDto));

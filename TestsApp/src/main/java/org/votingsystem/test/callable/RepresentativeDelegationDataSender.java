@@ -34,7 +34,7 @@ public class RepresentativeDelegationDataSender implements Callable<ResponseVS> 
     }
     
     @Override public ResponseVS call() throws Exception {
-        SignatureService signatureService = SignatureService.genUserVSSignatureService(userNIF);
+        SignatureService signatureService = SignatureService.load(userNIF);
         RepresentativeDelegationDto anonymousDelegation = getDelegationDto(representativeNIF);
         RepresentativeDelegationDto anonymousCertRequest = anonymousDelegation.getAnonymousCertRequest();
         RepresentativeDelegationDto anonymousDelegationRequest = anonymousDelegation.getDelegation();
