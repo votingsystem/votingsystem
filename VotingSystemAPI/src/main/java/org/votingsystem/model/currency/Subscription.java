@@ -25,32 +25,16 @@ public class Subscription extends EntityVS implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public CMSMessage getCancellationCMS() {
-        return cancellationCMS;
-    }
-
-    public void setCancellationCMS(CMSMessage cancellationCMS) {
-        this.cancellationCMS = cancellationCMS;
-    }
-
-    public CMSMessage getActivationCMS() {
-        return activationCMS;
-    }
-
-    public void setActivationCMS(CMSMessage activationCMS) {
-        this.activationCMS = activationCMS;
-    }
-
     public enum State {ACTIVE, PENDING, CANCELED}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
 
     @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name="user") private User user;
+    @JoinColumn(name="userId") private User user;
 
     @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name="group") private Group group;
+    @JoinColumn(name="groupId") private Group group;
 
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
 
@@ -162,4 +146,19 @@ public class Subscription extends EntityVS implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
+    public CMSMessage getCancellationCMS() {
+        return cancellationCMS;
+    }
+
+    public void setCancellationCMS(CMSMessage cancellationCMS) {
+        this.cancellationCMS = cancellationCMS;
+    }
+
+    public CMSMessage getActivationCMS() {
+        return activationCMS;
+    }
+
+    public void setActivationCMS(CMSMessage activationCMS) {
+        this.activationCMS = activationCMS;
+    }
 }

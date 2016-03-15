@@ -23,7 +23,7 @@ public class ImageVS extends EntityVS implements Serializable {
 	 @Column(name="type", nullable=false)
 	 private Type type;
 	 @ManyToOne(fetch=FetchType.LAZY)
-	 @JoinColumn(name="user")
+	 @JoinColumn(name="userId")
 	 private User user;
      @Column(name="fileBytes")
      private byte[] fileBytes;

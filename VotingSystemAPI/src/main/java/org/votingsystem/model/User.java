@@ -24,7 +24,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-@Entity @Table(name="User")
+@Entity @Table(name="UserVS")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="userType", discriminatorType=DiscriminatorType.STRING)
 @DiscriminatorValue("User")
@@ -44,14 +44,6 @@ public class User extends EntityVS implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private static Logger log = Logger.getLogger(User.class.getName());
-
-    public boolean isAnonymousUser() {
-        return isAnonymousUser;
-    }
-
-    public void setAnonymousUser(boolean anonymousUser) {
-        isAnonymousUser = anonymousUser;
-    }
 
     public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANK}
 
@@ -80,7 +72,7 @@ public class User extends EntityVS implements Serializable {
     //Owning Entity side of the relationship
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinTable(name = "user_tagvs", joinColumns = {
-            @JoinColumn(name = "user", referencedColumnName = "id", nullable = false) },
+            @JoinColumn(name = "userId", referencedColumnName = "id", nullable = false) },
             inverseJoinColumns = { @JoinColumn(name = "tagvs", nullable = false, referencedColumnName = "id") })
     private Set<TagVS> tagVSSet;
 
@@ -323,6 +315,14 @@ public class User extends EntityVS implements Serializable {
 
     public void setDateCancelled(Date dateCancelled) {
         this.dateCancelled = dateCancelled;
+    }
+
+    public boolean isAnonymousUser() {
+        return isAnonymousUser;
+    }
+
+    public void setAnonymousUser(boolean anonymousUser) {
+        isAnonymousUser = anonymousUser;
     }
 
     public String getDescription() {

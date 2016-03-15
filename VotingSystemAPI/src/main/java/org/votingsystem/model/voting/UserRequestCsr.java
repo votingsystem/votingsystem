@@ -31,7 +31,7 @@ public class UserRequestCsr extends EntityVS implements Serializable {
     @JoinColumn(name="device") private Device device;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="user") private User user;
+    @JoinColumn(name="userId") private User user;
     @OneToOne private CMSMessage cancelationCMS;
     @OneToOne private CMSMessage activationCMS;
     @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;

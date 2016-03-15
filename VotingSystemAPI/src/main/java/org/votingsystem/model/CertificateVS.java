@@ -45,7 +45,7 @@ public class CertificateVS extends EntityVS implements Serializable {
     @Column(name="content", nullable=false) private byte[] content;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="user") private User user;
+    @JoinColumn(name="userId") private User user;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="actor") private Actor actor;

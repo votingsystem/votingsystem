@@ -82,7 +82,7 @@ public class EventVS extends EntityVS implements Serializable {
     private Cardinality cardinality = Cardinality.EXCLUSIVE;
     @OneToOne private CertificateVS certificateVS;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="user")
+    @JoinColumn(name="userId")
     private User user;
     @OneToOne private CMSMessage cmsMessage;
     @OneToOne private KeyStoreVS keyStoreVS;

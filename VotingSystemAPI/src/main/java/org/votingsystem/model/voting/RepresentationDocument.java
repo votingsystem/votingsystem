@@ -35,7 +35,7 @@ public class RepresentationDocument extends EntityVS implements Serializable {
     @JoinColumn(name="cancellationCMS") private CMSMessage cancellationCMS;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="user") private User user;
+    @JoinColumn(name="userId") private User user;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="representative") private User representative;

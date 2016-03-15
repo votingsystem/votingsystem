@@ -40,7 +40,7 @@ public class CMSMessage extends EntityVS implements Serializable {
     @Column(name="content") private byte[] contentPEM;
     
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="user") private User user;
+    @JoinColumn(name="userId") private User user;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="cmsParent") private CMSMessage cmsParent;

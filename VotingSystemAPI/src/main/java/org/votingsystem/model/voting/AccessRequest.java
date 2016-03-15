@@ -26,7 +26,7 @@ public class AccessRequest extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="eventVS") private EventVS eventVS;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="user") private User user;
+    @JoinColumn(name="userId") private User user;
     @OneToOne private CMSMessage cmsMessage;
     @OneToOne(mappedBy="accessRequest") private VoteCanceler voteCanceler;
     @Column(name="hashAccessRequestBase64") private String hashAccessRequestBase64;

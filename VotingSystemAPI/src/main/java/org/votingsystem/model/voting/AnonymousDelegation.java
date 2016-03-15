@@ -32,7 +32,7 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
     @Column(name="originHashAnonymousDelegation", unique=true) private String originHashAnonymousDelegation;
     @Column(name="hashAnonymousDelegation", unique=true) private String hashAnonymousDelegation;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="user") private User user;
+    @JoinColumn(name="userId") private User user;
     @OneToOne private CMSMessage delegationCMS;
 
     @OneToOne private CMSMessage cancellationCMS;

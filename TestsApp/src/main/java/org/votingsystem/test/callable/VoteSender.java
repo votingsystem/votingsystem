@@ -11,10 +11,12 @@ import org.votingsystem.util.JSON;
 import org.votingsystem.util.crypto.CertificationRequestVS;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.util.crypto.VoteHelper;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
+
 import static org.votingsystem.util.ContextVS.SIGNATURE_ALGORITHM;
 
 /**

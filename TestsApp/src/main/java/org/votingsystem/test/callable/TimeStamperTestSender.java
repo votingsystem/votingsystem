@@ -5,6 +5,7 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.JSON;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

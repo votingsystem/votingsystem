@@ -34,7 +34,7 @@ public class Device extends EntityVS implements Serializable {
 	@Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="user") private User user;
+    @JoinColumn(name="userId") private User user;
     @Column(name="type") @Enumerated(EnumType.STRING) private Type type = Type.MOBILE;
     @Column(name="device" ) private String deviceId;//hardware id
     @Column(name="email" ) private String email;

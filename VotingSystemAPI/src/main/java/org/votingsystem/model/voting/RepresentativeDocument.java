@@ -34,7 +34,7 @@ public class RepresentativeDocument  extends EntityVS implements Serializable {
     @OneToOne private CMSMessage cancellationCMS;
 	@Column(name="description", columnDefinition="TEXT" ) private String description;
     @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name="user") private User user;
+    @JoinColumn(name="userId") private User user;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="dateCanceled", length=23) private Date dateCanceled;
     @Temporal(TemporalType.TIMESTAMP)

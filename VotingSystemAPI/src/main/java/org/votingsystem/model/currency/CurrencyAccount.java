@@ -55,7 +55,7 @@ public class CurrencyAccount extends EntityVS implements Serializable {
     @Column(name="IBAN", nullable=false) private String IBAN;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="user") private User user;
+    @JoinColumn(name="userId") private User user;
 
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="tag") private TagVS tag;
