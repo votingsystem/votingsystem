@@ -1,27 +1,19 @@
 package org.votingsystem.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.votingsystem.dto.ActorDto;
-import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.model.Actor;
 import org.votingsystem.model.ResponseVS;
-import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.model.voting.AccessControl;
 import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.throwable.KeyStoreException;
-import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.KeyGenerator;
-import org.votingsystem.util.crypto.KeyStoreUtil;
 import org.votingsystem.util.crypto.PEMUtils;
 
 import java.io.*;
-import java.security.KeyStore;
 import java.security.Security;
-import java.security.cert.Certificate;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;

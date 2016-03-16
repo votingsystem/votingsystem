@@ -50,13 +50,13 @@ public class SocketMessageDto {
     private String cmsMessagePEM;
     private String subject;
     private String toUser;
-    private String textToSign;
+    private String contentToSign;
     private String from;
     private String deviceFromName;
     private String deviceToName;
     private String deviceId;//hardware id
-    private String pemPublicKey;
-    private String pemCert;
+    private String publicKeyPEM;
+    private String x509CertificatePEM;
     private boolean timeLimited = false;
     private String URL;
     private List<CurrencyDto> currencyDtoList;
@@ -138,12 +138,12 @@ public class SocketMessageDto {
         return this;
     }
 
-    public String getPemPublicKey() {
-        return pemPublicKey;
+    public String getPublicKeyPEM() {
+        return publicKeyPEM;
     }
 
-    public void setPemPublicKey(String pemPublicKey) {
-        this.pemPublicKey = pemPublicKey;
+    public void setPublicKeyPEM(String publicKeyPEM) {
+        this.publicKeyPEM = publicKeyPEM;
     }
 
     public TypeVS getMessageSubType() {
@@ -217,12 +217,12 @@ public class SocketMessageDto {
         this.toUser = toUser;
     }
 
-    public String getTextToSign() {
-        return textToSign;
+    public String getContentToSign() {
+        return contentToSign;
     }
 
-    public void setTextToSign(String textToSign) {
-        this.textToSign = textToSign;
+    public void setContentToSign(String contentToSign) {
+        this.contentToSign = contentToSign;
     }
 
 
@@ -377,12 +377,12 @@ public class SocketMessageDto {
         this.UUID = webSocketSession.getUUID();
     }
 
-    public String getPemCert() {
-        return pemCert;
+    public String getX509CertificatePEM() {
+        return x509CertificatePEM;
     }
 
-    public void setPemCert(String pemCert) {
-        this.pemCert = pemCert;
+    public void setX509CertificatePEM(String x509CertificatePEM) {
+        this.x509CertificatePEM = x509CertificatePEM;
     }
 
     public String getEncryptedMessage() {
@@ -481,13 +481,13 @@ public class SocketMessageDto {
 
     @JsonIgnore
     private void encryptMessage(EncryptedContentDto encryptedDto) throws Exception {
-        if(pemCert != null) {
-            X509Certificate targetDeviceCert = PEMUtils.fromPEMToX509Cert(pemCert.getBytes());
+        if(x509CertificatePEM != null) {
+            X509Certificate targetDeviceCert = PEMUtils.fromPEMToX509Cert(x509CertificatePEM.getBytes());
             byte[] encryptedMessageBytes = Encryptor.encryptToCMS(
                     JSON.getMapper().writeValueAsBytes(encryptedDto), targetDeviceCert);
             encryptedMessage = new String(encryptedMessageBytes);
-        } else if(pemPublicKey != null) {
-            PublicKey publicKey = PEMUtils.fromPEMToRSAPublicKey(pemPublicKey);
+        } else if(publicKeyPEM != null) {
+            PublicKey publicKey = PEMUtils.fromPEMToRSAPublicKey(publicKeyPEM);
             byte[] encryptedMessageBytes = Encryptor.encryptToCMS(
                     JSON.getMapper().writeValueAsBytes(encryptedDto), publicKey);
             encryptedMessage = new String(encryptedMessageBytes);
@@ -515,10 +515,10 @@ public class SocketMessageDto {
         if(encryptedDto.getToUser() != null) toUser = encryptedDto.getToUser();
         if(encryptedDto.getDeviceToName() != null) deviceToName = encryptedDto.getDeviceToName();
         if(encryptedDto.getURL()!= null) URL = encryptedDto.getURL();
-        if(encryptedDto.getTextToSign() != null) textToSign = encryptedDto.getTextToSign();
+        if(encryptedDto.getContentToSign() != null) contentToSign = encryptedDto.getContentToSign();
         if(encryptedDto.getLocale() != null) locale = encryptedDto.getLocale();
-        if(encryptedDto.getPemCert() != null) pemCert = encryptedDto.getPemCert();
-        if(encryptedDto.getPemPublicKey() != null) pemPublicKey = encryptedDto.getPemPublicKey();
+        if(encryptedDto.getX509CertificatePEM() != null) x509CertificatePEM = encryptedDto.getX509CertificatePEM();
+        if(encryptedDto.getPublicKeyPEM() != null) publicKeyPEM = encryptedDto.getPublicKeyPEM();
         timeLimited = encryptedDto.isTimeLimited();
         this.encryptedMessage = null;
     }

@@ -36,8 +36,9 @@ public class CMSMessageReader implements MessageBodyReader<CMSMessage> {
     }
 
     @Override
-    public CMSMessage readFrom(Class<CMSMessage> aClass, Type type, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType,
-                               MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
+    public CMSMessage readFrom(Class<CMSMessage> aClass, Type type, Annotation[] annotations,
+               javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> multivaluedMap,
+               InputStream inputStream) throws IOException, WebApplicationException {
         try {
             return cmsBean.validateCMS(CMSSignedMessage.FROM_PEM(inputStream), ContentType.JSON_SIGNED).getCmsMessage();
         } catch (Exception ex) {

@@ -87,14 +87,14 @@ public class CurrencyRequestDto {
         }
     }
 
-    public Currency loadCurrencyCert(String pemCert) throws Exception {
-        Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(pemCert.getBytes());
+    public Currency loadCurrencyCert(String x509CertificatePEM) throws Exception {
+        Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(x509CertificatePEM.getBytes());
         if(certificates.isEmpty()) throw new ExceptionVS("Unable to init Currency. Certs not found on signed CSR");
         X509Certificate x509Certificate = certificates.iterator().next();
         CurrencyCertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CurrencyCertExtensionDto.class,
                 x509Certificate, ContextVS.CURRENCY_OID);
         Currency currency = currencyMap.get(certExtensionDto.getHashCertVS()).setState(Currency.State.OK);
-        currency.initSigner(pemCert.getBytes());
+        currency.initSigner(x509CertificatePEM.getBytes());
         return currency;
     }
 

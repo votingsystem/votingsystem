@@ -1,5 +1,9 @@
 package org.votingsystem.util.crypto;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
@@ -7,13 +11,11 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.util.ContextVS;
 
 import java.io.*;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Collection;
 
@@ -40,6 +42,14 @@ public class PEMUtils {
         return PEMUtils.getPEMEncoded(cmsSignedData.toASN1Structure());
     }
 
+    public static String getPEMEncodedStr (Object objectToEncode) throws IOException {
+        return new String(PEMUtils.getPEMEncoded(objectToEncode));
+    }
+
+    public static String getPEMEncodedStr (CMSSignedData cmsSignedData) throws IOException {
+        return new String(PEMUtils.getPEMEncoded(cmsSignedData.toASN1Structure()));
+    }
+
     public static PKCS10CertificationRequest fromPEMToPKCS10CertificationRequest (byte[] csrBytes) throws Exception {
         PEMParser PEMParser = new PEMParser(new InputStreamReader(new ByteArrayInputStream(csrBytes)));
         PKCS10CertificationRequest result = (PKCS10CertificationRequest)PEMParser.readObject();
@@ -63,18 +73,44 @@ public class PEMUtils {
         return x509Certs;
     }
 
-    public static PrivateKey fromPEMToRSAPrivateKey(String pemPrivateKey) throws Exception {
-        KeyPair kp = (KeyPair) new PEMParser(new InputStreamReader(new ByteArrayInputStream(pemPrivateKey.getBytes()))).readObject();
+    public static PrivateKey fromPEMToRSAPrivateKey(String privateKeyPEM) throws Exception {
+        KeyPair kp = (KeyPair) new PEMParser(new InputStreamReader(new ByteArrayInputStream(privateKeyPEM.getBytes()))).readObject();
         return kp.getPrivate();
     }
 
-    public static PublicKey fromPEMToRSAPublicKey(String pemPublicKey) throws Exception {
+    public static PublicKey fromPEMToRSAPublicKey(String publicKeyPEM) throws Exception {
         KeyFactory factory = KeyFactory.getInstance("RSA", "BC");
-        PEMParser PEMParser = new PEMParser(new InputStreamReader(new ByteArrayInputStream(pemPublicKey.getBytes())));
-        RSAPublicKey jcerSAPublicKey = (RSAPublicKey) PEMParser.readObject();
-        X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(jcerSAPublicKey.getEncoded());
-        PublicKey publicKey = factory.generatePublic(pubKeySpec);
-        return publicKey;
+        PEMParser PEMParser = new PEMParser(new InputStreamReader(new ByteArrayInputStream(publicKeyPEM.getBytes())));
+        Object object = PEMParser.readObject();
+        if(object instanceof SubjectPublicKeyInfo) {
+            return generatePublicKey((SubjectPublicKeyInfo)object);
+        } else {
+            RSAPublicKey jcerSAPublicKey = (RSAPublicKey) PEMParser.readObject();
+            X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(jcerSAPublicKey.getEncoded());
+            PublicKey publicKey = factory.generatePublic(pubKeySpec);
+            return publicKey;
+        }
     }
 
+    public static PublicKey generatePublicKey(SubjectPublicKeyInfo pkInfo)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        X509EncodedKeySpec keyspec;
+        try {
+            keyspec = new X509EncodedKeySpec(pkInfo.getEncoded());
+        } catch (IOException e) {
+            throw new InvalidKeySpecException(e.getMessage(), e);
+        }
+        ASN1ObjectIdentifier aid = pkInfo.getAlgorithm().getAlgorithm();
+        KeyFactory kf;
+        if (PKCSObjectIdentifiers.rsaEncryption.equals(aid)) {
+            kf = KeyFactory.getInstance("RSA");
+        } else if (X9ObjectIdentifiers.id_dsa.equals(aid)) {
+            kf = KeyFactory.getInstance("DSA");
+        } else if (X9ObjectIdentifiers.id_ecPublicKey.equals(aid)) {
+            kf = KeyFactory.getInstance("ECDSA");
+        } else {
+            throw new InvalidKeySpecException("unsupported key algorithm: " + aid);
+        }
+        return kf.generatePublic(keyspec);
+    }
 }

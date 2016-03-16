@@ -12,7 +12,7 @@ public enum ContentType {
     JSON(MediaType.JSON, "json"),
     JSON_SIGNED(MediaType.JSON_SIGNED,"p7s"),
     JSON_ENCRYPTED(MediaType.JSON_ENCRYPTED,"p7s"),//.p7c
-    JSON_SIGNED_AND_ENCRYPTED("application/json;application/pkcs7-signature;application/pkcs7-encrypted", "p7s"),
+    JSON_SIGNED_ENCRYPTED(MediaType.JSON_SIGNED_ENCRYPTED, "p7s"),
 
     MESSAGEVS(MediaType.MESSAGEVS, "vs"),
     MULTIPART_SIGNED("multipart/signed", null),
@@ -52,21 +52,10 @@ public enum ContentType {
 
     private String name;
     private String extension;
-    private TypeVS typeVS;
 
     private ContentType(String name, String extension) {
         this.name = name;
         this.extension = "." + extension;
-    }
-
-    private ContentType(String name, String extension, TypeVS typeVS) {
-        this.name = name;
-        this.extension = "." + extension;
-    }
-
-
-    public TypeVS getTypeVS() {
-        return typeVS;
     }
 
     public String getName() {
@@ -107,7 +96,7 @@ public enum ContentType {
         if(contentTypeStr.contains(VOTE.getName())) return VOTE;
         if(contentTypeStr.contains(CURRENCY.getName())) return CURRENCY;
 
-        if(contentTypeStr.contains(JSON_SIGNED_AND_ENCRYPTED.getName())) return JSON_SIGNED_AND_ENCRYPTED;
+        if(contentTypeStr.contains(JSON_SIGNED_ENCRYPTED.getName())) return JSON_SIGNED_ENCRYPTED;
         if(contentTypeStr.contains(JSON_ENCRYPTED.getName())) return JSON_ENCRYPTED;
         if(contentTypeStr.contains(JSON_SIGNED.getName())) return JSON_SIGNED;
         if(contentTypeStr.contains("json")) return JSON;
@@ -124,7 +113,7 @@ public enum ContentType {
 
         if(contentTypeStr.contains(JSON_ENCRYPTED.getName())) return JSON_ENCRYPTED;
 
-        if(contentTypeStr.contains(JSON_SIGNED_AND_ENCRYPTED.getName())) return JSON_SIGNED_AND_ENCRYPTED;
+        if(contentTypeStr.contains(JSON_SIGNED_ENCRYPTED.getName())) return JSON_SIGNED_ENCRYPTED;
 
         if(contentTypeStr.contains(MULTIPART_ENCRYPTED.getName())) return MULTIPART_ENCRYPTED;
 

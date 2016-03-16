@@ -2,9 +2,9 @@ var RSAUtil = function() {
     this.rsa = forge.pki.rsa;
     // generate an RSA key pair synchronously
     this.keypair = this.rsa.generateKeyPair({bits: 1024, e: 0x10001});
-    this.pemPublicKey = forge.pki.publicKeyToPem(this.keypair.publicKey),
-    this.pemPrivateKey = forge.pki.privateKeyToPem(this.keypair.privateKey);
-    this.publicKeyBase64 =  forge.util.encode64(this.pemPublicKey);
+    this.publicKeyPEM = forge.pki.publicKeyToPem(this.keypair.publicKey),
+    this.privateKeyPEM = forge.pki.privateKeyToPem(this.keypair.privateKey);
+    this.publicKeyBase64 =  forge.util.encode64(this.publicKeyPEM);
 }
 
 RSAUtil.prototype.encrypt = function(plainText) {
@@ -28,22 +28,23 @@ RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
     console.log("decryptedMsg: ")
     console.log(decryptedMsg.content.data)
     if(decryptedMsg.content && decryptedMsg.content.data) {
-        var msgContentJSON = toJSON(decryptedMsg.content.data)
+        var encryptedContentJSON = toJSON(decryptedMsg.content.data)
         messageJSON.messageType = messageJSON.operation
-        messageJSON.operation = msgContentJSON.operation
+        messageJSON.operation = encryptedContentJSON.operation
 
-        if(msgContentJSON.statusCode != null) messageJSON.statusCode = msgContentJSON.statusCode;
-        if(msgContentJSON.pemCert != null) messageJSON.pemCert = msgContentJSON.pemCert;
-        if(msgContentJSON.deviceFromName != null) messageJSON.deviceFromName = msgContentJSON.deviceFromName;
-        if(msgContentJSON.from != null) messageJSON.from = msgContentJSON.from;
-        if(msgContentJSON.deviceFromId != null) messageJSON.deviceFromId = msgContentJSON.deviceFromId;
-        if(msgContentJSON.cmsMessage != null) messageJSON.cms = msgContentJSON.cmsMessage;
-        if(msgContentJSON.subject != null) messageJSON.subject = msgContentJSON.subject;
-        if(msgContentJSON.message != null) messageJSON.message = msgContentJSON.message;
-        if(msgContentJSON.toUser != null) messageJSON.toUser = msgContentJSON.toUser;
-        if(msgContentJSON.deviceToName != null) messageJSON.deviceToName = msgContentJSON.deviceToName;
-        if(msgContentJSON.URL != null) messageJSON.URL = msgContentJSON.URL;
-        if(msgContentJSON.locale != null) messageJSON.locale = msgContentJSON.locale;
+        if(encryptedContentJSON.statusCode != null) messageJSON.statusCode = encryptedContentJSON.statusCode;
+        if(encryptedContentJSON.x509CertificatePEM != null) messageJSON.x509CertificatePEM = encryptedContentJSON.x509CertificatePEM;
+        if(encryptedContentJSON.publicKeyPEM != null) messageJSON.publicKeyPEM = encryptedContentJSON.publicKeyPEM;
+        if(encryptedContentJSON.deviceFromName != null) messageJSON.deviceFromName = encryptedContentJSON.deviceFromName;
+        if(encryptedContentJSON.from != null) messageJSON.from = encryptedContentJSON.from;
+        if(encryptedContentJSON.deviceFromId != null) messageJSON.deviceFromId = encryptedContentJSON.deviceFromId;
+        if(encryptedContentJSON.cmsMessage != null) messageJSON.cms = encryptedContentJSON.cmsMessage;
+        if(encryptedContentJSON.subject != null) messageJSON.subject = encryptedContentJSON.subject;
+        if(encryptedContentJSON.message != null) messageJSON.message = encryptedContentJSON.message;
+        if(encryptedContentJSON.toUser != null) messageJSON.toUser = encryptedContentJSON.toUser;
+        if(encryptedContentJSON.deviceToName != null) messageJSON.deviceToName = encryptedContentJSON.deviceToName;
+        if(encryptedContentJSON.URL != null) messageJSON.URL = encryptedContentJSON.URL;
+        if(encryptedContentJSON.locale != null) messageJSON.locale = encryptedContentJSON.locale;
         messageJSON.encryptedMessage = null;
     } else console.error("encrypted content not found")
 }
@@ -52,7 +53,7 @@ vs.encryptToCMS = function (receptorCertPEM, jsonToEncrypt) {
     var p7 = forge.pkcs7.createEnvelopedData();
     var cert = forge.pki.certificateFromPem(receptorCertPEM);
     p7.addRecipient(cert);
-    jsonToEncrypt.pemPublicKeyKey = this.pemPublicKey
+    jsonToEncrypt.publicKeyPEM = this.publicKeyPEM
     var contentToEncrypt = JSON.stringify(jsonToEncrypt)
     p7.content = forge.util.createBuffer(contentToEncrypt);
     p7.encrypt();

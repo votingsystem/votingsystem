@@ -60,11 +60,11 @@ public class SignatureService {
         this.keyStore = keyStore;
         certSignerChain = keyStore.getCertificateChain(keyAlias);
         cmsGenerator = new CMSGenerator(keyStore, keyAlias, password.toCharArray(),ContextVS.SIGNATURE_ALGORITHM);
-        byte[] pemCertsArray = null;
+        byte[] certificateCollectionPEM = null;
         for (int i = 0; i < certSignerChain.length; i++) {
             log.info("Adding local kesystore");
-            if(pemCertsArray == null) pemCertsArray = PEMUtils.getPEMEncoded (certSignerChain[i]);
-            else pemCertsArray = FileUtils.concat(pemCertsArray, PEMUtils.getPEMEncoded (certSignerChain[i]));
+            if(certificateCollectionPEM == null) certificateCollectionPEM = PEMUtils.getPEMEncoded (certSignerChain[i]);
+            else certificateCollectionPEM = FileUtils.concat(certificateCollectionPEM, PEMUtils.getPEMEncoded (certSignerChain[i]));
         }
         certSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
         privateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());

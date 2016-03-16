@@ -61,8 +61,8 @@ public class TimeStampCertValidationPane extends GridPane {
         log.info("validateTimeStamp");
         Collection<X509Certificate> certs = null;
         try {
-            String pemCert = textArea.getText();
-            certs = PEMUtils.fromPEMToX509CertCollection(pemCert.getBytes());
+            String x509CertificatePEM = textArea.getText();
+            certs = PEMUtils.fromPEMToX509CertCollection(x509CertificatePEM.getBytes());
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             MainApp.showMessage(ResponseVS.SC_ERROR, ContextVS.getInstance().getMessage("pemCertsErrorMsg"));

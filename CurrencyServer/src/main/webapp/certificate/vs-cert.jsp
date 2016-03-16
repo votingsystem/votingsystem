@@ -78,7 +78,7 @@
                 this.$.reasonDialog.show()
             },
             certvsChanged: function() {
-                this.$.pemCertTextArea.value = this.certvs.pemCert
+                this.$.pemCertTextArea.value = this.certvs.x509CertificatePEM
                 if('CERTIFICATE_AUTHORITY' == this.certvs.type) {
                     this.$.pageHeaderDiv.innerHTML = "${msg.trustedCertPageTitle}"
                 } else if ('USER' == this.certvs.type) {

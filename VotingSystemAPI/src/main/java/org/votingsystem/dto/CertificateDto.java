@@ -26,7 +26,7 @@ public class CertificateDto implements Serializable {
     private String serialNumber;
     private String issuerSerialNumber;
     private String description;
-    private String pemCert;
+    private String x509CertificatePEM;
     private String subjectDN;
     private String issuerDN;
     private String sigAlgName;
@@ -42,7 +42,7 @@ public class CertificateDto implements Serializable {
             NoSuchProviderException, IOException {
         serialNumber = x509Cert.getSerialNumber().toString();
         isRoot = CertUtils.isSelfSigned(x509Cert);
-        pemCert = new String(PEMUtils.getPEMEncoded (x509Cert), "UTF-8");
+        x509CertificatePEM = new String(PEMUtils.getPEMEncoded (x509Cert), "UTF-8");
         subjectDN = x509Cert.getSubjectDN().toString();
         issuerDN = x509Cert.getIssuerDN().toString();
         sigAlgName = x509Cert.getSigAlgName();
@@ -60,7 +60,7 @@ public class CertificateDto implements Serializable {
     }
 
     @JsonIgnore X509Certificate getX509Cert() throws Exception {
-        return PEMUtils.fromPEMToX509CertCollection(pemCert.getBytes()).iterator().next();
+        return PEMUtils.fromPEMToX509CertCollection(x509CertificatePEM.getBytes()).iterator().next();
     }
 
     public String getSerialNumber() {
@@ -75,8 +75,8 @@ public class CertificateDto implements Serializable {
         return description;
     }
 
-    public String getPemCert() {
-        return pemCert;
+    public String getX509CertificatePEM() {
+        return x509CertificatePEM;
     }
 
     public String getSubjectDN() {

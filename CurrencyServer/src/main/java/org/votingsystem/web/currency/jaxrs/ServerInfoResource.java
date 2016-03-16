@@ -44,7 +44,7 @@ public class ServerInfoResource {
         actor.setDate(new Date());
         actor.setTimeStampCertPEM(new String(timeStampBean.getSigningCertPEMBytes()));
         actor.setTimeStampServerURL(config.getTimeStampServerURL());
-        actor.setCertChainPEM(new String(cmsBean.getKeyStorePEMCerts()));
+        actor.setCertChainPEM(new String(cmsBean.getKeyStoreCertificatesPEM()));
         //resp.setHeader("Access-Control-Allow-Origin", "*");
         //if (params.callback) render "${param.callback}(${serverInfo as JSON})"
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(actor)).build() ;

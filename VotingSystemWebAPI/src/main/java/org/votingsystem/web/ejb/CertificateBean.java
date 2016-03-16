@@ -60,8 +60,8 @@ public class CertificateBean {
                 config.getContextURL() + "/rest/certificate/serialNumber/" + x509NewCACert.getSerialNumber().toString());
     }
 
-    public X509Certificate getVoteCert(byte[] pemCertCollection) throws Exception {
-        Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(pemCertCollection);
+    public X509Certificate getVoteCert(byte[] certCollectionPEM) throws Exception {
+        Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(certCollectionPEM);
         for (X509Certificate certificate : certificates) {
             if (certificate.getSubjectDN().toString().contains("SERIALNUMBER=hashCertVoteHex:")) {
                 return certificate;

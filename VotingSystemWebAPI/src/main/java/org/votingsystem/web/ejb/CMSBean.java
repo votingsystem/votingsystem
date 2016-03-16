@@ -11,7 +11,6 @@ import org.votingsystem.dto.UserCertificationRequestDto;
 import org.votingsystem.dto.voting.KeyStoreDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.Certificate;
-import org.votingsystem.model.KeyStore;
 import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.Vote;
@@ -29,7 +28,10 @@ import javax.security.auth.x500.X500PrivateCredential;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
-import java.security.*;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -60,7 +62,7 @@ public class CMSBean {
     private Certificate serverCertificate;
     private X509Certificate localServerCertSigner;
     private List<X509Certificate> certChain;
-    private byte[] keyStorePEMCerts;
+    private byte[] keyStoreCertificatesPEM;
     private Map<Long, Certificate> trustedCertsHashMap = new HashMap<>();
     private static final HashMap<Long, Set<TrustAnchor>> eventTrustedAnchorsMap = new HashMap<>();
     private Set<String> admins;
@@ -87,7 +89,7 @@ public class CMSBean {
             checkAuthorityCertDB((X509Certificate) certificate);
             certChain.add((X509Certificate) certificate);
         }
-        keyStorePEMCerts = PEMUtils.getPEMEncoded (certChain);
+        keyStoreCertificatesPEM = PEMUtils.getPEMEncoded (certChain);
         localServerCertSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
         currencyAnchors = new HashSet<>();
 
@@ -111,8 +113,8 @@ public class CMSBean {
         return systemUser;
     }
 
-    public byte[] getKeyStorePEMCerts() {
-        return keyStorePEMCerts;
+    public byte[] getKeyStoreCertificatesPEM() {
+        return keyStoreCertificatesPEM;
     }
 
     public Set<TrustAnchor> getCurrencyAnchors() {

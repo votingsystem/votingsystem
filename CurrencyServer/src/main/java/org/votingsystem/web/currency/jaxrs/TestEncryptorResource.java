@@ -1,14 +1,13 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import org.votingsystem.cms.CMSSignedMessage;
+import org.votingsystem.dto.EncryptedContentDto;
 import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.User;
-import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.util.MediaType;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
-import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
@@ -18,8 +17,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.Date;
-import java.util.Map;
 import java.util.logging.Logger;
 
 @Path("/testEncryptor")
@@ -30,28 +27,30 @@ public class TestEncryptorResource {
     @Inject ConfigVS config;
     @Inject CMSBean cmsBean;
     @Inject DAOBean dao;
-    private MessagesVS messages = MessagesVS.getCurrentInstance();
 
-
-    @Path("/getMultiSignedMessage") @POST
-    public Response getMultiSignedMessage(CMSMessage cmsMessage, @Context ServletContext context,
-                                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+    @Path("/multiSign") @POST
+    public Response multiSign(CMSMessage cmsMessage, @Context ServletContext context,
+                                  @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         CMSSignedMessage cmsSignedMessage = cmsBean.addSignature(cmsMessage.getCMS());
         return  Response.ok().entity(cmsSignedMessage.toPEM()).type(MediaType.JSON_SIGNED).build();
     }
 
-    @Path("/validateTimeStamp") @POST
-    public Response validateTimeStamp(CMSMessage cmsMessage, @Context ServletContext context,
-                                      @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        User user = cmsMessage.getUser();
-        //Date dateFinish = DateUtils.getDateFromString("2014-01-01 00:00:00")
-        Map requestMap = cmsMessage.getSignedContent(Map.class);
-        EventVS eventVS = dao.find(EventVS.class, ((Number)requestMap.get("eventId")).longValue());
-        Date signatureTime = user.getTimeStampToken().getTimeStampInfo().getGenTime();
-        if(!eventVS.isActive(signatureTime)) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(messages.get("checkedDateRangeErrorMsg",
-                    signatureTime, eventVS.getDateBegin(), eventVS.getDateFinish())).build();
-        } else return Response.ok().build();
+    @Path("/encrypted") @POST
+    public Response encrypted(CMSMessage cmsMessage, @Context ServletContext context,
+                      @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        EncryptedContentDto encryptedContentDto = cmsMessage.getSignedContent(EncryptedContentDto.class);
+        CMSSignedMessage cmsSignedMessage = cmsBean.addSignature(cmsMessage.getCMS());
+        byte[] result = null;
+        if(encryptedContentDto.getX509CertificatePEM() != null) {
+            result = cmsBean.encryptToCMS(cmsSignedMessage.getEncoded(),
+                    PEMUtils.fromPEMToX509Cert(encryptedContentDto.getX509CertificatePEM().getBytes()));
+        } else if(encryptedContentDto.getPublicKeyPEM() != null) {
+            result = cmsBean.encryptToCMS(cmsSignedMessage.getEncoded(),
+                    PEMUtils.fromPEMToRSAPublicKey(encryptedContentDto.getPublicKeyPEM()));
+        }
+        if(result == null) return  Response.ok().entity(result).type(MediaType.JSON_SIGNED).build();
+        else return  Response.ok().entity(result).type(MediaType.JSON_SIGNED_ENCRYPTED).build();
     }
+
 
 }

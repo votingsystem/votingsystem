@@ -27,15 +27,16 @@ public class EncryptedContentDto {
     private String deviceToName;
     private Long deviceFromId;
     private String sessionId;
-    private String textToSign;
+    private String contentToSign;
     private String toUser;
     private String hashCertVS;
     private String cmsMessage;
-    private String pemCert;
-    private String pemPublicKey;
+    private String x509CertificatePEM;
+    private String publicKeyPEM;
     private boolean timeLimited;
     private Set<CurrencyDto> currencyList;
     private String URL;
+    private String UUID;
 
 
     public EncryptedContentDto() {}
@@ -52,7 +53,7 @@ public class EncryptedContentDto {
         messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
         messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
         messageContentDto.setToUser(toUser);
-        messageContentDto.setTextToSign(textToSign);
+        messageContentDto.setContentToSign(textToSign);
         messageContentDto.setSubject(subject);
         messageContentDto.setLocale(ContextVS.getInstance().getLocale().getLanguage());
         return messageContentDto;
@@ -137,12 +138,12 @@ public class EncryptedContentDto {
         this.deviceFromName = deviceFromName;
     }
 
-    public String getTextToSign() {
-        return textToSign;
+    public String getContentToSign() {
+        return contentToSign;
     }
 
-    public void setTextToSign(String textToSign) {
-        this.textToSign = textToSign;
+    public void setContentToSign(String contentToSign) {
+        this.contentToSign = contentToSign;
     }
 
     public String getToUser() {
@@ -215,12 +216,12 @@ public class EncryptedContentDto {
         this.sessionId = sessionId;
     }
 
-    public String getPemCert() {
-        return pemCert;
+    public String getX509CertificatePEM() {
+        return x509CertificatePEM;
     }
 
-    public void setPemCert(String pemCert) {
-        this.pemCert = pemCert;
+    public void setX509CertificatePEM(String x509CertificatePEM) {
+        this.x509CertificatePEM = x509CertificatePEM;
     }
 
     public boolean isTimeLimited() {
@@ -231,11 +232,19 @@ public class EncryptedContentDto {
         this.timeLimited = timeLimited;
     }
 
-    public String getPemPublicKey() {
-        return pemPublicKey;
+    public String getPublicKeyPEM() {
+        return publicKeyPEM;
     }
 
-    public void setPemPublicKey(String pemPublicKey) {
-        this.pemPublicKey = pemPublicKey;
+    public void setPublicKeyPEM(String publicKeyPEM) {
+        this.publicKeyPEM = publicKeyPEM;
+    }
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
     }
 }

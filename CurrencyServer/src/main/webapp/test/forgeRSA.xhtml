@@ -28,8 +28,8 @@
         <script>
             window.addEventListener('WebComponentsReady', function() {
                 var rsaUtil = new RSAUtil();
-                console.log(rsaUtil.pemPrivateKey)
-                console.log(rsaUtil.pemPublicKey)
+                console.log(rsaUtil.privateKeyPEM)
+                console.log(rsaUtil.publicKeyPEM)
 
                 var encrypted = rsaUtil.encrypt("encrypted text")
                 console.log("encryptRSA - encryptedBase64: " + encrypted)

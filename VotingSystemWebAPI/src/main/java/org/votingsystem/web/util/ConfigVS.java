@@ -4,6 +4,7 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.ControlCenter;
 import org.votingsystem.throwable.ValidationException;
+
 import java.io.File;
 import java.util.Properties;
 

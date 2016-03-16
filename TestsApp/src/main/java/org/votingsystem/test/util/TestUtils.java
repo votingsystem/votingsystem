@@ -31,7 +31,7 @@ public class TestUtils {
 
     public static CurrencyServer fetchCurrencyServer(String serverURL) throws Exception {
         ResponseVS responseVS = ContextVS.getInstance().checkServer(serverURL);
-        if(ResponseVS.SC_OK == responseVS.getStatusCode()) throw responseVS.getException();
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw responseVS.getException();
         else return  (CurrencyServer) responseVS.getData();
     }
 

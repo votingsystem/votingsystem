@@ -44,7 +44,7 @@ public class ServerInfoResource {
         if(controlCenter != null) serverInfo.put("controlCenter", new ActorDto(controlCenter));
         serverInfo.put("timeStampCertPEM", new String(timeStampBean.getSigningCertPEMBytes()));
         serverInfo.put("timeStampServerURL", configVS.getTimeStampServerURL());
-        serverInfo.put("certChainPEM", new String(cmsBean.getKeyStorePEMCerts()));
+        serverInfo.put("certChainPEM", new String(cmsBean.getKeyStoreCertificatesPEM()));
         //resp.setHeader("Access-Control-Allow-Origin", "*");
         //if (params.callback) render "${param.callback}(${serverInfo as JSON})"
         return serverInfo;
