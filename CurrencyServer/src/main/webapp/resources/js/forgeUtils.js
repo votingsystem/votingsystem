@@ -1,3 +1,8 @@
+forge.oids['2.5.4.42'] = "givenName"
+forge.oids["givenName"] = '2.5.4.42'
+forge.oids['2.5.4.4'] = "surname"
+forge.oids["surname"] = '2.5.4.4'
+
 var RSAUtil = function() {
     this.rsa = forge.pki.rsa;
     // generate an RSA key pair synchronously
@@ -24,6 +29,30 @@ RSAUtil.prototype.decryptCMS = function(encryptedPEM) {
     return encryptedCMSMsg;
 }
 
+RSAUtil.prototype.getCSR = function(givenName, surname, serialName) {
+    this.csr = forge.pki.createCertificationRequest();
+    this.csr.publicKey = this.keypair.publicKey;
+    csr.setSubject([
+        { name: 'serialName', value: serialName},
+        { name: 'surname', value: surname },
+        { name: 'givenName', value: givenName }]);
+    csr.sign(this.keypair.privateKey);
+    var verified = csr.verify();
+    return forge.pki.certificationRequestToPem(csr);
+}
+
+vs.extractUserInfoFromCert = function(x509Certificate) {
+    var result = {}
+    var subjectAttrs = x509Certificate.subject.attributes
+    for (var i = 0; i < subjectAttrs.length; ++i) {
+        if (subjectAttrs[i].type === forge.pki.oids.serialName) result.serialName = subjectAttrs[i].value
+        if (subjectAttrs[i].type === forge.pki.oids.givenName) result.givenName = subjectAttrs[i].value
+        if (subjectAttrs[i].type === forge.pki.oids.surname) result.surname = subjectAttrs[i].value
+    }
+    return result
+}
+
+
 RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
     var decryptedMsg = this.decryptCMS(messageJSON.encryptedMessage)
     console.log("decryptedMsg: ")
@@ -33,7 +62,9 @@ RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
         messageJSON.messageType = messageJSON.operation
         messageJSON.operation = encryptedContentJSON.operation
 
+        if(encryptedContentJSON.operationCode != null) messageJSON.operationCode = encryptedContentJSON.operationCode;
         if(encryptedContentJSON.statusCode != null) messageJSON.statusCode = encryptedContentJSON.statusCode;
+        if(encryptedContentJSON.step != null) messageJSON.step = encryptedContentJSON.step;
         if(encryptedContentJSON.x509CertificatePEM != null) messageJSON.x509CertificatePEM = encryptedContentJSON.x509CertificatePEM;
         if(encryptedContentJSON.publicKeyPEM != null) messageJSON.publicKeyPEM = encryptedContentJSON.publicKeyPEM;
         if(encryptedContentJSON.deviceFromName != null) messageJSON.deviceFromName = encryptedContentJSON.deviceFromName;
@@ -50,6 +81,10 @@ RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
     } else console.error("encrypted content not found")
 }
 
+vs.operationCode = function() {
+  return Math.random().toString(36).substring(2, 6);  
+}
+
 vs.encryptToCMS = function (receptorCertPEM, jsonToEncrypt) {
     var p7 = forge.pkcs7.createEnvelopedData();
     var cert = forge.pki.certificateFromPem(receptorCertPEM);
@@ -60,7 +95,6 @@ vs.encryptToCMS = function (receptorCertPEM, jsonToEncrypt) {
     p7.encrypt();
     return forge.pkcs7.messageToPem(p7);
 }
-
 
 vs.getTSTInfoFromTimeStampTokenBase64 = function (base64TimeStampToken) {
     var timeStampTokenDer =  forge.util.decode64(base64TimeStampToken)
@@ -122,7 +156,7 @@ vs.getTimeStampToken = function (contentToSign, callback) {
             callback(timeStampTokenASN1)
         }
     };
-    xhttp.open("POST",  vs.timeStampServerURL + "/timestamp", true);
+    xhttp.open("POST",  vs.timeStampServiceURL , true);
     xhttp.setRequestHeader("Content-type", "application/timestamp-query");
     xhttp.setRequestHeader("Content-Encoding", "base64");
     xhttp.send(timeStampRequestBase64);

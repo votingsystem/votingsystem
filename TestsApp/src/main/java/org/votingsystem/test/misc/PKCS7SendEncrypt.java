@@ -78,7 +78,7 @@ public class PKCS7SendEncrypt {
                     SignatureService signatureService = SignatureService.load(requestNIF);
                     EncryptedContentDto encryptedContentDto = new EncryptedContentDto();
                     encryptedContentDto.setPublicKeyPEM(new String(PEMUtils.getPEMEncoded(
-                            signatureService.getCertSigner().getPublicKey())));
+                            signatureService.getX509Certificate().getPublicKey())));
                     encryptedContentDto.setUUID(requestNIF);
                     CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(
                             encryptedContentDto));

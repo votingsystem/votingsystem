@@ -188,7 +188,7 @@ public class CertUtils {
                     X509Extensions extensions = X509Extensions.getInstance(attr.getAttrValues().getObjectAt(0));
                     Enumeration e = extensions.oids();
                     while (e.hasMoreElements()) {
-                        DERObjectIdentifier oid = (DERObjectIdentifier) e.nextElement();
+                        ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier) e.nextElement();
                         X509Extension ext = extensions.getExtension(oid);
                         certGen.addExtension(oid, ext.isCritical(), ext.getValue().getOctets());
                     }

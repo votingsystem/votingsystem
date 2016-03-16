@@ -1,7 +1,7 @@
 <%@page contentType="text/javascript" %>
     var vs = {}
     vs.contextURL = "${contextURL}"
-    vs.timeStampServerURL = "${timeStampServerURL}"
+    vs.timeStampServiceURL = "${timeStampServerURL}" + "/timestamp"
 
     function OperationVS(operation, statusCode) {
         this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING

@@ -291,7 +291,7 @@ public class UserBaseSimulationData extends SimulationData {
             String userNif = NifUtils.getNif(userIndex);
             SignatureService signatureService = SignatureService.load(userNif);
             usersWithoutRepresentativeList.add(userNif);
-            byte[] usertCertPEMBytes = PEMUtils.getPEMEncoded(signatureService.getCertSigner());
+            byte[] usertCertPEMBytes = PEMUtils.getPEMEncoded(signatureService.getX509Certificate());
             String certServiceURL = ContextVS.getInstance().getAccessControl().getUserCertServiceURL();
             ResponseVS responseVS = HttpHelper.getInstance().sendData(
                     usertCertPEMBytes, ContentType.X509_USER,certServiceURL);

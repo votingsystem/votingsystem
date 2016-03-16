@@ -5,24 +5,30 @@
         <link href="../resources/forgePKCS7.html" rel="import"/>
     </ui:define>
     <ui:define name="content">
-        <div style="text-align: center;margin: 10px;"><a href="http://undertow.io/blog/2015/03/26/HTTP2-In-Wildfly.html">Wildfly  HTTP/2</a></div>
-        <div><b>document.cookie:</b><div id="documentCookie"></div></div>
-        <div><b>Session ID:</b><div id="sessionDiv"></div></div>
+        <div style="margin: 50px;">
+            <div class="vertical layout center">
+                <div>
+                    <div><b>document.cookie:</b><div id="documentCookie"></div></div>
+                    <div><b>Session ID:</b><div id="sessionDiv"></div></div>
+                </div>
+            </div>
 
-        <div id="qrCodeImgDiv" class="vertical layout center center-justified">
-            <div style="margin: 25px 0 0 0;font-size: 1.2em;"><b>${msg.accessLbl}</b></div>
-            <img id="qrImg"  src="" alt="read it with your mobile"/>
-            <div id="websocketSessionDiv" style="text-transform: uppercase;font-size: 1.4em;font-weight: bold;"></div>
+            <div id="qrCodeImgDiv" class="vertical layout center center-justified">
+                <div style="margin: 25px 0 0 0;font-size: 1.2em;"><b>${msg.accessLbl}</b></div>
+                <img id="qrImg"  src="" alt="read it with your mobile" style="border: 1px solid #ccc;"/>
+                <div id="websocketSessionDiv" style="text-transform: uppercase;font-size: 1.4em;font-weight: bold;"></div>
+            </div>
         </div>
+
 
         <script>
             //<![CDATA[
-                var qrCodes_OperationsMap = {}
-                var wsSessionId, wsDeviceId
+                vs.rsaUtil = new RSAUtil();
 
-                var INIT_REMOTE_SIGNED_BROWSER_SESSION = 0;
-                var QR_MESSAGE_INFO                    = 1;
-                var CURRENCY_SEND                      = 2;
+                var INIT_REMOTE_SIGNED_SESSION         = 0;
+                var INIT_BROWSER_AUTHENTICATED_SESSION = 1;
+                var QR_MESSAGE_INFO                    = 2;
+                var CURRENCY_SEND                      = 3;
 
                 var WEB_SOCKET_SESSION_KEY = "wsid";
                 var DEVICE_ID_KEY          = "did";
@@ -30,8 +36,7 @@
                 var OPERATION_ID_KEY       = "opid";
                 var PUBLIC_KEY_KEY         = "pk";
 
-
-                function getQRCodeURL(operation, operationId, deviceId, sessionId, key) {
+                vs.getQRCodeURL = function(operation, operationId, deviceId, sessionId, key) {
                     var result = "${contextURL}/qr?cht=qr&chs=150x150&chl="
                     if(operation != null) result = result + OPERATION_KEY + "=" + operation + ";"
                     if(operationId != null) result = result + OPERATION_ID_KEY + "=" + operationId + ";"
@@ -41,7 +46,6 @@
                     return result;
                 }
 
-                var socketServiceURL = "${webSocketURL}"
                 var JSESSIONID =  getCookie("JSESSIONID")
 
                 document.addEventListener('WebComponentsReady', function() {
@@ -60,15 +64,13 @@
 
                 var websocket
                 if ('WebSocket' in window) {
-                    websocket = new WebSocket(socketServiceURL);
+                    websocket = new WebSocket(vs.timeStampServiceURL);
                 } else {
                     alert('WebSocket is not supported by this browser.');
                 }
                 websocket.onopen = function () {
                     console.log('Info: WebSocket connection opened.');
                 };
-
-                var rsaUtil = new RSAUtil();
 
                 websocket.onmessage = function (event) {
                     console.log('Received: ' + event.data);
@@ -77,48 +79,46 @@
                         messageJSON.operation = messageJSON.messageType
                         switch(messageJSON.operation) {
                             case "INIT_SESSION":
-                                wsSessionId = messageJSON.sessionId
+                                vs.wsSessionId = messageJSON.sessionId
                                 websocket.send(JSON.stringify({operation:"INIT_BROWSER_SESSION"}))
                                 break;
                             case "INIT_BROWSER_SESSION":
                                 if(ResponseVS.SC_OK == messageJSON.statusCode) {
-                                    wsDeviceId = messageJSON.deviceId
-                                    var opCode = Math.random().toString(36).substring(2, 6);
-                                    qrCodes_OperationsMap[opCode] = { "operation":"CURRENCY_SEND",
-                                        "sessionId": wsSessionId, "deviceId":wsDeviceId}
-                                    document.querySelector("#qrImg").setAttribute(
-                                            "src", getQRCodeURL(QR_MESSAGE_INFO, opCode,
-                                                    wsDeviceId, null, rsaUtil.publicKeyBase64))
-                                    document.querySelector("#websocketSessionDiv").innerHTML = opCode;
+                                    vs.wsDeviceId = messageJSON.deviceId
+                                    document.querySelector("#qrImg").setAttribute("src", vr.getQRCodeURL(
+                                            INIT_REMOTE_SIGNED_SESSION, null, vs.wsDeviceId, null, vs.rsaUtil.publicKeyBase64))
+                                    document.querySelector("#websocketSessionDiv").innerHTML = operationCode;
                                 }
+                                break;
+                            case "INIT_BROWSER_AUTHENTICATED_SESSION":
                                 break;
                         }
 
                     } else {
                         if(messageJSON.encryptedMessage != null) {
-                            rsaUtil.decryptSocketMsg(messageJSON)
+                            vs.rsaUtil.decryptSocketMsg(messageJSON)
                             console.log("decryptSocketMsg: ")
                             console.log(messageJSON)
                         }
                         switch(messageJSON.operation) {
                             case "QR_MESSAGE_INFO":
-                                var qrOperation = qrCodes_OperationsMap[messageJSON.message]
+                                var qrOperation = vs.qrOperationsMap[messageJSON.operationCode]
                                 var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
                                     statusCode:700,
                                     deviceToId:messageJSON.deviceFromId,
-                                    deviceId:wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
+                                    deviceId: vs.wsDeviceId, UUID:messageJSON.UUID}
                                 socketMessageDto.encryptedMessage = vs.encryptToCMS(
                                         messageJSON.x509CertificatePEM, qrOperation)
                                 console.log(socketMessageDto)
                                 websocket.send(JSON.stringify(socketMessageDto))
                                 break;
-                            case "INIT_REMOTE_SIGNED_BROWSER_SESSION":
+                            case "INIT_BROWSER_AUTHENTICATED_SESSION":
                                 var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
                                     statusCode:700,
                                     deviceToId:messageJSON.deviceFromId,
-                                    deviceId:wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
-                                var encryptedDto = {operation:INIT_REMOTE_SIGNED_BROWSER_SESSION,
-                                    sessionId:wsSessionId, deviceFromId:wsDeviceId}
+                                    deviceId: vs.wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
+                                var encryptedDto = {operation:INIT_BROWSER_AUTHENTICATED_SESSION,
+                                    sessionId: vs.wsSessionId, deviceFromId: vs.wsDeviceId}
                                 socketMessageDto.encryptedMessage = vs.encryptToCMS(
                                         messageJSON.x509CertificatePEM, encryptedDto)
                                 websocket.send(JSON.stringify(socketMessageDto))
@@ -127,7 +127,8 @@
                     }
                 };
                 websocket.onclose = function (event) {
-                    console.log('Info: WebSocket connection closed, Code: ' + event.code + (event.reason == "" ? "" : ", Reason: " + event.reason));
+                    console.log('Info: WebSocket connection closed, Code: ' + event.code +
+                            (event.reason == "" ? "" : ", Reason: " + event.reason));
                 };
             //]]>
         </script>

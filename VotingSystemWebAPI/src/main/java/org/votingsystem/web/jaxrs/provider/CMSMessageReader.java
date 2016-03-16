@@ -1,7 +1,9 @@
 package org.votingsystem.web.jaxrs.provider;
 
+import org.apache.commons.io.IOUtils;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.CMSMessage;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentType;
 import org.votingsystem.util.MediaType;
 import org.votingsystem.web.ejb.CMSBean;
@@ -40,7 +42,14 @@ public class CMSMessageReader implements MessageBodyReader<CMSMessage> {
                javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> multivaluedMap,
                InputStream inputStream) throws IOException, WebApplicationException {
         try {
-            return cmsBean.validateCMS(CMSSignedMessage.FROM_PEM(inputStream), ContentType.JSON_SIGNED).getCmsMessage();
+            String contentType = multivaluedMap.getFirst("Content-Type");
+            if(MediaType.JSON_SIGNED.equals(contentType)) {
+                return cmsBean.validateCMS(CMSSignedMessage.FROM_PEM(inputStream), ContentType.JSON_SIGNED).getCmsMessage();
+            } else if (MediaType.JSON_SIGNED_ENCRYPTED.equals(contentType)) {
+                byte[] decryptedBytes = cmsBean.decryptCMS(IOUtils.toByteArray(inputStream));
+                CMSSignedMessage signedData = new CMSSignedMessage(decryptedBytes);
+                return cmsBean.validateCMS(signedData, ContentType.JSON_SIGNED).getCmsMessage();
+            } else throw new ExceptionVS("Invalid content type: " + contentType);
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
             throw new WebApplicationException(ex);

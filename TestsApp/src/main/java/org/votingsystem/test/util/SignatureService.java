@@ -41,8 +41,8 @@ public class SignatureService {
     private static ConcurrentHashMap<String, SignatureService> signatureServices	= new ConcurrentHashMap<>();
 
     private CMSGenerator cmsGenerator;
-	private X509Certificate certSigner;
-    private Certificate[] certSignerChain;
+	private X509Certificate x509Certificate;
+    private Certificate[] certificateChain;
     private X500PrivateCredential rootCAPrivateCredential;
     private PrivateKey privateKey;
     private Encryptor encryptor;
@@ -58,18 +58,18 @@ public class SignatureService {
     public synchronized void init(KeyStore keyStore, String keyAlias, String password) throws Exception {
         log.info("init");
         this.keyStore = keyStore;
-        certSignerChain = keyStore.getCertificateChain(keyAlias);
+        certificateChain = keyStore.getCertificateChain(keyAlias);
         cmsGenerator = new CMSGenerator(keyStore, keyAlias, password.toCharArray(),ContextVS.SIGNATURE_ALGORITHM);
         byte[] certificateCollectionPEM = null;
-        for (int i = 0; i < certSignerChain.length; i++) {
+        for (int i = 0; i < certificateChain.length; i++) {
             log.info("Adding local kesystore");
-            if(certificateCollectionPEM == null) certificateCollectionPEM = PEMUtils.getPEMEncoded (certSignerChain[i]);
-            else certificateCollectionPEM = FileUtils.concat(certificateCollectionPEM, PEMUtils.getPEMEncoded (certSignerChain[i]));
+            if(certificateCollectionPEM == null) certificateCollectionPEM = PEMUtils.getPEMEncoded (certificateChain[i]);
+            else certificateCollectionPEM = FileUtils.concat(certificateCollectionPEM, PEMUtils.getPEMEncoded (certificateChain[i]));
         }
-        certSigner = (X509Certificate) keyStore.getCertificate(keyAlias);
+        x509Certificate = (X509Certificate) keyStore.getCertificate(keyAlias);
         privateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
-        rootCAPrivateCredential = new X500PrivateCredential(certSigner, privateKey,  "rootAlias");
-        encryptor = new Encryptor(certSigner, privateKey);
+        rootCAPrivateCredential = new X500PrivateCredential(x509Certificate, privateKey,  "rootAlias");
+        encryptor = new Encryptor(x509Certificate, privateKey);
     }
 
     public static SignatureService getAuthoritySignatureService() throws Exception {
@@ -105,7 +105,7 @@ public class SignatureService {
     }
 
     public User getUser() {
-        if(user == null) user = User.FROM_X509_CERT(certSigner);
+        if(user == null) user = User.FROM_X509_CERT(x509Certificate);
         return user;
     }
 
@@ -113,12 +113,12 @@ public class SignatureService {
         return keyStore;
     }
 
-    public X509Certificate getCertSigner() {
-        return certSigner;
+    public X509Certificate getX509Certificate() {
+        return x509Certificate;
     }
 
-    public Certificate[] getCertSignerChain() {
-        return certSignerChain;
+    public Certificate[] getCertificateChain() {
+        return certificateChain;
     }
 
     public PrivateKey getPrivateKey() {
@@ -161,7 +161,7 @@ public class SignatureService {
     }
 
     public byte[] encryptToCMS(byte[] dataToEncrypt) throws Exception {
-        return encryptor.encryptToCMS(dataToEncrypt, certSigner);
+        return encryptor.encryptToCMS(dataToEncrypt, x509Certificate);
     }
 
     public byte[] decryptCMS (byte[] encryptedFile) throws Exception {
@@ -225,7 +225,7 @@ public class SignatureService {
                 subscriptionDto.loadActivationRequest();
             }
         }
-        User user = User.FROM_X509_CERT(certSigner);
+        User user = User.FROM_X509_CERT(x509Certificate);
         for (SubscriptionDto subscriptionDto : subscriptionDtoList.getResultList()) {
             CMSSignedMessage cmsMessage = signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(subscriptionDto));
             ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,

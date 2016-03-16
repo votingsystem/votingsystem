@@ -20,6 +20,8 @@ import java.util.Set;
 public class EncryptedContentDto {
 
     private TypeVS operation;
+    private String operationCode;
+    private TypeVS step;
     private Integer statusCode;
     private String subject;
     private String locale = ContextVS.getInstance().getLocale().getLanguage();;
@@ -255,5 +257,21 @@ public class EncryptedContentDto {
 
     public void setUUID(String UUID) {
         this.UUID = UUID;
+    }
+
+    public String getOperationCode() {
+        return operationCode;
+    }
+
+    public void setOperationCode(String operationCode) {
+        this.operationCode = operationCode;
+    }
+
+    public TypeVS getStep() {
+        return step;
+    }
+
+    public void setStep(TypeVS step) {
+        this.step = step;
     }
 }

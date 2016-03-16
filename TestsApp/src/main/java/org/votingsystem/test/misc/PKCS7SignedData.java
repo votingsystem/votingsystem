@@ -160,7 +160,7 @@ public class PKCS7SignedData {
         CMSSignedMessage cmsSigned = signatureService1.addSignature(cmsMessage);
         cmsSigned.isValidSignature();
         //log.info("document: " + cmsSigned.toPEMStr());
-        Collection result = cmsSigned.checkSignerCert(signatureService1.getCertSigner());
+        Collection result = cmsSigned.checkSignerCert(signatureService1.getX509Certificate());
         log.info("cert matches: " + result.size());
     }
 

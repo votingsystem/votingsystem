@@ -18,13 +18,13 @@ public class PKCS7EncryptedData {
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SignatureService signatureService = SignatureService.load("08888888D");
         log.info("privateKey" + new String(PEMUtils.getPEMEncoded(signatureService.getPrivateKey())));
-        log.info("cert" + new String(PEMUtils.getPEMEncoded(signatureService.getCertSigner())));
+        log.info("cert" + new String(PEMUtils.getPEMEncoded(signatureService.getX509Certificate())));
         signAndEncrypt(signatureService);
     }
 
     private static byte[] encrypt(SignatureService signatureService) throws Exception {
         log.info("signAndEncrypt");
-        byte[] encryptedBytes = Encryptor.encryptToCMS("text to encrypt".getBytes(), signatureService.getCertSigner());
+        byte[] encryptedBytes = Encryptor.encryptToCMS("text to encrypt".getBytes(), signatureService.getX509Certificate());
         log.info("encryptedBytes: " + new String(encryptedBytes));
         log.info("Decrypted text: " + new String(Encryptor.decryptCMS(encryptedBytes, signatureService.getPrivateKey())));
         return encryptedBytes;
@@ -34,7 +34,7 @@ public class PKCS7EncryptedData {
         log.info("signAndEncrypt");
         CMSSignedMessage cmsSignedMessage = signatureService.signData("Hello text signed and encrypted".getBytes());
         byte[] encryptedBytes = Encryptor.encryptToCMS(cmsSignedMessage.getEncoded(),
-                signatureService.getCertSigner());
+                signatureService.getX509Certificate());
         log.info("Encrypted signed CMS: " + new String(encryptedBytes));
         byte[] decryptedBytes = Encryptor.decryptCMS(encryptedBytes, signatureService.getPrivateKey());
         CMSSignedMessage signedData = new CMSSignedMessage(decryptedBytes);

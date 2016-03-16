@@ -29,8 +29,7 @@ public class WebSocketBean {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject
-    TransactionBean transactionBean;
+    @Inject TransactionBean transactionBean;
     @Inject CMSBean cmsBean;
 
     @Transactional
@@ -81,7 +80,7 @@ public class WebSocketBean {
                         .setDeviceId(browserDevice.getId().toString()).setMessageType(TypeVS.INIT_BROWSER_SESSION);
                 messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(response));
                 break;
-            case INIT_REMOTE_SIGNED_BROWSER_SESSION:
+            case INIT_BROWSER_AUTHENTICATED_SESSION:
                 break;
             case INIT_REMOTE_SIGNED_SESSION:
                 cmsMessage = cmsBean.validateCMS(messageDto.getCMS(), null).getCmsMessage();

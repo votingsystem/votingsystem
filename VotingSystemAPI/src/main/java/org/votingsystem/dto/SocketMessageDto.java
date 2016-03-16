@@ -36,8 +36,9 @@ public class SocketMessageDto {
     public enum ConnectionStatus {OPEN, CLOSED}
 
     private TypeVS operation;
+    private String operationCode;
     private TypeVS messageType;
-    private TypeVS messageSubType;
+    private TypeVS step;
     private State state = State.PENDING;
     private Integer statusCode;
     private Long deviceFromId;
@@ -146,12 +147,12 @@ public class SocketMessageDto {
         this.publicKeyPEM = publicKeyPEM;
     }
 
-    public TypeVS getMessageSubType() {
-        return messageSubType;
+    public TypeVS getStep() {
+        return step;
     }
 
-    public SocketMessageDto setMessageSubType(TypeVS messageSubType) {
-        this.messageSubType = messageSubType;
+    public SocketMessageDto setStep(TypeVS step) {
+        this.step = step;
         return this;
     }
 
@@ -409,6 +410,14 @@ public class SocketMessageDto {
         this.connectedDevice = connectedDevice;
     }
 
+    public String getOperationCode() {
+        return operationCode;
+    }
+
+    public void setOperationCode(String operationCode) {
+        this.operationCode = operationCode;
+    }
+
     public static SocketMessageDto getSignRequest(DeviceDto deviceTo, String toUser, String textToSign, String subject)
             throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceTo, null, TypeVS.MESSAGEVS_SIGN);
@@ -497,19 +506,19 @@ public class SocketMessageDto {
     @JsonIgnore
     public void decryptMessage(PrivateKey privateKey) throws Exception {
         byte[] decryptedBytes = Encryptor.decryptCMS(encryptedMessage.getBytes(), privateKey);
-        EncryptedContentDto encryptedDto =
-                JSON.getMapper().readValue(decryptedBytes, EncryptedContentDto.class);
+        EncryptedContentDto encryptedDto = JSON.getMapper().readValue(decryptedBytes, EncryptedContentDto.class);
         if(encryptedDto.getOperation() != null) {
             this.messageType = operation;
             operation = encryptedDto.getOperation();
         }
+        if(encryptedDto.getOperationCode() != null) operationCode = encryptedDto.getOperationCode();
         if(encryptedDto.getStatusCode() != null) statusCode = encryptedDto.getStatusCode();
+        if(encryptedDto.getStep() != null) step = encryptedDto.getStep();
         if(encryptedDto.getDeviceFromName() != null) deviceFromName = encryptedDto.getDeviceFromName();
         if(encryptedDto.getFrom() != null) from = encryptedDto.getFrom();
         if(encryptedDto.getDeviceFromId() != null) deviceFromId = encryptedDto.getDeviceFromId();
         if(encryptedDto.getCmsMessage() != null) cms = encryptedDto.getCMS();
-        if(encryptedDto.getCurrencyList() != null) currencySet = CurrencyDto.deSerialize(
-                encryptedDto.getCurrencyList());
+        if(encryptedDto.getCurrencyList() != null) currencySet = CurrencyDto.deSerialize(encryptedDto.getCurrencyList());
         if(encryptedDto.getSubject() != null) subject = encryptedDto.getSubject();
         if(encryptedDto.getMessage() != null) message = encryptedDto.getMessage();
         if(encryptedDto.getToUser() != null) toUser = encryptedDto.getToUser();

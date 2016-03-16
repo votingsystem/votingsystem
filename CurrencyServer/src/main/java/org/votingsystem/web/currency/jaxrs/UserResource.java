@@ -54,15 +54,11 @@ public class UserResource {
 
     private static final Logger log = Logger.getLogger(UserResource.class.getName());
 
-    @Inject
-    TransactionBean transactionBean;
-    @Inject
-    GroupBean groupBean;
+    @Inject TransactionBean transactionBean;
+    @Inject GroupBean groupBean;
     @Inject BalancesBean balancesBean;
-    @Inject
-    UserBean userBean;
-    @Inject
-    BankBean bankBean;
+    @Inject UserBean userBean;
+    @Inject BankBean bankBean;
     @Inject CMSBean cmsBean;
     @Inject DAOBean dao;
     @Inject ConfigVS config;
