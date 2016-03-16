@@ -21,10 +21,9 @@ public class CurrencySendFromWallet {
     private static Logger log =  Logger.getLogger(CurrencySendFromWallet.class.getName());
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
-        ContextVS.getInstance().setDefaultServer(currencyServer);
+        CurrencyServer currencyServer = TestUtils.fetchCurrencyServer();
         File walletDir = new File(ContextVS.getInstance().getProperty("walletDir"));
         log.info("walletDir: " + walletDir.getAbsolutePath());
         File[] currencyFiles = walletDir.listFiles(new FilenameFilter() {

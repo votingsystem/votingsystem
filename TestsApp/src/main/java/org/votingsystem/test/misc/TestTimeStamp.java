@@ -22,13 +22,13 @@ public class TestTimeStamp {
     private static String forge_TimeStamp = "MD4CADAvMAsGCWCGSAFlAwQCAQQguO2mhtXeBKLHI/AAJjzu4zFJ5vib491ZQgGeS+wrEdwCCTk5MDk3Mjk0Nw==";
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         byte[] decodedRequest = Base64.decode(forge_TimeStamp);
         TimeStampRequest timeStampRequest = new TimeStampRequest(new ByteArrayInputStream(decodedRequest));
         log.info(timeStampRequest.getEncoded().toString());
         ResponseVS responseVS = HttpHelper.getInstance().sendData(forge_TimeStamp.getBytes(), ContentType.TIMESTAMP_QUERY,
-                ContextVS.getInstance().getProperty("timeStampServerURL") + "/timestamp");
+                ContextVS.getInstance().getTimeStampServiceURL());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();
             TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));

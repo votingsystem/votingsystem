@@ -1,8 +1,8 @@
 package org.votingsystem.test.util;
 
-import org.votingsystem.dto.ActorDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.Actor;
+import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
@@ -21,15 +21,6 @@ public class TestUtils {
     private static ConcurrentHashMap<Long, UserDto> userMap = new ConcurrentHashMap<>();
 
 
-    public static CurrencyServer fetchCurrencyServer(String currencyServerURL) throws Exception {
-        if(ContextVS.getInstance().getCurrencyServer() == null) {
-            ActorDto actorDto = HttpHelper.getInstance().getData(ActorDto.class,
-                    Actor.getServerInfoURL(currencyServerURL), MediaType.JSON);
-            ContextVS.getInstance().setCurrencyServer((CurrencyServer) actorDto.getActor());
-        }
-        return ContextVS.getInstance().getCurrencyServer();
-    }
-
     public static UserDto getUser(Long userId, Actor server) throws Exception {
         if(userMap.get(userId) != null) return userMap.get(userId);
         UserDto dto = HttpHelper.getInstance().getData(UserDto.class, server.getUserURL(userId),
@@ -38,4 +29,13 @@ public class TestUtils {
         return dto;
     }
 
+    public static CurrencyServer fetchCurrencyServer(String serverURL) throws Exception {
+        ResponseVS responseVS = ContextVS.getInstance().checkServer(serverURL);
+        if(ResponseVS.SC_OK == responseVS.getStatusCode()) throw responseVS.getException();
+        else return  (CurrencyServer) responseVS.getData();
+    }
+
+    public static CurrencyServer fetchCurrencyServer() throws Exception {
+        return fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
+    }
 }

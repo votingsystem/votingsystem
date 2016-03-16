@@ -41,7 +41,7 @@ public class PublishAndSendElection {
     private static final Map<String, VoteHelper> voteMap = new ConcurrentHashMap<>();
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         eventVS = new EventVS();
         eventVS.setSubject("voting subject");

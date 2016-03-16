@@ -18,7 +18,7 @@ public class CMSEncryption {
     private static Logger log =  Logger.getLogger(CMSEncryption.class.getName());
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         String file = "Cert_USER_Currency_07553172H";
         String keyStorePath="./certs/" + file + ".jks";

@@ -12,7 +12,7 @@ public class Test {
     private static final Logger log = Logger.getLogger(Test.class.getName());
 
     private static void sendCMS() throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
     }
 

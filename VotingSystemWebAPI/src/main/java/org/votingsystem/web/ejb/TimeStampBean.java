@@ -47,7 +47,6 @@ public class TimeStampBean {
     private SignerInformationVerifier timeStampSignerInfoVerifier;
     private byte[] signingCertPEMBytes;
     private X509Certificate x509TimeStampServerCert;
-    private String timeStampServiceURL;
 
     public TimeStampBean() { }
 
@@ -55,7 +54,6 @@ public class TimeStampBean {
         log.info("TimeStampBean - init");
         try {
             String serverURL = StringUtils.checkURL(config.getTimeStampServerURL());
-            timeStampServiceURL = serverURL + "/timestamp";
             Query query = dao.getEM().createNamedQuery("findActorByServerURL").setParameter("serverURL", serverURL);
             Actor timeStampServer = dao.getSingleResult(Actor.class, query);
             Certificate timeStampServerCert = null;

@@ -31,12 +31,11 @@ public class CurrencyRequest {
     private static Logger log =  Logger.getLogger(CurrencyRequest.class.getName());
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SignatureService signatureService = SignatureService.getUserSignatureService(
                 "Currency_07553172H", User.Type.USER);
-        User fromUser = signatureService.getUser();
-        CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
+        CurrencyServer currencyServer = TestUtils.fetchCurrencyServer();
         BigDecimal totalAmount = new BigDecimal(10);
         String curencyCode = "EUR";
         TransactionDto transactionDto = new TransactionDto();

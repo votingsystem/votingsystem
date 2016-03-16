@@ -250,14 +250,6 @@ public class Actor extends EntityVS implements Serializable {
         return serverURL + "/rest/serverInfo";
     }
 
-    public String getMultiSignedMessageTestServiceURL() {
-        return serverURL + "/rest/encryptor/getMultiSignedMessage";
-    }
-
-    public String getEncryptionServiceURL() {
-        return getServerURL() + "/rest/encryptor";
-    }
-
     public static String getServerInfoURL(String serverURL) {
         return serverURL + "/rest/serverInfo";
     }

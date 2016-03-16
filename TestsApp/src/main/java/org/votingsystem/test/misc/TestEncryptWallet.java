@@ -17,7 +17,7 @@ public class TestEncryptWallet {
     private static Logger log =  Logger.getLogger(TestEncryptWallet.class.getName());
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SignatureService signatureService = SignatureService.getUserSignatureService("Currency_07553172H", User.Type.USER);
         File fileToEncrypt = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("plainWallet"));

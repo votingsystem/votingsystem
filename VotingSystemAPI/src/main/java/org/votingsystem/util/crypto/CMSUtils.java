@@ -139,7 +139,7 @@ public class CMSUtils {
                 digAlgId.getAlgorithm().getId(), digestBytes);
         ResponseVS responseVS = HttpHelper.getInstance().sendData(
                 timeStampRequest.getEncoded(), ContentType.TIMESTAMP_QUERY,
-                ContextVS.getInstance().getDefaultServer().getTimeStampServerURL() + "/timestamp");
+                ContextVS.getInstance().getTimeStampServiceURL());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();
             return new TimeStampToken(new CMSSignedData(bytesToken));

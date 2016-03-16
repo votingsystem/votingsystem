@@ -23,7 +23,7 @@ public class ValidateCert {
 
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         ResponseVS responseVS = HttpHelper.getInstance().getData(Actor.getServerInfoURL(
                 "https://192.168.1.5/AccessControl"), ContentType.JSON);
@@ -43,4 +43,5 @@ public class ValidateCert {
         log.info("statusCode: " + responseVS.getStatusCode() + " - message: " + responseVS.getMessage());
         System.exit(0);
     }
+
 }

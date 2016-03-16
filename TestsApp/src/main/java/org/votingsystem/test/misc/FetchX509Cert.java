@@ -26,7 +26,7 @@ public class FetchX509Cert {
     private static Logger log =  Logger.getLogger(FetchX509Cert.class.getName());
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         getDeviceDto();
         System.exit(0);

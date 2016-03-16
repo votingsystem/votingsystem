@@ -5,7 +5,10 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.*;
-import org.votingsystem.util.*;
+import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.HttpHelper;
+import org.votingsystem.util.MediaType;
+import org.votingsystem.util.TypeVS;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -17,7 +20,7 @@ public class AddUserToGroup {
     private static boolean subscribeNewUserList = true;
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
         userBaseSimulationData.setUserIndex(100L);
@@ -31,8 +34,7 @@ public class AddUserToGroup {
         SignatureService authoritySignatureService = SignatureService.getAuthoritySignatureService();
 
         log.info("initializeServer");
-        CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(simulationData.getServerURL());
-        ContextVS.getInstance().setDefaultServer(currencyServer);
+        CurrencyServer currencyServer = TestUtils.fetchCurrencyServer();
         String groupURL = currencyServer.getGroupURL(simulationData.getGroupId());
         GroupDto groupDto = HttpHelper.getInstance().getData(GroupDto.class, groupURL, MediaType.JSON);
         groupDto.setOperation(TypeVS.CURRENCY_GROUP_SUBSCRIBE);

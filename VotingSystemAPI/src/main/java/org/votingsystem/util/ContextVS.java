@@ -74,51 +74,39 @@ public class ContextVS {
     private String tempDir;
 
     public static String SETTINGS_FILE_NAME = "settings.properties";
-    public static String USER_KEYSTORE_FILE_NAME = "userks.jks";
     public static String WALLET_FILE_NAME = "wallet";
     public static String WALLET_FILE_EXTENSION = ".wvs";
     public static String SERIALIZED_OBJECT_EXTENSION = ".servs";
     public static String PLAIN_WALLET_FILE_NAME = "plain_wallet.wvs";
-    public static String BROWSER_SESSION_FILE = "browser.bvs";
-    public static String INBOX_FILE = "inbox.mvs";
-    public static String REPRESENTATIVE_STATE_FILE = "representative.bvs";
     public static String RECEIPT_FILE_NAME = "receipt";
     public static String CANCEL_DATA_FILE_NAME = "cancellationDataVS";
     public static String CANCEL_BUNDLE_FILE_NAME = "cancellationBundleVS";
 
     public static final String CSR_FILE_NAME                 = "csr" + ":" + ContentType.TEXT.getName();
-    public static final String IMAGE_FILE_NAME               = "image";
-    public static final String REPRESENTATIVE_DATA_FILE_NAME = "representativeData";
     public static final String CURRENCY_REQUEST_DATA_FILE_NAME = "currencyRequestData" + ":" + MediaType.JSON_SIGNED;
     public static final String ACCESS_REQUEST_FILE_NAME   = "accessRequest" + ":" + MediaType.JSON_SIGNED;
     public static final String CMS_FILE_NAME   = "cms" + ":" + MediaType.JSON_SIGNED;
     public static final String CMS_ANONYMOUS_FILE_NAME   = "cmsAnonymous" + ":" + MediaType.JSON_SIGNED;
 
 
-    public static final int IMAGE_MAX_FILE_SIZE_KB = 1024;
-    public static final int IMAGE_MAX_FILE_SIZE = IMAGE_MAX_FILE_SIZE_KB * 1024;
     public static final int SIGNED_MAX_FILE_SIZE_KB = 512;
     public static final int SIGNED_MAX_FILE_SIZE = SIGNED_MAX_FILE_SIZE_KB * 1024;
 
-    public static final int MAX_MSG_LENGTH = 300;
-
-    private X509Certificate timeStampCACert;
     private Locale locale = new Locale("es");
 
     private static final Map<String, WebSocketSession> sessionMap = new HashMap<>();
 
-    private Map<String, ResponseVS> hashCertVSDataMap;
     private Collection<X509Certificate> votingSystemSSLCerts;
     private Set<TrustAnchor> votingSystemSSLTrustAnchors;
     private ResourceBundle resBundle;
     private ResourceBundle parentBundle;
     private Properties settings;
-    private User user;
     private CurrencyServer currencyServer;
     private AccessControl accessControl;
     private ControlCenter controlCenter;
     private Actor defaultServer;
     private DeviceDto connectedDevice;
+    private String timeStampServiceURL;
     private static ContextVS INSTANCE;
 
     public ContextVS(String localizatedMessagesFileName, String localeParam) {
@@ -203,8 +191,8 @@ public class ContextVS {
         }
     }
 
-    public void initTestEnvironment(InputStream configPropertiesStream, String appDir) throws Exception {
-        log.info("initTestEnvironment - appDir: " + appDir);
+    public void initEnvironment(InputStream configPropertiesStream, String appDir) throws Exception {
+        log.info("initEnvironment - appDir: " + appDir);
         initDirs(appDir);
         try {
             settings = getSettings();
@@ -218,13 +206,6 @@ public class ContextVS {
         InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
         return FileUtils.getBytesFromStream(input);
     }
-
-    public void setSessionUser(User user) {
-        log.info("setSessionUser - nif: " + user.getNif());
-        this.user = user;
-    }
-
-    public User getSessionUser() { return user; }
 
     public Properties getSettings() {
         FileInputStream input = null;
@@ -304,7 +285,6 @@ public class ContextVS {
                         break;
                     case CURRENCY:
                         setCurrencyServer((CurrencyServer) actor);
-                        setTimeStampServerCert(actor.getTimeStampCert());
                         break;
                     case CONTROL_CENTER:
                         setControlCenter((ControlCenter) actor);
@@ -356,125 +336,6 @@ public class ContextVS {
         }
     }
 
-    public User saveUserKeyStore(KeyStore keyStore, char[] password) throws Exception{
-        byte[] keyStoreBytes = KeyStoreUtil.getBytes(keyStore, password);
-        File mainKeyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
-        if(mainKeyStoreFile.exists()) {
-            File oldFile = new File(appDir + File.separator + ".old_" + USER_KEYSTORE_FILE_NAME);
-            mainKeyStoreFile.renameTo(oldFile);
-            mainKeyStoreFile.createNewFile();
-        } else mainKeyStoreFile.createNewFile();
-        Certificate[] chain = keyStore.getCertificateChain(ContextVS.KEYSTORE_USER_CERT_ALIAS);
-        User user = User.FROM_X509_CERT((X509Certificate)chain[0]);
-
-        CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
-                user.getX509Certificate(), ContextVS.DEVICE_OID);
-        DeviceDto deviceDto = new DeviceDto(user, certExtensionDto);
-        deviceDto.setDeviceName(user.getNif() + " - " + user.getName());
-
-        File userKeyStoreFile = new File(appDir + File.separator + user.getNif() + "_" + USER_KEYSTORE_FILE_NAME);
-        userKeyStoreFile.createNewFile();
-        Map keyStoreMap = new HashMap<>();
-        keyStoreMap.put("deviceDto", JSON.getMapper().writeValueAsString(deviceDto));
-        keyStoreMap.put("certPEM", new String(PEMUtils.getPEMEncoded(chain[0])));
-        keyStoreMap.put("keyStore", Base64.getEncoder().encodeToString(keyStoreBytes));
-        JSON.getMapper().writeValue(mainKeyStoreFile, keyStoreMap);
-        JSON.getMapper().writeValue(userKeyStoreFile, keyStoreMap);
-        return user;
-    }
-
-    public DeviceDto getKeyStoreDevice() {
-        DeviceDto result = null;
-        try {
-            File keyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
-            if(keyStoreFile.createNewFile()) return null;
-            Map keyStoreMap = JSON.getMapper().readValue(keyStoreFile, new TypeReference<Map<String, String>>() { });
-            result = JSON.getMapper().readValue((String) keyStoreMap.get("deviceDto"), DeviceDto.class);
-        } catch(Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-        } finally {
-            return result;
-        }
-    }
-
-    public User getKeyStoreUser() {
-        try {
-            File keyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
-            if(keyStoreFile.createNewFile()) return null;
-            Map keyStoreMap = JSON.getMapper().readValue(keyStoreFile, new TypeReference<Map<String, String>>() { });
-            Collection<X509Certificate> certChain = PEMUtils.fromPEMToX509CertCollection(
-                    ((String) keyStoreMap.get("certPEM")).getBytes());
-            return User.FROM_X509_CERT(certChain.iterator().next());
-        } catch(Exception ex) {
-            log.log(Level.SEVERE, ex.getMessage(), ex);
-        }
-        return null;
-    }
-
-    public KeyStore getUserKeyStore(char[] password) throws KeyStoreException {
-        File keyStoreFile = null;
-        KeyStore keyStore = null;
-        try {
-            keyStoreFile = new File(appDir + File.separator + USER_KEYSTORE_FILE_NAME);
-            if(!keyStoreFile.exists()) throw new KeyStoreException(getMessage("cryptoTokenNotFoundErrorMsg"));
-        } catch(Exception ex) {
-            throw new KeyStoreException(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
-        }
-        try {
-            Map keyStoreMap = JSON.getMapper().readValue(keyStoreFile, new TypeReference<Map<String, String>>() {});
-            byte[] keyStoreBytes = Base64.getDecoder().decode((String) keyStoreMap.get("keyStore"));
-            keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(new ByteArrayInputStream(keyStoreBytes), password);
-        } catch(Exception ex) {
-            throw new KeyStoreException(getMessage("cryptoTokenPasswdErrorMsg"), ex);
-        }
-        return keyStore;
-    }
-
-    public KeyStore getUserKeyStore(String nif, String password) throws KeyStoreException {
-        if(nif == null) return getUserKeyStore(password.toCharArray());
-        File keyStoreFile = null;
-        KeyStore keyStore = null;
-        try {
-            keyStoreFile = new File(appDir + File.separator + nif + "_" + USER_KEYSTORE_FILE_NAME);
-        } catch(Exception ex) {
-            throw new KeyStoreException(getMessage("cryptoTokenNotFoundErrorMsg"), ex);
-        }
-        try {
-            keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(new FileInputStream(keyStoreFile), password.toCharArray());
-        } catch(Exception ex) {
-            throw new KeyStoreException(getMessage("cryptoTokenPasswdErrorMsg"), ex);
-        }
-        return keyStore;
-    }
-
-    public X509Certificate getTimeStampServerCert() throws ExceptionVS {
-        if(timeStampCACert != null) return timeStampCACert;
-        if(getDefaultServer() != null) {
-            return getDefaultServer().getTimeStampCert();
-        } else throw new ExceptionVS("TimeStampServerCert not initialized");
-    }
-
-    public void setTimeStampServerCert(X509Certificate timeStampCACert) {
-        this.timeStampCACert = timeStampCACert;
-    }
-    
-    public ResponseVS getHashCertVSData(String hashCertVSBase64) {
-        log.info("getHashCertVSData");
-        if(hashCertVSDataMap == null || hashCertVSBase64 == null) {
-            log.info("getHashCertVSData - hashCertVSDataMap: " + hashCertVSDataMap +
-                    " - hashCertVSBase64: " + hashCertVSBase64);
-            return null;
-        }
-        return hashCertVSDataMap.get(hashCertVSBase64);
-    }
-    
-    public void addHashCertVSData(String hashCertVSBase64, ResponseVS hashCertVSData) {
-        if(hashCertVSDataMap == null) hashCertVSDataMap = new HashMap<String, ResponseVS>();
-        hashCertVSDataMap.put(hashCertVSBase64, hashCertVSData);
-    }
-
     public void copyFile(byte[] fileToCopy, String subPath, String fileName) throws Exception {
         File newFileDir = new File(appDir + subPath);
         newFileDir.mkdirs();
@@ -490,7 +351,6 @@ public class ContextVS {
     public void setAccessControl(AccessControl accessControl) {
         this.accessControl = accessControl;
         this.controlCenter = accessControl.getControlCenter();
-        if(this.defaultServer == null) this.defaultServer = accessControl;
     }
 
     public ControlCenter getControlCenter() { return controlCenter; }
@@ -530,7 +390,8 @@ public class ContextVS {
         if(server instanceof CurrencyServer) setCurrencyServer((CurrencyServer) server);
         else if(server instanceof AccessControl) setAccessControl((AccessControl) server);
         else if(server instanceof ControlCenter) setControlCenter((ControlCenter) server);
-        else log.log(Level.SEVERE, "setServer - unknown server type: " + server.getType() + " - class: " + server.getClass().getSimpleName());
+        else log.log(Level.SEVERE, "setServer - unknown server type: " + server.getType() +
+                    " - class: " + server.getClass().getSimpleName());
     }
 
     public void setDefaultServer(Actor server) {
@@ -552,4 +413,24 @@ public class ContextVS {
     public void setConnectedDevice(DeviceDto connectedDevice) {
         this.connectedDevice = connectedDevice;
     }
+
+    public String getTimeStampServiceURL() {
+        if(timeStampServiceURL != null) return timeStampServiceURL;
+        else {
+            try {
+                Actor defaultServer = getDefaultServer();
+                if(defaultServer != null) return defaultServer.getTimeStampServiceURL();
+            } catch (Exception ex) {
+                log.info("without default server");
+            }
+            String timeStampServerURL = getProperty("timeStampServerURL");
+            if(timeStampServerURL != null) return Actor.getTimeStampServiceURL(timeStampServerURL);
+        }
+        return null;
+    }
+
+    public void setTimeStampServiceURL(String timeStampServiceURL) {
+        this.timeStampServiceURL = timeStampServiceURL;
+    }
+
 }

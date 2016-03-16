@@ -1,5 +1,6 @@
 package org.votingsystem.web.controlcenter.cdi;
 
+import org.votingsystem.model.Actor;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.ControlCenter;
@@ -88,7 +89,7 @@ public class ConfigVSImpl implements ConfigVS {
         if(systemUser == null) {
             systemUser = dao.persist(new User(systemNIF, serverName, User.Type.SYSTEM));
         }
-        new ContextVS(null, null);
+        ContextVS.getInstance().setTimeStampServiceURL(Actor.getTimeStampServiceURL(timeStampServerURL));
         executorService.submit(() -> {
             try {
                 timeStampBean.init();

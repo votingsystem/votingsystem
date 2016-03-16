@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.cdi;
 
 import org.iban4j.*;
+import org.votingsystem.model.Actor;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
@@ -111,7 +112,7 @@ public class ConfigVSImpl implements ConfigVS {
                     createtagVS(tag.trim());
                 }
             }
-            new ContextVS(null, null);
+            ContextVS.getInstance().setTimeStampServiceURL(Actor.getTimeStampServiceURL(timeStampServerURL));
             executorService.submit(() -> {
                 try {
                     LoggerVS.init(serverDir + "/logs");

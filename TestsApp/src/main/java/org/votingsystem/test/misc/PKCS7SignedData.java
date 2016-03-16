@@ -3,7 +3,12 @@ package org.votingsystem.test.misc;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.ContextVS;
+import org.votingsystem.util.JSON;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 public class PKCS7SignedData {
@@ -117,7 +122,7 @@ public class PKCS7SignedData {
             "-----END PKCS7-----";
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
 
         /*CMSSignedMessage cmsSignedMessage = CMSSignedMessage.FROM_PEM(forge_pkcs7PEM);
@@ -131,6 +136,7 @@ public class PKCS7SignedData {
 
         //log.info("TimeStamp - MessageImprintDigest: " + new String(timeStampToken.getTimeStampInfo().getMessageImprintDigest()));
         //log.info(new String(pemBytes));
+        multiSign();
     }
 
 
@@ -140,4 +146,22 @@ public class PKCS7SignedData {
         byte[] pemBytes = cmsSignedMessage.toPEM();
         return pemBytes;
     }
+
+    public static void multiSign() throws Exception {
+        new ContextVS(null, null).initEnvironment(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
+        Map dataToSignMap = new HashMap<>();
+        dataToSignMap.put("UUID", UUID.randomUUID().toString());
+
+        SignatureService signatureService = SignatureService.load("08888888D");
+        SignatureService signatureService1 = SignatureService.load("00111222V");
+        CMSSignedMessage cmsMessage = signatureService.signData(JSON.getMapper().writeValueAsBytes(dataToSignMap));
+
+        CMSSignedMessage cmsSigned = signatureService1.addSignature(cmsMessage);
+        cmsSigned.isValidSignature();
+        //log.info("document: " + cmsSigned.toPEMStr());
+        Collection result = cmsSigned.checkSignerCert(signatureService1.getCertSigner());
+        log.info("cert matches: " + result.size());
+    }
+
 }

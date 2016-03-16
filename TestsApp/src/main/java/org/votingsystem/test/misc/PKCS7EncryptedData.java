@@ -14,7 +14,7 @@ public class PKCS7EncryptedData {
     private static Logger log =  Logger.getLogger(PKCS7EncryptedData.class.getName());
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SignatureService signatureService = SignatureService.load("08888888D");
         log.info("privateKey" + new String(PEMUtils.getPEMEncoded(signatureService.getPrivateKey())));

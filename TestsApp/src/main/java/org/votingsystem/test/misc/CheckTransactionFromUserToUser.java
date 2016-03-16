@@ -14,7 +14,7 @@ public class CheckTransactionFromUserToUser {
     private static Logger log =  Logger.getLogger(CheckTransactionFromUserToUser.class.getName());
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         CMSSignedMessage cmsMessage = new CMSSignedMessage(ContextVS.getInstance().getResourceBytes("2222.p7s"));
         TransactionDto dto = cmsMessage.getSignedContent(TransactionDto.class);

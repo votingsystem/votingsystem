@@ -15,10 +15,9 @@ public class SendTransactionPlan {
     private static Logger log =  Logger.getLogger(SendTransactionPlan.class.getName());
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
-        ContextVS.getInstance().setDefaultServer(currencyServer);
+        CurrencyServer currencyServer = TestUtils.fetchCurrencyServer();
         File transactionPlan = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("transactionPlan.json"));
         TransactionPlanDto transactionPlanDto = JSON.getMapper().readValue(transactionPlan, TransactionPlanDto.class);
         transactionPlanDto.setCurrencyServer(currencyServer);

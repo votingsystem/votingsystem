@@ -37,7 +37,7 @@ public class CSRAttributes {
             "-----END CERTIFICATE REQUEST-----";
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getBytes());
         CertExtensionDto dto = CertUtils.getCertExtensionData(CertExtensionDto.class, csr, ContextVS.DEVICE_OID);

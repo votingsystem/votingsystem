@@ -1,5 +1,6 @@
 package org.votingsystem.web.timestamp.ejb;
 
+import org.votingsystem.model.Actor;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.ControlCenter;

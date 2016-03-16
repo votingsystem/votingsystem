@@ -142,7 +142,7 @@ public class SignatureService {
     public CMSSignedMessage signDataWithTimeStamp(byte[] contentToSign) throws Exception {
         TimeStampRequest timeStampRequest = cmsGenerator.getTimeStampRequest(contentToSign);
         ResponseVS responseVS = HttpHelper.getInstance().sendData(timeStampRequest.getEncoded(), ContentType.TIMESTAMP_QUERY,
-                ContextVS.getInstance().getProperty("timeStampServerURL") + "/timestamp");
+                ContextVS.getInstance().getTimeStampServiceURL());
         if(ResponseVS.SC_OK == responseVS.getStatusCode()) {
             byte[] bytesToken = responseVS.getMessageBytes();
             TimeStampToken timeStampToken = new TimeStampToken(new CMSSignedData(bytesToken));

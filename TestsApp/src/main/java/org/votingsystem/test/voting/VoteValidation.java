@@ -29,7 +29,7 @@ public class VoteValidation {
     private static ExecutorCompletionService completionService;
 
     public void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SimulationData simulationData = new SimulationData();
         simulationData.setServerURL("https://192.168.1.5/TimeStampServer");//http://www.sistemavotacion.org/TimeStampServer

@@ -21,7 +21,7 @@ public class PublishGroup {
     private static Logger log =  Logger.getLogger(PublishGroup.class.getName());
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         GroupDto groupDto = new GroupDto();
         String description = "Group From TESTS Description - " + DateUtils.getDayWeekDateStr(new Date(), "HH:mm:ss");
@@ -30,8 +30,7 @@ public class PublishGroup {
         groupDto.setName("Group From TESTS - " + DateUtils.getDayWeekDateStr(new Date(), "HH:mm:ss"));
         groupDto.setOperation(TypeVS.CURRENCY_GROUP_NEW);
         groupDto.setUUID(UUID.randomUUID().toString());
-        CurrencyServer currencyServer = TestUtils.fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
-        ContextVS.getInstance().setDefaultServer(currencyServer);
+        CurrencyServer currencyServer = TestUtils.fetchCurrencyServer();
         SignatureService representativeSignatureService = SignatureService.getUserSignatureService(
                 "Currency_07553172H", User.Type.USER);
         CMSSignedMessage cmsMessage = representativeSignatureService.signDataWithTimeStamp(

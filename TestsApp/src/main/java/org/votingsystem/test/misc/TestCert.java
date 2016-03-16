@@ -54,7 +54,7 @@ public class TestCert {
             "-----END CERTIFICATE-----";
 
     public static void main(String[] args) throws Exception {
-        new ContextVS(null, null).initTestEnvironment(
+        new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         X509Certificate anonymousDelegationCert = PEMUtils.fromPEMToX509Cert(certWithAnonymouesExtensionPEM.getBytes());
         log.info(anonymousDelegationCert.toString());

@@ -43,8 +43,7 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Inject DAOBean dao;
     @Inject CMSBean cmsBean;
-    @Inject
-    SubscriptionBean subscriptionBean;
+    @Inject SubscriptionBean subscriptionBean;
     @Inject EventElectionBean eventElectionBean;
     @Inject TimeStampBean timeStampBean;
     /* Executor service for asynchronous processing */
@@ -106,7 +105,7 @@ public class ConfigVSImpl implements ConfigVS {
             actor.setState(Actor.State.OK).setName(serverName);
             dao.persist(actor);
         }
-        new ContextVS(null, null);
+        ContextVS.getInstance().setTimeStampServiceURL(Actor.getTimeStampServiceURL(timeStampServerURL));
         executorService.submit(() -> {
             try {
                 timeStampBean.init();
