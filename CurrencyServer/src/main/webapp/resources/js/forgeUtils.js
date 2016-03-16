@@ -4,7 +4,8 @@ var RSAUtil = function() {
     this.keypair = this.rsa.generateKeyPair({bits: 1024, e: 0x10001});
     this.publicKeyPEM = forge.pki.publicKeyToPem(this.keypair.publicKey),
     this.privateKeyPEM = forge.pki.privateKeyToPem(this.keypair.privateKey);
-    this.publicKeyBase64 =  forge.util.encode64(this.publicKeyPEM);
+    var derBytes = forge.asn1.toDer(forge.pki.publicKeyToAsn1(this.keypair.publicKey)).getBytes()
+    this.publicKeyBase64 =  forge.util.encode64(derBytes);
 }
 
 RSAUtil.prototype.encrypt = function(plainText) {

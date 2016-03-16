@@ -79,12 +79,12 @@ public class PEMUtils {
     }
 
     public static PublicKey fromPEMToRSAPublicKey(String publicKeyPEM) throws Exception {
-        KeyFactory factory = KeyFactory.getInstance("RSA", "BC");
         PEMParser PEMParser = new PEMParser(new InputStreamReader(new ByteArrayInputStream(publicKeyPEM.getBytes())));
         Object object = PEMParser.readObject();
         if(object instanceof SubjectPublicKeyInfo) {
             return generatePublicKey((SubjectPublicKeyInfo)object);
         } else {
+            KeyFactory factory = KeyFactory.getInstance("RSA", "BC");
             RSAPublicKey jcerSAPublicKey = (RSAPublicKey) PEMParser.readObject();
             X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(jcerSAPublicKey.getEncoded());
             PublicKey publicKey = factory.generatePublic(pubKeySpec);
