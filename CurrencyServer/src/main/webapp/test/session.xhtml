@@ -108,7 +108,7 @@
                                     deviceToId:messageJSON.deviceFromId,
                                     deviceId:wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
                                 socketMessageDto.encryptedMessage = vs.encryptToCMS(
-                                        messageJSON.x509CertificatePEM, JSON.stringify(qrOperation))
+                                        messageJSON.x509CertificatePEM, qrOperation)
                                 console.log(socketMessageDto)
                                 websocket.send(JSON.stringify(socketMessageDto))
                                 break;
@@ -120,7 +120,7 @@
                                 var encryptedDto = {operation:INIT_REMOTE_SIGNED_BROWSER_SESSION,
                                     sessionId:wsSessionId, deviceFromId:wsDeviceId}
                                 socketMessageDto.encryptedMessage = vs.encryptToCMS(
-                                        messageJSON.x509CertificatePEM, JSON.stringify(encryptedDto))
+                                        messageJSON.x509CertificatePEM, encryptedDto)
                                 websocket.send(JSON.stringify(socketMessageDto))
                                 break;
                         }

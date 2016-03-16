@@ -42,15 +42,12 @@ public class TestEncryptorResource {
         CMSSignedMessage cmsSignedMessage = cmsBean.addSignature(cmsMessage.getCMS());
         byte[] result = null;
         if(encryptedContentDto.getX509CertificatePEM() != null) {
-            result = cmsBean.encryptToCMS(cmsSignedMessage.getEncoded(),
-                    PEMUtils.fromPEMToX509Cert(encryptedContentDto.getX509CertificatePEM().getBytes()));
+            result = cmsBean.encryptToCMS(cmsSignedMessage.getEncoded(), encryptedContentDto.getX509Certificate());
         } else if(encryptedContentDto.getPublicKeyPEM() != null) {
-            result = cmsBean.encryptToCMS(cmsSignedMessage.getEncoded(),
-                    PEMUtils.fromPEMToRSAPublicKey(encryptedContentDto.getPublicKeyPEM()));
+            result = cmsBean.encryptToCMS(cmsSignedMessage.getEncoded(), encryptedContentDto.getPublicKey());
         }
         if(result == null) return  Response.ok().entity(result).type(MediaType.JSON_SIGNED).build();
         else return  Response.ok().entity(result).type(MediaType.JSON_SIGNED_ENCRYPTED).build();
     }*/
-
 
 }

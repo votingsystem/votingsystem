@@ -321,7 +321,7 @@ function setClientToolMessage(callerId, message) {
 }
 
 window.onbeforeunload = function(e) {
-    console.log("utilsVS.js - onbeforeunload");
+    console.log("utils.js - onbeforeunload");
     document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message-to-webextension',
         {detail:{operation:"TAB_CLOSED"}}))
 };

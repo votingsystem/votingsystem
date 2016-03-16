@@ -29,6 +29,12 @@ public class TestUtils {
         return dto;
     }
 
+    public static Actor fetchServer(String serverURL) throws Exception {
+        ResponseVS responseVS = ContextVS.getInstance().checkServer(serverURL);
+        if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw responseVS.getException();
+        else return (Actor) responseVS.getData();
+    }
+
     public static CurrencyServer fetchCurrencyServer(String serverURL) throws Exception {
         ResponseVS responseVS = ContextVS.getInstance().checkServer(serverURL);
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw responseVS.getException();

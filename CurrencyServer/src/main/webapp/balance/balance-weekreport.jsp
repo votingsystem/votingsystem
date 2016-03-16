@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<script src="../resources/js/balanceVSUtils_js.vsp" type="text/javascript"></script>
+<script src="../resources/js/balanceUtils_js.vsp" type="text/javascript"></script>
 
 <dom-module name="balance-user-details">
     <template>

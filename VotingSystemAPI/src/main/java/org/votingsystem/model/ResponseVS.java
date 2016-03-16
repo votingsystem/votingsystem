@@ -313,6 +313,10 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
         return new ExceptionVS(getMessage());
     }
 
+    public ExceptionVS getException(String msg) {
+        return new ExceptionVS(msg + ": " + getMessage());
+    }
+
     public static ResponseVS OK() {
         return new ResponseVS(ResponseVS.SC_OK);
     }

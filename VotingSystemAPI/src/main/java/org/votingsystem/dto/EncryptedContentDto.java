@@ -8,9 +8,11 @@ import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.PEMUtils;
 
 import java.net.InetAddress;
-import java.util.Base64;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Set;
 
@@ -188,8 +190,7 @@ public class EncryptedContentDto {
 
     @JsonIgnore
     CMSSignedMessage getCMS () throws Exception {
-        byte[] cmsMessageBytes = Base64.getDecoder().decode(cmsMessage.getBytes());
-        return new CMSSignedMessage(cmsMessageBytes);
+        return CMSSignedMessage.FROM_PEM(cmsMessage);
     }
 
     public String getDeviceToName() {
@@ -216,6 +217,10 @@ public class EncryptedContentDto {
         this.sessionId = sessionId;
     }
 
+    public X509Certificate getX509Certificate() throws Exception {
+        return PEMUtils.fromPEMToX509Cert(x509CertificatePEM.getBytes())    ;
+    }
+
     public String getX509CertificatePEM() {
         return x509CertificatePEM;
     }
@@ -230,6 +235,10 @@ public class EncryptedContentDto {
 
     public void setTimeLimited(boolean timeLimited) {
         this.timeLimited = timeLimited;
+    }
+
+    public PublicKey getPublicKey() throws Exception {
+        return PEMUtils.fromPEMToRSAPublicKey(publicKeyPEM);
     }
 
     public String getPublicKeyPEM() {
