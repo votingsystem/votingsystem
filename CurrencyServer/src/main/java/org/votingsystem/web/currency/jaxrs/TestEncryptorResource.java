@@ -28,7 +28,7 @@ public class TestEncryptorResource {
     @Inject CMSBean cmsBean;
     @Inject DAOBean dao;
 
-    @Path("/multiSign") @POST
+    /*@Path("/multiSign") @POST
     public Response multiSign(CMSMessage cmsMessage, @Context ServletContext context,
                                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         CMSSignedMessage cmsSignedMessage = cmsBean.addSignature(cmsMessage.getCMS());
@@ -50,7 +50,7 @@ public class TestEncryptorResource {
         }
         if(result == null) return  Response.ok().entity(result).type(MediaType.JSON_SIGNED).build();
         else return  Response.ok().entity(result).type(MediaType.JSON_SIGNED_ENCRYPTED).build();
-    }
+    }*/
 
 
 }
