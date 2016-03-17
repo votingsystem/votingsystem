@@ -33,13 +33,13 @@
                 var WEB_SOCKET_SESSION_KEY = "wsid";
                 var DEVICE_ID_KEY          = "did";
                 var OPERATION_KEY          = "op";
-                var OPERATION_ID_KEY       = "opid";
+                var OPERATION_CODE_KEY     = "opid";
                 var PUBLIC_KEY_KEY         = "pk";
 
-                vs.getQRCodeURL = function(operation, operationId, deviceId, sessionId, key) {
+                vs.getQRCodeURL = function(operation, operationCode, deviceId, sessionId, key) {
                     var result = "${contextURL}/qr?cht=qr&chs=150x150&chl="
                     if(operation != null) result = result + OPERATION_KEY + "=" + operation + ";"
-                    if(operationId != null) result = result + OPERATION_ID_KEY + "=" + operationId + ";"
+                    if(operationCode != null) result = result + OPERATION_CODE_KEY + "=" + operationCode + ";"
                     if(deviceId != null) result = result + DEVICE_ID_KEY + "=" + deviceId + ";"
                     if(sessionId != null) result = result + WEB_SOCKET_SESSION_KEY + "=" + sessionId + ";"
                     if(key != null) result = result + PUBLIC_KEY_KEY + "=" + key + ";"
@@ -64,7 +64,7 @@
 
                 var websocket
                 if ('WebSocket' in window) {
-                    websocket = new WebSocket(vs.timeStampServiceURL);
+                    websocket = new WebSocket("${webSocketURL}");
                 } else {
                     alert('WebSocket is not supported by this browser.');
                 }
@@ -85,21 +85,20 @@
                             case "INIT_BROWSER_SESSION":
                                 if(ResponseVS.SC_OK == messageJSON.statusCode) {
                                     vs.wsDeviceId = messageJSON.deviceId
-                                    document.querySelector("#qrImg").setAttribute("src", vr.getQRCodeURL(
-                                            INIT_REMOTE_SIGNED_SESSION, null, vs.wsDeviceId, null, vs.rsaUtil.publicKeyBase64))
+                                    var operationCode = vs.operationCode()
+                                    vs.qrOperationsMap[operationCode] = {operation:'INIT_REMOTE_SIGNED_SESSION'}
+                                    document.querySelector("#qrImg").setAttribute("src", vs.getQRCodeURL(
+                                            INIT_REMOTE_SIGNED_SESSION, operationCode, vs.wsDeviceId, null,
+                                            vs.rsaUtil.publicKeyBase64))
                                     document.querySelector("#websocketSessionDiv").innerHTML = operationCode;
                                 }
-                                break;
-                            case "INIT_BROWSER_AUTHENTICATED_SESSION":
                                 break;
                         }
 
                     } else {
-                        if(messageJSON.encryptedMessage != null) {
-                            vs.rsaUtil.decryptSocketMsg(messageJSON)
-                            console.log("decryptSocketMsg: ")
-                            console.log(messageJSON)
-                        }
+                        vs.rsaUtil.decryptSocketMsg(messageJSON)
+                        console.log("decryptedSocketMsg: ")
+                        console.log(messageJSON)
                         switch(messageJSON.operation) {
                             case "QR_MESSAGE_INFO":
                                 var qrOperation = vs.qrOperationsMap[messageJSON.operationCode]
@@ -112,16 +111,21 @@
                                 console.log(socketMessageDto)
                                 websocket.send(JSON.stringify(socketMessageDto))
                                 break;
-                            case "INIT_BROWSER_AUTHENTICATED_SESSION":
+                            case 'INIT_REMOTE_SIGNED_SESSION':
+                                var qrOperation = vs.qrOperationsMap[messageJSON.operationCode]
+                                if(qrOperation.operation !== 'INIT_REMOTE_SIGNED_SESSION') {
+                                    throw new Error('INIT_REMOTE_SIGNED_SESSION - qrOperation ERROR');
+                                }
                                 var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
                                     statusCode:700,
                                     deviceToId:messageJSON.deviceFromId,
-                                    deviceId: vs.wsDeviceId, sessionId:messageJSON.sessionId, UUID:messageJSON.UUID}
-                                var encryptedDto = {operation:INIT_BROWSER_AUTHENTICATED_SESSION,
-                                    sessionId: vs.wsSessionId, deviceFromId: vs.wsDeviceId}
+                                    deviceId: vs.wsDeviceId, UUID:messageJSON.UUID}
+                                var encryptedDto = {operation:INIT_REMOTE_SIGNED_SESSION,
+                                    sessionId: vs.wsSessionId, deviceFromId: vs.wsDeviceId, }
                                 socketMessageDto.encryptedMessage = vs.encryptToCMS(
                                         messageJSON.x509CertificatePEM, encryptedDto)
                                 websocket.send(JSON.stringify(socketMessageDto))
+                                delete vs.qrOperationsMap[messageJSON.operationCode];
                                 break;
                         }
                     }

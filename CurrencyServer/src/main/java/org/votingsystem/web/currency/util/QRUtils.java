@@ -47,8 +47,9 @@ public class QRUtils {
             outputEncoding = Charset.forName(outputEncodingName);
             if(!SUPPORTED_OUTPUT_ENCODINGS.contains(outputEncoding)) throw new IllegalArgumentException("Bad output encoding");
         }
-        ErrorCorrectionLevel ecLevel = ErrorCorrectionLevel.L;
-        int margin = 4;
+        // ErrorCorrectionLevel ecLevel = ErrorCorrectionLevel.L;
+        ErrorCorrectionLevel ecLevel = ErrorCorrectionLevel.Q;
+        int margin = 0;
         String ldString = request.getParameter("chld");
         if (ldString != null) {
             int pipeIndex = ldString.indexOf('|');

@@ -67,6 +67,7 @@ public class SignatureService {
             else certificateCollectionPEM = FileUtils.concat(certificateCollectionPEM, PEMUtils.getPEMEncoded (certificateChain[i]));
         }
         x509Certificate = (X509Certificate) keyStore.getCertificate(keyAlias);
+        user = User.FROM_X509_CERT(x509Certificate);
         privateKey = (PrivateKey)keyStore.getKey(keyAlias, password.toCharArray());
         rootCAPrivateCredential = new X500PrivateCredential(x509Certificate, privateKey,  "rootAlias");
         encryptor = new Encryptor(x509Certificate, privateKey);
@@ -105,7 +106,6 @@ public class SignatureService {
     }
 
     public User getUser() {
-        if(user == null) user = User.FROM_X509_CERT(x509Certificate);
         return user;
     }
 
@@ -214,18 +214,18 @@ public class SignatureService {
         return userList;
     }
 
-    public Collection<SubscriptionDto> validateUserSubscriptions(Long groupId, CurrencyServer currencyServer)
-            throws Exception {
+    public Collection<SubscriptionDto> validateUserSubscriptions(
+            Long groupId, CurrencyServer currencyServer) throws Exception {
         log.info("validateUserSubscriptions");
-        ResultListDto<SubscriptionDto> subscriptionDtoList = HttpHelper.getInstance().getData(new TypeReference<ResultListDto<SubscriptionDto>>(){},
-                currencyServer.getGroupUsersServiceURL( groupId, 1000, 0, Subscription.State.PENDING, User.State.ACTIVE),
+        ResultListDto<SubscriptionDto> subscriptionDtoList = HttpHelper.getInstance().getData(
+                new TypeReference<ResultListDto<SubscriptionDto>>(){},
+                currencyServer.getGroupUsersServiceURL(groupId, 1000, 0, Subscription.State.PENDING, User.State.ACTIVE),
                 MediaType.JSON);
         for(SubscriptionDto subscriptionDto : subscriptionDtoList.getResultList()) {
             if(subscriptionDto.getState() == Subscription.State.PENDING) {
                 subscriptionDto.loadActivationRequest();
             }
         }
-        User user = User.FROM_X509_CERT(x509Certificate);
         for (SubscriptionDto subscriptionDto : subscriptionDtoList.getResultList()) {
             CMSSignedMessage cmsMessage = signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(subscriptionDto));
             ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,

@@ -1,5 +1,10 @@
 package org.votingsystem.model;
 
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.util.EntityVS;
@@ -12,6 +17,8 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.KeyStore;
+import java.security.Principal;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.HashMap;
@@ -421,8 +428,9 @@ public class User extends EntityVS implements Serializable {
         return metaInfMap;
     }
 
-    public User updateCertInfo (X509Certificate certificate) {
-        User user = getUser(certificate.getSubjectDN().getName());
+    public User updateCertInfo (X509Certificate certificate) throws CertificateEncodingException {
+        X500Name x500name = new JcaX509CertificateHolder(certificate).getSubject();
+        User user = getUser(x500name);
         setFirstName(user.getFirstName());
         setName(user.getFirstName());
         setLastName(user.getLastName());
@@ -432,8 +440,9 @@ public class User extends EntityVS implements Serializable {
         return this;
     }
 
-    public static User FROM_X509_CERT(X509Certificate certificate) {
-        User user = getUser(certificate.getSubjectDN().getName());
+    public static User FROM_X509_CERT(X509Certificate certificate) throws CertificateEncodingException {
+        X500Name x500name = new JcaX509CertificateHolder(certificate).getSubject();
+        User user = getUser(x500name);
         user.setX509Certificate(certificate);
         return user;
     }
@@ -460,18 +469,23 @@ public class User extends EntityVS implements Serializable {
         else return firstName + " " + lastName;
     }
 
-    public static User getUser(String subjectDN) {
-        User user = new User();
-        if (subjectDN.contains("C=")) user.setCountry(subjectDN.split("C=")[1].split(",")[0]);
-        if (subjectDN.contains("SERIALNUMBER=")) user.setNif(subjectDN.split("SERIALNUMBER=")[1].split(",")[0]);
-        if (subjectDN.contains("SURNAME=")) user.setLastName(subjectDN.split("SURNAME=")[1].split(",")[0]);
-        if (subjectDN.contains("GIVENNAME=")) {
-            String givenname = subjectDN.split("GIVENNAME=")[1].split(",")[0];
-            user.setName(givenname);
-            user.setFirstName(givenname);
+    public static User getUser(X500Name subject) {
+        User result = new User();
+        for(RDN rdn : subject.getRDNs()) {
+            AttributeTypeAndValue attributeTypeAndValue = rdn.getFirst();
+            if(BCStyle.SERIALNUMBER.getId().equals(attributeTypeAndValue.getType().getId())) {
+                result.setNif(attributeTypeAndValue.getValue().toString());
+            } else if(BCStyle.SURNAME.getId().equals(attributeTypeAndValue.getType().getId())) {
+                result.setLastName(attributeTypeAndValue.getValue().toString());
+            } else if(BCStyle.GIVENNAME.getId().equals(attributeTypeAndValue.getType().getId())) {
+                result.setFirstName(attributeTypeAndValue.getValue().toString());
+            } else if(BCStyle.CN.getId().equals(attributeTypeAndValue.getType().getId())) {
+                result.setCn(attributeTypeAndValue.getValue().toString());
+            } else if(BCStyle.C.getId().equals(attributeTypeAndValue.getType().getId())) {
+                result.setCountry(attributeTypeAndValue.getValue().toString());
+            } else log.info("oid: " + attributeTypeAndValue.getType().getId() + " - value: " + attributeTypeAndValue.getValue().toString());
         }
-        if (subjectDN.contains("CN=")) user.setCn(subjectDN.split("CN=")[1]);
-        return user;
+        return result;
     }
 
     @PrePersist

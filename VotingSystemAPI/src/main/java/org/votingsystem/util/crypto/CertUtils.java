@@ -3,10 +3,16 @@ package org.votingsystem.util.crypto;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.bc.BcX509ExtensionUtils;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
@@ -14,6 +20,7 @@ import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
@@ -161,36 +168,34 @@ public class CertUtils {
      * Generate V3 Certificate from CSR
      */
     public static X509Certificate generateV3EndEntityCertFromCsr(PKCS10CertificationRequest csr,
-            PrivateKey caKey, X509Certificate caCert, Date dateBegin, Date dateFinish, String subjectDN,
+            PrivateKey caPrivKey, X509Certificate caCert, Date dateBegin, Date dateFinish, String subjectDN,
              Attribute... attrs) throws Exception{
-        X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
         PublicKey publicKey = getPublicKey(csr);
-        X509Principal x509Principal = new X509Principal(subjectDN);
-        certGen.setSerialNumber(KeyGenerator.INSTANCE.getSerno());
-        log.info("generateV3EndEntityCertFromCsr - issuer: " + caCert.getSubjectX500Principal());
-        certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
-        certGen.setNotBefore(dateBegin);
-        certGen.setNotAfter(dateFinish);
-        certGen.setSubjectDN(x509Principal);
-        certGen.setPublicKey(publicKey);
-        certGen.setSignatureAlgorithm(ContextVS.CERT_GENERATION_SIG_ALGORITHM);
+        /*X500NameBuilder nameBuilder = new X500NameBuilder();
+        nameBuilder.addRDN(BCStyle.EmailAddress, "feedback-crypto@bouncycastle.org");
+        X500Name x500Name = nameBuilder.build()*/
+        X500Name x500Name = new X500Name(subjectDN);
+        X500Name issuer500name = new JcaX509CertificateHolder(caCert).getSubject();
+        X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(issuer500name, KeyGenerator.INSTANCE.getSerno(),
+                dateBegin, dateFinish, x500Name, publicKey);
         certGen.addExtension(Extension.authorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
         SubjectKeyIdentifier subjectKeyIdentifier = new BcX509ExtensionUtils().createSubjectKeyIdentifier(
                 SubjectPublicKeyInfo.getInstance(publicKey.getEncoded()));
         certGen.addExtension(Extension.subjectKeyIdentifier, false, subjectKeyIdentifier);
         certGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));//Certificado final
         certGen.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
+
         ASN1Set attributes = csr.toASN1Structure().getCertificationRequestInfo().getAttributes();
         if (attributes != null) {
             for (int i = 0; i != attributes.size(); i++) {
                 Attribute attr = Attribute.getInstance(attributes.getObjectAt(i));
                 if (attr.getAttrType().equals(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest)) {
-                    X509Extensions extensions = X509Extensions.getInstance(attr.getAttrValues().getObjectAt(0));
+                    Extensions extensions = Extensions.getInstance(attr.getAttrValues().getObjectAt(0));
                     Enumeration e = extensions.oids();
                     while (e.hasMoreElements()) {
                         ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier) e.nextElement();
-                        X509Extension ext = extensions.getExtension(oid);
-                        certGen.addExtension(oid, ext.isCritical(), ext.getValue().getOctets());
+                        Extension ext = extensions.getExtension(oid);
+                        certGen.addExtension(oid, ext.isCritical(), ext.getExtnValue().getOctets());
                     }
                 } else if(attr.getAttrType().toString().startsWith(ContextVS.VOTING_SYSTEM_BASE_OID)) {
                     certGen.addExtension(attr.getAttrType(), false, attr.getAttrValues());
@@ -202,7 +207,9 @@ public class CertUtils {
                 certGen.addExtension(attribute.getAttrType(), false, attribute.getAttrValues());
             }
         }
-        X509Certificate cert = certGen.generate(caKey, ContextVS.PROVIDER);
+        X509CertificateHolder certHldr = certGen.build(new JcaContentSignerBuilder(
+                ContextVS.CERT_GENERATION_SIG_ALGORITHM).setProvider(ContextVS.PROVIDER).build(caPrivKey));
+        X509Certificate cert = new JcaX509CertificateConverter().setProvider(ContextVS.PROVIDER).getCertificate(certHldr);
         cert.verify(caCert.getPublicKey());
         return cert;
     }

@@ -1,5 +1,8 @@
 package org.votingsystem.test.misc;
 
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.model.User;
 import org.votingsystem.test.util.SignatureService;
@@ -13,9 +16,9 @@ import java.util.Date;
 import java.util.logging.Logger;
 
 
-public class PKCS10Csr {
+public class PKCS10_CSR {
 
-    private static Logger log =  Logger.getLogger(PKCS10Csr.class.getName());
+    private static Logger log =  Logger.getLogger(PKCS10_CSR.class.getName());
 
     public static String CSR_REQUEST = "-----BEGIN CERTIFICATE REQUEST-----\n" +
             "MIIBjTCB9wIBADBOMRIwEAYDVQQFEwkwODg4ODg4OEQxGjAYBgNVBAQTEXN1cm5h\n" +
@@ -29,18 +32,29 @@ public class PKCS10Csr {
             "iSQpEDcDcfZoXt05Z8u/T9k=\n" +
             "-----END CERTIFICATE REQUEST-----\n";
 
+
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SignatureService signatureService = SignatureService.load("08888888D");
         log.info(PEMUtils.getPEMEncodedStr(signatureService.getX509Certificate()));
 
+
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(CSR_REQUEST.getBytes());
-        log.info(csr.toString());
+        X500Name subject = csr.getSubject();
+        User userCSR =  User.getUser(subject);
+
         Date validFrom = new Date();
         Date validTo = DateUtils.addDays(validFrom, 1).getTime(); //one year
         X509Certificate issuedCert = CertUtils.signCSR(csr, null, signatureService.getPrivateKey(),
                 signatureService.getX509Certificate(), validFrom, validTo);
+
+        X500Name x500name = new JcaX509CertificateHolder(issuedCert).getSubject();
+        User userCSR1 =  User.getUser(x500name);
+
+
+        String certExtensionValue = CertUtils.getCertExtensionData(issuedCert, BCStyle.SERIALNUMBER.getId());
+
         log.info(PEMUtils.getPEMEncodedStr(issuedCert));
     }
 

@@ -169,9 +169,7 @@ public class CSRBean {
     emailAddress=user@votingsystem.org, SERIALNUMBER=1234, SN=surname, GN=given name, GN=name given */
     public UserRequestCsr saveUserCSR(byte[] csrPEMBytes) throws Exception {
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrPEMBytes);
-        CertificationRequestInfo info = csr.toASN1Structure().getCertificationRequestInfo();
-        String subjectDN = info.getSubject().toString();
-        User user = User.getUser(subjectDN);
+        User user = User.getUser(csr.getSubject());
         CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
                 csr, ContextVS.DEVICE_OID);
         DeviceDto deviceDto = new DeviceDto(user, certExtensionDto);
@@ -183,9 +181,8 @@ public class CSRBean {
         for(UserRequestCsr prevRequest: previousRequestList) {
             dao.merge(prevRequest.setState(UserRequestCsr.State.CANCELED));
         }
-        UserRequestCsr requestCSR = dao.persist(new UserRequestCsr(UserRequestCsr.State.PENDING, csrPEMBytes,
-                device));
-        log.info("requestCSR id:" + requestCSR.getId() + " - cert subject: " + subjectDN);
+        UserRequestCsr requestCSR = dao.persist(new UserRequestCsr(UserRequestCsr.State.PENDING, csrPEMBytes, device));
+        log.info("requestCSR id:" + requestCSR.getId() + " - cert subject: " + csr.getSubject());
         return requestCSR;
     }
 
