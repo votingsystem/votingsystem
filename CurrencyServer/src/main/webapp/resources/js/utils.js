@@ -188,7 +188,8 @@ var ResponseVS = {
 		SC_PROCESSING : 700,
 		SC_CANCELED : 0,
 		SC_INITIALIZED : 1,
-		SC_PAUSED:10
+		SC_PAUSED:10,
+        SC_WS_CONNECTION_NOT_FOUND:841
 }
 
 function calculateNIFLetter(dni) {

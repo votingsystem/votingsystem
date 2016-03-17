@@ -29,19 +29,20 @@ RSAUtil.prototype.decryptCMS = function(encryptedPEM) {
     return encryptedCMSMsg;
 }
 
-RSAUtil.prototype.getCSR = function(givenName, surname, serialName) {
+RSAUtil.prototype.getCSR = function(userData) {
     this.csr = forge.pki.createCertificationRequest();
     this.csr.publicKey = this.keypair.publicKey;
-    csr.setSubject([
-        { name: 'serialName', value: serialName},
-        { name: 'surname', value: surname },
-        { name: 'givenName', value: givenName }]);
-    csr.sign(this.keypair.privateKey);
-    var verified = csr.verify();
-    return forge.pki.certificationRequestToPem(csr);
+    this.csr.setSubject([
+        { name: 'serialName', value: userData.serialName},
+        { name: 'surname', value: userData.surname },
+        { name: 'givenName', value: userData.givenName }]);
+    this.csr.sign(this.keypair.privateKey);
+    var verified = this.csr.verify();
+    return forge.pki.certificationRequestToPem(this.csr);
 }
 
 vs.extractUserInfoFromCert = function(x509Certificate) {
+    if(typeof x509Certificate === 'string') x509Certificate = forge.pki.certificateFromPem(x509Certificate)
     var result = {}
     var subjectAttrs = x509Certificate.subject.attributes
     for (var i = 0; i < subjectAttrs.length; ++i) {
@@ -76,13 +77,14 @@ RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
         if(encryptedContentJSON.toUser != null) messageJSON.toUser = encryptedContentJSON.toUser;
         if(encryptedContentJSON.deviceToName != null) messageJSON.deviceToName = encryptedContentJSON.deviceToName;
         if(encryptedContentJSON.URL != null) messageJSON.URL = encryptedContentJSON.URL;
+        if(encryptedContentJSON.uuid != null) messageJSON.uuid = encryptedContentJSON.uuid;
         if(encryptedContentJSON.locale != null) messageJSON.locale = encryptedContentJSON.locale;
         messageJSON.encryptedMessage = null;
     } else console.error("encrypted content not found")
 }
 
 vs.operationCode = function() {
-  return Math.random().toString(36).substring(2, 6);  
+  return Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
 vs.encryptToCMS = function (receptorCertPEM, jsonToEncrypt) {

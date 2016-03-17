@@ -14,7 +14,7 @@
             </div>
 
             <div id="qrCodeImgDiv" class="vertical layout center center-justified">
-                <div style="margin: 25px 0 0 0;font-size: 1.2em;"><b>${msg.accessLbl}</b></div>
+                <div style="margin: 25px 0 0 0;font-size: 1.2em; "><b>${msg.accessLbl}</b></div>
                 <img id="qrImg"  src="" alt="read it with your mobile" style="border: 1px solid #ccc;"/>
                 <div id="websocketSessionDiv" style="text-transform: uppercase;font-size: 1.4em;font-weight: bold;"></div>
             </div>
@@ -93,6 +93,10 @@
                                     document.querySelector("#websocketSessionDiv").innerHTML = operationCode;
                                 }
                                 break;
+                            default:
+                                if(messageJSON.statusCode === ResponseVS.SC_WS_CONNECTION_NOT_FOUND) {
+                                    alert(messageJSON.message, "${msg.errorLbl}")
+                                }
                         }
 
                     } else {
@@ -119,13 +123,21 @@
                                 var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
                                     statusCode:700,
                                     deviceToId:messageJSON.deviceFromId,
-                                    deviceId: vs.wsDeviceId, UUID:messageJSON.UUID}
-                                var encryptedDto = {operation:INIT_REMOTE_SIGNED_SESSION,
-                                    sessionId: vs.wsSessionId, deviceFromId: vs.wsDeviceId, }
+                                    deviceId: vs.wsDeviceId}
+                                var userDataFromCert = vs.extractUserInfoFromCert(messageJSON.x509CertificatePEM)
+                                var csr = vs.rsaUtil.getCSR(userDataFromCert)
+                                var remoteSignedSessionDto = {csr:csr, deviceId:vs.wsDeviceId, sessionId:vs.wsSessionId}
+                                var encryptedDto = {operation:'INIT_REMOTE_SIGNED_SESSION',
+                                    operationCode:messageJSON.operationCode,
+                                    sessionId: vs.wsSessionId, deviceFromId: vs.wsDeviceId,
+                                    message:JSON.stringify(remoteSignedSessionDto),
+                                    uuid:messageJSON.uuid}
                                 socketMessageDto.encryptedMessage = vs.encryptToCMS(
                                         messageJSON.x509CertificatePEM, encryptedDto)
+                                console.log("INIT_REMOTE_SIGNED_SESSION response: ")
+                                console.log(socketMessageDto)
                                 websocket.send(JSON.stringify(socketMessageDto))
-                                delete vs.qrOperationsMap[messageJSON.operationCode];
+                                //delete vs.qrOperationsMap[messageJSON.operationCode];
                                 break;
                         }
                     }

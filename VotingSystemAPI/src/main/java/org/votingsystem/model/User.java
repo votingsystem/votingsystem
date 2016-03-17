@@ -7,9 +7,12 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.votingsystem.dto.CertExtensionDto;
+import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.crypto.CMSUtils;
+import org.votingsystem.util.crypto.CertUtils;
 
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
@@ -440,10 +443,18 @@ public class User extends EntityVS implements Serializable {
         return this;
     }
 
-    public static User FROM_X509_CERT(X509Certificate certificate) throws CertificateEncodingException {
-        X500Name x500name = new JcaX509CertificateHolder(certificate).getSubject();
+    public static User FROM_X509_CERT(X509Certificate x509Certificate) throws CertificateEncodingException {
+        X500Name x500name = new JcaX509CertificateHolder(x509Certificate).getSubject();
         User user = getUser(x500name);
-        user.setX509Certificate(certificate);
+        user.setX509Certificate(x509Certificate);
+        try {
+            CertExtensionDto certExtensionDto = CertUtils.getCertExtensionData(CertExtensionDto.class,
+                    x509Certificate, ContextVS.DEVICE_OID);
+            if(certExtensionDto != null) {
+                user.setEmail(certExtensionDto.getEmail());
+                user.setPhone(certExtensionDto.getMobilePhone());
+            }
+        } catch(Exception ex) {ex.printStackTrace();}
         return user;
     }
 
