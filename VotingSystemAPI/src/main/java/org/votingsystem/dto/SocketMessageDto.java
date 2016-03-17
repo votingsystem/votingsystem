@@ -262,8 +262,9 @@ public class SocketMessageDto {
         return UUID;
     }
 
-    public void setUUID(String UUID) {
+    public SocketMessageDto setUUID(String UUID) {
         this.UUID = UUID;
+        return this;
     }
 
     public String getLocale() {
@@ -528,6 +529,7 @@ public class SocketMessageDto {
         if(encryptedDto.getLocale() != null) locale = encryptedDto.getLocale();
         if(encryptedDto.getX509CertificatePEM() != null) x509CertificatePEM = encryptedDto.getX509CertificatePEM();
         if(encryptedDto.getPublicKeyPEM() != null) publicKeyPEM = encryptedDto.getPublicKeyPEM();
+        if(encryptedDto.getUUID() != null) UUID = encryptedDto.getUUID();
         timeLimited = encryptedDto.isTimeLimited();
         this.encryptedMessage = null;
     }

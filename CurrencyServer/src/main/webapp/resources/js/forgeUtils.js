@@ -41,18 +41,10 @@ RSAUtil.prototype.getCSR = function(userData) {
     return forge.pki.certificationRequestToPem(this.csr);
 }
 
-vs.extractUserInfoFromCert = function(x509Certificate) {
-    if(typeof x509Certificate === 'string') x509Certificate = forge.pki.certificateFromPem(x509Certificate)
-    var result = {}
-    var subjectAttrs = x509Certificate.subject.attributes
-    for (var i = 0; i < subjectAttrs.length; ++i) {
-        if (subjectAttrs[i].type === forge.pki.oids.serialName) result.serialName = subjectAttrs[i].value
-        if (subjectAttrs[i].type === forge.pki.oids.givenName) result.givenName = subjectAttrs[i].value
-        if (subjectAttrs[i].type === forge.pki.oids.surname) result.surname = subjectAttrs[i].value
-    }
-    return result
+RSAUtil.prototype.initCSR = function(issuedX509CertificatePEM) {
+    this.x509CertificatePEM = issuedX509CertificatePEM
+    this.x509Certificate = forge.pki.certificateFromPem(issuedX509CertificatePEM);
 }
-
 
 RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
     var decryptedMsg = this.decryptCMS(messageJSON.encryptedMessage)
@@ -81,6 +73,19 @@ RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
         if(encryptedContentJSON.locale != null) messageJSON.locale = encryptedContentJSON.locale;
         messageJSON.encryptedMessage = null;
     } else console.error("encrypted content not found")
+}
+
+
+vs.extractUserInfoFromCert = function(x509Certificate) {
+    if(typeof x509Certificate === 'string') x509Certificate = forge.pki.certificateFromPem(x509Certificate)
+    var result = {}
+    var subjectAttrs = x509Certificate.subject.attributes
+    for (var i = 0; i < subjectAttrs.length; ++i) {
+        if (subjectAttrs[i].type === forge.pki.oids.serialName) result.serialName = subjectAttrs[i].value
+        if (subjectAttrs[i].type === forge.pki.oids.givenName) result.givenName = subjectAttrs[i].value
+        if (subjectAttrs[i].type === forge.pki.oids.surname) result.surname = subjectAttrs[i].value
+    }
+    return result
 }
 
 vs.operationCode = function() {

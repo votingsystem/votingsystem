@@ -120,7 +120,7 @@ public class CertificateResource {
         if(contentType.contains("pem")) {
             List<X509Certificate> resultList = new ArrayList<>();
             for(Certificate certificate : certificates) {
-                resultList.add(certificate.getX509Cert());
+                resultList.add(certificate.getX509Certificate());
             }
             return Response.ok().entity(PEMUtils.getPEMEncoded(resultList)).build();
         } else {
@@ -145,7 +145,7 @@ public class CertificateResource {
         if(certificate != null) {
             if(contentType.contains("pem") || "pem".equals(format)) {
                 resp.setHeader("Content-Disposition", "inline; filename='trustedCert_" + serialNumber + "'");
-                return Response.ok().entity(PEMUtils.getPEMEncoded(certificate.getX509Cert()))
+                return Response.ok().entity(PEMUtils.getPEMEncoded(certificate.getX509Certificate()))
                         .type(MediaType.PEM).build();
             } else {
                 return Response.ok().entity(JSON.getMapper().writeValueAsBytes(new CertificateDto(certificate))).build();

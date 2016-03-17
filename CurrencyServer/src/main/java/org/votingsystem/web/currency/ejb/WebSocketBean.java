@@ -1,11 +1,14 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.dto.DeviceDto;
+import org.votingsystem.dto.RemoteSignedSessionDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
+import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.currency.websocket.SessionManager;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -39,6 +42,7 @@ public class WebSocketBean {
         SocketMessageDto signedMessageDto = null;
         User signer = null;
         SocketMessageDto responseDto = null;
+        Device browserDevice = null;
         switch(messageDto.getOperation()) {
             //Device (authenticated or not) sends message knowing target device id. Target device must be authenticated.
             case MSG_TO_DEVICE_BY_TARGET_DEVICE_ID:
@@ -72,7 +76,7 @@ public class WebSocketBean {
                 }
                 break;
             case INIT_BROWSER_SESSION:
-                Device browserDevice = new Device(SessionManager.getInstance().getAndIncrementBrowserDeviceId())
+                browserDevice = new Device(SessionManager.getInstance().getAndIncrementBrowserDeviceId())
                         .setType(Device.Type.BROWSER);
                 messageDto.getSession().getUserProperties().put("device", browserDevice);
                 SessionManager.getInstance().putBrowserDevice(messageDto.getSession());
@@ -80,20 +84,37 @@ public class WebSocketBean {
                         .setDeviceId(browserDevice.getId().toString()).setMessageType(TypeVS.INIT_BROWSER_SESSION);
                 messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(response));
                 break;
-            case INIT_BROWSER_AUTHENTICATED_SESSION:
-                break;
             case INIT_REMOTE_SIGNED_SESSION:
                 cmsMessage = cmsBean.validateCMS(messageDto.getCMS(), null).getCmsMessage();
                 signer = cmsMessage.getUser();
-                signedMessageDto = cmsMessage.getSignedContent(SocketMessageDto.class);
-                Session remoteSession = SessionManager.getInstance().getNotAuthenticatedSession(signedMessageDto.getSessionId());
-                SessionManager.getInstance().putAuthenticatedDevice(remoteSession, signer);
-                remoteSession.getUserProperties().put("remote", true);
-                responseDto = messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK, null)
-                        .setSessionId(remoteSession.getId()).setMessageType(TypeVS.INIT_REMOTE_SIGNED_SESSION);
-                responseDto.setConnectedDevice(DeviceDto.INIT_AUTHENTICATED_SESSION(signer));
-                remoteSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
-                dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
+                RemoteSignedSessionDto remoteSignedSessionDto = cmsMessage.getSignedContent(RemoteSignedSessionDto.class);
+                PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(
+                        remoteSignedSessionDto.getCsr().getBytes());
+                User userFromCSR = User.getUser(csr.getSubject());
+                if(!userFromCSR.checkUserFromCSR(signer.getX509Certificate())) {
+                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                            messageDto.getServerResponse(ResponseVS.SC_ERROR, messages.get("remoteCSRErrorMsg",
+                            signer.getNameAndId(), userFromCSR.getNameAndId()))));
+                } else {
+                    Session remoteSession = SessionManager.getInstance().getNotAuthenticatedSession(
+                            remoteSignedSessionDto.getSessionId());
+                    browserDevice = (Device) remoteSession.getUserProperties().get("device");
+                    Certificate certificate = cmsBean.signCSRForBrowserSession(csr, cmsMessage, browserDevice);
+                    browserDevice.setId(null);
+                    browserDevice.setX509Certificate(certificate.getX509Certificate());
+                    browserDevice.setCertificate(certificate).setUser(signer);
+                    browserDevice = dao.persist(browserDevice);
+                    SessionManager.getInstance().putAuthenticatedDevice(remoteSession, signer, browserDevice);
+                    remoteSession.getUserProperties().put("remote", true);
+                    DeviceDto mobileDevice = new DeviceDto(signer.getDevice());
+                    responseDto = messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK,
+                            JSON.getMapper().writeValueAsString(mobileDevice))
+                            .setSessionId(remoteSession.getId())
+                            .setMessageType(TypeVS.INIT_REMOTE_SIGNED_SESSION);
+                    responseDto.setConnectedDevice(DeviceDto.INIT_BROWSER_SESSION(signer, browserDevice));
+                    remoteSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
+                    dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
+                }
                 break;
             case INIT_SIGNED_SESSION:
                 cmsMessage = cmsBean.validateCMS(messageDto.getCMS(), null).getCmsMessage();
@@ -107,7 +128,7 @@ public class WebSocketBean {
                 if(device != null) {
                     signer.setDevice(device);
                     messageDto.getSession().getUserProperties().put("remote", false);
-                    SessionManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer);
+                    SessionManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer, null);
                     responseDto = messageDto.getServerResponse(
                             ResponseVS.SC_WS_CONNECTION_INIT_OK, null).setMessageType(TypeVS.INIT_SIGNED_SESSION);
                     query = dao.getEM().createQuery("select t from UserToken t where t.user =:user and t.state =:state")

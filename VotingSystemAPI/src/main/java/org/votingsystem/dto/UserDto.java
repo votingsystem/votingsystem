@@ -102,7 +102,7 @@ public class UserDto implements Serializable {
         if(certificateList != null) {
             Set<CertificateDto> certCollection = new HashSet<>();
             for(Certificate certificate : certificateList) {
-                certCollection.add(new CertificateDto(certificate.getX509Cert()));
+                certCollection.add(new CertificateDto(certificate.getX509Certificate()));
             }
             userDto.setCertCollection(certCollection);
         }

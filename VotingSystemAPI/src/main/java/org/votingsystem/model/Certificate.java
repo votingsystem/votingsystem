@@ -36,7 +36,7 @@ public class Certificate extends EntityVS implements Serializable {
     public enum State {OK, ERROR, CANCELED, USED, LAPSED, UNKNOWN}
 
     public enum Type {
-        VOTE_ROOT, VOTE, USER, USER_ID_CARD, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD,
+        VOTE_ROOT, VOTE, USER, USER_ID_CARD, BROWSER_SESSION, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD,
         ACTOR_VS, ANONYMOUS_REPRESENTATIVE_DELEGATION, CURRENCY, TIMESTAMP_SERVER}
 
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -167,6 +167,17 @@ public class Certificate extends EntityVS implements Serializable {
         Certificate result = new Certificate(x509Cert);
         if(Type.CERTIFICATE_AUTHORITY_ID_CARD == authorityCertificate.getType()) result.type = Type.USER_ID_CARD;
         else result.type = Type.USER;
+        result.state = Certificate.State.OK;
+        result.user = user;
+        result.subjectDN = x509Cert.getSubjectDN().toString();
+        result.authorityCertificate = authorityCertificate;
+        return result;
+    }
+
+    public static Certificate ISSUED_BROWSER_CERT(User user, X509Certificate x509Cert, Certificate authorityCertificate)
+            throws CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
+        Certificate result = new Certificate(x509Cert);
+        result.type = Type.BROWSER_SESSION;
         result.state = Certificate.State.OK;
         result.user = user;
         result.subjectDN = x509Cert.getSubjectDN().toString();
@@ -362,9 +373,8 @@ public class Certificate extends EntityVS implements Serializable {
         else this.description = this.description + " ----- " + DateUtils.getDateStr(new Date()) + ": " + description;
     }
 
-    public X509Certificate getX509Cert() throws Exception {
-        X509Certificate x509Cert = CertUtils.loadCertificate(content);
-        return x509Cert;
+    public X509Certificate getX509Certificate() throws Exception {
+        return CertUtils.loadCertificate(content);
     }
 
 }

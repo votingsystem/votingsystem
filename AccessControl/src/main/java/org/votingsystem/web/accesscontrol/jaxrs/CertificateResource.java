@@ -85,7 +85,7 @@ public class CertificateResource {
         if(contentType.contains("pem")) {
             List<X509Certificate> resultList = new ArrayList<>();
             for(Certificate certificate : certificates) {
-                resultList.add(certificate.getX509Cert());
+                resultList.add(certificate.getX509Certificate());
             }
             return Response.ok().entity(PEMUtils.getPEMEncoded(resultList)).build();
         } else {
@@ -114,7 +114,7 @@ public class CertificateResource {
         Certificate certificate = dao.getSingleResult(Certificate.class, query);
         if(certificate == null) return Response.status(Response.Status.BAD_REQUEST).entity(
                 "ERROR - Certificate not found - serialNumber: " + serialNumber).build();
-        X509Certificate x509Cert = certificate.getX509Cert();
+        X509Certificate x509Cert = certificate.getX509Certificate();
         if(contentType.contains("pem") || (format != null && "pem".equals(format.toLowerCase()))){
             resp.setHeader("Content-Disposition", format("inline; filename='trustedCert_{0}'", serialNumber));
             return Response.ok().entity(PEMUtils.getPEMEncoded (x509Cert)).build();

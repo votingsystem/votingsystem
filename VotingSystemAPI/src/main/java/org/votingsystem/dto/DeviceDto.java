@@ -62,6 +62,13 @@ public class DeviceDto implements Serializable {
         return deviceDto;
     }
 
+    public static DeviceDto INIT_BROWSER_SESSION(User user, Device browserDevice) throws Exception {
+        DeviceDto deviceDto = new DeviceDto(browserDevice);
+        deviceDto.setIBAN(user.getIBAN());
+        return deviceDto;
+    }
+
+
     public DeviceDto(Device device) throws Exception {
         this.setId(device.getId());
         this.setDeviceId(device.getDeviceId());

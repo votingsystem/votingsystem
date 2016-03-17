@@ -51,20 +51,23 @@ public class SessionManager {
         } else log.info("put - session already in sessionMap");
     }
 
-    public void putAuthenticatedDevice(Session session, User user) throws ExceptionVS {
-        log.info("putAuthenticatedDevice - session id: " + session.getId() + " - User id:" + user.getId());
+    public void putAuthenticatedDevice(Session session, User user, Device device) throws ExceptionVS {
+        if(device == null) device = user.getDevice();
+        final String deviceId = device.getDeviceId();
+        log.info("putAuthenticatedDevice - session id: " + session.getId() + " - User id:" + user.getId() +
+                " - device Id: " + deviceId);
         if(sessionMap.containsKey(session.getId())) sessionMap.remove(session.getId());
         authenticatedSessionMap.put(session.getId(), session);
-        deviceSessionMap.put(user.getDevice().getId(), session);
+        deviceSessionMap.put(device.getId(), session);
         if(userDeviceMap.containsKey(user.getId())) {
-            Set<Device> deviceSet = userDeviceMap.get(user.getId()).stream().filter(device ->
-                !device.getDeviceId().equals(user.getDevice().getDeviceId())
+            Set<Device> deviceSet = userDeviceMap.get(user.getId()).stream().filter(dev ->
+                !dev.getDeviceId().equals(deviceId)
             ).collect(Collectors.toSet());
-            deviceSet.add(user.getDevice());
+            deviceSet.add(device);
             userDeviceMap.put(user.getId(), deviceSet);
-        } else userDeviceMap.put(user.getId(), Sets.newHashSet(user.getDevice()));
+        } else userDeviceMap.put(user.getId(), Sets.newHashSet(device));
         session.getUserProperties().put("user", user);
-        session.getUserProperties().put("device", user.getDevice());
+        session.getUserProperties().put("device", device);
     }
 
     public void putBrowserDevice(Session session){

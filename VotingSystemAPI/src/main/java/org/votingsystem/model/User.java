@@ -421,6 +421,19 @@ public class User extends EntityVS implements Serializable {
         return serverURL + "/rest/user/id/" + userId;
     }
 
+    public boolean checkUserFromCSR(X509Certificate x509CertificateToCheck) throws CertificateEncodingException {
+        X500Name x500name = new JcaX509CertificateHolder(x509CertificateToCheck).getSubject();
+        User userToCheck = getUser(x500name);
+        if(!nif.equals(userToCheck.getNif())) return false;
+        if(!firstName.equals(userToCheck.getFirstName())) return false;
+        if(!lastName.equals(userToCheck.getLastName())) return false;
+        return true;
+    }
+
+    public String getNameAndId() {
+        return firstName + " " + lastName + " - " + nif;
+    }
+
     public Map getMetaInfMap() throws IOException {
         if(metaInfMap == null) {
             if(metaInf == null) {

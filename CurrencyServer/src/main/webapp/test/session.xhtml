@@ -18,6 +18,9 @@
                 <img id="qrImg"  src="" alt="read it with your mobile" style="border: 1px solid #ccc;"/>
                 <div id="websocketSessionDiv" style="text-transform: uppercase;font-size: 1.4em;font-weight: bold;"></div>
             </div>
+            <div class="vertical layout center center-justified">
+                <div id="msgDiv" style="font-size: 2em;font-weight: bold; color: #888;"></div>
+            </div>
         </div>
 
 
@@ -26,9 +29,8 @@
                 vs.rsaUtil = new RSAUtil();
 
                 var INIT_REMOTE_SIGNED_SESSION         = 0;
-                var INIT_BROWSER_AUTHENTICATED_SESSION = 1;
-                var QR_MESSAGE_INFO                    = 2;
-                var CURRENCY_SEND                      = 3;
+                var QR_MESSAGE_INFO                    = 1;
+                var CURRENCY_SEND                      = 2;
 
                 var WEB_SOCKET_SESSION_KEY = "wsid";
                 var DEVICE_ID_KEY          = "did";
@@ -91,6 +93,19 @@
                                             INIT_REMOTE_SIGNED_SESSION, operationCode, vs.wsDeviceId, null,
                                             vs.rsaUtil.publicKeyBase64))
                                     document.querySelector("#websocketSessionDiv").innerHTML = operationCode;
+                                }
+                                break;
+                            case 'INIT_REMOTE_SIGNED_SESSION':
+                                if(ResponseVS.SC_WS_CONNECTION_INIT_OK == messageJSON.statusCode) {
+                                    vs.connectedDevice = messageJSON.connectedDevice
+                                    vs.mobileDevice = toJSON(messageJSON.message)
+                                    console.log("mobileDevice: ")
+                                    console.log(vs.mobileDevice)
+                                    console.log("connectedDevice: ")
+                                    console.log(vs.connectedDevice)
+                                    vs.rsaUtil.initCSR(vs.connectedDevice.x509CertificatePEM)
+                                    document.querySelector("#qrCodeImgDiv").style.display = 'none'
+                                    document.querySelector("#msgDiv").innerHTML = "connected with mobile";
                                 }
                                 break;
                             default:

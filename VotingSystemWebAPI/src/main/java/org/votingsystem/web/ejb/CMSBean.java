@@ -168,7 +168,7 @@ public class CMSBean {
     }
 
     public void addCertAuthority(Certificate certificate) throws Exception {
-        X509Certificate x509Cert = certificate.getX509Cert();
+        X509Certificate x509Cert = certificate.getX509Certificate();
         trustedCerts.add(x509Cert);
         trustedCertsHashMap.put(x509Cert.getSerialNumber().longValue(), certificate);
         TrustAnchor trustAnchor = new TrustAnchor(x509Cert, null);
@@ -208,7 +208,7 @@ public class CMSBean {
         Set<TrustAnchor> eventTrustedAnchors = eventTrustedAnchorsMap.get(eventVS.getId());
         if(eventTrustedAnchors == null) {
             Certificate eventCACert = eventVS.getCertificate();
-            X509Certificate certCAEventVS = eventCACert.getX509Cert();
+            X509Certificate certCAEventVS = eventCACert.getX509Certificate();
             eventTrustedAnchors = new HashSet<>();
             eventTrustedAnchors.add(new TrustAnchor(certCAEventVS, null));
             eventTrustedAnchors.addAll(getTrustAnchors());
@@ -462,6 +462,19 @@ public class CMSBean {
         dao.persist(new UserToken(signer, requestDto.getToken(), certificate, cmsReq));
         log.info("signCertUser - issued new Certificate id: " + certificate.getId() + " for device: " + device.getId());
         return issuedCert;
+    }
+
+    //issues certificates for browser sessions
+    public Certificate signCSRForBrowserSession(PKCS10CertificationRequest csr, CMSMessage cmsReq,
+                            Device browserDevice) throws Exception {
+        User signer = cmsReq.getUser();
+        Date validFrom = new Date();
+        Date validTo = DateUtils.addDays(validFrom, 1).getTime(); //one day
+        X509Certificate issuedCert = signCSR(csr, null, validFrom, validTo);
+        Certificate certificate = dao.persist(Certificate.ISSUED_BROWSER_CERT(signer, issuedCert, serverCertificate));
+        log.info("signCSRForBrowserSession - issued new browser cert id: " + certificate.getId() +
+                " for user: " + signer.getId());
+        return certificate;
     }
 
     public Set<TrustAnchor> getTrustAnchors() {
