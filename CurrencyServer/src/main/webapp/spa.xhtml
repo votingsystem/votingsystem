@@ -121,7 +121,6 @@
                     if(mainContentNode.childNodes[0]) mainContentNode.removeChild(mainContentNode.childNodes[0])
                     mainContentNode.appendChild(newContentNode)
                     newContentNode.addEventListener('click', function (event) {
-                        console.log("-------mainContentNode============= click")
                         d3.select("#drawer").style({display:'none'});
                     })
                     if('admin' === menuType) caption = caption + ' - ${msg.adminLbl}'
@@ -152,7 +151,7 @@
 
                 document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
                     console.log("spa.xhtml - user-clicked")
-                    page.show(contextURL + "/rest/user/id/" + e.detail.id + "?connectedDevices=true")
+                    page.show(vs.contextURL + "/rest/user/id/" + e.detail.id + "?connectedDevices=true")
                 })
 
                 vs.updateMenuView()

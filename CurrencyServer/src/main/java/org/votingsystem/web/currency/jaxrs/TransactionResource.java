@@ -56,10 +56,8 @@ public class TransactionResource {
 
     private static final Logger log = Logger.getLogger(TransactionResource.class.getName());
 
-    @Inject
-    UserBean serVSBean;
-    @Inject
-    TransactionBean transactionBean;
+    @Inject UserBean serVSBean;
+    @Inject TransactionBean transactionBean;
     @Inject CMSBean cmsBean;
     @Inject CurrencyBean currencyBean;
     @Inject BalancesBean balancesBean;

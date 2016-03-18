@@ -33,14 +33,10 @@ public class BankBean {
 
 
     @Inject DAOBean dao;
-    @Inject
-    BankBean bankBean;
-    @Inject
-    UserBean userBean;
-    @Inject
-    TransactionBean transactionBean;
-    @Inject
-    SubscriptionBean subscriptionBean;
+    @Inject BankBean bankBean;
+    @Inject UserBean userBean;
+    @Inject TransactionBean transactionBean;
+    @Inject SubscriptionBean subscriptionBean;
     @Inject CMSBean cmsBean;
     @Inject ConfigVS config;
 

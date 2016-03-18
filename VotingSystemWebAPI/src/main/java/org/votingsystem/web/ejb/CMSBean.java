@@ -50,8 +50,7 @@ public class CMSBean {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject TimeStampBean timeStampBean;
-    @Inject
-    SubscriptionBean subscriptionBean;
+    @Inject SubscriptionBean subscriptionBean;
     private CMSGenerator cmsGenerator;
     private Encryptor encryptor;
     private Set<TrustAnchor> trustAnchors;

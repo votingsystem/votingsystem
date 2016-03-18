@@ -38,8 +38,7 @@ public class EventElectionBean {
     @Inject DAOBean dao;
     @Inject CMSBean cmsBean;
     @Inject TimeStampBean timeStampBean;
-    @Inject
-    SubscriptionBean subscriptionBean;
+    @Inject SubscriptionBean subscriptionBean;
 
     public EventElection saveEvent(CMSMessage cmsMessage) throws Exception {
         CMSSignedMessage cmsReq = cmsMessage.getCMS();

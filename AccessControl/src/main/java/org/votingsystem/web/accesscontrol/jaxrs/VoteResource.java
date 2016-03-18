@@ -32,8 +32,7 @@ public class VoteResource {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject
-    VoteBean voteBean;
+    @Inject VoteBean voteBean;
 
     /**
      * Service that receives and checks the votes signed by the Control Center

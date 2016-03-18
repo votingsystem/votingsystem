@@ -31,14 +31,11 @@ public class GroupBean {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject
-    UserBean userBean;
+    @Inject UserBean userBean;
     @Inject CurrencyAccountBean currencyAccountBean;
     @Inject CMSBean cmsBean;
-    @Inject
-    SubscriptionBean subscriptionBean;
-    @Inject
-    TransactionBean transactionBean;
+    @Inject SubscriptionBean subscriptionBean;
+    @Inject TransactionBean transactionBean;
 
 
     public Group cancelGroup(Group group, CMSMessage cmsMessage) throws Exception {

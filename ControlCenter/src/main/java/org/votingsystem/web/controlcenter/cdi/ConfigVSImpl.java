@@ -38,8 +38,7 @@ public class ConfigVSImpl implements ConfigVS {
 
     @Inject DAOBean dao;
     @Inject CMSBean cmsBean;
-    @Inject
-    SubscriptionBean subscriptionBean;
+    @Inject SubscriptionBean subscriptionBean;
     @Inject TimeStampBean timeStampBean;
     /* Executor service for asynchronous processing */
     @Resource(name="comp/DefaultManagedExecutorService")

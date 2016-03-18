@@ -55,14 +55,11 @@ public class GroupResource {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject CurrencyAccountBean currencyAccountBean;
-    @Inject
-    GroupBean groupBean;
-    @Inject
-    UserBean userBean;
+    @Inject GroupBean groupBean;
+    @Inject UserBean userBean;
     @Inject BalancesBean balancesBean;
     @Inject CMSBean cmsBean;
-    @Inject
-    SubscriptionBean subscriptionBean;
+    @Inject SubscriptionBean subscriptionBean;
 
     @Path("/")
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional

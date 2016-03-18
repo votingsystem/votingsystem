@@ -51,11 +51,9 @@ public class CurrencyBean {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject
-    TransactionBean transactionBean;
+    @Inject TransactionBean transactionBean;
     @Inject CMSBean cmsBean;
-    @Inject
-    UserBean userBean;
+    @Inject UserBean userBean;
     @Inject CSRBean csrBean;
     @Inject WalletBean walletBean;
     @Inject TimeStampBean timeStampBean;

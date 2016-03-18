@@ -37,8 +37,7 @@ public class TransactionUserBean {
     @Inject DAOBean dao;
     @Inject CMSBean cmsBean;
     @Inject WalletBean walletBean;
-    @Inject
-    TransactionBean transactionBean;
+    @Inject TransactionBean transactionBean;
 
 
     public ResultListDto<TransactionDto> processTransaction(TransactionDto request, TagVS tagVS) throws Exception {

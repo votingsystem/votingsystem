@@ -47,8 +47,7 @@ public class CertificateResource {
     @Inject ConfigVS app;
     @Inject DAOBean dao;
     @Inject CMSBean cmsBean;
-    @Inject
-    CertificateBean certificateBean;
+    @Inject CertificateBean certificateBean;
 
     @Transactional
     @Path("/certs")

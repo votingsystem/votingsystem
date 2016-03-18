@@ -46,8 +46,7 @@ public class CSRBean {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject CMSBean cmsBean;
-    @Inject
-    SubscriptionBean subscriptionBean;
+    @Inject SubscriptionBean subscriptionBean;
 
     public Device signCertUser(CMSMessage cmsMessage) throws Exception {
         User user = cmsMessage.getUser();

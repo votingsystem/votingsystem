@@ -30,8 +30,7 @@ public class VoteResource {
 
     @Inject ConfigVS config;
     @Inject DAOBean dao;
-    @Inject
-    VoteBean voteBean;
+    @Inject VoteBean voteBean;
 
     /**
      * Service that validates and sends votes to the 'access control'

@@ -32,13 +32,10 @@ public class UserBean {
     @Inject DAOBean dao;
     @Inject ConfigVS config;
     @Inject CurrencyAccountBean currencyAccountBean;
-    @Inject
-    UserBean userBean;
+    @Inject UserBean userBean;
     @Inject CMSBean cmsBean;
-    @Inject
-    SubscriptionBean subscriptionBean;
-    @Inject
-    TransactionBean transactionBean;
+    @Inject SubscriptionBean subscriptionBean;
+    @Inject TransactionBean transactionBean;
     
     
     public User saveUser(CMSMessage cmsReq) throws Exception {

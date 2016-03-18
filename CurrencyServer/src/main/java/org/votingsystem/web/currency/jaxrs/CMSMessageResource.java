@@ -33,8 +33,7 @@ public class CMSMessageResource {
     private static final List<TypeVS> anonymousTransaction = Arrays.asList(TypeVS.CURRENCY_SEND, TypeVS.CURRENCY_CHANGE);
 
     @Inject DAOBean dao;
-    @Inject
-    UserBean userBean;
+    @Inject UserBean userBean;
 
     @Path("/id/{id}") @GET @Transactional
     public Response index(@PathParam("id") long id, @Context ServletContext context,

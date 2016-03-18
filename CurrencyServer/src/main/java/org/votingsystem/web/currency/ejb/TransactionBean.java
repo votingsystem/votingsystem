@@ -42,12 +42,9 @@ public class TransactionBean {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject BalancesBean balancesBean;
-    @Inject
-    TransactionGroupBean transactionGroupBean;
-    @Inject
-    TransactionBankBean transactionBankBean;
-    @Inject
-    TransactionUserBean transactionUserBean;
+    @Inject TransactionGroupBean transactionGroupBean;
+    @Inject TransactionBankBean transactionBankBean;
+    @Inject TransactionUserBean transactionUserBean;
 
 
     public ResultListDto<TransactionDto> processTransaction(CMSMessage cmsMessage) throws Exception {

@@ -34,8 +34,7 @@ public class IBANResource {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject
-    TransactionBean transactionBean;
+    @Inject TransactionBean transactionBean;
 
     @Path("/from/{IBANCode}")
     @GET @Produces(MediaType.APPLICATION_JSON)

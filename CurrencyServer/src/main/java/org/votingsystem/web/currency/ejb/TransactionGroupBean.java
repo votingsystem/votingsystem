@@ -43,8 +43,7 @@ public class TransactionGroupBean {
     @Inject WalletBean walletBean;
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject
-    TransactionBean transactionBean;
+    @Inject TransactionBean transactionBean;
 
 
     public ResultListDto<TransactionDto> processTransaction(TransactionDto request, TagVS tagVS) throws Exception {

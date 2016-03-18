@@ -46,8 +46,7 @@ public class CertificateResource {
     @Inject ConfigVS app;
     @Inject DAOBean dao;
     @Inject CMSBean cmsBean;
-    @Inject
-    CertificateBean certificateBean;
+    @Inject CertificateBean certificateBean;
 
     @Path("/hashHex/{hashHex}")
     @GET  @Produces(javax.ws.rs.core.MediaType.TEXT_PLAIN)

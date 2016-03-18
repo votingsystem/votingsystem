@@ -44,10 +44,8 @@ public class CurrencyResource {
     private static final Logger log = Logger.getLogger(CurrencyResource.class.getName());
 
     @Inject DAOBean dao;
-    @Inject
-    UserBean userBean;
-    @Inject
-    TransactionBean transactionBean;
+    @Inject UserBean userBean;
+    @Inject TransactionBean transactionBean;
     @Inject ConfigVS config;
     @Inject CMSBean cmsBean;
     @Inject CurrencyBean currencyBean;

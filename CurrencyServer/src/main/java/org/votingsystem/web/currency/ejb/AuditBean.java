@@ -45,8 +45,7 @@ public class AuditBean {
 
     @Inject DAOBean dao;
     @Inject ConfigVS config;
-    @Inject
-    TransactionBean transactionBean;
+    @Inject TransactionBean transactionBean;
     @Inject CMSBean cmsBean;
     @Inject BalancesBean balancesBean;
 

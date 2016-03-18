@@ -32,16 +32,12 @@ public class BalancesBean {
     private static Logger log = Logger.getLogger(BalancesBean.class.getName());
 
     @Inject ConfigVS config;
-    @Inject
-    GroupBean groupBean;
+    @Inject GroupBean groupBean;
     @Inject CMSBean cmsBean;
-    @Inject
-    BankBean bankBean;
-    @Inject
-    UserBean userBean;
+    @Inject BankBean bankBean;
+    @Inject UserBean userBean;
     @Inject DAOBean dao;
-    @Inject
-    TransactionBean transactionBean;
+    @Inject TransactionBean transactionBean;
     @Inject CurrencyAccountBean currencyAccountBean;
 
     public BalancesDto getSystemBalancesDto(Interval timePeriod) throws Exception {
