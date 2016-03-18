@@ -163,8 +163,7 @@
             processSearch:function() {
                 this.textToSearch = this.$.inputSearch.value.trim()
                 if(this.textToSearch === "") return
-                this.url = null
-                else this.url = vs.contextURL + "/rest/user/search?searchText=" + this.textToSearch
+                this.url = vs.contextURL + "/rest/user/search?searchText=" + this.textToSearch
             },
             setContactsView:function() {
                 this.modeSearch = false

@@ -27,7 +27,7 @@
                 </div>
                 <div class="horizontal layout"  style="margin: 5px 10px 5px 10px;">
                     <input class="form-control" type="text" id="searchInput" value='' style="width: 140px;margin:0 10px 0 0;" placeholder="${msg.searchLbl}"/>
-                    <button on-click="getHTTP"><i id="searchIcon" class="fa fa-search" style="margin:0px 3px 0px 0px;" ></i> ${msg.searchLbl}</button>
+                    <button on-click="getHTTP"><i id="searchIcon" class="fa fa-search" ></i> ${msg.searchLbl}</button>
                 </div>
                 <div class="horizontal layout center center-justified" style="width: 260px; margin: 0 5px 0 5px; font-size: 0.75em; padding: 0 6px 0 6px;">
                     <input id="timeLimitedCheckBox" type="checkbox" value="timeLimited" on-click="timeCheckboxSelected" checked="true" style="">
