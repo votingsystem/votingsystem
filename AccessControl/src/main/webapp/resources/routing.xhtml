@@ -3,13 +3,8 @@
 <script>
   window.addEventListener('WebComponentsReady', function() {
 
-      function scrollToTop(ctx, next) {
-          vs.scrollPageToTop();
-          next();
-      }
-
       var contactPage
-      page('*/app/contact', scrollToTop, function (ctx) {
+      page('*/app/contact', function (ctx) {
           vs.route = 'contact';
           Polymer.Base.importHref('./app/contact-page.vsp', function(e) {
               if(!contactPage) contactPage = document.createElement('contact-page');
@@ -18,7 +13,7 @@
       });
 
       var toolsPage
-      page('*/app/tools', scrollToTop, function (ctx) {
+      page('*/app/tools', function (ctx) {
           vs.route = 'tools';
           Polymer.Base.importHref('./app/tools-page.vsp', function(e) {
               if(!toolsPage) toolsPage = document.createElement('tools-page');
@@ -27,7 +22,7 @@
       });
 
       var eventElectionList
-      page('*/eventElection', scrollToTop, function (ctx) {
+      page('*/eventElection', function (ctx) {
           vs.route = 'eventElection';
           Polymer.Base.importHref('./eventElection/eventvs-election-list.vsp', function () {
               if (!eventElectionList) eventElectionList = document.createElement('eventvs-election-list');
@@ -37,7 +32,7 @@
       });
 
       var eventElection
-      page('/rest/eventElection/id*', scrollToTop, function (ctx) {
+      page('/rest/eventElection/id*', function (ctx) {
           vs.route = 'eventElection';
           Polymer.Base.importHref('./eventElection/eventvs-election.vsp', function () {
               if (!eventElection) eventElection = document.createElement('eventvs-election');
@@ -48,7 +43,7 @@
       });
 
       var representativePage
-      page('/rest/representative/id*', scrollToTop, function (ctx) {
+      page('/rest/representative/id*', function (ctx) {
           vs.route = 'representative';
           Polymer.Base.importHref('./representative/representative-info.vsp', function () {
               if (!representativePage) representativePage = document.createElement('representative-info');
@@ -59,7 +54,7 @@
       });
 
       var representativeEditor
-      page('/representative/edit', scrollToTop, function (ctx) {
+      page('/representative/edit', function (ctx) {
           vs.route = 'edit_representative';
           Polymer.Base.importHref('./representative/representative-editor.vsp', function () {
               if (!representativeEditor) representativeEditor = document.createElement('representative-editor');
@@ -68,7 +63,7 @@
       });
 
       var eventvsEditor
-      page('/publish_election', scrollToTop, function (ctx) {
+      page('/publish_election', function (ctx) {
           vs.route = 'publish_election';
           Polymer.Base.importHref('./eventElection/eventvs-editor.vsp', function () {
               if (!eventvsEditor) eventvsEditor = document.createElement('eventvs-editor');
@@ -77,7 +72,7 @@
       });
 
       var representativeList
-      page('*/representative', scrollToTop, function (ctx) {
+      page('*/representative', function (ctx) {
           vs.route = 'representative';
           Polymer.Base.importHref('./representative/representative-list.vsp', function () {
               if (!representativeList) representativeList = document.createElement('representative-list');
@@ -86,7 +81,7 @@
       });
 
       var feedsPage
-      page('*/subscription/feeds', scrollToTop, function (ctx) {
+      page('*/subscription/feeds', function (ctx) {
           vs.route = 'feeds';
           Polymer.Base.importHref('./subscription/feeds-page.vsp', function(e) {
               if(!feedsPage) feedsPage = document.createElement('feeds-page');

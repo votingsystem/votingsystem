@@ -2,14 +2,9 @@
 <script src="./bower_components/visionmedia-page/page.js"></script>
 <script>
   window.addEventListener('WebComponentsReady', function() {
-
-      function scrollToTop(ctx, next) {
-          vs.scrollPageToTop();
-          next();
-      }
-
+      
       var contactPage
-      page('*/app/contact', scrollToTop, function (ctx) {
+      page('*/app/contact', function (ctx) {
           vs.route = 'contact';
           Polymer.Base.importHref('./app/contact-page.vsp', function(e) {
               if(!contactPage) contactPage = document.createElement('contact-page');
@@ -18,7 +13,7 @@
       });
 
       var eventElectionList
-      page('*/eventElection', scrollToTop, function (ctx) {
+      page('*/eventElection', function (ctx) {
           vs.route = 'eventElection';
           Polymer.Base.importHref('./eventElection/eventvs-election-list.vsp', function () {
               if (!eventElectionList) eventElectionList = document.createElement('eventvs-election-list');
@@ -28,7 +23,7 @@
       });
 
       var eventElection
-      page('/rest/eventElection/id*', scrollToTop, function (ctx) {
+      page('/rest/eventElection/id*', function (ctx) {
           vs.route = 'eventElection';
           Polymer.Base.importHref('./eventElection/eventvs-election.vsp', function () {
               if (!eventElection) eventElection = document.createElement('eventvs-election');
@@ -39,7 +34,7 @@
       });
 
       var feedsPage
-      page('*/subscription/feeds', scrollToTop, function (ctx) {
+      page('*/subscription/feeds', function (ctx) {
           vs.route = 'feeds';
           Polymer.Base.importHref('./subscription/feeds-page.vsp', function(e) {
               if(!feedsPage) feedsPage = document.createElement('feeds-page');

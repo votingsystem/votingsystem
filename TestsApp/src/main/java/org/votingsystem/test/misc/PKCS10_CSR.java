@@ -4,13 +4,10 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.RemoteSignedSessionDto;
 import org.votingsystem.model.User;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.DateUtils;
-import org.votingsystem.util.JSON;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
 
@@ -41,11 +38,6 @@ public class PKCS10_CSR {
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SignatureService signatureService = SignatureService.load("08888888D");
         log.info(PEMUtils.getPEMEncodedStr(signatureService.getX509Certificate()));
-
-        RemoteSignedSessionDto remoteSignedSessionDto = new RemoteSignedSessionDto();
-        remoteSignedSessionDto.setCsr("1111111111111");
-        CMSSignedMessage cmsSignedMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(remoteSignedSessionDto));
-        remoteSignedSessionDto = cmsSignedMessage.getSignedContent(RemoteSignedSessionDto.class);
 
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(CSR_REQUEST.getBytes());
         X500Name subject = csr.getSubject();

@@ -22,7 +22,7 @@
     <ui:define name="content">
         <div id="drawer" style="display: none;">
             <div style="background-color: #ba0011; color: #f9f9f9;">
-                <div id="pageTitle" class="app-name" style="padding: 8px 0 8px 15px;font-size: 2em; font-weight: bold;"></div>
+                <div id="pageTitle" class="app-name" style="padding: 8px 0 8px 15px;font-size: 1.8em; font-weight: bold;"></div>
             </div>
             <div class="vertical layout flex" style="background-color: #fefefe;">
                 <a class="menuItem menuItemSelected" data-route="group" href="#{contextURL}/spa.xhtml#!/group">
@@ -80,75 +80,83 @@
         </div>
         <script>
             //debugger;  this is to allow logging from extension content scripts
-
-            vs.back = function() {
-                history.back()
-                //there's a delay until location.href is updated with history.back()
-                setTimeout(function () {
-                    page(window.location.href.split("\\#!")[1])
-                }, 50);
-            }
-
-            d3.select("#drawerButton").on("click", function(e) {
-                d3.select("#drawer").style({display:'block'});
-                d3.event.stopPropagation();
-            })
-
-            d3.select("#voting_system_page").on('click', function(d, i) {
-                d3.select("#drawer").style({display:'none'});
-            })
-
-            vs.updateMenuView = function() {
-                var appTitle = "${msg.appTitle}"
-                d3.selectAll(".isAdminView").style("display", "none")
-                d3.selectAll(".isSuperUserView").style("display", "none")
-                if('admin' === menuType) {
-                    d3.select(".isAdminView").style("display", "block")
-                    appTitle = "${msg.adminPageTitle}"
-                } else if('superuser' === menuType) {
-                    d3.select(".isSuperUserView").style("display", "block")
-                    appTitle = "${msg.superUserTitle}"
+            window.addEventListener('WebComponentsReady', function() {
+                vs.back = function() {
+                    history.back()
+                    //there's a delay until location.href is updated with history.back()
+                    setTimeout(function () {
+                        page(window.location.href.split("\\#!")[1])
+                    }, 50);
                 }
-                d3.select("#pageTitle").text(appTitle)
-            }
 
-            vs.loadMainContent = function(newContentNode, caption, searchVisible) {
-                if(caption) sendSignalVS({caption:caption})
-                var mainContentNode = document.getElementById("mainContent")
-                if(mainContentNode.childNodes[0]) mainContentNode.removeChild(mainContentNode.childNodes[0])
-                mainContentNode.appendChild(newContentNode)
-                if('admin' === menuType) caption = caption + ' - ${msg.adminLbl}'
-                if('superuser' === menuType) caption = caption + ' - ${msg.superUserLbl}'
-                if(searchVisible === true) d3.select("#searchDiv").style("display", "block")
-                else d3.select("#searchDiv").style("display", "none")
-                d3.selectAll("#drawer .menuItem").each( function(d) {
-                    if(d3.select(this).attr("data-route") === vs.route){
-                        d3.select(this).classed("menuItemSelected", true)
-                    } else d3.select(this).classed("menuItemSelected", false)
+                d3.select("#drawerButton").on("click", function(e) {
+                    d3.select("#drawer").style({display:'block'});
+                    d3.event.stopPropagation();
                 })
-            }
 
-            vs.updateSearchMessage = function(searchMessage) {
-                if(searchMessage) {
-                    document.querySelector("#pageInfoPanel").innerHTML = searchMessage
-                    document.querySelector("#pageInfoPanel").style.display = "block"
-                } else document.querySelector("#pageInfoPanel").style.display = "none"
-            }
 
-            vs.scrollPageToTop = function() {
-                document.getElementById('mainContent').scrollTop = 0;
-            };
+                document.body.addEventListener('click', function (event) {
+                    console.log("document.body")
+                    d3.select("#drawer").style({display:'none'});
+                }, true);
 
-            document.querySelector('#voting_system_page').addEventListener('search-request', function (e) {
-                console.log("spa.xhtml - search request - query:" + e.detail.query);
+
+                vs.updateMenuView = function() {
+                    var appTitle = "${msg.appTitle}"
+                    d3.selectAll(".isAdminView").style("display", "none")
+                    d3.selectAll(".isSuperUserView").style("display", "none")
+                    if('admin' === menuType) {
+                        d3.select(".isAdminView").style("display", "block")
+                        appTitle = "${msg.adminPageTitle}"
+                    } else if('superuser' === menuType) {
+                        d3.select(".isSuperUserView").style("display", "block")
+                        appTitle = "${msg.superUserTitle}"
+                    }
+                    d3.select("#pageTitle").text(appTitle)
+                }
+
+                vs.loadMainContent = function(newContentNode, caption, searchVisible) {
+                    if(caption) sendSignalVS({caption:caption})
+                    var mainContentNode = document.getElementById("mainContent")
+                    if(mainContentNode.childNodes[0]) mainContentNode.removeChild(mainContentNode.childNodes[0])
+                    mainContentNode.appendChild(newContentNode)
+                    newContentNode.addEventListener('click', function (event) {
+                        console.log("-------mainContentNode============= click")
+                        d3.select("#drawer").style({display:'none'});
+                    })
+                    if('admin' === menuType) caption = caption + ' - ${msg.adminLbl}'
+                    if('superuser' === menuType) caption = caption + ' - ${msg.superUserLbl}'
+                    if(searchVisible === true) d3.select("#searchDiv").style("display", "block")
+                    else d3.select("#searchDiv").style("display", "none")
+                    d3.selectAll("#drawer .menuItem").each( function(d) {
+                        if(d3.select(this).attr("data-route") === vs.route){
+                            d3.select(this).classed("menuItemSelected", true)
+                        } else d3.select(this).classed("menuItemSelected", false)
+                    })
+                }
+
+                vs.updateSearchMessage = function(searchMessage) {
+                    if(searchMessage) {
+                        document.querySelector("#pageInfoPanel").innerHTML = searchMessage
+                        document.querySelector("#pageInfoPanel").style.display = "block"
+                    } else document.querySelector("#pageInfoPanel").style.display = "none"
+                }
+
+                vs.scrollPageToTop = function() {
+                    document.getElementById('mainContent').scrollTop = 0;
+                };
+
+                document.querySelector('#voting_system_page').addEventListener('search-request', function (e) {
+                    console.log("spa.xhtml - search request - query:" + e.detail.query);
+                })
+
+                document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
+                    console.log("spa.xhtml - user-clicked")
+                    page.show(contextURL + "/rest/user/id/" + e.detail.id + "?connectedDevices=true")
+                })
+
+                vs.updateMenuView()
             })
-
-            document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
-                console.log("spa.xhtml - user-clicked")
-                page.show(contextURL + "/rest/user/id/" + e.detail.id + "?connectedDevices=true")
-            })
-
-            vs.updateMenuView()
         </script>
     </ui:define>
 </ui:composition>

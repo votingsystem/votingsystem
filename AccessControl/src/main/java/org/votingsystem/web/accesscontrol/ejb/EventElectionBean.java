@@ -87,7 +87,7 @@ public class EventElectionBean {
             throw new ExceptionVS(messages.get("controlCenterCommunicationErrorMsg", controlCenter.getServerURL()));
         }
         query = dao.getEM().createQuery("select c from Certificate c where c.type =:type " +
-                "and c.actor =:actor and c.state =:state").setParameter("type", Certificate.Type.ACTOR_VS)
+                "and c.actor =:actor and c.state =:state").setParameter("type", Certificate.Type.ACTOR)
                 .setParameter("actor", controlCenter).setParameter("state", Certificate.State.OK);
         Certificate controlCenterCert = dao.getSingleResult(Certificate.class, query);
         Certificate controlCenterCertEventVS = dao.persist(

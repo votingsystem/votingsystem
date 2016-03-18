@@ -29,6 +29,11 @@
     "iron-elements": "PolymerElements/iron-elements#^1.0.4",
     "layout": "Polymer/layout",
     "visionmedia-page":"visionmedia/page.js#^1.6.4",
+
+    "vaadin-elements": "^0.3.0",
+    "vaadin-combo-box": "1.0.0-alpha6",
+
+
     "forge":"forge#~0.6.39"
   },
   "resolutions": {

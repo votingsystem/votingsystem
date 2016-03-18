@@ -37,7 +37,7 @@ public class Certificate extends EntityVS implements Serializable {
 
     public enum Type {
         VOTE_ROOT, VOTE, USER, USER_ID_CARD, BROWSER_SESSION, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD,
-        ACTOR_VS, ANONYMOUS_REPRESENTATIVE_DELEGATION, CURRENCY, TIMESTAMP_SERVER}
+        ACTOR, ANONYMOUS_REPRESENTATIVE_DELEGATION, CURRENCY, TIMESTAMP_SERVER}
 
     @Id @GeneratedValue(strategy=IDENTITY)
     @Column(name="id", unique=true, nullable=false) private Long id;
@@ -118,7 +118,7 @@ public class Certificate extends EntityVS implements Serializable {
     public static Certificate ACTOR(Actor actor, X509Certificate x509Cert)
             throws CertificateEncodingException {
         Certificate result = new Certificate(x509Cert);
-        result.type = Certificate.Type.ACTOR_VS;
+        result.type = Certificate.Type.ACTOR;
         result.state = Certificate.State.OK;
         result.subjectDN = x509Cert.getSubjectDN().toString();
         result.actor = actor;

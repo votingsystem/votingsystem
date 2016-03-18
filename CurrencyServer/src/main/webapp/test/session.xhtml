@@ -39,7 +39,7 @@
                 var PUBLIC_KEY_KEY         = "pk";
 
                 vs.getQRCodeURL = function(operation, operationCode, deviceId, sessionId, key) {
-                    var result = "${contextURL}/qr?cht=qr&chs=150x150&chl="
+                    var result = "${contextURL}/qr?cht=qr&chs=50x50&chl="
                     if(operation != null) result = result + OPERATION_KEY + "=" + operation + ";"
                     if(operationCode != null) result = result + OPERATION_CODE_KEY + "=" + operationCode + ";"
                     if(deviceId != null) result = result + DEVICE_ID_KEY + "=" + deviceId + ";"
