@@ -15,7 +15,7 @@
       var pageMap = {}
       page('*/innerVSPage*', function(ctx) {
           var route = getQueryParam('data_route', ctx.querystring)
-          if(route) vs.route = route
+          vs.route = route || "docs"
           var url = vs.contextURL + getQueryParam('url', ctx.querystring)
           var pageCaption = getQueryParam('caption', ctx.querystring)
           console.log("innerVSPage - url: " + url + " - caption: " + pageCaption)

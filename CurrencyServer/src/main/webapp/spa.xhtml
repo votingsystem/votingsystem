@@ -16,8 +16,9 @@
         <script src="./resources/js/utils.js" type="text/javascript"></script>
         <script src="./resources/js/utils_js.vsp" type="text/javascript"></script>
         <link href="./resources/d3.html" rel="import"/>
-        <link rel="import" href="./element/search-bar.vsp"/>
+        <link rel="import" href="./element/access-dialog.vsp"/>
         <link rel="import" href="./resources/routing.xhtml"/>
+        <link rel="import" href="./resources/forgePKCS7.html"/>
     </ui:define>
     <ui:define name="content">
         <div id="drawer" style="display: none;">
@@ -52,15 +53,15 @@
             </div>
         </div>
         <div id='main'>
-            <div class="horizontal layout" style="margin:1px 0 0 0;">
-                <div style="margin:0 30px 0 30px;">
-                    <i id="drawerButton" class="fa fa-navicon" style="font-size: 1.7em; color: #ba0011; cursor: pointer;"></i>
-                </div>
-                <div style="font-size: 1.3em;margin:0 0 0 50px; color: #888;text-decoration: underline;" id="selectedPageTitle"></div>
-                <div id="searchDiv" style="display: none;">
-                    <div style="max-width: 300px; margin: 0 0 0 30px;">
-                        <search-bar id="searchBar" class="horizontal layout center end-justified"></search-bar>
+            <div class="horizontal layout" style="background-color: #ba0011;padding: 1px 0 1px 0;">
+                <div class="horizontal layout flex">
+                    <div style="margin:0 30px 0 30px;">
+                        <i id="drawerButton" class="fa fa-navicon" style="font-size: 1.7em; color: #f9f9f9;margin:3px 0 0 0; cursor: pointer;"></i>
                     </div>
+                    <div style="font-size: 1.7em;margin:0 0 0 50px; color: #f9f9f9;" id="selectedPageTitle"></div>
+                </div>
+                <div id="accessDiv" style="font-size: 1.2em; color: #f9f9f9;margin:3px 30px 0 0; cursor: pointer;">
+                    #{msg.accessLbl}
                 </div>
             </div>
 
@@ -68,8 +69,11 @@
                         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
             <div id="mainContent" class="mainContent"></div>
+
+            <access-dialog id="accessDialog"></access-dialog>
         </div>
         <script>
+            //<![CDATA[
             //debugger;  this is to allow logging from extension content scripts
             window.addEventListener('WebComponentsReady', function() {
                 vs.back = function() {
@@ -80,17 +84,29 @@
                     }, 50);
                 }
 
-                d3.select("#drawerButton").on("click", function(e) {
+                document.querySelector("#drawerButton").addEventListener('click', function (event) {
                     d3.select("#drawer").style({display:'block'});
-                    d3.event.stopPropagation();
-                })
-
+                }, true);
 
                 document.body.addEventListener('click', function (event) {
                     console.log("document.body")
                     d3.select("#drawer").style({display:'none'});
                 }, true);
 
+
+                document.querySelector("#accessDiv").addEventListener('click', function (event) {
+                    if(!vs.rsaUtil.x509Certificate) {
+                        var operationCode = vs.operationCode()
+                        vs.qrOperationsMap[operationCode] = {operation:'INIT_REMOTE_SIGNED_SESSION'}
+                        document.querySelector("#accessDialog").show(operationCode, vs.getQRCodeURL(
+                                INIT_REMOTE_SIGNED_SESSION, operationCode, vs.wsDeviceId, null,
+                                vs.rsaUtil.publicKeyBase64, "150x150"))
+                    } else {
+                        alert("#{msg.quitConfirmMsg}", "#{msg.messageLbl}", function() {
+                            console.log("===== TODO quit session")
+                        })
+                    }
+                });
 
                 vs.updateMenuView = function() {
                     var appTitle = "${msg.appTitle}"
@@ -144,9 +160,126 @@
                     console.log("spa.xhtml - user-clicked")
                     page.show(vs.contextURL + "/rest/user/id/" + e.detail.id + "?connectedDevices=true")
                 })
-
                 vs.updateMenuView()
+                initWebsocket()
             })
+
+            var INIT_REMOTE_SIGNED_SESSION         = 0;
+            var QR_MESSAGE_INFO                    = 1;
+            var CURRENCY_SEND                      = 2;
+
+            var WEB_SOCKET_SESSION_KEY = "wsid";
+            var DEVICE_ID_KEY          = "did";
+            var OPERATION_KEY          = "op";
+            var OPERATION_CODE_KEY     = "opid";
+            var PUBLIC_KEY_KEY         = "pk";
+
+            vs.getQRCodeURL = function(operation, operationCode, deviceId, sessionId, key, size) {
+                if(!size) size = "100x100"
+                var result = "${contextURL}/qr?cht=qr&chs=" + size + "&chl="
+                if(operation != null) result = result + OPERATION_KEY + "=" + operation + ";"
+                if(operationCode != null) result = result + OPERATION_CODE_KEY + "=" + operationCode + ";"
+                if(deviceId != null) result = result + DEVICE_ID_KEY + "=" + deviceId + ";"
+                if(sessionId != null) result = result + WEB_SOCKET_SESSION_KEY + "=" + sessionId + ";"
+                if(key != null) result = result + PUBLIC_KEY_KEY + "=" + key + ";"
+                return result;
+            }
+
+            function initWebsocket() {
+                vs.rsaUtil = new RSAUtil();
+                var websocket
+                if ('WebSocket' in window) {
+                    websocket = new WebSocket("${webSocketURL}");
+                } else {
+                    alert('WebSocket is not supported by this browser.');
+                }
+                websocket.onopen = function () {
+                    console.log('Info: WebSocket connection opened.');
+                };
+                websocket.onmessage = function (event) {
+                    console.log('Received: ' + event.data);
+                    var messageJSON = toJSON(event.data)
+                    if("MESSAGEVS_FROM_VS" ===  messageJSON.operation) {
+                        messageJSON.operation = messageJSON.messageType
+                        switch(messageJSON.operation) {
+                            case "INIT_SESSION":
+                                vs.wsSessionId = messageJSON.sessionId
+                                websocket.send(JSON.stringify({operation:"INIT_BROWSER_SESSION"}))
+                                break;
+                            case "INIT_BROWSER_SESSION":
+                                if(ResponseVS.SC_OK == messageJSON.statusCode) {
+                                    vs.wsDeviceId = messageJSON.deviceId
+                                }
+                                break;
+                            case 'INIT_REMOTE_SIGNED_SESSION':
+                                if(ResponseVS.SC_WS_CONNECTION_INIT_OK == messageJSON.statusCode) {
+                                    vs.connectedDevice = messageJSON.connectedDevice
+                                    vs.mobileDevice = toJSON(messageJSON.message)
+                                    console.log("mobileDevice: ")
+                                    console.log(vs.mobileDevice)
+                                    console.log("connectedDevice: ")
+                                    console.log(vs.connectedDevice)
+                                    vs.rsaUtil.initCSR(vs.connectedDevice.x509CertificatePEM)
+                                    document.querySelector("#accessDiv").innerHTML = '#{msg.quitLbl}'
+                                    document.querySelector("#accessDialog").close()
+                                }
+                                break;
+                            default:
+                                if(messageJSON.statusCode === ResponseVS.SC_WS_CONNECTION_NOT_FOUND) {
+                                    alert(messageJSON.message, "${msg.errorLbl}")
+                                }
+                        }
+
+                    } else {
+                        vs.rsaUtil.decryptSocketMsg(messageJSON)
+                        console.log("decryptedSocketMsg: ")
+                        console.log(messageJSON)
+                        switch(messageJSON.operation) {
+                            case "QR_MESSAGE_INFO":
+                                var qrOperation = vs.qrOperationsMap[messageJSON.operationCode]
+                                var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
+                                    statusCode:700,
+                                    deviceToId:messageJSON.deviceFromId,
+                                    deviceId: vs.wsDeviceId, UUID:messageJSON.UUID}
+                                socketMessageDto.encryptedMessage = vs.encryptToCMS(
+                                        messageJSON.x509CertificatePEM, qrOperation)
+                                console.log(socketMessageDto)
+                                websocket.send(JSON.stringify(socketMessageDto))
+                                break;
+                            case 'INIT_REMOTE_SIGNED_SESSION':
+                                var qrOperation = vs.qrOperationsMap[messageJSON.operationCode]
+                                if(qrOperation.operation !== 'INIT_REMOTE_SIGNED_SESSION') {
+                                    throw new Error('INIT_REMOTE_SIGNED_SESSION - qrOperation ERROR');
+                                }
+                                var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
+                                    statusCode:700,
+                                    deviceToId:messageJSON.deviceFromId,
+                                    deviceId: vs.wsDeviceId}
+                                var userDataFromCert = vs.extractUserInfoFromCert(messageJSON.x509CertificatePEM)
+                                var csr = vs.rsaUtil.getCSR(userDataFromCert)
+                                var remoteSignedSessionDto = {csr:csr, deviceId:vs.wsDeviceId, sessionId:vs.wsSessionId}
+                                var encryptedDto = {operation:'INIT_REMOTE_SIGNED_SESSION',
+                                    operationCode:messageJSON.operationCode,
+                                    sessionId: vs.wsSessionId, deviceFromId: vs.wsDeviceId,
+                                    message:JSON.stringify(remoteSignedSessionDto),
+                                    uuid:messageJSON.uuid}
+                                socketMessageDto.encryptedMessage = vs.encryptToCMS(
+                                        messageJSON.x509CertificatePEM, encryptedDto)
+                                console.log("INIT_REMOTE_SIGNED_SESSION response: ")
+                                console.log(socketMessageDto)
+                                websocket.send(JSON.stringify(socketMessageDto))
+                                //delete vs.qrOperationsMap[messageJSON.operationCode];
+                                break;
+                        }
+                    }
+                };
+                websocket.onclose = function (event) {
+                    console.log('Info: WebSocket connection closed, Code: ' + event.code +
+                            (event.reason == "" ? "" : ", Reason: " + event.reason));
+                };
+            }
+
+            //]]>
         </script>
     </ui:define>
 </ui:composition>

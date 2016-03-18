@@ -12,8 +12,9 @@
             .name {color: #000; font-size: 0.9em;}
         </style>
         <div class="vertical layout center">
-            <div hidden={{!contactSelector}} class="horizontal layout center center-justified" style="margin:-10px 0 20px 0; cursor: pointer;">
-                <div id="searchDiv" on-click="setSearchView"
+            <div hidden={{!contactSelector}} class="horizontal layout center center-justified"
+                 style="margin:10px 0 20px 0; cursor: pointer; border-bottom: 1px solid #888; color: #0000ee;">
+                <div id="searchUserDiv" on-click="setSearchView"
                      style="font-weight: bold; font-size: 1.1em; margin:0 40px 0 0;">${msg.userSearchLbl}</div>
                 <div id="contactDiv" on-click="setContactsView" style="font-weight: bold; font-size: 1.1em; cursor: pointer;">${msg.contactsLbl}</div>
             </div>
@@ -80,10 +81,10 @@
                 console.log(this.tagName + " modeSearchChanged - modeSearch: " + this.modeSearch)
                 if(this.modeSearch === true) {
                     this.userListDto = {resultList:[]}
-                    this.$.searchDiv.style.borderBottom = '3px solid'
+                    this.$.searchUserDiv.style.borderBottom = '3px solid'
                     this.$.contactDiv.style.borderBottom = ''
                 } else {
-                    this.$.searchDiv.style.borderBottom = ''
+                    this.$.searchUserDiv.style.borderBottom = ''
                     this.$.contactDiv.style.borderBottom = '3px solid'
                     this.userListDto = {resultList:toJSON(this.contacts)}
                 }
@@ -167,7 +168,7 @@
             },
             setContactsView:function() {
                 this.modeSearch = false
-                if(this.contactsArray.length > 0) this.userListEmpty = false
+                if(this.contactsArray && this.contactsArray.length > 0) this.userListEmpty = false
             },
             setSearchView:function() {
                 this.modeSearch = true

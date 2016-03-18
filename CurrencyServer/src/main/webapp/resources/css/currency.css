@@ -51,7 +51,16 @@ body {
 }
 
 button i{color: #388746; }
-button {font-size: 1em; }
+button {
+    font-size: 1em;
+}
+
+button::-moz-focus-inner {
+    border:0;
+    padding:0;
+    margin: -2px 0 -2px 0;
+}
+
 
 .formFieldError{
     font-weight: bold;
