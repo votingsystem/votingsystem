@@ -49,9 +49,6 @@ public class Formatter {
                 case SEND_VOTE:
                     result = formatVote(dataMap);
                     break;
-                case FROM_GROUP_TO_ALL_MEMBERS:
-                    result = formatTransactionFromGroupToAllMembers(dataMap);
-                    break;
                 default:
                     log.info("Formatter not found for " + operation);
                     result = JSON.getMapper().configure(
@@ -74,12 +71,6 @@ public class Formatter {
         result.append("</html>");
         return JSON.getMapper().writeValueAsString(result);
     }
-
-    private static String formatTransactionFromGroupToAllMembers(Map dataMap){
-        return dataMap.toString();
-    }
-
-
 
     public static String getEvent (EventVS eventVS) {
         log.info("getEvent - eventVS: " + eventVS.getId());

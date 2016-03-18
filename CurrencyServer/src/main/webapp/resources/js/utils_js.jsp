@@ -65,9 +65,8 @@
         CURRENCY_PERIOD_INIT:{lbl:"${msg.currencyPeriodInitLbl}"},
         CURRENCY_PERIOD_INIT_TIME_LIMITED:{lbl:"${msg.currencyPeriodInitTimeLimitedLbl}"},
         FROM_BANK:{lbl:"${msg.bankInputLbl}"},
-        FROM_USER:{lbl:"${msg.transactionFromUser}"},
-        FROM_GROUP_TO_MEMBER_GROUP:{lbl:"${msg.transactionFromGroupToMemberGroup}"},
-        FROM_GROUP_TO_ALL_MEMBERS:{lbl:"${msg.transactionFromGroupToAllMembers}"}}
+        FROM_USER:{lbl:"${msg.transactionFromUser}"}
+    }
 
 
     window.addEventListener('WebComponentsReady', function() {

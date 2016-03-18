@@ -15,11 +15,11 @@
 
                 <div>
                     <div>
-                        <div class='groupSubjectDiv' style="display: inline;"><span style="font-weight: bold;">
+                        <div style="display: inline;"><span style="font-weight: bold;">
                             ${msg.serialNumberLbl}: </span>{{certvs.serialNumber}}</div>
                         <div id="certStateDiv" style="display: inline; margin:0px 0px 0px 20px; font-size: 1.2em; font-weight: bold; float: right;"></div>
                     </div>
-                    <div class='groupSubjectDiv'><span style="font-weight: bold;">${msg.subjectLbl}: </span>{{certvs.subjectDN}}</div>
+                    <div><span style="font-weight: bold;">${msg.subjectLbl}: </span>{{certvs.subjectDN}}</div>
                     <div><span style="font-weight: bold;">${msg.issuerLbl}: </span>
                         <a id="issuerURL" on-click="certIssuerClicked" style="cursor: pointer; text-decoration: underline;">{{certvs.issuerDN}}</a>
                     </div>

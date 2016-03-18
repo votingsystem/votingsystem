@@ -83,43 +83,6 @@
           });
       });
 
-      var groupEditor
-      page('/group_editor', function (ctx) {
-          vs.route = 'group_editor';
-          Polymer.Base.importHref('./group/group-editor.vsp', function () {
-              if (!groupEditor) groupEditor = document.createElement('group-editor');
-              vs.loadMainContent(groupEditor, "${msg.newGroupLbl}")
-          });
-      });
-
-      var groupList
-      page('*/group', function() {
-          vs.route = 'group';
-          Polymer.Base.importHref('./group/group-list.vsp', function(e) {
-              if(!groupList) {
-                  groupList = document.createElement('group-list');
-              }
-              vs.loadMainContent(groupList, "${msg.groupLbl}", true)
-          });
-      });
-
-      var groupUser
-      page('*/rest/group/id/*/user/id/*', function(data) {
-          vs.route = 'group';
-          console.log("routing.xhtml - TODO - groupUser - display with group-user - data.path: " + data.path)
-      });
-
-      var groupDetailsPage
-      page('*/rest/group/id/*', function(data) {
-          vs.route = 'group';
-          Polymer.Base.importHref('./group/group-details.vsp', function(e) {
-              if(!groupDetailsPage) groupDetailsPage = document.createElement('group-details');
-              if(vs.group) groupDetailsPage.group = vs.group
-              else groupDetailsPage.url = data.path
-              vs.loadMainContent(groupDetailsPage, "${msg.groupLbl}", false)
-          });
-      });
-
       var cmsMessageViewer
       page('*/cmsMessagePEM/id*', function(data) {
           vs.route = 'userDashboard';
@@ -128,11 +91,6 @@
               cmsMessageViewer.url = data.path
               vs.loadMainContent(cmsMessageViewer)
           });
-      });
-
-      page('*/newGroup', function() {
-          vs.route = 'newGroup';
-          VotingSystemClient.setMessage(new OperationVS(Operation.CURRENCY_GROUP_NEW))
       });
 
       var reports
@@ -205,11 +163,11 @@
       var userViewer
       page('*/user/IBAN/*', function(data) {
           vs.route = 'reports';
-          Polymer.Base.importHref('./user/user-viewer.vsp', function(e) {
-              if(!userViewer) userViewer = document.createElement('user-viewer');
+          Polymer.Base.importHref(vs.contextURL + '/user/user-data.vsp', function(e) {
+              if(!userViewer) userViewer = document.createElement('user-data');
               userViewer.url = data.path
               vs.loadMainContent(userViewer)
-          });
+          }.bind(this));
       });
 
       var userSelector
@@ -225,7 +183,7 @@
           hashbang: true // add #! before urls
       });
 
-      if(!vs.route) page("/group")
+      if(!vs.route) page("/transactionsDashboard")
   });
 </script>
 </html>

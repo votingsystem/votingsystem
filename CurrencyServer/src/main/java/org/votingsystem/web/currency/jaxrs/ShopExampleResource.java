@@ -7,9 +7,7 @@ import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
-import org.votingsystem.model.currency.Group;
 import org.votingsystem.model.currency.Transaction;
-import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaType;
 import org.votingsystem.web.currency.ejb.ShopExampleBean;
@@ -20,7 +18,6 @@ import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
-import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,7 +31,6 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,12 +53,8 @@ public class ShopExampleResource {
     @Path("/") @GET
     public Object index(@Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        Query query = dao.getEM().createQuery("select g from Group g").setMaxResults(1);
-        List<Group> result = query.getResultList();
-        if(result.isEmpty()) throw new ExceptionVS("To do the test you must enter a Group");
-        Group group = result.iterator().next();
-        TransactionDto dto = TransactionDto.PAYMENT_REQUEST(group.getName(), User.Type.GROUP,
-                new BigDecimal(5), "EUR", group.getIBAN(), "shop example payment - " + new Date(), "HIDROGENO");
+        TransactionDto dto = TransactionDto.PAYMENT_REQUEST("Receptor name", User.Type.USER,
+                new BigDecimal(5), "EUR", "IBANNumber12345", "shop example payment - " + new Date(), "HIDROGENO");
         dto.setPaymentOptions(Arrays.asList(Transaction.Type.FROM_USER,
                 Transaction.Type.CURRENCY_SEND, Transaction.Type.CURRENCY_CHANGE));
         String sessionID = dto.getUUID().substring(0, 8);

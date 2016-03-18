@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="../transaction/transaction-form.vsp" rel="import"/>
 <link href="../element/messagevs-send-dialog.vsp" rel="import"/>
 
 <dom-module name="user-data">
@@ -60,20 +59,7 @@
             <div hidden="{{!user.description}}" style="margin:0 0 20px 0;">
                 <div id="userDescriptionDiv" class="contentDiv" style=" border: 1px solid #c0c0c0;padding:10px;"></div>
             </div>
-            <div hidden="{{subscriptionsHidden}}"
-                 layout flex horizontal wrap style="border:1px solid #eee; padding: 5px;">
-                <div style="font-size: 0.9em;font-weight: bold; color: #888; margin:0 15px 0 0;">
-                    - ${msg.groupsLbl} -
-                </div>
-                <template is="dom-repeat" items="{{user.subscriptionList}}" as="subscription">
-                    <a href="{{getUserURL(subscription.group.id)}}"
-                       style="margin: 0 10px 10px 0;">{{subscription.group.name}}</a>
-                </template>
-            </div>
         </div>
-    </div>
-    <div hidden="{{transactionFormHidden}}">
-        <transaction-form id="transactionForm" fab-visible="true"></transaction-form>
     </div>
     <messagevs-send-dialog id="sendMessageDialog"></messagevs-send-dialog>
 </template>
@@ -87,8 +73,6 @@
             isAdmin: {type:Boolean, value:false},
             isConnected: {type:Boolean, value:false},
             isBank: {type:Boolean, value:false},
-            transactionFormHidden: {type:Boolean, value:true},
-            subscriptionsHidden: {type:Boolean, value:false},
             userType: {type:String},
             url:{type:String, observer:'getHTTP'},
             message: {type:String}
@@ -109,7 +93,6 @@
                 if('USER' == this.user.type) userType = "${msg.userLbl}"
                 if('SYSTEM' == this.user.type) userType = "${msg.systemLbl}"
             }
-            this.subscriptionsHidden = (!this.user.subscriptionList ||  this.user.subscriptionList.length === 0)
             this.isActive = (this.user.state === 'ACTIVE')
             this.isConnected = (this.user.connectedDevices && this.user.connectedDevices.length > 0)
             this.isBank = ('BANK' !== this.user.type)

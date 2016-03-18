@@ -10,10 +10,8 @@
             properties: {
                 cmsMessageDto:{type:Object, value:{}, observer:'cmsMessageChanged'},
                 MESSAGE_CMS:{type:Object, value:null},
-                CURRENCY_GROUP_NEW:{type:Object, value:null},
                 FROM_BANK:{type:Object, value:null},
                 CURRENCY_REQUEST:{type:Object, value:null},
-                FROM_GROUP_TO_ALL_MEMBERS:{type:Object, value:null},
                 CURRENCY_CHANGE:{type:Object, value:null},
                 viewer: {type:String, value: ""},
                 url:{type:String, observer:'getHTTP'},

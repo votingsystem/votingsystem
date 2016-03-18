@@ -1,21 +1,14 @@
 package org.votingsystem.test.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.cms.CMSGenerator;
 import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.currency.GroupDto;
-import org.votingsystem.dto.currency.SubscriptionDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
-import org.votingsystem.model.currency.CurrencyServer;
-import org.votingsystem.model.currency.Subscription;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
-import org.votingsystem.util.crypto.CMSUtils;
 import org.votingsystem.util.crypto.Encryptor;
 import org.votingsystem.util.crypto.KeyStoreUtil;
 import org.votingsystem.util.crypto.PEMUtils;
@@ -27,7 +20,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -182,58 +175,6 @@ public class SignatureService {
         String userSubPath = StringUtils.getUserDirPath(userNIF);
         ContextVS.getInstance().copyFile(keyStoreBytes, userSubPath,  "user_" + userNIF + ".jks");
         return keyStore;
-    }
-
-    public List<DNIBundle> subscribeUsers(GroupDto groupDto, SimulationData simulationData,
-                                          CurrencyServer currencyServer) throws Exception {
-        log.info("subscribeUser - Num. Users:" + simulationData.getNumRequestsProjected());
-        List<DNIBundle> userList = new ArrayList<>();
-        int fromFirstUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue();
-        int toLastUser = simulationData.getUserBaseSimulationData().getUserIndex().intValue() +
-                simulationData.getNumRequestsProjected();
-        for(int i = fromFirstUser; i < toLastUser; i++ ) {
-            int userIndex = new Long(simulationData.getUserBaseSimulationData().getAndIncrementUserIndex()).intValue();
-            String userNif = NifUtils.getNif(userIndex);
-            KeyStore mockDnie = generateKeyStore(userNif);
-            groupDto.setUUID(UUID.randomUUID().toString());
-            CMSGenerator cmsGenerator = new CMSGenerator(mockDnie, ContextVS.END_ENTITY_ALIAS,
-                    ContextVS.PASSWORD.toCharArray(), ContextVS.SIGNATURE_ALGORITHM);
-            userList.add(new DNIBundle(userNif, mockDnie));
-            byte[] contentToSign = JSON.getMapper().writeValueAsBytes(groupDto);
-            TimeStampToken timeStampToken = CMSUtils.getTimeStampToken(cmsGenerator.getSignatureMechanism() ,contentToSign);
-            CMSSignedMessage cmsMessage = cmsGenerator.signDataWithTimeStamp(contentToSign, timeStampToken);
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
-                    currencyServer.getGroupSubscriptionServiceURL(simulationData.getGroupId()));
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) {
-                throw new org.votingsystem.throwable.ExceptionVS("ERROR nif: " + userNif + " - msg:" + responseVS.getMessage());
-            } else simulationData.getAndIncrementNumRequestsOK();
-            if((i % 50) == 0) log.info("Subscribed " + i + " of " +
-                    simulationData.getUserBaseSimulationData().getNumRequestsProjected() + " users to group");
-        }
-        log.info("subscribeUser - '" + userList.size() + "' user subscribed");
-        return userList;
-    }
-
-    public Collection<SubscriptionDto> validateUserSubscriptions(
-            Long groupId, CurrencyServer currencyServer) throws Exception {
-        log.info("validateUserSubscriptions");
-        ResultListDto<SubscriptionDto> subscriptionDtoList = HttpHelper.getInstance().getData(
-                new TypeReference<ResultListDto<SubscriptionDto>>(){},
-                currencyServer.getGroupUsersServiceURL(groupId, 1000, 0, Subscription.State.PENDING, User.State.ACTIVE),
-                MediaType.JSON);
-        for(SubscriptionDto subscriptionDto : subscriptionDtoList.getResultList()) {
-            if(subscriptionDto.getState() == Subscription.State.PENDING) {
-                subscriptionDto.loadActivationRequest();
-            }
-        }
-        for (SubscriptionDto subscriptionDto : subscriptionDtoList.getResultList()) {
-            CMSSignedMessage cmsMessage = signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(subscriptionDto));
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
-                    currencyServer.getGroupUsersActivationServiceURL());
-            if (ResponseVS.SC_OK != responseVS.getStatusCode()) throw new org.votingsystem.throwable.ExceptionVS(
-                    responseVS.getMessage());
-        }
-        return subscriptionDtoList.getResultList();
     }
 
 }

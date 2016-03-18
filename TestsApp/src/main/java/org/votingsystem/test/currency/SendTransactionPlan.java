@@ -22,9 +22,7 @@ public class SendTransactionPlan {
         TransactionPlanDto transactionPlanDto = JSON.getMapper().readValue(transactionPlan, TransactionPlanDto.class);
         transactionPlanDto.setCurrencyServer(currencyServer);
         transactionPlanDto.runBankTransactions();
-        transactionPlanDto.runGroupTransactions();
-        log.info("bankCurrencyResultMap: " + transactionPlanDto.getBankBalance() + "\n groupCurrencyResultMap: " +
-                transactionPlanDto.getGroupBalance());
+        log.info("bankCurrencyResultMap: " + transactionPlanDto.getBankBalance());
     }
 
 }

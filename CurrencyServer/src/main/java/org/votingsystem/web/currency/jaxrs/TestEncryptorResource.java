@@ -1,22 +1,11 @@
 package org.votingsystem.web.currency.jaxrs;
 
-import org.votingsystem.cms.CMSSignedMessage;
-import org.votingsystem.dto.EncryptedContentDto;
-import org.votingsystem.model.CMSMessage;
-import org.votingsystem.util.MediaType;
-import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.inject.Inject;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 import java.util.logging.Logger;
 
 @Path("/testEncryptor")

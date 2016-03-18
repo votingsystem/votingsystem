@@ -21,9 +21,6 @@ public class DashBoardDto {
     private Long numTransCurrencyChange;
     private Long numTransCancellation;
 
-    private TransFromGroup transFromGroupToMemberGroup;
-    private TransFromGroup transFromGroupToAllMembers;
-
     public DashBoardDto () {}
 
     public DashBoardDto(Interval timePeriod) {
@@ -100,22 +97,6 @@ public class DashBoardDto {
 
     public void setNumTransCancellation(Long numTransCancellation) {
         this.numTransCancellation = numTransCancellation;
-    }
-
-    public TransFromGroup getTransFromGroupToMemberGroup() {
-        return transFromGroupToMemberGroup;
-    }
-
-    public void setTransFromGroupToMemberGroup(TransFromGroup transFromGroupToMemberGroup) {
-        this.transFromGroupToMemberGroup = transFromGroupToMemberGroup;
-    }
-
-    public TransFromGroup getTransFromGroupToAllMembers() {
-        return transFromGroupToAllMembers;
-    }
-
-    public void setTransFromGroupToAllMembers(TransFromGroup transFromGroupToAllMembers) {
-        this.transFromGroupToAllMembers = transFromGroupToAllMembers;
     }
 
     public Long getNumTransCurrencyChange() {

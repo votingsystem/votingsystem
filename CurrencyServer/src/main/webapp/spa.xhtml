@@ -25,9 +25,6 @@
                 <div id="pageTitle" class="app-name" style="padding: 8px 0 8px 15px;font-size: 1.8em; font-weight: bold;"></div>
             </div>
             <div class="vertical layout flex" style="background-color: #fefefe;">
-                <a class="menuItem menuItemSelected" data-route="group" href="#{contextURL}/spa.xhtml#!/group">
-                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.selectGroupLbl}
-                </a>
                 <a class="menuItem menuItemSelected" data-route="transactionsDashboard" href="#{contextURL}/spa.xhtml#!/transactionsDashboard">
                     <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
                 </a>
@@ -36,9 +33,6 @@
                 </a>
                 <a class="menuItem menuItemSelected" data-route="currencyRequest" href="#{contextURL}/spa.xhtml#!/currency/request">
                     <i class="fa fa-money" style="margin:0px 10px 0px 0px;"></i> ${msg.doCurrencyRequestLbl}
-                </a>
-                <a class="menuItem menuItemSelected isAdminView" data-route="newGroup" href="#{contextURL}/spa.xhtml#!/group_editor">
-                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.newGroupLbl}
                 </a>
                 <a class="menuItem menuItemSelected isSuperUserView" data-route="newBank" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/user/newBank.xhtml&amp;caption=${msg.newBankLbl}&amp;data_route=newBank">
                     <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankLbl}
@@ -65,12 +59,12 @@
                 <div style="margin:0 30px 0 30px;">
                     <i id="drawerButton" class="fa fa-navicon" style="font-size: 1.7em; color: #ba0011; cursor: pointer;"></i>
                 </div>
+                <div style="font-size: 1.3em;margin:0 0 0 50px; color: #888;text-decoration: underline;" id="selectedPageTitle"></div>
                 <div id="searchDiv" style="display: none;">
-                    <div style="max-width: 300px;">
+                    <div style="max-width: 300px; margin: 0 0 0 30px;">
                         <search-bar id="searchBar" class="horizontal layout center end-justified"></search-bar>
                     </div>
                 </div>
-                <div style="font-size: 1.3em;margin:0 0 0 50px; color: #888;text-decoration: underline;" id="selectedPageTitle"></div>
             </div>
 
             <p id="pageInfoPanel" class="text-center" style="margin: 20px auto 20px auto; font-size: 1.3em;

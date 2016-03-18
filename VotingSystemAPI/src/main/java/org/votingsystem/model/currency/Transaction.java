@@ -4,7 +4,6 @@ import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -57,9 +56,8 @@ public class Transaction implements Serializable {
     public enum Source {FROM, TO}
 
     public enum Type {
-        FROM_BANK, FROM_USER, FROM_GROUP_TO_MEMBER_GROUP, FROM_GROUP_TO_ALL_MEMBERS,
-        CURRENCY_PERIOD_INIT, CURRENCY_PERIOD_INIT_TIME_LIMITED, CURRENCY_REQUEST, CURRENCY_SEND, CURRENCY_CHANGE,
-        CANCELLATION, TRANSACTION_INFO; }
+        FROM_BANK, FROM_USER, CURRENCY_PERIOD_INIT, CURRENCY_PERIOD_INIT_TIME_LIMITED, CURRENCY_REQUEST, CURRENCY_SEND,
+        CURRENCY_CHANGE, CANCELLATION, TRANSACTION_INFO; }
 
     public enum State { OK, REPEATED, CANCELED;}
 

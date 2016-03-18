@@ -16,7 +16,7 @@
                     {{messageToUser}}
                 </div>
                 <div style="margin:20px 0px 10px 0px;">
-                    <label>${msg.cancelSubscriptionFormMsg}</label>
+                    <label>${msg.reasonsLbl}</label>
                     <textarea id="reason" rows="8" required="" style="width: 400px;"></textarea>
                 </div>
 

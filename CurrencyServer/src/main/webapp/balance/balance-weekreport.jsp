@@ -98,10 +98,6 @@
                     this.infoName = this.balance.user.nif
                     this.name = this.balance.user.firstName + " " + this.balance.user.lastName
                 }
-                if(this.type === "group") {
-                    this.infoName = "${msg.groupLbl}"
-                    this.name = this.balance.user.name
-                }
                 if(this.type === "systemVS") {
                     this.infoName = "${msg.systemLbl}"
                     this.name = this.balance.user.name
@@ -138,11 +134,6 @@
         <div class="layout center center-justified" style="margin: 0px auto 0px auto;">
             <div class="layout flex horizontal wrap around-justified">
                 <balance-user-details type="systemVS" balance="{{balances.userBalances.systemBalance}}"></balance-user-details>
-            </div>
-            <div class="layout flex horizontal wrap around-justified">
-                <template is="dom-repeat" items="{{balances.userBalances.groupBalanceList}}" as="groupBalance">
-                    <balance-user-details type="group" balance="{{groupBalance}}"></balance-user-details>
-                </template>
             </div>
             <div class="layout flex horizontal wrap around-justified">
                 <template is="dom-repeat" items="{{balances.userBalances.userBalanceList}}" as="userBalance">

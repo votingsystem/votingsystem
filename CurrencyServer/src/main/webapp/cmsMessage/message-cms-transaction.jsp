@@ -99,12 +99,6 @@
                 this.messageToUser = null
                 console.log(this.tagName + " - cmsMessageContentChanged: " + JSON.stringify(this.cmsMessageContent))
                 this.tagName = this.cmsMessageContent.tags[0]
-                switch (this.cmsMessageContent.type) {
-                    case 'FROM_GROUP_TO_ALL_MEMBERS':
-                        this.messageType = "${msg.transactionFromGroupToAllMembers}"
-                        this.fromUserIBAN = this.cmsMessageContent.fromUserIBAN
-                        break;
-                }
                 sendSignalVS({caption:this.messageType})
             },
             showByUserIBAN:function(e) {

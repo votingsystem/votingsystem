@@ -58,7 +58,6 @@
             is:'user-selector',
             properties: {
                 url:{type:String, observer:'getHTTP'},
-                groupId:{type:Number},
                 userListDto:{type:Object, value:{resultList:[]}, observer:'userListDtoChanged'},
                 contactSelector:{type:Boolean, value:true},
                 modeSearch:{type:Boolean, value:true, observer:'modeSearchChanged'},
@@ -165,7 +164,6 @@
                 this.textToSearch = this.$.inputSearch.value.trim()
                 if(this.textToSearch === "") return
                 this.url = null
-                if(this.groupId) this.url = vs.contextURL + "/rest/group/id/" + this.groupId + "/searchUsers?searchText=" + this.textToSearch
                 else this.url = vs.contextURL + "/rest/user/search?searchText=" + this.textToSearch
             },
             setContactsView:function() {

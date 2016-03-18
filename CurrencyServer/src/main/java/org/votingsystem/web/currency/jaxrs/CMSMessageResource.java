@@ -85,9 +85,6 @@ public class CMSMessageResource {
             case CURRENCY_REQUEST:
                 viewer = "message-cms-transaction-currency-request";
                 break;
-            case FROM_GROUP_TO_ALL_MEMBERS:
-                viewer = "message-cms-transaction";
-                break;
             case CURRENCY_CHANGE:
                 signedContentMap.remove("currencySet");
                 signedContentMap.remove("currencyChangeCSR");

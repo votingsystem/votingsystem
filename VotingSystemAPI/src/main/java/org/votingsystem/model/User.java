@@ -20,7 +20,6 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.KeyStore;
-import java.security.Principal;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -55,7 +54,7 @@ public class User extends EntityVS implements Serializable {
 
     private static Logger log = Logger.getLogger(User.class.getName());
 
-    public enum Type {USER, GROUP, SYSTEM, REPRESENTATIVE, BANK}
+    public enum Type {USER, SYSTEM, REPRESENTATIVE, BANK}
 
     public enum State {ACTIVE, PENDING, SUSPENDED, CANCELED}
 

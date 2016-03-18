@@ -37,13 +37,13 @@
                     <div class="certDiv" on-tap="showCert">
                         <div>
                             <div class="horizontal layout">
-                                <div class='groupSubjectDiv'><span style="font-weight: bold;">
+                                <div><span style="font-weight: bold;">
                                             ${msg.serialNumberLbl}: </span>{{item.serialNumber}}</div>
                                 <div id="certStateDiv" style="margin:0px 0px 0px 20px; font-size: 1.2em;
                                         font-weight: bold; float: right;">{{getState(item.state)}}</div>
                             </div>
                         </div>
-                        <div class='groupSubjectDiv'><span style="font-weight: bold;">${msg.subjectLbl}:</span>
+                        <div><span style="font-weight: bold;">${msg.subjectLbl}:</span>
                             <span>{{item.subjectDN}}</span></div>
                         <div><span style="font-weight: bold;">${msg.issuerLbl}:</span> <span>{{item.issuerDN}}</span></div>
                         <div><span style="font-weight: bold;">${msg.signatureAlgotithmLbl}: </span>{{item.sigAlgName}}</div>

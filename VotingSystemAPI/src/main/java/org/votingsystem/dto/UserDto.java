@@ -6,7 +6,6 @@ import org.votingsystem.model.Certificate;
 import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
-import org.votingsystem.model.currency.Group;
 import org.votingsystem.util.TypeVS;
 
 import java.io.Serializable;
@@ -127,10 +126,6 @@ public class UserDto implements Serializable {
         switch (type) {
             case BANK:
                 user = new Bank();
-                break;
-            case GROUP:
-                user = new Group();
-                if(representative != null) ((Group) user).setRepresentative(representative.getUser());
                 break;
             default:
                 user = new User();

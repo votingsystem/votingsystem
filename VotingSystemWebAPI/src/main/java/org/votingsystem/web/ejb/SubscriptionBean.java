@@ -2,17 +2,12 @@ package org.votingsystem.web.ejb;
 
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.DeviceDto;
-import org.votingsystem.dto.currency.SubscriptionDto;
-import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
-import org.votingsystem.model.currency.Group;
-import org.votingsystem.model.currency.Subscription;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -25,7 +20,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -121,65 +115,6 @@ public class SubscriptionBean {
                 dto.getDeviceType());
         device.setState(Device.State.PENDING);
         return dao.persist(device);
-    }
-
-    public Subscription deActivateUser(CMSMessage cmsMessage) throws Exception {
-        User signer = cmsMessage.getUser();
-        log.log(Level.FINE, "signer: " + signer.getNif());
-        SubscriptionDto request = cmsMessage.getSignedContent(SubscriptionDto.class);
-        Group group = dao.find(Group.class, request.getGroupId());
-        if(group == null || !request.getGroupName().equals(group.getName())) {
-            throw new ExceptionVS("group with name: " + request.getGroupName() + " and id: " + request.getId() + " not found");
-        }
-        if(!group.getRepresentative().getNif().equals(request.getUserNIF()) && !cmsBean.isAdmin(signer.getNif())) {
-            throw new ExceptionVS("'userWithoutGroupPrivilegesErrorMsg - group:" + request.getGroupName() + " - nif:" +
-                    signer.getNif());
-        }
-        Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getUserNIF());
-        User groupUser = dao.getSingleResult(User.class, query);
-        if(groupUser == null) throw new ValidationException("user unknown - nif:" + request.getUserNIF());
-        query = dao.getEM().createNamedQuery("findSubscriptionByGroupAndUser").setParameter("group", group)
-                .setParameter("user", groupUser);
-        Subscription subscription = dao.getSingleResult(Subscription.class, query);
-        if(subscription == null || Subscription.State.CANCELED == subscription.getState()) {
-            throw new ExceptionVS("groupUserAlreadyCencelledErrorMsg - user nif: " + request.getUserNIF() +
-                    " - group: " + request.getGroupName());
-        }
-        subscription.setReason(request.getReason());
-        subscription.setState(Subscription.State.CANCELED);
-        subscription.setDateCancelled(new Date());
-        subscription.setCancellationCMS(cmsMessage);
-        log.info("deActivateUser OK - user nif: " + request.getUserNIF() + " - group: " + request.getGroupName());
-        return subscription;
-    }
-
-    public Subscription activateUser(CMSMessage cmsMessage) throws Exception {
-        User signer = cmsMessage.getUser();
-        log.info("signer: " + signer.getNif());
-        SubscriptionDto request = cmsMessage.getSignedContent(SubscriptionDto.class);
-        request.validateActivationRequest();
-        Group group = dao.find(Group.class, request.getGroupId());
-        if(group == null || !request.getGroupName().equals(group.getName())) {
-            throw new ValidationException("Group with id: " + request.getId() + " and name: " + request.getGroupName() + " not found");
-        }
-        if(!group.getRepresentative().getNif().equals(signer.getNif()) && !cmsBean.isAdmin(signer.getNif())) {
-            throw new ValidationException("userWithoutGroupPrivilegesErrorMsg - operation: " +
-                    TypeVS.CURRENCY_GROUP_USER_ACTIVATE.toString() + " - nif: " + signer.getNif() + " - group: " +
-                    request.getGroupName());
-        }
-        Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", request.getUserNIF());
-        User groupUser = dao.getSingleResult(User.class, query);
-        if(groupUser == null) throw new ValidationException("user unknown - nif:" + request.getUserNIF());
-        query = dao.getEM().createNamedQuery("findSubscriptionByGroupAndUser").setParameter("group", group)
-                .setParameter("user", groupUser);
-        Subscription subscription = dao.getSingleResult(Subscription.class, query);
-        if(subscription == null) throw new ValidationException("user:" + request.getUserNIF() +
-                " has not pending subscription request");
-        subscription.setState(Subscription.State.ACTIVE);
-        subscription.setDateActivated(new Date());
-        subscription.setActivationCMS(cmsMessage);
-        log.info("activateUser OK - user nif: " + request.getUserNIF() + " - group: " + request.getGroupName());
-        return subscription;
     }
     
 }

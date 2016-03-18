@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.dto.currency.GroupDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
@@ -31,16 +30,11 @@ public class TransactionPlanDto {
 
     private static Logger log = Logger.getLogger(TransactionPlanDto.class.getName());
 
-
     private Interval timePeriod;
-    private GroupDto groupDto;
     @JsonIgnore private CurrencyServer currencyServer;
     private List<TransactionDto> bankList = new ArrayList<>();
-    private List<TransactionDto> groupList = new ArrayList<>();
     private List<TransactionDto> userList = new ArrayList<>();
     private Map<String, Map<String, BigDecimal>> bankBalance;
-    private Map<String, Map<String, BigDecimal>> groupBalance;
-
 
     public TransactionPlanDto() {  }
 
@@ -69,27 +63,9 @@ public class TransactionPlanDto {
         return bankBalance;
     }
 
-    public Map<String, Map<String, BigDecimal>> runGroupTransactions() throws Exception {
-        groupBalance = new HashMap<>();
-        for(TransactionDto transaction : getGroupList()) {
-            transaction.setFromUserIBAN(groupDto.getIBAN());
-            transaction.setUUID(UUID.randomUUID().toString());
-            UserDto representative = groupDto.getRepresentative();
-            SignatureService signatureService = SignatureService.getUserSignatureService(
-                    representative.getNIF(), User.Type.USER);
-            CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(
-                    JSON.getMapper().writeValueAsBytes(transaction));
-            ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
-                    getCurrencyServer().getTransactionServiceURL());
-            if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-            updateCurrencyMap(groupBalance, transaction);
-        }
-        return groupBalance;
-    }
 
     public void runTransactionsVS() throws Exception {
         runBankTransactions();
-        runGroupTransactions();
     }
 
     public static Map<String, Map<String, BigDecimal>> updateCurrencyMap(
@@ -115,7 +91,6 @@ public class TransactionPlanDto {
     public List<TransactionDto> getTransacionList() {
         List<TransactionDto> result = new ArrayList<>();
         result.addAll(getBankList());
-        result.addAll(getGroupList());
         result.addAll(getUserList());
         return result;
     }
@@ -160,14 +135,6 @@ public class TransactionPlanDto {
         this.bankList = bankList;
     }
 
-    public List<TransactionDto> getGroupList() {
-        return groupList;
-    }
-
-    public void setGroupList(List<TransactionDto> groupList) {
-        this.groupList = groupList;
-    }
-
     public List<TransactionDto> getUserList() {
         return userList;
     }
@@ -184,19 +151,4 @@ public class TransactionPlanDto {
         this.bankBalance = bankBalance;
     }
 
-    public Map<String, Map<String, BigDecimal>> getGroupBalance() {
-        return groupBalance;
-    }
-
-    public void setGroupBalance(Map<String, Map<String, BigDecimal>> groupBalance) {
-        this.groupBalance = groupBalance;
-    }
-
-    public GroupDto getGroupDto() {
-        return groupDto;
-    }
-
-    public void setGroupDto(GroupDto groupDto) {
-        this.groupDto = groupDto;
-    }
 }

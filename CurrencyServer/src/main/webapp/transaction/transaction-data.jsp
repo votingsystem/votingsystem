@@ -133,15 +133,6 @@
                     case 'FROM_BANK':
                         this.caption = "${msg.transactionFromBank}"
                         break;
-                    case 'FROM_GROUP_TO_ALL_MEMBERS':
-                        this.isReceptorVisible = false
-                        this.caption = "${msg.transactionFromGroupToAllMembers}"
-                        this.receptorMsg = "${msg.transactionGroupReceptorsMsg}".format(
-                                this.transaction.numChildTransactions)
-                        break;
-                    case 'FROM_GROUP_TO_MEMBER_GROUP':
-                        this.caption = "${msg.transactionFromGroupToMemberGroup}"
-                        break;
                     case 'CURRENCY_PERIOD_INIT':
                         this.caption = "${msg.currencyPeriodInitLbl}"
                         this.$.fromUserDiv.innerHTML = "${msg.systemLbl}"
@@ -164,14 +155,6 @@
                 }
                 this.tagsHidden = (!this.transaction.tags || this.transaction.tags.length === 0)
                 this.timeStampDate = this.getDate(this.transaction.dateCreated)
-            },
-            showToUserInfo:function(e) {
-                var groupURL = vs.contextURL + "/rest/group/" + this.transaction.toUserName.id
-                console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
-            },
-            showFromUserInfo:function(group) {
-                var groupURL = vs.contextURL + "/rest/group/" +  this.transaction.fromUserName.id
-                console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showFromUserIBAN:function(e) {
                 var serviceURL = vs.contextURL + "/rest/user/IBAN/" + this.getFromUserIBAN(this.transaction)

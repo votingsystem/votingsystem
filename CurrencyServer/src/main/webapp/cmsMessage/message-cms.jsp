@@ -82,13 +82,6 @@
                     case 'FROM_BANK':
                         this.caption = "${msg.transactionFromBank}"
                         break;
-                    case 'FROM_GROUP_TO_ALL_MEMBERS':
-                        this.isReceptorVisible = false
-                        this.caption = "${msg.transactionFromGroupToAllMembers}"
-                        break;
-                    case 'FROM_GROUP_TO_MEMBER_GROUP':
-                        this.caption = "${msg.transactionFromGroupToMemberGroup}"
-                        break;
                     case 'CURRENCY_PERIOD_INIT':
                         this.caption = "${msg.currencyPeriodInitLbl}"
                         this.$.fromUserDiv.innerHTML = "${msg.systemLbl}"
@@ -114,14 +107,6 @@
 
                 }
                 this.messageContent = this.cmsMessageContent
-            },
-            showToUserInfo:function(e) {
-                var groupURL = vs.contextURL + "/rest/group/" + e.model.item.toUserName.id
-                console.log(this.tagName + "- showToUserInfo - groupURL: " + groupURL)
-            },
-            showFromUserInfo:function(group) {
-                var groupURL = vs.contextURL + "/rest/group/" +  e.model.item.fromUserName.id
-                console.log(this.tagName + "- showFromUserInfo - groupURL: " + groupURL)
             },
             showInfoIBAN:function(e) {
                 var fromUserIBANInfoURL = vs.contextURL + "/rest/IBAN/from/" + e.model.item.fromUserName.sender.fromUserIBAN

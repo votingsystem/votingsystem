@@ -27,14 +27,6 @@
                 <div class="numTrans">{{dashBoardDto.numTransFromUser}}</div>
                 <div class="transDesc">${msg.transactionFromUser}</div>
             </div>
-            <div id="FROM_GROUP_TO_MEMBER_GROUP" class="transBlock" on-click="transBlockSelected">
-                <div class="numTrans">{{fromGroupToMemberGroupInfo}}</div>
-                <div class="transDesc">${msg.transactionFromGroupToMemberGroup}</div>
-            </div>
-            <div id="FROM_GROUP_TO_ALL_MEMBERS" class="transBlock" on-click="transBlockSelected">
-                <div class="numTrans">{{fromGroupToAllMembersInfo}}</div>
-                <div class="transDesc">${msg.transactionFromGroupToAllMembers}</div>
-            </div>
             <div id="CURRENCY_PERIOD_INIT" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencyInitPeriod}}</div>
                 <div class="transDesc">${msg.currencyPeriodInitLbl}</div>
@@ -82,14 +74,6 @@
             console.log(this.tagName + " - timePeriod:" + JSON.stringify(this.dashBoardDto.timePeriod) )
             this.dateFrom = new Date(this.dashBoardDto.timePeriod.dateFrom)
             this.dateTo = new Date(this.dashBoardDto.timePeriod.dateTo)
-            if(this.dashBoardDto.transFromGroupToMemberGroup.numTrans > 0) {
-                this.fromGroupToMemberGroupInfo = this.dashBoardDto.transFromGroupToMemberGroup.numTrans + " trans - " +
-                        dashBoardDto.transFromGroupToMemberGroup.numUsers + " users"
-            } else this.fromGroupToMemberGroupInfo = 0
-            if(this.dashBoardDto.transFromGroupToAllMembers.numTrans > 0) {
-                this.fromGroupToAllMembersInfo = this.dashBoardDto.transFromGroupToAllMembers.numTrans + " trans - " +
-                        this.dashBoardDto.transFromGroupToAllMembers.numUsers + " users"
-            } else this.fromGroupToAllMembersInfo = 0
         },
         selectAction: function() {
             var servicePath = "/rest/app/userDashboard/hoursAgo/" + this.$.transactionLapsedSelect.value

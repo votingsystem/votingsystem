@@ -9,7 +9,6 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.Group;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationException;
@@ -42,7 +41,6 @@ public class TransactionBean {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject BalancesBean balancesBean;
-    @Inject TransactionGroupBean transactionGroupBean;
     @Inject TransactionBankBean transactionBankBean;
     @Inject TransactionUserBean transactionUserBean;
 
@@ -68,9 +66,6 @@ public class TransactionBean {
         switch(request.getOperation()) {
             case FROM_BANK:
                 return transactionBankBean.processTransaction(request, tagVS);
-            case FROM_GROUP_TO_MEMBER_GROUP:
-            case FROM_GROUP_TO_ALL_MEMBERS:
-                return transactionGroupBean.processTransaction(request, tagVS);
             case FROM_USER:
                 return transactionUserBean.processTransaction(request, tagVS);
             default:
@@ -214,13 +209,6 @@ public class TransactionBean {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         TransactionDto dto = new TransactionDto(transaction, config.getContextURL());
         dto.setDescription(getTransactionTypeDescription(transaction.getType().toString()));
-        if(transaction.getType()  == Transaction.Type.FROM_GROUP_TO_ALL_MEMBERS) {
-            Transaction transactionParent =
-                    (transaction.getTransactionParent() == null)? transaction : transaction.getTransactionParent();
-            Query query = dao.getEM().createNamedQuery("countTransByTransactionParent")
-                    .setParameter("transactionParent", transactionParent);
-            dto.setNumChildTransactions((long) query.getSingleResult());
-        }
         if(transaction.getTag() != null) {
             String tagName = TagVS.WILDTAG.equals(transaction.getTag().getName())? messages.get("wildTagLbl")
                     .toUpperCase(): transaction.getTag().getName();
@@ -254,25 +242,11 @@ public class TransactionBean {
     }
 
     public List<Transaction> getTransactionFromList(User fromUser, Interval timePeriod) {
-        List<Transaction> transactionList = null;
-        Query query = null;
-        if(fromUser instanceof Group) {
-            query = dao.getEM().createQuery("SELECT t FROM Transaction t WHERE (t.fromUser =:fromUser and t.state =:state " +
-                    "and t.transactionParent is not null and t.dateCreated between :dateFrom and :dateTo " +
-                    "and t.type not in (:notList)) OR (t.fromUser =:fromUser and t.state =:state " +
-                    "and t.transactionParent is null and  t.dateCreated between :dateFrom and :dateTo " +
-                    "and t.type in (:inList))").setParameter("fromUser", fromUser).setParameter("state", Transaction.State.OK)
-                    .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())
-                    .setParameter("notList", Arrays.asList(Transaction.Type.FROM_GROUP_TO_ALL_MEMBERS, Transaction.Type.CURRENCY_PERIOD_INIT))
-                    .setParameter("inList", Arrays.asList(Transaction.Type.FROM_GROUP_TO_ALL_MEMBERS));
-            transactionList = query.getResultList();
-        } else {
-            query = dao.getEM().createNamedQuery("findUserTransFromByFromUserAndStateAndDateCreatedAndInList")
-                    .setParameter("fromUser", fromUser).setParameter("state", Transaction.State.OK)
-                    .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())
-                    .setParameter("inList", Arrays.asList(Transaction.Type.CURRENCY_REQUEST, Transaction.Type.FROM_USER));
-            transactionList = query.getResultList();
-        }
+        Query query = dao.getEM().createNamedQuery("findUserTransFromByFromUserAndStateAndDateCreatedAndInList")
+                .setParameter("fromUser", fromUser).setParameter("state", Transaction.State.OK)
+                .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo", timePeriod.getDateTo())
+                .setParameter("inList", Arrays.asList(Transaction.Type.CURRENCY_REQUEST, Transaction.Type.FROM_USER));
+        List<Transaction> transactionList = query.getResultList();
         return transactionList;
     }
 

@@ -18,14 +18,15 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.BankInfo;
-import org.votingsystem.model.currency.Group;
-import org.votingsystem.model.currency.Subscription;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Interval;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaType;
 import org.votingsystem.util.crypto.PEMUtils;
-import org.votingsystem.web.currency.ejb.*;
+import org.votingsystem.web.currency.ejb.BalancesBean;
+import org.votingsystem.web.currency.ejb.BankBean;
+import org.votingsystem.web.currency.ejb.TransactionBean;
+import org.votingsystem.web.currency.ejb.UserBean;
 import org.votingsystem.web.currency.websocket.SessionManager;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -55,7 +56,6 @@ public class UserResource {
     private static final Logger log = Logger.getLogger(UserResource.class.getName());
 
     @Inject TransactionBean transactionBean;
-    @Inject GroupBean groupBean;
     @Inject BalancesBean balancesBean;
     @Inject UserBean userBean;
     @Inject BankBean bankBean;
@@ -147,9 +147,7 @@ public class UserResource {
 
     private Response processUserResult(User user, String msg) throws Exception {
         Object resultDto = null;
-        if(user instanceof Group) {
-            resultDto = groupBean.getGroupDto((Group) user);
-        } else if(user instanceof Bank) {
+        if(user instanceof Bank) {
             resultDto = UserDto.COMPLETE(user);
             ((UserDto)resultDto).setMessage(msg);
         } else resultDto = UserDto.COMPLETE(user);
@@ -187,42 +185,6 @@ public class UserResource {
                 .setParameter("searchText", "%" + searchText + "%");
         ResultListDto resultListDto = new ResultListDto(resultList, offset, max, (long)query.getSingleResult());
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
-    }
-
-
-    @Path("/search/group/{groupId}")
-    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    @Consumes({"application/json"})
-    public Response searchGroup(@DefaultValue("0") @QueryParam("offset") int offset,
-            @DefaultValue("100") @QueryParam("max") int max, @QueryParam("searchText") String searchText,
-            @QueryParam("groupState") String groupState,
-            @PathParam("groupId") long groupId, @Context ServletContext context,
-            @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        Group group = dao.find(Group.class, groupId);
-        if(group == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - groupId: " + groupId).build();
-        if(searchText != null) {
-            Subscription.State state = Subscription.State.ACTIVE;
-            try {state = Subscription.State.valueOf(groupState);} catch(Exception ex) {}
-            Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(Subscription.class).createAlias("user", "user");;
-            criteria.add(Restrictions.eq("group", group));
-            criteria.add(Restrictions.eq("state", state));
-            criteria.add(Restrictions.eq("user.state", User.State.ACTIVE));
-            if(searchText != null) {
-                Criterion rest1= Restrictions.ilike("user.name", "%" + searchText + "%");
-                Criterion rest2= Restrictions.ilike("user.firstName", "%" + searchText + "%");
-                Criterion rest3= Restrictions.ilike("user.lastName", "%" + searchText + "%");
-                Criterion rest4= Restrictions.ilike("user.nif", "%" + searchText + "%");
-                criteria.add(Restrictions.or(rest1, rest2, rest3, rest4));
-            }
-            List<Subscription> subscriptionList = criteria.setFirstResult(offset).setMaxResults(max).list();
-            List<UserDto> resultList = new ArrayList<>();
-            for(Subscription subscription : subscriptionList) {
-                resultList.add(userBean.getUserDto(subscription.getUser(), false));
-            }
-            long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
-            ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
-        } else return Response.status(Response.Status.BAD_REQUEST).entity("missing 'searchText'").build();
     }
 
     @Path("/nif/{nif}/{year}/{month}/{day}")

@@ -7,7 +7,6 @@ import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.Group;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.*;
@@ -122,7 +121,7 @@ public class AuditBean {
         Interval timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(requestDate));
         String transactionSubject =  messages.get("initWeekMsg", DateUtils.getDayWeekDateStr(timePeriod.getDateTo(), "HH:mm"));
         List<User.State> notActiveList = Arrays.asList(User.State.SUSPENDED, User.State.CANCELED);
-        List<User.Type> userTypeList = Arrays.asList(User.Type.GROUP, User.Type.USER);
+        List<User.Type> userTypeList = Arrays.asList(User.Type.USER);
         Query query = dao.getEM().createQuery("SELECT COUNT(u) FROM User u WHERE u.type in :typeList and(" +
                 "u.state = 'ACTIVE' or (u.state in :notActiveList and(u.dateCancelled >=:dateCancelled)))")
                 .setParameter("typeList", userTypeList)
@@ -163,10 +162,7 @@ public class AuditBean {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         BalancesDto balancesDto = null;
         String userSubPath;
-        if(user instanceof Group) {
-            balancesDto = balancesBean.getBalancesDto(user, timePeriod);
-            userSubPath = "Group_"+ user.getId();
-        } else if (user instanceof User) {
+        if (user instanceof User) {
             balancesDto = balancesBean.getBalancesDto(user, timePeriod);
             //userSubPath = StringUtils.getUserDirPath(user.getNif());
             userSubPath = user.getNif();
@@ -227,7 +223,7 @@ public class AuditBean {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         long beginCalc = System.currentTimeMillis();
         Query query = dao.getEM().createNamedQuery("countUserActiveByDateAndInList").setParameter("date", timePeriod.getDateFrom())
-                .setParameter("inList", Arrays.asList(User.Type.USER, User.Type.GROUP, User.Type.BANK));
+                .setParameter("inList", Arrays.asList(User.Type.USER, User.Type.BANK));
         long numTotalUsers = (long)query.getSingleResult();
 
         ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), null);
@@ -236,15 +232,13 @@ public class AuditBean {
         int pageSize = 100;
         List<User> userList;
         query = dao.getEM().createNamedQuery("findUserActiveOrCancelledAfterAndInList").setParameter("dateCancelled",
-                timePeriod.getDateFrom()).setParameter("typeList", Arrays.asList(User.Type.USER, User.Type.GROUP, User.Type.BANK))
+                timePeriod.getDateFrom()).setParameter("typeList", Arrays.asList(User.Type.USER, User.Type.BANK))
                 .setFirstResult(0).setMaxResults(pageSize);
         while ((userList = query.getResultList()).size() > 0) {
             for (User user : userList) {
                 try {
                     if(user instanceof Bank)
                         periodResultDto.addBankBalance(balancesBean.getBalancesDto(user, timePeriod));
-                    else if(user instanceof Group)
-                        periodResultDto.addGroupBalance(balancesBean.getBalancesDto(user, timePeriod));
                     else periodResultDto.addUserBalance(balancesBean.getBalancesDto(user, timePeriod));
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);

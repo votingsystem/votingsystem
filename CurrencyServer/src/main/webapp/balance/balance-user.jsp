@@ -184,11 +184,6 @@
                     this.caption = "${msg.bankLbl}"
                     this.$.balanceFromItem.caption = "${msg.contributionsLbl}"
                 }
-                else if('GROUP' == this.balance.user.type) {
-                    this.caption = "${msg.groupLbl}"
-                    this.description = "IBAN: " + this.balance.user.iban
-                    this.balance.user.nif = ""
-                }
                 else if('USER' == this.balance.user.type) {
                     this.userName = this.balance.user.firstName + " " + this.balance.user.lastName
                     this.caption = "${msg.userLbl}"

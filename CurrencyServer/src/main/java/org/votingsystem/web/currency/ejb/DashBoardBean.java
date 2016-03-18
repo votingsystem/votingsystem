@@ -33,24 +33,6 @@ public class DashBoardBean {
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
                  TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.FROM_USER);
          dto.setNumTransFromUser((long) query.getSingleResult());
-         query = em.createNamedQuery("countTransByToUserIsNotNullAndTypeAndDateCreatedBetween").setParameter(
-                 "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.FROM_GROUP_TO_MEMBER_GROUP);
-         Long numTrans = (long)query.getSingleResult();
-         query = em.createNamedQuery("countTransByToUserIsNotNullAndTypeAndDateCreatedBetween").setParameter(
-                 "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.FROM_GROUP_TO_MEMBER_GROUP);
-         Long numUsers = (long)query.getSingleResult();
-         dto.setTransFromGroupToMemberGroup(new DashBoardDto.TransFromGroup(numTrans, numUsers));
-         query = em.createNamedQuery("countTransByToUserIsNullAndTypeAndDateCreatedBetween").setParameter(
-                 "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.FROM_GROUP_TO_ALL_MEMBERS);
-         numTrans = (long)query.getSingleResult();
-         query = em.createNamedQuery("countTransByToUserIsNotNullAndTypeAndDateCreatedBetween").setParameter(
-                 "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
-                 TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.FROM_GROUP_TO_ALL_MEMBERS);
-         numUsers = (long)query.getSingleResult();
-         dto.setTransFromGroupToAllMembers(new DashBoardDto.TransFromGroup(numTrans, numUsers));
          query = em.createNamedQuery("countTransByTypeAndDateCreatedBetween").setParameter(
                  "dateFrom", timePeriod.getDateFrom(), TemporalType.TIMESTAMP).setParameter("dateTo", timePeriod.getDateTo(),
                  TemporalType.TIMESTAMP).setParameter("type", Transaction.Type.CURRENCY_PERIOD_INIT);

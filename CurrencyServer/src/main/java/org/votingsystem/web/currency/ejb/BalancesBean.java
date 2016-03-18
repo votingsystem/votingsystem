@@ -1,13 +1,11 @@
 package org.votingsystem.web.currency.ejb;
 
-import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.CurrencyAccount;
-import org.votingsystem.model.currency.Group;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.Interval;
@@ -32,7 +30,6 @@ public class BalancesBean {
     private static Logger log = Logger.getLogger(BalancesBean.class.getName());
 
     @Inject ConfigVS config;
-    @Inject GroupBean groupBean;
     @Inject CMSBean cmsBean;
     @Inject BankBean bankBean;
     @Inject UserBean userBean;
@@ -65,20 +62,6 @@ public class BalancesBean {
                 transactionBean.getTransactionFromList(bank, timePeriod), Transaction.Source.FROM);
         balancesDto.setTimePeriod(timePeriod);
         balancesDto.setUser(userBean.getUserDto(bank, false));
-        return balancesDto;
-    }
-
-    public BalancesDto getGroupBalancesDto(Group group, Interval timePeriod) throws Exception {
-        BalancesDto balancesDto = getBalancesDto(
-                transactionBean.getTransactionFromList(group, timePeriod), Transaction.Source.FROM);
-        balancesDto.setTimePeriod(timePeriod);
-        balancesDto.setUser(UserDto.BASIC(group));
-
-        BalancesDto balancesToDto = getBalancesDto(
-                transactionBean.getTransactionToList(group, timePeriod), Transaction.Source.TO);
-        balancesDto.setTo(balancesToDto);
-        balancesDto.calculateCash();
-        currencyAccountBean.checkBalancesWithCurrencyAccounts(group, balancesDto.getBalancesCash());
         return balancesDto;
     }
 
@@ -124,7 +107,6 @@ public class BalancesBean {
 
     public BalancesDto getBalancesDto(User user, Interval timePeriod) throws Exception {
         if(user instanceof Bank) return getBankBalancesDto((Bank) user, timePeriod);
-        else if(user instanceof Group) return getGroupBalancesDto((Group) user, timePeriod);
         else return getUserBalancesDto(user, timePeriod);
     }
 

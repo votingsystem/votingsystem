@@ -12,8 +12,6 @@
             <option value="CURRENCY_PERIOD_INIT_TIME_LIMITED"> - ${msg.currencyPeriodInitTimeLimitedLbl} - </option>
             <option value="FROM_BANK"> - ${msg.bankInputLbl} - </option>
             <option value="FROM_USER"> - ${msg.transactionFromUser} - </option>
-            <option value="FROM_GROUP_TO_MEMBER_GROUP"> - ${msg.transactionFromGroupToMemberGroup} - </option>
-            <option value="FROM_GROUP_TO_ALL_MEMBERS"> - ${msg.transactionFromGroupToAllMembers} - </option>
         </select>
     </template>
     <script>
