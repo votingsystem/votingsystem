@@ -86,11 +86,11 @@
                                 break;
                             case "INIT_BROWSER_SESSION":
                                 if(ResponseVS.SC_OK == messageJSON.statusCode) {
-                                    vs.wsDeviceId = messageJSON.deviceId
+                                    vs.wsId = messageJSON.message
                                     var operationCode = vs.operationCode()
                                     vs.qrOperationsMap[operationCode] = {operation:'INIT_REMOTE_SIGNED_SESSION'}
                                     document.querySelector("#qrImg").setAttribute("src", vs.getQRCodeURL(
-                                            INIT_REMOTE_SIGNED_SESSION, operationCode, vs.wsDeviceId, null,
+                                            INIT_REMOTE_SIGNED_SESSION, operationCode, vs.wsId, null,
                                             vs.rsaUtil.publicKeyBase64))
                                     document.querySelector("#websocketSessionDiv").innerHTML = operationCode;
                                 }
@@ -124,7 +124,7 @@
                                 var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
                                     statusCode:700,
                                     deviceToId:messageJSON.deviceFromId,
-                                    deviceId: vs.wsDeviceId, UUID:messageJSON.UUID}
+                                    deviceId: vs.wsId, UUID:messageJSON.UUID}
                                 socketMessageDto.encryptedMessage = vs.encryptToCMS(
                                         messageJSON.x509CertificatePEM, qrOperation)
                                 console.log(socketMessageDto)
@@ -138,13 +138,13 @@
                                 var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
                                     statusCode:700,
                                     deviceToId:messageJSON.deviceFromId,
-                                    deviceId: vs.wsDeviceId}
+                                    deviceId: vs.wsId}
                                 var userDataFromCert = vs.extractUserInfoFromCert(messageJSON.x509CertificatePEM)
                                 var csr = vs.rsaUtil.getCSR(userDataFromCert)
-                                var remoteSignedSessionDto = {csr:csr, deviceId:vs.wsDeviceId, sessionId:vs.wsSessionId}
+                                var remoteSignedSessionDto = {csr:csr, deviceId:vs.wsId, sessionId:vs.wsSessionId}
                                 var encryptedDto = {operation:'INIT_REMOTE_SIGNED_SESSION',
                                     operationCode:messageJSON.operationCode,
-                                    sessionId: vs.wsSessionId, deviceFromId: vs.wsDeviceId,
+                                    sessionId: vs.wsSessionId, deviceFromId: vs.wsId,
                                     message:JSON.stringify(remoteSignedSessionDto),
                                     uuid:messageJSON.uuid}
                                 socketMessageDto.encryptedMessage = vs.encryptToCMS(

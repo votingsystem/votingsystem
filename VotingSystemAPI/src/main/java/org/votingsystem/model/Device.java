@@ -107,8 +107,9 @@ public class Device extends EntityVS implements Serializable {
 		return deviceId;
 	}
 
-	public void setDeviceId(String deviceId) {
+	public Device setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
+        return this;
 	}
 
 	public String getEmail() {

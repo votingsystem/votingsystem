@@ -258,3 +258,12 @@ textarea.form-control {
 .closeIcon:hover {
     fill:#ba0011; color:#ba0011;
 }
+
+.navbarIcon {
+    color: #f9f9f9;
+    cursor: pointer;
+}
+
+.navbarIcon:hover {
+    color:#f9ef0a;
+}

@@ -30,22 +30,23 @@
         Polymer({
             is:'alert-dialog',
             ready: function() { },
-            setMessage: function(message, caption, callbackFunction) {
+            setMessage: function(message, caption, callback) {
                 this.reset()
                 this.$.messageDiv.innerHTML = message
                 this.caption = caption
-                this.callbackFunction = callbackFunction
-                if(this.callbackFunction) this.isConfirmMessage = true
+                this.callback = callback
+                if(this.callback) this.isConfirmMessage = true
                 this.$.modalDialog.style.opacity = 1
                 this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             reset: function() {
-                this.callbackFunction = null
+                this.callback = null
                 this.caption = null
                 this.isConfirmMessage = false
             },
             accept: function() {
                 this.close()
+                if(this.callback) this.callback()
             },
             close: function() {
                 this.$.modalDialog.style.opacity = 0

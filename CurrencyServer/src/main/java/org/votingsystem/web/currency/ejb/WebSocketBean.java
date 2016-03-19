@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.dto.DeviceDto;
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.RemoteSignedSessionDto;
 import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.*;
@@ -20,6 +21,8 @@ import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 import javax.websocket.Session;
+import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -51,7 +54,7 @@ public class WebSocketBean {
                             messageDto.getServerResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null)));
                 } else messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                         messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
-                                messages.get("webSocketDeviceSessionNotFoundErrorMsg", messageDto.getDeviceToId()))));
+                                messages.get("webSocketDeviceSessionNotFoundErrorMsg"))));
                 break;
             //Authenticated device sends message knowing target device session id. Target device can be authenticated or not.
             case MSG_TO_DEVICE_BY_TARGET_SESSION_ID:
@@ -77,12 +80,19 @@ public class WebSocketBean {
                 break;
             case INIT_BROWSER_SESSION:
                 browserDevice = new Device(SessionManager.getInstance().getAndIncrementBrowserDeviceId())
-                        .setType(Device.Type.BROWSER);
+                        .setType(Device.Type.BROWSER).setDeviceId(UUID.randomUUID().toString());
                 messageDto.getSession().getUserProperties().put("device", browserDevice);
-                SessionManager.getInstance().putBrowserDevice(messageDto.getSession());
+                SessionManager.getInstance().putBrowserDevice(messageDto.getSession(), browserDevice);
                 SocketMessageDto response = messageDto.getServerResponse(ResponseVS.SC_OK, null)
-                        .setDeviceId(browserDevice.getId().toString()).setMessageType(TypeVS.INIT_BROWSER_SESSION);
+                        .setMessage(browserDevice.getId().toString()).setMessageType(TypeVS.INIT_BROWSER_SESSION);
                 messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(response));
+                break;
+            case CLOSE_SESSION:
+                cmsMessage = cmsBean.validateCMS(messageDto.getCMS(), null).getCmsMessage();
+                MessageDto msgDto = cmsMessage.getSignedContent(MessageDto.class);
+                if(TypeVS.CLOSE_SESSION == TypeVS.valueOf(msgDto.getOperation())) {
+                    SessionManager.getInstance().remove(messageDto.getSession());
+                }
                 break;
             case INIT_REMOTE_SIGNED_SESSION:
                 cmsMessage = cmsBean.validateCMS(messageDto.getCMS(), null).getCmsMessage();
@@ -96,24 +106,41 @@ public class WebSocketBean {
                             messageDto.getServerResponse(ResponseVS.SC_ERROR, messages.get("remoteCSRErrorMsg",
                             signer.getNameAndId(), userFromCSR.getNameAndId()))));
                 } else {
-                    Session remoteSession = SessionManager.getInstance().getNotAuthenticatedSession(
+                    Session remoteSession = SessionManager.getInstance().getSession(
                             remoteSignedSessionDto.getSessionId());
-                    browserDevice = (Device) remoteSession.getUserProperties().get("device");
-                    Certificate certificate = cmsBean.signCSRForBrowserSession(csr, cmsMessage, browserDevice);
-                    browserDevice.setId(null);
-                    browserDevice.setX509Certificate(certificate.getX509Certificate());
-                    browserDevice.setCertificate(certificate).setUser(signer);
-                    browserDevice = dao.persist(browserDevice);
-                    SessionManager.getInstance().putAuthenticatedDevice(remoteSession, signer, browserDevice);
-                    remoteSession.getUserProperties().put("remote", true);
-                    DeviceDto mobileDevice = new DeviceDto(signer.getDevice());
-                    responseDto = messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK,
-                            JSON.getMapper().writeValueAsString(mobileDevice))
-                            .setSessionId(remoteSession.getId())
-                            .setMessageType(TypeVS.INIT_REMOTE_SIGNED_SESSION);
-                    responseDto.setConnectedDevice(DeviceDto.INIT_BROWSER_SESSION(signer, browserDevice));
-                    remoteSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
-                    dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
+                    if(remoteSession == null) {
+                        messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                                messageDto.getServerResponse(ResponseVS.SC_ERROR, messages.get(
+                                "webSocketDeviceSessionNotFoundErrorMsg",  signer.getNameAndId(),
+                                userFromCSR.getNameAndId()))));
+                    } else {
+                        browserDevice = (Device) remoteSession.getUserProperties().get("device");
+                        try {
+                            Certificate certificate = cmsBean.signCSRForBrowserSession(csr, cmsMessage, browserDevice);
+                            browserDevice.setX509Certificate(certificate.getX509Certificate());
+                            if(browserDevice.getUser() != null) {
+                                //device already in db
+                                browserDevice.setCertificate(certificate).setUser(signer);
+                                browserDevice = dao.merge(browserDevice);
+                            } else {
+                                browserDevice.setId(null);
+                                browserDevice.setDeviceId(UUID.randomUUID().toString());
+                                browserDevice.setCertificate(certificate).setUser(signer);
+                                browserDevice = dao.persist(browserDevice);
+                            }
+                            SessionManager.getInstance().putAuthenticatedDevice(remoteSession, signer, browserDevice);
+                        } catch (Exception ex) {
+                            log.log(Level.SEVERE, ex.getMessage(), ex);
+                        }
+                        DeviceDto mobileDevice = new DeviceDto(signer.getDevice());
+                        responseDto = messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK,
+                                JSON.getMapper().writeValueAsString(mobileDevice))
+                                .setSessionId(remoteSession.getId())
+                                .setMessageType(TypeVS.INIT_REMOTE_SIGNED_SESSION);
+                        responseDto.setConnectedDevice(DeviceDto.INIT_BROWSER_SESSION(signer, browserDevice));
+                        remoteSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
+                        dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
+                    }
                 }
                 break;
             case INIT_SIGNED_SESSION:
@@ -127,8 +154,6 @@ public class WebSocketBean {
                 Device device = dao.getSingleResult(Device.class, query);
                 if(device != null) {
                     signer.setDevice(device);
-                    messageDto.getSession().getUserProperties().put("remote", false);
-                    SessionManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer, null);
                     responseDto = messageDto.getServerResponse(
                             ResponseVS.SC_WS_CONNECTION_INIT_OK, null).setMessageType(TypeVS.INIT_SIGNED_SESSION);
                     query = dao.getEM().createQuery("select t from UserToken t where t.user =:user and t.state =:state")
@@ -138,9 +163,10 @@ public class WebSocketBean {
                         byte[] userToken = cmsBean.decryptCMS(token.getToken());
                         responseDto.setMessage(new String(userToken));
                     }
-                    responseDto.setConnectedDevice(DeviceDto.INIT_AUTHENTICATED_SESSION(signer));
-                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
+                    responseDto.setConnectedDevice(DeviceDto.INIT_SIGNED_SESSION(signer));
                     dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
+                    SessionManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer, device);
+                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
                 } else {
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                             messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,

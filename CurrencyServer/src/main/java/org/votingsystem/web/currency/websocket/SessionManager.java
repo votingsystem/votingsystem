@@ -52,7 +52,6 @@ public class SessionManager {
     }
 
     public void putAuthenticatedDevice(Session session, User user, Device device) throws ExceptionVS {
-        if(device == null) device = user.getDevice();
         final String deviceId = device.getDeviceId();
         log.info("putAuthenticatedDevice - session id: " + session.getId() + " - User id:" + user.getId() +
                 " - device Id: " + deviceId);
@@ -70,8 +69,7 @@ public class SessionManager {
         session.getUserProperties().put("device", device);
     }
 
-    public void putBrowserDevice(Session session){
-        Device device = (Device) session.getUserProperties().get("device");
+    public void putBrowserDevice(Session session, Device device){
         deviceSessionMap.put(device.getId(), session);
     }
 
@@ -154,6 +152,13 @@ public class SessionManager {
     public Session getNotAuthenticatedSession(String sessionId) {
         return sessionMap.get(sessionId);
     }
+
+    public Session getSession(String sessionId) {
+        Session result = sessionMap.get(sessionId);
+        if(result == null) result = authenticatedSessionMap.get(sessionId);
+        return result;
+    }
+
 
     public synchronized void broadcast(String message) {
         log.info("broadcast - message: " + message + " to '" + sessionMap.size() + "' NOT authenticated users");

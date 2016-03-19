@@ -56,11 +56,11 @@
             <div class="horizontal layout" style="background-color: #ba0011;padding: 1px 0 1px 0;">
                 <div class="horizontal layout flex">
                     <div style="margin:0 30px 0 30px;">
-                        <i id="drawerButton" class="fa fa-navicon" style="font-size: 1.7em; color: #f9f9f9;margin:3px 0 0 0; cursor: pointer;"></i>
+                        <i id="drawerButton" class="fa fa-navicon navbarIcon" style="font-size: 1.7em; margin:3px 0 0 0;"></i>
                     </div>
                     <div style="font-size: 1.7em;margin:0 0 0 50px; color: #f9f9f9;" id="selectedPageTitle"></div>
                 </div>
-                <div id="accessDiv" style="font-size: 1.2em; color: #f9f9f9;margin:3px 30px 0 0; cursor: pointer;">
+                <div id="connectionMsgDiv" class="navbarIcon" style="font-size: 1.2em;margin:3px 30px 0 0;">
                     #{msg.accessLbl}
                 </div>
             </div>
@@ -89,21 +89,24 @@
                 }, true);
 
                 document.body.addEventListener('click', function (event) {
-                    console.log("document.body")
                     d3.select("#drawer").style({display:'none'});
                 }, true);
 
-
-                document.querySelector("#accessDiv").addEventListener('click', function (event) {
+                document.querySelector("#connectionMsgDiv").addEventListener('click', function (event) {
                     if(!vs.rsaUtil.x509Certificate) {
                         var operationCode = vs.operationCode()
                         vs.qrOperationsMap[operationCode] = {operation:'INIT_REMOTE_SIGNED_SESSION'}
                         document.querySelector("#accessDialog").show(operationCode, vs.getQRCodeURL(
-                                INIT_REMOTE_SIGNED_SESSION, operationCode, vs.wsDeviceId, null,
-                                vs.rsaUtil.publicKeyBase64, "150x150"))
+                                INIT_REMOTE_SIGNED_SESSION, operationCode, vs.wsId, null,
+                                vs.rsaUtil.publicKeyBase64, "200x200"))
                     } else {
                         alert("#{msg.quitConfirmMsg}", "#{msg.messageLbl}", function() {
-                            console.log("===== TODO quit session")
+                            var socketMessageDto = {operation:"CLOSE_SESSION", uuid:vs.getUUID()}
+                            function signCallback(cmsSignedMessage) {
+                                socketMessageDto.cmsMessagePEM = forge.pkcs7.messageToPem(cmsSignedMessage);
+                                vs.websocket.send(JSON.stringify(socketMessageDto))
+                            }
+                            vs.rsaUtil.sign(JSON.stringify(socketMessageDto), signCallback)
                         })
                     }
                 });
@@ -174,19 +177,7 @@
             var OPERATION_CODE_KEY     = "opid";
             var PUBLIC_KEY_KEY         = "pk";
 
-            vs.getQRCodeURL = function(operation, operationCode, deviceId, sessionId, key, size) {
-                if(!size) size = "100x100"
-                var result = "${contextURL}/qr?cht=qr&chs=" + size + "&chl="
-                if(operation != null) result = result + OPERATION_KEY + "=" + operation + ";"
-                if(operationCode != null) result = result + OPERATION_CODE_KEY + "=" + operationCode + ";"
-                if(deviceId != null) result = result + DEVICE_ID_KEY + "=" + deviceId + ";"
-                if(sessionId != null) result = result + WEB_SOCKET_SESSION_KEY + "=" + sessionId + ";"
-                if(key != null) result = result + PUBLIC_KEY_KEY + "=" + key + ";"
-                return result;
-            }
-
             function initWebsocket() {
-                vs.rsaUtil = new RSAUtil();
                 var websocket
                 if ('WebSocket' in window) {
                     websocket = new WebSocket("${webSocketURL}");
@@ -205,10 +196,13 @@
                             case "INIT_SESSION":
                                 vs.wsSessionId = messageJSON.sessionId
                                 websocket.send(JSON.stringify({operation:"INIT_BROWSER_SESSION"}))
+                                setTimeout( function() {
+                                    vs.rsaUtil = new RSAUtil();
+                                }, 1000 );
                                 break;
                             case "INIT_BROWSER_SESSION":
                                 if(ResponseVS.SC_OK == messageJSON.statusCode) {
-                                    vs.wsDeviceId = messageJSON.deviceId
+                                    vs.wsId = messageJSON.message
                                 }
                                 break;
                             case 'INIT_REMOTE_SIGNED_SESSION':
@@ -220,7 +214,7 @@
                                     console.log("connectedDevice: ")
                                     console.log(vs.connectedDevice)
                                     vs.rsaUtil.initCSR(vs.connectedDevice.x509CertificatePEM)
-                                    document.querySelector("#accessDiv").innerHTML = '#{msg.quitLbl}'
+                                    document.querySelector("#connectionMsgDiv").innerHTML = '#{msg.quitLbl}'
                                     document.querySelector("#accessDialog").close()
                                 }
                                 break;
@@ -240,7 +234,7 @@
                                 var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
                                     statusCode:700,
                                     deviceToId:messageJSON.deviceFromId,
-                                    deviceId: vs.wsDeviceId, UUID:messageJSON.UUID}
+                                    deviceId: vs.wsId, UUID:messageJSON.UUID}
                                 socketMessageDto.encryptedMessage = vs.encryptToCMS(
                                         messageJSON.x509CertificatePEM, qrOperation)
                                 console.log(socketMessageDto)
@@ -254,13 +248,13 @@
                                 var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
                                     statusCode:700,
                                     deviceToId:messageJSON.deviceFromId,
-                                    deviceId: vs.wsDeviceId}
+                                    deviceId: vs.wsId}
                                 var userDataFromCert = vs.extractUserInfoFromCert(messageJSON.x509CertificatePEM)
                                 var csr = vs.rsaUtil.getCSR(userDataFromCert)
-                                var remoteSignedSessionDto = {csr:csr, deviceId:vs.wsDeviceId, sessionId:vs.wsSessionId}
+                                var remoteSignedSessionDto = {csr:csr, deviceId:vs.wsId, sessionId:vs.wsSessionId}
                                 var encryptedDto = {operation:'INIT_REMOTE_SIGNED_SESSION',
                                     operationCode:messageJSON.operationCode,
-                                    sessionId: vs.wsSessionId, deviceFromId: vs.wsDeviceId,
+                                    sessionId: vs.wsSessionId, deviceFromId: vs.wsId,
                                     message:JSON.stringify(remoteSignedSessionDto),
                                     uuid:messageJSON.uuid}
                                 socketMessageDto.encryptedMessage = vs.encryptToCMS(
@@ -276,9 +270,12 @@
                 websocket.onclose = function (event) {
                     console.log('Info: WebSocket connection closed, Code: ' + event.code +
                             (event.reason == "" ? "" : ", Reason: " + event.reason));
+                    vs.rsaUtil = null
+                    document.querySelector("#connectionMsgDiv").innerHTML = '#{msg.accessLbl}'
+                    initWebsocket()
                 };
+                vs.websocket = websocket
             }
-
             //]]>
         </script>
     </ui:define>

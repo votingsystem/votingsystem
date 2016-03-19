@@ -275,14 +275,6 @@ public class SocketMessageDto {
         this.locale = locale;
     }
 
-    public String getCmsMessage() {
-        return cmsMessagePEM;
-    }
-
-    public void setCMSMessage(String cmsMessage) {
-        this.cmsMessagePEM = cmsMessage;
-    }
-
     @JsonIgnore
     public CMSSignedMessage getCMS() throws Exception {
         if(cms == null) cms = CMSSignedMessage.FROM_PEM(cmsMessagePEM);
@@ -417,6 +409,14 @@ public class SocketMessageDto {
 
     public void setOperationCode(String operationCode) {
         this.operationCode = operationCode;
+    }
+
+    public String getCmsMessagePEM() {
+        return cmsMessagePEM;
+    }
+
+    public void setCmsMessagePEM(String cmsMessagePEM) {
+        this.cmsMessagePEM = cmsMessagePEM;
     }
 
     public static SocketMessageDto getSignRequest(DeviceDto deviceTo, String toUser, String textToSign, String subject)

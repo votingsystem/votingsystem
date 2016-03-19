@@ -56,7 +56,7 @@ public class DeviceDto implements Serializable {
         this.setSessionId(sessionId);
     }
 
-    public static DeviceDto INIT_AUTHENTICATED_SESSION(User user) throws Exception {
+    public static DeviceDto INIT_SIGNED_SESSION(User user) throws Exception {
         DeviceDto deviceDto = new DeviceDto(user.getDevice());
         deviceDto.setIBAN(user.getIBAN());
         return deviceDto;

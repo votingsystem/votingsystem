@@ -4,9 +4,11 @@ forge.oids['2.5.4.4'] = "surname"
 forge.oids["surname"] = '2.5.4.4'
 
 var RSAUtil = function() {
+    var keyLength = 1024
     this.rsa = forge.pki.rsa;
     // generate an RSA key pair synchronously
-    this.keypair = this.rsa.generateKeyPair({bits: 1024, e: 0x10001});
+    console.log("RSAUtil - keyLength: " + keyLength)
+    this.keypair = this.rsa.generateKeyPair(keyLength);
     this.publicKeyPEM = forge.pki.publicKeyToPem(this.keypair.publicKey),
     this.privateKeyPEM = forge.pki.privateKeyToPem(this.keypair.privateKey);
     var derBytes = forge.asn1.toDer(forge.pki.publicKeyToAsn1(this.keypair.publicKey)).getBytes()
@@ -44,6 +46,39 @@ RSAUtil.prototype.getCSR = function(userData) {
 RSAUtil.prototype.initCSR = function(issuedX509CertificatePEM) {
     this.x509CertificatePEM = issuedX509CertificatePEM
     this.x509Certificate = forge.pki.certificateFromPem(issuedX509CertificatePEM);
+}
+
+RSAUtil.prototype.sign = function(contentToSign, callback) {
+    vs.getTimeStampToken(contentToSign, function (timeStampTokenASN1) {
+        console.log("timeStampTokenASN1:")
+        console.log(timeStampTokenASN1)
+        var cmsSignedMessage = forge.pkcs7.createSignedData();
+        cmsSignedMessage.content = forge.util.createBuffer(contentToSign, 'utf8');
+        cmsSignedMessage.addCertificate(this.x509Certificate);
+        var authenticatedAttributes = [{
+            type: forge.pki.oids.contentType,
+            value: forge.pki.oids.data
+        }, {
+            type: forge.pki.oids.messageDigest
+            // value will be auto-populated at signing time
+        }, {
+            type: forge.pki.oids.signingTime,
+            // value can also be auto-populated at signing time
+            value: new Date()
+        }, {
+            type: forge.pki.oids.signatureTimeStampToken,
+            // value can also be auto-populated at signing time
+            value: timeStampTokenASN1
+        }]
+        cmsSignedMessage.addSigner({
+            key: this.keypair.privateKey,
+            certificate: this.x509Certificate,
+            digestAlgorithm: forge.pki.oids.sha256,
+            authenticatedAttributes: authenticatedAttributes 
+        });
+        cmsSignedMessage.sign()
+        callback(cmsSignedMessage);
+    }.bind(this))
 }
 
 RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
@@ -167,4 +202,23 @@ vs.getTimeStampToken = function (contentToSign, callback) {
     xhttp.setRequestHeader("Content-type", "application/timestamp-query");
     xhttp.setRequestHeader("Content-Encoding", "base64");
     xhttp.send(timeStampRequestBase64);
+}
+
+//http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript?rq=1
+vs.getUUID = function() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
+    });
+}
+
+vs.getQRCodeURL = function(operation, operationCode, deviceId, sessionId, key, size) {
+    if(!size) size = "100x100"
+    var result = vs.contextURL + "/qr?cht=qr&chs=" + size + "&chl="
+    if(operation != null) result = result + OPERATION_KEY + "=" + operation + ";"
+    if(operationCode != null) result = result + OPERATION_CODE_KEY + "=" + operationCode + ";"
+    if(deviceId != null) result = result + DEVICE_ID_KEY + "=" + deviceId + ";"
+    if(sessionId != null) result = result + WEB_SOCKET_SESSION_KEY + "=" + sessionId + ";"
+    if(key != null) result = result + PUBLIC_KEY_KEY + "=" + key + ";"
+    return result;
 }
