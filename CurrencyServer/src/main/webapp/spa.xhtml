@@ -188,8 +188,9 @@
                     console.log('Info: WebSocket connection opened.');
                 };
                 websocket.onmessage = function (event) {
-                    console.log('Received: ' + event.data);
                     var messageJSON = toJSON(event.data)
+                    console.log('websocket.onmessage: ');
+                    console.log(messageJSON);
                     if("MESSAGEVS_FROM_VS" ===  messageJSON.operation) {
                         messageJSON.operation = messageJSON.messageType
                         switch(messageJSON.operation) {

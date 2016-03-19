@@ -91,7 +91,7 @@ public class WebSocketBean {
                 cmsMessage = cmsBean.validateCMS(messageDto.getCMS(), null).getCmsMessage();
                 MessageDto msgDto = cmsMessage.getSignedContent(MessageDto.class);
                 if(TypeVS.CLOSE_SESSION == TypeVS.valueOf(msgDto.getOperation())) {
-                    SessionManager.getInstance().remove(messageDto.getSession());
+                    messageDto.getSession().close();
                 }
                 break;
             case INIT_REMOTE_SIGNED_SESSION:
