@@ -27,28 +27,25 @@
             </div>
             <div class="vertical layout flex" style="background-color: #fefefe;">
                 <a class="menuItem menuItemSelected" data-route="transactionsDashboard" href="#{contextURL}/spa.xhtml#!/transactionsDashboard">
-                    <i class="fa fa-tachometer" style="margin:0px 10px 0px 0px;"></i> ${msg.dashBoardLbl}
+                    <i class="fa fa-tachometer"></i> ${msg.dashBoardLbl}
                 </a>
                 <a class="menuItem menuItemSelected" data-route="user" href="#{contextURL}/spa.xhtml#!/user/search">
-                    <i class="fa fa-user" style="margin:0px 10px 0px 0px;"></i> ${msg.locateUserLbl}
+                    <i class="fa fa-user"></i> ${msg.locateUserLbl}
                 </a>
                 <a class="menuItem menuItemSelected isSuperUserView" data-route="newBank" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/user/newBank.xhtml&amp;caption=${msg.newBankLbl}&amp;data_route=newBank">
-                    <i class="fa fa-university" style="margin:0px 10px 0px 0px;"></i> ${msg.newBankLbl}
+                    <i class="fa fa-university"></i> ${msg.newBankLbl}
                 </a>
                 <a class="menuItem menuItemSelected isSuperUserView" data-route="x509Certificate" href="#{contextURL}/spa.xhtml#!/x509Certificate/certs">
-                    <i class="fa fa-users" style="margin:0px 10px 0px 0px;"></i> ${msg.locateCertLbl}
-                </a>
-                <a class="menuItem menuItemSelected clientToolConnected" data-route="tools" href="#{contextURL}/spa.xhtml#!/app/tools">
-                    <i class="fa fa-cogs" style="margin:0px 10px 0px 0px;"></i> ${msg.toolsLbl}
+                    <i class="fa fa-users"></i> ${msg.locateCertLbl}
                 </a>
                 <a class="menuItem menuItemSelected" data-route="reports" href="#{contextURL}/spa.xhtml#!/reports">
-                    <i class="fa fa-list-alt" style="margin:0px 10px 0px 0px;"></i> ${msg.reportsPageTitle}
+                    <i class="fa fa-cogs"></i> ${msg.reportsPageTitle}
                 </a>
                 <a class="menuItem menuItemSelected" data-route="docs" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/app/index.xhtml&amp;caption=${msg.docsLbl}&amp;data_route=docs">
-                    <i class="fa fa-info" style="margin:0px 10px 0px 0px;"></i> ${msg.docsLbl}
+                    <i class="fa fa-info"></i> ${msg.docsLbl}
                 </a>
                 <a class="menuItem menuItemSelected" data-route="contact" href="#{contextURL}/spa.xhtml#!/app/contact">
-                    <i class="fa fa-phone" style="margin:0px 10px 0px 0px;"></i> ${msg.contactLbl}
+                    <i class="fa fa-phone"></i> ${msg.contactLbl}
                 </a>
             </div>
         </div>
@@ -171,11 +168,6 @@
             var QR_MESSAGE_INFO                    = 1;
             var CURRENCY_SEND                      = 2;
 
-            var WEB_SOCKET_SESSION_KEY = "wsid";
-            var DEVICE_ID_KEY          = "did";
-            var OPERATION_KEY          = "op";
-            var OPERATION_CODE_KEY     = "opid";
-            var PUBLIC_KEY_KEY         = "pk";
 
             function initWebsocket() {
                 var websocket
@@ -263,7 +255,7 @@
                                 console.log("INIT_REMOTE_SIGNED_SESSION response: ")
                                 console.log(socketMessageDto)
                                 websocket.send(JSON.stringify(socketMessageDto))
-                                //delete vs.qrOperationsMap[messageJSON.operationCode];
+                                delete vs.qrOperationsMap[messageJSON.operationCode];
                                 break;
                         }
                     }

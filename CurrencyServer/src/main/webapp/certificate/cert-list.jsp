@@ -117,7 +117,7 @@
             },
             getState:function(state){
                 var stateLbl
-                if("OK" == state) stateLbl = "${msg.certOKLbl}"
+                if("OK" == state) stateLbl = "${msg.activeLbl}"
                 else if("CANCELED" ==  state) stateLbl = "${msg.certCancelledLbl}"
                 else stateLbl = state
             },

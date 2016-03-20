@@ -1,0 +1,89 @@
+<!-- Based on: https://github.com/liuwenchao/aha-tree -->
+<dom-module name="vs-json-doc">
+    <template>
+        <style>
+            .parent.collapsed:before{
+                content: '+ ';
+            }
+            .parent.expanded:before{
+                content: '- ';
+            }
+            .parent {
+                cursor: pointer;
+            }
+            .child {
+                cursor: default;
+            }
+            .nodeName {
+                font-weight: bold;
+            }
+            ul{
+                margin: 0;
+            }
+            li{
+                list-style-type: none;
+            }
+        </style>
+        <div id="resultDiv"></div>
+    </template>
+    <script>
+        Polymer({
+            is:'vs-json-doc',
+            properties: {
+                data:{type:Object, observer:'dataChanged'}
+            },
+            ready: function() {
+                console.log(this)
+            },
+            dataChanged: function(){
+                console.log("dataChanged", this.data)
+                var result = ""
+                this.keys = Object.keys(this.data)
+                this.keys.forEach(function (element, index, array) {
+                    result = result + this.formatNode(element, this.data)
+                }.bind(this))
+                Polymer.dom(this.$.resultDiv).innerHTML = '<ul>' + result + '</ul>'
+                var elementList = this.$.resultDiv.querySelectorAll(".parent");
+                for(i = 0; i < elementList.length; i++) {
+                    elementList[i].addEventListener('click', function (event) {
+                        this.toggleChildren(event)
+                        event.stopPropagation();
+                    }.bind(this))
+                }
+            },
+            formatNode: function(node, parentNode, result){
+                if(!result) result = ""
+                if(node.constructor === Array) {
+                    node.forEach(function (element, index, array) {
+                        var keys = Object.keys(element)
+                        keys.forEach(function (innerElement, innerIndex, innerArray) {
+                            result = result + this.formatNode(innerElement, element)
+                        }.bind(this))
+                    }.bind(this))
+                    result = result + '</li>'
+                } else if(typeof parentNode[node] === 'string') {
+                    result = "<li class='child'><span class='nodeName'>" + node + ":</span> " + parentNode[node] + '</li>'
+                } else {
+                    result = result +  "<li><span class='parent expanded nodeName'>" + node + ":</span><ul>" +
+                            this.formatNode(parentNode[node], node) + '</ul></li>';
+                }
+                return result;
+            },
+            toggleChildren: function(e, detail, sender){
+                var childElement = e.target.parentNode.querySelector("ul");
+                console.log("toggleChildren - childElement: ", childElement)
+                if (e.target.className.indexOf('parent') > -1 && childElement) {
+                    var current_display = childElement.style.display;
+                    if (current_display === 'none') {
+                        e.target.className = 'parent expanded nodeName';
+                        childElement.style.display = 'block';
+                    } else {
+                        e.target.className = 'parent collapsed nodeName';
+                        childElement.style.display = 'none';
+                    }
+                }
+                Polymer.dom(this.$.resultDiv).appendChild(Polymer.dom(this.$.resultDiv).childNodes[0])
+            }
+        });
+    </script>
+</dom-module>

@@ -28,15 +28,6 @@
           }
       });
 
-      var toolsPage
-      page('*/app/tools', function (ctx) {
-          vs.route = 'tools';
-          Polymer.Base.importHref('./app/tools-page.vsp', function(e) {
-              if(!toolsPage) toolsPage = document.createElement('tools-page');
-              vs.loadMainContent(toolsPage, "${msg.toolsPageTitle}")
-          });
-      });
-
       var transactionsDashboard
       page('*/transactionsDashboard*', function() {
           vs.route = 'transactionsDashboard';
@@ -175,7 +166,7 @@
           vs.route = 'user';
           Polymer.Base.importHref('./user/user-selector.vsp', function(e) {
               if(!userSelector) userSelector = document.createElement('user-selector');
-              vs.loadMainContent(userSelector, "${msg.userSearchPageTitle}")
+              vs.loadMainContent(userSelector, "${msg.usersLbl}")
           });
       });
 

@@ -15,7 +15,9 @@
         <div style="max-width: 1200px; margin: 0 auto">
             <div hidden="{{isBank}}" class="layout horizontal center center-justified" style="margin: 0 0 15px 0;">
                 <div class="flex" style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
-                    <div data-user-id$="{{user.id}}" style="text-align: center;"><span>{{user.firstName}}</span> <span>{{user.lastName}}</span></div>
+                    <div data-user-id$="{{user.id}}" style="text-align: center;">
+                        <span>{{user.firstName}}</span> <span>{{user.lastName}}</span>
+                    </div>
                 </div>
                 <div style="margin: 0 0 0 0; font-size: 0.8em;vertical-align: bottom;">
                     <b>IBAN: </b><span>{{user.iban}}</span>
@@ -41,6 +43,9 @@
                         <button on-click="makeTransaction">
                             <i class="fa fa-money"></i> ${msg.sendTransactionLbl}
                         </button>
+                    </div>
+                    <div>
+                        <img id="qrImg" src=""/>
                     </div>
                 </div>
                 <div style="margin:0 20px 0 0;">
@@ -80,13 +85,11 @@
         ready: function() {
             this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
             console.log(this.tagName + " - ready - menuType: " + this.menuType)
-            this.$.transactionForm.addEventListener('closed', function (e) {
-                this.page = 0;
-            }.bind(this))
             if(this.message) alert(this.message, "${msg.messageLbl}")
         },
         userChanged:function() {
-            console.log(this.tagName + " - userDtoChanged - user: " + JSON.stringify( this.user))
+            console.log(this.tagName + " - userChanged - user: ")
+            console.log(this.user)
             if(this.user.name) {
                 var userType
                 if('BANK' == this.user.type) userType = "${msg.bankLbl}"
@@ -97,7 +100,10 @@
             this.isConnected = (this.user.connectedDevices && this.user.connectedDevices.length > 0)
             this.isBank = ('BANK' !== this.user.type)
             this.isAdmin = ('superuser' === menuType || 'admin' === menuType)
-            d3.select(this).select("#userDescriptionDiv").html(this.user.description)
+            this.$.qrImg.src = vs.getQRCodeURL(INIT_REMOTE_SIGNED_SESSION, operationCode, vs.wsId, null,
+                    vs.rsaUtil.publicKeyBase64, "200x200")
+
+            this.$.userDescriptionDiv.innerHTML = this.user.description
          },
         getUserURL:function(id) {
             return vs.contextURL + "/rest/user/" + id

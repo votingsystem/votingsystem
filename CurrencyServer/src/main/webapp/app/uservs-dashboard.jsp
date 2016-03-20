@@ -33,7 +33,7 @@
             </div>
             <div id="CURRENCY_PERIOD_INIT_TIME_LIMITED" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencyInitPeriodTimeLimited}}</div>
-                <div class="transDesc">${msg.currencyPeriodInitTimeLimitedLbl}</div>
+                <div class="transDesc">${msg.lapsedLbl}</div>
             </div>
             <div id="CURRENCY_REQUEST" class="transBlock" on-click="transBlockSelected">
                 <div class="numTrans">{{dashBoardDto.numTransCurrencyRequest}}</div>

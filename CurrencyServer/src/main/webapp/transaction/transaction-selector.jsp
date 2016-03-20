@@ -9,7 +9,7 @@
             <option value="CURRENCY_SEND"> - ${msg.selectCurrencySendLbl} - </option>
             <option value="CURRENCY_CHANGE"> - ${msg.selectCurrencyChangeLbl} - </option>
             <option value="CURRENCY_PERIOD_INIT"> - ${msg.currencyPeriodInitLbl} - </option>
-            <option value="CURRENCY_PERIOD_INIT_TIME_LIMITED"> - ${msg.currencyPeriodInitTimeLimitedLbl} - </option>
+            <option value="CURRENCY_PERIOD_INIT_TIME_LIMITED"> - ${msg.lapsedLbl} - </option>
             <option value="FROM_BANK"> - ${msg.bankInputLbl} - </option>
             <option value="FROM_USER"> - ${msg.transactionFromUser} - </option>
         </select>

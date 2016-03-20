@@ -85,7 +85,7 @@
                     this.$.pageHeaderDiv.innerHTML = "${msg.userCertPageTitle}"
                 }
                 if('OK' == this.certvs.state) {
-                    this.$.certStateDiv.innerHTML = "${msg.certOKLbl}"
+                    this.$.certStateDiv.innerHTML = "${msg.activeLbl}"
                 } else if ('CANCELED' == this.certvs.state) {
                     this.$.certStateDiv.innerHTML = "${msg.certCancelledLbl}"
                 }

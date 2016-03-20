@@ -83,8 +83,6 @@ RSAUtil.prototype.sign = function(contentToSign, callback) {
 
 RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
     var decryptedMsg = this.decryptCMS(messageJSON.encryptedMessage)
-    console.log("decryptedMsg: ")
-    console.log(decryptedMsg.content.data)
     if(decryptedMsg.content && decryptedMsg.content.data) {
         var encryptedContentJSON = toJSON(decryptedMsg.content.data)
         messageJSON.messageType = messageJSON.operation
@@ -211,6 +209,12 @@ vs.getUUID = function() {
         return v.toString(16);
     });
 }
+
+var WEB_SOCKET_SESSION_KEY = "wsid";
+var DEVICE_ID_KEY          = "did";
+var OPERATION_KEY          = "op";
+var OPERATION_CODE_KEY     = "opid";
+var PUBLIC_KEY_KEY         = "pk";
 
 vs.getQRCodeURL = function(operation, operationCode, deviceId, sessionId, key, size) {
     if(!size) size = "100x100"

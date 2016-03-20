@@ -1,0 +1,46 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/polymer.xhtml">
+    <ui:define name="head">
+
+        <link href="../resources/bower_components/vs-json-doc/vs-json-doc.html" rel="import"/>
+        <link href="./test-table.vsp" rel="import"/>
+        <style>
+        </style>
+    </ui:define>
+    <ui:define name="content">
+        <test-table></test-table>
+
+        <div style="margin: 40px 0 0 0;">
+            <vs-json-doc id="expandableTree"></vs-json-doc>
+        </div>
+        <script>
+            document.addEventListener('WebComponentsReady', function() {
+
+                var data0 = {uuid:"12321312", operation:"MESSAGE_VS", message:"hello1"}
+                var data1 = {
+                    "name": "Tree B",
+                    "children": [
+                        {
+                            "name": "Child A",
+                            "children": [{ "name": "Grandchild A" }]
+                        },
+                        {
+                            "name": "Child B",
+                            "children": [{ "name": "Grandchild B" }]
+                        },
+                        {
+                            "name": "Child C",
+                            "children": [{ "name": "Grandchild C" }]
+                        },
+                        {
+                            "name": "Child D",
+                            "children": [{ "name": "Grandchild D" }]
+                        }
+                    ]
+                };
+                document.getElementById('expandableTree').data = data0;
+            })
+        </script>
+    </ui:define>
+</ui:composition>

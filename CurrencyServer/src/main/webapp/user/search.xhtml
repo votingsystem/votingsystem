@@ -14,7 +14,7 @@
             </div>
         </div>
         <script>
-            sendSignalVS({caption:"${msg.userSearchPageTitle}"})
+            sendSignalVS({caption:"${msg.usersLbl}"})
             document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
                 console.log("search.xhtml - user-clicked")
                 window.location.href = vs.contextURL + "/rest/user/id/" + e.detail.id + "?menu=" + menuType

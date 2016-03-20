@@ -24,7 +24,7 @@
     "tinymce": "tinymce#~4.3.2",
     "d3": "d3#~3.5.8",
     "font-awesome": "font-awesome#~4.5.0",
-    "polymer": "Polymer/polymer#^1.2.0",
+    "polymer": "Polymer/polymer#^1.4.0",
     "paper-elements": "PolymerElements/paper-elements#^1.0.5",
     "iron-elements": "PolymerElements/iron-elements#^1.0.4",
     "layout": "Polymer/layout",
@@ -32,7 +32,7 @@
     "forge":"forge#~0.6.39"
   },
   "resolutions": {
-    "polymer": "^1.2.3"
+    "polymer": "^1.4.0"
   }
 }
 

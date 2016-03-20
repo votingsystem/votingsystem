@@ -63,7 +63,7 @@
         CURRENCY_REQUEST:{lbl:"${msg.selectCurrencyRequestLbl}"},
         CURRENCY_SEND:{lbl:"${msg.selectCurrencySendLbl}"},
         CURRENCY_PERIOD_INIT:{lbl:"${msg.currencyPeriodInitLbl}"},
-        CURRENCY_PERIOD_INIT_TIME_LIMITED:{lbl:"${msg.currencyPeriodInitTimeLimitedLbl}"},
+        CURRENCY_PERIOD_INIT_TIME_LIMITED:{lbl:"${msg.lapsedLbl}"},
         FROM_BANK:{lbl:"${msg.bankInputLbl}"},
         FROM_USER:{lbl:"${msg.transactionFromUser}"}
     }
