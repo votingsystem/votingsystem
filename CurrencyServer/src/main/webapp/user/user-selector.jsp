@@ -122,6 +122,7 @@
                     console.log("toggleContact - addContact")
                     if(!this.isContact(user)) {
                         this.userListDto = {resultList:[]}
+                        if(!this.contactsArray) this.contactsArray = []
                         this.contactsArray.push(user)
                         for(userIdx in this.userListDto.resultList) {
                             if(user.id === this.userListDto.resultList[userIdx].id) {

@@ -138,7 +138,7 @@ public class UserResource {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         User user = dao.find(User.class, id);
         if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                messages.get("itemNotFoundMsg", Long.valueOf(id).toString())).build();
+                messages.get("objectNotFoundMsg", Long.valueOf(id).toString())).build();
         if(connectedDevices) {
             UserDto resultDto = userBean.getUserDto(user, false);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build() ;

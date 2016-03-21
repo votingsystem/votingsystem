@@ -90,32 +90,25 @@
                 var p7 = forge.pkcs7.createEnvelopedData();
                 var cert = forge.pki.certificateFromPem(document.querySelector("#cert").innerHTML);
                 var userCertData = vs.extractUserInfoFromCert(cert)
-                console.log("userCertData:")
-                console.log(userCertData)
+                console.log("userCertData:", userCertData)
                 p7.addRecipient(cert);
                 p7.content = forge.util.createBuffer('Just a little test');
                 p7.encrypt();
                 var pem = forge.pkcs7.messageToPem(p7);
-                console.log("Encrypted:")
-                console.log(pem)
+                console.log("Encrypted:", pem)
                 var privateKey = forge.pki.privateKeyFromPem(document.querySelector("#privateKey").innerHTML);
                 p7 = forge.pkcs7.messageFromPem(pem);
                 p7.decrypt(p7.recipients[0], privateKey);
-                console.log("Decrypted:")
-                console.log(p7)
+                console.log("Decrypted:", p7)
             }
 
             function testDecrypt() {
-                console.log("testDecrypt")
                 var encryptedCMSMsg = forge.pkcs7.messageFromPem(document.querySelector("#encryptedCMSMsg").innerHTML);
                 var privateKey = forge.pki.privateKeyFromPem(document.querySelector("#privateKey").innerHTML);
-                console.log("privateKey:")
-                console.log(privateKey)
-                console.log("encryptedCMSMsg:")
-                console.log(encryptedCMSMsg)
+                console.log("testDecrypt - privateKey:", privateKey)
+                console.log("encryptedCMSMsg:", encryptedCMSMsg)
                 encryptedCMSMsg.decrypt(encryptedCMSMsg.recipients[0], privateKey);
-                console.log("encryptedCMSMsg:")
-                console.log(encryptedCMSMsg)
+                console.log("encryptedCMSMsg:", encryptedCMSMsg)
             }
 
             window.addEventListener('WebComponentsReady', function() {

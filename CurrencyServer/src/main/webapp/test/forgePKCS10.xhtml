@@ -30,8 +30,7 @@
                 console.log(pem)
                 // convert a Forge certification request from PEM-format
                 var csr = forge.pki.certificationRequestFromPem(pem);
-                console.log("csr from PEM: ")
-                console.log(csr)
+                console.log("csr from PEM: ", csr)
                 document.querySelector("#result").innerHTML = "OK"
             })
         </script>

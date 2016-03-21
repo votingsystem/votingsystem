@@ -1,130 +1,55 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="../element/messagevs-send-dialog.vsp" rel="import"/>
-
 <dom-module name="user-data">
 <template>
-    <style>
-        .userCancelled {
-            background: #ff0000; opacity:0.5; left:20%; top:-60px; font-size: 1.8em; font-weight: bold;
-            color:#f9f9f9; text-align: center; text-transform:uppercase; transform:rotate(20deg);
-            -ms-transform:rotate(20deg); -webkit-transform:rotate(20deg); -moz-transform: rotate(20deg);
-        }
-    </style>
-    <div>
-        <div style="max-width: 1200px; margin: 0 auto">
-            <div hidden="{{isBank}}" class="layout horizontal center center-justified" style="margin: 0 0 15px 0;">
-                <div class="flex" style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
-                    <div data-user-id$="{{user.id}}" style="text-align: center;">
-                        <span>{{user.firstName}}</span> <span>{{user.lastName}}</span>
-                    </div>
-                </div>
-                <div style="margin: 0 0 0 0; font-size: 0.8em;vertical-align: bottom;">
-                    <b>IBAN: </b><span>{{user.iban}}</span>
-                </div>
-            </div>
-            <div hidden="{{!isBank}}" class="layout horizontal center center-justified" style="margin: 0 0 15px 0;">
-                <div class="flex" style="font-size: 1.5em; margin:5px 0 0 0;font-weight: bold; color:#6c0404;">
-                    <div data-user-id$="{{user.id}}" style="text-align: center;">{{user.name}}</div>
-                </div>
-                <div style="margin: 0 0 0 0; font-size: 0.8em;vertical-align: bottom;">
-                    <b>IBAN: </b><span>{{user.iban}}</span>
-                </div>
-            </div>
-            <div hidden="{{isActive}}" class="userCancelled">{{user.state}}</div>
-            <div hidden="{{!isActive}}" class="layout horizontal center center-justified" style="margin:0px 0px 10px 0px;">
-                <div hidden="{{!isClientToolConnected}}" class="horizontal layout">
-                    <div hidden="{{!isConnected}}" style="margin:0 20px 0 0;">
-                        <button on-click="showSendMessageDialog">
-                            <i class="fa fa-envelope-o"></i> ${msg.sendMessageVSLbl}
-                        </button>
-                    </div>
-                    <div hidden="{{isBank}}" style="margin:0 20px 0 0;">
-                        <button on-click="makeTransaction">
-                            <i class="fa fa-money"></i> ${msg.sendTransactionLbl}
-                        </button>
-                    </div>
-                    <div>
-                        <img id="qrImg" src=""/>
-                    </div>
-                </div>
-                <div style="margin:0 20px 0 0;">
-                    <button on-click="goToWeekBalance">
-                        <i class="fa fa-bar-chart"></i> ${msg.goToWeekBalanceLbl}
-                    </button>
-                </div>
-                <div hidden="{{!isConnected}}">
-                    <div hidden="{{!isAdmin}}" style="margin:0 20px 0 0;">
-                        <button on-click="blockUser">
-                            <i class="fa fa fa-thumbs-o-down"></i> ${msg.blockUserLbl}
-                        </button>
-                    </div>
-                </div>
+    <style></style>
+    <div style="max-width: 1200px; margin: 0 auto">
+        <div class="layout horizontal center center-justified"
+             style="font-size: 1.5em;margin:5px 0 15px 0;font-weight: bold; color:#6c0404;">
+            <div data-user-id$="{{user.id}}" style="text-align: center;">{{userName}}</div>
+            <div style="font-size: 0.7em; color: #888; font-weight: normal;margin: 2px 0 0 30px;">{{user.nif}}</div>
+        </div>
+        <div class="layout horizontal center center-justified" style="margin:0px 0px 10px 0px;">
+            <div>
+                <img id="qrImg"/>
             </div>
             <div hidden="{{!user.description}}" style="margin:0 0 20px 0;">
                 <div id="userDescriptionDiv" class="contentDiv" style=" border: 1px solid #c0c0c0;padding:10px;"></div>
             </div>
         </div>
     </div>
-    <messagevs-send-dialog id="sendMessageDialog"></messagevs-send-dialog>
 </template>
 <script>
     Polymer({
         is:'user-data',
         properties: {
             user: {type:Object, observer:'userChanged'},
-            isClientToolConnected: {type:Boolean},
-            isActive: {type:Boolean, value:false},
-            isAdmin: {type:Boolean, value:false},
-            isConnected: {type:Boolean, value:false},
             isBank: {type:Boolean, value:false},
-            userType: {type:String},
             url:{type:String, observer:'getHTTP'},
             message: {type:String}
         },
         ready: function() {
-            this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
             console.log(this.tagName + " - ready - menuType: " + this.menuType)
             if(this.message) alert(this.message, "${msg.messageLbl}")
         },
         userChanged:function() {
-            console.log(this.tagName + " - userChanged - user: ")
-            console.log(this.user)
+            console.log(this.tagName + " - userChanged - user: ", this.user)
             if(this.user.name) {
-                var userType
-                if('BANK' == this.user.type) userType = "${msg.bankLbl}"
-                if('USER' == this.user.type) userType = "${msg.userLbl}"
-                if('SYSTEM' == this.user.type) userType = "${msg.systemLbl}"
+                if('BANK' === this.user.type || 'SYSTEM' == this.user.type) {
+                    this.userName = this.user.name
+                } else if('USER' == this.user.type) {
+                    this.userName = this.user.firstName + " " + this.user.lastName
+                }
             }
-            this.isActive = (this.user.state === 'ACTIVE')
-            this.isConnected = (this.user.connectedDevices && this.user.connectedDevices.length > 0)
-            this.isBank = ('BANK' !== this.user.type)
-            this.isAdmin = ('superuser' === menuType || 'admin' === menuType)
-            this.$.qrImg.src = vs.getQRCodeURL(INIT_REMOTE_SIGNED_SESSION, operationCode, vs.wsId, null,
-                    vs.rsaUtil.publicKeyBase64, "200x200")
-
+            if(this.user.connectedDevices && this.user.connectedDevices.length > 0) {
+                console.log("fetching only first connected device!")
+                var cert = forge.pki.certificateFromPem(this.user.connectedDevices[0].x509CertificatePEM);
+                var publicKeyBase64 = vs.getPublicKeyBase64(cert.publicKey)
+                this.$.qrImg.src = vs.getQRCodeURL('USER_INFO', null, this.user.connectedDevices[0].id, null,
+                        publicKeyBase64, "150x150")
+            }
             this.$.userDescriptionDiv.innerHTML = this.user.description
          },
-        getUserURL:function(id) {
-            return vs.contextURL + "/rest/user/" + id
-        },
-        goToWeekBalance:function() {
-            page.show(vs.contextURL + "/rest/balance/user/id/" + this.user.id)
-        },
-        blockUser:function() {
-            console.log(this.tagName + " - blockUser")
-        },
-        makeTransaction:function() {
-            console.log(this.tagName + " - makeTransaction")
-            this.$.transactionForm.init(Operation.FROM_USER, this.user.name, this.user.iban , this.user.id)
-            this.page = 1;
-        },
-        showByIBAN:function(IBAN) {
-            this.url =  vs.contextURL + "/rest/user/IBAN/" + IBAN
-        },
-        showSendMessageDialog: function () {
-            this.$.sendMessageDialog.show(this.user)
-        },
         getHTTP: function (targetURL) {
             if(!targetURL) targetURL = this.url
             console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)

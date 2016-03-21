@@ -11,16 +11,14 @@
         <script>
             function createPKCS7MessageTimeStamped() {
                 var certPrivateKeyPair = test.createSelfSignedCert();
+                console.log("cert:", certPrivateKeyPair.cert)
                 var contentToSign = "Hello signed and TimeStamped message"
                 vs.getTimeStampToken(contentToSign, function (timeStampTokenASN1) {
-                    console.log("timeStampTokenASN1:")
-                    console.log(timeStampTokenASN1)
+                    console.log("timeStampTokenASN1:", timeStampTokenASN1)
                     var cmsSignedMessage =  test.createCMSSignedMessage(certPrivateKeyPair, contentToSign, timeStampTokenASN1)
-                    console.log("timeStamped CMSSignedMessage:")
-                    console.log(cmsSignedMessage)
+                    console.log("timeStamped CMSSignedMessage:", cmsSignedMessage)
                     var pem = forge.pkcs7.messageToPem(cmsSignedMessage);
-                    console.log("timeStamped CMSSignedMessage PEM:")
-                    console.log(pem)
+                    console.log("timeStamped CMSSignedMessage PEM:", pem)
                     var p7 = forge.pkcs7.messageFromPem(pem);
                     console.log(p7)
                 })
@@ -29,12 +27,10 @@
             function createPKCS7Message() {
                 var certPrivateKeyPair = test.createSelfSignedCert();
                 var cmsSignedMessage =  test.createCMSSignedMessage(certPrivateKeyPair, 'Some content to be signed.')
-                console.log("CMSSignedMessage:")
-                console.log(cmsSignedMessage)
+                console.log("CMSSignedMessage:", cmsSignedMessage)
                 var pem = forge.pkcs7.messageToPem(cmsSignedMessage);
                 var cmsSignedMessage = forge.pkcs7.messageFromPem(pem);
-                console.log("CMSSignedMessage FROM PEM:")
-                console.log(cmsSignedMessage)
+                console.log("CMSSignedMessage FROM PEM:", cmsSignedMessage)
             }
 
             window.addEventListener('WebComponentsReady', function() {

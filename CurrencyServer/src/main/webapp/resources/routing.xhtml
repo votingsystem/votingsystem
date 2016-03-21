@@ -114,14 +114,16 @@
       });
 
       var userBalance
-      page('*/rest/balance/user/id/*', function(data) {
+      function userBalanceRoute(data) {
           vs.route = 'user';
           Polymer.Base.importHref('./balance/balance-user.vsp', function(e) {
               if(!userBalance) userBalance = document.createElement('balance-user');
               userBalance.url = data.path
               vs.loadMainContent(userBalance, "${msg.balanceLbl}")
           });
-      });
+      }
+      page('*/rest/balance/user/id/*', userBalanceRoute);
+      page('*/rest/balance/user/IBAN/*', userBalanceRoute);
 
       page('/rest/balance/user/nif/:nif', function(ctx) {
           vs.route = 'user';

@@ -11,8 +11,7 @@ var RSAUtil = function() {
     this.keypair = this.rsa.generateKeyPair(keyLength);
     this.publicKeyPEM = forge.pki.publicKeyToPem(this.keypair.publicKey),
     this.privateKeyPEM = forge.pki.privateKeyToPem(this.keypair.privateKey);
-    var derBytes = forge.asn1.toDer(forge.pki.publicKeyToAsn1(this.keypair.publicKey)).getBytes()
-    this.publicKeyBase64 =  forge.util.encode64(derBytes);
+    this.publicKeyBase64 = vs.getPublicKeyBase64(this.keypair.publicKey);
 }
 
 RSAUtil.prototype.encrypt = function(plainText) {
@@ -108,6 +107,11 @@ RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
     } else console.error("encrypted content not found")
 }
 
+
+vs.getPublicKeyBase64 = function(publicKey) {
+    var derBytes = forge.asn1.toDer(forge.pki.publicKeyToAsn1(publicKey)).getBytes()
+    return  forge.util.encode64(derBytes);
+}
 
 vs.extractUserInfoFromCert = function(x509Certificate) {
     if(typeof x509Certificate === 'string') x509Certificate = forge.pki.certificateFromPem(x509Certificate)

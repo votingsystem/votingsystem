@@ -9,6 +9,7 @@ import org.votingsystem.web.currency.ejb.CurrencyAccountBean;
 import org.votingsystem.web.currency.util.ReportFiles;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
+import org.votingsystem.web.util.MessagesVS;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -41,9 +42,21 @@ public class BalanceResource {
     @GET @Path("/user/id/{userId}")
     public Response user(@PathParam("userId") long userId, @Context ServletContext context,
              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
         User user = dao.find(User.class, userId);
         if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - User not found - userId: " + userId).build();
+                messages.get("objectNotFoundMsg", userId)).build();
+        return getUserBalancesDto(req, resp, context, user, DateUtils.getWeekPeriod(Calendar.getInstance()));
+    }
+
+    @GET @Path("/user/IBAN/{IBAN}")
+    public Response userByIBAN(@PathParam("IBAN") String IBAN, @Context ServletContext context,
+                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        MessagesVS messages = MessagesVS.getCurrentInstance();
+        Query query = dao.getEM().createNamedQuery("findUserByIBAN").setParameter("IBAN", IBAN);
+        User user = dao.getSingleResult(User.class, query);
+        if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                messages.get("itemNotFoundByIBANMsg", IBAN)).build();
         return getUserBalancesDto(req, resp, context, user, DateUtils.getWeekPeriod(Calendar.getInstance()));
     }
 

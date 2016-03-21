@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="../resources/bower_components/vs-table/vs-table.html" rel="import"/>
+<link href="./vs-table/vs-table.html" rel="import"/>
 
 <dom-module name="test-table">
     <style>
@@ -60,7 +60,6 @@
         #vsTable::shadow tfoot td {
             background-color: #eee;
         }
-        #vsTable::shadow .hint,
         #vsTable::shadow .search,
         #vsTable::shadow .nosearch {
             border: 0;
@@ -73,9 +72,6 @@
             -moz-osx-font-smoothing: grayscale;
             min-width: 15px;
             min-height: 20px;
-        }
-        #vsTable::shadow .hint:before {
-            content:"\f05a";
         }
         #vsTable::shadow .search:before {
             content:"\f00e";
@@ -122,27 +118,19 @@
                         sortable
                         searchable
                         required
-                        searchplaceholder="Type to filter title"
-                        placeholder="Evenet Title"
-                        default=""
-                        hint="Meaningful title will help you remember"></aha-column>
+                        searchplaceholder="${msg.searchLbl}"
+                        default=""></aha-column>
             <aha-column name="date"
                         type="date"
                         searchable
                         sortable
-                        required
-                        placeholder="Event Date"
-                        hint="Dates are required"
-                        default="2011-12-21"></aha-column>
+                        required></aha-column>
 
             <aha-column name="type"
                         type="choice"
                         searchable
                         sortable
                         required
-                        placeholder="Event Type"
-                        default="private"
-                        hint="Public events will be available to everyone"
                         data-choices='{"":"", "private":"Private Event", "public":"Public Event"}'></aha-column>
 
             <aha-column name="content"
@@ -171,7 +159,7 @@
                         placeholder=""
                         default=""></aha-column>
         </vs-table>
-        <BUTTON id="create" on-click="{{addRow}}">Create</BUTTON>
+        <button id="create" on-click="{{addRow}}">Create</button>
         <div id="console"></div>
     </template>
     <script>
