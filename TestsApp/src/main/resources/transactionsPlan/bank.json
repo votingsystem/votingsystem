@@ -2,7 +2,7 @@
     "userList":[],
     "groupList":[],
     "bankList":[
-        {"fromUser":{"id":503}, "bankIBAN":"", "toUser":{"id":2}, "operation":"FROM_BANK",  "subject":"Bank transaction to user",
+        {"fromUser":{"id":3}, "bankIBAN":"", "toUser":{"id":2}, "operation":"FROM_BANK",  "subject":"Bank transaction to user",
          "fromUserName": "ClientBank App1", "fromUserIBAN":"ES8477777777450000012345",
          "amount":"100000", "currencyCode": "EUR", "tags":["WILDTAG"], "isTimeLimited":false}
     ]

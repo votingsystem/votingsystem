@@ -21,7 +21,7 @@
             <div class="horizontal layout center center-justified">
                 <div class="flex"></div>
                 <div id="caption" class="pageTitle" on-click="goToUserPage"><span>{{caption}}</span> - <span>{{userName}}</span></div>
-                <div class="flex" style="font-size: 0.7em; color: #888; font-weight: normal; text-align: right;">{{description}}</div>
+                    <div class="flex" style="font-size: 0.7em; color: #888; font-weight: normal; text-align: right;">{{description}}</div>
             </div>
             <div class="horizontal layout center center-justified" style="text-align: center;font-weight: bold; color: #888; margin:0 0 8px 0;">
                 <div><span>{{getDate(balance.timePeriod.dateFrom)}}</span> - <span>{{getDate(balance.timePeriod.dateTo)}}</span></div>
@@ -170,6 +170,9 @@
                 //var fromMap = {"EUR":{"HIDROGENO":580.5, "OXIGENO":250}, "DOLLAR":{"WILDTAG":245}}
                 //var resultCalc = calculateBalanceResultMap(toMap, fromMap)
                 //calculateUserBalanceSeries(toMap.EUR, fromMap.EUR, {})
+            },
+            getTableRow:function(transaction) {
+
             },
             balanceChanged:function() {
                 console.log(this.tagName + " - initBalance typeof: " + typeof balance)
