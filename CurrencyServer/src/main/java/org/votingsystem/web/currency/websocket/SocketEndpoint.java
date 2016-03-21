@@ -1,9 +1,12 @@
 package org.votingsystem.web.currency.websocket;
 
 import org.votingsystem.dto.SocketMessageDto;
+import org.votingsystem.model.Certificate;
+import org.votingsystem.model.Device;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.web.currency.ejb.WebSocketBean;
+import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -28,6 +31,7 @@ public class SocketEndpoint {
 
     private MessagesVS messages = null;
     @Inject WebSocketBean webSocketBean;
+    @Inject DAOBean dao;
     @Inject ConfigVS config;
 
     @OnMessage
@@ -82,6 +86,12 @@ public class SocketEndpoint {
         log.info(String.format("Session %s closed because of %s", session.getId(), closeReason.getCloseCode() + " - " +
             closeReason.getReasonPhrase()));
         try {
+            Device device = (Device) session.getUserProperties().get("device");
+            if(device != null && device.getCertificate() != null) {
+                dao.merge(device.getCertificate().setState(Certificate.State.SESSION_FINISHED));
+                log.info("session finished - certificate: " + device.getCertificate().getId() + " - state: " +
+                        device.getCertificate().getState());
+            }
             SessionManager.getInstance().remove(session);
         } catch (Exception ex) {
             log.log(Level.SEVERE,"EXCEPTION CLOSING CONNECTION: " + ex.getMessage());

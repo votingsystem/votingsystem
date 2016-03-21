@@ -33,7 +33,7 @@ public class Certificate extends EntityVS implements Serializable {
 
     private static Logger log = Logger.getLogger(Certificate.class.getName());
 
-    public enum State {OK, ERROR, CANCELED, USED, LAPSED, UNKNOWN}
+    public enum State {OK, ERROR, CANCELED, USED, LAPSED, UNKNOWN, SESSION_FINISHED}
 
     public enum Type {
         VOTE_ROOT, VOTE, USER, USER_ID_CARD, BROWSER_SESSION, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD,
