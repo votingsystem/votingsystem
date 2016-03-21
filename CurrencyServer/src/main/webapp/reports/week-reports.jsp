@@ -1,7 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="../resources/jsoneditor.html" rel="import"/>
-
 <dom-module name="week-reports">
     <template>
         <div class="layout vertical center center-justified" style="max-width:1000px; padding:20px 30px 0px 30px;">
@@ -22,9 +20,7 @@
             var options = { mode: 'code', modes: ['code', 'form', 'text', 'tree', 'view'], // allowed modes
                 error: function (err) { alert(err.toString());}
             };
-            var reportsDiv = new JSONEditor(this.$.reportsDiv);
-            reportsDiv.set(this.reportsDto);
-            reportsDiv.expandAll();
+            console.log("ready - reportsDto: ", this.reportsDto)
         },
         getHTTP: function (targetURL) {
             if(!targetURL) targetURL = this.url

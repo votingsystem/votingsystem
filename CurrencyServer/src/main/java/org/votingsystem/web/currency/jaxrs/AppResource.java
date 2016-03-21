@@ -80,12 +80,6 @@ public class AppResource {
         return Response.temporaryRedirect(new URI("../app/contact")).build();
     }
 
-    @GET @Path("/jsonDocs")
-    public Response jsonDocs(@Context ServletContext context, @Context HttpServletRequest req,
-                            @Context HttpServletResponse resp) throws ServletException, IOException, URISyntaxException {
-        return Response.temporaryRedirect(new URI("../app/jsonDocs.xhtml")).build();
-    }
-
     @GET @Path("/userDashboard")
     @Produces(MediaType.APPLICATION_JSON)
     public Response user(@Context ServletContext context, @Context HttpServletRequest req,
