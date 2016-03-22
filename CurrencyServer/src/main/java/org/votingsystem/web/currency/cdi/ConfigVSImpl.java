@@ -56,7 +56,6 @@ public class ConfigVSImpl implements ConfigVS {
 
     private String systemNIF;
     private String contextURL;
-    private String accessControlURL;
     private String webSocketURL;
     private String serverName;
     private String timeStampServerURL;
@@ -78,7 +77,6 @@ public class ConfigVSImpl implements ConfigVS {
             contextURL = (String) props.get("vs.contextURL");
             emailAdmin = (String) props.get("vs.emailAdmin");
             webSocketURL = (String) props.get("vs.webSocketURL");
-            accessControlURL = (String) props.get("vs.accessControlURL");
             serverName = (String) props.get("vs.serverName");
             timeStampServerURL = (String) props.get("vs.timeStampServerURL");
             bankCode = (String) props.get("vs.IBAN_bankCode");
@@ -199,10 +197,6 @@ public class ConfigVSImpl implements ConfigVS {
 
     public String getTimeStampServerURL() {
         return timeStampServerURL;
-    }
-
-    public String getAccessControlURL() {
-        return accessControlURL;
     }
 
     public String getWebSocketURL() {

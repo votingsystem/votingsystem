@@ -9,14 +9,14 @@
             border-spacing: 0;
             border-collapse: collapse;
             font-size: 14px;
-            border: 1px solid #ccc;
+            border: 1px solid #bfbfbf;
             box-shadow: 0 0 4px rgba(0,0,0,0.10);
         }
         #vsTable::shadow th.sortable,
         #vsTable::shadow .rows td {
             white-space: nowrap;
             padding: 8px 5px;
-            border: 1px solid #eee;
+            border: 1px solid #bfbfbf;
             text-align: center;
         }
         #vsTable::shadow tbody tr.rows:hover,
@@ -25,9 +25,8 @@
             color: #1B8CCD;
         }
         #vsTable::shadow th {
-            border-left: 1px solid #eee;
-            border-right: 1px solid #eee;
-            background: #fafafa;
+            border: 1px solid #bfbfbf;
+            background: #efefef;
             color: #434343;
             font-weight: bold;
         }
@@ -53,7 +52,7 @@
             float: right;
         }
         #vsTable::shadow tfoot td {
-            border: 1px solid #eee;
+            border: 1px solid #bfbfbf   ;
             background-color: #fafafa;
         }
         #vsTable::shadow .vs-${msg.subjectLbl}-th{

@@ -126,10 +126,7 @@ public class BalanceResource {
         if(reportFiles.getJsonFile() == null) {
             throw new NotFoundException("reportsForWeekNotFoundMsg - timePeriod: " + timePeriod.toString());
         } else {
-            Map<String, Object> dataMap = JSON.getMapper().readValue(reportFiles.getJsonFile(),
-                    new TypeReference<HashMap<String, Object>>() {});
-            return Response.ok().type(MediaType.JSON).entity(
-                    JSON.getMapper().writeValueAsBytes(dataMap)).build();
+            return Response.ok().type(MediaType.JSON).entity(FileUtils.getBytesFromFile(reportFiles.getJsonFile())).build();
         }
     }
 
