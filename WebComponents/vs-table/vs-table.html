@@ -153,7 +153,7 @@
 							<td
 								on-dblclick="dbclick"
 								title="{{getEditTitle(column.editable, edittitle)}}"
-								class="{{getCellClass(column.name)}}">
+								class$="{{getCellClass(column.name)}}">
 								<div hidden>
 									<template is="dom-if" if="{{isEqual(column.type, 'choice')}}">
 										<select

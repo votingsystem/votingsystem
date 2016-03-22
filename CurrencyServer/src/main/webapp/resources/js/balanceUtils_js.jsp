@@ -158,7 +158,7 @@
                 var calculatedAmount = tagDataMap[tagEntry].amount
                 var amount = (serverBalanceMap[entry][tagEntry].total)?serverBalanceMap[entry][tagEntry].total:
                         serverBalanceMap[entry][tagEntry]
-                var serverAmount = new Number(amount).toFixed(2)
+                var serverAmount = new Number(amount).toAmountStr()
                 if(calculatedAmount !== serverAmount)
                     throw new Error("ERROR currency: '" + entry + "' tag: '" + tagEntry +
                             "' calculated amount: '" + calculatedAmount + "' server amount: ''" + serverAmount + "''")
@@ -176,7 +176,7 @@
                     var tagVSInfoMap = currencyInfoMap[transaction.currency][tagName]
                     tagVSInfoMap.numTransaction = ++tagVSInfoMap.numTransaction
                     var totalAmount = new Number(transaction.amount) + new Number(tagVSInfoMap.amount)
-                    tagVSInfoMap.amount = totalAmount.toFixed(2)
+                    tagVSInfoMap.amount = totalAmount.toAmountStr()
                 } else {
                     currencyInfoMap[transaction.currency][tagName] =
                     {numTransaction:1, amount:transaction.amount}

@@ -79,7 +79,7 @@
             },
             amount: function(transaction) {
                 var amount
-                if(isNaN(transaction.amount)) amount = transaction.amount.toFixed(2) + " " + transaction.currency
+                if(isNaN(transaction.amount)) amount = transaction.amount.toAmountStr() + " " + transaction.currency
                 else  amount = transaction.amount + " " + transaction.currencyCode
                 return amount
             },

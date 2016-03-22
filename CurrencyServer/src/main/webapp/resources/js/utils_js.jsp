@@ -69,6 +69,16 @@
     }
 
 
+    vs.getCurrencySymbol = function(currencyCode) {
+        switch (currencyCode) {
+            case "EUR": return '€';
+            case "USD": return '$';
+            case "CNY":
+            case "JPY":
+                return '¥';
+        }
+    }
+
     window.addEventListener('WebComponentsReady', function() {
         Polymer.Base.importHref(vs.contextURL + '/element/alert-dialog.vsp', function(e) {
             var alertDialog = document.createElement('alert-dialog');
@@ -84,7 +94,13 @@
     vs.months = [${msg.monthsShort}];
 
     Date.prototype.getDayWeekFormat = function() {
-        return vs.weekdays[this.getDay()] + " " + this.getDate() + " " + vs.months[ this.getMonth()] + " " + this.getFullYear();
+        var currentDate = new Date()
+        if(currentDate.getFullYear() === this.getFullYear()) {
+            return vs.weekdays[this.getDay()] + " " + this.getDate() + " " + vs.months[ this.getMonth()] + " "
+                    + pad(this.getHours(), 2) + ":" + pad(this.getMinutes(), 2);
+        } else return this.getDate() + " " + vs.months[ this.getMonth()] + " " + this.getFullYear() + " "
+                + pad(this.getHours(), 2) + ":" + pad(this.getMinutes(), 2);
+
     };
 
     Date.prototype.getDayWeekAndHourFormat = function() {

@@ -61,6 +61,7 @@ public class BalancesBean {
         BalancesDto balancesDto = getBalancesDto(
                 transactionBean.getTransactionFromList(bank, timePeriod), Transaction.Source.FROM);
         balancesDto.setTimePeriod(timePeriod);
+        balancesDto.setTransactionToList(Collections.emptyList());
         balancesDto.setUser(userBean.getUserDto(bank, false));
         return balancesDto;
     }

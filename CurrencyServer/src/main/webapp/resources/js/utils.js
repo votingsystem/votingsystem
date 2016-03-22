@@ -159,6 +159,11 @@ String.prototype.getElapsedTime = function() {
 };
 
 
+Number.prototype.toAmountStr = function(fractionDigits){
+    if(!fractionDigits) fractionDigits = 2
+    return this.toLocaleString(undefined, { minimumFractionDigits: fractionDigits})
+} 
+
 function toJSON(message){
 	if(message != null) {
 		if( Object.prototype.toString.call(message) == '[object String]' ) {
