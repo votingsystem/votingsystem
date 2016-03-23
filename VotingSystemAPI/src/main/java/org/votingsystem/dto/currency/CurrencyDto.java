@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.ValidationException;
@@ -34,7 +35,7 @@ public class CurrencyDto implements Serializable {
     private Long id;
     private BigDecimal amount;
     private BigDecimal batchAmount;
-    private String currencyCode;
+    private CurrencyCode currencyCode;
     private String currencyServerURL;
     private String hashCertVS;
     private String subject;
@@ -124,7 +125,7 @@ public class CurrencyDto implements Serializable {
     public static CurrencyDto getCertSubjectDto(String subjectDN, String hashCertVS) {
         CurrencyDto currencyDto = new CurrencyDto();
         if (subjectDN.contains("CURRENCY_CODE:"))
-            currencyDto.setCurrencyCode(subjectDN.split("CURRENCY_CODE:")[1].split(",")[0]);
+            currencyDto.setCurrencyCode(CurrencyCode.valueOf(subjectDN.split("CURRENCY_CODE:")[1].split(",")[0]));
         if (subjectDN.contains("CURRENCY_VALUE:"))
             currencyDto.setAmount(new BigDecimal(subjectDN.split("CURRENCY_VALUE:")[1].split(",")[0]));
         if (subjectDN.contains("TAG:")) currencyDto.setTag(subjectDN.split("TAG:")[1].split(",")[0]);
@@ -184,11 +185,11 @@ public class CurrencyDto implements Serializable {
         this.hashCertVS = hashCertVS;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 

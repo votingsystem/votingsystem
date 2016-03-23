@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.model.CMSMessage;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.throwable.ExceptionVS;
@@ -32,7 +33,7 @@ public class CurrencyRequestDto {
     private TypeVS operation = TypeVS.CURRENCY_REQUEST;
     private String subject;
     private String serverURL;
-    private String currencyCode;
+    private CurrencyCode currencyCode;
     private TagVS tagVS;
     private String UUID;
     private BigDecimal totalAmount;
@@ -151,11 +152,11 @@ public class CurrencyRequestDto {
         this.serverURL = serverURL;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 

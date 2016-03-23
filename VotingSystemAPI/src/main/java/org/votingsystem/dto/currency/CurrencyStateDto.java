@@ -2,6 +2,7 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.util.crypto.CertUtils;
 import org.votingsystem.util.crypto.PEMUtils;
@@ -22,7 +23,7 @@ public class CurrencyStateDto {
     private Currency.State state;
     private Currency.Type type;
     private String currencyCert;
-    private String currencyCode;
+    private CurrencyCode currencyCode;
     private String leftOverCert;
     private String tag;
     private BigDecimal amount;
@@ -131,11 +132,11 @@ public class CurrencyStateDto {
         this.currencyCert = currencyCert;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 

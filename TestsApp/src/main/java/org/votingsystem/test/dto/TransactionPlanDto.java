@@ -79,7 +79,7 @@ public class TransactionPlanDto {
         } else {
             Map tagMap = new HashMap<>();
             tagMap.put(transaction.getTagName(), transaction.getAmount());
-            currencyMap.put(transaction.getCurrencyCode(), tagMap);
+            currencyMap.put(transaction.getCurrencyCode().toString(), tagMap);
         }
         return currencyMap;
     }

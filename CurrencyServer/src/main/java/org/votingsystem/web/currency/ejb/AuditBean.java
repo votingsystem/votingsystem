@@ -3,6 +3,7 @@ package org.votingsystem.web.currency.ejb;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.*;
 import org.votingsystem.model.CMSMessage;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
@@ -65,7 +66,7 @@ public class AuditBean {
                 .setParameter("dateTo", timePeriod.getDateTo());
         List<Transaction> transactionList = query.getResultList();
         List<TransactionDto> transactionFromList = new ArrayList<>();
-        Map<String, Map<String, BigDecimal>> balancesFromMap = new HashMap<>();
+        Map<CurrencyCode, Map<String, BigDecimal>> balancesFromMap = new HashMap<>();
         for(Transaction transaction : transactionList) {
             Map<String, BigDecimal> currencyMap = null;
             if((currencyMap = balancesFromMap.get(transaction.getCurrencyCode())) != null) {
@@ -89,7 +90,7 @@ public class AuditBean {
                 .setParameter("dateFrom", timePeriod.getDateFrom()).setParameter("dateTo",timePeriod.getDateTo());
         transactionList = query.getResultList();
         List<TransactionDto> transactionToList = new ArrayList<>();
-        Map<String, Map<String, IncomesDto>> balancesToMap = new HashMap<>();
+        Map<CurrencyCode, Map<String, IncomesDto>> balancesToMap = new HashMap<>();
         for(Transaction transaction : transactionList) {
             Map<String, IncomesDto> currencyMap = null;
             if((currencyMap = balancesToMap.get(transaction.getCurrencyCode())) != null) {
@@ -173,9 +174,9 @@ public class AuditBean {
         ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), userSubPath);
         log.info(format("initUserWeekPeriod - User ''{0}'' - dir ''{1}''", user.getId(),
                 reportFiles.getBaseDir().getAbsolutePath()) );
-        Map<String, Map<String, BigDecimal>> currencyMap = balancesDto.getBalancesCash();
+        Map<CurrencyCode, Map<String, BigDecimal>> currencyMap = balancesDto.getBalancesCash();
         Query query = null;
-        for(String currencyCode: currencyMap.keySet()) {
+        for(CurrencyCode currencyCode: currencyMap.keySet()) {
             for(Map.Entry<String, BigDecimal> tagVSEntry:  currencyMap.get(currencyCode).entrySet()) {
                 TagVS currentTagVS = config.getTag(tagVSEntry.getKey());
                 query = dao.getEM().createQuery("SELECT count (t) FROM Transaction t WHERE t.toUser =:toUser and " +

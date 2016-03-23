@@ -2,6 +2,7 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.dto.UserDto;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.User;
 import org.votingsystem.util.TypeVS;
 
@@ -18,13 +19,13 @@ public class InitPeriodTransactionDto {
     private BigDecimal timeLimitedNotExpended;
     private UserDto toUser;
     private String tag;
-    private String currencyCode;
+    private CurrencyCode currencyCode;
     private String UUID;
 
 
     public InitPeriodTransactionDto() {}
 
-    public InitPeriodTransactionDto(BigDecimal amount, BigDecimal timeLimitedNotExpended, String currencyCode,
+    public InitPeriodTransactionDto(BigDecimal amount, BigDecimal timeLimitedNotExpended, CurrencyCode currencyCode,
                                     String tag, User user) {
         this.setOperation(TypeVS.CURRENCY_PERIOD_INIT);
         this.setAmount(amount);
@@ -83,11 +84,11 @@ public class InitPeriodTransactionDto {
         this.UUID = UUID;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 }

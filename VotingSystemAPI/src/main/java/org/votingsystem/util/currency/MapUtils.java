@@ -26,9 +26,9 @@ public class MapUtils {
     public static Map<String, BigDecimal> getCurrencyMap(Collection<Currency> currencyList) {
         Map<String, BigDecimal> currencyMap = new HashMap<String, BigDecimal>();
         for(Currency currency : currencyList){
-            if(currencyMap.containsKey(currency.getCurrencyCode())) currencyMap.put(currency.getCurrencyCode(),
+            if(currencyMap.containsKey(currency.getCurrencyCode())) currencyMap.put(currency.getCurrencyCode().toString(),
                     currencyMap.get(currency.getCurrencyCode()).add(currency.getAmount()));
-            else currencyMap.put(currency.getCurrencyCode(), currency.getAmount());
+            else currencyMap.put(currency.getCurrencyCode().toString(), currency.getAmount());
         }
         return currencyMap;
     }

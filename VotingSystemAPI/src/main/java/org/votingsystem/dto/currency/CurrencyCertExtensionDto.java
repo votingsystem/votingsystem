@@ -1,5 +1,7 @@
 package org.votingsystem.dto.currency;
 
+import org.votingsystem.model.CurrencyCode;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -12,14 +14,14 @@ public class CurrencyCertExtensionDto implements Serializable {
 
     private String currencyServerURL;
     private String hashCertVS;
-    private String currencyCode;
+    private CurrencyCode currencyCode;
     private String tag;
     private Boolean timeLimited;
     private BigDecimal amount;
 
     public CurrencyCertExtensionDto() {}
 
-    public CurrencyCertExtensionDto(BigDecimal amount, String currencyCode, String hashCertVS, String currencyServerURL,
+    public CurrencyCertExtensionDto(BigDecimal amount, CurrencyCode currencyCode, String hashCertVS, String currencyServerURL,
                     Boolean timeLimited, String tag) {
         this.amount = amount;
         this.currencyCode = currencyCode;
@@ -45,11 +47,11 @@ public class CurrencyCertExtensionDto implements Serializable {
         this.hashCertVS = hashCertVS;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 

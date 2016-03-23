@@ -4,6 +4,7 @@ package org.votingsystem.test.currency;
 import org.votingsystem.dto.currency.CurrencyBatchDto;
 import org.votingsystem.dto.currency.CurrencyBatchResponseDto;
 import org.votingsystem.dto.currency.CurrencyDto;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.TestUtils;
@@ -35,9 +36,8 @@ public class CurrencySendFromWallet {
         File currencyFile = currencyFiles[0];
         CurrencyDto currencyDto = JSON.getMapper().readValue(currencyFile, CurrencyDto.class);
         CurrencyBatchDto currencyBatchDto =  CurrencyBatchDto.NEW("First Currency Transaction",
-                "ES4678788989450000000002", new BigDecimal(9), "EUR", "HIDROGENO", true,
-                Arrays.asList(currencyDto.deSerialize()), currencyServer.getServerURL(),
-                currencyServer.getTimeStampServiceURL());
+                "ES4678788989450000000002", new BigDecimal(9), CurrencyCode.EUR, "HIDROGENO", true,
+                Arrays.asList(currencyDto.deSerialize()), currencyServer.getServerURL());
 
         ResponseVS responseVS = HttpHelper.getInstance().sendData(JSON.getMapper().writeValueAsBytes(currencyBatchDto),
                 ContentType.JSON, currencyServer.getCurrencyTransactionServiceURL());

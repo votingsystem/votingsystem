@@ -1,5 +1,6 @@
 package org.votingsystem.model.currency;
 
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.util.EntityVS;
@@ -51,7 +52,7 @@ public class CurrencyAccount extends EntityVS implements Serializable {
 
     @Column(name="balance", nullable=false) private BigDecimal balance = null;
 
-    @Column(name="currencyCode", nullable=false) private String currencyCode;
+    @Column(name="currencyCode", nullable=false) @Enumerated(EnumType.STRING) private CurrencyCode currencyCode;
     @Column(name="IBAN", nullable=false) private String IBAN;
 
     @ManyToOne(fetch=FetchType.LAZY)
@@ -65,7 +66,7 @@ public class CurrencyAccount extends EntityVS implements Serializable {
 
     public CurrencyAccount() {}
 
-    public CurrencyAccount(User user, BigDecimal balance, String currencyCode, TagVS tag) {
+    public CurrencyAccount(User user, BigDecimal balance, CurrencyCode currencyCode, TagVS tag) {
         this.currencyCode = currencyCode;
         this.user = user;
         this.balance = balance;
@@ -114,11 +115,11 @@ public class CurrencyAccount extends EntityVS implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 

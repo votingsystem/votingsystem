@@ -225,7 +225,6 @@
                 return tagToExpend - expendedFromTag
             },
             isTimeLimited: function(item, tag) {
-                console.log("======== isTimeLimited - item:", item, tag)
                 if(!tag) {
                     if(item.timeLimited > 0) return true;
                     else return false;

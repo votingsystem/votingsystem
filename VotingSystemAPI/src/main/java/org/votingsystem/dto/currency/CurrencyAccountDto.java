@@ -1,6 +1,7 @@
 package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 
@@ -14,7 +15,7 @@ import java.util.Date;
 public class CurrencyAccountDto {
 
     private Long id;
-    private String currencyCode;
+    private CurrencyCode currencyCode;
     private String IBAN;
     private BigDecimal amount;
     private Date lastUpdated;
@@ -39,11 +40,11 @@ public class CurrencyAccountDto {
         this.id = id;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 

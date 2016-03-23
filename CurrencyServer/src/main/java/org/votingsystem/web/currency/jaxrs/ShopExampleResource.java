@@ -5,6 +5,7 @@ import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.dto.currency.TransactionResponseDto;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Transaction;
@@ -54,7 +55,7 @@ public class ShopExampleResource {
     public Object index(@Context ServletContext context,
                         @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         TransactionDto dto = TransactionDto.PAYMENT_REQUEST("Receptor name", User.Type.USER,
-                new BigDecimal(5), "EUR", "IBANNumber12345", "shop example payment - " + new Date(), "HIDROGENO");
+                new BigDecimal(5), CurrencyCode.EUR, "IBANNumber12345", "shop example payment - " + new Date(), "HIDROGENO");
         dto.setPaymentOptions(Arrays.asList(Transaction.Type.FROM_USER,
                 Transaction.Type.CURRENCY_SEND, Transaction.Type.CURRENCY_CHANGE));
         String sessionID = dto.getUUID().substring(0, 8);

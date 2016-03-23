@@ -5,6 +5,7 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.IncomesDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.CMSMessage;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
@@ -41,6 +42,7 @@ public class TransactionBean {
     @Inject ConfigVS config;
     @Inject DAOBean dao;
     @Inject BalancesBean balancesBean;
+    @Inject CurrencyAccountBean currencyAccountBean;
     @Inject TransactionBankBean transactionBankBean;
     @Inject TransactionUserBean transactionUserBean;
 
@@ -73,7 +75,7 @@ public class TransactionBean {
         }
     }
 
-    private synchronized CurrencyAccount updateUserAccountTo(Transaction transaction) throws ExceptionVS {
+    private synchronized CurrencyAccount updateUserAccountTo(Transaction transaction) throws Exception {
         if(transaction.getToUserIBAN() == null) throw new ExceptionVS("transaction without toUserIBAN");
         Query query = dao.getEM().createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")
                 .setParameter("userIBAN", transaction.getToUserIBAN()).setParameter("tag", transaction.getTag())
@@ -101,7 +103,9 @@ public class TransactionBean {
             }
         }
         if(accountTo == null) {//new user account for tag
-            //User user, BigDecimal balance, String currencyCode, TagVS tag
+            //check if there exists a WILDTAG account for that user and that CurrencyCode
+            if(!TagVS.WILDTAG.equals(transaction.getTag().getName()))
+                currencyAccountBean.checkWildtagUserAccountForCurrency(transaction.getToUser(), transaction.getCurrencyCode());
             accountTo = new CurrencyAccount(transaction.getToUser(), resultAmount, transaction.getCurrencyCode(),
                     transaction.getTag());
             dao.persist(accountTo);
@@ -191,11 +195,11 @@ public class TransactionBean {
     }
 
     //Check the amount from WILDTAG account expended for the param tag
-    public BigDecimal checkWildTagExpensesForTag(User user, TagVS tagVS, String currencyCode) {
+    public BigDecimal checkWildTagExpensesForTag(User user, TagVS tagVS, CurrencyCode currencyCode) {
         Interval timePeriod = DateUtils.getCurrentWeekPeriod();
-        Map<String, Map<String, BigDecimal>> balancesFrom =
+        Map<CurrencyCode, Map<String, BigDecimal>> balancesFrom =
                 BalanceUtils.getBalancesFrom(getTransactionFromList(user, timePeriod));
-        Map<String, Map<String, IncomesDto>> balancesTo = BalanceUtils.getBalancesTo(getTransactionToList(user, timePeriod));
+        Map<CurrencyCode, Map<String, IncomesDto>> balancesTo = BalanceUtils.getBalancesTo(getTransactionToList(user, timePeriod));
         if(balancesFrom.get(currencyCode) == null) return BigDecimal.ZERO;
         BigDecimal expendedForTagVS = balancesFrom.get(currencyCode).get(tagVS.getName());
         if(expendedForTagVS == null || BigDecimal.ZERO.compareTo(expendedForTagVS) == 0) return BigDecimal.ZERO;
@@ -203,7 +207,6 @@ public class TransactionBean {
         if(totalIncomesForTagVS.compareTo(expendedForTagVS) < 0) return expendedForTagVS.subtract(totalIncomesForTagVS);
         else return BigDecimal.ZERO;
     }
-
 
     public TransactionDto getTransactionDto(Transaction transaction) {
         MessagesVS messages = MessagesVS.getCurrentInstance();

@@ -15,7 +15,7 @@ public class TransactionUtils {
 
     static Logger log =  Logger.getLogger(TransactionUtils.class.getName());
 
-    public static Map<String, Map<String, BigDecimal>> getCurrencyMap1(List<Transaction> transactionList) {
+    public static Map<String, Map<String, BigDecimal>> getCurrencyMap(List<Transaction> transactionList) {
         Map<String, Map<String, BigDecimal>> currencyMap = new HashMap<String, Map<String, BigDecimal>>();
         Map<String, BigDecimal> tagMap = null;
         for(Transaction transaction : transactionList) {
@@ -28,7 +28,7 @@ public class TransactionUtils {
             } else {
                 tagMap = new HashMap<String, BigDecimal>();
                 tagMap.put(transaction.getTag().getName(), transaction.getAmount());
-                currencyMap.put(transaction.getCurrencyCode(), tagMap);
+                currencyMap.put(transaction.getCurrencyCode().toString(), tagMap);
             }
         }
         return currencyMap;

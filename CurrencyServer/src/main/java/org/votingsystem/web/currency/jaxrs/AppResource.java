@@ -1,7 +1,6 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import org.votingsystem.dto.DashBoardDto;
-import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Interval;
 import org.votingsystem.util.JSON;

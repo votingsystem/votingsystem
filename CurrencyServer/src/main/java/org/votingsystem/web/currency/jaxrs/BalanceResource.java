@@ -1,6 +1,5 @@
 package org.votingsystem.web.currency.jaxrs;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.User;
 import org.votingsystem.util.*;

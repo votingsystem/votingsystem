@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.cms.CMSSignedMessage;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyBatch;
@@ -34,7 +35,7 @@ public class CurrencyBatchDto {
     private String toUserIBAN;
     private String toUserName;
     private String subject;
-    private String currencyCode;
+    private CurrencyCode currencyCode;
     private String tag;
     private String batchUUID;
     private Boolean timeLimited = Boolean.FALSE;
@@ -65,9 +66,8 @@ public class CurrencyBatchDto {
         this.batchUUID  = currencyBatch.getBatchUUID();
     }
 
-    public static CurrencyBatchDto NEW(String subject, String toUserIBAN, BigDecimal batchAmount, String currencyCode,
-            String tag, Boolean timeLimited, List<Currency> currencyList, String currencyServerURL,
-            String timeStampServiceURL) throws Exception {
+    public static CurrencyBatchDto NEW(String subject, String toUserIBAN, BigDecimal batchAmount, CurrencyCode currencyCode,
+            String tag, Boolean timeLimited, List<Currency> currencyList, String currencyServerURL) throws Exception {
         CurrencyBatchDto batchDto = new CurrencyBatchDto();
         batchDto.subject = subject;
         batchDto.toUserIBAN = toUserIBAN;
@@ -250,11 +250,11 @@ public class CurrencyBatchDto {
         this.subject = subject;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 

@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.cdi;
 
 import org.iban4j.*;
 import org.votingsystem.model.Actor;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
@@ -150,8 +151,7 @@ public class ConfigVSImpl implements ConfigVS {
     public TagVS createtagVS(String tagName) {
         TagVS tagVS =  dao.persist(new TagVS(StringUtils.removeAccents(tagName).toUpperCase()));
         //TODO dollar, yuan, yen ...
-        dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO,
-                java.util.Currency.getInstance("EUR").getCurrencyCode(), tagVS));
+        dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO, CurrencyCode.EUR, tagVS));
         return tagVS;
     }
 
@@ -162,8 +162,7 @@ public class ConfigVSImpl implements ConfigVS {
                 .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
         user.setIBAN(iban.toString());
         user = dao.merge(user);
-        dao.persist(new CurrencyAccount(user, BigDecimal.ZERO,
-                java.util.Currency.getInstance("EUR").getCurrencyCode(), getTag(TagVS.WILDTAG)));
+        dao.persist(new CurrencyAccount(user, BigDecimal.ZERO, CurrencyCode.EUR, getTag(TagVS.WILDTAG)));
         return user;
     }
 

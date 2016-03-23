@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.model.CMSMessage;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
@@ -33,7 +34,7 @@ public class TransactionDto {
     private Date dateCreated;
     private String subject;
     private String description;
-    private String currencyCode;
+    private CurrencyCode currencyCode;
     private String fromUserName;
     private String toUserName;
     private String fromUserIBAN;
@@ -90,7 +91,7 @@ public class TransactionDto {
     }
 
     public static TransactionDto PAYMENT_REQUEST(String toUser, User.Type userToType, BigDecimal amount,
-                                                 String currencyCode, String toUserIBAN, String subject, String tag) {
+                                 CurrencyCode currencyCode, String toUserIBAN, String subject, String tag) {
         TransactionDto dto = new TransactionDto();
         dto.setOperation(TypeVS.TRANSACTION_INFO);
         dto.setUserToType(userToType);
@@ -106,7 +107,7 @@ public class TransactionDto {
     }
 
     public static TransactionDto CURRENCY_SEND(String toUser, String subject, BigDecimal amount,
-                                               String currencyCode, String toUserIBAN, boolean isTimeLimited, String tag) {
+                                   CurrencyCode currencyCode, String toUserIBAN, boolean isTimeLimited, String tag) {
         TransactionDto dto = new TransactionDto();
         dto.setOperation(TypeVS.CURRENCY_SEND);
         dto.setSubject(subject);
@@ -121,7 +122,7 @@ public class TransactionDto {
     }
 
     public static TransactionDto BASIC(String toUser, User.Type userToType, BigDecimal amount,
-                                       String currencyCode, String toUserIBAN, String subject, String tag) {
+                                       CurrencyCode currencyCode, String toUserIBAN, String subject, String tag) {
         TransactionDto dto = new TransactionDto();
         dto.setUserToType(userToType);
         dto.setToUserName(toUser);
@@ -312,11 +313,11 @@ public class TransactionDto {
         this.operation = operation;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 

@@ -1,6 +1,7 @@
 package org.votingsystem.util.currency;
 
 import org.votingsystem.dto.currency.IncomesDto;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.currency.Transaction;
 
 import java.math.BigDecimal;
@@ -18,30 +19,30 @@ import static java.util.stream.Collectors.groupingBy;
  */
 public class BalanceUtils {
 
-    private static final Function<Transaction, String> currencyCode = new Function<Transaction, String> () {
-        @Override public String apply(Transaction transaction) { return transaction.getCurrencyCode(); }
+    private static final Function<Transaction, CurrencyCode> currencyCode = new Function<Transaction, CurrencyCode> () {
+        @Override public CurrencyCode apply(Transaction transaction) { return transaction.getCurrencyCode(); }
     };
     private static final Function<Transaction, String> tagName = new Function<Transaction, String> () {
         @Override public String apply(Transaction transaction) { return transaction.getTagName(); }
     };
 
 
-    public static Map<String, Map<String, BigDecimal>> getBalancesFrom(Collection<Transaction> transactionList) {
+    public static Map<CurrencyCode, Map<String, BigDecimal>> getBalancesFrom(Collection<Transaction> transactionList) {
         Collector<Transaction, ?, ?> amountCollector = new TransactionFromAmountCollector();
-        Map<String, List<Transaction>> currencyMaps =  transactionList.stream().collect(groupingBy(currencyCode));
-        Map<String, Map<String, BigDecimal>> result = new HashMap<>();
-        for(String currency : currencyMaps.keySet()) {
+        Map<CurrencyCode, List<Transaction>> currencyMaps =  transactionList.stream().collect(groupingBy(currencyCode));
+        Map<CurrencyCode, Map<String, BigDecimal>> result = new HashMap<>();
+        for(CurrencyCode currency : currencyMaps.keySet()) {
             Map tagVSMap = currencyMaps.get(currency).stream().collect(groupingBy(tagName, amountCollector));
             result.put(currency, tagVSMap);
         }
         return result;
     }
 
-    public static Map<String, Map<String, IncomesDto>> getBalancesTo(Collection<Transaction> transactionList) {
+    public static Map<CurrencyCode, Map<String, IncomesDto>> getBalancesTo(Collection<Transaction> transactionList) {
         Collector<Transaction, ?, ?> amountCollector = new TransactionToAmountCollector();
-        Map<String, Map<String, IncomesDto>> result = new HashMap<>();
-        Map<String, List<Transaction>> currencyMaps =  transactionList.stream().collect(groupingBy(currencyCode));
-        for(String currency : currencyMaps.keySet()) {
+        Map<CurrencyCode, Map<String, IncomesDto>> result = new HashMap<>();
+        Map<CurrencyCode, List<Transaction>> currencyMaps =  transactionList.stream().collect(groupingBy(currencyCode));
+        for(CurrencyCode currency : currencyMaps.keySet()) {
             Map tagVSMap = currencyMaps.get(currency).stream().collect(groupingBy(tagName, amountCollector));
             result.put(currency, tagVSMap);
         }

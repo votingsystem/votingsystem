@@ -4,10 +4,7 @@ package org.votingsystem.model.currency;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyDto;
-import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.Certificate;
-import org.votingsystem.model.TagVS;
-import org.votingsystem.model.User;
+import org.votingsystem.model.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContextVS;
@@ -51,7 +48,7 @@ public class Currency extends EntityVS implements Serializable  {
     @Column(name="id", unique=true, nullable=false) private Long id;
     @Column(name="subject") private String subject;
     @Column(name="amount") private BigDecimal amount = null;
-    @Column(name="currency", nullable=false) private String currencyCode;
+    @Column(name="currency", nullable=false) @Enumerated(EnumType.STRING) private CurrencyCode currencyCode;
     @Column(name="isTimeLimited") private Boolean timeLimited = Boolean.FALSE;
 
     @Column(name="hashCertVS") private String hashCertVS;
@@ -117,7 +114,7 @@ public class Currency extends EntityVS implements Serializable  {
         this.toUserName = batchItemDto.getToUserName();
     }
 
-    public Currency(String currencyServerURL, BigDecimal amount, String currencyCode,
+    public Currency(String currencyServerURL, BigDecimal amount, CurrencyCode currencyCode,
                     Boolean timeLimited, String hashCertVS, TagVS tag) {
         this.amount = amount;
         this.currencyServerURL = currencyServerURL;
@@ -132,7 +129,7 @@ public class Currency extends EntityVS implements Serializable  {
         } catch(Exception ex) {  ex.printStackTrace(); }
     }
 
-    public Currency(String currencyServerURL, BigDecimal amount, String currencyCode, Boolean timeLimited, TagVS tag) {
+    public Currency(String currencyServerURL, BigDecimal amount, CurrencyCode currencyCode, Boolean timeLimited, TagVS tag) {
         this.amount = amount;
         this.currencyServerURL = currencyServerURL;
         this.currencyCode = currencyCode;
@@ -429,11 +426,11 @@ public class Currency extends EntityVS implements Serializable  {
         return this;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 

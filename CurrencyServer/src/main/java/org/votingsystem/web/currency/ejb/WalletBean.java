@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.ejb;
 
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.throwable.ExceptionVS;
@@ -26,7 +27,7 @@ public class WalletBean {
 
 
     public Map<CurrencyAccount, BigDecimal> getAccountMovementsForTransaction(String fromUserIBAN,
-               TagVS tag, BigDecimal amount, String currencyCode) throws Exception {
+               TagVS tag, BigDecimal amount, CurrencyCode currencyCode) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         if(tag == null) throw new ExceptionVS("Transaction without tag!!!");
         if(amount.compareTo(BigDecimal.ZERO) < 0) throw new ExceptionVS(

@@ -7,6 +7,7 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.TransactionDto;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
@@ -37,10 +38,9 @@ public class CurrencyRequest {
                 "Currency_07553172H", User.Type.USER);
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer();
         BigDecimal totalAmount = new BigDecimal(10);
-        String curencyCode = "EUR";
         TransactionDto transactionDto = new TransactionDto();
         transactionDto.setAmount(totalAmount);
-        transactionDto.setCurrencyCode(curencyCode);
+        transactionDto.setCurrencyCode(CurrencyCode.EUR);
         transactionDto.setTags(Sets.newHashSet("ENERGY"));
         transactionDto.setTimeLimited(true);
         CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionDto, totalAmount,

@@ -17,6 +17,7 @@ import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
 import org.votingsystem.dto.voting.AnonymousDelegationCertExtensionDto;
 import org.votingsystem.dto.voting.VoteCertExtensionDto;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.JSON;
@@ -107,16 +108,16 @@ public class CertificationRequest implements java.io.Serializable {
     }
 
     public static CertificationRequest getCurrencyRequest(
-              String signatureMechanism, String provider, String currencyServerURL, String hashCertVS,
-              BigDecimal amount, String currencyCode, Boolean timeLimited, String tagVS) throws NoSuchAlgorithmException,
+            String signatureMechanism, String provider, String currencyServerURL, String hashCertVS,
+            BigDecimal amount, CurrencyCode currencyCode, Boolean timeLimited, String tagVS) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidKeyException, SignatureException, IOException, OperatorCreationException {
         KeyPair keyPair = KeyGenerator.INSTANCE.genKeyPair();
         tagVS = (tagVS == null)? TagVS.WILDTAG:tagVS.trim();
         X500Principal subject = new X500Principal("CN=currencyServerURL:" + currencyServerURL +
                 ", OU=CURRENCY_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currencyCode +
                 ", OU=TAG:" + tagVS + ", OU=DigitalCurrency");
-        CurrencyCertExtensionDto dto = new CurrencyCertExtensionDto(amount, currencyCode, hashCertVS, currencyServerURL,
-                timeLimited, tagVS);
+        CurrencyCertExtensionDto dto = new CurrencyCertExtensionDto(amount, currencyCode,
+                hashCertVS, currencyServerURL, timeLimited, tagVS);
         PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject, keyPair.getPublic());
         pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(ContextVS.CURRENCY_OID),
                 new DERUTF8String(JSON.getMapper().writeValueAsString(dto)));

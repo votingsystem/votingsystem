@@ -1,9 +1,6 @@
 package org.votingsystem.model.currency;
 
-import org.votingsystem.model.Batch;
-import org.votingsystem.model.CMSMessage;
-import org.votingsystem.model.TagVS;
-import org.votingsystem.model.User;
+import org.votingsystem.model.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -24,7 +21,7 @@ public class CurrencyBatch extends Batch implements Serializable {
     @JoinColumn(name="leftOver") private Currency leftOver;
     @OneToOne
     @JoinColumn(name="currencyChange") private Currency currencyChange;
-    @Column(name="currencyCode") private String currencyCode;
+    @Column(name="currencyCode") @Enumerated(EnumType.STRING) private CurrencyCode currencyCode;
     @ManyToOne(fetch= FetchType.EAGER)
     @JoinColumn(name="tagVS", nullable=false) private TagVS tagVS;
     @Column(name="timeLimited") private Boolean timeLimited = Boolean.FALSE;
@@ -73,11 +70,11 @@ public class CurrencyBatch extends Batch implements Serializable {
         this.subject = subject;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 

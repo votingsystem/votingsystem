@@ -2,6 +2,7 @@ package org.votingsystem.web.currency.ejb;
 
 import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.dto.currency.TransactionDto;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
@@ -82,7 +83,7 @@ public class BalancesBean {
         return balancesDto;
     }
 
-    public void updateTagBalance(BigDecimal amount, String currencyCode, TagVS tag) throws Exception {
+    public void updateTagBalance(BigDecimal amount, CurrencyCode currencyCode, TagVS tag) throws Exception {
         Query query = dao.getEM().createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")
                 .setParameter("state", CurrencyAccount.State.ACTIVE).setParameter("userIBAN", config.getSystemUser().getIBAN())
                 .setParameter("tag", tag).setParameter("currencyCode", currencyCode);

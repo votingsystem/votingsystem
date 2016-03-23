@@ -84,7 +84,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.votingsystem.client.webextension.MainApp</mainClass>
+                            <mainClass>org.votingsystem.client.MainApp</mainClass>
                         </manifest>
                         <manifestEntries>
                             <Application-Name>${project.artifactId}</Application-Name>
@@ -110,7 +110,7 @@
                 <configuration>
                     <programs>
                         <program>
-                            <mainClass>org.votingsystem.client.webextension.MainApp</mainClass>
+                            <mainClass>org.votingsystem.client.MainApp</mainClass>
                             <id>VotingSystemBrowserHost</id>
                         </program>
                     </programs>
@@ -122,7 +122,7 @@
                     <finalName>VotingSystemBrowserHost</finalName>
                     <archive>
                         <manifest>
-                            <mainClass>org.votingsystem.client.webextension.MainApp</mainClass>
+                            <mainClass>org.votingsystem.client.MainApp</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

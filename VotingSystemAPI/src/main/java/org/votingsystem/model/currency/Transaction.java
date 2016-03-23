@@ -2,6 +2,7 @@ package org.votingsystem.model.currency;
 
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.model.CMSMessage;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import javax.persistence.*;
@@ -66,7 +67,7 @@ public class Transaction implements Serializable {
 
     @Column(name="subject") private String subject;
 
-    @Column(name="currency", nullable=false) private String currencyCode;
+    @Column(name="currency", nullable=false) @Enumerated(EnumType.STRING) private CurrencyCode currencyCode;
 
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="tag", nullable=false) private TagVS tag;
@@ -103,7 +104,7 @@ public class Transaction implements Serializable {
 
     public Transaction() {}
 
-    public Transaction(User fromUser, User toUser, BigDecimal amount, String currencyCode, String subject,
+    public Transaction(User fromUser, User toUser, BigDecimal amount, CurrencyCode currencyCode, String subject,
                        CMSMessage cmsMessage, Type type, State state, TagVS tag) {
         this.amount = amount;
         this.fromUser = fromUser;
@@ -146,7 +147,7 @@ public class Transaction implements Serializable {
     }
 
     public static Transaction USER(User user, User toUser, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
-                                   BigDecimal amount, String currencyCode, String subject, Date validTo, CMSMessage cmsMessage, TagVS tag) {
+               BigDecimal amount, CurrencyCode currencyCode, String subject, Date validTo, CMSMessage cmsMessage, TagVS tag) {
         Transaction transaction = BASIC(toUser, type, accountFromMovements, amount, currencyCode, subject,
                 validTo, cmsMessage, tag);
         transaction.setFromUser(user);
@@ -155,7 +156,7 @@ public class Transaction implements Serializable {
     }
 
     public static Transaction BASIC(User toUser, Type type, Map<CurrencyAccount, BigDecimal> accountFromMovements,
-                                    BigDecimal amount, String currencyCode, String subject, Date validTo, CMSMessage cmsMessage, TagVS tag) {
+            BigDecimal amount, CurrencyCode currencyCode, String subject, Date validTo, CMSMessage cmsMessage, TagVS tag) {
         Transaction transaction = new Transaction();
         transaction.setToUser(toUser);
         transaction.setToUserIBAN(toUser.getIBAN());
@@ -172,7 +173,7 @@ public class Transaction implements Serializable {
     }
 
     public static Transaction FROM_BANK(Bank bank, String bankClientIBAN, String bankClientName, User toUser,
-                                        BigDecimal amount, String currencyCode, String subject, Date validTo, CMSMessage cmsMessage, TagVS tag) {
+            BigDecimal amount, CurrencyCode currencyCode, String subject, Date validTo, CMSMessage cmsMessage, TagVS tag) {
         Transaction transaction = new Transaction();
         transaction.setFromUser(bank);
         transaction.setFromUserIBAN(bankClientIBAN);
@@ -309,11 +310,11 @@ public class Transaction implements Serializable {
         this.state = state;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 
