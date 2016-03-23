@@ -19,7 +19,7 @@ Or see the LICENSE file that comes with this code.
 
             --vs-datepicker-header: {
                 background-color: #ba0011;
-                padding: 0 10px;
+                padding: 0 10px 0 25px;
                 color: #fff;
             };
 
@@ -289,7 +289,7 @@ Or see the LICENSE file that comes with this code.
     </style>
     <template>
         <vs-i18n id="i18nVS"></vs-i18n>
-        <div class="horizontal layout dateInput" style="border: 1px solid #ccc; padding: 2px 2px 2px 0;border-radius: 2px;">
+        <div  id="inputDiv" class="horizontal layout dateInput" style="border: 1px solid #ccc; padding: 2px 2px 2px 0;border-radius: 2px;">
             <input type="text" id="dateInput" on-click="show" value='' style="" placeholder="{{caption}}" title="{{caption}}" readonly/>
             <div style="padding: 2px 0 0 1px;">
                 <i class="fa fa-calendar-o" on-click="show" style="color: #ccc; padding: 0px; font-weight: normal;"></i>
@@ -369,6 +369,7 @@ Or see the LICENSE file that comes with this code.
                 }
             },
             timeEnabled: {type: Boolean, value: false},
+            inputHidden: {type: Boolean},
             caption: {type: String},
             showDate: {
                 type: Object, value: function () {
@@ -413,6 +414,7 @@ Or see the LICENSE file that comes with this code.
             for (var i = end; i > begin; --i) {
                 list.push(i);
             }
+            if(this.inputHidden === true) this.$.inputDiv.style.display = 'none'
             this.yearList = list;
         },
         attached: function () {
@@ -444,7 +446,6 @@ Or see the LICENSE file that comes with this code.
                     month: this.showDate.month + 1,
                     day: parseInt(e.target.textContent || e.target.innerText)
                 };
-                this.dateSelected = true
                 this.fire('date-selected', {detail: this.getDate()});
             }
         },
@@ -578,12 +579,10 @@ Or see the LICENSE file that comes with this code.
             this.$.dateInput.value = this.format(date)
             this.$.hours.value = this._validateTime(date.getHours(), 23);
             this.$.minutes.value = this._validateTime(date.getMinutes(), 59);
-            this.dateSelected = true
         },
         getDate: function () {
-            if (this.dateSelected === true) return new Date(this.date.year, this.date.month - 1, this.date.day,
+            return new Date(this.date.year, this.date.month - 1, this.date.day,
                     parseInt(this.$.hours.value), parseInt(this.$.minutes.value));
-            else return null
         },
         _genTable: function (year, month) {
             var table = document.createElement('table');
@@ -671,7 +670,7 @@ Or see the LICENSE file that comes with this code.
         },
         accept: function () {
             var date = this.getDate()
-            this.fire('date-selected', {detail: { year: date.year, month: date.month, day: date.day, hour:date.hour, minute:date.minute }});
+            this.fire('date-selected-accept', {detail: { year: date.year, month: date.month, day: date.day, hour:date.hour, minute:date.minute }});
             this.$.dateInput.value = this.format(date)
             this.close()
         },

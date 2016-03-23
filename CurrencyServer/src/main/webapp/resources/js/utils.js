@@ -73,6 +73,15 @@ Date.prototype.formatWithTime = function() {
             ('0' + this.getMinutes()).slice(-2) + ":" + ('0' + this.getSeconds()).slice(-2)
 };
 
+Date.prototype.toISOStr = function() {
+    return this.toISOString().slice(0, 10) + " " + 
+        ('0' + this.getHours()).slice(-2) + ":" + ('0' + this.getMinutes()).slice(-2)
+}
+
+Number.prototype.getDate = function() {
+    return new Date(this)
+}
+
 Date.prototype.urlFormatWithTime = function() {//YYYYMMDD_HHmm
     var curr_date = pad(this.getDate(), 2);
     var curr_month = pad(this.getMonth() + 1, 2); //Months are zero based
@@ -89,6 +98,10 @@ Date.prototype.format = function() {
 
 Date.prototype.daydiff = function (dateToCompare) {
     return (this - dateToCompare)/(1000*60*60*24);
+}
+
+Date.prototype.getURL = function () {
+    return "/" + this.getFullYear() + "/" + pad(this.getMonth() + 1, 2) + "/" + pad(this.getDate(), 2)
 }
 
 Date.prototype.getMonday = function () {

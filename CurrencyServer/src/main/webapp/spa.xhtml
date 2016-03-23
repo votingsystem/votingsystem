@@ -23,7 +23,7 @@
     <ui:define name="content">
         <div id="drawer" style="display: none;">
             <div style="background-color: #ba0011; color: #f9f9f9;">
-                <div id="pageTitle" class="app-name" style="padding: 8px 0 8px 15px;font-size: 1.8em; font-weight: bold;"></div>
+                <div id="pageTitle" class="app-name" style="padding: 8px 0 8px 15px;font-size: 1.8em;"></div>
             </div>
             <div class="vertical layout flex" style="background-color: #fefefe;">
                 <a class="menuItem menuItemSelected" data-route="transactionsDashboard" href="#{contextURL}/spa.xhtml#!/transactionsDashboard">
@@ -50,7 +50,7 @@
             </div>
         </div>
         <div id='main'>
-            <div class="horizontal layout" style="background-color: #ba0011;padding: 1px 0 1px 0;">
+            <div class="horizontal layout flex" style="background-color: #ba0011;padding: 1px 0 1px 0;min-width:1000px;width:100%;">
                 <div class="horizontal layout flex">
                     <div style="margin:0 30px 0 30px;">
                         <i id="drawerButton" class="fa fa-navicon navbarIcon" style="font-size: 1.7em; margin:3px 0 0 0;"></i>
@@ -140,6 +140,7 @@
                             d3.select(this).classed("menuItemSelected", true)
                         } else d3.select(this).classed("menuItemSelected", false)
                     })
+
                 }
 
                 vs.updateSearchMessage = function(searchMessage) {

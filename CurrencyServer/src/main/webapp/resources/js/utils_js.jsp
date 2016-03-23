@@ -106,3 +106,7 @@
     Date.prototype.getDayWeekAndHourFormat = function() {
         return this.getDayWeekFormat() + " - " + this.getHours() + ":" + this.getMinutes();
     };
+
+    Number.prototype.getDayWeekFormat = function() {
+        return new Date(this).getDayWeekFormat()
+    }
