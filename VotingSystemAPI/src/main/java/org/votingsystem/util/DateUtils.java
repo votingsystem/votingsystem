@@ -218,7 +218,7 @@ public class DateUtils {
         dayFrom.set(Calendar.SECOND, 0);
         dayFrom.set(Calendar.MILLISECOND, 0);
         Calendar dayTo = (Calendar) dayFrom.clone();
-        dayTo.add(Calendar.DAY_OF_YEAR, 365);
+        dayTo.add(Calendar.YEAR, 1);
         return new Interval(dayFrom.getTime(), dayTo.getTime());
     }
 
@@ -230,7 +230,7 @@ public class DateUtils {
         dayFrom.set(Calendar.SECOND, 0);
         dayFrom.set(Calendar.MILLISECOND, 0);
         Calendar dayTo = (Calendar) dayFrom.clone();
-        dayTo.add(Calendar.DAY_OF_MONTH, dayFrom.getActualMaximum(Calendar.DAY_OF_MONTH));
+        dayTo.add(Calendar.MONTH, 1);
         return new Interval(dayFrom.getTime(), dayTo.getTime());
     }
 

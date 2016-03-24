@@ -33,9 +33,13 @@ public enum KeyGenerator {
          return keyPairGenerator.genKeyPair();
      } 
      
-     public int getNextRandomInt() {
+    public int getNextRandomInt() {
          return random.nextInt();
      }
+
+    public int getNextRandomInt(int size) {
+        return random.nextInt(size);
+    }
 
     public BigInteger getSerno() {
         random.setSeed(new Date().getTime());

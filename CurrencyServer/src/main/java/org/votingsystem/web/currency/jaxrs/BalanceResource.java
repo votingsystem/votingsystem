@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -86,7 +87,7 @@ public class BalanceResource {
 
     @Path("/user/id/{userId}/{year}/{month}/{day}")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    public Response userWithDate(@PathParam("userId") long userId, @PathParam("year") int year, @PathParam("month") int month,
+    public Response userWeek(@PathParam("userId") long userId, @PathParam("year") int year, @PathParam("month") int month,
                                  @PathParam("day") int day, @Context ServletContext context, @Context HttpServletRequest req,
                                  @Context HttpServletResponse resp) throws Exception {
         Calendar calendar = DateUtils.getCalendar(year, month, day);
@@ -94,6 +95,30 @@ public class BalanceResource {
         if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - User not found - userId: " + userId).build();
         return getUserBalancesDto(req, resp, context, user, DateUtils.getWeekPeriod(calendar));
+    }
+
+    @Path("/user/id/{userId}/{year}/{month}")
+    @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+    public Response userMonth(@PathParam("userId") long userId, @PathParam("year") int year, @PathParam("month") int month,
+                             @Context ServletContext context, @Context HttpServletRequest req,
+                             @Context HttpServletResponse resp) throws Exception {
+        Calendar calendar = DateUtils.getCalendar(year, month, 1);
+        User user = dao.find(User.class, userId);
+        if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - User not found - userId: " + userId).build();
+        return getUserBalancesDto(req, resp, context, user, DateUtils.getMonthPeriod(calendar));
+    }
+
+    @Path("/user/id/{userId}/{year}")
+    @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+    public Response userYear(@PathParam("userId") long userId, @PathParam("year") int year,
+                              @Context ServletContext context, @Context HttpServletRequest req,
+                              @Context HttpServletResponse resp) throws Exception {
+        Calendar calendar = DateUtils.getCalendar(year, 1, 1);
+        User user = dao.find(User.class, userId);
+        if(user == null) return Response.status(Response.Status.NOT_FOUND).entity(
+                "ERROR - User not found - userId: " + userId).build();
+        return getUserBalancesDto(req, resp, context, user, DateUtils.getYearPeriod(calendar));
     }
 
     private Response getUserBalancesDto(HttpServletRequest req, HttpServletResponse resp, ServletContext context,
@@ -128,7 +153,6 @@ public class BalanceResource {
             return Response.ok().type(MediaType.JSON).entity(FileUtils.getBytesFromFile(reportFiles.getJsonFile())).build();
         }
     }
-
 
     @Path("/weekdb/{year}/{month}/{day}")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)

@@ -21,6 +21,7 @@
         <link rel="import" href="./resources/forgePKCS7.html"/>
     </ui:define>
     <ui:define name="content">
+        <div id="spaMainDiv" style="display: none;">
         <div id="drawer" style="display: none;">
             <div style="background-color: #ba0011; color: #f9f9f9;">
                 <div id="pageTitle" class="app-name" style="padding: 8px 0 8px 15px;font-size: 1.8em;"></div>
@@ -68,6 +69,7 @@
             <div id="mainContent" class="mainContent"></div>
 
             <access-dialog id="accessDialog"></access-dialog>
+        </div>
         </div>
         <script>
             //<![CDATA[
@@ -164,6 +166,7 @@
                 })
                 vs.updateMenuView()
                 initWebsocket()
+                document.querySelector("#spaMainDiv").style.display = "block"
             })
 
             var INIT_REMOTE_SIGNED_SESSION         = 0;

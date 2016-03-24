@@ -90,10 +90,10 @@
                 </div>
             </div>
             <div class="horizontal layout center center-justified" style="text-align: center;color: #888; margin:0 0 8px 0;">
-                <div id="previousWeekSelector"  on-click="goPreviousWeek">
+                <div id="previousWeekSelector"  on-click="goPreviousPeriod">
                     <i class="fa fa-angle-double-left iconSelector" style="margin: 0 20px 0 0; "></i></div>
                 <div on-click="selectWeek" style="cursor: pointer;"><span>{{dateFromStr}}</span> - <span>{{dateToStr}}</span></div>
-                <div id="nextWeekSelector" on-click="goNextWeek">
+                <div id="nextWeekSelector" on-click="goNextPeriod">
                     <i class="fa fa-angle-double-right iconSelector" style="margin: 0 0 0 20px;"></i></div>
             </div>
             <div style="margin: 0 auto;max-width: 1000px;">
@@ -102,7 +102,7 @@
                 </div>
                 <div class="horizontal layout">
                     <template is="dom-repeat" items="{{curencyBalanceList}}" as="currencyData">
-                        <div style="width:400px;border-left: 1px solid #888;margin: 0 0 0 3px;">
+                        <div style="width:400px;border-left: 1px solid #bfbfbf;">
                             <div class="horizontal layout center" style="background-color: #efefef;">
                                 <div style="color: #434343;font-size: 1.2em;width: 40px;margin: 0 0 0 20px;">{{currencyData.name}}</div>
                                 <div class="vertical layout center">
@@ -130,13 +130,19 @@
 
         <div id="movementsDiv">
             <div style="color:#6c0404; text-align: center;text-decoration: underline;margin: 15px auto;font-size: 1.1em;">
-                ${msg.weekMovementsLbl}
+                <select id=periodSelect" style="margin:10px auto 0px auto;color:black; width: 250px;"
+                        on-change="periodSelectChange" class="form-control" value="{{selectedPeriod}}">
+                    <option value="WEEK" style="color:#6c0404;font-size: 1.2em;"> ${msg.weekMovementsLbl} </option>
+                    <option value="MONTH" style="color:#6c0404;"> ${msg.monthMovementsLbl} </option>
+                    <option value="YEAR" style="color:#6c0404;"> ${msg.yearMovementsLbl} </option>
+                </select>
+
             </div>
 
-            <div class="expensesTable horizontal layout center center-justified wrap" style="margin: 10px auto; width: 1100px;">
+            <div class="expensesTable horizontal layout" style="margin: 10px auto; width: 1100px;">
                 <vs-table id="vsTable"
                           searchable
-                          pagesize="100"
+                          pagesize="1000"
                           pagetext="${msg.pageLbl}:"
                           pageoftext="${msg.ofLbl}"
                           itemoftext="${msg.ofLbl}">
@@ -186,14 +192,18 @@
             is:'balance-user',
             properties: {
                 url:{type:String, observer:'getHTTP'},
-                balance: {type:Object, observer:'balanceChanged'}
+                selectedPeriod:{type:String, value:'WEEK'}, //one of [WEEK, MONTH, YEAR]
+                balance: {type:Object, observer:'balanceChanged'},
+                baseDate:{type:Date, value:new Date()}
             },
             ready: function(e) {
                 console.log(this.tagName + " - ready")
                 this.$.datePicker.addEventListener('date-selected-accept', function(e) {
                     if(e.detail.getTime() > new Date().getTime()) alert("${msg.dateAfterTodayERRORMsg}")
                     else {
-                        this.getHTTP("${contextURL}/rest/balance/user/id/" + this.balance.user.id + e.detail.getURL())
+                        this.baseDate = e.detail
+                        this.getHTTP("${contextURL}/rest/balance/user/id/" +
+                                this.balance.user.id + e.detail.getURL(this.selectedPeriod))
                     }
                 }.bind(this))
             },
@@ -329,19 +339,26 @@
                 this.$.datePicker.setDate(this.balance.timePeriod.dateFrom.getDate())
                 this.$.mainDiv.style.display = 'block'
             },
-            goNextWeek: function () {
-                var currentWeekEnd =  this.balance.timePeriod.dateTo.getDate();
-                currentWeekEnd.setDate(currentWeekEnd.getDate() + 1); //one day from next week
-                this.getHTTP("${contextURL}/rest/balance/user/id/" + this.balance.user.id + currentWeekEnd.getURL())
+            goNextPeriod: function () {
+                var currentPeriodEnd =  this.balance.timePeriod.dateTo.getDate();
+                currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 1); //one day from next period
+                this.getHTTP("${contextURL}/rest/balance/user/id/" +
+                        this.balance.user.id + currentPeriodEnd.getURL(this.selectedPeriod))
             },
-            goPreviousWeek: function () {
-                var currentWeekBegin =  this.balance.timePeriod.dateFrom.getDate();
-                currentWeekBegin.setDate(currentWeekBegin.getDate() - 1); //one day from previous week
-                this.getHTTP("${contextURL}/rest/balance/user/id/" + this.balance.user.id + currentWeekBegin.getURL())
+            goPreviousPeriod: function () {
+                var currentPeriodBegin =  this.balance.timePeriod.dateFrom.getDate();
+                currentPeriodBegin.setDate(currentPeriodBegin.getDate() - 1); //one day from previous period
+                this.getHTTP("${contextURL}/rest/balance/user/id/" + this.balance.user.id +
+                        currentPeriodBegin.getURL(this.selectedPeriod))
+            },
+            periodSelectChange: function (e) {
+                this.selectedPeriod = e.target.value
+                console.log("periodSelectChange - selectedPeriod: " + this.selectedPeriod)
+                this.getHTTP("${contextURL}/rest/balance/user/id/" + this.balance.user.id + this.baseDate.getURL(this.selectedPeriod))
             },
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
-                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL + " - selectedPeriod:" + this.selectedPeriod)
                 d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
                     this.balance = toJSON(rawData.response)
                 }.bind(this));
@@ -355,7 +372,7 @@
         <div style="min-width: 280px;">
             <template is="dom-repeat" items="{{currencyList}}" as="currencyData">
                 <div class="horizontal layout center" style=" border-bottom: solid 1px #888;background-color: #efefef;">
-                    <div style="color: #434343;font-size: 1.2em;width: 70px;">{{currencyData.name}}</div>
+                    <div style="color: #434343;font-size: 1.2em;width: 60px;padding:0 0 0 10px;">{{currencyData.name}}</div>
                     <div class="horizontal layout center" style="font-size: 0.9em;">
                         <div style="text-align: right;width: 100px;">{{currencyData.total}} {{currencyData.symbol}}</div>
                         <div style="border-left: 1px solid #888; padding: 0 0 0 3px;margin:0 0 0 3px;width: 100px;">

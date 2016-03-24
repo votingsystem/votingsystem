@@ -16,8 +16,8 @@
         <search-info id="searchInfo"></search-info>
         <div>
             <div class="layout horizontal center center-justified">
-                <select id="eventVSStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
-                        on-change="eventVSStateSelect" class="form-control">
+                <select id="eventStateSelect" style="margin:10px auto 0px auto;color:black; width: 300px;"
+                        on-change="eventStateSelect" class="form-control" value="{{eventVSState}}">
                     <option value="ACTIVE" style="color:#388746;"> - ${msg.selectOpenPollsLbl} - </option>
                     <option value="PENDING" style="color:#fba131;"> - ${msg.selectPendingPollsLbl} - </option>
                     <option value="TERMINATED" style="color:#cc1606;"> - ${msg.selectClosedPollsLbl} - </option>
@@ -58,7 +58,7 @@
             properties: {
                 eventListDto:{type:Object, value:{}, observer:'eventListDtoChanged'},
                 url:{type:String, observer:'getHTTP'},
-                eventVSState:{type:String}
+                eventVSState:{type:String, value:'ACTIVE'}
             },
             ready:function(e) {
                 console.log(this.tagName + " - ready")
@@ -70,8 +70,6 @@
                     this.url = vs.contextURL + "/rest/eventElection?" + querystring
                 } else this.url = vs.contextURL + "/rest/eventElection"
                 this.eventVSState = getURLParam("eventVSState", path)
-                if(this.eventVSState === "") this.eventVSState = 'ACTIVE'
-                this.$.eventVSStateSelect.value = this.eventVSState
             },
             isCanceled:function(eventvs) {
                 eventvs.state === 'CANCELED'
@@ -86,11 +84,10 @@
                 this.$.vspager.style.display = 'block'
             },
             pagerChange:function(e) {
-                var optionSelected = this.$.eventVSStateSelect.value
-                console.log("eventVSStateSelect: " + optionSelected)
+                console.log("eventStateSelect: " + this.eventVSState)
                 this.$.vspager.style.display = 'none'
                 targetURL = vs.contextURL + "/rest/eventElection?menu=" + menuType + "&eventVSState=" +
-                        optionSelected + "&max=" + e.detail.max + "&offset=" + e.detail.offset
+                        this.eventVSState + "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
                 this.url = targetURL
@@ -125,9 +122,9 @@
                     case EventVS.State.CANCELED: return "card eventDiv eventVSFinished"
                 }
             },
-            eventVSStateSelect: function() {
-                this.eventVSState = this.$.eventVSStateSelect.value
-                console.log("eventVSStateSelect: " + this.eventVSState)
+            eventStateSelect: function(e) {
+                this.eventVSState = e.target.value
+                console.log("eventStateSelect - state: " + this.eventVSState)
                 targetURL = vs.contextURL + "/rest/eventElection?eventVSState=" + this.eventVSState
                 var newURL = setURLParameter(window.location.href, "eventVSState",  this.eventVSState)
                 history.pushState(null, null, newURL);

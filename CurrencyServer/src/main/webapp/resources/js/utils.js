@@ -100,8 +100,13 @@ Date.prototype.daydiff = function (dateToCompare) {
     return (this - dateToCompare)/(1000*60*60*24);
 }
 
-Date.prototype.getURL = function () {
-    return "/" + this.getFullYear() + "/" + pad(this.getMonth() + 1, 2) + "/" + pad(this.getDate(), 2)
+Date.prototype.getURL = function (period) {
+    if(!period) return "/" + this.getFullYear() + "/" + pad(this.getMonth() + 1, 2) + "/" + pad(this.getDate(), 2)
+    switch (period) {
+        case 'WEEK': return "/" + this.getFullYear() + "/" + pad(this.getMonth() + 1, 2) + "/" + pad(this.getDate(), 2)
+        case 'MONTH': return "/" + this.getFullYear() + "/" + pad(this.getMonth() + 1, 2)
+        case 'YEAR': return "/" + this.getFullYear()
+    }
 }
 
 Date.prototype.getMonday = function () {

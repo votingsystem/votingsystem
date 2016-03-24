@@ -96,17 +96,18 @@
     Date.prototype.getDayWeekFormat = function() {
         var currentDate = new Date()
         if(currentDate.getFullYear() === this.getFullYear()) {
-            return vs.weekdays[this.getDay()] + " " + this.getDate() + " " + vs.months[ this.getMonth()] + " "
-                    + pad(this.getHours(), 2) + ":" + pad(this.getMinutes(), 2);
-        } else return this.getDate() + " " + vs.months[ this.getMonth()] + " " + this.getFullYear() + " "
-                + pad(this.getHours(), 2) + ":" + pad(this.getMinutes(), 2);
-
+            return vs.weekdays[this.getDay()] + " " + this.getDate() + " " + vs.months[ this.getMonth()];
+        } else return this.getDate() + " " + vs.months[ this.getMonth()] + " " + this.getFullYear();
     };
 
     Date.prototype.getDayWeekAndHourFormat = function() {
-        return this.getDayWeekFormat() + " - " + this.getHours() + ":" + this.getMinutes();
+        return this.getDayWeekFormat() + " " + pad(this.getHours(), 2) + ":" + pad(this.getMinutes(), 2);
     };
 
     Number.prototype.getDayWeekFormat = function() {
         return new Date(this).getDayWeekFormat()
+    }
+
+    Number.prototype.getDayWeekAndHourFormat = function() {
+        return new Date(this).getDayWeekAndHourFormat()
     }

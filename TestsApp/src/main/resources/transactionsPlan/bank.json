@@ -4,6 +4,6 @@
     "bankList":[
         {"fromUser":{"id":3}, "bankIBAN":"", "toUser":{"id":2}, "operation":"FROM_BANK",  "subject":"Bank transaction to user isTimeLimited",
          "fromUserName": "ClientBank App2", "fromUserIBAN":"ES8477777777450000012345",
-         "amount":"111", "currencyCode": "CNY", "tags":["WEALTH"], "isTimeLimited":true}
+         "amount":"111", "currencyCode": "EUR", "tags":["WEALTH"], "isTimeLimited":true}
     ]
 }
