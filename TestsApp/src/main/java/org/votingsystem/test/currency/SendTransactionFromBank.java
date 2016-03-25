@@ -51,9 +51,9 @@ public class SendTransactionFromBank {
     }
 
     private static void runMultipleTransactions() throws Exception {
-        int numTransactions = 10000;
+        int numTransactions = 10;
         Long fromUserId = 3L;
-        Long toUserId = 2L;
+        Long toUserId = 4L;
         int amountLimit = 100;
         for(int i = 0; i < numTransactions; i++) {
             TransactionDto transaction = new TransactionDto();

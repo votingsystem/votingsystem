@@ -233,12 +233,6 @@ public class TransactionBean {
             case "FROM_BANK":
                 typeDescription = messages.get("bankInputLbl");
                 break;
-            case "FROM_GROUP_TO_MEMBER_GROUP":
-                typeDescription = messages.get("transactionFromGroupToMemberGroup");
-                break;
-            case "FROM_GROUP_TO_ALL_MEMBERS":
-                typeDescription = messages.get("transactionFromGroupToAllMembers");
-                break;
             default: typeDescription = transactionType;
         }
         return typeDescription;

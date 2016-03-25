@@ -98,138 +98,138 @@
 	<template>
 		<table id="vs_table_main" unresolved="">
 			<thead>
-				<tr>
-					<template is="dom-repeat" items="{{meta}}" as="column">
-						<th
+			<tr>
+				<template is="dom-repeat" items="{{meta}}" as="column">
+					<th
 							title$="{{columntitle}}"
 							class$="{{getHeaderClass(column.name, column.sortable)}}">
 							<span
-								class$="{{getSortingClass(column, sortedColumn, descending)}}"></span>
+									class$="{{getSortingClass(column, sortedColumn, descending)}}"></span>
 							<span
-								class="column-head"
-								title$="{{sorttitle}}"
-								on-click="sort">{{column.label}}</span>
+									class="column-head"
+									title$="{{sorttitle}}"
+									on-click="sort">{{column.label}}</span>
 							<span
-								hidden$="{{!column.hint}}"
-								class="hint"
-								title$="{{column.hint}}"></span>
-						</th>
-					</template>
-				</tr>
-				<tr class="search-head" id="filter" hidden$="{{!searchable}}">
-					<template is="dom-repeat" items="{{meta}}" as="column">
-						<th>
-							<template is="dom-if" if="{{column.searchable}}">
-								<div
+									hidden$="{{!column.hint}}"
+									class="hint"
+									title$="{{column.hint}}"></span>
+					</th>
+				</template>
+			</tr>
+			<tr class="search-head" id="filter" hidden$="{{!searchable}}">
+				<template is="dom-repeat" items="{{meta}}" as="column">
+					<th>
+						<template is="dom-if" if="{{column.searchable}}">
+							<div
 									class="searchable">
-									<template is="dom-if" if="{{isEqual(column.type, 'choice')}}">
-										<select
+								<template is="dom-if" if="{{isEqual(column.type, 'choice')}}">
+									<select
 											on-change="search">
-												<template is="dom-repeat" items="{{column.options}}" as="option">
-													<option value$="{{option.value}}">{{option.label}}</option>
-												</template>
-										</select>
-									</template>
-									<template is="dom-if" if="{{isEqual(column.type, 'boolean')}}">
-										<input type="checkbox"
-											title$="{{column.hint}}"
-											on-change="search"/>
-									</template>
-									<template is="dom-if" if="{{isTextType(column.type)}}">
-										<input type="text"
-											on-keyup="search"
-											placeholder$="{{column.searchplaceholder}}"/>
-									</template>
-								</div>
-							</template>
-						</th>
-					</template>
-				</tr>
+										<template is="dom-repeat" items="{{column.options}}" as="option">
+											<option value$="{{option.value}}">{{option.label}}</option>
+										</template>
+									</select>
+								</template>
+								<template is="dom-if" if="{{isEqual(column.type, 'boolean')}}">
+									<input type="checkbox"
+										   title$="{{column.hint}}"
+										   on-change="search"/>
+								</template>
+								<template is="dom-if" if="{{isTextType(column.type)}}">
+									<input type="text"
+										   on-keyup="search"
+										   placeholder$="{{column.searchplaceholder}}"/>
+								</template>
+							</div>
+						</template>
+					</th>
+				</template>
+			</tr>
 			</thead>
 			<tbody>
-				<template id="recordList" is="dom-repeat" items="{{viewingRows}}" as="row">
-					<tr class$="{{getRowClass(row)}}">
-						<template is="dom-repeat" items="{{meta}}" as="column">
-							<td
+			<template id="recordList" is="dom-repeat" items="{{viewingRows}}" as="row">
+				<tr class$="{{getRowClass(row)}}">
+					<template is="dom-repeat" items="{{meta}}" as="column">
+						<td
 								on-dblclick="dbclick"
 								title="{{getEditTitle(column.editable, edittitle)}}"
 								class$="{{getCellClass(column.name)}}">
-								<div hidden>
-									<template is="dom-if" if="{{isEqual(column.type, 'choice')}}">
-										<select
+							<div hidden>
+								<template is="dom-if" if="{{isEqual(column.type, 'choice')}}">
+									<select
 											required$="{{column.required}}"
 											on-blur="save">
-											<template is="dom-repeat" items="{{column.options}}" as="option">
-												<option
+										<template is="dom-repeat" items="{{column.options}}" as="option">
+											<option
 													selected$="{{isOptionSelected(option.value, row, column.name)}}"
 													value="{{option.value}}">{{option.label}}</option>
-											</template>
-										</select>
-									</template>
-									<template is="dom-if" if="{{isEqual(column.type, 'string')}}">
-										<input type="text"
-											required$="{{column.required}}"
-											on-blur="save"
-											value$="{{getValue(row,column.name)}}"/>
-									</template>
-									<template is="dom-if" if="{{isEqual(column.type, 'date')}}">
-										<input type="date"
-											required?="{{column.required}}"
-											on-blur="save"
-											value$="{{getValue(row,column.name)}}"/>
-									</template>
-									<template is="dom-if" if="{{isEqual(column.type, 'time')}}">
-										<input type="time"
-											required?="{{column.required}}"
-											on-blur="save"
-											value$="{{getValue(row,column.name)}}"/>
-									</template>
-									<template is="dom-if" if="{{isEqual(column.type, 'datetime')}}">
-										<input type="datetime"
-											required?="{{column.required}}"
-											on-blur="save"
-											value$="{{getValue(row,column.name)}}"/>
-									</template>
-									<template is="dom-if" if="{{isEqual(column.type, 'text')}}">
+										</template>
+									</select>
+								</template>
+								<template is="dom-if" if="{{isEqual(column.type, 'string')}}">
+									<input type="text"
+										   required$="{{column.required}}"
+										   on-blur="save"
+										   value$="{{getValue(row,column.name)}}"/>
+								</template>
+								<template is="dom-if" if="{{isEqual(column.type, 'date')}}">
+									<input type="date"
+										   required?="{{column.required}}"
+										   on-blur="save"
+										   value$="{{getValue(row,column.name)}}"/>
+								</template>
+								<template is="dom-if" if="{{isEqual(column.type, 'time')}}">
+									<input type="time"
+										   required?="{{column.required}}"
+										   on-blur="save"
+										   value$="{{getValue(row,column.name)}}"/>
+								</template>
+								<template is="dom-if" if="{{isEqual(column.type, 'datetime')}}">
+									<input type="datetime"
+										   required?="{{column.required}}"
+										   on-blur="save"
+										   value$="{{getValue(row,column.name)}}"/>
+								</template>
+								<template is="dom-if" if="{{isEqual(column.type, 'text')}}">
 										<textarea
-											required?="{{column.required}}"
-											on-blur="save">{{getValue(row,column.name)}}</textarea>
-									</template>
-									<template is="dom-if" if="{{isEqual(column.type, 'boolean')}}">
-										<input type="checkbox"
-											on-change="save"
-											on-blur="save"
-											checked$="{{getValue(row,column.name)}}" />
-									</template>
-								</div>
-								<div
+												required?="{{column.required}}"
+												on-blur="save">{{getValue(row,column.name)}}</textarea>
+								</template>
+								<template is="dom-if" if="{{isEqual(column.type, 'boolean')}}">
+									<input type="checkbox"
+										   on-change="save"
+										   on-blur="save"
+										   checked$="{{getValue(row,column.name)}}" />
+								</template>
+							</div>
+							<div
 									on-click="click"
 									class$="{{getReaderClass(row, column.name)}}">
-									<template is="dom-if" if="{{!isEqual(column.type, 'html')}}">
-										<span>{{readContent(row, column)}}</span>
-									</template>
-									<template is="dom-if" if="{{isEqual(column.type, 'html')}}">
-										<vs-html-echo html="{{readContent(row, column)}}"></vs-html-echo>
-									</template>
-								</div>
-							</td>
-						</template>
-					</tr>
-				</template>
+								<template is="dom-if" if="{{!isEqual(column.type, 'html')}}">
+									<span style$="{{getColumnStyle(row, column)}}">{{readContent(row, column)}}</span>
+								</template>
+								<template is="dom-if" if="{{isEqual(column.type, 'html')}}">
+									<vs-html-echo html="{{readContent(row, column)}}"></vs-html-echo>
+								</template>
+							</div>
+						</td>
+					</template>
+				</tr>
+			</template>
 			</tbody>
 			<tfoot>
-				<tr>
-					<td colspan$="{{getColspan(meta.length)}}">
-						<div class="pagination">
+			<tr>
+				<td colspan$="{{getColspan(meta.length)}}">
+					<div class="pagination">
 							<span class="paging">
 								<button
-									title$="{{firsttitle}}"
-									class$="{{getPageupClass(currentpage, 'first')}}"
-									on-click="firstPage">{{first}}</button>
+										title$="{{firsttitle}}"
+										class$="{{getPageupClass(currentpage, 'first')}}"
+										on-click="firstPage">{{first}}</button>
 								<button
-									title$="{{previoustitle}}"
-									class$="{{getPageupClass(currentpage, 'previous')}}"
-									on-click="prevPage">{{previous}}</button>
+										title$="{{previoustitle}}"
+										class$="{{getPageupClass(currentpage, 'previous')}}"
+										on-click="prevPage">{{previous}}</button>
 								<span class="pager">
 									<span>{{pagetext}}</span>
 									<input type="text"  value="{{currentpage}}" readonly/>
@@ -237,13 +237,13 @@
 									<span>{{pageCount}}</span>
 								</span>
 								<button
-									title$="{{nexttitle}}"
-									class$="{{getPagedownClass(currentpage, pageCount, 'next')}}"
-									on-click="nextPage">{{next}}</button>
+										title$="{{nexttitle}}"
+										class$="{{getPagedownClass(currentpage, pageCount, 'next')}}"
+										on-click="nextPage">{{next}}</button>
 								<button
-									title$="{{lasttitle}}"
-									class$="{{getPagedownClass(currentpage, pageCount, 'last')}}"
-									on-click="lastPage">{{last}}</button>
+										title$="{{lasttitle}}"
+										class$="{{getPagedownClass(currentpage, pageCount, 'last')}}"
+										on-click="lastPage">{{last}}</button>
 							</span>
 							<span class="pagesize">
 								<span style="margin: 0 0 0 10px;">{{pagesizetext}}</span>
@@ -261,9 +261,9 @@
 								<span>{{itemoftext}}</span>
 								<span>{{itemCount}}</span>
 							</span>
-						</div>
-					</td>
-				</tr>
+					</div>
+				</td>
+			</tr>
 			</tfoot>
 		</table>
 		<content></content>
@@ -529,10 +529,10 @@
 		},
 		getRowClass: function(row) {
 			return ['rows',
-					row._modified ? 'modified' : '',
-					row._editing  ? 'editing'  : '',
-					row._selected ? 'selected'  : ''
-				].join(' ');
+				row._modified ? 'modified' : '',
+				row._editing  ? 'editing'  : '',
+				row._selected ? 'selected'  : ''
+			].join(' ');
 		},
 		isEditing: function(rowEditable, columnEditable) {
 			return rowEditable && columnEditable;
@@ -543,7 +543,7 @@
 		getReaderClass: function(row, columnName) {
 			var datum = row[columnName], classList = ['viewing'];
 			if (datum === null || datum === undefined
-				|| typeof datum === 'string' && datum.trim().length === 0) {
+					|| typeof datum === 'string' && datum.trim().length === 0) {
 				classList.push('empty');
 			}
 			return classList.join(' ');
@@ -551,24 +551,27 @@
 		readContent: function(row, column) {
 			var datum = row[column.name];
 			if (column.renderer !== null && column.renderer !== undefined
-				&& typeof column.renderer === 'string' && column.renderer.trim().length > 0) {
-					datum = this._render(column.renderer, datum, row, column);
+					&& typeof column.renderer === 'string' && column.renderer.trim().length > 0) {
+				datum = this._render(column.renderer, datum, row, column);
 			}
 			if (datum === null || datum === undefined
-				|| typeof datum === 'string' && datum.trim().length === 0) {
-					var options = column.options;
-					var blank = column.placeholder;
-					if (datum !== "" && options) {
+					|| typeof datum === 'string' && datum.trim().length === 0) {
+				var options = column.options;
+				var blank = column.placeholder;
+				if (datum !== "" && options) {
 					//translate value to labels for select
-						for (var i = options.length - 1; i >= 0; i--) {
-							if (options[i].value == datum) {
-								return options[i].label;
-							}
-						};
-					}
-					datum = datum === undefined || datum === null ? '' : datum;
-					return datum === "" ? blank : datum;
+					for (var i = options.length - 1; i >= 0; i--) {
+						if (options[i].value == datum) {
+							return options[i].label;
+						}
+					};
+				}
+				datum = datum === undefined || datum === null ? '' : datum;
+				return datum === "" ? blank : datum;
 			} else {
+				if(column.type.toUpperCase() === 'AMOUNT') {
+					datum = datum.amount.toLocaleString(undefined, { minimumFractionDigits: 2}) + ' ' + datum.currencyCode
+				}
 				return datum;
 			}
 		},
@@ -604,13 +607,17 @@
 		getCellClass: function(name) {
 			return ['vs-td vs-', name, '-td'].join('');
 		},
+		getColumnStyle: function(row, column) {
+			if(column.type.toUpperCase() !== 'AMOUNT') return;
+			var datum = row[column.name];
+			if(datum.amount < 0) return 'color: red;'
+		},
 		isTextType: function(type) {
 			return type !== 'choice' && type !== 'boolean';
 		},
 		getValue: function(row, name) {
 			return row[name];
 		},
-
 		//=============
 		//internal methods
 		dataChanged: function(newValue, oldValue) {
@@ -674,12 +681,10 @@
 					this.set('_modified', true, row);
 					this.push('modified', row);
 				}
-
 				if (!e.relatedTarget
-					|| !e.relatedTarget.templateInstance
-					|| e.relatedmodel.row !== e.model.row) {
+						|| !e.relatedTarget.templateInstance
+						|| e.relatedmodel.row !== e.model.row) {
 					this.set('_editing', false, row);
-
 					var editor = e.target.parentElement;
 					var reader = editor.nextElementSibling;
 					editor.setAttribute('hidden', true);
@@ -691,7 +696,6 @@
 						reader.classList.add('empty');
 					}
 				}
-
 				if (column.required && !e.target.validity.valid) {
 					this.fire('after-invalid', {"event": e, "row" : row, "column" : column});
 				}
@@ -708,7 +712,6 @@
 					this.set('sortedColumn', sortingColumn);
 				}
 			}
-
 			this.refreshPagination();
 		},
 		unsort: function() {
@@ -716,6 +719,9 @@
 			this.refreshPagination();
 		},
 		search: function(e, p) {
+			//wait for enter key
+			if(e.keyCode !==13) return
+
 			if(e.model.column){
 				var searchedColumn = e.model.column.name;
 				this.data.forEach(function(row){
@@ -725,13 +731,29 @@
 					//checkbox will only filter checked rows.
 					if ("CHECKBOX" === e.target.type.toUpperCase()) {
 						matched = !e.target.checked || row[searchedColumn];
+					}else if ("AMOUNT" === e.model.column.type.toUpperCase()) {
+						var searchInput = Number(e.target.value)
+						if(isNaN(searchInput)) {
+							searchInputParams = e.target.value.split(" ")
+							if(searchInputParams.length > 1) {
+								searchInput = Number(searchInputParams[0])
+								if(!isNaN(searchInput) && row[searchedColumn].amount < searchInput) {
+									if(row[searchedColumn] &&  row[searchedColumn].currencyCode.toString().
+											toLowerCase().indexOf(searchInputParams[1].toLowerCase()) > -1) matched = true;
+								}
+							} else if(row[searchedColumn] &&  row[searchedColumn].currencyCode.toString().
+									toLowerCase().indexOf(e.target.value.toString().toLowerCase()) > -1) matched = true;
+						} else if(row[searchedColumn].amount < searchInput) {
+							matched = true;
+						}
+						if(e.target.value === "") matched = true;
 					} else if (
-						// empty search means it always match
-						e.target.value === ""
-						||
-						// non-empty search and the content matches.
-						row[searchedColumn]
-						&& row[searchedColumn].toString().toLowerCase().indexOf(e.target.value.toString().toLowerCase()) > -1) {
+							// empty search means it always match
+					e.target.value === ""
+					||
+					// non-empty search and the content matches.
+					row[searchedColumn]
+					&& row[searchedColumn].toString().toLowerCase().indexOf(e.target.value.toString().toLowerCase()) > -1) {
 						matched = true;
 					}
 
@@ -752,9 +774,7 @@
 						}
 					}
 				});
-
 				this.filtered = this.data.some(function(row){return row._filtered;});
-
 				this.refreshPagination();
 			}
 		},
@@ -808,25 +828,36 @@
 			if (this.sortedColumn) {
 				// sorting map: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#Sorting_maps
 				filteredRows =
-				filteredRows
-					.map(function(e, i){
-						var v = e[this.sortedColumn];
-						if (undefined === v || null === v) {
-							v = '';
-						}
-						return {
-							index: i,
-							value: typeof v === "string" ? v.toLowerCase() : v
-						};
-					}, this)
-					.sort(function(a, b) {
-						return this.descending
-						? (a.value < b.value ? 1 : -1)
-						: (a.value > b.value ? 1 : -1);
-					}.bind(this))
-					.map(function(e){
-						return filteredRows[e.index];
-					});
+						filteredRows
+								.map(function(e, i){
+									var v = e[this.sortedColumn];
+									if (undefined === v || null === v) {
+										v = '';
+									}
+									if(v.currencyCode) { //it's an amount column
+										return { index: i, value: v };
+									} else {
+										return { index: i, value: typeof v === "string" ? v.toLowerCase() : v };
+									}
+								}, this)
+								.sort(function(a, b) {
+									if(a.value.currencyCode) {
+										if(this.descending) {
+											if(a.value.currencyCode === b.value.currencyCode) {
+												return (a.value.amount < b.value.amount)? 1: -1;
+											} else return (a.value.currencyCode < b.value.currencyCode)? 1: -1;
+										} else {
+											if(a.value.currencyCode === b.value.currencyCode) {
+												return (a.value.amount > b.value.amount)? 1: -1;
+											} else return (a.value.currencyCode > b.value.currencyCode)? 1: -1;
+										}
+									} else {
+										return this.descending ? (a.value < b.value ? 1 : -1) : (a.value > b.value ? 1 : -1);
+									}
+								}.bind(this))
+								.map(function(e){
+									return filteredRows[e.index];
+								});
 			}
 			this.set('viewingRows', filteredRows.slice(from, to));
 		},
@@ -968,7 +999,6 @@
 			if (this.sortedColumn) {
 				this.unsort();
 			}
-
 			this._movedown('viewingRows', row);
 			this._movedown('data', row);
 			this.fire('after-move-down', row);
@@ -988,7 +1018,6 @@
 			if (this.sortedColumn) {
 				this.unsort();
 			}
-
 			this._moveup('viewingRows', row);
 			this._moveup('data', row);
 			this.fire('after-move-up', row);
@@ -1017,12 +1046,10 @@
 			if (displayValue !== null) {
 				return displayValue;
 			}
-
 			displayValue = this._invokeRenderer(this, name, args);
 			if (displayValue !== null) {
 				return displayValue;
 			}
-
 			displayValue = this._invokeRenderer(this.domHost, name, args);
 			if (displayValue === null || displayValue === undefined) {
 				displayValue = datum;
@@ -1030,13 +1057,12 @@
 			return displayValue;
 		},
 		_invokeRenderer: function (b, name, args) {
-		var fn = b[name];
-		if (fn) {
-			return fn.apply(this, args || Polymer.nar);
+			var fn = b[name];
+			if (fn) {
+				return fn.apply(this, args || Polymer.nar);
+			}
+			return null;
 		}
-		return null;
-		}
-
 	});
 </script>
 
@@ -1164,7 +1190,7 @@
 			}
 		},
 		onHtmlChanged: function() {
-		    this.innerHTML = this.html;
+			this.innerHTML = this.html;
 		}
 	});
 </script>

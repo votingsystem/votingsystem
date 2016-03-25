@@ -1,10 +1,5 @@
 {
     "userList":[],
-    "groupList":[
-        {"fromUserId":5, "toUserList":[],"operation":"FROM_GROUP_TO_ALL_MEMBERS", "subject":"Group Transaction Test",
-            "amount":"1000", "currencyCode": "EUR", "tags":["HIDROGENO"], "isTimeLimited":true}
-
-    ],
     "bankList":[
         {"fromUserId":3, "toUserId":5, "operation":"FROM_BANK",  "subject":"Bank transaction",
             "fromUser": "ClientBank App1 App2", "fromUserIBAN":"ES8477777777450000012345",

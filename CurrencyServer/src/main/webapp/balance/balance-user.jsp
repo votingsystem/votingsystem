@@ -58,19 +58,11 @@
                 border: 1px solid #bfbfbf   ;
                 background-color: #fafafa;
             }
-            #vsTable::shadow .vs-${msg.subjectLbl}-th{
-                width:300px;
-            }
-            #vsTable::shadow .vs-${msg.dateLbl}-th{
-                width: 100px;
-            }
-            #vsTable::shadow .vs-${msg.tagLbl}-th{
-                width: 110px;
-            }
-            #vsTable::shadow .vs-${msg.amountLbl}-td{
-                text-align: right;
-                width: 100px;
-            }
+            #vsTable::shadow .vs-${msg.subjectLbl}-th{ width:300px; }
+            #vsTable::shadow .vs-${msg.dateLbl}-th{ width: 100px; }
+            #vsTable::shadow .vs-${msg.tagLbl}-th{ width: 110px; }
+            #vsTable::shadow .vs-${msg.amountLbl}-th{  width: 130px;  }
+            #vsTable::shadow .rows .vs-${msg.amountLbl}-td{ text-align: right; }
             .pageTitle {color: #6c0404; font-size: 1.3em; text-align: center; margin:10px 0 10px 0 }
             .iconSelector {cursor: pointer;color: dodgerblue; font-size: 1.3em;}
         </style>
@@ -104,18 +96,18 @@
                     <template is="dom-repeat" items="{{curencyBalanceList}}" as="currencyData">
                         <div style="width:400px;border-left: 1px solid #bfbfbf;">
                             <div class="horizontal layout center" style="background-color: #efefef;">
-                                <div style="color: #434343;font-size: 1.2em;width: 40px;margin: 0 0 0 20px;">{{currencyData.name}}</div>
+                                <div style="color: #434343;font-size: 1.2em;width: 50px;margin: 0 0 0 20px;">{{currencyData.name}}</div>
                                 <div class="vertical layout center">
-                                    <div style="text-align: right;width: 90px;">{{currencyData.totalStr}} {{currencyData.symbol}}</div>
+                                    <div style="text-align: right;width: 110px;">{{currencyData.totalStr}} {{currencyData.symbol}}</div>
                                     <div hidden="{{!isTimeLimited(currencyData)}}">{{currencyData.timeLimitedStr}} {{currencyData.symbol}}</div>
                                 </div>
                             </div>
                             <div class="horizontal layout wrap">
                                 <template is="dom-repeat" items="{{getTagList(currencyData.name)}}" as="tag">
                                     <div class="horizontal layout center" style="margin: 0 0 0 20px; border-bottom: dashed 1px #ccc;height: 2em;">
-                                        <div style="width: 50px;font-size: 0.8em;">{{tagDescription(tag)}}</div>
+                                        <div style="width: 60px;font-size: 0.8em;">{{tagDescription(tag)}}</div>
                                         <div class="vertical layout center" style="font-size: 0.7em;">
-                                            <div style="text-align: right;width: 80px;">{{formatAmount(currencyData.name, tag)}} {{currencyData.symbol}}</div>
+                                            <div style="text-align: right;width: 100px;">{{formatAmount(currencyData.name, tag)}} {{currencyData.symbol}}</div>
                                             <div hidden="{{!isTimeLimited(currencyData.name, tag)}}" title="{{getTimeLimitedForTagMsg(currencyData.name, tag)}}">
                                                 {{getTimeLimitedForTag(currencyData.name, tag)}} {{currencyData.symbol}}</div>
                                         </div>
@@ -149,35 +141,22 @@
                     <vs-column name="${msg.dateLbl}"
                                type="date"
                                searchable
-                               sortable
-                               required></vs-column>
+                               sortable></vs-column>
 
                     <vs-column name="${msg.subjectLbl}"
                                type="string"
                                sortable
-                               searchable
-                               required
-                               default=""></vs-column>
+                               searchable></vs-column>
 
                     <vs-column name="${msg.tagLbl}"
                                type="string"
                                sortable
-                               searchable
-                               required
-                               default=""></vs-column>
+                               searchable></vs-column>
 
                     <vs-column name="${msg.amountLbl}"
-                               type="html"
+                               type="amount"
                                sortable
-                               searchable
-                               required
-                               default=""></vs-column>
-
-                    <vs-column name="${msg.currencyLbl}"
-                               type="html"
-                               searchable
-                               sortable
-                               required></vs-column>
+                               searchable></vs-column>
                 </vs-table>
                 <div>
                     <filter-result-report id="filterResultReport"></filter-result-report>
@@ -265,17 +244,14 @@
             },
             getTableRow:function(transaction, origin) {
                 if("from" === origin) {
-                    currencyInfo =  "<span style='color: red;'>" + transaction.currencyCode + "</span>"
-                    amountInfo = "<span style='color: red;'>" + transaction.amount.toAmountStr() + "</span>"
+                    amount = - transaction.amount
                 } else if("to" === origin) {
-                    currencyInfo =  transaction.currencyCode
-                    amountInfo = transaction.amount.toAmountStr()
+                    amount = transaction.amount
                 } else throw new Error('getTableRow - unknown transaction origin: ' + origin);
 
-                return { ${msg.subjectLbl}: transaction.subject,
+                return {${msg.subjectLbl}: transaction.subject,
                         ${msg.dateLbl}: new Date(transaction.dateCreated).toISOStr(),
-                        ${msg.amountLbl}:amountInfo,
-                        ${msg.currencyLbl}:currencyInfo,
+                        ${msg.amountLbl}:{amount:amount, currencyCode:transaction.currencyCode},
                         ${msg.tagLbl}: transaction.tags[0],
                         'origin':origin, 'transaction':transaction}
             },
@@ -300,7 +276,7 @@
                     this.$.vsTable.data = JSON.parse(JSON.stringify(tableRows));//deep copy so that they have independent data source.
                     this.$.filterResultReport.tableRows = this.$.vsTable.data
 
-                    this.$.vsTable.addEventListener('after-td-click', function(e) {
+                    this.$.vsTable.addEventListener('after-td-dbclick', function(e) {
                         console.log('after-td-click', e.detail);
                         this.$.transactionViewer.show(e.detail.row.transaction)
                     }.bind(this));
@@ -353,6 +329,17 @@
             },
             periodSelectChange: function (e) {
                 this.selectedPeriod = e.target.value
+                switch(this.selectedPeriod) {
+                    case 'WEEK':
+                        this.$.datePicker.caption = "${msg.selectWeekLbl}"
+                        break;
+                    case 'MONTH':
+                        this.$.datePicker.caption = "${msg.selectMonthLbl}"
+                        break;
+                    case 'YEAR':
+                        this.$.datePicker.caption = "${msg.selectYearLbl}"
+                        break;
+                }
                 console.log("periodSelectChange - selectedPeriod: " + this.selectedPeriod)
                 this.getHTTP("${contextURL}/rest/balance/user/id/" + this.balance.user.id + this.baseDate.getURL(this.selectedPeriod))
             },
@@ -426,8 +413,6 @@
                     }
                     this.updateTagBalanceMap(tagBalanceMap, transaction.amount, row.origin)
                 }.bind(this))
-                console.log("currencyMap", this.currencyMap)
-
 
                 var currencyList = []
                 Object.keys(this.currencyMap).forEach(function(currency, currencyIndex, currencyArray) {

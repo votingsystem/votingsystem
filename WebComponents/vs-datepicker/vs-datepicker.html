@@ -516,6 +516,7 @@ Or see the LICENSE file that comes with this code.
             this.notifyPath('date.year', this.showDate.year);
             this.currentMonth = this.monthLabels[this.showDate.month];
             this._genTable(this.showDate.year, this.showDate.month);
+            this._dateChanged({day:1 , month:this.showDate.month + 1, year:this.showDate.year})
         },
         _toggleYearList: function () {
             if (!this.$.monthList.classList.contains('hidden')) {
@@ -542,6 +543,7 @@ Or see the LICENSE file that comes with this code.
             this.set('showDate.year', e.model.item);
             this.notifyPath('date.year', this.showDate.year);
             this._genTable(this.showDate.year, this.showDate.month);
+            this._dateChanged({day:1 , month:this.showDate.month, year:this.showDate.year})
         },
         _dateChanged: function (newDate) {
             var date = new Date();
@@ -670,7 +672,8 @@ Or see the LICENSE file that comes with this code.
         },
         accept: function () {
             var date = this.getDate()
-            this.fire('date-selected-accept', {detail: { year: date.year, month: date.month, day: date.day, hour:date.hour, minute:date.minute }});
+            console.log("---------- accept: " + (typeof date), date.getDayWeekFormat())
+            this.fire('date-selected-accept', date);
             this.$.dateInput.value = this.format(date)
             this.close()
         },

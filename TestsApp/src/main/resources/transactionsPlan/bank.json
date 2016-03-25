@@ -1,6 +1,5 @@
 {
     "userList":[],
-    "groupList":[],
     "bankList":[
         {"fromUser":{"id":3}, "bankIBAN":"", "toUser":{"id":2}, "operation":"FROM_BANK",  "subject":"Bank transaction to user isTimeLimited",
          "fromUserName": "ClientBank App2", "fromUserIBAN":"ES8477777777450000012345",

@@ -1,6 +1,5 @@
 {
     "userList":[],
-    "groupList":[ ],
     "bankList":[
         {"operation":"FROM_BANK", "bankIBAN":"ES1877777777450000000050",
         "fromUser": "ClientBank App1 App2", "currencyCode": "EUR",

@@ -50,7 +50,7 @@ public class CurrencyAccountBean {
                     result.get(account.getIBAN()).get(account.getCurrencyCode()).put(account.getTag().getName(),
                             account.getBalance());
                 } else {
-                    Map tagDataMap = new HashMap<>();
+                    Map<String, BigDecimal> tagDataMap = new HashMap<>();
                     tagDataMap.put(account.getTag().getName(), account.getBalance());
                     result.get(account.getIBAN()).put(account.getCurrencyCode(), tagDataMap);
                 }

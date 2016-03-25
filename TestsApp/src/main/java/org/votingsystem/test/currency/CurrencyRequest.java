@@ -35,7 +35,7 @@ public class CurrencyRequest {
         new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
         SignatureService signatureService = SignatureService.getUserSignatureService(
-                "Currency_07553172H", User.Type.USER);
+                "Currency_00111222V", User.Type.USER);
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer();
         BigDecimal totalAmount = new BigDecimal(10);
         TransactionDto transactionDto = new TransactionDto();

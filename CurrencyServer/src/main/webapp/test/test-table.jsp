@@ -64,6 +64,12 @@
         #vsTable::shadow .vs-${msg.tagLbl}-th{
             width: 110px;
         }
+        #vsTable::shadow .vs-${msg.amountLbl}-th{
+            width: 100px;
+        }
+        #vsTable::shadow .rows .vs-${msg.amountLbl}-td{
+            text-align: right;
+        }
     </style>
     <template>
         <div class="horizontal layout center center-justified" style="margin: 30px auto;">
@@ -94,19 +100,20 @@
                            required
                            default=""></vs-column>
 
-                <vs-column name="${msg.amountLbl}"
-                           type="html"
+                <vs-column name="TestNumber"
+                           type="string"
                            sortable
                            searchable
                            required
                            default=""></vs-column>
 
-                <vs-column name="${msg.currencyLbl}"
-                           type="html"
-                           searchable
+                <vs-column name="${msg.amountLbl}"
+                           type="amount"
                            sortable
+                           searchable
                            required
-                           data-choices='{"":"", "EUR":"Euro", "USD":"Dollar", "CNY":"Yuan", "JPY":"Yen"}'></vs-column>
+                           default=""></vs-column>
+
             </vs-table>
         </div>
         <button id="create" on-click="{{addRow}}">Create</button>
@@ -118,32 +125,39 @@
             ready: function() {
                 this.initTable();
             },
+            busca: function(e, p) {
+                console.log("")
+            },
             initTable: function() {
                 var events = [
-                    { ${msg.subjectLbl}: "gym tonu", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
-                            ${msg.currencyLbl}: "<span style='color: red'>EUR</span>", ${msg.amountLbl}: "<span style='color: red'>123</span>" },
+                { ${msg.subjectLbl}: "gym tonu", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
+                    ${msg.amountLbl}: {amount:-123, currencyCode:'EUR'}, TestNumber:-123.00 },
                 { ${msg.subjectLbl}: "breakfast", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
-                            ${msg.currencyLbl}: "EUR"},
+                    ${msg.amountLbl}: {amount:0, currencyCode:'EUR'}, ${msg.tagLbl}:'WILDTAG', TestNumber:0.00},
+                { ${msg.subjectLbl}: "breakfast", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
+                    ${msg.amountLbl}: {amount:2, currencyCode:'EUR'}, ${msg.tagLbl}:'WILDTAG', TestNumber:2.00},
+                { ${msg.subjectLbl}: "breakfast", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
+                        ${msg.amountLbl}: {amount:23, currencyCode:'EUR'}, ${msg.tagLbl}:'WILDTAG', TestNumber:23.00},
                 { ${msg.subjectLbl}: "work", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
-                            ${msg.currencyLbl}: "USD", ${msg.amountLbl}: "<span>100</span>" },
+                        ${msg.amountLbl}: {amount:-123, currencyCode:'EUR'}, TestNumber:-123.00 },
                 { ${msg.subjectLbl}: "lunch", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
-                            ${msg.currencyLbl}: "EUR", ${msg.amountLbl}: "<span>100</span>"},
+                        ${msg.amountLbl}: {amount:123, currencyCode:'USD'}, TestNumber:123.00 },
                 { ${msg.subjectLbl}: "work", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
-                            ${msg.currencyLbl}: "EUR" },
+                        ${msg.amountLbl}: {amount:0, currencyCode:'USD'} , TestNumber:0.00 },
                 { ${msg.subjectLbl}: "lunch", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
-                            ${msg.currencyLbl}: "EUR"},
+                        ${msg.amountLbl}: {amount:0.1, currencyCode:'USD'}, TestNumber:0.1 },
                 { ${msg.subjectLbl}: "work", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
-                            ${msg.currencyLbl}: "USD"},
+                        ${msg.amountLbl}: {amount:-123, currencyCode:'CNY'}, TestNumber:-123.00 },
                 { ${msg.subjectLbl}: "", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
-                            ${msg.currencyLbl}: "EUR"},
+                        ${msg.amountLbl}: {amount:-123, currencyCode:'CNY'}, TestNumber:-123.00 },
                 { ${msg.subjectLbl}: "work", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
-                            ${msg.currencyLbl}: "EUR"},
+                        ${msg.amountLbl}: {amount:-123, currencyCode:'CNY'}, TestNumber:-123.00 },
                 { ${msg.subjectLbl}: "", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
-                            ${msg.currencyLbl}: "EUR"},
+                        ${msg.amountLbl}: {amount:-123, currencyCode:'CNY'}, TestNumber:-123.00 },
                 { ${msg.subjectLbl}: "meeting", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
-                            ${msg.currencyLbl}: "CNY"},
+                        ${msg.amountLbl}: {amount:-123, currencyCode:'JPY'}, TestNumber:-123.00 },
                 { ${msg.subjectLbl}: "dinner", ${msg.dateLbl}: new Date().toISOString().slice(0, 10),
-                            ${msg.currencyLbl}: "EUR"}
+                        ${msg.amountLbl}: {amount:-123, currencyCode:'JPY'}, TestNumber:-123.00 }
                 ];
                 this.$.vsTable.data = JSON.parse(JSON.stringify(events));//deep copy so that they have independent data source.
 
