@@ -24,7 +24,7 @@
                         <div class="numVotesClass" style="margin:0 10px 0 0;">
                             <button on-click="removeOption"><i class="fa fa-times"></i> ${msg.deleteLbl}</button>
                         </div>
-                        <div class="voteOption" style="font-size: 2em; font-weight: bold;">
+                        <div style="font-size: 2em; font-weight: bold;">
                             {{item}}
                         </div>
                     </div>

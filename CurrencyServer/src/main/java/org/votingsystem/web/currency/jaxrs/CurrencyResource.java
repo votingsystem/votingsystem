@@ -3,6 +3,7 @@ package org.votingsystem.web.currency.jaxrs;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.currency.Currency;
@@ -109,7 +110,7 @@ public class CurrencyResource {
         List<TagVSDto> errorListDto = new ArrayList<>();
         for(Object[] result : resultList) {
             Currency.State state = (Currency.State) result[3];
-            TagVSDto tagVSDto = TagVSDto.CURRENCY_DATA((BigDecimal) result[0], (String) result[2], (TagVS) result[1]);
+            TagVSDto tagVSDto = TagVSDto.CURRENCY_DATA((BigDecimal) result[0], (CurrencyCode) result[2], (TagVS) result[1]);
             switch (state) {
                 case EXPENDED:
                     expendedListDto.add(tagVSDto);

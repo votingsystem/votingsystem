@@ -34,7 +34,7 @@
 
             <h3><div id="pageHeader" class="pageHeader text-center">{{pageHeader}}</div></h3>
 
-            <div class="flex" horizontal wrap around-justified layout>
+            <div class="flex horizontal wrap around-justified layout">
                 <template is="dom-repeat" items="{{certListDto.resultList}}">
                     <div class="certDiv" on-tap="showCert">
                         <div>
@@ -83,8 +83,8 @@
                 certListDto:{type:Object,observer:'certListDtoChanged'},
             },
             ready: function() {
-                console.log(this.tagName + " - ready - ")
-                this.url = vs.contextURL + "/rest/x509Certificate/certs"
+                console.log(this.tagName + " - ready")
+                if(!this.certListDto) this.getHTTP(vs.contextURL + "/rest/certificate/certs")
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
@@ -121,7 +121,7 @@
             },
             pagerChange:function(e) {
                 var certTypeSelectValue = this.$.certTypeSelect.value
-                targetURL = vs.contextURL + "/rest/x509Certificate/certs?menu=" + menuType + certTypeSelectValue +
+                targetURL = vs.contextURL + "/rest/certificate/certs?" + certTypeSelectValue +
                         "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
@@ -129,14 +129,14 @@
             },
             getHTTP: function (targetURL) {
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
-                    this.certListDto = toJSON(rawData.response)
+                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                    this.certListDto = toJSON(responseText)
                 }.bind(this));
             },
             certTypeSelect: function () {
                 var optionSelected = this.$.certTypeSelect.value
                 if("" != optionSelected) {
-                    targetURL = vs.contextURL + "/rest/x509Certificate/certs?menu=" + menuType + optionSelected
+                    targetURL = vs.contextURL + "/rest/certificate/certs?" + optionSelected
                     history.pushState(null, null, targetURL);
                     this.getHTTP(targetURL)
                 }

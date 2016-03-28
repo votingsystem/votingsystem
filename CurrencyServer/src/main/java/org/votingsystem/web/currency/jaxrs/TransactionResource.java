@@ -108,7 +108,7 @@ public class TransactionResource {
     @Path("/from/{dateFrom}/to/{dateTo}")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Response search(@DefaultValue("0") @QueryParam("offset") int offset,
-                       @DefaultValue("100") @QueryParam("max") int max,
+                       @DefaultValue("10000") @QueryParam("max") int max,
                        @QueryParam("transactionType") String transactionTypeStr,
                        @QueryParam("tag") String tag,
                        @QueryParam("searchText") String searchText,

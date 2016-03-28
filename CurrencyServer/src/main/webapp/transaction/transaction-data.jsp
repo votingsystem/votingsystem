@@ -93,7 +93,7 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
-                this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
+                this.isClientToolConnected = (clientTool !== undefined)
             },
             getDate:function(dateStamp) {
                 if(!dateStamp) return null

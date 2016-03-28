@@ -148,19 +148,13 @@ public class EventElectionBean {
         EventVSStatsDto statsDto = new EventVSStatsDto();
         statsDto.setId(eventVS.getId());
         statsDto.setSubject(eventVS.getSubject() + " - 'this is inside simple quotes' - ");
-        Query query = dao.getEM().createQuery("select count(v) from Vote v where v.eventVS =:eventVS")
-                .setParameter("eventVS", eventVS);
-        statsDto.setNumVotesVS((long) query.getSingleResult());
-        query = dao.getEM().createQuery("select count(v) from Vote v where v.eventVS =:eventVS and v.state =:state")
+        Query query = dao.getEM().createQuery("select count(v) from Vote v where v.eventVS =:eventVS and v.state =:state")
                 .setParameter("eventVS", eventVS).setParameter("state", Vote.State.OK);
-        statsDto.setNumVotesVSOK((long) query.getSingleResult());
-        query = dao.getEM().createQuery("select count(v) from Vote v where v.eventVS =:eventVS and v.state =:state")
-                .setParameter("eventVS", eventVS).setParameter("state", Vote.State.CANCELED);
-        statsDto.setNumVotesVSVotesVSCANCELED((long) query.getSingleResult());
+        statsDto.setNumVotes((long) query.getSingleResult());
         for(FieldEvent option : eventVS.getFieldsEventVS()) {
             query = dao.getEM().createQuery("select count(v) from Vote v where v.optionSelected =:option " +
                     "and v.state =:state").setParameter("option", option).setParameter("state", Vote.State.OK);
-            option.setNumVotesVS((long) query.getSingleResult());
+            option.setNumVotes((long) query.getSingleResult());
         }
         statsDto.setFieldsEventVS(eventVS.getFieldsEventVS());
         return statsDto;

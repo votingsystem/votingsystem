@@ -34,9 +34,9 @@ public class ValidateCert {
         AccessControl accessControl = (AccessControl) actor;
         ContextVS.getInstance().setAccessControl((AccessControl) actor);
         CertValidationDto certValidationDto = CertValidationDto.validationRequest("1234s", "015d3c26550c160e");
-        SignatureService superUserSignatureService = SignatureService.getUserSignatureService(
+        SignatureService adminSignatureService = SignatureService.getUserSignatureService(
                 "AccessControl_07553172H", User.Type.USER);
-        CMSSignedMessage cmsMessage = superUserSignatureService.signDataWithTimeStamp(
+        CMSSignedMessage cmsMessage = adminSignatureService.signDataWithTimeStamp(
                 JSON.getMapper().writeValueAsBytes(certValidationDto));
         responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                 accessControl.getUserCSRValidationServiceURL());

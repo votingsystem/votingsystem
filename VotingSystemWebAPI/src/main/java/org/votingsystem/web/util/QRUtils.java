@@ -1,4 +1,4 @@
-package org.votingsystem.web.currency.util;
+package org.votingsystem.web.util;
 
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;

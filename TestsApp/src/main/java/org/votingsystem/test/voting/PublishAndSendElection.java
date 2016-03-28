@@ -46,15 +46,14 @@ public class PublishAndSendElection {
         eventVS = new EventVS();
         eventVS.setSubject("voting subject");
         eventVS.setContent(Base64.getEncoder().encodeToString("<p>election content</p>".getBytes()));
-        eventVS.setDateBegin(new Date());
         eventVS.setFieldsEventVS(Sets.newHashSet(new FieldEvent("field1", null), new FieldEvent("field2", null)));
 
         UserBaseSimulationData userBaseSimulationData = new UserBaseSimulationData();
         userBaseSimulationData.setUserIndex(100);
-        userBaseSimulationData.setNumUsersWithoutRepresentative(10);
-        userBaseSimulationData.setNumUsersWithoutRepresentativeWithVote(10);
-        userBaseSimulationData.setNumRepresentatives(5);
-        userBaseSimulationData.setNumRepresentativesWithVote(1);
+        userBaseSimulationData.setNumUsersWithoutRepresentative(20);
+        userBaseSimulationData.setNumUsersWithoutRepresentativeWithVote(15);
+        userBaseSimulationData.setNumRepresentatives(0);
+        userBaseSimulationData.setNumRepresentativesWithVote(0);
         userBaseSimulationData.setNumUsersWithRepresentative(0);
         userBaseSimulationData.setNumUsersWithRepresentativeWithVote(0);
 
@@ -160,6 +159,7 @@ public class PublishAndSendElection {
     private static EventVS publishEvent(EventVS eventVS, String publisherNIF, String cmsMessageSubject) throws Exception {
         log.info("publishEvent");
         eventVS.setDateBegin(new Date());
+        //eventVS.setDateBegin(DateUtils.addDays(new Date(), 10).getTime());
         eventVS.setSubject(eventVS.getSubject()+ " -> " + DateUtils.getDayWeekDateStr(new Date(), "HH:mm:ss"));
         SignatureService signatureService = SignatureService.getUserSignatureService(publisherNIF, User.Type.USER);
         CMSSignedMessage cmsMessage = signatureService.signDataWithTimeStamp(JSON.getMapper().writeValueAsBytes(

@@ -98,7 +98,7 @@
                             <div class="horizontal layout center" style="background-color: #efefef;">
                                 <div style="color: #434343;font-size: 1.2em;width: 50px;margin: 0 0 0 20px;">{{currencyData.name}}</div>
                                 <div class="vertical layout center">
-                                    <div style="text-align: right;width: 110px;">{{currencyData.totalStr}} {{currencyData.symbol}}</div>
+                                    <div style="text-align: right;width: 130px;">{{currencyData.totalStr}} {{currencyData.symbol}}</div>
                                     <div hidden="{{!isTimeLimited(currencyData)}}">{{currencyData.timeLimitedStr}} {{currencyData.symbol}}</div>
                                 </div>
                             </div>
@@ -173,6 +173,7 @@
                 url:{type:String, observer:'getHTTP'},
                 selectedPeriod:{type:String, value:'WEEK'}, //one of [WEEK, MONTH, YEAR]
                 balance: {type:Object, observer:'balanceChanged'},
+                maxSubjectLength: {type:Number, value:50},
                 baseDate:{type:Date, value:new Date()}
             },
             ready: function(e) {
@@ -248,8 +249,8 @@
                 } else if("to" === origin) {
                     amount = transaction.amount
                 } else throw new Error('getTableRow - unknown transaction origin: ' + origin);
-
-                return {${msg.subjectLbl}: transaction.subject,
+                return {${msg.subjectLbl}: transaction.subject.length > this.maxSubjectLength ?
+                            transaction.subject.substring(0, this.maxSubjectLength) + "..." : transaction.subject,
                         ${msg.dateLbl}: new Date(transaction.dateCreated).toISOStr(),
                         ${msg.amountLbl}:{amount:amount, currencyCode:transaction.currencyCode},
                         ${msg.tagLbl}: transaction.tags[0],
@@ -295,7 +296,6 @@
                     Object.keys(this.balance.balancesCash[currency]).forEach(function(tag, tagIndex, tagArray) {
                         currencyMap.total = currencyMap.total + this.balance.balancesCash[currency][tag]
                         currencyMap.timeLimited = currencyMap.timeLimited + this.getTimeLimitedForTagAmount(currency, tag)
-
                     }.bind(this))
                     currencyMap.totalStr = currencyMap.total.toAmountStr()
                     currencyMap.timeLimitedStr = currencyMap.timeLimited.toAmountStr()
@@ -359,10 +359,10 @@
         <div style="min-width: 280px;">
             <template is="dom-repeat" items="{{currencyList}}" as="currencyData">
                 <div class="horizontal layout center" style=" border-bottom: solid 1px #888;background-color: #efefef;">
-                    <div style="color: #434343;font-size: 1.2em;width: 60px;padding:0 0 0 10px;">{{currencyData.name}}</div>
+                    <div style="color: #434343;font-size: 1.2em;width: 50px;padding:0 0 0 10px;">{{currencyData.name}}</div>
                     <div class="horizontal layout center" style="font-size: 0.9em;">
-                        <div style="text-align: right;width: 100px;">{{currencyData.total}} {{currencyData.symbol}}</div>
-                        <div style="border-left: 1px solid #888; padding: 0 0 0 3px;margin:0 0 0 3px;width: 100px;">
+                        <div style="text-align: right;width: 120px;">{{currencyData.total}} {{currencyData.symbol}}</div>
+                        <div style="border-left: 1px solid #888; padding: 0 0 0 3px;margin:0 0 0 3px;width: 120px;">
                             <div style="text-align: right;">{{currencyData.incomes}} {{currencyData.symbol}}</div>
                             <div style="color: red;text-align: right;">{{currencyData.expenses}} {{currencyData.symbol}}</div>
                         </div>
@@ -371,10 +371,10 @@
                 <div style="margin: 0 0 0 20px;">
                     <template is="dom-repeat" items="{{getTagList(currencyData.name)}}" as="tag">
                         <div class="horizontal layout center" style="margin: 3px 0 0 0; border-bottom: dashed 1px #ccc;">
-                            <div style="width: 70px;font-size: 0.8em;">{{tag.name}}</div>
+                            <div style="width: 60px;font-size: 0.8em;">{{tag.name}}</div>
                             <div class="horizontal layout center" style="font-size: 0.6em;">
-                                <div style="text-align: right;width: 80px;">{{tag.total}} {{currencyData.symbol}}</div>
-                                <div style="border-left: 1px solid #888; padding: 0 0 0 3px;margin:0 0 0 3px;width: 100px;">
+                                <div style="text-align: right;width: 100px;">{{tag.total}} {{currencyData.symbol}}</div>
+                                <div style="border-left: 1px solid #888; padding: 0 0 0 3px;margin:0 0 0 3px;width: 120px;">
                                     <div style="text-align: right;">{{tag.incomes}} {{currencyData.symbol}}</div>
                                     <div style="color: red;text-align: right;">{{tag.expenses}} {{currencyData.symbol}}</div>
                                 </div>

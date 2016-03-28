@@ -5,36 +5,18 @@
 <h:head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <script src="../resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-    <link href="../resources/bower_components/polymer/polymer.html" rel="import"/>
+    <script src="./resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="./resources/bower_components/polymer/polymer.html"/>
+    <link rel="import" href="./resources/bower_components/layout/layout.html"/>
     <link href="../resources/css/currency.css" media="all" rel="stylesheet" />
     <link href="../resources/bower_components/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
     <script src="../resources/js/utils_js.vsp" type="text/javascript"></script>
     <script src="../resources/js/utils.js" type="text/javascript"></script>
-    <link rel="import" href="../resources/bower_components/iron-flex-layout/classes/iron-flex-layout.html"/>
     <ui:insert name="head" />
 </h:head>
 <h:body>
     <div id="voting_system_page">
         <ui:insert name="content"/>
     </div>
-    <script>
-        document.querySelector("#voting_system_page").addEventListener('message_from_extension',
-                function(event) {
-                    vs.webextension_available = true
-                    Polymer.Base.importHref(vs.contextURL + '/resources/bower_components/vs-block-screen/vs-block-screen.vsp', function(e) {
-                        var blockScreen = document.createElement('vs-block-screen');
-                        document.querySelector("body").appendChild(blockScreen)
-                        vs.blockScreen = blockScreen.block.bind(blockScreen)
-
-                        var operationVS = new OperationVS(Operation.INIT_SERVER)
-                        operationVS.serverURL = vs.contextURL
-                        VotingSystemClient.setMessage(operationVS);
-                    });
-                    document.querySelector("#voting_system_page").addEventListener("message_from_webextension:dialog_closed", function(e) {
-                        vs.blockScreen(false)
-                    });
-                })
-    </script>
 </h:body>
 </html>

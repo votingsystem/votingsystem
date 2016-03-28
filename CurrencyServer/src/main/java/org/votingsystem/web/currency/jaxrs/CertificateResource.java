@@ -102,11 +102,11 @@ public class CertificateResource {
         String contentType = req.getContentType() != null ? req.getContentType(): "";
         Certificate.Type type = Certificate.Type.valueOf(typeStr);
         Certificate.State state = Certificate.State.valueOf(stateStr);
-        Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(Certificate.class)
-                .createAlias("user", "user");
+        Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(Certificate.class);
         criteria.add(Restrictions.eq("state", state));
         criteria.add(Restrictions.eq("type", type));
         if(searchText != null) {
+            criteria.createAlias("user", "user");
             Criterion rest1= Restrictions.ilike("user.name", "%" + searchText + "%");
             Criterion rest2= Restrictions.ilike("user.firstName", "%" + searchText + "%");
             Criterion rest3= Restrictions.ilike("user.lastName", "%" + searchText + "%");

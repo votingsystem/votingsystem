@@ -37,7 +37,7 @@
                 <div style="max-height:400px; overflow-y: auto; margin:20px auto 0px auto;">
                     <div>{{certvs.description}}</div>
                 </div>
-                <button id="cancelCertButton" on-click="openReasonDialog" style="display: none;">
+                <button id="cancelCertButton" on-click="openReasonDialog">
                     ${msg.cancelCertLbl}
                 </button>
                 <div class="vertical layout center center-justified" style="margin:0px auto 0px auto;">
@@ -58,18 +58,16 @@
             },
             ready: function() {
                 this.certsSelectedStack = []
-                if(menuType === "admin" || menuType === "superuser") this.$.cancelCertButton.style.display = "block"
-
                 document.querySelector("#voting_system_page").addEventListener('on-submit-reason',
                         function() {
                             var operationVS = new OperationVS(Operation.CERT_EDIT)
-                            operationVS.serviceURL = vs.contextURL + "/rest/x509Certificate/editCert"
+                            operationVS.serviceURL = vs.contextURL + "/rest/certificate/editCert"
                             operationVS.signedMessageSubject = "${msg.cancelCertMessageSubject}"
                             var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                                 changeCertToState:"${Certificate.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
                             operationVS.jsonStr = JSON.stringify(signedContent)
                             operationVS.setCallback(function() {
-                                this.url = vs.contextURL + "/rest/x509Certificate/serialNumber/${certMap.serialNumber}?menu=" + menuType
+                                this.url = vs.contextURL + "/rest/certificate/serialNumber/${certMap.serialNumber}"
                             })
                             VotingSystemClient.setMessage(operationVS);
                         }.bind(this))
@@ -96,7 +94,7 @@
             certIssuerClicked:function(e) {
                 var issuerSerialNumber = this.certvs.issuerSerialNumber
                 if(issuerSerialNumber != null) {
-                    var certURL = vs.contextURL + "/rest/x509Certificate/serialNumber/" + issuerSerialNumber
+                    var certURL = vs.contextURL + "/rest/certificate/serialNumber/" + issuerSerialNumber
                     console.log(this.tagName + " - certIssuerClicked: " + certURL)
                     this.certsSelectedStack.push(this.certvs)
                     this.url = certURL
@@ -105,8 +103,8 @@
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
-                    this.certvs = toJSON(rawData.response)
+                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                    this.certvs = toJSON(responseText)
                 }.bind(this));
             }
         })

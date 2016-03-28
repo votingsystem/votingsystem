@@ -24,9 +24,9 @@ public class PublishBank {
                 "./certs/Cert_BANK_03455543T.pem"),"UTF-8");
         BankDto bankDto = BankDto.NEW("ES1877777777450000000050", info, certChainPEM);
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer();
-        SignatureService superUserSignatureService = SignatureService.getUserSignatureService(
+        SignatureService adminSignatureService = SignatureService.getUserSignatureService(
                 "Currency_07553172H", User.Type.USER);
-        CMSSignedMessage cmsMessage = superUserSignatureService.signDataWithTimeStamp(
+        CMSSignedMessage cmsMessage = adminSignatureService.signDataWithTimeStamp(
                 JSON.getMapper().writeValueAsBytes(bankDto));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                 currencyServer.getSaveBankServiceURL());

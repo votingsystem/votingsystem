@@ -26,11 +26,11 @@ public class ResetRepresentatives {
                 Actor.getServerInfoURL("https://192.168.1.5/AccessControl"), MediaType.JSON);
         AccessControl accessControl = (AccessControl) actorDto.getActor();
         ContextVS.getInstance().setAccessControl(accessControl);
-        SignatureService superUserSignatureService = SignatureService.getUserSignatureService(
+        SignatureService adminSignatureService = SignatureService.getUserSignatureService(
                 "AccessControl_07553172H", User.Type.USER);
         Map dataMap = new HashMap<>();
         dataMap.put("UUID", UUID.randomUUID().toString());
-        CMSSignedMessage cmsMessage = superUserSignatureService.signDataWithTimeStamp(
+        CMSSignedMessage cmsMessage = adminSignatureService.signDataWithTimeStamp(
                 JSON.getMapper().writeValueAsBytes(dataMap));
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                 "https://192.168.1.5/AccessControl/rest/development/resetRepresentatives");

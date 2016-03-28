@@ -58,18 +58,18 @@
             },
             ready: function() {
                 this.certsSelectedStack = []
-                if(menuType === "admin" || menuType === "superuser") this.$.cancelCertButton.style.display = "block"
+                if(menuType === "admin") this.$.cancelCertButton.style.display = "block"
 
                 document.querySelector("#voting_system_page").addEventListener('on-submit-reason',
                         function() {
                             var operationVS = new OperationVS(Operation.CERT_EDIT)
-                            operationVS.serviceURL = vs.contextURL + "/rest/x509Certificate/editCert"
+                            operationVS.serviceURL = vs.contextURL + "/rest/certificate/editCert"
                             operationVS.signedMessageSubject = "${msg.cancelCertMessageSubject}"
                             var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                                 changeCertToState:"${Certificate.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
                             operationVS.jsonStr = JSON.stringify(signedContent)
                             operationVS.setCallback(function(appMessage) {
-                                this.url = vs.contextURL + "/rest/x509Certificate/serialNumber/${certMap.serialNumber}?menu=" + menuType
+                                this.url = vs.contextURL + "/rest/certificate/serialNumber/${certMap.serialNumber}?menu=" + menuType
                             })
                             VotingSystemClient.setMessage(operationVS);
                         }.bind(this))
@@ -96,7 +96,7 @@
             certIssuerClicked:function(e) {
                 var issuerSerialNumber = this.certvs.issuerSerialNumber
                 if(issuerSerialNumber != null) {
-                    var certURL = vs.contextURL + "/rest/x509Certificate/serialNumber/" + issuerSerialNumber
+                    var certURL = vs.contextURL + "/rest/certificate/serialNumber/" + issuerSerialNumber
                     console.log(this.tagName + " - certIssuerClicked: " + certURL)
                     this.certsSelectedStack.push(this.certvs)
                     this.url = certURL

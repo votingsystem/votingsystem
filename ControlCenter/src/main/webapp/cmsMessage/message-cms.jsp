@@ -48,7 +48,7 @@
             },
             cmsMessageContentChanged:function() {
                 this.messageToUser = null
-                d3.select(this).select("#messageContent").html(JSON.stringify(this.cmsMessageContent))
+                this.querySelector("#messageContent").innerHTML = JSON.stringify(this.cmsMessageContent)
             },
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_CMS)

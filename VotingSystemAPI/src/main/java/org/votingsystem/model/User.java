@@ -519,9 +519,6 @@ public class User extends EntityVS implements Serializable {
         if(nif != null) {
             this.nif = nif.toUpperCase();
         }
-        if(name == null) {
-            this.name = (firstName == null? "":firstName + " " + lastName == null? "":lastName).trim();
-        }
     }
 
     @PreUpdate

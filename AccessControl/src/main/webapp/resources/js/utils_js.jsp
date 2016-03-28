@@ -1,5 +1,6 @@
 <%@page contentType="text/javascript" %>
-    var vs = {}
+    function vs() {}
+
     vs.contextURL = "${contextURL}"
     vs.timeStampServiceURL = "${timeStampServerURL}" + "/timestamp"
 
@@ -15,24 +16,13 @@
         document.querySelector("#voting_system_page").addEventListener(this.callerCallback, function(e) { callbackFunction(e.detail) });
     }
 
-    function EventVS() {}
-
-    EventVS.State = {
-        ACTIVE:"ACTIVE",
-        TERMINATED:"TERMINATED",
-        CANCELED:"CANCELED",
-        PENDING:"PENDING",
-        PENDING_SIGNATURE:"PENDING_SIGNATURE",
-        DELETED_FROM_SYSTEM:"DELETED_FROM_SYSTEM"
-    }
-
     //http://jsfiddle.net/cckSj/5/
     Date.prototype.getElapsedTime = function() {
         // time difference in ms
         var timeDiff = this - new Date();
 
         if(timeDiff <= 0) {
-            return "${msg.timeFinsishedLbl}"
+            return "${msg.timeFinishedLbl}"
         }
 
         // strip the miliseconds
@@ -84,7 +74,8 @@
     vs.months = [${msg.monthsShort}];
 
     Date.prototype.getDayWeekFormat = function() {
-        return vs.weekdays[this.getDay()] + " " + this.getDate() + " " + vs.months[ this.getMonth()] + " " + this.getFullYear();
+        return vs.weekdays[this.getDay()] + " " + this.getDate() + " " + vs.months[ this.getMonth()] + " " +
+                this.getFullYear();
     };
 
     Date.prototype.getDayWeekAndHourFormat = function() {

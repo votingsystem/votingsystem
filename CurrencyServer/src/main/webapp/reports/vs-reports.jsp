@@ -24,7 +24,7 @@
                 </div>
 
                 <div style="margin:20px 0px;">
-                    <a href="${contextURL}/spa.xhtml#!/rest/reports${spa.now()}/week">
+                    <a href="${contextURL}/spa.xhtml#!/reports/week?url=${contextURL}/rest/reports${spa.now()}/week">
                         ${msg.currentWeekLbl}
                     </a>
                 </div>

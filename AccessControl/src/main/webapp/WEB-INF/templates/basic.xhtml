@@ -14,19 +14,5 @@
     <div id="voting_system_page">
         <ui:insert name="content"/>
     </div>
-    <script>
-        document.querySelector("#voting_system_page").addEventListener('message_from_extension',
-                function(event) {
-                    vs.webextension_available = true
-                    Polymer.Base.importHref(vs.contextURL + '/resources/bower_components/vs-block-screen/vs-block-screen.vsp', function(e) {
-                        var blockScreen = document.createElement('vs-block-screen');
-                        document.querySelector("body").appendChild(blockScreen)
-                        vs.blockScreen = blockScreen.block.bind(blockScreen)
-                    });
-                    document.querySelector("#voting_system_page").addEventListener("message_from_webextension:dialog_closed", function(e) {
-                        vs.blockScreen(false)
-                    });
-                })
-    </script>
 </h:body>
 </html>

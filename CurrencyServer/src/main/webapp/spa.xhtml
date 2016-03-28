@@ -11,8 +11,8 @@
         <link href="./resources/bower_components/font-awesome/css/font-awesome.min.css" media="all" rel="stylesheet" />
         <link href="./resources/css/currency.css" media="all" rel="stylesheet" />
         <script src="./resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-        <link href="./resources/bower_components/polymer/polymer.html" rel="import"/>
-        <link rel="import" href="./resources/bower_components/iron-flex-layout/classes/iron-flex-layout.html"/>
+        <link rel="import" href="./resources/bower_components/polymer/polymer.html"/>
+        <link rel="import" href="./resources/bower_components/layout/layout.html"/>
         <script src="./resources/js/utils.js" type="text/javascript"></script>
         <script src="./resources/js/utils_js.vsp" type="text/javascript"></script>
         <link href="./resources/d3.html" rel="import"/>
@@ -33,10 +33,10 @@
                 <a class="menuItem menuItemSelected" data-route="user" href="#{contextURL}/spa.xhtml#!/user/search">
                     <i class="fa fa-user"></i> ${msg.locateUserLbl}
                 </a>
-                <a class="menuItem menuItemSelected isSuperUserView" data-route="newBank" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/user/newBank.xhtml&amp;caption=${msg.newBankLbl}&amp;data_route=newBank">
+                <a class="menuItem menuItemSelected isAdminView" data-route="newBank" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/user/newBank.xhtml&amp;caption=${msg.newBankLbl}&amp;data_route=newBank">
                     <i class="fa fa-university"></i> ${msg.newBankLbl}
                 </a>
-                <a class="menuItem menuItemSelected isSuperUserView" data-route="x509Certificate" href="#{contextURL}/spa.xhtml#!/x509Certificate/certs">
+                <a class="menuItem menuItemSelected isAdminView" data-route="x509Certificate" href="#{contextURL}/spa.xhtml#!/x509Certificate/certs">
                     <i class="fa fa-users"></i> ${msg.locateCertLbl}
                 </a>
                 <a class="menuItem menuItemSelected" data-route="reports" href="#{contextURL}/spa.xhtml#!/reports">
@@ -114,13 +114,9 @@
                 vs.updateMenuView = function() {
                     var appTitle = "${msg.appTitle}"
                     d3.selectAll(".isAdminView").style("display", "none")
-                    d3.selectAll(".isSuperUserView").style("display", "none")
                     if('admin' === menuType) {
                         d3.select(".isAdminView").style("display", "block")
                         appTitle = "${msg.adminPageTitle}"
-                    } else if('superuser' === menuType) {
-                        d3.select(".isSuperUserView").style("display", "block")
-                        appTitle = "${msg.superUserTitle}"
                     }
                     d3.select("#pageTitle").text(appTitle)
                 }
@@ -134,7 +130,6 @@
                         d3.select("#drawer").style({display:'none'});
                     })
                     if('admin' === menuType) caption = caption + ' - ${msg.adminLbl}'
-                    if('superuser' === menuType) caption = caption + ' - ${msg.superUserLbl}'
                     if(searchVisible === true) d3.select("#searchDiv").style("display", "block")
                     else d3.select("#searchDiv").style("display", "none")
                     d3.selectAll("#drawer .menuItem").each( function(d) {

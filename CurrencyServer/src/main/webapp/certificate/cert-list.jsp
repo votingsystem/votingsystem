@@ -80,12 +80,12 @@
         Polymer({
             is:'cert-list',
             properties: {
-                url:{type:String, value: vs.contextURL + '/rest/x509Certificate/certs', observer:'getHTTP'},
+                url:{type:String, value: vs.contextURL + '/rest/certificate/certs', observer:'getHTTP'},
                 certListDto:{type:Object, observer:'certListDtoChanged'}
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
-                this.url= vs.contextURL + "/rest/x509Certificate/certs"
+                this.url= vs.contextURL + "/rest/certificate/certs"
             },
             attached: function() {
                 console.log(this.localName + '#' + this.id + ' attached');
@@ -123,7 +123,7 @@
             },
             pagerChange:function(e) {
                 var certTypeSelectValue = this.$.certTypeSelect.value
-                targetURL = vs.contextURL + "/rest/x509Certificate/certs?menu=" + menuType + certTypeSelectValue +
+                targetURL = vs.contextURL + "/rest/certificate/certs?menu=" + menuType + certTypeSelectValue +
                         "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
@@ -132,7 +132,7 @@
             certTypeSelect: function () {
                 var optionSelected = this.$.certTypeSelect.value
                 if("" != optionSelected) {
-                    targetURL = vs.contextURL + "/rest/x509Certificate/certs?menu=" + menuType + optionSelected
+                    targetURL = vs.contextURL + "/rest/certificate/certs?menu=" + menuType + optionSelected
                     history.pushState(null, null, targetURL);
                     this.url = targetURL
                 }

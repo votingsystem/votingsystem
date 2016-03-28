@@ -22,7 +22,7 @@
         var timeDiff = this - new Date();
 
         if(timeDiff <= 0) {
-            return "${msg.timeFinsishedLbl}"
+            return "${msg.timeFinishedLbl}"
         }
 
         // strip the miliseconds

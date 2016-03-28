@@ -44,7 +44,7 @@ public class MetaInf {
             case VOTING_EVENT:
                 result.append("<b>" + ContextVS.getMessage("accessRequestLbl") +": </b>");
                 result.append( BACKUP.getNumAccessRequest() + "<br/>");
-                result.append("<b>" + ContextVS.getMessage("numVotesVSLbl") +": </b>" +
+                result.append("<b>" + ContextVS.getMessage("numVotesLbl") +": </b>" +
                         String.valueOf(BACKUP.getNumVotes()) + "<br/>");
                 if(representativesData != null) {
                     result.append("<b>" + ContextVS.getMessage("numRepresentativesLbl") +": </b>" +

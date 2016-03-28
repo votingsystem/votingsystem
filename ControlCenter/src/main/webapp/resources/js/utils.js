@@ -18,6 +18,16 @@ var Operation = {
     REPRESENTATIVE_STATE:"REPRESENTATIVE_STATE"
 }
 
+function EventVS() {}
+
+EventVS.State = {
+    ACTIVE:"ACTIVE",
+    TERMINATED:"TERMINATED",
+    CANCELED:"CANCELED",
+    PENDING:"PENDING",
+    DELETED_FROM_SYSTEM:"DELETED_FROM_SYSTEM"
+}
+
 function DateUtils(){}
 
 //parse dates with format "2010-08-30 01:02:03"
@@ -204,6 +214,25 @@ function setURLParameter(baseURL, name, value){
     return result
 }
 
+XMLHttpRequest.prototype.get = function(url, callback) {
+    this.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            callback(this.responseText)
+        }
+    };
+    this.open("GET", url, true);
+    if(this.requestHeaders) this.requestHeaders.forEach(function (element, index, array) {
+        this.setRequestHeader(element.key, element.value);
+    }.bind(this))
+    this.send();
+}
+
+XMLHttpRequest.prototype.header = function(key, value) {
+    if(!this.requestHeaders) this.requestHeaders = []
+    this.requestHeaders.push({key:key, value:value})
+    return this
+};
+
 function VotingSystemClient () { }
 
 var clientTool
@@ -212,9 +241,6 @@ VotingSystemClient.setMessage = function (messageJSON) {
         var messageToSignatureClient = JSON.stringify(messageJSON);
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
-    }  else if(isChrome() && vs.webextension_available) {
-        vs.blockScreen(true)
-        document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message-to-host', {detail:messageJSON}))
     } else console.log("clientTool undefined - operation: " + messageJSON.operation)
 }
 

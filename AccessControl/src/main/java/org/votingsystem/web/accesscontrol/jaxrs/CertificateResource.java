@@ -61,17 +61,17 @@ public class CertificateResource {
                           @DefaultValue("100") @QueryParam("max") int max,
                           @DefaultValue("USER") @QueryParam("type") String typeStr,
                           @DefaultValue("OK") @QueryParam("state") String stateStr,
-                          @DefaultValue("") @QueryParam("format") String format, @QueryParam("searchText") String searchText,
+                          @QueryParam("searchText") String searchText,
                           @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         String contentType = req.getContentType() != null ? req.getContentType(): "";
         Certificate.Type type = Certificate.Type.valueOf(typeStr);
         Certificate.State state = Certificate.State.valueOf(stateStr);
-        Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(Certificate.class)
-                .createAlias("user", "user");
+        Criteria criteria = dao.getEM().unwrap(Session.class).createCriteria(Certificate.class);
         criteria.add(Restrictions.eq("state", state));
         criteria.add(Restrictions.eq("type", type));
         if(searchText != null) {
+            criteria.createAlias("user", "user");
             Criterion rest1= Restrictions.ilike("user.name", "%" + searchText + "%");
             Criterion rest2= Restrictions.ilike("user.firstName", "%" + searchText + "%");
             Criterion rest3= Restrictions.ilike("user.lastName", "%" + searchText + "%");

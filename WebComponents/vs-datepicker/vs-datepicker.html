@@ -404,8 +404,6 @@ Or see the LICENSE file that comes with this code.
 
         ready: function () {
             this.messages = this.$.i18nVS.getMessages()
-            if(this.timeEnabled === true) this.format = d3.time.format("%Y/%m/%d %H:%M")
-            else this.format = d3.time.format("%Y/%m/%d")
             var d = new Date();
             var list = [];
             this._currYear = d.getFullYear()
@@ -670,9 +668,12 @@ Or see the LICENSE file that comes with this code.
             this.$.modalDialog.style.opacity = 1
             this.$.modalDialog.style['pointer-events'] = 'auto'
         },
+        format: function (date) {
+            if(this.timeEnabled === true) return date.formatWithTime()
+            else return date.format()
+        },
         accept: function () {
             var date = this.getDate()
-            console.log("---------- accept: " + (typeof date), date.getDayWeekFormat())
             this.fire('date-selected-accept', date);
             this.$.dateInput.value = this.format(date)
             this.close()

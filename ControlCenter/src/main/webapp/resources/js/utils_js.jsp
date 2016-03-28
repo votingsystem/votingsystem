@@ -15,24 +15,13 @@
         document.querySelector("#voting_system_page").addEventListener(this.callerCallback, function(e) { callbackFunction(e.detail) });
     }
 
-    function EventVS() {}
-
-    EventVS.State = {
-        ACTIVE:"ACTIVE",
-        TERMINATED:"TERMINATED",
-        CANCELED:"CANCELED",
-        PENDING:"PENDING",
-        PENDING_SIGNATURE:"PENDING_SIGNATURE",
-        DELETED_FROM_SYSTEM:"DELETED_FROM_SYSTEM"
-    }
-
     //http://jsfiddle.net/cckSj/5/
     Date.prototype.getElapsedTime = function() {
         // time difference in ms
         var timeDiff = this - new Date();
 
         if(timeDiff <= 0) {
-            return "${msg.timeFinsishedLbl}"
+            return "${msg.timeFinishedLbl}"
         }
 
         // strip the miliseconds

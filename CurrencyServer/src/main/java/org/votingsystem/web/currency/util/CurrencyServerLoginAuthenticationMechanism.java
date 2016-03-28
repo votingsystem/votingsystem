@@ -12,10 +12,7 @@ import org.votingsystem.model.User;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 
@@ -26,7 +23,7 @@ public class CurrencyServerLoginAuthenticationMechanism implements Authenticatio
 
     private static final Logger log = Logger.getLogger(CurrencyServerLoginAuthenticationMechanism.class.getName());
 
-    private static final Set<String> roles = new HashSet<>(Arrays.asList("userAuthenticated"));
+    private static final Set<String> roles =  Collections.unmodifiableSet(new HashSet<>(Arrays.asList("userAuthenticated")));
 
     private final String mechanismName;
 

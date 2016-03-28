@@ -5,6 +5,12 @@
 <dom-module name="tools-page">
     <template>
         <div style="margin:30px auto;" class="vertical layout center center-justified">
+            <a class="menuItem menuItemSelected" style="width: 280px;" data-route="publish_election" href="/publish_election">
+                <i class="fa fa-envelope" style="margin:0px 10px 0px 0px;"></i> ${msg.publishVoteLbl}
+            </a>
+            <a class="menuItem menuItemSelected" style="width: 280px;" data-route="edit_representative" href="/representative/edit">
+                <i class="fa fa-hand-o-right" style="margin:0px 10px 0px 0px;"></i> ${msg.newRepresentativeLbl}
+            </a>
             <div style="margin: 20px;">
                 <fmt:message key="nativeClientURLMsg" bundle="${bundle}">
                     <fmt:param value="${contextURL}/tools/NativeClient.zip"/>

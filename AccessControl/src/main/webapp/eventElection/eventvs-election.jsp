@@ -1,198 +1,108 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <link href="eventvs-admin-dialog.vsp" rel="import"/>
-<link href="vote-result-dialog.vsp" rel="import"/>
+<link href="eventvs-election-stats.vsp" rel="import"/>
 
 <dom-module name="eventvs-election">
     <template>
         <style>
-            .numVotesClass{
-                font-size: 3em;
+            :host {
+                display: none;
+            }
+            #eventContentDiv {
+                border: #f2f2f2 solid 1px;
+                -moz-border-radius: 3px; border-radius: 3px;
+                margin:0px 0px 0px 0px;
+                min-height:100px;
+                padding: 10px 10px 10px 10px;
+                word-wrap:break-word;
+                overflow: hidden;
+            }
+            #eventAuthorDiv {
+                color: #52515e;
                 font-style: italic;
-                color: #888;
             }
         </style>
-        <div hidden="{{mainDivHidden}}" class="vertical layout center center-justified">
-            <div hidden="{{adminMenuHidden}}" style="text-align: center;">
-                <button type="submit" on-click="showAdminDialog" style="margin:15px 20px 15px 0px;">
-                    ${msg.adminDocumentLinkLbl} <i class="fa fa fa-check"></i>
-                </button>
-            </div>
+        <div class="vertical layout center center-justified">
             <div class="vertical layout center center-justified" style="margin: 0px 30px;width: 100%; max-width: 1000px;">
                 <div class="layout horizontal center center-justified" style="width:100%;">
-                    <div class="flex horizontal layout center center-justified">
-                        <div hidden="{{!isActive}}" style='color: #888;font-size: 0.9em;'>{{getElapsedTime(eventvs.dateFinish)}}</div>
-                    </div>
+                    <div class="flex"></div>
                     <div style="text-align: center">
                         <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
                     </div>
-                    <div class="flex" on-click="showVoteResul">
-                        <div hidden="{{!voteResul}}" style="cursor: pointer;background: #ffeb3b;width: 50px; text-align: center;">
-                            <i class="fa fa-envelope" style="margin:10px;color: #ba0011;font-size: 1.3em;"></i> </div>
+                    <div class="flex"></div>
+                    <div hidden="{{adminMenuHidden}}" style="text-align: right;"  on-click="showAdminDialog">
+                        <i class="fa fa-cogs" style="margin:0px 10px 0px 0px; color:#ba0011;cursor: pointer;"></i>
                     </div>
                 </div>
                 <div class="horizontal layout">
-                    <div class="flex" style="display: block;">
-                        <div hidden="{{!isPending}}" style="font-size: 1.3em; font-weight:bold;color:#fba131;">${msg.eventVSPendingMsg}</div>
-                        <div hidden="{{!isTerminated}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSFinishedLbl}</div>
-                        <div hidden="{{!isCanceled}}" style="font-size: 1.3em; font-weight:bold;color:#cc1606;">${msg.eventVSCancelledLbl}</div>
-                    </div>
-                    <div hidden="{{isActive}}" style="margin:0px 30px 0px 30px; color: #888"><b>${msg.dateLbl}: </b>
-                        {{getDate(eventvs.dateBegin)}}</div>
+                    <div style="color: #888;font-size: 1.1em;">{{getDate(eventvs.dateBegin)}}</div>
                 </div>
                 <div style="width: 100%;">
                     <div id="eventContentDiv" style="border: 1px solid #ccc;padding: 0 7px;"></div>
 
-                    <div class="horizontal layout center center-justified">
-                        <div hidden="{{!isTerminated}}" style="margin: 10px 0 0 0;">
-                            <button on-click="getResults">
-                                <i class="fa fa-bar-chart"></i> ${msg.getResultsLbl}
-                            </button>
+                    <div class="horizontal layout center center-justified" style="margin: 5px 0 0 0;">
+                        <div hidden="{{!isTerminated}}" class="horizontal layout center center-justified">
+                            <i class="fa fa-bar-chart"></i>
+                            <a href="[[backupURL]]">${msg.getResultsLbl}</a>
                         </div>
-                        <div id="eventAuthorDiv" class="flex" style="margin:0px 20px 0 30px; color:#888; font-size: 0.85em;">
-                            <b>${msg.byLbl}:</b> <span>{{eventvs.user}}</span>
+                        <div id="eventAuthorDiv" class="flex" style="margin:0px 20px 0 30px; color:#888; font-size: 0.85em;text-align: right;">
+                            {{eventvs.user}}
                         </div>
                     </div>
 
-                    <div>
-                        <div>
-                            <div hidden="{{!isActive}}">
-                                <div style="font-size: 1.4em; font-weight: bold; text-decoration: underline; color:#888;
-                                        margin: 20px 0 0 0;">${msg.pollFieldLegend}:</div>
-                                <template is="dom-repeat" items="{{eventvs.fieldsEventVS}}">
-                                    <div>
-                                        <button on-click="showConfirmDialog"
-                                                style="margin: 30px 0px 0px 5px;font-size: 1.2em; font-weight:bold;width: 100%; max-width: 500px; padding: 10px;">
-                                            <span>{{item.content}}</span>
-                                        </button>
-                                    </div>
-                                </template>
-                            </div>
-                            <div hidden="{{isActive}}">
-                                <div style="font-size: 1.4em; font-weight: bold; text-decoration: underline; color:#888;
-                                        margin: 20px 0 10px 0;">${msg.pollFieldLegend}:</div>
-                                <template is="dom-repeat" items="{{fieldsEventVS}}">
-                                    <div class="horizontal layout center center-justified">
-                                        <div class="voteOption" style="font-size: 2em; font-weight: bold;">
-                                            - {{item.content}}
-                                        </div>
-                                        <div class="numVotesClass flex" style="display: none;margin:0 0 0 20px;">{{item.numVotesVS}} ${msg.votesLbl}</div>
-                                    </div>
-                                </template>
-                            </div>
+                    <div class="horizontal layout center center-justified" style="width: 100%; margin: 15px 0 0 0;">
+                        <div hidden="{{!isActive}}" style="margin: 0 30px 0 0;">
+                            <img id="qrImg"  src="" style="border: 1px solid #ccc;"/>
+                        </div>
+                        <div style="width: 600px;margin: 0 auto;">
+                            <eventvs-election-stats id="eventStats" stats-dto='${statsDto}'></eventvs-election-stats>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <eventvs-election-vote-confirm-dialog id="confirmOptionDialog" on-option-confirmed="submitVote"></eventvs-election-vote-confirm-dialog>
         <eventvs-admin-dialog id="eventVSAdminDialog" eventvs="{{eventvs}}"></eventvs-admin-dialog>
-        <vote-result-dialog id="voteResultDialog"></vote-result-dialog>
     </template>
     <script>
         Polymer({
             is:'eventvs-election',
             properties: {
                 url:{type:String, observer:'getHTTP'},
-                eventvs:{type:Object, observer:'eventvsChanged'},
-                mainDivHidden:{type:Boolean, value:true},
+                eventvs:{type:Object, observer:'eventvsChanged'}
             },
             ready: function() {
                 console.log(this.tagName + "- ready")
-                this.isClientToolConnected = (clientTool !== undefined) || vs.webextension_available
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
             },
-            getElapsedTime: function(dateStamp) {
-                return new Date(dateStamp).getElapsedTime() + " ${msg.toCloseLbl}"
-            },
             eventvsChanged:function() {
                 console.log("eventvsChanged - eventvs: " + this.eventvs.state)
-                this.optionVSSelected = null
-                this.dateFinish = new Date(this.eventvs.dateFinish)
-                this.voteResul = null;
-                this.isPending = ('PENDING' === this.eventvs.state)? true : false
+                this.$.eventStats.eventvs = this.eventvs
                 this.isTerminated = ('TERMINATED' === this.eventvs.state)? true : false
                 this.isCanceled = ('CANCELED' === this.eventvs.state)? true : false
                 this.isActive = ('ACTIVE' === this.eventvs.state)? true : false
                 this.adminMenuHidden = true
-                if('admin' === menuType) {
-                    if(this.eventvs.state === 'ACTIVE' || this.eventvs.state === 'PENDING') this.adminMenuHidden = false
+                if(this.eventvs.state === 'ACTIVE' || this.eventvs.state === 'PENDING') this.adminMenuHidden = false
+                if(this.isActive === true) {
+                    var voteOperationCode = 4;
+                    var qrCodeURL = vs.contextURL + "/qr?cht=qr&chs=150x150&chl=op=" + voteOperationCode + ";iid=" + this.eventvs.id
+                    this.$.qrImg.setAttribute("src", qrCodeURL)
                 }
-                this.fieldsEventVS = this.eventvs.fieldsEventVS
-                d3.xhr(vs.contextURL + "/rest/eventElection/id/" + this.eventvs.id + "/stats")
-                        .header("Content-Type", "application/json").get(function(err, rawData){
-                        if(this.isTerminated == true) {
-                            this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
-                            this.async(function () { d3.select(this).selectAll(".numVotesClass").style("display", "block")}.bind(this))
-                        }
-                    }.bind(this));
-                d3.select(this).select("#eventContentDiv").html(decodeURIComponent(escape(window.atob(this.eventvs.content))))
-                this.mainDivHidden = false
+                this.$.eventContentDiv.innerHTML = decodeURIComponent(escape(window.atob(this.eventvs.content)))
+                this.backupURL =  "${contextURL}/static/backup/" + new Date(this.eventvs.dateFinish).urlFormat() +
+                        "/VOTING_EVENT_" + this.eventvs.id + ".zip"
+                this.style.display = 'block'
             },
             showAdminDialog:function() {
                 this.$.eventVSAdminDialog.show()
             },
-            showConfirmDialog: function(e) {
-                console.log(this.tagName + " showConfirmDialog")
-                if(!this.isClientToolConnected) {
-                    alert("${msg.clientToolRequiredErrorMsg}", "${msg.errorLbl}");
-                } else {
-                    this.optionVSSelected = e.model.item
-                    alert(this.optionVSSelected.content, "${msg.confirmOptionDialogCaption}", this.submitVote.bind(this));
-                }
-            },
-            getResults:function() {
-                console.log("getResults")
-                var fileURL = "${contextURL}/static/backup/" + this.dateFinish.urlFormat() + "/VOTING_EVENT_" + this.eventvs.id + ".zip"
-                if(this.isClientToolConnected) {
-                    var operationVS = new OperationVS(Operation.FILE_FROM_URL)
-                    operationVS.subject = '${msg.downloadingFileMsg}'
-                    operationVS.documentURL = fileURL
-                    operationVS.setCallback(function(appMessage) { this.showGetResultsResponse(appMessage) }.bind(this))
-                    VotingSystemClient.setMessage(operationVS)
-                } else window.location.href  = fileURL
-            },
-            showGetResultsResponse:function(appMessageJSON) {
-                if(ResponseVS.SC_OK !== appMessageJSON.statusCode) alert(appMessageJSON.message, "${msg.errorLbl}")
-            },
-            showVoteResul:function() {
-                this.$.voteResultDialog.show(this.voteResul)
-            },
-            submitVote:function() {
-                console.log("submitVote - eventvs.url: " + this.eventvs.url)
-                var operationVS = new OperationVS(Operation.SEND_VOTE)
-                this.eventvs.vote = {optionSelected:this.optionVSSelected, EventId:this.eventvs.id, eventURL:this.eventvs.url}
-                operationVS.vote = this.eventvs.vote
-                operationVS.signedMessageSubject = '${msg.sendVoteMsgSubject} - ' + this.eventvs.subject
-                operationVS.setCallback(function(appMessage) {
-                    this.voteResponse(appMessage)}.bind(this))
-                console.log(" - operationVS: " +  JSON.stringify(operationVS))
-                VotingSystemClient.setMessage(operationVS);
-            },
-            voteResponse:function(appMessageJSON) {
-                console.log(this.tagName + " - voteResponse: " + JSON.stringify(appMessageJSON));
-                if(appMessageJSON.statusCode == ResponseVS.SC_OK) {
-                    var resultJSON = toJSON(appMessageJSON.message)
-                    resultJSON.eventVS = this.eventvs
-                    resultJSON.optionSelected = this.optionVSSelected.content
-                    this.voteResul = resultJSON
-                    this.$.voteResultDialog.show(resultJSON)
-                } else if (appMessageJSON.statusCode === ResponseVS.SC_ERROR_REQUEST_REPEATED) {
-                    var msgJSON = toJSON(appMessageJSON.message)
-                    var msgTemplate =  "${msg.accessRequestRepeatedMsg}"
-                    alert(msgTemplate.format(this.eventvs.subject, msgJSON.url), "${msg.errorLbl}")
-                } else if (appMessageJSON.statusCode !== ResponseVS.SC_CANCELED) {
-                    alert(appMessageJSON.message, "${msg.errorLbl}")
-                }
-            },
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
-                    this.eventvs = toJSON(rawData.response)
+                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                    this.eventvs = toJSON(responseText)
                 }.bind(this));
             }
             });

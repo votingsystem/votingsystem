@@ -58,7 +58,7 @@ public class EventElectionResource {
     @Transactional
     @Path("/id/{id}") @GET
     public Response getById (@PathParam("id") long id, @Context ServletContext context, @Context HttpServletRequest req,
-                           @Context HttpServletResponse resp) throws ValidationException, IOException, ServletException, URISyntaxException {
+                       @Context HttpServletResponse resp) throws ValidationException, IOException, ServletException, URISyntaxException {
         String contentType = req.getContentType() != null ? req.getContentType():"";
         List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE, EventVS.State.PENDING, EventVS.State.CANCELED,
                 EventVS.State.TERMINATED);

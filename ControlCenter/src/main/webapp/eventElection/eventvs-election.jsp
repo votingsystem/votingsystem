@@ -8,6 +8,18 @@
                 font-style: italic;
                 color: #888;
             }
+            .eventContentDiv {
+                border: #f2f2f2 solid 1px;
+                margin:0px 0px 0px 0px;
+                min-height:100px;
+                padding: 10px 10px 10px 10px;
+                word-wrap:break-word;
+                overflow: hidden;
+            }
+            #eventAuthorDiv {
+                color: #52515e;
+                font-style: italic;
+            }
         </style>
         <div style="margin: 0px 30px;">
             <div hidden="{{!isActive}}" style='color: #888;'>{{getElapsedTime(eventvs.dateFinish)}}</div>
@@ -30,7 +42,7 @@
 
                 <div class="horizontal layout center center-justified">
                     <div id="eventAuthorDiv" class="flex" style="margin:0px 20px 0 20px; color:#888; font-size: 0.85em;">
-                        <b>${msg.byLbl}:</b> <span>{{eventvs.user}}</span>
+                        <span>{{eventvs.user}}</span>
                     </div>
                     <div style="font-size: 1.1em;">
                         <a href="{{eventvs.url}}" target="_blank">${msg.accessControlLbl}</a>
@@ -39,13 +51,13 @@
 
                 <div>
                     <div on-click="update" style="font-size: 1.4em; font-weight: bold; text-decoration: underline; color:#888;
-                                        margin: 20px 0 10px 0;">${msg.pollFieldLegend}:</div>
+                                        margin: 20px 0 10px 0;"></div>
                     <template is="dom-repeat" items="{{fieldsEventVS}}">
                         <div class="horizontal layout center center-justified">
-                            <div class="voteOption" style="font-size: 2em; font-weight: bold;">
+                            <div style="font-size: 2em; font-weight: bold;">
                                 - {{item.content}}
                             </div>
-                            <div class="numVotesClass flex" style="display: none;margin:0 0 0 20px;">{{item.numVotesVS}} ${msg.votesLbl}</div>
+                            <div class="numVotesClass flex" style="display: none;margin:0 0 0 20px;">{{item.numVotes}} ${msg.votesLbl}</div>
                         </div>
                     </template>
                     </div>
@@ -95,26 +107,23 @@
                 if('admin' === menuType) {
                     if(this.eventvs.state === 'ACTIVE' || this.eventvs.state === 'PENDING') this.adminMenuHidden = false
                 }
-                d3.xhr(vs.contextURL + "/rest/eventElection/id/" + this.eventvs.id + "/stats")
-                        .header("Content-Type", "application/json").get(function(err, rawData){
-                            this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
-                            this.async(function (targetURL) { d3.select(this).selectAll(".numVotesClass").style("display", "block")}.bind(this))
-                        }.bind(this)
-                );
-                d3.xhr(vs.contextURL + "/rest/eventElection/id/" + this.eventvs.id + "/stats")
-                        .header("Content-Type", "application/json").get(function(err, rawData){
-                    if('TERMINATED' == this.eventvs.state) {
-                        this.fieldsEventVS = toJSON(rawData.response).fieldsEventVS
-                        d3.select(this).selectAll(".numVotesClass").style("display", "block")
-                    }
-                }.bind(this));
-                d3.select(this).select(".eventContentDiv").html(this.decodeBase64(this.eventvs.content))
+                new XMLHttpRequest().header("Content-Type", "application/json").get(vs.contextURL + "/rest/eventElection/id/" +
+                        this.eventvs.id + "/stats", function(responseText){
+                    this.fieldsEventVS = toJSON(responseText).fieldsEventVS
+                    this.async(function () {
+                        var votesInfoDiv = document.querySelectorAll(".numVotesClass")
+                        for (var i = 0; i < votesInfoDiv.length; ++i) {
+                            votesInfoDiv[i].style.display = 'block';
+                        }
+                    })
+                }.bind(this))
+                this.querySelector(".eventContentDiv").innerHTML = this.decodeBase64(this.eventvs.content)
             },
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
-                    this.eventvs = toJSON(rawData.response)
+                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                    this.eventvs = toJSON(responseText)
                 }.bind(this));
             }
         });

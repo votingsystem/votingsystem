@@ -68,39 +68,11 @@ button::-moz-focus-inner {
     border-color: #ba0011;
 }
 
-.userAdvert {
-    margin: 20px auto 20px auto;
-    background-color: #f2f2f2;
-    font-size:0.9em;
-    padding: 5px 10px 5px 0px;
-    -moz-border-radius: 5px; border-radius: 5px;
-    width:90%;
-}
-
 .pageHeader {
     color: #6c0404;
     font-weight: bold;
     text-overflow: ellipsis;
     padding: 5px 10px 5px 10px;
-}
-
-.messagePanel {
-    padding: 7px 12px 7px 12px;
-    margin: 20px auto 20px auto;
-    border: 2px solid #cc1606;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-    -moz-box-shadow: 0 8px 6px -6px #555;
-    -webkit-box-shadow: 0 8px 6px -6px #888;
-    box-shadow: 0 8px 6px -6px #888;
-    width: 70%;
-}
-
-.messagePanel .messageContent {
-    text-align: center;
-    font-size: 1.3em;
-    font-weight:bold;
-    margin:7px 0px 7px 0px;
 }
 
 .contentDiv {

@@ -10,7 +10,7 @@
     <ui:define name="content">
         <div>
             <div id="adminButtonsDiv" class=""  style="width: 600px; margin:20px auto 0px auto;">
-                <c:if test="#{'admin'.equals(param.menu) || 'superuser'.equals(param.menu)}">
+                <c:if test="#{'admin'.equals(param.menu)}">
                     <button onclick="document.querySelector('#reasonDialog').show()">
                         ${msg.cancelCertLbl}
                     </button>

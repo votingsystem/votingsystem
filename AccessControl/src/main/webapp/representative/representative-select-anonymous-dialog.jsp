@@ -59,7 +59,7 @@
                 console.log(this.tagName + " - ready")
             },
             anonymousDelegationMsgChanged: function() {
-                d3.select(this).select("#anonymousDelegationMsg").html(this.anonymousDelegationMsg)
+                this.querySelector("#anonymousDelegationMsg").innerHTML = this.anonymousDelegationMsg
             },
             show: function(representative) {
                 this.representative = representative
@@ -92,7 +92,7 @@
                         return
                     }
                     var weeksMsgTemplate = "${msg.numWeeksResultAnonymousDelegationMsg}";
-                    d3.select(this).select("#delegationMsg").html(msgTemplate.format(this.anonymousLbl, this.representative.name))
+                    this.querySelector("#delegationMsg").innerHTML = msgTemplate.format(this.anonymousLbl, this.representative.name)
                     this.anonymousDelegationMsg = weeksMsgTemplate.format(this.anonymousLbl, this.$.numWeeksAnonymousDelegation.value)
                     this.confirmStep = true
                     this.infoRequestStep = false

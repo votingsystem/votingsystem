@@ -1,6 +1,7 @@
 package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 
 import java.math.BigDecimal;
@@ -13,7 +14,7 @@ public class TagVSDto {
 
     private Long id;
     private String name;
-    private String currencyCode;
+    private CurrencyCode currencyCode;
     private BigDecimal amount;
 
     public TagVSDto() {}
@@ -23,14 +24,14 @@ public class TagVSDto {
         this.name = tagVS.getName();
     }
 
-    public TagVSDto(BigDecimal amount, String currencyCode, TagVS tagVS) {
+    public TagVSDto(BigDecimal amount, CurrencyCode currencyCode, TagVS tagVS) {
         this.id = tagVS.getId();
         this.name = tagVS.getName();
         this.amount = amount;
         this.currencyCode = currencyCode;
     }
 
-    public static TagVSDto CURRENCY_DATA(BigDecimal amount, String currencyCode, TagVS tagVS) {
+    public static TagVSDto CURRENCY_DATA(BigDecimal amount, CurrencyCode currencyCode, TagVS tagVS) {
         TagVSDto tagVSDto = new TagVSDto();
         tagVSDto.setName(tagVS.getName());
         tagVSDto.setAmount(amount);
@@ -54,11 +55,11 @@ public class TagVSDto {
         this.name = name;
     }
 
-    public String getCurrencyCode() {
+    public CurrencyCode getCurrencyCode() {
         return currencyCode;
     }
 
-    public void setCurrencyCode(String currencyCode) {
+    public void setCurrencyCode(CurrencyCode currencyCode) {
         this.currencyCode = currencyCode;
     }
 

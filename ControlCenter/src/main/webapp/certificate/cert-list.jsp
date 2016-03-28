@@ -83,7 +83,7 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready - ")
-                this.url = vs.contextURL + "/rest/x509Certificate/certs"
+                this.url = vs.contextURL + "/rest/certificate/certs"
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
@@ -115,7 +115,7 @@
             },
             pagerChange:function(e) {
                 var certTypeSelectValue = this.$.certTypeSelect.value
-                targetURL = vs.contextURL + "/rest/x509Certificate/certs?menu=" + menuType + certTypeSelectValue +
+                targetURL = vs.contextURL + "/rest/certificate/certs?" + certTypeSelectValue +
                         "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
@@ -124,7 +124,7 @@
             certTypeSelect: function () {
                 var optionSelected = this.$.certTypeSelect.value
                 if("" != optionSelected) {
-                    targetURL = vs.contextURL + "/rest/x509Certificate/certs?menu=" + menuType + optionSelected
+                    targetURL = vs.contextURL + "/rest/certificate/certs?" + optionSelected
                     history.pushState(null, null, targetURL);
                     this.url = targetURL
                 }
@@ -132,8 +132,8 @@
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
-                    this.certListDto = toJSON(rawData.response)
+                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                    this.certListDto = toJSON(responseText)
                 }.bind(this));
             }
         });

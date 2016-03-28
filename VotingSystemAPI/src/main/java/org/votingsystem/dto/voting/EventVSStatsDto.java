@@ -1,8 +1,10 @@
 package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.model.voting.EventElection;
 import org.votingsystem.model.voting.FieldEvent;
 
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -13,16 +15,19 @@ public class EventVSStatsDto {
 
     private Long id;
     private Long numAccessRequests;
-    private Long numAccessRequestsOK;
-    private Long numAccessRequestsCancelled;
-    private Long numVotesVS;
-    private Long numVotesVSOK;
-    private Long numVotesVSVotesVSCANCELED;
+    private Long numVotes;
     private String subject;
+    private Date dateBegin;
+    private Date dateFinish;
     private Set<FieldEvent> fieldsEventVS;
 
     public EventVSStatsDto() {}
 
+    public EventVSStatsDto(EventElection eventElection) {
+        this.dateBegin = eventElection.getDateBegin();
+        this.dateFinish = eventElection.getDateFinish();
+        this.subject = eventElection.getSubject();
+    }
 
     public Long getId() {
         return id;
@@ -40,44 +45,13 @@ public class EventVSStatsDto {
         this.numAccessRequests = numAccessRequests;
     }
 
-    public Long getNumAccessRequestsOK() {
-        return numAccessRequestsOK;
+
+    public Long getNumVotes() {
+        return numVotes;
     }
 
-    public void setNumAccessRequestsOK(Long numAccessRequestsOK) {
-        this.numAccessRequestsOK = numAccessRequestsOK;
-    }
-
-    public Long getNumAccessRequestsCancelled() {
-        return numAccessRequestsCancelled;
-    }
-
-    public void setNumAccessRequestsCancelled(Long numAccessRequestsCancelled) {
-        this.numAccessRequestsCancelled = numAccessRequestsCancelled;
-    }
-
-    public Long getNumVotesVS() {
-        return numVotesVS;
-    }
-
-    public void setNumVotesVS(Long numVotesVS) {
-        this.numVotesVS = numVotesVS;
-    }
-
-    public Long getNumVotesVSOK() {
-        return numVotesVSOK;
-    }
-
-    public void setNumVotesVSOK(Long numVotesVSOK) {
-        this.numVotesVSOK = numVotesVSOK;
-    }
-
-    public Long getNumVotesVSVotesVSCANCELED() {
-        return numVotesVSVotesVSCANCELED;
-    }
-
-    public void setNumVotesVSVotesVSCANCELED(Long numVotesVSVotesVSCANCELED) {
-        this.numVotesVSVotesVSCANCELED = numVotesVSVotesVSCANCELED;
+    public void setNumVotes(Long numVotes) {
+        this.numVotes = numVotes;
     }
 
     public String getSubject() {
@@ -96,4 +70,21 @@ public class EventVSStatsDto {
         this.fieldsEventVS = fieldsEventVS;
     }
 
+    public Date getDateBegin() {
+        return dateBegin;
+    }
+
+    public EventVSStatsDto setDateBegin(Date dateBegin) {
+        this.dateBegin = dateBegin;
+        return this;
+    }
+
+    public Date getDateFinish() {
+        return dateFinish;
+    }
+
+    public EventVSStatsDto setDateFinish(Date dateFinish) {
+        this.dateFinish = dateFinish;
+        return this;
+    }
 }

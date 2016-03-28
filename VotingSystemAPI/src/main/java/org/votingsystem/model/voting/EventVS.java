@@ -51,7 +51,7 @@ public class EventVS extends EntityVS implements Serializable {
 
     public enum Type {ELECTION }
 
-    public enum State { ACTIVE, TERMINATED, CANCELED, ERROR, PENDING, PENDING_SIGNATURE, DELETED_FROM_SYSTEM }
+    public enum State { ACTIVE, TERMINATED, CANCELED, ERROR, PENDING, DELETED_FROM_SYSTEM }
 
 
     @Id @GeneratedValue(strategy=IDENTITY) 

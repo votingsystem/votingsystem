@@ -10,7 +10,7 @@
     <ui:define name="content">
         <div>
             <div id="adminButtonsDiv" style="width: 600px; margin:20px auto 0px auto;">
-                <c:if test="${'admin'.equals(param.menu) || 'superuser'.equals(param.menu)}">
+                <c:if test="${'admin'.equals(param.menu)}">
                 <button onclick="document.querySelector('#reasonDialog').show()">
                     <div>${msg.cancelCertLbl}</div>
                 </button>
@@ -28,13 +28,13 @@
                 document.querySelector("#voting_system_page").addEventListener('on-submit-reason',
                         function() {
                             var operationVS = new OperationVS(Operation.CERT_EDIT)
-                            operationVS.serviceURL = vs.contextURL + "/rest/x509Certificate/editCert"
+                            operationVS.serviceURL = vs.contextURL + "/rest/certificate/editCert"
                             operationVS.signedMessageSubject = "${msg.cancelCertMessageSubject}"
                             var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                                 changeCertToState:"${Certificate.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
                             operationVS.jsonStr = JSON.stringify(signedContent)
                             operationVS.setCallback(function() {
-                                document.querySelector("#certData").url = vs.contextURL + "/rest/x509Certificate/serialNumber/${certMap.serialNumber}?menu=" + menuType
+                                document.querySelector("#certData").url = vs.contextURL + "/rest/certificate/serialNumber/${certMap.serialNumber}"
                             })
                             VotingSystemClient.setMessage(operationVS);
                         }.bind(this))

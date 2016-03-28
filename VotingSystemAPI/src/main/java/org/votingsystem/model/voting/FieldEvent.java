@@ -36,7 +36,7 @@ public class FieldEvent extends EntityVS implements Serializable {
     @Transient private Long numUsersWithVote;
     @Transient private Long numRepresentativesWithVote;
     @Transient private Long numVotesResult;
-    @Transient private Long numVotesVS;
+    @Transient private Long numVotes;
 
     public FieldEvent() {}
 
@@ -134,12 +134,12 @@ public class FieldEvent extends EntityVS implements Serializable {
         return dateCreated;
     }
 
-    public Long getNumVotesVS() {
-        return numVotesVS;
+    public Long getNumVotes() {
+        return numVotes;
     }
 
-    public void setNumVotesVS(Long numVotesVS) {
-        this.numVotesVS = numVotesVS;
+    public void setNumVotes(Long numVotes) {
+        this.numVotes = numVotes;
     }
 
     @Override

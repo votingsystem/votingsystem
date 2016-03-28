@@ -94,11 +94,11 @@
       });
 
       var weekReports
-      page('*/reports/*/week', function(data) {
+      page('*/reports/*/week', function(ctx) {
           vs.route = 'reports';
           Polymer.Base.importHref('./reports/week-reports.vsp', function(e) {
               if(!weekReports) weekReports = document.createElement('week-reports');
-              weekReports.url = data.path
+              weekReports.url = getQueryParam('url', ctx.querystring)
               vs.loadMainContent(weekReports)
           });
       });

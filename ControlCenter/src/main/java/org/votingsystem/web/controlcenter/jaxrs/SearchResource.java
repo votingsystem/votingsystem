@@ -56,8 +56,8 @@ public class SearchResource {
         if(params.dateBeginFrom) try {dateBeginFrom = DateUtils.getDateFromString(params.dateBeginFrom)} catch(Exception ex) {}
         if(params.dateBeginTo) try {dateBeginTo = DateUtils.getDateFromString(params.dateBeginTo)} catch(Exception ex) {}*/
         Query query = dao.getEM().createQuery("select e from EventVS e where e.state in :inList and " +
-                "(e.subject like :searchText or e.content like :searchText)").setParameter("inList", inList)
-                .setParameter("searchText", "%" + searchText + "%");
+                "(lower(e.subject) like :searchText or lower(e.content) like :searchText)").setParameter("inList", inList)
+                .setParameter("searchText", "%" + searchText.toLowerCase() + "%");
         List<EventVS> eventvsList = query.getResultList();
         List<EventVSDto> dtoList = new ArrayList<>();
         for(EventVS eventVS : eventvsList) {

@@ -4,7 +4,7 @@ forge.oids['2.5.4.4'] = "surname"
 forge.oids["surname"] = '2.5.4.4'
 
 var RSAUtil = function() {
-    var keyLength = 1024
+    var keyLength = 2048
     this.rsa = forge.pki.rsa;
     // generate an RSA key pair synchronously
     console.log("RSAUtil - keyLength: " + keyLength)

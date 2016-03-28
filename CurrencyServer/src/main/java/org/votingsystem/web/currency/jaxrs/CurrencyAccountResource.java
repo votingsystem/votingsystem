@@ -4,6 +4,7 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyAccountDto;
 import org.votingsystem.dto.currency.SystemAccountsDto;
+import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
@@ -84,7 +85,7 @@ public class CurrencyAccountResource {
         List<Object[]> resultList = query.getResultList();
         List<TagVSDto> tagVSBalanceList = new ArrayList<>();
         for(Object[] result : resultList) {
-            tagVSBalanceList.add(new TagVSDto((BigDecimal) result[0], (String) result[2], (TagVS) result[1]));
+            tagVSBalanceList.add(new TagVSDto((BigDecimal) result[0], (CurrencyCode) result[2], (TagVS) result[1]));
         }
 
 
@@ -94,7 +95,7 @@ public class CurrencyAccountResource {
         resultList = query.getResultList();
         List<TagVSDto> bankBalanceList = new ArrayList<>();
         for(Object[] result : resultList) {
-            bankBalanceList.add(new TagVSDto((BigDecimal) result[0], (String) result[2], (TagVS) result[1]));
+            bankBalanceList.add(new TagVSDto((BigDecimal) result[0], (CurrencyCode) result[2], (TagVS) result[1]));
         }
         SystemAccountsDto systemAccountsDto = new SystemAccountsDto(accountListDto, tagVSBalanceList, bankBalanceList);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(systemAccountsDto)).build();
