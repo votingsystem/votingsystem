@@ -98,6 +98,7 @@ public class EventElectionResource {
         criteria.addOrder(Order.desc("dateBegin"));
         criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         List<EventElection> resultList = criteria.setFirstResult(offset).setMaxResults(max).list();
+        criteria.setFirstResult(0); //reset offset for total count
         long totalCount = ((Number)DAOUtils.cleanOrderings(criteria).setProjection(Projections.rowCount()).uniqueResult()).longValue();
         List<EventVSDto> eventVSListDto = new ArrayList<>();
         for(EventElection eventElection : resultList) {

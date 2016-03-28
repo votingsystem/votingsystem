@@ -61,7 +61,7 @@
                             this.cancellationHidden = false
                         }
                         if(this.representationState.representative)
-                            this.querySelector("#descriptionDiv").innerHTML = this.representationState.representative.description
+                            this.$.descriptionDiv.innerHTML = this.representationState.representative.description
                         document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('updated-state'))
                     }.bind(this))
                     VotingSystemClient.setMessage(operationVS);

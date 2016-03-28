@@ -80,6 +80,7 @@ public class CertificateResource {
             criteria.add(Restrictions.or(rest1, rest2, rest3, rest4, rest5));
         }
         List<Certificate> certificates = criteria.setFirstResult(offset).setMaxResults(max).list();
+        criteria.setFirstResult(0); //reset offset for total count
         long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         if(contentType.contains("pem")) {
             List<X509Certificate> resultList = new ArrayList<>();

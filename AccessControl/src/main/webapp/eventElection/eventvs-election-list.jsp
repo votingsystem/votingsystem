@@ -140,10 +140,6 @@
                 console.log(this.tagName + " - ready")
                 this.loading = true
             },
-            test:function(item) {
-                console.log(" ======= test: ", item)
-                return '<div>' + item.dateFinish + '</div>'
-            },
             loadURL:function(path, querystring) {
                 console.log(this.tagName + " - loadURL - path: " + path + " - querystring: " + querystring)
                 if(querystring) {

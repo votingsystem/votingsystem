@@ -93,6 +93,7 @@ public class TransactionResource {
         for(Transaction transaction : transactionList) {
             resultList.add(transactionBean.getTransactionDto(transaction));
         }
+        criteria.setFirstResult(0); //reset offset for total count
         long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
         ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
@@ -161,6 +162,7 @@ public class TransactionResource {
             for(Transaction transaction :  transactionList) {
                 resultList.add(transactionBean.getTransactionDto(transaction));
             }
+            criteria.setFirstResult(0); //reset offset for total count
             long totalCount = ((Number)criteria.setProjection(Projections.rowCount()).uniqueResult()).longValue();
             ResultListDto resultListDto = new ResultListDto(resultList, offset, max, totalCount);
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
