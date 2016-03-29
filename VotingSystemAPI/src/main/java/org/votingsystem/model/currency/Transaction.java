@@ -5,6 +5,7 @@ import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;

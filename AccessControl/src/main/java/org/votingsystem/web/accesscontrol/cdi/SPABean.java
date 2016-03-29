@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -19,10 +18,6 @@ import java.util.logging.Logger;
 public class SPABean implements Serializable {
 
     private static final Logger log = Logger.getLogger(SPABean.class.getName());
-
-    public String getUUID() {
-        return UUID.randomUUID().toString();
-    }
 
     public String formatDate(Date date) {
         if(date == null) return "";

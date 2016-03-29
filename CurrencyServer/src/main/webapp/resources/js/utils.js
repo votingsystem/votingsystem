@@ -6,17 +6,12 @@ var Operation = {
     CERT_EDIT:"CERT_EDIT",
     CONNECT:"CONNECT",
     DISCONNECT:"DISCONNECT",
-    INIT_SERVER:"INIT_SERVER",
-    TOOL_VS:"TOOL_VS",
     FILE_FROM_URL:"FILE_FROM_URL",
     LISTEN_TRANSACTIONS: "LISTEN_TRANSACTIONS",
     MESSAGEVS:"MESSAGEVS",
-    OPEN_CMS: "OPEN_CMS",
-    OPEN_CMS_FROM_URL: "OPEN_CMS_FROM_URL",
     CURRENCY_OPEN: "CURRENCY_OPEN",
     FROM_USER:"FROM_USER",
     CURRENCY_REQUEST: "CURRENCY_REQUEST",
-    TAB_CLOSED: "TAB_CLOSED",
     WALLET_OPEN: "WALLET_OPEN",
     WALLET_SAVE: "WALLET_SAVE"
 }
@@ -322,7 +317,6 @@ XMLHttpRequest.prototype.header = function(key, value) {
 function VotingSystemClient () { }
 
 var clientTool
-var nonBlockingOperations = [Operation.TOOL_VS, Operation.INIT_SERVER]
 VotingSystemClient.setMessage = function (messageJSON) {
     if(clientTool !== undefined) {
         var messageToSignatureClient = JSON.stringify(messageJSON);
@@ -351,9 +345,3 @@ function setClientToolMessage(callerId, message) {
     var b64_to_utf8 = decodeURIComponent(escape(window.atob(message)))
     document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent(callerId, {detail:b64_to_utf8}))
 }
-
-window.onbeforeunload = function(e) {
-    console.log("utils.js - onbeforeunload");
-    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('message-to-webextension',
-        {detail:{operation:"TAB_CLOSED"}}))
-};

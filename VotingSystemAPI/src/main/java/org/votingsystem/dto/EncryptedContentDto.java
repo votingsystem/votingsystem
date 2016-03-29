@@ -30,7 +30,6 @@ public class EncryptedContentDto {
     private String deviceFromName;
     private String deviceToName;
     private Long deviceFromId;
-    private String sessionId;
     private String contentToSign;
     private String toUser;
     private String hashCertVS;
@@ -50,17 +49,6 @@ public class EncryptedContentDto {
         this.statusCode = statusCode;
         this.message = message;
         this.URL = URL;
-    }
-
-    public static EncryptedContentDto getSignRequest(String toUser, String textToSign, String subject) throws Exception {
-        EncryptedContentDto messageContentDto =  new EncryptedContentDto();
-        messageContentDto.setOperation(TypeVS.MESSAGEVS_SIGN);
-        messageContentDto.setDeviceFromName(InetAddress.getLocalHost().getHostName());
-        messageContentDto.setToUser(toUser);
-        messageContentDto.setContentToSign(textToSign);
-        messageContentDto.setSubject(subject);
-        messageContentDto.setLocale(ContextVS.getInstance().getLocale().getLanguage());
-        return messageContentDto;
     }
 
     public static EncryptedContentDto getCurrencyWalletChangeRequest(List<Currency> currencyList) throws Exception {
@@ -209,14 +197,6 @@ public class EncryptedContentDto {
 
     public void setHashCertVS(String hashCertVS) {
         this.hashCertVS = hashCertVS;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
     }
 
     public X509Certificate getX509Certificate() throws Exception {

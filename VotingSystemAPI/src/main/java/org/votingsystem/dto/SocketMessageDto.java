@@ -43,7 +43,6 @@ public class SocketMessageDto {
     private Integer statusCode;
     private Long deviceFromId;
     private Long deviceToId;
-    private String sessionId;
     private String message;
     private String encryptedMessage;
     private String UUID;
@@ -77,8 +76,8 @@ public class SocketMessageDto {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setStatusCode(statusCode);
         socketMessageDto.setMessage(message);
-        socketMessageDto.setSessionId(session.getId());
         socketMessageDto.setOperation(TypeVS.MESSAGEVS_FROM_VS);
+        socketMessageDto.setMessageType(this.messageType);
         socketMessageDto.setUUID(UUID);
         return socketMessageDto;
     }
@@ -86,9 +85,9 @@ public class SocketMessageDto {
     public SocketMessageDto getResponse(Integer statusCode, String message, Long deviceFromId,
                             CMSSignedMessage cmsMessage, TypeVS operation) throws Exception {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_SESSION_ID);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
-        socketMessageDto.setSessionId(sessionId);
+        socketMessageDto.setDeviceToId(this.deviceFromId);
         EncryptedContentDto encryptedDto = new EncryptedContentDto();
         encryptedDto.setStatusCode(statusCode);
         encryptedDto.setMessage(message);
@@ -100,7 +99,7 @@ public class SocketMessageDto {
         return socketMessageDto;
     }
 
-    public static SocketMessageDto INIT_SESSION_REQUEST(String deviceId) throws NoSuchAlgorithmException {
+    public static SocketMessageDto INIT_AUTHENTICATED_SESSION_REQUEST(String deviceId) throws NoSuchAlgorithmException {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setOperation(TypeVS.INIT_SIGNED_SESSION);
         socketMessageDto.setDeviceId(deviceId);
@@ -109,11 +108,15 @@ public class SocketMessageDto {
     }
 
     public static SocketMessageDto INIT_SESSION_RESPONSE(String sessionId) {
+        return null;
+    }
+
+    public static SocketMessageDto INIT_SESSION_RESPONSE(Long deviceId) {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
+        socketMessageDto.setStatusCode(ResponseVS.SC_WS_CONNECTION_INIT_OK);
         socketMessageDto.setOperation(TypeVS.MESSAGEVS_FROM_VS);
         socketMessageDto.setMessageType(TypeVS.INIT_SESSION);
-        socketMessageDto.setSessionId(sessionId);
+        socketMessageDto.setDeviceToId(deviceId);
         socketMessageDto.setUUID(java.util.UUID.randomUUID().toString());
         return socketMessageDto;
     }
@@ -172,15 +175,6 @@ public class SocketMessageDto {
         this.deviceToId = deviceToId;
     }
 
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public SocketMessageDto setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-        return this;
-    }
-
     public TypeVS getOperation() {
         return operation;
     }
@@ -229,8 +223,6 @@ public class SocketMessageDto {
 
     public void setSession(Session session) throws ValidationException {
         this.session = session;
-        //if sessionId isn't null is because it's a MSG_TO_DEVICE_BY_TARGET_SESSION_ID
-        if(sessionId == null) this.sessionId = session.getId();
     }
 
     public Integer getStatusCode() {
@@ -419,25 +411,11 @@ public class SocketMessageDto {
         this.cmsMessagePEM = cmsMessagePEM;
     }
 
-    public static SocketMessageDto getSignRequest(DeviceDto deviceTo, String toUser, String textToSign, String subject)
-            throws Exception {
-        WebSocketSession socketSession = checkWebSocketSession(deviceTo, null, TypeVS.MESSAGEVS_SIGN);
-        SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
-        socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
-        socketMessageDto.setDeviceToId(deviceTo.getId());
-        socketMessageDto.setDeviceToName(deviceTo.getDeviceName());
-        socketMessageDto.setUUID(socketSession.getUUID());
-        EncryptedContentDto encryptedDto = EncryptedContentDto.getSignRequest(toUser, textToSign, subject);
-        encryptMessage(socketMessageDto, encryptedDto, deviceTo);
-        return socketMessageDto;
-    }
-
     public static SocketMessageDto getCurrencyWalletChangeRequest(
             DeviceDto deviceTo, List<Currency> currencyList) throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceTo, currencyList, TypeVS.CURRENCY_WALLET_CHANGE);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setTimeLimited(true);
         socketMessageDto.setUUID(socketSession.getUUID());
@@ -452,7 +430,7 @@ public class SocketMessageDto {
                           String textToEncrypt) throws Exception {
         WebSocketSession socketSession = checkWebSocketSession(deviceTo, null, TypeVS.MESSAGEVS);
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         socketMessageDto.setDeviceToId(deviceTo.getId());
         socketMessageDto.setDeviceToName(deviceTo.getDeviceName());
@@ -465,7 +443,7 @@ public class SocketMessageDto {
     //method to response a message previously received
     public SocketMessageDto getMessageResponse(User user, String textToEncrypt) throws Exception {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
-        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE_BY_TARGET_DEVICE_ID);
+        socketMessageDto.setOperation(TypeVS.MSG_TO_DEVICE);
         socketMessageDto.setStatusCode(ResponseVS.SC_PROCESSING);
         WebSocketSession socketSession = ContextVS.getInstance().getWSSession(UUID);
         socketMessageDto.setDeviceToId(deviceFromId);

@@ -168,6 +168,7 @@
             var QR_MESSAGE_INFO                    = 1;
             var CURRENCY_SEND                      = 2;
 
+
             function initWebsocket() {
                 var websocket
                 if ('WebSocket' in window) {
@@ -220,7 +221,7 @@
                         switch(messageJSON.operation) {
                             case "QR_MESSAGE_INFO":
                                 var qrOperation = vs.qrOperationsMap[messageJSON.operationCode]
-                                var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
+                                var socketMessageDto = {"operation":"MSG_TO_DEVICE",
                                     statusCode:700,
                                     deviceToId:messageJSON.deviceFromId,
                                     deviceId: vs.wsId, UUID:messageJSON.UUID}
@@ -234,7 +235,7 @@
                                 if(qrOperation.operation !== 'INIT_REMOTE_SIGNED_SESSION') {
                                     throw new Error('INIT_REMOTE_SIGNED_SESSION - qrOperation ERROR');
                                 }
-                                var socketMessageDto = {"operation":"MSG_TO_DEVICE_BY_TARGET_DEVICE_ID",
+                                var socketMessageDto = {"operation":"MSG_TO_DEVICE",
                                     statusCode:700,
                                     deviceToId:messageJSON.deviceFromId,
                                     deviceId: vs.wsId}

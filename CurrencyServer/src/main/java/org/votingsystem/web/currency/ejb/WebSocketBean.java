@@ -48,35 +48,13 @@ public class WebSocketBean {
         Device browserDevice = null;
         switch(messageDto.getOperation()) {
             //Device (authenticated or not) sends message knowing target device id. Target device must be authenticated.
-            case MSG_TO_DEVICE_BY_TARGET_DEVICE_ID:
+            case MSG_TO_DEVICE:
                 if(SessionManager.getInstance().sendMessageByTargetDeviceId(messageDto)) {//message send OK
                     messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                             messageDto.getServerResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null)));
                 } else messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                         messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
                                 messages.get("webSocketDeviceSessionNotFoundErrorMsg"))));
-                break;
-            //Authenticated device sends message knowing target device session id. Target device can be authenticated or not.
-            case MSG_TO_DEVICE_BY_TARGET_SESSION_ID:
-                if(messageDto.getSession().getUserProperties().get("user") == null) {
-                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
-                            messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
-                            messages.get("userNotAuthenticatedErrorMsg"))));
-                } else {
-                    Session callerSession = SessionManager.getInstance().getAuthenticatedSession(messageDto.getSessionId());
-                    if(callerSession == null) callerSession = SessionManager.getInstance()
-                            .getNotAuthenticatedSession(messageDto.getSessionId());
-                    if(callerSession == null) {
-                        messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
-                                messageDto.getServerResponse( ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
-                                messages.get("messagevsSignRequestorNotFound"))));
-                    } else {
-                        messageDto.setSessionId(messageDto.getSession().getId());
-                        callerSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(messageDto));
-                        messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
-                                messageDto.getServerResponse(ResponseVS.SC_WS_MESSAGE_SEND_OK, null)));
-                    }
-                }
                 break;
             case INIT_BROWSER_SESSION:
                 browserDevice = new Device(SessionManager.getInstance().getAndIncrementBrowserDeviceId())
@@ -135,7 +113,6 @@ public class WebSocketBean {
                         DeviceDto mobileDevice = new DeviceDto(signer.getDevice());
                         responseDto = messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK,
                                 JSON.getMapper().writeValueAsString(mobileDevice))
-                                .setSessionId(remoteSession.getId())
                                 .setMessageType(TypeVS.INIT_REMOTE_SIGNED_SESSION);
                         responseDto.setConnectedDevice(DeviceDto.INIT_BROWSER_SESSION(signer, browserDevice));
                         remoteSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));

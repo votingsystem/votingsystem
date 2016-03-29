@@ -21,6 +21,7 @@ public class FilterVS implements Filter {
     private ServletContext servletContext;
     private String serverName;
     private String contextURL;
+    private String webSocketURL;
     private String bundleBaseName;
     private String timeStampServerURL;
 
@@ -28,6 +29,7 @@ public class FilterVS implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
         servletContext = filterConfig.getServletContext();
         contextURL = config.getContextURL();
+        webSocketURL = config.getWebSocketURL();
         serverName = config.getServerName();
         timeStampServerURL = config.getTimeStampServerURL();
         bundleBaseName = config.getProperty("vs.bundleBaseName");
@@ -39,6 +41,7 @@ public class FilterVS implements Filter {
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         String requestMethod = ((HttpServletRequest)req).getMethod();
         req.setAttribute("contextURL", contextURL);
+        req.setAttribute("webSocketURL", webSocketURL);
         req.setAttribute("serverName", serverName);
         req.setAttribute("timeStampServerURL", timeStampServerURL);
         if(!"HEAD".equals(requestMethod)) {

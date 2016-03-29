@@ -32,7 +32,9 @@
                 </select>
             </div>
 
-            <div class="flex" horizontal wrap around-justified layout>
+            <h3><div id="pageHeader" class="pageHeader text-center">{{pageHeader}}</div></h3>
+
+            <div class="flex horizontal wrap around-justified layout">
                 <template is="dom-repeat" items="{{certListDto.resultList}}">
                     <div class="certDiv" on-tap="showCert">
                         <div>
@@ -60,7 +62,7 @@
                     </div>
                 </template>
             </div>
-            <vs-pager on-pager-change="pagerChange" max="{{certListDto.max}}"
+            <vs-pager id="pager" on-pager-change="pagerChange" max="{{certListDto.max}}"
                       next="${msg.nextLbl}" previous="${msg.previousLbl}"
                       first="${msg.firstLbl}" last="${msg.lastLbl}"
                       offset="{{certListDto.offset}}" total="{{certListDto.totalCount}}"></vs-pager>
@@ -78,15 +80,28 @@
         Polymer({
             is:'cert-list',
             properties: {
-                url:{type:String, observer:'getHTTP'},
                 certListDto:{type:Object,observer:'certListDtoChanged'},
+                state:{type:String},
+                type:{type:String}
             },
             ready: function() {
-                console.log(this.tagName + " - ready - ")
-                this.url = vs.contextURL + "/rest/certificate/certs"
+                console.log(this.tagName + " - ready")
+                if(!this.certListDto) this.getHTTP(vs.contextURL + "/rest/certificate/certs")
+                if(this.state && this.type) {
+                    if("OK" === this.state) {
+                        if("USER" === this.type) this.$.certTypeSelect.value = "&type=USER&state=OK"
+                        else this.$.certTypeSelect.value = "&type=CERTIFICATE_AUTHORITY&state=OK"
+                    } else {
+                        if("USER" === this.type) this.$.certTypeSelect.value = "&type=USER&state=CANCELED"
+                        else this.$.certTypeSelect.value = "&type=CERTIFICATE_AUTHORITY&state=CANCELED"
+                    }
+                }
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()
+            },
+            closeCertDetails:function(e, detail, sender) {
+                console.log(this.tagName + " - closeCertDetails")
             },
             isRoot : function(item) {
                 return item.root
@@ -102,10 +117,15 @@
                 this.$.certDetailsDialog.style['pointer-events'] = 'none'
             },
             certListDtoChanged:function() {
+                console.log("certListDtoChanged", this.certListDto)
                 if(this.certListDto == null) return
                 var certType = getURLParam('type')
                 var certState = getURLParam('state')
                 console.log(this.tagName + " - certListDtoChanged - certType: " + certType + " - certState: " + certState)
+                if("CERTIFICATE_AUTHORITY" == certType) this.pageHeader = "${msg.trustedCertsPageTitle}"
+                else this.pageHeader = "${msg.userCertsPageTitle}"
+                if(this.certListDto.totalCount && this.certListDto.totalCount < this.certListDto.max)
+                        this.$.pager.style.display = 'none'
             },
             getState:function(state){
                 var stateLbl
@@ -119,22 +139,21 @@
                         "&max=" + e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
-                this.url = targetURL
+                this.getHTTP(targetURL)
+            },
+            getHTTP: function (targetURL) {
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                    this.certListDto = toJSON(responseText)
+                }.bind(this));
             },
             certTypeSelect: function () {
                 var optionSelected = this.$.certTypeSelect.value
                 if("" != optionSelected) {
                     targetURL = vs.contextURL + "/rest/certificate/certs?" + optionSelected
                     history.pushState(null, null, targetURL);
-                    this.url = targetURL
+                    this.getHTTP(targetURL)
                 }
-            },
-            getHTTP: function (targetURL) {
-                if(!targetURL) targetURL = this.url
-                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
-                    this.certListDto = toJSON(responseText)
-                }.bind(this));
             }
         });
     </script>

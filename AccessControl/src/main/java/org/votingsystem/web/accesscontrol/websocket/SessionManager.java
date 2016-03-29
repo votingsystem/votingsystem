@@ -1,4 +1,4 @@
-package org.votingsystem.web.currency.websocket;
+package org.votingsystem.web.accesscontrol.websocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;

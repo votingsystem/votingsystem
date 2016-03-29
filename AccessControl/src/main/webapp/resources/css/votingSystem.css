@@ -35,20 +35,13 @@ body {
 
 .menuItem:hover {
     background-color: #c8c8c8;
+    color: #f9f9f9;
 }
 
 .menuItemSelected {
     color: #ba0011;
 }
 
-.menuItem i {
-    width: 23px;
-    color: #888;
-}
-
-.menuItemSelected i{
-    color: #ba0011;
-}
 button i{color: #388746; }
 button {font-size: 1em; }
 

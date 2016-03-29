@@ -97,6 +97,8 @@ public class CertificateResource {
             if(contentType.contains("json")) {
                 return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
             } else {
+                req.getSession().setAttribute("state", state.toString());
+                req.getSession().setAttribute("type", type.toString());
                 req.getSession().setAttribute("certListDto", JSON.getMapper().writeValueAsString(resultListDto));
                 return Response.temporaryRedirect(new URI("../certificate/certs.xhtml")).build();
             }

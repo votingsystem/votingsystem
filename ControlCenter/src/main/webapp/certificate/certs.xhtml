@@ -2,12 +2,11 @@
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 template="/WEB-INF/templates/polymer.xhtml">
     <ui:define name="head">
-        <title>${msg.certsPageTitle}</title>
         <link href="cert-list.vsp" rel="import"/>
     </ui:define>
     <ui:define name="content">
-        <div>
-            <cert-list cert-list-dto='${certListDto}'></cert-list>
+        <div  style="margin: 10px 0 0 0;">
+            <cert-list cert-list-dto='${certListDto}' type="${type}" state="${state}"></cert-list>
         </div>
     </ui:define>
 </ui:composition>

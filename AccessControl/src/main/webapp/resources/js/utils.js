@@ -4,8 +4,6 @@ var Operation = {
     SEND_ANONYMOUS_DELEGATION:"SEND_ANONYMOUS_DELEGATION",
     OPEN_CMS: "OPEN_CMS",
     FILE_FROM_URL:"FILE_FROM_URL",
-    INIT_SERVER:"INIT_SERVER",
-    TOOL_VS:"TOOL_VS",
     BACKUP_REQUEST: "BACKUP_REQUEST",
     SEND_VOTE: "SEND_VOTE",
     CANCEL_VOTE:"CANCEL_VOTE",
@@ -238,7 +236,6 @@ XMLHttpRequest.prototype.header = function(key, value) {
 function VotingSystemClient () { }
 
 var clientTool
-var nonBlockingOperations = [Operation.TOOL_VS, Operation.INIT_SERVER]
 VotingSystemClient.setMessage = function (messageJSON) {
     if(clientTool !== undefined) {
         var messageToSignatureClient = JSON.stringify(messageJSON);

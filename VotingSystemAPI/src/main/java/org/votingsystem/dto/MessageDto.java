@@ -65,25 +65,9 @@ public class MessageDto<T> {
         return dto;
     }
 
-    public static MessageDto NEW_TAB(String url) {
-        MessageDto dto = new MessageDto();
-        dto.setOperation("url_tab");
-        dto.setMessage_type("message-to-webextension");
-        dto.setURL(url);
-        return dto;
-    }
-
     public static MessageDto OPERATION_CALLBACK(int statusCode, String message, String tabId, String callerCallback) {
         MessageDto dto = new MessageDto(statusCode, message);
         dto.setCallerCallback(callerCallback);
-        dto.setTabId(tabId);
-        return dto;
-    }
-
-    public static MessageDto DIALOG_CLOSE(String tabId) {
-        MessageDto dto = new MessageDto();
-        dto.setOperation("dialog_closed");
-        dto.setMessage_type("message-to-webextension");
         dto.setTabId(tabId);
         return dto;
     }

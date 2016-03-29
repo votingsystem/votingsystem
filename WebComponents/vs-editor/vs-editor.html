@@ -14,8 +14,8 @@ localization ->https://www.tinymce.com/docs/configure/localization/
         Polymer({
             is:'vs-editor',
             properties:{
-                tinytoolbar:{ type:String, value:"undo | bullist" },
-                tinyplugins:{ type:Array, value:["advlist autolink lists link image charmap preview anchor fullscreen"] },
+                tinytoolbar:{ type:String, value:"undo | bullist | link" },
+                tinyplugins:{ type:Array, value:["advlist autolink lists link preview fullscreen"] },
                 templates: { type: Array, value: function () { return [] } },
                 height: { type: Number, value: 168 },
                 baseUrl: { type: String, value: '' },

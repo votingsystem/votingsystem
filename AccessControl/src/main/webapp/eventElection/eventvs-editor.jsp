@@ -3,10 +3,11 @@
 <link href="../resources/bower_components/vs-editor/vs-editor.html" rel="import"/>
 <link href="../resources/bower_components/vs-datepicker/vs-datepicker.html" rel="import"/>
 <link href="../element/reason-dialog.vsp" rel="import"/>
+<link href="../element/vs-socket.vsp" rel="import"/>
 
 <dom-module name="eventvs-editor">
     <template>
-        <div class="horizontal layout center center-justified">
+        <div class="horizontal layout center center-justified" style="margin: 10px 0 0 0;">
             <div style="max-width: 1000px; width: 100%;">
                 <div class="horizontal layout center center-justified" style="margin: 0 10px 10px 0;">
                     <input type="text" id="subject" class="form-control" required
@@ -16,11 +17,11 @@
                                    caption="${msg.dateBeginLbl}"> </vs-datepicker>
                 </div>
                 <vs-editor id="editor"></vs-editor>
-                <div>
+                <div style="margin: 5px 0 0 5px;">
                     <button on-click="addOption">${msg.missingOptionsErrorMsg}</button>
                 </div>
                 <template is="dom-repeat" items="{{optionList}}">
-                    <div class="horizontal layout center" style="margin: 10px 0 0 0;">
+                    <div class="horizontal layout center" style="margin: 10px 0 0 5px;">
                         <div class="numVotesClass" style="margin:0 10px 0 0;">
                             <button on-click="removeOption"><i class="fa fa-times"></i> ${msg.deleteLbl}</button>
                         </div>
@@ -36,13 +37,12 @@
             </div>
         </div>
         <reason-dialog id="reasonDialog" caption="${msg.enterOptionLbl}"></reason-dialog>
+        <vs-socket id="vsSocket"></vs-socket>
     </template>
     <script>
         Polymer({
             is:'eventvs-editor',
-            properties:{
-
-            },
+            properties:{ },
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.tomorrow = new Date().getTime() + 24 * 60 * 60 * 1000;
@@ -54,14 +54,29 @@
                             this.optionList = this.optionList.slice(0) //to make changes visible to template
                             console.table(this.optionList)
                         }.bind(this))
+                this.$.vsSocket.addEventListener('socket-message', function(e) {
+                    console.log(this.tagName + ' - socket-message', e.detail);
+                    this.processSocketMessage(e.detail)
+                }.bind(this));
+            },
+            processSocketMessage: function(socketMessage) {
+                console.log(this.tagName + " - processSocketMessage: ", socketMessage)
+                if(this.currentOperationCode === socketMessage.operationCode){
+                    console.log("==== we have the response")
+                    switch (socketMessage.operation) {
+                        case "OPERATION_RESULT":
+                            break;
+                    }
+                }
             },
             submitForm: function() {
+                this.$.vsSocket.connect();
                 var msgTemplate = "${msg.enterFieldMsg}"
                 if(FormUtils.checkIfEmpty(this.$.subject.value)) {
                     alert(msgTemplate.format("${msg.electionSubjectLbl}"), "${msg.errorLbl}")
                     return
                 }
-                if(this.tomorrow > this.$.datePicker.getDate()) {
+                if(new Date() > this.$.datePicker.getDate()) {
                     alert("${msg.dateBeforeCurrentErrorMsg}", "${msg.errorLbl}")
                     return
                 }
@@ -77,11 +92,11 @@
                 this.optionList.forEach(function(option) {
                     fieldsEventVS.push({content:option})
                 })
-                operationVS.jsonStr = JSON.stringify({subject:this.$.subject.value, content:content,
-                    fieldsEventVS:fieldsEventVS, dateBegin:this.$.datePicker.getDate().getTime(),
-                    UUID: "${spa.getUUID()}"})
-                console.log(JSON.stringify(operationVS))
-                VotingSystemClient.setMessage(operationVS);
+                operationVS.eventVS = {subject:this.$.subject.value, content:content,
+                    fieldEventSet:fieldsEventVS, dateBegin:this.$.datePicker.getDate().getTime()}
+                operationVS.UUID = this.$.vsSocket.getUUID()
+                console.log("operation: ", operationVS)
+                this.currentOperationCode = this.$.vsSocket.showOperationQRCode(this.$.vsSocket.VOTING_SYSTEM, operationVS)
             },
             removeOption: function(e) {
                 var index = this.optionList.indexOf(e.model.item);

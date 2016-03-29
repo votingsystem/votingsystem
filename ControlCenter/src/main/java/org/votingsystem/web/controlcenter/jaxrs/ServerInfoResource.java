@@ -1,6 +1,9 @@
 package org.votingsystem.web.controlcenter.jaxrs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.votingsystem.dto.ActorDto;
 import org.votingsystem.model.Actor;
+import org.votingsystem.util.JSON;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.TimeStampBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -14,9 +17,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -32,18 +34,19 @@ public class ServerInfoResource {
     @EJB TimeStampBean timeStampBean;
 
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Map doGet(@Context HttpServletRequest req, @Context HttpServletResponse resp) {
-        HashMap serverInfo = new HashMap();
-        serverInfo.put("serverType", Actor.Type.CONTROL_CENTER);
-        serverInfo.put("name", config.getServerName());
-        serverInfo.put("serverURL", config.getContextURL());
-        serverInfo.put("state",  Actor.State.OK);
-        serverInfo.put("date", new Date());
-        serverInfo.put("timeStampCertPEM", new String(timeStampBean.getSigningCertPEMBytes()));
-        serverInfo.put("timeStampServerURL", config.getTimeStampServerURL());
-        serverInfo.put("certChainPEM", new String(cmsBean.getKeyStoreCertificatesPEM()));
+    public Response doGet(@Context HttpServletRequest req, @Context HttpServletResponse resp) throws JsonProcessingException {
+        ActorDto actor = new ActorDto();
+        actor.setServerType(Actor.Type.CONTROL_CENTER);
+        actor.setName(config.getServerName());
+        actor.setServerURL(config.getContextURL());
+        actor.setState(Actor.State.OK);
+        actor.setDate(new Date());
+        actor.setTimeStampCertPEM(new String(timeStampBean.getSigningCertPEMBytes()));
+        actor.setTimeStampServerURL(config.getTimeStampServerURL());
+        actor.setCertChainPEM(new String(cmsBean.getKeyStoreCertificatesPEM()));
         //resp.setHeader("Access-Control-Allow-Origin", "*");
         //if (params.callback) render "${param.callback}(${serverInfo as JSON})"
-        return serverInfo;
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(actor)).build();
     }
+
 }
