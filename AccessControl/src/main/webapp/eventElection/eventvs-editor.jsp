@@ -42,7 +42,9 @@
     <script>
         Polymer({
             is:'eventvs-editor',
-            properties:{ },
+            properties:{
+                numMaxCharacters:{type:Number, value:4000},
+            },
             ready: function() {
                 console.log(this.tagName + " - ready")
                 this.tomorrow = new Date().getTime() + 24 * 60 * 60 * 1000;
@@ -84,10 +86,17 @@
                     alert("${msg.missingOptionsErrorMsg}", "${msg.errorLbl}")
                     return
                 }
+                var editorContent = this.$.editor.getContent()
+                console.log("editorContent.length: " + editorContent.length, " - numMaxCharacters: " + this.numMaxCharacters)
+                if(editorContent.length > this.numMaxCharacters)  {
+                    this.searchResultMsg =
+                    alert("${msg.documentSizeExceededMsg}".format(this.numMaxCharacters), "${msg.errorLbl}")
+                    return
+                }
                 var operationVS = new OperationVS(Operation.PUBLISH_EVENT)
                 operationVS.serviceURL = vs.contextURL + "/rest/eventElection"
                 operationVS.signedMessageSubject = "${msg.publishVoteLbl}"
-                var content = window.btoa(encodeURIComponent( escape(this.$.editor.getContent())))
+                var content = window.btoa(this.$.editor.getContent())
                 var fieldsEventVS = []
                 this.optionList.forEach(function(option) {
                     fieldsEventVS.push({content:option})

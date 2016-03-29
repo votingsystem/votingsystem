@@ -114,8 +114,10 @@ public class EventElectionResource {
     public Response save(CMSMessage cmsMessage, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         EventElection response = eventElectionBean.saveEvent(cmsMessage);
-        resp.setHeader("eventURL", format("{0}/rest/eventElection/id/{1}", config.getContextURL(), response.getId()));
-        return Response.ok().entity(response.getCmsMessage().getContentPEM()).type(MediaType.JSON_SIGNED).build();
+        MessageDto responseDto = new MessageDto().setURL(format("{0}/rest/eventElection/id/{1}",
+                config.getContextURL(), response.getId()));
+        responseDto.setCmsMessagePEM(new String(response.getCmsMessage().getContentPEM()));
+        return Response.ok().entity(responseDto).type(MediaType.JSON).build();
     }
 
     @Path("/cancel") @POST

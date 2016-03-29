@@ -39,7 +39,6 @@ public class SocketMessageDto {
     private String operationCode;
     private TypeVS messageType;
     private TypeVS step;
-    private State state = State.PENDING;
     private Integer statusCode;
     private Long deviceFromId;
     private Long deviceToId;
@@ -50,7 +49,6 @@ public class SocketMessageDto {
     private String cmsMessagePEM;
     private String subject;
     private String toUser;
-    private String contentToSign;
     private String from;
     private String deviceFromName;
     private String deviceToName;
@@ -212,15 +210,6 @@ public class SocketMessageDto {
         this.toUser = toUser;
     }
 
-    public String getContentToSign() {
-        return contentToSign;
-    }
-
-    public void setContentToSign(String contentToSign) {
-        this.contentToSign = contentToSign;
-    }
-
-
     public void setSession(Session session) throws ValidationException {
         this.session = session;
     }
@@ -278,15 +267,6 @@ public class SocketMessageDto {
         this.cmsMessagePEM = cmsMessage.toPEMStr();
         return this;
     }
-
-    public State getState() {
-        return state;
-    }
-
-    public void setState(State state) {
-        this.state = state;
-    }
-
 
     public String getFrom() {
         return from;
@@ -503,7 +483,6 @@ public class SocketMessageDto {
         if(encryptedDto.getToUser() != null) toUser = encryptedDto.getToUser();
         if(encryptedDto.getDeviceToName() != null) deviceToName = encryptedDto.getDeviceToName();
         if(encryptedDto.getURL()!= null) URL = encryptedDto.getURL();
-        if(encryptedDto.getContentToSign() != null) contentToSign = encryptedDto.getContentToSign();
         if(encryptedDto.getLocale() != null) locale = encryptedDto.getLocale();
         if(encryptedDto.getX509CertificatePEM() != null) x509CertificatePEM = encryptedDto.getX509CertificatePEM();
         if(encryptedDto.getPublicKeyPEM() != null) publicKeyPEM = encryptedDto.getPublicKeyPEM();

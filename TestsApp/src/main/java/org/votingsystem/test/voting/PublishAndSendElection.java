@@ -3,6 +3,7 @@ package org.votingsystem.test.voting;
 import com.google.common.collect.Sets;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ActorDto;
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.voting.EventVSChangeDto;
 import org.votingsystem.dto.voting.EventVSDto;
 import org.votingsystem.model.Actor;
@@ -169,7 +170,6 @@ public class PublishAndSendElection {
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
         String eventURL = ((List<String>)responseVS.getData()).iterator().next();
         ContextVS.getInstance().copyFile(responseVS.getMessageBytes(), "/electionSimulation", "ElectionPublishedReceipt");
-        CMSSignedMessage message = responseVS.getCMS();
         responseVS = HttpHelper.getInstance().getData(eventURL, ContentType.JSON);
         EventVSDto eventVSJSON = JSON.getMapper().readValue(responseVS.getMessage(), EventVSDto.class);
         return eventVSJSON.getEventElection();

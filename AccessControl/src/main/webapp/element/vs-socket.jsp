@@ -85,6 +85,7 @@
                 return operationCode
             },
             sendOperation: function(socketMessage, operation) {
+                operation.uuid = this.getUUID()
                 var socketMessage = {operation:"MSG_TO_DEVICE", messageType:"OPERATION_PROCESS",
                     deviceFromId:this.devId, deviceToId:socketMessage.deviceFromId,
                     operationCode:socketMessage.operationCode,

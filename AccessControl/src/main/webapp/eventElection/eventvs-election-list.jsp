@@ -115,7 +115,7 @@
                             <div hidden="{{!isCanceled(item)}}" class='cancelMessage'>${msg.eventCancelledLbl}</div>
                         </div>
                         <div class='eventDivFooter'>
-                            <div class='eventRemainingDiv'>{{getElapsedTime(item.dateFinish)}}</div>
+                            <div class='eventRemainingDiv'>{{getElapsedTime(item)}}</div>
                             <div class='eventStateDiv'>{{getMessage(item.state)}}</div>
                         </div>
                     </div>
@@ -182,14 +182,19 @@
             },
             getMessage : function (eventVSState) {
                 switch (eventVSState) {
-                    case EventVS.State.ACTIVE: return ""
-                    case EventVS.State.PENDING: return "${msg.pendingLbl}"
+                    case EventVS.State.ACTIVE:
+                    case EventVS.State.PENDING: return ""
                     case EventVS.State.TERMINATED: return "${msg.closedLbl}"
                     case EventVS.State.CANCELED: return "${msg.cancelledLbl}"
                 }
             },
-            getElapsedTime: function(dateStamp) {
-                return new Date(dateStamp).getElapsedTime() + " ${msg.toCloseLbl}"
+            getElapsedTime: function(election) {
+                switch (election.state) {
+                    case EventVS.State.ACTIVE: return new Date(election.dateFinish).getElapsedTime() + " ${msg.toCloseLbl}"
+                    case EventVS.State.PENDING:
+                        console.log(new Date(election.dateBegin), "elapsedTime: ", new Date(election.dateBegin).getElapsedTime())
+                        return new Date(election.dateBegin).getElapsedTime() + " ${msg.toOpenLbl}"
+                }
             },
             getEventVSClass:function(eventVSState) {
                 switch (eventVSState) {

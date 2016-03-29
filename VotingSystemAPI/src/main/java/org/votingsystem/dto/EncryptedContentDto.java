@@ -30,7 +30,6 @@ public class EncryptedContentDto {
     private String deviceFromName;
     private String deviceToName;
     private Long deviceFromId;
-    private String contentToSign;
     private String toUser;
     private String hashCertVS;
     private String cmsMessage;
@@ -128,14 +127,6 @@ public class EncryptedContentDto {
 
     public void setDeviceFromName(String deviceFromName) {
         this.deviceFromName = deviceFromName;
-    }
-
-    public String getContentToSign() {
-        return contentToSign;
-    }
-
-    public void setContentToSign(String contentToSign) {
-        this.contentToSign = contentToSign;
     }
 
     public String getToUser() {

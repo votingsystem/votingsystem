@@ -46,6 +46,7 @@ public class EventElectionBean {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         User userSigner = cmsMessage.getUser();
         EventVSDto request  = cmsMessage.getSignedContent(EventVSDto.class);
+        request.setDateBegin(DateUtils.resetDay(request.getDateBegin()).getTime());
         request.setDateFinish(DateUtils.resetDay(DateUtils.addDays(request.getDateBegin(), 1).getTime()).getTime());
         ControlCenter controlCenter = config.getControlCenter();
         Query query = dao.getEM().createQuery("select a from Actor a where a.serverURL =:serverURL")

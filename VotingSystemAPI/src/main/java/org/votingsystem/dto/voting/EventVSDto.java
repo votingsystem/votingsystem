@@ -65,7 +65,7 @@ public class EventVSDto {
         this.setDateCreated(eventVS.getDateCreated());
         this.setSubject(eventVS.getSubject());
         this.setContent(eventVS.getContent());
-        if(eventVS.getUser() != null) this.setUser(eventVS.getUser().getName());
+        if(eventVS.getUser() != null) this.setUser(eventVS.getUser().getFirstName() + " " + eventVS.getUser().getLastName());
         this.setCardinality(eventVS.getCardinality());
         this.setTags(eventVS.getTagList());
         this.setBackupAvailable(eventVS.getBackupAvailable());

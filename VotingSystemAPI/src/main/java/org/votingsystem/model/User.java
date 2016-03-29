@@ -447,7 +447,6 @@ public class User extends EntityVS implements Serializable {
         X500Name x500name = new JcaX509CertificateHolder(certificate).getSubject();
         User user = getUser(x500name);
         setFirstName(user.getFirstName());
-        setName(user.getFirstName());
         setLastName(user.getLastName());
         setNif(user.getNif());
         setCountry(user.getCountry());

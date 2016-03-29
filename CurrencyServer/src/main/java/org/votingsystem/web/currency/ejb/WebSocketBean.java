@@ -68,7 +68,7 @@ public class WebSocketBean {
             case CLOSE_SESSION:
                 cmsMessage = cmsBean.validateCMS(messageDto.getCMS(), null).getCmsMessage();
                 MessageDto msgDto = cmsMessage.getSignedContent(MessageDto.class);
-                if(TypeVS.CLOSE_SESSION == TypeVS.valueOf(msgDto.getOperation())) {
+                if(TypeVS.CLOSE_SESSION == msgDto.getOperation()) {
                     messageDto.getSession().close();
                 }
                 break;

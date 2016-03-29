@@ -1,7 +1,10 @@
 package org.votingsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.model.ResponseVS;
+import org.votingsystem.util.TypeVS;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -10,11 +13,9 @@ import org.votingsystem.model.ResponseVS;
 public class MessageDto<T> {
 
     private Integer statusCode;
-    private String operation;
-    private String message_type;
+    private TypeVS operation;
     private String message;
-    private String tabId;
-    private String callerCallback;
+    private String cmsMessagePEM;
     private T data;
     private String URL;
 
@@ -51,27 +52,6 @@ public class MessageDto<T> {
         return new MessageDto(ResponseVS.SC_ERROR_REQUEST_REPEATED, message, URL);
     }
 
-
-    public static <T> MessageDto<T> WEB_SOCKET(int statusCode, T data) {
-        MessageDto dto = new MessageDto(statusCode, null);
-        dto.setOperation("vs-websocket-message");
-        dto.setData(data);
-        return dto;
-    }
-
-    public static MessageDto SIGNAL(int statusCode, String operation) {
-        MessageDto dto = new MessageDto(statusCode, null);
-        dto.setOperation(operation);
-        return dto;
-    }
-
-    public static MessageDto OPERATION_CALLBACK(int statusCode, String message, String tabId, String callerCallback) {
-        MessageDto dto = new MessageDto(statusCode, message);
-        dto.setCallerCallback(callerCallback);
-        dto.setTabId(tabId);
-        return dto;
-    }
-
     public Integer getStatusCode() {
         return statusCode;
     }
@@ -88,8 +68,9 @@ public class MessageDto<T> {
         return URL;
     }
 
-    public void setURL(String URL) {
+    public MessageDto setURL(String URL) {
         this.URL = URL;
+        return this;
     }
 
     public T getData() {
@@ -100,35 +81,26 @@ public class MessageDto<T> {
         this.data = data;
     }
 
-    public String getOperation() {
+    public TypeVS getOperation() {
         return operation;
     }
 
-    public void setOperation(String operation) {
+    public void setOperation(TypeVS operation) {
         this.operation = operation;
     }
 
-    public String getMessage_type() {
-        return message_type;
+    public String getCmsMessagePEM() {
+        return cmsMessagePEM;
     }
 
-    public void setMessage_type(String message_type) {
-        this.message_type = message_type;
+    @JsonIgnore
+    public CMSSignedMessage getCMS() throws Exception {
+        if(cmsMessagePEM != null) return CMSSignedMessage.FROM_PEM(cmsMessagePEM);
+        return null;
     }
 
-    public String getCallerCallback() {
-        return callerCallback;
-    }
-
-    public void setCallerCallback(String callerCallback) {
-        this.callerCallback = callerCallback;
-    }
-
-    public String getTabId() {
-        return tabId;
-    }
-
-    public void setTabId(String tabId) {
-        this.tabId = tabId;
+    public MessageDto setCmsMessagePEM(String cmsMessagePEM) {
+        this.cmsMessagePEM = cmsMessagePEM;
+        return this;
     }
 }
