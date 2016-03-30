@@ -11,33 +11,31 @@
         }
     </style>
     <template>
-        <div class="horizontal layout center center-justified" style="margin: 10px 0 0 0;">
-            <div style="max-width: 1000px; width: 100%;">
-                <div class="horizontal layout center center-justified" style="margin: 0 10px 10px 0;">
-                    <input type="text" id="subject" class="form-control" required
-                           title="${msg.electionSubjectLbl}" placeholder="${msg.electionSubjectLbl}"/>
-                    <vs-datepicker style="margin:0 0 0 10px;" id="datePicker" years-back="0" years-fwd="0"
-                                   month-labels='[${msg.monthsShort}]' day-labels='[${msg.weekdaysShort}]'
-                                   caption="${msg.dateBeginLbl}"> </vs-datepicker>
-                </div>
-                <vs-editor id="editor"></vs-editor>
-                <div style="margin: 5px 0 0 5px;">
-                    <button on-click="addOption">${msg.missingOptionsErrorMsg}</button>
-                </div>
-                <template is="dom-repeat" items="{{optionList}}">
-                    <div class="horizontal layout center" style="margin: 10px 0 0 5px;">
-                        <div class="numVotesClass" style="margin:0 10px 0 0;">
-                            <button on-click="removeOption"><i class="fa fa-times"></i> ${msg.deleteLbl}</button>
-                        </div>
-                        <div style="font-size: 2em; font-weight: bold;">
-                            {{item}}
-                        </div>
+        <div class="pagevs">
+            <div class="horizontal layout center center-justified" style="margin: 0 10px 10px 0;">
+                <input type="text" id="subject" class="form-control" required
+                       title="${msg.electionSubjectLbl}" placeholder="${msg.electionSubjectLbl}"/>
+                <vs-datepicker style="margin:0 0 0 10px;" id="datePicker" years-back="0" years-fwd="0"
+                               month-labels='[${msg.monthsShort}]' day-labels='[${msg.weekdaysShort}]'
+                               caption="${msg.dateBeginLbl}"> </vs-datepicker>
+            </div>
+            <vs-editor id="editor"></vs-editor>
+            <div style="margin: 5px 0 0 5px;">
+                <button on-click="addOption">${msg.missingOptionsErrorMsg}</button>
+            </div>
+            <template is="dom-repeat" items="{{optionList}}">
+                <div class="horizontal layout center" style="margin: 10px 0 0 5px;">
+                    <div class="numVotesClass" style="margin:0 10px 0 0;">
+                        <button on-click="removeOption"><i class="fa fa-times"></i> ${msg.deleteLbl}</button>
                     </div>
-                </template>
-                <div class="horizontal layout">
-                    <div class="flex"></div>
-                    <button on-click="submitForm"><i class="fa fa-check"></i> ${msg.acceptLbl}</button>
+                    <div style="font-size: 2em; font-weight: bold;">
+                        {{item}}
+                    </div>
                 </div>
+            </template>
+            <div class="horizontal layout">
+                <div class="flex"></div>
+                <button on-click="submitForm"><i class="fa fa-check"></i> ${msg.acceptLbl}</button>
             </div>
         </div>
         <reason-dialog id="reasonDialog" caption="${msg.enterOptionLbl}"></reason-dialog>

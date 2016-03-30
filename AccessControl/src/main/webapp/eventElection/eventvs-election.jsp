@@ -23,41 +23,40 @@
                 font-style: italic;
             }
         </style>
-        <div class="vertical layout center center-justified">
-            <div class="vertical layout center center-justified" style="margin: 0px 30px;width: 100%; max-width: 1000px;">
-                <div class="layout horizontal center center-justified" style="width:100%;">
-                    <div class="flex"></div>
-                    <div style="text-align: center">
-                        <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
+        <div class="pagevs">
+            <div class="layout horizontal center center-justified" style="width:100%;">
+                <div class="flex"></div>
+                <div style="text-align: center">
+                    <div id="pageTitle" data-eventvs-id$="{{eventvs.id}}" class="pageHeader">{{eventvs.subject}}</div>
+                </div>
+                <div class="flex"></div>
+                <div hidden="{{adminMenuHidden}}" style="text-align: right;"  class="configIcon" on-click="showAdminDialog">
+                    <i class="fa fa-cogs"></i>
+                </div>
+            </div>
+            <div class="horizontal layout">
+                <div style="color: #888;font-size: 1.1em;">{{getDate(eventvs.dateBegin)}}</div>
+            </div>
+            <div style="width: 100%;">
+                <div id="eventContentDiv" style="border: 1px solid #ccc;padding: 0 7px;"></div>
+
+                <div class="horizontal layout center center-justified" style="margin: 5px 0 0 0;">
+                    <div hidden="{{!isTerminated}}" class="horizontal layout center center-justified">
+                        <a class="buttonvs" href="[[backupURL]]" style="font-size: 0.9em;">
+                            <i class="fa fa-bar-chart"></i> ${msg.getResultsLbl}
+                        </a>
                     </div>
-                    <div class="flex"></div>
-                    <div hidden="{{adminMenuHidden}}" style="text-align: right;"  on-click="showAdminDialog">
-                        <i class="fa fa-cogs" style="margin:0px 10px 0px 0px; color:#ba0011;cursor: pointer;"></i>
+                    <div id="eventAuthorDiv" class="flex" style="margin:0px 20px 0 30px; color:#888; font-size: 0.85em;text-align: right;">
+                        {{eventvs.user}}
                     </div>
                 </div>
-                <div class="horizontal layout">
-                    <div style="color: #888;font-size: 1.1em;">{{getDate(eventvs.dateBegin)}}</div>
-                </div>
-                <div style="width: 100%;">
-                    <div id="eventContentDiv" style="border: 1px solid #ccc;padding: 0 7px;"></div>
 
-                    <div class="horizontal layout center center-justified" style="margin: 5px 0 0 0;">
-                        <div hidden="{{!isTerminated}}" class="horizontal layout center center-justified">
-                            <i class="fa fa-bar-chart"></i>
-                            <a href="[[backupURL]]">${msg.getResultsLbl}</a>
-                        </div>
-                        <div id="eventAuthorDiv" class="flex" style="margin:0px 20px 0 30px; color:#888; font-size: 0.85em;text-align: right;">
-                            {{eventvs.user}}
-                        </div>
+                <div class="horizontal layout center center-justified" style="width: 100%; margin: 15px 0 0 0;">
+                    <div hidden="{{!isActive}}" style="margin: 0 30px 0 0;">
+                        <img id="qrImg"  src="" style="border: 1px solid #ccc;"/>
                     </div>
-
-                    <div class="horizontal layout center center-justified" style="width: 100%; margin: 15px 0 0 0;">
-                        <div hidden="{{!isActive}}" style="margin: 0 30px 0 0;">
-                            <img id="qrImg"  src="" style="border: 1px solid #ccc;"/>
-                        </div>
-                        <div style="width: 600px;margin: 0 auto;">
-                            <eventvs-election-stats id="eventStats"></eventvs-election-stats>
-                        </div>
+                    <div style="width: 600px;margin: 0 auto;">
+                        <eventvs-election-stats id="eventStats"></eventvs-election-stats>
                     </div>
                 </div>
             </div>

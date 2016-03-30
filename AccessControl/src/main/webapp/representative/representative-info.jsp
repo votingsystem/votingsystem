@@ -13,22 +13,16 @@
             .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px; text-align: center;}
             .representativeNumRepHeader { text-overflow: ellipsis; color:#888;}
         </style>
-        <div>
-            <div class="horizontal layout center-justified" style="font-size: 0.9em;">
-                <div  class="layout horizontal center" style="margin:0 20px 0 0;">
-                    <button on-click="selectRepresentative">
-                        <i class="fa fa-hand-o-right"></i> ${msg.saveAsRepresentativeLbl}
-                    </button>
+        <div class="pagevs">
+            <div class="flex horizontal layout center center-justified" style="font-size: 0.9em;">
+                <div on-click="selectRepresentative" class="buttonvs layout horizontal center">
+                    <i class="fa fa-hand-o-right"></i> ${msg.saveAsRepresentativeLbl}
                 </div>
-                <div hidden="{{!isAdmin}}" class="layout horizontal center center-justified">
-                    <button type="button" on-click="revokeRepresentative"
-                            style="margin:15px 20px 15px 0px;">
-                        <i class="fa fa-times"></i> ${msg.removeRepresentativeLbl}
-                    </button>
-                    <button type="button" on-click="editRepresentative"
-                            style="margin:15px 20px 15px 0px;">
-                        <i class="fa fa-pencil-square-o"></i> ${msg.editRepresentativeLbl}
-                    </button>
+                <div class="flex"></div>
+                <div>
+                    <div class="configIcon" on-click="showAdminDialog">
+                        <i class="fa fa-cogs"></i>
+                    </div>
                 </div>
             </div>
             <div class="text-center" style="margin:20px auto 15px 15px;">
@@ -41,10 +35,11 @@
                     </div>
                 </div>
             </div>
-            <div style="margin: 20px 20px 0 20px;">
-                <div hidden={{!smallScreen}} class="horizontal layout"
-                     style="cursor: pointer;padding:5px 0 0 0;background-color: #ba0011;color:#fefefe;">
-                    <div id="profileDiv" on-click="setProfileView" style="width: 100%;font-weight: bold; font-size: 1.1em;border-bottom: 3px orange solid;" class="horizontal layout center-justified">
+            <div style="margin: 20px auto 0 auto;">
+                <div class="horizontal layout"
+                     style="cursor: pointer;padding:5px 0 0 0;color:#ba0011; border-bottom: 1px solid #ba0011;">
+                    <div id="profileDiv" on-click="setProfileView" style="width: 100%;font-weight: bold; font-size: 1.1em;
+                            border-bottom: 2px #ba0011 solid;" class="horizontal layout center-justified">
                         <div>${msg.profileLbl}</div>
                     </div>
                     <div id="votingHistoryDiv" on-click="setVotingHistoryView" style="width: 100%;font-weight: bold; font-size: 1.1em;" class="horizontal layout center-justified">
@@ -64,25 +59,48 @@
                 </div>
 
                 <div hidden="{{!votingTabSelected}}" class="tabContent">
-                    <div hidden="{{!isAdmin}}">
+                    <div>
                         <div class="horizontal layout center center-justified" style="margin: 10px 0 0 0;">
                             <div>
-                                <button id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                <div class="buttonvs" id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;"
                                          on-click="requestVotingHistory">
                                     ${msg.requestVotingHistoryLbl}
-                                </button>
+                                </div>
                             </div>
                             <div>
-                                <button id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
+                                <div class="buttonvs" id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
                                         on-click="requestAccreditations">
                                     ${msg.requestRepresentativeAcreditationsLbl}
-                                </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div id="adminDialog" class="modalDialog">
+                <div>
+                    <div class="layout horizontal center center-justified">
+                        <div class="flex" style="font-size: 1.5em; margin:5px 0px 10px 10px;font-weight: bold; color:#6c0404;">
+                            <div style="text-align: center;">
+                                ${msg.removeRepresentativeLbl}
+                            </div>
+                        </div>
+                        <div style="position: absolute; top: 0px; right: 0px;">
+                            <i class="fa fa-times closeIcon" on-click="closeAdminDialog"></i>
+                        </div>
+                    </div>
+                    <div class="textDialog" style="padding:10px 20px 10px 20px;">
+                        <div class="buttonvs" on-click="revokeRepresentative">
+                            <i class="fa fa-times"></i> ${msg.removeRepresentativeLbl}
+                        </div>
+                        <div class="buttonvs"  on-click="editRepresentative" style="margin: 10px 0 0 0;">
+                            <i class="fa fa-pencil-square-o"></i> ${msg.editRepresentativeLbl}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
         <image-viewer-dialog id="representativeImage" url="{{representative.imageURL}}" description="{{representativeFullName}}"></image-viewer-dialog>
         <representative-cancel-dialog id="representativeRevokeDialog"></representative-cancel-dialog>
         <representative-select-dialog id="selectRepresentativeDialog"></representative-select-dialog>
@@ -94,14 +112,17 @@
             is:'representative-info',
             properties: {
                 url:{type:String, observer:'getHTTP'},
+                votingTabSelected:{type:Boolean, value:false},
                 representative:{type:Object, value:{}, observer:'representativeChanged'},
             },
             revokeRepresentative:function(){
-                this.$.representativeRevokeDialog.show()
+                this.$.representativeRevokeDialog.show(this.representative)
+                this.closeAdminDialog();
             },
             editRepresentative:function(){
                 vs.representative = this.representative
                 page("/representative/edit")
+                this.closeAdminDialog();
             },
             requestAccreditations:function(){
                 this.$.accreditationsDialog.show(this.representative)
@@ -121,14 +142,14 @@
             },
             selectedTabChanged:function() {
                 console.log(this.tagName + " selectedTabChanged")
-                this.$.profileDiv.style['border-bottom'] = "0px orange solid"
-                this.$.votingHistoryDiv.style['border-bottom'] = "0px orange solid"
+                this.$.profileDiv.style['border-bottom'] = "0px #ba0011 solid"
+                this.$.votingHistoryDiv.style['border-bottom'] = "0px #ba0011 solid"
                 if(this.modeProfile === true) {
                     this.votingTabSelected = false
-                    this.$.profileDiv.style['border-bottom'] = "3px orange solid"
+                    this.$.profileDiv.style['border-bottom'] = "2px #ba0011 solid"
                 } else {
                     this.votingTabSelected = true
-                    this.$.votingHistoryDiv.style['border-bottom'] = "3px orange solid"
+                    this.$.votingHistoryDiv.style['border-bottom'] = "2px #ba0011 solid"
                 }
             },
             selectRepresentative:function() {
@@ -144,9 +165,14 @@
                     this.$.representativeDescription.innerHTML = window.atob(this.representative.description)
                 } catch (e) {console.log(e)}
             },
-            ready: function() {
-                this.isAdmin = ('admin' === menuType)
-                console.log(this.tagName + " - ready - isAdmin " + this.isAdmin)
+            ready: function() { },
+            closeAdminDialog: function() {
+                this.$.adminDialog.style.opacity = 0
+                this.$.adminDialog.style['pointer-events'] = 'none'
+            },
+            showAdminDialog: function() {
+                this.$.adminDialog.style.opacity = 1
+                this.$.adminDialog.style['pointer-events'] = 'auto'
             },
             showImage:function() {
                 console.log(this.tagName + " - showImage")

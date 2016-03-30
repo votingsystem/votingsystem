@@ -7,18 +7,18 @@
         <style>
         .representativeDiv {
             width:300px;
-            background-color: #f2f2f2;
+            background-color: #fefefe;
             border: 1px solid #6c0404;
-            box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+            box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.24);
             margin: 10px 15px 10px 0px;
             -moz-border-radius: 5px;
-            border-radius: 5px;
+            border-radius: 3px;
             cursor: pointer;
             height:90px;
             text-overflow: ellipsis;
         }
         </style>
-        <div>
+        <div style="padding:10px;">
             <div hidden="{{!representationInfo}}" class="linkVS" on-click="showRepresentativeListDto"
                  style="margin: 10px 0 10px 0; text-align: center;font-weight: bold;font-size: 1.2em;" >${msg.userRepresentativeLbl}</div>
             <div class="layout flex horizontal wrap around-justified">
@@ -27,9 +27,9 @@
                         <div>
                             <img  style=' max-width: 90px;' src='{{item.imageURL}}'/>
                         </div>
-                        <div class='flex vertical layout center center center-justified'>
+                        <div>
                             <p style="text-overflow: ellipsis; font-weight: bold;"><span>{{item.name}}</span></p>
-                            <div style='margin: 10px 10px 0px 10px;'>
+                            <div style='margin: 0px 10px 3px 0px;text-align: right;font-size: 0.9em;'>
                                 <span>{{item.numRepresentations}}</span> ${msg.numDelegationsPartMsg}
                             </div>
                         </div>

@@ -11,14 +11,24 @@
             is:'vs-socket',
             properties:{
                 qrOperationsMap:{type:Object, value:{}},
-                DEVICE_ID_KEY:{type:String, value:"did"},
-                OPERATION_KEY:{type:String, value:"op"},
-                OPERATION_CODE_KEY:{type:String, value:"opid"},
-                SERVER_KEY:{type:String, value:"srv"},
-                PUBLIC_KEY_KEY:{type:String, value:"pk"},
-                OPERATION_PROCESS:{type:Number, value:5},
+                //websocket system
                 CURRENCY_SYSTEM:{type:Number, value:0},
                 VOTING_SYSTEM:{type:Number, value:1},
+                //param keys
+                DEVICE_ID_KEY:{type:String, value:"did"},
+                ITEM_ID_KEY:{type:String, value:"iid"},
+                OPERATION_KEY:{type:String, value:"op"},
+                OPERATION_CODE_KEY:{type:String, value:"opid"},
+                PUBLIC_KEY_KEY:{type:String, value:"pk"},
+                SERVER_KEY:{type:String, value:"srv"},
+                //operations
+                INIT_REMOTE_SIGNED_SESSION:{type:Number, value:0},
+                MESSAGE_INFO:{type:Number, value:1},
+                CURRENCY_SEND:{type:Number, value:2},
+                USER_INFO:{type:Number, value:3},
+                VOTE:{type:Number, value:4},
+                OPERATION_PROCESS:{type:Number, value:5},
+                ANONYMOUS_REPRESENTATIVE_SELECTION:{type:Number, value:6},
             },
             ready: function() {},
             connect: function() {

@@ -7,29 +7,27 @@
         .representativeNameHeader { font-size: 1.3em; text-overflow: ellipsis; color:#6c0404; padding: 0 40px 0 40px; text-align: center;}
     </style>
     <template>
-        <div class="horizontal layout center center-justified">
-            <div style="max-width: 1000px; width: 100%;">
-                <div style="margin: 0 10px 10px 0;">${msg.newRepresentativeAdviceMsg1}</div>
-                <div style="margin: 0 10px 10px 0;">${msg.newRepresentativeAdviceMsg2}</div>
-                <div style="margin: 0 10px 10px 0;">${msg.newRepresentativeAdviceMsg3}</div>
-                <div class="flex representativeNameHeader">
-                    <div>{{representativeFullName}}</div>
-                </div>
-                <div>
-                    <vs-editor id="editor"></vs-editor>
-                </div>
-                <div class="horizontal layout center">
-                    <div>
-                        <div style="font-size: 0.8em;">${msg.selectRepresentativeImgLbl}</div>
-                        <input type="file" id="imageFile" accept=".jpg, .png, .jpeg, .gif|image/*/">
-                    </div>
-                    <div class="flex"></div>
-                    <div>
-                        <button on-click="submitForm"><i class="fa fa-check"></i> ${msg.acceptLbl}</button>
-                    </div>
-                </div>
-                <div id="holder" style="width: 250px;height: 250px;"></div>
+        <div class="pagevs">
+            <div style="margin: 0 10px 10px 0;">${msg.newRepresentativeAdviceMsg1}</div>
+            <div style="margin: 0 10px 10px 0;">${msg.newRepresentativeAdviceMsg2}</div>
+            <div style="margin: 0 10px 10px 0;">${msg.newRepresentativeAdviceMsg3}</div>
+            <div class="flex representativeNameHeader">
+                <div>{{representativeFullName}}</div>
             </div>
+            <div>
+                <vs-editor id="editor"></vs-editor>
+            </div>
+            <div class="horizontal layout center">
+                <div>
+                    <div style="font-size: 0.8em;">${msg.selectRepresentativeImgLbl}</div>
+                    <input type="file" id="imageFile" accept=".jpg, .png, .jpeg, .gif|image/*/">
+                </div>
+                <div class="flex"></div>
+                <div>
+                    <button on-click="submitForm"><i class="fa fa-check"></i> ${msg.acceptLbl}</button>
+                </div>
+            </div>
+            <div id="holder" style="width: 250px;height: 250px;"></div>
         </div>
     </template>
     <script>

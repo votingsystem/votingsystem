@@ -25,9 +25,9 @@
                 <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
                     <div class="flex"></div>
                     <div>
-                        <button on-click="accept" style="margin: 0px 0px 0px 5px;">
+                        <div class="buttonvs" on-click="accept" style="margin: 0px 0px 0px 5px;">
                             <i class="fa fa-check"></i> ${msg.acceptLbl}
-                        </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -39,14 +39,15 @@
             ready: function() {
                 console.log(this.tagName + " - ready")
             },
-            show: function() {
+            show: function(representative) {
+                this.representative = representative;
                 this.$.modalDialog.style.opacity = 1
                 this.$.modalDialog.style['pointer-events'] = 'auto'
             },
             accept: function() {
                 console.log(this.tagName + " - removeRepresentative")
                 var operationVS = new OperationVS(Operation.REPRESENTATIVE_REVOKE)
-                operationVS.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_REVOKE, nif:validatedNif})
+                operationVS.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_REVOKE, nif:this.representative.nif})
                 operationVS.serviceURL = vs.contextURL + "/rest/representative/revoke"
                 operationVS.subject = '${msg.removeRepresentativeMsgSubject}'
                 operationVS.setCallback(function(appMessage) { this.revokeResponse(appMessage) }.bind(this))

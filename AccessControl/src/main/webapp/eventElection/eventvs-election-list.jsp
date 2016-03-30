@@ -51,7 +51,8 @@
             .eventDiv {
                 display:inline;
                 width:280px;
-                background-color: #f2f2f2;
+                height: 100%;
+                background-color: #fefefe;
                 margin: 10px 5px 5px 10px;
                 -moz-border-radius: 5px; border-radius: 3px;
                 cursor: pointer; cursor: hand;

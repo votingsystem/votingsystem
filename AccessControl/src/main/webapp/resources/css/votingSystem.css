@@ -4,7 +4,7 @@ html {
 
 body {
     color:#434343;
-    background-color: #fefefe;
+    background-color: #f2f2f2;
     margin: 0 auto 0 auto;
     padding: 0 0px 0 0px;
 }
@@ -42,6 +42,49 @@ body {
     color: #ba0011;
 }
 
+.buttonvs {
+    padding: 7px;
+    text-decoration: none;
+    box-shadow: 1px 2px 1px 0px #888;
+    border: 1px solid #bbb;
+    color: #388746;
+    cursor: pointer;
+    background-color: #fefefe;
+}
+
+.buttonvs:hover {
+    background-color: #388746;
+    border: 1px solid #388746;
+    color: #f9f9f9;
+}
+
+.buttonvs:active {
+    background-color: #6c0404;
+}
+
+.pagevs {
+    background-color: #fefefe;
+    box-shadow: 1px 2px 1px 0px #888;
+    border: 1px solid #bbb;
+    min-height: 800px;
+    max-width: 1100px;
+    margin: 7px auto;
+    padding: 10px;
+}
+
+.configIcon {
+    color:#ba0011;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.configIcon:hover {
+    background-color:#ba0011;
+    color:#fefefe;
+    cursor: pointer;
+    box-shadow: 1px 2px 1px 0px #888;
+}
+
 button i{color: #388746; }
 button {font-size: 1em; }
 
@@ -55,7 +98,6 @@ select, textarea, text, input {
 	font-size: 1em;
 	padding: 1px 2px 1px 2px;
 }
-
 
 hr {
 	border: 1px solid #cccccc;
@@ -167,6 +209,7 @@ textarea.form-control {
 .closeIcon {
     cursor: pointer;fill:#6c0404; color:#6c0404; font-size: 1.3em; margin: 0 2px 0 0;
 }
+
 .closeIcon:hover {
     fill:#ba0011; color:#ba0011;
 }
