@@ -13,6 +13,7 @@
 
     OperationVS.prototype.setCallback = function(callbackFunction) {
         this.callerCallback = Math.random().toString(36).substring(7);
+        this.callback = callbackFunction;
         document.querySelector("#voting_system_page").addEventListener(this.callerCallback, function(e) { callbackFunction(e.detail) });
     }
 

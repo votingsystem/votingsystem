@@ -29,7 +29,7 @@
                         function() {
                             var operationVS = new OperationVS(Operation.CERT_EDIT)
                             operationVS.serviceURL = vs.contextURL + "/rest/certificate/editCert"
-                            operationVS.signedMessageSubject = "${msg.cancelCertMessageSubject}"
+                            operationVS.subject = "${msg.cancelCertMessageSubject}"
                             var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                                 changeCertToState:"${Certificate.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
                             operationVS.jsonStr = JSON.stringify(signedContent)

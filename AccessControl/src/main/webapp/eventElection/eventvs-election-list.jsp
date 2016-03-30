@@ -192,7 +192,6 @@
                 switch (election.state) {
                     case EventVS.State.ACTIVE: return new Date(election.dateFinish).getElapsedTime() + " ${msg.toCloseLbl}"
                     case EventVS.State.PENDING:
-                        console.log(new Date(election.dateBegin), "elapsedTime: ", new Date(election.dateBegin).getElapsedTime())
                         return new Date(election.dateBegin).getElapsedTime() + " ${msg.toOpenLbl}"
                 }
             },

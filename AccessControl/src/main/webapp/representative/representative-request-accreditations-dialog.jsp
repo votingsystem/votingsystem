@@ -68,7 +68,7 @@
                     selectedDate:this.$.datePicker.getDate().getTime(),
                     UUID:"${spa.getUUID()}"})
                 operationVS.serviceURL = vs.contextURL + "/rest/representative/accreditations"
-                operationVS.signedMessageSubject = '${msg.requestRepresentativeAcreditationsLbl}'
+                operationVS.subject = '${msg.requestRepresentativeAcreditationsLbl}'
                 VotingSystemClient.setMessage(operationVS);
                 this.close()
             },

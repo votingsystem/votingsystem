@@ -71,7 +71,7 @@ public class EventElectionBean {
         request.setType(EventVS.Type.ELECTION);
 
         KeyStoreDto keyStoreDto = cmsBean.generateElectionKeysStore(eventVS);
-        Certificate certificate = dao.persist(Certificate.ELECTION((X509Certificate) keyStoreDto.getX509Cert()));
+        Certificate certificate = dao.persist(Certificate.ELECTION(keyStoreDto.getX509Cert()));
         dao.merge(eventVS.setCertificate(certificate));
         keyStoreDto.getKeyStore().setCertificate(certificate);
         KeyStore keyStore = dao.persist(keyStoreDto.getKeyStore());
@@ -97,7 +97,7 @@ public class EventElectionBean {
                 Certificate.ACTOR(null, cmsBean.getServerCert()));
         dao.merge(cmsMessage.setType(TypeVS.VOTING_EVENT).setCMS(cms));
         dao.merge(eventVS.setControlCenterCert(controlCenterCertEventVS).setAccessControlCert(accessControlCertEventVS)
-                .setState(EventVS.State.ACTIVE).setCmsMessage(cmsMessage));
+                .setCmsMessage(cmsMessage));
         return eventVS;
     }
 

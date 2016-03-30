@@ -29,38 +29,32 @@
             eventvs:{type:Object, observer:'eventvsChanged'}
         },
         ready: function() {
-            console.log(this.tagName + "ready: ", this.statsDto)
+            console.log(this.tagName + " - ready: ", this.statsDto)
         },
         eventvsChanged: function() {
+            console.log("eventvsChanged: ", this.eventvs)
             var dateBegin =  new Date(this.eventvs.dateBegin)
-            var dateFinish = new Date(this.eventvs.dateFinish)
-            var currentDate = new Date()
-            if(currentDate.getTime() > dateBegin.getTime()) {
-                this.getHTTP("${contextURL}/rest/eventElection/id/" + this.eventvs.id + "/stats")
-            } else {
+            if(this.eventvs.state === 'PENDING') {
                 this.headerColor = "#fba131"
                 this.$.header.textContent = new Date(this.eventvs.dateBegin).getElapsedTime() + " ${msg.toOpenLbl}"
                 this.eventvs.fieldsEventVS.forEach(function(element, index, array) {
                     element.numVotes = 0
                 })
                 this.fieldsEventVS = this.eventvs.fieldsEventVS
+            } else {
+                this.getHTTP("${contextURL}/rest/eventElection/id/" + this.eventvs.id + "/stats")
             }
         },
         statsDtoChanged: function() {
-            var dateBegin =  new Date(this.statsDto.dateBegin)
-            var dateFinish = new Date(this.statsDto.dateFinish)
-            var currentDate = new Date()
-            if(currentDate.getTime() > dateBegin.getTime()) {
-                if(currentDate.getTime() > dateFinish.getTime()) {
-                    this.headerColor = "#ba0011"
-                    this.$.header.textContent = "${msg.finalResultLbl}"
-                } else {
-                    this.headerColor = "#388746"
-                    this.$.header.textContent = new Date(this.statsDto.dateFinish).getElapsedTime() + " ${msg.toCloseLbl}"
-                }
-            } else {
+            if(this.statsDto.eventState === 'ACTIVE') {
+                this.headerColor = "#388746"
+                this.$.header.textContent = new Date(this.statsDto.dateFinish).getElapsedTime() + " ${msg.toCloseLbl}"
+            } else if(this.statsDto.eventState === 'PENDING') {
                 this.headerColor = "#fba131"
                 this.$.header.textContent = new Date(this.statsDto.dateBegin).getElapsedTime() + " ${msg.toOpenLbl}"
+            } else {
+                this.headerColor = "#ba0011"
+                this.$.header.textContent = "${msg.finalResultLbl}"
             }
             this.fieldsEventVS = this.statsDto.fieldsEventVS
         },

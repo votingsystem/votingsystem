@@ -79,7 +79,7 @@
                     dateTo:this.$.dateToPicker.getDate().getTime(),
                     UUID:"${spa.getUUID()}"})
                 operationVS.serviceURL = vs.contextURL + "/rest/representative/history"
-                operationVS.signedMessageSubject = '${msg.requestVotingHistoryLbl}'
+                operationVS.subject = '${msg.requestVotingHistoryLbl}'
                 VotingSystemClient.setMessage(operationVS);
                 this.close()
             },

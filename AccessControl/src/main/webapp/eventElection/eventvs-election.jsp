@@ -56,7 +56,7 @@
                             <img id="qrImg"  src="" style="border: 1px solid #ccc;"/>
                         </div>
                         <div style="width: 600px;margin: 0 auto;">
-                            <eventvs-election-stats id="eventStats" stats-dto='${statsDto}'></eventvs-election-stats>
+                            <eventvs-election-stats id="eventStats"></eventvs-election-stats>
                         </div>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
                 eventvs:{type:Object, observer:'eventvsChanged'}
             },
             ready: function() {
-                console.log(this.tagName + "- ready")
+                console.log(this.tagName + " - ready")
             },
             getDate:function(dateStamp) {
                 return new Date(dateStamp).getDayWeekFormat()

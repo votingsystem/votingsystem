@@ -81,7 +81,7 @@
                     operationVS.jsonStr = JSON.stringify({operation:Operation.ANONYMOUS_REPRESENTATIVE_SELECTION,
                             representative:this.representative,
                             weeksOperationActive:this.$.numWeeksAnonymousDelegation.value})
-                    operationVS.signedMessageSubject = '${msg.representativeDelegationMsgSubject}'
+                    operationVS.subject = '${msg.representativeDelegationMsgSubject}'
                     operationVS.setCallback(function(appMessage) { this.delegationResponse(appMessage) }.bind(this))
                     VotingSystemClient.setMessage(operationVS);
                 } else {

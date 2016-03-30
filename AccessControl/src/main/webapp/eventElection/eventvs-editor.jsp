@@ -6,6 +6,11 @@
 <link href="../element/vs-socket.vsp" rel="import"/>
 
 <dom-module name="eventvs-editor">
+    <style>
+        :host {
+            display: none;
+        }
+    </style>
     <template>
         <div class="horizontal layout center center-justified" style="margin: 10px 0 0 0;">
             <div style="max-width: 1000px; width: 100%;">
@@ -47,29 +52,23 @@
             },
             ready: function() {
                 console.log(this.tagName + " - ready")
-                this.tomorrow = new Date().getTime() + 24 * 60 * 60 * 1000;
-                this.$.datePicker.setDate(new Date(this.tomorrow))
-                this.optionList = []
+                this.resetForm();
                 document.querySelector("#voting_system_page").addEventListener('on-submit-reason',
                         function(e) {
                             this.optionList.push(e.detail)
                             this.optionList = this.optionList.slice(0) //to make changes visible to template
                             console.table(this.optionList)
                         }.bind(this))
-                this.$.vsSocket.addEventListener('socket-message', function(e) {
-                    console.log(this.tagName + ' - socket-message', e.detail);
-                    this.processSocketMessage(e.detail)
-                }.bind(this));
+                this.$.editor.addEventListener ('tiny-init', function(e) {
+                    this.style.display = 'block';
+                }.bind(this))
             },
-            processSocketMessage: function(socketMessage) {
-                console.log(this.tagName + " - processSocketMessage: ", socketMessage)
-                if(this.currentOperationCode === socketMessage.operationCode){
-                    console.log("==== we have the response")
-                    switch (socketMessage.operation) {
-                        case "OPERATION_RESULT":
-                            break;
-                    }
-                }
+            resetForm: function() {
+                this.tomorrow = new Date().getTime() + 24 * 60 * 60 * 1000;
+                this.$.datePicker.setDate(new Date(this.tomorrow))
+                this.$.subject.value = ""
+                if(this.$.editor.editorLoaded === true) this.$.editor.setContentText("")
+                this.optionList = []
             },
             submitForm: function() {
                 this.$.vsSocket.connect();
@@ -95,14 +94,15 @@
                 }
                 var operationVS = new OperationVS(Operation.PUBLISH_EVENT)
                 operationVS.serviceURL = vs.contextURL + "/rest/eventElection"
-                operationVS.signedMessageSubject = "${msg.publishVoteLbl}"
+                operationVS.subject = "${msg.publishVoteLbl}"
                 var content = window.btoa(this.$.editor.getContent())
+                operationVS.setCallback(function(socketMessage) { this.processSocketMessage(socketMessage)}.bind(this))
                 var fieldsEventVS = []
                 this.optionList.forEach(function(option) {
                     fieldsEventVS.push({content:option})
                 })
                 operationVS.eventVS = {subject:this.$.subject.value, content:content,
-                    fieldEventSet:fieldsEventVS, dateBegin:this.$.datePicker.getDate().getTime()}
+                    fieldsEventVS:fieldsEventVS, dateBegin:this.$.datePicker.getDate().getTime()}
                 operationVS.UUID = this.$.vsSocket.getUUID()
                 console.log("operation: ", operationVS)
                 this.currentOperationCode = this.$.vsSocket.showOperationQRCode(this.$.vsSocket.VOTING_SYSTEM, operationVS)
@@ -114,6 +114,19 @@
             },
             addOption: function() {
                 this.$.reasonDialog.show()
+            },
+            processSocketMessage: function(socketMessage) {
+                console.log(this.tagName + " - processSocketMessage: ", socketMessage)
+                switch (socketMessage.messageType) {
+                    case "OPERATION_RESULT":
+                        if(ResponseVS.SC_OK === socketMessage.statusCode) {
+                            var msgDto = toJSON(socketMessage.message)
+                            page(msgDto.url)
+                            this.resetForm();
+                        } else alert(socketMessage.message, "${msg.errorLbl}")
+                        break;
+                }
+                this.$.vsSocket.closeQRDialog()
             }
         });
     </script>

@@ -117,7 +117,7 @@ public class EventElectionResource {
         MessageDto responseDto = new MessageDto().setURL(format("{0}/rest/eventElection/id/{1}",
                 config.getContextURL(), response.getId()));
         responseDto.setCmsMessagePEM(new String(response.getCmsMessage().getContentPEM()));
-        return Response.ok().entity(responseDto).type(MediaType.JSON).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(responseDto)).type(MediaType.JSON).build();
     }
 
     @Path("/cancel") @POST

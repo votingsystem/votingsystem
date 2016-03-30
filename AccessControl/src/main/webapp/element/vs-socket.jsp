@@ -11,7 +11,6 @@
             is:'vs-socket',
             properties:{
                 qrOperationsMap:{type:Object, value:{}},
-                devId:{type:String},
                 DEVICE_ID_KEY:{type:String, value:"did"},
                 OPERATION_KEY:{type:String, value:"op"},
                 OPERATION_CODE_KEY:{type:String, value:"opid"},
@@ -23,7 +22,7 @@
             },
             ready: function() {},
             connect: function() {
-                if(this.websocket) {
+                if(vs.deviceId) {
                     console.log("socket already connected")
                     return;
                 }
@@ -36,7 +35,6 @@
                 this.websocket.onopen = function () {
                     console.log(this.tagName + '- WebSocket connection opened.');
                 };
-
                 this.websocket.onmessage = function (event) {
                     console.log(this.tagName + ' - Received: ' + event.data);
                     var messageJSON = toJSON(event.data)
@@ -44,9 +42,10 @@
                         messageJSON.operation = messageJSON.messageType
                         switch(messageJSON.operation) {
                             case "INIT_SESSION":
-                                this.devId = messageJSON.deviceToId
+                                vs.deviceId = messageJSON.deviceToId
                                 if(this.pendingOperation) {
-                                    this.showOperationQRCode(this.pendingOperation.system, this.pendingOperation.operation)
+                                    this.showOperationQRCode(this.pendingOperation.system, this.pendingOperation.operation,
+                                            this.pendingOperation.operationCode)
                                     this.pendingOperation = null;
                                 }
                                 break;
@@ -63,34 +62,42 @@
                                 break;
                             case "OPERATION_RESULT":
                                 this.fire('socket-message', messageJSON);
+                                var operation = this.qrOperationsMap[messageJSON.operationCode]
+                                if(operation.callback) operation.callback(messageJSON)
                                 break;
                         }
                     }
                 }.bind(this);
                 this.websocket.onclose = function (event) {
+                    vs.deviceId = null
                     console.log('Info: WebSocket connection closed, Code: ' + event.code +
                             (event.reason == "" ? "" : ", Reason: " + event.reason));
                 };
-                vs.socket = this
             },
-            showOperationQRCode:function (socketSystem, operationVS) {
-                if(!this.devId) {
-                    this.pendingOperation = {system:socketSystem, operation:operationVS}
-                    return;
+            closeQRDialog:function (socketSystem, operationVS, operationCode) {
+                this.$.qrDialog.close()
+            },
+            showOperationQRCode:function (socketSystem, operationVS, operationCode) {
+                console.log("showOperationQRCode")
+                if(!operationCode) {
+                    operationCode = this.getOperationCode()
+                    this.qrOperationsMap[operationCode] = operationVS
                 }
-                var operationCode = this.getOperationCode()
-                this.qrOperationsMap[operationCode] = operationVS
-                this.$.qrDialog.show(operationCode, this.getQRCodeURL(vs.socket.OPERATION_PROCESS, operationCode,
-                        this.devId, null, "200x200", socketSystem))
+                if(!vs.deviceId) {
+                    this.pendingOperation = {system:socketSystem, operation:operationVS, operationCode:operationCode}
+                    return operationCode;
+                }
+                this.$.qrDialog.show(operationCode, this.getQRCodeURL(this.OPERATION_PROCESS, operationCode,
+                        vs.deviceId, null, "200x200", socketSystem))
                 return operationCode
             },
             sendOperation: function(socketMessage, operation) {
                 operation.uuid = this.getUUID()
                 var socketMessage = {operation:"MSG_TO_DEVICE", messageType:"OPERATION_PROCESS",
-                    deviceFromId:this.devId, deviceToId:socketMessage.deviceFromId,
+                    deviceFromId:vs.deviceId, deviceToId:socketMessage.deviceFromId,
                     operationCode:socketMessage.operationCode,
                     message:JSON.stringify(operation), uuid:socketMessage.uuid}
-                console.log(this.tagName + " - socketMessage: ", socketMessage)
+                console.log(this.tagName + " - sendOperation: ", socketMessage)
                 this.websocket.send(JSON.stringify(socketMessage))
             },
             getOperationCode: function() {

@@ -122,7 +122,7 @@
 
                 var operationVS = new OperationVS(Operation.CURRENCY_REQUEST)
                 operationVS.serviceURL = vs.contextURL + "/currency/request"
-                operationVS.signedMessageSubject = "${msg.currencyRequestLbl}"
+                operationVS.subject = "${msg.currencyRequestLbl}"
                 var signedContent = {operation:Operation.CURRENCY_REQUEST, amount:this.$.inputAmount.value,
                     timeLimited:this.$.timeLimitedButton.checked, currencyCode:this.$.currencySelector.getSelected(),
                     tags:tagList}

@@ -32,12 +32,15 @@
       });
 
       var eventElection
-      page('/rest/eventElection/id*', function (ctx) {
+      page('*/rest/eventElection/id*', function (ctx) {
           vs.route = 'eventElection';
           Polymer.Base.importHref('./eventElection/eventvs-election.vsp', function () {
               if (!eventElection) eventElection = document.createElement('eventvs-election');
               if(vs.eventvs) eventElection.eventvs = vs.eventvs
-              else eventElection.url = vs.contextURL + ctx.path
+              else {
+                  if(ctx.path.startsWith("https")) eventElection.url = ctx.path
+                  else eventElection.url = vs.contextURL + ctx.path
+              }
               vs.loadMainContent(eventElection, "${msg.pollLbl}")
           });
       });

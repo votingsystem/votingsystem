@@ -18,6 +18,7 @@ localization ->https://www.tinymce.com/docs/configure/localization/
                 tinyplugins:{ type:Array, value:["advlist autolink lists link preview fullscreen"] },
                 templates: { type: Array, value: function () { return [] } },
                 height: { type: Number, value: 168 },
+                editorLoaded: { type: Boolean, value: false },
                 baseUrl: { type: String, value: '' },
                 contentMap: { type: Object, value: {} },
                 availableLocales: { type: Array, value: ["es"] }
@@ -43,6 +44,7 @@ localization ->https://www.tinymce.com/docs/configure/localization/
                 if (this.baseUrl !== '') {
                     tinymce.baseURL = this.baseUrl;
                 }
+                var hostElement = this
                 tinymce.init({
                     selector: "#" + this.textareaId,
                     language: this.locale,
@@ -53,6 +55,8 @@ localization ->https://www.tinymce.com/docs/configure/localization/
                     setup: function (ed) {
                         ed.on('init', function(args) {
                             this.fire('tiny-init');
+                            hostElement.editorLoaded = true
+                            hostElement.fire('tiny-init');
                         });
                         ed.on('focus', function(e) {
                             this.fire('tiny-focus');

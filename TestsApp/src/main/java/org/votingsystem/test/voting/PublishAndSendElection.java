@@ -168,9 +168,9 @@ public class PublishAndSendElection {
         ResponseVS responseVS = HttpHelper.getInstance().sendData(cmsMessage.toPEM(), ContentType.JSON_SIGNED,
                 ContextVS.getInstance().getAccessControl().getPublishElectionURL(), "eventURL");
         if(ResponseVS.SC_OK != responseVS.getStatusCode()) throw new ExceptionVS(responseVS.getMessage());
-        String eventURL = ((List<String>)responseVS.getData()).iterator().next();
+        MessageDto messageDto = (MessageDto) responseVS.getMessage(MessageDto.class);
         ContextVS.getInstance().copyFile(responseVS.getMessageBytes(), "/electionSimulation", "ElectionPublishedReceipt");
-        responseVS = HttpHelper.getInstance().getData(eventURL, ContentType.JSON);
+        responseVS = HttpHelper.getInstance().getData(messageDto.getURL(), ContentType.JSON);
         EventVSDto eventVSJSON = JSON.getMapper().readValue(responseVS.getMessage(), EventVSDto.class);
         return eventVSJSON.getEventElection();
     }

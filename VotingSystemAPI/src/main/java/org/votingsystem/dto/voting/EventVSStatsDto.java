@@ -2,6 +2,7 @@ package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.voting.EventElection;
+import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.model.voting.FieldEvent;
 
 import java.util.Date;
@@ -17,6 +18,7 @@ public class EventVSStatsDto {
     private Long numAccessRequests;
     private Long numVotes;
     private String subject;
+    private EventVS.State eventState;
     private Date dateBegin;
     private Date dateFinish;
     private Set<FieldEvent> fieldsEventVS;
@@ -27,6 +29,7 @@ public class EventVSStatsDto {
         this.dateBegin = eventElection.getDateBegin();
         this.dateFinish = eventElection.getDateFinish();
         this.subject = eventElection.getSubject();
+        this.eventState = eventElection.getState();
     }
 
     public Long getId() {
@@ -86,5 +89,13 @@ public class EventVSStatsDto {
     public EventVSStatsDto setDateFinish(Date dateFinish) {
         this.dateFinish = dateFinish;
         return this;
+    }
+
+    public EventVS.State getEventState() {
+        return eventState;
+    }
+
+    public void setEventState(EventVS.State eventState) {
+        this.eventState = eventState;
     }
 }

@@ -1,16 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
+<link href="../element/vs-socket.vsp" rel="import"/>
+
 <dom-module name="eventvs-admin-dialog">
     <template>
-        <style>
-            .messageToUser {
-                font-weight: bold;
-                margin:10px auto 10px auto;
-                background: #f9f9f9;
-                padding:10px 20px 10px 20px;
-                margin:0px 10px 0px 0px;
-            }
-        </style>
         <div id="modalDialog" class="modalDialog">
             <div id="container" style="overflow-y: auto; width:450px; padding:10px;">
                 <div class="layout horizontal center center-justified">
@@ -21,24 +14,20 @@
                         <i class="fa fa-times closeIcon" on-click="close"></i>
                     </div>
                 </div>
-
-                <div hidden="{{!messageToUser}}" style="text-align: center;">
-                    <div class="messageToUser">{{messageToUser}}</div>
-                </div>
                 <div>
                     <p style="text-align: center;">${msg.adminDocumenInfoMsg}</p>
                     ${msg.documentStateSelectionMsg}:<br/>
                     <div style="font-size: 1.1em; margin:10px 0 0 10px;">
                         <div style="margin:10px 0 0 0">
                             <label>
-                                <input type="radio" name="optionsRadios" id="selectDeleteDocument" value="">
-                                ${msg.selectDeleteDocumentMsg}
+                                <input type="radio" name="optionsRadios" id="selectCloseDocument" value="" checked="checked">
+                                ${msg.selectCloseDocumentMsg}
                             </label>
                         </div>
                         <div style="margin:10px 0 0 0">
                             <label>
-                                <input type="radio" name="optionsRadios" id="selectCloseDocument" value="">
-                                ${msg.selectCloseDocumentMsg}
+                                <input type="radio" name="optionsRadios" id="selectDeleteDocument" value="">
+                                ${msg.selectDeleteDocumentMsg}
                             </label>
                         </div>
                     </div>
@@ -51,6 +40,7 @@
                 </div>
             </div>
         </div>
+        <vs-socket id="vsSocket"></vs-socket>
     </template>
     <script>
         Polymer({
@@ -59,47 +49,43 @@
                 eventvs:{type:Object, value:{}}
             },
             ready: function() {
-                this.messageToUser = null
                 this.isConfirmMessage = this.isConfirmMessage || false
             },
             submitForm: function() {
-                console.log("submitForm")
-                this.messageToUser = null
-                if(!this.$.selectDeleteDocument.checked && !this.$.selectCloseDocument.checked) {
-                    this.messageToUser = "${msg.selectDocumentStateERRORMsg}"
-                } else {
-                    var state
-                    var messageSubject
-                    if(this.$.selectDeleteDocument.checked) {
-                        state = EventVS.State.DELETED_FROM_SYSTEM
-                        messageSubject = '${msg.deleteEventVSMsgSubject}'
-                    } else if(this.$.selectCloseDocument.checked) {
-                        state = EventVS.State.CANCELED
-                        messageSubject = '${msg.cancelEventVSMsgSubject}'
-                    }
-                    var operationVS = new OperationVS(Operation.EVENT_CANCELLATION)
-                    operationVS.serviceURL= vs.contextURL + "/rest/eventElection/cancel"
-                    var signedContent = {operation:Operation.EVENT_CANCELLATION,
-                        accessControlURL:vs.contextURL, eventId:Number(this.eventvs.id), state:state}
-                    operationVS.jsonStr = JSON.stringify(signedContent)
-                    operationVS.signedMessageSubject = messageSubject
-                    operationVS.setCallback(function(appMessage) { this.cancelationResponse(appMessage)}.bind(this))
-                    VotingSystemClient.setMessage(operationVS);
+                this.$.vsSocket.connect();
+                var state
+                var messageSubject
+                if(this.$.selectDeleteDocument.checked) {
+                    state = EventVS.State.DELETED_FROM_SYSTEM
+                    messageSubject = '${msg.deleteEventVSMsgSubject}'
+                } else if(this.$.selectCloseDocument.checked) {
+                    state = EventVS.State.CANCELED
+                    messageSubject = '${msg.cancelEventVSMsgSubject}'
                 }
+                var operationVS = new OperationVS(Operation.EVENT_CANCELLATION)
+                operationVS.serviceURL= vs.contextURL + "/rest/eventElection/cancel"
+                var signedContent = {operation:Operation.EVENT_CANCELLATION,
+                    accessControlURL:vs.contextURL, eventId:Number(this.eventvs.id), state:state}
+                operationVS.jsonStr = JSON.stringify(signedContent)
+                operationVS.subject = messageSubject
+                operationVS.setCallback(function(socketMessage) { this.cancelationResponse(socketMessage)}.bind(this))
+                //VotingSystemClient.setMessage(operationVS);
+                this.currentOperationCode = this.$.vsSocket.showOperationQRCode(this.$.vsSocket.VOTING_SYSTEM, operationVS)
+                console.log("currentOperationCode: ", this.currentOperationCode)
             },
-            cancelationResponse:function(appMessageJSON) {
+            cancelationResponse:function(socketMessage) {
                 console.log("cancelationResponse");
-                var caption
-                var msg
-                if(ResponseVS.SC_OK == appMessageJSON.statusCode) {
+                if(ResponseVS.SC_OK == socketMessage.statusCode) {
                     caption = "${msg.operationOKCaption}"
                     msg = "${msg.documentCancellationOKMsg}".format(this.eventvs.subject);
                     if(this.$.selectDeleteDocument.checked) page("/eventElection")
                     else page("/rest/eventElection/id/" + this.eventvs.id)
                 } else {
                     caption = "${msg.operationERRORCaption}"
-                    msg = appMessageJSON.message
+                    msg = socketMessage.message
                 }
+                this.close()
+                this.$.vsSocket.closeQRDialog()
                 alert(msg, caption)
             },
             show: function() {
@@ -109,7 +95,6 @@
             close: function() {
                 this.$.modalDialog.style.opacity = 0
                 this.$.modalDialog.style['pointer-events'] = 'none'
-                this.messageToUser = null
             }
         });
     </script>

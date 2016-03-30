@@ -71,7 +71,6 @@ public class EventVSBean {
         if(!(eventVS.getUser().getNif().equals(signer.getNif()) || cmsBean.isAdmin(signer.getNif())))
             throw new ValidationException("userWithoutPrivilege - nif: " + signer.getNif());
         CMSSignedMessage cmsMessageResp = null;
-        String fromUser = config.getServerName();
         if(eventVS instanceof EventElection) {
             cmsMessageResp = cmsBean.addSignature(cmsMessageReq);
             String controlCenterUrl = ((EventElection)eventVS).getControlCenter().getServerURL();
@@ -84,12 +83,11 @@ public class EventVSBean {
             }
         } else cmsMessageResp = cmsBean.addSignature(cmsMessageReq);
         cmsMessage.setCMS(cmsMessageResp);
-        eventVS.setState(request.getState());
-        eventVS.setDateCanceled(new Date());
         if(eventVS.getKeyStore() != null) {
             eventVS.getKeyStore().setValid(Boolean.FALSE);
             dao.merge(eventVS.getKeyStore());
         }
+        eventVS.setState(request.getState()).setDateCanceled(new Date());
         dao.merge(eventVS);
         log.info("EventVS with id:" + eventVS.getId() + " changed to state: " + request.getState().toString());
         return cmsMessage;
