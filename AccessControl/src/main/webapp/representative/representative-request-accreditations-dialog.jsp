@@ -65,8 +65,7 @@
                 operationVS.jsonStr = JSON.stringify({operation:Operation.REPRESENTATIVE_ACCREDITATIONS_REQUEST,
                     representativeNif:this.representative.nif, representativeName:this.representativeFullName,
                     email:this.$.email.value,
-                    selectedDate:this.$.datePicker.getDate().getTime(),
-                    UUID:"${spa.getUUID()}"})
+                    selectedDate:this.$.datePicker.getDate().getTime()})
                 operationVS.serviceURL = vs.contextURL + "/rest/representative/accreditations"
                 operationVS.subject = '${msg.requestRepresentativeAcreditationsLbl}'
                 VotingSystemClient.setMessage(operationVS);

@@ -76,8 +76,7 @@
                     representativeNif:this.representative.nif, representativeName:this.representativeFullName,
                     email:this.$.email.value,
                     dateFrom:this.$.dateFromPicker.getDate().getTime(),
-                    dateTo:this.$.dateToPicker.getDate().getTime(),
-                    UUID:"${spa.getUUID()}"})
+                    dateTo:this.$.dateToPicker.getDate().getTime()})
                 operationVS.serviceURL = vs.contextURL + "/rest/representative/history"
                 operationVS.subject = '${msg.requestVotingHistoryLbl}'
                 VotingSystemClient.setMessage(operationVS);

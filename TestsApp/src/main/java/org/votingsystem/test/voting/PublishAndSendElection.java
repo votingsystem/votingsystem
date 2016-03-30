@@ -53,7 +53,7 @@ public class PublishAndSendElection {
         userBaseSimulationData.setUserIndex(100);
         userBaseSimulationData.setNumUsersWithoutRepresentative(20);
         userBaseSimulationData.setNumUsersWithoutRepresentativeWithVote(15);
-        userBaseSimulationData.setNumRepresentatives(0);
+        userBaseSimulationData.setNumRepresentatives(10);
         userBaseSimulationData.setNumRepresentativesWithVote(0);
         userBaseSimulationData.setNumUsersWithRepresentative(0);
         userBaseSimulationData.setNumUsersWithRepresentativeWithVote(0);

@@ -241,7 +241,16 @@ VotingSystemClient.setMessage = function (messageJSON) {
         var messageToSignatureClient = JSON.stringify(messageJSON);
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
-    } else console.log("clientTool undefined - operation: " + messageJSON.operation)
+    } else {
+        Polymer.Base.importHref(vs.contextURL + '/element/vs-socket.vsp', function () {
+            if (!vs.socketElement) {
+                vs.socketElement = document.createElement('vs-socket');
+                document.querySelector("#voting_system_page").appendChild(vs.socketElement)
+                vs.socketElement.connect()
+            }
+            vs.socketElement.showOperationQRCode(vs.socketElement.VOTING_SYSTEM, messageJSON)
+        });
+    }
 }
 
 

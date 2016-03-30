@@ -3,7 +3,6 @@
 <link href="../resources/bower_components/vs-editor/vs-editor.html" rel="import"/>
 <link href="../resources/bower_components/vs-datepicker/vs-datepicker.html" rel="import"/>
 <link href="../element/reason-dialog.vsp" rel="import"/>
-<link href="../element/vs-socket.vsp" rel="import"/>
 
 <dom-module name="eventvs-editor">
     <style>
@@ -42,7 +41,6 @@
             </div>
         </div>
         <reason-dialog id="reasonDialog" caption="${msg.enterOptionLbl}"></reason-dialog>
-        <vs-socket id="vsSocket"></vs-socket>
     </template>
     <script>
         Polymer({
@@ -71,7 +69,6 @@
                 this.optionList = []
             },
             submitForm: function() {
-                this.$.vsSocket.connect();
                 var msgTemplate = "${msg.enterFieldMsg}"
                 if(FormUtils.checkIfEmpty(this.$.subject.value)) {
                     alert(msgTemplate.format("${msg.electionSubjectLbl}"), "${msg.errorLbl}")
@@ -103,9 +100,8 @@
                 })
                 operationVS.eventVS = {subject:this.$.subject.value, content:content,
                     fieldsEventVS:fieldsEventVS, dateBegin:this.$.datePicker.getDate().getTime()}
-                operationVS.UUID = this.$.vsSocket.getUUID()
-                console.log("operation: ", operationVS)
-                this.currentOperationCode = this.$.vsSocket.showOperationQRCode(this.$.vsSocket.VOTING_SYSTEM, operationVS)
+                console.log(" -- operation: ", operationVS)
+                VotingSystemClient.setMessage(operationVS);
             },
             removeOption: function(e) {
                 var index = this.optionList.indexOf(e.model.item);
@@ -126,7 +122,7 @@
                         } else alert(socketMessage.message, "${msg.errorLbl}")
                         break;
                 }
-                this.$.vsSocket.closeQRDialog()
+                vs.socketElement.closeQRDialog()
             }
         });
     </script>
