@@ -104,7 +104,7 @@
                 operation.uuid = vs.getUUID()
                 if(operation.jsonStr) {
                     var jsonData = toJSON(operation.jsonStr)
-                    jsonData.UUID =  vs.getUUID()
+                    jsonData.uuid =  vs.getUUID()
                     operation.jsonStr = JSON.stringify(jsonData)
                 }
                 var socketMessage = {operation:"MSG_TO_DEVICE", messageType:"OPERATION_PROCESS",

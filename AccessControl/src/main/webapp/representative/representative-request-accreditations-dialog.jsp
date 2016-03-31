@@ -23,12 +23,12 @@
                     </div>
                     <input id="email" type="email" name="email" title="${msg.emailLbl}" placeholder="${msg.emailLbl}" required>
                 </div>
-                <div class="layout horizontal">
+                <div class="layout horizontal" style="margin: 10px 15px 20px 0;">
                     <div class="flex"></div>
                     <div>
-                        <button on-click="submitForm">
+                        <a class="buttonvs" on-click="submitForm">
                             <i class="fa fa-check"></i> ${msg.acceptLbl}
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -68,6 +68,11 @@
                     selectedDate:this.$.datePicker.getDate().getTime()})
                 operationVS.serviceURL = vs.contextURL + "/rest/representative/accreditations"
                 operationVS.subject = '${msg.requestRepresentativeAcreditationsLbl}'
+                operationVS.setCallback(function(socketMessage) {
+                    if(ResponseVS.SC_OK === socketMessage.statusCode) {
+                        alert(socketMessage.message)
+                    } else alert(socketMessage.message, "${msg.errorLbl}")
+                }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
                 this.close()
             },

@@ -43,23 +43,23 @@ body {
 }
 
 .buttonvs {
-    padding: 7px;
+    padding: 5px 5px 5px 4px;
     text-decoration: none;
-    box-shadow: 1px 2px 1px 0px #888;
+    box-shadow: 1px 2px 1px 0px #bbb;
     border: 1px solid #bbb;
-    color: #388746;
+    color: #585;
     cursor: pointer;
     background-color: #fefefe;
 }
 
 .buttonvs:hover {
-    background-color: #388746;
-    border: 1px solid #388746;
+    background-color: #585;
+    border: 1px solid #585;
     color: #f9f9f9;
 }
 
 .buttonvs:active {
-    background-color: #6c0404;
+    background-color: #0a0;
 }
 
 .pagevs {
@@ -86,7 +86,7 @@ body {
 }
 
 input:required {
-    border: 1px solid rgba(253, 8, 8, 0.29);
+    border: 1px solid #ba0011;
 }
 
 select, textarea, text, input {

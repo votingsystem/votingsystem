@@ -38,6 +38,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 @Path("/representative")
@@ -61,10 +62,12 @@ public class RepresentativeResource {
     @Path("/history") @POST
     public Response history(CMSMessage cmsMessage, @Context ServletContext context, @Context HttpServletRequest req,
                             @Context HttpServletResponse resp) throws Exception {
+        //To enable application filters change what follows to the standalone / domain server configuration
+        //<servlet-container name="default" allow-non-standard-wrappers="true">
         EmailTemplateWrapper responseWrapper = new EmailTemplateWrapper(resp);
         context.getRequestDispatcher("/mail/RepresentativeVotingHistoryDownloadInstructions.vsp").forward(req, responseWrapper);
         String mailTemplate = responseWrapper.toString();
-        representativeBean.processVotingHistoryRequest(cmsMessage, mailTemplate);
+        representativeBean.processVotingHistoryRequest(cmsMessage, mailTemplate, req.getLocale());
         RepresentativeVotingHistoryDto request = cmsMessage.getSignedContent(RepresentativeVotingHistoryDto.class);
         return Response.ok().entity(messages.get("backupRequestOKMsg", request.getEmail())).build();
     }
@@ -72,12 +75,14 @@ public class RepresentativeResource {
     @Path("/accreditations") @POST
     public Response accreditations(CMSMessage cmsMessage,
                    @Context ServletContext context, @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        //To enable application filters change what follows to the standalone / domain server configuration
+        //<servlet-container name="default" allow-non-standard-wrappers="true">
         EmailTemplateWrapper responseWrapper = new EmailTemplateWrapper(resp);
         req.setAttribute("pageTitle", messages.get("representativeAccreditationsLbl"));
         context.getRequestDispatcher("/mail/RepresentativeAccreditationRequestDownloadInstructions.vsp").forward(req, responseWrapper);
         String mailTemplate = responseWrapper.toString();
         RepresentativeAccreditationsDto request = cmsMessage.getSignedContent(RepresentativeAccreditationsDto.class);
-        representativeBean.processAccreditationsRequest(cmsMessage, mailTemplate);
+        representativeBean.processAccreditationsRequest(cmsMessage, mailTemplate, req.getLocale());
         return Response.ok().entity(messages.get("backupRequestOKMsg", request.getEmail())).build();
     }
 

@@ -48,6 +48,7 @@
                 font-weight:bold;
                 padding: 0px 5px 5px 5px;
             }
+            .eventDiv:hover { border: 1px solid #cfc; }
             .eventDiv {
                 display:inline;
                 width:280px;

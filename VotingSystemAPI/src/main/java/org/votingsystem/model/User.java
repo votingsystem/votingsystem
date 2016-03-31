@@ -188,7 +188,13 @@ public class User extends EntityVS implements Serializable {
     }
 
     public String getName() {
-        if(name == null) name = firstName + " " + lastName;
+        if(name == null) {
+            name = firstName;
+            if(lastName != null) {
+                if(name == null) name = lastName;
+                else name = firstName + " " + lastName;
+            }
+        }
         return name;
     }
 

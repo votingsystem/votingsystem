@@ -41,8 +41,28 @@ body {
     color: #ba0011;
 }
 
+.buttonvs {
+    padding: 5px 5px 5px 4px;
+    text-decoration: none;
+    box-shadow: 1px 2px 1px 0px #bbb;
+    border: 1px solid #bbb;
+    color: #585;
+    cursor: pointer;
+    background-color: #fefefe;
+}
+
+.buttonvs:hover {
+    background-color: #585;
+    border: 1px solid #585;
+    color: #f9f9f9;
+}
+
+.buttonvs:active {
+    background-color: #0a0;
+}
+
 input:required {
-    border: 1px solid rgba(253, 8, 8, 0.29);
+    border: 1px solid #ba0011;
 }
 
 select, textarea, text, input {
@@ -55,7 +75,6 @@ select, textarea, text, input {
 hr {
     border: 1px solid #cccccc;
 }
-
 
 .formFieldError{
     font-weight: bold;

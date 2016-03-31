@@ -53,11 +53,13 @@
                     vs.representative = null
                     this.representativeFullName = this.representative.firstName + " " + this.representative.lastName
                     sendSignalVS({caption:"${msg.editRepresentativeLbl}"})
+                    this.subject = "${msg.editRepresentativeLbl}"
                     this.$.editor.setContent(window.atob(this.representative.description))
                 } else {
                     this.representativeFullName = null;
                     this.$.editor.setContent("")
                     sendSignalVS({caption:"${msg.newRepresentativeLbl}"})
+                    this.subject = "${msg.newRepresentativeLbl}"
                 }
             },
             submitForm: function() {
@@ -67,9 +69,16 @@
                 }
                 var operationVS = new OperationVS(Operation.EDIT_REPRESENTATIVE)
                 operationVS.serviceURL = vs.contextURL + "/rest/representative/save"
-                operationVS.subject = "${msg.newRepresentativeLbl}"
+                operationVS.subject = this.subject
                 var description = window.btoa(this.$.editor.getContent())
                 operationVS.jsonStr = JSON.stringify({description:description, base64Image:this.selectedFileBase64})
+                operationVS.setCallback(function(socketMessage) {
+                    if(ResponseVS.SC_OK === socketMessage.statusCode) {
+                        var msgDto = toJSON(socketMessage.message)
+                        page(msgDto.url)
+                        this.resetForm()
+                    } else alert(socketMessage.message, "${msg.errorLbl}")
+                }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
             },
             loadFile:function(file) {
@@ -81,6 +90,11 @@
                 };
                 console.log(file);
                 reader.readAsDataURL(file);
+            },
+            resetForm:function() {
+                if(this.$.editor.editorLoaded === true) this.$.editor.setContentText("")
+                this.$.holder.innerHTML = ""
+                this.selectedFileBase64 = null
             },
             handleFileSelect:function(evt) {
                 var files = evt.target.files; // FileList object
@@ -102,7 +116,7 @@
                     reader.onload = function (event) {
                         console.log(event.target);
                         holder.style.background = 'url(' + event.target.result + ') no-repeat center';
-                        this.selectedFileBase64 = event.target.result
+                        this.selectedFileBase64 = event.target.result.split(",")[1]
                     }.bind(this);
                     reader.readAsDataURL(this.selectedFile);
                 }

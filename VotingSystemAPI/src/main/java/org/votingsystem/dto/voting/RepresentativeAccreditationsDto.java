@@ -25,13 +25,13 @@ public class RepresentativeAccreditationsDto {
     public RepresentativeAccreditationsDto() {}
 
     public void validate() throws ExceptionVS {
-        if(TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST != getOperation()) throw new ValidationException(
+        if(TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST != operation) throw new ValidationException(
                 format("ERROR - operation missmatch - expected: {0} - found: {1}",
                         TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST, getOperation()));
         setRepresentativeNif(NifUtils.validate(getRepresentativeNif()));
-        if(getEmail() == null) throw new ValidationException("missing param 'email'");
-        if(getSelectedDate() == null) throw new ValidationException("missing param 'selectedDate'");
-        if(getUUID() == null) throw new ValidationException("missing param 'UUID'");
+        if(email == null) throw new ValidationException("missing param 'email'");
+        if(selectedDate == null) throw new ValidationException("missing param 'selectedDate'");
+        if(UUID == null) throw new ValidationException("missing param 'UUID'");
     }
 
     public TypeVS getOperation() {

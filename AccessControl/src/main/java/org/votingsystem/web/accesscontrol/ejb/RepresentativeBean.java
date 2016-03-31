@@ -374,10 +374,9 @@ public class RepresentativeBean {
     }
 
     @Asynchronous
-    public void processVotingHistoryRequest(CMSMessage cmsMessage, String messageTemplate) throws Exception {
-        MessagesVS messages = MessagesVS.getCurrentInstance();
+    public void processVotingHistoryRequest(CMSMessage cmsMessage, String messageTemplate, Locale locale) throws Exception {
+        ResourceBundle bundle = ResourceBundle.getBundle(config.getProperty("vs.bundleBaseName"), locale);
         try {
-            CMSSignedMessage cmsSignedMessage = cmsMessage.getCMS();
             User user = cmsMessage.getUser();
             RepresentativeVotingHistoryDto request = cmsMessage.getSignedContent(RepresentativeVotingHistoryDto.class);
             request.validate();
@@ -393,7 +392,8 @@ public class RepresentativeBean {
                     representative, cmsMessage, request.getEmail()));
             String downloadURL = config.getContextURL() + "/rest/backup/request/id/" + backupRequest.getId() + "/download";
             String requestURL = config.getContextURL() + "/rest/backup/request/id/" + backupRequest.getId();
-            String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
+            String subject = MessageFormat.format(bundle.getString("representativeVotingHistoryMailSubject"),
+                    representative.getName());
             String content = MessageFormat.format(messageTemplate, user.getName(), requestURL, representative.getName(),
                     DateUtils.getDayWeekDateStr(request.getDateFrom(), "HH:mm"), DateUtils.getDayWeekDateStr(request.getDateTo(), "HH:mm"),
                     downloadURL);
@@ -404,8 +404,8 @@ public class RepresentativeBean {
     }
 
     @Asynchronous
-    public void processAccreditationsRequest(CMSMessage cmsMessage, String messageTemplate) throws Exception {
-        MessagesVS messages = MessagesVS.getCurrentInstance();
+    public void processAccreditationsRequest(CMSMessage cmsMessage, String messageTemplate, Locale locale) throws Exception {
+        ResourceBundle bundle = ResourceBundle.getBundle(config.getProperty("vs.bundleBaseName"), locale);
         try {
             User user = cmsMessage.getUser();
             RepresentativeAccreditationsDto request = cmsMessage.getSignedContent(RepresentativeAccreditationsDto.class);
@@ -420,7 +420,8 @@ public class RepresentativeBean {
                     TypeVS.REPRESENTATIVE_ACCREDITATIONS_REQUEST, representative, cmsMessage, request.getEmail()));
             String downloadURL = config.getContextURL() + "/rest/backup/request/id/" + backupRequest.getId() + "/download";
             String requestURL = config.getContextURL() + "/rest/backup/request/id/" + backupRequest.getId();
-            String subject = messages.get("representativeAccreditationsMailSubject", backupRequest.getRepresentative().getName());
+            String subject = MessageFormat.format(bundle.getString("representativeAccreditationsMailSubject"),
+                    representative.getName());
             String content = MessageFormat.format(messageTemplate, user.getName(), requestURL, representative.getName(),
                     DateUtils.getDayWeekDateStr(request.getSelectedDate(), "HH:mm"), downloadURL);
             mailBean.send(request.getEmail(), subject, content);

@@ -5,10 +5,14 @@
 <dom-module name="representative-list">
     <template>
         <style>
+        .representativeDiv:hover {
+            border: 1px solid orange;
+        }
         .representativeDiv {
             width:300px;
             background-color: #fefefe;
-            border: 1px solid #6c0404;
+            color: #888;
+            border: 1px solid #888;
             box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.24);
             margin: 10px 15px 10px 0px;
             -moz-border-radius: 5px;
@@ -25,10 +29,10 @@
                 <template is="dom-repeat" items="{{representativeListDto.resultList}}">
                     <div on-tap="showRepresentativeDetails" class='representativeDiv horizontal layout center center center-justified'>
                         <div>
-                            <img  style=' max-width: 90px;' src='{{item.imageURL}}'/>
+                            <img  style=' max-width: 90px; margin: 0 5px 0 0;' src='{{item.imageURL}}'/>
                         </div>
-                        <div>
-                            <p style="text-overflow: ellipsis; font-weight: bold;"><span>{{item.name}}</span></p>
+                        <div class="flex">
+                            <p style="text-overflow: ellipsis; font-weight: bold;"><span>{{item.firstName}} {{item.lastName}}</span></p>
                             <div style='margin: 0px 10px 3px 0px;text-align: right;font-size: 0.9em;'>
                                 <span>{{item.numRepresentations}}</span> ${msg.numDelegationsPartMsg}
                             </div>

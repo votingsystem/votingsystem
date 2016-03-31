@@ -30,14 +30,14 @@
                     </div>
                 </div>
                 <div class="horizontal layout center center-justified" style="margin:10px 0 10px 0;">
-                    <input id="email" type="email" name="email" title="${msg.emailLbl}" placeholder="${msg.emailLbl}" required>
+                    <input id="email" type="email" name="email" title="${msg.emailLbl}" placeholder="${msg.emailLbl}" style="border: 1px solid #ba0011;">
                 </div>
-                <div class="layout horizontal">
+                <div class="layout horizontal" style="margin: 10px 15px 20px 0;">
                     <div class="flex"></div>
                     <div>
-                        <button on-click="submitForm">
+                        <a class="buttonvs" on-click="submitForm">
                             <i class="fa fa-check"></i> ${msg.acceptLbl}
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -79,6 +79,11 @@
                     dateTo:this.$.dateToPicker.getDate().getTime()})
                 operationVS.serviceURL = vs.contextURL + "/rest/representative/history"
                 operationVS.subject = '${msg.requestVotingHistoryLbl}'
+                operationVS.setCallback(function(socketMessage) {
+                    if(ResponseVS.SC_OK === socketMessage.statusCode) {
+                        alert(socketMessage.message)
+                    } else alert(socketMessage.message, "${msg.errorLbl}")
+                }.bind(this))
                 VotingSystemClient.setMessage(operationVS);
                 this.close()
             },

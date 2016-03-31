@@ -59,20 +59,14 @@
                 </div>
 
                 <div hidden="{{!votingTabSelected}}" class="tabContent">
-                    <div>
-                        <div class="horizontal layout center center-justified" style="margin: 10px 0 0 0;">
-                            <div>
-                                <div class="buttonvs" id="votingHistoryButton" style="margin:0px 20px 0px 0px; width:300px;"
-                                         on-click="requestVotingHistory">
-                                    ${msg.requestVotingHistoryLbl}
-                                </div>
-                            </div>
-                            <div>
-                                <div class="buttonvs" id="accreditationRequestButton" style="margin:0px 20px 0px 0px; width:300px;"
-                                        on-click="requestAccreditations">
-                                    ${msg.requestRepresentativeAcreditationsLbl}
-                                </div>
-                            </div>
+                    <div class="vertical layout center" style="margin: 10px auto;">
+                        <div class="buttonvs" id="votingHistoryButton" style="margin:10px 0 0 0; width:230px;"
+                             on-click="requestVotingHistory">
+                            ${msg.requestVotingHistoryLbl}
+                        </div>
+                        <div class="buttonvs" id="accreditationRequestButton" style="margin:20px 0 0 0; width:230px;"
+                             on-click="requestAccreditations">
+                            ${msg.requestRepresentativeAcreditationsLbl}
                         </div>
                     </div>
                 </div>
