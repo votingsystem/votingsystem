@@ -65,7 +65,7 @@
                             operationVS.subject = "${msg.cancelCertMessageSubject}"
                             var signedContent = {operation:Operation.CERT_EDIT, reason:e.detail,
                                 changeCertToState:"${Certificate.State.CANCELED.toString()}", serialNumber:"${certMap.serialNumber}"}
-                            operationVS.jsonStr = JSON.stringify()
+                            operationVS.jsonStr = JSON.stringify(signedContent)
                             operationVS.setCallback(function() {
                                 this.url = vs.contextURL + "/rest/certificate/serialNumber/${certMap.serialNumber}"
                             })

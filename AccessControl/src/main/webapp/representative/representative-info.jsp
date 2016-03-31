@@ -102,7 +102,7 @@
         </div>
 
         <image-viewer-dialog id="representativeImage" url="{{representative.imageURL}}" description="{{representativeFullName}}"></image-viewer-dialog>
-        <representative-cancel-dialog id="representativeRevokeDialog"></representative-cancel-dialog>
+        <representative-cancel-dialog id="representativeCancelDialog"></representative-cancel-dialog>
         <representative-select-dialog id="selectRepresentativeDialog"></representative-select-dialog>
         <representative-request-accreditations-dialog id="accreditationsDialog"></representative-request-accreditations-dialog>
         <representative-request-votinghistory-dialog id="votingHistoryDialog"></representative-request-votinghistory-dialog>
@@ -116,7 +116,7 @@
                 representative:{type:Object, value:{}, observer:'representativeChanged'},
             },
             revokeRepresentative:function(){
-                this.$.representativeRevokeDialog.show(this.representative)
+                this.$.representativeCancelDialog.show(this.representative)
                 this.closeAdminDialog();
             },
             editRepresentative:function(){

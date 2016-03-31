@@ -20,22 +20,28 @@
                                caption="${msg.dateBeginLbl}"> </vs-datepicker>
             </div>
             <vs-editor id="editor"></vs-editor>
-            <div style="margin: 5px 0 0 5px;">
-                <button on-click="addOption">${msg.missingOptionsErrorMsg}</button>
+            <div style="margin: 15px 0 0 15px;font-size: 0.9em;">
+                <a class="buttonvs" on-click="addOption">
+                    <i class="fa fa-check"></i> ${msg.missingOptionsErrorMsg}
+                </a>
             </div>
             <template is="dom-repeat" items="{{optionList}}">
-                <div class="horizontal layout center" style="margin: 10px 0 0 5px;">
-                    <div class="numVotesClass" style="margin:0 10px 0 0;">
-                        <button on-click="removeOption"><i class="fa fa-times"></i> ${msg.deleteLbl}</button>
-                    </div>
-                    <div style="font-size: 2em; font-weight: bold;">
+                <div style="margin: 15px 0 0 25px;font-size: 0.8em;">
+                    <a class="buttonvs" on-click="removeOption">
+                        <i class="fa fa-times" style="color: #ba0011;"></i> ${msg.deleteLbl}
+                    </a>
+                    <span style="font-size: 2em; font-weight: bold;margin: 0 0 0 10px;">
                         {{item}}
-                    </div>
+                    </span>
                 </div>
             </template>
             <div class="horizontal layout">
                 <div class="flex"></div>
-                <button on-click="submitForm"><i class="fa fa-check"></i> ${msg.acceptLbl}</button>
+                <div style="margin: 0 15px 0 0;">
+                    <a class="buttonvs" on-click="submitForm">
+                        <i class="fa fa-check"></i> ${msg.acceptLbl}
+                    </a>
+                </div>
             </div>
         </div>
         <reason-dialog id="reasonDialog" caption="${msg.enterOptionLbl}"></reason-dialog>

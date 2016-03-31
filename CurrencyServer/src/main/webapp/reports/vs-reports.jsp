@@ -1,6 +1,4 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<fmt:setBundle basename="org.votingsystem.web.currency.messages" var="bundle"/>
 
 <dom-module name="vs-reports">
     <template>
@@ -37,16 +35,12 @@
             </div>
             <div class="layout vertical center center-justified" style="margin:30px auto;">
                 <h2 style="text-decoration: underline;">${msg.toolsLbl}</h2>
-                <div style="margin:0 0 20px 0;">
-                    <fmt:message key="nativeClientURLMsg" bundle="${bundle}">
-                        <fmt:param value="${contextURL}/tools/NativeClient.zip"/>
-                    </fmt:message>
-                </div>
-                <div style="font-size: 0.8em;">
-                    <fmt:message key="javaRequirementsMsg" bundle="${bundle}">
-                        <fmt:param value="http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html#javasejdk"/>
-                    </fmt:message>
-                </div>
+                <a class="buttonvs" style="width: 280px; margin: 10px 0 0 0; font-size: 1.1em;" href="${contextURL}/tools/NativeClient.zip">
+                    <i class="fa fa-download"></i> ${msg.validationToolMsg}
+                </a>
+                <a href="http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html#javasejdk">
+                    ${msg.javaRequirementsMsg}
+                </a>
             </div>
         </div>
     </template>

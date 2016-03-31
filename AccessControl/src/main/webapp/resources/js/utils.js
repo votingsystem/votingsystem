@@ -238,6 +238,11 @@ function VotingSystemClient () { }
 var clientTool
 VotingSystemClient.setMessage = function (messageJSON) {
     if(clientTool !== undefined) {
+        if(messageJSON.jsonStr) {
+                var jsonData = toJSON(messageJSON.jsonStr)
+                jsonData.UUID =  vs.getUUID()
+                messageJSON.jsonStr = JSON.stringify(jsonData)
+            }
         var messageToSignatureClient = JSON.stringify(messageJSON);
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
@@ -262,6 +267,14 @@ function sendSignalVS(signalData) {
 function checkIfClientToolIsConnected() {
     return (clientTool !== undefined) ||  (window.parent.clientTool !== undefined)
 }
+
+vs.getUUID = function() {
+    //http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript?rq=1
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
+    });
+},
 
 //Message -> base64 encoded JSON
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Base64_encoding_and_decoding#Solution_.232_.E2.80.93_rewriting_atob()_and_btoa()_using_TypedArrays_and_UTF-8

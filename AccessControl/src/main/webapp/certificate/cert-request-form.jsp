@@ -88,8 +88,7 @@
             operationVS.serviceURL = vs.contextURL + "/rest/csr/request"
             operationVS.subject = "${msg.certRequestLbl}"
             operationVS.jsonStr = JSON.stringify({nif:validateNIF(this.$.nif.value), givenname:this.$.givenname.value.toUpperCase(),
-                surname:this.$.surname.value.toUpperCase(), mobilePhone:this.$.phone.value, email:this.$.email.value,
-                UUID:"${spa.getUUID()}"})
+                surname:this.$.surname.value.toUpperCase(), mobilePhone:this.$.phone.value, email:this.$.email.value})
             operationVS.setCallback(function(appMessage) { this.showResponse(appMessage) }.bind(this))
             VotingSystemClient.setMessage(operationVS);
         },

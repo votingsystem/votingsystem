@@ -23,9 +23,9 @@
                     <input type="file" id="imageFile" accept=".jpg, .png, .jpeg, .gif|image/*/">
                 </div>
                 <div class="flex"></div>
-                <div>
-                    <button on-click="submitForm"><i class="fa fa-check"></i> ${msg.acceptLbl}</button>
-                </div>
+                <a class="buttonvs" on-click="submitForm">
+                    <i class="fa fa-check"></i> ${msg.acceptLbl}
+                </a>
             </div>
             <div id="holder" style="width: 250px;height: 250px;"></div>
         </div>
@@ -34,7 +34,7 @@
         Polymer({
             is:'representative-editor',
             properties:{
-                representativeImageMaxSize: { type: Number, value: 102400 },
+                representativeImageMaxSize: { type: Number, value: 1024*1024 },
             },
             ready: function() {
                 console.log(this.tagName + " - ready")

@@ -85,9 +85,6 @@ body {
     box-shadow: 1px 2px 1px 0px #888;
 }
 
-button i{color: #388746; }
-button {font-size: 1em; }
-
 input:required {
     border: 1px solid rgba(253, 8, 8, 0.29);
 }
@@ -141,7 +138,6 @@ hr {
     background-color: #fff;
     background-image: none;
     border: 1px solid #ccc;
-    border-radius: 4px;
     -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
     -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;

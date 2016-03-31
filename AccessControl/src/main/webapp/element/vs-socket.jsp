@@ -88,7 +88,6 @@
                 this.$.qrDialog.close()
             },
             showOperationQRCode:function (socketSystem, operationVS, operationCode) {
-                console.log("showOperationQRCode")
                 if(!operationCode) {
                     operationCode = this.getOperationCode()
                     this.qrOperationsMap[operationCode] = operationVS
@@ -102,7 +101,12 @@
                 return operationCode
             },
             sendOperation: function(socketMessage, operation) {
-                operation.uuid = this.getUUID()
+                operation.uuid = vs.getUUID()
+                if(operation.jsonStr) {
+                    var jsonData = toJSON(operation.jsonStr)
+                    jsonData.UUID =  vs.getUUID()
+                    operation.jsonStr = JSON.stringify(jsonData)
+                }
                 var socketMessage = {operation:"MSG_TO_DEVICE", messageType:"OPERATION_PROCESS",
                     deviceFromId:vs.deviceId, deviceToId:socketMessage.deviceFromId,
                     operationCode:socketMessage.operationCode,
@@ -112,13 +116,6 @@
             },
             getOperationCode: function() {
                 return Math.random().toString(36).substring(2, 6).toUpperCase();
-            },
-            getUUID: function() {
-                //http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript?rq=1
-                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-                    return v.toString(16);
-                });
             },
             getQRCodeURL:function(operation, operationCode, deviceId, key, size, server) {
                 if(!size) size = "100x100"
