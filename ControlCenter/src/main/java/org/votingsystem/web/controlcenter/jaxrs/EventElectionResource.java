@@ -128,12 +128,7 @@ public class EventElectionResource {
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - EventElection not found - eventId: " + id).build();
         EventVSStatsDto statsDto = eventVSBean.getStats(eventVS);
-        if(contentType.contains("json")) {
-            return Response.ok().entity(JSON.getMapper().writeValueAsBytes(statsDto)).type(MediaType.JSON).build();
-        } else {
-            req.getSession().setAttribute("statsDto", JSON.getMapper().writeValueAsString(statsDto));
-            return Response.temporaryRedirect(new URI("../eventElection/stats.xhtml")).build();
-        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(statsDto)).type(MediaType.JSON).build();
     }
 
     @Path("/id/{id}/publishRequest") @GET

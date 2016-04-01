@@ -34,9 +34,7 @@
                     <i class="fa fa-cogs"></i>
                 </div>
             </div>
-            <div class="horizontal layout">
-                <div style="color: #888;font-size: 1.1em;">{{getDate(eventvs.dateBegin)}}</div>
-            </div>
+            <div style="color: #888;font-size: 1.1em; text-align: center">{{getDate(eventvs.dateBegin)}}</div>
             <div style="width: 100%;">
                 <div id="eventContentDiv" style="border: 1px solid #ccc;padding: 0 7px;"></div>
 

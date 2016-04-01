@@ -240,7 +240,7 @@ VotingSystemClient.setMessage = function (messageJSON) {
     if(clientTool !== undefined) {
         if(messageJSON.jsonStr) {
                 var jsonData = toJSON(messageJSON.jsonStr)
-                jsonData.UUID =  vs.getUUID()
+                jsonData.uuid =  vs.getUUID()
                 messageJSON.jsonStr = JSON.stringify(jsonData)
             }
         var messageToSignatureClient = JSON.stringify(messageJSON);

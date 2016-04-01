@@ -18,11 +18,11 @@
                 position: relative;
             }
             .eventDateBeginDiv {
-                margin: 0px 7px 10px 0;
-                text-align: right;
-                font-size: 1.1em;
+                margin: 0px 7px 0px 0;
+                text-align: center;
                 color: #888;
                 font-weight: bold;
+                border-bottom: 1px dotted #888;
             }
             .eventBodyDiv {
                 width: 100%;
@@ -42,22 +42,18 @@
                 font-weight:bold;
                 font-size: 1.9em;
             }
-            .eventVSActive { border: 1px solid #388746; }
-            .eventVSActive .eventSubjectDiv{ color:#388746; }
-            .eventVSActive .eventStateDiv{ color:#388746; }
-            .eventVSPending { border: 1px solid #fba131; }
-            .eventVSPending .eventSubjectDiv{ color:#fba131; }
-            .eventVSPending .eventStateDiv{ color:#fba131; }
             .eventSubjectDiv {
                 font-size: 1.1em;
                 display: block;
                 font-weight:bold;
-                padding: 5px 5px 5px 5px;
+                padding: 0px 5px 5px 5px;
             }
+            .eventDiv:hover { border: 1px solid greenyellow; }
             .eventDiv {
                 display:inline;
                 width:280px;
-                background-color: #f2f2f2;
+                height: 100%;
+                background-color: #fefefe;
                 margin: 10px 5px 5px 10px;
                 -moz-border-radius: 5px; border-radius: 3px;
                 cursor: pointer; cursor: hand;
@@ -86,6 +82,12 @@
                 float:right;
                 position: relative;
             }
+            .eventVSActive { border: 1px solid #388746; }
+            .eventVSActive .eventSubjectDiv{ color:#388746; }
+            .eventVSActive .eventStateDiv{ color:#388746; }
+            .eventVSPending { border: 1px solid #fba131; }
+            .eventVSPending .eventSubjectDiv{ color:#fba131; }
+            .eventVSPending .eventStateDiv{ color:#fba131; }
             .eventVSFinished .eventRemainingDiv{ display: none; }
             .eventVSFinished { border: 1px solid #cc1606; }
             .eventVSFinished .eventSubjectDiv{ color:#cc1606; }
@@ -105,16 +107,17 @@
             <div class="layout flex horizontal wrap around-justified">
                 <template is="dom-repeat" items="{{eventListDto.resultList}}">
                     <div on-tap="showEventVSDetails" class$='{{getEventVSClass(item.state)}}'>
+                        <div class='eventDateBeginDiv'>{{getDate(item.dateBegin)}}</div>
                         <div  eventvs-id="{{item.id}}" class='eventSubjectDiv' style="text-align: center;">{{getSubject(item.subject)}}</div>
                         <div class="eventBodyDiv flex">
-                            <div class='eventDateBeginDiv'>{{getDate(item.dateBegin)}}</div>
+
                             <div class='eventAuthorDiv'>
                                 <div class='eventAuthorValueDiv'>{{item.user}}</div>
                             </div>
                             <div hidden="{{!isCanceled(item)}}" class='cancelMessage'>${msg.eventCancelledLbl}</div>
                         </div>
                         <div class='eventDivFooter'>
-                            <div class='eventRemainingDiv'>{{getElapsedTime(item.dateFinish)}}</div>
+                            <div class='eventRemainingDiv'>{{getElapsedTime(item)}}</div>
                             <div class='eventStateDiv'>{{getMessage(item.state)}}</div>
                         </div>
                     </div>
@@ -160,10 +163,10 @@
                 this.$.vspager.style.display = 'block'
             },
             pagerChange:function(e) {
-                console.log("eventStateSelect: " + this.eventVSState)
+                console.log("pagerChange - event state: " + this.eventVSState)
                 this.$.vspager.style.display = 'none'
-                targetURL = vs.contextURL + "/rest/eventElection?menu=" + menuType + "&eventVSState=" +
-                        this.eventVSState + "&max=" + e.detail.max + "&offset=" + e.detail.offset
+                targetURL = vs.contextURL + "/rest/eventElection?eventVSState=" + this.eventVSState + "&max=" +
+                        e.detail.max + "&offset=" + e.detail.offset
                 console.log(this.tagName + " - pagerChange - targetURL: " + targetURL)
                 history.pushState(null, null, targetURL);
                 this.url = targetURL

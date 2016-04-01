@@ -145,7 +145,7 @@ public class EventElectionBean {
     }
 
     public EventVSStatsDto getStats (EventElection eventVS) {
-        EventVSStatsDto statsDto = new EventVSStatsDto();
+        EventVSStatsDto statsDto = new EventVSStatsDto(eventVS);
         statsDto.setId(eventVS.getId());
         statsDto.setSubject(eventVS.getSubject() + " - 'this is inside simple quotes' - ");
         Query query = dao.getEM().createQuery("select count(v) from Vote v where v.eventVS =:eventVS and v.state =:state")
