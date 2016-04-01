@@ -39,7 +39,6 @@ public class DeviceResource {
         if(device == null) return Response.status(Response.Status.NOT_FOUND).entity(
                 "ERROR - Device not found - id:" + deviceId).build();
         DeviceDto dto = new DeviceDto(device);
-        dto.setSessionId(SessionManager.getInstance().getDeviceSessionId(device.getId()));
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
@@ -79,11 +78,10 @@ public class DeviceResource {
     public Response connectedDevice(@PathParam("deviceId") Long deviceId,
             @DefaultValue("false") @QueryParam("getAllDevicesFromOwner") boolean getAllDevicesFromOwner) throws Exception {
         Set<DeviceDto> deviceSetDto = new HashSet<>();
-        String sessionId = SessionManager.getInstance().getDeviceSessionId(deviceId);
+        Session session = SessionManager.getInstance().getDeviceSession(deviceId);
         User user = null;
         Device device = null;
-        if(sessionId != null) {
-            Session session = SessionManager.getInstance().getAuthenticatedSession(sessionId);
+        if(session != null) {
             user = (User) session.getUserProperties().get("user");
             device = (Device) session.getUserProperties().get("device");
             if(device != null) deviceSetDto.add(new DeviceDto(device));

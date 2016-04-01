@@ -42,7 +42,6 @@ public class WebSocketBean {
     public void processRequest(SocketMessageDto messageDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         CMSMessage cmsMessage = null;
-        SocketMessageDto signedMessageDto = null;
         User signer = null;
         SocketMessageDto responseDto = null;
         Device browserDevice = null;
@@ -55,15 +54,6 @@ public class WebSocketBean {
                 } else messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                         messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_NOT_FOUND,
                                 messages.get("webSocketDeviceSessionNotFoundErrorMsg"))));
-                break;
-            case INIT_BROWSER_SESSION:
-                browserDevice = new Device(SessionManager.getInstance().getAndIncrementBrowserDeviceId())
-                        .setType(Device.Type.BROWSER).setDeviceId(UUID.randomUUID().toString());
-                messageDto.getSession().getUserProperties().put("device", browserDevice);
-                SessionManager.getInstance().putBrowserDevice(messageDto.getSession(), browserDevice);
-                SocketMessageDto response = messageDto.getServerResponse(ResponseVS.SC_OK, null)
-                        .setMessage(browserDevice.getId().toString()).setMessageType(TypeVS.INIT_BROWSER_SESSION);
-                messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(response));
                 break;
             case CLOSE_SESSION:
                 cmsMessage = cmsBean.validateCMS(messageDto.getCMS(), null).getCmsMessage();
@@ -84,8 +74,8 @@ public class WebSocketBean {
                             messageDto.getServerResponse(ResponseVS.SC_ERROR, messages.get("remoteCSRErrorMsg",
                             signer.getNameAndId(), userFromCSR.getNameAndId()))));
                 } else {
-                    Session remoteSession = SessionManager.getInstance().getSession(
-                            remoteSignedSessionDto.getSessionId());
+                    Session remoteSession = SessionManager.getInstance().getDeviceSession(
+                            remoteSignedSessionDto.getDeviceId());
                     if(remoteSession == null) {
                         messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                                 messageDto.getServerResponse(ResponseVS.SC_ERROR, messages.get(

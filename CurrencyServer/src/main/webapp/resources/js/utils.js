@@ -319,10 +319,43 @@ function VotingSystemClient () { }
 var clientTool
 VotingSystemClient.setMessage = function (messageJSON) {
     if(clientTool !== undefined) {
+        if(messageJSON.jsonStr) {
+            var jsonData = toJSON(messageJSON.jsonStr)
+            jsonData.uuid =  vs.getUUID()
+            messageJSON.jsonStr = JSON.stringify(jsonData)
+        }
         var messageToSignatureClient = JSON.stringify(messageJSON);
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings
         clientTool.setMessage(window.btoa(encodeURIComponent( escape(messageToSignatureClient))))
-    } else console.log("clientTool undefined - operation: " + messageJSON.operation)
+    } else {
+        Polymer.Base.importHref(vs.contextURL + '/element/vs-socket.vsp', function () {
+            if (!vs.socketElement) {
+                vs.socketElement = document.createElement('vs-socket');
+                document.querySelector("#voting_system_page").appendChild(vs.socketElement)
+                vs.socketElement.connect()
+                socketElementListeners.forEach(function (element) {
+                    vs.socketElement.addEventListener(element.type, element.listener)
+                })
+                socketElementListeners = []
+            }
+            if(messageJSON.operation === "ACCESS_QR_CODE") vs.socketElement.showAccessQRCode()
+            else vs.socketElement.showOperationQRCode(vs.socketElement.CURRENCY_SYSTEM, messageJSON)
+        });
+    }
+}
+
+var socketElementListeners = []
+VotingSystemClient.addSocketEventListener = function (type, listener) {
+    if(vs.socketElement) vs.socketElement.addEventListener(type, listener)
+    socketElementListeners.push({type:type, listener:listener})
+}
+
+VotingSystemClient.showAccessQRCode = function () {
+    VotingSystemClient.setMessage(new OperationVS("ACCESS_QR_CODE"))
+}
+
+VotingSystemClient.disconnect = function () {
+    if(vs.socketElement) vs.socketElement.disconnect
 }
 
 function querySelector(selector) {

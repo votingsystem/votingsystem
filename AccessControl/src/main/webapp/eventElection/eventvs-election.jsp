@@ -48,12 +48,11 @@
                         {{eventvs.user}}
                     </div>
                 </div>
-
-                <div class="horizontal layout center center-justified" style="width: 100%; margin: 15px 0 0 0;">
-                    <div hidden="{{!isActive}}" style="margin: 0 30px 0 0;">
-                        <img id="qrImg"  src="" style="border: 1px solid #ccc;"/>
+                <div class="layout horizontal wrap" style="margin: 15px auto 0 0;">
+                    <div hidden="{{!isActive}}">
+                        <img id="qrImg"  src="" style="border: 1px solid #ccc;margin: 0 30px 0 30px;"/>
                     </div>
-                    <div style="width: 600px;margin: 0 auto;">
+                    <div style="width: 600px;">
                         <eventvs-election-stats id="eventStats"></eventvs-election-stats>
                     </div>
                 </div>

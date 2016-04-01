@@ -77,13 +77,10 @@ public class SocketEndpoint {
                 }
                 sessionSet.add(session);
             }
-
             Device device = new Device(SessionManager.getInstance().getAndIncrementBrowserDeviceId())
                     .setType(Device.Type.BROWSER).setDeviceId(UUID.randomUUID().toString());
             session.getUserProperties().put("device", device);
             SessionManager.getInstance().putBrowserDevice(session, device);
-
-
             session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
                     SocketMessageDto.INIT_SESSION_RESPONSE(device.getId())));
         }catch (Exception ex) {

@@ -3,8 +3,8 @@ forge.oids["givenName"] = '2.5.4.42'
 forge.oids['2.5.4.4'] = "surname"
 forge.oids["surname"] = '2.5.4.4'
 
-var RSAUtil = function() {
-    var keyLength = 2048
+var RSAUtil = function(keyLength) {
+    if(!keyLength) keyLength = 2048
     this.rsa = forge.pki.rsa;
     // generate an RSA key pair synchronously
     console.log("RSAUtil - keyLength: " + keyLength)
@@ -84,8 +84,7 @@ RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
     var decryptedMsg = this.decryptCMS(messageJSON.encryptedMessage)
     if(decryptedMsg.content && decryptedMsg.content.data) {
         var encryptedContentJSON = toJSON(decryptedMsg.content.data)
-        messageJSON.messageType = messageJSON.operation
-        messageJSON.operation = encryptedContentJSON.operation
+        messageJSON.messageType = encryptedContentJSON.operation
 
         if(encryptedContentJSON.operationCode != null) messageJSON.operationCode = encryptedContentJSON.operationCode;
         if(encryptedContentJSON.statusCode != null) messageJSON.statusCode = encryptedContentJSON.statusCode;

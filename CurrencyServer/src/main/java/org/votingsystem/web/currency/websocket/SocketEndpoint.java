@@ -17,6 +17,7 @@ import javax.websocket.server.ServerEndpoint;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,14 +69,20 @@ public class SocketEndpoint {
         SessionManager.getInstance().put(session);
         try {
             HttpSession httpSession = ((HttpSession)session.getUserProperties().get(HttpSession.class.getName()));
-            Set<Session> sessionSet = (Set<Session>) httpSession.getAttribute(Session.class.getName());
-            if(sessionSet == null) {
-                sessionSet = new HashSet<>();
-                httpSession.setAttribute(Session.class.getName(), sessionSet);
+            if(httpSession != null) { //connecting from browser
+                Set<Session> sessionSet = (Set<Session>) httpSession.getAttribute(Session.class.getName());
+                if(sessionSet == null) {
+                    sessionSet = new HashSet<>();
+                    httpSession.setAttribute(Session.class.getName(), sessionSet);
+                }
+                sessionSet.add(session);
             }
-            sessionSet.add(session);
+            Device device = new Device(SessionManager.getInstance().getAndIncrementBrowserDeviceId())
+                    .setType(Device.Type.BROWSER).setDeviceId(UUID.randomUUID().toString());
+            session.getUserProperties().put("device", device);
+            SessionManager.getInstance().putBrowserDevice(session, device);
             session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
-                    SocketMessageDto.INIT_SESSION_RESPONSE(session.getId())));
+                    SocketMessageDto.INIT_SESSION_RESPONSE(device.getId())));
         }catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

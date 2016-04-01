@@ -31,7 +31,6 @@ public class WebSocketBean {
     @Transactional
     public void processRequest(SocketMessageDto messageDto) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        Device browserDevice = null;
         switch(messageDto.getOperation()) {
             //Device (authenticated or not) sends message knowing target device id. Target device must be authenticated.
             case MSG_TO_DEVICE:

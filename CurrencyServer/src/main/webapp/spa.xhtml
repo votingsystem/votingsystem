@@ -15,10 +15,7 @@
         <link rel="import" href="./resources/bower_components/layout/layout.html"/>
         <script src="./resources/js/utils.js" type="text/javascript"></script>
         <script src="./resources/js/utils_js.vsp" type="text/javascript"></script>
-        <link href="./resources/d3.html" rel="import"/>
-        <link rel="import" href="./element/access-dialog.vsp"/>
         <link rel="import" href="./resources/routing.xhtml"/>
-        <link rel="import" href="./resources/forgePKCS7.html"/>
     </ui:define>
     <ui:define name="content">
         <div id="spaMainDiv" style="display: none;">
@@ -67,8 +64,6 @@
                         background-color: #f9f9f9; max-width: 1000px; padding: 10px; display: none;"></p>
 
             <div id="mainContent" class="mainContent"></div>
-
-            <access-dialog id="accessDialog"></access-dialog>
         </div>
         </div>
         <script>
@@ -84,41 +79,45 @@
                 }
 
                 document.querySelector("#drawerButton").addEventListener('click', function (event) {
-                    d3.select("#drawer").style({display:'block'});
+                    document.querySelector("#drawer").style.display = 'block'
+                    event.stopPropagation();
                 }, true);
 
-                document.body.addEventListener('click', function (event) {
-                    d3.select("#drawer").style({display:'none'});
-                }, true);
+                document.querySelector("#voting_system_page").addEventListener('click', function (event) {
+                    document.querySelector("#drawer").style.display = 'none'
+                });
+
+                VotingSystemClient.addSocketEventListener("disconnected", function() {
+                    page.show("#{contextURL}/spa.xhtml#!/transactionsDashboard")
+                })
+
+                VotingSystemClient.addSocketEventListener("connected", function() {
+                    page.show(vs.contextURL + "/rest/balance/user/IBAN/" + vs.connectedDevice.iban)
+                })
 
                 document.querySelector("#connectionMsgDiv").addEventListener('click', function (event) {
-                    if(!vs.rsaUtil.x509Certificate) {
-                        var operationCode = vs.operationCode()
-                        vs.qrOperationsMap[operationCode] = {operation:'INIT_REMOTE_SIGNED_SESSION'}
-                        document.querySelector("#accessDialog").show(operationCode, vs.getQRCodeURL(
-                                INIT_REMOTE_SIGNED_SESSION, operationCode, vs.wsId, null,
-                                vs.rsaUtil.publicKeyBase64, "200x200"))
+                    if(vs.connected !== true) {
+                        VotingSystemClient.showAccessQRCode()
                     } else {
                         alert("#{msg.quitConfirmMsg}", "#{msg.messageLbl}", function() {
-                            var socketMessageDto = {operation:"CLOSE_SESSION", uuid:vs.getUUID()}
-                            function signCallback(cmsSignedMessage) {
-                                socketMessageDto.cmsMessagePEM = forge.pkcs7.messageToPem(cmsSignedMessage);
-                                vs.websocket.send(JSON.stringify(socketMessageDto))
-                                page.show("#{contextURL}/spa.xhtml#!/transactionsDashboard")
-                            }
-                            vs.rsaUtil.sign(JSON.stringify(socketMessageDto), signCallback)
+                            VotingSystemClient.disconnect()
                         })
                     }
                 });
 
                 vs.updateMenuView = function() {
                     var appTitle = "${msg.appTitle}"
-                    d3.selectAll(".isAdminView").style("display", "none")
+                    var adminElements = document.querySelectorAll(".isAdminView");
+                    for (var i = 0; i < adminElements.length; ++i) {
+                        adminElements[i].style.display = "none";
+                    }
                     if('admin' === menuType) {
-                        d3.select(".isAdminView").style("display", "block")
+                        for (var i = 0; i < adminElements.length; ++i) {
+                            adminElements[i].style.display = "block";
+                        }
                         appTitle = "${msg.adminPageTitle}"
                     }
-                    d3.select("#pageTitle").text(appTitle)
+                    document.querySelector("#pageTitle").innerText = appTitle
                 }
 
                 vs.loadMainContent = function(newContentNode, caption, searchVisible) {
@@ -126,18 +125,13 @@
                     var mainContentNode = document.getElementById("mainContent")
                     if(mainContentNode.childNodes[0]) mainContentNode.removeChild(mainContentNode.childNodes[0])
                     mainContentNode.appendChild(newContentNode)
-                    newContentNode.addEventListener('click', function (event) {
-                        d3.select("#drawer").style({display:'none'});
-                    })
                     if('admin' === menuType) caption = caption + ' - ${msg.adminLbl}'
-                    if(searchVisible === true) d3.select("#searchDiv").style("display", "block")
-                    else d3.select("#searchDiv").style("display", "none")
-                    d3.selectAll("#drawer .menuItem").each( function(d) {
-                        if(d3.select(this).attr("data-route") === vs.route){
-                            d3.select(this).classed("menuItemSelected", true)
-                        } else d3.select(this).classed("menuItemSelected", false)
-                    })
-
+                    var menuItems = document.querySelectorAll("#drawer .menuItem")
+                    for(var i = 0; i < menuItems.length ; i++) {
+                        if(menuItems[i].getAttribute("data-route") === vs.route) {
+                            menuItems[i].classList.add("menuItemSelected");
+                        } else menuItems[i].classList.remove("menuItemSelected");
+                    }
                 }
 
                 vs.updateSearchMessage = function(searchMessage) {
@@ -160,111 +154,9 @@
                     page.show(vs.contextURL + "/rest/user/id/" + e.detail.id + "?connectedDevices=true")
                 })
                 vs.updateMenuView()
-                initWebsocket()
                 document.querySelector("#spaMainDiv").style.display = "block"
             })
 
-            var INIT_REMOTE_SIGNED_SESSION         = 0;
-            var QR_MESSAGE_INFO                    = 1;
-            var CURRENCY_SEND                      = 2;
-
-
-            function initWebsocket() {
-                var websocket
-                if ('WebSocket' in window) {
-                    websocket = new WebSocket("${webSocketURL}");
-                } else {
-                    alert('WebSocket is not supported by this browser.');
-                }
-                websocket.onopen = function () {
-                    console.log('Info: WebSocket connection opened.');
-                };
-                websocket.onmessage = function (event) {
-                    var messageJSON = toJSON(event.data)
-                    console.log('websocket.onmessage: ', messageJSON);
-                    if("MESSAGEVS_FROM_VS" ===  messageJSON.operation) {
-                        messageJSON.operation = messageJSON.messageType
-                        switch(messageJSON.operation) {
-                            case "INIT_SESSION":
-                                vs.wsSessionId = messageJSON.sessionId
-                                websocket.send(JSON.stringify({operation:"INIT_BROWSER_SESSION"}))
-                                setTimeout( function() {
-                                    vs.rsaUtil = new RSAUtil();
-                                }, 1000 );
-                                break;
-                            case "INIT_BROWSER_SESSION":
-                                if(ResponseVS.SC_OK == messageJSON.statusCode) {
-                                    vs.wsId = messageJSON.message
-                                }
-                                break;
-                            case 'INIT_REMOTE_SIGNED_SESSION':
-                                if(ResponseVS.SC_WS_CONNECTION_INIT_OK == messageJSON.statusCode) {
-                                    vs.connectedDevice = messageJSON.connectedDevice
-                                    vs.mobileDevice = toJSON(messageJSON.message)
-                                    console.log("mobileDevice: ", vs.mobileDevice)
-                                    console.log("connectedDevice: ", vs.connectedDevice)
-                                    vs.rsaUtil.initCSR(vs.connectedDevice.x509CertificatePEM)
-                                    document.querySelector("#connectionMsgDiv").innerHTML = '#{msg.quitLbl}'
-                                    document.querySelector("#accessDialog").close()
-                                    page.show(vs.contextURL + "/rest/balance/user/IBAN/" + vs.connectedDevice.iban)
-                                }
-                                break;
-                            default:
-                                if(messageJSON.statusCode === ResponseVS.SC_WS_CONNECTION_NOT_FOUND) {
-                                    alert(messageJSON.message, "${msg.errorLbl}")
-                                }
-                        }
-
-                    } else {
-                        vs.rsaUtil.decryptSocketMsg(messageJSON)
-                        console.log("decryptedSocketMsg: ", messageJSON)
-                        switch(messageJSON.operation) {
-                            case "QR_MESSAGE_INFO":
-                                var qrOperation = vs.qrOperationsMap[messageJSON.operationCode]
-                                var socketMessageDto = {"operation":"MSG_TO_DEVICE",
-                                    statusCode:700,
-                                    deviceToId:messageJSON.deviceFromId,
-                                    deviceId: vs.wsId, UUID:messageJSON.UUID}
-                                socketMessageDto.encryptedMessage = vs.encryptToCMS(
-                                        messageJSON.x509CertificatePEM, qrOperation)
-                                console.log(socketMessageDto)
-                                websocket.send(JSON.stringify(socketMessageDto))
-                                break;
-                            case 'INIT_REMOTE_SIGNED_SESSION':
-                                var qrOperation = vs.qrOperationsMap[messageJSON.operationCode]
-                                if(qrOperation.operation !== 'INIT_REMOTE_SIGNED_SESSION') {
-                                    throw new Error('INIT_REMOTE_SIGNED_SESSION - qrOperation ERROR');
-                                }
-                                var socketMessageDto = {"operation":"MSG_TO_DEVICE",
-                                    statusCode:700,
-                                    deviceToId:messageJSON.deviceFromId,
-                                    deviceId: vs.wsId}
-                                var userDataFromCert = vs.extractUserInfoFromCert(messageJSON.x509CertificatePEM)
-                                var csr = vs.rsaUtil.getCSR(userDataFromCert)
-                                var remoteSignedSessionDto = {csr:csr, deviceId:vs.wsId, sessionId:vs.wsSessionId}
-                                var encryptedDto = {operation:'INIT_REMOTE_SIGNED_SESSION',
-                                    operationCode:messageJSON.operationCode,
-                                    sessionId: vs.wsSessionId, deviceFromId: vs.wsId,
-                                    message:JSON.stringify(remoteSignedSessionDto),
-                                    uuid:messageJSON.uuid}
-                                socketMessageDto.encryptedMessage = vs.encryptToCMS(
-                                        messageJSON.x509CertificatePEM, encryptedDto)
-                                console.log("INIT_REMOTE_SIGNED_SESSION response: ", socketMessageDto)
-                                websocket.send(JSON.stringify(socketMessageDto))
-                                delete vs.qrOperationsMap[messageJSON.operationCode];
-                                break;
-                        }
-                    }
-                };
-                websocket.onclose = function (event) {
-                    console.log('Info: WebSocket connection closed, Code: ' + event.code +
-                            (event.reason == "" ? "" : ", Reason: " + event.reason));
-                    vs.rsaUtil = null
-                    document.querySelector("#connectionMsgDiv").innerHTML = '#{msg.accessLbl}'
-                    initWebsocket()
-                };
-                vs.websocket = websocket
-            }
             //]]>
         </script>
     </ui:define>

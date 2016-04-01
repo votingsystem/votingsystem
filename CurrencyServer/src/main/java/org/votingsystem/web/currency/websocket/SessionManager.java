@@ -136,17 +136,8 @@ public class SessionManager {
         }
     }
 
-    public String getDeviceSessionId(Long deviceId) {
-        if(!deviceSessionMap.containsKey(deviceId)) return null;
-        else return deviceSessionMap.get(deviceId).getId();
-    }
-
     public static SessionManager getInstance() {
         return instance;
-    }
-
-    public Session getAuthenticatedSession(String sessionId) {
-        return authenticatedSessionMap.get(sessionId);
     }
 
     public Session getNotAuthenticatedSession(String sessionId) {
@@ -233,6 +224,10 @@ public class SessionManager {
         Session deviceSession = deviceSessionMap.get(messageDto.getDeviceToId());
         if(deviceSession == null) return false;
         else return sendMessage(messageDto, deviceSession.getId());
+    }
+
+    public Session getDeviceSession(long deviceId) throws ExceptionVS, JsonProcessingException {
+        return deviceSessionMap.get(deviceId);
     }
 
     private boolean sendMessage(SocketMessageDto messageDto, String deviceToSessionId) throws ExceptionVS {

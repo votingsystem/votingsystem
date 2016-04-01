@@ -13,7 +13,6 @@ public class RemoteSignedSessionDto implements Serializable {
     private static final long serialVersionUID = 1L;
     private String csr;
     private Long deviceId;
-    private String sessionId;
 
     public String getCsr() {
         return csr;
@@ -29,14 +28,6 @@ public class RemoteSignedSessionDto implements Serializable {
 
     public void setDeviceId(Long deviceId) {
         this.deviceId = deviceId;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
     }
 
 }

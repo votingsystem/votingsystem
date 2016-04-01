@@ -22,9 +22,9 @@
 
                 <div class="layout horizontal" style="margin:10px 20px 0px 0px; margin:10px;">
                     <div class="flex"></div>
-                    <button on-click="submitForm">
-                        <i class="fa fa-check" style="color: #388746;"></i> ${msg.acceptLbl}
-                    </button>
+                    <div class="buttonvs" on-click="submitForm">
+                        <i class="fa fa-check"></i> ${msg.acceptLbl}
+                    </div>
                 </div>
             </div>
         </div>

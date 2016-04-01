@@ -42,6 +42,10 @@ body {
     color: #ba0011;
 }
 
+.menuItem i {
+    margin:0px 10px 0px 0px;
+}
+
 .buttonvs {
     padding: 5px 5px 5px 4px;
     text-decoration: none;
@@ -166,6 +170,7 @@ fieldset[disabled] .form-control {
     background-color: #eee;
     opacity: 1;
 }
+
 textarea.form-control {
     height: auto;
 }

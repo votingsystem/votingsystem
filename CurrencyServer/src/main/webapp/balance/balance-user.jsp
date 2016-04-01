@@ -70,7 +70,7 @@
         <vs-datepicker id="datePicker" input-hidden month-labels='[${msg.monthsShort}]' day-labels='[${msg.weekdaysShort}]'
                        caption="${msg.selectWeekLbl}"></vs-datepicker>
 
-        <div id="mainDiv" style="display: none;">
+        <div id="mainDiv" class="pagevs" hidden>
         <div style="padding: 0 20px;">
             <div class="horizontal layout center center-justified">
                 <div class="flex"></div>
@@ -313,7 +313,7 @@
                 this.dateToStr = this.balance.timePeriod.dateTo.getDayWeekFormat()
 
                 this.$.datePicker.setDate(this.balance.timePeriod.dateFrom.getDate())
-                this.$.mainDiv.style.display = 'block'
+                this.$.mainDiv.hidden = null
             },
             goNextPeriod: function () {
                 var currentPeriodEnd =  this.balance.timePeriod.dateTo.getDate();
@@ -346,8 +346,8 @@
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL + " - selectedPeriod:" + this.selectedPeriod)
-                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
-                    this.balance = toJSON(rawData.response)
+                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                    this.balance = toJSON(responseText)
                 }.bind(this));
             }
         });

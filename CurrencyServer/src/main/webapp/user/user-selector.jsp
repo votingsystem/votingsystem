@@ -178,8 +178,8 @@
                 if(!targetURL) targetURL = this.url
                 if(!targetURL) return
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
-                    this.userListDto = toJSON(rawData.response)
+                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                    this.userListDto = toJSON(responseText)
                 }.bind(this));
             }
         });

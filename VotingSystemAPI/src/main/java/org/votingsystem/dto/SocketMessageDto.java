@@ -105,10 +105,6 @@ public class SocketMessageDto {
         return socketMessageDto;
     }
 
-    public static SocketMessageDto INIT_SESSION_RESPONSE(String sessionId) {
-        return null;
-    }
-
     public static SocketMessageDto INIT_SESSION_RESPONSE(Long deviceId) {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setStatusCode(ResponseVS.SC_WS_CONNECTION_INIT_OK);

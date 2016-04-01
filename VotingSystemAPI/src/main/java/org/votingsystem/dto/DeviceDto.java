@@ -21,7 +21,6 @@ public class DeviceDto implements Serializable {
 
     private Long id;
     private String deviceId;
-    private String sessionId;
     private String deviceName;
     private String email;
     private String phone;
@@ -45,15 +44,10 @@ public class DeviceDto implements Serializable {
         this.deviceType = certExtensionDto.getDeviceType();
     }
 
-    public DeviceDto(Long id, String name) {
+    public DeviceDto(Long id, String name, String deviceId) {
         this.setId(id);
         this.setDeviceName(name);
-    }
-
-    public DeviceDto(Long id, String deviceId, String sessionId) {
-        this.setId(id);
         this.setDeviceId(deviceId);
-        this.setSessionId(sessionId);
     }
 
     public static DeviceDto INIT_SIGNED_SESSION(User user) throws Exception {
@@ -146,14 +140,6 @@ public class DeviceDto implements Serializable {
     @JsonIgnore public X509Certificate getX509Certificate() throws Exception {
         if(x509CertificatePEM == null) return null;
         else return PEMUtils.fromPEMToX509Cert(x509CertificatePEM.getBytes());
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
     }
 
     public String getFirstName() {

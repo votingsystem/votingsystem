@@ -31,8 +31,8 @@
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                d3.xhr(targetURL).header("Content-Type", "application/json").get(function(err, rawData){
-                    this.bankListDto = toJSON(rawData.response)
+                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                    this.bankListDto = toJSON(responseText)
                 }.bind(this));
             }
         });
