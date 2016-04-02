@@ -10,56 +10,58 @@
             .tagDesc { background: #6c0404; color: #f9f9f9; padding: 5px;text-align: center; }
             .sectionHeader { font-size: 1.8em; font-weight: bold; color: #ba0011;text-align: center;text-decoration: underline; }
         </style>
-        <div hidden="{{okListHidden}}">
-            <div class="sectionHeader">${msg.activesLbl}</div>
-            <div class="layout flex horizontal wrap around-justified">
-                <template is="dom-repeat" items="{{currencyIssuedDto.okList}}">
-                    <div>
-                        <div class="currencyIssuedBlock">
-                            <div class="currencyIssuedBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
-                            <div class="tagDesc">{{item.name}}</div>
+        <div class="pagevs">
+            <div hidden="{{okListHidden}}">
+                <div class="sectionHeader">${msg.activesLbl}</div>
+                <div class="layout flex horizontal wrap around-justified">
+                    <template is="dom-repeat" items="{{currencyIssuedDto.okList}}">
+                        <div>
+                            <div class="currencyIssuedBlock">
+                                <div class="currencyIssuedBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
+                                <div class="tagDesc">{{item.name}}</div>
+                            </div>
                         </div>
-                    </div>
-                </template>
+                    </template>
+                </div>
             </div>
-        </div>
-        <div hidden="{{expendedListHidden}}" style="margin: 15px 0 0 0;">
-            <div class="sectionHeader">${msg.expendedLbl}</div>
-            <div class="layout flex horizontal wrap around-justified">
-                <template is="dom-repeat" items="{{currencyIssuedDto.expendedList}}">
-                    <div>
-                        <div class="currencyIssuedBlock">
-                            <div class="currencyIssuedBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
-                            <div class="tagDesc">{{item.name}}</div>
+            <div hidden="{{expendedListHidden}}" style="margin: 15px 0 0 0;">
+                <div class="sectionHeader">${msg.expendedLbl}</div>
+                <div class="layout flex horizontal wrap around-justified">
+                    <template is="dom-repeat" items="{{currencyIssuedDto.expendedList}}">
+                        <div>
+                            <div class="currencyIssuedBlock">
+                                <div class="currencyIssuedBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
+                                <div class="tagDesc">{{item.name}}</div>
+                            </div>
                         </div>
-                    </div>
-                </template>
+                    </template>
+                </div>
             </div>
-        </div>
-        <div hidden="{{lapsedListHidden}}" style="margin: 15px 0 0 0;">
-            <div class="sectionHeader">${msg.lapsedLbl}</div>
-            <div class="layout flex horizontal wrap around-justified">
-                <template is="dom-repeat" items="{{currencyIssuedDto.lapsedList}}">
-                    <div>
-                        <div class="currencyIssuedBlock">
-                            <div class="currencyIssuedBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
-                            <div class="tagDesc">{{item.name}}</div>
+            <div hidden="{{lapsedListHidden}}" style="margin: 15px 0 0 0;">
+                <div class="sectionHeader">${msg.lapsedLbl}</div>
+                <div class="layout flex horizontal wrap around-justified">
+                    <template is="dom-repeat" items="{{currencyIssuedDto.lapsedList}}">
+                        <div>
+                            <div class="currencyIssuedBlock">
+                                <div class="currencyIssuedBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
+                                <div class="tagDesc">{{item.name}}</div>
+                            </div>
                         </div>
-                    </div>
-                </template>
+                    </template>
+                </div>
             </div>
-        </div>
-        <div hidden="{{errorListHidden}}" style="margin: 15px 0 0 0;">
-            <div class="sectionHeader">${msg.errorLbl}</div>
-            <div class="layout flex horizontal wrap around-justified">
-                <template is="dom-repeat" items="{{currencyIssuedDto.errorList}}">
-                    <div>
-                        <div class="currencyIssuedBlock">
-                            <div class="currencyIssuedBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
-                            <div class="tagDesc">{{item.name}}</div>
+            <div hidden="{{errorListHidden}}" style="margin: 15px 0 0 0;">
+                <div class="sectionHeader">${msg.errorLbl}</div>
+                <div class="layout flex horizontal wrap around-justified">
+                    <template is="dom-repeat" items="{{currencyIssuedDto.errorList}}">
+                        <div>
+                            <div class="currencyIssuedBlock">
+                                <div class="currencyIssuedBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
+                                <div class="tagDesc">{{item.name}}</div>
+                            </div>
                         </div>
-                    </div>
-                </template>
+                    </template>
+                </div>
             </div>
         </div>
     </template>
@@ -87,9 +89,9 @@
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                vs.getHTTPJSON(targetURL, function(responseText){
                     this.currencyIssuedDto = toJSON(responseText)
-                }.bind(this));
+                }.bind(this))
             }
         })
     </script>

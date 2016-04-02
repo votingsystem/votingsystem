@@ -13,8 +13,8 @@
         <script src="./resources/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
         <link rel="import" href="./resources/bower_components/polymer/polymer.html"/>
         <link rel="import" href="./resources/bower_components/layout/layout.html"/>
-        <script src="./resources/js/utils.js" type="text/javascript"></script>
         <script src="./resources/js/utils_js.vsp" type="text/javascript"></script>
+        <script src="./resources/js/utils.js" type="text/javascript"></script>
         <link rel="import" href="./resources/routing.xhtml"/>
     </ui:define>
     <ui:define name="content">
@@ -48,7 +48,8 @@
             </div>
         </div>
         <div id='main'>
-            <div class="horizontal layout flex" style="background-color: #ba0011;padding: 1px 0 1px 0;min-width:1000px;width:100%;">
+            <div class="horizontal layout flex" style="background-color: #ba0011;box-shadow: 0 3px 3px 0 #ccc;
+                    padding: 1px 0 1px 0;min-width:1000px;width:100%;">
                 <div class="horizontal layout flex">
                     <div style="margin:0 30px 0 30px;">
                         <i id="drawerButton" class="fa fa-navicon navbarIcon" style="font-size: 1.7em; margin:3px 0 0 0;"></i>
@@ -87,20 +88,20 @@
                     document.querySelector("#drawer").style.display = 'none'
                 });
 
-                VotingSystemClient.addSocketEventListener("disconnected", function() {
+                vs.socket.addEventListener("disconnected", function() {
                     page.show("#{contextURL}/spa.xhtml#!/transactionsDashboard")
                 })
 
-                VotingSystemClient.addSocketEventListener("connected", function() {
+                vs.socket.addEventListener("connected", function() {
                     page.show(vs.contextURL + "/rest/balance/user/IBAN/" + vs.connectedDevice.iban)
                 })
 
                 document.querySelector("#connectionMsgDiv").addEventListener('click', function (event) {
                     if(vs.connected !== true) {
-                        VotingSystemClient.showAccessQRCode()
+                        vs.showAccessQRCode()
                     } else {
                         alert("#{msg.quitConfirmMsg}", "#{msg.messageLbl}", function() {
-                            VotingSystemClient.disconnect()
+                            vs.socket.disconnect()
                         })
                     }
                 });
@@ -140,10 +141,6 @@
                         document.querySelector("#pageInfoPanel").style.display = "block"
                     } else document.querySelector("#pageInfoPanel").style.display = "none"
                 }
-
-                vs.scrollPageToTop = function() {
-                    document.getElementById('mainContent').scrollTop = 0;
-                };
 
                 document.querySelector('#voting_system_page').addEventListener('search-request', function (e) {
                     console.log("spa.xhtml - search request - query:" + e.detail.query);

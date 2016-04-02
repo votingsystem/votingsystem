@@ -104,8 +104,7 @@
                 })
                 operationVS.eventVS = {subject:this.$.subject.value, content:content,
                     fieldsEventVS:fieldsEventVS, dateBegin:this.$.datePicker.getDate().getTime()}
-                console.log(" -- operation: ", operationVS)
-                VotingSystemClient.setMessage(operationVS);
+                vs.client.processOperation(operationVS);
             },
             removeOption: function(e) {
                 var index = this.optionList.indexOf(e.model.item);

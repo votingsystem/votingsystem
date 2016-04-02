@@ -43,7 +43,7 @@ body {
 }
 
 .menuItem i {
-    margin:0px 10px 0px 0px;
+    width: 22px;
 }
 
 .buttonvs {
@@ -54,6 +54,7 @@ body {
     color: #585;
     cursor: pointer;
     background-color: #fefefe;
+    text-align: center;
 }
 
 .buttonvs:hover {
@@ -94,23 +95,8 @@ input:required {
 }
 
 select, textarea, text, input {
-	background-color: #fcfcfc;
-	border: 1px solid #cccccc;
-	font-size: 1em;
-	padding: 1px 2px 1px 2px;
-}
-
-hr {
-	border: 1px solid #cccccc;
-}
-
-.header {
-    margin: 0 0 10px 0;
-    width:100%;
-    border-bottom: 1pt solid #3E125F;
-    padding: 0.1em 0 5px 0;
-    overflow: hidden;
-    display:table;
+	border: 1px solid #ccc;
+    border-radius: 2px;
 }
 
 .pageHeader {

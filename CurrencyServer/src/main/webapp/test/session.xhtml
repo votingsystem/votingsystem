@@ -22,10 +22,10 @@
                     document.querySelector("#sessionPageMainDiv").hidden = null;
                 });
                 function  showAccessQRCode() {
-                    VotingSystemClient.showAccessQRCode()
+                    vs.showAccessQRCode()
                 }
 
-                VotingSystemClient.addSocketEventListener("connected", function() {
+                vs.socket.addEventListener("connected", function() {
                     document.querySelector("#msgDiv").innerHTML = "connected with mobile";
                 })
 

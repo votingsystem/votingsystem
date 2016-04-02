@@ -175,7 +175,7 @@
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                vs.getHTTPJSON(targetURL, function(responseText){
                     this.representative = toJSON(responseText)
                 }.bind(this));
             }

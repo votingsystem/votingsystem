@@ -4,7 +4,7 @@
     <template>
         <style>
             .transBlock { border: 1px solid #6c0404; margin: 10px;
-                box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+                box-shadow: 0 5px 5px 0 #ccc;
                 cursor: pointer;
             }
             .numTrans { font-size: 2em; color: #6c0404; text-align: center;}
@@ -89,9 +89,9 @@
         getHTTP: function (targetURL) {
             if(!targetURL) targetURL = this.url
             console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-            new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+            vs.getHTTPJSON(targetURL, function(responseText){
                 this.dashBoardDto = toJSON(responseText)
-            }.bind(this));
+            }.bind(this))
         }
     });
 </script>

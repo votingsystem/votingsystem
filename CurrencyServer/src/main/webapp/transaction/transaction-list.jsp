@@ -63,9 +63,9 @@
             this.transactionType = getURLParam("transactionType", this.url)
             if(!targetURL) targetURL = this.url
             console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-            new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+            vs.getHTTPJSON(targetURL, function(responseText){
                 this.transactionsDto = toJSON(responseText)
-            }.bind(this));
+            }.bind(this))
         }
     });</script>
 </dom-module>

@@ -76,7 +76,7 @@
                         }
                         alert(msg, caption)
                     })
-                    VotingSystemClient.setMessage(operationVS);
+                    vs.client.processOperation(operationVS);
                     appMessageJSON = null
                     return false
                 } catch(ex) {

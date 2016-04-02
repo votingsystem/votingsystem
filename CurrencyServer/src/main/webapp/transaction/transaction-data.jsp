@@ -172,7 +172,7 @@
                 } else operationVS.message = this.cmsMessage
                 console.log(operationVS)
                 console.log(this.transaction)
-                VotingSystemClient.setMessage(operationVS);
+                vs.client.processOperation(operationVS);
             },
             show: function(transaction) {
                 this.transaction = transaction

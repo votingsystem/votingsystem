@@ -121,7 +121,7 @@
             checkReceipt: function() {
                 var operationVS = new OperationVS(Operation.OPEN_CMS)
                 operationVS.message = this.cmsMessage
-                VotingSystemClient.setMessage(operationVS);
+                vs.client.processOperation(operationVS);
             }
         });
     </script>

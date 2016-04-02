@@ -1,7 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<link href="../element/vs-socket.vsp" rel="import"/>
-
 <dom-module name="eventvs-admin-dialog">
     <template>
         <div id="modalDialog" class="modalDialog">
@@ -40,7 +38,6 @@
                 </div>
             </div>
         </div>
-        <vs-socket id="vsSocket"></vs-socket>
     </template>
     <script>
         Polymer({
@@ -52,7 +49,6 @@
                 this.isConfirmMessage = this.isConfirmMessage || false
             },
             submitForm: function() {
-                this.$.vsSocket.connect();
                 var state
                 var messageSubject
                 if(this.$.selectDeleteDocument.checked) {
@@ -69,8 +65,7 @@
                 operationVS.jsonStr = JSON.stringify(signedContent)
                 operationVS.subject = messageSubject
                 operationVS.setCallback(function(socketMessage) { this.cancelationResponse(socketMessage)}.bind(this))
-                //VotingSystemClient.setMessage(operationVS);
-                this.currentOperationCode = this.$.vsSocket.showOperationQRCode(this.$.vsSocket.VOTING_SYSTEM, operationVS)
+                vs.client.processOperation(operationVS);
                 console.log("currentOperationCode: ", this.currentOperationCode)
             },
             cancelationResponse:function(socketMessage) {

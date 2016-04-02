@@ -17,35 +17,40 @@
         }
     </style>
     <template>
-        <div class="horizontal layout">
-            <div id="selectorDiv" style="border: 1px solid #ccc; margin: 5px;border-radius: 3px;padding: 5px;">
-                <div class="horizontal layout" style="font-size: 0.9em;margin: 5px 0 5px 0;">
-                    <vs-datepicker id="dateFromDatepicker" years-back="5" month-labels='[${msg.monthsShort}]' day-labels='[${msg.weekdaysShort}]' time-enabled
-                        caption="${msg.fromLbl}" style="margin:0 5px 0 0;"> </vs-datepicker>
-                    <vs-datepicker id="dateToDatepicker" years-back="5" month-labels='[${msg.monthsShort}]' day-labels='[${msg.weekdaysShort}]' time-enabled
-                                   caption="${msg.toLbl}"> </vs-datepicker>
+        <div class="pagevs" style="max-width: 100%; margin:7px;">
+            <div class="horizontal layout" style="max-width: 100%; margin:7px;">
+                <div id="selectorDiv" style="border: 1px solid #ccc; margin: 5px;border-radius: 3px;padding: 5px;">
+                    <div class="horizontal layout" style="font-size: 0.9em;margin: 5px 0 5px 0;">
+                        <vs-datepicker id="dateFromDatepicker" years-back="5" month-labels='[${msg.monthsShort}]' day-labels='[${msg.weekdaysShort}]' time-enabled
+                            caption="${msg.fromLbl}" style="margin:0 5px 0 0;"> </vs-datepicker>
+                        <vs-datepicker id="dateToDatepicker" years-back="5" month-labels='[${msg.monthsShort}]' day-labels='[${msg.weekdaysShort}]' time-enabled
+                                       caption="${msg.toLbl}"> </vs-datepicker>
+                    </div>
+                    <div class="horizontal layout"  style="margin: 5px 10px 5px 10px;">
+                        <input class="form-control" type="text" id="searchInput" value='' style="width: 140px;margin:0 10px 0 0;" placeholder="${msg.searchLbl}"/>
+                        <button on-click="getHTTP"><i id="searchIcon" class="fa fa-search" ></i> ${msg.searchLbl}</button>
+                    </div>
+                    <div class="horizontal layout center center-justified" style="width: 260px; margin: 0 5px 0 5px; font-size: 0.75em; padding: 0 6px 0 6px;">
+                        <input id="timeLimitedCheckBox" type="checkbox" value="timeLimited" on-click="timeCheckboxSelected" checked="true" style="">
+                        <span style="color:#ba0011;"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}</span>
+                        <input id="timeFreeCheckBox" type="checkbox" value="timeFree" on-click="timeCheckboxSelected" style="margin:0 0 0 10px;" checked="true">${msg.timeFreeLbl}
+                    </div>
+                    <div style="padding:5px 0 0 0; width: 100%;">
+                        <vs-expandable-div id="currencyExpDiv" caption="${msg.currencyLbl}"></vs-expandable-div>
+                    </div>
+                    <div style="margin:5px 0 0 0;width: 100%;">
+                        <vs-expandable-div id="transactionTypeExpDiv" caption="${msg.movementTypeLbl}"></vs-expandable-div>
+                    </div>
+                    <div style="margin:5px 0 0 0;width: 100%;">
+                        <vs-expandable-div id="tagExpDiv" caption="${msg.tagLbl}"></vs-expandable-div>
+                    </div>
                 </div>
-                <div class="horizontal layout"  style="margin: 5px 10px 5px 10px;">
-                    <input class="form-control" type="text" id="searchInput" value='' style="width: 140px;margin:0 10px 0 0;" placeholder="${msg.searchLbl}"/>
-                    <button on-click="getHTTP"><i id="searchIcon" class="fa fa-search" ></i> ${msg.searchLbl}</button>
-                </div>
-                <div class="horizontal layout center center-justified" style="width: 260px; margin: 0 5px 0 5px; font-size: 0.75em; padding: 0 6px 0 6px;">
-                    <input id="timeLimitedCheckBox" type="checkbox" value="timeLimited" on-click="timeCheckboxSelected" checked="true" style="">
-                    <span style="color:#ba0011;"><i class="fa fa-clock-o"></i> ${msg.timeLimitedLbl}</span>
-                    <input id="timeFreeCheckBox" type="checkbox" value="timeFree" on-click="timeCheckboxSelected" style="margin:0 0 0 10px;" checked="true">${msg.timeFreeLbl}
-                </div>
-                <div style="padding:5px 0 0 0; width: 100%;">
-                    <vs-expandable-div id="currencyExpDiv" caption="${msg.currencyLbl}"></vs-expandable-div>
-                </div>
-                <div style="margin:5px 0 0 0;width: 100%;">
-                    <vs-expandable-div id="transactionTypeExpDiv" caption="${msg.movementTypeLbl}"></vs-expandable-div>
-                </div>
-                <div style="margin:5px 0 0 0;width: 100%;">
-                    <vs-expandable-div id="tagExpDiv" caption="${msg.tagLbl}"></vs-expandable-div>
+                <div id="treemapZoomableDiv">
+                    <transactions-treemap id="transactionTreemap" on-filter-request="filterChart"></transactions-treemap>
                 </div>
             </div>
-            <div id="treemapZoomableDiv">
-                <transactions-treemap id="transactionTreemap" on-filter-request="filterChart"></transactions-treemap>
+            <div>
+                <transactions-scatter id="transactionsScatter" style="height: 300px; width: 100%;"></transactions-scatter>
             </div>
         </div>
         <div style="display: none;">
@@ -76,10 +81,6 @@
                     </div>
                 </template>
             </div>
-        </div>
-
-        <div>
-            <transactions-scatter id="transactionsScatter" style="height: 300px; width: 100%;"></transactions-scatter>
         </div>
     </template>
     <script>

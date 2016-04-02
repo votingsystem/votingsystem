@@ -15,7 +15,7 @@
             border: 1px solid #888;
             box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.24);
             margin: 10px 15px 10px 0px;
-            -moz-border-radius: 5px;
+            border-radius: 5px;
             border-radius: 3px;
             cursor: pointer;
             height:90px;
@@ -67,7 +67,7 @@
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                vs.getHTTPJSON(targetURL, function(responseText){
                     this.representativeListDto = toJSON(responseText)
                 }.bind(this));
             }

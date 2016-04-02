@@ -94,7 +94,7 @@
       });
 
       var weekReports
-      page('*/reports/*/week', function(ctx) {
+      page('*/reports/week/*', function(ctx) {
           vs.route = 'reports';
           Polymer.Base.importHref('./reports/week-reports.vsp', function(e) {
               if(!weekReports) weekReports = document.createElement('week-reports');

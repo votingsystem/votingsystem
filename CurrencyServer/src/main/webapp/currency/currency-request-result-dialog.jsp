@@ -30,7 +30,7 @@
             saveToSecureWallet: function() {
                 var operationVS = new OperationVS(Operation.WALLET_SAVE)
                 operationVS.setCallback(function(appMessage) { this.saveResponse(appMessage)}.bind(this))
-                VotingSystemClient.setMessage(operationVS);
+                vs.client.processOperation(operationVS);
             },
             saveResponse:function(appMessageJSON) {
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {

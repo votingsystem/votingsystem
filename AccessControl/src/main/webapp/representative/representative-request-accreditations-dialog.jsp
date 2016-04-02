@@ -73,7 +73,7 @@
                         alert(socketMessage.message)
                     } else alert(socketMessage.message, "${msg.errorLbl}")
                 }.bind(this))
-                VotingSystemClient.setMessage(operationVS);
+                vs.client.processOperation(operationVS);
                 this.close()
             },
             close: function() {

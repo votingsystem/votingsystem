@@ -11,7 +11,7 @@
             .nif {font-size: 0.7em; color:#888;margin:5px 0 0 0; }
             .name {color: #000; font-size: 0.9em;}
         </style>
-        <div class="vertical layout center">
+        <div class="pagevs vertical layout center" style="max-width: 100%; margin:7px;">
             <div hidden={{!contactSelector}} class="horizontal layout center center-justified"
                  style="margin:10px 0 20px 0; cursor: pointer; border-bottom: 1px solid #888; color: #0000ee;">
                 <div id="searchUserDiv" on-click="setSearchView"
@@ -178,9 +178,9 @@
                 if(!targetURL) targetURL = this.url
                 if(!targetURL) return
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                vs.getHTTPJSON(targetURL, function(responseText){
                     this.userListDto = toJSON(responseText)
-                }.bind(this));
+                }.bind(this))
             }
         });
     </script>

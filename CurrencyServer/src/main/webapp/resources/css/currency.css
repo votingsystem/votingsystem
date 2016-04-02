@@ -39,7 +39,7 @@ body {
 }
 
 .menuItem i {
-    margin:0px 10px 0px 0px;
+    width: 22px;
 }
 
 .menuItemSelected {
@@ -54,6 +54,7 @@ body {
     color: #585;
     cursor: pointer;
     background-color: #fefefe;
+    text-align: center;
 }
 
 .buttonvs:hover {
@@ -93,6 +94,11 @@ input:required {
     border: 1px solid #ba0011;
 }
 
+select, textarea, text, input {
+    border: 1px solid #ccc;
+    border-radius: 2px;
+}
+
 .formFieldError{
     font-weight: bold;
     background: #f6ccd0;
@@ -106,39 +112,8 @@ input:required {
     padding: 5px 10px 5px 10px;
 }
 
-.contentDiv {
-    border: #f2f2f2 solid 1px;
-    background: #f9f9f9;
-    margin:0px 0px 0px 0px;
-    padding: 10px 10px 10px 10px;
-    word-wrap:break-word;
-    overflow: hidden;
-    border-radius: 2px;
-}
-
-.tableHeadervs {
-    margin: 0px 0px 0px 0px;
-    color:#6c0404;
-    border-bottom: 1px solid #6c0404;
-    background: white;
-    font-weight: bold;
-    padding:5px 0px 5px 0px;
-    width: 100%;
-}
-
-.tableHeadervs div {
-    text-align:center;
-}
-
-.rowvs {
-    border-bottom: 1px solid #ccc;
-    padding: 10px 0px 10px 0px;
-    cursor: pointer;
-    width: 100%;
-}
-
-.rowvs div {
-    text-align:center;
+.sectionHeader {
+    text-decoration: underline; color: #6c0404;
 }
 
 .text-center {

@@ -214,29 +214,21 @@ function setURLParameter(baseURL, name, value){
     return result
 }
 
-XMLHttpRequest.prototype.get = function(url, callback) {
-    this.onreadystatechange = function() {
+vs.getHTTPJSON = function(url, callback) {
+    var xhr = new XMLHttpRequest()
+    xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             callback(this.responseText)
         }
     };
-    this.open("GET", url, true);
-    if(this.requestHeaders) this.requestHeaders.forEach(function (element, index, array) {
-        this.setRequestHeader(element.key, element.value);
-    }.bind(this))
-    this.send();
+    xhr.open("GET", url, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send();
 }
 
-XMLHttpRequest.prototype.header = function(key, value) {
-    if(!this.requestHeaders) this.requestHeaders = []
-    this.requestHeaders.push({key:key, value:value})
-    return this
-};
-
-function VotingSystemClient () { }
-
 var clientTool
-VotingSystemClient.setMessage = function (messageJSON) {
+vs.client = {}
+vs.client.processOperation = function (messageJSON) {
     if(clientTool !== undefined) {
         var messageToSignatureClient = JSON.stringify(messageJSON);
         //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64.btoa#Unicode_Strings

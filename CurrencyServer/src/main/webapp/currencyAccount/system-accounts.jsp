@@ -8,36 +8,37 @@
             }
             .accountBalance { font-size: 2em; color: #6c0404; text-align: center;  padding: 10px; }
             .tagDesc { background: #6c0404; color: #f9f9f9; padding: 5px;text-align: center; }
-            .sectionHeader { font-size: 1.8em; font-weight: bold; color: #ba0011;text-align: center;text-decoration: underline; }
         </style>
-        <div class="sectionHeader">${msg.systemAccountsLbl}</div>
-        <div class="layout flex horizontal wrap around-justified">
-            <template is="dom-repeat" items="{{systemAccountsDto.accountList}}">
-                <div>
+        <div class="pagevs vertical layout center" style="max-width: 100%; margin:7px;">
+            <h3 class="sectionHeader">${msg.systemAccountsLbl}</h3>
+            <div class="layout flex horizontal wrap around-justified">
+                <template is="dom-repeat" items="{{systemAccountsDto.accountList}}">
+                    <div>
+                        <div class="accountBlock">
+                            <div class="accountBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
+                            <div class="tagDesc">{{item.tag.name}}</div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <h3 class="sectionHeader" style="margin: 30px 0 0 0;">${msg.userAccountsLbl}</h3>
+            <div class="layout flex horizontal wrap around-justified">
+                <template is="dom-repeat" items="{{systemAccountsDto.tagVSBalanceList}}">
                     <div class="accountBlock">
                         <div class="accountBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
-                        <div class="tagDesc">{{item.tag.name}}</div>
+                        <div class="tagDesc">{{item.name}}</div>
                     </div>
-                </div>
-            </template>
-        </div>
-        <div class="sectionHeader" style="margin: 30px 0 0 0;">${msg.userAccountsLbl}</div>
-        <div class="layout flex horizontal wrap around-justified">
-            <template is="dom-repeat" items="{{systemAccountsDto.tagVSBalanceList}}">
-                <div class="accountBlock">
-                    <div class="accountBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
-                    <div class="tagDesc">{{item.name}}</div>
-                </div>
-            </template>
-        </div>
-        <div class="sectionHeader" style="margin: 30px 0 0 0;">${msg.bankInputsLbl}</div>
-        <div class="layout flex horizontal wrap around-justified">
-            <template is="dom-repeat" items="{{systemAccountsDto.bankBalanceList}}">
-                <div class="accountBlock">
-                    <div class="accountBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
-                    <div class="tagDesc">{{item.name}}</div>
-                </div>
-            </template>
+                </template>
+            </div>
+            <h3 class="sectionHeader" style="margin: 30px 0 0 0;">${msg.bankInputsLbl}</h3>
+            <div class="layout flex horizontal wrap around-justified">
+                <template is="dom-repeat" items="{{systemAccountsDto.bankBalanceList}}">
+                    <div class="accountBlock">
+                        <div class="accountBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
+                        <div class="tagDesc">{{item.name}}</div>
+                    </div>
+                </template>
+            </div>
         </div>
     </template>
     <script>
@@ -56,9 +57,9 @@
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                vs.getHTTPJSON(targetURL, function(responseText){
                     this.systemAccountsDto = toJSON(responseText)
-                }.bind(this));
+                }.bind(this))
             }
         })
     </script>

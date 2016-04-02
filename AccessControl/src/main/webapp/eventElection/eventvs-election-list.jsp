@@ -55,7 +55,7 @@
                 height: 100%;
                 background-color: #fefefe;
                 margin: 10px 5px 5px 10px;
-                -moz-border-radius: 5px; border-radius: 3px;
+                border-radius: 3px;
                 cursor: pointer; cursor: hand;
                 overflow:hidden;
                 float:left;
@@ -223,9 +223,9 @@
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                vs.getHTTPJSON(targetURL, function(responseText){
                     this.eventListDto = toJSON(responseText)
-                }.bind(this));
+                }.bind(this))
             }
         });
     </script>

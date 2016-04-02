@@ -51,7 +51,7 @@
                 operationVS.serviceURL = vs.contextURL + "/rest/representative/revoke"
                 operationVS.subject = '${msg.removeRepresentativeMsgSubject}'
                 operationVS.setCallback(function(appMessage) { this.revokeResponse(appMessage) }.bind(this))
-                VotingSystemClient.setMessage(operationVS);
+                vs.client.processOperation(operationVS);
                 this.close()
             },
             revokeResponse: function(appMessageJSON) {

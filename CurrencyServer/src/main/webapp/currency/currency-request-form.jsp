@@ -90,7 +90,7 @@
                 this.$.tagDialog.show(this.maxNumberTags, this.selectedTags)
             },
             showWallet: function() {
-                VotingSystemClient.setMessage(new OperationVS(Operation.WALLET_OPEN));
+                vs.client.processOperation(new OperationVS(Operation.WALLET_OPEN));
             },
             removeTag: function(e) {
                 var tagToDelete = e.model.tag
@@ -129,7 +129,7 @@
                 operationVS.jsonStr = JSON.stringify(signedContent)
                 operationVS.setCallback(function(appMessage) { this.showResponse(appMessage)}.bind(this))
                 console.log(JSON.stringify(operationVS))
-                VotingSystemClient.setMessage(operationVS);
+                vs.client.processOperation(operationVS);
             },
             showResponse:function(appMessageJSON) {
                 if(ResponseVS.SC_OK == appMessageJSON.statusCode) {

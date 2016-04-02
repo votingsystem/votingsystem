@@ -295,29 +295,21 @@ function setURLParameter(baseURL, name, value){
     return result
 }
 
-XMLHttpRequest.prototype.get = function(url, callback) {
-    this.onreadystatechange = function() {
+vs.getHTTPJSON = function(url, callback) {
+    var xhr = new XMLHttpRequest()
+    xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             callback(this.responseText)
         }
     };
-    this.open("GET", url, true);
-    if(this.requestHeaders) this.requestHeaders.forEach(function (element, index, array) {
-        this.setRequestHeader(element.key, element.value);
-    }.bind(this))
-    this.send();
+    xhr.open("GET", url, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send();
 }
 
-XMLHttpRequest.prototype.header = function(key, value) {
-    if(!this.requestHeaders) this.requestHeaders = []
-    this.requestHeaders.push({key:key, value:value})
-    return this
-};
-
-function VotingSystemClient () { }
-
 var clientTool
-VotingSystemClient.setMessage = function (messageJSON) {
+vs.client = {}
+vs.client.processOperation = function (messageJSON) {
     if(clientTool !== undefined) {
         if(messageJSON.jsonStr) {
             var jsonData = toJSON(messageJSON.jsonStr)
@@ -345,17 +337,22 @@ VotingSystemClient.setMessage = function (messageJSON) {
 }
 
 var socketElementListeners = []
-VotingSystemClient.addSocketEventListener = function (type, listener) {
+
+function SocketVS() { }
+
+SocketVS.prototype.addEventListener = function(type, listener) {
     if(vs.socketElement) vs.socketElement.addEventListener(type, listener)
     socketElementListeners.push({type:type, listener:listener})
 }
 
-VotingSystemClient.showAccessQRCode = function () {
-    VotingSystemClient.setMessage(new OperationVS("ACCESS_QR_CODE"))
+SocketVS.prototype.disconnect = function() {
+    if(vs.socketElement) vs.socketElement.disconnect
 }
 
-VotingSystemClient.disconnect = function () {
-    if(vs.socketElement) vs.socketElement.disconnect
+vs.socket = new SocketVS()
+
+vs.showAccessQRCode = function () {
+    vs.client.processOperation(new OperationVS("ACCESS_QR_CODE"))
 }
 
 function querySelector(selector) {

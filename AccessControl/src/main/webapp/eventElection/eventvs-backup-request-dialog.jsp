@@ -68,7 +68,7 @@
                 operationVS.jsonStr = JSON.stringify(this.eventvs)
                 operationVS.email = this.$.eventBackupUserEmailText.value
                 operationVS.setCallback(function(appMessage) { this.showResponse(appMessage)}.bind(this))
-                VotingSystemClient.setMessage(operationVS)
+                vs.client.processOperation(operationVS)
             },
             showResponse: function(appMessageJSON) {
                 console.log("showResponse");

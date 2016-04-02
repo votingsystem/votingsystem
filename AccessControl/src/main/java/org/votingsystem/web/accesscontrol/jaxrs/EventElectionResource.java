@@ -67,7 +67,6 @@ public class EventElectionResource {
         EventElection eventVS =  dao.getSingleResult(EventElection.class, query);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventElection not found - " +
                 "eventId: " + id).build();
-        eventVSBean.checkEventVSDates(eventVS);
         EventVSDto eventVSDto = new EventVSDto(eventVS, config.getServerName(), config.getContextURL());
         if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventVSDto)).type(MediaType.JSON).build();
@@ -102,7 +101,6 @@ public class EventElectionResource {
         long totalCount = ((Number)DAOUtils.cleanOrderings(criteria).setProjection(Projections.rowCount()).uniqueResult()).longValue();
         List<EventVSDto> eventVSListDto = new ArrayList<>();
         for(EventElection eventElection : resultList) {
-            eventVSBean.checkEventVSDates(eventElection);
             eventVSListDto.add(new EventVSDto(eventElection, config.getServerName(), config.getContextURL()));
         }
         ResultListDto<EventVSDto> resultListDto = new ResultListDto<>(eventVSListDto, offset, max, totalCount);
@@ -141,16 +139,6 @@ public class EventElectionResource {
             req.getSession().setAttribute("statsDto", JSON.getMapper().writeValueAsString(statsDto));
             return Response.temporaryRedirect(new URI("../eventElection/stats.xhtml")).build();
         }
-    }
-
-    @Transactional
-    @Path("/id/{id}/checkDates") @GET
-    public Response checkDates(@PathParam("id") long id) throws Exception {
-        EventVS eventVS = dao.find(EventVS.class, id);
-        if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventVSClaim not found - " +
-                "eventId: " + id).build();
-        eventVSBean.checkEventVSDates(eventVS);
-        return Response.ok().build();
     }
 
     @Transactional

@@ -36,7 +36,7 @@
                             operationVS.setCallback(function() {
                                 document.querySelector("#certData").url = vs.contextURL + "/rest/certificate/serialNumber/${certMap.serialNumber}"
                             })
-                            VotingSystemClient.setMessage(operationVS);
+                            vs.client.processOperation(operationVS);
                         }.bind(this))
             });
             <c:if test="${'CANCELED'.equals(certMap.state.toString())}">

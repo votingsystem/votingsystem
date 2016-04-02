@@ -89,7 +89,7 @@
                 var operationVS = new OperationVS(Operation.OPEN_CMS)
                 operationVS.message = this.cmsMessage
                 console.log(JSON.stringify(operationVS))
-                VotingSystemClient.setMessage(operationVS);
+                vs.client.processOperation(operationVS);
             }
         });
     </script>

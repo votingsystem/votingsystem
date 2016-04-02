@@ -69,7 +69,7 @@
                             operationVS.setCallback(function() {
                                 this.url = vs.contextURL + "/rest/certificate/serialNumber/${certMap.serialNumber}"
                             })
-                            VotingSystemClient.setMessage(operationVS);
+                            vs.client.processOperation(operationVS);
                         }.bind(this))
             },
             openReasonDialog: function() {
@@ -102,8 +102,8 @@
             },
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
-                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                console.log(this.tagName + " - getHTTP - targetURL: " + targetURL);
+                vs.getHTTPJSON(targetURL, function(responseText){
                     this.certvs = toJSON(responseText)
                 }.bind(this));
             }

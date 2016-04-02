@@ -3,7 +3,7 @@
 <dom-module name="user-data">
 <template>
     <style></style>
-    <div style="max-width: 1200px; margin: 0 auto">
+    <div class="pagevs">
         <div class="layout horizontal center center-justified"
              style="font-size: 1.5em;margin:5px 0 15px 0;font-weight: bold; color:#6c0404;">
             <div data-user-id$="{{user.id}}" style="text-align: center;">{{userName}}</div>
@@ -53,9 +53,9 @@
         getHTTP: function (targetURL) {
             if(!targetURL) targetURL = this.url
             console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-            new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+            vs.getHTTPJSON(targetURL, function(responseText){
                 this.user = toJSON(responseText)
-            }.bind(this));
+            }.bind(this))
         }
     });
 </script>

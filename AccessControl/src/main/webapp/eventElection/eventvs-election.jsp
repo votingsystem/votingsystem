@@ -11,7 +11,7 @@
             }
             #eventContentDiv {
                 border: #f2f2f2 solid 1px;
-                -moz-border-radius: 3px; border-radius: 3px;
+                border-radius: 3px;
                 margin:0px 0px 0px 0px;
                 min-height:100px;
                 padding: 10px 10px 10px 10px;
@@ -48,7 +48,7 @@
                         {{eventvs.user}}
                     </div>
                 </div>
-                <div class="layout horizontal wrap" style="margin: 15px auto 0 0;">
+                <div class="layout horizontal wrap around-justified" style="margin: 15px auto 0 0;">
                     <div hidden="{{!isActive}}">
                         <img id="qrImg"  src="" style="border: 1px solid #ccc;margin: 0 30px 0 30px;"/>
                     </div>
@@ -97,9 +97,9 @@
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                vs.getHTTPJSON(targetURL, function(responseText){
                     this.eventvs = toJSON(responseText)
-                }.bind(this));
+                }.bind(this))
             }
             });
     </script>

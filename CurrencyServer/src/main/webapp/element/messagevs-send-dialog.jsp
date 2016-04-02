@@ -66,7 +66,7 @@
                     else  alert(appMessageJSON.message, '${msg.errorLbl}')
                     console.log(this.tagName + " - " + this.id + " - sendMessageVS callback");
                 }.bind(this))
-                VotingSystemClient.setMessage(operationVS);
+                vs.client.processOperation(operationVS);
                 this.close()
             }
         });

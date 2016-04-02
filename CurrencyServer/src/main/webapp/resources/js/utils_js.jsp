@@ -2,7 +2,6 @@
     var vs = {}
     vs.contextURL = "${contextURL}"
     vs.timeStampServiceURL = "${timeStampServerURL}" + "/timestamp"
-    vs.qrOperationsMap = {}
 
     function OperationVS(operation, statusCode) {
         this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseVS.SC_PROCESSING

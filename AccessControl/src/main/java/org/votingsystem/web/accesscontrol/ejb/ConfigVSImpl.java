@@ -4,6 +4,7 @@ import org.votingsystem.dto.ActorDto;
 import org.votingsystem.model.*;
 import org.votingsystem.model.voting.AccessControl;
 import org.votingsystem.model.voting.ControlCenter;
+import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContentType;
@@ -30,6 +31,8 @@ import javax.persistence.Query;
 import java.io.File;
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,6 +52,7 @@ public class ConfigVSImpl implements ConfigVS {
     @Inject SubscriptionBean subscriptionBean;
     @Inject EventElectionBean eventElectionBean;
     @Inject TimeStampBean timeStampBean;
+    @Inject EventVSBean eventVSBean;
     /* Executor service for asynchronous processing */
     @Resource(name="comp/DefaultManagedExecutorService")
     private ManagedExecutorService executorService;
@@ -120,10 +124,27 @@ public class ConfigVSImpl implements ConfigVS {
         });
     }
 
-    @Schedule(dayOfWeek = "*")
+    @Schedule(dayOfWeek = "*",  minute = "0", hour = "0", persistent = false)
     public void generateElectionBackups() throws Exception {
         log.info("scheduled - generateElectionBackups");
         eventElectionBean.generateBackups();
+    }
+
+
+    @Schedule(dayOfWeek = "*", minute = "0", hour = "0", persistent = false)
+    public void checkDates() throws InterruptedException {
+        log.info("scheduled - checkDates");
+        try {
+            List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE, EventVS.State.PENDING);
+            Query query = dao.getEM().createQuery("select e from EventElection e where e.state in :inList")
+                    .setParameter("inList", inList);
+            List<EventVS> eventList = query.getResultList();
+            for(EventVS eventVS : eventList) {
+                eventVSBean.checkEventVSDates(eventVS);
+            }
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
     @PreDestroy

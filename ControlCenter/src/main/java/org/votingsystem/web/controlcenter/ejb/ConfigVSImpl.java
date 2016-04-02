@@ -1,9 +1,10 @@
-package org.votingsystem.web.controlcenter.cdi;
+package org.votingsystem.web.controlcenter.ejb;
 
 import org.votingsystem.model.Actor;
 import org.votingsystem.model.TagVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.ControlCenter;
+import org.votingsystem.model.voting.EventVS;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.web.ejb.CMSBean;
@@ -14,14 +15,17 @@ import org.votingsystem.web.util.ConfigVS;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.ejb.Schedule;
+import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 import javax.persistence.Query;
 import java.io.File;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,6 +44,7 @@ public class ConfigVSImpl implements ConfigVS {
     @Inject CMSBean cmsBean;
     @Inject SubscriptionBean subscriptionBean;
     @Inject TimeStampBean timeStampBean;
+    @Inject EventElectionBean eventVSBean;
     /* Executor service for asynchronous processing */
     @Resource(name="comp/DefaultManagedExecutorService")
     private ManagedExecutorService executorService;
@@ -106,6 +111,22 @@ public class ConfigVSImpl implements ConfigVS {
     public TagVS getTag(String tagName) {
         Query query = dao.getEM().createNamedQuery("findTagByName").setParameter("name", tagName);
         return dao.getSingleResult(TagVS.class, query);
+    }
+
+    @Schedule(dayOfWeek = "*", minute = "0", hour = "0", persistent = false)
+    public void checkDates() throws InterruptedException {
+        log.info("scheduled - checkDates");
+        try {
+            List<EventVS.State> inList = Arrays.asList(EventVS.State.ACTIVE, EventVS.State.PENDING);
+            Query query = dao.getEM().createQuery("select e from EventElection e where e.state in :inList")
+                    .setParameter("inList", inList);
+            List<EventVS> eventList = query.getResultList();
+            for(EventVS eventVS : eventList) {
+                eventVSBean.checkEventVSDates(eventVS);
+            }
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
     @Override

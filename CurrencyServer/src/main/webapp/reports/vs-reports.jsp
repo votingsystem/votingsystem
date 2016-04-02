@@ -2,27 +2,28 @@
 
 <dom-module name="vs-reports">
     <template>
-        <div class="layout vertical center center-justified" style="max-width:1000px; padding:20px 30px 0px 30px; margin: 0 auto">
-            <div>
-                <h2 style="text-decoration: underline;">${msg.reportsLbl}</h2>
-                <div style="margin:20px 0px;">
-                    <a href="/user/bankList">
+        <div class="pagevs vertical layout center">
+            <div style="margin: 0 auto;">
+                <h3 class="sectionHeader">${msg.reportsLbl}</h3>
+                <div style="margin:0px 0px;">
+                    <a class="buttonvs" style="display: block;width: 150px;" href="/user/bankList">
                         ${msg.bankListLbl}
                     </a>
                 </div>
                 <div style="margin:20px 0px;">
-                    <a href="${contextURL}/spa.xhtml#!/currencyIssued?currencyCode=EUR">
+                    <a class="buttonvs" style="display: block;width: 150px;" href="${contextURL}/spa.xhtml#!/currencyIssued?currencyCode=EUR">
                         ${msg.currencyIssued}
                     </a>
                 </div>
                 <div style="margin:20px 0px;">
-                    <a href="${contextURL}/spa.xhtml#!/currencyAccount/system">
+                    <a class="buttonvs" style="display: block;width: 150px;" href="${contextURL}/spa.xhtml#!/currencyAccount/system">
                         ${msg.systemBalanceLbl}
                     </a>
                 </div>
 
                 <div style="margin:20px 0px;">
-                    <a href="${contextURL}/spa.xhtml#!/reports/week?url=${contextURL}/rest/reports${spa.now()}/week">
+                    <a class="buttonvs"  style="display: block;width: 150px;"
+                        href="${contextURL}/spa.xhtml#!/reports/week?url=/rest/reports${spa.now()}/week">
                         ${msg.currentWeekLbl}
                     </a>
                 </div>
@@ -34,8 +35,8 @@
                 </template>
             </div>
             <div class="layout vertical center center-justified" style="margin:30px auto;">
-                <h2 style="text-decoration: underline;">${msg.toolsLbl}</h2>
-                <a class="buttonvs" style="width: 280px; margin: 10px 0 0 0; font-size: 1.1em;" href="${contextURL}/tools/NativeClient.zip">
+                <h3 class="sectionHeader">${msg.toolsLbl}</h3>
+                <a class="buttonvs" style="width: 280px; font-size: 1.1em;" href="${contextURL}/tools/NativeClient.zip">
                     <i class="fa fa-download"></i> ${msg.validationToolMsg}
                 </a>
                 <a href="http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html#javasejdk">
@@ -62,10 +63,10 @@
         getHTTP: function (targetURL) {
             if(!targetURL) targetURL = this.url
             console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-            new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+            vs.getHTTPJSON(targetURL, function(responseText){
                 this.reportsInfoDto = toJSON(responseText)
                 this.historyMsgHidden = (this.reportsInfoDto.length === 0)
-            }.bind(this));
+            }.bind(this))
         }
     });
 </script>

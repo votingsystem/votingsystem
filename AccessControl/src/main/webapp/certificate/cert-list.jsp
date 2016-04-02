@@ -12,13 +12,11 @@
                 border:1px solid #ccc;
                 background-color: #f9f9f9;
                 margin: 10px 5px 5px 10px;
-                -moz-border-radius: 5px; border-radius: 5px;
+                border-radius: 5px;
                 cursor: pointer;
                 overflow:hidden;
                 position: relative;
-                display: inline-block;
-                vertical-align: top;
-                box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+                box-shadow: 0 5px 5px 0 #ccc;
             }
         </style>
         <div>
@@ -143,9 +141,9 @@
             },
             getHTTP: function (targetURL) {
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
-                new XMLHttpRequest().header("Content-Type", "application/json").get(targetURL, function(responseText){
+                vs.getHTTPJSON(targetURL, function(responseText){
                     this.certListDto = toJSON(responseText)
-                }.bind(this));
+                }.bind(this))
             },
             certTypeSelect: function () {
                 var optionSelected = this.$.certTypeSelect.value

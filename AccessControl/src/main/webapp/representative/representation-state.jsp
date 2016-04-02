@@ -64,7 +64,7 @@
                             this.$.descriptionDiv.innerHTML = this.representationState.representative.description
                         document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('updated-state'))
                     }.bind(this))
-                    VotingSystemClient.setMessage(operationVS);
+                    vs.client.processOperation(operationVS);
                 }
             },
             show: function() {
@@ -79,7 +79,7 @@
                 operationVS.serviceURL = vs.contextURL + "/rest/representative/cancelAnonymousDelegation"
                 operationVS.subject = '${msg.cancelAnonymousDelegationMsgSubject}'
                 operationVS.setCallback(function(appMessage) { this.cancelationResponse(appMessage)}.bind(this))
-                VotingSystemClient.setMessage(operationVS);
+                vs.client.processOperation(operationVS);
             },
             cancelationResponse: function(appMessageJSON) {
                 console.log(this.tagName + "cancelationResponse");

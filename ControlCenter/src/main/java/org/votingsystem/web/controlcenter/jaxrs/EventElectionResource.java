@@ -62,7 +62,6 @@ public class EventElectionResource {
         EventElection eventVS =  dao.getSingleResult(EventElection.class, query);
         if(eventVS == null) return Response.status(Response.Status.NOT_FOUND).entity("ERROR - EventElection not found - " +
                 "eventId: " + id).build();
-        eventVSBean.checkEventVSDates(eventVS);
         EventVSDto eventVSDto = new EventVSDto(eventVS);
         if(contentType.contains("json")) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(eventVSDto)).type(MediaType.JSON).build();
@@ -97,7 +96,6 @@ public class EventElectionResource {
         long totalCount = ((Number) DAOUtils.cleanOrderings(criteria).setProjection(Projections.rowCount()).uniqueResult()).longValue();
         List<EventVSDto> eventVSListDto = new ArrayList<>();
         for(EventElection eventElection : resultList) {
-            eventVSBean.checkEventVSDates(eventElection);
             eventVSListDto.add(new EventVSDto(eventElection));
         }
         ResultListDto<EventVSDto> resultListDto = new ResultListDto<>(eventVSListDto, offset, max, totalCount);
