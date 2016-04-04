@@ -90,10 +90,12 @@
 
                 vs.socket.addEventListener("disconnected", function() {
                     page.show("#{contextURL}/spa.xhtml#!/transactionsDashboard")
+                    document.querySelector("#connectionMsgDiv").innerText = "${msg.accessLbl}"
                 })
 
                 vs.socket.addEventListener("connected", function() {
                     page.show(vs.contextURL + "/rest/balance/user/IBAN/" + vs.connectedDevice.iban)
+                    document.querySelector("#connectionMsgDiv").innerText = "${msg.disConnectLbl}"
                 })
 
                 document.querySelector("#connectionMsgDiv").addEventListener('click', function (event) {

@@ -159,6 +159,36 @@ fieldset[disabled] .form-control {
     background-color: #eee;
     opacity: 1;
 }
+
+.btn {
+    padding: 6px 10px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.btn-default {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+}
+
+.btn:hover,
+.btn:focus,
+.btn.focus {
+    color: #fff;
+    background-color: #ccc;
+    text-decoration: none;
+}
+
+
 textarea.form-control {
     height: auto;
 }

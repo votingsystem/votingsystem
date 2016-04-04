@@ -18,9 +18,9 @@
                 <div class="layout horizontal" style="margin:0px 20px 0px 0px;">
                     <div class="flex"></div>
                     <div hidden="{{!isConfirmMessage}}">
-                        <button on-click="accept">
+                        <div class="buttonvs" on-click="accept">
                             <i class="fa fa-check"></i> ${msg.acceptLbl}
-                        </button>
+                        </div>
                     </div>
                 </div>
             </div>

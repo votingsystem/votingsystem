@@ -127,7 +127,7 @@
                     vs.connected = false
                     console.log('Info: WebSocket connection closed, Code: ' + event.code +
                             (event.reason == "" ? "" : ", Reason: " + event.reason));
-                };
+                }.bind(this);
             },
             disconnect:function () {
                 var socketMessageDto = {operation:"CLOSE_SESSION", uuid:vs.getUUID()}

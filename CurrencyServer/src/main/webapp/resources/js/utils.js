@@ -346,7 +346,7 @@ SocketVS.prototype.addEventListener = function(type, listener) {
 }
 
 SocketVS.prototype.disconnect = function() {
-    if(vs.socketElement) vs.socketElement.disconnect
+    if(vs.socketElement) vs.socketElement.disconnect()
 }
 
 vs.socket = new SocketVS()

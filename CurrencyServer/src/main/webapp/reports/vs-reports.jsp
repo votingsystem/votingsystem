@@ -36,7 +36,7 @@
             </div>
             <div class="layout vertical center center-justified" style="margin:30px auto;">
                 <h3 class="sectionHeader">${msg.toolsLbl}</h3>
-                <a class="buttonvs" style="width: 280px; font-size: 1.1em;" href="${contextURL}/tools/NativeClient.zip">
+                <a class="buttonvs" style="width: 280px;" href="${contextURL}/tools/NativeClient.zip">
                     <i class="fa fa-download"></i> ${msg.validationToolMsg}
                 </a>
                 <a href="http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html#javasejdk">
