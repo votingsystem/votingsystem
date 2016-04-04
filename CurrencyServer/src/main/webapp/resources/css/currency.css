@@ -47,7 +47,7 @@ body {
 }
 
 .buttonvs {
-    padding: 5px 5px 5px 4px;
+    padding: 4px;
     text-decoration: none;
     box-shadow: 1px 2px 1px 0px #bbb;
     border: 1px solid #bbb;
@@ -231,6 +231,7 @@ textarea.form-control {
 .closeIcon:hover {
     fill:#ba0011; color:#ba0011;
 }
+.closeIcon:active { color:orangered; }
 
 .navbarIcon {
     color: #f9f9f9;

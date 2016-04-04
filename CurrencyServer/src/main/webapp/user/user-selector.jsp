@@ -21,11 +21,11 @@
 
             <div hidden="{{!modeSearch}}" class="horizontal layout" style="width: 100%;">
                 <div class="layout horizontal center center-justified flex" style="margin:0px auto 0px auto;">
-                    <input id="inputSearch" type="text" style="width:200px;" class="form-control"
-                           placeholder="${msg.userSearchLbl}" on-keypress="searchInputKeyPress">
-                    <button on-click="processSearch" style="margin:0 0 0 5px;">
+                    <input id="inputSearch" on-keyup="searchInputKeyPress" type="text" style="width:200px;" class="form-control"
+                           placeholder="${msg.userSearchLbl}">
+                    <div class="buttonvs" on-click="processSearch" style="margin:0 0 0 5px;">
                         <i class="fa fa-search"></i> ${msg.searchLbl}
-                    </button>
+                    </div>
                 </div>
             </div>
             <div hidden="{{modeSearch}}" class="horizontal layout center center-justified" style="width: 100%;">
@@ -36,14 +36,14 @@
                     <div class="card" style="display: block;">
                         <div class="horizontal layout" on-click="showUserDetails">
                             <div class="layout flex vertical center-justified">
-                                <div class="name">{{user.name}}</div>
+                                <div class="name">{{user.firstName}}</div>
                                 <div class="name" style="margin: 5px 0 0 0;">{{user.lastName}}</div>
                             </div>
                             <div>
                                 <div hidden="{{isContactButtonHidden(user)}}">
-                                    <button on-click="toggleContact" style="font-size: 0.7em; margin:0 0 0 0;">
+                                    <div class="buttonvs" on-click="toggleContact" style="font-size: 0.7em; margin:0 0 0 0;">
                                         <span>{{selectorModeMsg}}</span>
-                                    </button>
+                                    </div>
                                 </div>
                                 <div class="nif flex horizontal layout center center-justified">{{user.nif}}</div>
                             </div>
@@ -159,8 +159,7 @@
                 else return true
             },
             searchInputKeyPress:function (e){
-                var chCode = ('charCode' in e) ? e.charCode : e.keyCode;
-                if (chCode == 13) this.processSearch()
+                if(e.keyCode === 13) this.processSearch();
             },
             processSearch:function() {
                 this.textToSearch = this.$.inputSearch.value.trim()

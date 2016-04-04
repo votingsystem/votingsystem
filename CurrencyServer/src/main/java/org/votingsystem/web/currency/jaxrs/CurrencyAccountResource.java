@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import com.google.common.collect.ImmutableMap;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyAccountDto;
@@ -10,6 +11,7 @@ import org.votingsystem.model.User;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.JSON;
+import org.votingsystem.web.currency.ejb.UserBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -29,10 +31,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -45,6 +47,7 @@ public class CurrencyAccountResource {
     @Inject ConfigVS app;
     @Inject DAOBean dao;
     @Inject ConfigVS config;
+    @Inject UserBean userBean;
 
 
     @Path("/user/id/{userId}/balance")
@@ -99,6 +102,28 @@ public class CurrencyAccountResource {
         }
         SystemAccountsDto systemAccountsDto = new SystemAccountsDto(accountListDto, tagVSBalanceList, bankBalanceList);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(systemAccountsDto)).build();
+    }
+
+    @GET @Produces(MediaType.APPLICATION_JSON)
+    @Path("/bank/id/{bankId}") @Transactional
+    public Response bank(@PathParam("bankId") long bankId, @Context HttpServletRequest req,
+             @Context HttpServletResponse resp, @Context ServletContext context) throws Exception {
+        User bank = dao.find(User.class, bankId);
+        if(bank == null || bank.getType() != User.Type.BANK) {
+            return Response.status(Response.Status.NOT_FOUND).entity("bank id: " + bankId).build();
+        }
+        Query query = dao.getEM().createQuery("select SUM(t.amount), tag, t.currencyCode from Transaction t " +
+                "JOIN t.tag tag where t.state =:state and t.fromUser=:bank group by tag, t.currencyCode")
+                .setParameter("state", Transaction.State.OK)
+                .setParameter("bank", bank);
+        List<Object[]> resultList = query.getResultList();
+        List<TagVSDto> tagBalanceList = new ArrayList<>();
+        for(Object[] result : resultList) {
+            tagBalanceList.add(new TagVSDto((BigDecimal) result[0], (CurrencyCode) result[2], (TagVS) result[1]));
+        }
+        Map tagBalanceMap = tagBalanceList.stream().collect(Collectors.groupingBy(TagVSDto::getCurrencyCode));
+        Map result = ImmutableMap.of("bank", userBean.getUserDto(bank, false), "tagBalanceList", tagBalanceMap);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(result)).build();
     }
 
 }

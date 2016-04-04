@@ -73,11 +73,12 @@
         <div id="mainDiv" class="pagevs" hidden>
         <div style="padding: 0 20px;">
             <div class="horizontal layout center center-justified">
-                <div class="flex">
-                    <div style="color:#6c0404; text-align: center;text-decoration: underline;margin: 15px auto;">
-                        <select id=periodSelect" style="margin:10px auto 0px auto;color:black; width: 250px;"
+                <div class="flex horizontal layout">
+                    <div>
+                        <select id=periodSelect" style="margin:10px auto 0px auto;color:black; width: 200px;"
                                 on-change="periodSelectChange" class="form-control" value="{{selectedPeriod}}">
-                            <option value="WEEK" style="color:#6c0404;font-size: 1.2em;"> ${msg.weekInfoLbl} </option>
+                            <option value="WEEK" style="color:#6c0404;">
+                                ${msg.weekInfoLbl} </option>
                             <option value="MONTH" style="color:#6c0404;"> ${msg.monthInfoLbl} </option>
                             <option value="YEAR" style="color:#6c0404;"> ${msg.yearInfoLbl} </option>
                         </select>
@@ -101,7 +102,7 @@
                 <div class="sectionHeader" style="margin: 0px auto 10px auto;">
                     ${msg.cashLbl}
                 </div>
-                <div class="horizontal layout">
+                <div class="horizontal layout center center-justified">
                     <template is="dom-repeat" items="{{curencyBalanceList}}" as="currencyData">
                         <div style="width:400px;border-left: 1px solid #bfbfbf;">
                             <div class="horizontal layout center" style="background-color: #efefef;">

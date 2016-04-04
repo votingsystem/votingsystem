@@ -37,7 +37,7 @@
                     <i class="fa fa-users"></i> ${msg.locateCertLbl}
                 </a>
                 <a class="menuItem menuItemSelected" data-route="reports" href="#{contextURL}/spa.xhtml#!/reports">
-                    <i class="fa fa-cogs"></i> ${msg.reportsPageTitle}
+                    <i class="fa fa-cogs"></i> ${msg.reportsSectionLbl}
                 </a>
                 <a class="menuItem menuItemSelected" data-route="docs" href="#{contextURL}/spa.xhtml#!/innerVSPage?url=/app/index.xhtml&amp;caption=${msg.docsLbl}&amp;data_route=docs">
                     <i class="fa fa-info"></i> ${msg.docsLbl}
@@ -49,13 +49,11 @@
         </div>
         <div id='main'>
             <div class="horizontal layout flex" style="background-color: #ba0011;box-shadow: 0 3px 3px 0 #ccc;
-                    padding: 1px 0 1px 0;min-width:1000px;width:100%;">
-                <div class="horizontal layout flex">
-                    <div style="margin:0 30px 0 30px;">
-                        <i id="drawerButton" class="fa fa-navicon navbarIcon" style="font-size: 1.7em; margin:3px 0 0 0;"></i>
-                    </div>
-                    <div style="font-size: 1.7em;margin:0 0 0 50px; color: #f9f9f9;" id="selectedPageTitle"></div>
+                    padding: 1px 0 1px 0;width:100%;">
+                <div style="margin:0 30px 0 30px;">
+                    <i id="drawerButton" class="fa fa-navicon navbarIcon" style="font-size: 1.7em; margin:3px 0 0 0;"></i>
                 </div>
+                <div class="flex" style="font-size: 1.7em;color: #f9f9f9;text-align: center;" id="selectedPageTitle"></div>
                 <div id="connectionMsgDiv" class="navbarIcon" style="font-size: 1.2em;margin:3px 30px 0 0;">
                     #{msg.accessLbl}
                 </div>
@@ -89,7 +87,7 @@
                 });
 
                 vs.socket.addEventListener("disconnected", function() {
-                    page.show("#{contextURL}/spa.xhtml#!/transactionsDashboard")
+                    page.show("#{contextURL}")
                     document.querySelector("#connectionMsgDiv").innerText = "${msg.accessLbl}"
                 })
 

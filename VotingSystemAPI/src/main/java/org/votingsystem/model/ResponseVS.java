@@ -45,7 +45,6 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     public static final int SC_PRECONDITION_FAILED      = 412;
     public static final int SC_ERROR_REQUEST_REPEATED   = 409;
     public static final int SC_EXCEPTION                = 490;
-    public static final int SC_NULL_REQUEST             = 472;
     public static final int SC_ERROR                    = 500;
     public static final int SC_CONNECTION_TIMEOUT       = 522;
     public static final int SC_ERROR_TIMESTAMP          = 570;

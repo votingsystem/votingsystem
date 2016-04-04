@@ -119,10 +119,10 @@ public class WebSocketBean {
                 Query query = dao.getEM().createQuery("select d from Device d where d.user.nif =:nif and d.deviceId =:deviceId")
                         .setParameter("nif", signer.getNif()).setParameter("deviceId", dto.getDeviceId());
                 Device device = dao.getSingleResult(Device.class, query);
+                responseDto = messageDto.getServerResponse(
+                        ResponseVS.SC_WS_CONNECTION_INIT_OK, null).setMessageType(TypeVS.INIT_SIGNED_SESSION);
                 if(device != null) {
                     signer.setDevice(device);
-                    responseDto = messageDto.getServerResponse(
-                            ResponseVS.SC_WS_CONNECTION_INIT_OK, null).setMessageType(TypeVS.INIT_SIGNED_SESSION);
                     query = dao.getEM().createQuery("select t from UserToken t where t.user =:user and t.state =:state")
                             .setParameter("user", signer).setParameter("state", UserToken.State.OK);
                     UserToken token = dao.getSingleResult(UserToken.class, query);
@@ -130,18 +130,18 @@ public class WebSocketBean {
                         byte[] userToken = cmsBean.decryptCMS(token.getToken());
                         responseDto.setMessage(new String(userToken));
                     }
-                    responseDto.setConnectedDevice(DeviceDto.INIT_SIGNED_SESSION(signer));
-                    dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
-                    SessionManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer, device);
-                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
                 } else {
-                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
-                            messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_ERROR,
-                            messages.get("certWithoutDeviceInfoErrorMsg"))));
+                    device = (Device) messageDto.getSession().getUserProperties().get("device");
+                    device.setX509Certificate(signer.getX509Certificate());
+                    signer.setDevice(device);
                 }
+                responseDto.setConnectedDevice(DeviceDto.INIT_SIGNED_SESSION(signer));
+                dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
+                SessionManager.getInstance().putAuthenticatedDevice(messageDto.getSession(), signer, device);
+                messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
                 break;
             case WEB_SOCKET_BAN_SESSION:
-                //talks
+                //TODO
                 break;
             default: throw new ExceptionVS("unknownSocketOperationErrorMsg: " + messageDto.getOperation());
         }

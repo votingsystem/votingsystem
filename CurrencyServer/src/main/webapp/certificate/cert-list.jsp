@@ -12,11 +12,12 @@
                 border:1px solid #ccc;
                 background-color: #f9f9f9;
                 margin: 10px 5px 5px 10px;
-                border-radius: 5px;
+                border-radius: 3px;
                 cursor: pointer;
                 overflow:hidden;
                 position: relative;
-                box-shadow: 0 5px 5px 0 #ccc;
+                box-shadow: 0 3px 3px 0 #ccc;
+                font-size: 0.9em;;
             }
         </style>
         <div class="pagevs" style="max-width: 100%; margin:7px;">

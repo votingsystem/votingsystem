@@ -98,7 +98,7 @@
           vs.route = 'reports';
           Polymer.Base.importHref('./reports/vs-reports.vsp', function(e) {
               if(!reports) reports = document.createElement('vs-reports');
-              vs.loadMainContent(reports)
+              vs.loadMainContent(reports, "${msg.reportsSectionLbl}")
           });
       });
 
@@ -159,6 +159,16 @@
           Polymer.Base.importHref('./user/bank-list.vsp', function(e) {
               if(!bankList) bankList = document.createElement('bank-list');
               vs.loadMainContent(bankList, "${msg.bankListLbl}")
+          });
+      });
+
+      var bank
+      page('*/rest/currencyAccount/bank/id/*', function(data) {
+          vs.route = 'reports';
+          Polymer.Base.importHref('./user/bank-data.vsp', function(e) {
+              if(!bank) bank = document.createElement('bank-data');
+              bank.url = data.path
+              vs.loadMainContent(bank)
           });
       });
 

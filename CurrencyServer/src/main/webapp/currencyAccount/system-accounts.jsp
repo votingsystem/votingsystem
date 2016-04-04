@@ -3,11 +3,12 @@
 <dom-module id="system-accounts">
     <template>
         <style>
-            .accountBlock { border: 1px solid #6c0404; margin: 20px;
-                box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); cursor: pointer;
+            .accountBlock { border: 1px solid #888; margin: 20px;
+                background-color: #f9f9f9;
+                box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.24); cursor: pointer; display: table;
             }
-            .accountBalance { font-size: 2em; color: #6c0404; text-align: center;  padding: 10px; }
-            .tagDesc { background: #6c0404; color: #f9f9f9; padding: 5px;text-align: center; }
+            .accountBalance { font-size: 2em; color: #434343; text-align: center;  padding: 10px; }
+            .tagDesc { background: #888; color: #f9f9f9; padding: 5px;text-align: center; }
         </style>
         <div class="pagevs vertical layout center" style="max-width: 100%; margin:7px;">
             <h3 class="sectionHeader">${msg.systemAccountsLbl}</h3>
@@ -28,6 +29,7 @@
                         <div class="accountBalance"><span>{{item.amount}}</span> <span>{{item.currencyCode}}</span></div>
                         <div class="tagDesc">{{item.name}}</div>
                     </div>
+
                 </template>
             </div>
             <h3 class="sectionHeader" style="margin: 30px 0 0 0;">${msg.bankInputsLbl}</h3>
