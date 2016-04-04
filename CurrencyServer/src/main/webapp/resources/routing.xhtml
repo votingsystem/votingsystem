@@ -28,6 +28,15 @@
           }
       });
 
+      var homePage
+      page('*/home', function() {
+          vs.route = 'home';
+          Polymer.Base.importHref('./app/home-page.vsp', function(e) {
+              if(!homePage) homePage = document.createElement('home-page');
+              vs.loadMainContent(homePage, "${msg.homeLbl}")
+          });
+      });
+
       var transactionsDashboard
       page('*/transactionsDashboard*', function() {
           vs.route = 'transactionsDashboard';
@@ -176,7 +185,7 @@
           hashbang: true // add #! before urls
       });
 
-      if(!vs.route) page("/transactionsDashboard")
+      if(!vs.route) page("/home")
   });
 </script>
 </html>

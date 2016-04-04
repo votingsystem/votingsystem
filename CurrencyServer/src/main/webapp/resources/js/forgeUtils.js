@@ -204,28 +204,3 @@ vs.getTimeStampToken = function (contentToSign, callback) {
     xhttp.setRequestHeader("Content-Encoding", "base64");
     xhttp.send(timeStampRequestBase64);
 }
-
-//http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript?rq=1
-vs.getUUID = function() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-        return v.toString(16);
-    });
-}
-
-var WEB_SOCKET_SESSION_KEY = "wsid";
-var DEVICE_ID_KEY          = "did";
-var OPERATION_KEY          = "op";
-var OPERATION_CODE_KEY     = "opid";
-var PUBLIC_KEY_KEY         = "pk";
-
-vs.getQRCodeURL = function(operation, operationCode, deviceId, sessionId, key, size) {
-    if(!size) size = "100x100"
-    var result = vs.contextURL + "/qr?cht=qr&chs=" + size + "&chl="
-    if(operation != null) result = result + OPERATION_KEY + "=" + operation + ";"
-    if(operationCode != null) result = result + OPERATION_CODE_KEY + "=" + operationCode + ";"
-    if(deviceId != null) result = result + DEVICE_ID_KEY + "=" + deviceId + ";"
-    if(sessionId != null) result = result + WEB_SOCKET_SESSION_KEY + "=" + sessionId + ";"
-    if(key != null) result = result + PUBLIC_KEY_KEY + "=" + key + ";"
-    return result;
-}

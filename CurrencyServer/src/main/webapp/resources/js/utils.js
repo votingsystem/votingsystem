@@ -355,6 +355,42 @@ vs.showAccessQRCode = function () {
     vs.client.processOperation(new OperationVS("ACCESS_QR_CODE"))
 }
 
+//http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript?rq=1
+vs.getUUID = function() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
+    });
+}
+
+vs.getQRCodeURL = function(operation, operationCode, deviceId, key, size, socketSystem) {
+    if(!size) size = "100x100"
+    if(!socketSystem) socketSystem = vs.systemCode.CURRENCY_SYSTEM
+    var result = vs.contextURL + "/qr?cht=qr&chs=" + size + "&chl=srv=" + socketSystem + ";"
+    if(operation != null) result = result + "op=" + operation + ";"
+    if(operationCode != null) result = result + "opid=" + operationCode + ";"
+    if(deviceId != null) result = result + "did=" + deviceId + ";"
+    if(key != null) result = result + "pk=" + key + ";"
+    console.log("getQRCodeURL: " + result)
+    return result;
+}
+
+vs.QROperationCode = {
+    INIT_REMOTE_SIGNED_SESSION:0,
+    MESSAGE_INFO:1,
+    CURRENCY_SEND:2,
+    USER_INFO:3,
+    VOTE:4,
+    OPERATION_PROCESS:5,
+    ANONYMOUS_REPRESENTATIVE_SELECTION:6
+    
+}
+
+vs.systemCode = {
+    CURRENCY_SYSTEM:0,
+    VOTING_SYSTEM:1
+}
+
 function querySelector(selector) {
     if(document.querySelector(selector) != null) return document.querySelector(selector)
     else return document.querySelector('html /deep/ ' + selector)

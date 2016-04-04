@@ -3,27 +3,31 @@
 <dom-module name="vs-reports">
     <template>
         <div class="pagevs vertical layout center">
-            <div style="margin: 0 auto;">
+            <div class="layout vertical center" style="margin: 0 auto;">
                 <h3 class="sectionHeader">${msg.reportsLbl}</h3>
-                <div style="margin:0px 0px;">
+                <div style="margin:0 0 0 0;">
+                    <a class="buttonvs" style="display: block;width: 150px;" href="${contextURL}/spa.xhtml#!/transactionsDashboard">
+                        <i class="fa fa-tachometer"></i> ${msg.dashBoardLbl}
+                    </a>
+                </div>
+                <div style="margin:10px 0 0 0;">
                     <a class="buttonvs" style="display: block;width: 150px;" href="/user/bankList">
                         ${msg.bankListLbl}
                     </a>
                 </div>
-                <div style="margin:20px 0px;">
+                <div style="margin:10px 0 0 0;">
                     <a class="buttonvs" style="display: block;width: 150px;" href="${contextURL}/spa.xhtml#!/currencyIssued?currencyCode=EUR">
                         ${msg.currencyIssued}
                     </a>
                 </div>
-                <div style="margin:20px 0px;">
+                <div style="margin:10px 0 0 0;">
                     <a class="buttonvs" style="display: block;width: 150px;" href="${contextURL}/spa.xhtml#!/currencyAccount/system">
                         ${msg.systemBalanceLbl}
                     </a>
                 </div>
-
-                <div style="margin:20px 0px;">
+                <div style="margin:10px 0 0 0;">
                     <a class="buttonvs"  style="display: block;width: 150px;"
-                        href="${contextURL}/spa.xhtml#!/reports/week?url=/rest/reports${spa.now()}/week">
+                       href="${contextURL}/spa.xhtml#!/reports/week?url=/rest/reports${spa.now()}/week">
                         ${msg.currentWeekLbl}
                     </a>
                 </div>

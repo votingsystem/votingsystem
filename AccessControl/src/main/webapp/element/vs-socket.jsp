@@ -16,7 +16,6 @@
                 VOTING_SYSTEM:{type:Number, value:1},
                 //param keys
                 DEVICE_ID_KEY:{type:String, value:"did"},
-                ITEM_ID_KEY:{type:String, value:"iid"},
                 OPERATION_KEY:{type:String, value:"op"},
                 OPERATION_CODE_KEY:{type:String, value:"opid"},
                 PUBLIC_KEY_KEY:{type:String, value:"pk"},

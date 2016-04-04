@@ -11,27 +11,11 @@
         Polymer({
             is:'vs-socket',
             properties:{
-                qrOperationsMap:{type:Object, value:{}},
-                //websocket system
-                CURRENCY_SYSTEM:{type:Number, value:0},
-                VOTING_SYSTEM:{type:Number, value:1},
-                //param keys
-                DEVICE_ID_KEY:{type:String, value:"did"},
-                ITEM_ID_KEY:{type:String, value:"iid"},
-                OPERATION_KEY:{type:String, value:"op"},
-                OPERATION_CODE_KEY:{type:String, value:"opid"},
-                PUBLIC_KEY_KEY:{type:String, value:"pk"},
-                SERVER_KEY:{type:String, value:"srv"},
-                //operations
-                INIT_REMOTE_SIGNED_SESSION:{type:Number, value:0},
-                MESSAGE_INFO:{type:Number, value:1},
-                CURRENCY_SEND:{type:Number, value:2},
-                USER_INFO:{type:Number, value:3},
-                VOTE:{type:Number, value:4},
-                OPERATION_PROCESS:{type:Number, value:5},
-                ANONYMOUS_REPRESENTATIVE_SELECTION:{type:Number, value:6},
+                qrOperationsMap:{type:Object, value:{}}
             },
-            ready: function() {},
+            ready: function() {
+                console.log("ready")
+            },
             connect: function() {
                 if(vs.deviceId) {
                     console.log("socket already connected")
@@ -154,7 +138,7 @@
                 }
                 if(!vs.rsaUtil) vs.rsaUtil = new RSAUtil(1024);
                 this.qrOperationsMap[operationCode] = {operation:'INIT_REMOTE_SIGNED_SESSION'}
-                this.$.qrDialog.show(operationCode, this.getQRCodeURL(this.INIT_REMOTE_SIGNED_SESSION, operationCode,
+                this.$.qrDialog.show(operationCode, vs.getQRCodeURL(vs.QROperationCode.INIT_REMOTE_SIGNED_SESSION, operationCode,
                         vs.deviceId, vs.rsaUtil.publicKeyBase64, "200x200"))
             },
             showOperationQRCode:function (socketSystem, operationVS, operationCode) {
@@ -166,7 +150,7 @@
                     this.pendingOperation = {system:socketSystem, operation:operationVS, operationCode:operationCode}
                     return operationCode;
                 }
-                this.$.qrDialog.show(operationCode, this.getQRCodeURL(this.OPERATION_PROCESS, operationCode,
+                this.$.qrDialog.show(operationCode, vs.getQRCodeURL(vs.QROperationCode.OPERATION_PROCESS, operationCode,
                         vs.deviceId, null, "200x200", socketSystem))
                 return operationCode
             },
@@ -186,16 +170,6 @@
             },
             getOperationCode: function() {
                 return Math.random().toString(36).substring(2, 6).toUpperCase();
-            },
-            getQRCodeURL:function(operation, operationCode, deviceId, key, size, socketSystem) {
-                if(!size) size = "100x100"
-                if(!socketSystem) socketSystem = this.CURRENCY_SYSTEM
-                var result = vs.contextURL + "/qr?cht=qr&chs=" + size + "&chl=" + this.SERVER_KEY + "=" + socketSystem + ";"
-                if(operation != null) result = result + this.OPERATION_KEY + "=" + operation + ";"
-                if(operationCode != null) result = result + this.OPERATION_CODE_KEY + "=" + operationCode + ";"
-                if(deviceId != null) result = result + this.DEVICE_ID_KEY + "=" + deviceId + ";"
-                if(key != null) result = result + this.PUBLIC_KEY_KEY + "=" + key + ";"
-                return result;
             }
         });
     </script>

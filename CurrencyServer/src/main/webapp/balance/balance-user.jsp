@@ -73,7 +73,16 @@
         <div id="mainDiv" class="pagevs" hidden>
         <div style="padding: 0 20px;">
             <div class="horizontal layout center center-justified">
-                <div class="flex"></div>
+                <div class="flex">
+                    <div style="color:#6c0404; text-align: center;text-decoration: underline;margin: 15px auto;">
+                        <select id=periodSelect" style="margin:10px auto 0px auto;color:black; width: 250px;"
+                                on-change="periodSelectChange" class="form-control" value="{{selectedPeriod}}">
+                            <option value="WEEK" style="color:#6c0404;font-size: 1.2em;"> ${msg.weekInfoLbl} </option>
+                            <option value="MONTH" style="color:#6c0404;"> ${msg.monthInfoLbl} </option>
+                            <option value="YEAR" style="color:#6c0404;"> ${msg.yearInfoLbl} </option>
+                        </select>
+                    </div>
+                </div>
                 <div class="pageTitle">
                     <span>{{userName}}</span>
                 </div>
@@ -89,7 +98,7 @@
                     <i class="fa fa-angle-double-right iconSelector" style="margin: 0 0 0 20px;"></i></div>
             </div>
             <div style="margin: 0 auto;max-width: 1000px;">
-                <div style="color:#6c0404; text-align: center;text-decoration: underline;margin: 0px auto 10px auto;font-size: 1.1em;">
+                <div class="sectionHeader" style="margin: 0px auto 10px auto;">
                     ${msg.cashLbl}
                 </div>
                 <div class="horizontal layout">
@@ -121,16 +130,7 @@
         </div>
 
         <div id="movementsDiv">
-            <div style="color:#6c0404; text-align: center;text-decoration: underline;margin: 15px auto;font-size: 1.1em;">
-                <select id=periodSelect" style="margin:10px auto 0px auto;color:black; width: 250px;"
-                        on-change="periodSelectChange" class="form-control" value="{{selectedPeriod}}">
-                    <option value="WEEK" style="color:#6c0404;font-size: 1.2em;"> ${msg.weekMovementsLbl} </option>
-                    <option value="MONTH" style="color:#6c0404;"> ${msg.monthMovementsLbl} </option>
-                    <option value="YEAR" style="color:#6c0404;"> ${msg.yearMovementsLbl} </option>
-                </select>
-
-            </div>
-
+            <div class="sectionHeader" style="margin: 20px 0 10px 0;">${msg.movementsLbl}</div>
             <div class="expensesTable horizontal layout" style="margin: 10px auto; width: 1100px;">
                 <vs-table id="vsTable"
                           searchable

@@ -1,5 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 
+<link href="../resources/forgePKCS7.html" rel="import"/>
+
 <dom-module name="user-data">
 <template>
     <style></style>
@@ -42,10 +44,10 @@
                 }
             }
             if(this.user.connectedDevices && this.user.connectedDevices.length > 0) {
-                console.log("fetching only first connected device!")
+                console.log("---fetching only first connected device!")
                 var cert = forge.pki.certificateFromPem(this.user.connectedDevices[0].x509CertificatePEM);
                 var publicKeyBase64 = vs.getPublicKeyBase64(cert.publicKey)
-                this.$.qrImg.src = vs.getQRCodeURL('USER_INFO', null, this.user.connectedDevices[0].id, null,
+                this.$.qrImg.src = vs.getQRCodeURL(vs.QROperationCode.USER_INFO, null, this.user.connectedDevices[0].id,
                         publicKeyBase64, "150x150")
             }
             this.$.userDescriptionDiv.innerHTML = this.user.description
