@@ -49,8 +49,6 @@ public class AuditBean {
     @Inject CMSBean cmsBean;
     @Inject BalancesBean balancesBean;
 
-    //Check that the sum of all issued Currency match with valid request
-    public void checkCurrencyRequest(Interval timePeriod) { }
 
     //Backup user transactions for timePeriod
     public BalancesDto backupUserTransactionList(User user, Interval timePeriod) throws IOException {

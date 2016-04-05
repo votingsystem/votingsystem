@@ -66,4 +66,6 @@ public class AppResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
+
+
 }

@@ -6,6 +6,7 @@ import org.votingsystem.model.Device;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.web.currency.ejb.WebSocketBean;
+import org.votingsystem.web.currency.util.PrincipalVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -98,6 +99,10 @@ public class SocketEndpoint {
                 dao.merge(device.getCertificate().setState(Certificate.State.SESSION_FINISHED));
                 log.info("session finished - certificate: " + device.getCertificate().getId() + " - state: " +
                         device.getCertificate().getState());
+            }
+            HttpSession httpSession = ((HttpSession)session.getUserProperties().get(HttpSession.class.getName()));
+            if(httpSession != null) { //disconnecting from browser
+                httpSession.removeAttribute(PrincipalVS.USER_KEY);
             }
             SessionManager.getInstance().remove(session);
         } catch (Exception ex) {

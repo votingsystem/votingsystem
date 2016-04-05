@@ -33,10 +33,10 @@ public class CurrencyServerLoginAuthenticationMechanism implements Authenticatio
 
     @Override
     public AuthenticationMechanismOutcome authenticate(HttpServerExchange exchange, SecurityContext securityContext) {
-        log.info("authenticate");
+        //log.info("authenticate");
         ServletRequestContext servletRequestContext = exchange.getAttachment(ServletRequestContext.ATTACHMENT_KEY);
         HttpServletRequest request = servletRequestContext.getOriginalRequest();
-        User user = (User) request.getSession().getAttribute("user");
+        User user = (User) request.getSession().getAttribute(PrincipalVS.USER_KEY);
         if(user == null) return AuthenticationMechanismOutcome.NOT_ATTEMPTED;
         Account account =  new AccountImpl(new PrincipalVS(user), roles);
         securityContext.authenticationComplete(account, mechanismName, true);

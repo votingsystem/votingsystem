@@ -10,6 +10,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.PEMUtils;
+import org.votingsystem.web.currency.util.PrincipalVS;
 import org.votingsystem.web.currency.websocket.SessionManager;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -19,6 +20,7 @@ import org.votingsystem.web.util.MessagesVS;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
+import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import javax.websocket.Session;
 import java.util.UUID;
@@ -97,6 +99,7 @@ public class WebSocketBean {
                                 browserDevice = dao.persist(browserDevice);
                             }
                             SessionManager.getInstance().putAuthenticatedDevice(remoteSession, signer, browserDevice);
+
                         } catch (Exception ex) {
                             log.log(Level.SEVERE, ex.getMessage(), ex);
                         }
@@ -107,6 +110,8 @@ public class WebSocketBean {
                         responseDto.setConnectedDevice(DeviceDto.INIT_BROWSER_SESSION(signer, browserDevice));
                         remoteSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
                         dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
+                        ((HttpSession)remoteSession.getUserProperties().get(HttpSession.class.getName()))
+                                .setAttribute(PrincipalVS.USER_KEY, signer.setDevice(browserDevice));
                     }
                 }
                 break;

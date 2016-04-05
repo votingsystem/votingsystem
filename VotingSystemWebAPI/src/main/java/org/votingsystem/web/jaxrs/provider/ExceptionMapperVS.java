@@ -9,6 +9,7 @@ import org.votingsystem.util.TypeVS;
 import org.votingsystem.web.ejb.DAOBean;
 
 import javax.inject.Inject;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -36,6 +37,10 @@ public class ExceptionMapperVS implements ExceptionMapper<Exception> {
                 log.log(Level.SEVERE, "--- NotFoundException --- " + exception.getMessage());
                 return Response.status(Response.Status.NOT_FOUND).entity(
                         "NotFoundException: " + exception.getMessage()).type(javax.ws.rs.core.MediaType.TEXT_PLAIN).build();
+            } else if(exception instanceof ForbiddenException) {
+                log.log(Level.SEVERE, "--- ForbiddenException --- " + exception.getMessage());
+                return Response.status(Response.Status.FORBIDDEN).entity(exception.getMessage())
+                        .type(javax.ws.rs.core.MediaType.TEXT_PLAIN).build();
             } else if(exception instanceof WebApplicationException) {
                 log.log(Level.SEVERE, "--- WebApplicationException --- " + exception.getMessage(), exception);
                 if(exception.getCause() instanceof ExceptionVS) {

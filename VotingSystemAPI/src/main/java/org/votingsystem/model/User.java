@@ -479,10 +479,10 @@ public class User extends EntityVS implements Serializable {
         return device;
     }
 
-    public void setDevice(Device device) {
+    public User setDevice(Device device) {
         this.device = device;
+        return this;
     }
-
 
     public Address getAddress() {
         return address;

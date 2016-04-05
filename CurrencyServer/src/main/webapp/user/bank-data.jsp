@@ -58,9 +58,7 @@
             console.log(this.tagName + " - ready - menuType: " + this.menuType)
         },
         getTagList:function(currencyCode) {
-            var result = this.bankIncomesMap[currencyCode];
-            console.log("getTagList - currency: " + currencyCode, result, "bankIncomesMap: ", this.bankIncomesMap)
-            return result
+            return this.bankIncomesMap[currencyCode];
         },
         getCurrencyCodeAmount:function(currencyCode) {
             return this.bankIncomesMap[currencyCode].amount

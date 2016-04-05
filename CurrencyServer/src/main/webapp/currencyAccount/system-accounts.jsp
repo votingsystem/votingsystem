@@ -93,15 +93,14 @@
             calculateMapTotals:function(map) {
                 var currencyList = Object.keys(map)
                 map.amounts = {}
-                currencyList.forEach(function(element, index) {
-                    var currencyItemList = map[element]
+                currencyList.forEach(function(currencyCode, index) {
+                    var currencyItemList = map[currencyCode]
                     var currencyAmount = 0
                     currencyItemList.forEach(function(element, index) {
                         currencyAmount += element.amount
                     })
-                    map.amounts[element] = currencyAmount
+                    map.amounts[currencyCode] = currencyAmount
                 })
-                console.log("calculateMapTotals: ", map)
             },
             getCurrencySymbol:function(currencyCode) {
                 return vs.getCurrencySymbol(currencyCode)
