@@ -13,7 +13,7 @@
         </style>
         <div class="pagevs vertical layout center" style="max-width: 100%; margin:7px;">
             <div hidden={{!contactSelector}} class="horizontal layout center center-justified"
-                 style="margin:10px 0 20px 0; cursor: pointer; border-bottom: 1px solid #888; color: #0000ee;">
+                 style="margin:10px 0 20px 0; cursor: pointer; border-bottom: 1px solid #888; color: #888;width: 400px;">
                 <div id="searchUserDiv" on-click="setSearchView"
                      style="font-weight: bold; font-size: 1.1em; margin:0 40px 0 0;">${msg.userSearchLbl}</div>
                 <div id="contactDiv" on-click="setContactsView" style="font-weight: bold; font-size: 1.1em; cursor: pointer;">${msg.contactsLbl}</div>
@@ -81,11 +81,11 @@
                 console.log(this.tagName + " modeSearchChanged - modeSearch: " + this.modeSearch)
                 if(this.modeSearch === true) {
                     this.userListDto = {resultList:[]}
-                    this.$.searchUserDiv.style.borderBottom = '3px solid'
+                    this.$.searchUserDiv.style.borderBottom = '3px solid #b3b'
                     this.$.contactDiv.style.borderBottom = ''
                 } else {
                     this.$.searchUserDiv.style.borderBottom = ''
-                    this.$.contactDiv.style.borderBottom = '3px solid'
+                    this.$.contactDiv.style.borderBottom = '3px solid #b3b'
                     this.userListDto = {resultList:toJSON(this.contacts)}
                 }
                 this.userListEmpty = false
@@ -105,10 +105,10 @@
             },
             userListDtoChanged: function() {
                 if(!this.userListDto.resultList) {
-                    console.log(this.tagName + " - userListDtoChanged - null userListDto.resultList")
+                    console.log(this.tagName + " - userListDtoChanged - empty list")
                     return
                 }
-                console.log(this.tagName + " - userListDtoChanged - num. users: " + JSON.stringify(this.userListDto))
+                console.log(this.tagName + " - userListDtoChanged: ", this.userListDto)
                 this.userListEmpty = (this.userListDto.resultList.length === 0)
             },
             contactsArrayChanged: function(e) {

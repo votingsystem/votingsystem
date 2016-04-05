@@ -2,8 +2,11 @@ package org.votingsystem.dto.currency;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.dto.TagVSDto;
+import org.votingsystem.model.CurrencyCode;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -11,42 +14,29 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SystemAccountsDto {
 
-    private List<CurrencyAccountDto> accountList;
-    private List<TagVSDto> tagVSBalanceList;
-    private List<TagVSDto> bankBalanceList;
+    private Map<CurrencyCode, List<CurrencyAccountDto>> systemAccounts;
+    private Map<CurrencyCode, List<TagVSDto>> userAccounts;
+    private Map<CurrencyCode, List<TagVSDto>> bankInputs;
 
     public SystemAccountsDto() {}
 
-    public SystemAccountsDto( List<CurrencyAccountDto> accountList, List<TagVSDto> tagVSBalanceList,
-                              List<TagVSDto> bankBalanceList) {
-        this.accountList = accountList;
-        this.tagVSBalanceList = tagVSBalanceList;
-        this.bankBalanceList = bankBalanceList;
+    public SystemAccountsDto(List<CurrencyAccountDto> systemAccounts, List<TagVSDto> userAccounts,
+                              List<TagVSDto> bankInputs) {
+        this.systemAccounts = systemAccounts.stream().collect(Collectors.groupingBy(CurrencyAccountDto::getCurrencyCode));
+        this.userAccounts = userAccounts.stream().collect(Collectors.groupingBy(TagVSDto::getCurrencyCode));
+        this.bankInputs = bankInputs.stream().collect(Collectors.groupingBy(TagVSDto::getCurrencyCode));
     }
 
-
-    public List<CurrencyAccountDto> getAccountList() {
-        return accountList;
+    public Map<CurrencyCode, List<CurrencyAccountDto>> getSystemAccounts() {
+        return systemAccounts;
     }
 
-    public void setAccountList(List<CurrencyAccountDto> accountList) {
-        this.accountList = accountList;
+    public Map<CurrencyCode, List<TagVSDto>> getUserAccounts() {
+        return userAccounts;
     }
 
-    public List<TagVSDto> getTagVSBalanceList() {
-        return tagVSBalanceList;
-    }
-
-    public void setTagVSBalanceList(List<TagVSDto> tagVSBalanceList) {
-        this.tagVSBalanceList = tagVSBalanceList;
-    }
-
-    public List<TagVSDto> getBankBalanceList() {
-        return bankBalanceList;
-    }
-
-    public void setBankBalanceList(List<TagVSDto> bankBalanceList) {
-        this.bankBalanceList = bankBalanceList;
+    public Map<CurrencyCode, List<TagVSDto>> getBankInputs() {
+        return bankInputs;
     }
 
 }

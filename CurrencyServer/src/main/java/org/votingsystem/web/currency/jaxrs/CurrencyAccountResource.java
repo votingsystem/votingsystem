@@ -32,7 +32,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -76,32 +75,30 @@ public class CurrencyAccountResource {
                              @Context ServletContext context) throws IOException, ServletException {
         Query query = dao.getEM().createQuery("select c FROM CurrencyAccount c where c.user =:user and c.state =:state")
                 .setParameter("user", config.getSystemUser()).setParameter("state", CurrencyAccount.State.ACTIVE);
-        List<CurrencyAccount> accountList = query.getResultList();
-        List<CurrencyAccountDto> accountListDto = new ArrayList<>();
-        for(CurrencyAccount currencyAccount :accountList) {
-            accountListDto.add(new CurrencyAccountDto(currencyAccount));
+        List<CurrencyAccount> systemAccounts = query.getResultList();
+        List<CurrencyAccountDto> systemAccountsDto = new ArrayList<>();
+        for(CurrencyAccount currencyAccount:systemAccounts) {
+            systemAccountsDto.add(new CurrencyAccountDto(currencyAccount));
         }
         List<User.Type> notList = Arrays.asList(User.Type.SYSTEM);
         query = dao.getEM().createQuery("select SUM(c.balance), tag, c.currencyCode from CurrencyAccount c JOIN c.tag tag where c.state =:state " +
                 "and c.user.type not in :notList group by tag, c.currencyCode").setParameter("state", CurrencyAccount.State.ACTIVE)
                 .setParameter("notList", notList);
         List<Object[]> resultList = query.getResultList();
-        List<TagVSDto> tagVSBalanceList = new ArrayList<>();
+        List<TagVSDto> userAccounts = new ArrayList<>();
         for(Object[] result : resultList) {
-            tagVSBalanceList.add(new TagVSDto((BigDecimal) result[0], (CurrencyCode) result[2], (TagVS) result[1]));
+            userAccounts.add(new TagVSDto((BigDecimal) result[0], (CurrencyCode) result[2], (TagVS) result[1]));
         }
-
-
         query = dao.getEM().createQuery("select SUM(t.amount), tag, t.currencyCode from Transaction t JOIN t.tag tag where t.state =:state " +
                 "and t.type =:type group by tag, t.currencyCode").setParameter("state", Transaction.State.OK)
                 .setParameter("type", Transaction.Type.FROM_BANK);
         resultList = query.getResultList();
-        List<TagVSDto> bankBalanceList = new ArrayList<>();
+        List<TagVSDto> bankInputs = new ArrayList<>();
         for(Object[] result : resultList) {
-            bankBalanceList.add(new TagVSDto((BigDecimal) result[0], (CurrencyCode) result[2], (TagVS) result[1]));
+            bankInputs.add(new TagVSDto((BigDecimal) result[0], (CurrencyCode) result[2], (TagVS) result[1]));
         }
-        SystemAccountsDto systemAccountsDto = new SystemAccountsDto(accountListDto, tagVSBalanceList, bankBalanceList);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(systemAccountsDto)).build();
+        SystemAccountsDto resultDto = new SystemAccountsDto(systemAccountsDto, userAccounts, bankInputs);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build();
     }
 
     @GET @Produces(MediaType.APPLICATION_JSON)
@@ -121,7 +118,7 @@ public class CurrencyAccountResource {
         for(Object[] result : resultList) {
             tagBalanceList.add(new TagVSDto((BigDecimal) result[0], (CurrencyCode) result[2], (TagVS) result[1]));
         }
-        Map tagBalanceMap = tagBalanceList.stream().collect(Collectors.groupingBy(TagVSDto::getCurrencyCode));
+        Map<CurrencyCode, List<TagVSDto>> tagBalanceMap = tagBalanceList.stream().collect(Collectors.groupingBy(TagVSDto::getCurrencyCode));
         Map result = ImmutableMap.of("bank", userBean.getUserDto(bank, false), "tagBalanceList", tagBalanceMap);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(result)).build();
     }
