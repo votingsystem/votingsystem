@@ -6,7 +6,7 @@ import org.votingsystem.model.Device;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.web.currency.ejb.WebSocketBean;
-import org.votingsystem.web.currency.util.PrincipalVS;
+import org.votingsystem.web.currency.filter.PrincipalVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;

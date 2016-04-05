@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.filter;
 
+import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -19,6 +20,7 @@ public class FilterVS implements Filter {
 
     private ServletContext servletContext;
     @Inject ConfigVS config;
+    @Inject CMSBean cmsBean;
     private String serverName;
     private String contextURL;
     private String webSocketURL;

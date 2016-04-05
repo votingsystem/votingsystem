@@ -10,7 +10,7 @@ import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.PEMUtils;
-import org.votingsystem.web.currency.util.PrincipalVS;
+import org.votingsystem.web.currency.filter.PrincipalVS;
 import org.votingsystem.web.currency.websocket.SessionManager;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;

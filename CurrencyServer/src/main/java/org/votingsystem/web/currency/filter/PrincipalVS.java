@@ -1,9 +1,13 @@
-package org.votingsystem.web.currency.util;
+package org.votingsystem.web.currency.filter;
 
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.User;
 
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -11,6 +15,9 @@ import java.security.Principal;
 public class PrincipalVS implements Principal {
 
     public static final String USER_KEY = "USER_KEY";
+
+    public static final Set<String> ADMIN_ROLES =  Collections.unmodifiableSet(new HashSet<>(Arrays.asList("USER", "ADMIN")));
+    public static final Set<String> USER_ROLES =  Collections.unmodifiableSet(new HashSet<>(Arrays.asList("USER")));
 
     private User user;
     private CMSMessage cmsMessage;

@@ -4,24 +4,23 @@
     <template>
         <div class="vertical layout center center-justified">
             <div class="horizontal layout">
-                <b>${msg.subjectLbl}:</b><span>{{transactionRequest.subject}}</span>
+                <b>${msg.subjectLbl}:</b>{{transactionRequest.subject}}
             </div>
             <h3>
-                ${msg.amountLbl}:
-                <span>{{transactionRequest.amount}}</span> <span>{{transactionRequest.currencyCode}}</span> -
-                <span>{{transactionRequest.tags}}</span>
+                ${msg.amountLbl}: {{transactionRequest.amount}} {{transactionRequest.currencyCode}} {{transactionRequest.tags}}
             </h3>
             <div class="horizontal layout">
                 <b>${msg.receptorLbl}:</b><span style="margin: 0 20px 0 0;">{{transactionRequest.toUserName}}</span>
-                <b>IBAN:</b><span>{{transactionRequest.toUserIBAN}}</span>
+                <b>IBAN:</b>{{transactionRequest.toUserIBAN}}
             </div>
             <div id="qrCodeImgDiv" class="vertical layout center center-justified">
                 <div style="margin: 25px 0 0 0;font-size: 1.2em;"><b>${msg.readQRMsg}:</b></div>
                 <img src="{{qrCodeServiceUrl}}" alt="read it with your mobile"/>
             </div>
-            <div hidden="{{!messageDto}}" class="horizontal layout" style="border: 1px solid #ba0011; padding: 5px 10px 5px 10px; margin: 20px 0 0 0;">
-                <h3 style="min-width: 150px;">statusCode: <span style="color: #888;">{{messageDto.statusCode}}</span></h3>
-                <h3> - message: <span style="color: #888;">{{messageDto.message}}</span></h3>
+            <div hidden="{{!messageDto}}" class="horizontal layout" style="border: 1px solid #ccc; padding:
+                    5px 10px 5px 10px; margin: 20px 0 0 0;">
+                <h3 style="min-width: 150px;">statusCode: {{messageDto.statusCode}}</h3>
+                <h3>message: {{messageDto.message}}</h3>
             </div>
         </div>
     </template>

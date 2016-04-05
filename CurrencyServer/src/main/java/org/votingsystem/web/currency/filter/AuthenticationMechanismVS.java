@@ -1,4 +1,4 @@
-package org.votingsystem.web.currency.util;
+package org.votingsystem.web.currency.filter;
 
 import io.undertow.security.api.AuthenticationMechanism;
 import io.undertow.security.api.AuthenticationMechanismFactory;
@@ -12,22 +12,21 @@ import org.votingsystem.model.User;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class CurrencyServerLoginAuthenticationMechanism implements AuthenticationMechanism {
+public class AuthenticationMechanismVS implements AuthenticationMechanism {
 
-    private static final Logger log = Logger.getLogger(CurrencyServerLoginAuthenticationMechanism.class.getName());
-
-    private static final Set<String> roles =  Collections.unmodifiableSet(new HashSet<>(Arrays.asList("userAuthenticated")));
+    private static final Logger log = Logger.getLogger(AuthenticationMechanismVS.class.getName());
 
     private final String mechanismName;
 
-    public CurrencyServerLoginAuthenticationMechanism(String mechanismName) {
+    public AuthenticationMechanismVS(String mechanismName) {
         this.mechanismName = mechanismName;
     }
 
@@ -38,7 +37,7 @@ public class CurrencyServerLoginAuthenticationMechanism implements Authenticatio
         HttpServletRequest request = servletRequestContext.getOriginalRequest();
         User user = (User) request.getSession().getAttribute(PrincipalVS.USER_KEY);
         if(user == null) return AuthenticationMechanismOutcome.NOT_ATTEMPTED;
-        Account account =  new AccountImpl(new PrincipalVS(user), roles);
+        Account account =  new AccountImpl(new PrincipalVS(user), PrincipalVS.USER_ROLES);
         securityContext.authenticationComplete(account, mechanismName, true);
         return AuthenticationMechanismOutcome.AUTHENTICATED;
     }
@@ -75,7 +74,7 @@ public class CurrencyServerLoginAuthenticationMechanism implements Authenticatio
     public static final class Factory implements AuthenticationMechanismFactory {
         @Override
         public AuthenticationMechanism create(String mechanismName, FormParserFactory formParserFactory, Map<String, String> properties) {
-            return new CurrencyServerLoginAuthenticationMechanism(mechanismName);
+            return new AuthenticationMechanismVS(mechanismName);
         }
     }
 

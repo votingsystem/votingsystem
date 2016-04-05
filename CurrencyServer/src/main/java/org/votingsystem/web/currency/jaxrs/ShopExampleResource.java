@@ -100,7 +100,7 @@ public class ShopExampleResource {
         MessagesVS messages = MessagesVS.getCurrentInstance();
         AsyncRequestShopBundle requestBundle = shopExampleBean.getRequestBundle(uuid);
         String currencyCSR = requestBundle.addHashCertVS(config.getContextURL(), hashCertVS);
-        CMSSignedMessage cmsMessage = cmsBean.signData(currencyCSR.getBytes());
+                                CMSSignedMessage cmsMessage = cmsBean.signData(currencyCSR.getBytes());
         if(requestBundle.getTransactionDto() != null) {
             return Response.ok().entity(JSON.getMapper().writeValueAsBytes(requestBundle.getTransactionDto(
                     cmsMessage))).type(MediaType.JSON).build();
