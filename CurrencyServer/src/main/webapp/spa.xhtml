@@ -92,7 +92,7 @@
                 })
 
                 vs.socket.addEventListener("connected", function() {
-                    page.show(vs.contextURL + "/rest/balance/user/IBAN/" + vs.connectedDevice.iban)
+                    page.show(vs.contextURL + "/rest/balance/user" + new Date().getURL('WEEK'))
                     document.querySelector("#connectionMsgDiv").innerText = "${msg.disConnectLbl}"
                 })
 

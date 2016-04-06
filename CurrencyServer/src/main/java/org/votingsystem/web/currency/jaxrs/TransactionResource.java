@@ -142,7 +142,7 @@ public class TransactionResource {
         criteria.add(orDisjunction);
         List<Transaction> transactionList = criteria.setFirstResult(offset).setMaxResults(max).list();
         if("zip".equals(contentType)) {
-            String tempPath = ConfigVSImpl.getTempPath() + File.separator + UUID.randomUUID().toString();
+            String tempPath = ((ConfigVSImpl)config).getTempDir() + File.separator + UUID.randomUUID().toString();
             File tempDir = new File(config.getServerDir().getAbsolutePath() + tempPath);
             tempDir.mkdirs();
             File metaInfFile = new File(config.getServerDir().getAbsolutePath() + tempPath + File.separator + "meta.inf");

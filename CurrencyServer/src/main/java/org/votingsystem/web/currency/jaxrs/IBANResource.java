@@ -1,12 +1,12 @@
 package org.votingsystem.web.currency.jaxrs;
 
-import org.iban4j.CountryCode;
 import org.iban4j.Iban;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.web.currency.ejb.TransactionBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;
@@ -18,7 +18,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -36,6 +35,7 @@ public class IBANResource {
     @Inject ConfigVS config;
     @Inject TransactionBean transactionBean;
 
+    @RolesAllowed("ADMIN")
     @Path("/from/{IBANCode}")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Object from(@PathParam("IBANCode") String IBANCode, @Context ServletContext context,
@@ -61,15 +61,6 @@ public class IBANResource {
             }
         }
         return result;
-    }
-
-
-    @Path("/testExternal/{id}") @GET
-    public Response testExternal(@PathParam("id") long id) {
-        String accountNumberStr = String.format("%010d", id);
-        Iban iban = new Iban.Builder().countryCode(CountryCode.ES).bankCode("7777").branchCode("7777")
-                .accountNumber(accountNumberStr).nationalCheckDigit("45").build();
-        return Response.ok().entity(iban.toString()).build();
     }
 
 }

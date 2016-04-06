@@ -86,8 +86,7 @@ public class ConfigVSImpl implements ConfigVS {
             serverDir =  new File((String) props.get("vs.staticResourcesPath"));
             serverDir.mkdirs();
             log.info("serverDir: " + serverDir.getAbsolutePath());
-            new File((String) props.get("vs.staticResourcesPath") + "/backup");
-            new File((String) props.get("vs.staticResourcesPath") + "/error").mkdirs();
+            new File(props.get("vs.staticResourcesPath") + "/error").mkdirs();
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -178,7 +177,7 @@ public class ConfigVSImpl implements ConfigVS {
         return IBAN;
     }
 
-    public static String getTempPath() {
+    public String getTempDir() {
         return File.separator + "temp";
     }
 

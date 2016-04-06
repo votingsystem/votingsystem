@@ -133,6 +133,7 @@
       }
       page('*/rest/balance/user/id/*', userBalanceRoute);
       page('*/rest/balance/user/IBAN/*', userBalanceRoute);
+      page('*/rest/balance/user/*', userBalanceRoute);
 
       page('/rest/balance/user/nif/:nif', function(ctx) {
           vs.route = 'user';

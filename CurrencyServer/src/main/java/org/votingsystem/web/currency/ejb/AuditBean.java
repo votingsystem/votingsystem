@@ -284,7 +284,7 @@ public class AuditBean {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.HOUR_OF_DAY, -1);
             Date oneHourAgo = calendar.getTime();
-            File tempDir = new File(config.getServerDir().getAbsolutePath() + ConfigVSImpl.getTempPath());
+            File tempDir = new File(config.getServerDir().getAbsolutePath() + ((ConfigVSImpl)config).getTempDir());
             tempDir.mkdirs();
             for (File file : tempDir.listFiles()) {
                 if(new Date(file.lastModified()).compareTo(oneHourAgo) < 0) FileUtils.deleteRecursively(file);

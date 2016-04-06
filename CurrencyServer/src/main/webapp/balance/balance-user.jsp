@@ -183,8 +183,7 @@
                     if(e.detail.getTime() > new Date().getTime()) alert("${msg.dateAfterTodayERRORMsg}")
                     else {
                         this.baseDate = e.detail
-                        this.getHTTP("${contextURL}/rest/balance/user/id/" +
-                                this.balance.user.id + e.detail.getURL(this.selectedPeriod))
+                        this.getHTTP("${contextURL}/rest/balance/user" + e.detail.getURL(this.selectedPeriod))
                     }
                 }.bind(this))
             },
@@ -319,14 +318,12 @@
             goNextPeriod: function () {
                 var currentPeriodEnd =  this.balance.timePeriod.dateTo.getDate();
                 currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 1); //one day from next period
-                this.getHTTP("${contextURL}/rest/balance/user/id/" +
-                        this.balance.user.id + currentPeriodEnd.getURL(this.selectedPeriod))
+                this.getHTTP("${contextURL}/rest/balance/user"+ currentPeriodEnd.getURL(this.selectedPeriod))
             },
             goPreviousPeriod: function () {
                 var currentPeriodBegin =  this.balance.timePeriod.dateFrom.getDate();
                 currentPeriodBegin.setDate(currentPeriodBegin.getDate() - 1); //one day from previous period
-                this.getHTTP("${contextURL}/rest/balance/user/id/" + this.balance.user.id +
-                        currentPeriodBegin.getURL(this.selectedPeriod))
+                this.getHTTP("${contextURL}/rest/balance/user" + currentPeriodBegin.getURL(this.selectedPeriod))
             },
             periodSelectChange: function (e) {
                 this.selectedPeriod = e.target.value
@@ -342,7 +339,7 @@
                         break;
                 }
                 console.log("periodSelectChange - selectedPeriod: " + this.selectedPeriod)
-                this.getHTTP("${contextURL}/rest/balance/user/id/" + this.balance.user.id + this.baseDate.getURL(this.selectedPeriod))
+                this.getHTTP("${contextURL}/rest/balance/user" + this.baseDate.getURL(this.selectedPeriod))
             },
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url

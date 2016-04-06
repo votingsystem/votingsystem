@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  */
 public class StartupExtension implements ServletExtension {
 
-    private static final Logger log = Logger.getLogger(AuthenticationMechanismVS.class.getName());
+    private static final Logger log = Logger.getLogger(StartupExtension.class.getName());
 
     @Override
     public void handleDeployment(DeploymentInfo deploymentInfo, ServletContext servletContext) {
