@@ -2,9 +2,11 @@ package org.votingsystem.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.http.*;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.MessageConstraints;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -17,12 +19,14 @@ import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.DefaultHttpResponseFactory;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.*;
@@ -34,6 +38,8 @@ import org.apache.http.io.SessionInputBuffer;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicLineParser;
 import org.apache.http.message.LineParser;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.CharArrayBuffer;
 import org.apache.http.util.EntityUtils;
 import org.votingsystem.dto.MessageDto;
@@ -72,6 +78,7 @@ public class HttpHelper {
     private IdleConnectionEvictor connEvictor;
     private SSLConnectionSocketFactory sslSocketFactory;
     private CloseableHttpClient httpClient;
+    private HttpContext httpContext;
     public static HttpHelper INSTANCE;
 
     // Use custom message parser / writer to customize the way HTTP
@@ -179,9 +186,29 @@ public class HttpHelper {
             httpClient = HttpClients.custom().setConnectionManager(connManager).setDefaultRequestConfig(
                     requestConfig).build();*/
             httpClient = HttpClients.custom().setConnectionManager(connManager).build();
+            CookieStore cookieStore = new BasicCookieStore();
+            httpContext = new BasicHttpContext();
+            httpContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
         } catch(Exception ex) { log.log(Level.SEVERE, ex.getMessage(), ex);}
     }
 
+    public Cookie getCookie(String domain) {
+        CookieStore cookieStore = (CookieStore) httpContext.getAttribute(HttpClientContext.COOKIE_STORE);
+        Cookie result = null;
+        for(Cookie cookie : cookieStore.getCookies()) {
+            if(cookie.getDomain().equals(domain)) result = cookie;
+        }
+        return result;
+    }
+
+    public String getSessionId(String domain) {
+        Cookie cookie = getCookie(domain);
+        String result = null;
+        if(cookie != null) {
+            result = cookie.getValue().contains(".") ? cookie.getValue().split("\\.")[0] : cookie.getValue();
+        }
+        return result;
+    }
 
     public static HttpHelper getInstance() {
         if(INSTANCE == null) INSTANCE = new HttpHelper();
@@ -212,7 +239,7 @@ public class HttpHelper {
         httpget = new HttpGet(serverURL);
         httpget.setHeader("Accept-Language", Locale.getDefault().getLanguage());
         if(mediaType != null) httpget.setHeader("Content-Type", mediaType);
-        response = httpClient.execute(httpget);
+        response = httpClient.execute(httpget, httpContext);
         log.info("----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
             for (int i = 0; i < headers.length; i++) { System.out.println(headers[i]); }*/
@@ -260,7 +287,7 @@ public class HttpHelper {
             httpget = new HttpGet(serverURL);
             //httpget.setHeader("Accept-Language", Locale.getDefault().getLanguage());
             if(contentType != null) httpget.setHeader("Content-Type", contentType.getName());
-            response = httpClient.execute(httpget);
+            response = httpClient.execute(httpget, httpContext);
             log.info("----------------------------------------");
             /*Header[] headers = response.getAllHeaders();
             for (int i = 0; i < headers.length; i++) { System.out.println(headers[i]); }*/
@@ -301,7 +328,7 @@ public class HttpHelper {
             if(contentTypeVS != null) contentType = org.apache.http.entity.ContentType.create(contentTypeVS.getName());
             FileEntity entity = new FileEntity(file, contentType);
             httpPost.setEntity(entity);
-            response = httpClient.execute(httpPost);
+            response = httpClient.execute(httpPost, httpContext);
             log.info("----------------------------------------");
             log.info(response.getStatusLine().toString() + " - connManager stats: " +
                     connManager.getTotalStats().toString());
@@ -348,7 +375,7 @@ public class HttpHelper {
         if(contentType != null) entity = new ByteArrayEntity(byteArray,  org.apache.http.entity.ContentType.create(contentType.getName()));
         else entity = new ByteArrayEntity(byteArray);
         httpPost.setEntity(entity);
-        response = httpClient.execute(httpPost);
+        response = httpClient.execute(httpPost, httpContext);
         String responseContentType = "";
         Header header = response.getFirstHeader("Content-Type");
         if(header != null) responseContentType = header.getValue();
@@ -388,7 +415,7 @@ public class HttpHelper {
             if(contentType != null) entity = new ByteArrayEntity(byteArray,  org.apache.http.entity.ContentType.create(contentType.getName()));
             else entity = new ByteArrayEntity(byteArray);
             httpPost.setEntity(entity);
-            response = httpClient.execute(httpPost);
+            response = httpClient.execute(httpPost, httpContext);
             ContentType responseContentType = null;
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentType.getByName(header.getValue());
@@ -447,7 +474,7 @@ public class HttpHelper {
                 }
             }
             httpPost.setEntity(reqEntity);
-            response = httpClient.execute(httpPost);
+            response = httpClient.execute(httpPost, httpContext);
             Header header = response.getFirstHeader("Content-Type");
             if(header != null) responseContentType = ContentType.getByName(header.getValue());
             log.info("----------------------------------------");

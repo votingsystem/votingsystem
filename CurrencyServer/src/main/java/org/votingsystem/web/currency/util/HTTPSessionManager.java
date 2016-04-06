@@ -8,14 +8,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 @WebListener
-public class SessionListener implements HttpSessionListener {
+public class HTTPSessionManager implements HttpSessionListener {
 
-    private static Logger log = Logger.getLogger(SessionListener.class.getName());
+    private static Logger log = Logger.getLogger(HTTPSessionManager.class.getName());
 
     private static final ConcurrentHashMap<String, HttpSession> sessionMap = new ConcurrentHashMap();
-    private static SessionListener INSTANCE;
+    private static HTTPSessionManager INSTANCE;
 
-    public SessionListener() {
+    public HTTPSessionManager() {
         INSTANCE = this;
     }
 
@@ -33,7 +33,7 @@ public class SessionListener implements HttpSessionListener {
         return sessionMap.get(sessionId);
     }
 
-    public static SessionListener getInstance() {
+    public static HTTPSessionManager getInstance() {
         return INSTANCE;
     }
 

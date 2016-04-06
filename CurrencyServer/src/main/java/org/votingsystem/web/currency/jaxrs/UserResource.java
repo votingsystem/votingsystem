@@ -1,17 +1,14 @@
 package org.votingsystem.web.currency.jaxrs;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.iban4j.Iban;
-import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.dto.currency.BalancesDto;
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.Device;
 import org.votingsystem.model.ResponseVS;
@@ -23,7 +20,6 @@ import org.votingsystem.util.Interval;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.MediaType;
 import org.votingsystem.util.crypto.PEMUtils;
-import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.BankBean;
 import org.votingsystem.web.currency.ejb.TransactionBean;
 import org.votingsystem.web.currency.ejb.UserBean;
@@ -33,6 +29,7 @@ import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.servlet.ServletContext;
@@ -44,7 +41,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -56,7 +55,6 @@ public class UserResource {
     private static final Logger log = Logger.getLogger(UserResource.class.getName());
 
     @Inject TransactionBean transactionBean;
-    @Inject BalancesBean balancesBean;
     @Inject UserBean userBean;
     @Inject BankBean bankBean;
     @Inject CMSBean cmsBean;
@@ -147,10 +145,10 @@ public class UserResource {
     }
 
     private Response processUserResult(User user, String msg) throws Exception {
-        Object resultDto = null;
+        UserDto resultDto = null;
         if(user instanceof Bank) {
             resultDto = UserDto.COMPLETE(user);
-            ((UserDto)resultDto).setMessage(msg);
+            resultDto.setMessage(msg);
         } else resultDto = UserDto.COMPLETE(user);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build() ;
     }
@@ -188,36 +186,6 @@ public class UserResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
     }
 
-    @Path("/nif/{nif}/{year}/{month}/{day}")
-    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    public Response userInfo(@PathParam("nif") String nif,
-                           @PathParam("year") int year,
-                           @PathParam("month") int month,
-                           @PathParam("day") int day,
-                           @Context ServletContext context, @Context HttpServletRequest req,
-                           @Context HttpServletResponse resp) throws Exception {
-        Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", nif);
-        User user = dao.getSingleResult(User.class, query);
-        if(user == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - nif: " + nif).build();
-        Calendar calendar = DateUtils.getCalendar(year, month, day);
-        Interval timePeriod = DateUtils.getWeekPeriod(calendar);
-        BalancesDto dto = balancesBean.getBalancesDto(user, timePeriod);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
-    }
-
-    @Path("/nif/{nif}")
-    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    public Response userInfoByNif(@PathParam("nif") String nif,
-                           @Context ServletContext context, @Context HttpServletRequest req,
-                           @Context HttpServletResponse resp) throws Exception {
-        Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", nif);
-        User user = dao.getSingleResult(User.class, query);
-        if(user == null) return Response.status(Response.Status.NOT_FOUND).entity("not found - nif: " + nif).build();
-        Interval timePeriod = DateUtils.getCurrentWeekPeriod();
-        BalancesDto dto = balancesBean.getBalancesDto(user, timePeriod);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
-    }
-
     @Transactional
     @Path("/searchByDevice")
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
@@ -250,18 +218,6 @@ public class UserResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultList)).build();
     }
 
-    @Path("/userInfoTest")
-    @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    public Response userInfoTest(CMSMessage cmsMessage, @Context HttpServletRequest req, @Context
-        HttpServletResponse resp) throws Exception {
-        CMSSignedMessage cmsSignedMessage = cmsMessage.getCMS();
-        Map<String, String> dataMap = cmsSignedMessage.getSignedContent(new TypeReference<Map<String, String>>() {});
-        //TODO check operation
-        Interval timePeriod = DateUtils.getCurrentWeekPeriod();
-        BalancesDto dto = balancesBean.getBalancesDto(cmsMessage.getUser(), timePeriod);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
-    }
-
     @Path("/save")
     @POST @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response save(CMSMessage cmsMessage, @Context HttpServletRequest req) throws Exception {
@@ -290,6 +246,7 @@ public class UserResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaType.JSON).build();
     }
 
+    @RolesAllowed("ADMIN")
     @Path("/connected")
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response connected(@Context HttpServletRequest req) throws Exception {

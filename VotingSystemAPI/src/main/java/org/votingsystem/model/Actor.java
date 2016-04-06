@@ -282,11 +282,6 @@ public class Actor extends EntityVS implements Serializable {
         return getServerURL() + "/rest/user/id/" + String.valueOf(id);
     }
 
-    public String getUserBalanceURL(String nif, String menu, String locale) {
-        String sufix = (menu != null || locale != null)? "?menu=" + menu + "&locale=" + locale : "";
-        return getServerURL() + "/spa.xhtml" + sufix + "#!/rest/balance/user/nif/" + nif;
-    }
-
     public String getDeviceListByNifServiceURL(String nif) {
         return getServerURL() + "/rest/device/nif/" + nif + "/list";
     }
