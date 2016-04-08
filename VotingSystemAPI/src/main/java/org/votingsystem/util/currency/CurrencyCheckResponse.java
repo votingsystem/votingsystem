@@ -27,6 +27,11 @@ public class CurrencyCheckResponse {
         this.currencyWithErrorSet = errorSet;
     }
 
+    public CurrencyCheckResponse(Integer statusCode, String message){
+        this.statusCode = statusCode;
+        this.message = message;
+    }
+
     public Integer getStatusCode() {
         return statusCode;
     }
@@ -67,10 +72,6 @@ public class CurrencyCheckResponse {
             case EXPENDED: return ContextVS.getMessage("currencyExpendedDesc");
             default: return state.toString().toLowerCase();
         }
-    }
-
-    public static CurrencyCheckResponse load(ResponseVS responseVS) {
-        return new CurrencyCheckResponse(responseVS.getStatusCode(), responseVS.getMessage(), null, null);
     }
 
     public static CurrencyCheckResponse load(Set<CurrencyStateDto> currencySet, Map<String, Currency> currencyMap)

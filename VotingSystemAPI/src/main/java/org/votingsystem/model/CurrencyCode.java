@@ -5,7 +5,7 @@ package org.votingsystem.model;
  */
 public enum CurrencyCode {
 
-    EUR("Euro"), USD("Dollar"), CNY("Dollar"), JPY("Yen");
+    EUR("Euro"), USD("Dollar"), CNY("Yuan"), JPY("Yen");
 
     private CurrencyCode(String name) {
         this.name = name;

@@ -3,7 +3,6 @@ package org.votingsystem.dto.currency;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -11,40 +10,21 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WalletDto {
 
-    //plain wallet -> currency items stored without password
-    private Collection<CurrencyDto> plainWallet;
-    private Collection<CurrencyDto> wallet;
-    private Set<String> walletFilesHashSet;
+    private Collection<CurrencyDto> currencyCollection;
 
     public WalletDto () {}
 
-    public WalletDto (Collection<CurrencyDto> plainWallet, Collection<CurrencyDto> wallet, Set<String> walletFilesHashSet) {
-        this.plainWallet = plainWallet;
-        this.wallet = wallet;
-        this.walletFilesHashSet = walletFilesHashSet;
+    public WalletDto (Collection<CurrencyDto> currencyCollection) {
+        this.currencyCollection = currencyCollection;
+
     }
 
-    public Collection<CurrencyDto> getPlainWallet() {
-        return plainWallet;
+    public Collection<CurrencyDto> getCurrencyCollection() {
+        return currencyCollection;
     }
 
-    public void setPlainWallet(Collection<CurrencyDto> plainWallet) {
-        this.plainWallet = plainWallet;
+    public void setCurrencyCollection(Collection<CurrencyDto> currencyCollection) {
+        this.currencyCollection = currencyCollection;
     }
 
-    public Collection<CurrencyDto> getWallet() {
-        return wallet;
-    }
-
-    public void setWallet(Collection<CurrencyDto> wallet) {
-        this.wallet = wallet;
-    }
-
-    public Set<String> getWalletFilesHashSet() {
-        return walletFilesHashSet;
-    }
-
-    public void setWalletFilesHashSet(Set<String> walletFilesHashSet) {
-        this.walletFilesHashSet = walletFilesHashSet;
-    }
 }

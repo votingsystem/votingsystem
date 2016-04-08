@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TagVSDto {
 
+    public static final String WILDTAG = "WILDTAG";
+
     private Long id;
     private String name;
     private CurrencyCode currencyCode;

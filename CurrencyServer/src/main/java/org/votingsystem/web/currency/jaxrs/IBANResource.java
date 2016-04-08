@@ -3,6 +3,7 @@ package org.votingsystem.web.currency.jaxrs;
 import org.iban4j.Iban;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.web.currency.ejb.TransactionBean;
+import org.votingsystem.web.currency.util.AuthRole;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
@@ -35,7 +36,7 @@ public class IBANResource {
     @Inject ConfigVS config;
     @Inject TransactionBean transactionBean;
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(AuthRole.ADMIN)
     @Path("/from/{IBANCode}")
     @GET @Produces(MediaType.APPLICATION_JSON)
     public Object from(@PathParam("IBANCode") String IBANCode, @Context ServletContext context,

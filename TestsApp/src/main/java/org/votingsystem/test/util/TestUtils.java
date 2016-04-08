@@ -44,4 +44,5 @@ public class TestUtils {
     public static CurrencyServer fetchCurrencyServer() throws Exception {
         return fetchCurrencyServer(ContextVS.getInstance().getProperty("currencyServerURL"));
     }
+
 }

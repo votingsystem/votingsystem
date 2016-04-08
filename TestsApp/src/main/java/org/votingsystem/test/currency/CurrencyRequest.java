@@ -4,24 +4,20 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Sets;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.ResultListDto;
-import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.CurrencyRequestDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
-import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.CurrencyServer;
 import org.votingsystem.test.util.SignatureService;
 import org.votingsystem.test.util.TestUtils;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.HttpHelper;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.currency.Wallet;
 
-import java.io.File;
 import java.math.BigDecimal;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -34,14 +30,16 @@ public class CurrencyRequest {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
+        String NIF = "07553172H";
+        Wallet wallet = new Wallet(NIF.toCharArray());
         SignatureService signatureService = SignatureService.getUserSignatureService(
-                "Currency_00111222V", User.Type.USER);
+                "Currency_" + NIF, User.Type.USER);
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer();
         BigDecimal totalAmount = new BigDecimal(10);
         TransactionDto transactionDto = new TransactionDto();
         transactionDto.setAmount(totalAmount);
         transactionDto.setCurrencyCode(CurrencyCode.EUR);
-        transactionDto.setTags(Sets.newHashSet("ENERGY"));
+        transactionDto.setTags(Sets.newHashSet("WEALTH"));
         transactionDto.setTimeLimited(true);
         CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionDto, totalAmount,
                 ContextVS.getInstance().getCurrencyServer().getServerURL());
@@ -56,24 +54,12 @@ public class CurrencyRequest {
             ResultListDto<String> currencyCertsDto = (ResultListDto<String>) responseVS.getMessage(
                     new TypeReference<ResultListDto<String>>(){});
             requestDto.loadCurrencyCerts(currencyCertsDto.getResultList());
-            saveCurrencyToDir(requestDto.getCurrencyMap().values());
+            wallet.addToWallet(Sets.newHashSet(requestDto.getCurrencyMap().values()));
         } else {
             log.log(Level.SEVERE," --- ERROR --- " + responseVS.getMessage());
         }
         System.exit(0);
     }
 
-    public static void saveCurrencyToDir(Collection<Currency> currencyCollection) throws Exception {
-        String walletPath = ContextVS.getInstance().getProperty("walletDir");
-        for(Currency currency : currencyCollection) {
-            CurrencyDto currencyDto = CurrencyDto.serialize(currency);
-            File currencyFile = new File(walletPath + StringUtils.toHex(currencyDto.getHashCertVS()) +
-                    ContextVS.SERIALIZED_OBJECT_EXTENSION);
-            currencyFile.getParentFile().mkdirs();
-            currencyFile.createNewFile();
-            JSON.getMapper().writeValue(currencyFile, currencyDto);
-            log.info("stored currency: " + currencyFile.getAbsolutePath());
-        }
-    }
 }
 

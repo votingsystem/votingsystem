@@ -1,4 +1,4 @@
-package org.votingsystem.web.currency.filter;
+package org.votingsystem.web.currency.util;
 
 import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.User;
@@ -15,9 +15,6 @@ import java.util.Set;
 public class PrincipalVS implements Principal {
 
     public static final String USER_KEY = "USER_KEY";
-
-    public static final Set<String> ADMIN_ROLES =  Collections.unmodifiableSet(new HashSet<>(Arrays.asList("USER", "ADMIN")));
-    public static final Set<String> USER_ROLES =  Collections.unmodifiableSet(new HashSet<>(Arrays.asList("USER")));
 
     private User user;
     private CMSMessage cmsMessage;

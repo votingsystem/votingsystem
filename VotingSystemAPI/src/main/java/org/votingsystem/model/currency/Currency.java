@@ -137,7 +137,7 @@ public class Currency extends EntityVS implements Serializable  {
         this.timeLimited = timeLimited;
         try {
             this.originHashCertVS = UUID.randomUUID().toString();
-            this.hashCertVS = StringUtils.getHashBase64(getOriginHashCertVS(), ContextVS.DATA_DIGEST_ALGORITHM);
+            this.hashCertVS = StringUtils.getHashBase64(this.originHashCertVS , ContextVS.DATA_DIGEST_ALGORITHM);
             certificationRequest = CertificationRequest.getCurrencyRequest(
                     ContextVS.SIGNATURE_ALGORITHM, ContextVS.PROVIDER,
                     currencyServerURL, hashCertVS, amount, this.currencyCode, timeLimited, tag.getName());
@@ -253,7 +253,7 @@ public class Currency extends EntityVS implements Serializable  {
         initCertData(certificationRequest.getCertificate());
     }
 
-    public static Currency fromCertificationRequestVS(CertificationRequest certificationRequest) throws Exception {
+    public static Currency fromCertificationRequest(CertificationRequest certificationRequest) throws Exception {
         Currency currency = new Currency();
         currency.setCertificationRequest(certificationRequest);
         currency.initSigner(certificationRequest.getSignedCsr());

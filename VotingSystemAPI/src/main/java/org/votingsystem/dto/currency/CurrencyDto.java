@@ -44,7 +44,7 @@ public class CurrencyDto implements Serializable {
     private String tag;
     private Boolean timeLimited;
     private String batchUUID;
-    private String object;
+    private String serializedObject;
     private Date notBefore;
     private Date notAfter;
     private Date dateCreated;
@@ -107,7 +107,7 @@ public class CurrencyDto implements Serializable {
 
     public CurrencyDto(Boolean timeLimited, String object) {
         this.timeLimited = timeLimited;
-        this.object = object;
+        this.serializedObject = object;
     }
 
     public static CurrencyDto serialize(Currency currency) throws Exception {
@@ -118,7 +118,7 @@ public class CurrencyDto implements Serializable {
         currencyDto.setTag(currency.getTagVS().getName());
         currencyDto.setTimeLimited(currency.getTimeLimited());
         //CertificationRequest instead of Currency to make it easier deserialization on Android
-        currencyDto.setObject(ObjectUtils.serializeObjectToString(currency.getCertificationRequest()));
+        currencyDto.setSerialized(ObjectUtils.serializeObjectToString(currency.getCertificationRequest()));
         return currencyDto;
     }
 
@@ -146,10 +146,10 @@ public class CurrencyDto implements Serializable {
     public Currency deSerialize() throws Exception {
         try {
             CertificationRequest certificationRequest =
-                    (CertificationRequest) ObjectUtils.deSerializeObject(object.getBytes());
-            return Currency.fromCertificationRequestVS(certificationRequest);
+                    (CertificationRequest) ObjectUtils.deSerializeObject(serializedObject.getBytes());
+            return Currency.fromCertificationRequest(certificationRequest);
         }catch (Exception ex) {
-            return (Currency) ObjectUtils.deSerializeObject(object.getBytes());
+            return (Currency) ObjectUtils.deSerializeObject(serializedObject.getBytes());
         }
     }
 
@@ -169,12 +169,12 @@ public class CurrencyDto implements Serializable {
         this.timeLimited = timeLimited;
     }
 
-    public String getObject() {
-        return object;
+    public String getSerialized() {
+        return serializedObject;
     }
 
-    public void setObject(String object) {
-        this.object = object;
+    public void setSerialized(String serializedObject) {
+        this.serializedObject = serializedObject;
     }
 
     public String getHashCertVS() {

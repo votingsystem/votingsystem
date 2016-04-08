@@ -1,5 +1,7 @@
 package org.votingsystem.web.currency.filter;
 
+import org.votingsystem.web.currency.util.AuthRole;
+import org.votingsystem.web.currency.util.PrincipalVS;
 import org.votingsystem.web.ejb.CMSBean;
 
 import javax.annotation.Priority;
@@ -33,7 +35,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                     }
 
                     @Override public boolean isUserInRole(String role) {
-                        return PrincipalVS.ADMIN_ROLES.contains(role);
+                        return AuthRole.ADMIN_ROLES.contains(role);
                     }
 
                     @Override public boolean isSecure() {

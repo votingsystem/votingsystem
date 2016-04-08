@@ -5,7 +5,8 @@ import org.votingsystem.model.User;
 import org.votingsystem.util.*;
 import org.votingsystem.web.currency.ejb.BalancesBean;
 import org.votingsystem.web.currency.ejb.CurrencyAccountBean;
-import org.votingsystem.web.currency.filter.PrincipalVS;
+import org.votingsystem.web.currency.util.AuthRole;
+import org.votingsystem.web.currency.util.PrincipalVS;
 import org.votingsystem.web.currency.util.ReportFiles;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
@@ -40,7 +41,7 @@ public class BalanceResource {
     @Inject CurrencyAccountBean accountBean;
     @Inject BalancesBean balancesBean;
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(AuthRole.ADMIN)
     @GET @Path("/user/id/{userId}")
     public Response user(@PathParam("userId") long userId, @Context ServletContext context,
              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
@@ -51,7 +52,7 @@ public class BalanceResource {
         return getUserBalancesDto(req, resp, context, user, DateUtils.getWeekPeriod(Calendar.getInstance()));
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(AuthRole.ADMIN)
     @GET @Path("/user/IBAN/{IBAN}")
     public Response userByIBAN(@PathParam("IBAN") String IBAN, @Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
@@ -63,7 +64,7 @@ public class BalanceResource {
         return getUserBalancesDto(req, resp, context, user, DateUtils.getWeekPeriod(Calendar.getInstance()));
     }
 
-    @RolesAllowed("USER")
+    @RolesAllowed(AuthRole.USER)
     @GET @Path("/user")
     public Response user(ServletContext context, @Context HttpServletRequest req,
                      @Context HttpServletResponse resp) throws Exception {
@@ -71,7 +72,7 @@ public class BalanceResource {
         return getUserBalancesDto(req, resp, context, user, DateUtils.getWeekPeriod(Calendar.getInstance()));
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(AuthRole.ADMIN)
     @GET @Path("/user/nif/{userNIF}")
     public Response userByNIF(@PathParam("userNIF") String nif, @Context ServletContext context,
                            @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
@@ -83,7 +84,7 @@ public class BalanceResource {
         return getUserBalancesDto(req, resp, context, user, DateUtils.getWeekPeriod(Calendar.getInstance()));
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(AuthRole.ADMIN)
     @Path("/user/id/{userId}/{timePeriod}")
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response user(@PathParam("userId") long userId, @PathParam("timePeriod") String lapseStr,
@@ -98,7 +99,7 @@ public class BalanceResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(balancesBean.getBalancesDto(user, timePeriod))).build();
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(AuthRole.ADMIN)
     @Path("/user/id/{userId}/{year}/{month}/{day}")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response userWeek(@PathParam("userId") long userId, @PathParam("year") int year, @PathParam("month") int month,
@@ -111,7 +112,7 @@ public class BalanceResource {
         return getUserBalancesDto(req, resp, context, user, DateUtils.getWeekPeriod(calendar));
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(AuthRole.ADMIN)
     @Path("/user/id/{userId}/{year}/{month}")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response userMonth(@PathParam("userId") long userId, @PathParam("year") int year, @PathParam("month") int month,
@@ -124,7 +125,7 @@ public class BalanceResource {
         return getUserBalancesDto(req, resp, context, user, DateUtils.getMonthPeriod(calendar));
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(AuthRole.ADMIN)
     @Path("/user/id/{userId}/{year}")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response userYear(@PathParam("userId") long userId, @PathParam("year") int year,
@@ -138,7 +139,7 @@ public class BalanceResource {
     }
 
 
-    @RolesAllowed("USER")
+    @RolesAllowed(AuthRole.USER)
     @Path("/user/{year}/{month}/{day}")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response authUserWeek(@PathParam("year") int year, @PathParam("month") int month,
@@ -149,7 +150,7 @@ public class BalanceResource {
         return getUserBalancesDto(req, resp, context, user, DateUtils.getWeekPeriod(calendar));
     }
 
-    @RolesAllowed("USER")
+    @RolesAllowed(AuthRole.USER)
     @Path("/user/{year}/{month}")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response authUserMonth(@PathParam("year") int year, @PathParam("month") int month,
@@ -160,7 +161,7 @@ public class BalanceResource {
         return getUserBalancesDto(req, resp, context, user, DateUtils.getMonthPeriod(calendar));
     }
 
-    @RolesAllowed("USER")
+    @RolesAllowed(AuthRole.USER)
     @Path("/user/{year}")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response authUserYear(@PathParam("year") int year, @Context ServletContext context,
@@ -177,7 +178,7 @@ public class BalanceResource {
                 JSON.getMapper().writeValueAsBytes(balancesDto)).build();
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(AuthRole.ADMIN)
     @Path("/user/id/{userId}/db")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Map userDB(@PathParam("userId") long userId, @Context ServletContext context,
@@ -188,7 +189,7 @@ public class BalanceResource {
         } else return accountBean.getAccountsBalanceMap(user);
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(AuthRole.ADMIN)
     //data for <balance-weekreport>
     @Path("/week/{year}/{month}/{day}")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
@@ -205,7 +206,7 @@ public class BalanceResource {
         }
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(AuthRole.ADMIN)
     @Path("/weekdb/{year}/{month}/{day}")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Object weekdb(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,

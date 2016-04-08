@@ -69,7 +69,6 @@ public class ContextVS {
     public static String WALLET_FILE_NAME = "wallet";
     public static String WALLET_FILE_EXTENSION = ".wvs";
     public static String SERIALIZED_OBJECT_EXTENSION = ".servs";
-    public static String PLAIN_WALLET_FILE_NAME = "plain_wallet.wvs";
     public static String RECEIPT_FILE_NAME = "receipt";
     public static String CANCEL_DATA_FILE_NAME = "cancellationDataVS";
     public static String CANCEL_BUNDLE_FILE_NAME = "cancellationBundleVS";

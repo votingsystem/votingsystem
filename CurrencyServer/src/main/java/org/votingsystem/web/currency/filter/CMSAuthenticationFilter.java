@@ -6,6 +6,8 @@ import org.votingsystem.model.CMSMessage;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContentType;
 import org.votingsystem.util.MediaType;
+import org.votingsystem.web.currency.util.AuthRole;
+import org.votingsystem.web.currency.util.PrincipalVS;
 import org.votingsystem.web.ejb.CMSBean;
 
 import javax.annotation.Priority;
@@ -55,7 +57,7 @@ public class CMSAuthenticationFilter implements ContainerRequestFilter {
         //to avoid process again the CMSMessage with org.votingsystem.web.jaxrs.provider.CMSMessageReader
         requestContext.getHeaders().remove("Content-Type");
         PrincipalVS principal = new PrincipalVS(cmsMessage);
-        Set<String> roles = cmsBean.isAdmin(cmsMessage.getUser().getNif()) ? PrincipalVS.ADMIN_ROLES : PrincipalVS.USER_ROLES;
+        Set<String> roles = cmsBean.isAdmin(cmsMessage.getUser().getNif()) ? AuthRole.ADMIN_ROLES : AuthRole.USER_ROLES;
         try {
             requestContext.setSecurityContext(new SecurityContext() {
 

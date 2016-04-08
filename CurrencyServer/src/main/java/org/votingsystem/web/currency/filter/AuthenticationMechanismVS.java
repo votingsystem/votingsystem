@@ -8,6 +8,8 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.form.FormParserFactory;
 import io.undertow.servlet.handlers.ServletRequestContext;
 import org.votingsystem.model.User;
+import org.votingsystem.web.currency.util.AuthRole;
+import org.votingsystem.web.currency.util.PrincipalVS;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,7 +39,7 @@ public class AuthenticationMechanismVS implements AuthenticationMechanism {
         HttpServletRequest request = servletRequestContext.getOriginalRequest();
         User user = (User) request.getSession().getAttribute(PrincipalVS.USER_KEY);
         if(user == null) return AuthenticationMechanismOutcome.NOT_ATTEMPTED;
-        Account account =  new AccountImpl(new PrincipalVS(user), PrincipalVS.USER_ROLES);
+        Account account =  new AccountImpl(new PrincipalVS(user), AuthRole.USER_ROLES);
         securityContext.authenticationComplete(account, mechanismName, true);
         return AuthenticationMechanismOutcome.AUTHENTICATED;
     }

@@ -23,6 +23,7 @@ import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.currency.ejb.BankBean;
 import org.votingsystem.web.currency.ejb.TransactionBean;
 import org.votingsystem.web.currency.ejb.UserBean;
+import org.votingsystem.web.currency.util.AuthRole;
 import org.votingsystem.web.currency.websocket.SessionManager;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -145,11 +146,8 @@ public class UserResource {
     }
 
     private Response processUserResult(User user, String msg) throws Exception {
-        UserDto resultDto = null;
-        if(user instanceof Bank) {
-            resultDto = UserDto.COMPLETE(user);
-            resultDto.setMessage(msg);
-        } else resultDto = UserDto.COMPLETE(user);
+        UserDto resultDto = UserDto.COMPLETE(user);
+        if(user instanceof Bank) resultDto.setMessage(msg);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultDto)).build() ;
     }
 
@@ -246,7 +244,7 @@ public class UserResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(messageDto)).type(MediaType.JSON).build();
     }
 
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(AuthRole.ADMIN)
     @Path("/connected")
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response connected(@Context HttpServletRequest req) throws Exception {
