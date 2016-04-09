@@ -1,0 +1,169 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/polymer.xhtml">
+    <ui:define name="head">
+
+        <link href="../resources/bower_components/vs-json-doc/vs-json-doc.html" rel="import"/>
+        <link href="./test-table.vsp" rel="import"/>
+        <style>
+            .selectric {
+                border: 1px solid white;
+                background: #F8F8F8;
+                position: relative;
+                z-index: 1;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                cursor: default;
+            }
+            .selectric .label {
+                display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                margin: 0 30px 0 0;
+                padding: 6px;
+                font-size: 12px;
+                line-height: 18px;
+                color: #444;
+                min-height: 18px;
+            }
+            .selectric .button {
+                display: block;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 30px;
+                height: 30px;
+                color: #BBB;
+                text-align: center;
+                font: 0/0 a;
+                *font: 20px/30px Lucida Sans Unicode, Arial Unicode MS, Arial;
+            }
+            .selectric .button:after {
+                content:" ";
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                margin: auto;
+                width: 0;
+                height: 0;
+                border: 4px solid transparent;
+                border-top-color: #BBB;
+                border-bottom: none;
+            }
+            ul {
+                height: 150px;
+                width: 280px;
+                overflow: hidden;
+                overflow-y: scroll;
+                list-style-type: none;
+                margin-top: 0;
+                margin: 0 30px 0 0;
+                padding: 6px;
+                font-size: 12px;
+                line-height: 25px;
+                position: absolute;
+                background: white;
+                border: 1px solid #888;
+                position: absolute;
+                z-index: 1;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                cursor: default;
+            }
+            .hidden {
+                visibility: hidden;
+            }
+            .visible {
+                visibility: visible;
+            }
+        </style>
+    </ui:define>
+    <ui:define name="content">
+
+        <div class="Wrapper" style="width: 300px;position: absolute">
+        <div class="selectric" onclick="show ();">
+            <div class="label"><span>Select Element</span><b class="button">▾</b>
+
+            </div>
+            <div id="options" class="hidden">
+                <ul>
+                    <li>Option 1</li>
+                    <li>Option 2</li>
+                    <li>Option 3</li>
+                    <li>Option 4</li>
+                    <li>Option 5</li>
+                    <li>Option 6</li>
+                    <li>Option 7</li>
+                    <li>
+                        <input type="checkbox"  checked="true"/>
+                    </li>
+                </ul>
+            </div>
+        </div>
+            ===========
+        </div>
+
+        <script>
+            //<![CDATA[
+            var dd = document.querySelector('.label span');
+            var options = document.querySelectorAll('div.hidden ul li');
+            console.log(options)
+            for (var i = 0; i < options.length; i++) {
+                options[i].onclick = select;
+            }
+
+            function show() {
+                var selectbox = document.getElementById("options");
+                if (selectbox.className == "hidden") {
+                    selectbox.setAttribute("class", "visible");
+                } else {
+                    selectbox.setAttribute("class", "hidden");
+                }
+            }
+
+            function select() {
+                console.log(this.innerHTML);
+                dd.innerHTML = this.innerHTML;
+            }
+
+
+            document.addEventListener('WebComponentsReady', function() {
+
+                var data0 = {uuid:"12321312", operation:"MESSAGE_VS", message:"hello1"}
+                var data1 = {
+                    "name": "Tree B",
+                    "children": [
+                        {
+                            "name": "Child A",
+                            "children": [{ "name": "Grandchild A" }]
+                        },
+                        {
+                            "name": "Child B",
+                            "children": [{ "name": "Grandchild B" }]
+                        },
+                        {
+                            "name": "Child C",
+                            "children": [{ "name": "Grandchild C" }]
+                        },
+                        {
+                            "name": "Child D",
+                            "children": [{ "name": "Grandchild D" }]
+                        }
+                    ]
+                };
+                document.getElementById('expandableTree').data = data0;
+            })
+            // ]]>
+        </script>
+    </ui:define>
+</ui:composition>

@@ -307,6 +307,19 @@ vs.getHTTPJSON = function(url, callback) {
     xhr.send();
 }
 
+vs.postHTTP = function(url, callback, request, requestHeader) {
+    if(!requestHeader) requestHeader = "application/json"
+    var xhr = new XMLHttpRequest()
+    xhr.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            callback(this.responseText)
+        }
+    };
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", requestHeader);
+    xhr.send(request);
+}
+
 var clientTool
 vs.client = {}
 vs.client.processOperation = function (messageJSON) {
@@ -363,6 +376,12 @@ vs.getUUID = function() {
     });
 }
 
+vs.getCookie = function(name) {
+    var value = "; " + document.cookie;
+    var parts = value.split("; " + name + "=");
+    if (parts.length == 2) result = parts.pop().split(";").shift();
+    return result.split(".")[0];
+}
 vs.getQRCodeURL = function(operation, operationCode, deviceId, key, size, socketSystem) {
     if(!size) size = "100x100"
     if(!socketSystem) socketSystem = vs.systemCode.CURRENCY_SYSTEM

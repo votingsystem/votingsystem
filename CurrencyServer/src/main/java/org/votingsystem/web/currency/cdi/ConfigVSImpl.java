@@ -149,8 +149,9 @@ public class ConfigVSImpl implements ConfigVS {
 
     public TagVS createtagVS(String tagName) {
         TagVS tagVS =  dao.persist(new TagVS(StringUtils.removeAccents(tagName).toUpperCase()));
-        //TODO dollar, yuan, yen ...
-        dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO, CurrencyCode.EUR, tagVS));
+        for(CurrencyCode currencyCode : CurrencyCode.values()) {
+            dao.persist(new CurrencyAccount(systemUser, BigDecimal.ZERO, currencyCode, tagVS));
+        }
         return tagVS;
     }
 

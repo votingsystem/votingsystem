@@ -1,14 +1,17 @@
 package org.votingsystem.web.currency.ejb;
 
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.votingsystem.dto.*;
+import org.votingsystem.dto.DeviceDto;
+import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.RemoteSignedSessionDto;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.TypeVS;
 import org.votingsystem.util.crypto.PEMUtils;
-import org.votingsystem.web.currency.util.PrincipalVS;
 import org.votingsystem.web.currency.util.HTTPSessionManager;
+import org.votingsystem.web.currency.util.PrincipalVS;
 import org.votingsystem.web.currency.websocket.SessionManager;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
@@ -110,6 +113,8 @@ public class WebSocketBean {
                         dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
                         ((HttpSession)remoteSession.getUserProperties().get(HttpSession.class.getName()))
                                 .setAttribute(PrincipalVS.USER_KEY, signer.setDevice(browserDevice));
+                        ((HttpSession)remoteSession.getUserProperties().get(HttpSession.class.getName()))
+                                .setAttribute(HTTPSessionManager.WEBSOCKET_SESSION_KEY, remoteSession);
                     }
                 }
                 break;
@@ -118,7 +123,7 @@ public class WebSocketBean {
                 signer = cmsMessage.getUser();
                 if(Certificate.Type.USER_ID_CARD != signer.getCertificate().getType())
                     throw new ExceptionVS("ERROR - ID_CARD signature required");
-                InitSessionDto dto = cmsMessage.getSignedContent(InitSessionDto.class);
+                MessageDto dto = cmsMessage.getSignedContent(MessageDto.class);
                 Query query = dao.getEM().createQuery("select d from Device d where d.user.nif =:nif and d.deviceId =:deviceId")
                         .setParameter("nif", signer.getNif()).setParameter("deviceId", dto.getDeviceId());
                 Device device = dao.getSingleResult(Device.class, query);

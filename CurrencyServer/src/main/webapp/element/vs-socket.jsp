@@ -28,8 +28,8 @@
                     return;
                 }
                 this.websocket.onopen = function () {
-                    console.log(this.tagName + '- WebSocket connection opened.');
-                };
+                    console.log(this.tagName + '- WebSocket connection opened.', this.websocket);
+                }.bind(this);
                 this.websocket.onmessage = function (event) {
                     console.log(this.tagName + ' - Received: ' + event.data);
                     var messageJSON = toJSON(event.data)

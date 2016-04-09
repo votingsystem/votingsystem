@@ -1,8 +1,7 @@
 package org.votingsystem.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.votingsystem.cms.CMSSignedMessage;
+import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.util.TypeVS;
 
@@ -12,19 +11,22 @@ import org.votingsystem.util.TypeVS;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageDto<T> {
 
-    private Integer statusCode;
     private TypeVS operation;
+    private Integer statusCode;
     private String message;
     private String cmsMessagePEM;
     private T data;
     private String URL;
+    private String deviceId;
+    private String httpSessionId;
+    private String UUID;
 
-    public MessageDto () {}
+    public MessageDto() {}
 
     public MessageDto(Integer statusCode, String message, String URL) {
         this.statusCode = statusCode;
         this.message = message;
-        this.URL = URL;
+        this.setURL(URL);
     }
 
     public MessageDto(Integer statusCode, String message) {
@@ -52,55 +54,52 @@ public class MessageDto<T> {
         return new MessageDto(ResponseVS.SC_ERROR_REQUEST_REPEATED, message, URL);
     }
 
-    public Integer getStatusCode() {
-        return statusCode;
+    public String getDeviceId() {
+        return deviceId;
     }
 
-    public String getMessage() {
-        return message;
+    public String getHttpSessionId() {
+        return httpSessionId;
     }
 
-    @Override public String toString() {
-        return "[statusCode: " + statusCode + " - message: " + message + " - URL: " + URL +"]";
-    }
-
-    public String getURL() {
-        return URL;
-    }
-
-    public MessageDto setURL(String URL) {
-        this.URL = URL;
-        return this;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
+    public String getUUID() {
+        return UUID;
     }
 
     public TypeVS getOperation() {
         return operation;
     }
 
-    public void setOperation(TypeVS operation) {
-        this.operation = operation;
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Integer getStatusCode() {
+        return statusCode;
     }
 
     public String getCmsMessagePEM() {
         return cmsMessagePEM;
     }
 
-    @JsonIgnore
-    public CMSSignedMessage getCMS() throws Exception {
-        if(cmsMessagePEM != null) return CMSSignedMessage.FROM_PEM(cmsMessagePEM);
-        return null;
+    public void setCmsMessagePEM(String cmsMessagePEM) {
+        this.cmsMessagePEM = cmsMessagePEM;
     }
 
-    public MessageDto setCmsMessagePEM(String cmsMessagePEM) {
-        this.cmsMessagePEM = cmsMessagePEM;
+    public String getURL() {
+        return URL;
+    }
+
+    public MessageDto<T> setURL(String URL) {
+        this.URL = URL;
         return this;
+    }
+
+    public void setData(T data) {
+        this.data = data;
     }
 }

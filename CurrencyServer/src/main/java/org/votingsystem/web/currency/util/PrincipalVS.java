@@ -4,10 +4,6 @@ import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.User;
 
 import java.security.Principal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

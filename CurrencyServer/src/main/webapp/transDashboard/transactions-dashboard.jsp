@@ -36,10 +36,10 @@
                         <input id="timeFreeCheckBox" type="checkbox" value="timeFree" on-click="timeCheckboxSelected" style="margin:0 0 0 10px;" checked="true">${msg.timeFreeLbl}
                     </div>
                     <div style="padding:5px 0 0 0; width: 100%;">
-                        <vs-expandable-div id="currencyExpDiv" caption="${msg.currencyLbl}"></vs-expandable-div>
+                        <vs-expandable-div id="currencyExpDiv" caption="${msg.currencyLbl}" style="z-index: 20;"></vs-expandable-div>
                     </div>
                     <div style="margin:5px 0 0 0;width: 100%;">
-                        <vs-expandable-div id="transactionTypeExpDiv" caption="${msg.movementTypeLbl}"></vs-expandable-div>
+                        <vs-expandable-div id="transactionTypeExpDiv" caption="${msg.movementTypeLbl}" style="z-index: 10;"></vs-expandable-div>
                     </div>
                     <div style="margin:5px 0 0 0;width: 100%;">
                         <vs-expandable-div id="tagExpDiv" caption="${msg.tagLbl}"></vs-expandable-div>

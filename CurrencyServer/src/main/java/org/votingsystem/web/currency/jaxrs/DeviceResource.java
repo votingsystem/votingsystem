@@ -1,19 +1,30 @@
 package org.votingsystem.web.currency.jaxrs;
 
 import org.votingsystem.dto.DeviceDto;
+import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserDto;
+import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
+import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.NifUtils;
+import org.votingsystem.util.TypeVS;
+import org.votingsystem.web.currency.util.AuthRole;
+import org.votingsystem.web.currency.util.PrincipalVS;
 import org.votingsystem.web.currency.websocket.SessionManager;
 import org.votingsystem.web.ejb.DAOBean;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.persistence.Query;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Session;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -21,6 +32,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import static java.text.MessageFormat.format;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -31,6 +44,21 @@ public class DeviceResource {
     private static final Logger log = Logger.getLogger(DeviceResource.class.getName());
 
     @Inject DAOBean dao;
+
+    @RolesAllowed(AuthRole.USER)
+    @POST @Path("/closeBrowserSession")
+    public Response closeBrowserSession(CMSMessage cmsMessage, @Context ServletContext context,
+                @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
+        User user = ((PrincipalVS)req.getUserPrincipal()).getUser();
+        User signer = cmsMessage.getUser();
+        if(!user.getNif().equals(signer.getNif())) throw new ExceptionVS("signer it's not session owner");
+        MessageDto messageDto = cmsMessage.getSignedContent(MessageDto.class);
+        if(messageDto.getOperation() != TypeVS.CLOSE_SESSION) throw new ExceptionVS(format(
+                "bad message type, expected ''{0}'' found ''{1}''", TypeVS.CLOSE_SESSION, messageDto.getOperation()));
+        if(!messageDto.getHttpSessionId().equals(req.getSession().getId())) throw new ExceptionVS("bad http session id");
+        req.getSession().removeAttribute(PrincipalVS.USER_KEY);
+        return Response.ok().entity("").build();
+    }
 
     @Path("/id/{id}")
     @GET @Produces(MediaType.APPLICATION_JSON)

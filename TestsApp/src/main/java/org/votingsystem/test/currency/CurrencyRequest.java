@@ -35,10 +35,10 @@ public class CurrencyRequest {
         SignatureService signatureService = SignatureService.getUserSignatureService(
                 "Currency_" + NIF, User.Type.USER);
         CurrencyServer currencyServer = TestUtils.fetchCurrencyServer();
-        BigDecimal totalAmount = new BigDecimal(10);
+        BigDecimal totalAmount = new BigDecimal(12);
         TransactionDto transactionDto = new TransactionDto();
         transactionDto.setAmount(totalAmount);
-        transactionDto.setCurrencyCode(CurrencyCode.EUR);
+        transactionDto.setCurrencyCode(CurrencyCode.JPY);
         transactionDto.setTags(Sets.newHashSet("WEALTH"));
         transactionDto.setTimeLimited(true);
         CurrencyRequestDto requestDto = CurrencyRequestDto.CREATE_REQUEST(transactionDto, totalAmount,
