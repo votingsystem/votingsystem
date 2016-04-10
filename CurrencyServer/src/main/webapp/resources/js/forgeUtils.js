@@ -3,15 +3,23 @@ forge.oids["givenName"] = '2.5.4.42'
 forge.oids['2.5.4.4'] = "surname"
 forge.oids["surname"] = '2.5.4.4'
 
-var RSAUtil = function(keyLength) {
-    if(!keyLength) keyLength = 2048
-    this.rsa = forge.pki.rsa;
-    // generate an RSA key pair synchronously
-    console.log("RSAUtil - keyLength: " + keyLength)
-    this.keypair = this.rsa.generateKeyPair(keyLength);
-    this.publicKeyPEM = forge.pki.publicKeyToPem(this.keypair.publicKey),
-    this.privateKeyPEM = forge.pki.privateKeyToPem(this.keypair.privateKey);
-    this.publicKeyBase64 = vs.getPublicKeyBase64(this.keypair.publicKey);
+var RSAUtil = function(keyLength, privateKeyPEM, x509CertificatePEM) {
+    if(privateKeyPEM && x509CertificatePEM) {
+        this.privateKeyPEM = privateKeyPEM
+        this.x509CertificatePEM = x509CertificatePEM
+        this.x509Certificate = forge.pki.certificateFromPem(x509CertificatePEM);
+        this.publicKeyPEM = forge.pki.publicKeyToPem(this.x509Certificate.publicKey)
+        this.keypair = {privateKey:forge.pki.privateKeyFromPem(privateKeyPEM), publicKey: this.x509Certificate.publicKey}
+    } else {
+        if(!keyLength) keyLength = 2048
+        this.rsa = forge.pki.rsa;
+        // generate an RSA key pair synchronously
+        console.log("RSAUtil - keyLength: " + keyLength)
+        this.keypair = this.rsa.generateKeyPair(keyLength);
+        this.publicKeyPEM = forge.pki.publicKeyToPem(this.keypair.publicKey),
+            this.privateKeyPEM = forge.pki.privateKeyToPem(this.keypair.privateKey);
+        this.publicKeyBase64 = vs.getPublicKeyBase64(this.keypair.publicKey);
+    }
 }
 
 RSAUtil.prototype.encrypt = function(plainText) {
@@ -42,15 +50,20 @@ RSAUtil.prototype.getCSR = function(userData) {
     return forge.pki.certificationRequestToPem(this.csr);
 }
 
-RSAUtil.prototype.initCSR = function(issuedX509CertificatePEM) {
-    this.x509CertificatePEM = issuedX509CertificatePEM
-    this.x509Certificate = forge.pki.certificateFromPem(issuedX509CertificatePEM);
+RSAUtil.prototype.initCSR = function(x509CertificatePEM, aesParams) {
+    this.x509CertificatePEM = x509CertificatePEM
+    this.x509Certificate = forge.pki.certificateFromPem(x509CertificatePEM);
+    if(aesParams) {
+        var rsaData = vs.encryptAES(JSON.stringify({privateKeyPEM:this.privateKeyPEM,
+            x509CertificatePEM:this.x509CertificatePEM}), aesParams)
+        localStorage.setItem('sessionData', JSON.stringify({rsaData:rsaData}));
+    }
 }
 
 RSAUtil.prototype.sign = function(contentToSign, callback) {
+    if(typeof contentToSign !== 'string') contentToSign = JSON.stringify(contentToSign)
     vs.getTimeStampToken(contentToSign, function (timeStampTokenASN1) {
-        console.log("timeStampTokenASN1:")
-        console.log(timeStampTokenASN1)
+        console.log("timeStampTokenASN1:", timeStampTokenASN1, " - contentToSign: ", contentToSign)
         var cmsSignedMessage = forge.pkcs7.createSignedData();
         cmsSignedMessage.content = forge.util.createBuffer(contentToSign, 'utf8');
         cmsSignedMessage.addCertificate(this.x509Certificate);

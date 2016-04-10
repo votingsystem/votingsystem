@@ -121,13 +121,10 @@ String.prototype.getElapsedTime = function() {
 
 
 function toJSON(message){
-	if(message != null) {
-		if( Object.prototype.toString.call(message) == '[object String]' ) {
-			return JSON.parse(message);
-		} else {
-			return message
-		} 
-	}
+    if(message) {
+        if(typeof message === 'string' ) return JSON.parse(message);
+        else  return message
+    }
 }
 
 var ResponseVS = {

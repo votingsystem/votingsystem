@@ -28,11 +28,11 @@
                     return;
                 }
                 this.websocket.onopen = function () {
-                    console.log(this.tagName + '- WebSocket connection opened.', this.websocket);
+                    console.log(this.tagName + '- websocket.onopen');
                 }.bind(this);
                 this.websocket.onmessage = function (event) {
-                    console.log(this.tagName + ' - Received: ' + event.data);
                     var messageJSON = toJSON(event.data)
+                    console.log(this.tagName + ' - websocket.onmessage: ', messageJSON);
                     if("MESSAGEVS_FROM_VS" ===  messageJSON.operation) {
                         messageJSON.operation = messageJSON.messageType
                         switch(messageJSON.operation) {
@@ -51,9 +51,9 @@
                                 if(ResponseVS.SC_WS_CONNECTION_INIT_OK == messageJSON.statusCode) {
                                     vs.connectedDevice = messageJSON.connectedDevice
                                     vs.mobileDevice = toJSON(messageJSON.message)
-                                    console.log("mobileDevice: ", vs.mobileDevice)
-                                    console.log("connectedDevice: ", vs.connectedDevice)
-                                    vs.rsaUtil.initCSR(vs.connectedDevice.x509CertificatePEM)
+                                    var aesParams = {key:forge.util.decode64(vs.connectedDevice.aesParams.key),
+                                        iv:forge.util.decode64(vs.connectedDevice.aesParams.iv)}
+                                    vs.rsaUtil.initCSR(vs.connectedDevice.x509CertificatePEM, aesParams)
                                     this.$.qrDialog.close()
                                     this.fire('connected');
                                     vs.connected = true
@@ -125,9 +125,6 @@
                 this.$.qrDialog.close()
             },
             showAccessQRCode:function () {
-                //vs.operationCode()
-                //vs.getUUID()
-                //vs.deviceId
                 var operationCode = this.getOperationCode()
                 if(!vs.deviceId) {
                     this.pendingAccessRequest = true

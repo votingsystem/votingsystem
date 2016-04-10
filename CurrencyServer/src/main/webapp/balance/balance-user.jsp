@@ -76,7 +76,7 @@
                 <div class="flex horizontal layout">
                     <div>
                         <select id=periodSelect" style="margin:10px auto 0px auto;color:black;
-                                width: 250px;font-size: 1.2em;height: 28px;color: #888;"
+                                width: 270px;font-size: 1.2em;height: 28px;color: #888;"
                                 on-change="periodSelectChange" class="form-control" value="{{selectedPeriod}}">
                             <option value="WEEK" style="color:#6c0404;">
                                 ${msg.weekInfoLbl} </option>

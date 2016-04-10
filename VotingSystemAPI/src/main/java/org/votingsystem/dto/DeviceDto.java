@@ -26,6 +26,7 @@ public class DeviceDto implements Serializable {
     private String phone;
     private String publicKeyPEM;
     private String x509CertificatePEM;
+    private AESParamsDto aesParams;
     private String firstName;
     private String lastName;
     private String NIF;
@@ -69,6 +70,7 @@ public class DeviceDto implements Serializable {
         this.setDeviceName(device.getDeviceName());
         this.setPhone(device.getPhone());
         this.setEmail(device.getEmail());
+        this.setAesParams(device.getAesParams());
         X509Certificate x509Cert = device.getX509Certificate();
         if(x509Cert != null) x509CertificatePEM = new String(PEMUtils.getPEMEncoded(x509Cert));
     }
@@ -195,4 +197,12 @@ public class DeviceDto implements Serializable {
         else return PEMUtils.fromPEMToRSAPublicKey(publicKeyPEM);
     }
 
+    public AESParamsDto getAesParams() {
+        return aesParams;
+    }
+
+    public DeviceDto setAesParams(AESParamsDto aesParams) {
+        this.aesParams = aesParams;
+        return this;
+    }
 }

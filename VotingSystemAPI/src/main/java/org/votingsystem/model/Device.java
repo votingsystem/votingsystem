@@ -1,5 +1,6 @@
 package org.votingsystem.model;
 
+import org.votingsystem.dto.AESParamsDto;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;
@@ -49,6 +50,7 @@ public class Device extends EntityVS implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23) private Date lastUpdated;
     @Transient private transient X509Certificate x509Certificate;
+    @Transient private transient AESParamsDto aesParams;
 
     public Device() {}
 
@@ -212,6 +214,14 @@ public class Device extends EntityVS implements Serializable {
         setDeviceId(extensionDto.getDeviceId());
         setType(extensionDto.getDeviceType());
         return this;
+    }
+
+    public AESParamsDto getAesParams() {
+        return aesParams;
+    }
+
+    public void setAesParams(AESParamsDto aesParams) {
+        this.aesParams = aesParams;
     }
 
 }

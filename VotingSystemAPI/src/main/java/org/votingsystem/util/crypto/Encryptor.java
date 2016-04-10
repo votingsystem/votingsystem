@@ -8,7 +8,15 @@ import org.bouncycastle.cms.bc.BcRSAKeyTransRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.openssl.PEMParser;
+import org.votingsystem.dto.AESParamsDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 
@@ -25,6 +33,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Iterator;
 import java.util.logging.Logger;
@@ -139,4 +148,35 @@ public class Encryptor {
         return new String(plainText, "UTF-8");
     }
 
+    public static String encryptAES(String messageToEncrypt, AESParamsDto aesParams) throws
+            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException, InvalidCipherTextException {
+        PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()));
+        KeyParameter keyParam = new KeyParameter(aesParams.getAesKey().getEncoded());
+        ParametersWithIV params = new ParametersWithIV(keyParam, aesParams.getIvParam().getIV());
+        pbbc.init(true, params); //to decrypt put param to false
+        byte[] input = messageToEncrypt.getBytes("UTF-8");
+        byte[] output = new byte[pbbc.getOutputSize(input.length)];
+        int bytesWrittenOut = pbbc.processBytes(input, 0, input.length, output, 0);
+        pbbc.doFinal(output, bytesWrittenOut);
+        return Base64.getEncoder().encodeToString(output);
+    }
+
+    //BC provider to avoid key length restrictions on normal jvm
+    public static String decryptAES(String messageToDecrypt, AESParamsDto aesParams) throws
+            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+            InvalidKeyException, BadPaddingException, IllegalBlockSizeException,
+            UnsupportedEncodingException, InvalidCipherTextException {
+        PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()));
+        KeyParameter keyParam = new KeyParameter(aesParams.getAesKey().getEncoded());
+        CipherParameters params = new ParametersWithIV(keyParam, aesParams.getIvParam().getIV());
+        pbbc.init(false, params); //to encrypt put param to true
+        byte[] input =  Base64.getDecoder().decode(messageToDecrypt);
+        byte[] output = new byte[pbbc.getOutputSize(input.length)];
+        int bytesWrittenOut = pbbc.processBytes(input, 0, input.length, output, 0);
+        pbbc.doFinal(output, bytesWrittenOut);
+        int i = output.length - 1; //remove padding
+        while (i >= 0 && output[i] == 0) { --i; }
+        return new String(Arrays.copyOf(output, i + 1), "UTF-8");
+    }
 }

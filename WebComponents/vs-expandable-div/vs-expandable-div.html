@@ -6,7 +6,7 @@
                 position: relative;
             }
             .mainDiv {
-                border-radius: 3px;
+                border-radius: 2px;
                 border: 1px solid #ccc;
                 padding: 0 3px 0 3px;
                 color: #ccc;
@@ -20,7 +20,8 @@
                 <div class="flex" style="margin: 0 0 0 10px;color: #888;">[[caption]]</div>
                 <div on-click="expand" style="cursor: pointer;"><i id="expandIcon" class="fa fa-plus"></i></div>
             </div>
-            <div id="contentDiv" style="display: none;"></div>
+            <div id="contentDiv" style="display: none;z-index: 1; width: 99.3%;position: absolute;background-color: #fefefe;
+                border: 1px solid #ccc;border-top: 1px solid transparent;left: 0px;"></div>
         </div>
     </template>
     <script>

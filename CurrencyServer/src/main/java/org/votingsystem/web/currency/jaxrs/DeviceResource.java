@@ -46,8 +46,8 @@ public class DeviceResource {
     @Inject DAOBean dao;
 
     @RolesAllowed(AuthRole.USER)
-    @POST @Path("/closeBrowserSession")
-    public Response closeBrowserSession(CMSMessage cmsMessage, @Context ServletContext context,
+    @POST @Path("/closeSession")
+    public Response closeSession(CMSMessage cmsMessage, @Context ServletContext context,
                 @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
         User user = ((PrincipalVS)req.getUserPrincipal()).getUser();
         User signer = cmsMessage.getUser();
@@ -56,8 +56,17 @@ public class DeviceResource {
         if(messageDto.getOperation() != TypeVS.CLOSE_SESSION) throw new ExceptionVS(format(
                 "bad message type, expected ''{0}'' found ''{1}''", TypeVS.CLOSE_SESSION, messageDto.getOperation()));
         if(!messageDto.getHttpSessionId().equals(req.getSession().getId())) throw new ExceptionVS("bad http session id");
-        req.getSession().removeAttribute(PrincipalVS.USER_KEY);
+        req.getSession().invalidate();
         return Response.ok().entity("").build();
+    }
+
+    @RolesAllowed(AuthRole.USER)
+    @Path("/authenticatedDevice")
+    @GET @Produces(MediaType.APPLICATION_JSON)
+    public Response authenticatedDevice(@Context HttpServletRequest req) throws Exception {
+        User user = ((PrincipalVS)req.getUserPrincipal()).getUser();
+        DeviceDto dto = new DeviceDto(user.getDevice());
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }
 
     @Path("/id/{id}")

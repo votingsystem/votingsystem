@@ -25,6 +25,8 @@ public class UserToken extends EntityVS implements Serializable {
     @Column(name="state") @Enumerated(EnumType.STRING) private State state = State.OK;
     //user token encrypted with the server certificate
     @Column(name="token") private byte[] token;
+    @Column(name="aesParamsDto") private String aesParamsDto;
+    @Column(name="httpSessionId") private String httpSessionId;
     @OneToOne private Certificate certificate;
     @OneToOne private User user;
     @OneToOne private CMSMessage cmsMessage;
@@ -105,6 +107,24 @@ public class UserToken extends EntityVS implements Serializable {
     public UserToken setState(State state) {
         this.state = state;
         return this;
+    }
+
+    public String getAesParamsDto() {
+        return aesParamsDto;
+    }
+
+    public UserToken setAesParamsDto(String aesParamsDto) {
+        this.aesParamsDto = aesParamsDto;
+        return this;
+
+    }
+
+    public String getHttpSessionId() {
+        return httpSessionId;
+    }
+
+    public void setHttpSessionId(String httpSessionId) {
+        this.httpSessionId = httpSessionId;
     }
 
 }

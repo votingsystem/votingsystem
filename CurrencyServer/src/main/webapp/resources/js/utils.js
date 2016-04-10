@@ -178,12 +178,9 @@ Number.prototype.toAmountStr = function(fractionDigits){
 } 
 
 function toJSON(message){
-	if(message != null) {
-		if( Object.prototype.toString.call(message) == '[object String]' ) {
-			return JSON.parse(message);
-		} else {
-			return message
-		} 
+	if(message) {
+		if(typeof message === 'string' ) return JSON.parse(message);
+		else  return message
 	}
 }
 
@@ -298,8 +295,8 @@ function setURLParameter(baseURL, name, value){
 vs.getHTTPJSON = function(url, callback) {
     var xhr = new XMLHttpRequest()
     xhr.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            callback(this.responseText)
+        if (this.readyState == 4) {
+            callback(this.responseText, this.status)
         }
     };
     xhr.open("GET", url, true);
@@ -311,8 +308,8 @@ vs.postHTTP = function(url, callback, request, requestHeader) {
     if(!requestHeader) requestHeader = "application/json"
     var xhr = new XMLHttpRequest()
     xhr.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            callback(this.responseText)
+        if (this.readyState == 4) {
+            callback(this.responseText, this.status)
         }
     };
     xhr.open("POST", url, true);
@@ -404,6 +401,28 @@ vs.QROperationCode = {
     ANONYMOUS_REPRESENTATIVE_SELECTION:6
     
 }
+
+vs.MediaType = {
+    JSON_SIGNED:"application/json;application/pkcs7-signature"
+}
+
+vs.encryptAES = function(textToEncrypt, aesparamsDto) {
+    var cipher = forge.cipher.createCipher('AES-CBC', aesparamsDto.key);
+    cipher.start({iv: aesparamsDto.iv});
+    cipher.update(forge.util.createBuffer(textToEncrypt));
+    cipher.finish();
+    var encrypted = cipher.output;
+    return encrypted.data
+}
+
+vs.decryptAES = function(encryptedData, aesparamsDto) {
+    var decipher = forge.cipher.createDecipher('AES-CBC', aesparamsDto.key);
+    decipher.start({iv: aesparamsDto.iv});
+    decipher.update(forge.util.createBuffer(encryptedData));
+    decipher.finish();
+    return decipher.output.data
+}
+
 
 vs.systemCode = {
     CURRENCY_SYSTEM:0,

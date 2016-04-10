@@ -83,7 +83,7 @@
                     document.querySelector("#drawer").style.display = 'none'
                 });
                 vs.socket.addEventListener("disconnected", function() {
-                    page.show("#{contextURL}")
+                    page.show(vs.contextURL)
                     document.querySelector("#connectionMsgDiv").innerText = "${msg.accessLbl}"
                 })
                 vs.socket.addEventListener("connected", function() {
@@ -97,10 +97,11 @@
                         alert("#{msg.quitConfirmMsg}", "#{msg.messageLbl}", function() {
                             var operation = {operation:'CLOSE_SESSION', UUID:vs.getUUID(),
                                 httpSessionId:vs.getCookie("JSESSIONID")}
-                            vs.rsaUtil.sign(operation, function () {
-                                vs.postHTTP(vs.contextURL + "/rest/device/closeBrowserSession", function(responseText){
-                                    vs.socket.disconnect()
-                                })
+                            vs.rsaUtil.sign(operation, function (cmsSignedMessage) {
+                                var cmsSignedMessagePEM = forge.pkcs7.messageToPem(cmsSignedMessage);
+                                vs.postHTTP(vs.contextURL + "/rest/device/closeSession", function(responseText){
+                                    page.show(vs.contextURL)
+                                }, cmsSignedMessagePEM, vs.MediaType.JSON_SIGNED)
                             })
                         })
                     }
@@ -147,6 +148,30 @@
                 })
                 vs.updateMenuView()
                 document.querySelector("#spaMainDiv").style.display = "block"
+                var sessionId = vs.getCookie("JSESSIONID");
+
+                if(localStorage.getItem('sessionData')) {
+                    var sessionData = toJSON(localStorage.getItem('sessionData'));
+                    console.log("restoring session")
+                    vs.getHTTPJSON(vs.contextURL + "/rest/device/authenticatedDevice", function(responseText, statusCode) {
+                        if(statusCode  === 403) {
+                            page.show(vs.contextURL)
+                            console.log("sessionId: ", sessionId, " - sessionData sessionId: ", sessionData.sessionId)
+                            localStorage.removeItem('sessionData');
+                        } else {
+                            Polymer.Base.importHref(vs.contextURL + '/resources/forgePKCS7.html', function () {
+                                vs.connectedDevice = toJSON(responseText);
+                                var aesParams = {key:forge.util.decode64(vs.connectedDevice.aesParams.key),
+                                    iv:forge.util.decode64(vs.connectedDevice.aesParams.iv)}
+                                var rsaDataStr = vs.decryptAES(sessionData.rsaData, aesParams)
+                                var rsaData = toJSON(rsaDataStr)
+                                vs.rsaUtil = new RSAUtil(null, rsaData.privateKeyPEM, rsaData.x509CertificatePEM)
+                                document.querySelector("#connectionMsgDiv").innerText = "${msg.disConnectLbl}"
+                                vs.connected = true
+                            });
+                        }
+                    })
+                }
             })
             //]]>
         </script>
