@@ -22,7 +22,7 @@ public class BalancesDto {
     private List<TransactionDto> transactionList;
     private List<TransactionDto> transactionFromList;
     private List<TransactionDto> transactionToList;
-    private Map<CurrencyCode, Map> balances;
+
     private Map<CurrencyCode, Map<String, BigDecimal>> balancesFrom = new HashMap<>();
     private Map<CurrencyCode, Map<String, IncomesDto>> balancesTo = new HashMap<>();
     private Map<CurrencyCode, Map<String, BigDecimal>> balancesCash = new HashMap<>();
@@ -124,14 +124,6 @@ public class BalancesDto {
 
     public void setTransactionList(List<TransactionDto> transactionList) {
         this.transactionList = transactionList;
-    }
-
-    public Map<CurrencyCode, Map> getBalances() {
-        return balances;
-    }
-
-    public void setBalances(Map<CurrencyCode, Map> balances) {
-        this.balances = balances;
     }
 
     public List<TransactionDto> getTransactionFromList() {

@@ -3,12 +3,12 @@
 <dom-module id="system-accounts">
     <template>
         <style>
-            .accountBlock { border: 1px solid #888; margin: 5px 10px 20px 10px;
+            .accountBlock { border: 1px solid #888; margin: 0px 10px 10px 0px;
                 background-color: #f9f9f9; border-radius: 2px;min-width: 100px;
-                box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.24); cursor: pointer; display: table;
+                box-shadow: 0 8px 6px -6px #888;cursor: pointer; display: table;
             }
-            .accountBalance { font-size: 1.2em; color: #434343; text-align: center;  padding: 10px; }
-            .tagDesc { background: #888; color: #f9f9f9; padding: 5px;text-align: center; }
+            .accountBalance { font-size: 1.2em; color: #434343; text-align: center;  padding: 2px; }
+            .tagDesc { background: #888; color: #f9f9f9; padding: 2px;text-align: center; font-size: 0.9em;}
             .sectionHeader {
                 color: #f9f9f9;
                 text-align: center;

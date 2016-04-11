@@ -113,28 +113,26 @@ public class AuditBean {
         return balancesDto;
     }
 
-    public void initWeekPeriod(Calendar requestDate) throws IOException {
+    public void initWeekPeriod(Calendar requestDate) throws Exception {
         MessagesVS messages = new MessagesVS(Locale.getDefault(), config.getProperty("vs.bundleBaseName"));
         long beginCalc = System.currentTimeMillis();
         //we know this is launch every Monday after 00:00 so we just make sure to select a day from last week
         Interval timePeriod = DateUtils.getWeekPeriod(DateUtils.getDayFromPreviousWeek(requestDate));
         String transactionSubject =  messages.get("initWeekMsg", DateUtils.getDayWeekDateStr(timePeriod.getDateTo(), "HH:mm"));
-        List<User.State> notActiveList = Arrays.asList(User.State.SUSPENDED, User.State.CANCELED);
         List<User.Type> userTypeList = Arrays.asList(User.Type.USER);
         Query query = dao.getEM().createQuery("SELECT COUNT(u) FROM User u WHERE u.type in :typeList and(" +
-                "u.state = 'ACTIVE' or (u.state in :notActiveList and(u.dateCancelled >=:dateCancelled)))")
+                "u.state = 'ACTIVE' or (u.state != 'ACTIVE' and(u.dateCancelled >=:dateCancelled)))")
                 .setParameter("typeList", userTypeList)
-                .setParameter("notActiveList", notActiveList)
                 .setParameter("dateCancelled", timePeriod.getDateFrom());
         long numTotalUsers = (long)query.getSingleResult();
         log.info(transactionSubject + " - numTotalUsers:" + numTotalUsers + " - " + timePeriod.toString());
         int offset = 0;
         int pageSize = 100;
         List<User> userList;
-        query = dao.getEM().createNamedQuery("findUserActiveOrCancelledAfterAndInList").setFirstResult(0).setMaxResults(pageSize)
+        query = dao.getEM().createNamedQuery("findUserActiveOrCancelledAfterAndInList")
                 .setParameter("typeList", userTypeList)
-                .setParameter("notActiveList", notActiveList)
-                .setParameter("dateCancelled", timePeriod.getDateFrom());;
+                .setParameter("dateCancelled", timePeriod.getDateFrom())
+                .setFirstResult(0).setMaxResults(pageSize);
         while ((userList = query.getResultList()).size() > 0) {
             for (User user : userList) {
                 try {
@@ -154,21 +152,14 @@ public class AuditBean {
             offset += pageSize;
             query.setFirstResult(offset);
         }
+        signPeriodResult(timePeriod);
     }
 
-    public boolean initUserWeekPeriod(User user, Interval timePeriod, String transactionSubject)
-            throws Exception {
+    public boolean initUserWeekPeriod(User user, Interval timePeriod, String transactionSubject) throws Exception {
         MessagesVS messages = MessagesVS.getCurrentInstance();
-        BalancesDto balancesDto = null;
-        String userSubPath;
-        if (user instanceof User) {
-            balancesDto = balancesBean.getBalancesDto(user, timePeriod);
-            //userSubPath = StringUtils.getUserDirPath(user.getNif());
-            userSubPath = user.getNif();
-        } else {
-            log.info("user id: " + user.getId() + " is " + user.getClass().getSimpleName() + " - no init period");
-            return false;
-        }
+        BalancesDto balancesDto = balancesBean.getBalancesDto(user, timePeriod);
+        //userSubPath = StringUtils.getUserDirPath(user.getNif());
+        String userSubPath = user.getNif();
         ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), userSubPath);
         log.info(format("initUserWeekPeriod - User ''{0}'' - dir ''{1}''", user.getId(),
                 reportFiles.getBaseDir().getAbsolutePath()) );
@@ -179,9 +170,11 @@ public class AuditBean {
                 TagVS currentTagVS = config.getTag(tagVSEntry.getKey());
                 query = dao.getEM().createQuery("SELECT count (t) FROM Transaction t WHERE t.toUser =:toUser and " +
                         "t.state =:state and t.type =:type and t.tag =:tag and t.dateCreated >=:dateTo")
-                        .setParameter("toUser", user).setParameter("state", Transaction.State.OK)
+                        .setParameter("toUser", user)
+                        .setParameter("state", Transaction.State.OK)
                         .setParameter("type", Transaction.Type.CURRENCY_PERIOD_INIT)
-                        .setParameter("tag", currentTagVS).setParameter("dateTo", timePeriod.getDateTo());
+                        .setParameter("tag", currentTagVS)
+                        .setParameter("dateTo", timePeriod.getDateTo());
 
                 long numInitPeriodTransaction = (long) query.getSingleResult();
                 if(numInitPeriodTransaction > 0) throw new ExceptionVS("REPEATED CURRENCY_PERIOD_INIT Transaction for " +
@@ -219,25 +212,25 @@ public class AuditBean {
 
     //@Transactional
     public PeriodResultDto signPeriodResult(Interval timePeriod) throws Exception {
-        MessagesVS messages = MessagesVS.getCurrentInstance();
         long beginCalc = System.currentTimeMillis();
-        Query query = dao.getEM().createNamedQuery("countUserActiveByDateAndInList").setParameter("date", timePeriod.getDateFrom())
+        Query query = dao.getEM().createNamedQuery("countUserActiveByDateAndInList")
+                .setParameter("date", timePeriod.getDateFrom())
                 .setParameter("inList", Arrays.asList(User.Type.USER, User.Type.BANK));
         long numTotalUsers = (long)query.getSingleResult();
-
-        ReportFiles reportFiles = new ReportFiles(timePeriod, config.getServerDir().getAbsolutePath(), null);
-        PeriodResultDto periodResultDto = PeriodResultDto.init(timePeriod);
+        ReportFiles reportFiles = ReportFiles.CURRENCY_PERIOD(timePeriod, config.getServerDir().getAbsolutePath());
+        PeriodResultDto periodResultDto = new PeriodResultDto(timePeriod);
         int offset = 0;
         int pageSize = 100;
         List<User> userList;
         query = dao.getEM().createNamedQuery("findUserActiveOrCancelledAfterAndInList").setParameter("dateCancelled",
-                timePeriod.getDateFrom()).setParameter("typeList", Arrays.asList(User.Type.USER, User.Type.BANK))
+                timePeriod.getDateFrom())
+                .setParameter("typeList", Arrays.asList(User.Type.USER, User.Type.BANK))
                 .setFirstResult(0).setMaxResults(pageSize);
         while ((userList = query.getResultList()).size() > 0) {
             for (User user : userList) {
                 try {
                     if(user instanceof Bank)
-                        periodResultDto.addBankBalance(balancesBean.getBalancesDto(user, timePeriod));
+                            periodResultDto.addBankBalance(balancesBean.getBalancesDto(user, timePeriod));
                     else periodResultDto.addUserBalance(balancesBean.getBalancesDto(user, timePeriod));
                 } catch (Exception ex) {
                     log.log(Level.SEVERE, ex.getMessage(), ex);
@@ -255,12 +248,11 @@ public class AuditBean {
         periodResultDto.setSystemBalance(balancesBean.getSystemBalancesDto(timePeriod));
         byte[] resultBalanceBytes = JSON.getMapper().writeValueAsBytes(periodResultDto);
         Files.write(Paths.get(reportFiles.getJsonFile().getAbsolutePath()), resultBalanceBytes);
-        //String subjectSufix = "[" + DateUtils.getDateStr(timePeriod.getDateFrom()) + " - " +
-        //        DateUtils.getDateStr(timePeriod.getDateTo()) + "]";
         CMSSignedMessage receipt = cmsBean.signDataWithTimeStamp(resultBalanceBytes);
         FileUtils.copyBytesToFile(receipt.toPEM(), reportFiles.getReceiptFile());
         String elapsedTime = DateUtils.getElapsedTimeHoursMinutesMillis(System.currentTimeMillis() - beginCalc);
-        log.info("numTotalUsers:" + numTotalUsers + " - finished in: " + elapsedTime);
+        log.info("numTotalUsers:" + numTotalUsers + " - finished in: " + elapsedTime + " - reportFiles: " +
+                reportFiles.getJsonFile().getAbsolutePath());
         return periodResultDto;
     }
 
@@ -293,7 +285,7 @@ public class AuditBean {
     }
 
     //@Schedule(dayOfWeek = "Mon", hour="0", minute = "0", second = "0")
-    public void initWeekPeriod() throws IOException {
+    public void initWeekPeriod() throws Exception {
         checkCurrencyCanceled();
         initWeekPeriod(Calendar.getInstance());
     }

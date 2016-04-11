@@ -6,7 +6,6 @@ import org.votingsystem.model.CMSMessage;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Bank;
 import org.votingsystem.model.currency.BankInfo;
-import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.crypto.PEMUtils;
 import org.votingsystem.web.ejb.CMSBean;
@@ -56,19 +55,18 @@ public class BankBean {
         cmsBean.verifyUserCertificate(bank);
         String validatedNIF = org.votingsystem.util.NifUtils.validate(bank.getNif());
         Query query = dao.getEM().createNamedQuery("findUserByNIF").setParameter("nif", validatedNIF);
-        Object bankDB = dao.getSingleResult(Object.class, query);
-        if(bankDB instanceof User) throw new ExceptionVS("The Bank: " + ((User)bankDB).getId() +
-                " has the same NIF:" + validatedNIF);
+        Bank bankDB = dao.getSingleResult(Bank.class, query);
         if(bankDB == null) {
-            bankDB = dao.persist(bank.setDescription(request.getInfo()).setIBAN(request.getIBAN()));
-            dao.persist(new BankInfo((Bank) bankDB, IBAN.getBankCode()));
-            log.info("NEW bank id: " + ((Bank) bankDB).getId());
+            bank.setDescription(request.getInfo()).setIBAN(request.getIBAN());
+            bankDB = dao.persist(bank);
+            dao.persist(new BankInfo(bankDB, IBAN.getBankCode()));
+            log.info("NEW bank id: " + bankDB.getId());
         } else {
-            ((Bank)bankDB).setDescription(request.getInfo()).setCertificateCA(bank.getCertificateCA());
-            ((Bank)bankDB).setX509Certificate(bank.getX509Certificate());
-            ((Bank)bankDB).setTimeStampToken(bank.getTimeStampToken());
+            bankDB.setDescription(request.getInfo()).setCertificateCA(bank.getCertificateCA());
+            bankDB.setX509Certificate(bank.getX509Certificate());
+            bankDB.setTimeStampToken(bank.getTimeStampToken());
         }
-        bank = (Bank) bankDB;
+        bank = bankDB;
         subscriptionBean.setUserData(bank, null);
         config.createIBAN(bank);
         log.info("saveBank - Bank id: " + bank.getId() + " - " + x509Certificate.getSubjectDN().toString());

@@ -4,15 +4,14 @@
     <template>
         <style>
             .currencyIssuedBlock { border: 1px solid #6c0404; margin: 20px;
-                box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.24); cursor: pointer;
+                box-shadow: 0 8px 6px -6px #888;min-width: 100px;
             }
-            .currencyIssuedBalance { font-size: 2em; color: #6c0404; text-align: center;  padding: 10px; }
-            .tagDesc { background: #6c0404; color: #f9f9f9; padding: 5px;text-align: center; }
-            .sectionHeader { font-size: 1.8em; font-weight: bold; color: #ba0011;text-align: center;text-decoration: underline; }
+            .currencyIssuedBalance { font-size: 1.2em; color: #6c0404; text-align: center;  padding: 2px; }
+            .tagDesc { background: #6c0404; color: #f9f9f9; padding: 2px;text-align: center; font-size: 0.9em;}
         </style>
         <div class="pagevs">
             <div hidden="{{okListHidden}}">
-                <div class="sectionHeader">${msg.activesLbl}</div>
+                <h3 class="sectionHeader">${msg.activesLbl}</h3>
                 <div class="layout flex horizontal wrap around-justified">
                     <template is="dom-repeat" items="{{currencyIssuedDto.okList}}">
                         <div>
@@ -25,7 +24,7 @@
                 </div>
             </div>
             <div hidden="{{expendedListHidden}}" style="margin: 15px 0 0 0;">
-                <div class="sectionHeader">${msg.expendedLbl}</div>
+                <h3 class="sectionHeader">${msg.expendedLbl}</h3>
                 <div class="layout flex horizontal wrap around-justified">
                     <template is="dom-repeat" items="{{currencyIssuedDto.expendedList}}">
                         <div>
@@ -38,7 +37,7 @@
                 </div>
             </div>
             <div hidden="{{lapsedListHidden}}" style="margin: 15px 0 0 0;">
-                <div class="sectionHeader">${msg.lapsedLbl}</div>
+                <h3 class="sectionHeader">${msg.lapsedLbl}</h3>
                 <div class="layout flex horizontal wrap around-justified">
                     <template is="dom-repeat" items="{{currencyIssuedDto.lapsedList}}">
                         <div>
@@ -51,7 +50,7 @@
                 </div>
             </div>
             <div hidden="{{errorListHidden}}" style="margin: 15px 0 0 0;">
-                <div class="sectionHeader">${msg.errorLbl}</div>
+                <h3 class="sectionHeader">${msg.errorLbl}</h3>
                 <div class="layout flex horizontal wrap around-justified">
                     <template is="dom-repeat" items="{{currencyIssuedDto.errorList}}">
                         <div>

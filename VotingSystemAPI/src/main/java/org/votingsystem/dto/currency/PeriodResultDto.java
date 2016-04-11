@@ -14,27 +14,15 @@ public class PeriodResultDto {
 
     private Interval timePeriod;
     private BalancesDto systemBalance;
-    private List<BalancesDto> groupBalanceList;
     private List<BalancesDto> userBalanceList;
     private List<BalancesDto> bankBalanceList;
 
     public PeriodResultDto() {}
 
-    public static PeriodResultDto init(Interval timePeriod) {
-        PeriodResultDto periodResultDto = new PeriodResultDto();
-        periodResultDto.setGroupBalanceList(new ArrayList<>());
-        periodResultDto.setUserBalanceList(new ArrayList<>());
-        periodResultDto.setBankBalanceList(new ArrayList<>());
-        periodResultDto.setTimePeriod(timePeriod);
-        return periodResultDto;
-    }
-
-    public List<BalancesDto> getGroupBalanceList() {
-        return groupBalanceList;
-    }
-
-    public void setGroupBalanceList(List<BalancesDto> groupBalanceList) {
-        this.groupBalanceList = groupBalanceList;
+    public PeriodResultDto(Interval timePeriod) {
+        userBalanceList = new ArrayList<>();
+        bankBalanceList = new ArrayList<>();
+        this.timePeriod = timePeriod;
     }
 
     public List<BalancesDto> getUserBalanceList() {
@@ -57,10 +45,6 @@ public class PeriodResultDto {
         bankBalanceList.add(balancesDto);
     }
 
-    public void addGroupBalance(BalancesDto balancesDto) {
-        groupBalanceList.add(balancesDto);
-    }
-
     public void addUserBalance(BalancesDto balancesDto) {
         userBalanceList.add(balancesDto);
     }
@@ -80,4 +64,5 @@ public class PeriodResultDto {
     public void setTimePeriod(Interval timePeriod) {
         this.timePeriod = timePeriod;
     }
+
 }

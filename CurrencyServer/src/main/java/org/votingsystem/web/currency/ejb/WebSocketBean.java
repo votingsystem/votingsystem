@@ -66,53 +66,57 @@ public class WebSocketBean {
                 cmsMessage = cmsBean.validateCMS(messageDto.getCMS(), null).getCmsMessage();
                 signer = cmsMessage.getUser();
                 RemoteSignedSessionDto remoteSignedSessionDto = cmsMessage.getSignedContent(RemoteSignedSessionDto.class);
+                Session remoteSession = SessionManager.getInstance().getDeviceSession(
+                        remoteSignedSessionDto.getDeviceId());
+                if(remoteSession == null) {
+                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                            messageDto.getServerResponse(ResponseVS.SC_ERROR, messages.get(
+                            "webSocketDeviceSessionNotFoundErrorMsg"))));
+                    return;
+                }
+                HttpSession remoteHttpSession = (HttpSession)remoteSession.getUserProperties().get(HttpSession.class.getName());
+                if(remoteHttpSession == null) {
+                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
+                            messageDto.getServerResponse(ResponseVS.SC_ERROR, messages.get(
+                                    "webSocketDeviceSessionNotFoundErrorMsg"))));
+                    return;
+                }
                 PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(
                         remoteSignedSessionDto.getCsr().getBytes());
                 User userFromCSR = User.getUser(csr.getSubject());
                 if(!userFromCSR.checkUserFromCSR(signer.getX509Certificate())) {
-                    messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
-                            messageDto.getServerResponse(ResponseVS.SC_ERROR, messages.get("remoteCSRErrorMsg",
-                            signer.getNameAndId(), userFromCSR.getNameAndId()))));
-                } else {
-                    Session remoteSession = SessionManager.getInstance().getDeviceSession(
-                            remoteSignedSessionDto.getDeviceId());
-                    if(remoteSession == null) {
                         messageDto.getSession().getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
-                                messageDto.getServerResponse(ResponseVS.SC_ERROR, messages.get(
-                                "webSocketDeviceSessionNotFoundErrorMsg",  signer.getNameAndId(),
-                                userFromCSR.getNameAndId()))));
-                    } else {
-                        browserDevice = (Device) remoteSession.getUserProperties().get("device");
-                        try {
-                            Certificate certificate = cmsBean.signCSRForBrowserSession(csr, cmsMessage, browserDevice);
-                            browserDevice.setX509Certificate(certificate.getX509Certificate());
-                            if(browserDevice.getUser() != null) {
-                                //device already in db
-                                browserDevice.setCertificate(certificate).setUser(signer);
-                                browserDevice = dao.merge(browserDevice);
-                            } else {
-                                browserDevice.setId(null);
-                                browserDevice.setDeviceId(UUID.randomUUID().toString());
-                                browserDevice.setCertificate(certificate).setUser(signer);
-                                browserDevice = dao.persist(browserDevice);
-                            }
-                            browserDevice.setAesParams(AESParamsDto.CREATE());
-                            SessionManager.getInstance().putAuthenticatedDevice(remoteSession, signer, browserDevice);
-                        } catch (Exception ex) {
-                            log.log(Level.SEVERE, ex.getMessage(), ex);
+                        messageDto.getServerResponse(ResponseVS.SC_ERROR, messages.get("remoteCSRErrorMsg",
+                        signer.getNameAndId(), userFromCSR.getNameAndId()))));
+                } else {
+                    browserDevice = (Device) remoteSession.getUserProperties().get("device");
+                    try {
+                        Certificate certificate = cmsBean.signCSRForBrowserSession(csr, cmsMessage, browserDevice);
+                        browserDevice.setX509Certificate(certificate.getX509Certificate());
+                        if(browserDevice.getUser() != null) {
+                            //device already in db
+                            browserDevice.setCertificate(certificate).setUser(signer);
+                            browserDevice = dao.merge(browserDevice);
+                        } else {
+                            browserDevice.setId(null);
+                            browserDevice.setDeviceId(UUID.randomUUID().toString());
+                            browserDevice.setCertificate(certificate).setUser(signer);
+                            browserDevice = dao.persist(browserDevice);
                         }
-                        DeviceDto mobileDevice = new DeviceDto(signer.getDevice());
-                        responseDto = messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK,
-                                JSON.getMapper().writeValueAsString(mobileDevice))
-                                .setMessageType(TypeVS.INIT_REMOTE_SIGNED_SESSION);
-                        responseDto.setConnectedDevice(DeviceDto.INIT_BROWSER_SESSION(signer, browserDevice));
-                        remoteSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
-                        dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
-                        ((HttpSession)remoteSession.getUserProperties().get(HttpSession.class.getName()))
-                                .setAttribute(PrincipalVS.USER_KEY, signer.setDevice(browserDevice));
-                        ((HttpSession)remoteSession.getUserProperties().get(HttpSession.class.getName()))
-                                .setAttribute(HTTPSessionManager.WEBSOCKET_SESSION_KEY, remoteSession);
+                        browserDevice.setAesParams(AESParamsDto.CREATE());
+                        SessionManager.getInstance().putAuthenticatedDevice(remoteSession, signer, browserDevice);
+                    } catch (Exception ex) {
+                        log.log(Level.SEVERE, ex.getMessage(), ex);
                     }
+                    DeviceDto mobileDevice = new DeviceDto(signer.getDevice());
+                    responseDto = messageDto.getServerResponse(ResponseVS.SC_WS_CONNECTION_INIT_OK,
+                            JSON.getMapper().writeValueAsString(mobileDevice))
+                            .setMessageType(TypeVS.INIT_REMOTE_SIGNED_SESSION);
+                    responseDto.setConnectedDevice(DeviceDto.INIT_BROWSER_SESSION(signer, browserDevice));
+                    remoteSession.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(responseDto));
+                    dao.getEM().merge(cmsMessage.setType(TypeVS.WEB_SOCKET_INIT));
+                    remoteHttpSession.setAttribute(PrincipalVS.USER_KEY, signer.setDevice(browserDevice));
+                    remoteHttpSession.setAttribute(HTTPSessionManager.WEBSOCKET_SESSION_KEY, remoteSession);
                 }
                 break;
             case INIT_SIGNED_SESSION:

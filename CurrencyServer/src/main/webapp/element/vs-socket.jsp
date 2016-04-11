@@ -56,12 +56,14 @@
                                     vs.setConnected(messageJSON.connectedDevice, toJSON(messageJSON.message));
                                 }
                                 break;
+                            case 'RENEW_SESSION':
+
+                                break;
                             default:
                                 if(messageJSON.statusCode === ResponseVS.SC_WS_CONNECTION_NOT_FOUND) {
                                     alert(messageJSON.message, "${msg.errorLbl}")
                                 }
                         }
-
                     } else {
                         vs.rsaUtil.decryptSocketMsg(messageJSON)
                         console.log("decryptedSocketMsg: ", messageJSON)

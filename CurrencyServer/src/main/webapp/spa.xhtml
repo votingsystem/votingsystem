@@ -137,10 +137,10 @@
                     } else document.querySelector("#pageInfoPanel").style.display = "none"
                 }
                 document.querySelector('#voting_system_page').addEventListener('search-request', function (e) {
-                    console.log("spa.xhtml - search request - query:" + e.detail.query);
+                    console.log("search request - query:" + e.detail.query);
                 })
                 document.querySelector("#voting_system_page").addEventListener('user-clicked', function(e) {
-                    console.log("spa.xhtml - user-clicked")
+                    console.log("user-clicked")
                     page.show(vs.contextURL + "/rest/user/id/" + e.detail.id + "?connectedDevices=true")
                 })
                 vs.updateMenuView()

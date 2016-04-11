@@ -4,7 +4,7 @@
     <template>
         <style>
             .bank {border: 1px solid #ccc; margin: 10px; padding:3px 7px 7px 7px;
-                box-shadow: 0 2px 2px 0 #bbb; text-align: center; background-color: #f9f9f9;
+                box-shadow: 0 8px 6px -6px #888; text-align: center; background-color: #f9f9f9;
                 cursor: pointer; text-overflow: ellipsis; max-width: 300px; border-radius: 3px;
             }
             .bank:hover { border-color: #ba0011; }

@@ -5,12 +5,12 @@
 <dom-module name="bank-data">
 <template>
     <style>
-        .accountBlock { border: 1px solid #888; margin: 10px 15px 10px 15px;
+        .accountBlock { border: 1px solid #888; margin: 0px 10px 10px 0px;
             background-color: #f9f9f9; min-width: 100px; border-radius: 2px;
-            box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.24); cursor: pointer; display: table;
+            box-shadow: 0 8px 6px -6px #888; cursor: pointer; display: table;
         }
-        .accountBalance { font-size: 1.2em; color: #434343; text-align: center;  padding: 10px; }
-        .tagDesc { background: #888; color: #f9f9f9; padding: 5px;text-align: center; }
+        .accountBalance { font-size: 1.2em; color: #434343; text-align: center;  padding: 2px; }
+        .tagDesc { background: #888; color: #f9f9f9; padding: 2px;text-align: center;font-size: 0.9em;}
         .sectionHeader {
             color: #f9f9f9;
             text-align: center;
@@ -32,7 +32,7 @@
 
         <div class="vertical layout center">
             <template is="dom-repeat" items="{{currencyList}}" as="currencyCode">
-                <div style="color:#888;border-bottom: 1px solid #888;font-weight: bold;">
+                <div style="color:#888;border-bottom: 1px solid #888;font-weight: bold; margin-bottom: 10px;">
                     {{getCurrencyCodeAmount(currencyCode)}} {{currencyCode}}</div>
                 <div class="layout horizontal center center-justified" style="border-bottom: 1px solid #ccc;width: 100%;">
                     <template is="dom-repeat" items="{{getTagList(currencyCode)}}" as="tag">
