@@ -25,12 +25,12 @@
                     vs.showAccessQRCode()
                 }
 
-                vs.socket.addEventListener("connected", function() {
+                document.querySelector("#voting_system_page").addEventListener('connected', function (event) {
                     document.querySelector("#msgDiv").innerHTML = "connected with mobile";
-                })
+                });
+
 
                 var JSESSIONID =  vs.getCookie("JSESSIONID")
-
                 document.querySelector("#documentCookie").innerHTML = document.cookie;
                 document.querySelector("#sessionDiv").innerHTML = JSESSIONID
             //]]>

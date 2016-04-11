@@ -13,7 +13,7 @@
         </style>
         <div class="pagevs vertical layout center" style="max-width: 100%; margin:7px;">
             <div hidden={{!contactSelector}} class="horizontal layout center center-justified"
-                 style="margin:10px 0 20px 0; cursor: pointer; border-bottom: 1px solid #888; color: #888;width: 400px;">
+                 style="margin:10px 0 20px 0; cursor: pointer; border-bottom: 1px solid #888; color: #888;width: 100%;">
                 <div id="searchUserDiv" on-click="setSearchView"
                      style="font-weight: bold; font-size: 1.1em; margin:0 40px 0 0;">${msg.userSearchLbl}</div>
                 <div id="contactDiv" on-click="setContactsView" style="font-weight: bold; font-size: 1.1em; cursor: pointer;">${msg.contactsLbl}</div>

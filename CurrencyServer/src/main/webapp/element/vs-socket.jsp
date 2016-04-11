@@ -49,14 +49,11 @@
                                 break;
                             case 'INIT_REMOTE_SIGNED_SESSION':
                                 if(ResponseVS.SC_WS_CONNECTION_INIT_OK == messageJSON.statusCode) {
-                                    vs.connectedDevice = messageJSON.connectedDevice
-                                    vs.mobileDevice = toJSON(messageJSON.message)
-                                    var aesParams = {key:forge.util.decode64(vs.connectedDevice.aesParams.key),
-                                        iv:forge.util.decode64(vs.connectedDevice.aesParams.iv)}
-                                    vs.rsaUtil.initCSR(vs.connectedDevice.x509CertificatePEM, aesParams)
-                                    this.$.qrDialog.close()
-                                    this.fire('connected');
-                                    vs.connected = true
+                                    var aesParams = {key:forge.util.decode64(messageJSON.connectedDevice.aesParams.key),
+                                        iv:forge.util.decode64(messageJSON.connectedDevice.aesParams.iv)}
+                                    vs.rsaUtil.initCSR(messageJSON.connectedDevice.x509CertificatePEM, aesParams);
+                                    this.$.qrDialog.close();
+                                    vs.setConnected(messageJSON.connectedDevice, toJSON(messageJSON.message));
                                 }
                                 break;
                             default:
@@ -73,7 +70,8 @@
                                 this.sendOperation(messageJSON, this.qrOperationsMap[messageJSON.operationCode])
                                 break;
                             case "OPERATION_RESULT":
-                                this.fire('socket-message', messageJSON);
+                                document.querySelector("#voting_system_page").dispatchEvent(
+                                        new CustomEvent('socket-message', {detail:messageJSON}))
                                 var operation = this.qrOperationsMap[messageJSON.operationCode]
                                 if(operation.callback) operation.callback(messageJSON)
                                 break;
@@ -105,12 +103,9 @@
                     }
                 }.bind(this);
                 this.websocket.onclose = function (event) {
-                    vs.deviceId = null
-                    vs.rsaUtil = null
-                    this.fire('disconnected');
-                    vs.connected = false
                     console.log('Info: WebSocket connection closed, Code: ' + event.code +
                             (event.reason == "" ? "" : ", Reason: " + event.reason));
+                    vs.setDisConnected()
                 }.bind(this);
             },
             disconnect:function () {

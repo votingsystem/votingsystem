@@ -56,7 +56,7 @@ public class DeviceResource {
         if(messageDto.getOperation() != TypeVS.CLOSE_SESSION) throw new ExceptionVS(format(
                 "bad message type, expected ''{0}'' found ''{1}''", TypeVS.CLOSE_SESSION, messageDto.getOperation()));
         if(!messageDto.getHttpSessionId().equals(req.getSession().getId())) throw new ExceptionVS("bad http session id");
-        req.getSession().invalidate();
+        req.getSession().removeAttribute(PrincipalVS.USER_KEY);
         return Response.ok().entity("").build();
     }
 

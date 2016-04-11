@@ -335,31 +335,12 @@ vs.client.processOperation = function (messageJSON) {
                 vs.socketElement = document.createElement('vs-socket');
                 document.querySelector("#voting_system_page").appendChild(vs.socketElement)
                 vs.socketElement.connect()
-                socketElementListeners.forEach(function (element) {
-                    vs.socketElement.addEventListener(element.type, element.listener)
-                })
-                socketElementListeners = []
             }
             if(messageJSON.operation === "ACCESS_QR_CODE") vs.socketElement.showAccessQRCode()
             else vs.socketElement.showOperationQRCode(vs.socketElement.CURRENCY_SYSTEM, messageJSON)
         });
     }
 }
-
-var socketElementListeners = []
-
-function SocketVS() { }
-
-SocketVS.prototype.addEventListener = function(type, listener) {
-    if(vs.socketElement) vs.socketElement.addEventListener(type, listener)
-    socketElementListeners.push({type:type, listener:listener})
-}
-
-SocketVS.prototype.disconnect = function() {
-    if(vs.socketElement) vs.socketElement.disconnect()
-}
-
-vs.socket = new SocketVS()
 
 vs.showAccessQRCode = function () {
     vs.client.processOperation(new OperationVS("ACCESS_QR_CODE"))
@@ -423,6 +404,20 @@ vs.decryptAES = function(encryptedData, aesparamsDto) {
     return decipher.output.data
 }
 
+vs.setConnected = function (connectedDevice, mobileDevice) {
+    vs.connectedDevice = connectedDevice
+    vs.mobileDevice = mobileDevice
+    vs.connected = true
+    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('connected'))
+}
+
+vs.setDisConnected = function () {
+    vs.connectedDevice = null
+    vs.mobileDevice = null
+    vs.rsaUtil = null
+    vs.connected = false
+    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('disconnected'))
+}
 
 vs.systemCode = {
     CURRENCY_SYSTEM:0,

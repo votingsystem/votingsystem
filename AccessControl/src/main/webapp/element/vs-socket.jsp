@@ -70,7 +70,8 @@
                                 this.sendOperation(messageJSON, this.qrOperationsMap[messageJSON.operationCode])
                                 break;
                             case "OPERATION_RESULT":
-                                this.fire('socket-message', messageJSON);
+                                document.querySelector("#voting_system_page").dispatchEvent(
+                                        new CustomEvent('socket-message', {detail:messageJSON}))
                                 var operation = this.qrOperationsMap[messageJSON.operationCode]
                                 if(operation.callback) operation.callback(messageJSON)
                                 break;
