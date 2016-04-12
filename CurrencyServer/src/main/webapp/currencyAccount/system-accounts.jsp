@@ -16,9 +16,7 @@
                 margin: 0 0 15px 0; font-size: 1.2em;
                 text-decoration: none; background-color: #888;width: 100%;
             }
-            .subSection {
-                border-bottom: 1px solid #ccc;width: 100%;margin: 10px 10px 0 10px;
-            }
+            .subSection { border-bottom: 1px solid #ccc;width: 100%;margin: 10px 10px 0 10px; }
             .currencyInfo {color:#888;border-bottom: 1px solid #888;font-weight: bold;}
         </style>
         <div class="pagevs vertical layout center">

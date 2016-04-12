@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.jaxrs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.votingsystem.dto.TagVSDto;
 import org.votingsystem.dto.currency.CurrencyIssuedDto;
 import org.votingsystem.dto.currency.CurrencyStateDto;
@@ -30,10 +31,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -94,15 +92,29 @@ public class CurrencyResource {
     }
 
     @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+    @Path("/issued") @Transactional
+    public Response issued() throws JsonProcessingException {
+        Map<CurrencyCode, CurrencyIssuedDto> result = new HashMap<>();
+        for(CurrencyCode currencyCode :CurrencyCode.values()) {
+            result.put(currencyCode, getCurrencyIssuedDto(currencyCode));
+        }
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(result)).build();
+    }
+
+    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     @Path("/issued/currencyCode/{currencyCode}") @Transactional
-    public Response currencyIssued(@PathParam("currencyCode") String currencyCode, @Context HttpServletRequest req,
-               @Context HttpServletResponse resp, @Context ServletContext context) throws IOException, ServletException {
+    public Response currencyIssued(@PathParam("currencyCode") String currencyCode) throws JsonProcessingException {
+        CurrencyIssuedDto currencyIssuedDto = getCurrencyIssuedDto(CurrencyCode.valueOf(currencyCode));
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyIssuedDto)).build();
+    }
+
+    private CurrencyIssuedDto getCurrencyIssuedDto(CurrencyCode currencyCode) {
         List<Currency.State> inState = Arrays.asList(Currency.State.OK, Currency.State.EXPENDED, Currency.State.LAPSED,
                 Currency.State.ERROR);
         Query query = dao.getEM().createQuery("select SUM(c.amount), tag, c.currencyCode, c.state from Currency c " +
                 "JOIN c.tagVS tag where c.state in :inState " +
                 "and c.currencyCode =:currencyCode group by tag, c.currencyCode, c.state").setParameter("inState", inState)
-                .setParameter("currencyCode", CurrencyCode.valueOf(currencyCode));
+                .setParameter("currencyCode", currencyCode);
         List<Object[]> resultList = query.getResultList();
         List<TagVSDto> okListDto = new ArrayList<>();
         List<TagVSDto> expendedListDto = new ArrayList<>();
@@ -126,8 +138,7 @@ public class CurrencyResource {
                     break;
             }
         }
-        CurrencyIssuedDto currencyIssuedDto = new CurrencyIssuedDto(okListDto, expendedListDto, lapsedListDto, errorListDto);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(currencyIssuedDto)).build();
+        return new CurrencyIssuedDto(okListDto, expendedListDto, lapsedListDto, errorListDto);
     }
 
 }

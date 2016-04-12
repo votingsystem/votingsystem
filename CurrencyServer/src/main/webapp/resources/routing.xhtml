@@ -60,7 +60,6 @@
           vs.route = 'reports';
           Polymer.Base.importHref('./currency/currency-issued.vsp', function(e) {
               if(!currencyIssued) currencyIssued = document.createElement('currency-issued');
-              currencyIssued.currencyCode = getQueryParam('currencyCode', ctx.querystring)
               vs.loadMainContent(currencyIssued, "${msg.currencyIssued}")
           });
       });

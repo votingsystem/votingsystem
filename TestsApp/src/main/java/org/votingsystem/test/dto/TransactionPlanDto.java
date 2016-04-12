@@ -64,7 +64,7 @@ public class TransactionPlanDto {
     }
 
 
-    public void runTransactionsVS() throws Exception {
+    public void runTransactions() throws Exception {
         runBankTransactions();
     }
 
@@ -97,9 +97,9 @@ public class TransactionPlanDto {
 
     @JsonIgnore
     public Map getReport() {
-        List<TransactionDto> transactionsVSList = getTransacionList();
+        List<TransactionDto> transactionsList = getTransacionList();
         Map<String, TransactionCounter> resultMap = new HashMap<>();
-        for(TransactionDto transaction : transactionsVSList) {
+        for(TransactionDto transaction : transactionsList) {
             if(resultMap.containsKey(transaction.getOperation().toString()))
                 resultMap.get(transaction.getType().toString()).addTransaction(transaction.getAmount());
             else resultMap.put(transaction.getOperation().toString(), new TransactionCounter(transaction));

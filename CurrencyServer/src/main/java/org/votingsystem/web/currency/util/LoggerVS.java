@@ -1,6 +1,7 @@
 package org.votingsystem.web.currency.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.jboss.logmanager.handlers.PeriodicRotatingFileHandler;
 import org.votingsystem.dto.currency.CurrencyDto;
 import org.votingsystem.dto.currency.TransactionDto;
 import org.votingsystem.model.currency.Currency;
@@ -23,11 +24,15 @@ public class LoggerVS {
     private static Logger currencyIssuedlog = Logger.getLogger("currencyIssuedLog");
     private static Logger weekPeriodLog = Logger.getLogger("weekPeriodLog");
 
+    public static final int LIMIT = 2 * 1024 * 1024;
+    public static final int COUNT = 20;
 
-    public static String reporstLogPath;
-    public static String transactionsLogPath;
-    public static String currencyIssuedLogPath;
-    public static String weekPeriodLogPath;
+    private String reporstLogPath;
+    private String transactionsLogPath;
+    private String currencyIssuedLogPath;
+    private String weekPeriodLogPath;
+
+    private static LoggerVS INSTANCE;
 
     static class TransactionFormatter extends Formatter {
         @Override public String format(LogRecord record) {
@@ -37,40 +42,53 @@ public class LoggerVS {
 
     public static void init(String logsDir) {
         try {
+            INSTANCE = new LoggerVS();
             new File(logsDir).mkdirs();
-            reporstLogPath = logsDir + "/reports.log";
-            transactionsLogPath = logsDir + "/transactionsVS.log";
-            currencyIssuedLogPath = logsDir + "/currencyIssued.log";
-            weekPeriodLogPath = logsDir + "/weekPeriodLog.log";
+            INSTANCE.reporstLogPath = logsDir + "/reports.log";
+            INSTANCE.transactionsLogPath = logsDir + "/transactions.log";
+            INSTANCE.currencyIssuedLogPath = logsDir + "/currency_issued.log";
+            INSTANCE.weekPeriodLogPath = logsDir + "/week_period.log";
 
-            FileHandler transactionsHandler = new FileHandler(transactionsLogPath);
-            transactionsHandler.setFormatter(new TransactionFormatter());
+            FileHandler transactionsHandler = new FileHandler(INSTANCE.transactionsLogPath);
             transactionslog.addHandler(transactionsHandler);
-            //handler.setLevel (java.util.logging.Level.FINE);
 
-
-            FileHandler currencyIssuedHandler = new FileHandler(currencyIssuedLogPath);
+            FileHandler currencyIssuedHandler = new FileHandler(INSTANCE.currencyIssuedLogPath, LIMIT, COUNT);
             currencyIssuedHandler.setFormatter(new TransactionFormatter());
             currencyIssuedlog.addHandler(currencyIssuedHandler);
 
-            FileHandler reportsHandler = new FileHandler(reporstLogPath);
+            FileHandler reportsHandler = new FileHandler(INSTANCE.reporstLogPath, LIMIT, COUNT);
             reportsHandler.setFormatter(new TransactionFormatter());
             reportslog.addHandler(reportsHandler);
 
-            FileHandler weekPeriodHandler = new FileHandler(weekPeriodLogPath);
+            FileHandler weekPeriodHandler = new FileHandler(INSTANCE.weekPeriodLogPath, LIMIT, COUNT);
             weekPeriodHandler.setFormatter(new TransactionFormatter());
             weekPeriodLog.addHandler(weekPeriodHandler);
 
         } catch (Exception ex) { ex.printStackTrace();}
     }
 
+    public static String getReporstLogPath() {
+        return INSTANCE.reporstLogPath;
+    }
 
-    public static void logReportVS(Map dataMap) throws JsonProcessingException {
+    public static String getTransactionsLogPath() {
+        return INSTANCE.transactionsLogPath;
+    }
+
+    public static String getCurrencyIssuedLogPath() {
+        return INSTANCE.currencyIssuedLogPath;
+    }
+
+    public static String getWeekPeriodLogPath() {
+        return INSTANCE.weekPeriodLogPath;
+    }
+
+    public static void logReport(Map dataMap) throws JsonProcessingException {
         dataMap.put("date", Calendar.getInstance().getTime());
         reportslog.info(JSON.getMapper().writeValueAsString(dataMap) + ",");
     }
 
-    public static void logReportVS(int status, String type, String message, String url) throws JsonProcessingException {
+    public static void logReport(int status, String type, String message, String url) throws JsonProcessingException {
         Map<String,Object> dataMap = new HashMap();
         dataMap.put("date", Calendar.getInstance().getTime());
         dataMap.put("status", status);
@@ -87,7 +105,7 @@ public class LoggerVS {
 
     public static void logCurrencyIssued(Currency currency) throws JsonProcessingException {
         CurrencyDto currencyDto = new CurrencyDto(currency);
-        currencyIssuedlog.info(JSON.getMapper().writeValueAsString(currencyDto) + ",");
+        currencyIssuedlog.info(JSON.getMapper().writeValueAsString(currencyDto) + ",\n");
     }
 
     public static void weekLog(Level level, String msg, Throwable thrown) {

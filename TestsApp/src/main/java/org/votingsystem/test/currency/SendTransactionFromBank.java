@@ -45,7 +45,7 @@ public class SendTransactionFromBank {
         File transactionsPlan = FileUtils.getFileFromBytes(ContextVS.getInstance().getResourceBytes("transactionsPlan/bank.json"));
         TransactionPlanDto transactionPlanDto = JSON.getMapper().readValue(transactionsPlan, TransactionPlanDto.class);
         transactionPlanDto.setCurrencyServer(currencyServer);
-        transactionPlanDto.runTransactionsVS();
+        transactionPlanDto.runTransactions();
         log.info("Transaction report:" + transactionPlanDto.getReport());
         log.info("currencyResultMap: " + transactionPlanDto.getBankBalance());
     }

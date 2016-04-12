@@ -45,7 +45,7 @@ public class ReportsResource {
     public Response week(@PathParam("year") int year, @PathParam("month") int month, @PathParam("day") int day,
                           @Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        File reportsFile = new File(LoggerVS.weekPeriodLogPath);
+        File reportsFile = new File(LoggerVS.getWeekPeriodLogPath());
         Calendar calendar = DateUtils.getCalendar(year, month, day);
         Interval timePeriod = DateUtils.getWeekPeriod(calendar);
         //TODO
@@ -55,17 +55,17 @@ public class ReportsResource {
             stringBuilder.append("}");
             return Response.ok().type(MediaType.JSON).entity(stringBuilder.toString()).build();
         } else return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - not found - file: " + LoggerVS.weekPeriodLogPath).build();
+                "ERROR - not found - file: " + LoggerVS.getWeekPeriodLogPath()).build();
     }
 
     @Path("/")
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
     public Response index(@Context ServletContext context,
                          @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        File weekReportsBaseDir = new File(config.getServerDir() +  "/weekReports");
+        File weekReportsBaseDir = new File(config.getServerDir() +  "/backup/weekReports");
         List<Interval> periods = new ArrayList<>();
         if(weekReportsBaseDir.exists()) {
-            DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             Files.list(weekReportsBaseDir.toPath()).forEach(file -> {
                 try {
                     String[] fileNameParts = file.getFileName().toString().split("_");
@@ -83,9 +83,9 @@ public class ReportsResource {
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
     public Response logs(@Context ServletContext context,
                           @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        File reportsFile = new File(LoggerVS.reporstLogPath);
+        File reportsFile = new File(LoggerVS.getReporstLogPath());
         if(!reportsFile.exists()) return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - not found - file: " + LoggerVS.reporstLogPath).build();
+                "ERROR - not found - file: " + LoggerVS.getReporstLogPath()).build();
         StringBuilder stringBuilder = new StringBuilder("{\"resultList\":[");
         stringBuilder.append(FileUtils.getStringFromFile(reportsFile));
         stringBuilder.append("]}");
@@ -96,9 +96,9 @@ public class ReportsResource {
     @GET  @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON) @Transactional
     public Response transaction(@Context ServletContext context, @QueryParam("transactionType") String transactionType,
                                 @Context HttpServletRequest req, @Context HttpServletResponse resp) throws Exception {
-        File reportsFile = new File(LoggerVS.transactionsLogPath);
+        File reportsFile = new File(LoggerVS.getTransactionsLogPath());
         if(!reportsFile.exists()) return Response.status(Response.Status.NOT_FOUND).entity(
-                "ERROR - not found - file: " + LoggerVS.reporstLogPath).build();
+                "ERROR - not found - file: " + LoggerVS.getReporstLogPath()).build();
         ObjectMapper mapper =  JSON.getMapper();
         String result = null;
         AtomicLong totalCount = new AtomicLong(0);

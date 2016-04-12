@@ -6,7 +6,7 @@
             <div class="layout vertical center" style="margin: 0 auto;">
                 <h3 class="sectionHeader">${msg.reportsLbl}</h3>
                 <div style="margin:0 0 0 0;">
-                    <a class="buttonvs" style="display: block;width: 150px;" href="${contextURL}/spa.xhtml#!/transactionsDashboard">
+                    <a class="buttonvs" style="display: block;width: 150px;" href="${contextURL}#!/transactionsDashboard">
                         <i class="fa fa-tachometer"></i> ${msg.dashBoardLbl}
                     </a>
                 </div>
@@ -16,27 +16,28 @@
                     </a>
                 </div>
                 <div style="margin:10px 0 0 0;">
-                    <a class="buttonvs" style="display: block;width: 150px;" href="${contextURL}/spa.xhtml#!/currencyIssued?currencyCode=EUR">
+                    <a class="buttonvs" style="display: block;width: 150px;" href="${contextURL}#!/currencyIssued">
                         ${msg.currencyIssued}
                     </a>
                 </div>
                 <div style="margin:10px 0 0 0;">
-                    <a class="buttonvs" style="display: block;width: 150px;" href="${contextURL}/spa.xhtml#!/currencyAccount/system">
+                    <a class="buttonvs" style="display: block;width: 150px;" href="${contextURL}#!/currencyAccount/system">
                         ${msg.systemBalanceLbl}
                     </a>
                 </div>
-                <div style="margin:10px 0 0 0;">
-                    <a class="buttonvs"  style="display: block;width: 150px;"
-                       href="${contextURL}/spa.xhtml#!/reports/week?url=/rest/reports${spa.now()}/week">
+                <div style="margin:10px 0 15px 0;">
+                    <a class="buttonvs" style="display: block;width: 150px;"
+                       href="${contextURL}#!/reports/week?url=/rest/reports${spa.now()}/week">
                         ${msg.currentWeekLbl}
                     </a>
                 </div>
-                <div hidden="{{historyMsgHidden}}"><b>${msg.historyLbl}:</b></div>
-                <template is="dom-repeat" items="{{reportsInfoDto}}" as="timePeriod">
-                    <div>
-                        <a href="{{getPeriodReportURL(timePeriod)}}">{{getPeriodDescription(timePeriod)}}</a>
-                    </div>
-                </template>
+                <h3 hidden="{{historyMsgHidden}}" class="sectionHeader">${msg.previousWeeksLbl}</h3>
+                <div class="layout flex horizontal wrap around-justified">
+                    <template is="dom-repeat" items="{{reportsInfoDto}}" as="timePeriod">
+                        <a class="buttonvs" style="display: block;width: 110px;margin:5px 5px;" target="_blank"
+                           href="{{getPeriodReportURL(timePeriod)}}">{{getPeriodDescription(timePeriod)}}</a>
+                    </template>
+                </div>
             </div>
             <div class="layout vertical center center-justified" style="margin:30px auto;">
                 <h3 class="sectionHeader">${msg.toolsLbl}</h3>
@@ -66,7 +67,7 @@
         },
         getHTTP: function (targetURL) {
             if(!targetURL) targetURL = this.url
-            console.log(this.tagName + " - getHTTP - targetURL: " + targetURL)
+            console.log("getHTTP - targetURL: " + targetURL)
             vs.getHTTPJSON(targetURL, function(responseText){
                 this.reportsInfoDto = toJSON(responseText)
                 this.historyMsgHidden = (this.reportsInfoDto.length === 0)

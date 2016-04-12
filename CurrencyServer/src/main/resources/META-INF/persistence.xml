@@ -21,8 +21,6 @@
         <class>org.votingsystem.model.currency.CurrencyAccount</class>
         <class>org.votingsystem.model.currency.CurrencyRequestBatch</class>
         <class>org.votingsystem.model.currency.CurrencyBatch</class>
-        <class>org.votingsystem.model.currency.Group</class>
-        <class>org.votingsystem.model.currency.Subscription</class>
         <class>org.votingsystem.model.currency.Transaction</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

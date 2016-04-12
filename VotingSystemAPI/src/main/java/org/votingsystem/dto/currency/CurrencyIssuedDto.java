@@ -20,7 +20,7 @@ public class CurrencyIssuedDto {
     public CurrencyIssuedDto() {}
 
     public CurrencyIssuedDto(List<TagVSDto> okList, List<TagVSDto> expendedList, List<TagVSDto> lapsedList,
-                             List<TagVSDto> errorList) {
+                     List<TagVSDto> errorList) {
         this.okList = okList;
         this.expendedList = expendedList;
         this.lapsedList = lapsedList;
