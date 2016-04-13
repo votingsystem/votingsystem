@@ -3,6 +3,12 @@
 <script>
   window.addEventListener('WebComponentsReady', function() {
 
+      /*var aes_paramsBase64 = getURLParam("aes_params", window.location.href);
+      if(aes_paramsBase64) {
+          history.pushState(null, null, vs.removeQueryStringParameter(window.location.href, "aes_params"));
+      }*/
+
+
       var contactPage
       page('*/app/contact', function (ctx) {
           vs.route = 'contact';
@@ -126,7 +132,7 @@
           vs.route = 'user';
           Polymer.Base.importHref('./balance/balance-user.vsp', function(e) {
               if(!userBalance) userBalance = document.createElement('balance-user');
-              userBalance.url = data.path
+              userBalance.url = vs.removeQueryStringParameter(data.path, "aes_params")
               vs.loadMainContent(userBalance, "${msg.balanceLbl}")
           });
       }

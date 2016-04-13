@@ -267,6 +267,23 @@ function getURLParam(name, url) {
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
+vs.updateQueryStringParameter = function (uri, key, value) {
+    var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+    var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+    if (uri.match(re)) {
+        return uri.replace(re, '$1' + key + "=" + value + '$2');
+    } else {
+        return uri + separator + key + "=" + value;
+    }
+}
+
+vs.removeQueryStringParameter = function (uri, key) {
+    var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+    if (uri.match(re)) {
+        return uri.replace(re, '$1' + '$2');
+    } else return uri;
+}
+
 function getQueryParam(variable, querystring) {
     if(!querystring) querystring = location.search
     var vars = querystring.split('&');

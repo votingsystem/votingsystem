@@ -179,7 +179,7 @@ textarea.form-control {
 }
 
 .closeIcon {
-    cursor: pointer;fill:#6c0404; color:#6c0404; font-size: 1.3em; margin: 0 2px 0 0;
+    cursor: pointer;fill:#6c0404; color:#6c0404; font-size: 1.3em; margin: 0 2px 0 0;padding: 2px;
 }
 .closeIcon:hover {
     fill:#ba0011; color:#ba0011;

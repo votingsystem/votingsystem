@@ -62,9 +62,10 @@ public class DeviceResource {
 
     @RolesAllowed(AuthRole.USER)
     @Path("/authenticatedDevice")
-    @GET @Produces(MediaType.APPLICATION_JSON)
-    public Response authenticatedDevice(@Context HttpServletRequest req) throws Exception {
+    @POST @Produces(MediaType.APPLICATION_JSON)
+    public Response authenticatedDevice(CMSMessage cmsMessage, @Context HttpServletRequest req) throws Exception {
         User user = ((PrincipalVS)req.getUserPrincipal()).getUser();
+        if(!cmsMessage.getUser().getNif().equals(user.getNif())) throw new ExceptionVS("signer NIF doesn't match session NIF");
         DeviceDto dto = new DeviceDto(user.getDevice());
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(dto)).build();
     }

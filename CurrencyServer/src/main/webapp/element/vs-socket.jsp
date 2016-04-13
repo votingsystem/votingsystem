@@ -51,6 +51,7 @@
                                 if(ResponseVS.SC_WS_CONNECTION_INIT_OK == messageJSON.statusCode) {
                                     var aesParams = {key:forge.util.decode64(messageJSON.connectedDevice.aesParams.key),
                                         iv:forge.util.decode64(messageJSON.connectedDevice.aesParams.iv)}
+                                    messageJSON.connectedDevice.aesParams = aesParams
                                     vs.rsaUtil.initCSR(messageJSON.connectedDevice.x509CertificatePEM, aesParams);
                                     this.$.qrDialog.close();
                                     vs.setConnected(messageJSON.connectedDevice, toJSON(messageJSON.message));

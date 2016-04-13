@@ -345,8 +345,9 @@
             getHTTP: function (targetURL) {
                 if(!targetURL) targetURL = this.url
                 console.log(this.tagName + " - getHTTP - targetURL: " + targetURL + " - selectedPeriod:" + this.selectedPeriod)
-                vs.getHTTPJSON(targetURL, function(responseText){
-                    this.balance = toJSON(responseText)
+                vs.getHTTPJSON(targetURL, function(responseText, statusCode){
+                    if(200 === statusCode) this.balance = toJSON(responseText)
+                    else alert(responseText)
                 }.bind(this))
             }
         });

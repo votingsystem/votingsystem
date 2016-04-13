@@ -11,7 +11,7 @@
                     </a>
                 </div>
                 <div style="margin:10px 0 0 0;">
-                    <a class="buttonvs" style="display: block;width: 150px;" href="/user/bankList">
+                    <a class="buttonvs" style="display: block;width: 150px;" href="${contextURL}#!/user/bankList">
                         ${msg.bankListLbl}
                     </a>
                 </div>

@@ -71,6 +71,19 @@
                     //there's a delay until location.href is updated with history.back()
                     setTimeout(function () { page(window.location.href.split("\\#!")[1]) }, 50);
                 }
+                var rightClickHandle = function(e) {
+                    if(vs.connectedDevice) {
+                        e.target.setAttribute('href', vs.updateQueryStringParameter(e.target.href, "aes_params",
+                                window.btoa(escape(encodeURIComponent(JSON.stringify(vs.connectedDevice.aesParams))))));
+                    }
+                };
+                function updateLinksVS(elementsArray) {
+                    for (var i = 0; i < elementsArray.length; i++) {
+                        if(elementsArray[i].href.indexOf("#{contextURL}") > -1) {
+                            elementsArray[i].addEventListener('contextmenu', rightClickHandle);
+                        }
+                    }
+                }
                 document.querySelector("#drawerButton").addEventListener('click', function (event) {
                     document.querySelector("#drawer").style.display = 'block'
                     event.stopPropagation();
@@ -86,7 +99,6 @@
                     page.show("/home")
                     document.querySelector("#connectionMsgDiv").innerText = "${msg.accessLbl}"
                 });
-
                 document.querySelector("#connectionMsgDiv").addEventListener('click', function (event) {
                     if(vs.connected !== true) {
                         vs.showAccessQRCode()
@@ -94,11 +106,8 @@
                         alert("#{msg.quitConfirmMsg}", "#{msg.messageLbl}", function() {
                             var operation = {operation:'CLOSE_SESSION', UUID:vs.getUUID(),
                                 httpSessionId:vs.getCookie("JSESSIONID")}
-                            vs.rsaUtil.sign(operation, function (cmsSignedMessage) {
-                                var cmsSignedMessagePEM = forge.pkcs7.messageToPem(cmsSignedMessage);
-                                vs.postHTTP(vs.contextURL + "/rest/device/closeSession", function(responseText){
-                                    vs.setDisConnected();
-                                }, cmsSignedMessagePEM, vs.MediaType.JSON_SIGNED)
+                            vs.rsaUtil.signAndPost(vs.contextURL + "/rest/device/closeSession", operation, function(responseText){
+                                vs.setDisConnected();
                             })
                         })
                     }
@@ -129,6 +138,11 @@
                             menuItems[i].classList.add("menuItemSelected");
                         } else menuItems[i].classList.remove("menuItemSelected");
                     }
+                    updateLinksVS(newContentNode.querySelectorAll("a"))
+                    if(vs.connectedDevice) {
+                        history.pushState(null, null, vs.updateQueryStringParameter(window.location.href, "aes_params",
+                                window.btoa(escape(encodeURIComponent(JSON.stringify(vs.connectedDevice.aesParams))))));
+                    }
                 }
                 vs.updateSearchMessage = function(searchMessage) {
                     if(searchMessage) {
@@ -147,25 +161,31 @@
                 document.querySelector("#spaMainDiv").style.display = "block"
                 var sessionId = vs.getCookie("JSESSIONID");
 
+                updateLinksVS(document.querySelectorAll("a"))
+
                 if(localStorage.getItem('sessionData')) {
+                    var aesParams
                     var sessionData = toJSON(localStorage.getItem('sessionData'));
+                    var aes_paramsBase64 = getURLParam("aes_params", window.location.href);
+                    if(aes_paramsBase64) aesParams = toJSON(decodeURIComponent(unescape(window.atob(aes_paramsBase64))))
                     console.log("restoring session")
-                    vs.getHTTPJSON(vs.contextURL + "/rest/device/authenticatedDevice", function(responseText, statusCode) {
-                        if(statusCode  === 403) {
-                            console.log("sessionId: ", sessionId, " - sessionData sessionId: ", sessionData.sessionId);
-                            localStorage.removeItem('sessionData');
-                            vs.setDisConnected();
-                        } else {
-                            Polymer.Base.importHref(vs.contextURL + '/resources/forgePKCS7.html', function () {
-                                vs.connectedDevice = toJSON(responseText);
-                                var aesParams = {key:forge.util.decode64(vs.connectedDevice.aesParams.key),
-                                    iv:forge.util.decode64(vs.connectedDevice.aesParams.iv)}
-                                var rsaData = toJSON(vs.decryptAES(sessionData.rsaData, aesParams))
-                                vs.rsaUtil = new RSAUtil(null, rsaData.privateKeyPEM, rsaData.x509CertificatePEM)
-                                vs.setConnected(vs.connectedDevice, null);
-                            });
-                        }
-                    })
+                    if(!aesParams) {
+                        console.log("removed sessionData");
+                        localStorage.removeItem('sessionData');
+                        vs.setDisConnected();
+                    } else {
+                        Polymer.Base.importHref(vs.contextURL + '/resources/forgePKCS7.html', function () {
+                            var rsaData = toJSON(vs.decryptAES(sessionData.rsaData, aesParams))
+                            vs.rsaUtil = new RSAUtil(null, rsaData.privateKeyPEM, rsaData.x509CertificatePEM)
+                            var operation = {operation:'USER_INFO', UUID:vs.getUUID(), httpSessionId:vs.getCookie("JSESSIONID")}
+                            vs.rsaUtil.signAndPost(vs.contextURL + "/rest/device/authenticatedDevice", operation,
+                                    function(responseText, statusCode){
+                                        if(200 === statusCode) {
+                                            vs.setConnected(toJSON(responseText), null);
+                                        }
+                                    })
+                        }.bind(aesParams));
+                    }
                 }
             })
             //]]>

@@ -93,6 +93,13 @@ RSAUtil.prototype.sign = function(contentToSign, callback) {
     }.bind(this))
 }
 
+RSAUtil.prototype.signAndPost = function(url, contentToSign, callback) {
+    this.sign(contentToSign, function (cmsSignedMessage) {
+        var cmsSignedMessagePEM = forge.pkcs7.messageToPem(cmsSignedMessage);
+        vs.postHTTP(url, callback , cmsSignedMessagePEM, vs.MediaType.JSON_SIGNED)
+    })
+}
+
 RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
     var decryptedMsg = this.decryptCMS(messageJSON.encryptedMessage)
     if(decryptedMsg.content && decryptedMsg.content.data) {

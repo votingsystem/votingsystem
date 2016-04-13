@@ -27,14 +27,15 @@
             function createPKCS7Message() {
                 var certPrivateKeyPair = test.createSelfSignedCert();
                 var cmsSignedMessage =  test.createCMSSignedMessage(certPrivateKeyPair, 'Some content to be signed.')
-                console.log("CMSSignedMessage:", cmsSignedMessage)
                 var pem = forge.pkcs7.messageToPem(cmsSignedMessage);
+                console.log("CMSSignedMessage - pem:", pem)
+
                 var cmsSignedMessage = forge.pkcs7.messageFromPem(pem);
                 console.log("CMSSignedMessage FROM PEM:", cmsSignedMessage)
             }
 
             window.addEventListener('WebComponentsReady', function() {
-                createPKCS7MessageTimeStamped();
+                createPKCS7Message();
             })
         </script>
     </ui:define>
