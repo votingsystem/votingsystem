@@ -112,8 +112,8 @@ public class CurrencyResource {
         List<Currency.State> inState = Arrays.asList(Currency.State.OK, Currency.State.EXPENDED, Currency.State.LAPSED,
                 Currency.State.ERROR);
         Query query = dao.getEM().createQuery("select SUM(c.amount), tag, c.currencyCode, c.state from Currency c " +
-                "JOIN c.tagVS tag where c.state in :inState " +
-                "and c.currencyCode =:currencyCode group by tag, c.currencyCode, c.state").setParameter("inState", inState)
+                "JOIN c.tagVS tag where c.state in :inState and c.currencyCode =:currencyCode group by tag, " +
+                "c.currencyCode, c.state").setParameter("inState", inState)
                 .setParameter("currencyCode", currencyCode);
         List<Object[]> resultList = query.getResultList();
         List<TagVSDto> okListDto = new ArrayList<>();

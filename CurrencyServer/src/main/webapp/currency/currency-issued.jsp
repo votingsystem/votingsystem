@@ -3,9 +3,7 @@
 <dom-module id="currency-issued">
     <template>
         <style>
-            .currencyIssuedBlock { border: 1px solid #888; margin: 5px;
-                box-shadow: 0 8px 6px -6px #888;min-width: 100px;
-            }
+            .currencyIssuedBlock { border: 1px solid #888; margin: 5px; box-shadow: 0 8px 6px -6px #888;min-width: 100px; }
             .currencyIssuedBalance { font-size: 1.2em; color: #888; text-align: center;  padding: 2px; }
             .tagDesc { background: #888; color: #f9f9f9; padding: 2px;text-align: center; font-size: 0.9em;}
         </style>

@@ -12,7 +12,6 @@ import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.StringUtils;
 import org.votingsystem.web.currency.ejb.AuditBean;
-import org.votingsystem.web.currency.util.LoggerVS;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.ejb.SubscriptionBean;
@@ -112,7 +111,6 @@ public class ConfigVSImpl implements ConfigVS {
             ContextVS.getInstance().setTimeStampServiceURL(Actor.getTimeStampServiceURL(timeStampServerURL));
             executorService.submit(() -> {
                 try {
-                    LoggerVS.init(serverDir + "/logs");
                     timeStampBean.init();
                     cmsBean.init();
                 } catch (Exception ex) {
