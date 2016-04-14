@@ -82,7 +82,7 @@ public class SocketEndpoint {
             session.getUserProperties().put("device", device);
             SessionManager.getInstance().putBrowserDevice(session, device);
             session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
-                    SocketMessageDto.INIT_SESSION_RESPONSE(device.getId())));
+                    SocketMessageDto.INIT_SESSION_RESPONSE(device)));
         }catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

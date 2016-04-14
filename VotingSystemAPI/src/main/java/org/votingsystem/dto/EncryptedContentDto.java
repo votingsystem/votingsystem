@@ -33,6 +33,7 @@ public class EncryptedContentDto {
     private String toUser;
     private String hashCertVS;
     private String cmsMessage;
+    private AESParamsDto aesParams;
     private String x509CertificatePEM;
     private String publicKeyPEM;
     private boolean timeLimited;
@@ -244,5 +245,13 @@ public class EncryptedContentDto {
 
     public void setStep(TypeVS step) {
         this.step = step;
+    }
+
+    public AESParamsDto getAesParams() {
+        return aesParams;
+    }
+
+    public void setAesParams(AESParamsDto aesParams) {
+        this.aesParams = aesParams;
     }
 }

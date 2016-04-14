@@ -103,7 +103,6 @@ public class WebSocketBean {
                             browserDevice.setCertificate(certificate).setUser(signer);
                             browserDevice = dao.persist(browserDevice);
                         }
-                        browserDevice.setAesParams(AESParamsDto.CREATE());
                         SessionManager.getInstance().putAuthenticatedDevice(remoteSession, signer, browserDevice);
                     } catch (Exception ex) {
                         log.log(Level.SEVERE, ex.getMessage(), ex);

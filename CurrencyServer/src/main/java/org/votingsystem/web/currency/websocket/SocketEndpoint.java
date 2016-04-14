@@ -68,7 +68,9 @@ public class SocketEndpoint {
         SessionManager.getInstance().put(session);
         try {
             HttpSession httpSession = ((HttpSession)session.getUserProperties().get(HttpSession.class.getName()));
+            Device device = null;
             if(httpSession != null) { //connecting from browser
+                device = (Device) httpSession.getAttribute("device");
                 Set<Session> sessionSet = (Set<Session>) httpSession.getAttribute(Session.class.getName());
                 if(sessionSet == null) {
                     sessionSet = new HashSet<>();
@@ -76,12 +78,15 @@ public class SocketEndpoint {
                 }
                 sessionSet.add(session);
             }
-            Device device = new Device(SessionManager.getInstance().getAndIncrementBrowserDeviceId())
-                    .setType(Device.Type.BROWSER).setDeviceId(UUID.randomUUID().toString());
+            if(device == null) {
+                device = new Device(SessionManager.getInstance().getAndIncrementBrowserDeviceId())
+                        .setType(Device.Type.BROWSER).setDeviceId(UUID.randomUUID().toString());
+                httpSession.setAttribute("device", device);
+            }
             session.getUserProperties().put("device", device);
             SessionManager.getInstance().putBrowserDevice(session, device);
             session.getBasicRemote().sendText(JSON.getMapper().writeValueAsString(
-                    SocketMessageDto.INIT_SESSION_RESPONSE(device.getId())));
+                    SocketMessageDto.INIT_SESSION_RESPONSE(device)));
         }catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }

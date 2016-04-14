@@ -6,13 +6,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

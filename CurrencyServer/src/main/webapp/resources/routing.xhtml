@@ -132,7 +132,7 @@
           vs.route = 'user';
           Polymer.Base.importHref('./balance/balance-user.vsp', function(e) {
               if(!userBalance) userBalance = document.createElement('balance-user');
-              userBalance.url = vs.removeQueryStringParameter(data.path, "aes_params")
+              userBalance.url = data.path
               vs.loadMainContent(userBalance, "${msg.balanceLbl}")
           });
       }

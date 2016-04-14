@@ -50,14 +50,9 @@ RSAUtil.prototype.getCSR = function(userData) {
     return forge.pki.certificationRequestToPem(this.csr);
 }
 
-RSAUtil.prototype.initCSR = function(x509CertificatePEM, aesParams) {
+RSAUtil.prototype.initCSR = function(x509CertificatePEM) {
     this.x509CertificatePEM = x509CertificatePEM
     this.x509Certificate = forge.pki.certificateFromPem(x509CertificatePEM);
-    if(aesParams) {
-        var rsaData = vs.encryptAES(JSON.stringify({privateKeyPEM:this.privateKeyPEM,
-            x509CertificatePEM:this.x509CertificatePEM}), aesParams)
-        localStorage.setItem('sessionData', JSON.stringify({rsaData:rsaData}));
-    }
 }
 
 RSAUtil.prototype.sign = function(contentToSign, callback) {
@@ -117,6 +112,7 @@ RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
         if(encryptedContentJSON.cmsMessage != null) messageJSON.cms = encryptedContentJSON.cmsMessage;
         if(encryptedContentJSON.subject != null) messageJSON.subject = encryptedContentJSON.subject;
         if(encryptedContentJSON.message != null) messageJSON.message = encryptedContentJSON.message;
+        if(encryptedContentJSON.aesParams != null) messageJSON.aesParams = encryptedContentJSON.aesParams;
         if(encryptedContentJSON.toUser != null) messageJSON.toUser = encryptedContentJSON.toUser;
         if(encryptedContentJSON.deviceToName != null) messageJSON.deviceToName = encryptedContentJSON.deviceToName;
         if(encryptedContentJSON.URL != null) messageJSON.URL = encryptedContentJSON.URL;

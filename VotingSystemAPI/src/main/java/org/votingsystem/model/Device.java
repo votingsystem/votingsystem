@@ -50,7 +50,6 @@ public class Device extends EntityVS implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="lastUpdated", length=23) private Date lastUpdated;
     @Transient private transient X509Certificate x509Certificate;
-    @Transient private transient AESParamsDto aesParams;
 
     public Device() {}
 
@@ -193,7 +192,7 @@ public class Device extends EntityVS implements Serializable {
     }
 
     public X509Certificate getX509Certificate() throws Exception {
-        if(x509Certificate == null) x509Certificate = CertUtils.loadCertificate(certificate.getContent());
+        if(x509Certificate == null && certificate != null) x509Certificate = CertUtils.loadCertificate(certificate.getContent());
         return x509Certificate;
     }
 
@@ -214,14 +213,6 @@ public class Device extends EntityVS implements Serializable {
         setDeviceId(extensionDto.getDeviceId());
         setType(extensionDto.getDeviceType());
         return this;
-    }
-
-    public AESParamsDto getAesParams() {
-        return aesParams;
-    }
-
-    public void setAesParams(AESParamsDto aesParams) {
-        this.aesParams = aesParams;
     }
 
 }

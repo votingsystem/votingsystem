@@ -73,8 +73,8 @@
                 }
                 var rightClickHandle = function(e) {
                     if(vs.connectedDevice) {
-                        e.target.setAttribute('href', vs.updateQueryStringParameter(e.target.href, "aes_params",
-                                window.btoa(escape(encodeURIComponent(JSON.stringify(vs.connectedDevice.aesParams))))));
+                        e.target.setAttribute('href', vs.updateQueryStringParameter(e.target.href, "iv_id",
+                                vs.aesParams.iv_id));
                     }
                 };
                 function updateLinksVS(elementsArray) {
@@ -140,8 +140,8 @@
                     }
                     updateLinksVS(newContentNode.querySelectorAll("a"))
                     if(vs.connectedDevice) {
-                        history.pushState(null, null, vs.updateQueryStringParameter(window.location.href, "aes_params",
-                                window.btoa(escape(encodeURIComponent(JSON.stringify(vs.connectedDevice.aesParams))))));
+                        history.pushState(null, null, vs.updateQueryStringParameter(
+                                window.location.href, "iv_id", vs.aesParams.iv_id));
                     }
                 }
                 vs.updateSearchMessage = function(searchMessage) {
@@ -164,27 +164,19 @@
                 updateLinksVS(document.querySelectorAll("a"))
 
                 if(localStorage.getItem('sessionData')) {
-                    var aesParams
-                    var sessionData = toJSON(localStorage.getItem('sessionData'));
-                    var aes_paramsBase64 = getURLParam("aes_params", window.location.href);
-                    if(aes_paramsBase64) aesParams = toJSON(decodeURIComponent(unescape(window.atob(aes_paramsBase64))))
-                    console.log("restoring session")
-                    if(!aesParams) {
-                        console.log("removed sessionData");
-                        localStorage.removeItem('sessionData');
-                        vs.setDisConnected();
-                    } else {
-                        Polymer.Base.importHref(vs.contextURL + '/resources/forgePKCS7.html', function () {
-                            var rsaData = toJSON(vs.decryptAES(sessionData.rsaData, aesParams))
-                            vs.rsaUtil = new RSAUtil(null, rsaData.privateKeyPEM, rsaData.x509CertificatePEM)
-                            var operation = {operation:'USER_INFO', UUID:vs.getUUID(), httpSessionId:vs.getCookie("JSESSIONID")}
-                            vs.rsaUtil.signAndPost(vs.contextURL + "/rest/device/authenticatedDevice", operation,
-                                    function(responseText, statusCode){
-                                        if(200 === statusCode) {
-                                            vs.setConnected(toJSON(responseText), null);
-                                        }
-                                    })
-                        }.bind(aesParams));
+                    var sessionDataEncrypted = localStorage.getItem('sessionData');
+                    var iv_id = getURLParam("iv_id", window.location.href);
+
+                    document.querySelector("#voting_system_page").addEventListener('SEND_AES_PARAMS', function(e) {
+                        var sessionData = toJSON(vs.decryptAES(sessionDataEncrypted, vs.aesParams))
+                        console.log("restoring sessionData");
+                        vs.rsaUtil = new RSAUtil(null, sessionData.privateKeyPEM, sessionData.x509CertificatePEM)
+                        vs.setConnected(sessionData.connectedDevice, null);
+                    })
+                    if(iv_id) {
+                        console.log("restoring session - iv_id: " + iv_id );
+                        vs.client.processOperation({qrOperationCode:vs.QROperationCode.GET_AES_PARAMS, msg:iv_id,
+                            caption:"${msg.restoreSession}"})
                     }
                 }
             })

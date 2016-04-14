@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.votingsystem.cms.CMSSignedMessage;
 import org.votingsystem.dto.currency.CurrencyDto;
+import org.votingsystem.model.Device;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.User;
 import org.votingsystem.model.currency.Currency;
@@ -54,6 +55,7 @@ public class SocketMessageDto {
     private String deviceToName;
     private String deviceId;//hardware id
     private String publicKeyPEM;
+    private AESParamsDto aesParams;
     private String x509CertificatePEM;
     private boolean timeLimited = false;
     private String URL;
@@ -105,12 +107,13 @@ public class SocketMessageDto {
         return socketMessageDto;
     }
 
-    public static SocketMessageDto INIT_SESSION_RESPONSE(Long deviceId) {
+    public static SocketMessageDto INIT_SESSION_RESPONSE(Device device) throws Exception {
         SocketMessageDto socketMessageDto = new SocketMessageDto();
         socketMessageDto.setStatusCode(ResponseVS.SC_WS_CONNECTION_INIT_OK);
         socketMessageDto.setOperation(TypeVS.MESSAGEVS_FROM_VS);
         socketMessageDto.setMessageType(TypeVS.INIT_SESSION);
-        socketMessageDto.setDeviceToId(deviceId);
+        socketMessageDto.setConnectedDevice(new DeviceDto(device));
+        socketMessageDto.setDeviceToId(device.getId());
         socketMessageDto.setUUID(java.util.UUID.randomUUID().toString());
         return socketMessageDto;
     }
@@ -176,6 +179,14 @@ public class SocketMessageDto {
     public SocketMessageDto setOperation(TypeVS operation) {
         this.operation = operation;
         return this;
+    }
+
+    public AESParamsDto getAesParams() {
+        return aesParams;
+    }
+
+    public void setAesParams(AESParamsDto aesParams) {
+        this.aesParams = aesParams;
     }
 
     public String getRemoteAddress() {
@@ -480,6 +491,7 @@ public class SocketMessageDto {
         if(encryptedDto.getDeviceToName() != null) deviceToName = encryptedDto.getDeviceToName();
         if(encryptedDto.getURL()!= null) URL = encryptedDto.getURL();
         if(encryptedDto.getLocale() != null) locale = encryptedDto.getLocale();
+        if(encryptedDto.getAesParams() != null) aesParams = encryptedDto.getAesParams();
         if(encryptedDto.getX509CertificatePEM() != null) x509CertificatePEM = encryptedDto.getX509CertificatePEM();
         if(encryptedDto.getPublicKeyPEM() != null) publicKeyPEM = encryptedDto.getPublicKeyPEM();
         if(encryptedDto.getUUID() != null) UUID = encryptedDto.getUUID();

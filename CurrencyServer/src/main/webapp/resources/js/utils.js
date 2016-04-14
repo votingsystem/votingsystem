@@ -377,13 +377,14 @@ vs.getCookie = function(name) {
     if (parts.length == 2) result = parts.pop().split(";").shift();
     return result.split(".")[0];
 }
-vs.getQRCodeURL = function(operation, operationCode, deviceId, key, size, socketSystem) {
+vs.getQRCodeURL = function(operation, operationCode, deviceId, key, size, socketSystem, msg) {
     if(!size) size = "100x100"
     if(!socketSystem) socketSystem = vs.systemCode.CURRENCY_SYSTEM
     var result = vs.contextURL + "/qr?cht=qr&chs=" + size + "&chl=srv=" + socketSystem + ";"
     if(operation != null) result = result + "op=" + operation + ";"
     if(operationCode != null) result = result + "opid=" + operationCode + ";"
     if(deviceId != null) result = result + "did=" + deviceId + ";"
+    if(msg != null) result = result + "msg=" + msg + ";"
     if(key != null) result = result + "pk=" + key + ";"
     console.log("getQRCodeURL: " + result)
     return result;
@@ -396,8 +397,8 @@ vs.QROperationCode = {
     USER_INFO:3,
     VOTE:4,
     OPERATION_PROCESS:5,
-    ANONYMOUS_REPRESENTATIVE_SELECTION:6
-    
+    ANONYMOUS_REPRESENTATIVE_SELECTION:6,
+    GET_AES_PARAMS:7
 }
 
 vs.MediaType = {

@@ -33,11 +33,12 @@
         Polymer({
             is:'qr-dialog',
             ready: function() { },
-            show: function(operationCode, qrCodeURL) {
+            show: function(operationCode, qrCodeURL, caption) {
                 console.log(this.tagName + " - qrCodeURL: " + qrCodeURL)
                 this.processing = false
                 this.$.operationCodeDiv.innerHTML = operationCode
                 this.$.qrImg.src = qrCodeURL
+                this.caption = caption
                 this.$.modalDialog.style.opacity = 1
                 this.$.modalDialog.style['pointer-events'] = 'auto'
             },
