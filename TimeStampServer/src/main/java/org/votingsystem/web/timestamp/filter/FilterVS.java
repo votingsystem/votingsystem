@@ -28,29 +28,13 @@ public class FilterVS implements Filter {
         servletContext.log("------- FilterVS initialized -------");
     }
 
-
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain filterChain)
             throws IOException, ServletException {
-        RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
-        MessagesVS.setCurrentInstance(requestWrapper.getLocale(), bundleBaseName);
+        MessagesVS.setCurrentInstance(req.getLocale(), bundleBaseName);
         log.info(((HttpServletRequest) req).getMethod() + " - " + ((HttpServletRequest) req).getRequestURI() +
                 " - contentType: " + req.getContentType() + " - locale: " + req.getLocale());
-        filterChain.doFilter(requestWrapper, resp);
-    }
-
-    public class RequestVSWrapper extends HttpServletRequestWrapper {
-
-        public RequestVSWrapper(HttpServletRequest request) {
-            super(request);
-        }
-
-        //hack to solve JavaFX webkit Accept-Language header problem
-        @Override public Locale getLocale() {
-            if(getParameterMap().get("locale") != null) return Locale.forLanguageTag(getParameterMap().get("locale")[0]);
-            else return super.getLocale();
-        }
-
+        filterChain.doFilter(req, resp);
     }
 
     @Override

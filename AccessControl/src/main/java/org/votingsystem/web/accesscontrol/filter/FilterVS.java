@@ -7,9 +7,7 @@ import javax.ejb.EJB;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
-import java.util.Locale;
 import java.util.logging.Logger;
 
 @WebFilter("/*")
@@ -44,27 +42,10 @@ public class FilterVS implements Filter {
         req.setAttribute("webSocketURL", webSocketURL);
         req.setAttribute("serverName", serverName);
         req.setAttribute("timeStampServerURL", timeStampServerURL);
-        if(!"HEAD".equals(requestMethod)) {
-            RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
-            MessagesVS.setCurrentInstance(requestWrapper.getLocale(), bundleBaseName);
-            log.info(requestMethod + " - " + ((HttpServletRequest)req).getRequestURI() +
-                    " - contentType: " + req.getContentType() + " - locale: " + req.getLocale());
-            chain.doFilter(requestWrapper, resp);
-        } else chain.doFilter(req, resp);
-    }
-
-    public class RequestVSWrapper extends HttpServletRequestWrapper {
-
-        public RequestVSWrapper(HttpServletRequest request) {
-            super(request);
-        }
-
-        //hack to solve JavaFX webkit Accept-Language header problem
-        @Override public Locale getLocale() {
-            if(getParameterMap().get("locale") != null) return Locale.forLanguageTag(getParameterMap().get("locale")[0]);
-            else return super.getLocale();
-        }
-
+        MessagesVS.setCurrentInstance(req.getLocale(), bundleBaseName);
+        chain.doFilter(req, resp);
+        log.info(requestMethod + " - " + ((HttpServletRequest)req).getRequestURI() +
+                " - contentType: " + req.getContentType() + " - locale: " + req.getLocale());
     }
 
     @Override

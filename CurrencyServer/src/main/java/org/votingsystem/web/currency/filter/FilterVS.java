@@ -12,8 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -55,12 +53,10 @@ public class FilterVS implements Filter {
             }
             return nativeClientSHA1CheckSum;
         }
-
     }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
-        String requestMethod = ((HttpServletRequest)req).getMethod();
         req.setAttribute("contextURL", contextURL);
         req.setAttribute("serverName", serverName);
         req.setAttribute("webSocketURL", webSocketURL);
@@ -70,29 +66,13 @@ public class FilterVS implements Filter {
         } catch (NoSuchAlgorithmException ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
         }
-        if(!"HEAD".equals(requestMethod)) {
-            RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
-            MessagesVS.setCurrentInstance(requestWrapper.getLocale(), bundleBaseName);
-            log.info(requestMethod + " - " + ((HttpServletRequest)req).getRequestURI() +
-                    " - contentType: " + req.getContentType() + " - locale: " + requestWrapper.getLocale() + " - User-Agent: " +
-                    ((HttpServletRequest) req).getHeader("User-Agent"));
-            chain.doFilter(requestWrapper, resp);
-        } else chain.doFilter(req, resp);
+        log.info(((HttpServletRequest) req).getMethod() + " - " + ((HttpServletRequest) req).getRequestURI() +
+                " - contentType: " + req.getContentType() + " - locale: " + req.getLocale());
+        MessagesVS.setCurrentInstance(req.getLocale(), bundleBaseName);
+        chain.doFilter(req, resp);
     }
 
-    public class RequestVSWrapper extends HttpServletRequestWrapper {
 
-        public RequestVSWrapper(HttpServletRequest request) {
-            super(request);
-        }
-
-        //hack to solve JavaFX webkit Accept-Language header problem
-        @Override public Locale getLocale() {
-            if(getParameterMap().get("locale") != null) return Locale.forLanguageTag(getParameterMap().get("locale")[0]);
-            else return super.getLocale();
-        }
-
-    }
 
     @Override
     public void destroy() {

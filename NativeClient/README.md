@@ -1,4 +1,4 @@
 ### build java native client
 
-        mvn assembly:assembly
+        mvn assembly:assembly install
                 
