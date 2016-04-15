@@ -83,10 +83,6 @@ public class BalancesBean {
         return balancesDto;
     }
 
-    public BalancesDto getUserBalancesDto(User user, Interval timePeriod) throws Exception {
-        return getUserBalancesDto(user, timePeriod, true);
-    }
-
     public void updateTagBalance(BigDecimal amount, CurrencyCode currencyCode, TagVS tag) throws Exception {
         Query query = dao.getEM().createNamedQuery("findAccountByUserIBANAndTagAndCurrencyCodeAndState")
                 .setParameter("state", CurrencyAccount.State.ACTIVE).setParameter("userIBAN", config.getSystemUser().getIBAN())
@@ -113,7 +109,7 @@ public class BalancesBean {
 
     public BalancesDto getBalancesDto(User user, Interval timePeriod) throws Exception {
         if(user instanceof Bank) return getBankBalancesDto((Bank) user, timePeriod);
-        else return getUserBalancesDto(user, timePeriod);
+        else return getUserBalancesDto(user, timePeriod, true);
     }
 
 }

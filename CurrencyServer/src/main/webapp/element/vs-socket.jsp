@@ -55,9 +55,6 @@
                                     vs.setConnected(messageJSON.connectedDevice, toJSON(messageJSON.message));
                                 }
                                 break;
-                            case 'RENEW_SESSION':
-
-                                break;
                             default:
                                 if(messageJSON.statusCode === ResponseVS.SC_WS_CONNECTION_NOT_FOUND) {
                                     alert(messageJSON.message, "${msg.errorLbl}")
@@ -83,6 +80,7 @@
                                     iv_id:messageJSON.aesParams.iv.substring(0, 4)}
                                 document.querySelector("#voting_system_page").dispatchEvent(
                                         new CustomEvent('SEND_AES_PARAMS'))
+                                this.$.qrDialog.close()
                                 break;
                             case 'INIT_REMOTE_SIGNED_SESSION':
                                 //we receive the user data from the mobile and prepare a CSR that is sended to the mobile.
@@ -134,7 +132,7 @@
             },
             showOperationQRCode:function (socketSystem, operationVS, operationCode) {
                 var publicKeyBase64;
-                if(!operationCode) {
+                if(operationCode == null) {
                     operationCode = this.getOperationCode()
                     this.qrOperationsMap[operationCode] = operationVS
                 }
@@ -145,13 +143,15 @@
                     }.bind(this))
                     return operationCode;
                 }
-                if(vs.QROperationCode.GET_AES_PARAMS === operationVS.qrOperationCode) {
-                    this.rsaUtil = new RSAUtil(1024);
-                    publicKeyBase64 = this.rsaUtil.publicKeyBase64
-                }
-                if(vs.QROperationCode.INIT_REMOTE_SIGNED_SESSION === operationVS.qrOperationCode) {
-                    if(!vs.rsaUtil) vs.rsaUtil = new RSAUtil(1024);
-                    publicKeyBase64 = vs.rsaUtil.publicKeyBase64
+                switch (operationVS.qrOperationCode) {
+                    case vs.QROperationCode.GET_AES_PARAMS:
+                        this.rsaUtil = new RSAUtil(1024);
+                        publicKeyBase64 = this.rsaUtil.publicKeyBase64
+                        break;
+                    case vs.QROperationCode.INIT_REMOTE_SIGNED_SESSION:
+                        if(!vs.rsaUtil) vs.rsaUtil = new RSAUtil(1024);
+                        publicKeyBase64 = vs.rsaUtil.publicKeyBase64
+                        break;
                 }
                 var qrOperationCode = operationVS.qrOperationCode != null?
                         operationVS.qrOperationCode : vs.QROperationCode.OPERATION_PROCESS;

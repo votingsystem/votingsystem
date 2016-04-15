@@ -41,9 +41,10 @@
             </div>
             <div class="layout vertical center center-justified" style="margin:30px auto;">
                 <h3 class="sectionHeader">${msg.toolsLbl}</h3>
-                <a class="buttonvs" style="width: 280px;" href="${contextURL}/tools/NativeClient.zip">
+                <a class="buttonvs" style="width: 280px;" href="${contextURL}/tools/NativeClient.jar">
                     <i class="fa fa-download"></i> ${msg.validationToolMsg}
                 </a>
+                <div style="font-size: 0.8em; color: #888;margin: 3px 0 15px 0;">SHA1: ${nativeClientSHA1CheckSum}</div>
                 <a href="http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html#javasejdk">
                     ${msg.javaRequirementsMsg}
                 </a>

@@ -405,6 +405,8 @@ vs.setDisConnected = function () {
     vs.rsaUtil = null
     vs.connected = false
     document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('disconnected'))
+    localStorage.setItem('sessionData', null);
+    window.location.href = vs.contextURL;
 }
 
 vs.systemCode = {

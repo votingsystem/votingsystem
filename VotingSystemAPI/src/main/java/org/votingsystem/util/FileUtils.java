@@ -1,5 +1,6 @@
 package org.votingsystem.util;
 
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.MappedByteBuffer;
@@ -7,6 +8,8 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -350,6 +353,20 @@ public class FileUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String getFileCheckSum(String filePath) throws NoSuchAlgorithmException, IOException {
+        MessageDigest md = MessageDigest.getInstance("SHA1");
+        FileInputStream fis = new FileInputStream(filePath);
+        byte[] dataBytes = new byte[1024];
+        int nread = 0;
+        while ((nread = fis.read(dataBytes)) != -1) {
+            md.update(dataBytes, 0, nread);
+        }
+        byte[] mdbytes = md.digest();
+        HexBinaryAdapter hexConverter = new HexBinaryAdapter();
+        String result = hexConverter.marshal(mdbytes);
+        return result;
     }
 
     public static void copyDirs(String sourcePath, String destPath) {

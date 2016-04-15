@@ -84,9 +84,9 @@ public class CurrencyAccountBean {
                         else if(tagAccountAmount.compareTo(tagBalanceAmount) != 0)
                             wildTagExpendedInTags = wildTagExpendedInTags.add(tagBalanceAmount.subtract(tagAccountAmount));
                     } else {
-                        if(tagAccountAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS(
-                                "tagAccountAmount Error with user " + user.getId() + " - " + tag + " - " +
-                                        currencyCode + " - tagAccountAmount: " + tagAccountAmount);
+                        if(tagAccountAmount.compareTo(BigDecimal.ZERO) != 0) throw new ExceptionVS(format(
+                                "Error with user {0} - tag: {1} - tagAccountAmount: {2} {3} - transaction balance: 0 {3}",
+                                user.getId(), tag, tagAccountAmount, currencyCode));
                     }
                 }
             } else {//check if there's a tag with negative balance

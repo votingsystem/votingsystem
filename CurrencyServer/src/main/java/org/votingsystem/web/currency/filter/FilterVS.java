@@ -1,5 +1,6 @@
 package org.votingsystem.web.currency.filter;
 
+import org.votingsystem.util.FileUtils;
 import org.votingsystem.web.ejb.CMSBean;
 import org.votingsystem.web.util.ConfigVS;
 import org.votingsystem.web.util.MessagesVS;
@@ -9,8 +10,13 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @WebFilter(urlPatterns = {"/*"}, asyncSupported=true)
@@ -26,6 +32,7 @@ public class FilterVS implements Filter {
     private String webSocketURL;
     private String bundleBaseName;
     private String timeStampServerURL;
+    private String nativeClientSHA1CheckSum;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -38,6 +45,18 @@ public class FilterVS implements Filter {
         servletContext.log("------- currency FilterVS initialized -------");
     }
 
+    private String getNativeClientSHA1CheckSum(ServletRequest req) throws IOException, NoSuchAlgorithmException {
+        if(nativeClientSHA1CheckSum != null) return nativeClientSHA1CheckSum;
+        else {
+            String nativeClientPath =  req.getServletContext().getRealPath("/tools/NativeClient.jar");
+            File nativeClientFile = new File(nativeClientPath);
+            if(nativeClientFile.exists()) {
+                nativeClientSHA1CheckSum = FileUtils.getFileCheckSum(nativeClientPath);
+            }
+            return nativeClientSHA1CheckSum;
+        }
+
+    }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
@@ -46,6 +65,11 @@ public class FilterVS implements Filter {
         req.setAttribute("serverName", serverName);
         req.setAttribute("webSocketURL", webSocketURL);
         req.setAttribute("timeStampServerURL", timeStampServerURL);
+        try {
+            req.setAttribute("nativeClientSHA1CheckSum", getNativeClientSHA1CheckSum(req));
+        } catch (NoSuchAlgorithmException ex) {
+            log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
         if(!"HEAD".equals(requestMethod)) {
             RequestVSWrapper requestWrapper = new RequestVSWrapper((HttpServletRequest) req);
             MessagesVS.setCurrentInstance(requestWrapper.getLocale(), bundleBaseName);
