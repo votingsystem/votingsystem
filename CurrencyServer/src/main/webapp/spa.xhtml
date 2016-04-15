@@ -101,7 +101,8 @@
                 });
                 document.querySelector("#connectionMsgDiv").addEventListener('click', function (event) {
                     if(vs.connected !== true) {
-                        vs.showAccessQRCode()
+                        vs.client.processOperation({qrOperationCode:vs.QROperationCode.INIT_REMOTE_SIGNED_SESSION,
+                            operation:"INIT_REMOTE_SIGNED_SESSION"})
                     } else {
                         alert("#{msg.quitConfirmMsg}", "#{msg.messageLbl}", function() {
                             var operation = {operation:'CLOSE_SESSION', UUID:vs.getUUID(),

@@ -302,36 +302,11 @@ function setURLParameter(baseURL, name, value){
         result = baseURL.replace(new RegExp('([?|&]'+name + '=)' + '(.+?)(&|$)'),"$1"+encodeURIComponent(value)+"$3");
     }else if(baseURL.length){
         if(baseURL.indexOf("?") < 0) baseURL = baseURL + "?"
-        result = baseURL +'&'+name + '=' +encodeURIComponent(value);
+        result = baseURL + '&' + name + '=' +encodeURIComponent(value);
     } else {
-        result = '?'+name + '=' +encodeURIComponent(value);
+        result = '?' + name + '=' +encodeURIComponent(value);
     }
     return result
-}
-
-vs.getHTTPJSON = function(url, callback) {
-    var xhr = new XMLHttpRequest()
-    xhr.onreadystatechange = function() {
-        if (this.readyState == 4) {
-            callback(this.responseText, this.status)
-        }
-    };
-    xhr.open("GET", url, true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send();
-}
-
-vs.postHTTP = function(url, callback, request, requestHeader) {
-    if(!requestHeader) requestHeader = "application/json"
-    var xhr = new XMLHttpRequest()
-    xhr.onreadystatechange = function() {
-        if (this.readyState == 4) {
-            callback(this.responseText, this.status)
-        }
-    };
-    xhr.open("POST", url, true);
-    xhr.setRequestHeader("Content-Type", requestHeader);
-    xhr.send(request);
 }
 
 var clientTool
@@ -353,14 +328,9 @@ vs.client.processOperation = function (messageJSON) {
                 document.querySelector("#voting_system_page").appendChild(vs.socketElement)
                 vs.socketElement.connect()
             }
-            if(messageJSON.operation === "ACCESS_QR_CODE") vs.socketElement.showAccessQRCode()
-            else vs.socketElement.showOperationQRCode(vs.socketElement.CURRENCY_SYSTEM, messageJSON)
+            vs.socketElement.showOperationQRCode(vs.socketElement.CURRENCY_SYSTEM, messageJSON)
         });
     }
-}
-
-vs.showAccessQRCode = function () {
-    vs.client.processOperation(new OperationVS("ACCESS_QR_CODE"))
 }
 
 //http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript?rq=1
@@ -443,7 +413,7 @@ vs.systemCode = {
 }
 
 function querySelector(selector) {
-    if(document.querySelector(selector) != null) return document.querySelector(selector)
+    if(document.querySelector(selector)) return document.querySelector(selector)
     else return document.querySelector('html /deep/ ' + selector)
 }
 

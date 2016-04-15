@@ -42,9 +42,6 @@
                                     this.showOperationQRCode(this.pendingOperation.system, this.pendingOperation.operation,
                                             this.pendingOperation.operationCode)
                                     this.pendingOperation = null;
-                                } else if(this.pendingAccessRequest) {
-                                    this.showAccessQRCode()
-                                    this.pendingAccessRequest = null
                                 }
                                 break;
                             case 'INIT_REMOTE_SIGNED_SESSION':
@@ -135,37 +132,31 @@
             closeQRDialog:function (socketSystem, operationVS, operationCode) {
                 this.$.qrDialog.close()
             },
-            showAccessQRCode:function () {
-                var operationCode = this.getOperationCode()
-                if(!vs.connectedDevice) {
-                    this.pendingAccessRequest = true
-                    this.async(function () {
-                        this.$.qrDialog.showProcessing(operationCode, null)
-                    }.bind(this))
-                    return;
-                }
-                if(!vs.rsaUtil) vs.rsaUtil = new RSAUtil(1024);
-                this.qrOperationsMap[operationCode] = {operation:'INIT_REMOTE_SIGNED_SESSION'}
-                this.$.qrDialog.show(operationCode, vs.getQRCodeURL(vs.QROperationCode.INIT_REMOTE_SIGNED_SESSION, operationCode,
-                        vs.connectedDevice.id, vs.rsaUtil.publicKeyBase64, "200x200"))
-            },
             showOperationQRCode:function (socketSystem, operationVS, operationCode) {
                 var publicKeyBase64;
                 if(!operationCode) {
                     operationCode = this.getOperationCode()
                     this.qrOperationsMap[operationCode] = operationVS
                 }
+                if(!vs.connectedDevice) {
+                    this.pendingOperation = {system:socketSystem, operation:operationVS, operationCode:operationCode}
+                    this.async(function () {
+                        this.$.qrDialog.showProcessing(operationCode, null)
+                    }.bind(this))
+                    return operationCode;
+                }
                 if(vs.QROperationCode.GET_AES_PARAMS === operationVS.qrOperationCode) {
                     this.rsaUtil = new RSAUtil(1024);
                     publicKeyBase64 = this.rsaUtil.publicKeyBase64
                 }
-                if(!vs.connectedDevice) {
-                    this.pendingOperation = {system:socketSystem, operation:operationVS, operationCode:operationCode}
-                    return operationCode;
+                if(vs.QROperationCode.INIT_REMOTE_SIGNED_SESSION === operationVS.qrOperationCode) {
+                    if(!vs.rsaUtil) vs.rsaUtil = new RSAUtil(1024);
+                    publicKeyBase64 = vs.rsaUtil.publicKeyBase64
                 }
-                var qrOperationCode = operationVS.qrOperationCode || vs.QROperationCode.OPERATION_PROCESS
-                this.$.qrDialog.show(operationCode, vs.getQRCodeURL(qrOperationCode, operationCode,
-                        vs.connectedDevice.id, publicKeyBase64, "200x200", socketSystem, operationVS.msg), operationVS.caption)
+                var qrOperationCode = operationVS.qrOperationCode != null?
+                        operationVS.qrOperationCode : vs.QROperationCode.OPERATION_PROCESS;
+                this.$.qrDialog.show(operationCode, vs.getQRCodeURL(qrOperationCode, operationCode, vs.connectedDevice.id,
+                        publicKeyBase64, "200x200", socketSystem, operationVS.msg), operationVS.caption)
                 return operationCode
             },
             sendOperation: function(socketMessage, operation) {

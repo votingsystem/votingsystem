@@ -3,6 +3,7 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.CurrencyCode;
 import org.votingsystem.model.TagVS;
+import org.votingsystem.model.currency.CurrencyAccount;
 
 import java.math.BigDecimal;
 
@@ -20,6 +21,10 @@ public class TagVSDto {
     private BigDecimal amount;
 
     public TagVSDto() {}
+
+    public TagVSDto(CurrencyAccount account) {
+
+    }
 
     public TagVSDto(TagVS tagVS) {
         this.id = tagVS.getId();

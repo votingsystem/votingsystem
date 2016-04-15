@@ -106,7 +106,7 @@ RSAUtil.prototype.decryptSocketMsg = function(messageJSON) {
         if(encryptedContentJSON.step != null) messageJSON.step = encryptedContentJSON.step;
         if(encryptedContentJSON.x509CertificatePEM != null) messageJSON.x509CertificatePEM = encryptedContentJSON.x509CertificatePEM;
         if(encryptedContentJSON.publicKeyPEM != null) messageJSON.publicKeyPEM = encryptedContentJSON.publicKeyPEM;
-        if(encryptedContentJSON.deviceFromName != null) messageJSON.deviceFromName = encryptedContentJSON.deviceFromName;
+        if(encryptedContentJSON.deviceFromName  != null) messageJSON.deviceFromName = encryptedContentJSON.deviceFromName;
         if(encryptedContentJSON.from != null) messageJSON.from = encryptedContentJSON.from;
         if(encryptedContentJSON.deviceFromId != null) messageJSON.deviceFromId = encryptedContentJSON.deviceFromId;
         if(encryptedContentJSON.cmsMessage != null) messageJSON.cms = encryptedContentJSON.cmsMessage;

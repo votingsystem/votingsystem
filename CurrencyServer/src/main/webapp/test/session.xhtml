@@ -9,7 +9,9 @@
                 <div><b>document.cookie: </b><span id="documentCookie"></span></div>
                 <div><b>Session ID: </b><span id="sessionDiv"></span></div>
             </div>
-            <div  class="buttonvs" style="margin: 20px 0 0 0;" onclick="showAccessQRCode()">show Access QRCode</div>
+            <div  class="buttonvs" style="margin: 20px 0 0 0;"
+                  onclick="vs.client.processOperation({operation:'INIT_REMOTE_SIGNED_SESSION',
+                    qrOperationCode:vs.QROperationCode.INIT_REMOTE_SIGNED_SESSION})">show Access QRCode</div>
             <div class="vertical layout center center-justified">
                 <div id="msgDiv" style="font-size: 2em;font-weight: bold; color: #888;"></div>
             </div>
@@ -21,14 +23,9 @@
                     console.log("polymer.xhtml - WebComponentsReady")
                     document.querySelector("#sessionPageMainDiv").hidden = null;
                 });
-                function  showAccessQRCode() {
-                    vs.showAccessQRCode()
-                }
-
                 document.querySelector("#voting_system_page").addEventListener('connected', function (event) {
                     document.querySelector("#msgDiv").innerHTML = "connected with mobile";
                 });
-
 
                 var JSESSIONID =  vs.getCookie("JSESSIONID")
                 document.querySelector("#documentCookie").innerHTML = document.cookie;

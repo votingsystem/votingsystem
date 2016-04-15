@@ -94,9 +94,8 @@
                 return new Date(dateStamp).getDayWeekFormat()
             },
             certIssuerClicked:function(e) {
-                var issuerSerialNumber = this.certvs.issuerSerialNumber
-                if(issuerSerialNumber != null) {
-                    var certURL = vs.contextURL + "/rest/certificate/serialNumber/" + issuerSerialNumber
+                if(this.certvs.issuerSerialNumber) {
+                    var certURL = vs.contextURL + "/rest/certificate/serialNumber/" + this.certvs.issuerSerialNumber
                     console.log(this.tagName + " - certIssuerClicked: " + certURL)
                     this.certsSelectedStack.push(this.certvs)
                     this.url = certURL

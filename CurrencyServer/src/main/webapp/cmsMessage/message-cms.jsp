@@ -75,7 +75,7 @@
             },
             cmsMessageContentChanged:function() {
                 this.isReceptorVisible = true
-                if(this.cmsMessageContent.toUserIBAN != null && this.cmsMessageContent.toUserIBAN.length > 1) {
+                if(this.cmsMessageContent.toUserIBAN && this.cmsMessageContent.toUserIBAN.length > 1) {
                     this.receptorLbl = '${msg.receptorsLbl}'
                 } else this.receptorLbl = '${msg.receptorLbl}'
                 switch (this.cmsMessageContent.operation) {

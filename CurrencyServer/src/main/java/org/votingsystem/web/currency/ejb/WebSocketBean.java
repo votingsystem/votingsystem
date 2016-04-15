@@ -1,7 +1,10 @@
 package org.votingsystem.web.currency.ejb;
 
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.votingsystem.dto.*;
+import org.votingsystem.dto.DeviceDto;
+import org.votingsystem.dto.MessageDto;
+import org.votingsystem.dto.RemoteSignedSessionDto;
+import org.votingsystem.dto.SocketMessageDto;
 import org.votingsystem.model.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;

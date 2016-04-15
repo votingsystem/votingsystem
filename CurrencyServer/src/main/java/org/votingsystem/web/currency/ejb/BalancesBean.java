@@ -67,7 +67,7 @@ public class BalancesBean {
         return balancesDto;
     }
 
-    public BalancesDto getUserBalancesDto(User user, Interval timePeriod) throws Exception {
+    public BalancesDto getUserBalancesDto(User user, Interval timePeriod, boolean checkWithAccounts) throws Exception {
         BalancesDto balancesDto = getBalancesDto(
                 transactionBean.getTransactionFromList(user, timePeriod), Transaction.Source.FROM);
         balancesDto.setTimePeriod(timePeriod);
@@ -78,9 +78,13 @@ public class BalancesBean {
         balancesDto.setTo(balancesToDto);
 
         balancesDto.calculateCash();
-        if(User.Type.SYSTEM != user.getType() && timePeriod.isCurrentWeekPeriod())
+        if(checkWithAccounts && User.Type.SYSTEM != user.getType() && timePeriod.isCurrentWeekPeriod())
             currencyAccountBean.checkBalancesWithCurrencyAccounts(user, balancesDto.getBalancesCash());
         return balancesDto;
+    }
+
+    public BalancesDto getUserBalancesDto(User user, Interval timePeriod) throws Exception {
+        return getUserBalancesDto(user, timePeriod, true);
     }
 
     public void updateTagBalance(BigDecimal amount, CurrencyCode currencyCode, TagVS tag) throws Exception {

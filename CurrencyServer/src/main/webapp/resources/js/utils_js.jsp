@@ -79,6 +79,38 @@
         }
     }
 
+
+    vs.getHTTPJSON = function(url, callback) {
+        var xhr = new XMLHttpRequest()
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                if(403 === this.status) {
+                    alert("${msg.sessionExpiredMsg}", "${msg.errorLbl}");
+                    vs.setDisConnected();
+                } else callback(this.responseText, this.status)
+            }
+        };
+        xhr.open("GET", url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send();
+    }
+
+    vs.postHTTP = function(url, callback, request, requestHeader) {
+        if(!requestHeader) requestHeader = "application/json"
+        var xhr = new XMLHttpRequest()
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                if(403 === this.status) {
+                    alert("${msg.sessionExpiredMsg}", "${msg.errorLbl}");
+                    vs.setDisConnected();
+                } else callback(this.responseText, this.status)
+            }
+        };
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", requestHeader);
+        xhr.send(request);
+    }
+
     window.addEventListener('WebComponentsReady', function() {
         Polymer.Base.importHref(vs.contextURL + '/element/alert-dialog.vsp', function(e) {
             var alertDialog = document.createElement('alert-dialog');

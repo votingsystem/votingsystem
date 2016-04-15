@@ -12,15 +12,16 @@ import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Transaction;
 import org.votingsystem.util.JSON;
 import org.votingsystem.web.currency.ejb.UserBean;
+import org.votingsystem.web.currency.util.AuthRole;
+import org.votingsystem.web.currency.util.PrincipalVS;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.ConfigVS;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.persistence.Query;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -31,10 +32,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -52,10 +50,11 @@ public class CurrencyAccountResource {
     @Inject UserBean userBean;
 
 
-    @Path("/user/id/{userId}/balance")
+    @RolesAllowed(AuthRole.ADMIN)
+    @Path("/user/id/{userId}")
     @GET @Produces(MediaType.APPLICATION_JSON)
-    public Response balance(@PathParam("userId") long userId, @Context ServletContext context,
-              @Context HttpServletRequest req, @Context HttpServletResponse resp) throws IOException, ServletException {
+    public Response userAccountsForAdmin(@PathParam("userId") long userId, @Context HttpServletRequest req)
+            throws IOException, ServletException {
         User user = dao.find(User.class, userId);
         if(user == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("user id: " + userId).build();
@@ -71,11 +70,29 @@ public class CurrencyAccountResource {
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
     }
 
+    @RolesAllowed(AuthRole.USER)
+    @Path("/user")
+    @GET @Produces(MediaType.APPLICATION_JSON)
+    public Response userAccounts(@Context HttpServletRequest req) throws IOException, ServletException {
+        User user = ((PrincipalVS)req.getUserPrincipal()).getUser();
+        Query query = dao.getEM().createQuery("select account from CurrencyAccount account " +
+                "where account.user =:user and account.state =:state")
+                .setParameter("user", user)
+                .setParameter("state", CurrencyAccount.State.ACTIVE);
+        List<CurrencyAccount> userAccountsDB = query.getResultList();
+        Map<CurrencyCode, List<CurrencyAccountDto>> resultMap = new HashMap<>();
+        for(CurrencyAccount account : userAccountsDB) {
+            if(resultMap.containsKey(account.getCurrencyCode()))
+                resultMap.get(account.getCurrencyCode()).add(new CurrencyAccountDto(account));
+            else resultMap.put(account.getCurrencyCode(), new ArrayList<>(Arrays.asList(new CurrencyAccountDto(account))));
+        }
+        //ResultListDto<CurrencyAccountDto> resultListDto = new ResultListDto<>(userAccounts);
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultMap)).build();
+    }
 
     @GET @Produces(MediaType.APPLICATION_JSON)
     @Path("/system") @Transactional
-    public Response system(@Context HttpServletRequest req, @Context HttpServletResponse resp,
-                             @Context ServletContext context) throws IOException, ServletException {
+    public Response system() throws IOException, ServletException {
         Query query = dao.getEM().createQuery("select c FROM CurrencyAccount c where c.user =:user and c.state =:state")
                 .setParameter("user", config.getSystemUser()).setParameter("state", CurrencyAccount.State.ACTIVE);
         List<CurrencyAccount> systemAccounts = query.getResultList();
@@ -84,15 +101,18 @@ public class CurrencyAccountResource {
             systemAccountsDto.add(new CurrencyAccountDto(currencyAccount));
         }
         List<User.Type> notList = Arrays.asList(User.Type.SYSTEM);
-        query = dao.getEM().createQuery("select SUM(c.balance), tag, c.currencyCode from CurrencyAccount c JOIN c.tag tag where c.state =:state " +
-                "and c.user.type not in :notList group by tag, c.currencyCode").setParameter("state", CurrencyAccount.State.ACTIVE)
+        query = dao.getEM().createQuery(
+                "select SUM(c.balance), tag, c.currencyCode from CurrencyAccount c JOIN c.tag tag where c.state =:state " +
+                "and c.user.type not in :notList group by tag, c.currencyCode")
+                .setParameter("state", CurrencyAccount.State.ACTIVE)
                 .setParameter("notList", notList);
         List<Object[]> resultList = query.getResultList();
         List<TagVSDto> userAccounts = new ArrayList<>();
         for(Object[] result : resultList) {
             userAccounts.add(new TagVSDto((BigDecimal) result[0], (CurrencyCode) result[2], (TagVS) result[1]));
         }
-        query = dao.getEM().createQuery("select SUM(t.amount), tag, t.currencyCode from Transaction t JOIN t.tag tag where t.state =:state " +
+        query = dao.getEM().createQuery(
+                "select SUM(t.amount), tag, t.currencyCode from Transaction t JOIN t.tag tag where t.state =:state " +
                 "and t.type =:type group by tag, t.currencyCode").setParameter("state", Transaction.State.OK)
                 .setParameter("type", Transaction.Type.FROM_BANK);
         resultList = query.getResultList();
@@ -106,8 +126,7 @@ public class CurrencyAccountResource {
 
     @GET @Produces(MediaType.APPLICATION_JSON)
     @Path("/bank/id/{bankId}") @Transactional
-    public Response bank(@PathParam("bankId") long bankId, @Context HttpServletRequest req,
-             @Context HttpServletResponse resp, @Context ServletContext context) throws Exception {
+    public Response bank(@PathParam("bankId") long bankId) throws Exception {
         User bank = dao.find(User.class, bankId);
         if(bank == null || bank.getType() != User.Type.BANK) {
             return Response.status(Response.Status.NOT_FOUND).entity("bank id: " + bankId).build();
@@ -121,7 +140,8 @@ public class CurrencyAccountResource {
         for(Object[] result : resultList) {
             tagBalanceList.add(new TagVSDto((BigDecimal) result[0], (CurrencyCode) result[2], (TagVS) result[1]));
         }
-        Map<CurrencyCode, List<TagVSDto>> tagBalanceMap = tagBalanceList.stream().collect(Collectors.groupingBy(TagVSDto::getCurrencyCode));
+        Map<CurrencyCode, List<TagVSDto>> tagBalanceMap = tagBalanceList.stream()
+                .collect(Collectors.groupingBy(TagVSDto::getCurrencyCode));
         Map result = ImmutableMap.of("bank", userBean.getUserDto(bank, false), "tagBalanceList", tagBalanceMap);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(result)).build();
     }

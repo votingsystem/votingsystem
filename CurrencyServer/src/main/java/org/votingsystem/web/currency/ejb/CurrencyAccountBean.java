@@ -71,7 +71,6 @@ public class CurrencyAccountBean {
         if(accountsMap.keySet().size() > 1) throw new ExceptionVS("User: " + user.getId() + "has " +
                 accountsMap.keySet().size() + " accounts");
         if(accountsMap.keySet().isEmpty()) return;
-        //TODO - bucle when User could have multiple accounts
         Map<CurrencyCode, Map<String, BigDecimal>> mainAccountMap = accountsMap.values().iterator().next();
         for(CurrencyCode currencyCode : mainAccountMap.keySet()) {
             BigDecimal wildTagExpendedInTags = BigDecimal.ZERO;

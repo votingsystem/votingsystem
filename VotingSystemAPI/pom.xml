@@ -82,7 +82,7 @@
     <properties>
         <votingsystem.version>0.8.2-SNAPSHOT</votingsystem.version>
         <hibernate.version>5.0.7.Final</hibernate.version>
-        <jackson.version>2.6.2</jackson.version>
+        <jackson.version>2.7.3</jackson.version>
         <zxing.version>3.2.1</zxing.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
