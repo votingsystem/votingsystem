@@ -1,6 +1,5 @@
 package org.votingsystem.model;
 
-import org.votingsystem.dto.AESParamsDto;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.util.ContextVS;
 import org.votingsystem.util.EntityVS;

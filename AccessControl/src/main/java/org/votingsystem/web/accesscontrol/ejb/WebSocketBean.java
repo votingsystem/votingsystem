@@ -1,7 +1,6 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
 import org.votingsystem.dto.SocketMessageDto;
-import org.votingsystem.model.Device;
 import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;

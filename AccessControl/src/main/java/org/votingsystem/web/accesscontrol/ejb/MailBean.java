@@ -1,7 +1,5 @@
 package org.votingsystem.web.accesscontrol.ejb;
 
-import org.votingsystem.model.BackupRequest;
-import org.votingsystem.model.User;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.activation.DataHandler;

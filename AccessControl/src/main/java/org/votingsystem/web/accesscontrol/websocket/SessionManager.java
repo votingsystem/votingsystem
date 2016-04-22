@@ -9,7 +9,6 @@ import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.JSON;
-import org.votingsystem.util.TypeVS;
 
 import javax.websocket.Session;
 import java.util.*;

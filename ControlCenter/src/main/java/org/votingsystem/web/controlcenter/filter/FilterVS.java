@@ -7,9 +7,7 @@ import javax.inject.Inject;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
-import java.util.Locale;
 import java.util.logging.Logger;
 
 @WebFilter("/*")
