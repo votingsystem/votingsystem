@@ -34,10 +34,10 @@ public class TimeStamp extends EntityVS implements Serializable {
     @Column(name="reason") 
     private String reason;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCreated", length=23)
+    @Column(name="dateCreated")
     private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23)
+    @Column(name="lastUpdated")
     private Date lastUpdated;
    
     public TimeStamp() { }

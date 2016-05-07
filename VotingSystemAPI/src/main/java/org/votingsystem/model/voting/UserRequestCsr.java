@@ -34,8 +34,8 @@ public class UserRequestCsr extends EntityVS implements Serializable {
     @JoinColumn(name="userId") private User user;
     @OneToOne private CMSMessage cancelationCMS;
     @OneToOne private CMSMessage activationCMS;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23, insertable=true) private Date lastUpdated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated") private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated") private Date lastUpdated;
 
     public UserRequestCsr() {}
 

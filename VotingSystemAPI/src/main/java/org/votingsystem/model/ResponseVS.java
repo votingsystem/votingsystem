@@ -71,8 +71,8 @@ public class ResponseVS<T> extends EntityVS implements Serializable {
     @JoinColumn(name="userId") private User user;
     @Column(name="messageBytes") private byte[] messageBytes;
     @OneToOne private CMSMessage cmsMessage;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23, insertable=true) private Date lastUpdated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated") private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated") private Date lastUpdated;
 
 
     @Transient private CMSSignedMessage cmsSignedMessage;

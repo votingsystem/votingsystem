@@ -31,9 +31,9 @@ public class UserToken extends EntityVS implements Serializable {
     @OneToOne private User user;
     @OneToOne private CMSMessage cmsMessage;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCreated", length=23) private Date dateCreated;
+    @Column(name="dateCreated") private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Column(name="lastUpdated") private Date lastUpdated;
 
     public UserToken() {}
 

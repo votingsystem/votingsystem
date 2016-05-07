@@ -45,7 +45,7 @@ public class CMSMessage extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="cmsParent") private CMSMessage cmsParent;
 
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated") private Date dateCreated;
     
     @Column(name="metaInf", columnDefinition="TEXT")  private String metaInf;
     
@@ -57,7 +57,7 @@ public class CMSMessage extends EntityVS implements Serializable {
     @Column(name="signedContent", columnDefinition="TEXT") private String signedContent;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23, insertable=true)
+    @Column(name="lastUpdated")
     private Date lastUpdated;
 
     private static ThreadLocal<CMSMessage> instance = new ThreadLocal() {

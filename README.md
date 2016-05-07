@@ -15,7 +15,7 @@ To run the applications you need to:
 All the applications need access to a running instance of the [timestamp server](https://github.com/votingsystem/votingsystem/tree/master/TimeStampServer) 
 to add timestamps to the signatures. You must install this app in your server before running the **voting system** or the **currency server**
 
-#### Wildfly SSL
+#### Wildfly 10. SSL
 
 1. Create a self-signed certificate with the IP of the machine hosting the server, f.e. for a server with the IP 192.168.1.5 it would be:
 

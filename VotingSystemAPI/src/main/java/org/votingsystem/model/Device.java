@@ -45,9 +45,9 @@ public class Device extends EntityVS implements Serializable {
     @Column(name="reason", columnDefinition="TEXT") private String reason;
     @Column(name="deviceName") private String deviceName;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCreated", length=23) private Date dateCreated;
+    @Column(name="dateCreated") private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Column(name="lastUpdated") private Date lastUpdated;
     @Transient private transient X509Certificate x509Certificate;
 
     public Device() {}

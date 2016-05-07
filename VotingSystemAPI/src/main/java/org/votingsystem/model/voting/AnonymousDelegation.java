@@ -38,22 +38,22 @@ public class AnonymousDelegation extends EntityVS implements Serializable {
     @OneToOne private CMSMessage cancellationCMS;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateFrom", length=23, nullable=false)
+    @Column(name="dateFrom", nullable=false)
     private Date dateFrom;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateTo", length=23, nullable=false)
+    @Column(name="dateTo", nullable=false)
     private Date dateTo;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCancelled", length=23)
+    @Column(name="dateCancelled")
     private Date dateCancelled;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCreated", length=23, insertable=true)
+    @Column(name="dateCreated", insertable=true)
     private Date dateCreated;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23, insertable=true)
+    @Column(name="lastUpdated", insertable=true)
     private Date lastUpdated;
 
     public AnonymousDelegation() {}

@@ -78,11 +78,11 @@ public class Currency extends EntityVS implements Serializable  {
 
     @OneToOne @JoinColumn(name="cmsMessage") private CMSMessage cmsMessage;
 
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="validFrom", length=23) private Date validFrom;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="validTo", length=23) private Date validTo;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="validFrom") private Date validFrom;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="validTo") private Date validTo;
 
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated") private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated") private Date lastUpdated;
 
     @Transient private CertificationRequest certificationRequest;
     @Transient private X509Certificate x509AnonymousCert;

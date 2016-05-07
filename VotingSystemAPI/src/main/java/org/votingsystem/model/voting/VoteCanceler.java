@@ -38,8 +38,8 @@ public class VoteCanceler extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="eventElection", nullable=false)
     private EventElection eventElection;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated") private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated") private Date lastUpdated;
 
     public VoteCanceler() {}
 

@@ -30,10 +30,10 @@ public class Image extends EntityVS implements Serializable {
      @OneToOne
      private CMSMessage cmsMessage;
      @Temporal(TemporalType.TIMESTAMP)
-     @Column(name="dateCreated", length=23)
+     @Column(name="dateCreated")
      private Date dateCreated;
      @Temporal(TemporalType.TIMESTAMP)
-     @Column(name="lastUpdated", length=23)
+     @Column(name="lastUpdated")
      private Date lastUpdated;
      
      public Image() { }

@@ -95,9 +95,9 @@ public class Transaction implements Serializable {
     @Column(name="isTimeLimited") private Boolean isTimeLimited;
     @Column(name="type", nullable=false) @Enumerated(EnumType.STRING) private Type type;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="validTo", length=23) private Date validTo;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="validTo") private Date validTo;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated") private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated") private Date lastUpdated;
 
     @Transient private Map<CurrencyAccount, BigDecimal> accountFromMovements;
     @Transient private Long userId;

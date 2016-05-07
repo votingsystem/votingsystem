@@ -31,10 +31,10 @@ public class TagVS implements Serializable {
     @Column(name="name", nullable=false, unique=true, length=50) private String name;
     @Column(name="frequency") private Long frequency;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCreated", length=23) private Date dateCreated;
+    @Column(name="dateCreated") private Date dateCreated;
     @ManyToMany(mappedBy = "tagVSSet", fetch = FetchType.LAZY) @JsonIgnore private Set<User> userSet;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Column(name="lastUpdated") private Date lastUpdated;
 
     public TagVS() { }
 

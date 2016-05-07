@@ -35,8 +35,8 @@ public class Batch extends EntityVS implements Serializable  {
     @Column(name="content") private byte[] content;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="userId") private User user;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated") private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated") private Date lastUpdated;
 
     public Batch(byte[] content) throws IOException {
         this.content = content;

@@ -71,15 +71,15 @@ public class Certificate extends EntityVS implements Serializable {
 
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
 
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23, insertable=true) private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated") private Date dateCreated;
 
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23, insertable=true) private Date lastUpdated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated") private Date lastUpdated;
 
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="validFrom", length=23, insertable=true) private Date validFrom;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="validFrom") private Date validFrom;
 
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="validTo", length=23, insertable=true) private Date validTo;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="validTo") private Date validTo;
 
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="cancelDate", length=23, insertable=true) private Date cancelDate;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="cancelDate") private Date cancelDate;
 
     @Transient private String eventId;
 

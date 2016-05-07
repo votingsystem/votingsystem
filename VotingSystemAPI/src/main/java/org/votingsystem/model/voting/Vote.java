@@ -42,8 +42,8 @@ public class Vote extends EntityVS implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="eventElection") private EventElection eventVS;
     @Column(name="state", nullable=false) @Enumerated(EnumType.STRING) private State state;
-    @Column(name="dateCreated", length=23) @Temporal(TemporalType.TIMESTAMP) private Date dateCreated;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Column(name="dateCreated") @Temporal(TemporalType.TIMESTAMP) private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated") private Date lastUpdated;
 
 
     @Transient private String voteUUID;

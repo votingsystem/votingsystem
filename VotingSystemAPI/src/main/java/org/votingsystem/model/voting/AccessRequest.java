@@ -31,8 +31,8 @@ public class AccessRequest extends EntityVS implements Serializable {
     @OneToOne(mappedBy="accessRequest") private VoteCanceler voteCanceler;
     @Column(name="hashAccessRequestBase64") private String hashAccessRequestBase64;
     @Column(name="metainf") private String metaInf;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated") private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated") private Date lastUpdated;
 
     public AccessRequest() {}
 

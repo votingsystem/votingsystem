@@ -32,7 +32,7 @@
                 </div>
             </div>
         </div>
-        <paper-toast id="toast" role="alert" text="${msg.messageSendedLbl}"></paper-toast>
+        <paper-toast id="toast" role="alert" text="${msg.messagePostedLbl}"></paper-toast>
     </template>
     <script>
         Polymer({

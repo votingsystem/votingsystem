@@ -25,8 +25,8 @@ public class BankInfo extends EntityVS implements Serializable {
     @Column(name="id", unique=true, nullable=false) private Long id;
     @OneToOne  private Bank bank;
     @Column(name="bankCode" ) private String bankCode;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated") private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated") private Date lastUpdated;
 
     public BankInfo() {}
 

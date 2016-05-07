@@ -41,13 +41,13 @@ public class RepresentationDocument extends EntityVS implements Serializable {
     @JoinColumn(name="representative") private User representative;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCanceled", length=23) private Date dateCanceled;
+    @Column(name="dateCanceled") private Date dateCanceled;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCreated", length=23) private Date dateCreated;
+    @Column(name="dateCreated") private Date dateCreated;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Column(name="lastUpdated") private Date lastUpdated;
 
     public RepresentationDocument() {}
 

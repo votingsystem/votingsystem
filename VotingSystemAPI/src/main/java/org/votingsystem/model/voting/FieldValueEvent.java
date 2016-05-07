@@ -20,8 +20,8 @@ public class FieldValueEvent extends EntityVS implements Serializable {
     @Column(name="value", length=1000) private String value;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="fieldEvent", nullable=false) private FieldEvent fieldEvent;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated", length=23) private Date dateCreated;
-    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="dateCreated") private Date dateCreated;
+    @Temporal(TemporalType.TIMESTAMP) @Column(name="lastUpdated") private Date lastUpdated;
     
     public FieldValueEvent() {}
 

@@ -40,11 +40,11 @@ public class Address extends EntityVS implements Serializable {
     @Column(name = "city", nullable = false, length = 48)
     private String city;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCreated", length=23, insertable=true)
+    @Column(name="dateCreated")
     public Date dateCreated;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23, insertable=true)
+    @Column(name="lastUpdated")
     public Date lastUpdated;
     
     public void setDateCreated(Date dateCreated) {

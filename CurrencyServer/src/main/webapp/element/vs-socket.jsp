@@ -83,7 +83,7 @@
                                 this.$.qrDialog.close()
                                 break;
                             case 'INIT_REMOTE_SIGNED_SESSION':
-                                //we receive the user data from the mobile and prepare a CSR that is sended to the mobile.
+                                //we receive the user data from the mobile and prepare a CSR that is posted to the mobile.
                                 //The mobile signs a request with the CSR and sends it to the server.
                                 vs.aesParams = {key:forge.util.decode64(messageJSON.aesParams.key),
                                         iv:forge.util.decode64(messageJSON.aesParams.iv),

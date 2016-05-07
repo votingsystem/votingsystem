@@ -36,11 +36,11 @@ public class RepresentativeDocument  extends EntityVS implements Serializable {
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name="userId") private User user;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCanceled", length=23) private Date dateCanceled;
+    @Column(name="dateCanceled") private Date dateCanceled;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCreated", length=23) private Date dateCreated;
+    @Column(name="dateCreated") private Date dateCreated;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23) private Date lastUpdated;
+    @Column(name="lastUpdated") private Date lastUpdated;
 
     public RepresentativeDocument() {}
 

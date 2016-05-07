@@ -50,10 +50,10 @@ public class Actor extends EntityVS implements Serializable {
     @Column(name="state") private State state;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCreated", length=23, insertable=true) public Date dateCreated;
+    @Column(name="dateCreated") public Date dateCreated;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23, insertable=true) public Date lastUpdated;
+    @Column(name="lastUpdated") public Date lastUpdated;
 
     @Transient private Type serverType;
     @Transient private String certChainPEM;

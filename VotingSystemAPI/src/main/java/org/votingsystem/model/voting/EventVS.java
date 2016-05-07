@@ -95,26 +95,26 @@ public class EventVS extends EntityVS implements Serializable {
     private Set<FieldEvent> fieldsEventVS;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateBegin", length=23, nullable=false)
+    @Column(name="dateBegin", nullable=false)
     //@Field(index = Index.NO, analyze=Analyze.NO, store = Store.YES)
     //@DateBridge(resolution = Resolution.HOUR)
     private Date dateBegin;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateFinish", length=23, nullable=false)
+    @Column(name="dateFinish", nullable=false)
     //@Field(index = Index.NO, analyze=Analyze.NO, store = Store.YES)
     //@DateBridge(resolution = Resolution.HOUR)
     private Date dateFinish;
     
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCanceled", length=23)
+    @Column(name="dateCanceled")
     private Date dateCanceled;
     
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="dateCreated", length=23)
+    @Column(name="dateCreated")
     private Date dateCreated;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="lastUpdated", length=23)
+    @Column(name="lastUpdated")
     private Date lastUpdated;
 
     @Transient private Type type = null;
