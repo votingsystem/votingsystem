@@ -32,12 +32,14 @@ public class MessagesVS {
     }
 
     public String get(String key, Object... arguments) {
+        String pattern = null;
         try {
-            String pattern = bundle.getString(key);
+            pattern = bundle.getString(key);
             if(arguments.length > 0) return MessageFormat.format(pattern, arguments);
             else return pattern;
         } catch (Exception ex) {
-            return "-- " + key + " --";
+            if(pattern != null) return pattern;
+            else return "- " + key + " -";
         }
     }
 
