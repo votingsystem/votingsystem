@@ -10,10 +10,7 @@ import org.bouncycastle.util.Store;
 import org.votingsystem.service.TimeStampService;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
-import org.votingsystem.util.crypto.KeyStoreUtil;
-import org.votingsystem.util.crypto.PEMUtils;
-import org.votingsystem.util.crypto.SignatureData;
-import org.votingsystem.util.crypto.TimeStampResponseGenerator;
+import org.votingsystem.util.crypto.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,23 +77,28 @@ public class TimeStampServiceImpl implements TimeStampService {
         return timeStampRequest.getEncoded();
     }
 
-    public TimeStampResponseGenerator getResponseGeneratorDiscrete(InputStream inputStream) throws OperatorCreationException,
+    public TimeStampTokenGeneratorHelper getResponseGeneratorDiscrete(InputStream inputStream) throws OperatorCreationException,
             CertificateEncodingException, ExceptionVS, TSPException, IOException {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        return new TimeStampResponseGenerator(inputStream, signingData, calendar.getTime());
+        return new TimeStampTokenGeneratorHelper(inputStream, signingData, calendar.getTime());
     }
 
     public byte[] getTimeStampResponse(InputStream inputStream) throws OperatorCreationException,
             CertificateEncodingException, ExceptionVS, TSPException, IOException {
-        TimeStampResponseGenerator responseGenerator =
-                new TimeStampResponseGenerator(inputStream, signingData, new Date());
+        TimeStampTokenGeneratorHelper responseGenerator =
+                new TimeStampTokenGeneratorHelper(inputStream, signingData, new Date());
         return responseGenerator.getTimeStampToken().getEncoded();
     }
 
-    public TimeStampResponseGenerator getResponseGenerator(InputStream inputStream) throws Exception {
-        return new TimeStampResponseGenerator(inputStream, signingData, new Date());
+    public TimeStampTokenGeneratorHelper getResponseGenerator(InputStream inputStream) throws Exception {
+        return new TimeStampTokenGeneratorHelper(inputStream, signingData, new Date());
+    }
+
+    @Override
+    public TimeStampResponseGeneratorHelper getXAdESResponseGenerator(InputStream inputStream) throws Exception {
+        return new TimeStampResponseGeneratorHelper(inputStream, signingData, new Date());
     }
 
 }

@@ -7,7 +7,8 @@ import org.votingsystem.service.TimeStampService;
 import org.votingsystem.service.impl.TimeStampServiceImpl;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.crypto.TimeStampResponseGenerator;
+import org.votingsystem.util.crypto.TimeStampResponseGeneratorHelper;
+import org.votingsystem.util.crypto.TimeStampTokenGeneratorHelper;
 import org.votingsystem.web.util.ConfigVS;
 
 import javax.annotation.PostConstruct;
@@ -54,12 +55,17 @@ public class TimeStampServerBean implements TimeStampService {
     }
 
     @Override
-    public TimeStampResponseGenerator getResponseGenerator(InputStream inputStream) throws Exception {
+    public TimeStampTokenGeneratorHelper getResponseGenerator(InputStream inputStream) throws Exception {
         return timeStampService.getResponseGenerator(inputStream);
     }
 
     @Override
-    public TimeStampResponseGenerator getResponseGeneratorDiscrete(InputStream inputStream) throws Exception {
+    public TimeStampResponseGeneratorHelper getXAdESResponseGenerator(InputStream inputStream) throws Exception {
+        return timeStampService.getXAdESResponseGenerator(inputStream);
+    }
+
+    @Override
+    public TimeStampTokenGeneratorHelper getResponseGeneratorDiscrete(InputStream inputStream) throws Exception {
         return timeStampService.getResponseGeneratorDiscrete(inputStream);
     }
 

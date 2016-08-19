@@ -5,7 +5,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.model.TimeStamp;
 import org.votingsystem.service.TimeStampService;
 import org.votingsystem.util.ContentType;
-import org.votingsystem.util.crypto.TimeStampResponseGenerator;
+import org.votingsystem.util.crypto.TimeStampTokenGeneratorHelper;
 import org.votingsystem.web.ejb.DAOBean;
 import org.votingsystem.web.util.MessagesVS;
 
@@ -41,7 +41,7 @@ public class TimeStampServlet extends HttpServlet {
         String contentEncoding = req.getHeader("Content-Encoding");
         if(contentType == ContentType.TIMESTAMP_QUERY) {
             try {
-                TimeStampResponseGenerator responseGenerator = null;
+                TimeStampTokenGeneratorHelper responseGenerator = null;
                 if(contentEncoding != null && "base64".equals(contentEncoding)) {
                     byte[] requestBytesBase64 =  IOUtils.toByteArray(req.getInputStream());
                     byte[] requestBytes = Base64.getDecoder().decode(requestBytesBase64);

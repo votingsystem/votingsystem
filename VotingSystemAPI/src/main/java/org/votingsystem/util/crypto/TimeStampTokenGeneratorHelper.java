@@ -10,10 +10,7 @@ import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.bouncycastle.tsp.TSPException;
-import org.bouncycastle.tsp.TimeStampRequest;
-import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.tsp.TimeStampTokenGenerator;
+import org.bouncycastle.tsp.*;
 import org.votingsystem.throwable.ExceptionVS;
 import org.votingsystem.util.ContextVS;
 
@@ -29,9 +26,9 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class TimeStampResponseGenerator {
+public class TimeStampTokenGeneratorHelper {
 
-    private static Logger log = Logger.getLogger(TimeStampResponseGenerator.class.getName());
+    private static Logger log = Logger.getLogger(TimeStampTokenGeneratorHelper.class.getName());
 
     public static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
     public static final String DEFAULT_TSA_POLICY_OID = "1.2.3";
@@ -43,10 +40,11 @@ public class TimeStampResponseGenerator {
     public static boolean ORDERING = false;
 
     private TimeStampToken token;
+    private TimeStampResponse timeStampResponse;
     private BigInteger serialNumber;
     private TimeStampTokenGenerator tokenGenerator;
 
-    public TimeStampResponseGenerator(InputStream requestInputStream, SignatureData signingData, Date timeStampDate)
+    public TimeStampTokenGeneratorHelper(InputStream requestInputStream, SignatureData signingData, Date timeStampDate)
             throws ExceptionVS, OperatorCreationException, CertificateEncodingException, TSPException {
         TimeStampRequest timeStampRequest;
         try {
@@ -58,6 +56,7 @@ public class TimeStampResponseGenerator {
         log.info("getTimeStampResponse - serialNumber: " + serialNumber + " - CertReq: " + timeStampRequest.getCertReq());
         JcaSignerInfoGeneratorBuilder infoGeneratorBuilder = new JcaSignerInfoGeneratorBuilder(
                 new JcaDigestCalculatorProviderBuilder().setProvider(ContextVS.PROVIDER).build());
+
         tokenGenerator = new TimeStampTokenGenerator(infoGeneratorBuilder.build(
                 new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).setProvider(
                         ContextVS.PROVIDER).build(signingData.getSigningKey()), signingData.getSigningCert()),
@@ -68,6 +67,7 @@ public class TimeStampResponseGenerator {
         tokenGenerator.setAccuracySeconds(ACCURACYSECONDS);
         tokenGenerator.setOrdering(ORDERING);
         tokenGenerator.addCertificates(signingData.getCerts());
+
         token = tokenGenerator.generate(timeStampRequest, serialNumber, timeStampDate);
     }
 

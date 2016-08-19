@@ -175,7 +175,7 @@ public class ContextVS {
     public void shutdown() {
         try {
             log.info("------------------ shutdown --------------------");
-            FileUtils.deleteRecursively(new File(tempDir));
+            if(tempDir != null) FileUtils.deleteRecursively(new File(tempDir));
             log.info("------------------------------------------------");
         } catch (IOException ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

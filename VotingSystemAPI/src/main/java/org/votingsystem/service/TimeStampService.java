@@ -4,7 +4,8 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.throwable.ExceptionVS;
-import org.votingsystem.util.crypto.TimeStampResponseGenerator;
+import org.votingsystem.util.crypto.TimeStampResponseGeneratorHelper;
+import org.votingsystem.util.crypto.TimeStampTokenGeneratorHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,9 +18,11 @@ public interface TimeStampService {
 
     public byte[] getSigningCertPEMBytes();
 
-    public TimeStampResponseGenerator getResponseGenerator(InputStream inputStream) throws Exception;
+    public TimeStampTokenGeneratorHelper getResponseGenerator(InputStream inputStream) throws Exception;
 
-    public TimeStampResponseGenerator getResponseGeneratorDiscrete(InputStream inputStream) throws Exception;
+    public TimeStampResponseGeneratorHelper getXAdESResponseGenerator(InputStream inputStream) throws Exception;
+
+    public TimeStampTokenGeneratorHelper getResponseGeneratorDiscrete(InputStream inputStream) throws Exception;
 
     public byte[] getSigningCertChainPEMBytes();
 
