@@ -28,12 +28,12 @@ public class FetchX509Cert {
     public static void main(String[] args) throws Exception {
         new ContextVS(null, null).initEnvironment(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("TestsApp.properties"), "./TestDir");
-        getDeviceDto();
+        getServer();
         System.exit(0);
     }
 
     public static void getServer() throws Exception {
-        Actor actor = TestUtils.fetchCurrencyServer("https://192.168.1.5/CurrencyServer");
+        Actor actor = TestUtils.fetchServer("https://192.168.1.5/TimeStampServer");
         Collection<X509Certificate> certCollection = PEMUtils.fromPEMToX509CertCollection(
                 actor.getCertChainPEM().getBytes());
         for(X509Certificate cert: certCollection) {

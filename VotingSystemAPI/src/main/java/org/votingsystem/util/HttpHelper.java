@@ -15,10 +15,7 @@ import org.apache.http.conn.HttpConnectionFactory;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContexts;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.FileEntity;
@@ -40,6 +37,7 @@ import org.apache.http.message.BasicLineParser;
 import org.apache.http.message.LineParser;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.CharArrayBuffer;
 import org.apache.http.util.EntityUtils;
 import org.votingsystem.dto.MessageDto;
@@ -47,6 +45,7 @@ import org.votingsystem.model.ResponseVS;
 import org.votingsystem.throwable.*;
 import org.votingsystem.util.crypto.CertUtils;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -57,7 +56,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -149,6 +147,32 @@ public class HttpHelper {
 
     private HttpHelper() {
         try {
+            log.severe(" **** This HttpHelper WILL NOT VALIDATE SSL CERTIFICATES **** ");
+            // setup a Trust Strategy that allows all certificates.
+            SSLContext sslcontext = new SSLContextBuilder().loadTrustMaterial(null, new org.apache.http.ssl.TrustStrategy() {
+                public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+                    log.log(Level.FINE, "REQUEST WITHOUT VALIDATING SSL CERTIFICATE");
+                    return true;
+                }
+            }).build();
+            // don't check Hostnames, either.
+            //      -- use SSLConnectionSocketFactory.getDefaultHostnameVerifier(), if you don't want to weaken
+            HostnameVerifier hostnameVerifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+
+            // here's the special part:
+            //      -- need to create an SSL Socket Factory, to use our weakened "trust strategy";
+            //      -- and create a Registry, to register it.
+            sslSocketFactory = new SSLConnectionSocketFactory(sslcontext, hostnameVerifier);
+            Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                    .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                    .register("https", sslSocketFactory)
+                    .build();
+
+            // now, we create connection-manager using our Registry.
+            //      -- allows multi-threaded use
+            connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+
+            /*
             KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null, null);
             SSLContext sslcontext = null;
@@ -173,7 +197,8 @@ public class HttpHelper {
             //SocketConfig socketConfig = SocketConfig.custom().setTcpNoDelay(true).build();
             //Configure the connection manager to use socket configuration either by default or for a specific host.
             //connManager.setDefaultSocketConfig(socketConfig);
-            connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry, connFactory, dnsResolver);
+            connManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry, connFactory, dnsResolver);*/
+
             connManager.setMaxTotal(200);
             connManager.setDefaultMaxPerRoute(100);
             connEvictor = new IdleConnectionEvictor(connManager);
