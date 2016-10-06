@@ -27,14 +27,14 @@ import java.util.logging.Logger;
  */
 @Singleton
 @Named(value="timeStampService")
-public class TimeStampServerBean implements TimeStampService {
+public class TimeStampEJB implements TimeStampService {
 
-    private static final Logger log = Logger.getLogger(TimeStampServerBean.class.getName());
+    private static final Logger log = Logger.getLogger(TimeStampEJB.class.getName());
 
     private TimeStampServiceImpl timeStampService = null;
     @Inject ConfigVS config;
 
-    public TimeStampServerBean() { }
+    public TimeStampEJB() { }
 
     @PostConstruct
     public void initialize() {

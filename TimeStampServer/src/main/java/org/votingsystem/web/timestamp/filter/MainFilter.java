@@ -7,12 +7,13 @@ import javax.inject.Inject;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @WebFilter("/*")
-public class FilterVS implements Filter {
+public class MainFilter implements Filter {
 
-    private java.util.logging.Logger log = java.util.logging.Logger.getLogger(FilterVS.class.getName());
+    private java.util.logging.Logger log = java.util.logging.Logger.getLogger(MainFilter.class.getName());
 
     @Inject ConfigVS config;
     private String bundleBaseName;
@@ -23,7 +24,7 @@ public class FilterVS implements Filter {
         // It is common to save a reference to the ServletContext here in case it is needed in the destroy() call.
         servletContext = filterConfig.getServletContext();
         bundleBaseName = config.getProperty("vs.bundleBaseName");
-        servletContext.log("------- FilterVS initialized -------");
+        servletContext.log("------- MainFilter initialized -------");
     }
 
     @Override
@@ -32,12 +33,18 @@ public class FilterVS implements Filter {
         MessagesVS.setCurrentInstance(req.getLocale(), bundleBaseName);
         log.info(((HttpServletRequest) req).getMethod() + " - " + ((HttpServletRequest) req).getRequestURI() +
                 " - contentType: " + req.getContentType() + " - locale: " + req.getLocale());
+
+        ((HttpServletResponse)resp).addHeader("Access-Control-Allow-Origin", "*");
+        ((HttpServletResponse)resp).addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        ((HttpServletResponse)resp).addHeader("Access-Control-Max-Age", "-1");
+        ((HttpServletResponse)resp).addHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
         filterChain.doFilter(req, resp);
     }
 
     @Override
     public void destroy() {
-        servletContext.log("------- FilterVS destroyed -------");
+        servletContext.log("------- MainFilter destroyed -------");
     }
 
 }

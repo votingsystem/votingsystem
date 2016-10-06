@@ -22,14 +22,14 @@ import java.util.logging.Logger;
 @Singleton
 @Named(value="config")
 @Startup
-public class ConfigVSImpl implements ConfigVS {
+public class ConfigEJB implements ConfigVS {
 
-    private static final Logger log = Logger.getLogger(ConfigVSImpl.class.getName());
+    private static final Logger log = Logger.getLogger(ConfigEJB.class.getName());
 
     private String contextURL;
     private Properties props;
 
-    public ConfigVSImpl() {
+    public ConfigEJB() {
         try {
             String resourceFile = "TimeStampServer.properties";
             props = new Properties();

@@ -7,7 +7,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class ExceptionMapperVS implements ExceptionMapper<NotFoundException> {
+public class MainExceptionMapper implements ExceptionMapper<NotFoundException> {
 
     public Response toResponse(NotFoundException exception) {
         return Response.status(Response.Status.NOT_FOUND).entity(
