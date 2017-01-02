@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TrustedEntities>
+	<Entity Type="anonymizer" Id="https://192.168.1.5:8443/voting-service" CountryCode="ES"/>
+	<Entity Type="voting-service-provider" Id="https://192.168.1.5:8443/voting-service222" CountryCode="ES"/>
+	<Entity Type="voting-service-provider" Id="https://192.168.1.5:8443/voting-service111" CountryCode="ES"/>
+	<Entity Type="timestamp-server" Id="https://192.168.1.5:8443/timestamp-server333" CountryCode="ES"/>
+	<Entity Type="timestamp-server" Id="https://192.168.1.5:8443/timestamp-server222" CountryCode="ES"/>
+	<Entity Type="timestamp-server" Id="https://192.168.1.5:8443/timestamp-server111" CountryCode="ES"/>
+	<!--Entity type="voting-service-provider" id="https://192.168.1.5:8443/voting-service" country_code="ES" -->
+</TrustedEntities>
