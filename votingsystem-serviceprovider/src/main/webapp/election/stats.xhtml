@@ -1,0 +1,52 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:of="http://omnifaces.org/functions"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="/WEB-INF/templates/mainTemplate.xhtml">
+  <ui:define name="content">
+    <div style="margin: 30px auto;">
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="row x_title">
+              <div class="col-md-12" style="display: flex; flex-direction: row; align-items: center;">
+                <div style="margin: 0 50px 0 0; font-size:1.1em;font-weight: bold; color: #43c2cb;">
+                  #{msg.dateLbl}: #{pageBean.formatDate(statsDto.dateBegin)}
+                </div>
+                <div style="text-transform:capitalize;font-weight:bold;text-align:center;font-size:1.6em">
+                  #{statsDto.subject}
+                </div>
+              </div>
+            </div>
+            <div style="font-size: 1.7em;color:#146c72;">
+              #{msg.numVotesLbl} : <span style="font-weight: bold;">#{statsDto.numVotes}</span>
+            </div>
+
+            <div id="electionOptions">
+              <ul>
+                <ui:repeat value="#{of:setToList(statsDto.electionOptions)}" var="option">
+                  <li style="margin: 5px 0 0 0; font-size:1.5em;color: #43c2cb;">
+                    <span style="font-weight: bold; text-decoration: underline;">#{option.numVotes} #{msg.votesLbl}: </span> #{option.content}
+                  </li>
+                </ui:repeat>
+              </ul>
+            </div>
+
+
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+
+    <script>
+      //<![CDATA[
+        vs.setMainPageCaption("#{msg.statsLbl}");
+
+      // ]]>
+    </script>
+  </ui:define>
+</ui:composition>

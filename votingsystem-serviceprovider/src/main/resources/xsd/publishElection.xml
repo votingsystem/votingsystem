@@ -1,0 +1,17 @@
+<Election>
+    <DateBegin>2016-11-20T01:00:00+01:00</DateBegin>
+    <DateFinish>2016-11-21T01:00:00+01:00</DateFinish>
+    <Subject>CDSCSDCSD</Subject>
+    <Content>ASDASFSDFSDC</Content>
+    <State>PENDING</State>
+    <Options>
+        <Option>
+            <Content>sasAS</Content>
+        </Option>
+        <Option>
+            <Content>DASDASD</Content>
+        </Option>
+    </Options>
+    <EntityId>https://192.168.1.5:8443/voting-service</EntityId>
+    <UUID>5297b92b-8c4f-4e60-99fd-2a33acef0813</UUID>
+</Election>

@@ -1,37 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>org.votingsystem</groupId>
-    <artifactId>votingsystem</artifactId>
+    <artifactId>votingsystem-parent</artifactId>
     <packaging>pom</packaging>
-    <version>${votingsystem.version}</version>
+    <name>VotingSystem Parent</name>
+    <version>${version.votingsystem}</version>
 
     <modules>
-        <module>VotingSystemAPI</module>
-        <module>VotingSystemWebAPI</module>
-        <module>AccessControl</module>
-        <module>ControlCenter</module>
-        <module>TimeStampServer</module>
-        <module>CurrencyServer</module>
-        <module>TestsApp</module>
-        <module>NativeClient</module>
+        <module>votingsystem-api</module>
+	<module>votingsystem-api-web</module>
+        <module>timestamp-server</module>
+        <module>votingsystem-idprovider</module>
+        <module>votingsystem-serviceprovider</module>
+        <module>votingsystem-test</module>
     </modules>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>javax</groupId>
-                <artifactId>javaee-api</artifactId>
-                <version>7.0</version>
-                <scope>provided</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <properties>
-        <votingsystem.version>0.8.2.SNAPSHOT</votingsystem.version>
+        <version.votingsystem>0.9.0</version.votingsystem>
     </properties>
 </project>

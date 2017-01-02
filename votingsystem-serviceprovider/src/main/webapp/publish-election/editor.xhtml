@@ -1,0 +1,278 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="/WEB-INF/templates/mainTemplate.xhtml">
+  <ui:define name="head">
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="-1" />
+    <meta http-equiv="cache-control" content="no-cache, must-revalidate" />
+    <style>
+      #editor{
+        max-height: 350px;
+        height: 300px;
+        background-color: white;
+        border-collapse: separate;
+        border: 1px solid rgb(204, 204, 204);
+        padding: 4px;
+        box-sizing: content-box;
+        -webkit-box-shadow: rgba(0, 0, 0, 0.0745098) 0 1px 1px 0 inset;
+        box-shadow: rgba(0, 0, 0, 0.0745098) 0 1px 1px 0 inset;
+        border-top-right-radius: 3px; border-bottom-right-radius: 3px;
+        border-bottom-left-radius: 3px; border-top-left-radius: 3px;
+        outline: none;
+        overflow-y: scroll;
+        overflow-x: hidden;
+      }
+      #editor:focus{
+        border-color:rgba(82, 168, 236, 0.8);
+        outline:0;
+        outline:thin dotted \9;
+        -webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+        -moz-box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+        box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+      }
+      div[data-role="editor-toolbar"] {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      .dropdown-menu a {
+        cursor: pointer;
+      }
+      .btn-toolbar {
+        padding: 10px 0px 10px 0px;
+      }
+      [contentEditable=true]:empty:not(:focus):before {
+        content:attr(data-placeholder)
+      }
+      .errorMessages {
+        color:#CE5454;
+        margin:10px;font-weight: bold;
+        font-size: 1.3em;
+      }
+      .calendar-date .available{
+        font-weight: bold;
+        font-size: 1.1em;
+        color: #3a8287;
+      }
+      div.tagsinput{border:1px solid #CCC;background:#FFF;padding:7px;width:300px;height:100px;overflow-y:auto}
+      div.tagsinput span.tag{border:1px solid #43c2cb;-moz-border-radius:2px;-webkit-border-radius:2px;display:block;float:left;padding:5px;text-decoration:none;background:#43c2cb;color:#43c2cb;margin-right:5px;margin-bottom:5px;font-family:helvetica;font-size:20px}
+      div.tagsinput span.tag a{font-weight:700;color:#fff;text-decoration:none;font-size:20px}
+      div.tagsinput input{width:80px;margin:0 5px 5px 0;font-family:helvetica;font-size:13px;border:1px solid transparent;padding:5px;background:0 0;color:#000;outline:0}
+      div.tagsinput div{display:block;float:left}.tags_clear{clear:both;width:100%;height:0}.not_valid{background:#FBD8DB!important;color:#90111A!important}
+      div.tagsinput span.tag::after { border-left: 0px solid; }
+    </style>
+  </ui:define>
+  <f:metadata>
+    <f:viewAction action="#{publishElection.onload}" />
+  </f:metadata>
+  <ui:define name="content">
+    <div>
+    <h:form id="electionForm">
+
+    <div style="display: flex; flex-direction: row;">
+      <div>
+        <fieldset>
+          <div class="control-group " style="width: 254px;">
+            <div class="controls">
+              <div class="col-md-11 xdisplay_inputx form-group has-feedback">
+                <input type="text" class="form-control has-feedback-left active" id="electionCal" readonly="readonly"
+                       placeholder="#{msg.dateLbl}" aria-describedby="inputSuccess2Status2" style="padding-right: 0px; width: 180px;" required="required"/>
+                <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+      <div class="col-md-9">
+        <h:inputText type="text" a:required="required" class="form-control" a:placeholder="#{msg.electionSubjectLbl}"
+                     a:maxlength='160' label="#{msg.electionSubject}" value="#{publishElection.electionSubject}"/>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="x_content">
+        <div id="alerts"></div>
+        <div class="btn-toolbar editor" data-role="editor-toolbar" data-target="#editor">
+          <div class="btn-group">
+            <a class="btn dropdown-toggle" data-toggle="dropdown" title="Font Size"><i class="fa fa-text-height"></i> <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li>
+                <a data-edit="fontSize 5">
+                  <p style="font-size:17px">#{msg.hugeLbl}</p>
+                </a>
+              </li>
+              <li>
+                <a data-edit="fontSize 3">
+                  <p style="font-size:14px">#{msg.normalLbl}</p>
+                </a>
+              </li>
+              <li>
+                <a data-edit="fontSize 1">
+                  <p style="font-size:11px">#{msg.smallLbl}</p>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="btn-group">
+            <a class="btn" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a>
+            <a class="btn" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="fa fa-italic"></i></a>
+            <a class="btn" data-edit="strikethrough" title="Strikethrough"><i class="fa fa-strikethrough"></i></a>
+            <a class="btn" data-edit="underline" title="Underline (Ctrl/Cmd+U)"><i class="fa fa-underline"></i></a>
+          </div>
+
+          <div class="btn-group">
+            <a class="btn" data-edit="insertunorderedlist" title="Bullet list"><i class="fa fa-list-ul"></i></a>
+            <a class="btn" data-edit="insertorderedlist" title="Number list"><i class="fa fa-list-ol"></i></a>
+            <a class="btn" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-dedent"></i></a>
+            <a class="btn" data-edit="indent" title="Indent (Tab)"><i class="fa fa-indent"></i></a>
+          </div>
+
+          <div class="btn-group">
+            <a class="btn" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="fa fa-align-left"></i></a>
+            <a class="btn" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)"><i class="fa fa-align-center"></i></a>
+            <a class="btn" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)"><i class="fa fa-align-right"></i></a>
+            <a class="btn" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)"><i class="fa fa-align-justify"></i></a>
+          </div>
+
+        </div>
+
+        <div id="editor" class="editor-wrapper"></div>
+      </div>
+    </div>
+
+    <div class="row">
+          <div class="col-md-9">
+            <div style="margin: 15px;">
+              <label class="control-label col-md-4 col-sm-3 col-xs-12">#{msg.electionOptionsLbl} (#{msg.electionOptionsAdviceLbl})</label>
+              <div class="col-md-8 col-sm-8 col-xs-10">
+                <input id="electionOptionsInput" type="text" required="required" class="tags form-control" />
+              </div>
+            </div>
+          </div>
+          <div class="col-md-2" style="margin: 10px;display: flex; flex-direction: row;justify-content: flex-end;">
+            <h:commandButton class="btn btn-success" value="#{msg.publishLbl}" type="submit" action="#{publishElection.publish()}" onclick="return submitForm()"/>
+          </div>
+    </div>
+
+      <h:inputHidden id="electionContentInput" value="#{publishElection.electionContent}"></h:inputHidden>
+      <h:inputHidden id="electionDate" value="#{publishElection.electionDate}"></h:inputHidden>
+      <h:inputHidden id="electionOptions" value="#{publishElection.electionOptions}"></h:inputHidden>
+
+    </h:form>
+
+      <div id="electionContent" style="display: none">
+        <h:outputText value="#{publishElection.electionContent}" escape="false"/>
+      </div>
+
+    </div>
+
+    <script src="#{request.contextPath}/res/gtl/vendors/parsleyjs/dist/parsley.min.js"></script>
+    <script src="#{request.contextPath}/res/gtl/vendors/parsleyjs/dist/i18n/#{request.getLocale().getLanguage()}.js"></script>
+    <!-- jQuery Tags Input -->
+    <script src="#{request.contextPath}/res/gtl/vendors/jquery.tagsinput/src/jquery.tagsinput.js"></script>
+    <!-- bootstrap-daterangepicker -->
+    <script src="#{request.contextPath}/res/gtl/production/js/moment/moment.min.js"></script>
+    <script src="#{request.contextPath}/res/gtl/production/js/datepicker/daterangepicker.js"></script>
+
+    <script src="#{request.contextPath}/res/gtl/vendors/jquery.hotkeys/jquery.hotkeys.js"></script>
+    <script src="#{request.contextPath}/res/gtl/vendors/google-code-prettify/src/prettify.js"></script>
+    <script src="#{request.contextPath}/res/gtl/vendors/bootstrap-wysiwyg/js/bootstrap-wysiwyg.min.js"></script>
+
+    <c:if test="${publishElection.errorMsg != null}">
+      <script>vs.alert("#{msg.errorLbl}", "#{publishElection.errorMsg}")</script>
+    </c:if>
+
+    <script>
+      //<![CDATA[
+
+      var electionOptionsSeparator = "#@#@#@";
+      $(document).ready(function() {
+        vs.setMainPageCaption("#{msg.publishElectionLbl}");
+
+        $('#editor').wysiwyg( {
+              'form': {
+                'seperate-binary': false
+              }
+            });
+
+        $(".dropdown-menu > input").click(function (e) {
+          e.stopPropagation();
+        });
+
+        $('#electionOptionsInput').tagsInput({
+            'height':'200px',
+            'width':'300px',
+            'interactive':true,
+            'defaultText':'#{msg.addLbl}',
+            'delimiter': [electionOptionsSeparator],   // Or a string with a single delimiter. Ex: ';'
+            'removeWithBackspace' : true,
+            'minChars' : 1,
+            'maxChars' : 0, // if not provided there is no limit
+            'placeholderColor' : '#666666'
+        });
+
+        $('#electionForm').parsley();
+      })
+
+      var editorContent = document.querySelector("#electionContent").innerHTML
+      $('#editor').html(editorContent)
+
+
+      if("" !== "#{publishElection.electionDate}") {
+        document.querySelector("#electionCal").value = "#{publishElection.electionDate}".substring(0, 10);
+      }
+      document.querySelector("#electionOptionsInput").value = "#{publishElection.electionOptions}";
+
+      function submitForm () {
+        var electionContent = $('#editor').cleanHtml(true);
+        document.getElementById("electionForm:electionContentInput").value = electionContent;
+        var electionOptionsStr = document.querySelector('#electionOptionsInput').value;
+
+        if(electionOptionsStr.split(electionOptionsSeparator).length < 2) {
+          vs.alert("#{msg.errorLbl}", "#{msg.electionOptionsMissingErrorMsg}");
+          return false;
+        }
+        document.getElementById("electionForm:electionOptions").value = electionOptionsStr.replace(/"/g, "'");;
+        if("" === electionContent.trim()) {
+          vs.alert("#{msg.errorLbl}", "#{msg.electionContentErrorMsg}");
+          return false;
+        }
+        return true;
+      }
+
+      var today = moment();
+      var tomorrow = moment(today).add(1, 'day');
+      var todayPlus30Days = moment(today).add(30, 'day');
+
+      $('#electionCal').daterangepicker({
+        singleDatePicker: true,
+        minDate: tomorrow.toDate(),
+        maxDate: todayPlus30Days.toDate(),
+        "calender_style": "picker_2",
+        "format": "YYYY-MM-DD HH:mm ZZ",
+        "locale"  : {
+          "daysOfWeek": [#{msg.daysOfWeek}],
+          "monthNames": [#{msg.monthNames}],
+          "firstDay": 1
+        }
+      }, function(start, end, label) { });
+      //All elections begin at 00:00 UTC time
+      $('#electionCal').on('apply.daterangepicker', function(ev, picker) {
+        var selectedDate = new Date(picker.startDate);
+        var selectedDateUTC = moment.utc([selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()]);
+        console.log("selectedDateUTC.format(): " + selectedDateUTC.format())
+        document.getElementById("electionForm:electionDate").value = picker.startDate.format('YYYY-MM-DD');
+        $(this).val(picker.startDate.format('YYYY-MM-DD'));
+      });
+
+      // ]]>
+    </script>
+
+  </ui:define>
+</ui:composition>

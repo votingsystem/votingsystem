@@ -1,0 +1,2 @@
+create table Certificate (ID  bigserial not null, CANCEL_DATE DATETIME, CONTENT bytea not null, HASH_CERTVS_BASE64 varchar(255), IS_ROOT boolean, META_INF TEXT, SERIAL_NUMBER int8 not null, STATE varchar(255) not null, SUBJECT_DN varchar(255), TYPE varchar(255) not null, VALID_FROM DATETIME, VALID_TO DATETIME, AUTHORITY_CERTIFICATE_ID int8, SIGNER_ID int8, primary key (ID))]
+    Caused by: org.postgresql.util.PSQLException: ERROR: no existe el tipo «datetime»

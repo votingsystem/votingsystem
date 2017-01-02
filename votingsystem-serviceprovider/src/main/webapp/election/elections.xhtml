@@ -1,0 +1,84 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                template="/WEB-INF/templates/mainTemplate.xhtml">
+  <ui:define name="head">
+    <script src="#{request.contextPath}/res/pagination/jquery.twbsPagination.js" type="text/javascript"></script>
+  </ui:define>
+  <f:metadata>
+    <f:viewAction action="#{electionsBean.loadElections}" />
+  </f:metadata>
+  <ui:define name="content">
+    <div>
+      <div style="margin: 10px auto; width: 100%;">
+
+        <ui:repeat value="#{electionsBean.getElectionList()}" var="election" varStatus="status">
+          <h:panelGroup layout="block" rendered="#{electionsBean.qrURL !=null and status.index == 0}">
+            <div id="qrImgDiv" style="margin: 0 auto; text-align: center; width: 180px;" class="col-md-2 col-sm-2 col-xs-2">
+              <img id="qrImg" src="#{electionsBean.qrURL}"/>
+            </div>
+          </h:panelGroup>
+
+          <a href="election.xhtml?id=#{election.id}">
+            <div class="col-md-4 col-sm-4 col-xs-12 election_details">
+              <div class="well profile_view" style="border: 1px solid #{electionsBean.pageColor};max-height: 200px;overflow: hidden;">
+                <div class="col-xs-12 text-center" style="background-color: #{electionsBean.pageColor};min-height: 30px; color: #EFEFEF;">
+                  <div style="position: absolute;font-size: 0.7em; line-height: 1em;margin: 2px 0 0 0;">#{election.publisher.getFullName()}</div>
+                  <div style="font-weight: bold; color: #fefefe;font-size: 1.2em; margin: 7px 0 0 0;">
+                    <h:outputText value="#{election.dateBegin}" >
+                      <f:converter converterId="org.votingsystem.jsf.dateConverter" />
+                    </h:outputText>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div style="text-align: center;font-size: 1.5em;font-weight: bold;text-decoration: underline;"><i>#{election.subject}</i></div>
+                  <div style="text-overflow: ellipsis;overflow: hidden;">
+                    <h:outputText value="#{election.content}" escape="false" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </ui:repeat>
+      </div>
+
+      <h:form id="paginateForm">
+        <h:commandButton id="paginateButton" value="test" action="#{electionsBean.paginate()}" style="display: none;">
+          <h:inputHidden id="paginationPage" value="#{electionsBean.paginationPage}"></h:inputHidden>
+          <h:inputHidden id="pageSize" value="#{electionsBean.pageSize}"></h:inputHidden>
+        </h:commandButton>
+      </h:form>
+
+      <div id="paginationDiv" style="margin: 0 auto; text-align: center;">
+        <ul id="election-pagination" class="pagination-sm"></ul>
+      </div>
+    </div>
+    <script>
+      //<![CDATA[
+        console.log("qrURL: #{electionsBean.qrURL}")
+        vs.setMainPageCaption("#{electionsBean.pageCaption}");
+
+        $('#election-pagination').twbsPagination({
+            totalPages: #{electionsBean.totalPages},
+            visiblePages: #{electionsBean.visiblePages},
+            startPage:#{electionsBean.paginationPage},
+            prev:"#{msg.prevLbl}",
+            next:"#{msg.nextLbl}",
+            first:"#{msg.firstLbl}",
+            last:"#{msg.lastLbl}",
+            initiateStartPageClick:false,
+            onPageClick: function (event, page) {
+                document.getElementById("paginateForm:paginationPage").value = page;
+                document.getElementById("paginateForm:paginateButton").click();
+            }
+        });
+
+        if("#{electionsBean.totalPages}" === "1"){
+            document.querySelector("#paginationDiv").style.display = "none";
+        }
+      // ]]>
+    </script>
+  </ui:define>
+</ui:composition>

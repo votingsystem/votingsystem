@@ -1,0 +1,148 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:o="http://omnifaces.org/ui"
+                xmlns:of="http://omnifaces.org/functions"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                template="/WEB-INF/templates/mainTemplate.xhtml">
+  <ui:define name="head">
+    <script src="#{request.contextPath}/res/flagstrap/dist/js/jquery.flagstrap.js"></script>
+    <link href="#{request.contextPath}/res/flagstrap/dist/css/flags.css" rel="stylesheet"/>
+  </ui:define>
+  <f:metadata>
+    <f:viewAction action="#{electionBean.onload}" />
+  </f:metadata>
+  <ui:define name="content">
+    <script>
+        vs.parentURL = "#{electionBean.parentURL}"
+    </script>
+    <div style="margin: 30px auto;">
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="row x_title">
+              <div class="col-md-12">
+                <div style="display: flex; flex-direction: row;align-items: center;">
+                  <div style="margin: 0 50px 0 0; font-size:1.1em;font-weight: bold; color: #43c2cb;">
+                    <h:outputText value="#{electionBean.election.dateBegin}" >
+                      <f:converter converterId="org.votingsystem.jsf.dateConverter" />
+                    </h:outputText>
+                  </div>
+                  <div style="text-transform:capitalize;font-weight:bold;font-size:1.6em;">
+                    #{electionBean.election.subject}
+                  </div>
+                  <div style="position: absolute; right: 5px;">
+                    #{electionBean.election.publisher.getFullName()}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="x_content" style="display: block;">
+              <div class="container" style="display: block;">
+                <div style="font-size: 1.2em;height: 100%; min-height: 200px;">
+                  <h:outputText value="#{electionBean.election.content}" escape="false"/>
+                </div>
+                <div class="ln_solid"></div>
+                <div>
+                  <div style="font-size: 1.3em;font-weight: bold;margin: 0 10px 0 0;">
+                    #{msg.electionOptionsLbl}:
+                  </div>
+                  <div id="electionOptions">
+                    <ul>
+                      <ui:repeat value="#{of:setToList(electionBean.election.electionOptions)}" var="option">
+                        <li style="margin: 5px 0 0 0; font-size:1.5em;color: #43c2cb;">#{option.content}</li>
+                      </ui:repeat>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <o:importConstants type="org.votingsystem.model.voting.Election.State" />
+
+      <div style="display: flex; flex-direction: row;justify-content: flex-end;">
+        <c:if test="${electionBean.election.state == State.ACTIVE}">
+          <script>vs.setMainPageCaption("#{msg.electionLbl}");</script>
+          <div id="submitButtonDiv" style="margin:0 20px 0 0;">
+            <a class="btn btn-success" onclick="$('#contrySelectorDialog').modal()">#{msg.voteLbl}</a>
+          </div>
+        </c:if>
+        <c:if test="${electionBean.election.state == State.PENDING}">
+          <script>vs.setMainPageCaption("#{msg.pendingElectionLbl}");</script>
+        </c:if>
+        <c:if test="${electionBean.election.state == State.TERMINATED}">
+          <script>vs.setMainPageCaption("#{msg.closedElectionLbl}");</script>
+        </c:if>
+      </div>
+    </div>
+
+    <div id="contrySelectorDialog" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span>
+            </button>
+            <h4 class="modal-title" id="myModalLabel2">#{msg.voteLbl}</h4>
+          </div>
+          <div class="modal-body" style="margin: 10px auto 0 0;display: flex; flex-direction: row;justify-content: center;">
+            <div class="countrydiv" style="margin: 0 0 20px 0;">
+              <div id="options" class="flagstrap" data-input-name="country" data-selected-displayName="ES">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <h:form id="initIdentificationProcessForm">
+              <h:inputHidden id="selectedCountry" value="#{electionBean.selectedCountry}"></h:inputHidden>
+              <h:inputHidden id="UUID" value="#{electionBean.electionUUID}"></h:inputHidden>
+              <h:commandButton class="btn btn-success" value="#{msg.continueLbl}" type="submit"
+                               action="#{electionBean.initAuthentication()}" onclick="return checkCountryForm()"/>
+            </h:form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      //<![CDATA[
+      var selectedCountry = '';
+      $(document).ready(function() {
+          $('#options').flagStrap({
+              countries: #{pageBean.getIdProvidersCountryMapAsJSON()},
+              buttonSize: "btn-md",
+              buttonType: "btn-info",
+              labelMargin: "10px",
+              scrollable: false,
+              scrollableHeight: "350px",
+              placeholder: {
+                  value: '',
+                  text: '#{msg.selectCountryLbl}'
+              },
+              onSelect: function (value, element) {
+                  console.log("selected: '" + element.querySelector('[selected="selected"]').value + "'");
+                  selectedCountry = element.querySelector('[selected="selected"]').value;
+              }
+          });
+      });
+
+      var action = '#{electionBean.action}'
+      switch (action) {
+          case 'notifyPublish':
+              vs.alert('#{msg.errorLbl}', '#{msg.selectCountryLbl}')
+              break;
+      }
+
+      function checkCountryForm() {
+          if(selectedCountry === "") {
+              vs.alert('#{msg.errorLbl}', '#{msg.selectCountryLbl}')
+              return false;
+          } else {
+              document.getElementById("initIdentificationProcessForm:selectedCountry").value = selectedCountry;
+              return true;
+          }
+      }
+      // ]]>
+    </script>
+  </ui:define>
+</ui:composition>

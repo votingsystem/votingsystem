@@ -1,0 +1,1 @@
+https://www.iconfinder.com/icons/473788/banking_buy_card_commerce_credit_payment_shopping_icon#size=128
