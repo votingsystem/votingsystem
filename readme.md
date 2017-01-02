@@ -1,3 +1,8 @@
+To build the project and install javascript libraries
+
+    mvn clean install -Pinstall-web-templates
+
+
 ## TimeStamp server
 
 All the signatures made by the system incorporates a TimeStamp, the system 

@@ -1,4 +1,11 @@
-## TimeStamp server
+## Config files
+
+The application expects the content of the directory 'docs/application-dir-contents' with values appropriate to the 
+installation in the directory:
+
+    /var/local/middleware/timestamp-server
+
+It can be changed setting system environment var 'timestamp_server_dir' with the desired value
 
 ### Configuration
  - The application has been developed and tested on Wildfly 10.
@@ -23,7 +30,7 @@ To enable application filters change what follows to the standalone / domain  se
             mvn clean package wildfly:deploy
       
 #### Logging
-Application will store log files on dir:
+Application will store log files in directory:
     
     /var/log/middleware/timestamp-server
 

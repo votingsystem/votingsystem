@@ -20,6 +20,7 @@ import org.votingsystem.model.Certificate;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.Messages;
 import org.votingsystem.util.OperationType;
+import org.votingsystem.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -92,6 +93,11 @@ public class ConfigEJB implements Config, ConfigIdProvider {
             KeyGenerator.INSTANCE.init(Constants.SIG_NAME, Constants.PROVIDER, Constants.KEY_SIZE, Constants.ALGORITHM_RNG);
             HttpConn.init(HttpConn.HTTPS_POLICY.ALL, null);
             entityMap = new ConcurrentHashMap<>();
+
+            applicationDirPath = System.getProperty("idprovider_server_dir");
+            if(StringUtils.isEmpty(applicationDirPath))
+                applicationDirPath = DEFAULT_APP_HOME;
+
             if(System.getProperty("APP_HOME") != null) {
                 applicationDirPath = System.getProperty("VS_SERVICE_HOME");
                 log.info("Setting application path from system property - applicationDirPath: " + applicationDirPath);

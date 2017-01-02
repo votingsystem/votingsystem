@@ -40,6 +40,8 @@ public class ConfigEJB {
 
     private static final Logger log = Logger.getLogger(ConfigEJB.class.getName());
 
+    public static final String DEFAULT_APP_HOME = "/var/local/middleware/timestamp-server";
+
     private String entityId;
     private String timestampServiceURL;
     private String applicationDirPath;
@@ -58,9 +60,9 @@ public class ConfigEJB {
             KeyGenerator.INSTANCE.init(Constants.SIG_NAME, Constants.PROVIDER, Constants.KEY_SIZE, Constants.ALGORITHM_RNG);
             HttpConn.init(HttpConn.HTTPS_POLICY.ALL, null);
 
-            applicationDirPath = System.getProperty(Constants.TIMESTAMP_SERVER_DIR_KEY);
+            applicationDirPath = System.getProperty("timestamp_server_dir");
             if(StringUtils.isEmpty(applicationDirPath))
-                applicationDirPath = "/var/local/middleware/timestamp-server";
+                applicationDirPath = DEFAULT_APP_HOME;
             log.info("applicationDirPath: " + applicationDirPath);
             Properties properties = new Properties();
             properties.load(new FileInputStream(new File(applicationDirPath + "/config.properties")));

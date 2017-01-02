@@ -1,3 +1,12 @@
+## Config files
+
+The application expects the content of the directory 'docs/application-dir-contents' with values appropriate to the 
+installation in the directory:
+
+    /var/local/middleware/votingsystem-idprovider
+
+It can be changed setting system environment var 'idprovider_server_dir' with the desired value
+
 ## Proveedor de identidad
 
 Este proyecto es un proveedor de identidad preparado para ser utilizado en el sistema de votación.
@@ -36,7 +45,7 @@ put here the TimeStampServers and the Voting Service Providers
  
  
 #### Logging
-Application will store log files on dir:
+Application will store log files in directory:
     
     /var/log/middleware/votingsystem-idprovider
     

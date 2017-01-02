@@ -3,14 +3,14 @@
                              http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.votingsystem</groupId>
-    <artifactId>votingsystem-parent</artifactId>
+    <artifactId>votingsystem</artifactId>
     <packaging>pom</packaging>
     <name>VotingSystem Parent</name>
     <version>${version.votingsystem}</version>
 
     <modules>
         <module>votingsystem-api</module>
-	<module>votingsystem-api-web</module>
+	    <module>votingsystem-api-web</module>
         <module>timestamp-server</module>
         <module>votingsystem-idprovider</module>
         <module>votingsystem-serviceprovider</module>

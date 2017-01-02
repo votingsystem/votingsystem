@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TrustedEntities>
+	<Entity Type="timestamp-server" Id="https://192.168.1.5/timestamp-server" CountryCode="ES"/>
+	<Entity Type="voting-idprovider" Id="https://192.168.1.5/idprovider" CountryCode="DE"/>
+</TrustedEntities>

@@ -55,7 +55,6 @@ public class Constants {
     public static final String CMS_ANON_FILE_NAME                    = "cmsAnonymous" + ":" + MediaType.JSON_SIGNED;
 
     public static final String BUNDLE_BASE_NAME                      = "org.votingsystem.messages";
-    public static final String TIMESTAMP_SERVER_DIR_KEY              = "timestamp_server_dir";
 
     public static final int SIGNED_MAX_FILE_SIZE_KB = 512;
     public static final int SIGNED_MAX_FILE_SIZE = SIGNED_MAX_FILE_SIZE_KB * 1024;

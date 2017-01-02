@@ -21,6 +21,7 @@ import org.votingsystem.model.voting.Election;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.Messages;
 import org.votingsystem.util.OperationType;
+import org.votingsystem.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -94,10 +95,10 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
             KeyGenerator.INSTANCE.init(Constants.SIG_NAME, Constants.PROVIDER, Constants.KEY_SIZE, Constants.ALGORITHM_RNG);
             HttpConn.init(HttpConn.HTTPS_POLICY.ALL, null);
             entityMap = new ConcurrentHashMap<>();
-            if(System.getProperty("APP_HOME") != null) {
-                applicationDirPath = System.getProperty("VS_SERVICE_HOME");
-                log.info("Setting application path from system property - applicationDirPath: " + applicationDirPath);
-            } else applicationDirPath = DEFAULT_APP_HOME;
+
+            applicationDirPath = System.getProperty("voting_provider_server_dir");
+            if(StringUtils.isEmpty(applicationDirPath))
+                applicationDirPath = DEFAULT_APP_HOME;
 
             Properties properties = new Properties();
             File propertiesFile = new File(applicationDirPath + "/config.properties");
