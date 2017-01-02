@@ -1,0 +1,37 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/basic.xhtml">
+    <ui:define name="head">
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="-1" />
+        <meta http-equiv="cache-control" content="no-cache" />
+        <style>
+            .loader {
+                border: 8px solid #f3f3f3;
+                border-top: 8px solid #43c2cb;
+                border-radius: 50%;
+                width: 20px; height: 20px;
+                margin: 10px auto 10px auto;
+                animation: spin 0.9s linear infinite;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+    </ui:define>
+    <ui:define name="content">
+        <body style="font-family: 'RobotoDraft', sans-serif;">
+            <div style="width: 800px; margin: 60px auto 20px auto;text-align: center; color: #26A69A;font-size: 1.4em;">
+                #{message}
+            </div>
+            <div class="loader"></div>
+            <form id="mainForm" method="post" action='#{formAction}'>
+                <input type='hidden' id='xmlInput' name="xmlInput" value='#{xmlInput}'/>
+            </form>
+            <script>
+                document.querySelector("#mainForm").submit();
+            </script>
+        </body>
+    </ui:define>
+</ui:composition>
