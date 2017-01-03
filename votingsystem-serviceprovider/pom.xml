@@ -161,6 +161,8 @@
                                 <configuration>
                                     <tasks>
                                         <echo message="prepare phase" />
+                                        <unzip src="${project.basedir}/../lib/org/web-components/flagstrap/1.0.0/flagstrap-1.0.0.zip"
+                                               dest="${project.basedir}/src/main/webapp/res" />
                                         <unzip src="${project.basedir}/../lib/org/web-components/gentelella/1.3.0/gentelella-1.3.0.zip"
                                                dest="${project.basedir}/src/main/webapp/res" />
                                         <unzip src="${project.basedir}/../lib/org/web-components/esimakin-twbs-pagination/1.3.1/esimakin-twbs-pagination-1.3.1.zip"
