@@ -1,6 +1,7 @@
-package org.votingsystem.serviceprovider.util;
+package org.votingsystem.serviceprovider.http;
 
 import org.votingsystem.ejb.QRSessionsEJB;
+import org.votingsystem.util.Constants;
 
 import javax.ejb.EJB;
 import javax.servlet.annotation.WebListener;
@@ -32,7 +33,7 @@ public class HttpSessionManager implements HttpSessionListener {
 
     @Override
     public void sessionDestroyed(HttpSessionEvent sessionEvent) {
-        Set<String> qrOperations = (Set<String>) sessionEvent.getSession().getAttribute(Constants.QR_OPERATIONS_KEY);
+        Set<String> qrOperations = (Set<String>) sessionEvent.getSession().getAttribute(Constants.QR_OPERATIONS);
         log.info("sessionDestroyed: " + sessionEvent.getSession().getId() + " - closing qrOperations: " + qrOperations);
         if(qrOperations != null) {
             for(String qrOperation:qrOperations) {

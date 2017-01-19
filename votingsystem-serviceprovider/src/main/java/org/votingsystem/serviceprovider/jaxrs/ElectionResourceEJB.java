@@ -66,7 +66,7 @@ public class ElectionResourceEJB {
         ElectionDto electionDto = XML.getMapper().readValue(requestSignedXML, ElectionDto.class);
         SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
                 SignedDocumentType.NEW_ELECTION_REQUEST).setWithTimeStampValidation(true);
-        SignedDocument signedDocument = signatureService.validateAndSaveXAdES(new InMemoryDocument(requestSignedXML), signatureParams);
+        SignedDocument signedDocument = signatureService.validateXAdESAndSave(new InMemoryDocument(requestSignedXML), signatureParams);
         electionDto.validatePublishRequest();
         byte[] receiptXML = signatureService.signXAdES(requestSignedXML);
         signedDocument.setBody(new String(receiptXML));

@@ -12,6 +12,6 @@
             <Content>DASDASD</Content>
         </Option>
     </Options>
-    <EntityId>https://192.168.1.5:8443/voting-service</EntityId>
+    <EntityId>https://votingsystem.ddns.net/voting-service</EntityId>
     <UUID>5297b92b-8c4f-4e60-99fd-2a33acef0813</UUID>
 </Election>

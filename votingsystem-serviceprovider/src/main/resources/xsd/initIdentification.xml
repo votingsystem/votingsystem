@@ -1,5 +1,5 @@
 <IdentityRequest Language="es" TimeZone="Europe/Madrid" Date="2016-12-04T18:47:26.271Z">
-    <Entity Id="https://192.168.1.5:8443/voting-service" Type="voting-service-provider"/>
+    <Entity Id="https://votingsystem.ddns.net/voting-service" Type="voting-service-provider"/>
     <OperationType></OperationType>
     <ElectionUUID></ElectionUUID>
 </IdentityRequest>

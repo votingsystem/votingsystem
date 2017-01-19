@@ -64,11 +64,11 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
     private static final Logger log = Logger.getLogger(ConfigEJB.class.getName());
 
     public static final String DEFAULT_APP_HOME = "/var/local/middleware/votingsystem-serviceprovider";
+    public static final Integer DEFAULT_METADATA_LIVE_IN_HOURS = 1;
 
     @PersistenceContext
     private EntityManager em;
-    @Inject
-    MetadataService metadataEJB;
+    @Inject MetadataService metadataEJB;
     @Inject TrustedServicesEJB trustedServices;
 
     private String entityId;
@@ -83,7 +83,6 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
     private Map<Long, Certificate> trustedCACertsMap = new HashMap<>();
     private Map<String, MetadataDto> entityMap;
     private MetadataDto metadata;
-    private Integer defaultMetadataLiveInHours;
     private Set<X509Certificate> trustedTimeStampServers;
     private Set<TrustAnchor> trustedCertAnchors;
 
@@ -110,13 +109,11 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
                 handler.setLevel(selectedLogLevel);
             }
             timestampServiceURL = OperationType.TIMESTAMP_REQUEST.getUrl((String)properties.get("timestampServerURL"));
-
-            defaultMetadataLiveInHours = Integer.valueOf( (String) properties.get("DEFAULT_METADATA_LIVE_IN_HOURS"));
             entityId = (String)properties.get("entityId");
 
             log.info("entityId: " + entityId + " - applicationDirPath: " + applicationDirPath
                     + " - selectedLogLevel: " + selectedLogLevel + " - timestampServiceURL: " + timestampServiceURL +
-                    " - defaultMetadataLiveInHours: " + defaultMetadataLiveInHours);
+                    " - defaultMetadataLiveInHours: " + DEFAULT_METADATA_LIVE_IN_HOURS);
 
             properties = new Properties();
             propertiesFile = new File(applicationDirPath + "/sec/keystore.properties");
@@ -276,7 +273,7 @@ public class ConfigEJB implements Config, ConfigServiceProvider, Serializable {
                 metadata.setTrustedEntities(trustedServices.getTrustedEntities());
             }
             metadata.setValidUntil(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(
-                    ZonedDateTime.now().plus(defaultMetadataLiveInHours, ChronoUnit.HOURS)));
+                    ZonedDateTime.now().plus(DEFAULT_METADATA_LIVE_IN_HOURS, ChronoUnit.HOURS)));
             return metadata;
         } catch (Exception ex) {
             throw new RuntimeException(Messages.currentInstance().get("invalidMetadataMsg") + " - " + ex.getMessage());

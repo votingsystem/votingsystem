@@ -8,7 +8,7 @@ import org.votingsystem.model.voting.Election;
 import org.votingsystem.model.voting.ElectionOption;
 import org.votingsystem.qr.QRConstants;
 import org.votingsystem.qr.QRRequestBundle;
-import org.votingsystem.serviceprovider.util.Constants;
+import org.votingsystem.util.Constants;
 import org.votingsystem.util.OperationType;
 import org.votingsystem.xml.XML;
 
@@ -101,7 +101,7 @@ public class PublishElectionBean implements Serializable {
 
             qrUUID = election.getUUID();
             qrId = qrUUID.substring(0, 4).toUpperCase();
-            Set<String> qrSessionsSet = (Set<String>) req.getSession().getAttribute(Constants.QR_OPERATIONS_KEY);
+            Set<String> qrSessionsSet = (Set<String>) req.getSession().getAttribute(Constants.QR_OPERATIONS);
             if(qrSessionsSet == null)
                 qrSessionsSet = new HashSet<>();
             qrSessionsSet.add(qrUUID);

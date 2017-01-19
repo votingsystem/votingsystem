@@ -1,6 +1,5 @@
 @charset "UTF-8";
 body {
-  color: #73879C;
   font-family: "Helvetica Neue", Roboto, Arial, "Droid Sans", sans-serif;
 }
 
@@ -1135,24 +1134,6 @@ table.dataTable td.focus {
 .paginate_disabled_next, .paginate_enabled_next {
   padding-right: 23px;
   margin-left: 10px; }
-
-.paginate_disabled_previous {
-  background: url("../images/back_disabled.png") no-repeat top left; }
-
-.paginate_enabled_previous {
-  background: url("../images/back_enabled.png") no-repeat top left; }
-
-.paginate_enabled_previous:hover {
-  background: url("../images/back_enabled_hover.png") no-repeat top left; }
-
-.paginate_disabled_next {
-  background: url("../images/forward_disabled.png") no-repeat top right; }
-
-.paginate_enabled_next {
-  background: url("../images/forward_enabled.png") no-repeat top right; }
-
-.paginate_enabled_next:hover {
-  background: url("../images/forward_enabled_hover.png") no-repeat top right; }
 
 table.display {
   margin: 0 auto;
@@ -4317,6 +4298,7 @@ ul.notifications {
 .nav.side-menu li.active > a:hover {
   color: #f5f5f5 !important;
 }
+
 .nav.child_menu li.active > a:hover {
   color: #146c72 !important;
 }
@@ -4327,5 +4309,3 @@ ul.notifications {
 
 .nav li li.current-page:hover a {
   color: #146c72; }
-
-.nav.child_menu

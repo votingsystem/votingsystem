@@ -59,7 +59,7 @@ public class VoteResourceEJB {
         }
         SignatureParams signatureParams = new SignatureParams(null, User.Type.ANON_ELECTOR,
                 SignedDocumentType.VOTE).setWithTimeStampValidation(true);
-        SignedDocument signedDocument = signatureService.validateAndSaveXAdES(new InMemoryDocument(voteSigned), signatureParams);
+        SignedDocument signedDocument = signatureService.validateXAdESAndSave(new InMemoryDocument(voteSigned), signatureParams);
         Certificate certificate = signedDocument.getAnonSigner().getCertificate();
         if(!signedDocument.getAnonSigner().isValidElector()) {
             String message = Messages.currentInstance().get("voteCertificateRepeatedErrorMsg");
