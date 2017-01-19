@@ -1,15 +1,19 @@
 package org.votingsystem.model;
 
+import eu.europa.esig.dss.DigestAlgorithm;
+import eu.europa.esig.dss.EncryptionAlgorithm;
+import eu.europa.esig.dss.validation.TimestampToken;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
- * @author votingsystem
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity
 @Table(name="SIGNATURE", uniqueConstraints= @UniqueConstraint(columnNames = {"SIGNATURE_ID", "DOCUMENT_ID"}))
@@ -36,11 +40,23 @@ public class Signature implements Serializable {
     @Convert(converter = LocalDateTimeAttributeConverter.class)
     private LocalDateTime signatureDate;
 
+    @Transient private X509Certificate signingCert;
+    @Transient private DigestAlgorithm digestAlgorithm;
+    @Transient private EncryptionAlgorithm encryptionAlgorithm;
+    @Transient private TimestampToken timestampToken;
 
     public Signature() {}
 
-    public Signature(User signer, SignedDocument document, String signatureId, LocalDateTime signatureDate) {
+    public Signature(User signer, String signatureId, LocalDateTime signatureDate) {
         this.signer = signer;
+        this.signatureDate = signatureDate;
+        this.signatureId = signatureId;
+    }
+
+    public Signature(User signer, X509Certificate signingCert, SignedDocument document, String signatureId,
+                     LocalDateTime signatureDate) {
+        this.signer = signer;
+        this.signingCert = signingCert;
         this.document = document;
         this.signatureId = signatureId;
         this.signatureDate = signatureDate;
@@ -58,8 +74,9 @@ public class Signature implements Serializable {
         return document;
     }
 
-    public void setDocument(SignedDocument documentId) {
+    public Signature setDocument(SignedDocument documentId) {
         this.document = documentId;
+        return this;
     }
 
     public User getSigner() {
@@ -84,6 +101,42 @@ public class Signature implements Serializable {
 
     public void setSignatureId(String signatureId) {
         this.signatureId = signatureId;
+    }
+
+    public X509Certificate getSigningCert() {
+        return signingCert;
+    }
+
+    public Signature setSigningCert(X509Certificate signingCert) {
+        this.signingCert = signingCert;
+        return this;
+    }
+
+    public DigestAlgorithm getDigestAlgorithm() {
+        return digestAlgorithm;
+    }
+
+    public Signature setDigestAlgorithm(DigestAlgorithm digestAlgorithm) {
+        this.digestAlgorithm = digestAlgorithm;
+        return this;
+    }
+
+    public EncryptionAlgorithm getEncryptionAlgorithm() {
+        return encryptionAlgorithm;
+    }
+
+    public Signature setEncryptionAlgorithm(EncryptionAlgorithm encryptionAlgorithm) {
+        this.encryptionAlgorithm = encryptionAlgorithm;
+        return this;
+    }
+
+    public TimestampToken getTimestampToken() {
+        return timestampToken;
+    }
+
+    public Signature setTimestampToken(TimestampToken timestampToken) {
+        this.timestampToken = timestampToken;
+        return this;
     }
 
 }

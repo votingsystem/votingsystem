@@ -2,8 +2,9 @@ package org.votingsystem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import org.votingsystem.crypto.HashUtils;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.HashUtils;
 import org.votingsystem.util.OperationType;
 
 import java.io.Serializable;
@@ -11,12 +12,14 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Date;
+import java.time.ZonedDateTime;
+
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class QRMessageDto<T> implements Serializable {
 
     public static final String TAG = QRMessageDto.class.getSimpleName();
@@ -41,9 +44,9 @@ public class QRMessageDto<T> implements Serializable {
 
     private String systemEntityID;
     private String operationCode;
-    private Long deviceId;
+    private String deviceUUID;
     private String itemId;
-    private Date dateCreated;
+    private ZonedDateTime dateCreated;
     private String revocationHashBase64;
     private String publicKeyBase64;
     private String url;
@@ -54,15 +57,15 @@ public class QRMessageDto<T> implements Serializable {
 
     public QRMessageDto(DeviceDto deviceDto, OperationType operationType){
         this.operationType = operationType;
-        this.deviceId = deviceDto.getId();
-        this.dateCreated = new Date();
+        this.deviceUUID = deviceDto.getUUID();
+        this.dateCreated = ZonedDateTime.now();
         this.UUID = java.util.UUID.randomUUID().toString().substring(0,3);
     }
 
     public static QRMessageDto FROM_QR_CODE(String msg) {
         QRMessageDto qrMessageDto = new QRMessageDto();
         if (msg.contains(DEVICE_ID_KEY + "="))
-            qrMessageDto.setDeviceId(Long.valueOf(msg.split(DEVICE_ID_KEY + "=")[1].split(";")[0]));
+            qrMessageDto.setDeviceUUID(msg.split(DEVICE_ID_KEY + "=")[1].split(";")[0]);
         if (msg.contains(ITEM_ID_KEY + "="))
             qrMessageDto.setItemId(msg.split(ITEM_ID_KEY + "=")[1].split(";")[0]);
         if (msg.contains(SYSTEM_ENTITY_ID_KEY + "="))
@@ -91,9 +94,11 @@ public class QRMessageDto<T> implements Serializable {
 
     @JsonIgnore
     public DeviceDto getDevice() throws Exception {
-        if(device != null) return device;
-        DeviceDto dto = new DeviceDto(deviceId);
-        if(publicKeyBase64 != null) dto.setPublicKey(getRSAPublicKey());
+        if(device != null)
+            return device;
+        DeviceDto dto = new DeviceDto().setUUID(deviceUUID);
+        if(publicKeyBase64 != null)
+            dto.setPublicKey(getRSAPublicKey());
         return dto;
     }
     public void setDevice(DeviceDto device) {
@@ -122,13 +127,6 @@ public class QRMessageDto<T> implements Serializable {
         return this;
     }
 
-    public Long getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(Long deviceId) {
-        this.deviceId = deviceId;
-    }
 
     public T getData() {
         return data;
@@ -146,11 +144,11 @@ public class QRMessageDto<T> implements Serializable {
         this.operationType = operationType;
     }
 
-    public Date getDateCreated() {
+    public ZonedDateTime getDateCreated() {
         return dateCreated;
     }
 
-    public void setDateCreated(Date dateCreated) {
+    public void setDateCreated(ZonedDateTime dateCreated) {
         this.dateCreated = dateCreated;
     }
 
@@ -228,4 +226,11 @@ public class QRMessageDto<T> implements Serializable {
     }
 
 
+    public String getDeviceUUID() {
+        return deviceUUID;
+    }
+
+    public void setDeviceUUID(String deviceUUID) {
+        this.deviceUUID = deviceUUID;
+    }
 }

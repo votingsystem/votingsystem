@@ -6,4 +6,8 @@ public class HttpRequestException extends ExceptionBase {
         super(message);
     }
 
+    public HttpRequestException(String message, Throwable e) {
+        super(message, e);
+    }
+
 }

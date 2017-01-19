@@ -1,13 +1,17 @@
 package org.votingsystem.dto.voting;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.votingsystem.dto.metadata.SystemEntityDto;
+import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.model.voting.Vote;
 import org.votingsystem.model.voting.VoteCanceler;
 import org.votingsystem.util.OperationType;
+
+import java.security.cert.X509Certificate;
+import java.util.Set;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
@@ -33,6 +37,14 @@ public class VoteDto {
     private ElectionOptionDto optionSelected;
     @JacksonXmlProperty(localName = "ElectionUUID")
     private String electionUUID;
+
+    @JsonIgnore
+    private TimeStampToken timeStampToken;
+    @JsonIgnore
+    private X509Certificate anonCert;
+    @JsonIgnore
+    private
+    Set<X509Certificate> signerCerts;
 
     public VoteDto() {}
 
@@ -153,4 +165,29 @@ public class VoteDto {
                     " - found in cert vote extension: " + certVoteExtension.getRevocationHashBase64());
     }
 
+    public TimeStampToken getTimeStampToken() {
+        return timeStampToken;
+    }
+
+    public VoteDto setTimeStampToken(TimeStampToken timeStampToken) {
+        this.timeStampToken = timeStampToken;
+        return this;
+    }
+
+    public X509Certificate getAnonCert() {
+        return anonCert;
+    }
+
+    public VoteDto setAnonCert(X509Certificate anonCert) {
+        this.anonCert = anonCert;
+        return this;
+    }
+
+    public Set<X509Certificate> getSignerCerts() {
+        return signerCerts;
+    }
+
+    public void setSignerCerts(Set<X509Certificate> signerCerts) {
+        this.signerCerts = signerCerts;
+    }
 }

@@ -1,5 +1,7 @@
 package org.votingsystem.util;
 
+import org.votingsystem.model.currency.Tag;
+
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -14,7 +16,6 @@ import java.util.logging.Logger;
 public class Messages {
 
     private static final Logger log = Logger.getLogger(Messages.class.getName());
-
 
     private ResourceBundle bundle;
     private Locale locale;
@@ -53,8 +54,9 @@ public class Messages {
 
     public static Messages currentInstance() {
         if(instance.get() == null) {
-            log.severe("Messages not initialized - fetching messages for default languaje -> es_ES");
-            setCurrentInstance(Locale.forLanguageTag("es_ES"), Constants.BUNDLE_BASE_NAME);
+            log.severe("Messages not initialized - fetching messages for default languaje: " +
+                    Locale.getDefault().getDisplayLanguage());
+            setCurrentInstance(Locale.getDefault(), Constants.BUNDLE_BASE_NAME);
         }
         return instance.get();
     }
@@ -69,6 +71,11 @@ public class Messages {
 
     public static void setCurrentInstance(Locale locale, String bundleBaseName) {
         setCurrentInstance(new Messages(locale, bundleBaseName));
+    }
+
+    public String getTagMessage(String tag) {
+        if(Tag.WILDTAG.equals(tag)) return get("wildTagMsg");
+        else return get("tagMsg", tag);
     }
 
 }

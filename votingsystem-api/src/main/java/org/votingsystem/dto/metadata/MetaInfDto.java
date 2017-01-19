@@ -1,14 +1,22 @@
 package org.votingsystem.dto.metadata;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.votingsystem.util.SystemOperation;
 
+/**
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MetaInfDto {
 
+
+    public enum System {ELECTIONS, CURRENCY}
+
+    private SystemOperation operation;
+    private String subject;
     private String reason;
     private String data;
+    private System system;
 
     public MetaInfDto() { }
 
@@ -35,20 +43,30 @@ public class MetaInfDto {
         return this;
     }
 
-    public String toXmlStr() throws JsonProcessingException {
-        return new XmlMapper().writeValueAsString(this);
+    public System getSystem() {
+        return system;
     }
 
-    public static MetaInfDto FROM_REASON(String reason) {
-        MetaInfDto result = new MetaInfDto();
-        result.setReason(reason);
-        return result;
+    public MetaInfDto setSystem(System system) {
+        this.system = system;
+        return this;
     }
 
-    public static MetaInfDto FROM_SIMPLE_REPORT(String xmlSimpleReport) {
-        MetaInfDto result = new MetaInfDto();
-        result.setData(xmlSimpleReport);
-        return result;
+    public SystemOperation getOperation() {
+        return operation;
+    }
+
+    public MetaInfDto setOperation(SystemOperation operation) {
+        this.operation = operation;
+        return this;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
     }
 
 }

@@ -4,19 +4,20 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
 import org.votingsystem.throwable.ExceptionBase;
-import org.votingsystem.util.Country;
+import org.votingsystem.util.CountryEurope;
 
 import java.io.Serializable;
 import java.util.Base64;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
+@JacksonXmlRootElement(localName = "Address")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AddressDto implements Serializable {
@@ -25,17 +26,17 @@ public class AddressDto implements Serializable {
 
     private static final Logger log = Logger.getLogger(AddressDto.class.getName());
 
+    @JacksonXmlProperty(localName = "Id", isAttribute = true)
     private Long id;
-    private String metaInf;
-    private String province;
-    private Country country;
-    private String city;
-    public Date dateCreated;
-    public Date lastUpdated;
-    @JacksonXmlText
-    private String address;
     @JacksonXmlProperty(localName = "PostalCode", isAttribute = true)
     private String postalCode;
+    @JacksonXmlProperty(localName = "Country", isAttribute = true)
+    private CountryEurope country;
+    private String metaInf;
+    private String province;
+    private String city;
+    @JacksonXmlText
+    private String address;
 
     public AddressDto() {}
 
@@ -44,22 +45,6 @@ public class AddressDto implements Serializable {
             this.address = Base64.getEncoder().encodeToString(address.getBytes());
         }
         this.postalCode = postalCode;
-    }
-    
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateCreated;
-    }
-
-    public Date getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setLastUpdated(Date lastUpdated) {
-        this.lastUpdated = lastUpdated;
-    }
-
-    public Date getLastUpdated() {
-        return lastUpdated;
     }
 
     public void setId(Long id) {
@@ -120,11 +105,11 @@ public class AddressDto implements Serializable {
 		this.metaInf = metaInf;
 	}
 
-    public Country getCountry() {
+    public CountryEurope getCountry() {
         return country;
     }
 
-    public void setCountry(Country country) {
+    public void setCountry(CountryEurope country) {
         this.country = country;
     }
 

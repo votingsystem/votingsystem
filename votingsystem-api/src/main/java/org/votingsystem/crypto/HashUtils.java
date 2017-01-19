@@ -1,10 +1,21 @@
 package org.votingsystem.crypto;
 
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
-public class DigestUtils {
+public class HashUtils {
+
+    public static byte[] getHash(byte[] content, String digestMethod) throws NoSuchAlgorithmException {
+        MessageDigest messageDigest = MessageDigest.getInstance(digestMethod);
+        return messageDigest.digest(content);
+    }
+
+    public static String getHashBase64(byte[] content, String digestMethod) throws NoSuchAlgorithmException {
+        MessageDigest messageDigest = MessageDigest.getInstance(digestMethod);
+        byte[] resultDigest = messageDigest.digest(content);
+        return Base64.getEncoder().encodeToString(resultDigest);
+    }
 
     public static byte[] getSHA256Base64(byte[] content) throws NoSuchAlgorithmException {
         byte[] digest =  getSHA256(content);
@@ -35,4 +46,5 @@ public class DigestUtils {
         byte[] digest =  messageDigest.digest();
         return digest;
     }
+
 }

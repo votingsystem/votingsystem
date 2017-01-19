@@ -3,6 +3,7 @@ package org.votingsystem.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.Device;
@@ -32,6 +33,8 @@ public class UserDto implements Serializable {
     private Set<DeviceDto> connectedDevices;
     @JacksonXmlProperty(localName = "Device")
     private DeviceDto device;
+    @JacksonXmlElementWrapper(useWrapping = true, localName = "Certificates")
+    @JacksonXmlProperty(localName = "Certificate")
     private Set<CertificateDto> certCollection = new HashSet<>();
     @JacksonXmlProperty(localName = "GivenName")
     private String givenName;
@@ -52,6 +55,8 @@ public class UserDto implements Serializable {
     private String numId;
     @JacksonXmlProperty(localName = "DocumentType")
     private IdDocument documentType;
+    @JacksonXmlProperty(localName = "Details")
+    private String details;
     @JacksonXmlProperty(localName = "UUID")
     private String UUID;
 
@@ -140,7 +145,7 @@ public class UserDto implements Serializable {
         if (connectedDevices != null) {
             result = new HashSet<>();
             for(DeviceDto deviceDto : connectedDevices) {
-                result.add(deviceDto.getDevice());
+                result.add(new Device(deviceDto));
             }
         }
         return result;
@@ -272,5 +277,14 @@ public class UserDto implements Serializable {
 
     public void setDevice(DeviceDto device) {
         this.device = device;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public UserDto setDetails(String details) {
+        this.details = details;
+        return this;
     }
 }

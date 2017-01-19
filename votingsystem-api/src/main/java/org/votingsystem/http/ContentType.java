@@ -9,12 +9,14 @@ public enum ContentType {
     BACKUP(MediaType.BACKUP, "zip"),
     JAVASCRIPT("application/javascript", "js"),
 
-    JSON(MediaType.JSON, "json"),
-    JSON_SIGNED(MediaType.JSON_SIGNED,"p7s"),
-    JSON_ENCRYPTED(MediaType.JSON_ENCRYPTED,"p7s"),//.p7c
-    JSON_SIGNED_ENCRYPTED(MediaType.JSON_SIGNED_ENCRYPTED, "p7s"),
+    XML(MediaType.XML, "xml"),
 
-    MESSAGEVS(MediaType.MESSAGEVS, "vs"),
+    JSON(MediaType.JSON, "json"),
+    PKCS7_SIGNED(MediaType.PKCS7_SIGNED, "p7s"),
+    PKCS7_ENCRYPTED(MediaType.PKCS7_ENCRYPTED, "p7s"),//.p7c
+    PKCS7_SIGNED_ENCRYPTED(MediaType.PKCS7_SIGNED_ENCRYPTED, "p7s"),
+
+    MESSAGE(MediaType.MESSAGE, "vs"),
     MULTIPART_SIGNED("multipart/signed", null),
     MULTIPART_ENCRYPTED(MediaType.MULTIPART_ENCRYPTED, null),
     TEXT("text/plain", "txt"),
@@ -29,9 +31,7 @@ public enum ContentType {
     OCSP_REQUEST("application/ocsp-request", null),
     OCSP_RESPONSE("application/ocsp-response", null),
 
-    CMS_SIGNED("signed-data", null),
-    SIGNED("application/pkcs7-signature","p7s"),
-    ENCRYPTED(MediaType.ENCRYPTED, "p7s"),//.p7c
+
     SIGNED_AND_ENCRYPTED("application/pkcs7-signature;application/pkcs7-encrypted", "p7s"),
 
     PKCS7_CERT("application/pkcs7-certificates","p7b"),//.spc
@@ -81,11 +81,11 @@ public enum ContentType {
     }
 
     public boolean isEncrypted() {
-        return name.contains(MediaType.ENCRYPTED);
+        return name.contains(MediaType.PKCS7_SIGNED);
     }
 
     public boolean isSignedAndEncrypted() {
-        return (name.contains("application/pkcs7-signature") && name.contains(MediaType.ENCRYPTED));
+        return (name.contains(MediaType.PKCS7_SIGNED) && name.contains(MediaType.PKCS7_SIGNED_ENCRYPTED));
     }
 
     public static ContentType getByName(String contentTypeStr) {
@@ -93,24 +93,18 @@ public enum ContentType {
 
         if(contentTypeStr.contains(VOTE.getName())) return VOTE;
 
-        if(contentTypeStr.contains(JSON_SIGNED_ENCRYPTED.getName())) return JSON_SIGNED_ENCRYPTED;
-        if(contentTypeStr.contains(JSON_ENCRYPTED.getName())) return JSON_ENCRYPTED;
-        if(contentTypeStr.contains(JSON_SIGNED.getName())) return JSON_SIGNED;
+        if(contentTypeStr.contains(PKCS7_SIGNED_ENCRYPTED.getName())) return PKCS7_SIGNED_ENCRYPTED;
+        if(contentTypeStr.contains(PKCS7_ENCRYPTED.getName())) return PKCS7_ENCRYPTED;
+        if(contentTypeStr.contains(PKCS7_SIGNED.getName())) return PKCS7_SIGNED;
         if(contentTypeStr.contains("json")) return JSON;
 
         if(contentTypeStr.contains(MULTIPART_SIGNED.getName())) return MULTIPART_SIGNED;
         if(contentTypeStr.contains(TEXT.getName())) return TEXT;
         if(contentTypeStr.contains(HTML.getName())) return HTML;
 
-        if(contentTypeStr.contains(MESSAGEVS.getName())) return MESSAGEVS;
+        if(contentTypeStr.contains(MESSAGE.getName())) return MESSAGE;
 
-        if(contentTypeStr.contains(ENCRYPTED.getName())) return ENCRYPTED;
-        if(contentTypeStr.contains(SIGNED.getName())) return SIGNED;
         if(contentTypeStr.contains(SIGNED_AND_ENCRYPTED.getName())) return SIGNED_AND_ENCRYPTED;
-
-        if(contentTypeStr.contains(JSON_ENCRYPTED.getName())) return JSON_ENCRYPTED;
-
-        if(contentTypeStr.contains(JSON_SIGNED_ENCRYPTED.getName())) return JSON_SIGNED_ENCRYPTED;
 
         if(contentTypeStr.contains(MULTIPART_ENCRYPTED.getName())) return MULTIPART_ENCRYPTED;
 

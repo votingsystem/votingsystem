@@ -5,17 +5,16 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.ocsp.*;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.FileUtils;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.Security;
-import java.security.cert.X509Certificate;
 import java.util.Date;
 
 
@@ -64,16 +63,6 @@ public class OCSPUtils {
             }
             return certificateState;
         } else return Certificate.State.UNKNOWN;
-    }
-
-    public static void main(String[] args) throws Exception {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        X509Certificate cert = PEMUtils.fromPEMToX509Cert(FileUtils.getBytesFromFile(new File("/home/jgzornoza/temp/dnie.pem")));
-        X509Certificate intermediateCert = PEMUtils.fromPEMToX509Cert(FileUtils.getBytesFromFile(new File("/home/jgzornoza/temp/dnie_raiz.pem")));
-        org.votingsystem.model.Certificate.State certState = OCSPUtils.validateCert(
-                new X509CertificateHolder(intermediateCert.getEncoded()),
-                cert.getSerialNumber(), new Date());
-        System.out.println("certState: " + certState);
     }
 
 }

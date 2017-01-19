@@ -2,6 +2,7 @@ package org.votingsystem.model;
 
 import org.votingsystem.crypto.CertUtils;
 import org.votingsystem.dto.CertExtensionDto;
+import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.util.Constants;
 
@@ -18,14 +19,16 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity
 @Table(name="DEVICE")
 @NamedQueries({
-        @NamedQuery(name = "findDeviceByUserAndDeviceId", query =
-                "SELECT d FROM Device d WHERE d.user =:user and d.deviceId =:deviceId"),
-        @NamedQuery(name = "findByDeviceIdAndUser", query = "SELECT d FROM Device d WHERE d.deviceId =:deviceId " +
-                "and d.user =:user")
+        @NamedQuery(name = Device.FIND_BY_UUID, query = "SELECT d FROM Device d WHERE d.user =:user and d.UUID =:deviceUUID"),
+        @NamedQuery(name = Device.FIND_BY_USER_AND_UUID, query = "SELECT d FROM Device d WHERE d.UUID =:deviceUUID and d.user =:user")
 })
 public class Device extends EntityBase implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+    public static final String FIND_BY_UUID= "Device.findByUUID";
+    public static final String FIND_BY_USER_AND_UUID = "Device.findByUserAndUUID";
+
 
     public enum Type {MOBILE, PC, BROWSER}
 
@@ -36,14 +39,15 @@ public class Device extends EntityBase implements Serializable {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="USER_ID") private User user;
     @Column(name="TYPE") @Enumerated(EnumType.STRING) private Type type = Type.MOBILE;
-    @Column(name="DEVICE" ) private String deviceId;//hardware id
-    @Column(name="EMAIL" ) private String email;
-    @Column(name="PHONE" ) private String phone;
-    @Column(name="STATE" ) @Enumerated(EnumType.STRING)  private State state;
-    @Column(name="META_INF" ) private String metaInf;
-    @OneToOne
-    @JoinColumn(name="CERTIFICATE_ID")
+    @Column(name="UUID") private String UUID;
+    @Column(name="EMAIL") private String email;
+    @Column(name="PHONE") private String phone;
+    @Column(name="STATE") @Enumerated(EnumType.STRING)  private State state;
+    @Column(name="META_INF") private String metaInf;
+    @OneToOne @JoinColumn(name="CERTIFICATE_ID")
     private Certificate certificate;
+    @OneToOne @JoinColumn(name="SIGNED_DOCUMENT")
+    private SignedDocument signedDocument;
     @Column(name="REASON", columnDefinition="TEXT") private String reason;
     @Column(name="DEVICE_NAME") private String deviceName;
     @Column(name="DATE_CREATED", columnDefinition="TIMESTAMP")
@@ -57,23 +61,18 @@ public class Device extends EntityBase implements Serializable {
 
     public Device() {}
 
-    public Device(Long deviceId) {
-        this.id = deviceId;
-    }
-
-    public Device(User user, String deviceId, String email, String phone, String deviceName,
-                  Certificate certificate) {
+    public Device(User user, String UUID, String email, String phone, String deviceName, Certificate certificate){
         this.user = user;
-        this.deviceId =deviceId;
+        this.UUID = UUID;
         this.email = email;
         this.phone = phone;
         this.deviceName = deviceName;
         this.certificate = certificate;
     }
 
-    public Device(User user, String deviceId, String email, String phone, Type type) {
+    public Device(User user, String UUID, String email, String phone, Type type) {
         this.user = user;
-        this.deviceId =deviceId;
+        this.UUID = UUID;
         this.email = email;
         this.phone = phone;
         this.type = type;
@@ -82,6 +81,15 @@ public class Device extends EntityBase implements Serializable {
     public Device(Long deviceId, String name) {
         this.id = deviceId;
         this.deviceName = name;
+    }
+
+
+    public Device(DeviceDto deviceDto) throws Exception {
+        this.UUID = deviceDto.getUUID();
+        this.deviceName = deviceDto.getDeviceName();
+        this.email = deviceDto.getEmail();
+        this.phone = deviceDto.getPhone();
+        this.x509Certificate = deviceDto.getX509Certificate();
     }
 
 	public User getUser() {
@@ -106,15 +114,6 @@ public class Device extends EntityBase implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getDeviceId() {
-		return deviceId;
-	}
-
-	public Device setDeviceId(String deviceId) {
-		this.deviceId = deviceId;
-        return this;
 	}
 
 	public String getEmail() {
@@ -195,13 +194,32 @@ public class Device extends EntityBase implements Serializable {
         return this;
     }
 
+    public String getUUID() {
+        return UUID;
+    }
+
+    public Device setUUID(String UUID) {
+        this.UUID = UUID;
+        return this;
+    }
+
     public X509Certificate getX509Certificate() throws Exception {
-        if(x509Certificate == null && certificate != null) x509Certificate = CertUtils.loadCertificate(certificate.getContent());
+        if(x509Certificate == null && certificate != null)
+            x509Certificate = CertUtils.loadCertificate(certificate.getContent());
         return x509Certificate;
     }
 
     public void setX509Certificate(X509Certificate x509Certificate) {
         this.x509Certificate = x509Certificate;
+    }
+
+    public SignedDocument getSignedDocument() {
+        return signedDocument;
+    }
+
+    public Device setSignedDocument(SignedDocument signedDocument) {
+        this.signedDocument = signedDocument;
+        return this;
     }
 
     public Device updateCertInfo (X509Certificate certificate) throws Exception {
@@ -214,7 +232,7 @@ public class Device extends EntityBase implements Serializable {
     public Device updateCertInfo (CertExtensionDto extensionDto) {
         setPhone(extensionDto.getMobilePhone());
         setEmail(extensionDto.getEmail());
-        setDeviceId(extensionDto.getDeviceId());
+        setUUID(extensionDto.getUUID());
         setType(extensionDto.getDeviceType());
         return this;
     }

@@ -2,10 +2,7 @@ package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.votingsystem.model.voting.Election;
-import org.votingsystem.model.voting.ElectionOption;
-import org.votingsystem.util.DateUtils;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Set;
@@ -18,6 +15,7 @@ public class ElectionStatsDto {
 
     private String electionUUID;
     private Long numVotes;
+    private Long numIdentityRequests;
     private String subject;
     private Election.State electionState;
     private ZonedDateTime dateBegin;
@@ -93,4 +91,14 @@ public class ElectionStatsDto {
     public void setElectionUUID(String electionUUID) {
         this.electionUUID = electionUUID;
     }
+
+    public Long getNumIdentityRequests() {
+        return numIdentityRequests;
+    }
+
+    public ElectionStatsDto setNumIdentityRequests(Long numIdentityRequests) {
+        this.numIdentityRequests = numIdentityRequests;
+        return this;
+    }
+
 }

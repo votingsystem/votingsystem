@@ -10,7 +10,6 @@ import org.votingsystem.model.Device;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CertExtensionDto {
 
-    private String deviceId;
     private String deviceName;
     private String email;
     private String mobilePhone;
@@ -18,24 +17,22 @@ public class CertExtensionDto {
     private String givenname;
     private String surname;
     private Device.Type deviceType;
-
+    private String UUID;
 
     public CertExtensionDto() {}
 
-    public CertExtensionDto(String deviceId, String deviceName, String email, String phone, Device.Type deviceType) {
-        this.deviceId = deviceId;
+    public CertExtensionDto(String nif , String givenname, String surname) {
+        this.nif = nif;
+        this.givenname = givenname;
+        this.surname = surname;
+    }
+
+    public CertExtensionDto(String deviceName, String UUID, String email, String phone, Device.Type deviceType) {
+        this.UUID = UUID;
         this.deviceName = deviceName;
         this.email = email;
         this.mobilePhone = phone;
         this.deviceType = deviceType;
-    }
-
-    public String getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
     }
 
     public String getDeviceName() {
@@ -94,8 +91,19 @@ public class CertExtensionDto {
         this.surname = surname;
     }
 
+
+    public String getUUID() {
+        return UUID;
+    }
+
+    public CertExtensionDto setUUID(String UUID) {
+        this.UUID = UUID;
+        return this;
+    }
+
     @JsonIgnore
     public String getPrincipal() {
         return "SERIALNUMBER=" + nif + ", GIVENNAME=" + givenname + ", SURNAME=" + surname;
     }
+
 }

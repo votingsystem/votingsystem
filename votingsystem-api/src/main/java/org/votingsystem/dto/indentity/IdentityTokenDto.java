@@ -22,7 +22,8 @@ public class IdentityTokenDto {
         @JsonProperty("ok")
         ok,
         @JsonProperty("error")
-        error}
+        error
+    }
 
     @JacksonXmlProperty(localName = "Type", isAttribute = true)
     private OperationType type;

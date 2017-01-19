@@ -7,8 +7,8 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.votingsystem.crypto.CMSUtils;
 import org.votingsystem.crypto.CertUtils;
+import org.votingsystem.crypto.cms.CMSUtils;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.util.Constants;
@@ -27,7 +27,6 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import static javax.persistence.GenerationType.IDENTITY;
@@ -37,10 +36,12 @@ import static javax.persistence.GenerationType.IDENTITY;
 */
 @Entity @Table(name="SIGNER")
 @NamedQueries({
-        @NamedQuery(name = "findUserByType", query = "SELECT u FROM User u WHERE u.type =:type"),
-        @NamedQuery(name = "findUserByNIF", query = "SELECT u FROM User u WHERE u.numId =:numI"),
-        @NamedQuery(name = "findUserByIBAN", query = "SELECT u FROM User u WHERE u.IBAN =:IBAN"),
-        @NamedQuery(name = "countUserActiveByDateAndInList", query = "SELECT COUNT(u) FROM User u " +
+        @NamedQuery(name = User.FIND_USER_BY_TYPE, query = "SELECT u FROM User u WHERE u.type =:type"),
+        @NamedQuery(name = User.FIND_USER_BY_NIF, query = "SELECT u FROM User u WHERE u.numId =:numId"),
+        @NamedQuery(name = User.FIND_USER_BY_IBAN, query = "SELECT u FROM User u WHERE u.IBAN =:IBAN"),
+        @NamedQuery(name = User.FIND_USER_IN_LIST_ACTIVE_OR_CANCELED_AFTER, query = "SELECT u FROM User u " +
+                "WHERE u.type in :typeList and(u.state = 'ACTIVE' or (u.state != 'ACTIVE' and(u.dateCanceled >=:dateCanceled)))"),
+        @NamedQuery(name = User.COUNT_USER_ACTIVE_BY_DATE_AND_IN_LIST, query = "SELECT COUNT(u) FROM User u " +
                 "WHERE (u.dateCanceled is null OR u.dateCanceled >=:date) and u.type in :inList")
 })
 public class User extends EntityBase implements Serializable {
@@ -49,7 +50,15 @@ public class User extends EntityBase implements Serializable {
 
     private static Logger log = Logger.getLogger(User.class.getName());
 
-    public enum Type {ENTITY, USER, ID_CARD_USER, TIMESTAMP_SERVER, ANON_ELECTOR, BANK}
+
+    public static final String FIND_USER_IN_LIST_ACTIVE_OR_CANCELED_AFTER = "User.findUserInListActiveOrCancelledAfter";
+    public static final String FIND_USER_BY_TYPE = "User.findUserByType";
+    public static final String FIND_USER_BY_NIF = "User.findUserByNif";
+    public static final String FIND_USER_BY_IBAN = "User.findUserByIBAN";
+    public static final String COUNT_USER_ACTIVE_BY_DATE_AND_IN_LIST = "User.countUserActiveByDateAndInList";
+
+    public enum Type {ENTITY, USER, ID_CARD_USER, TIMESTAMP_SERVER, ANON_ELECTOR, BANK, CURRENCY_SERVER, IDENTITY_SERVER,
+        ANON_CURRENCY, BROWSER, MOBILE}
 
     public enum State {ACTIVE, PENDING, SUSPENDED, CANCELED}
 
@@ -100,6 +109,7 @@ public class User extends EntityBase implements Serializable {
     @Transient private transient Device device;
     @Transient private KeyStore keyStore;
     @Transient private boolean isValidElector = false;
+    @Transient private boolean isAnonymousUser = false;
 
     public User() {}
 
@@ -271,11 +281,6 @@ public class User extends EntityBase implements Serializable {
 		this.metaInf = metaInf;
 	}
 
-    public void updateAdmins(Set<String> admins) throws IOException {
-        getMetaInfMap().put("adminsDNI", admins);
-        this.metaInf = JSON.getMapper().writeValueAsString(metaInfMap);
-    }
-
     public void setSignerInformation(SignerInformation signer) {
         this.signerInformation = signer;
     }
@@ -344,7 +349,7 @@ public class User extends EntityBase implements Serializable {
 
     public String getEncryptiontId() {
         if(signerInformation == null) return null;
-        else return CMSUtils.getEncryptiontId(signerInformation.getEncryptionAlgOID()); 
+        else return CMSUtils.getEncryptiontId(signerInformation.getEncryptionAlgOID());
     }
 
     public Date getSignatureDate() {
@@ -369,10 +374,6 @@ public class User extends EntityBase implements Serializable {
     public String getSignedContentDigestBase64() {
         if (signerInformation.getContentDigest() == null) return null;
         return DatatypeConverter.printBase64Binary(signerInformation.getContentDigest());
-    }
-
-    public static String getServerInfoURL(String serverURL, Long userId) {
-        return serverURL + "/rest/user/id/" + userId;
     }
 
     public boolean isValidElector() {
@@ -457,6 +458,14 @@ public class User extends EntityBase implements Serializable {
     public User setDevice(Device device) {
         this.device = device;
         return this;
+    }
+
+    public boolean isAnonymousUser() {
+        return isAnonymousUser;
+    }
+
+    public void setAnonymousUser(boolean anonymousUser) {
+        isAnonymousUser = anonymousUser;
     }
 
     public Address getAddress() {

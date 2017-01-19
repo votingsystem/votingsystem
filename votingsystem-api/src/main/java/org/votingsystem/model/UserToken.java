@@ -25,7 +25,7 @@ public class UserToken extends EntityBase implements Serializable {
     @Column(name="STATE") @Enumerated(EnumType.STRING) private State state = State.OK;
     //user token encrypted with the server certificate
     @Column(name="TOKEN")
-    private byte[] token;
+    private String token;
     @Column(name="AES_PARAMS_DTO")
     private String aesParamsDto;
     @Column(name="HTTP_SESSION_ID")
@@ -48,18 +48,18 @@ public class UserToken extends EntityBase implements Serializable {
 
     public UserToken() {}
 
-    public UserToken(User user, byte[] token, Certificate certificate, SignedDocument signedDocument) {
+    public UserToken(User user, String token, Certificate certificate, SignedDocument signedDocument) {
         this.user = user;
         this.token = token;
         this.certificate = certificate;
         this.signedDocument = signedDocument;
     }
 
-    public byte[] getToken() {
+    public String getToken() {
         return token;
     }
 
-    public void setToken(byte[] token) {
+    public void setToken(String token) {
         this.token = token;
     }
 

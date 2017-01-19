@@ -2,9 +2,9 @@ package org.votingsystem.dto.voting;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.votingsystem.crypto.HashUtils;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.HashUtils;
 import org.votingsystem.util.OperationType;
 
 import java.security.NoSuchAlgorithmException;

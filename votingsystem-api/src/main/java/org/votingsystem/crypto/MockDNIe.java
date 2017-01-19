@@ -21,24 +21,30 @@ public class MockDNIe {
     private Certificate[] certificateChain;
     private PrivateKey privateKey;
     private KeyStore keyStore;
+    private String keyAlias;
+    private String password;
 
     public MockDNIe(String nif) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException,
             UnrecoverableEntryException {
         URL res = Thread.currentThread().getContextClassLoader().getResource("certs/fake_" + nif + ".jks");
         this.keyStore = KeyStore.getInstance("JKS");
         keyStore.load(res.openStream(), Constants.PASSW_DEMO.toCharArray());
-        loadKeyStore(keyStore, Constants.PASSW_DEMO.toCharArray());
+        loadKeyStore(keyStore, Constants.PASSW_DEMO.toCharArray(), Constants.USER_CERT_ALIAS);
     }
 
-    public MockDNIe(KeyStore keyStore, char[] password) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
-        loadKeyStore(keyStore, password);
+    public MockDNIe(KeyStore keyStore, char[] password, String keyAlias) throws UnrecoverableKeyException,
+            NoSuchAlgorithmException, KeyStoreException {
+        loadKeyStore(keyStore, password, keyAlias);
     }
 
-    private void loadKeyStore(KeyStore keyStore, char[] password) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
+    private void loadKeyStore(KeyStore keyStore, char[] password, String keyAlias) throws KeyStoreException,
+            UnrecoverableKeyException, NoSuchAlgorithmException {
         this.keyStore = keyStore;
-        certificateChain = keyStore.getCertificateChain(Constants.USER_CERT_ALIAS);
-        x509Certificate = (X509Certificate)keyStore.getCertificate(Constants.USER_CERT_ALIAS);
-        privateKey = (PrivateKey) keyStore.getKey(Constants.USER_CERT_ALIAS, password);
+        this.keyAlias = keyAlias;
+        certificateChain = keyStore.getCertificateChain(keyAlias);
+        x509Certificate = (X509Certificate)keyStore.getCertificate(keyAlias);
+        privateKey = (PrivateKey) keyStore.getKey(keyAlias, password);
+        this.password = new String(password);
     }
 
     public MockDNIe(PrivateKey privateKey, X509Certificate x509Certificate) {
@@ -103,4 +109,19 @@ public class MockDNIe {
         this.keyStore = keyStore;
     }
 
+    public String getKeyAlias() {
+        return keyAlias;
+    }
+
+    public void setKeyAlias(String keyAlias) {
+        this.keyAlias = keyAlias;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

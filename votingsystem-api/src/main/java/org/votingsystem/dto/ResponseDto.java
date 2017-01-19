@@ -12,6 +12,7 @@ import org.votingsystem.throwable.ExceptionBase;
 import org.votingsystem.util.AppCode;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.OperationType;
+import org.votingsystem.util.SystemOperation;
 
 import java.io.File;
 import java.io.Serializable;
@@ -31,6 +32,7 @@ public class ResponseDto<T> implements Serializable {
     public static final long serialVersionUID = 1L;
 
     private static Logger log = java.util.logging.Logger.getLogger(ResponseDto.class.getName());
+
 
     public enum Status {
         OK, ERROR
@@ -60,7 +62,7 @@ public class ResponseDto<T> implements Serializable {
     public static final int SC_PAUSED                   = 10;
 
     @JacksonXmlProperty(localName = "OperationType", isAttribute = true)
-    private OperationType type;
+    private SystemOperation type;
     @JacksonXmlProperty(localName = "StatusCode", isAttribute = true)
     private Integer statusCode;
     @JacksonXmlProperty(localName = "Reason")
@@ -73,6 +75,8 @@ public class ResponseDto<T> implements Serializable {
     private String message;
     @JacksonXmlProperty(localName = "Caption")
     private String caption;
+    @JacksonXmlProperty(localName = "base64Data")
+    private String base64Data;
 
     @JsonIgnore
     private User user;
@@ -208,11 +212,11 @@ public class ResponseDto<T> implements Serializable {
         this.statusCode = statusCode;
     }
 
-    public OperationType getType() {
+    public SystemOperation getType() {
         return type;
     }
 
-    public ResponseDto setType(OperationType type) {
+    public ResponseDto setType(SystemOperation type) {
         this.type = type;
         return this;
     }
@@ -285,6 +289,15 @@ public class ResponseDto<T> implements Serializable {
 
     public ResponseDto setMetaInf(String metaInf) {
         this.metaInf = metaInf;
+        return this;
+    }
+
+    public String getBase64Data() {
+        return base64Data;
+    }
+
+    public ResponseDto setBase64Data(String base64Data) {
+        this.base64Data = base64Data;
         return this;
     }
 

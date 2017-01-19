@@ -28,6 +28,8 @@ public class KeyDto {
     }
 
     public enum Use {
+        @JsonProperty("currency-issuer")
+        CURRENCY_ISSUER,
         @JsonProperty("encryption")
         ENCRYPTION,
         @JsonProperty("sign")

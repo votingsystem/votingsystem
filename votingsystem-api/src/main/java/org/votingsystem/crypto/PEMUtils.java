@@ -5,7 +5,9 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.util.Constants;
@@ -74,8 +76,8 @@ public class PEMUtils {
     }
 
     public static PrivateKey fromPEMToRSAPrivateKey(String privateKeyPEM) throws Exception {
-        KeyPair kp = (KeyPair) new PEMParser(new InputStreamReader(new ByteArrayInputStream(privateKeyPEM.getBytes()))).readObject();
-        return kp.getPrivate();
+        Object objectKey = new PEMParser(new InputStreamReader(new ByteArrayInputStream(privateKeyPEM.getBytes()))).readObject();
+        return new JcaPEMKeyConverter().setProvider(Constants.PROVIDER).getKeyPair(((PEMKeyPair)objectKey)).getPrivate();
     }
 
     public static PublicKey fromPEMToRSAPublicKey(String publicKeyPEM) throws Exception {

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.votingsystem.util.OperationType;
+import org.votingsystem.util.SystemOperation;
 
 import java.util.Collection;
 
@@ -15,7 +16,7 @@ import java.util.Collection;
 public class ResultListDto<T> {
 
     @JacksonXmlProperty(localName = "Type", isAttribute = true)
-    private OperationType type;
+    private SystemOperation type;
     @JacksonXmlProperty(localName = "Offset", isAttribute = true)
     private Integer offset;
     @JacksonXmlProperty(localName = "StatusCode", isAttribute = true)
@@ -39,7 +40,7 @@ public class ResultListDto<T> {
         this(resultList, 0, resultList.size(), Long.valueOf(resultList.size()));
     }
 
-    public ResultListDto(Collection<T> resultList, OperationType type) {
+    public ResultListDto(Collection<T> resultList, SystemOperation type) {
         this(resultList, 0, resultList.size(), Long.valueOf(resultList.size()));
         this.type = type;
     }
@@ -95,7 +96,7 @@ public class ResultListDto<T> {
         this.message = message;
     }
 
-    public OperationType getType() {
+    public SystemOperation getType() {
         return type;
     }
 

@@ -5,15 +5,20 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
+import org.votingsystem.dto.SystemOperationDeserializer;
+import org.votingsystem.util.SystemOperation;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-
+/**
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 public class XML {
 
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
@@ -27,6 +32,11 @@ public class XML {
 
         mapper.registerModule(javaTimeModule);
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(SystemOperation.class, new SystemOperationDeserializer());
+        mapper.registerModule(module);
+
         return mapper;
     }
 
@@ -36,4 +46,5 @@ public class XML {
             return ZonedDateTime.parse(arg0.getText(), FORMATTER);
         }
     }
+
 }

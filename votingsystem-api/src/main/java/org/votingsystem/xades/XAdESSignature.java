@@ -11,7 +11,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

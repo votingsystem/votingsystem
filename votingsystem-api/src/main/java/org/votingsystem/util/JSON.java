@@ -5,11 +5,13 @@ import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.ZonedDateTimeSerializer;
+import org.votingsystem.dto.SystemOperationDeserializer;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -60,6 +62,10 @@ public class JSON {
         javaTimeModule.addDeserializer(ZonedDateTime.class, InstantDeserializer.ZONED_DATE_TIME);
 
         mapper.registerModule(javaTimeModule);
+
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(SystemOperation.class, new SystemOperationDeserializer());
+        mapper.registerModule(module);
 
         return mapper;
     }

@@ -12,8 +12,6 @@ import org.bouncycastle.cert.bc.BcX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.jce.PrincipalUtil;
@@ -35,10 +33,7 @@ import org.votingsystem.util.JSON;
 import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.*;
 import java.security.cert.*;
 import java.security.spec.InvalidKeySpecException;
@@ -59,7 +54,7 @@ public class CertUtils {
      * Generate V3 certificate for users
      */
     public static X509Certificate generateUserCert(PublicKey entityKey, PrivateKey caKey, X509Certificate caCert,
-                               Date dateBegin, Date dateFinish, String endEntitySubjectDN, String ocspServer) throws Exception {
+                       Date dateBegin, Date dateFinish, String endEntitySubjectDN, String ocspServer) throws Exception {
         X509V3CertificateGenerator  certGen = new X509V3CertificateGenerator();
         certGen.setSerialNumber(KeyGenerator.INSTANCE.getSerno());
         certGen.setIssuerDN(PrincipalUtil.getSubjectX509Principal(caCert));
@@ -147,7 +142,7 @@ public class CertUtils {
         //the certificate containing it is a CA and that only one certificate can follow in the certificate path.
         certGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(true, 0));
         certGen.addExtension(Extension.subjectKeyIdentifier, false,
-                new SubjectKeyIdentifier(getDigest(pair.getPublic().getEncoded())));
+                new SubjectKeyIdentifier(HashUtils.getSHA1(pair.getPublic().getEncoded())));
         certGen.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.keyCertSign | KeyUsage.cRLSign));
         return certGen.generate(pair.getPrivate(), Constants.PROVIDER);
     }
@@ -185,8 +180,8 @@ public class CertUtils {
             throw new Exception("ERROR VERIFYING CSR - fail signature check");
 
 
-        //if(organizationalUnit != null)
-        //    subjectDN = organizationalUnit + "," + subjectDN;
+        if(organizationalUnit != null)
+            subjectDN = "OU=" + organizationalUnit + "," + subjectDN;
 
         //X500NameBuilder nameBuilder = new X500NameBuilder();
         //nameBuilder.addRDN(BCStyle.EmailAddress, "feedback-crypto@bouncycastle.org");
@@ -211,7 +206,6 @@ public class CertUtils {
         //aia_ASN.add(caIssuers);
         aia_ASN.add(ocsp);
         certGen.addExtension(Extension.authorityInfoAccess, false, new DERSequence(aia_ASN));
-
 
         SubjectKeyIdentifier subjectKeyIdentifier = new BcX509ExtensionUtils().createSubjectKeyIdentifier(
                 SubjectPublicKeyInfo.getInstance(publicKey.getEncoded()));
@@ -308,8 +302,6 @@ public class CertUtils {
 
 	/**
 	 * Checks whether given X.509 certificate is self-signed.
-	 * 
-	 * http://www.nakov.com/blog/2009/12/01/x509-certificate-validation-in-java-build-and-verify-chain-and-verify-clr-with-bouncy-castle/
 	 */
 	public static boolean isSelfSigned(X509Certificate cert) throws CertificateException, NoSuchAlgorithmException,
 			NoSuchProviderException {
@@ -326,25 +318,100 @@ public class CertUtils {
 			return false;
 		}
 	}
-    
-	/**
-	 * Downloads a CRL from given HTTP/HTTPS/FTP URL, e.g.
-	 * http://crl.infonotary.com/crl/identity-ca.crl
-	 * 
-	 * http://www.nakov.com/blog/2009/12/01/x509-certificate-validation-in-java-build-and-verify-chain-and-verify-clr-with-bouncy-castle/
-	 */
-	public static X509CRL downloadCRLFromWeb(String crlURL) throws MalformedURLException, IOException,
-            CertificateException, CRLException {
-		URL url = new URL(crlURL);
-		InputStream crlStream = url.openStream();
-		try {
-			CertificateFactory cf = CertificateFactory.getInstance("X.509");
-			X509CRL crl = (X509CRL) cf.generateCRL(crlStream);
-			return crl;
-		} finally {
-			crlStream.close();
-		}
-	}
+
+    public static PKIXCertPathBuilderResult verifyCertificateChain(byte[] certChainPEM) throws Exception {
+        Iterator<X509Certificate> certIterator = PEMUtils.fromPEMToX509CertCollection(certChainPEM).iterator();
+        X509Certificate cert = certIterator.next();
+        Set<X509Certificate> additionalCerts = new HashSet<>();
+        while(certIterator.hasNext()) {
+            additionalCerts.add(certIterator.next());
+        }
+        return verifyCertificateChain(cert, additionalCerts);
+    }
+
+    public static PKIXCertPathBuilderResult verifyCertificateChain(X509Certificate cert,
+            Set<X509Certificate> additionalCerts) throws ValidationException {
+        try {
+            if (isSelfSigned(cert)) {
+                throw new ValidationException("The certificate is self-signed - " + cert.getSubjectDN());
+            }
+            Set<X509Certificate> trustedRootCerts = new HashSet<>();
+            Set<X509Certificate> intermediateCerts = new HashSet<>();
+            for (X509Certificate additionalCert : additionalCerts) {
+                if (isSelfSigned(additionalCert)) {
+                    trustedRootCerts.add(additionalCert);
+                } else {
+                    intermediateCerts.add(additionalCert);
+                }
+            }
+            PKIXCertPathBuilderResult verifiedCertChain = verifyCertificate(cert, trustedRootCerts, intermediateCerts);
+
+            // Check whether the certificate is revoked by the CRL given in its CRL distribution point extension
+            //CRLVerifier.verifyCertificateCRLs(cert);
+
+            // The chain is built and verified. Return it as a result
+            return verifiedCertChain;
+        } catch (Exception ex) {
+            throw new ValidationException("Error verifying the certificate: " + cert.getSubjectX500Principal(), ex);
+        }
+    }
+
+    /**
+     * Attempts to build a certification chain for given certificate and to verify
+     * it. Relies on a set of root CA certificates (trust anchors) and a set of
+     * intermediate certificates (to be used as part of the chain).
+     * @param cert - certificate for validation
+     * @param trustedRootCerts - set of trusted root CA certificates
+     * @param intermediateCerts - set of intermediate certificates
+     * @return the certification chain (if verification is successful)
+     * @throws GeneralSecurityException - if the verification is not successful
+     *      (e.g. certification path cannot be built or some certificate in the
+     *      chain is expired)
+     */
+    private static PKIXCertPathBuilderResult verifyCertificate(X509Certificate cert, Set<X509Certificate> trustedRootCerts,
+                               Set<X509Certificate> intermediateCerts) throws GeneralSecurityException {
+        // Create the selector that specifies the starting certificate
+        X509CertSelector selector = new X509CertSelector();
+        selector.setCertificate(cert);
+
+        // Create the trust anchors (set of root CA certificates)
+        Set<TrustAnchor> trustAnchors = new HashSet<>();
+        for (X509Certificate trustedRootCert : trustedRootCerts) {
+            trustAnchors.add(new TrustAnchor(trustedRootCert, null));
+        }
+
+        // Configure the PKIX certificate builder algorithm parameters
+        PKIXBuilderParameters pkixParams = new PKIXBuilderParameters(trustAnchors, selector);
+
+        // Disable CRL checks (this is done manually as additional step)
+        pkixParams.setRevocationEnabled(false);
+
+        // Specify a list of intermediate certificates
+        CertStore intermediateCertStore = CertStore.getInstance("Collection",
+                new CollectionCertStoreParameters(intermediateCerts), "BC");
+        pkixParams.addCertStore(intermediateCertStore);
+
+        // Build and verify the certification chain
+        CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", "BC");
+        PKIXCertPathBuilderResult result = (PKIXCertPathBuilderResult) builder.build(pkixParams);
+        return result;
+    }
+
+    /**
+     * @param certificate	the certificate from which we need the ExtensionValue
+     * @param oid the Object Identifier value for the extension.
+     * @return	the extension value as an ASN1Primitive object
+     * @throws IOException
+     */
+    public static ASN1Primitive getExtensionValue(X509Certificate certificate, String oid) throws IOException {
+        byte[] bytes = certificate.getExtensionValue(oid);
+        if (bytes == null) {
+            return null;
+        }
+        ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(bytes));
+        ASN1OctetString octs = (ASN1OctetString) aIn.readObject();
+        return new ASN1InputStream(new ByteArrayInputStream(octs.getOctets())).readObject();
+    }
 
     public static <T> T getCertExtensionData(Class<T> type, X509Certificate x509Certificate,
                                              String extensionOID) throws Exception {
@@ -357,7 +424,7 @@ public class CertUtils {
         return null;
     }
 
-    public static String getCertExtensionData(X509Certificate x509Certificate, String extensionOID) throws Exception {
+    public static String getCertExtensionData(X509Certificate x509Certificate, String extensionOID) throws IOException {
         byte[] extensionValue =  x509Certificate.getExtensionValue(extensionOID);
         if(extensionValue == null) return null;
         ASN1Primitive asn1Primitive = X509ExtensionUtil.fromExtensionValue(extensionValue);
@@ -367,7 +434,7 @@ public class CertUtils {
         return null;
     }
 
-    public static <T> T getCertExtensionData(Class<T> type, PKCS10CertificationRequest csr, String oid) throws Exception {
+    public static <T> T getCertExtensionData(Class<T> type, PKCS10CertificationRequest csr, String oid) throws IOException {
         org.bouncycastle.asn1.pkcs.Attribute[] attributes = csr.getAttributes(new ASN1ObjectIdentifier(oid));
         if(attributes.length > 0) {
             String certAttributeJSONStr = ((DERUTF8String) attributes[0].getAttrValues().getObjectAt(0)).getString();
@@ -375,14 +442,6 @@ public class CertUtils {
         }
         log.info("missing attribute with oid: " + oid);
         return null;
-    }
-
-    private static byte[] getDigest(byte[] bytes) {
-        Digest digest = new SHA1Digest();
-        byte[] resBuf = new byte[digest.getDigestSize()];
-        digest.update(bytes, 0, bytes.length);
-        digest.doFinal(resBuf, 0);
-        return resBuf;
     }
 
 }

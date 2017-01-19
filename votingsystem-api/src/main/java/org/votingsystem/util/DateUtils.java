@@ -19,6 +19,7 @@ public class DateUtils {
 
     public static String APPLICATION_DATE_PATTERN = "yyyy-MM-dd' 'HH:mm:ss OOOO";
 
+
     public static String getISO_OFFSET_DATE_TIME(LocalDateTime date) {
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(date, ZoneId.systemDefault()));
     }
@@ -72,8 +73,7 @@ public class DateUtils {
      */
     public static LocalDateTime getDate (String dateStr) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(APPLICATION_DATE_PATTERN + " ");
-            ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateStr + " ", formatter);
+            ZonedDateTime zonedDateTime = getZonedDateTime(dateStr);
             return zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
         } catch (Exception ex) {
             return ZonedDateTime.parse(dateStr).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
@@ -92,6 +92,15 @@ public class DateUtils {
     public static String getDateStr(LocalDateTime date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(APPLICATION_DATE_PATTERN);
         return formatter.format(ZonedDateTime.of(date, ZoneId.systemDefault()));
+    }
+
+    public static String getDateStr(Date date) {
+        return getDateStr(getLocalDateFromUTCDate(date));
+    }
+
+    public static String getUTCDateStr(Date date) {
+        LocalDateTime localDateTime = getLocalDateFromUTCDate(date);
+        return getDateStr(localDateTime);
     }
 
     public static String getDateStr(ZonedDateTime date) {
@@ -180,42 +189,49 @@ public class DateUtils {
 
     public static Interval getYearPeriod(LocalDateTime selectedDate) {
         LocalDateTime dayFrom = selectedDate.withNano(0).withSecond(0).withMinute(0).withHour(0).withDayOfYear(1);
-        return new Interval(dayFrom, selectedDate);
+        return new Interval(ZonedDateTime.of(dayFrom, ZoneId.systemDefault()),
+                ZonedDateTime.of(selectedDate, ZoneId.systemDefault()));
     }
 
     public static Interval getMonthPeriod(LocalDateTime selectedDate) {
         LocalDateTime dayFrom = selectedDate.withNano(0).withSecond(0).withMinute(0).withHour(0).withDayOfMonth(1);
-        return new Interval(dayFrom, selectedDate);
+        return new Interval(ZonedDateTime.of(dayFrom, ZoneId.systemDefault()),
+                ZonedDateTime.of(selectedDate, ZoneId.systemDefault()));
     }
 
     public static Interval getWeekPeriod(LocalDateTime selectedDate) {
-        LocalDateTime previousMonday = selectedDate.withNano(0).withSecond(0).withMinute(0).withHour(0)
+        LocalDateTime dayFrom = selectedDate.withNano(0).withSecond(0).withMinute(0).withHour(0)
                 .with(TemporalAdjusters.previous(DayOfWeek.MONDAY));
-        return new Interval(previousMonday, selectedDate);
+        return new Interval(ZonedDateTime.of(dayFrom, ZoneId.systemDefault()),
+                ZonedDateTime.of(selectedDate, ZoneId.systemDefault()));
     }
 
     public static Interval getDayPeriod(LocalDateTime selectedDate) {
-        LocalDateTime from = selectedDate.withNano(0).withSecond(0).withMinute(0).withHour(0);
-        LocalDateTime to = selectedDate.plus(1, ChronoUnit.DAYS).withNano(0).withSecond(0).withMinute(0).withHour(0);
-        return new Interval(from, to);
+        LocalDateTime dayFrom = selectedDate.withNano(0).withSecond(0).withMinute(0).withHour(0);
+        LocalDateTime dayTo = selectedDate.plus(1, ChronoUnit.DAYS).withNano(0).withSecond(0).withMinute(0).withHour(0);
+        return new Interval(ZonedDateTime.of(dayFrom, ZoneId.systemDefault()),
+                ZonedDateTime.of(dayTo, ZoneId.systemDefault()));
     }
 
     public static Interval getHourPeriod(LocalDateTime selectedDate) {
         LocalDateTime from = selectedDate.withNano(0).withSecond(0).withMinute(0);
         LocalDateTime to = selectedDate.plus(1, ChronoUnit.HOURS).withNano(0).withSecond(0).withMinute(0);
-        return new Interval(from, to);
+        return new Interval(ZonedDateTime.of(from, ZoneId.systemDefault()),
+                ZonedDateTime.of(to, ZoneId.systemDefault()));
     }
 
     public static Interval getMinutePeriod(LocalDateTime selectedDate) {
         LocalDateTime from = selectedDate.withNano(0).withSecond(0);
         LocalDateTime to = selectedDate.plus(1, ChronoUnit.MINUTES).withNano(0).withSecond(0);
-        return new Interval(from, to);
+        return new Interval(ZonedDateTime.of(from, ZoneId.systemDefault()),
+                ZonedDateTime.of(to, ZoneId.systemDefault()));
     }
 
     public static Interval getSecondPeriod(LocalDateTime selectedDate) {
         LocalDateTime from = selectedDate.withNano(0);
         LocalDateTime to = selectedDate.plus(1, ChronoUnit.SECONDS).withNano(0);
-        return new Interval(from, to);
+        return new Interval(ZonedDateTime.of(from, ZoneId.systemDefault()),
+                ZonedDateTime.of(to, ZoneId.systemDefault()));
     }
 
     public static Interval getLapsePeriod(LocalDateTime selectedDate, Interval.Lapse timePeriodLapse) throws ExceptionBase {
@@ -231,26 +247,17 @@ public class DateUtils {
         throw new ExceptionBase("Unsupported Lapse period: '" + timePeriodLapse + "'");
     }
 
-    public static LocalDateTime getDayFromPreviousWeek(LocalDateTime selectedDate) {
-        return selectedDate.plus(-7, ChronoUnit.DAYS);
-    }
-
     public static Interval getURLTimePeriod(String dateFromStr, String dateToStr) throws ParseException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
         LocalDateTime dateFrom = LocalDateTime.parse(dateFromStr, formatter);
         LocalDateTime dateTo = LocalDateTime.parse(dateToStr, formatter);
-        return new Interval(dateFrom, dateTo);
+        return new Interval(ZonedDateTime.of(dateFrom, ZoneId.systemDefault()),
+                ZonedDateTime.of(dateTo, ZoneId.systemDefault()));
     }
 
     public static LocalDateTime getURLPart(String dateStr) throws ParseException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
         return LocalDateTime.parse(dateStr, formatter);
-    }
-
-    public static String getDayWeekDateStr (LocalDateTime date, String hourFormat) {
-        if(date.getYear() == LocalDateTime.now().getYear())
-            return getDateStr(date, "dd MMM yyyy' '" + hourFormat);
-        else return getDateStr(date, "EEE dd MMM' '" + hourFormat);
     }
 
     public static LocalDateTime getDayWeekDate (String dateStr) throws ParseException {
@@ -296,4 +303,9 @@ public class DateUtils {
         return getLocalDateFromUTCDate(certificateDate);
     }
 
+    public static Interval getCurrentWeekPeriod() {
+        ZonedDateTime dayFrom = ZonedDateTime.now().withNano(0).withSecond(0).withMinute(0).withHour(0)
+                .with(TemporalAdjusters.previous(DayOfWeek.MONDAY));
+        return new Interval(dayFrom, dayFrom.plus(1, ChronoUnit.WEEKS));
+    }
 }

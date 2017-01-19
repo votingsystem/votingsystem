@@ -57,8 +57,7 @@ public class TimeStampResponseGeneratorHelper {
 
 
     public TimeStampResponseGeneratorHelper(InputStream requestInputStream, SignatureParams signingData,
-                                            Date timeStampDateUTC)
-            throws Exception {
+                                            Date timeStampDateUTC) throws Exception {
         TimeStampRequest timeStampRequest;
         try {
             timeStampRequest = new TimeStampRequest(requestInputStream);

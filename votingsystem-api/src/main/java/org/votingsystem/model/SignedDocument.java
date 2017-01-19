@@ -6,17 +6,18 @@ import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.metadata.MetaInfDto;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.model.converter.MetaInfConverter;
+import org.votingsystem.util.Constants;
 import org.votingsystem.xml.XML;
 
 import javax.persistence.*;
 import java.io.IOException;
 import java.io.Serializable;
+import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import static javax.persistence.GenerationType.IDENTITY;
-
 
 @Entity
 @Table(name="SIGNED_DOCUMENT")
@@ -31,11 +32,12 @@ public class SignedDocument extends EntityBase implements Serializable {
 
     private static Logger log = Logger.getLogger(SignedDocument.class.getName());
 
-    public static final String FIND_BY_MESSAGE_DIGEST = "FIND_SIGNED_DOCUMENT_BY_MESSAGE_DIGEST";
     private static final long serialVersionUID = 1L;
 
+    public static final String FIND_BY_MESSAGE_DIGEST = "SignedDocument.FIND_BY_MESSAGE_DIGEST";
 
-    public enum Indication {TOTAL_PASSED(false), ERROR_ZERO_SIGNATURES(true), ERROR_SIGNATURES_COUNT(true),
+
+    public enum Indication {TOTAL_PASSED(false), LOCAL_SIGNATURE(false), ERROR_ZERO_SIGNATURES(true), ERROR_SIGNATURES_COUNT(true),
             ERROR_SIGNER(true), ERROR_TIMESTAMP(true), ERROR(true);
         private boolean isError;
         Indication(boolean isError) {
@@ -54,6 +56,10 @@ public class SignedDocument extends EntityBase implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name="DOCUMENT_TYPE", nullable=false)
     private SignedDocumentType signedDocumentType;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="RECEIPT_ID")
+    private SignedDocument receipt;
 
     @Enumerated(EnumType.STRING)
     @Column(name="INDICATION", nullable=false)
@@ -79,9 +85,8 @@ public class SignedDocument extends EntityBase implements Serializable {
 
     @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy="document")
     private Set<Signature> signatures;
-
-
     @Transient private User anonSigner;
+
 
     public SignedDocument() {}
 
@@ -157,6 +162,14 @@ public class SignedDocument extends EntityBase implements Serializable {
         return this;
     }
 
+    public SignedDocument getReceipt() {
+        return receipt;
+    }
+
+    public void setReceipt(SignedDocument receipt) {
+        this.receipt = receipt;
+    }
+
     public Set<Signature> getSignatures() {
         return signatures;
     }
@@ -180,7 +193,39 @@ public class SignedDocument extends EntityBase implements Serializable {
         this.lastUpdated = lastUpdated;
     }
 
+    @Override
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public Signature getFirstSignature() {
+        Signature result = null;
+        for(Signature signature : signatures) {
+            if(result == null)
+                result = signature;
+            else result = result.getSignatureDate().isBefore(signature.getSignatureDate()) ? result : signature;
+        }
+        return result;
+    }
+
     public <T> T getSignedContent(Class<T> type) throws Exception {
         return XML.getMapper().readValue(body, type);
     }
+
+    public X509Certificate getCurrencyCert() {
+        return getAnonCert(Constants.CURRENCY_OID);
+    }
+
+    public X509Certificate getVoteCert() {
+        return getAnonCert(Constants.VOTE_OID);
+    }
+
+    public X509Certificate getAnonCert(String certExtensionOID) {
+        for(Signature signature : signatures) {
+            if(signature.getSigningCert().getExtensionValue(certExtensionOID) != null)
+                return signature.getSigningCert();
+        }
+        return null;
+    }
+
 }

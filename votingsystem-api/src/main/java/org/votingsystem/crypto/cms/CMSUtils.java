@@ -1,4 +1,4 @@
-package org.votingsystem.crypto;
+package org.votingsystem.crypto.cms;
 
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -21,9 +21,9 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.http.ContentType;
 import org.votingsystem.http.HttpConn;
-import org.votingsystem.throwable.ExceptionBase;
+import org.votingsystem.http.MediaType;
+import org.votingsystem.throwable.HttpRequestException;
 
 import java.security.MessageDigest;
 import java.util.*;
@@ -127,7 +127,7 @@ public class CMSUtils {
     }
 
     public static TimeStampToken getTimeStampToken(String signatureAlgorithm, byte[] contentToSign,
-            String timeStampServiceURL) throws Exception {
+            String timestampServiceURL) throws Exception {
         AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
                 .find(signatureAlgorithm);
         AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
@@ -136,12 +136,12 @@ public class CMSUtils {
         TimeStampRequestGenerator reqgen = new TimeStampRequestGenerator();
         TimeStampRequest timeStampRequest = reqgen.generate(
                 digAlgId.getAlgorithm().getId(), digestBytes);
-        ResponseDto response = HttpConn.getInstance().doPostRequest(timeStampRequest.getEncoded(),
-                ContentType.TIMESTAMP_QUERY.getName(), timeStampServiceURL);
+        ResponseDto response = HttpConn.getInstance().doPostRequest(
+                timeStampRequest.getEncoded(), MediaType.TIMESTAMP_QUERY, timestampServiceURL);
         if(ResponseDto.SC_OK == response.getStatusCode()) {
             byte[] bytesToken = response.getMessageBytes();
             return new TimeStampToken(new CMSSignedData(bytesToken));
-        } else throw new ExceptionBase(response.getMessage());
+        } else throw new HttpRequestException(response.getMessage());
     }
 
     public static ASN1Encodable getSingleValuedAttribute(AttributeTable signedAttrTable,

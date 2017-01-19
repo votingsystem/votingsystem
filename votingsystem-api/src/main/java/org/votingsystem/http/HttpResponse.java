@@ -29,31 +29,6 @@ public class HttpResponse {
         return Response.status(statusCode).build();
     }
 
-    /*
-                    if(reqContentType.contains("json")){
-                    return Response.status(appCode.getStatusCode()).entity(JSON.getMapper().writeValueAsBytes(
-                                    new ResponseDto(appCode, message))).build();
-                } else if(reqContentType.contains("html")) {
-                    res.setStatus(appCode.getStatusCode());
-                    req.getSession().setAttribute("responseDto", new ResponseDto(ResponseDto.SC_ERROR,
-                            message).setCode(appCode).setCaption(Messages.currentInstance().get("errorMsg", appCode)));
-                    res.sendRedirect(req.getContextPath() + "/response.xhtml");
-                } else {
-                    return Response.status(Response.Status.BAD_REQUEST).entity(
-                            new XmlMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(
-                                    new ResponseDto(appCode, message))).build();
-                }
-     */
-    public static byte[] getResponse(final HttpServletRequest req, final Object responseDto) throws IOException, 
-            ServletException {
-        String reqContentType = HttpRequest.getContentType(req, true);
-        if(reqContentType.contains("json")) {
-            return JSON.getMapper().writeValueAsBytes(responseDto);
-        } else {
-            return XML.getMapper().writeValueAsBytes(responseDto);
-        }
-    }
-
     public static Response getResponse(final HttpServletRequest req, final Integer statusCode,
                                      final Object responseDto) throws JsonProcessingException {
         String reqContentType = HttpRequest.getContentType(req, true);
@@ -64,6 +39,15 @@ public class HttpResponse {
             return Response.status(statusCode).type(javax.ws.rs.core.MediaType.APPLICATION_XML_TYPE)
                     .entity(XML.getMapper().writeValueAsBytes(responseDto)).build();
         }
+    }
+
+    public static byte[] getResponseContent(final HttpServletRequest req,
+                                            final Object responseDto) throws JsonProcessingException {
+        String reqContentType = HttpRequest.getContentType(req, true);
+        if(reqContentType.contains("json"))
+            return JSON.getMapper().writeValueAsBytes(responseDto);
+        else
+            return XML.getMapper().writeValueAsBytes(responseDto);
     }
 
     public static Response getResponseFromBytes(final HttpServletRequest req, final Integer statusCode,

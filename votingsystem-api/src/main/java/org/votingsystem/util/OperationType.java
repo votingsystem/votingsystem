@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
-public enum OperationType {
+public enum OperationType implements SystemOperation {
 
     @JsonProperty("GET_METADATA")
     GET_METADATA("/api/metadata"),
@@ -37,6 +37,8 @@ public enum OperationType {
     FETCH_ELECTION("/api/election/uuid"),
     @JsonProperty("SEND_VOTE")
     SEND_VOTE("/api/vote"),
+    @JsonProperty("VOTE_REPOSITORY")
+    VOTE_REPOSITORY("/api/vote/repository"),
 
 
     //id provider
@@ -75,12 +77,10 @@ public enum OperationType {
     @JsonProperty("USER_INFO")
     USER_INFO(null),
 
-    @JsonProperty("MESSAGEVS")
+    @JsonProperty("MESSAGE")
     MESSAGEVS(null),
     @JsonProperty("MSG_TO_DEVICE")
     MSG_TO_DEVICE(null),
-    @JsonProperty("MESSAGEVS_FROM_VS")
-    MESSAGEVS_FROM_VS(null),
 
     @JsonProperty("LISTEN_TRANSACTIONS")
     LISTEN_TRANSACTIONS(null),
@@ -88,10 +88,8 @@ public enum OperationType {
     INIT_SESSION(null),
     @JsonProperty("CLOSE_SESSION")
     CLOSE_SESSION(null),
-    @JsonProperty("INIT_SIGNED_SESSION")
-    INIT_SIGNED_SESSION(null),
-    @JsonProperty("INIT_REMOTE_SIGNED_SESSION")
-    INIT_REMOTE_SIGNED_SESSION(null),
+    @JsonProperty("GENERATE_BROWSER_CERTIFICATE")
+    GENERATE_BROWSER_CERTIFICATE(null),
 
     @JsonProperty("CERT_USER_CHECK")
     CERT_USER_CHECK(null),

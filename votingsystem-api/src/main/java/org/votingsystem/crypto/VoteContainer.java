@@ -7,7 +7,6 @@ import org.votingsystem.dto.voting.ElectionOptionDto;
 import org.votingsystem.dto.voting.VoteDto;
 import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.HashUtils;
 import org.votingsystem.util.OperationType;
 
 import java.io.Serializable;

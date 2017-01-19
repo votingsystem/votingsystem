@@ -13,15 +13,15 @@ import java.util.logging.Logger;
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
-public class MultipartRequestForAnonymousCertificates {
+public class AnonCertMultipartRequest {
 
-    private final static Logger log = Logger.getLogger(MultipartRequestForAnonymousCertificates.class.getName());
+    private final static Logger log = Logger.getLogger(AnonCertMultipartRequest.class.getName());
 
     public enum Type {CURRENCY_REQUEST, ELECTION_IDENTIFICATION}
     private DSSDocument dssDocument;
     private byte[] csrBytes;
 
-    public MultipartRequestForAnonymousCertificates(Collection<Part> parts, Type type) throws Exception {
+    public AnonCertMultipartRequest(Collection<Part> parts, Type type) throws Exception {
         switch (type) {
             case CURRENCY_REQUEST:
                 for(Part part : parts) {

@@ -13,7 +13,7 @@ import static javax.persistence.GenerationType.IDENTITY;
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 @Entity
-@Table(name="BackupRequest")
+@Table(name="BACKUP_REQUEST")
 public class BackupRequest extends EntityBase implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,9 +27,6 @@ public class BackupRequest extends EntityBase implements Serializable {
     @OneToOne
     @JoinColumn(name="SIGNED_DOCUMENT_ID")
     private SignedDocument signedDocument;
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="REPRESENTATIVE")
-    private User representative;
     @Column(name="EMAIL")
     private String email;
     @Column(name="FILE_PATH")
@@ -46,14 +43,6 @@ public class BackupRequest extends EntityBase implements Serializable {
     public BackupRequest(String filePath, OperationType type, String email) {
         this.filePath = filePath;
         this.type = type;
-        this.email = email;
-    }
-
-    public BackupRequest(String filePath, OperationType type, User representative, String email) {
-        this.filePath = filePath;
-        this.type = type;
-        this.representative = representative;
-        this.signedDocument = signedDocument;
         this.email = email;
     }
 
@@ -103,14 +92,6 @@ public class BackupRequest extends EntityBase implements Serializable {
 
 	public void setSignedDocument(SignedDocument signedDocument) {
 		this.signedDocument = signedDocument;
-	}
-
-	public User getRepresentative() {
-		return representative;
-	}
-
-	public void setRepresentative(User representative) {
-		this.representative = representative;
 	}
 
 	public OperationType getType() {

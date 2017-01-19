@@ -6,12 +6,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.votingsystem.dto.OperationTypeDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.http.SystemEntityType;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -21,6 +23,9 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MetadataDto {
+
+    @JacksonXmlProperty(localName = "Operation")
+    private OperationTypeDto operation;
 
     @JacksonXmlProperty(localName = "Language", isAttribute = true)
     private String language;
@@ -40,6 +45,7 @@ public class MetadataDto {
 
     @JacksonXmlProperty(localName = "TrustedEntities")
     private TrustedEntitiesDto trustedEntities;
+
 
     public MetadataDto() {}
 
@@ -93,8 +99,9 @@ public class MetadataDto {
         return entity;
     }
 
-    public void setEntity(SystemEntityDto entity) {
+    public MetadataDto setEntity(SystemEntityDto entity) {
         this.entity = entity;
+        return this;
     }
 
     public MetadataDto setLocation(LocationDto location) {
@@ -113,4 +120,23 @@ public class MetadataDto {
     public void setTrustedEntities(TrustedEntitiesDto trustedEntities) {
         this.trustedEntities = trustedEntities;
     }
+
+    public Set<KeyDto> getKeys(KeyDto.Use keyUse) {
+        Set<KeyDto> result = new HashSet<>();
+        for(KeyDto keyDto : keyDescriptorSet) {
+            if(keyDto.getUse() == keyUse)
+                result.add(keyDto);
+        }
+        return result;
+    }
+
+    public OperationTypeDto getOperation() {
+        return operation;
+    }
+
+    public MetadataDto setOperation(OperationTypeDto operation) {
+        this.operation = operation;
+        return this;
+    }
+
 }

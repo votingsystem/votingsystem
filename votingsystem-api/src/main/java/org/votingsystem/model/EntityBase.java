@@ -11,9 +11,10 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 public abstract class EntityBase {
 
-    public abstract LocalDateTime getDateCreated();
     public abstract void setDateCreated(LocalDateTime date);
+    public abstract LocalDateTime getDateCreated();
     public abstract void setLastUpdated(LocalDateTime lastUpdated);
+    public abstract LocalDateTime getLastUpdated();
 
     @PrePersist
     public void prePersist() {

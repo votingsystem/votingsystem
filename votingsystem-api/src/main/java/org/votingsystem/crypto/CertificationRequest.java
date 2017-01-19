@@ -4,20 +4,24 @@ import org.bouncycastle.asn1.ASN1Boolean;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.votingsystem.dto.CertExtensionDto;
+import org.votingsystem.dto.currency.CurrencyCertExtensionDto;
+import org.votingsystem.dto.currency.TagDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
+import org.votingsystem.throwable.CertificateRequestException;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.CurrencyCode;
 import org.votingsystem.util.JSON;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.math.BigDecimal;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
@@ -40,7 +44,7 @@ public class CertificationRequest implements java.io.Serializable {
     private transient KeyPair keyPair;
     private String signatureMechanism;
     private X509Certificate certificate;
-    private byte[] signedCsr;
+    private byte[] csrCertificate;
 
     private CertificationRequest(KeyPair keyPair, PKCS10CertificationRequest csr, String signatureMechanism) {
         this.keyPair = keyPair;
@@ -49,46 +53,75 @@ public class CertificationRequest implements java.io.Serializable {
     }
 
     public static CertificationRequest getVoteRequest(String indentityServiceEntity, String votingServiceEntity,
-            String electionUUID, String revocationHashBase64) throws NoSuchAlgorithmException, NoSuchProviderException,
-            InvalidKeyException, SignatureException, IOException, OperatorCreationException {
-        KeyPair keyPair = KeyGenerator.INSTANCE.genKeyPair();
-        X500Name subject = new X500Name("CN=identityService:" + indentityServiceEntity +
-                ";votingService:" + votingServiceEntity + ", OU=electionUUID:" + electionUUID);
-        CertVoteExtensionDto dto = new CertVoteExtensionDto(indentityServiceEntity, votingServiceEntity,
-                revocationHashBase64, electionUUID);
-        PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject, keyPair.getPublic());
-        pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.VOTE_OID),
-                new DERUTF8String(JSON.getMapper().writeValueAsString(dto)));
-        pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.ANON_CERT_OID), ASN1Boolean.getInstance(true));
-        PKCS10CertificationRequest request = pkcs10Builder.build(new JcaContentSignerBuilder(
-                Constants.SIGNATURE_ALGORITHM).setProvider(Constants.PROVIDER).build(keyPair.getPrivate()));
-        return new CertificationRequest(keyPair, request, Constants.SIGNATURE_ALGORITHM);
+            String electionUUID, String revocationHashBase64) throws CertificateRequestException {
+        try {
+            KeyPair keyPair = KeyGenerator.INSTANCE.genKeyPair();
+            X500Name subject = new X500Name("CN=identityService:" + indentityServiceEntity +
+                    ";votingService:" + votingServiceEntity + ", OU=electionUUID:" + electionUUID);
+            CertVoteExtensionDto dto = new CertVoteExtensionDto(indentityServiceEntity, votingServiceEntity,
+                    revocationHashBase64, electionUUID);
+            PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject, keyPair.getPublic());
+            pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.VOTE_OID),
+                    new DERUTF8String(JSON.getMapper().writeValueAsString(dto)));
+            pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.ANON_CERT_OID), ASN1Boolean.getInstance(true));
+            PKCS10CertificationRequest request = pkcs10Builder.build(new JcaContentSignerBuilder(
+                    Constants.SIGNATURE_ALGORITHM).setProvider(Constants.PROVIDER).build(keyPair.getPrivate()));
+            return new CertificationRequest(keyPair, request, Constants.SIGNATURE_ALGORITHM);
+        } catch (Exception ex) {
+            throw new CertificateRequestException(ex.getMessage(), ex);
+        }
     }
 
-    public static CertificationRequest getUserRequest (String signatureMechanism, CertExtensionDto certExtensionDto)
-            throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException,
-            IOException, OperatorCreationException {
-        KeyPair keyPair = KeyGenerator.INSTANCE.genKeyPair();
-        X500Principal subject = new X500Principal(certExtensionDto.getPrincipal());
-        PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject, keyPair.getPublic());
-        pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.DEVICE_OID),
-                new DERUTF8String(JSON.getMapper().writeValueAsString(certExtensionDto)));
-        PKCS10CertificationRequest request = pkcs10Builder.build(new JcaContentSignerBuilder(
-                signatureMechanism).setProvider(Constants.PROVIDER).build(keyPair.getPrivate()));
-        return new CertificationRequest(keyPair, request, signatureMechanism);
+    public static CertificationRequest getCurrencyRequest(String currencyEntity, String revocationHashBase64,
+            BigDecimal amount, CurrencyCode currencyCode, Boolean timeLimited, String tagName) throws CertificateRequestException {
+        try {
+            KeyPair keyPair = KeyGenerator.INSTANCE.genKeyPair();
+            tagName = (tagName == null)? TagDto.WILDTAG:tagName.trim();
+            X500Principal subject = new X500Principal("CN=currencyService:" + currencyEntity +
+                    ", OU=CURRENCY_VALUE:" + amount + ", OU=CURRENCY_CODE:" + currencyCode +
+                    ", OU=TAG:" + tagName + ", OU=DigitalCurrency");
+            CurrencyCertExtensionDto dto = new CurrencyCertExtensionDto(amount, currencyCode, revocationHashBase64,
+                    currencyEntity, timeLimited, tagName);
+            PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject,
+                    keyPair.getPublic());
+            pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.CURRENCY_OID),
+                    new DERUTF8String(JSON.getMapper().writeValueAsString(dto)));
+            pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.ANON_CERT_OID), ASN1Boolean.getInstance(true));
+            PKCS10CertificationRequest request = pkcs10Builder.build(new JcaContentSignerBuilder(
+                    Constants.SIGNATURE_ALGORITHM).setProvider(Constants.PROVIDER).build(keyPair.getPrivate()));
+            return new CertificationRequest(keyPair, request, Constants.SIGNATURE_ALGORITHM);
+        } catch (Exception ex) {
+            throw new CertificateRequestException(ex.getMessage(), ex);
+        }
+    }
+
+    public static CertificationRequest getUserRequest (CertExtensionDto certExtensionDto)
+            throws CertificateRequestException {
+        try {
+            KeyPair keyPair = KeyGenerator.INSTANCE.genKeyPair();
+            X500Principal subject = new X500Principal(certExtensionDto.getPrincipal());
+            PKCS10CertificationRequestBuilder pkcs10Builder = new JcaPKCS10CertificationRequestBuilder(subject, keyPair.getPublic());
+            pkcs10Builder.addAttribute(new  ASN1ObjectIdentifier(Constants.DEVICE_OID),
+                    new DERUTF8String(JSON.getMapper().writeValueAsString(certExtensionDto)));
+            PKCS10CertificationRequest request = pkcs10Builder.build(new JcaContentSignerBuilder(
+                    Constants.SIGNATURE_ALGORITHM).setProvider(Constants.PROVIDER).build(keyPair.getPrivate()));
+            return new CertificationRequest(keyPair, request, Constants.SIGNATURE_ALGORITHM);
+        } catch (Exception ex) {
+            throw new CertificateRequestException(ex.getMessage(), ex);
+        }
     }
     
-    public byte[] signDataWithTimeStamp(byte[] cotentToSign, String timeStampServiceURL) throws Exception {
-        Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(signedCsr);
+    public byte[] signDataWithTimeStamp(byte[] xmlToSign, String timeStampServiceURL) throws Exception {
+        Collection<X509Certificate> certificates = PEMUtils.fromPEMToX509CertCollection(csrCertificate);
         X509Certificate[] arrayCerts = new X509Certificate[certificates.size()];
         certificates.toArray(arrayCerts);
-        return org.votingsystem.xades.XAdESSignature.sign(cotentToSign,
+        return org.votingsystem.xades.XAdESSignature.sign(xmlToSign,
                 new SignatureTokenConnection(keyPair.getPrivate(), arrayCerts), new TSPHttpSource(timeStampServiceURL));
     }
 
     public X509Certificate getCertificate() throws Exception {
         if(certificate == null)
-            return PEMUtils.fromPEMToX509Cert(signedCsr);
+            return PEMUtils.fromPEMToX509Cert(csrCertificate);
         return certificate;
     }
 
@@ -145,13 +178,26 @@ public class CertificationRequest implements java.io.Serializable {
         } catch(Exception ex) {log.log(Level.SEVERE, ex.getMessage(), ex);}
     }
 
-    public byte[] getSignedCsr() {
-        return signedCsr;
-    }
 
-    public CertificationRequest setSignedCsr(byte[] signedCsr) {
-        this.signedCsr = signedCsr;
+    public CertificationRequest setSignedCsr(byte[] csrCertificate) {
+        this.csrCertificate = csrCertificate;
         return this;
     }
 
+    public String getSignatureMechanism() {
+        return signatureMechanism;
+    }
+
+    public void setSignatureMechanism(String signatureMechanism) {
+        this.signatureMechanism = signatureMechanism;
+    }
+
+    public byte[] getCsrCertificate() {
+        return csrCertificate;
+    }
+
+    public CertificationRequest setCsrCertificate(byte[] csrCertificate) {
+        this.csrCertificate = csrCertificate;
+        return this;
+    }
 }

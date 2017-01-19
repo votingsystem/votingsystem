@@ -2,7 +2,7 @@ package org.votingsystem.service;
 
 import org.votingsystem.model.User;
 
-public interface EJBRemoteAdminIdProvider {
+public interface EJBAdminRemoteIdProvider {
 
     public void generateBackup(String electionUUID) throws Exception;
     public byte[] generateUserKeyStore(String givenName, String surname, String nif, char[] password) throws Exception;

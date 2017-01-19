@@ -1,6 +1,7 @@
 package org.votingsystem.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.votingsystem.dto.AddressDto;
 import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.util.CountryEurope;
 
@@ -15,11 +16,9 @@ import static javax.persistence.GenerationType.IDENTITY;
 * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
 */
 @Entity
-@Table(name="Address")
+@Table(name="ADDRESS")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Address extends EntityBase implements Serializable {
-
-    public enum Type {CERTIFICATION_OFFICE}
 
     public static final long serialVersionUID = 1L;
     
@@ -45,7 +44,16 @@ public class Address extends EntityBase implements Serializable {
     @Column(name="LAST_UPDATE", columnDefinition="TIMESTAMP")
     @Convert(converter = LocalDateTimeAttributeConverter.class)
     private LocalDateTime lastUpdated;
-    
+
+    public Address(AddressDto addressDto) {
+        this.name = addressDto.getDecodedAddress();
+        this.postalCode = addressDto.getPostalCode();
+        this.metaInf = addressDto.getMetaInf();
+        this.province = addressDto.getProvince();
+        this.country = addressDto.getCountry();
+        this.city = addressDto.getCity();
+    }
+
     public void setDateCreated(LocalDateTime dateCreated) {
         this.dateCreated = dateCreated;
     }
@@ -132,8 +140,8 @@ public class Address extends EntityBase implements Serializable {
                 name, postalCode, province, city, country);
     }
 
-    public void update(Address address) {
-        this.name = address.getName();
+    public void update(AddressDto address) {
+        this.name = address.getDecodedAddress();
         this.city = address.getCity();
         this.province = address.getProvince();
         this.postalCode = address.getPostalCode();

@@ -16,7 +16,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.logging.Logger;
 
 import static javax.persistence.GenerationType.IDENTITY;
@@ -48,7 +47,7 @@ public class Certificate implements Serializable {
     public enum State {OK, ERROR, CANCELED, CONSUMED, LAPSED, UNKNOWN, SESSION_FINISHED}
 
     public enum Type {
-        VOTE, USER, USER_ID_CARD, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD,
+        VOTE, USER, USER_ID_CARD, CERTIFICATE_AUTHORITY, CERTIFICATE_AUTHORITY_ID_CARD, BROWSER_SESSION, MOBILE_SESSION,
         TIMESTAMP_SERVER}
 
     @Id @GeneratedValue(strategy=IDENTITY)
@@ -57,6 +56,8 @@ public class Certificate implements Serializable {
 
     @Column(name="SERIAL_NUMBER", nullable=false)
     private Long serialNumber;
+
+    @Column(name="UUID") private String UUID;
 
     @Column(name="CONTENT", nullable=false)
     private byte[] content;
@@ -82,6 +83,9 @@ public class Certificate implements Serializable {
     @Column(name="IS_ROOT") private Boolean isRoot;
 
     @Column(name="STATE", nullable=false) @Enumerated(EnumType.STRING) private State state;
+
+    @OneToOne @JoinColumn(name="SIGNED_DOCUMENT_ID")
+    private SignedDocument signedDocument;
 
     @Column(name="VALID_FROM", columnDefinition="TIMESTAMP")
     @Convert(converter = LocalDateTimeAttributeConverter.class)
@@ -159,6 +163,15 @@ public class Certificate implements Serializable {
         return result;
     }
 
+    public String getUUID() {
+        return UUID;
+    }
+
+    public Certificate setUUID(String UUID) {
+        this.UUID = UUID;
+        return this;
+    }
+
     public byte[] getContent() {
         return content;
     }
@@ -182,7 +195,6 @@ public class Certificate implements Serializable {
     public void setSerialNumber(Long serialNumber) {
         this.serialNumber = serialNumber;
     }
-
 
     public void setId(Long id) {
         this.id = id;
@@ -213,8 +225,9 @@ public class Certificate implements Serializable {
         return type;
     }
 
-    public void setType(Type type) {
+    public Certificate setType(Type type) {
         this.type = type;
+        return this;
     }
 
     public Certificate getAuthorityCertificate() { return authorityCertificate; }
@@ -288,6 +301,15 @@ public class Certificate implements Serializable {
 
     public Certificate setCertVoteExtension(CertVoteExtensionDto certVoteExtension) {
         this.certVoteExtension = certVoteExtension;
+        return this;
+    }
+
+    public SignedDocument getSignedDocument() {
+        return signedDocument;
+    }
+
+    public Certificate setSignedDocument(SignedDocument signedDocument) {
+        this.signedDocument = signedDocument;
         return this;
     }
 

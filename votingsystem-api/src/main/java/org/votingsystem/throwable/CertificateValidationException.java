@@ -3,7 +3,7 @@ package org.votingsystem.throwable;
 /**
  * Exceptions related to Certificate validation exceptions
  *
- * @author votingsystem
+ * License: https://github.com/votingsystem/votingsystem/wiki/Licencia
  */
 public class CertificateValidationException extends Exception {
 
