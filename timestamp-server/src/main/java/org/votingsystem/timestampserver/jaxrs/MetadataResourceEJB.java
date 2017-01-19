@@ -4,11 +4,11 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europa.esig.dss.token.AbstractSignatureTokenConnection;
 import org.votingsystem.crypto.TSPHttpSource;
 import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.http.HttpConn;
-import org.votingsystem.util.Messages;
 import org.votingsystem.dto.metadata.MetadataDto;
+import org.votingsystem.http.HttpConn;
 import org.votingsystem.throwable.XMLValidationException;
 import org.votingsystem.timestampserver.ejb.ConfigEJB;
+import org.votingsystem.util.Messages;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;

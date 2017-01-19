@@ -1,7 +1,7 @@
-package org.votingsystem.timestampserver.filter;
+package org.votingsystem.timestampserver.http;
 
-import org.votingsystem.util.Messages;
 import org.votingsystem.util.Constants;
+import org.votingsystem.util.Messages;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -23,7 +23,7 @@ public class MainFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
         // It is common to save a reference to the ServletContext here in case it is needed in the destroy() call.
         servletContext = filterConfig.getServletContext();
-        servletContext.log("------- MainFilter initialized -------");
+        servletContext.log(String.format("%s init", this.getClass().getSimpleName()));
     }
 
     @Override
@@ -35,7 +35,14 @@ public class MainFilter implements Filter {
         ((HttpServletResponse)res).addHeader("Access-Control-Allow-Origin", "*");
         ((HttpServletResponse)res).addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         ((HttpServletResponse)res).addHeader("Access-Control-Max-Age", "-1");
-        ((HttpServletResponse)res).addHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        ((HttpServletResponse)res).addHeader("Access-Control-Allow-Headers",
+                "Origin, X-Requested-With, Content-Type, Accept, Content-Encoding");
+
+        if (((HttpServletRequest)req).getMethod().equalsIgnoreCase("OPTIONS")) {
+            res.getOutputStream().write("OK".getBytes());
+            return;
+        }
+
         filterChain.doFilter(req, res);
     }
 

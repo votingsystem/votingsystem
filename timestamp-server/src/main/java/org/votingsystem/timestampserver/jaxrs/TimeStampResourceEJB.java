@@ -41,8 +41,7 @@ public class TimeStampResourceEJB {
 
     @PersistenceContext
     private EntityManager em;
-    @EJB
-    ConfigEJB config;
+    @EJB ConfigEJB config;
 
     @POST @Path("/")
     public void getTimestampResponse(@Context HttpServletRequest req, @Context HttpServletResponse res) 
@@ -88,7 +87,10 @@ public class TimeStampResourceEJB {
                     timeStampResponse.getTimeStampToken().getEncoded(), TimeStamp.State.OK));
             res.setContentType(ContentType.TIMESTAMP_RESPONSE.getName());
             final ServletOutputStream out = res.getOutputStream();
-            out.write(timeStampResponse.getEncoded());
+
+            if("base64".equals(contentEncoding)) {
+                out.write(Base64.getEncoder().encode(timeStampResponse.getTimeStampToken().getEncoded()));
+            } else out.write(timeStampResponse.getEncoded());
             out.flush();
         } catch(Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);

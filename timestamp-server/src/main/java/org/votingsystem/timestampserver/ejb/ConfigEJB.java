@@ -4,18 +4,14 @@ import eu.europa.esig.dss.token.AbstractSignatureTokenConnection;
 import eu.europa.esig.dss.token.JKSSignatureToken;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.votingsystem.crypto.KeyGenerator;
-import org.votingsystem.http.HttpConn;
-import org.votingsystem.http.SystemEntityType;
-import org.votingsystem.util.Messages;
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.dto.metadata.MetadataUtils;
 import org.votingsystem.dto.metadata.TrustedEntitiesDto;
+import org.votingsystem.http.HttpConn;
+import org.votingsystem.http.SystemEntityType;
 import org.votingsystem.service.TimeStampService;
 import org.votingsystem.service.impl.TimeStampServiceImpl;
-import org.votingsystem.util.Constants;
-import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.OperationType;
-import org.votingsystem.util.StringUtils;
+import org.votingsystem.util.*;
 
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -41,6 +37,7 @@ public class ConfigEJB {
     private static final Logger log = Logger.getLogger(ConfigEJB.class.getName());
 
     public static final String DEFAULT_APP_HOME = "/var/local/middleware/timestamp-server";
+    public static final Integer DEFAULT_METADATA_LIVE_IN_HOURS = 1;
 
     private String entityId;
     private String timestampServiceURL;
@@ -50,7 +47,6 @@ public class ConfigEJB {
     private TimeStampService timeStampService;
     private MetadataDto metadata;
     private X509Certificate signingCert;
-    private Integer defaultMetadataLiveInHours;
     private TrustedEntitiesDto trustedEntities;
 
     public ConfigEJB() {
@@ -69,9 +65,8 @@ public class ConfigEJB {
 
             timestampServiceURL = OperationType.TIMESTAMP_REQUEST.getUrl((String)properties.get("timestampServerURL"));
             entityId = (String)properties.get("entityId");
-            defaultMetadataLiveInHours = Integer.valueOf( (String) properties.get("DEFAULT_METADATA_LIVE_IN_HOURS"));
             log.info("entityId: " + entityId + " - timestampServiceURL: " + timestampServiceURL +
-                    " - defaultMetadataLiveInHours: " + defaultMetadataLiveInHours);
+                    " - defaultMetadataLiveInHours: " + DEFAULT_METADATA_LIVE_IN_HOURS);
 
             properties = new Properties();
             properties.load(new FileInputStream(new File(applicationDirPath + "/sec/keystore.properties")));
@@ -115,7 +110,7 @@ public class ConfigEJB {
                         signingCert, signingCert);
                 metadata.setTrustedEntities(trustedEntities);
             }
-            metadata.setValidUntil(ZonedDateTime.now().plus(defaultMetadataLiveInHours, ChronoUnit.HOURS)
+            metadata.setValidUntil(ZonedDateTime.now().plus(DEFAULT_METADATA_LIVE_IN_HOURS, ChronoUnit.HOURS)
                     .toInstant().toString());
             return metadata;
         } catch (Exception ex) {
