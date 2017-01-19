@@ -1,0 +1,47 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:o="http://omnifaces.org/ui"
+                template="/WEB-INF/templates/main-template-forge.xhtml">
+    <ui:define name="head">
+    </ui:define>
+    <ui:define name="content">
+        <div style="width: 1000px; margin: 30px auto;">
+            <button onclick="signAndSend()">TEST</button>
+            <button onclick="printKeys()">RSA</button>
+            <button onclick="postData()">POST</button>
+        </div>
+        <script>
+            //<![CDATA[
+                vs.setMainPageCaption("#{msg.appTitle}");
+
+                function postData() {
+                    //vs.httpPost = function(url, callback, request, contentType, headersMap)
+                    vs.httpPost("http://votingsystem.ddns.net/currency-server/api/test/testPost", function (responseText, status) {
+                        console.log("status: " + status + " - responseText: " + responseText);
+                    }, "test string");
+                }
+
+                function printKeys() {
+                    console.log("pkiSessionData: " + localStorage.getItem('pkiSessionData'))
+                }
+
+                function signAndSend() {
+                    console.log("signAndSend");
+                    var socketMsgDto = {operation:{type:"CLOSE_SESSION"}, uuid:vs.getUUID()};
+                    vs.rsaUtil.sign(JSON.stringify(socketMsgDto), function(cmsSignedMessage) {
+                        console.log("cmsSignedMessage: ", cmsSignedMessage);
+
+                        var pemMessage = forge.pkcs7.messageToPem(cmsSignedMessage);
+                        console.log("pemMessage:", pemMessage)
+
+                        //function(url, callback, request, contentType, headersMap)
+                        vs.httpPost(vs.entityId + "/api/test-pkcs7/sign", function (responseText, status) {
+                            console.log("status: " + status + " - responseText: " + responseText);
+                        }, pemMessage, "application/json;application/pkcs7-signature");
+                    })
+                }
+            // ]]>
+        </script>
+        <o:socket channel="testChannel" user="#{socketBean.getUserUUID()}" onmessage="serviceUpdated"/>
+    </ui:define>
+</ui:composition>

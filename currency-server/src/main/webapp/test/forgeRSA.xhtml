@@ -1,0 +1,27 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/main-template-forge.xhtml">
+    <ui:define name="head">
+    </ui:define>
+    <ui:define name="content">
+        <div style="width: 1000px; margin: 30px auto;">
+            <button onclick="testRSA()">TEST RSA</button>
+            <div id="result" style="font-size: 1.2em; font-weight: bold;"></div>
+        </div>
+        <script>
+            //<![CDATA[
+            vs.setMainPageCaption("RSA");
+
+            function testRSA() {
+                var rsaUtil = new RSAUtil();
+                console.log(rsaUtil.privateKeyPEM)
+                console.log(rsaUtil.publicKeyPEM)
+                var encrypted = rsaUtil.encrypt("encrypted text")
+                console.log("encryptRSA - encryptedBase64: " + encrypted)
+                console.log("encryptRSA - decrypted: " + rsaUtil.decrypt(encrypted))
+                document.querySelector("#result").innerHTML = "OK"
+            }
+            // ]]>
+        </script>
+    </ui:define>
+</ui:composition>

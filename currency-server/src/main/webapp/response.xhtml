@@ -1,0 +1,17 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/main-template.xhtml">
+    <ui:define name="head">
+        <style> </style>
+    </ui:define>
+    <ui:define name="content">
+        <div style="width: 1000px; margin: 30px auto; text-align:center;font-size: 1.6em;">
+            #{responseDto.message}
+        </div>
+        <script>
+            //<![CDATA[
+                vs.setMainPageCaption("#{responseDto.caption}");
+            // ]]>
+        </script>
+    </ui:define>
+</ui:composition>

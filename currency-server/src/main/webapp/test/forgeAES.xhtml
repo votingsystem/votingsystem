@@ -1,0 +1,31 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/main-template-forge.xhtml">
+    <ui:define name="head">
+    </ui:define>
+    <ui:define name="content">
+        <div style="width: 1000px; margin: 30px auto;"></div>
+        <script>
+            //<![CDATA[
+            vs.setMainPageCaption("AES");
+
+            var aesparamsDtoStr = '{"key":"E877WsVHQqZ4fOFxrmqTYRplTfMKhg4MFqbSvFgTqn8=","iv":"ZrSelxPlqW/vFYks4uqUqQ=="}'
+            var encryptedDataBase64 = 'Sb9JQ8Rva811hADz56nq9ozrzr9TN1T2pBwzVaovfm0='
+
+            var aesparamsDto = decodeAESParams(toJSON(aesparamsDtoStr));
+            console.log("aesparamsDto: ", aesparamsDto)
+            var encryptedData = forge.util.decode64(encryptedDataBase64);
+
+            console.log("decrypted:", vs.decryptAES(encryptedData, aesparamsDto));
+
+            var localEncrypted = vs.encryptAES("text to encrypt local", aesparamsDto);
+            console.log("localEncrypted:", localEncrypted, "localDecrypted:", vs.decryptAES(localEncrypted, aesparamsDto));
+
+            function decodeAESParams(aesparamsDto) {
+                return {key:forge.util.decode64(aesparamsDto.key), iv:forge.util.decode64(aesparamsDto.iv)}
+            }
+
+            // ]]>
+        </script>
+    </ui:define>
+</ui:composition>

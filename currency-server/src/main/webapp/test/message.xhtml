@@ -1,0 +1,77 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/main-template-forge.xhtml">
+    <ui:define name="head">
+    </ui:define>
+    <ui:define name="content">
+        <div style="width: 1000px; margin: 30px auto;">
+            <div>
+                <button onclick="sendMessage()">Send message</button>
+                <input id="deviceUUID" type="text" style="width: 300px;" placeholder="Device UUID"/>
+                <textarea id="message" required="required" class="form-control" name="message" data-parsley-trigger="keyup"></textarea>
+            </div>
+            <div id="result" style="font-size: 1.2em; font-weight: bold;"></div>
+        </div>
+        <script>
+            //<![CDATA[
+            vs.setMainPageCaption("Messages - test");
+
+            function sendMessage() {
+                var deviceUUID = document.querySelector("#deviceUUID").value;
+                if(!vs.certMap[deviceUUID]) {
+                    var certServiceURL = vs.entityId + "/api/certificate/uuid";
+                    vs.httpPost(certServiceURL, function(responseText, status) {
+                        if(200 === status) {
+                            vs.certMap[deviceUUID] = responseText;
+                            console.log("status: " + status + "cert: ", vs.certMap[deviceUUID]);
+                            sendEncryptedMessage(vs.certMap[deviceUUID], deviceUUID);
+                        } else console.log("status: " + status + " - responseText: " + responseText);
+                    }, deviceUUID);
+                } else {
+                    sendEncryptedMessage(vs.certMap[deviceUUID], deviceUUID);
+                }
+            }
+
+            function sendEncryptedMessage(receiverCert, deviceUUID) {
+                var encryptedPem = vs.decryptMessage(receiverCert,  {message:"test message"})
+                var socketOperation = {socketOperation:"MSG_TO_DEVICE", deviceFromUUID:vs.userUUID,
+                    deviceToUUID:deviceUUID, certificatePEM:vs.rsaUtil.x509CertificatePEM,
+                    encryptedMessage:encryptedPem};
+
+                var msgServiceURL = vs.entityId + "/api/msg/send";
+                vs.httpPost (msgServiceURL, function (responseText, status) {
+                    console.log("status: " + status + " - responseText: " + responseText)
+                }, JSON.stringify(socketOperation), "application/json");
+            }
+
+
+            /**
+             private SocketOperation socketOperation;
+             private CurrencyOperation operation;
+             private Step step;
+             private Integer statusCode;
+             private String operationCode;
+             private String deviceFromUUID;
+             private String deviceToUUID;
+             private String userFromName;
+             private String userToName;
+             private String deviceFromName;
+             private String deviceToName;
+             private String message;
+             private String encryptedMessage;
+             private String signedMessageBase64;
+             private String subject;
+             private String publicKeyPEM;
+             private AESParamsDto aesParams;
+             private String certificatePEM;
+             private boolean timeLimited = false;
+             @JacksonXmlProperty(localName = "CurrencySet")
+             private Set<CurrencyDto> currencyDtoSet;
+             private ZonedDateTime date;
+             private DeviceDto device;
+             private String UUID;
+             */
+            // ]]>
+        </script>
+    </ui:define>
+</ui:composition>

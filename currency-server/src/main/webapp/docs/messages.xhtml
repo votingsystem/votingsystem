@@ -1,0 +1,19 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="/WEB-INF/templates/main-template.xhtml">
+    <ui:define name="head">
+    </ui:define>
+    <ui:define name="content">
+        <div style="font-size: 1.1em;">
+            <p>Para recibir y enviar mensajes es necesario iniciar una sesión autenticada.</p>
+            <p>Al viajar los mensajes cifrados con las claves de los usuarios el sistema no tiene acceso al
+                contenido de los mismos.</p>
+            <p>El sistema no guarda en ningún momento los mensajes ni tiene acceso al contenido de los mismos.</p>
+        </div>
+        <script>
+            //<![CDATA[
+            vs.setMainPageCaption("mensajes");
+            // ]]>
+        </script>
+    </ui:define>
+</ui:composition>

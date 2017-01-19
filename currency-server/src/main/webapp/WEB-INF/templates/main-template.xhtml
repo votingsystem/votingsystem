@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="shortcut icon" type="image/png" href="#{request.contextPath}/res/img/icon_16/fa-money.png" />
+    <title>#{msg.currencyLbl}</title>
+    <link href="#{request.contextPath}/res/gtl/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="#{request.contextPath}/res/gtl/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+    <script src="#{request.contextPath}/res/gtl/vendors/jquery/dist/jquery.min.js"></script>
+    <!-- FastClick -->
+    <script src="#{request.contextPath}/res/gtl/vendors/fastclick/lib/fastclick.js"></script>
+    <script src="#{request.contextPath}/res/gtl/vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="#{request.contextPath}/res/gtl/vendors/fastclick/lib/fastclick.js"></script>
+    <script src="#{request.contextPath}/res/gtl/vendors/nprogress/nprogress.js"></script>
+    <script src="#{request.contextPath}/res/gtl/vendors/validator/validator.min.js"></script>
+    <link href="#{request.contextPath}/res/css/gl-custom.css" rel="stylesheet"/>
+    <ui:insert name="head" />
+</h:head>
+<h:body class="nav-md">
+    <script>
+        //<![CDATA[
+
+        //]]>
+    </script>
+    <!-- Large modal -->
+    <div id="alertDialog" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 10000;">
+        <div class="modal-dialog">
+            <div class="modal-content" style="text-align: center;">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">
+                        <i class="fa fa-times"></i>
+                    </span>
+                    </button>
+                    <h4 class="modal-title" id="alertCaption"></h4>
+                </div>
+                <div class="modal-body" style="font-size: 1.2em; display: block; margin-right: 20px;word-wrap: break-word;">
+                    <p id="alertMessage"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container body">
+        <div class="main_container">
+            <div class="col-md-3 left_col">
+                <div class="left_col scroll-view">
+                    <div class="navbar nav_title">
+                        <a href="#{request.contextPath}/index.xhtml" class="site_title" style="margin: 5px 0 0 0;"><i class="fa fa-money"></i>
+                            <span style="margin: 10px 0 0 0;">#{msg.currencyLbl}</span>
+                        </a>
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                    <!-- sidebar menu -->
+                    <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+                        <div class="menu_section">
+                            <ul class="nav side-menu">
+                                <li>
+                                    <a href="#{request.contextPath}/election/elections.xhtml?state=ACTIVE"><i class="fa fa-user"></i>#{msg.locateUserLbl}</a>
+                                </li>
+                                <li>
+                                    <a><i class="fa fa-cogs"></i>#{msg.reportsSectionLbl} <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu">
+                                        <li>
+                                            <a href="#{request.contextPath}/dashBoardLbl">#{msg.dashBoardLbl}</a>
+                                        </li>
+                                        <li>
+                                            <a href="#{request.contextPath}/bankListLbl">#{msg.bankListLbl}</a>
+                                        </li>
+                                        <li>
+                                            <a href="#{request.contextPath}/currencyIssued">#{msg.currencyIssued}</a>
+                                        </li>
+                                        <li>
+                                            <a href="#{request.contextPath}/systemBalanceLbl">#{msg.systemBalanceLbl}</a>
+                                        </li>
+                                        <li>
+                                            <a href="#{request.contextPath}/currentWeekLbl">#{msg.currentWeekLbl}</a>
+                                        </li>
+                                        <li>
+                                            <a href="#{request.contextPath}/validationToolMsg">#{msg.validationToolMsg}</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a><i class="fa fa-info"></i>#{msg.docsLbl} <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu">
+                                        <li>
+                                            <a href="#{request.contextPath}/docs/incomes.xhtml">#{msg.incomesLbl}</a>
+                                        </li>
+                                        <li>
+                                            <a href="#{request.contextPath}/docs/accounts.xhtml">#{msg.accountsLbl}</a>
+                                        </li>
+                                        <li>
+                                            <a href="#{request.contextPath}/docs/messages.xhtml">#{msg.messageLbl}s</a>
+                                        </li>
+                                        <li>
+                                            <a href="https://github.com/votingsystem/votingsystem" target="_blank">#{msg.proyectLbl}</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- /sidebar menu -->
+
+                </div>
+            </div>
+
+            <!-- top navigation -->
+            <div class="top_nav">
+                <div class="nav_menu" style="display: block;">
+                    <nav role="navigation">
+                        <div class="nav toggle" style="padding: 8px 0 0 0;">
+                            <a id="menu_toggle" style="color: #f2f2f2;"><i class="fa fa-bars"></i></a>
+                        </div>
+                        <div style="display: flex; flex-direction: row;color: #f2f2f2;">
+                            <div id="mainPageCaption" style="width: 100%; text-align: center;font-size: 1.8em;">
+                            </div>
+                            <div style="margin: 0 10px 0 0;vertical-align: baseline;align-self: center;cursor: pointer;" onclick="vs.alert('caqption', 'message')">
+                                #{msg.accessLbl}
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+            <!-- /top navigation -->
+
+            <!-- page content -->
+            <div class="right_col" role="main">
+                <div class="">
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <div class="dashboard_graph x_panel">
+                                <ui:insert name="content"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="#{request.contextPath}/res/js/custom.min.js"></script>
+</h:body>
+</html>
