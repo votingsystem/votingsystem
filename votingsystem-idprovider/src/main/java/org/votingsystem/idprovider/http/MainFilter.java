@@ -1,9 +1,7 @@
-package org.votingsystem.idprovider.filter;
-
+package org.votingsystem.idprovider.http;
 
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.Messages;
-
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;

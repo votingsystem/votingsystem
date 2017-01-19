@@ -94,7 +94,7 @@ public class ElectionsEJB {
                 ElectionDto electionDto = XML.getMapper().readValue(requestSignedXML, ElectionDto.class);
                 SignatureParams signatureParams = new SignatureParams(null, User.Type.ENTITY,
                         SignedDocumentType.NEW_ELECTION_REQUEST).setWithTimeStampValidation(true);
-                SignedDocument signedDocument = signatureService.validateAndSaveXAdES(
+                SignedDocument signedDocument = signatureService.validateXAdESAndSave(
                         new InMemoryDocument(requestSignedXML), signatureParams);
                 Election election = new Election(electionDto, signedDocument).setEntityId(entityId);
                 em.persist(election);

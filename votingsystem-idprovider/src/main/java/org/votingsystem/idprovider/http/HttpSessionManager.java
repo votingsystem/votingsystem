@@ -1,4 +1,4 @@
-package org.votingsystem.idprovider.util;
+package org.votingsystem.idprovider.http;
 
 import org.votingsystem.ejb.QRSessionsEJB;
 

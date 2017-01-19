@@ -39,7 +39,7 @@ public class SignatureResourceEJB {
         SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
                 SignedDocumentType.SIGNED_DOCUMENT).setWithTimeStampValidation(withTimeStampValidation);
         try {
-            SignedDocument signedDocument = signatureService.validateAndSaveXAdES(
+            SignedDocument signedDocument = signatureService.validateXAdESAndSave(
                     new InMemoryDocument(signedXML.getBytes()), signatureParams);
             ResponseDto response = ResponseDto.OK().setMessage("signedDocument id: " + signedDocument.getId());
             return Response.ok().entity(XML.getMapper().writeValueAsBytes(response)).build();

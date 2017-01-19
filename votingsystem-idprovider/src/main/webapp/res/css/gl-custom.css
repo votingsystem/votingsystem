@@ -328,8 +328,6 @@ body .container.body .right_col {
   background: #D9DEE4; }
 
 body {
-  color: #73879C;
-
   font-family: "Helvetica Neue", Roboto, Arial, "Droid Sans", sans-serif;
   font-size: 13px;
   font-weight: 400;
@@ -4280,5 +4278,3 @@ ul.notifications {
 
 .nav li li.current-page:hover a {
   color: #146c72; }
-
-.nav.child_menu

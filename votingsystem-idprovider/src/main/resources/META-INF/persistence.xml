@@ -12,14 +12,15 @@
         <class>org.votingsystem.model.Signature</class>
         <class>org.votingsystem.model.SignedDocument</class>
         <class>org.votingsystem.model.User</class>
+        <class>org.votingsystem.model.UserToken</class>
         <class>org.votingsystem.model.voting.UserCSRRequest</class>
         <class>org.votingsystem.model.XAdESDocument</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
 
-            <!--
-
             <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
+
+            <!--
 
             <property name="hibernate.show_sql" value="true"/>
             <property name="format_sql" value="true"/>

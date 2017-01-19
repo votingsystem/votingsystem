@@ -14,14 +14,11 @@ import java.security.cert.X509Certificate;
  */
 public interface ConfigIdProvider {
 
-    public String getIssuerKeyStoreFileName();
     public String getApplicationDirPath();
     public Certificate getCACertificate(Long certificateId);
     public Certificate loadAuthorityCertificate(CertificateToken certificateToken) throws IOException,
             CertificateException, NoSuchAlgorithmException, NoSuchProviderException;
-    public String getIssuerKeyPassword();
     public X509Certificate getSigningCert();
     public String getEntityId();
-
     public String getOcspServerURL();
 }

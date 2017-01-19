@@ -60,10 +60,12 @@ public class ConfigEJB implements Config, ConfigIdProvider {
     private static final Logger log = Logger.getLogger(ConfigEJB.class.getName());
 
     public static final String DEFAULT_APP_HOME = "/var/local/middleware/votingsystem-idprovider";
+    public static final Integer DEFAULT_METADATA_LIVE_IN_HOURS = 1;
 
-    @PersistenceContext private EntityManager em;
-    @EJB TrustedServicesEJB trustedServices;
-    @EJB CertIssuerEJB certIssuer;
+    @PersistenceContext
+    private EntityManager em;
+    @EJB private TrustedServicesEJB trustedServices;
+    @EJB private CertIssuerEJB certIssuer;
 
     private String entityId;
     private String timestampServiceURL;
@@ -77,13 +79,10 @@ public class ConfigEJB implements Config, ConfigIdProvider {
     private Set<TrustAnchor> trustedCertAnchors;
     private Map<Long, Certificate> trustedCACertsMap = new HashMap<>();
     private MetadataDto metadata;
-    private Integer defaultMetadataLiveInHours;
     private Map<String, MetadataDto> entityMap;
     private Set<X509Certificate> trustedTimeStampServers;
     private String ocspServerURL;
 
-    private String issuerKeyStoreFileName;
-    private String issuerKeyPassword;
 
     @PostConstruct
     public void initialize() {
@@ -98,11 +97,6 @@ public class ConfigEJB implements Config, ConfigIdProvider {
             if(StringUtils.isEmpty(applicationDirPath))
                 applicationDirPath = DEFAULT_APP_HOME;
 
-            if(System.getProperty("APP_HOME") != null) {
-                applicationDirPath = System.getProperty("VS_SERVICE_HOME");
-                log.info("Setting application path from system property - applicationDirPath: " + applicationDirPath);
-            } else applicationDirPath = DEFAULT_APP_HOME;
-
             Properties properties = new Properties();
             File propertiesFile = new File(applicationDirPath + "/config.properties");
             properties.load(new FileInputStream(propertiesFile));
@@ -113,21 +107,16 @@ public class ConfigEJB implements Config, ConfigIdProvider {
                 handler.setLevel(selectedLogLevel);
             }
             timestampServiceURL = OperationType.TIMESTAMP_REQUEST.getUrl((String)properties.get("timestampServerURL"));
-
-            defaultMetadataLiveInHours = Integer.valueOf((String)properties.get("DEFAULT_METADATA_LIVE_IN_HOURS"));
             entityId = (String)properties.get("entityId");
             ocspServerURL = entityId + "/ocsp";
 
             log.info("entityId: " + entityId + " - applicationDirPath: " + applicationDirPath
                     + " - selectedLogLevel: " + selectedLogLevel + " - timestampServiceURL: " + timestampServiceURL +
-                    " - defaultMetadataLiveInHours: " + defaultMetadataLiveInHours + " - ocspServerURL: " + ocspServerURL);
+                    " - defaultMetadataLiveInHours: " + DEFAULT_METADATA_LIVE_IN_HOURS + " - ocspServerURL: " + ocspServerURL);
 
             properties = new Properties();
             propertiesFile = new File(applicationDirPath + "/sec/keystore.properties");
             properties.load(new FileInputStream(propertiesFile));
-
-            issuerKeyStoreFileName = (String) properties.get("issuerKeyStoreFileName");
-            issuerKeyPassword = (String) properties.get("issuerKeyPassword");
 
             String keyStoreFileName = (String) properties.get("keyStoreFileName");
             String keyStorePassword = (String) properties.get("keyStorePassword");
@@ -208,27 +197,31 @@ public class ConfigEJB implements Config, ConfigIdProvider {
         return certificate;
     }
 
-    public Certificate getCACertificate(Long certificateId) {
-        return trustedCACertsMap.get(certificateId);
-    }
-
     public byte[] getSignatureCertPEMBytes() {
         return signatureCertChainPEMBytes;
     }
 
+    @Override
+    public Certificate getCACertificate(Long certificateId) {
+        return trustedCACertsMap.get(certificateId);
+    }
 
+    @Override
     public AbstractSignatureTokenConnection getSigningToken() {
         return signingToken;
     }
 
+    @Override
     public String getEntityId() {
         return entityId;
     }
 
+    @Override
     public String getApplicationDirPath() {
         return applicationDirPath;
     }
 
+    @Override
     public String getTimestampServiceURL() {
         return timestampServiceURL;
     }
@@ -257,7 +250,7 @@ public class ConfigEJB implements Config, ConfigIdProvider {
                         signingCert, signingCert);
                 metadata.setTrustedEntities(trustedServices.getTrustedEntities());
             }
-            metadata.setValidUntil(ZonedDateTime.now().plus(defaultMetadataLiveInHours, ChronoUnit.HOURS)
+            metadata.setValidUntil(ZonedDateTime.now().plus(DEFAULT_METADATA_LIVE_IN_HOURS, ChronoUnit.HOURS)
                     .toInstant().toString());
             return metadata;
         } catch (Exception ex) {
@@ -291,14 +284,6 @@ public class ConfigEJB implements Config, ConfigIdProvider {
 
     public String getOcspServerURL() {
         return ocspServerURL;
-    }
-
-    public String getIssuerKeyStoreFileName() {
-        return issuerKeyStoreFileName;
-    }
-
-    public String getIssuerKeyPassword() {
-        return issuerKeyPassword;
     }
 
     public Set<TrustAnchor> getTrustedCertAnchors() {

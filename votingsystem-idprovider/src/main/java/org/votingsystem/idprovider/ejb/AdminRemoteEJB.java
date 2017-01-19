@@ -5,7 +5,7 @@ import org.votingsystem.crypto.KeyStoreUtils;
 import org.votingsystem.model.Device;
 import org.votingsystem.model.User;
 import org.votingsystem.model.voting.UserCSRRequest;
-import org.votingsystem.service.EJBRemoteAdminIdProvider;
+import org.votingsystem.service.EJBAdminRemoteIdProvider;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.NifUtils;
 
@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 @Stateless
-@Remote(EJBRemoteAdminIdProvider.class)
-public class AdminRemoteBean implements EJBRemoteAdminIdProvider {
+@Remote(EJBAdminRemoteIdProvider.class)
+public class AdminRemoteEJB implements EJBAdminRemoteIdProvider {
 
-    private static final Logger log = Logger.getLogger(AdminRemoteBean.class.getName());
+    private static final Logger log = Logger.getLogger(AdminRemoteEJB.class.getName());
 
     @PersistenceContext
     private EntityManager em;

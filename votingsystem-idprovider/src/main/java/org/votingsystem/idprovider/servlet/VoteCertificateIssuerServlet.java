@@ -5,8 +5,8 @@ import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.ejb.SignatureService;
+import org.votingsystem.http.AnonCertMultipartRequest;
 import org.votingsystem.http.ContentType;
-import org.votingsystem.http.MultipartRequestForAnonymousCertificates;
 import org.votingsystem.idprovider.ejb.CertIssuerEJB;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
@@ -52,11 +52,11 @@ public class VoteCertificateIssuerServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest req, HttpServletResponse res) throws IOException {
         SignedDocument signedDocument = null;
         try {
-            MultipartRequestForAnonymousCertificates request = new MultipartRequestForAnonymousCertificates(req.getParts(),
-                    MultipartRequestForAnonymousCertificates.Type.ELECTION_IDENTIFICATION);
+            AnonCertMultipartRequest request = new AnonCertMultipartRequest(req.getParts(),
+                    AnonCertMultipartRequest.Type.ELECTION_IDENTIFICATION);
             SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
                     SignedDocumentType.ANON_VOTE_CERT_REQUEST).setWithTimeStampValidation(true);
-            signedDocument = signatureService.validateAndSaveXAdES(request.getDssDocument(), signatureParams);
+            signedDocument = signatureService.validateXAdESAndSave(request.getDssDocument(), signatureParams);
             CsrResponse csrResponse = certIssuer.processAnonymousCertificateRequest(signedDocument, request.getCSRBytes());
             res.setContentType(ContentType.TEXT_STREAM.getName());
             if(csrResponse.getIssuedCert() != null) {

@@ -1,11 +1,16 @@
 package org.votingsystem.idprovider.jaxrs;
 
 
+import org.votingsystem.crypto.SignatureParams;
+import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
+import org.votingsystem.dto.indentity.BrowserCertificationDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
+import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.model.SignedDocument;
-import org.votingsystem.util.FileUtils;
+import org.votingsystem.model.User;
+import org.votingsystem.xml.XML;
 
 import javax.ejb.EJB;
 import javax.inject.Inject;
@@ -18,8 +23,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.io.File;
-import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 /**
@@ -33,14 +37,17 @@ public class TestResource {
     @PersistenceContext EntityManager em;
     @Inject Config config;
     @EJB QRSessionsEJB qrSessionsEJB;
+    @Inject private SignatureService signatureService;
 
     @GET @Path("/")
     @Transactional
     public Response test(@Context HttpServletRequest req) throws Exception {
-        List<SignedDocument> signedDocumentList = em.createQuery("select s from SignedDocument s where s.id=:id")
-                .setParameter("id", 6L).getResultList();
-        FileUtils.copyBytesToFile(signedDocumentList.iterator().next().getBody().getBytes(), new File("/home/jgzornoza/temp/dnieSignedDocument.xml"));
-        return Response.ok().entity("OK").build() ;
+        SignatureParams signatureParams = new SignatureParams(config.getEntityId(), User.Type.CURRENCY_SERVER,
+                SignedDocumentType.BROWSER_CERTIFICATION_REQUEST_RECEIPT).setWithTimeStampValidation(false);
+        BrowserCertificationDto csrResponse = new BrowserCertificationDto().setUserUUID(UUID.randomUUID().toString());
+        SignedDocument signedDocument = signatureService.signXAdESAndSave(
+                XML.getMapper().writeValueAsBytes(csrResponse), signatureParams);
+        return Response.ok().entity(signedDocument.getBody()).build() ;
     }
 
     @GET @Path("/responsePage")
