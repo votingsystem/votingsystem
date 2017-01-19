@@ -2,6 +2,7 @@ package org.votingsystem.ejb;
 
 import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.throwable.HttpRequestException;
+import org.votingsystem.throwable.SignatureException;
 import org.votingsystem.throwable.XMLValidationException;
 
 import java.io.IOException;
@@ -14,5 +15,5 @@ public interface MetadataService {
     public MetadataDto getMetadataFromURL(String metadataURL, boolean validateSignature, boolean withTimeStampValidation)
             throws XMLValidationException, HttpRequestException;
 
-    public byte[] getMetadataSigned() throws IOException;
+    public byte[] getMetadataSigned() throws IOException, SignatureException;
 }

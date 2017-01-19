@@ -1,10 +1,14 @@
 package org.votingsystem.ejb;
 
-import org.votingsystem.crypto.SignatureParams;
+import org.votingsystem.dto.CertExtensionDto;
+import org.votingsystem.model.Certificate;
 import org.votingsystem.model.User;
+import org.votingsystem.throwable.CertificateRequestException;
 import org.votingsystem.throwable.CertificateValidationException;
+import org.votingsystem.throwable.InsufficientPrivilegesException;
 import org.votingsystem.throwable.SignerValidationException;
 
+import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.X509Certificate;
 
 /**
@@ -15,5 +19,11 @@ public interface SignerInfoService {
     public User checkSigner(X509Certificate x509Certificate, User.Type userType, String entityId)
             throws SignerValidationException, CertificateValidationException;
 
-    public User checkSigner(SignatureParams signatureParams) throws SignerValidationException;
+    public User checkIfAdmin(X509Certificate x509Certificate) throws InsufficientPrivilegesException;
+
+    public PKIXCertPathValidatorResult verifyUserCertificate(final User user) throws CertificateValidationException;
+
+    public void loadCertInfo(User user, CertExtensionDto deviceData) throws CertificateRequestException;
+
+    public Certificate verifyCertificate(X509Certificate certToCheck) throws Exception;
 }

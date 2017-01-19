@@ -67,7 +67,7 @@ public class QRResourceEJB {
 
     @POST @Path("/info")
     @Produces(MediaType.TEXT_XML)
-    public Response publishInfo(@Context HttpServletRequest req) throws Exception {
+    public Response info(@Context HttpServletRequest req) throws Exception {
         String uuidInfo = FileUtils.getStringFromStream(req.getInputStream());
         QRRequestBundle qrRequest = qrSessions.getOperation(uuidInfo);
         if(qrRequest != null)

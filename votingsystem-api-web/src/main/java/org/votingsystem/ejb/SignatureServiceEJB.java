@@ -2,6 +2,7 @@ package org.votingsystem.ejb;
 
 import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.DigestAlgorithm;
+import eu.europa.esig.dss.InMemoryDocument;
 import eu.europa.esig.dss.token.AbstractSignatureTokenConnection;
 import eu.europa.esig.dss.validation.AdvancedSignature;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
@@ -15,10 +16,7 @@ import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.crypto.TSPHttpSource;
 import org.votingsystem.dto.metadata.MetaInfDto;
 import org.votingsystem.model.*;
-import org.votingsystem.throwable.DuplicatedDbItemException;
-import org.votingsystem.throwable.SignerValidationException;
-import org.votingsystem.throwable.TimeStampValidationException;
-import org.votingsystem.throwable.XAdESValidationException;
+import org.votingsystem.throwable.*;
 import org.votingsystem.util.DateUtils;
 import org.votingsystem.util.Messages;
 import org.votingsystem.xades.CertificateVerifier;
@@ -28,7 +26,6 @@ import javax.ejb.TransactionAttribute;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -50,18 +47,39 @@ public class SignatureServiceEJB implements SignatureService {
 
     private static final Logger log = Logger.getLogger(SignatureServiceEJB.class.getName());
 
-    @PersistenceContext private EntityManager em;
+    @PersistenceContext
+    private EntityManager em;
     @Inject private Config config;
     @Inject private SignerInfoService signerInfoService;
 
-    public byte[] signXAdES(byte[] xmlToSign) throws IOException {
-        AbstractSignatureTokenConnection signingToken = config.getSigningToken();
-        return org.votingsystem.xades.XAdESSignature.sign(xmlToSign, signingToken,
-                new TSPHttpSource(config.getTimestampServiceURL()));
+    public SignedDocument signXAdESAndSave(byte[] xmlToSign, SignatureParams signatureParams) throws SignatureException {
+        try {
+            byte[] signedDocumentBytes = org.votingsystem.xades.XAdESSignature.sign(xmlToSign, config.getSigningToken(),
+                    new TSPHttpSource(config.getTimestampServiceURL()));
+            DSSDocument signedDocument = new InMemoryDocument(signedDocumentBytes);
+            String documentDigest = signedDocument.getDigest(DigestAlgorithm.MD5);
+            XAdESDocument xadesDocument = new XAdESDocument(signedDocument, signatureParams.getSignedDocumentType(),
+                    documentDigest);
+            xadesDocument.setIndication(SignedDocument.Indication.LOCAL_SIGNATURE);
+            em.persist(xadesDocument);
+            return xadesDocument;
+        } catch (Exception ex) {
+            throw new SignatureException(ex.getMessage(), ex);
+        }
+    }
+
+    public byte[] signXAdES(byte[] xmlToSign) throws SignatureException {
+        try {
+            AbstractSignatureTokenConnection signingToken = config.getSigningToken();
+            return org.votingsystem.xades.XAdESSignature.sign(xmlToSign, signingToken,
+                    new TSPHttpSource(config.getTimestampServiceURL()));
+        } catch (Exception ex) {
+            throw new SignatureException(ex.getMessage(), ex);
+        }
     }
 
     @TransactionAttribute(REQUIRES_NEW)
-    public SignedDocument validateAndSaveXAdES(DSSDocument signedDocument, SignatureParams signatureParams)
+    public SignedDocument validateXAdESAndSave(DSSDocument signedDocument, SignatureParams signatureParams)
             throws XAdESValidationException, DuplicatedDbItemException {
         try {
             XAdESDocument xAdESDocument = validateXAdES(signedDocument, signatureParams);
@@ -91,8 +109,7 @@ public class SignatureServiceEJB implements SignatureService {
             validator = SignedDocumentValidator.fromDocument(signedDocument);
         } catch (Exception ex) {
             if (xAdESDocument != null) {
-                xAdESDocument.setIndication(XAdESDocument.Indication.ERROR).setMetaInf(
-                        MetaInfDto.FROM_REASON(ex.getMessage()));
+                xAdESDocument.setIndication(XAdESDocument.Indication.ERROR).setMetaInf(new MetaInfDto(ex.getMessage(), null));
             }
             throw new XAdESValidationException(ex.getMessage(), ex, xAdESDocument);
         }
@@ -107,11 +124,11 @@ public class SignatureServiceEJB implements SignatureService {
             reports = validator.validateDocument();
             simpleReport = reports.getSimpleReport();
         } catch (Exception ex) {
-            xAdESDocument.setIndication(XAdESDocument.Indication.ERROR).setMetaInf(MetaInfDto.FROM_REASON(ex.getMessage()));
+            xAdESDocument.setIndication(XAdESDocument.Indication.ERROR).setMetaInf(new MetaInfDto(ex.getMessage(), null));
             throw new XAdESValidationException(ex.getMessage(), ex, xAdESDocument);
         }
         if (simpleReport.getSignaturesCount() == 0) {
-            xAdESDocument.setMetaInf(MetaInfDto.FROM_SIMPLE_REPORT(reports.getXmlSimpleReport()))
+            xAdESDocument.setMetaInf(new MetaInfDto(reports.getXmlSimpleReport(), null))
                     .setIndication(XAdESDocument.Indication.ERROR_ZERO_SIGNATURES);
             msg = Messages.currentInstance().get("zeroSignaturesErrorMsg");
             log.log(Level.SEVERE, msg);
@@ -119,7 +136,7 @@ public class SignatureServiceEJB implements SignatureService {
             throw new XAdESValidationException(msg, xAdESDocument);
         }
         if (simpleReport.getSignaturesCount() > simpleReport.getValidSignaturesCount()) {
-            xAdESDocument.setMetaInf(MetaInfDto.FROM_REASON(reports.getXmlSimpleReport()))
+            xAdESDocument.setMetaInf(new MetaInfDto(reports.getXmlSimpleReport(), null))
                     .setIndication(XAdESDocument.Indication.ERROR_SIGNATURES_COUNT);
             msg = Messages.currentInstance().get("signatureCountMismatchErrorMsg",
                     simpleReport.getSignaturesCount(), simpleReport.getValidSignaturesCount());
@@ -145,7 +162,8 @@ public class SignatureServiceEJB implements SignatureService {
                 }
                 Certificate caCertificate = config.getCACertificate(issuerToken.getCertificate().getSerialNumber().longValue());
                 signatureParams.setSigningCert(signingCertToken.getCertificate()).setCertificateCA(caCertificate);
-                User signer = signerInfoService.checkSigner(signatureParams);
+                User signer = signerInfoService.checkSigner(signingCertToken.getCertificate(),
+                        signatureParams.getSignerType(), signatureParams.getEntityId());
                 switch (signatureParams.getSignerType()) {
                     case ANON_ELECTOR:
                         xAdESDocument.setAnonSigner(signer);
@@ -156,10 +174,9 @@ public class SignatureServiceEJB implements SignatureService {
                         break;
 
                 }
+                TimestampToken selectedTimestampToken = null;
                 //we allow only one timestamp per signature
-                List<TimestampToken> timeStampTokens = xAdESSignature.getSignatureTimestamps();
-                LocalDateTime selectedTokenDate = null;
-                for (TimestampToken timestampToken : timeStampTokens) {
+                for (TimestampToken timestampToken : xAdESSignature.getSignatureTimestamps()) {
                     X509Certificate tokenIssuerCert = timestampToken.getIssuerToken().getCertificate();
                     if(signatureParams.isWithTimeStampValidation()) {
                         try {
@@ -184,36 +201,37 @@ public class SignatureServiceEJB implements SignatureService {
                     if(!timestampToken.isSignatureValid()) {
                         throw new TimeStampValidationException("Timestamp's signature validity: INVALID");
                     }
-                    LocalDateTime tokenDate = DateUtils.getLocalDateFromUTCDate(timestampToken.getGenerationTime());
-                    log.log(Level.FINEST, "timestampToken: " + timestampToken + " - EncodedSignedDataDigestValue: " +
-                            timestampToken.getEncodedSignedDataDigestValue() + " - localDateTime: " + tokenDate);
-                    if(selectedTokenDate == null)
-                        selectedTokenDate = tokenDate;
-                    else if(selectedTokenDate.isAfter(tokenDate))
-                        selectedTokenDate = tokenDate;
+                    if(selectedTimestampToken == null)
+                        selectedTimestampToken = timestampToken;
+                    else if(selectedTimestampToken.getGenerationTime().after(timestampToken.getGenerationTime()))
+                        selectedTimestampToken = timestampToken;
                 }
+                LocalDateTime selectedTokenDate = DateUtils.getLocalDateFromUTCDate(selectedTimestampToken.getGenerationTime());
+                log.log(Level.FINEST, "timestampToken: " + selectedTimestampToken + " - EncodedSignedDataDigestValue: " +
+                        selectedTimestampToken.getEncodedSignedDataDigestValue() + " - localDateTime: " + selectedTokenDate);
+                X509Certificate signingCert = xAdESSignature.getCandidatesForSigningCertificate()
+                        .getTheBestCandidate().getCertificateToken().getCertificate();
                 switch (signatureParams.getSignerType()) {
                     case ANON_ELECTOR:
-                        signatures.add(new Signature(null, xAdESDocument, xAdESSignature.getId(), selectedTokenDate));
+                        signatures.add(new Signature(null, signingCert, xAdESDocument, xAdESSignature.getId(),
+                                selectedTokenDate));
                         break;
                     default:
-                        signatures.add(new Signature(signer, xAdESDocument, xAdESSignature.getId(), selectedTokenDate));
+                        signatures.add(new Signature(signer, signingCert, xAdESDocument, xAdESSignature.getId(),
+                                selectedTokenDate));
                 }
             }
             xAdESDocument.setSignatures(signatures);
-        } catch (SignerValidationException ex) {
-            xAdESDocument.setMetaInf(MetaInfDto.FROM_REASON(ex.getMessage()))
+        } catch (CertificateValidationException | SignerValidationException ex) {
+            xAdESDocument.setMetaInf(new MetaInfDto(ex.getMessage(), null))
                     .setIndication(XAdESDocument.Indication.ERROR_SIGNER);
             throw new XAdESValidationException(ex.getMessage(), xAdESDocument);
         } catch (TimeStampValidationException ex) {
-            xAdESDocument.setMetaInf(MetaInfDto.FROM_REASON(ex.getMessage()))
+            xAdESDocument.setMetaInf(new MetaInfDto(ex.getMessage(), null))
                     .setIndication(XAdESDocument.Indication.ERROR_TIMESTAMP);
             throw new XAdESValidationException(ex.getMessage(), xAdESDocument);
         }
-        //InputStream is = new ByteArrayInputStream(reports.getData().getContent("UTF-8"));
-        //is = new ByteArrayInputStream(reports.getXmlDetailedReport().getContent("UTF-8"));
         return xAdESDocument;
     }
-
 
 }

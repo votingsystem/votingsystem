@@ -25,6 +25,10 @@ public class TrustedServicesEJB {
 
     private static final Logger log = Logger.getLogger(TrustedServicesEJB.class.getName());
 
+    @Inject private Config config;
+    @Inject private MetadataService metadataResource;
+    @Inject private SignerInfoService signerInfoService;
+
     private static Map<String, MetadataDto> trustedEntitiesMap = new ConcurrentHashMap<>();
 
     /* Executor service for asynchronous processing */
@@ -32,16 +36,13 @@ public class TrustedServicesEJB {
     private ManagedExecutorService executorService;
 
     private TrustedEntitiesDto trustedEntities;
-    @Inject private Config config;
-    @Inject private MetadataService metadataResource;
-    @Inject private SignerInfoService signerInfoService;
 
     @PostConstruct
     public void initialize() {
         executorService.submit(() -> {
             try {
                 //Hack to allow local OCSP service initialization
-                Thread.sleep(3000);
+                Thread.sleep(10000);
                 loadTrustedServices();
             } catch (Exception ex) {
                 log.log(Level.SEVERE, ex.getMessage(), ex);

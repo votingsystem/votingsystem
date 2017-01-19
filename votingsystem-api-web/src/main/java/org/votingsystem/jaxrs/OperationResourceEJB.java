@@ -12,7 +12,7 @@ import org.votingsystem.ejb.TrustedServicesEJB;
 import org.votingsystem.http.HttpResponse;
 import org.votingsystem.model.SignedDocument;
 import org.votingsystem.model.User;
-import org.votingsystem.throwable.InsuficientPrivilegesException;
+import org.votingsystem.throwable.InsufficientPrivilegesException;
 import org.votingsystem.xml.XML;
 
 import javax.ejb.Singleton;
@@ -67,11 +67,11 @@ public class OperationResourceEJB {
     }
 
 
-     private SignedDocument validateRequest(InMemoryDocument inMemoryDocument, SignatureParams signatureParams) throws Exception {
-         SignedDocument signedDocument = signatureService.validateAndSaveXAdES(inMemoryDocument, signatureParams);
-         User user = signedDocument.getSignatures().iterator().next().getSigner();
+     private SignedDocument validateRequest(InMemoryDocument document, SignatureParams signatureParams) throws Exception {
+         SignedDocument signedDocument = signatureService.validateXAdESAndSave(document, signatureParams);
+         User user = signedDocument.getFirstSignature().getSigner();
          if(!Arrays.equals(config.getSigningCert().getEncoded(), user.getX509Certificate().getEncoded())) {
-            throw new InsuficientPrivilegesException("ERROR - Insuficient privileges exception");
+            throw new InsufficientPrivilegesException("ERROR - Insufficient privileges exception");
          }
          return signedDocument;
      }

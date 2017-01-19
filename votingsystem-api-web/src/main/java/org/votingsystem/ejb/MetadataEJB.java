@@ -1,5 +1,6 @@
 package org.votingsystem.ejb;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europa.esig.dss.DSSDocument;
 import eu.europa.esig.dss.InMemoryDocument;
@@ -11,12 +12,13 @@ import org.votingsystem.dto.metadata.MetadataDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.model.User;
 import org.votingsystem.throwable.HttpRequestException;
+import org.votingsystem.throwable.SignatureException;
 import org.votingsystem.throwable.XMLValidationException;
 import org.votingsystem.util.Messages;
+import org.votingsystem.xml.XML;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,9 +32,9 @@ public class MetadataEJB implements MetadataService {
     @Inject private SignerInfoService signerInfoService;
 
 
-    public byte[] getMetadataSigned() throws IOException {
+    public byte[] getMetadataSigned() throws JsonProcessingException, SignatureException {
         MetadataDto metadata = config.getMetadata();
-        byte[] metadataBytes = new XmlMapper().writeValueAsBytes(metadata);
+        byte[] metadataBytes = XML.getMapper().writeValueAsBytes(metadata);
         return signatureService.signXAdES(metadataBytes);
     }
 
@@ -56,7 +58,7 @@ public class MetadataEJB implements MetadataService {
             DSSDocument signedDocument = new InMemoryDocument(response.getMessageBytes());
             SignatureParams signatureParams = new SignatureParams(metadata.getEntity().getId(), User.Type.ENTITY,
                     SignedDocumentType.ENTITY_METADATA).setWithTimeStampValidation(withTimeStampValidation);
-            signatureService.validateAndSaveXAdES(signedDocument, signatureParams);
+            signatureService.validateXAdESAndSave(signedDocument, signatureParams);
             config.putEntityMetadata(metadata);
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
