@@ -21,6 +21,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+/**
+ * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 public class XmlReader {
 
     private static final Logger log = Logger.getLogger(XmlReader.class.getName());

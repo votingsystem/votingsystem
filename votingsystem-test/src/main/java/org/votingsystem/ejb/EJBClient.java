@@ -3,7 +3,7 @@ package org.votingsystem.ejb;
 
 import org.votingsystem.BaseTest;
 import org.votingsystem.model.User;
-import org.votingsystem.service.EJBRemoteAdminIdProvider;
+import org.votingsystem.service.EJBAdminRemoteIdProvider;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.IOUtils;
@@ -29,7 +29,7 @@ public class EJBClient extends BaseTest {
     }
 
     private final Context context;
-    private EJBRemoteAdminIdProvider idProviderRemote;
+    private EJBAdminRemoteIdProvider idProviderRemote;
 
 
     public EJBClient() throws NamingException {
@@ -142,8 +142,8 @@ public class EJBClient extends BaseTest {
     }
 
     private void lookupRemoteBeans() throws NamingException {
-        idProviderRemote =  (EJBRemoteAdminIdProvider) context.lookup(
-                "ejb:/votingsystem-idprovider/AdminRemoteBean!" + EJBRemoteAdminIdProvider.class.getName());
+        idProviderRemote =  (EJBAdminRemoteIdProvider) context.lookup(
+                "ejb:/votingsystem-idprovider/AdminRemoteEJB!" + EJBAdminRemoteIdProvider.class.getName());
 
     }
 

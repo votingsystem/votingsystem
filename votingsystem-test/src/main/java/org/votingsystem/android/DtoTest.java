@@ -27,7 +27,7 @@ public class DtoTest extends BaseTest {
 
     public static void electionResultListTest() throws Exception {
         ResponseDto response = HttpConn.getInstance().doGetRequest(
-                OperationType.FETCH_ELECTIONS.getUrl(Constants.VOTING_SERVICE_SERVICE_ENTITY_ID), MediaType.XML);
+                OperationType.FETCH_ELECTIONS.getUrl(Constants.VOTING_SERVICE_ENTITY_ID), MediaType.XML);
         ResultListDto<ElectionDto> elections = XmlReader.readElections(response.getMessageBytes());
         log.info("StatusCode: " + response.getStatusCode() + " - message: " + response.getMessage());
     }

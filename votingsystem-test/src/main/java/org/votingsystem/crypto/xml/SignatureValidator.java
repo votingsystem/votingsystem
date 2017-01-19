@@ -1,20 +1,10 @@
 package org.votingsystem.crypto.xml;
 
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.tsp.TimeStampRequest;
-import org.bouncycastle.tsp.TimeStampRequestGenerator;
-import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
-import org.kxml2.kdom.Node;
-import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.http.ContentType;
-import org.votingsystem.http.HttpConn;
 import org.votingsystem.throwable.ValidationException;
-import org.votingsystem.util.Constants;
-import org.votingsystem.util.HashUtils;
 import org.votingsystem.util.XMLUtils;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -22,7 +12,10 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
-import java.util.*;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**

@@ -32,7 +32,7 @@ public class PublishElection extends BaseTest {
 
     private static final String TAG = PublishElection.class.getSimpleName();
 
-    private static final String QR_CODE = "eid=https://192.168.1.5/voting-service;uid=26ce4bcd-4765-4630-bb21-8f8f74d43e51;";
+    private static final String QR_CODE = "eid=https://votingsystem.ddns.net/voting-service;uid=dce1f8a8-34d4-4172-9054-c958736cb3cb;";
 
     public PublishElection() {
         super();
@@ -62,7 +62,7 @@ public class PublishElection extends BaseTest {
         String textToSign = XMLUtils.prepareRequestToSign(qrResponseDto.getData());
 
         byte[] signatureBytes = new SignatureBuilder(textToSign.getBytes(), XAdESUtils.XML_MIME_TYPE,
-                SignatureAlgorithm.RSA_SHA_256.getName(), new MockDNIe("7553172H"),
+                SignatureAlgorithm.RSA_SHA_256.getName(), new MockDNIe("08888888D"),
                 Constants.TIMESTAMP_SERVICE_URL).build();
 
         log.info("signatureBytes: " + new String(signatureBytes));

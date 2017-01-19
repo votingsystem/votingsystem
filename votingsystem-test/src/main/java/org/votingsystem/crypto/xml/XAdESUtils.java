@@ -4,8 +4,8 @@ import org.bouncycastle.util.encoders.Base64;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
+import org.votingsystem.crypto.HashUtils;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.HashUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

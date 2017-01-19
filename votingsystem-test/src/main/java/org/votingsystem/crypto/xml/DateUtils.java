@@ -128,15 +128,6 @@ public class DateUtils {
         return cal;
     }
 
-    public static String getDayWeekDateStr(Date date, String hourFormat) {
-        if (hourFormat == null) hourFormat = "HH:mm";
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        if (Calendar.getInstance().get(Calendar.YEAR) != calendar.get(Calendar.YEAR))
-            return getDateStr(date, "dd MMM yyyy' '" + hourFormat);
-        else return getDateStr(date, "EEE dd MMM' '" + hourFormat);
-    }
-
     public static String getDayWeekDateSimpleStr(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);

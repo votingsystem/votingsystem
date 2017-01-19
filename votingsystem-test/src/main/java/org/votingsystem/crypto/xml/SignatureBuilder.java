@@ -10,12 +10,12 @@ import org.bouncycastle.tsp.TimeStampToken;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
+import org.votingsystem.crypto.HashUtils;
 import org.votingsystem.crypto.MockDNIe;
 import org.votingsystem.dto.ResponseDto;
 import org.votingsystem.http.ContentType;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.HashUtils;
 
 import java.io.IOException;
 import java.security.*;
@@ -59,7 +59,7 @@ public class SignatureBuilder {
      * @param privateKey
      * @param signingCertificate
      * @param signingCertificateChain
-     * @param timeStampServiceURL     p.e: http://192.168.1.5/timestamp-server/api/timestamp
+     * @param timeStampServiceURL     p.e: http://votingsystem.ddns.net/timestamp-server/api/timestamp
      * @throws IOException
      * @throws ParseException
      */

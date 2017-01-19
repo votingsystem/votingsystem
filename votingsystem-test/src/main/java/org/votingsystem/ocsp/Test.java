@@ -19,12 +19,12 @@ import java.util.Date;
 public class Test {
 
     //private static final String OCSP_SERVER = Constants.OCSP_DNIE_URL;
-    private static final String OCSP_SERVER = "https://192.168.1.5/idprovider/ocsp";
+    private static final String OCSP_SERVER = "https://votingsystem.ddns.net/idprovider/ocsp";
 
     //private static final String rootCertPath = "certs/dnie_raiz.pem";
     private static final String rootCertPath = "certs/fakeRootDNIe.pem";
     //private static final String certPath = "certs/dnie.pem";
-    private static final String certPath = "certs/fake_7553172H.pem";
+    private static final String certPath = "certs/fake_08888888D.pem";
 
     private static X509Certificate cert;
     private static X509Certificate intermediateCert;

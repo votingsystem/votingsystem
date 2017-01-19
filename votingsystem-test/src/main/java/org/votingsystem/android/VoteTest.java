@@ -43,7 +43,7 @@ public class VoteTest extends BaseTest {
 
     private static final Logger log = Logger.getLogger(VoteTest.class.getName());
 
-    private static final String QR_CODE = "eid=https://192.168.1.5/idprovider;uid=8edb0f56-cf18-4bf9-9bb7-6c821f963972;";
+    private static final String QR_CODE = "eid=https://votingsystem.ddns.net/idprovider;uid=232585a0-426c-4193-aab4-1b24021e26f8;";
     private static final String KEYSTORE_PATH = "./vote.jks";
 
     public static void main(String[] args) throws Exception {
@@ -78,9 +78,9 @@ public class VoteTest extends BaseTest {
         IdentityRequestDto identityRequest = new IdentityRequestDto();
 
         SystemEntityDto identityEntity = new SystemEntityDto(
-                org.votingsystem.Constants.ID_PROVIDER_SERVICE_ENTITY_ID, SystemEntityType.VOTING_ID_PROVIDER);
+                org.votingsystem.Constants.ID_PROVIDER_ENTITY_ID, SystemEntityType.VOTING_ID_PROVIDER);
         SystemEntityDto callbackEntity = new SystemEntityDto(
-                org.votingsystem.Constants.VOTING_SERVICE_SERVICE_ENTITY_ID, SystemEntityType.VOTING_SERVICE_PROVIDER);
+                org.votingsystem.Constants.VOTING_SERVICE_ENTITY_ID, SystemEntityType.VOTING_SERVICE_PROVIDER);
         identityRequest.setIndentityServiceEntity(identityEntity).setCallbackServiceEntityId(callbackEntity);
         identityRequest.setUUID(electionDto.getUUID()).setType(OperationType.ANON_VOTE_CERT_REQUEST);
         identityRequest.setRevocationHashBase64(voteContainer.getRevocationHashBase64());
@@ -90,7 +90,7 @@ public class VoteTest extends BaseTest {
         log.info("identityRequest: " + textToSign);
 
         byte[] signatureBytes = new SignatureBuilder(textToSign.getBytes(),
-                XAdESUtils.XML_MIME_TYPE, SignatureAlgorithm.RSA_SHA_256.getName(), new MockDNIe("7553172H"),
+                XAdESUtils.XML_MIME_TYPE, SignatureAlgorithm.RSA_SHA_256.getName(), new MockDNIe("08888888D"),
                 org.votingsystem.Constants.TIMESTAMP_SERVICE_URL).build();
 
         Map<String, byte[]> fileMap = new HashedMap();
@@ -141,7 +141,7 @@ public class VoteTest extends BaseTest {
         //we use discrete timestamps to avoid associate by time proximity signed request with votes in the audits
         KeyStore keyStore = KeyStoreUtils.getKeyStore(FileUtils.getBytesFromFile(new File(KEYSTORE_PATH)),
                 org.votingsystem.util.Constants.PASSW_DEMO.toCharArray());
-        MockDNIe mockDNIe = new MockDNIe(keyStore, Constants.PASSW_DEMO.toCharArray());
+        MockDNIe mockDNIe = new MockDNIe(keyStore, Constants.PASSW_DEMO.toCharArray(), Constants.USER_CERT_ALIAS);
 
         byte[] voteBytes = XmlWriter.write(voteContainer.getVote());
         String voteStr = XMLUtils.prepareRequestToSign(voteBytes);

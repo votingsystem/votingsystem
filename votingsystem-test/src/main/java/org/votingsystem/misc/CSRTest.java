@@ -2,13 +2,9 @@ package org.votingsystem.misc;
 
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.BaseTest;
-import org.votingsystem.crypto.CertUtils;
-import org.votingsystem.crypto.CertificationRequest;
-import org.votingsystem.crypto.MockDNIe;
-import org.votingsystem.crypto.PEMUtils;
+import org.votingsystem.crypto.*;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.FileUtils;
-import org.votingsystem.util.HashUtils;
 
 import java.io.File;
 import java.security.cert.X509Certificate;
@@ -42,20 +38,16 @@ public class CSRTest extends BaseTest {
         String originRevocationHash = UUID.randomUUID().toString();
         String revocationHashBase64 = HashUtils.getHashBase64(originRevocationHash.getBytes(), Constants.DATA_DIGEST_ALGORITHM);
         CertificationRequest certificationRequest = CertificationRequest.getVoteRequest(
-                org.votingsystem.Constants.ID_PROVIDER_SERVICE_ENTITY_ID,
-                org.votingsystem.Constants.VOTING_SERVICE_SERVICE_ENTITY_ID, electionUUID, revocationHashBase64);
+                org.votingsystem.Constants.ID_PROVIDER_ENTITY_ID,
+                org.votingsystem.Constants.VOTING_SERVICE_ENTITY_ID, electionUUID, revocationHashBase64);
 
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(certificationRequest.getCsrPEM());
 
-
-        X509Certificate voteCert = CertUtils.signCSR(csr, org.votingsystem.Constants.ID_PROVIDER_SERVICE_ENTITY_ID, adminCert.getPrivateKey(),
-                adminCert.getX509Certificate(), LocalDateTime.now(), LocalDateTime.now(),
+        X509Certificate voteCert = CertUtils.signCSR(csr, org.votingsystem.Constants.ID_PROVIDER_ENTITY_ID,
+                adminCert.getPrivateKey(), adminCert.getX509Certificate(), LocalDateTime.now(), LocalDateTime.now(),
                 org.votingsystem.Constants.OCSP_SERVER_URL);
-
         log.info("voteCert: " + voteCert);
-
-
-        FileUtils.copyBytesToFile(PEMUtils.getPEMEncoded(voteCert), new File("/home/jgzornoza/temp/voteCert.crt"));
-
+        FileUtils.copyBytesToFile(PEMUtils.getPEMEncoded(voteCert), new File("voteCert.crt"));
     }
+
 }

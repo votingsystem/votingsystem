@@ -20,7 +20,7 @@ public class QRTest extends BaseTest {
 
     private static final Logger log = Logger.getLogger(QRTest.class.getName());
 
-    private static String QR_CODE = "eid=https://192.168.1.5/idprovider;uid=75b8889a-3bd7-47ee-bec3-1bcde186ed56;";
+    private static String QR_CODE = "eid=https://votingsystem.ddns.net/idprovider;uid=75b8889a-3bd7-47ee-bec3-1bcde186ed56;";
 
     public static void main(String[] args) throws Exception {
         //String reqContentType = "application/xml";

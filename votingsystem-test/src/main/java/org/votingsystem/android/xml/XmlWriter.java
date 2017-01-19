@@ -6,6 +6,9 @@ import org.kxml2.kdom.Node;
 import org.votingsystem.dto.indentity.IdentityRequestDto;
 import org.votingsystem.dto.voting.VoteDto;
 
+/**
+ * Licence: https://github.com/votingsystem/votingsystem/wiki/Licencia
+ */
 public class XmlWriter {
 
 

@@ -31,14 +31,14 @@ public class CheckUserCertificate extends BaseTest {
 
     private static final Logger log = Logger.getLogger(CheckUserCertificate.class.getName());
 
-    //private static String TEST_ENTITY = "https://192.168.1.5/voting-service";
-    private static String TEST_ENTITY = "https://192.168.1.5/idprovider";
+    //private static String TEST_ENTITY = "https://votingsystem.ddns.net/voting-service";
+    private static String TEST_ENTITY = "https://votingsystem.ddns.net/idprovider";
 
     private static String ADMIN_KEYSTORE = "certs/votingsystem-idprovider.jks";
     //private static String ADMIN_KEYSTORE = "certs/votingsystem-serviceprovider.jks";
-    //private static String ADMIN_KEYSTORE = "certs/fake_7553172H.jks";
+    //private static String ADMIN_KEYSTORE = "certs/fake_08888888D.jks";
     private static String ADMIN_KEYSTORE_PASSWORD = org.votingsystem.util.Constants.PASSW_DEMO;
-    private static String CERT_TO_CHECK = "certs/fake_7553172H.pem";
+    private static String CERT_TO_CHECK = "certs/fake_08888888D.pem";
 
 
     public static void main(String[] args) throws Exception {

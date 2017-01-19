@@ -29,10 +29,10 @@ public class MultipleSignatureGenerator extends BaseTest {
 
     private static final Logger log = Logger.getLogger(MultipleSignatureGenerator.class.getName());
 
-    private static String TEST_ENTITY = "https://192.168.1.5/idprovider";
+    private static String TEST_ENTITY = "https://votingsystem.ddns.net/idprovider";
 
 
-    private static String SIGNER1_KEYSTORE = "certs/fake_7553172H.jks";
+    private static String SIGNER1_KEYSTORE = "certs/fake_08888888D.jks";
     private static String SIGNER2_KEYSTORE = "certs/fake_00012345V.jks";
     private static Boolean WITH_TIMESTAMP_VALIDATION = Boolean.TRUE;
 
