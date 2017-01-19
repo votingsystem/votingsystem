@@ -22,6 +22,8 @@ Discrete timestamps are created to make it more difficult to trace
 electors analyzing the TimeStamp of the signed votes (the results of the 
 elections are freely available online for anyone that could want to validate them).
 
+### Security
+You need to install the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files [(available at Oracle)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html).
 
 #### Server certificates
 
