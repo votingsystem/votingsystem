@@ -33,22 +33,22 @@ public class GenerateCertificateForBrowser extends BaseTest {
     private static final Logger log = Logger.getLogger(GenerateCertificateForBrowser.class.getName());
 
     private static String CSR = "-----BEGIN CERTIFICATE REQUEST-----\n" +
-            "MIIBbjCB2AIBADAvMS0wKwYDVQQFEyQ0YjhkN2Q0Mi00ZjJiLTQwNjgtOTM0ZS0y\n" +
-            "ZTk2YjI2OGRlNWMwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAJVPe6JZIZHY\n" +
-            "Piji1L/mgwSoOzIvv3B/sCVxV4jk70NymUKZIkjnk9ZUaL4SWqgc/PZ48GhoeNKG\n" +
-            "I01RGdg0JjbuwD8+nSrwSL+wj7wiI5olXegalUZyYHQXDH2QuVaxE21tJIHmhuQu\n" +
-            "rqlkMTnhuL1XKUnU/BUuyQah5Jccf3V9AgMBAAGgADANBgkqhkiG9w0BAQUFAAOB\n" +
-            "gQCG9LFtrTVyHmKFvzXhG6Vg4feEa3tBLucvX2eTbDKXv2JyLnNCSy0lBVO4GxBh\n" +
-            "UorbR7f9DT0lzr8/4MRGFuGoapNxzKyRDc2KV6NvxzuPgBgvFLOrOudrFqUSXRJy\n" +
-            "ejWhgs75D1enO3jr6dxY22dn8VDftMaPnfJu7SP8FSOtZA==\n" +
+            "MIIBbjCB2AIBADAvMS0wKwYDVQQFEyQ0Y2U5Yzg0My02MTdlLTQ3NWEtYTM0Ny0x\n" +
+            "NTNhYTJiNzhkZTUwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMH/oN1U/YZH\n" +
+            "h+3aUdZPNIPxb/p0IHJ97AwZKyNYw/ziyrL/V7u+tOcZ+mOIvCD5+ZO1hYODoS8n\n" +
+            "o8U++W54KlygnD4x0kURxSDO1Z0tEdWcIqkLhKKuP+RasBxsZo/b5fxfwItVmHiP\n" +
+            "4D+I8OFxIvqDEzyY5uJRLjgNSWEUTP33AgMBAAGgADANBgkqhkiG9w0BAQUFAAOB\n" +
+            "gQASo3EWI1iAOq9SZSKTjJVIxnxwTPqVCGgS09H2l/1tCUH27vGacqnLXDhVdXaj\n" +
+            "njWjjLHXkDivTfyX+RIiIzWbp0Am8KDvhKNP1fnOjbjxkiiWlK16FKzWyY3NRVGk\n" +
+            "61zKGg3tSVzhNsSv/rdfQt75dADiKO0vpR8u1tRTgN3WtQ==\n" +
             "-----END CERTIFICATE REQUEST-----";
 
-    private static final String QR_CODE = "eid=https://votingsystem.ddns.net/currency-server;op=0;uid=36f68a30-1e90-42e8-b705-d1401bdc8175;";
+    private static final String QR_CODE = "eid=https://votingsystem.ddns.net/currency-server;op=0;uid=d0384dca-a86d-46bf-844d-7a4b9acb3ce1;";
 
 
     public static void main(String[] args) throws Exception {
-        //new GenerateCertificateForBrowser().generateFromHttp();
-        new GenerateCertificateForBrowser().generate(CSR, null);
+        new GenerateCertificateForBrowser().generateFromHttp();
+        //new GenerateCertificateForBrowser().generate(CSR, null);
         System.exit(0);
     }
 

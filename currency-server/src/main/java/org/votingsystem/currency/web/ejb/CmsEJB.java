@@ -99,6 +99,7 @@ public class CmsEJB {
                 em.persist(signature.setDocument(cmsDocument));
                 log.info("signature: " + signature.getId());
             }
+            cmsDocument.setSignatures(cmsDto.getSignatures());
             cmsDto.setCmsDocument(cmsDocument);
             return cmsDto;
         } else throw new ValidationException("invalid CMSDocument");

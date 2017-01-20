@@ -174,8 +174,9 @@ public class SignedDocument extends EntityBase implements Serializable {
         return signatures;
     }
 
-    public void setSignatures(Set<Signature> signatures) {
+    public SignedDocument setSignatures(Set<Signature> signatures) {
         this.signatures = signatures;
+        return this;
     }
 
     @Override
@@ -203,7 +204,8 @@ public class SignedDocument extends EntityBase implements Serializable {
         for(Signature signature : signatures) {
             if(result == null)
                 result = signature;
-            else result = result.getSignatureDate().isBefore(signature.getSignatureDate()) ? result : signature;
+            else if(result.getSignatureDate() != null)
+                result = result.getSignatureDate().isBefore(signature.getSignatureDate()) ? result : signature;
         }
         return result;
     }

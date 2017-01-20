@@ -42,14 +42,15 @@ public class HttpSessionManager implements HttpSessionListener {
 
     @Override
     public void sessionDestroyed(HttpSessionEvent sessionEvent) {
-        log.info("sessionDestroyed: " + sessionEvent.getSession().getId());
+        log.info("session id: " + sessionEvent.getSession().getId() + " - userUUID: " +
+                sessionEvent.getSession().getAttribute(Constants.USER_UUID));
         try {
             User user = (User) sessionEvent.getSession().getAttribute(Constants.USER_KEY);
             if(user != null) {
                 Device device = user.getDevice();
                 if(device != null && device.getCertificate() != null) {
                     em.merge(device.getCertificate().setState(Certificate.State.SESSION_FINISHED));
-                    log.info("sessionDestroyed - certificate: " + device.getCertificate().getId() + " - state: " +
+                    log.info("certificate id: " + device.getCertificate().getId() + " - state: " +
                             device.getCertificate().getState());
                 }
             }
@@ -71,14 +72,14 @@ public class HttpSessionManager implements HttpSessionListener {
         return sessionMap.size();
     }
 
-    public Set<String> getSessionIdSet() {
+    public Set<String> getSessionUUIDSet() {
         return sessionMap.keySet();
     }
 
     public void setUserInSession(String userUUID, User user) {
         if(sessionMap.containsKey(userUUID)) {
             sessionMap.get(userUUID).setAttribute(Constants.USER_KEY, user);
-        } else log.log(Level.SEVERE,"HttpSession not found - userUUID: " + userUUID);
+        } else log.log(Level.SEVERE, "HttpSession not found - userUUID: " + userUUID);
     }
 
 }

@@ -112,9 +112,9 @@
                 var encryptedCMSMsg = forge.pkcs7.messageFromPem(document.querySelector("#encryptedCMSMsg").innerHTML);
                 var privateKey = forge.pki.privateKeyFromPem(document.querySelector("#privateKey").innerHTML);
                 console.log("testDecrypt - privateKey: ", privateKey);
-                console.log("encryptedCMSMsg: ", encryptedCMSMsg);
+                console.log("encryptedCMSMsg: ", encryptedCMSMsg );
                 encryptedCMSMsg.decrypt(encryptedCMSMsg.recipients[0], privateKey);
-                console.log("decrypted: ", encryptedCMSMsg)
+                console.log("decrypted: ", encryptedCMSMsg);
             }
 
             // ]]>

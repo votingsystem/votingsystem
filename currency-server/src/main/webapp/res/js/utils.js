@@ -203,6 +203,8 @@ function getURLParam(name, url) {
 
 var clientTool
 vs.client = {}
+vs.certMap = {}
+
 vs.client.processOperation = function (messageJSON) {
     if(clientTool !== undefined) {
         if(messageJSON.jsonStr) {
@@ -299,21 +301,6 @@ vs.decryptAES = function(encryptedData, aesparamsDto) {
     decipher.update(forge.util.createBuffer(encryptedData));
     decipher.finish();
     return decipher.output.data
-}
-
-vs.setConnected = function (connectedDevice, mobileDevice) {
-    vs.connectedDevice = connectedDevice
-    vs.mobileDevice = mobileDevice
-    vs.connected = true
-    document.querySelector("#voting_system_page").dispatchEvent(new CustomEvent('connected'))
-}
-
-vs.setDisConnected = function () {
-    vs.connectedDevice = null
-    vs.mobileDevice = null
-    vs.rsaUtil = null
-    vs.connected = false
-    window.location.href = vs.contextURL;
 }
 
 function checkIfClientToolIsConnected() {

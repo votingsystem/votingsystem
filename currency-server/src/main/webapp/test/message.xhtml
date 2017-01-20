@@ -23,7 +23,7 @@
                     vs.httpPost(certServiceURL, function(responseText, status) {
                         if(200 === status) {
                             vs.certMap[deviceUUID] = responseText;
-                            console.log("status: " + status + "cert: ", vs.certMap[deviceUUID]);
+                            console.log("status: " + status + " - added cert for device: ", deviceUUID);
                             sendEncryptedMessage(vs.certMap[deviceUUID], deviceUUID);
                         } else console.log("status: " + status + " - responseText: " + responseText);
                     }, deviceUUID);
@@ -33,7 +33,7 @@
             }
 
             function sendEncryptedMessage(receiverCert, deviceUUID) {
-                var encryptedPem = vs.decryptMessage(receiverCert,  {message:"test message"})
+                var encryptedPem = vs.encryptToCMS(receiverCert,  {message:"test message"})
                 var socketOperation = {socketOperation:"MSG_TO_DEVICE", deviceFromUUID:vs.userUUID,
                     deviceToUUID:deviceUUID, certificatePEM:vs.rsaUtil.x509CertificatePEM,
                     encryptedMessage:encryptedPem};
@@ -44,33 +44,6 @@
                 }, JSON.stringify(socketOperation), "application/json");
             }
 
-
-            /**
-             private SocketOperation socketOperation;
-             private CurrencyOperation operation;
-             private Step step;
-             private Integer statusCode;
-             private String operationCode;
-             private String deviceFromUUID;
-             private String deviceToUUID;
-             private String userFromName;
-             private String userToName;
-             private String deviceFromName;
-             private String deviceToName;
-             private String message;
-             private String encryptedMessage;
-             private String signedMessageBase64;
-             private String subject;
-             private String publicKeyPEM;
-             private AESParamsDto aesParams;
-             private String certificatePEM;
-             private boolean timeLimited = false;
-             @JacksonXmlProperty(localName = "CurrencySet")
-             private Set<CurrencyDto> currencyDtoSet;
-             private ZonedDateTime date;
-             private DeviceDto device;
-             private String UUID;
-             */
             // ]]>
         </script>
     </ui:define>

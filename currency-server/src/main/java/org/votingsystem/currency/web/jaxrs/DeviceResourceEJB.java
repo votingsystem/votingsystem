@@ -1,7 +1,5 @@
 package org.votingsystem.currency.web.jaxrs;
 
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.votingsystem.crypto.PEMUtils;
 import org.votingsystem.currency.web.ejb.DeviceEJB;
 import org.votingsystem.currency.web.http.CurrencyPrincipal;
 import org.votingsystem.currency.web.util.AuthRole;
@@ -12,12 +10,10 @@ import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserDto;
 import org.votingsystem.dto.indentity.BrowserCertificationDto;
 import org.votingsystem.ejb.SignerInfoService;
-import org.votingsystem.model.CMSDocument;
-import org.votingsystem.model.Device;
-import org.votingsystem.model.SignedDocument;
-import org.votingsystem.model.User;
+import org.votingsystem.model.*;
 import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.*;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.TransactionAttribute;
 import javax.enterprise.inject.spi.BeanManager;
@@ -27,6 +23,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import javax.websocket.Session;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -57,17 +54,19 @@ public class DeviceResourceEJB {
 
     @RolesAllowed(AuthRole.USER)
     @POST @Path("/close-session")
+    @Transactional
     public Response closeSession(CMSDocument signedDocument, @Context HttpServletRequest req,
                                  @Context HttpServletResponse resp) throws Exception {
         User user = ((CurrencyPrincipal)req.getUserPrincipal()).getUser();
         User signer = signedDocument.getFirstSignature().getSigner();
-        List<User> userList = em.createQuery("select c from Certificate c where c.UUID=:UUID")
+        List<Certificate> certList = em.createQuery("select c from Certificate c where c.UUID=:UUID")
                 .setParameter("UUID", signer.getNumId()).getResultList();
-        if(userList.isEmpty())
+        if(certList.isEmpty())
             return Response.status(Response.Status.NOT_FOUND).entity("Certificate not found - UUID: " + signer.getNumId()).build();
-        signer = userList.iterator().next();
-        if(!user.getNumId().equals(signer.getNumId())) throw new ValidationException("signer it's not session owner");
-        OperationDto requestDto = signedDocument.getSignedContent(OperationDto.class);
+        signer = certList.iterator().next().getSigner();
+        if(!user.getNumId().equals(signer.getNumId()))
+            throw new ValidationException("signer it's not session owner");
+        OperationDto requestDto = JSON.getMapper().readValue(signedDocument.getCmsMessage().getSignedContentStr(), OperationDto.class);
         if(requestDto.getOperation().getType() != CurrencyOperation.CLOSE_SESSION) throw new ValidationException(format(
                 "bad message type, expected ''{0}'' found ''{1}''", CurrencyOperation.CLOSE_SESSION, requestDto.getOperation()));
         req.getSession().removeAttribute(Constants.USER_KEY);
@@ -163,8 +162,6 @@ public class DeviceResourceEJB {
         BrowserCertificationDto csrRequest = JSON.getMapper().readValue(
                 FileUtils.getBytesFromStream(req.getInputStream()), BrowserCertificationDto.class);
         req.getSession().setAttribute(Constants.CSR, csrRequest);
-        log.info("csrRequest: " + csrRequest.getBrowserCsr());
-        PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getBrowserCsr().getBytes());
         return Response.ok().entity("OK").build();
     }
 

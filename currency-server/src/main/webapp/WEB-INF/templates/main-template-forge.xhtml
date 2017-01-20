@@ -58,7 +58,7 @@
                     <h3 class="modal-title" id="alertCaption" style="color:#b71c1c;"></h3>
                 </div>
                 <div id="alertDialogQRImgDiv" style="margin: 0 auto; text-align: center; display: none;padding: 0 0 15px 0;">
-                    <div id="alertDialogQRId" style="font-size: 1.8em;color: #3a8287;"></div>
+                    <div id="alertDialogQRId" style="font-size: 1.8em;color: #434343;"></div>
                     <img id="alertDialogQRImg" src=""/>
                 </div>
                 <div id="alertDialogMsgDiv" class="modal-body" style="font-size: 1.2em; display: block; margin-right: 20px;word-wrap: break-word;">
@@ -151,7 +151,7 @@
                                             <i class="fa fa-user"></i><span id="authenticatedUserName" style="margin: 0 0 0 3px;"></span>
                                         </span>
                                         <ul class="dropdown-menu dropdown-usermenu pull-right">
-                                            <li onclick="setUserAuthenticated(false)">
+                                            <li onclick="closeSession()">
                                                 <a href="#"><i class="fa fa-sign-out pull-right"></i>#{msg.quitLbl}</a>
                                             </li>
                                         </ul>
@@ -183,13 +183,17 @@
     </div>
     <script>
         //<![CDATA[
+        vs.userUUID = "#{socketBean.getUserUUID()}";
 
-        var isUserAuthenticated = false;
+        vs.setDisConnected = function() {
+            setUserAuthenticated(false);
+            localStorage.setItem('pkiSessionData', null);
+        };
+
         function showAccessCode() {
             var userUUID = "#{socketBean.getUserUUID()}";
             vs.showQR('#{msg.readQRMsg}', userUUID.substring(0, 4).toUpperCase(), '#{pageBean.getAccessCodeQR()}')
             console.log("pageBean.getAccessCodeQR: #{pageBean.getAccessCodeQR()}")
-            setUserAuthenticated(!isUserAuthenticated);
         }
 
         function setUserAuthenticated(isUserAuthenticated, userName) {
@@ -201,24 +205,26 @@
             } else {
                 document.querySelector("#accessCodeButtonDiv").style.display = 'block';
                 document.querySelector("#authenticatedUserButtonDiv").style.display = 'none';
-
-                var socketMsgDto = {operation:{type:"CLOSE_SESSION"}, uuid:vs.getUUID()};
-                vs.rsaUtil.sign(JSON.stringify(socketMsgDto), function(cmsSignedMessage) {
-                    var cmsSignedMessage = forge.pkcs7.messageToPem(cmsSignedMessage);
-                    console.log("cmsSignedMessage: ", cmsSignedMessage)
-
-                    vs.httpPost(vs.entityId + "/api/device/close-session", function (responseText, status) {
-                        console.log("status: " + status + " - responseText: " + responseText);
-                    }, cmsSignedMessage, "application/pkcs7-signature");
-                })
-
             }
+        }
+
+        function closeSession() {
+            var socketMsgDto = {operation:{type:"CLOSE_SESSION"}, uuid:vs.getUUID()};
+            vs.rsaUtil.sign(JSON.stringify(socketMsgDto), function(cmsSignedMessage) {
+                var cmsSignedMessage = forge.pkcs7.messageToPem(cmsSignedMessage);
+                vs.httpPost(vs.entityId + "/api/device/close-session", function (responseText, status) {
+                    console.log("status: " + status + " - responseText: " + responseText);
+                    if(200 === status) {
+                        vs.setDisConnected();
+                        window.location.href = vs.entityId;
+                    }
+                }, cmsSignedMessage, "application/pkcs7-signature");
+            });
         }
 
         function serviceUpdated(updateMessage) {
             var jsonMessage = toJSON(updateMessage);
             console.log("serviceUpdated - jsonMessage: ", jsonMessage);
-
             var operationType;
             if(jsonMessage.operation)
                 operationType = jsonMessage.operation.type;
@@ -231,15 +237,16 @@
                         jsonMessage.privateKeyPEM = vs.rsaUtil.privateKeyPEM;
                         jsonMessage.x509CertificatePEM = vs.rsaUtil.x509CertificatePEM;
                         jsonMessage.userName = jsonMessage.user.givenName + " " + jsonMessage.user.surName;
-                        pkiSessionDataMap[sessionId] = jsonMessage;
+                        pkiSessionDataMap[vs.userUUID] = jsonMessage;
                         //session storage doesn't work with multiple tabs on IExplorer
                         localStorage.setItem('pkiSessionData', JSON.stringify(pkiSessionDataMap));
                         setUserAuthenticated(true, jsonMessage.userName);
+                        $('#alertDialog').modal('toggle');
                     }
                     break;
                 case "MSG_TO_DEVICE":
-                    if(vs.rsaUtil) vs.rsaUtil.decryptSocketMsg(jsonMessage)
-
+                    var encryptedMessage = jsonMessage.encryptedMessage;
+                    if(vs.rsaUtil) vs.rsaUtil.decryptMessage(jsonMessage);
                     break;
             }
         }
@@ -255,19 +262,17 @@
         }
         if(!pkiSessionDataMap)
             pkiSessionDataMap = {};
-        console.log("pkiSessionDataMap: ", pkiSessionDataMap);
 
-        vs.userUUID = "#{socketBean.getUserUUID()}";
         var sessionId = vs.getCookie("JSESSIONID");
         console.log("sessionId: " + sessionId + " - userUUID: " + vs.userUUID);
 
-        if(pkiSessionDataMap[sessionId] == null) {
+        if(pkiSessionDataMap[vs.userUUID] == null) {
             pkiSessionDataMap = {}
             localStorage.setItem('pkiSessionData', null);
             console.log("deleting previous sessions");
         }
 
-        console.log("after cleaning pkiSessionDataMap: ", pkiSessionDataMap);
+        console.log("pkiSessionDataMap: ", pkiSessionDataMap);
 
         if(Object.keys(pkiSessionDataMap).length === 0) {
             vs.rsaUtil = new RSAUtil(1024);
@@ -279,7 +284,7 @@
                 console.log("responseText: " + responseText + " - status: " + status);
             }, JSON.stringify(browserCsrRequest));
         } else {
-            var sessionData = pkiSessionDataMap[sessionId];
+            var sessionData = pkiSessionDataMap[vs.userUUID];
             vs.rsaUtil = new RSAUtil(null, sessionData.privateKeyPEM, sessionData.x509CertificatePEM);
             setUserAuthenticated(true, sessionData.userName);
         }

@@ -37,15 +37,16 @@ public class SignedDocumentReader implements MessageBodyReader<SignedDocument> {
     }
 
     @Override
-    public SignedDocument readFrom(Class<SignedDocument> aClass, Type type, Annotation[] annotations, javax.ws.rs.core.MediaType mediaType,
-                               MultivaluedMap<String, String> multivaluedMap, InputStream inputStream) throws IOException, WebApplicationException {
+    public SignedDocument readFrom(Class<SignedDocument> aClass, Type type, Annotation[] annotations,
+            javax.ws.rs.core.MediaType mediaType, MultivaluedMap<String, String> multivaluedMap, InputStream inputStream)
+            throws IOException, WebApplicationException {
         try {
             SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
                     SignedDocumentType.SIGNED_DOCUMENT).setWithTimeStampValidation(true);
             return signatureService.validateXAdESAndSave(new InMemoryDocument(inputStream), signatureParams);
         } catch (Exception ex) {
             log.log(Level.SEVERE, ex.getMessage(), ex);
+            throw new WebApplicationException("Signed document with errors");
         }
-        return null;
     }
 }

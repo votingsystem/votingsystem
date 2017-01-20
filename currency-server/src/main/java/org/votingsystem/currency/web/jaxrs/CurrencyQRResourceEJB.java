@@ -16,6 +16,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -53,8 +54,10 @@ public class CurrencyQRResourceEJB {
     @Produces(MediaType.TEXT_XML)
     public Response browserCertificate(@Context HttpServletRequest req) throws Exception {
         String userUUID = FileUtils.getStringFromStream(req.getInputStream());
-        BrowserCertificationDto csrRequest = (BrowserCertificationDto) HttpSessionManager.getInstance()
-                .getHttpSession(userUUID).getAttribute(Constants.CSR);
+        HttpSession httpSession = HttpSessionManager.getInstance().getHttpSession(userUUID);
+        if(httpSession == null)
+            return Response.status(Response.Status.NOT_FOUND).entity("Session not found - userUUID: " + userUUID).build();
+        BrowserCertificationDto csrRequest = (BrowserCertificationDto) httpSession.getAttribute(Constants.CSR);
         if(csrRequest != null)
             return HttpResponse.getResponse(req, Response.Status.OK.getStatusCode(), csrRequest);
         else

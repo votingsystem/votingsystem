@@ -7,7 +7,8 @@
     <ui:define name="content">
         <div style="width: 1000px; margin: 30px auto;">
             <button onclick="createPKCS7MessageTimeStamped()">TIMESTAMPED MESSAGE</button>
-            <button onclick="createPKCS7Message()">MESSAGE</button>
+            <button onclick="createPKCS7Message()">MESSAGE WITHOUT TIMESTAMP</button>
+            <button onclick="createPKCS7MessageSession()">MESSAGE SIGNED WITH SESSION KEYS</button>
             <div id="result" style="font-size: 1.2em; font-weight: bold;"></div>
         </div>
         <script>
@@ -17,7 +18,7 @@
             function createPKCS7MessageTimeStamped() {
                 var certPrivateKeyPair = test.createSelfSignedCert();
                 console.log("cert:", certPrivateKeyPair.cert)
-                var contentToSign = "Hello signed and TimeStamped message"
+                var contentToSign = "Signed and TimeStamped message"
                 vs.getTimeStampToken(contentToSign, function (timeStampTokenASN1) {
                     console.log("timeStampTokenASN1:", timeStampTokenASN1)
                     var cmsSignedMessage =  test.createCMSSignedMessage(certPrivateKeyPair, contentToSign, timeStampTokenASN1)
@@ -27,6 +28,14 @@
                     var p7 = forge.pkcs7.messageFromPem(pem);
                     console.log(p7)
                 })
+            }
+
+            function createPKCS7MessageSession() {
+                var messageDto = {operation:{type:"CLOSE_SESSION"}, uuid:vs.getUUID()};
+                vs.rsaUtil.sign(JSON.stringify(messageDto), function(cmsSignedMessage) {
+                    var cmsSignedMessage = forge.pkcs7.messageToPem(cmsSignedMessage);
+                    console.log("message signed with session keys:", cmsSignedMessage)
+                });
             }
 
             function createPKCS7Message() {

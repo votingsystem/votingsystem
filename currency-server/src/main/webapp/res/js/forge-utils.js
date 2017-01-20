@@ -17,7 +17,7 @@ var RSAUtil = function(keyLength, privateKeyPEM, x509CertificatePEM) {
         console.log("RSAUtil - keyLength: " + keyLength)
         this.keypair = this.rsa.generateKeyPair(keyLength);
         this.publicKeyPEM = forge.pki.publicKeyToPem(this.keypair.publicKey),
-            this.privateKeyPEM = forge.pki.privateKeyToPem(this.keypair.privateKey);
+        this.privateKeyPEM = forge.pki.privateKeyToPem(this.keypair.privateKey);
         this.publicKeyBase64 = vs.getPublicKeyBase64(this.keypair.publicKey);
     }
 }
@@ -155,6 +155,8 @@ RSAUtil.prototype.decryptMessage = function(messageJSON) {
             messageJSON.locale = encryptedContentJSON.locale;
         messageJSON.encryptedMessage = null;
     } else console.error("encrypted content not found")
+
+    console.log("messageJSON: ", messageJSON);
 }
 
 vs.getPublicKeyBase64 = function(publicKey) {

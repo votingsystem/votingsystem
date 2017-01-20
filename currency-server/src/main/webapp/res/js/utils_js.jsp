@@ -4,19 +4,6 @@
     vs.entityId = "${pageBean.getEntityId()}"
     vs.timeStampServiceURL = "${pageBean.getTimestampServiceURL()}"
 
-    function OperationVS(operation, statusCode) {
-        this.statusCode = statusCode == null ? 700: statusCode; //700 -> ResponseDto.SC_PROCESSING
-        this.operation = operation
-        this.receiverName = "${serverName}";
-        this.serverURL = "${contextURL}";
-    }
-
-    OperationVS.prototype.setCallback = function(callbackFunction) {
-        this.callerCallback = Math.random().toString(36).substring(7);
-        document.querySelector("#voting_system_page").addEventListener(this.callerCallback, function(e) { callbackFunction(e.detail) });
-        return this
-    }
-
     //http://jsfiddle.net/cckSj/5/
     Date.prototype.getElapsedTime = function() {
         // time difference in ms
@@ -117,17 +104,6 @@
         console.log("contentType: " + contentType)
         xhr.send(request);
     }
-
-    window.addEventListener('WebComponentsReady', function() {
-        Polymer.Base.importHref(vs.contextURL + '/element/alert-dialog.vsp', function(e) {
-            var alertDialog = document.createElement('alert-dialog');
-            window.alert = function(message, caption, callerId, isConfirmMessage) {
-                if(!caption) caption = "${msg.messageLbl}"
-                alertDialog.setMessage(message, caption, callerId, isConfirmMessage)
-            }
-            document.querySelector("body").appendChild(alertDialog)
-        });
-    })
 
     vs.weekdays = [${msg.weekdaysShort}];
     vs.months = [${msg.monthsShort}];

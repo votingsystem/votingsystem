@@ -1,4 +1,4 @@
-package org.votingsystem.jaxrs.provider;
+package org.votingsystem.currency.web.jaxrs.provider;
 
 import eu.europa.esig.dss.InMemoryDocument;
 import org.votingsystem.crypto.SignatureParams;
