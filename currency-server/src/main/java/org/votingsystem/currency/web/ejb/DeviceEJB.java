@@ -8,7 +8,7 @@ import org.votingsystem.currency.web.managed.SocketPushEvent;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.OperationTypeDto;
 import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.dto.indentity.BrowserCertificationDto;
+import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.Certificate;
 import org.votingsystem.model.SignedDocument;
@@ -54,7 +54,7 @@ public class DeviceEJB {
 
         User idProvider = signedDocument.getFirstSignature().getSigner();
 
-        BrowserCertificationDto certificationDto = signedDocument.getSignedContent(BrowserCertificationDto.class);
+        SessionCertificationDto certificationDto = signedDocument.getSignedContent(SessionCertificationDto.class);
 
         X509Certificate signerCertificate = PEMUtils.fromPEMToX509Cert(certificationDto.getSignerCertPEM().getBytes());
         User signer = signerInfoService.checkSigner(signerCertificate, User.Type.ID_CARD_USER, null);

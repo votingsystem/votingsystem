@@ -61,14 +61,13 @@ public class ElectionResourceEJB {
 
     @POST @Path("/save")
     @Produces({"application/xml"})
-    public Response save(@Context HttpServletRequest req) throws Exception {
-        byte[] requestSignedXML = FileUtils.getBytesFromStream(req.getInputStream());
-        ElectionDto electionDto = XML.getMapper().readValue(requestSignedXML, ElectionDto.class);
+    public Response save(@Context HttpServletRequest req, byte[] xmlRequestSigned) throws Exception {
+        ElectionDto electionDto = XML.getMapper().readValue(xmlRequestSigned, ElectionDto.class);
         SignatureParams signatureParams = new SignatureParams(null, User.Type.ID_CARD_USER,
                 SignedDocumentType.NEW_ELECTION_REQUEST).setWithTimeStampValidation(true);
-        SignedDocument signedDocument = signatureService.validateXAdESAndSave(new InMemoryDocument(requestSignedXML), signatureParams);
+        SignedDocument signedDocument = signatureService.validateXAdESAndSave(new InMemoryDocument(xmlRequestSigned), signatureParams);
         electionDto.validatePublishRequest();
-        byte[] receiptXML = signatureService.signXAdES(requestSignedXML);
+        byte[] receiptXML = signatureService.signXAdES(xmlRequestSigned);
         signedDocument.setBody(new String(receiptXML));
         Election election = new Election(electionDto, signedDocument).setEntityId(config.getEntityId());
         em.persist(election);
@@ -81,8 +80,7 @@ public class ElectionResourceEJB {
 
     @POST @Path("/uuid")
     @Produces({"application/xml"})
-    public Response uuid(@Context HttpServletRequest req) throws Exception {
-        String electionUUID = FileUtils.getStringFromStream(req.getInputStream());
+    public Response uuid(@Context HttpServletRequest req, String electionUUID) throws Exception {
         List<Election> elections = em.createQuery("select e from Election e where e.uuid=:electionUUID")
                 .setParameter("electionUUID", electionUUID).getResultList();
         if(elections.isEmpty())

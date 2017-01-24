@@ -14,7 +14,6 @@ import org.votingsystem.http.MediaType;
 import org.votingsystem.model.currency.Currency;
 import org.votingsystem.model.currency.Tag;
 import org.votingsystem.util.CurrencyCode;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.Messages;
 
@@ -70,11 +69,11 @@ public class CurrencyResourceEJB {
 
 
     @Path("/revocationHash/state") @GET
-    public Response state(@Context HttpServletRequest req, @Context HttpServletResponse res) throws Exception {
-        String revocationHashBase64 = FileUtils.getStringFromStream(req.getInputStream());
+    public Response state(@Context HttpServletRequest req, @Context HttpServletResponse res, String revocationHash)
+            throws Exception {
         List<Currency> currencyList = em.createQuery(
                 "select c from Currency c where c.revocationHashBase64 =:revocationHashBase64")
-                .setParameter("revocationHashBase64", revocationHashBase64).getResultList();
+                .setParameter("revocationHashBase64", revocationHash).getResultList();
         if(currencyList.isEmpty()) return Response.status(ResponseDto.SC_NOT_FOUND).entity(
                 Messages.currentInstance().get("currencyNotFoundErrorMsg"))
                 .type(javax.ws.rs.core.MediaType.TEXT_PLAIN + ";charset=utf-8").build();

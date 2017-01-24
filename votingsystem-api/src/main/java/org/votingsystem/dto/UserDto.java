@@ -24,7 +24,6 @@ public class UserDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long id;
     @JacksonXmlProperty(localName = "State", isAttribute = true)
     private User.State state;
     @JacksonXmlProperty(localName = "Type", isAttribute = true)
@@ -84,7 +83,6 @@ public class UserDto implements Serializable {
 
     public static UserDto BASIC(User user) {
         UserDto result = new UserDto();
-        result.setId(user.getId());
         result.setGivenName(user.getName());
         result.setSurName(user.getSurname());
         result.setIBAN(user.getIBAN());
@@ -129,7 +127,6 @@ public class UserDto implements Serializable {
         if(!certCollection.isEmpty()) {
             user.setX509Certificate(certCollection.iterator().next().getX509Cert());
         }
-        user.setId(id);
         user.setName(givenName);
         user.setSurname(surName);
         user.setIBAN(IBAN);
@@ -149,14 +146,6 @@ public class UserDto implements Serializable {
             }
         }
         return result;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getIBAN() {
@@ -287,4 +276,5 @@ public class UserDto implements Serializable {
         this.details = details;
         return this;
     }
+
 }

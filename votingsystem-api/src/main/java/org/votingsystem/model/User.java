@@ -14,7 +14,6 @@ import org.votingsystem.model.converter.LocalDateTimeAttributeConverter;
 import org.votingsystem.util.Constants;
 import org.votingsystem.util.IdDocument;
 import org.votingsystem.util.JSON;
-
 import javax.persistence.*;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
@@ -28,7 +27,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
 import static javax.persistence.GenerationType.IDENTITY;
 
 /**
@@ -76,6 +74,7 @@ public class User extends EntityBase implements Serializable {
     @Column(name="IBAN") private String IBAN;
     @Column(name="NAME") private String name;
     @Column(name="SURNAME" ) private String surname;
+    @Column(name="UUID" ) private String UUID;
     @Column(name="URL") private String url;
     @Column(name="META_INF", columnDefinition="TEXT") private String metaInf;
     @Column(name="DESCRIPTION", columnDefinition="TEXT" ) private String description;
@@ -385,6 +384,14 @@ public class User extends EntityBase implements Serializable {
         return this;
     }
 
+    public String getUUID() {
+        return UUID;
+    }
+
+    public void setUUID(String UUID) {
+        this.UUID = UUID;
+    }
+
     public boolean checkUserFromCSR(X509Certificate x509CertificateToCheck) throws CertificateEncodingException {
         X500Name x500name = new JcaX509CertificateHolder(x509CertificateToCheck).getSubject();
         User userToCheck = getUser(x500name);
@@ -478,6 +485,14 @@ public class User extends EntityBase implements Serializable {
 
     public String getFullName() {
         return name + " " + surname;
+    }
+
+    @Override @PrePersist
+    public void prePersist() {
+        LocalDateTime date = LocalDateTime.now();
+        setDateCreated(date);
+        setLastUpdated(date);
+        setUUID(java.util.UUID.randomUUID().toString());
     }
 
     public static User getUser(X500Name subject) {

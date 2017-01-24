@@ -276,10 +276,8 @@
 
         if(Object.keys(pkiSessionDataMap).length === 0) {
             vs.rsaUtil = new RSAUtil(1024);
-            var userDataFromCert = {serialName: vs.userUUID}
-            var browserCsr = vs.rsaUtil.getCSR(userDataFromCert);
-            console.log("browserCsr: ", browserCsr);
-            var browserCsrRequest = {browserCsr:browserCsr, userUUID:vs.userUUID};
+            var userDataFromCert = {serialName: vs.userUUID};
+            var browserCsrRequest = {browserCsr:vs.rsaUtil.getCSR(userDataFromCert), userUUID:vs.userUUID};
             vs.httpPost("#{request.contextPath}/api/device/browser-csr", function(responseText, status) {
                 console.log("responseText: " + responseText + " - status: " + status);
             }, JSON.stringify(browserCsrRequest));

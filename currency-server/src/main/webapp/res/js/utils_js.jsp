@@ -56,7 +56,6 @@
         FROM_USER:{lbl:"${msg.transactionFromUser}"}
     }
 
-
     vs.getCurrencySymbol = function(currencyCode) {
         switch (currencyCode) {
             case "EUR": return '€';
@@ -67,7 +66,7 @@
         }
     }
 
-    vs.httpGet = function(url, callback, requestHeader, headerMap) {
+    vs.httpGet = function(url, callback, requestHeader, headersMap) {
         if(!requestHeader) requestHeader = "application/json"
         var xhr = new XMLHttpRequest()
         xhr.onreadystatechange = function() {
@@ -77,8 +76,10 @@
         };
         xhr.open("GET", url, true);
         xhr.setRequestHeader("Content-Type", requestHeader);
-        if(headerMap) {
-
+        if(headersMap) {
+            Object.keys(headersMap).forEach(function(headerKey) {
+                xhr.setRequestHeader(headerKey, headersMap[headerKey]);
+            });
         }
         xhr.send();
     }
@@ -121,8 +122,8 @@
 
     Number.prototype.getDayWeekFormat = function() {
         return new Date(this).getDayWeekFormat()
-    }
+    };
 
     Number.prototype.getDayWeekAndHourFormat = function() {
         return new Date(this).getDayWeekAndHourFormat()
-    }
+    };

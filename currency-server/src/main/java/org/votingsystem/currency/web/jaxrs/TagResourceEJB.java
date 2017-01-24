@@ -8,7 +8,6 @@ import org.votingsystem.ejb.SignatureService;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.model.currency.CurrencyAccount;
 import org.votingsystem.model.currency.Tag;
-import org.votingsystem.throwable.ValidationException;
 import org.votingsystem.util.JSON;
 import org.votingsystem.util.StringUtils;
 
@@ -19,12 +18,14 @@ import javax.persistence.PersistenceContext;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.*;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -41,40 +42,26 @@ public class TagResourceEJB {
     @Inject private ConfigCurrencyServer config;
     @Inject private SignatureService signatureService;
 
-    @Path("/")
-    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+    @GET @Path("/")
     public Response index(@DefaultValue("") @QueryParam("tag") String tag, @Context ServletContext context,
                   @Context HttpServletRequest req, @Context HttpServletResponse resp) throws JsonProcessingException {
         List<Tag> tagList = em.createQuery("select t from Tag t where upper(t.name) like :tag").setParameter("tag",
                 "%" + StringUtils.removeAccents(tag).toUpperCase() + "%").getResultList();
         ResultListDto<Tag> resultListDto = new ResultListDto<>(tagList);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).build();
+        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultListDto)).type(MediaType.JSON).build();
     }
 
-
-    @Path("/list")
-    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+    @GET @Path("/list")
     public Response list() throws JsonProcessingException {
         List<Tag> tagList = em.createQuery("select t from Tag t").getResultList();
         ResultListDto resultList = new ResultListDto(tagList);
         return Response.ok().entity(JSON.getMapper().writeValueAsBytes(resultList)).type(MediaType.JSON).build();
     }
 
-    @POST @Path("/")
-    @Consumes({"application/json"})
-    public Response indexPost(Map requestMap, @Context ServletContext context, @Context HttpServletRequest req,
-                          @Context HttpServletResponse resp) throws JsonProcessingException, ValidationException {
-        if(!requestMap.containsKey("tag"))  return Response.status(Response.Status.BAD_REQUEST).entity(
-                "missing json node - tag").build();
-        String tagName = (String) requestMap.get("tag");
-        Tag tag = config.getTag(tagName);
-        return Response.ok().entity(JSON.getMapper().writeValueAsBytes(tag)).type(MediaType.JSON).build();
-    }
-
-    @Path("/currencyAccountByBalanceTagVS")
-    @GET @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    public Response currencyAccountByBalanceTagVS(@QueryParam("tag") String tag) throws JsonProcessingException {
-        if(tag == null) return Response.status(Response.Status.BAD_REQUEST).entity("missing param - tag").build();
+    @GET @Path("/currencyAccountByBalanceTag")
+    public Response currencyAccountByBalanceTag(@QueryParam("tag") String tag) throws JsonProcessingException {
+        if(tag == null)
+            return Response.status(Response.Status.BAD_REQUEST).entity("missing param - tag").build();
         List<CurrencyAccount> accountList = em.createQuery("select c from CurrencyAccount c where c.tag.name =:tag")
                 .setParameter("tag", tag).getResultList();
         List<CurrencyAccountDto> resultList = new ArrayList<>();

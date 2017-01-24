@@ -2,7 +2,7 @@ package org.votingsystem.androidcurrency.xml;
 
 import org.kxml2.kdom.Element;
 import org.votingsystem.dto.AddressDto;
-import org.votingsystem.dto.indentity.BrowserCertificationDto;
+import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.util.CountryEurope;
 import org.votingsystem.util.XMLUtils;
 import org.xmlpull.v1.XmlPullParserException;
@@ -14,9 +14,9 @@ import java.io.IOException;
  */
 public class XmlReader {
 
-    public static BrowserCertificationDto getUserCertificationRequest(byte[] xmlBytes) throws IOException,
+    public static SessionCertificationDto getUserCertificationRequest(byte[] xmlBytes) throws IOException,
             XmlPullParserException {
-        BrowserCertificationDto userCertificationRequest = new BrowserCertificationDto();
+        SessionCertificationDto userCertificationRequest = new SessionCertificationDto();
         Element certRequestElement = XMLUtils.parse(xmlBytes).getRootElement();
         userCertificationRequest.setBrowserCsr(XMLUtils.getTextChild(certRequestElement, "browserCsr"));
         userCertificationRequest.setBrowserCsrSigned(XMLUtils.getTextChild(certRequestElement, "browserCsrSigned"));

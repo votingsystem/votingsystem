@@ -8,11 +8,14 @@ import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.OperationDto;
 import org.votingsystem.dto.ResultListDto;
 import org.votingsystem.dto.UserDto;
-import org.votingsystem.dto.indentity.BrowserCertificationDto;
+import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.ejb.SignerInfoService;
 import org.votingsystem.model.*;
 import org.votingsystem.throwable.ValidationException;
-import org.votingsystem.util.*;
+import org.votingsystem.util.Constants;
+import org.votingsystem.util.CurrencyOperation;
+import org.votingsystem.util.JSON;
+import org.votingsystem.util.NifUtils;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.TransactionAttribute;
@@ -158,9 +161,8 @@ public class DeviceResourceEJB {
 
     @POST @Path("/browser-csr")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response browserCsr(@Context HttpServletRequest req) throws Exception {
-        BrowserCertificationDto csrRequest = JSON.getMapper().readValue(
-                FileUtils.getBytesFromStream(req.getInputStream()), BrowserCertificationDto.class);
+    public Response browserCsr(@Context HttpServletRequest req, byte[] csrRequestBytes) throws Exception {
+        SessionCertificationDto csrRequest = JSON.getMapper().readValue(csrRequestBytes, SessionCertificationDto.class);
         req.getSession().setAttribute(Constants.CSR, csrRequest);
         return Response.ok().entity("OK").build();
     }

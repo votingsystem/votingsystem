@@ -4,7 +4,7 @@ package org.votingsystem.idprovider.jaxrs;
 import org.votingsystem.crypto.SignatureParams;
 import org.votingsystem.crypto.SignedDocumentType;
 import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.dto.indentity.BrowserCertificationDto;
+import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
 import org.votingsystem.ejb.SignatureService;
@@ -44,7 +44,7 @@ public class TestResource {
     public Response test(@Context HttpServletRequest req) throws Exception {
         SignatureParams signatureParams = new SignatureParams(config.getEntityId(), User.Type.CURRENCY_SERVER,
                 SignedDocumentType.BROWSER_CERTIFICATION_REQUEST_RECEIPT).setWithTimeStampValidation(false);
-        BrowserCertificationDto csrResponse = new BrowserCertificationDto().setUserUUID(UUID.randomUUID().toString());
+        SessionCertificationDto csrResponse = new SessionCertificationDto().setUserUUID(UUID.randomUUID().toString());
         SignedDocument signedDocument = signatureService.signXAdESAndSave(
                 XML.getMapper().writeValueAsBytes(csrResponse), signatureParams);
         return Response.ok().entity(signedDocument.getBody()).build() ;

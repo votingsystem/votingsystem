@@ -4,7 +4,7 @@ import eu.europa.esig.dss.x509.CertificateToken;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.votingsystem.crypto.*;
 import org.votingsystem.dto.*;
-import org.votingsystem.dto.indentity.BrowserCertificationDto;
+import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.dto.indentity.IdentityRequestDto;
 import org.votingsystem.dto.voting.CertVoteExtensionDto;
 import org.votingsystem.ejb.SignatureService;
@@ -326,7 +326,7 @@ public class CertIssuerEJB {
     public SignedDocument signBrowserCSR(SignedDocument signedDocument) throws Exception {
         User signer = signedDocument.getFirstSignature().getSigner();
         X509Certificate signerCertificate = signedDocument.getFirstSignature().getSigningCert();
-        BrowserCertificationDto csrRequest = signedDocument.getSignedContent(BrowserCertificationDto.class);
+        SessionCertificationDto csrRequest = signedDocument.getSignedContent(SessionCertificationDto.class);
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getBrowserCsr().getBytes());
         PKCS10CertificationRequest mobileCSR = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequest.getMobileCsr().getBytes());
         ZonedDateTime dateBegin = ZonedDateTime.now();
@@ -346,7 +346,7 @@ public class CertIssuerEJB {
                 .setAuthorityCertificate(config.getCACertificate(certIssuerSigningCert.getSerialNumber().longValue()))
                 .setSignedDocument(signedDocument);
 
-        BrowserCertificationDto csrResponse = new BrowserCertificationDto(new OperationTypeDto(
+        SessionCertificationDto csrResponse = new SessionCertificationDto(new OperationTypeDto(
                 CurrencyOperation.BROWSER_CERTIFICATION, config.getEntityId())).setUser(new UserDto(signer))
                 .setBrowserCsrSigned(new String(PEMUtils.getPEMEncoded(browserCert)))
                 .setMobileCsrSigned(new String(PEMUtils.getPEMEncoded(mobileCert)))

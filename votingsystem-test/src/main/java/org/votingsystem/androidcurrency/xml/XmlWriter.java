@@ -4,7 +4,7 @@ import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.kxml2.kdom.Node;
 import org.votingsystem.dto.AddressDto;
-import org.votingsystem.dto.indentity.BrowserCertificationDto;
+import org.votingsystem.dto.indentity.SessionCertificationDto;
 
 import java.util.logging.Logger;
 
@@ -29,7 +29,7 @@ public class XmlWriter {
 
 */
 
-    public static byte[] write(BrowserCertificationDto certRequest) throws Exception {
+    public static byte[] write(SessionCertificationDto certRequest) throws Exception {
         Document doc = new Document();
         Element certificationRequestElement = doc.createElement("", "CertificationRequest");
         if(certRequest.getBrowserCsr() != null) {

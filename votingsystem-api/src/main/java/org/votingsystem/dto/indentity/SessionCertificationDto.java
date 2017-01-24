@@ -14,7 +14,7 @@ import org.votingsystem.dto.UserDto;
 @JacksonXmlRootElement(localName = "BrowserCertification")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BrowserCertificationDto {
+public class SessionCertificationDto {
 
     @JacksonXmlProperty(localName = "Operation")
     private OperationTypeDto operation;
@@ -36,13 +36,13 @@ public class BrowserCertificationDto {
     private String token;
     private String userUUID;
 
-    public BrowserCertificationDto() { }
+    public SessionCertificationDto() { }
 
-    public BrowserCertificationDto(OperationTypeDto operationType) {
+    public SessionCertificationDto(OperationTypeDto operationType) {
         this.operation = operationType;
     }
 
-    public BrowserCertificationDto(AddressDto address, String browserCsr, String token) {
+    public SessionCertificationDto(AddressDto address, String browserCsr, String token) {
         this.address = address;
         this.browserCsr = browserCsr;
         this.token = token;
@@ -68,7 +68,7 @@ public class BrowserCertificationDto {
         return userUUID;
     }
 
-    public BrowserCertificationDto setUserUUID(String userUUID) {
+    public SessionCertificationDto setUserUUID(String userUUID) {
         this.userUUID = userUUID;
         return this;
     }
@@ -77,7 +77,7 @@ public class BrowserCertificationDto {
         return mobileCsr;
     }
 
-    public BrowserCertificationDto setMobileCsr(String mobileCsr) {
+    public SessionCertificationDto setMobileCsr(String mobileCsr) {
         this.mobileCsr = mobileCsr;
         return this;
     }
@@ -86,7 +86,7 @@ public class BrowserCertificationDto {
         return mobileCsrSigned;
     }
 
-    public BrowserCertificationDto setMobileCsrSigned(String mobileCsrSigned) {
+    public SessionCertificationDto setMobileCsrSigned(String mobileCsrSigned) {
         this.mobileCsrSigned = mobileCsrSigned;
         return this;
     }
@@ -95,7 +95,7 @@ public class BrowserCertificationDto {
         return browserCsr;
     }
 
-    public BrowserCertificationDto setBrowserCsr(String browserCsr) {
+    public SessionCertificationDto setBrowserCsr(String browserCsr) {
         this.browserCsr = browserCsr;
         return this;
     }
@@ -104,7 +104,7 @@ public class BrowserCertificationDto {
         return browserCsrSigned;
     }
 
-    public BrowserCertificationDto setBrowserCsrSigned(String browserCsrSigned) {
+    public SessionCertificationDto setBrowserCsrSigned(String browserCsrSigned) {
         this.browserCsrSigned = browserCsrSigned;
         return this;
     }
@@ -113,7 +113,7 @@ public class BrowserCertificationDto {
         return user;
     }
 
-    public BrowserCertificationDto setUser(UserDto user) {
+    public SessionCertificationDto setUser(UserDto user) {
         this.user = user;
         return this;
     }
@@ -122,7 +122,7 @@ public class BrowserCertificationDto {
         return operation;
     }
 
-    public BrowserCertificationDto setOperation(OperationTypeDto operation) {
+    public SessionCertificationDto setOperation(OperationTypeDto operation) {
         this.operation = operation;
         return this;
     }
@@ -131,7 +131,7 @@ public class BrowserCertificationDto {
         return signerCertPEM;
     }
 
-    public BrowserCertificationDto setSignerCertPEM(String signerCertPEM) {
+    public SessionCertificationDto setSignerCertPEM(String signerCertPEM) {
         this.signerCertPEM = signerCertPEM;
         return this;
     }
@@ -140,7 +140,7 @@ public class BrowserCertificationDto {
         return statusCode;
     }
 
-    public BrowserCertificationDto setStatusCode(Integer statusCode) {
+    public SessionCertificationDto setStatusCode(Integer statusCode) {
         this.statusCode = statusCode;
         return this;
     }
@@ -149,7 +149,7 @@ public class BrowserCertificationDto {
         return browserUUID;
     }
 
-    public BrowserCertificationDto setBrowserUUID(String browserUUID) {
+    public SessionCertificationDto setBrowserUUID(String browserUUID) {
         this.browserUUID = browserUUID;
         return this;
     }
@@ -158,7 +158,7 @@ public class BrowserCertificationDto {
         return mobileUUID;
     }
 
-    public BrowserCertificationDto setMobileUUID(String mobileUUID) {
+    public SessionCertificationDto setMobileUUID(String mobileUUID) {
         this.mobileUUID = mobileUUID;
         return this;
     }

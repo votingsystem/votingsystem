@@ -175,7 +175,8 @@ public class ConfigEJB implements Config, ConfigCurrencyServer, Serializable {
                 systemUser = new User(User.Type.CURRENCY_SERVER, entityId);
                 em.persist(systemUser);
                 createIBAN(systemUser);
-                File tagsFile = new File(applicationDirPath + File.separator + "default-tags.txt");String[] defaultTags = FileUtils.getStringFromFile(tagsFile).split(",");
+                File tagsFile = new File(applicationDirPath + File.separator + "default-tags.txt");
+                String[] defaultTags = FileUtils.getStringFromFile(tagsFile).split(",");
                 for(String tag: defaultTags) {
                     createtag(tag.trim());
                 }

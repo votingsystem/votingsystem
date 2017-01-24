@@ -3,7 +3,6 @@ package org.votingsystem.socket;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.MessageDto;
 import org.votingsystem.dto.OperationTypeDto;
-import org.votingsystem.util.CurrencyOperation;
 
 /**
  * License: https://github.com/votingsystem/votingsystem/wiki/Licencia

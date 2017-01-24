@@ -3,7 +3,6 @@ package org.votingsystem;
 import org.votingsystem.dto.DeviceDto;
 import org.votingsystem.dto.OperationTypeDto;
 import org.votingsystem.socket.WebSocketSession;
-import org.votingsystem.util.CurrencyOperation;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;

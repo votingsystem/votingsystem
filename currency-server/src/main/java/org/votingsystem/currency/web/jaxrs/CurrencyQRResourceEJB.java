@@ -3,13 +3,12 @@ package org.votingsystem.currency.web.jaxrs;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.votingsystem.currency.web.http.HttpSessionManager;
 import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.dto.indentity.BrowserCertificationDto;
+import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.ejb.Config;
 import org.votingsystem.ejb.QRSessionsEJB;
 import org.votingsystem.http.HttpResponse;
 import org.votingsystem.qr.QRRequestBundle;
 import org.votingsystem.util.Constants;
-import org.votingsystem.util.FileUtils;
 import org.votingsystem.util.Messages;
 
 import javax.ejb.EJB;
@@ -40,9 +39,8 @@ public class CurrencyQRResourceEJB {
 
     @POST @Path("/info")
     @Produces(MediaType.TEXT_XML)
-    public Response info(@Context HttpServletRequest req) throws Exception {
-        String uuidInfo = FileUtils.getStringFromStream(req.getInputStream());
-        QRRequestBundle qrRequest = qrSessions.getOperation(uuidInfo);
+    public Response info(@Context HttpServletRequest req, String UUID) throws Exception {
+        QRRequestBundle qrRequest = qrSessions.getOperation(UUID);
         if(qrRequest != null)
             return Response.ok().entity(qrRequest.generateResponse(req, LocalDateTime.now())).build();
         else
@@ -52,12 +50,11 @@ public class CurrencyQRResourceEJB {
 
     @POST @Path("/browser-certificate")
     @Produces(MediaType.TEXT_XML)
-    public Response browserCertificate(@Context HttpServletRequest req) throws Exception {
-        String userUUID = FileUtils.getStringFromStream(req.getInputStream());
+    public Response browserCertificate(@Context HttpServletRequest req, String userUUID) throws Exception {
         HttpSession httpSession = HttpSessionManager.getInstance().getHttpSession(userUUID);
         if(httpSession == null)
             return Response.status(Response.Status.NOT_FOUND).entity("Session not found - userUUID: " + userUUID).build();
-        BrowserCertificationDto csrRequest = (BrowserCertificationDto) httpSession.getAttribute(Constants.CSR);
+        SessionCertificationDto csrRequest = (SessionCertificationDto) httpSession.getAttribute(Constants.CSR);
         if(csrRequest != null)
             return HttpResponse.getResponse(req, Response.Status.OK.getStatusCode(), csrRequest);
         else

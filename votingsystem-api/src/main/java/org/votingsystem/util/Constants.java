@@ -55,7 +55,7 @@ public class Constants {
     public static final String ANON_CERTIFICATE_REQUEST_FILE_NAME = "anon-cert-request" + ":" + MediaType.XML;
     public static final String CURRENCY_REQUEST_FILE_NAME         = "currency-request" + ":" + MediaType.XML;
     public static final String CMS_FILE_NAME                      = "cms" + ":" + MediaType.PKCS7_SIGNED;
-    public static final String XML_SIGNED_FILE_NAME               = "signed" + ":" + MediaType.XML;
+    public static final String XML_SIGNED_getTransactionServiceURLFILE_NAME               = "signed" + ":" + MediaType.XML;
     public static final String BUNDLE_BASE_NAME                   = "org.votingsystem.messages";
 
     public static final int SIGNED_MAX_FILE_SIZE_KB = 512;

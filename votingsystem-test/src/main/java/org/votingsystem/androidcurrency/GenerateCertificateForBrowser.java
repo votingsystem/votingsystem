@@ -14,7 +14,7 @@ import org.votingsystem.crypto.xml.XAdESUtils;
 import org.votingsystem.dto.CertExtensionDto;
 import org.votingsystem.dto.QRMessageDto;
 import org.votingsystem.dto.ResponseDto;
-import org.votingsystem.dto.indentity.BrowserCertificationDto;
+import org.votingsystem.dto.indentity.SessionCertificationDto;
 import org.votingsystem.http.HttpConn;
 import org.votingsystem.http.MediaType;
 import org.votingsystem.util.CurrencyOperation;
@@ -64,18 +64,16 @@ public class GenerateCertificateForBrowser extends BaseTest {
             log.info("bad request - msg: " + responseDto.getMessage());
             System.exit(0);
         }
-        BrowserCertificationDto csrRequest = JSON.getMapper().readValue(responseDto.getMessageBytes(),
-                BrowserCertificationDto.class);
+        SessionCertificationDto csrRequest = JSON.getMapper().readValue(responseDto.getMessageBytes(),
+                SessionCertificationDto.class);
         generate(csrRequest.getBrowserCsr(), csrRequest.getUserUUID());
     }
 
     private void generate(String csrRequest, String userUUID) throws Exception {
-        BrowserCertificationDto csrRequestDto = new BrowserCertificationDto();
+        SessionCertificationDto csrRequestDto = new SessionCertificationDto();
         csrRequestDto.setBrowserCsr(csrRequest).setUserUUID(userUUID);
 
         PKCS10CertificationRequest csr = PEMUtils.fromPEMToPKCS10CertificationRequest(csrRequestDto.getBrowserCsr().getBytes());
-
-
         String mobileHTTPSessionUUID = UUID.randomUUID().toString();
 
         CertExtensionDto certExtension = new CertExtensionDto(NifUtils.getNif(12345), "TestGivenName", "TestSurname")
@@ -103,7 +101,7 @@ public class GenerateCertificateForBrowser extends BaseTest {
             System.exit(0);
         }
 
-        BrowserCertificationDto browserCertification = XmlReader.getUserCertificationRequest(response.getMessageBytes());
+        SessionCertificationDto browserCertification = XmlReader.getUserCertificationRequest(response.getMessageBytes());
 
         ResponseDto responseDto = HttpConn.getInstance().doPostRequest(response.getMessageBytes(), MediaType.XML,
                 CurrencyOperation.INIT_BROWSER_SESSION.getUrl(Constants.CURRENCY_SERVICE_ENTITY_ID));
